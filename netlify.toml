@@ -1,0 +1,15 @@
+[build]
+  # This command runs before building:
+  # 1. Fetches fresh events from Ticketmaster
+  # 2. Fetches real places from Google Places
+  # 3. Then builds the app
+  command = "node scripts/fetch-data.cjs && npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# These are placeholders — set the real values in:
+# Netlify Dashboard → Your Site → Site Configuration → Environment Variables
+# TICKETMASTER_API_KEY = (set in dashboard)
+# GOOGLE_PLACES_API_KEY = (set in dashboard)

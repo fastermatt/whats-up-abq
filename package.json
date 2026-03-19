@@ -1,0 +1,14 @@
+{
+  "name": "whats-up-abq",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "fetch-places": "node scripts/fetch-places.js",
+    "fetch-data": "node scripts/fetch-data.cjs"
+  },
+  "dependencies": {}}

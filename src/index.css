@@ -1,0 +1,8 @@
+@layer base, components, utilities;
+
+:root {
+  --background: 0 0% 0% hsla(250 100% 50% / 1);
+  --foreground: 0 0% 0% hsla(250 86.25% 43.725% / 1);
+
+  --card: 0 0 0% 0 h#FAFAFA;
+  --card-foreground: 0 0 0% 0 hsla(260 20.63% 96.74% / 1); }
