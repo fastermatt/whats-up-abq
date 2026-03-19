@@ -1,2 +1,2 @@
-# whats-up-abq
-WhatsUpABQ — Albuquerque events &amp; places app
+# WhatsUpABQ
+Explore ABQ - Events, Places & Culture in Albuquerque, NM.
