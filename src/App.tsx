@@ -872,7 +872,7 @@ function DiscoverScreen({
     .slice(0, 10);
 
   return (
-    <div className="h-full overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
+    <div className="h-full overflow-y-auto" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
       {/* Hero */}
       <div className="px-5 pt-5 pb-3">
         <p
@@ -1228,7 +1228,7 @@ function EventsScreen({
   );
 
   return (
-    <div className="h-full overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
+    <div className="h-full overflow-y-auto" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
       <div className="px-5 pt-5 pb-3">
         <p
           className="text-xs font-semibold tracking-widest uppercase"
@@ -1384,7 +1384,7 @@ function PlacesScreen({
   }, [places, coords]);
 
   return (
-    <div className="h-full overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
+    <div className="h-full overflow-y-auto" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
       <div className="px-5 pt-5 pb-3">
         <p
           className="text-xs font-semibold tracking-widest uppercase"
@@ -1716,7 +1716,7 @@ function ProfileScreen({
   const progressPct = myCount === 0 ? 0 : Math.min(100, Math.round((myCount / level.next) * 100));
 
   return (
-    <div className="h-full overflow-y-auto px-5 pb-28" style={{ scrollbarWidth: 'none' }}>
+    <div className="h-full overflow-y-auto px-5 pb-28" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
       <div className="pt-5 pb-4">
         <p
           className="text-xs font-semibold tracking-widest uppercase"
@@ -2138,6 +2138,8 @@ export default function App() {
     }
 
     // Proximity OK → check in
+    // Haptic feedback: iOS/Android vibration on successful check-in
+    if ('vibrate' in navigator) { try { navigator.vibrate([12, 40, 12]); } catch {} }
     setCheckedIn(prev => {
       const next = new Set(prev);
       next.add(placeId);
@@ -2196,22 +2198,100 @@ export default function App() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@400;700;900&family=Manrope:wght@400;500;600;700;800&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #f5f7f5; font-family: 'Manrope', sans-serif; overflow: hidden; }
+
+        /* ── Reset ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root { color-scheme: light; }
+
+        /* ── Safe-area CSS variables (Apple HIG: viewport-fit=cover) ── */
+        :root {
+          --sat: env(safe-area-inset-top, 0px);
+          --sab: env(safe-area-inset-bottom, 0px);
+          --sal: env(safe-area-inset-left, 0px);
+          --sar: env(safe-area-inset-right, 0px);
+        }
+
+        /* ── Base document ── */
+        html {
+          -webkit-text-size-adjust: 100%;
+          text-size-adjust: 100%;
+          height: 100%;
+        }
+        body {
+          background: #f5f7f5;
+          font-family: -apple-system, 'Manrope', system-ui, sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          /* Prevent body bounce/rubber-band on iOS — app handles its own scroll */
+          overflow: hidden;
+          overscroll-behavior: none;
+          height: 100%;
+          position: fixed;
+          width: 100%;
+        }
+
+        /* ── Scrollbars: hidden (native iOS feel) ── */
         ::-webkit-scrollbar { display: none; }
+        * { scrollbar-width: none; }
+
+        /* ── Touch: Apple HIG ≥ 44×44pt tap targets ── */
+        button, a, [role="button"], [role="tab"] {
+          min-height: 44px;
+          -webkit-tap-highlight-color: transparent;
+          tap-highlight-color: transparent;
+          touch-action: manipulation;
+          cursor: pointer;
+        }
+
+        /* ── Press state: iOS-style spring-back ── */
+        button:active, [role="button"]:active {
+          opacity: 0.65;
+          transform: scale(0.96);
+        }
+        button { transition: opacity 0.12s ease, transform 0.12s ease; }
+
+        /* ── Prevent unwanted text selection on UI chrome ── */
+        header, nav, button, [role="button"] {
+          -webkit-user-select: none;
+          user-select: none;
+        }
+
+        /* ── Momentum scrolling + contain overscroll ── */
+        .overflow-y-auto, .overflow-x-auto {
+          -webkit-overflow-scrolling: touch;
+          overscroll-behavior: contain;
+        }
+
+        /* ── Input font-size ≥ 16px prevents iOS auto-zoom on focus ── */
+        input, textarea, select {
+          font-size: max(16px, 1rem) !important;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        /* ── iOS Liquid Glass (iOS 26 HIG) — saturate + blur backdrop ── */
+        .glass {
+          background: rgba(245, 247, 245, 0.76);
+          backdrop-filter: saturate(180%) blur(28px);
+          -webkit-backdrop-filter: saturate(180%) blur(28px);
+        }
+        .glass-card {
+          background: rgba(255, 255, 255, 0.82);
+          backdrop-filter: saturate(160%) blur(20px);
+          -webkit-backdrop-filter: saturate(160%) blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.55);
+        }
       `}</style>
 
       <div
         className="flex flex-col mx-auto relative"
         style={{ maxWidth: '480px', height: '100dvh', background: '#f5f7f5', overflow: 'hidden' }}
       >
-        {/* Glassmorphism header */}
+        {/* Glassmorphism header — Liquid Glass (iOS 26 HIG) with Dynamic Island / notch safe area */}
         <header
-          className="flex-shrink-0 px-5 py-3 flex items-center justify-between"
+          className="glass flex-shrink-0 px-5 flex items-center justify-between"
           style={{
-            background: 'rgba(245,247,245,0.85)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
+            paddingTop: 'calc(var(--sat) + 12px)',
+            paddingBottom: '12px',
             borderBottom: '1px solid rgba(0,0,0,0.06)',
             zIndex: 40,
           }}
@@ -2229,9 +2309,10 @@ export default function App() {
             {/* Location indicator */}
             <button
               onClick={requestGeo}
-              className="w-9 h-9 rounded-full flex items-center justify-center"
+              className="w-11 h-11 rounded-full flex items-center justify-center"
               style={{ background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}
               title={coords ? 'Location active' : 'Enable location'}
+              aria-label={coords ? 'Location active' : 'Enable location'}
             >
               <span
                 className="material-symbols-outlined"
@@ -2289,13 +2370,12 @@ export default function App() {
           )}
         </main>
 
-        {/* Bottom navigation */}
+        {/* Bottom navigation — Liquid Glass with home indicator safe area */}
         <nav
-          className="flex-shrink-0 flex items-center px-2 pt-2 pb-2"
+          className="glass flex-shrink-0 flex items-center px-2"
           style={{
-            background: 'rgba(245,247,245,0.92)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
+            paddingTop: '8px',
+            paddingBottom: 'calc(var(--sab) + 8px)',
             borderTop: '1px solid rgba(0,0,0,0.07)',
             zIndex: 40,
           }}
@@ -2304,7 +2384,9 @@ export default function App() {
             <button
               key={item.id}
               onClick={() => navigateTab(item.id)}
-              className="flex-1 flex flex-col items-center gap-0.5 py-1.5 transition-all"
+              aria-label={item.label}
+              className="flex-1 flex flex-col items-center gap-0.5 py-1 transition-all"
+              style={{ minHeight: '44px' }}
             >
               <span
                 className="material-symbols-outlined"
