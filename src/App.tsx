@@ -189,21 +189,44 @@ function ABQUnpluggedLogo({ size = 28 }: { size?: number }) {
 
 // ─── ImageWithFallback ──────────────────────────────────────────────────────
 
+const FALLBACK_GRADIENTS = [
+  'linear-gradient(135deg,#a03b00,#ff793b)',
+  'linear-gradient(135deg,#1a3a2a,#2d8659)',
+  'linear-gradient(135deg,#1a2a4a,#3b82f6)',
+  'linear-gradient(135deg,#4a1a3a,#c026d3)',
+  'linear-gradient(135deg,#3a2a1a,#d97706)',
+  'linear-gradient(135deg,#1a3a3a,#0d9488)',
+];
+
+function hashGradient(name?: string): string {
+  if (!name) return FALLBACK_GRADIENTS[0];
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = ((h << 5) - h + name.charCodeAt(i)) | 0;
+  return FALLBACK_GRADIENTS[Math.abs(h) % FALLBACK_GRADIENTS.length];
+}
+
 function ImageWithFallback({
-  src, alt, className, gradient,
+  src, alt, className, gradient, showLabel,
 }: {
-  src?: string; alt?: string; className?: string; gradient?: string;
+  src?: string; alt?: string; className?: string; gradient?: string; showLabel?: boolean;
 }) {
   const [error, setError] = useState(false);
   const resolvedSrc = src ? hiResUrl(src) : '';
+  const bg = gradient || hashGradient(alt);
 
   if (!resolvedSrc || error) {
     return (
       <div
         className={className}
-        style={{ background: gradient || 'linear-gradient(135deg,#a03b00,#ff793b)' }}
+        style={{ background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}
         aria-label={alt}
-      />
+      >
+        {showLabel && alt && (
+          <span style={{ color: 'rgba(255,255,255,0.5)', fontFamily: 'Epilogue, sans-serif', fontWeight: 900, fontSize: '13px', textAlign: 'center', padding: '8px', lineHeight: 1.2 }}>
+            {alt}
+          </span>
+        )}
+      </div>
     );
   }
   return (
@@ -236,7 +259,7 @@ const PLACE_CATEGORIES = [
   { label: 'Library', icon: '📚' },
 ];
 
-const EVENT_GENRES = ['All', 'Music', 'Sports', 'Arts & Theatre', 'Comedy', 'Family'];
+const EVENT_GENRES = ['All', 'Music', 'Sports', 'Arts & Theatre', 'Comedy', 'Family', 'Outdoor'];
 
 // ─── Geo Banner ──────────────────────────────────────────────────────────────
 
@@ -323,6 +346,7 @@ function PlaceCard({
           alt={place.name}
           className="w-full h-full object-cover"
           gradient={place.gradient}
+          showLabel
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
         <div className="absolute top-2 left-2">
@@ -458,12 +482,13 @@ function EventCard({ event, onClick }: { event: TMEvent; onClick: () => void }) 
 // ─── Place Detail Modal ──────────────────────────────────────────────────────
 
 function PlaceDetailModal({
-  place, onClose, isCheckedIn, onCheckIn,
+  place, onClose, isCheckedIn, onCheckIn, checkInError,
 }: {
   place: Place;
   onClose: () => void;
   isCheckedIn: boolean;
   onCheckIn: () => void;
+  checkInError?: string | null;
 }) {
   const catEmoji = PLACE_CATEGORIES.find(c => c.label === place.category)?.icon || '📍';
   const mapsQuery = encodeURIComponent((place.address || place.name) + ' Albuquerque NM');
@@ -537,6 +562,13 @@ function PlaceDetailModal({
             {isCheckedIn ? 'Visited! ✓' : 'Check In'}
           </button>
         </div>
+
+        {checkInError && (
+          <div className="mb-4 px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-2" style={{ background: '#fff3e0', color: '#a03b00', border: '1px solid #ffe0b2' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>location_off</span>
+            {checkInError}
+          </div>
+        )}
 
         {place.description && (
           <p className="text-gray-700 text-sm leading-relaxed mb-4" style={{ fontFamily: 'Manrope, sans-serif' }}>
@@ -1121,6 +1153,11 @@ function EventsScreen({
       result = result.filter(e => {
         const seg = e.classifications?.[0]?.segment?.name || '';
         const gen = e.classifications?.[0]?.genre?.name || '';
+        if (selectedGenre === 'Outdoor') {
+          const venueName = (e._embedded?.venues?.[0]?.name || '').toLowerCase();
+          const eventName = e.name.toLowerCase();
+          return venueName.includes('outdoor') || venueName.includes('amphitheater') || venueName.includes('park') || venueName.includes('field') || venueName.includes('arena') || eventName.includes('outdoor') || gen === 'Outdoor';
+        }
         return seg === selectedGenre || gen === selectedGenre;
       });
     }
@@ -1707,18 +1744,89 @@ export default function App() {
 
   const { coords, error: geoError, requested: geoRequested, request: requestGeo } = useGeolocation();
 
+  // ── Browser history management (prevents swipe-back leaving the site) ──
+  const navigateTab = useCallback((tab: TabId) => {
+    setActiveTab(tab);
+    window.history.pushState({ tab, modal: null }, '', `#${tab}`);
+  }, []);
+
+  const openPlaceModal = useCallback((place: Place) => {
+    setSelectedPlace(place);
+    window.history.pushState({ tab: null, modal: 'place', id: place.id }, '', `#place/${place.id}`);
+  }, []);
+
+  const openEventModal = useCallback((event: TMEvent) => {
+    setSelectedEvent(event);
+    window.history.pushState({ tab: null, modal: 'event', id: event.id }, '', `#event/${event.id}`);
+  }, []);
+
+  const closePlaceModal = useCallback(() => setSelectedPlace(null), []);
+  const closeEventModal = useCallback(() => setSelectedEvent(null), []);
+
+  useEffect(() => {
+    // Set initial history entry
+    window.history.replaceState({ tab: 'discover', modal: null }, '', '#discover');
+
+    const handlePopState = (e: PopStateEvent) => {
+      const state = e.state;
+      // If going back from a modal, close it
+      if (selectedPlace) { setSelectedPlace(null); return; }
+      if (selectedEvent) { setSelectedEvent(null); return; }
+      // If going back between tabs, go to that tab (or default to discover)
+      if (state?.tab) {
+        setActiveTab(state.tab);
+      } else {
+        // Push a new state to prevent leaving the site
+        window.history.pushState({ tab: activeTab, modal: null }, '', `#${activeTab}`);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [selectedPlace, selectedEvent, activeTab]);
+
+  const [checkInError, setCheckInError] = useState<string | null>(null);
+
   const handleCheckIn = useCallback((placeId: string) => {
+    // Allow un-checking without proximity
+    if (checkedIn.has(placeId)) {
+      setCheckedIn(prev => {
+        const next = new Set(prev);
+        next.delete(placeId);
+        saveCheckins(next);
+        return next;
+      });
+      setCheckInError(null);
+      return;
+    }
+
+    // Require location for checking IN
+    if (!coords) {
+      setCheckInError('Enable location to check in — you need to be near the place!');
+      requestGeo();
+      setTimeout(() => setCheckInError(null), 3500);
+      return;
+    }
+
+    // Find the place and verify proximity (within 0.5 miles)
+    const place = places.find(p => p.id === placeId);
+    if (place?.lat && place?.lng) {
+      const dist = distanceMiles(coords.lat, coords.lng, place.lat, place.lng);
+      if (dist > 0.5) {
+        setCheckInError(`You're ${formatDist(dist)} away — get within 0.5 mi to check in!`);
+        setTimeout(() => setCheckInError(null), 3500);
+        return;
+      }
+    }
+
+    // Proximity OK (or place has no coordinates) → check in
     setCheckedIn(prev => {
       const next = new Set(prev);
-      if (next.has(placeId)) {
-        next.delete(placeId);
-      } else {
-        next.add(placeId);
-      }
+      next.add(placeId);
       saveCheckins(next);
       return next;
     });
-  }, []);
+    setCheckInError(null);
+  }, [checkedIn, coords, places, requestGeo]);
 
   useEffect(() => {
     async function loadData() {
@@ -1811,8 +1919,8 @@ export default function App() {
             <DiscoverScreen
               places={places}
               events={events}
-              onPlaceSelect={setSelectedPlace}
-              onEventSelect={setSelectedEvent}
+              onPlaceSelect={openPlaceModal}
+              onEventSelect={openEventModal}
               coords={coords}
               geoRequested={geoRequested}
               geoError={geoError}
@@ -1822,12 +1930,12 @@ export default function App() {
             />
           )}
           {activeTab === 'events' && (
-            <EventsScreen events={events} onEventSelect={setSelectedEvent} />
+            <EventsScreen events={events} onEventSelect={openEventModal} />
           )}
           {activeTab === 'places' && (
             <PlacesScreen
               places={places}
-              onPlaceSelect={setSelectedPlace}
+              onPlaceSelect={openPlaceModal}
               coords={coords}
               geoRequested={geoRequested}
               geoError={geoError}
@@ -1855,7 +1963,7 @@ export default function App() {
           {NAV_ITEMS.map(item => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => navigateTab(item.id)}
               className="flex-1 flex flex-col items-center gap-0.5 py-1.5 transition-all"
             >
               <span
@@ -1891,13 +1999,14 @@ export default function App() {
       {selectedPlace && (
         <PlaceDetailModal
           place={selectedPlace}
-          onClose={() => setSelectedPlace(null)}
+          onClose={() => { closePlaceModal(); window.history.back(); }}
           isCheckedIn={checkedIn.has(selectedPlace.id)}
           onCheckIn={() => handleCheckIn(selectedPlace.id)}
+          checkInError={checkInError}
         />
       )}
       {selectedEvent && (
-        <EventDetailModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />
+        <EventDetailModal event={selectedEvent} onClose={() => { closeEventModal(); window.history.back(); }} />
       )}
     </>
   );
