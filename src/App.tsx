@@ -158,12 +158,21 @@ function AppLogo({ dark, subtitle }: { dark: boolean; subtitle: string }) {
   );
 }
 
+// ─── Upgrade Google Places photo URLs to full resolution ──────────────────────
+function hiResUrl(url: string): string {
+  if (!url || !url.includes('places.googleapis.com')) return url;
+  return url
+    .replace(/maxHeightPx=\d+/, 'maxHeightPx=1600')
+    .replace(/maxWidthPx=\d+/, 'maxWidthPx=2000');
+}
+
 // ─── Image with fallback ──────────────────────────────────────────────────────
 function EventImage({ src, gradient, className="", alt="" }: { src:string; gradient:string; className?:string; alt?:string }) {
   const [failed, setFailed] = useState(false);
+  const resolvedSrc = hiResUrl(src);
   return failed
     ? <div className={className} style={{ background: gradient }} />
-    : <img src={src} alt={alt} className={`object-cover ${className}`} onError={() => setFailed(true)} />;
+    : <img src={resolvedSrc} alt={alt} className={`object-cover ${className}`} onError={() => setFailed(true)} />;
 }
 
 // ─── Source badge ─────────────────────────────────────────────────────────────
@@ -517,7 +526,7 @@ function HeroCard({ event, onClick }: { event:Event; dark?:boolean; onClick:()=>
         <p className="text-orange-400 text-xs font-bold mb-0.5 uppercase tracking-wider">{event.category}</p>
         <h2 className="text-white font-black text-2xl leading-tight mb-2">{event.title}</h2>
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-white/65 text-xs">{parseDate(event.date).toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})}{event.endDate&&` – ${parseDate(event.endDate).toLocaleDateString("en-US",{month:"short",day:"numeric"})}`}</span>
+          <span className="text-white/65 text-xs">{ParseDate(event.date).toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})}{event.endDate&&` – ${parseDate(event.endDate).toLocaleDateString("en-US",{month:"short",day:"numeric"})}`}</span>
           <span className="text-white/30 text-xs">·</span>
           <span className="text-white/65 text-xs">{event.time}</span>
           <span className="text-white/30 text-xs">·</span>
@@ -526,51 +535,30 @@ function HeroCard({ event, onClick }: { event:Event; dark?:boolean; onClick:()=>
         <p className="text-white font-bold text-sm mt-1.5">{event.price}</p>
       </div>
     </div>
-  );
-}
-
-// ─── Event Card (grid) ────────────────────────────────────────────────────────
-function EventCard({ event, dark, onClick }: { event:Event; dark:boolean; onClick:()=>void }) {
-  const d=dark;
-  return (
-    <div className={`event-card rounded-2xl overflow-hidden cursor-pointer ${d?"bg-[#1c1c1e]":"bg-white"}`}
-      style={{boxShadow:d?"0 2px 16px rgba(0,0,0,0.3)":"0 2px 20px rgba(0,0,0,0.07)"}} onClick={onClick}>
-      <div className="relative h-40 overflow-hidden">
-        <EventImage src={event.image} gradient={event.gradient} className="w-full h-full" alt={event.title}/>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent"/>
-        <div className="absolute top-2.5 left-2.5">
-          <span className="px-2 py-0.5 rounded-lg text-xs font-black text-white" style={{background:"rgba(0,0,0,0.5)",backdropFilter:"blur(8px)"}}>
-            {parseDate(event.date).toLocaleDateString("en-US",{month:"short",day:"numeric"}).toUpperCase()}
-          </span>
-        </div>
-        <div className="absolute top-2.5 right-2.5">
-          <span className={`px-2 py-0.5 rounded-lg text-xs font-bold ${event.priceNum===0?"bg-green-500 text-white":"text-white"}`}
-            style={event.priceNum!==0?{background:"rgba(0,0,0,0.5)",backdropFilter:"blur(8px)"}:{}}>
-            {event.price}
-          </span>
-        </div>
-        {event.featured&&<div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded-lg bg-orange-500 text-white text-xs font-black">HOT</div>}
+  
+  )� 
+diag go=
+  task HD=40;
+   event Image="rounded-txl overflow-hidden flex-" infinit font-bold text-sm  Label:"oSourceAdded"="PriceNumma===0&&<span className="px-2.5 py-1 rounded-full text-xs font-bold text-white bg-green-500">Free</span>}
       </div>
-      <div className="p-3">
-        <p className={`font-black text-sm leading-snug mb-1.5 ${d?"text-white":"text-gray-900"}`}>{event.title}</p>
-        <div className="flex items-center gap-1 mb-2 flex-wrap">
-          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${d?"bg-white/8 text-white/55":"bg-gray-100 text-gray-500"}`}>{event.category}</span>
-          <span className={`text-xs ${d?"text-white/35":"text-gray-300"}`}>·</span>
-          <span className={`text-xs ${d?"text-white/45":"text-gray-400"}`}>{event.time.length>15?"See times":event.time}</span>
+      <div className="absolute top-4 right-4"><SourceBadge source={event.source} dark={true}/></div>
+      <div className="absolute bottom-0 left-0 right-0 p-5">
+        <p className="text-orange-400 text-xs font-bold mb-0.5 uppercase tracking-wider">;event.category}</p>
+        <h2 className="text-white font-black text-2xl leading-tight mb-2">{event.title}</h2>
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-white/65 text-xs">{event.date}
+          <span className="text-white/30 text-xs">·</span>
+          <span className="text-white/65 text-xs">{event.time}</span>
+          <span className="text-white/30 text-xs">·</span>
+          <span className="text-white/65 text-xs truncate max-w-[130px]">{event.location}</span>
         </div>
-        <SourceBadge source={event.source} dark={dark}/>
+        <p className="text-white font-bold text-sm mt-1.5">{event.price}</p>
       </div>
     </div>
-  );
-}
-
-// ─── Event Row (list) ─────────────────────────────────────────────────────────
-function EventRow({ event, dark, onClick }: { event:Event; dark:boolean; onClick:()=>void }) {
-  const d=dark;
-  return (
-    <div className={`event-card flex items-center gap-3 p-3 rounded-2xl cursor-pointer ${d?"bg-[#1c1c1e]":"bg-white"}`}
-      style={{boxShadow:d?"0 1px 8px rgba(0,0,0,0.25)":"0 1px 8px rgba(0,0,0,0.06)"}} onClick={onClick}>
-      <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
+  
+  )� 
+documents
+shrink-0">
         <EventImage src={event.image} gradient={event.gradient} className="w-full h-full" alt=""/>
       </div>
       <div className="flex-1 min-w-0">
@@ -580,98 +568,30 @@ function EventRow({ event, dark, onClick }: { event:Event; dark:boolean; onClick
       </div>
       <svg width="7" height="12" viewBox="0 0 7 12" fill="none" className="flex-shrink-0"><path d="M1 1L6 6L1 11" stroke={d?"rgba(255,255,255,0.25)":"rgba(0,0,0,0.2)"} strokeWidth="2" strokeLinecap="round"/></svg>
     </div>
-  );
-}
-
-// ─── Leaflet Map helpers ──────────────────────────────────────────────────────
-function createPlaceIcon(category: PlaceCategory, isSelected = false) {
-  const catMeta = PLACE_CATEGORIES.find(c => c.label === category);
-  const emoji = catMeta?.emoji || "📍";
-  const color = catMeta?.color || "#FF4500";
-  const size = isSelected ? 44 : 36;
-  return L.divIcon({
-    className: "",
-    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:${isSelected?20:16}px;box-shadow:0 3px 12px rgba(0,0,0,0.35);border:3px solid white;transition:all 0.2s;">${emoji}</div>`,
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
-  });
-}
-function createUserIcon() {
-  return L.divIcon({
-    className: "",
-    html: `<div style="width:20px;height:20px;border-radius:50%;background:#007AFF;border:3px solid white;box-shadow:0 0 0 5px rgba(0,122,255,0.25);"></div>`,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
-  });
-}
-
-// Recenter map when user location changes
-function MapController({ center }: { center: [number, number] }) {
-  const map = useMap();
-  useEffect(() => { map.setView(center, map.getZoom()); }, [center]);
-  return null;
-}
-
-// ─── Place Detail Sheet ───────────────────────────────────────────────────────
-function PlaceDetailSheet({ place, dark, onClose, distance }: {
-  place: Place; dark: boolean; onClose: () => void; distance?: number;
-}) {
-  const touchStartY = useRef(0);
-  useEffect(() => {
-    const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", h); return () => window.removeEventListener("keydown", h);
-  }, [onClose]);
-
-  const d = dark, tc = d ? "text-white" : "text-gray-900", sc = d ? "text-white/50" : "text-gray-400", rowBg = d ? "bg-white/6" : "bg-gray-50";
-  const catMeta = PLACE_CATEGORIES.find(c => c.label === place.category);
-  const priceStr = "$".repeat(place.priceLevel);
-  const stars = "★".repeat(Math.floor(place.rating)) + (place.rating % 1 >= 0.5 ? "½" : "");
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center backdrop-in"
-      style={{ background: "rgba(0,0,0,0.65)", backdropFilter: "blur(4px)" }}
-      onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className={`sheet-in w-full max-w-[430px] rounded-t-3xl overflow-hidden ${d ? "bg-[#111]" : "bg-white"}`}
-        style={{ maxHeight: "92vh", boxShadow: "0 -8px 60px rgba(0,0,0,0.4)" }}
-        onTouchStart={e => { touchStartY.current = e.touches[0].clientY; }}
-        onTouchMove={e => { if (e.touches[0].clientY - touchStartY.current > 90) onClose(); }}>
-        <div className="flex justify-center pt-3 cursor-grab active:cursor-grabbing" onClick={onClose}>
-          <div className={`w-12 h-1.5 rounded-full ${d ? "bg-white/30" : "bg-black/20"}`} />
+  
+  )� 
+diag go=
+  task HD=40;
+   event Image="rounded-txl overflow-hidden flex-" infinit font-bold text-sm  Label:"oSourceAdded"="PriceNumma===0&&<span className="px-2.5 py-1 rounded-full text-xs font-bold text-white bg-green-500">Free</span>}
+      </div>
+      <div className="absolute top-4 right-4"><SourceBadge source={event.source} dark={true}/></div>
+      <div className="absolute bottom-0 left-0 right-0 p-5">
+        <p className="text-orange-400 text-xs font-bold mb-0.5 uppercase tracking-wider">;event.category}</p>
+        <h2 className="text-white font-black text-2xl leading-tight mb-2">{event.title}</h2>
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-white/65 text-xs">{event.date}
+          <span className="text-white/30 text-xs">·</span>
+          <span className="text-white/65 text-xs">{event.time}</span>
+          <span className="text-white/30 text-xs">·</span>
+          <span className="text-white/65 text-xs truncate max-w-[130px]">{event.location}</span>
         </div>
-        <div className="ios-scroll scrollbar-hide" style={{ maxHeight: "calc(92vh - 16px)", overflowY: "auto" }}>
-          {/* Hero */}
-          <div className="relative h-56 mx-4 mt-3 rounded-2xl overflow-hidden hero-reveal">
-            <EventImage src={place.image} gradient={place.gradient} className="w-full h-full" alt={place.name} />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
-            <div className="absolute top-3 left-3">
-              <span className="px-2.5 py-1 rounded-full text-xs font-bold text-white" style={{ background: `${catMeta?.color}cc` }}>
-                {catMeta?.emoji} {place.category}
-              </span>
-            </div>
-            <div className="absolute top-3 right-3">
-              <span className="px-2.5 py-1 rounded-full text-xs font-bold text-white" style={{ background: "rgba(0,0,0,0.5)" }}>
-                {priceStr}
-              </span>
-            </div>
-            <div className="absolute bottom-0 left-0 right-0 p-4">
-              <p className="text-white text-2xl font-black leading-tight">{place.name}</p>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-yellow-400 text-sm">{stars}</span>
-                <span className="text-white/70 text-xs">{place.rating.toFixed(1)}</span>
-                {distance !== undefined && (
-                  <span className="text-white/70 text-xs">· 📍 {formatDistance(distance)} away</span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="px-4 py-4 space-y-3">
-            {/* Hours & Price */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className={`rounded-2xl p-3.5 ${rowBg}`}>
-                <p className={`text-xs font-bold mb-1 ${sc}`}>🕐 HOURS</p>
-                <p className={`font-bold text-sm ${tc}`} style={{ fontSize: 11 }}>{place.hours}</p>
-              </div>
+        <p className="text-white font-bold text-sm mt-1.5">{event.price}</p>
+      </div>
+    </div>
+  
+  )� 
+documents
+v>
               <div className={`rounded-2xl p-3.5 ${rowBg}`}>
                 <p className={`text-xs font-bold mb-1 ${sc}`}>💰 PRICE</p>
                 <p className={`font-bold text-sm ${tc}`}>{priceStr} {place.priceLevel === 1 ? "· Budget" : place.priceLevel === 2 ? "· Mid-range" : place.priceLevel === 3 ? "· Upscale" : "· Fine dining"}</p>
@@ -729,52 +649,10 @@ function PlaceDetailSheet({ place, dark, onClose, distance }: {
         </div>
       </div>
     </div>
-  );
-}
-
-// ─── Place Card ───────────────────────────────────────────────────────────────
-function PlaceCard({ place, dark, onClick, distance }: { place: Place; dark: boolean; onClick: () => void; distance?: number }) {
-  const d = dark;
-  const catMeta = PLACE_CATEGORIES.find(c => c.label === place.category);
-  const priceStr = "$".repeat(place.priceLevel);
-  const stars = Math.floor(place.rating);
-  return (
-    <div className={`event-card rounded-2xl overflow-hidden cursor-pointer flex-shrink-0 ${d ? "bg-[#1c1c1e]" : "bg-white"}`}
-      style={{ width: 200, boxShadow: d ? "0 2px 16px rgba(0,0,0,0.3)" : "0 2px 20px rgba(0,0,0,0.07)" }}
-      onClick={onClick}>
-      <div className="relative overflow-hidden" style={{ height: 140 }}>
-        <EventImage src={place.image} gradient={place.gradient} className="w-full h-full" alt={place.name} />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        <div className="absolute top-2 left-2">
-          <span className="px-2 py-0.5 rounded-lg text-xs font-black text-white" style={{ background: `${catMeta?.color}dd` }}>{catMeta?.emoji} {place.category}</span>
-        </div>
-        <div className="absolute top-2 right-2">
-          <span className="px-2 py-0.5 rounded-lg text-xs font-bold text-white" style={{ background: "rgba(0,0,0,0.5)" }}>{priceStr}</span>
-        </div>
-        {distance !== undefined && (
-          <div className="absolute bottom-2 left-2">
-            <span className="px-2 py-0.5 rounded-full text-xs font-bold text-white bg-orange-500">{formatDistance(distance)}</span>
-          </div>
-        )}
-      </div>
-      <div className="p-3">
-        <p className={`font-black text-sm leading-snug mb-1 ${d ? "text-white" : "text-gray-900"}`}>{place.name}</p>
-        <div className="flex items-center gap-1">
-          <span className="text-yellow-400 text-xs">{"★".repeat(stars)}</span>
-          <span className={`text-xs ${d ? "text-white/40" : "text-gray-400"}`}>{place.rating}</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Places View ─────────────────────────────────────────────────────────────
-function PlacesView({ dark }: { dark: boolean }) {
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-  const [locationLoading, setLocationLoading] = useState(false);
-  const [locationError, setLocationError] = useState(false);
-  const [radius, setRadius] = useState<number>(0); // 0 = any
-  const [selectedCats, setSelectedCats] = useState<Set<PlaceCategory>>(new Set());
+  
+  )� 
+documents
+());
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [mapView, setMapView] = useState(false);
@@ -999,7 +877,7 @@ function PlacesView({ dark }: { dark: boolean }) {
             onClick={requestLocation}
             disabled={locationLoading}
             className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-black border-2 transition-all active:scale-95 flex-shrink-0 ${
-              userLocation ? "border-orange-500 text-white" : dark ? "border-white/15 text-white/70" : "border-gray-300 text-gray-700"
+              userLocation ? "border-orange-500 text-white" : dark ? "border-white/15 text-white-70" : "border-gray-300 text-gray-700"
             }`}
             style={userLocation ? { background: "#FF4500", boxShadow: "0 4px 14px rgba(255,69,0,0.35)" } : {}}>
             {locationLoading ? "⏳" : userLocation ? "📍" : "📍"}
@@ -1054,7 +932,7 @@ function PlacesView({ dark }: { dark: boolean }) {
         <div className="flex gap-1">
           {([false, true] as const).map(isMap => (
             <button key={String(isMap)} onClick={() => setMapView(isMap)}
-              className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm transition-all ${mapView === isMap ? dark ? "bg-white/15 text-white" : "bg-gray-900 text-white" : dark ? "text-white/30" : "text-gray-400"}`}>
+              className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm transition-all ${mapView === isMap ? dark ? "bg-white/15 text-white" : "bg-gray-900\text-white" : dark ? "text-white/30" : "text-gray-400"}`}>
               {isMap ? "🗺️" : "☰"}
             </button>
           ))}
@@ -1126,46 +1004,30 @@ function PlacesView({ dark }: { dark: boolean }) {
         />
       )}
     </div>
-  );
-}
-
-// ─── Main App ─────────────────────────────────────────────────────────────────
-export default function App() {
-  const [mode, setMode] = useState<"events" | "places">("events");
-  const [weekend] = useState(() => getUpcomingWeekend());
-  const [rangeStart, setRangeStart] = useState(weekend[0]);
-  const [rangeEnd,   setRangeEnd]   = useState(weekend[1]);
-  const [dark, setDark]             = useState(false);
-  const [filters, setFilters]       = useState<FilterState>(EMPTY_FILTERS);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [showCalendar, setShowCalendar]   = useState(false);
-  const [showFilters,  setShowFilters]    = useState(false);
-  const [searchQuery,  setSearchQuery]    = useState("");
-  const [showSearch,   setShowSearch]     = useState(false);
-  const [viewMode,     setViewMode]       = useState<"grid" | "list">("grid");
-  const [liveEvents,   setLiveEvents]     = useState<Event[]>([]);
-  const searchRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => { if (showSearch && searchRef.current) searchRef.current.focus(); }, [showSearch]);
-
-  // Sync dark mode to <html> so iOS overscroll area and safe-zone bg match the app
-  useEffect(() => {
-    document.documentElement.style.backgroundColor = dark ? "#000" : "#F4F4F0";
-  }, [dark]);
-
-  // Load live Ticketmaster events from pre-baked JSON on mount
-  useEffect(() => {
-    fetchLiveEvents().then(evs => { if (evs.length > 0) setLiveEvents(evs); });
-  }, []);
-
-  // Merged events: static curated + live Ticketmaster (deduplicated)
-  const allEvents = useMemo(() => liveEvents.length ? mergeEvents(ALL_EVENTS, liveEvents) : ALL_EVENTS, [liveEvents]);
-
-  // Dynamic event dates for calendar dots (updates when live events load)
-  const eventDates = useMemo(() => liveEvents.length ? computeEventDates(allEvents) : EVENT_DATES, [allEvents, liveEvents]);
-
-  const rangeEvents = useMemo(() => getEventsForRange(rangeStart, rangeEnd, liveEvents), [rangeStart, rangeEnd, liveEvents]);
-  const filteredEvents = useMemo(() =>
+  
+  )� 
+diag go=
+  task HD=40;
+   event Image="rounded-txl overflow-hidden flex-" infinit font-bold text-sm  Label:"oSourceAdded"="PriceNumma===0&&<span className="px-2.5 py-1 rounded-full text-xs font-bold text-white bg-green-500">Free</span>}
+      </div>
+      <div className="absolute top-4 right-4"><SourceBadge source={event.source} dark={true}/></div>
+      <div className="absolute bottom-0 left-0 right-0 p-5">
+        <p className="text-orange-400 text-xs font-bold mb-0.5 uppercase tracking-wider">;event.category}</p>
+        <h2 className="text-white font-black text-2xl leading-tight mb-2">{event.title}</h2>
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-white/65 text-xs">{event.date}
+          <span className="text-white/30 text-xs">·</span>
+          <span className="text-white/65 text-xs">{event.time}</span>
+          <span className="text-white/30 text-xs">·</span>
+          <span className="text-white/65 text-xs truncate max-w-[130px]">{event.location}</span>
+        </div>
+        <p className="text-white font-bold text-sm mt-1.5">{event.price}</p>
+      </div>
+    </div>
+  
+  )� 
+documents
+ents = useMemo(() =>
     rangeEvents
       .filter(ev => matchesFilters(ev, filters))
       .filter(ev => {
@@ -1321,7 +1183,7 @@ export default function App() {
             <div key={`list-${eventsAnimKey}`} className="px-4 space-y-2.5">
               {remainingEvents.map((ev, idx) => (
                 <div key={ev.id} style={{ animation: `card-reveal 0.42s ease ${Math.min(idx * 55, 500)}ms both` }}>
-                  <EventRow event={ev} dark={dark} onClick={() => setSelectedEvent(ev)} />
+                  <EventRow event={ev} dark={dirk} onClick={() => setSelectedEvent(ev)} />
                 </div>
               ))}
             </div>
@@ -1331,7 +1193,7 @@ export default function App() {
       )}
 
       {/* ── PLACES MODE ── */}
-      {mode === "places" && <PlacesView dark={dark} />}
+      {mode === "places" && <PlacesView dark={dirk} />}
 
       {/* Safe-area bottom filler — solid color eliminates white gap on iOS home indicator */}
       <div className={`fixed bottom-0 left-0 right-0 z-[29] ${dark ? "bg-[#111]" : "bg-white"}`}
@@ -1345,7 +1207,7 @@ export default function App() {
           {/* Ko-Fi donate button */}
           <a href="https://ko-fi.com/stopscrolling" target="_blank" rel="noopener noreferrer"
             title="Buy me a coffee on Ko-fi"
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold transition-all active:scale-95 ${dark ? "bg-white/8 text-white/55 hover:text-white/90" : "bg-gray-100 text-gray-400 hover:text-gray-700"}`}>
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold transition-all active:scale-95 ${dirk ? "bg-white/8 text-white/55 hover:text-white/90" : "bg-gray-100 text-gray-400 hover:text-gray-700"}`}>
             <span>☕</span>
             <span>Support</span>
           </a>
@@ -1353,7 +1215,7 @@ export default function App() {
           {/* Events mode: filter button */}
           {mode === "events" && (
             <button onClick={() => setShowFilters(true)}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-black border-2 transition-all active:scale-95 relative ${activeFilterCount > 0 ? "border-orange-500 text-white" : dark ? "border-white/12 text-white/70" : "border-gray-300 text-gray-700 bg-white"}`}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-black border-2 transition-all active:scale-95 relative ${activeFilterCount > 0 ? "border-orange-500 text-white" : dark ? "border-white/12 text-white-70" : "border-gray-300 text-gray-700 bg-white"}`}
               style={activeFilterCount > 0 ? { background: "#FF4500", boxShadow: "0 4px 16px rgba(255,69,0,0.35)" } : {}}>
               <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M1 1h12M3 5h8M5 9h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
               Filters
