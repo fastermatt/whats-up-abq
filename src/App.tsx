@@ -116,7 +116,9 @@ function formatDate(dateStr?: string): string {
 
 function formatTime(timeStr?: string): string {
   if (!timeStr) return '';
-  const [h, m] = timeStr.split(':').map(Number);
+  const parts = timeStr.split(':').map(Number);
+  const h = parts[0]; const m = parts[1] ?? 0;
+  if (isNaN(h) || h < 0 || h > 23) return '';
   const ampm = h >= 12 ? 'PM' : 'AM';
   const h12 = h % 12 || 12;
   return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
@@ -147,7 +149,7 @@ function formatDist(miles: number): string {
 }
 
 function getLevel(count: number): { label: string; emoji: string; next: number } {
-  if (count >= 50) return { label: 'Legend', emoji: '🏆', next: 100 };
+  if (count >= 50) return { label: 'Legend', emoji: '🏆', next: count }; // max level
   if (count >= 35) return { label: 'Pioneer', emoji: '🥇', next: 50 };
   if (count >= 20) return { label: 'Trailblazer', emoji: '🥈', next: 35 };
   if (count >= 10) return { label: 'Adventurer', emoji: '🥉', next: 20 };
@@ -450,7 +452,7 @@ function PlaceCard({
                 color: isCheckedIn ? '#a03b00' : 'white',
               }}
             >
-              {isCheckedIn ? '✓ In' : 'Check In'}
+              {isCheckedIn ? '✓ Visited' : 'Check In'}
             </button>
           )}
         </div>
@@ -475,7 +477,7 @@ function EventCard({ event, onClick }: { event: TMEvent; onClick: () => void }) 
     >
       <div className="flex-shrink-0 relative overflow-hidden" style={{ width: '110px' }}>
         {imgSrc ? (
-          <img src={imgSrc} alt={event.name} className="w-full h-full object-cover" />
+          <img src={hiResUrl(imgSrc)} alt={event.name} className="w-full h-full object-cover" />
         ) : (
           <div
             className="w-full h-full flex items-center justify-center"
@@ -701,7 +703,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
     <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto" style={{ background: '#f5f7f5' }}>
       <div className="relative flex-shrink-0" style={{ height: '260px' }}>
         {imgSrc ? (
-          <img src={imgSrc} alt={event.name} className="w-full h-full object-cover" />
+          <img src={hiResUrl(imgSrc)} alt={event.name} className="w-full h-full object-cover" />
         ) : (
           <div
             className="w-full h-full flex items-center justify-center"
@@ -925,7 +927,7 @@ function DiscoverScreen({
                 >
                   <div className="relative" style={{ height: '120px' }}>
                     {imgSrc ? (
-                      <img src={imgSrc} alt={event.name} className="w-full h-full object-cover" />
+                      <img src={hiResUrl(imgSrc)} alt={event.name} className="w-full h-full object-cover" />
                     ) : (
                       <div
                         className="w-full h-full flex items-center justify-center"
@@ -1460,17 +1462,18 @@ function PlacesScreen({
         ] as const).map(s => (
           <button
             key={s.id}
-            onClick={() => { if (!s.disabled) setSortMode(s.id); }}
+            onClick={() => { if (s.disabled) { onRequestGeo(); } else { setSortMode(s.id); } }}
             className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+            title={s.disabled ? 'Enable location to sort by distance' : undefined}
             style={{
               background: sortMode === s.id ? '#111' : 'white',
               color: sortMode === s.id ? 'white' : s.disabled ? '#ccc' : '#555',
               boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-              opacity: s.disabled ? 0.5 : 1,
+              opacity: s.disabled ? 0.6 : 1,
             }}
           >
             {s.id === 'near' && !coords && (
-              <span className="material-symbols-outlined mr-1" style={{ fontSize: '11px', verticalAlign: 'middle' }}>lock</span>
+              <span className="material-symbols-outlined mr-1" style={{ fontSize: '11px', verticalAlign: 'middle' }}>location_off</span>
             )}
             {s.label}
           </button>
@@ -1652,12 +1655,13 @@ const LEADERBOARD_SEEDS = [
 interface LeaderboardRow { rank: number; name: string; count: number; isMe: boolean; uid?: string; }
 
 function ProfileScreen({
-  checkedIn, user, onSignIn, onSignOut,
+  checkedIn, user, onSignIn, onSignOut, places,
 }: {
   checkedIn: Set<string>;
   user: User | null;
   onSignIn: () => void;
   onSignOut: () => void;
+  places: Place[];
 }) {
   const myCount = checkedIn.size;
   const level = getLevel(myCount);
@@ -1801,7 +1805,13 @@ function ProfileScreen({
       </div>
 
       {/* Progress bar */}
-      {myCount < 50 && (
+      {myCount >= 50 ? (
+        <div className="bg-white rounded-2xl p-4 mb-4 text-center" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
+          <span style={{ fontSize: '28px' }}>🏆</span>
+          <p className="font-black text-sm mt-1" style={{ fontFamily: 'Epilogue, sans-serif', color: '#a03b00' }}>Max Level Reached!</p>
+          <p className="text-xs text-gray-400 mt-0.5" style={{ fontFamily: 'Manrope, sans-serif' }}>You're a Legend — {myCount} places explored!</p>
+        </div>
+      ) : (
         <div className="bg-white rounded-2xl p-4 mb-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs font-bold text-gray-700" style={{ fontFamily: 'Manrope, sans-serif' }}>
@@ -1864,7 +1874,7 @@ function ProfileScreen({
       <div className="flex flex-col gap-2 mb-5">
         {leaderboard.map((row) => (
           <div
-            key={row.name}
+            key={row.uid || `${row.name}_${row.rank}`}
             className="flex items-center gap-3 bg-white rounded-2xl px-4 py-3"
             style={{
               boxShadow: row.isMe ? '0 0 0 2px #a03b00, 0 2px 8px rgba(160,59,0,0.15)' : '0 1px 4px rgba(0,0,0,0.08)',
@@ -1903,13 +1913,51 @@ function ProfileScreen({
       </div>
 
       <div
-        className="rounded-2xl p-4 mb-2"
+        className="rounded-2xl p-4 mb-5"
         style={{ background: 'rgba(160,59,0,0.06)' }}
       >
         <p className="text-xs text-gray-500 text-center" style={{ fontFamily: 'Manrope, sans-serif' }}>
           🎖️ Rankings are based on self-reported check-ins. We can't verify visits, but we trust you to explore honestly. The real prize is the memories you make!
         </p>
       </div>
+
+      {/* Visited Places */}
+      {myCount > 0 && (
+        <>
+          <h2
+            className="font-black text-base uppercase tracking-tight mb-3"
+            style={{ fontFamily: 'Epilogue, sans-serif' }}
+          >
+            Your Check-ins
+          </h2>
+          <div className="flex flex-col gap-2 mb-6">
+            {places
+              .filter(p => checkedIn.has(p.id))
+              .map(p => (
+                <div
+                  key={p.id}
+                  className="flex items-center gap-3 bg-white rounded-2xl px-4 py-3"
+                  style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}
+                >
+                  <div
+                    className="w-10 h-10 rounded-xl flex-shrink-0 overflow-hidden"
+                    style={{ background: hashGradient(p.name) }}
+                  >
+                    {p.image && (
+                      <img src={hiResUrl(p.image)} alt={p.name} className="w-full h-full object-cover" onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold truncate" style={{ fontFamily: 'Epilogue, sans-serif' }}>{p.name}</p>
+                    <p className="text-xs text-gray-400" style={{ fontFamily: 'Manrope, sans-serif' }}>{p.category}</p>
+                  </div>
+                  <span className="text-xs font-bold flex-shrink-0" style={{ color: '#a03b00' }}>✓</span>
+                </div>
+              ))
+            }
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -1963,6 +2011,7 @@ export default function App() {
   const [places, setPlaces] = useState<Place[]>([]);
   const [events, setEvents] = useState<TMEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<TMEvent | null>(null);
   const [checkedIn, setCheckedIn] = useState<Set<string>>(loadCheckins);
@@ -2066,7 +2115,7 @@ export default function App() {
     if (!coords) {
       setCheckInError('Enable location to check in — you need to be near the place!');
       requestGeo();
-      setTimeout(() => setCheckInError(null), 3500);
+      setTimeout(() => setCheckInError(null), 5000);
       return;
     }
 
@@ -2076,12 +2125,19 @@ export default function App() {
       const dist = distanceMiles(coords.lat, coords.lng, place.lat, place.lng);
       if (dist > 0.5) {
         setCheckInError(`You're ${formatDist(dist)} away — get within 0.5 mi to check in!`);
-        setTimeout(() => setCheckInError(null), 3500);
+        setTimeout(() => setCheckInError(null), 5000);
         return;
       }
     }
 
-    // Proximity OK (or place has no coordinates) → check in
+    // If place has no coordinates, we can't verify proximity — block check-in
+    if (place && !place.lat && !place.lng) {
+      setCheckInError('Check-in unavailable — this place has no location data.');
+      setTimeout(() => setCheckInError(null), 4000);
+      return;
+    }
+
+    // Proximity OK → check in
     setCheckedIn(prev => {
       const next = new Set(prev);
       next.add(placeId);
@@ -2110,6 +2166,7 @@ export default function App() {
         }
       } catch (err) {
         console.error('Failed to load data:', err);
+        setLoadError(true);
       } finally {
         setLoading(false);
       }
@@ -2119,6 +2176,20 @@ export default function App() {
   }, []);
 
   if (loading) return <LoadingScreen />;
+  if (loadError) return (
+    <div className="fixed inset-0 flex flex-col items-center justify-center gap-3 px-8" style={{ background: '#f5f7f5' }}>
+      <ABQUnpluggedLogo size={56} />
+      <h2 className="text-xl font-black uppercase tracking-tighter text-center" style={{ fontFamily: 'Epilogue, sans-serif', color: '#a03b00' }}>Couldn't Load Content</h2>
+      <p className="text-sm text-gray-500 text-center" style={{ fontFamily: 'Manrope, sans-serif' }}>Check your connection and try again.</p>
+      <button
+        onClick={() => { setLoadError(false); setLoading(true); }}
+        className="mt-2 px-6 py-3 rounded-2xl font-bold text-sm text-white"
+        style={{ background: '#a03b00', fontFamily: 'Manrope, sans-serif' }}
+      >
+        Retry
+      </button>
+    </div>
+  );
 
   return (
     <>
@@ -2211,6 +2282,7 @@ export default function App() {
             <ProfileScreen
               checkedIn={checkedIn}
               user={user}
+              places={places}
               onSignIn={() => setShowAuthModal(true)}
               onSignOut={() => signOut(fbAuth)}
             />
