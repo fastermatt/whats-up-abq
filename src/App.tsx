@@ -2222,12 +2222,11 @@ export default function App() {
           font-family: -apple-system, 'Manrope', system-ui, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
-          /* Prevent body bounce/rubber-band on iOS — app handles its own scroll */
+          /* NOTE: no position:fixed here — that blocks iOS Safari address-bar auto-hide.
+             The app root div uses height:100dvh to fill the visual viewport instead. */
           overflow: hidden;
           overscroll-behavior: none;
           height: 100%;
-          position: fixed;
-          width: 100%;
         }
 
         /* ── Scrollbars: hidden (native iOS feel) ── */
