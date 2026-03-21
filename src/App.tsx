@@ -1,4 +1,29 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { initializeApp } from 'firebase/app';
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword,
+  createUserWithEmailAndPassword, signOut, onAuthStateChanged, type User,
+  updateProfile,
+} from 'firebase/auth';
+import {
+  getFirestore, doc, setDoc, getDoc, collection, query, orderBy,
+  limit, onSnapshot, serverTimestamp,
+} from 'firebase/firestore';
+
+// ─── Firebase Setup ──────────────────────────────────────────────────────────
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAVL8hY7QZjgbgny7GKDWA7ti2hoBU2Xvs",
+  authDomain: "abq-unplugged.firebaseapp.com",
+  projectId: "abq-unplugged",
+  storageBucket: "abq-unplugged.firebasestorage.app",
+  messagingSenderId: "587816012900",
+  appId: "1:587816012900:web:bba5f7bc9f43b64ce76371",
+};
+
+const fbApp  = initializeApp(firebaseConfig);
+const fbAuth = getAuth(fbApp);
+const fbDb   = getFirestore(fbApp);
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -165,6 +190,24 @@ function loadCheckins(): Set<string> {
 
 function saveCheckins(s: Set<string>) {
   try { localStorage.setItem('abq_checkins', JSON.stringify([...s])); } catch {}
+}
+
+async function syncCheckinsToFirestore(uid: string, checkIns: Set<string>, displayName: string) {
+  try {
+    const count = checkIns.size;
+    await setDoc(doc(fbDb, 'users', uid), {
+      checkIns: [...checkIns],
+      updatedAt: serverTimestamp(),
+    }, { merge: true });
+    // Update leaderboard entry
+    await setDoc(doc(fbDb, 'leaderboard', uid), {
+      displayName: displayName || 'Anonymous',
+      count,
+      updatedAt: serverTimestamp(),
+    }, { merge: true });
+  } catch (err) {
+    console.error('Firestore sync error:', err);
+  }
 }
 
 // ─── SVG Logo ───────────────────────────────────────────────────────────────
@@ -1469,6 +1512,130 @@ function PlacesScreen({
   );
 }
 
+// ─── Auth Modal ──────────────────────────────────────────────────────────────
+
+function AuthModal({ onClose }: { onClose: () => void }) {
+  const [mode, setMode] = useState<'choose' | 'email'>('choose');
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  async function handleGoogle() {
+    setError(''); setLoading(true);
+    try {
+      await signInWithPopup(fbAuth, new GoogleAuthProvider());
+      onClose();
+    } catch (e: any) { setError(e.message || 'Sign-in failed'); }
+    setLoading(false);
+  }
+
+  async function handleEmail(e: React.FormEvent) {
+    e.preventDefault(); setError(''); setLoading(true);
+    try {
+      if (isSignUp) {
+        const cred = await createUserWithEmailAndPassword(fbAuth, email, password);
+        if (displayName) await updateProfile(cred.user, { displayName });
+      } else {
+        await signInWithEmailAndPassword(fbAuth, email, password);
+      }
+      onClose();
+    } catch (e: any) { setError(e.message?.replace('Firebase: ', '') || 'Auth failed'); }
+    setLoading(false);
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center"
+      style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)' }}
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        className="w-full max-w-md rounded-t-3xl p-6 pb-10"
+        style={{ background: '#fff', boxShadow: '0 -4px 32px rgba(0,0,0,0.18)' }}
+      >
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-2xl font-black uppercase tracking-tighter" style={{ fontFamily: 'Epilogue, sans-serif' }}>
+            {mode === 'choose' ? 'Sign In' : (isSignUp ? 'Create Account' : 'Sign In')}
+          </h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 text-2xl leading-none">×</button>
+        </div>
+        <p className="text-sm text-gray-500 mb-5" style={{ fontFamily: 'Manrope, sans-serif' }}>
+          Sign in to sync your check-ins across devices and appear on the leaderboard.
+        </p>
+
+        {mode === 'choose' ? (
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={handleGoogle}
+              disabled={loading}
+              className="flex items-center justify-center gap-3 w-full rounded-2xl py-3.5 font-bold text-sm border border-gray-200"
+              style={{ fontFamily: 'Manrope, sans-serif', background: '#fff' }}
+            >
+              <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-3.58-13.47-8.71l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+              Continue with Google
+            </button>
+            <button
+              onClick={() => setMode('email')}
+              className="w-full rounded-2xl py-3.5 font-bold text-sm text-white"
+              style={{ fontFamily: 'Manrope, sans-serif', background: '#a03b00' }}
+            >
+              Continue with Email
+            </button>
+            {error && <p className="text-red-500 text-xs text-center">{error}</p>}
+          </div>
+        ) : (
+          <form onSubmit={handleEmail} className="flex flex-col gap-3">
+            <div className="flex gap-2 mb-1">
+              {['Sign In', 'Sign Up'].map((t, i) => (
+                <button key={t} type="button"
+                  onClick={() => setIsSignUp(i === 1)}
+                  className="flex-1 rounded-xl py-2 text-sm font-bold transition-all"
+                  style={{ background: isSignUp === (i === 1) ? '#a03b00' : '#f5f5f5', color: isSignUp === (i === 1) ? 'white' : '#666', fontFamily: 'Manrope, sans-serif' }}
+                >{t}</button>
+              ))}
+            </div>
+            {isSignUp && (
+              <input
+                type="text" placeholder="Display name (e.g. xplorer_abq)" value={displayName}
+                onChange={e => setDisplayName(e.target.value)}
+                className="w-full rounded-xl px-4 py-3 text-sm border border-gray-200 outline-none"
+                style={{ fontFamily: 'Manrope, sans-serif' }}
+              />
+            )}
+            <input
+              type="email" placeholder="Email" required value={email}
+              onChange={e => setEmail(e.target.value)}
+              className="w-full rounded-xl px-4 py-3 text-sm border border-gray-200 outline-none"
+              style={{ fontFamily: 'Manrope, sans-serif' }}
+            />
+            <input
+              type="password" placeholder="Password (min 6 chars)" required value={password}
+              onChange={e => setPassword(e.target.value)} minLength={6}
+              className="w-full rounded-xl px-4 py-3 text-sm border border-gray-200 outline-none"
+              style={{ fontFamily: 'Manrope, sans-serif' }}
+            />
+            {error && <p className="text-red-500 text-xs">{error}</p>}
+            <button
+              type="submit" disabled={loading}
+              className="w-full rounded-2xl py-3.5 font-bold text-sm text-white"
+              style={{ background: '#a03b00', fontFamily: 'Manrope, sans-serif', opacity: loading ? 0.7 : 1 }}
+            >
+              {loading ? 'Please wait…' : (isSignUp ? 'Create Account' : 'Sign In')}
+            </button>
+            <button type="button" onClick={() => setMode('choose')}
+              className="text-xs text-gray-400 text-center mt-1"
+              style={{ fontFamily: 'Manrope, sans-serif' }}
+            >← Back</button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Profile Screen ────────────────────────────────────────────────────────────
 
 const LEADERBOARD_SEEDS = [
@@ -1482,24 +1649,55 @@ const LEADERBOARD_SEEDS = [
   { name: 'tortilla_factory',  count: 6  },
 ];
 
-function ProfileScreen({ checkedIn }: { checkedIn: Set<string> }) {
+interface LeaderboardRow { rank: number; name: string; count: number; isMe: boolean; uid?: string; }
+
+function ProfileScreen({
+  checkedIn, user, onSignIn, onSignOut,
+}: {
+  checkedIn: Set<string>;
+  user: User | null;
+  onSignIn: () => void;
+  onSignOut: () => void;
+}) {
   const myCount = checkedIn.size;
   const level = getLevel(myCount);
+  const [lbRows, setLbRows] = useState<LeaderboardRow[]>([]);
 
-  // Build leaderboard: inject "You" at the right rank
-  const leaderboard = useMemo(() => {
+  // Subscribe to live leaderboard from Firestore
+  useEffect(() => {
+    const q = query(collection(fbDb, 'leaderboard'), orderBy('count', 'desc'), limit(20));
+    const unsub = onSnapshot(q, snap => {
+      const rows: LeaderboardRow[] = snap.docs.map((d, i) => ({
+        rank: i + 1,
+        name: (d.data().displayName as string) || 'Explorer',
+        count: (d.data().count as number) || 0,
+        isMe: d.id === user?.uid,
+        uid: d.id,
+      }));
+      setLbRows(rows);
+    }, () => {/* ignore errors */ });
+    return unsub;
+  }, [user?.uid]);
+
+  // Build leaderboard: if user signed in, they'll appear from Firestore; otherwise inject "You" locally
+  const leaderboard = useMemo<LeaderboardRow[]>(() => {
+    if (lbRows.length > 0) {
+      // Use Firestore data; if user not in list, inject them
+      const userInList = user && lbRows.some(r => r.isMe);
+      if (!userInList && myCount > 0) {
+        const merged = [...lbRows, { rank: 0, name: user?.displayName || 'You', count: myCount, isMe: true }];
+        merged.sort((a, b) => b.count - a.count);
+        return merged.map((r, i) => ({ ...r, rank: i + 1 })).slice(0, 10);
+      }
+      return lbRows.slice(0, 10);
+    }
+    // Fallback: seed data + local user
     const rows = LEADERBOARD_SEEDS.map((s, i) => ({ rank: i + 1, name: s.name, count: s.count, isMe: false }));
-    // Find where user fits
     const insertAt = rows.findIndex(r => myCount >= r.count);
     const meEntry = { rank: 0, name: 'You', count: myCount, isMe: true };
-    if (insertAt === -1) {
-      rows.push(meEntry);
-    } else {
-      rows.splice(insertAt, 0, meEntry);
-    }
-    // Re-rank
+    if (insertAt === -1) rows.push(meEntry); else rows.splice(insertAt, 0, meEntry);
     return rows.map((r, i) => ({ ...r, rank: i + 1 })).slice(0, 10);
-  }, [myCount]);
+  }, [lbRows, myCount, user]);
 
   const ACHIEVEMENTS = [
     { id: 'first', emoji: '🌱', label: 'First Check-in', unlocked: myCount >= 1 },
@@ -1526,9 +1724,30 @@ function ProfileScreen({ checkedIn }: { checkedIn: Set<string> }) {
           className="text-4xl font-black uppercase tracking-tighter leading-none mt-1"
           style={{ fontFamily: 'Epilogue, sans-serif' }}
         >
-          Hey,<br />Explorer
+          Hey,<br />{user?.displayName?.split(' ')[0] || 'Explorer'}
         </h1>
       </div>
+
+      {/* Sign in / out banner */}
+      {!user ? (
+        <button
+          onClick={onSignIn}
+          className="w-full flex items-center justify-between rounded-2xl px-4 py-3 mb-4 text-white font-bold text-sm"
+          style={{ background: 'linear-gradient(135deg, #a03b00, #ff793b)', fontFamily: 'Manrope, sans-serif', boxShadow: '0 2px 8px rgba(160,59,0,0.25)' }}
+        >
+          <span>Sign in to sync check-ins & join the leaderboard</span>
+          <span className="material-symbols-rounded text-base">login</span>
+        </button>
+      ) : (
+        <div className="flex items-center justify-between mb-4 px-1">
+          <p className="text-xs text-gray-400" style={{ fontFamily: 'Manrope, sans-serif' }}>
+            Signed in as {user.email}
+          </p>
+          <button onClick={onSignOut} className="text-xs font-bold" style={{ color: '#a03b00', fontFamily: 'Manrope, sans-serif' }}>
+            Sign out
+          </button>
+        </div>
+      )}
 
       {/* Profile card */}
       <div
@@ -1536,15 +1755,21 @@ function ProfileScreen({ checkedIn }: { checkedIn: Set<string> }) {
         style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
       >
         <div
-          className="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0"
+          className="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden"
           style={{ background: 'linear-gradient(135deg, #a03b00, #ff793b)' }}
         >
-          <span className="text-white text-2xl font-black" style={{ fontFamily: 'Epilogue, sans-serif' }}>
-            {level.emoji}
-          </span>
+          {user?.photoURL ? (
+            <img src={user.photoURL} alt="avatar" className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-white text-2xl font-black" style={{ fontFamily: 'Epilogue, sans-serif' }}>
+              {level.emoji}
+            </span>
+          )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-black text-lg" style={{ fontFamily: 'Epilogue, sans-serif' }}>ABQ Explorer</p>
+          <p className="font-black text-lg truncate" style={{ fontFamily: 'Epilogue, sans-serif' }}>
+            {user?.displayName || 'ABQ Explorer'}
+          </p>
           <p className="text-sm text-gray-500">Albuquerque, NM</p>
           <p className="text-xs font-semibold mt-0.5" style={{ color: '#a03b00', fontFamily: 'Manrope, sans-serif' }}>
             {level.emoji} {level.label}
@@ -1741,6 +1966,44 @@ export default function App() {
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<TMEvent | null>(null);
   const [checkedIn, setCheckedIn] = useState<Set<string>>(loadCheckins);
+
+  // ── Firebase Auth ──
+  const [user, setUser] = useState<User | null>(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const syncTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(fbAuth, async (u) => {
+      setUser(u);
+      setAuthReady(true);
+      if (u) {
+        // Load check-ins from Firestore on sign-in
+        try {
+          const snap = await getDoc(doc(fbDb, 'users', u.uid));
+          if (snap.exists()) {
+            const data = snap.data();
+            if (Array.isArray(data.checkIns) && data.checkIns.length > 0) {
+              const merged = new Set<string>([...loadCheckins(), ...data.checkIns]);
+              setCheckedIn(merged);
+              saveCheckins(merged);
+            }
+          }
+        } catch (err) { console.error('Load checkins error:', err); }
+      }
+    });
+    return unsub;
+  }, []);
+
+  // Debounced Firestore sync when checkedIn changes and user is signed in
+  useEffect(() => {
+    if (!user || !authReady) return;
+    if (syncTimeout.current) clearTimeout(syncTimeout.current);
+    syncTimeout.current = setTimeout(() => {
+      syncCheckinsToFirestore(user.uid, checkedIn, user.displayName || user.email || 'Explorer');
+    }, 1500);
+    return () => { if (syncTimeout.current) clearTimeout(syncTimeout.current); };
+  }, [checkedIn, user, authReady]);
 
   const { coords, error: geoError, requested: geoRequested, request: requestGeo } = useGeolocation();
 
@@ -1945,7 +2208,12 @@ export default function App() {
             />
           )}
           {activeTab === 'profile' && (
-            <ProfileScreen checkedIn={checkedIn} />
+            <ProfileScreen
+              checkedIn={checkedIn}
+              user={user}
+              onSignIn={() => setShowAuthModal(true)}
+              onSignOut={() => signOut(fbAuth)}
+            />
           )}
         </main>
 
@@ -2007,6 +2275,9 @@ export default function App() {
       )}
       {selectedEvent && (
         <EventDetailModal event={selectedEvent} onClose={() => { closeEventModal(); window.history.back(); }} />
+      )}
+      {showAuthModal && (
+        <AuthModal onClose={() => setShowAuthModal(false)} />
       )}
     </>
   );
