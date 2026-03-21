@@ -2,51 +2,67 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>Explore ABQ — Events, Places &amp; Culture in Albuquerque</title>
-    <meta name="description" content="Discover events, restaurants, coffee shops, parks, breweries, museums &amp; more in Albuquerque, New Mexico. Your local guide to the Duke City." />
-    <meta name="keywords" content="Albuquerque, ABQ, events, restaurants, things to do, New Mexico, Duke City, nightlife, culture" />
-    <meta name="author" content="Explore ABQ" />
 
-    <!-- ── Theme & PWA ─────────────────────────────────────────────── -->
-    <meta name="theme-color" content="#FF9500" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#FF9500" media="(prefers-color-scheme: dark)" />
+    <!-- ─── Viewport: viewport-fit=cover for iOS Dynamic Island / notch (Apple HIG) ─── -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no"
+    />
+
+    <!-- ─── iOS PWA: Add to Home Screen support ─── -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <!-- black-translucent: status bar overlays our content so we can extend behind it with safe-area-inset-top -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="ABQ Unplugged" />
+
+    <!-- ─── Android / Chrome PWA ─── -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="ABQ Unplugged" />
+
+    <!-- ─── Theme colour: matches app background / header (Liquid Glass era) ─── -->
+    <meta name="theme-color" content="#f5f7f5" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
+
+    <!-- ─── Description / social ─── -->
+    <meta
+      name="description"
+      content="Explore events, places &amp; culture in Albuquerque. Check in, earn levels, and discover ABQ like never before."
+    />
+
+    <!-- ─── Favicon ─── -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+
+    <!-- ─── Apple touch icons (iOS HIG: 180×180 for iPhone, 167×167 for iPad) ─── -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180.png" />
+    <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152.png" />
+
+    <!-- ─── PWA Web App Manifest ─── -->
     <link rel="manifest" href="/manifest.json" />
 
-    <!-- ── Apple PWA ──────────────────────────────────────────────── -->
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Explore ABQ" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <!-- ─── iOS Launch / Splash screens (iPhone 14 Pro and up) ─── -->
+    <!-- Primary splash: 1179×2556 @3x (iPhone 15/16 Pro) -->
+    <link
+      rel="apple-touch-startup-image"
+      media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)"
+      href="/splash/splash-1179x2556.png"
+    />
+    <!-- iPhone 14/15 -->
+    <link
+      rel="apple-touch-startup-image"
+      media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)"
+      href="/splash/splash-1170x2532.png"
+    />
+    <!-- iPhone SE 3rd gen -->
+    <link
+      rel="apple-touch-startup-image"
+      media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)"
+      href="/splash/splash-750x1334.png"
+    />
 
-    <!-- ── Favicon ────────────────────────────────────────────────── -->
-    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☀️</text></svg>" />
-
-    <!-- ── Open Graph (iMessage, Slack, WhatsApp, etc.) ───────────── -->
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Explore ABQ" />
-    <meta property="og:title" content="Explore ABQ — Events &amp; Places in Albuquerque" />
-    <meta property="og:description" content="Your guide to the Duke City 🌶️ Find events, restaurants, breweries, parks &amp; more. Updated constantly." />
-    <meta property="og:url" content="https://explore-abq.netlify.app" />
-    <meta property="og:image" content="https://explore-abq.netlify.app/og-image.png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Explore ABQ — Albuquerque events and places guide" />
-    <meta property="og:locale" content="en_US" />
-
-    <!-- ── Twitter / X Card ──────────────────────────────────────── -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Explore ABQ — Events &amp; Places in Albuquerque" />
-    <meta name="twitter:description" content="Your guide to the Duke City 🌶️ Find events, restaurants, breweries, parks &amp; more." />
-    <meta name="twitter:image" content="https://explore-abq.netlify.app/og-image.png" />
-    <meta name="twitter:image:alt" content="Explore ABQ — Albuquerque events and places guide" />
-
-    <style>
-      html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #0a0a12; }
-      #root { min-height: 100vh; min-height: 100dvh; width: 100%; }
-    </style>
+    <title>ABQ Unplugged — Events, Places &amp; Culture in Albuquerque</title>
   </head>
   <body>
     <div id="root"></div>
