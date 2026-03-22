@@ -149,15 +149,17 @@ function formatDist(miles: number): string {
 }
 
 function getLevel(count: number): { label: string; emoji: string; next: number } {
-  if (count >= 50) return { label: 'Legend', emoji: '[Trophy]', next: count }; // max level
-  if (count >= 35) return { label: 'Pioneer', emoji: '', next: 50 };
-  if (count >= 20) return { label: 'Trailblazer', emoji: '', next: 35 };
-  if (count >= 10) return { label: 'Adventurer', emoji: '', next: 20 };
-  if (count >= 5)  return { label: 'Explorer', emoji: '⚡', next: 10 };
-  return { label: 'Newcomer', emoji: '[Leaf]', next: 5 };
+  if (count >= 50) return { label: 'Legend',     emoji: '★',  next: count }; // max level
+  if (count >= 35) return { label: 'Pioneer',    emoji: '◆',  next: 50 };
+  if (count >= 20) return { label: 'Trailblazer',emoji: '◇',  next: 35 };
+  if (count >= 10) return { label: 'Adventurer', emoji: '✦',  next: 20 };
+  if (count >= 5)  return { label: 'Explorer',   emoji: '⚡', next: 10 };
+  return                 { label: 'Newcomer',    emoji: '✿',  next: 5 };
 }
 
 // ─── Geolocation Hook ────────────────────────────────────────────────────────
+
+const GEO_GRANTED_KEY = 'abq_geo_granted';
 
 function useGeolocation() {
   const [coords, setCoords] = useState<GeoCoords | null>(null);
@@ -172,11 +174,40 @@ function useGeolocation() {
     setRequested(true);
     setError(null);
     navigator.geolocation.getCurrentPosition(
-      pos => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      err => setError(err.message),
+      pos => {
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        try { localStorage.setItem(GEO_GRANTED_KEY, 'true'); } catch {}
+      },
+      err => {
+        setError(err.message);
+        // Clear saved grant if user denied / revoked
+        if (err.code === 1 /* PERMISSION_DENIED */) {
+          try { localStorage.removeItem(GEO_GRANTED_KEY); } catch {}
+        }
+      },
       { enableHighAccuracy: true, timeout: 10000 }
     );
   }, []);
+
+  // Auto-request on mount if user previously granted permission
+  useEffect(() => {
+    const previouslyGranted = (() => {
+      try { return localStorage.getItem(GEO_GRANTED_KEY) === 'true'; } catch { return false; }
+    })();
+    if (previouslyGranted) {
+      // Use Permissions API if available for a faster no-prompt check
+      if (navigator.permissions) {
+        navigator.permissions.query({ name: 'geolocation' as PermissionName }).then(result => {
+          if (result.state === 'granted') request();
+          else if (result.state === 'denied') {
+            try { localStorage.removeItem(GEO_GRANTED_KEY); } catch {}
+          }
+        }).catch(() => request()); // fallback: just try
+      } else {
+        request();
+      }
+    }
+  }, [request]);
 
   return { coords, error, requested, request };
 }
@@ -287,21 +318,21 @@ function ImageWithFallback({
 // ─── Category Data ──────────────────────────────────────────────────────────
 
 const PLACE_CATEGORIES = [
-  { label: 'All', icon: '✨' },
-  { label: 'Restaurant', icon: '[Food]️' },
-  { label: 'Coffee & Tea', icon: '☕' },
-  { label: 'Bar', icon: '[Beer]' },
-  { label: 'Bakery', icon: '' },
-  { label: 'Park', icon: '[Park]' },
-  { label: 'Museum', icon: '[Museum]️' },
-  { label: 'Art Gallery', icon: '[Art]' },
-  { label: 'Attraction', icon: '' },
-  { label: 'Shopping', icon: '[Shop]️' },
-  { label: 'Nightlife', icon: '' },
-  { label: 'Spa & Wellness', icon: '' },
+  { label: 'All',           icon: '✨' },
+  { label: 'Restaurant',    icon: '' },
+  { label: 'Coffee & Tea',  icon: '☕' },
+  { label: 'Bar',           icon: '' },
+  { label: 'Bakery',        icon: '' },
+  { label: 'Park',          icon: '' },
+  { label: 'Museum',        icon: '' },
+  { label: 'Art Gallery',   icon: '' },
+  { label: 'Attraction',    icon: '' },
+  { label: 'Shopping',      icon: '' },
+  { label: 'Nightlife',     icon: '' },
+  { label: 'Spa & Wellness',icon: '' },
   { label: 'Gym & Fitness', icon: '' },
   { label: 'Movie Theater', icon: '' },
-  { label: 'Library', icon: '' },
+  { label: 'Library',       icon: '' },
 ];
 
 const EVENT_GENRES = ['All', 'Music', 'Sports', 'Arts & Theatre', 'Comedy', 'Family', 'Outdoor'];
@@ -378,7 +409,7 @@ function PlaceCard({
   isCheckedIn?: boolean;
   onCheckIn?: (e: React.MouseEvent) => void;
 }) {
-  const catEmoji = PLACE_CATEGORIES.find(c => c.label === place.category)?.icon || '[Loc]';
+  const catEmoji = PLACE_CATEGORIES.find(c => c.label === place.category)?.icon || '';
   return (
     <button
       onClick={onClick}
@@ -483,7 +514,7 @@ function EventCard({ event, onClick }: { event: TMEvent; onClick: () => void }) 
             className="w-full h-full flex items-center justify-center"
             style={{ background: 'linear-gradient(135deg, #a03b00, #ff793b)' }}
           >
-            <span className="text-3xl">[Music]</span>
+            <span className="text-3xl">♪</span>
           </div>
         )}
       </div>
@@ -527,15 +558,16 @@ function EventCard({ event, onClick }: { event: TMEvent; onClick: () => void }) 
 // ─── Place Detail Modal ──────────────────────────────────────────────────────
 
 function PlaceDetailModal({
-  place, onClose, isCheckedIn, onCheckIn, checkInError,
+  place, onClose, isCheckedIn, onCheckIn, checkInError, tooFar,
 }: {
   place: Place;
   onClose: () => void;
   isCheckedIn: boolean;
   onCheckIn: () => void;
   checkInError?: string | null;
+  tooFar?: boolean;
 }) {
-  const catEmoji = PLACE_CATEGORIES.find(c => c.label === place.category)?.icon || '[Loc]';
+  const catEmoji = PLACE_CATEGORIES.find(c => c.label === place.category)?.icon || '';
   const mapsQuery = encodeURIComponent((place.address || place.name) + ' Albuquerque NM');
 
   return (
@@ -594,17 +626,17 @@ function PlaceDetailModal({
           )}
           <button
             onClick={onCheckIn}
-            className="ml-auto flex items-center gap-1.5 px-4 py-2 rounded-xl font-black text-sm"
+            className="ml-auto flex items-center gap-1.5 px-4 py-2 rounded-xl font-black text-sm transition-all"
             style={{
-              background: isCheckedIn ? 'rgba(160,59,0,0.1)' : '#a03b00',
-              color: isCheckedIn ? '#a03b00' : 'white',
+              background: tooFar ? '#dc2626' : isCheckedIn ? 'rgba(160,59,0,0.1)' : '#a03b00',
+              color: isCheckedIn && !tooFar ? '#a03b00' : 'white',
               fontFamily: 'Epilogue, sans-serif',
             }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
-              {isCheckedIn ? 'check_circle' : 'add_location_alt'}
+              {tooFar ? 'near_me' : isCheckedIn ? 'check_circle' : 'add_location_alt'}
             </span>
-            {isCheckedIn ? 'Visited! ✓' : 'Check In'}
+            {tooFar ? 'Get Closer' : isCheckedIn ? 'Visited! ✓' : 'Check In'}
           </button>
         </div>
 
@@ -709,7 +741,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
             className="w-full h-full flex items-center justify-center"
             style={{ background: 'linear-gradient(135deg, #a03b00, #ff793b)' }}
           >
-            <span style={{ fontSize: '72px' }}>[Music]</span>
+            <span style={{ fontSize: '72px' }}>♪</span>
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
@@ -933,7 +965,7 @@ function DiscoverScreen({
                         className="w-full h-full flex items-center justify-center"
                         style={{ background: 'linear-gradient(135deg, #a03b00, #ff793b)' }}
                       >
-                        <span className="text-4xl">[Music]</span>
+                        <span className="text-4xl">♪</span>
                       </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -1727,12 +1759,12 @@ function ProfileScreen({
   }, [lbRows, myCount, user]);
 
   const ACHIEVEMENTS = [
-    { id: 'first', emoji: '[Leaf]', label: 'First Check-in', unlocked: myCount >= 1 },
+    { id: 'first', emoji: '✿', label: 'First Check-in', unlocked: myCount >= 1 },
     { id: 'five', emoji: '⚡', label: 'Explorer (5)', unlocked: myCount >= 5 },
     { id: 'ten', emoji: '', label: 'Adventurer (10)', unlocked: myCount >= 10 },
     { id: 'twenty', emoji: '', label: 'Trailblazer (20)', unlocked: myCount >= 20 },
     { id: 'thirty5', emoji: '', label: 'Pioneer (35)', unlocked: myCount >= 35 },
-    { id: 'fifty', emoji: '[Trophy]', label: 'Legend (50)', unlocked: myCount >= 50 },
+    { id: 'fifty', emoji: '★', label: 'Legend (50)', unlocked: myCount >= 50 },
   ];
 
   const nextLevel = getLevel(myCount + 1);
@@ -1808,7 +1840,7 @@ function ProfileScreen({
       <div className="grid grid-cols-3 gap-3 mb-4">
         {[
           { label: 'Places\nVisited', val: myCount.toString() },
-          { label: 'Next\nLevel', val: myCount >= 50 ? '[Trophy]' : (level.next - myCount).toString() + ' away' },
+          { label: 'Next\nLevel', val: myCount >= 50 ? '★' : (level.next - myCount).toString() + ' away' },
           { label: 'Rank', val: leaderboard.find(r => r.isMe)?.rank ? '#' + leaderboard.find(r => r.isMe)!.rank : '—' },
         ].map(s => (
           <div
@@ -1830,7 +1862,7 @@ function ProfileScreen({
       {/* Progress bar */}
       {myCount >= 50 ? (
         <div className="bg-white rounded-2xl p-4 mb-4 text-center" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
-          <span style={{ fontSize: '28px' }}>[Trophy]</span>
+          <span style={{ fontSize: '28px' }}>★</span>
           <p className="font-black text-sm mt-1" style={{ fontFamily: 'Epilogue, sans-serif', color: '#a03b00' }}>Max Level Reached!</p>
           <p className="text-xs text-gray-400 mt-0.5" style={{ fontFamily: 'Manrope, sans-serif' }}>You're a Legend — {myCount} places explored!</p>
         </div>
@@ -1873,7 +1905,7 @@ function ProfileScreen({
               opacity: a.unlocked ? 1 : 0.4,
             }}
           >
-            <span style={{ fontSize: '24px' }}>{a.unlocked ? a.emoji : '[Lock]'}</span>
+            <span style={{ fontSize: '24px' }}>{a.unlocked ? a.emoji : '○'}</span>
             <p className="text-xs font-semibold text-gray-600 leading-tight text-center" style={{ fontFamily: 'Manrope, sans-serif' }}>
               {a.label}
             </p>
@@ -2895,6 +2927,7 @@ export default function App() {
   }, [selectedPlace, selectedEvent, activeTab, showAdmin]);
 
   const [checkInError, setCheckInError] = useState<string | null>(null);
+  const [tooFarPlaceId, setTooFarPlaceId] = useState<string | null>(null);
 
   const [siteBanner, setSiteBanner] = useState<BannerConfig | null>(null);
 
@@ -2928,13 +2961,13 @@ export default function App() {
       return;
     }
 
-    // Find the place and verify proximity (within 0.5 miles)
+    // Find the place and verify proximity (within 0.05 miles / ~264 ft)
     const place = places.find(p => p.id === placeId);
     if (place?.lat && place?.lng) {
       const dist = distanceMiles(coords.lat, coords.lng, place.lat, place.lng);
-      if (dist > 0.5) {
-        setCheckInError(`You're ${formatDist(dist)} away — get within 0.5 mi to check in!`);
-        setTimeout(() => setCheckInError(null), 5000);
+      if (dist > 0.05) {
+        setTooFarPlaceId(placeId);
+        setTimeout(() => setTooFarPlaceId(null), 3000);
         return;
       }
     }
@@ -3259,6 +3292,7 @@ export default function App() {
           isCheckedIn={checkedIn.has(selectedPlace.id)}
           onCheckIn={() => handleCheckIn(selectedPlace.id)}
           checkInError={checkInError}
+          tooFar={tooFarPlaceId === selectedPlace.id}
         />
       )}
       {selectedEvent && (
