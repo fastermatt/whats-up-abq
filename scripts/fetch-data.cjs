@@ -36,14 +36,26 @@ if (fs.existsSync(envPath)) {
   });
 }
 
-const TM_KEY     = process.env.TICKETMASTER_API_KEY;
-const GOOGLE_KEY = process.env.GOOGLE_PLACES_API_KEY;
-const EB_TOKEN   = process.env.EVENTBRITE_TOKEN; // optional — skipped if absent
-const SKIP_PLACES = process.env.SKIP_PLACES === 'true';
+const TM_KEY         = process.env.TICKETMASTER_API_KEY;
+const GOOGLE_KEY     = process.env.GOOGLE_PLACES_API_KEY;
+const EB_TOKEN       = process.env.EVENTBRITE_TOKEN;      // optional
+const SG_CLIENT_ID   = process.env.SEATGEEK_CLIENT_ID;    // optional — register at seatgeek.com/account/develop
+const BIT_APP_ID     = process.env.BANDSINTOWN_APP_ID;    // optional — register at bandsintown.com/v3/api
+const MEETUP_KEY     = process.env.MEETUP_API_KEY;        // optional — register at secure.meetup.com/meetup_api
+const SKIP_PLACES    = process.env.SKIP_PLACES === 'true';
 
 if (!TM_KEY)     { console.error('Missing TICKETMASTER_API_KEY'); process.exit(1); }
-if (!GOOGLE_KEY && !SKIP_PLACES) { console.error('Missing GOOGLE_PLACES_API_KEY (set SKIP_PLACES=true to skip places refresh)'); process.exit(1); }
-if (!EB_TOKEN)   { console.warn('EVENTBRITE_TOKEN not set — skipping Eventbrite fetch'); }
+if (!GOOGLE_KEY && !SKIP_PLACES) { console.error('Missing GOOGLE_PLACES_API_KEY (set SKIP_PLACES=true to skip places)'); process.exit(1); }
+
+// Warn for optional sources but don't fail
+for (const [name, val] of [
+  ['EVENTBRITE_TOKEN',    EB_TOKEN],
+  ['SEATGEEK_CLIENT_ID',  SG_CLIENT_ID],
+  ['BANDSINTOWN_APP_ID',  BIT_APP_ID],
+  ['MEETUP_API_KEY',      MEETUP_KEY],
+]) {
+  if (!val) console.warn(`  [optional] ${name} not set — skipping that source`);
+}
 
 // ─── Geographic Config ────────────────────────────────────────────────────────
 // Greater ABQ Metro bounding box:
@@ -469,6 +481,307 @@ function mapEventbriteCategory(id) {
   return EB_CATEGORY_MAP[String(id)] || 'Miscellaneous';
 }
 
+// ─── SeatGeek ─────────────────────────────────────────────────────────────────
+/**
+ * Fetch events near ABQ from SeatGeek's public platform API.
+ *
+ * Docs: https://platform.seatgeek.com/
+ * Free registration: https://seatgeek.com/account/develop
+ *
+ * SeatGeek aggregates inventory from many sources including AXS, Dice,
+ * venue box offices, and resale marketplaces — catching shows that
+ * Ticketmaster doesn't list.
+ */
+async function fetchSeatGeekEvents() {
+  if (!SG_CLIENT_ID) return [];
+  console.log('\n🎟  Fetching SeatGeek events near ABQ...');
+
+  const allEvents = [];
+  let page = 1;
+  let totalPages = 1;
+
+  while (page <= totalPages && page <= 10) {
+    const params = new URLSearchParams({
+      'venue.city':  'Albuquerque',
+      'venue.state': 'NM',
+      'sort':        'datetime_utc.asc',
+      'datetime_utc.gte': new Date().toISOString(),
+      'per_page':    '200',
+      'page':        String(page),
+      'client_id':   SG_CLIENT_ID,
+    });
+    const url = `https://api.seatgeek.com/2/events?${params}`;
+    const data = await get(url);
+
+    if (data.status === 'error' || !data.events) {
+      console.warn(`  SeatGeek error: ${data.message || JSON.stringify(data).slice(0, 100)}`);
+      break;
+    }
+
+    allEvents.push(...data.events);
+    totalPages = Math.ceil((data.meta?.total || 0) / 200);
+    console.log(`  Page ${page}/${totalPages}: ${data.events.length} events`);
+    page++;
+    if (page <= totalPages) await sleep(300);
+  }
+
+  console.log(`  SeatGeek: ${allEvents.length} total events`);
+  return allEvents;
+}
+
+function transformSeatGeekEvent(ev) {
+  const venue = ev.venue || {};
+  const perf  = ev.performers?.[0] || {};
+
+  return {
+    id:      `sg-${ev.id}`,
+    name:    ev.title || perf.name || 'Untitled Event',
+    url:     ev.url,
+    _source: 'seatgeek',
+
+    images: perf.image ? [{ url: perf.image }] : [],
+
+    dates: {
+      start: {
+        localDate: ev.datetime_local ? ev.datetime_local.split('T')[0] : undefined,
+        localTime: ev.datetime_local ? ev.datetime_local.split('T')[1]?.slice(0, 5) : undefined,
+      },
+    },
+
+    _embedded: {
+      venues: [{
+        name:    venue.name,
+        address: { line1: venue.address },
+        city:    { name: venue.city },
+        location: venue.location ? {
+          latitude:  String(venue.location.lat),
+          longitude: String(venue.location.lon),
+        } : undefined,
+      }],
+    },
+
+    classifications: [{
+      segment: { name: mapSeatGeekType(ev.type) },
+      genre:   { name: perf.type },
+    }],
+
+    priceRanges: (ev.stats?.lowest_price || ev.stats?.average_price) ? [{
+      min:      ev.stats.lowest_price  || 0,
+      max:      ev.stats.highest_price || ev.stats.lowest_price || 0,
+      currency: 'USD',
+    }] : undefined,
+  };
+}
+
+const SG_TYPE_MAP = {
+  'concert':         'Music',
+  'sports':          'Sports',
+  'theater':         'Arts & Theatre',
+  'comedy':          'Arts & Theatre',
+  'classical':       'Arts & Theatre',
+  'dance_performace':'Arts & Theatre',
+  'opera':           'Arts & Theatre',
+  'family':          'Family',
+  'festival':        'Music',
+};
+function mapSeatGeekType(type) {
+  return SG_TYPE_MAP[type] || 'Miscellaneous';
+}
+
+// ─── Bandsintown ──────────────────────────────────────────────────────────────
+/**
+ * Fetch music events near ABQ from Bandsintown.
+ *
+ * Bandsintown specializes in concert discovery, especially for smaller
+ * local venues and touring acts that don't sell through Ticketmaster.
+ * Common ABQ venues it covers: Sunshine Theater, El Rey, Meow Wolf,
+ * Launchpad, Tractor Brewing, Low Spirits, Sister Bar, etc.
+ *
+ * Docs: https://bandsintown.com/api/v3 (requires free app_id registration)
+ * Register: https://corp.bandsintown.com/api
+ */
+async function fetchBandsintownEvents() {
+  if (!BIT_APP_ID) return [];
+  console.log('\n🎸  Fetching Bandsintown events near ABQ...');
+
+  const params = new URLSearchParams({
+    app_id:   BIT_APP_ID,
+    location: 'Albuquerque, NM, US',
+    radius:   '40',
+    per_page: '100',
+    date:     'upcoming',
+  });
+  const url = `https://rest.bandsintown.com/events/search?${params}`;
+  const data = await get(url);
+
+  if (!Array.isArray(data)) {
+    console.warn('  Bandsintown returned unexpected format');
+    return [];
+  }
+
+  console.log(`  Bandsintown: ${data.length} events found`);
+  return data;
+}
+
+function transformBandsintownEvent(ev) {
+  const venue = ev.venue || {};
+  const start = ev.datetime ? new Date(ev.datetime) : null;
+
+  return {
+    id:      `bit-${ev.id}`,
+    name:    ev.title || (ev.artist?.name ? `${ev.artist.name} Live` : 'Concert'),
+    url:     ev.url,
+    _source: 'bandsintown',
+
+    images: ev.artist?.image_url ? [{ url: ev.artist.image_url }] : [],
+
+    dates: {
+      start: start ? {
+        localDate: start.toLocaleDateString('en-CA'), // YYYY-MM-DD
+        localTime: start.toTimeString().slice(0, 5),
+      } : {},
+    },
+
+    _embedded: {
+      venues: [{
+        name:    venue.name,
+        address: { line1: venue.location },
+        city:    { name: venue.city },
+        location: venue.latitude ? {
+          latitude:  String(venue.latitude),
+          longitude: String(venue.longitude),
+        } : undefined,
+      }],
+    },
+
+    classifications: [{ segment: { name: 'Music' }, genre: { name: ev.artist?.genre } }],
+  };
+}
+
+// ─── Meetup ───────────────────────────────────────────────────────────────────
+/**
+ * Fetch local group events near ABQ from Meetup.com.
+ *
+ * Meetup covers free and low-cost community events that no ticketing
+ * platform carries: hiking groups, tech meetups, book clubs, language
+ * exchanges, craft nights, outdoor adventures, etc.
+ *
+ * Docs: https://www.meetup.com/api/guide/ (GraphQL — no key required for
+ * public events via the Open Events endpoint)
+ *
+ * Note: Meetup deprecated its v2 REST API. The v3 / GraphQL API requires
+ * OAuth for most operations. The MEETUP_API_KEY here is an OAuth Bearer
+ * token from https://secure.meetup.com/meetup_api/oauth_consumers/create
+ */
+async function fetchMeetupEvents() {
+  if (!MEETUP_KEY) return [];
+  console.log('\n☕  Fetching Meetup events near ABQ...');
+
+  // Meetup GraphQL endpoint
+  const query = `
+    query {
+      results: rankedEvents(
+        filter: {
+          location: "Albuquerque, NM, US"
+          radius: 40
+          isOnline: false
+          startDateRange: "${new Date().toISOString()}"
+        }
+        first: 200
+        sort: { sortField: DATE_TIME, sortOrder: ASC }
+      ) {
+        edges {
+          node {
+            id title eventUrl dateTime
+            description(truncate: 300)
+            venue { name address city lat lng }
+            group { name category { name } }
+            going rsvpOpenDuration
+            tickets { type price }
+            images { id baseUrl preview }
+          }
+        }
+        pageInfo { hasNextPage }
+      }
+    }
+  `;
+
+  const data = await new Promise((resolve, reject) => {
+    const body = JSON.stringify({ query });
+    const options = {
+      hostname: 'api.meetup.com',
+      path:     '/gql',
+      method:   'POST',
+      headers: {
+        'Content-Type':   'application/json',
+        'Content-Length': Buffer.byteLength(body),
+        'Authorization':  `Bearer ${MEETUP_KEY}`,
+      },
+    };
+    const req = require('https').request(options, res => {
+      let raw = '';
+      res.on('data', c => raw += c);
+      res.on('end', () => {
+        try { resolve(JSON.parse(raw)); }
+        catch (e) { reject(e); }
+      });
+    });
+    req.on('error', reject);
+    req.write(body);
+    req.end();
+  });
+
+  const events = data?.data?.results?.edges?.map(e => e.node) || [];
+  console.log(`  Meetup: ${events.length} events found`);
+  return events;
+}
+
+function transformMeetupEvent(ev) {
+  const venue = ev.venue || {};
+  const start = ev.dateTime ? new Date(ev.dateTime) : null;
+  const ticket = ev.tickets?.[0];
+
+  return {
+    id:      `mu-${ev.id}`,
+    name:    ev.title || 'Meetup Event',
+    url:     ev.eventUrl,
+    _source: 'meetup',
+
+    images: ev.images?.[0] ? [{ url: `${ev.images[0].baseUrl}${ev.images[0].preview}` }] : [],
+
+    dates: {
+      start: start ? {
+        localDate: start.toLocaleDateString('en-CA'),
+        localTime: start.toTimeString().slice(0, 5),
+      } : {},
+    },
+
+    _embedded: {
+      venues: [{
+        name:    venue.name || ev.group?.name,
+        address: { line1: venue.address },
+        city:    { name: venue.city },
+        location: venue.lat ? {
+          latitude:  String(venue.lat),
+          longitude: String(venue.lng),
+        } : undefined,
+      }],
+    },
+
+    classifications: [{
+      segment: { name: ev.group?.category?.name || 'Community' },
+    }],
+
+    priceRanges: ticket?.price ? [{
+      min:      parseFloat(ticket.price),
+      max:      parseFloat(ticket.price),
+      currency: 'USD',
+    }] : undefined,
+
+    isFree: !ticket?.price || parseFloat(ticket?.price || '0') === 0,
+  };
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 async function main() {
   console.log('=== ABQ Unplugged Data Fetcher — Greater Metro Area ===');
@@ -509,6 +822,51 @@ async function main() {
     if (!fs.existsSync(ebPath)) fs.writeFileSync(ebPath, '[]');
   }
 
+  // ── SeatGeek ──
+  let sgEvents = [];
+  try {
+    const rawSg = await fetchSeatGeekEvents();
+    sgEvents = rawSg.map(transformSeatGeekEvent);
+    const sgPath = path.join(__dirname, '..', 'public', 'data', 'seatgeek-events.json');
+    fs.writeFileSync(sgPath, JSON.stringify(sgEvents, null, 2));
+    if (SG_CLIENT_ID) console.log(`\n✓ Saved ${sgEvents.length} events → public/data/seatgeek-events.json`);
+    else fs.writeFileSync(sgPath, '[]');
+  } catch (e) {
+    console.error('SeatGeek fetch failed:', e.message);
+    const p = path.join(__dirname, '..', 'public', 'data', 'seatgeek-events.json');
+    if (!fs.existsSync(p)) fs.writeFileSync(p, '[]');
+  }
+
+  // ── Bandsintown ──
+  let bitEvents = [];
+  try {
+    const rawBit = await fetchBandsintownEvents();
+    bitEvents = rawBit.map(transformBandsintownEvent);
+    const bitPath = path.join(__dirname, '..', 'public', 'data', 'bandsintown-events.json');
+    fs.writeFileSync(bitPath, JSON.stringify(bitEvents, null, 2));
+    if (BIT_APP_ID) console.log(`\n✓ Saved ${bitEvents.length} events → public/data/bandsintown-events.json`);
+    else fs.writeFileSync(bitPath, '[]');
+  } catch (e) {
+    console.error('Bandsintown fetch failed:', e.message);
+    const p = path.join(__dirname, '..', 'public', 'data', 'bandsintown-events.json');
+    if (!fs.existsSync(p)) fs.writeFileSync(p, '[]');
+  }
+
+  // ── Meetup ──
+  let meetupEvents = [];
+  try {
+    const rawMu = await fetchMeetupEvents();
+    meetupEvents = rawMu.map(transformMeetupEvent);
+    const muPath = path.join(__dirname, '..', 'public', 'data', 'meetup-events.json');
+    fs.writeFileSync(muPath, JSON.stringify(meetupEvents, null, 2));
+    if (MEETUP_KEY) console.log(`\n✓ Saved ${meetupEvents.length} events → public/data/meetup-events.json`);
+    else fs.writeFileSync(muPath, '[]');
+  } catch (e) {
+    console.error('Meetup fetch failed:', e.message);
+    const p = path.join(__dirname, '..', 'public', 'data', 'meetup-events.json');
+    if (!fs.existsSync(p)) fs.writeFileSync(p, '[]');
+  }
+
   // ── Google Places ──
   let places = [];
   if (SKIP_PLACES) {
@@ -540,10 +898,13 @@ async function main() {
     }
   }
 
-  const totalEvents = tmEvents.length + ebEvents.length;
+  const totalEvents = tmEvents.length + ebEvents.length + sgEvents.length + bitEvents.length + meetupEvents.length;
   console.log('\n=== Done! ===');
   console.log(`Ticketmaster: ${tmEvents.length} events`);
   console.log(`Eventbrite:   ${ebEvents.length} events`);
+  console.log(`SeatGeek:     ${sgEvents.length} events`);
+  console.log(`Bandsintown:  ${bitEvents.length} events`);
+  console.log(`Meetup:       ${meetupEvents.length} events`);
   console.log(`Total events: ${totalEvents}  |  Places: ${places.length}`);
   if (!process.env.CI) {
     console.log('\nNext steps:');
