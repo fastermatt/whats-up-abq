@@ -6,11 +6,11 @@ import {
   updateProfile,
 } from 'firebase/auth';
 import {
-  getFirestore, doc, setDoc, getDoc, getDocs, collection, query, orderBy,
+  getFirestore, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, collection, query, orderBy,
   limit, onSnapshot, serverTimestamp,
 } from 'firebase/firestore';
 
-// âââ Firebase Setup ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Firebase Setup ──────────────────────────────────────────────────────────
 
 const firebaseConfig = {
   apiKey: "AIzaSyAVL8hY7QZjgbgny7GKDWA7ti2hoBU2Xvs",
@@ -25,7 +25,7 @@ const fbApp  = initializeApp(firebaseConfig);
 const fbAuth = getAuth(fbApp);
 const fbDb   = getFirestore(fbApp);
 
-// âââ Types ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Types ──────────────────────────────────────────────────────────────────
 
 interface Place {
   id: string;
@@ -87,7 +87,7 @@ interface TMEvent {
 
 interface GeoCoords { lat: number; lng: number; }
 
-// âââ Utilities ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Utilities ──────────────────────────────────────────────────────────────
 
 function hiResUrl(url: string): string {
   if (!url || !url.includes('places.googleapis.com')) return url;
@@ -149,15 +149,15 @@ function formatDist(miles: number): string {
 }
 
 function getLevel(count: number): { label: string; emoji: string; next: number } {
-  if (count >= 50) return { label: 'Legend', emoji: 'ð', next: count }; // max level
-  if (count >= 35) return { label: 'Pioneer', emoji: 'ð¥', next: 50 };
-  if (count >= 20) return { label: 'Trailblazer', emoji: 'ð¥', next: 35 };
-  if (count >= 10) return { label: 'Adventurer', emoji: 'ð¥', next: 20 };
-  if (count >= 5)  return { label: 'Explorer', emoji: 'â¡', next: 10 };
-  return { label: 'Newcomer', emoji: 'ð±', next: 5 };
+  if (count >= 50) return { label: 'Legend', emoji: '🏆', next: count }; // max level
+  if (count >= 35) return { label: 'Pioneer', emoji: '🥇', next: 50 };
+  if (count >= 20) return { label: 'Trailblazer', emoji: '🥈', next: 35 };
+  if (count >= 10) return { label: 'Adventurer', emoji: '🥉', next: 20 };
+  if (count >= 5)  return { label: 'Explorer', emoji: '⚡', next: 10 };
+  return { label: 'Newcomer', emoji: '🌱', next: 5 };
 }
 
-// âââ Geolocation Hook ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Geolocation Hook ────────────────────────────────────────────────────────
 
 function useGeolocation() {
   const [coords, setCoords] = useState<GeoCoords | null>(null);
@@ -181,7 +181,7 @@ function useGeolocation() {
   return { coords, error, requested, request };
 }
 
-// âââ Check-In Storage ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Check-In Storage ────────────────────────────────────────────────────────
 
 function loadCheckins(): Set<string> {
   try {
@@ -212,7 +212,7 @@ async function syncCheckinsToFirestore(uid: string, checkIns: Set<string>, displ
   }
 }
 
-// âââ SVG Logo âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── SVG Logo ───────────────────────────────────────────────────────────────
 
 function ABQUnpluggedLogo({ size = 28 }: { size?: number }) {
   return (
@@ -232,7 +232,7 @@ function ABQUnpluggedLogo({ size = 28 }: { size?: number }) {
   );
 }
 
-// âââ ImageWithFallback ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── ImageWithFallback ──────────────────────────────────────────────────────
 
 const FALLBACK_GRADIENTS = [
   'linear-gradient(135deg,#a03b00,#ff793b)',
@@ -284,29 +284,29 @@ function ImageWithFallback({
   );
 }
 
-// âââ Category Data ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Category Data ──────────────────────────────────────────────────────────
 
 const PLACE_CATEGORIES = [
-  { label: 'All', icon: 'â¨' },
-  { label: 'Restaurant', icon: 'ð½ï¸' },
-  { label: 'Coffee & Tea', icon: 'â' },
-  { label: 'Bar', icon: 'ðº' },
-  { label: 'Bakery', icon: 'ð¥' },
-  { label: 'Park', icon: 'ð³' },
-  { label: 'Museum', icon: 'ðï¸' },
-  { label: 'Art Gallery', icon: 'ð¨' },
-  { label: 'Attraction', icon: 'ð¡' },
-  { label: 'Shopping', icon: 'ðï¸' },
-  { label: 'Nightlife', icon: 'ð' },
-  { label: 'Spa & Wellness', icon: 'ð' },
-  { label: 'Gym & Fitness', icon: 'ðª' },
-  { label: 'Movie Theater', icon: 'ð¬' },
-  { label: 'Library', icon: 'ð' },
+  { label: 'All', icon: '✨' },
+  { label: 'Restaurant', icon: '🍽️' },
+  { label: 'Coffee & Tea', icon: '☕' },
+  { label: 'Bar', icon: '🍺' },
+  { label: 'Bakery', icon: '🥐' },
+  { label: 'Park', icon: '🌳' },
+  { label: 'Museum', icon: '🏛️' },
+  { label: 'Art Gallery', icon: '🎨' },
+  { label: 'Attraction', icon: '🎡' },
+  { label: 'Shopping', icon: '🛍️' },
+  { label: 'Nightlife', icon: '🌙' },
+  { label: 'Spa & Wellness', icon: '💆' },
+  { label: 'Gym & Fitness', icon: '💪' },
+  { label: 'Movie Theater', icon: '🎬' },
+  { label: 'Library', icon: '📚' },
 ];
 
 const EVENT_GENRES = ['All', 'Music', 'Sports', 'Arts & Theatre', 'Comedy', 'Family', 'Outdoor'];
 
-// âââ Geo Banner ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Geo Banner ──────────────────────────────────────────────────────────────
 
 function GeoBanner({
   coords, error, requested, onRequest,
@@ -337,7 +337,7 @@ function GeoBanner({
   if (requested) return (
     <div className="mx-5 mb-4 rounded-2xl p-3 flex items-center gap-3" style={{ background: 'rgba(160,59,0,0.06)' }}>
       <span className="material-symbols-outlined flex-shrink-0" style={{ color: '#a03b00', fontSize: '20px' }}>my_location</span>
-      <p className="text-xs text-gray-500 flex-1" style={{ fontFamily: 'Manrope, sans-serif' }}>Getting your locationâ¦</p>
+      <p className="text-xs text-gray-500 flex-1" style={{ fontFamily: 'Manrope, sans-serif' }}>Getting your location…</p>
     </div>
   );
 
@@ -367,7 +367,7 @@ function GeoBanner({
   );
 }
 
-// âââ Place Card âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Place Card ─────────────────────────────────────────────────────────────
 
 function PlaceCard({
   place, onClick, distance, isCheckedIn, onCheckIn,
@@ -378,7 +378,7 @@ function PlaceCard({
   isCheckedIn?: boolean;
   onCheckIn?: (e: React.MouseEvent) => void;
 }) {
-  const catEmoji = PLACE_CATEGORIES.find(c => c.label === place.category)?.icon || 'ð';
+  const catEmoji = PLACE_CATEGORIES.find(c => c.label === place.category)?.icon || '📍';
   return (
     <button
       onClick={onClick}
@@ -419,7 +419,7 @@ function PlaceCard({
               className="text-xs font-bold text-white px-1.5 py-0.5 rounded-full"
               style={{ background: 'rgba(160,59,0,0.85)' }}
             >
-              â Visited
+              ✓ Visited
             </span>
           </div>
         )}
@@ -434,7 +434,7 @@ function PlaceCard({
         <div className="flex items-center justify-between mt-1.5 gap-1">
           {place.rating ? (
             <div className="flex items-center gap-1 flex-1 min-w-0">
-              <span className="text-yellow-400 text-xs">â</span>
+              <span className="text-yellow-400 text-xs">★</span>
               <span className="text-xs font-bold text-gray-700">{place.rating.toFixed(1)}</span>
               {place.reviewCount ? (
                 <span className="text-xs text-gray-400 truncate">
@@ -452,7 +452,7 @@ function PlaceCard({
                 color: isCheckedIn ? '#a03b00' : 'white',
               }}
             >
-              {isCheckedIn ? 'â Visited' : 'Check In'}
+              {isCheckedIn ? '✓ Visited' : 'Check In'}
             </button>
           )}
         </div>
@@ -461,7 +461,7 @@ function PlaceCard({
   );
 }
 
-// âââ Event Card âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Event Card ─────────────────────────────────────────────────────────────
 
 function EventCard({ event, onClick }: { event: TMEvent; onClick: () => void }) {
   const imgSrc = getBestEventImage(event.images);
@@ -483,7 +483,7 @@ function EventCard({ event, onClick }: { event: TMEvent; onClick: () => void }) 
             className="w-full h-full flex items-center justify-center"
             style={{ background: 'linear-gradient(135deg, #a03b00, #ff793b)' }}
           >
-            <span className="text-3xl">ðµ</span>
+            <span className="text-3xl">🎵</span>
           </div>
         )}
       </div>
@@ -512,7 +512,7 @@ function EventCard({ event, onClick }: { event: TMEvent; onClick: () => void }) 
           <div className="flex items-center justify-between mt-1">
             <p className="text-xs font-bold" style={{ color: '#a03b00' }}>
               {event.dates?.start?.localDate ? formatDate(event.dates.start.localDate) : 'Date TBD'}
-              {event.dates?.start?.localTime ? ' Â· ' + formatTime(event.dates.start.localTime) : ''}
+              {event.dates?.start?.localTime ? ' · ' + formatTime(event.dates.start.localTime) : ''}
             </p>
             {price && (
               <p className="text-xs text-gray-500">From ${Math.round(price.min || 0)}</p>
@@ -524,7 +524,7 @@ function EventCard({ event, onClick }: { event: TMEvent; onClick: () => void }) 
   );
 }
 
-// âââ Place Detail Modal ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Place Detail Modal ──────────────────────────────────────────────────────
 
 function PlaceDetailModal({
   place, onClose, isCheckedIn, onCheckIn, checkInError,
@@ -535,7 +535,7 @@ function PlaceDetailModal({
   onCheckIn: () => void;
   checkInError?: string | null;
 }) {
-  const catEmoji = PLACE_CATEGORIES.find(c => c.label === place.category)?.icon || 'ð';
+  const catEmoji = PLACE_CATEGORIES.find(c => c.label === place.category)?.icon || '📍';
   const mapsQuery = encodeURIComponent((place.address || place.name) + ' Albuquerque NM');
 
   return (
@@ -576,7 +576,7 @@ function PlaceDetailModal({
         <div className="flex items-center gap-2 mb-4 flex-wrap">
           {place.rating && (
             <div className="flex items-center gap-1 bg-white rounded-xl px-3 py-2" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}>
-              <span className="text-yellow-400">â</span>
+              <span className="text-yellow-400">★</span>
               <span className="font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif' }}>
                 {place.rating.toFixed(1)}
               </span>
@@ -604,7 +604,7 @@ function PlaceDetailModal({
             <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
               {isCheckedIn ? 'check_circle' : 'add_location_alt'}
             </span>
-            {isCheckedIn ? 'Visited! â' : 'Check In'}
+            {isCheckedIn ? 'Visited! ✓' : 'Check In'}
           </button>
         </div>
 
@@ -663,12 +663,12 @@ function PlaceDetailModal({
           <div className="flex gap-2 mt-2 mb-4 flex-wrap">
             {place.isKidFriendly && (
               <span className="text-xs font-semibold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full">
-                ð¨âð©âð§ Kid Friendly
+                👨‍👩‍👧 Kid Friendly
               </span>
             )}
             {place.isAccessible && (
               <span className="text-xs font-semibold bg-green-50 text-green-700 px-2.5 py-1 rounded-full">
-                â¿ Accessible
+                ♿ Accessible
               </span>
             )}
           </div>
@@ -681,14 +681,14 @@ function PlaceDetailModal({
           className="block w-full py-4 text-center text-white font-black text-sm rounded-2xl mt-2"
           style={{ background: 'linear-gradient(135deg, #a03b00, #ff793b)', fontFamily: 'Epilogue, sans-serif' }}
         >
-          GET DIRECTIONS â
+          GET DIRECTIONS →
         </a>
       </div>
     </div>
   );
 }
 
-// âââ Event Detail Modal ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Event Detail Modal ──────────────────────────────────────────────────────
 
 function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => void }) {
   const imgSrc = getBestEventImage(event.images);
@@ -709,7 +709,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
             className="w-full h-full flex items-center justify-center"
             style={{ background: 'linear-gradient(135deg, #a03b00, #ff793b)' }}
           >
-            <span style={{ fontSize: '72px' }}>ðµ</span>
+            <span style={{ fontSize: '72px' }}>🎵</span>
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
@@ -768,7 +768,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
             <div className="col-span-2 bg-white rounded-2xl p-3" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
               <p className="text-xs text-gray-400 mb-1">Price</p>
               <p className="font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif' }}>
-                ${Math.round(price.min || 0)} â ${Math.round(price.max || 0)}
+                ${Math.round(price.min || 0)} – ${Math.round(price.max || 0)}
               </p>
             </div>
           )}
@@ -793,7 +793,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
             className="font-black text-sm mb-1"
             style={{ fontFamily: 'Epilogue, sans-serif', color: '#a03b00' }}
           >
-            â¡ UNPLUGGING TIP
+            ⚡ UNPLUGGING TIP
           </p>
           <p className="text-xs text-gray-600" style={{ fontFamily: 'Manrope, sans-serif' }}>
             Put your phone away for the first 30 minutes. Let yourself fully arrive before documenting.
@@ -808,7 +808,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
             className="block w-full py-4 text-center text-white font-black text-sm rounded-2xl"
             style={{ background: 'linear-gradient(135deg, #a03b00, #ff793b)', fontFamily: 'Epilogue, sans-serif' }}
           >
-            GET TICKETS â
+            GET TICKETS →
           </a>
         ) : (
           <a
@@ -818,7 +818,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
             className="block w-full py-4 text-center text-white font-black text-sm rounded-2xl"
             style={{ background: 'linear-gradient(135deg, #a03b00, #ff793b)', fontFamily: 'Epilogue, sans-serif' }}
           >
-            GET DIRECTIONS â
+            GET DIRECTIONS →
           </a>
         )}
       </div>
@@ -826,7 +826,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
   );
 }
 
-// âââ Discover Screen (Mixed Feed) âââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Discover Screen (Mixed Feed) ─────────────────────────────────────────────
 
 function DiscoverScreen({
   places, events, onPlaceSelect, onEventSelect,
@@ -888,7 +888,7 @@ function DiscoverScreen({
           Get Out &<br />Unplug Today
         </h1>
         <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: 'Manrope, sans-serif' }}>
-          {places.length} places Â· {events.length} events in ABQ
+          {places.length} places · {events.length} events in ABQ
         </p>
       </div>
 
@@ -911,7 +911,7 @@ function DiscoverScreen({
               This Week
             </h2>
             <span className="text-xs font-semibold" style={{ color: '#a03b00', fontFamily: 'Manrope, sans-serif' }}>
-              ð Live events
+              🎟 Live events
             </span>
           </div>
           <div className="flex gap-3 px-5 pb-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
@@ -933,7 +933,7 @@ function DiscoverScreen({
                         className="w-full h-full flex items-center justify-center"
                         style={{ background: 'linear-gradient(135deg, #a03b00, #ff793b)' }}
                       >
-                        <span className="text-4xl">ðµ</span>
+                        <span className="text-4xl">🎵</span>
                       </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -957,7 +957,7 @@ function DiscoverScreen({
                   <div className="px-3 py-2">
                     <p className="text-xs font-bold" style={{ color: '#a03b00', fontFamily: 'Manrope, sans-serif' }}>
                       {event.dates?.start?.localDate ? formatDate(event.dates.start.localDate) : 'TBD'}
-                      {event.dates?.start?.localTime ? ' Â· ' + formatTime(event.dates.start.localTime) : ''}
+                      {event.dates?.start?.localTime ? ' · ' + formatTime(event.dates.start.localTime) : ''}
                     </p>
                     {venue && (
                       <p className="text-xs text-gray-400 truncate">{venue.name}</p>
@@ -995,12 +995,12 @@ function DiscoverScreen({
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
               <div className="absolute top-3 left-3">
                 <span className="text-xs font-bold text-white bg-[#a03b00] px-2 py-1 rounded-full">
-                  â¡ Featured
+                  ⚡ Featured
                 </span>
               </div>
               {checkedIn.has(featured[0].id) && (
                 <div className="absolute top-3 right-3">
-                  <span className="text-xs font-bold text-white px-2 py-1 rounded-full" style={{ background: 'rgba(160,59,0,0.85)' }}>â Visited</span>
+                  <span className="text-xs font-bold text-white px-2 py-1 rounded-full" style={{ background: 'rgba(160,59,0,0.85)' }}>✓ Visited</span>
                 </div>
               )}
               <div className="absolute bottom-3 left-3 right-3 text-left">
@@ -1030,7 +1030,7 @@ function DiscoverScreen({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 {checkedIn.has(place.id) && (
                   <div className="absolute top-2 right-2">
-                    <span className="text-white text-xs px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(160,59,0,0.85)' }}>â</span>
+                    <span className="text-white text-xs px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(160,59,0,0.85)' }}>✓</span>
                   </div>
                 )}
                 <div className="absolute bottom-2.5 left-2.5 right-2.5 text-left">
@@ -1090,7 +1090,7 @@ function DiscoverScreen({
                   </div>
                   {checkedIn.has(place.id) && (
                     <div className="absolute top-2 right-2">
-                      <span className="text-white text-xs px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(160,59,0,0.85)' }}>â</span>
+                      <span className="text-white text-xs px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(160,59,0,0.85)' }}>✓</span>
                     </div>
                   )}
                 </div>
@@ -1120,7 +1120,7 @@ function DiscoverScreen({
               Hidden Gems
             </h2>
             <span className="text-xs font-semibold" style={{ color: '#a03b00', fontFamily: 'Manrope, sans-serif' }}>
-              â 4.5+ rated
+              ★ 4.5+ rated
             </span>
           </div>
           <div className="flex gap-3 px-5 pb-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
@@ -1140,13 +1140,13 @@ function DiscoverScreen({
                         className="text-xs font-bold text-white px-1.5 py-0.5 rounded-full"
                         style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}
                       >
-                        â {place.rating.toFixed(1)}
+                        ★ {place.rating.toFixed(1)}
                       </span>
                     </div>
                   )}
                   {checkedIn.has(place.id) && (
                     <div className="absolute top-2 right-2">
-                      <span className="text-white text-xs px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(160,59,0,0.85)' }}>â</span>
+                      <span className="text-white text-xs px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(160,59,0,0.85)' }}>✓</span>
                     </div>
                   )}
                 </div>
@@ -1174,13 +1174,13 @@ function DiscoverScreen({
         <p className="text-white/80 text-sm mt-1" style={{ fontFamily: 'Manrope, sans-serif' }}>
           Real experiences create memories no screen can replicate. Get out there, ABQ.
         </p>
-        <span className="absolute right-4 bottom-2 text-5xl opacity-20">â¡</span>
+        <span className="absolute right-4 bottom-2 text-5xl opacity-20">⚡</span>
       </div>
     </div>
   );
 }
 
-// âââ Events Screen ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Events Screen ────────────────────────────────────────────────────────────
 
 function EventsScreen({
   events,
@@ -1316,7 +1316,7 @@ function EventsScreen({
   );
 }
 
-// âââ Places Screen ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Places Screen ────────────────────────────────────────────────────────────
 
 function PlacesScreen({
   places, onPlaceSelect, coords, geoRequested, geoError, onRequestGeo,
@@ -1458,7 +1458,7 @@ function PlacesScreen({
         {([
           { id: 'top', label: 'Top Rated' },
           { id: 'near', label: 'Near Me', disabled: !coords },
-          { id: 'az', label: 'AâZ' },
+          { id: 'az', label: 'A–Z' },
         ] as const).map(s => (
           <button
             key={s.id}
@@ -1515,7 +1515,7 @@ function PlacesScreen({
   );
 }
 
-// âââ Auth Modal ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Auth Modal ──────────────────────────────────────────────────────────────
 
 function AuthModal({ onClose }: { onClose: () => void }) {
   const [mode, setMode] = useState<'choose' | 'email'>('choose');
@@ -1563,7 +1563,7 @@ function AuthModal({ onClose }: { onClose: () => void }) {
           <h2 className="text-2xl font-black uppercase tracking-tighter" style={{ fontFamily: 'Epilogue, sans-serif' }}>
             {mode === 'choose' ? 'Sign In' : (isSignUp ? 'Create Account' : 'Sign In')}
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 text-2xl leading-none">Ã</button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 text-2xl leading-none">×</button>
         </div>
         <p className="text-sm text-gray-500 mb-5" style={{ fontFamily: 'Manrope, sans-serif' }}>
           Sign in to sync your check-ins across devices and appear on the leaderboard.
@@ -1626,12 +1626,12 @@ function AuthModal({ onClose }: { onClose: () => void }) {
               className="w-full rounded-2xl py-3.5 font-bold text-sm text-white"
               style={{ background: '#a03b00', fontFamily: 'Manrope, sans-serif', opacity: loading ? 0.7 : 1 }}
             >
-              {loading ? 'Please waitâ¦' : (isSignUp ? 'Create Account' : 'Sign In')}
+              {loading ? 'Please wait…' : (isSignUp ? 'Create Account' : 'Sign In')}
             </button>
             <button type="button" onClick={() => setMode('choose')}
               className="text-xs text-gray-400 text-center mt-1"
               style={{ fontFamily: 'Manrope, sans-serif' }}
-            >â Back</button>
+            >← Back</button>
           </form>
         )}
       </div>
@@ -1639,7 +1639,7 @@ function AuthModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-// âââ Profile Screen ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Profile Screen ────────────────────────────────────────────────────────────
 
 const LEADERBOARD_SEEDS = [
   { name: 'xplorer_abq',      count: 47 },
@@ -1704,12 +1704,12 @@ function ProfileScreen({
   }, [lbRows, myCount, user]);
 
   const ACHIEVEMENTS = [
-    { id: 'first', emoji: 'ð±', label: 'First Check-in', unlocked: myCount >= 1 },
-    { id: 'five', emoji: 'â¡', label: 'Explorer (5)', unlocked: myCount >= 5 },
-    { id: 'ten', emoji: 'ð¥', label: 'Adventurer (10)', unlocked: myCount >= 10 },
-    { id: 'twenty', emoji: 'ð¥', label: 'Trailblazer (20)', unlocked: myCount >= 20 },
-    { id: 'thirty5', emoji: 'ð¥', label: 'Pioneer (35)', unlocked: myCount >= 35 },
-    { id: 'fifty', emoji: 'ð', label: 'Legend (50)', unlocked: myCount >= 50 },
+    { id: 'first', emoji: '🌱', label: 'First Check-in', unlocked: myCount >= 1 },
+    { id: 'five', emoji: '⚡', label: 'Explorer (5)', unlocked: myCount >= 5 },
+    { id: 'ten', emoji: '🥉', label: 'Adventurer (10)', unlocked: myCount >= 10 },
+    { id: 'twenty', emoji: '🥈', label: 'Trailblazer (20)', unlocked: myCount >= 20 },
+    { id: 'thirty5', emoji: '🥇', label: 'Pioneer (35)', unlocked: myCount >= 35 },
+    { id: 'fifty', emoji: '🏆', label: 'Legend (50)', unlocked: myCount >= 50 },
   ];
 
   const nextLevel = getLevel(myCount + 1);
@@ -1785,8 +1785,8 @@ function ProfileScreen({
       <div className="grid grid-cols-3 gap-3 mb-4">
         {[
           { label: 'Places\nVisited', val: myCount.toString() },
-          { label: 'Next\nLevel', val: myCount >= 50 ? 'ð' : (level.next - myCount).toString() + ' away' },
-          { label: 'Rank', val: leaderboard.find(r => r.isMe)?.rank ? '#' + leaderboard.find(r => r.isMe)!.rank : 'â' },
+          { label: 'Next\nLevel', val: myCount >= 50 ? '🏆' : (level.next - myCount).toString() + ' away' },
+          { label: 'Rank', val: leaderboard.find(r => r.isMe)?.rank ? '#' + leaderboard.find(r => r.isMe)!.rank : '—' },
         ].map(s => (
           <div
             key={s.label}
@@ -1807,9 +1807,9 @@ function ProfileScreen({
       {/* Progress bar */}
       {myCount >= 50 ? (
         <div className="bg-white rounded-2xl p-4 mb-4 text-center" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
-          <span style={{ fontSize: '28px' }}>ð</span>
+          <span style={{ fontSize: '28px' }}>🏆</span>
           <p className="font-black text-sm mt-1" style={{ fontFamily: 'Epilogue, sans-serif', color: '#a03b00' }}>Max Level Reached!</p>
-          <p className="text-xs text-gray-400 mt-0.5" style={{ fontFamily: 'Manrope, sans-serif' }}>You're a Legend â {myCount} places explored!</p>
+          <p className="text-xs text-gray-400 mt-0.5" style={{ fontFamily: 'Manrope, sans-serif' }}>You're a Legend — {myCount} places explored!</p>
         </div>
       ) : (
         <div className="bg-white rounded-2xl p-4 mb-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
@@ -1850,7 +1850,7 @@ function ProfileScreen({
               opacity: a.unlocked ? 1 : 0.4,
             }}
           >
-            <span style={{ fontSize: '24px' }}>{a.unlocked ? a.emoji : 'ð'}</span>
+            <span style={{ fontSize: '24px' }}>{a.unlocked ? a.emoji : '🔒'}</span>
             <p className="text-xs font-semibold text-gray-600 leading-tight text-center" style={{ fontFamily: 'Manrope, sans-serif' }}>
               {a.label}
             </p>
@@ -1885,7 +1885,7 @@ function ProfileScreen({
               className="font-black text-sm w-6 text-center flex-shrink-0"
               style={{ fontFamily: 'Epilogue, sans-serif', color: row.rank <= 3 ? '#a03b00' : '#999' }}
             >
-              {row.rank === 1 ? 'ð¥' : row.rank === 2 ? 'ð¥' : row.rank === 3 ? 'ð¥' : `#${row.rank}`}
+              {row.rank === 1 ? '🥇' : row.rank === 2 ? '🥈' : row.rank === 3 ? '🥉' : `#${row.rank}`}
             </span>
             <div
               className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -1917,7 +1917,7 @@ function ProfileScreen({
         style={{ background: 'rgba(160,59,0,0.06)' }}
       >
         <p className="text-xs text-gray-500 text-center" style={{ fontFamily: 'Manrope, sans-serif' }}>
-          ðï¸ Rankings are based on self-reported check-ins. We can't verify visits, but we trust you to explore honestly. The real prize is the memories you make!
+          🎖️ Rankings are based on self-reported check-ins. We can't verify visits, but we trust you to explore honestly. The real prize is the memories you make!
         </p>
       </div>
 
@@ -1951,7 +1951,7 @@ function ProfileScreen({
                     <p className="text-sm font-bold truncate" style={{ fontFamily: 'Epilogue, sans-serif' }}>{p.name}</p>
                     <p className="text-xs text-gray-400" style={{ fontFamily: 'Manrope, sans-serif' }}>{p.category}</p>
                   </div>
-                  <span className="text-xs font-bold flex-shrink-0" style={{ color: '#a03b00' }}>â</span>
+                  <span className="text-xs font-bold flex-shrink-0" style={{ color: '#a03b00' }}>✓</span>
                 </div>
               ))
             }
@@ -1962,7 +1962,7 @@ function ProfileScreen({
   );
 }
 
-// âââ Loading Screen ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Loading Screen ────────────────────────────────────────────────────────────
 
 function LoadingScreen() {
   return (
@@ -1978,7 +1978,7 @@ function LoadingScreen() {
         ABQ Unplugged
       </h1>
       <p className="text-sm text-gray-400 mt-1" style={{ fontFamily: 'Manrope, sans-serif' }}>
-        Loading your cityâ¦
+        Loading your city…
       </p>
       <div
         className="mt-6 rounded-full overflow-hidden"
@@ -1993,7 +1993,7 @@ function LoadingScreen() {
   );
 }
 
-// âââ Site Banner âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Site Banner ─────────────────────────────────────────────────────────────
 
 const ADMIN_EMAIL = '4mattcarlson@gmail.com';
 
@@ -2009,718 +2009,744 @@ function SiteBanner({ banner }: { banner: BannerConfig | null }) {
   );
 }
 
-// âââ Admin Screen âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Admin Screen ─────────────────────────────────────────────────────────────
 
-function AdminScreen({ user, onBack }: { user: User | null; onBack: () => void }) {
-  const [tab, setTab] = useState<'banner' | 'places'>('banner');
+//                                                                                                      
+//     Admin Screen                                                                               
+//                                                                                                      
 
-  // Banner
-  const [bannerMsg, setBannerMsg] = useState('');
-  const [bannerType, setBannerType] = useState<'info' | 'success' | 'warning'>('info');
-  const [bannerActive, setBannerActive] = useState(false);
-  const [bannerSaving, setBannerSaving] = useState(false);
-  const [bannerSaved, setBannerSaved] = useState(false);
+type AdminTab = 'dashboard' | 'places' | 'events' | 'tagrules' | 'settings';
 
-  // Places
-  const [adminPlaces, setAdminPlaces] = useState<Place[]>([]);
-  const [placesLoading, setPlacesLoading] = useState(false);
-  const [editingPlace, setEditingPlace] = useState<Place | null>(null);
-  const [placeSaving, setPlaceSaving] = useState(false);
-  const [placeSearch, setPlaceSearch] = useState('');
+interface PlaceDoc {
+  id: string;
+  name: string;
+  category: string;
+  tags: string[];
+  isFeatured: boolean;
+  description?: string;
+  address?: string;
+  lat?: number;
+  lng?: number;
+  image?: string;
+  gradient?: string;
+  phone?: string;
+  hours?: string;
+  website?: string;
+  rating?: number;
+  priceLevel?: number;
+  reviewCount?: number;
+}
 
-  useEffect(() => {
-    getDoc(doc(fbDb, 'config', 'siteConfig')).then(snap => {
-      if (snap.exists()) {
-        const d = snap.data();
-        if (d.banner) { setBannerMsg(d.banner.message || ''); setBannerType(d.banner.type || 'info'); setBannerActive(!!d.banner.active); }
-      }
-    });
-  }, []);
+interface LbEntry {
+  uid: string;
+  displayName: string;
+  count: number;
+}
 
-  useEffect(() => {
-    if (tab !== 'places') return;
-    setPlacesLoading(true);
-    getDocs(collection(fbDb, 'places')).then(snap => {
-      const ps: Place[] = [];
-      snap.forEach(d => ps.push({ id: d.id, ...d.data() } as Place));
-      ps.sort((a, b) => a.name.localeCompare(b.name));
-      setAdminPlaces(ps);
-      setPlacesLoading(false);
-    });
-  }, [tab]);
+interface EventOverrideDoc {
+  eventId: string;
+  customTags: string[];
+  eventName?: string;
+  venueName?: string;
+  notes?: string;
+}
 
-  const saveBanner = async () => {
-    setBannerSaving(true);
-    await setDoc(doc(fbDb, 'config', 'siteConfig'), { banner: { message: bannerMsg, type: bannerType, active: bannerActive } }, { merge: true });
-    setBannerSaving(false); setBannerSaved(true);
-    setTimeout(() => setBannerSaved(false), 2000);
-  };
+interface TagRulesConfig {
+  outdoorKeywords: string[];
+  indoorKeywords: string[];
+  categoryKeywords: Record<string, string[]>;
+}
 
-  const toggleFeatured = async (place: Place) => {
-    const next = !place.isFeatured;
-    await setDoc(doc(fbDb, 'places', place.id), { isFeatured: next }, { merge: true });
-    setAdminPlaces(prev => prev.map(p => p.id === place.id ? { ...p, isFeatured: next } : p));
-  };
+const ADMIN_ACCENT = '#b45309';
 
-  const saveEditingPlace = async () => {
-    if (!editingPlace) return;
-    setPlaceSaving(true);
-    await setDoc(doc(fbDb, 'places', editingPlace.id), {
-      description: editingPlace.description || '',
-      hours: editingPlace.hours || '',
-      phone: editingPlace.phone || '',
-      website: editingPlace.website || '',
-    }, { merge: true });
-    setAdminPlaces(prev => prev.map(p => p.id === editingPlace.id ? editingPlace : p));
-    setPlaceSaving(false); setEditingPlace(null);
-  };
+const PLACE_CATS = [
+  'restaurant','bar','coffee','park','museum','shop',
+  'entertainment','outdoor','arts','fitness','hotel','other',
+];
 
-  const filtered = adminPlaces.filter(p => p.name.toLowerCase().includes(placeSearch.toLowerCase()));
+const PLACE_TAG_OPTIONS = [
+  'outdoor','indoor','family-friendly','dog-friendly','live-music',
+  'date-night','free','kid-friendly','accessible','patio',
+  'late-night','brunch','art','nature','hiking','sports',
+];
 
-  const inputStyle: React.CSSProperties = { width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #e5e5e5', fontSize: '15px', fontFamily: 'Manrope, sans-serif', background: '#fafafa', outline: 'none', boxSizing: 'border-box' };
+const EVENT_TAG_OPTIONS = [
+  'outdoor','indoor','family-friendly','free','live-music',
+  'sports','art','comedy','festival','dance','film',
+  'food','kids','nightlife','theater',
+];
 
+const DEFAULT_RULES: TagRulesConfig = {
+  outdoorKeywords: ['outdoor','amphitheater','park','field','arena','stadium','garden','trail','wilderness','lake','river','mountain'],
+  indoorKeywords: ['theater','theatre','cinema','gallery','museum','hall','auditorium','studio','lounge'],
+  categoryKeywords: {
+    'family-friendly': ['family','kids','children','youth','junior'],
+    'live-music': ['music','concert','band','jazz','blues','rock','symphony'],
+    'arts': ['art','gallery','museum','exhibit','artist'],
+    'sports': ['sport','game','match','tournament','league'],
+    'food': ['food','dining','restaurant','chef','culinary','tasting'],
+    'festival': ['festival','fair','carnival','fiesta','celebration'],
+    'nightlife': ['bar','club','lounge','cocktail','nightlife'],
+  },
+};
+
+//    Shared mini-components                                                                      
+
+const TagPill = ({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    style={{
+      padding: '4px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer',
+      border: '1px solid ' + (active ? ADMIN_ACCENT : '#d1d5db'),
+      backgroundColor: active ? ADMIN_ACCENT : 'white',
+      color: active ? 'white' : '#374151',
+    }}
+  >{label}</button>
+);
+
+const FlashMsg = ({ msg }: { msg: string }) => msg ? (
+  <div style={{ padding: '10px 14px', backgroundColor: '#ecfdf5', border: '1px solid #6ee7b7', borderRadius: 8, marginBottom: 12, fontSize: 14, color: '#065f46' }}>{msg}</div>
+) : null;
+
+const inputSty = {
+  width: '100%', padding: '8px 10px', border: '1px solid #d1d5db',
+  borderRadius: 8, fontSize: 14, boxSizing: 'border-box' as const,
+};
+const cardSty = {
+  backgroundColor: 'white', borderRadius: 12, padding: 16,
+  boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+};
+const btnPrim = {
+  padding: '8px 18px', borderRadius: 8, border: 'none' as const,
+  backgroundColor: ADMIN_ACCENT, color: 'white', cursor: 'pointer' as const,
+  fontSize: 14, fontWeight: 600 as const,
+};
+const btnSec = {
+  padding: '8px 14px', borderRadius: 8, border: '1px solid #d1d5db',
+  background: 'white', cursor: 'pointer' as const, fontSize: 14,
+};
+
+//    Dashboard                                                                                     
+function DashboardTab({ places, lbEntries }: { places: PlaceDoc[]; lbEntries: LbEntry[] }) {
+  const totalCheckIns = lbEntries.reduce((s, e) => s + (e.count || 0), 0);
+  const featured = places.filter(p => p.isFeatured).length;
+  const stats = [
+    { label: 'Total Places', value: places.length, icon: '=�' },
+    { label: 'Featured',     value: featured,       icon: 'P' },
+    { label: 'Users',        value: lbEntries.length, icon: '=d' },
+    { label: 'Check-ins',   value: totalCheckIns,  icon: '' },
+  ];
   return (
-    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: '#f5f7f5', zIndex: 50 }}>
-
-      {/* Header */}
-      <div style={{ paddingTop: 'calc(var(--sat) + 14px)', paddingBottom: '14px', paddingLeft: '16px', paddingRight: '16px', background: '#a03b00', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button onClick={onBack} style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>arrow_back</span>
-          </button>
-          <div>
-            <p style={{ color: 'white', fontFamily: 'Epilogue, sans-serif', fontWeight: 900, fontSize: '17px', letterSpacing: '-0.5px' }}>Admin Panel</p>
-            <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '11px', fontFamily: 'Manrope, sans-serif' }}>{user?.email}</p>
+    <div>
+      <h2 style={{ fontSize: 20, fontWeight: 700, color: '#1f2937', marginBottom: 16 }}>Overview</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 12, marginBottom: 24 }}>
+        {stats.map(s => (
+          <div key={s.label} style={{ ...cardSty }}>
+            <div style={{ fontSize: 28 }}>{s.icon}</div>
+            <div style={{ fontSize: 30, fontWeight: 700, color: '#1f2937' }}>{s.value}</div>
+            <div style={{ fontSize: 13, color: '#6b7280' }}>{s.label}</div>
           </div>
-        </div>
-        <button onClick={() => window.location.reload()} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', borderRadius: '8px', padding: '6px 12px', fontSize: '12px', fontFamily: 'Manrope, sans-serif', fontWeight: 700 }}>
-          Reload App
-        </button>
-      </div>
-
-      {/* Tabs */}
-      <div style={{ display: 'flex', background: 'white', borderBottom: '1px solid rgba(0,0,0,0.08)', flexShrink: 0 }}>
-        {(['banner', 'places'] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)} style={{ flex: 1, padding: '12px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', borderBottom: tab === t ? '2px solid #a03b00' : '2px solid transparent', color: tab === t ? '#a03b00' : '#999', fontFamily: 'Manrope, sans-serif', fontSize: '11px', fontWeight: 700 }}>
-            <span className="material-symbols-outlined" style={{ fontSize: '20px', fontVariationSettings: tab === t ? "'FILL' 1" : "'FILL' 0" }}>{t === 'banner' ? 'campaign' : 'place'}</span>
-            {t === 'banner' ? 'Banner' : 'Places'}
-          </button>
         ))}
       </div>
-
-      {/* Content */}
-      <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-
-        {/* ââ Banner Tab ââ */}
-        {tab === 'banner' && (
-          <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div style={{ background: 'white', borderRadius: '16px', padding: '18px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-              <p style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 800, fontSize: '12px', letterSpacing: '0.08em', color: '#999', marginBottom: '14px' }}>SITE ANNOUNCEMENT BANNER</p>
-              <p style={{ fontSize: '13px', color: '#666', fontFamily: 'Manrope, sans-serif', marginBottom: '16px', lineHeight: 1.5 }}>Post a message visible to all users at the top of the app. Great for events, closures, or updates.</p>
-
-              {/* Active toggle */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <span style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: '14px', color: '#333' }}>Banner Active</span>
-                <button onClick={() => setBannerActive(!bannerActive)} style={{ width: 46, height: 26, borderRadius: 13, background: bannerActive ? '#a03b00' : '#ddd', position: 'relative', flexShrink: 0, transition: 'background 0.2s' }}>
-                  <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'white', position: 'absolute', top: 3, left: bannerActive ? 23 : 3, transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.25)' }} />
-                </button>
-              </div>
-
-              {/* Type */}
-              <p style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: '12px', color: '#666', marginBottom: '8px' }}>TYPE</p>
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-                {(['info', 'success', 'warning'] as const).map(ty => (
-                  <button key={ty} onClick={() => setBannerType(ty)} style={{ flex: 1, padding: '8px 4px', borderRadius: '10px', fontSize: '13px', fontFamily: 'Manrope, sans-serif', fontWeight: 700, textTransform: 'capitalize', background: bannerType === ty ? '#a03b00' : '#f3f3f3', color: bannerType === ty ? 'white' : '#777', transition: 'all 0.15s' }}>
-                    {ty === 'info' ? 'ðµ Info' : ty === 'success' ? 'ð¢ Good' : 'ð¡ Alert'}
-                  </button>
-                ))}
-              </div>
-
-              {/* Message */}
-              <p style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: '12px', color: '#666', marginBottom: '8px' }}>MESSAGE</p>
-              <textarea value={bannerMsg} onChange={e => setBannerMsg(e.target.value)} placeholder="e.g. ð Balloon Fiesta this weekend â check the Events tab!" rows={3} style={{ ...inputStyle, resize: 'none' }} />
-
-              {/* Preview */}
-              {bannerMsg && (
-                <div style={{ marginTop: '12px' }}>
-                  <p style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: '11px', color: '#aaa', marginBottom: '6px', letterSpacing: '0.06em' }}>PREVIEW</p>
-                  <div style={{ borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.07)' }}>
-                    <SiteBanner banner={{ message: bannerMsg, type: bannerType, active: true }} />
-                  </div>
-                </div>
-              )}
-
-              <button onClick={saveBanner} disabled={bannerSaving} style={{ marginTop: '16px', width: '100%', padding: '14px', borderRadius: '12px', background: bannerSaved ? '#15803d' : '#a03b00', color: 'white', fontFamily: 'Manrope, sans-serif', fontWeight: 800, fontSize: '15px', transition: 'background 0.3s', opacity: bannerSaving ? 0.7 : 1 }}>
-                {bannerSaved ? 'â Saved!' : bannerSaving ? 'Savingâ¦' : 'Save Banner'}
-              </button>
-            </div>
+      <div style={{ ...cardSty }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: '#1f2937', marginBottom: 12 }}><� Top Check-in Leaders</h3>
+        {lbEntries.slice(0, 10).map((entry, i) => (
+          <div key={entry.uid} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < Math.min(lbEntries.length - 1, 9) ? '1px solid #f3f4f6' : 'none' }}>
+            <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: i < 3 ? '#fbbf24' : '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 12 }}>{i + 1}</div>
+            <div style={{ flex: 1, fontSize: 14, color: '#374151' }}>{entry.displayName || 'Anonymous'}</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: ADMIN_ACCENT }}>{entry.count}</div>
           </div>
-        )}
-
-        {/* ââ Places Tab ââ */}
-        {tab === 'places' && (
-          <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-
-            {/* Edit bottom sheet */}
-            {editingPlace && (
-              <div style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'flex-end' }}>
-                <div style={{ background: 'white', borderRadius: '20px 20px 0 0', padding: '20px 16px', paddingBottom: 'calc(var(--sab) + 20px)', width: '100%', maxHeight: '82vh', overflowY: 'auto', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                    <p style={{ fontFamily: 'Epilogue, sans-serif', fontWeight: 900, fontSize: '17px', letterSpacing: '-0.5px', color: '#111' }}>{editingPlace.name}</p>
-                    <button onClick={() => setEditingPlace(null)} style={{ color: '#999', width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5', borderRadius: '50%' }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
-                    </button>
-                  </div>
-                  {[
-                    { key: 'description', label: 'Description', multi: true },
-                    { key: 'hours', label: 'Hours (e.g. MonâSat 10amâ9pm)', multi: false },
-                    { key: 'phone', label: 'Phone', multi: false },
-                    { key: 'website', label: 'Website URL', multi: false },
-                  ].map(f => (
-                    <div key={f.key} style={{ marginBottom: '14px' }}>
-                      <p style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: '12px', color: '#666', marginBottom: '6px' }}>{f.label.toUpperCase()}</p>
-                      {f.multi
-                        ? <textarea value={(editingPlace as any)[f.key] || ''} onChange={e => setEditingPlace({ ...editingPlace, [f.key]: e.target.value })} rows={3} style={{ ...inputStyle, resize: 'none' }} />
-                        : <input value={(editingPlace as any)[f.key] || ''} onChange={e => setEditingPlace({ ...editingPlace, [f.key]: e.target.value })} style={inputStyle} />
-                      }
-                    </div>
-                  ))}
-                  <button onClick={saveEditingPlace} disabled={placeSaving} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#a03b00', color: 'white', fontFamily: 'Manrope, sans-serif', fontWeight: 800, fontSize: '15px', opacity: placeSaving ? 0.7 : 1, marginTop: '4px' }}>
-                    {placeSaving ? 'Savingâ¦' : 'Save Changes'}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Search */}
-            <div style={{ position: 'relative' }}>
-              <span className="material-symbols-outlined" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#bbb', pointerEvents: 'none' }}>search</span>
-              <input value={placeSearch} onChange={e => setPlaceSearch(e.target.value)} placeholder="Search placesâ¦" style={{ ...inputStyle, paddingLeft: '38px' }} />
-            </div>
-
-            <p style={{ fontFamily: 'Manrope, sans-serif', fontSize: '12px', color: '#aaa', textAlign: 'center' }}>â­ = Featured in Discover &nbsp;Â·&nbsp; âï¸ = Edit details</p>
-
-            {placesLoading ? (
-              <div style={{ textAlign: 'center', padding: '50px 0', color: '#bbb' }}>
-                <span className="material-symbols-outlined" style={{ fontSize: '36px', display: 'block', marginBottom: '10px' }}>sync</span>
-                <p style={{ fontFamily: 'Manrope, sans-serif', fontSize: '13px' }}>Loading placesâ¦</p>
-              </div>
-            ) : filtered.map(place => (
-              <div key={place.id} style={{ background: 'white', borderRadius: '14px', padding: '12px 14px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: '14px', color: '#111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: '2px' }}>{place.name}</p>
-                  <p style={{ fontFamily: 'Manrope, sans-serif', fontSize: '11px', color: '#aaa' }}>{place.category}</p>
-                </div>
-                <button onClick={() => toggleFeatured(place)} title={place.isFeatured ? 'Unfeature' : 'Feature'} style={{ width: 36, height: 36, borderRadius: '50%', flexShrink: 0, background: place.isFeatured ? 'rgba(160,59,0,0.1)' : '#f3f3f3', color: place.isFeatured ? '#a03b00' : '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '18px', fontVariationSettings: place.isFeatured ? "'FILL' 1" : "'FILL' 0" }}>star</span>
-                </button>
-                <button onClick={() => setEditingPlace(place)} title="Edit" style={{ width: 36, height: 36, borderRadius: '50%', flexShrink: 0, background: '#f3f3f3', color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+        ))}
+        {lbEntries.length === 0 && <p style={{ color: '#9ca3af', fontSize: 14 }}>No users yet.</p>}
       </div>
     </div>
   );
 }
 
-// âââ Navigation ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+//    Places                                                                                        
+function PlacesTab({ places, setPlaces }: { places: PlaceDoc[]; setPlaces: (fn: (prev: PlaceDoc[]) => PlaceDoc[]) => void }) {
+  const EMPTY: Omit<PlaceDoc,'id'> = { name:'', category:'restaurant', tags:[], isFeatured:false, description:'', address:'', image:'', phone:'', hours:'', website:'', rating:0, priceLevel:1 };
+  const [search, setSearch] = useState('');
+  const [catFilter, setCatFilter] = useState('all');
+  const [mode, setMode] = useState<'list'|'add'|'edit'>('list');
+  const [editTarget, setEditTarget] = useState<PlaceDoc|null>(null);
+  const [form, setForm] = useState<Omit<PlaceDoc,'id'>>(EMPTY);
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState('');
 
-const NAV_ITEMS = [
-  { id: 'discover', label: 'Discover', icon: 'explore' },
-  { id: 'events',   label: 'Events',   icon: 'confirmation_number' },
-  { id: 'places',   label: 'Places',   icon: 'storefront' },
-  { id: 'profile',  label: 'Profile',  icon: 'person' },
-] as const;
+  const flash = (m: string) => { setMsg(m); setTimeout(() => setMsg(''), 3500); };
 
-type TabId = (typeof NAV_ITEMS)[number]['id'];
+  const startAdd = () => { setForm(EMPTY); setEditTarget(null); setMode('add'); };
+  const startEdit = (p: PlaceDoc) => {
+    setEditTarget(p);
+    setForm({ name:p.name, category:p.category||'other', tags:p.tags||[], isFeatured:!!p.isFeatured,
+      description:p.description||'', address:p.address||'', image:p.image||'',
+      phone:p.phone||'', hours:p.hours||'', website:p.website||'',
+      rating:p.rating||0, priceLevel:p.priceLevel||1, gradient:p.gradient });
+    setMode('edit');
+  };
 
-// âââ Main App ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-
-export default function App() {
-  const [activeTab, setActiveTab] = useState<TabId>('discover');
-  const [places, setPlaces] = useState<Place[]>([]);
-  const [events, setEvents] = useState<TMEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [selectedEvent, setSelectedEvent] = useState<TMEvent | null>(null);
-  const [checkedIn, setCheckedIn] = useState<Set<string>>(loadCheckins);
-
-  // ââ Firebase Auth ââ
-  const [user, setUser] = useState<User | null>(null);
-  const [authReady, setAuthReady] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const syncTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(fbAuth, async (u) => {
-      setUser(u);
-      setAuthReady(true);
-      if (u) {
-        // Load check-ins from Firestore on sign-in
-        try {
-          const snap = await getDoc(doc(fbDb, 'users', u.uid));
-          if (snap.exists()) {
-            const data = snap.data();
-            if (Array.isArray(data.checkIns) && data.checkIns.length > 0) {
-              const merged = new Set<string>([...loadCheckins(), ...data.checkIns]);
-              setCheckedIn(merged);
-              saveCheckins(merged);
-            }
-          }
-        } catch (err) { console.error('Load checkins error:', err); }
-      }
-    });
-    return unsub;
-  }, []);
-
-  // Debounced Firestore sync when checkedIn changes and user is signed in
-  useEffect(() => {
-    if (!user || !authReady) return;
-    if (syncTimeout.current) clearTimeout(syncTimeout.current);
-    syncTimeout.current = setTimeout(() => {
-      syncCheckinsToFirestore(user.uid, checkedIn, user.displayName || user.email || 'Explorer');
-    }, 1500);
-    return () => { if (syncTimeout.current) clearTimeout(syncTimeout.current); };
-  }, [checkedIn, user, authReady]);
-
-  const { coords, error: geoError, requested: geoRequested, request: requestGeo } = useGeolocation();
-
-  // ââ Browser history management (prevents swipe-back leaving the site) ââ
-  const navigateTab = useCallback((tab: TabId) => {
-    setActiveTab(tab);
-    window.history.pushState({ tab, modal: null }, '', `#${tab}`);
-  }, []);
-
-  const openPlaceModal = useCallback((place: Place) => {
-    setSelectedPlace(place);
-    window.history.pushState({ tab: null, modal: 'place', id: place.id }, '', `#place/${place.id}`);
-  }, []);
-
-  const openEventModal = useCallback((event: TMEvent) => {
-    setSelectedEvent(event);
-    window.history.pushState({ tab: null, modal: 'event', id: event.id }, '', `#event/${event.id}`);
-  }, []);
-
-  const closePlaceModal = useCallback(() => setSelectedPlace(null), []);
-  const closeEventModal = useCallback(() => setSelectedEvent(null), []);
-
-  // ── Admin ──
-  const [currentHash, setCurrentHash] = useState(() => window.location.hash);
-  const showAdmin = currentHash === '#admin';
-
-  // Listen for hash changes so navigating to #admin after mount works
-  // Keep currentHash in sync with all navigation methods (hashchange + popstate)
-  useEffect(() => {
-    const syncHash = () => setCurrentHash(window.location.hash);
-    window.addEventListener('hashchange', syncHash);
-    window.addEventListener('popstate', syncHash);
-    return () => {
-      window.removeEventListener('hashchange', syncHash);
-      window.removeEventListener('popstate', syncHash);
-    };
-  }, []);
-
-  useEffect(() => {
-    // When admin panel is open, don't manipulate the URL at all
-    if (showAdmin) return;
-
-    // Set initial history entry
-    window.history.replaceState({ tab: 'discover', modal: null }, '', '#discover');
-
-    const handlePopState = (e: PopStateEvent) => {
-      const state = e.state;
-      // If going back from a modal, close it
-      if (selectedPlace) { setSelectedPlace(null); return; }
-      if (selectedEvent) { setSelectedEvent(null); return; }
-      // If going back between tabs, go to that tab (or default to discover)
-      if (state?.tab) {
-        setActiveTab(state.tab);
+  const savePlace = async () => {
+    if (!form.name.trim()) { flash('Name is required'); return; }
+    setSaving(true);
+    try {
+      if (mode === 'edit' && editTarget) {
+        await updateDoc(doc(fbDb, 'places', editTarget.id), form as Record<string,unknown>);
+        setPlaces(prev => prev.map(p => p.id === editTarget.id ? { ...p, ...form } : p));
+        flash('Place updated '); setMode('list');
       } else {
-        // Push a new state to prevent leaving the site
-        window.history.pushState({ tab: activeTab, modal: null }, '', `#${activeTab}`);
+        const ref = await addDoc(collection(fbDb, 'places'), form as Record<string,unknown>);
+        setPlaces(prev => [...prev, { id: ref.id, ...form }]);
+        flash('Place added '); setMode('list');
       }
-    };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [selectedPlace, selectedEvent, activeTab, showAdmin]);
+    } catch (e) { flash('Error: ' + (e as Error).message); }
+    setSaving(false);
+  };
 
-  const [checkInError, setCheckInError] = useState<string | null>(null);
+  const deletePlace = async (p: PlaceDoc) => {
+    if (!confirm('Delete "' + p.name + '"? This cannot be undone.')) return;
+    await deleteDoc(doc(fbDb, 'places', p.id));
+    setPlaces(prev => prev.filter(x => x.id !== p.id));
+    flash('Deleted ');
+  };
 
-  const [siteBanner, setSiteBanner] = useState<BannerConfig | null>(null);
+  const toggleFeatured = async (p: PlaceDoc) => {
+    const next = !p.isFeatured;
+    await updateDoc(doc(fbDb, 'places', p.id), { isFeatured: next });
+    setPlaces(prev => prev.map(x => x.id === p.id ? { ...x, isFeatured: next } : x));
+  };
+
+  const sf = (key: string) => (e: { target: { value: string } }) =>
+    setForm(prev => ({ ...prev, [key]: e.target.value }));
+
+  const toggleTag = (tag: string) => setForm(prev => ({
+    ...prev,
+    tags: (prev.tags||[]).includes(tag) ? (prev.tags||[]).filter(t => t !== tag) : [...(prev.tags||[]), tag],
+  }));
+
+  const filtered = places.filter(p =>
+    (catFilter === 'all' || p.category === catFilter) &&
+    (p.name.toLowerCase().includes(search.toLowerCase()) || (p.address||'').toLowerCase().includes(search.toLowerCase()))
+  );
+
+  if (mode === 'add' || mode === 'edit') {
+    return (
+      <div>
+        <button style={{ ...btnSec, marginBottom: 16 }} onClick={() => setMode('list')}>� Back to List</button>
+        <h2 style={{ fontSize: 20, fontWeight: 700, color: '#1f2937', marginBottom: 16 }}>
+          {mode === 'edit' ? `Edit: ${editTarget?.name}` : 'Add New Place'}
+        </h2>
+        <FlashMsg msg={msg} />
+        <div style={{ ...cardSty }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            {([['name','Name *'],['address','Address'],['phone','Phone'],['website','Website'],['hours','Hours (e.g. MonSat 11am9pm)']] as [string,string][]).map(([k,l]) => (
+              <div key={k}>
+                <label style={{ fontSize: 12, color: '#6b7280', display: 'block', marginBottom: 3 }}>{l}</label>
+                <input value={(form as Record<string,unknown>)[k] as string || ''} onChange={sf(k)} style={inputSty} />
+              </div>
+            ))}
+            <div>
+              <label style={{ fontSize: 12, color: '#6b7280', display: 'block', marginBottom: 3 }}>Image URL</label>
+              <input value={form.image||''} onChange={sf('image')} style={inputSty} placeholder="https://..." />
+            </div>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ fontSize: 12, color: '#6b7280', display: 'block', marginBottom: 3 }}>Description</label>
+              <textarea value={form.description||''} onChange={sf('description')} rows={3} style={{ ...inputSty, resize: 'vertical' }} />
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginTop: 12 }}>
+            <div>
+              <label style={{ fontSize: 12, color: '#6b7280', display: 'block', marginBottom: 3 }}>Category</label>
+              <select value={form.category} onChange={sf('category')} style={inputSty}>
+                {PLACE_CATS.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={{ fontSize: 12, color: '#6b7280', display: 'block', marginBottom: 3 }}>Rating (05)</label>
+              <input type="number" min="0" max="5" step="0.1"
+                value={form.rating||0}
+                onChange={e => setForm(prev => ({ ...prev, rating: parseFloat(e.target.value)||0 }))}
+                style={inputSty} />
+            </div>
+            <div>
+              <label style={{ fontSize: 12, color: '#6b7280', display: 'block', marginBottom: 3 }}>Price Level</label>
+              <select value={form.priceLevel||1} onChange={e => setForm(prev => ({ ...prev, priceLevel: parseInt(e.target.value) }))} style={inputSty}>
+                {[1,2,3,4].map(n => <option key={n} value={n}>{'$'.repeat(n)}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 16 }}>
+            <label style={{ fontSize: 12, color: '#6b7280', display: 'block', marginBottom: 6 }}>Tags</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {PLACE_TAG_OPTIONS.map(tag => (
+                <TagPill key={tag} label={tag} active={(form.tags||[]).includes(tag)} onClick={() => toggleTag(tag)} />
+              ))}
+            </div>
+            {(form.tags||[]).length > 0 && (
+              <div style={{ marginTop: 8, fontSize: 12, color: '#6b7280' }}>
+                Selected: <strong>{(form.tags||[]).join(', ')}</strong>
+              </div>
+            )}
+          </div>
+
+          <div style={{ marginTop: 16 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, cursor: 'pointer' }}>
+              <input type="checkbox" checked={!!form.isFeatured} onChange={e => setForm(prev => ({ ...prev, isFeatured: e.target.checked }))} />
+              <span style={{ fontWeight: 600 }}>Featured on home screen</span>
+            </label>
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, marginTop: 20, justifyContent: 'flex-end' }}>
+            <button style={btnSec} onClick={() => setMode('list')}>Cancel</button>
+            <button style={{ ...btnPrim, opacity: saving ? 0.7 : 1 }} onClick={savePlace} disabled={saving}>
+              {saving ? 'Saving&' : (mode === 'edit' ? 'Update Place' : 'Add Place')}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 700, color: '#1f2937', flex: 1 }}>Places ({places.length})</h2>
+        <button style={btnPrim} onClick={startAdd}>+ Add Place</button>
+      </div>
+      <FlashMsg msg={msg} />
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+        <input placeholder="Search by name or address&" value={search} onChange={e => setSearch(e.target.value)} style={{ ...inputSty, flex: 1 }} />
+        <select value={catFilter} onChange={e => setCatFilter(e.target.value)} style={{ ...inputSty, width: 'auto', flex: 'none' }}>
+          <option value="all">All Categories</option>
+          {PLACE_CATS.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {filtered.map(p => (
+          <div key={p.id} style={{ ...cardSty, display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+            {p.image && (
+              <img src={p.image} alt="" style={{ width: 52, height: 52, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }}
+                onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            )}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 15, fontWeight: 700, color: '#1f2937' }}>{p.name}</span>
+                {p.isFeatured && <span style={{ fontSize: 11, backgroundColor: '#fef3c7', color: '#92400e', padding: '2px 7px', borderRadius: 999 }}>P Featured</span>}
+                <span style={{ fontSize: 11, backgroundColor: '#f3f4f6', color: '#6b7280', padding: '2px 7px', borderRadius: 999 }}>{p.category}</span>
+                {p.rating ? <span style={{ fontSize: 11, color: '#9ca3af' }}> {p.rating}</span> : null}
+              </div>
+              {p.address && <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 2 }}>{p.address}</div>}
+              {(p.tags||[]).length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 5 }}>
+                  {(p.tags||[]).map(t => <span key={t} style={{ fontSize: 11, backgroundColor: '#ede9e0', color: '#6b4c2a', padding: '2px 8px', borderRadius: 999 }}>{t}</span>)}
+                </div>
+              )}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 5, flexShrink: 0 }}>
+              <button onClick={() => toggleFeatured(p)} style={{ ...btnSec, padding: '4px 10px', fontSize: 12, backgroundColor: p.isFeatured ? '#fef3c7' : 'white' }}>
+                {p.isFeatured ? ' Unfeature' : ' Feature'}
+              </button>
+              <button onClick={() => startEdit(p)} style={{ ...btnSec, padding: '4px 10px', fontSize: 12 }}> Edit</button>
+              <button onClick={() => deletePlace(p)} style={{ padding: '4px 10px', fontSize: 12, borderRadius: 6, border: '1px solid #fca5a5', background: '#fff5f5', color: '#dc2626', cursor: 'pointer' }}>=� Delete</button>
+            </div>
+          </div>
+        ))}
+        {filtered.length === 0 && <p style={{ textAlign: 'center', color: '#9ca3af', padding: 40 }}>No places found.</p>}
+      </div>
+    </div>
+  );
+}
+
+//    Event Tag Overrides                                                                        
+function EventsTab() {
+  const [overrides, setOverrides] = useState<EventOverrideDoc[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [mode, setMode] = useState<'list'|'add'>('list');
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState('');
+  const EMPTY_FORM = { eventId:'', eventName:'', venueName:'', customTags:[] as string[], notes:'' };
+  const [form, setForm] = useState(EMPTY_FORM);
+
+  useEffect(() => {
+    getDocs(collection(fbDb, 'eventOverrides')).then(snap => {
+      setOverrides(snap.docs.map(d => ({ eventId: d.id, ...d.data() } as EventOverrideDoc)));
+      setLoading(false);
+    });
+  }, []);
+
+  const flash = (m: string) => { setMsg(m); setTimeout(() => setMsg(''), 3500); };
+
+  const saveOverride = async () => {
+    if (!form.eventId.trim()) { flash('Event ID is required'); return; }
+    setSaving(true);
+    try {
+      const data = { customTags: form.customTags, eventName: form.eventName, venueName: form.venueName, notes: form.notes };
+      await setDoc(doc(fbDb, 'eventOverrides', form.eventId.trim()), data);
+      setOverrides(prev => {
+        const i = prev.findIndex(o => o.eventId === form.eventId.trim());
+        const item = { eventId: form.eventId.trim(), ...data };
+        if (i >= 0) { const n = [...prev]; n[i] = item; return n; }
+        return [...prev, item];
+      });
+      setForm(EMPTY_FORM); setMode('list'); flash('Override saved ');
+    } catch (e) { flash('Error: ' + (e as Error).message); }
+    setSaving(false);
+  };
+
+  const deleteOverride = async (id: string) => {
+    await deleteDoc(doc(fbDb, 'eventOverrides', id));
+    setOverrides(prev => prev.filter(o => o.eventId !== id));
+    flash('Deleted ');
+  };
+
+  const toggleTag = (tag: string) => setForm(f => ({
+    ...f, customTags: f.customTags.includes(tag) ? f.customTags.filter(t => t !== tag) : [...f.customTags, tag]
+  }));
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 700, color: '#1f2937', flex: 1 }}>Event Tag Overrides</h2>
+        {mode === 'list' && <button style={btnPrim} onClick={() => setMode('add')}>+ Add Override</button>}
+      </div>
+      <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 16 }}>
+        Manually tag specific Ticketmaster events. Find the event ID in the TM URL
+        (e.g. <code style={{ backgroundColor: '#f3f4f6', padding: '1px 5px', borderRadius: 4 }}>G5vYZ9fIjbfBo</code>).
+        The app will apply these tags instead of the auto-detected ones.
+      </p>
+      <FlashMsg msg={msg} />
+
+      {mode === 'add' && (
+        <div style={{ ...cardSty, marginBottom: 16 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12 }}>New Event Override</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
+            {([['eventId','Ticketmaster Event ID *'],['eventName','Event Name (for reference)'],['venueName','Venue Name (for reference)'],['notes','Notes']] as [string,string][]).map(([k,l]) => (
+              <div key={k}>
+                <label style={{ fontSize: 12, color: '#6b7280', display: 'block', marginBottom: 3 }}>{l}</label>
+                <input value={(form as Record<string,unknown>)[k] as string} onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))} style={inputSty} />
+              </div>
+            ))}
+          </div>
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ fontSize: 12, color: '#6b7280', display: 'block', marginBottom: 6 }}>Tags to apply</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {EVENT_TAG_OPTIONS.map(tag => <TagPill key={tag} label={tag} active={form.customTags.includes(tag)} onClick={() => toggleTag(tag)} />)}
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            <button style={btnSec} onClick={() => setMode('list')}>Cancel</button>
+            <button style={{ ...btnPrim, opacity: saving ? 0.7 : 1 }} onClick={saveOverride} disabled={saving}>
+              {saving ? 'Saving&' : 'Save Override'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {loading ? (
+        <p style={{ color: '#9ca3af', textAlign: 'center', padding: 40 }}>Loading&</p>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {overrides.map(o => (
+            <div key={o.eventId} style={{ ...cardSty, display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: '#1f2937' }}>{o.eventName || '(unnamed event)'}</div>
+                {o.venueName && <div style={{ fontSize: 12, color: '#6b7280' }}>=� {o.venueName}</div>}
+                <div style={{ fontSize: 11, color: '#9ca3af', fontFamily: 'monospace', marginTop: 2 }}>ID: {o.eventId}</div>
+                {o.notes && <div style={{ fontSize: 12, color: '#6b7280', fontStyle: 'italic', marginTop: 2 }}>{o.notes}</div>}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
+                  {o.customTags.map(t => <span key={t} style={{ fontSize: 11, backgroundColor: '#ede9e0', color: '#6b4c2a', padding: '2px 8px', borderRadius: 999 }}>{t}</span>)}
+                </div>
+              </div>
+              <button onClick={() => deleteOverride(o.eventId)} style={{ padding: '4px 10px', fontSize: 12, borderRadius: 6, border: '1px solid #fca5a5', background: '#fff5f5', color: '#dc2626', cursor: 'pointer', flexShrink: 0 }}>=� Delete</button>
+            </div>
+          ))}
+          {overrides.length === 0 && <p style={{ textAlign: 'center', color: '#9ca3af', padding: 40 }}>No overrides yet. Add one above to manually tag specific events.</p>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+//    Tag Rules                                                                                     
+function TagRulesTab() {
+  const [rules, setRules] = useState<TagRulesConfig>(DEFAULT_RULES);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState('');
+
+  useEffect(() => {
+    getDoc(doc(fbDb, 'config', 'tagRules')).then(snap => {
+      if (snap.exists()) setRules({ ...DEFAULT_RULES, ...(snap.data() as TagRulesConfig) });
+      setLoading(false);
+    });
+  }, []);
+
+  const flash = (m: string) => { setMsg(m); setTimeout(() => setMsg(''), 4000); };
+
+  const saveRules = async () => {
+    setSaving(true);
+    try {
+      await setDoc(doc(fbDb, 'config', 'tagRules'), rules);
+      flash('Tag rules saved   reload the app to apply changes');
+    } catch (e) { flash('Error: ' + (e as Error).message); }
+    setSaving(false);
+  };
+
+  const setList = (key: 'outdoorKeywords' | 'indoorKeywords', val: string) =>
+    setRules(r => ({ ...r, [key]: val.split(',').map((s: string) => s.trim()).filter(Boolean) }));
+
+  const setCatKw = (cat: string, val: string) =>
+    setRules(r => ({ ...r, categoryKeywords: { ...r.categoryKeywords, [cat]: val.split(',').map((s: string) => s.trim()).filter(Boolean) } }));
+
+  const addCat = () => {
+    const name = prompt('New tag category name (e.g. "nightlife"):');
+    if (name && name.trim()) setRules(r => ({ ...r, categoryKeywords: { ...r.categoryKeywords, [name.trim()]: [] } }));
+  };
+
+  const removeCat = (cat: string) => setRules(r => {
+    const kw = { ...r.categoryKeywords };
+    delete kw[cat];
+    return { ...r, categoryKeywords: kw };
+  });
+
+  if (loading) return <p style={{ color: '#9ca3af', textAlign: 'center', padding: 40 }}>Loading&</p>;
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 700, color: '#1f2937', flex: 1 }}>Tag Detection Rules</h2>
+        <button style={{ ...btnPrim, opacity: saving ? 0.7 : 1 }} onClick={saveRules} disabled={saving}>
+          {saving ? 'Saving&' : '=� Save Rules'}
+        </button>
+      </div>
+      <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 16 }}>
+        Keywords matched case-insensitively against event and venue names to auto-assign tags.
+        Separate with commas. Changes apply on next page reload.
+      </p>
+      <FlashMsg msg={msg} />
+
+      {/* Outdoor */}
+      <div style={{ ...cardSty, marginBottom: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <span style={{ fontSize: 22 }}><?</span>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: '#1f2937' }}>Outdoor Keywords</h3>
+        </div>
+        <p style={{ fontSize: 12, color: '#9ca3af', marginBottom: 8 }}>
+          If a venue OR event name contains any of these words, the event is tagged "outdoor".
+          Add words like "park", "wilderness", "trail" to catch outdoor venues.
+        </p>
+        <textarea
+          value={rules.outdoorKeywords.join(', ')}
+          onChange={e => setList('outdoorKeywords', e.target.value)}
+          rows={3}
+          style={{ ...inputSty, fontFamily: 'monospace', fontSize: 13, resize: 'vertical' }}
+        />
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
+          {rules.outdoorKeywords.map(k => <span key={k} style={{ fontSize: 11, backgroundColor: '#d1fae5', color: '#065f46', padding: '2px 8px', borderRadius: 999 }}>{k}</span>)}
+        </div>
+      </div>
+
+      {/* Indoor */}
+      <div style={{ ...cardSty, marginBottom: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <span style={{ fontSize: 22 }}><�</span>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: '#1f2937' }}>Indoor Keywords</h3>
+        </div>
+        <p style={{ fontSize: 12, color: '#9ca3af', marginBottom: 8 }}>
+          If a venue name contains any of these words, the event is tagged "indoor".
+        </p>
+        <textarea
+          value={rules.indoorKeywords.join(', ')}
+          onChange={e => setList('indoorKeywords', e.target.value)}
+          rows={3}
+          style={{ ...inputSty, fontFamily: 'monospace', fontSize: 13, resize: 'vertical' }}
+        />
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
+          {rules.indoorKeywords.map(k => <span key={k} style={{ fontSize: 11, backgroundColor: '#e0f2fe', color: '#0369a1', padding: '2px 8px', borderRadius: 999 }}>{k}</span>)}
+        </div>
+      </div>
+
+      {/* Category keywords */}
+      <div style={{ ...cardSty }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+          <span style={{ fontSize: 22 }}><�</span>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: '#1f2937', flex: 1 }}>Category Tag Keywords</h3>
+          <button style={{ ...btnSec, fontSize: 13, padding: '5px 12px' }} onClick={addCat}>+ Add Category</button>
+        </div>
+        <p style={{ fontSize: 12, color: '#9ca3af', marginBottom: 12 }}>
+          Keywords that auto-assign events and places to tag categories. Comma-separated.
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {Object.entries(rules.categoryKeywords).map(([cat, words]) => (
+            <div key={cat}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: '#374151', flex: 1 }}><� {cat}</label>
+                <button onClick={() => removeCat(cat)} style={{ fontSize: 11, color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}> remove</button>
+              </div>
+              <textarea
+                value={words.join(', ')}
+                onChange={e => setCatKw(cat, e.target.value)}
+                rows={2}
+                style={{ ...inputSty, fontFamily: 'monospace', fontSize: 13, resize: 'vertical' }}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+//    Settings                                                                                      
+function SettingsTab() {
+  const [bannerMsg, setBannerMsg] = useState('');
+  const [bannerActive, setBannerActive] = useState(false);
+  const [bannerColor, setBannerColor] = useState('#b45309');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState('');
 
   useEffect(() => {
     getDoc(doc(fbDb, 'config', 'siteConfig')).then(snap => {
       if (snap.exists()) {
         const d = snap.data();
-        if (d.banner?.active) setSiteBanner(d.banner as BannerConfig);
+        setBannerMsg(d.banner?.message || '');
+        setBannerActive(d.banner?.active ?? false);
+        setBannerColor(d.banner?.color || '#b45309');
       }
+      setLoading(false);
     });
   }, []);
 
-  const handleCheckIn = useCallback((placeId: string) => {
-    // Allow un-checking without proximity
-    if (checkedIn.has(placeId)) {
-      setCheckedIn(prev => {
-        const next = new Set(prev);
-        next.delete(placeId);
-        saveCheckins(next);
-        return next;
-      });
-      setCheckInError(null);
-      return;
-    }
+  const flash = (m: string) => { setMsg(m); setTimeout(() => setMsg(''), 3500); };
 
-    // Require location for checking IN
-    if (!coords) {
-      setCheckInError('Enable location to check in â you need to be near the place!');
-      requestGeo();
-      setTimeout(() => setCheckInError(null), 5000);
-      return;
-    }
-
-    // Find the place and verify proximity (within 0.5 miles)
-    const place = places.find(p => p.id === placeId);
-    if (place?.lat && place?.lng) {
-      const dist = distanceMiles(coords.lat, coords.lng, place.lat, place.lng);
-      if (dist > 0.5) {
-        setCheckInError(`You're ${formatDist(dist)} away â get within 0.5 mi to check in!`);
-        setTimeout(() => setCheckInError(null), 5000);
-        return;
-      }
-    }
-
-    // If place has no coordinates, we can't verify proximity â block check-in
-    if (place && !place.lat && !place.lng) {
-      setCheckInError('Check-in unavailable â this place has no location data.');
-      setTimeout(() => setCheckInError(null), 4000);
-      return;
-    }
-
-    // Proximity OK â check in
-    // Haptic feedback: iOS/Android vibration on successful check-in
-    if ('vibrate' in navigator) { try { navigator.vibrate([12, 40, 12]); } catch {} }
-    setCheckedIn(prev => {
-      const next = new Set(prev);
-      next.add(placeId);
-      saveCheckins(next);
-      return next;
-    });
-    setCheckInError(null);
-  }, [checkedIn, coords, places, requestGeo]);
-
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const [placesResult, eventsResult] = await Promise.allSettled([
-          fetch('/places-data.json').then(r => r.json()),
-          fetch('/data/ticketmaster-events.json').then(r => r.json()),
-        ]);
-
-        if (placesResult.status === 'fulfilled') {
-          const data = placesResult.value;
-          setPlaces(Array.isArray(data) ? data : []);
-        }
-
-        if (eventsResult.status === 'fulfilled') {
-          const data = eventsResult.value;
-          setEvents(Array.isArray(data) ? data : []);
-        }
-      } catch (err) {
-        console.error('Failed to load data:', err);
-        setLoadError(true);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadData();
-  }, []);
-
-  // ââ Admin route ââ
-  if (showAdmin) {
-    if (!user || user.email !== ADMIN_EMAIL) {
-      return (
-        <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '32px', background: '#f5f7f5' }}>
-          <ABQUnpluggedLogo size={52} />
-          <p style={{ fontFamily: 'Epilogue, sans-serif', fontWeight: 900, fontSize: '20px', letterSpacing: '-0.5px' }}>Admin Access</p>
-          <p style={{ fontFamily: 'Manrope, sans-serif', fontSize: '14px', color: '#666', textAlign: 'center', lineHeight: 1.5 }}>
-            Sign in with the owner account ({ADMIN_EMAIL}) to access the admin panel.
-          </p>
-          <button onClick={() => setShowAuthModal(true)} style={{ padding: '13px 28px', background: '#a03b00', color: 'white', borderRadius: '12px', fontFamily: 'Manrope, sans-serif', fontWeight: 800, fontSize: '15px' }}>
-            Sign In
-          </button>
-          <button onClick={() => { setShowAdmin(false); window.history.replaceState({}, '', '#discover'); }} style={{ color: '#aaa', fontSize: '13px', fontFamily: 'Manrope, sans-serif' }}>
-            Back to App
-          </button>
-          {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
-        </div>
+  const save = async () => {
+    setSaving(true);
+    try {
+      await setDoc(doc(fbDb, 'config', 'siteConfig'),
+        { banner: { message: bannerMsg, active: bannerActive, color: bannerColor } },
+        { merge: true }
       );
-    }
-    return <AdminScreen user={user} onBack={() => { setShowAdmin(false); window.history.replaceState({}, '', '#discover'); }} />;
-  }
+      flash('Saved ');
+    } catch (e) { flash('Error: ' + (e as Error).message); }
+    setSaving(false);
+  };
 
-  if (loading) return <LoadingScreen />;
-  if (loadError) return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center gap-3 px-8" style={{ background: '#f5f7f5' }}>
-      <ABQUnpluggedLogo size={56} />
-      <h2 className="text-xl font-black uppercase tracking-tighter text-center" style={{ fontFamily: 'Epilogue, sans-serif', color: '#a03b00' }}>Couldn't Load Content</h2>
-      <p className="text-sm text-gray-500 text-center" style={{ fontFamily: 'Manrope, sans-serif' }}>Check your connection and try again.</p>
-      <button
-        onClick={() => { setLoadError(false); setLoading(true); }}
-        className="mt-2 px-6 py-3 rounded-2xl font-bold text-sm text-white"
-        style={{ background: '#a03b00', fontFamily: 'Manrope, sans-serif' }}
-      >
-        Retry
-      </button>
-    </div>
-  );
+  if (loading) return <p style={{ color: '#9ca3af', textAlign: 'center', padding: 40 }}>Loading&</p>;
 
   return (
-    <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@400;700;900&family=Manrope:wght@400;500;600;700;800&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
-
-        /* ââ Reset ââ */
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        :root { color-scheme: light; }
-
-        /* ââ Safe-area CSS variables (Apple HIG: viewport-fit=cover) ââ */
-        :root {
-          --sat: env(safe-area-inset-top, 0px);
-          --sab: env(safe-area-inset-bottom, 0px);
-          --sal: env(safe-area-inset-left, 0px);
-          --sar: env(safe-area-inset-right, 0px);
-        }
-
-        /* ââ Base document ââ */
-        html {
-          -webkit-text-size-adjust: 100%;
-          text-size-adjust: 100%;
-          height: 100%;
-        }
-        body {
-          background: #f5f7f5;
-          font-family: -apple-system, 'Manrope', system-ui, sans-serif;
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-          /* NOTE: no position:fixed here â that blocks iOS Safari address-bar auto-hide.
-             The app root div uses height:100dvh to fill the visual viewport instead. */
-          overflow: hidden;
-          overscroll-behavior: none;
-          height: 100%;
-        }
-
-        /* ââ Scrollbars: hidden (native iOS feel) ââ */
-        ::-webkit-scrollbar { display: none; }
-        * { scrollbar-width: none; }
-
-        /* ââ Touch: Apple HIG â¥ 44Ã44pt tap targets ââ */
-        button, a, [role="button"], [role="tab"] {
-          min-height: 44px;
-          -webkit-tap-highlight-color: transparent;
-          tap-highlight-color: transparent;
-          touch-action: manipulation;
-          cursor: pointer;
-        }
-
-        /* ââ Press state: iOS-style spring-back ââ */
-        button:active, [role="button"]:active {
-          opacity: 0.65;
-          transform: scale(0.96);
-        }
-        button { transition: opacity 0.12s ease, transform 0.12s ease; }
-
-        /* ââ Prevent unwanted text selection on UI chrome ââ */
-        header, nav, button, [role="button"] {
-          -webkit-user-select: none;
-          user-select: none;
-        }
-
-        /* ââ Momentum scrolling + contain overscroll ââ */
-        .overflow-y-auto, .overflow-x-auto {
-          -webkit-overflow-scrolling: touch;
-          overscroll-behavior: contain;
-        }
-
-        /* ââ Input font-size â¥ 16px prevents iOS auto-zoom on focus ââ */
-        input, textarea, select {
-          font-size: max(16px, 1rem) !important;
-          -webkit-tap-highlight-color: transparent;
-        }
-
-        /* ââ iOS Liquid Glass (iOS 26 HIG) â saturate + blur backdrop ââ */
-        .glass {
-          background: rgba(245, 247, 245, 0.76);
-          backdrop-filter: saturate(180%) blur(28px);
-          -webkit-backdrop-filter: saturate(180%) blur(28px);
-        }
-        .glass-card {
-          background: rgba(255, 255, 255, 0.82);
-          backdrop-filter: saturate(160%) blur(20px);
-          -webkit-backdrop-filter: saturate(160%) blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.55);
-        }
-      `}</style>
-
-      <div
-        className="flex flex-col mx-auto relative"
-        style={{ maxWidth: '480px', height: '100dvh', background: '#f5f7f5', overflow: 'hidden' }}
-      >
-        {/* Glassmorphism header â Liquid Glass (iOS 26 HIG) with Dynamic Island / notch safe area */}
-        <header
-          className="glass flex-shrink-0 px-5 flex items-center justify-between"
-          style={{
-            paddingTop: 'calc(var(--sat) + 12px)',
-            paddingBottom: '12px',
-            borderBottom: '1px solid rgba(0,0,0,0.06)',
-            zIndex: 40,
-          }}
-        >
-          <div className="flex items-center gap-2">
-            <ABQUnpluggedLogo size={30} />
-            <span
-              className="font-black uppercase tracking-tighter text-base"
-              style={{ fontFamily: 'Epilogue, sans-serif', color: '#a03b00' }}
-            >
-              ABQ Unplugged
-            </span>
+    <div>
+      <h2 style={{ fontSize: 20, fontWeight: 700, color: '#1f2937', marginBottom: 16 }}>Site Settings</h2>
+      <FlashMsg msg={msg} />
+      <div style={{ ...cardSty }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: '#1f2937', marginBottom: 14 }}>=� Site Banner</h3>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, cursor: 'pointer', marginBottom: 12 }}>
+          <input type="checkbox" checked={bannerActive} onChange={e => setBannerActive(e.target.checked)} style={{ width: 16, height: 16 }} />
+          <span style={{ fontWeight: 600 }}>Show banner to all users</span>
+        </label>
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ fontSize: 12, color: '#6b7280', display: 'block', marginBottom: 4 }}>Message</label>
+          <textarea
+            value={bannerMsg}
+            onChange={e => setBannerMsg(e.target.value)}
+            rows={3}
+            placeholder="e.g. ABQ Balloon Fiesta is this weekend! Check the Events tab."
+            style={{ ...inputSty, resize: 'vertical' }}
+          />
+        </div>
+        <div style={{ marginBottom: 20 }}>
+          <label style={{ fontSize: 12, color: '#6b7280', display: 'block', marginBottom: 4 }}>Banner color</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <input type="color" value={bannerColor} onChange={e => setBannerColor(e.target.value)}
+              style={{ width: 48, height: 36, borderRadius: 8, border: '1px solid #d1d5db', cursor: 'pointer', padding: 2 }} />
+            <div style={{ flex: 1, backgroundColor: bannerColor, color: 'white', padding: '8px 12px', borderRadius: 8, fontSize: 13, minHeight: 36, display: 'flex', alignItems: 'center' }}>
+              {bannerMsg || 'Banner preview'}
+            </div>
           </div>
-          <div className="flex items-center gap-1.5">
-            {/* Location indicator */}
-            <button
-              onClick={requestGeo}
-              className="w-11 h-11 rounded-full flex items-center justify-center"
-              style={{ background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}
-              title={coords ? 'Location active' : 'Enable location'}
-              aria-label={coords ? 'Location active' : 'Enable location'}
-            >
-              <span
-                className="material-symbols-outlined"
-                style={{
-                  fontSize: '18px',
-                  color: coords ? '#a03b00' : '#bbb',
-                  fontVariationSettings: coords ? "'FILL' 1" : "'FILL' 0",
-                }}
-              >
-                my_location
-              </span>
-            </button>
-          </div>
-        </header>
+        </div>
+        <button style={{ ...btnPrim, opacity: saving ? 0.7 : 1 }} onClick={save} disabled={saving}>
+          {saving ? 'Saving&' : '=� Save Settings'}
+        </button>
+      </div>
+    </div>
+  );
+}
 
-        {/* Site-wide announcement banner */}
-        <SiteBanner banner={siteBanner} />
+//    AdminScreen (root)                                                                          
+function AdminScreen({ user, onBack }: { user: User | null; onBack: () => void }) {
+  const [tab, setTab] = useState<AdminTab>('dashboard');
+  const [places, setPlaces] = useState<PlaceDoc[]>([]);
+  const [lbEntries, setLbEntries] = useState<LbEntry[]>([]);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
-        {/* Screen content */}
-        <main className="flex-1 overflow-hidden">
-          {activeTab === 'discover' && (
-            <DiscoverScreen
-              places={places}
-              events={events}
-              onPlaceSelect={openPlaceModal}
-              onEventSelect={openEventModal}
-              coords={coords}
-              geoRequested={geoRequested}
-              geoError={geoError}
-              onRequestGeo={requestGeo}
-              checkedIn={checkedIn}
-              onCheckIn={handleCheckIn}
-            />
-          )}
-          {activeTab === 'events' && (
-            <EventsScreen events={events} onEventSelect={openEventModal} />
-          )}
-          {activeTab === 'places' && (
-            <PlacesScreen
-              places={places}
-              onPlaceSelect={openPlaceModal}
-              coords={coords}
-              geoRequested={geoRequested}
-              geoError={geoError}
-              onRequestGeo={requestGeo}
-              checkedIn={checkedIn}
-              onCheckIn={handleCheckIn}
-            />
-          )}
-          {activeTab === 'profile' && (
-            <ProfileScreen
-              checkedIn={checkedIn}
-              user={user}
-              places={places}
-              onSignIn={() => setShowAuthModal(true)}
-              onSignOut={() => signOut(fbAuth)}
-            />
-          )}
-        </main>
+  useEffect(() => {
+    Promise.all([
+      getDocs(collection(fbDb, 'places')),
+      getDocs(collection(fbDb, 'leaderboard')),
+    ]).then(([plSnap, lbSnap]) => {
+      setPlaces(plSnap.docs.map(d => ({ id: d.id, tags: [], ...d.data() } as PlaceDoc)));
+      setLbEntries(
+        lbSnap.docs
+          .map(d => ({ uid: d.id, displayName: '', count: 0, ...d.data() } as LbEntry))
+          .sort((a, b) => b.count - a.count)
+      );
+      setDataLoaded(true);
+    });
+  }, []);
 
-        {/* Bottom navigation â Liquid Glass with home indicator safe area */}
-        <nav
-          className="glass flex-shrink-0 flex items-center px-2"
-          style={{
-            paddingTop: '8px',
-            paddingBottom: 'calc(var(--sab) + 8px)',
-            borderTop: '1px solid rgba(0,0,0,0.07)',
-            zIndex: 40,
-          }}
-        >
-          {NAV_ITEMS.map(item => (
-            <button
-              key={item.id}
-              onClick={() => navigateTab(item.id)}
-              aria-label={item.label}
-              className="flex-1 flex flex-col items-center gap-0.5 py-1 transition-all"
-              style={{ minHeight: '44px' }}
-            >
-              <span
-                className="material-symbols-outlined"
-                style={{
-                  fontSize: '24px',
-                  color: activeTab === item.id ? '#a03b00' : '#bbb',
-                  fontVariationSettings:
-                    activeTab === item.id
-                      ? "'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24"
-                      : "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24",
-                  transition: 'all 0.2s',
-                }}
-              >
-                {item.icon}
-              </span>
-              <span
-                className="text-xs font-semibold"
-                style={{
-                  color: activeTab === item.id ? '#a03b00' : '#bbb',
-                  fontFamily: 'Manrope, sans-serif',
-                  fontSize: '10px',
-                }}
-              >
-                {item.label}
-              </span>
-            </button>
-          ))}
-        </nav>
+  const TABS: { key: AdminTab; label: string; icon: string }[] = [
+    { key: 'dashboard', label: 'Dashboard', icon: '=�' },
+    { key: 'places',    label: 'Places',    icon: '=�' },
+    { key: 'events',    label: 'Events',    icon: '<�' },
+    { key: 'tagrules',  label: 'Tag Rules', icon: '<�' },
+    { key: 'settings',  label: 'Settings',  icon: '�' },
+  ];
+
+  const setPlacesFn = (fn: (prev: PlaceDoc[]) => PlaceDoc[]) => setPlaces(fn);
+
+  return (
+    <div style={{ minHeight: '100vh', backgroundColor: '#faf7f4' }}>
+      {/* Header */}
+      <div style={{ backgroundColor: ADMIN_ACCENT, color: 'white', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, position: 'sticky', top: 0, zIndex: 100 }}>
+        <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: 8, color: 'white', padding: '6px 14px', cursor: 'pointer', fontSize: 14, fontWeight: 600 }}>� Back</button>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 700, fontSize: 18 }}>ABQ Unplugged Admin</div>
+          <div style={{ fontSize: 12, opacity: 0.85 }}>{user?.email}</div>
+        </div>
       </div>
 
-      {/* Detail Modals */}
-      {selectedPlace && (
-        <PlaceDetailModal
-          place={selectedPlace}
-          onClose={() => { closePlaceModal(); window.history.back(); }}
-          isCheckedIn={checkedIn.has(selectedPlace.id)}
-          onCheckIn={() => handleCheckIn(selectedPlace.id)}
-          checkInError={checkInError}
-        />
-      )}
-      {selectedEvent && (
-        <EventDetailModal event={selectedEvent} onClose={() => { closeEventModal(); window.history.back(); }} />
-      )}
-      {showAuthModal && (
-        <AuthModal onClose={() => setShowAuthModal(false)} />
-      )}
-    </>
+      {/* Tab Bar */}
+      <div style={{ display: 'flex', gap: 2, padding: '8px 12px', backgroundColor: 'white', borderBottom: '1px solid #e5e7eb', overflowX: 'auto', position: 'sticky', top: 56, zIndex: 99 }}>
+        {TABS.map(t => (
+          <button key={t.key} onClick={() => setTab(t.key)} style={{
+            padding: '8px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
+            fontSize: 13, whiteSpace: 'nowrap',
+            fontWeight: tab === t.key ? 700 : 400,
+            backgroundColor: tab === t.key ? ADMIN_ACCENT : 'transparent',
+            color: tab === t.key ? 'white' : '#374151',
+          }}>
+            {t.icon} {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Content */}
+      <div style={{ padding: '20px 16px', maxWidth: 900, margin: '0 auto' }}>
+        {(tab === 'dashboard' || tab === 'places') && !dataLoaded ? (
+          <p style={{ textAlign: 'center', color: '#9ca3af', padding: 60 }}>Loading data&</p>
+        ) : (
+          <>
+            {tab === 'dashboard' && <DashboardTab places={places} lbEntries={lbEntries} />}
+            {tab === 'places'    && <PlacesTab places={places} setPlaces={setPlacesFn} />}
+            {tab === 'events'    && <EventsTab />}
+            {tab === 'tagrules'  && <TagRulesTab />}
+            {tab === 'settings'  && <SettingsTab />}
+          </>
+        )}
+      </div>
+    </div>
   );
 }
