@@ -6,7 +6,7 @@ import {
   updateProfile,
 } from 'firebase/auth';
 import {
-  getFirestore, doc, setDoc, getDoc, collection, query, orderBy,
+  getFirestore, doc, setDoc, getDoc, getDocs, collection, query, orderBy,
   limit, onSnapshot, serverTimestamp,
 } from 'firebase/firestore';
 
@@ -1993,6 +1993,239 @@ function LoadingScreen() {
   );
 }
 
+// ─── Site Banner ─────────────────────────────────────────────────────────────
+
+const ADMIN_EMAIL = '4mattcarlson@gmail.com';
+
+interface BannerConfig { message: string; type: 'info' | 'success' | 'warning'; active: boolean; }
+
+function SiteBanner({ banner }: { banner: BannerConfig | null }) {
+  if (!banner?.active || !banner.message) return null;
+  const color = { info: { bg: 'rgba(59,130,246,0.1)', border: 'rgba(59,130,246,0.25)', text: '#1d4ed8' }, success: { bg: 'rgba(34,197,94,0.1)', border: 'rgba(34,197,94,0.25)', text: '#15803d' }, warning: { bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.25)', text: '#92400e' } }[banner.type] ?? { bg: 'rgba(59,130,246,0.1)', border: 'rgba(59,130,246,0.25)', text: '#1d4ed8' };
+  return (
+    <div style={{ background: color.bg, borderBottom: `1px solid ${color.border}`, padding: '9px 16px', textAlign: 'center' }}>
+      <p style={{ fontSize: '13px', fontWeight: 700, color: color.text, fontFamily: 'Manrope, sans-serif', lineHeight: 1.4 }}>{banner.message}</p>
+    </div>
+  );
+}
+
+// ─── Admin Screen ─────────────────────────────────────────────────────────────
+
+function AdminScreen({ user, onBack }: { user: User | null; onBack: () => void }) {
+  const [tab, setTab] = useState<'banner' | 'places'>('banner');
+
+  // Banner
+  const [bannerMsg, setBannerMsg] = useState('');
+  const [bannerType, setBannerType] = useState<'info' | 'success' | 'warning'>('info');
+  const [bannerActive, setBannerActive] = useState(false);
+  const [bannerSaving, setBannerSaving] = useState(false);
+  const [bannerSaved, setBannerSaved] = useState(false);
+
+  // Places
+  const [adminPlaces, setAdminPlaces] = useState<Place[]>([]);
+  const [placesLoading, setPlacesLoading] = useState(false);
+  const [editingPlace, setEditingPlace] = useState<Place | null>(null);
+  const [placeSaving, setPlaceSaving] = useState(false);
+  const [placeSearch, setPlaceSearch] = useState('');
+
+  useEffect(() => {
+    getDoc(doc(fbDb, 'config', 'siteConfig')).then(snap => {
+      if (snap.exists()) {
+        const d = snap.data();
+        if (d.banner) { setBannerMsg(d.banner.message || ''); setBannerType(d.banner.type || 'info'); setBannerActive(!!d.banner.active); }
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (tab !== 'places') return;
+    setPlacesLoading(true);
+    getDocs(collection(fbDb, 'places')).then(snap => {
+      const ps: Place[] = [];
+      snap.forEach(d => ps.push({ id: d.id, ...d.data() } as Place));
+      ps.sort((a, b) => a.name.localeCompare(b.name));
+      setAdminPlaces(ps);
+      setPlacesLoading(false);
+    });
+  }, [tab]);
+
+  const saveBanner = async () => {
+    setBannerSaving(true);
+    await setDoc(doc(fbDb, 'config', 'siteConfig'), { banner: { message: bannerMsg, type: bannerType, active: bannerActive } }, { merge: true });
+    setBannerSaving(false); setBannerSaved(true);
+    setTimeout(() => setBannerSaved(false), 2000);
+  };
+
+  const toggleFeatured = async (place: Place) => {
+    const next = !place.isFeatured;
+    await setDoc(doc(fbDb, 'places', place.id), { isFeatured: next }, { merge: true });
+    setAdminPlaces(prev => prev.map(p => p.id === place.id ? { ...p, isFeatured: next } : p));
+  };
+
+  const saveEditingPlace = async () => {
+    if (!editingPlace) return;
+    setPlaceSaving(true);
+    await setDoc(doc(fbDb, 'places', editingPlace.id), {
+      description: editingPlace.description || '',
+      hours: editingPlace.hours || '',
+      phone: editingPlace.phone || '',
+      website: editingPlace.website || '',
+    }, { merge: true });
+    setAdminPlaces(prev => prev.map(p => p.id === editingPlace.id ? editingPlace : p));
+    setPlaceSaving(false); setEditingPlace(null);
+  };
+
+  const filtered = adminPlaces.filter(p => p.name.toLowerCase().includes(placeSearch.toLowerCase()));
+
+  const inputStyle: React.CSSProperties = { width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #e5e5e5', fontSize: '15px', fontFamily: 'Manrope, sans-serif', background: '#fafafa', outline: 'none', boxSizing: 'border-box' };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: '#f5f7f5', zIndex: 50 }}>
+
+      {/* Header */}
+      <div style={{ paddingTop: 'calc(var(--sat) + 14px)', paddingBottom: '14px', paddingLeft: '16px', paddingRight: '16px', background: '#a03b00', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button onClick={onBack} style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>arrow_back</span>
+          </button>
+          <div>
+            <p style={{ color: 'white', fontFamily: 'Epilogue, sans-serif', fontWeight: 900, fontSize: '17px', letterSpacing: '-0.5px' }}>Admin Panel</p>
+            <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '11px', fontFamily: 'Manrope, sans-serif' }}>{user?.email}</p>
+          </div>
+        </div>
+        <button onClick={() => window.location.reload()} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', borderRadius: '8px', padding: '6px 12px', fontSize: '12px', fontFamily: 'Manrope, sans-serif', fontWeight: 700 }}>
+          Reload App
+        </button>
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', background: 'white', borderBottom: '1px solid rgba(0,0,0,0.08)', flexShrink: 0 }}>
+        {(['banner', 'places'] as const).map(t => (
+          <button key={t} onClick={() => setTab(t)} style={{ flex: 1, padding: '12px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', borderBottom: tab === t ? '2px solid #a03b00' : '2px solid transparent', color: tab === t ? '#a03b00' : '#999', fontFamily: 'Manrope, sans-serif', fontSize: '11px', fontWeight: 700 }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '20px', fontVariationSettings: tab === t ? "'FILL' 1" : "'FILL' 0" }}>{t === 'banner' ? 'campaign' : 'place'}</span>
+            {t === 'banner' ? 'Banner' : 'Places'}
+          </button>
+        ))}
+      </div>
+
+      {/* Content */}
+      <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+
+        {/* ── Banner Tab ── */}
+        {tab === 'banner' && (
+          <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ background: 'white', borderRadius: '16px', padding: '18px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+              <p style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 800, fontSize: '12px', letterSpacing: '0.08em', color: '#999', marginBottom: '14px' }}>SITE ANNOUNCEMENT BANNER</p>
+              <p style={{ fontSize: '13px', color: '#666', fontFamily: 'Manrope, sans-serif', marginBottom: '16px', lineHeight: 1.5 }}>Post a message visible to all users at the top of the app. Great for events, closures, or updates.</p>
+
+              {/* Active toggle */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <span style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: '14px', color: '#333' }}>Banner Active</span>
+                <button onClick={() => setBannerActive(!bannerActive)} style={{ width: 46, height: 26, borderRadius: 13, background: bannerActive ? '#a03b00' : '#ddd', position: 'relative', flexShrink: 0, transition: 'background 0.2s' }}>
+                  <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'white', position: 'absolute', top: 3, left: bannerActive ? 23 : 3, transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.25)' }} />
+                </button>
+              </div>
+
+              {/* Type */}
+              <p style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: '12px', color: '#666', marginBottom: '8px' }}>TYPE</p>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                {(['info', 'success', 'warning'] as const).map(ty => (
+                  <button key={ty} onClick={() => setBannerType(ty)} style={{ flex: 1, padding: '8px 4px', borderRadius: '10px', fontSize: '13px', fontFamily: 'Manrope, sans-serif', fontWeight: 700, textTransform: 'capitalize', background: bannerType === ty ? '#a03b00' : '#f3f3f3', color: bannerType === ty ? 'white' : '#777', transition: 'all 0.15s' }}>
+                    {ty === 'info' ? '🔵 Info' : ty === 'success' ? '🟢 Good' : '🟡 Alert'}
+                  </button>
+                ))}
+              </div>
+
+              {/* Message */}
+              <p style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: '12px', color: '#666', marginBottom: '8px' }}>MESSAGE</p>
+              <textarea value={bannerMsg} onChange={e => setBannerMsg(e.target.value)} placeholder="e.g. 🎉 Balloon Fiesta this weekend — check the Events tab!" rows={3} style={{ ...inputStyle, resize: 'none' }} />
+
+              {/* Preview */}
+              {bannerMsg && (
+                <div style={{ marginTop: '12px' }}>
+                  <p style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: '11px', color: '#aaa', marginBottom: '6px', letterSpacing: '0.06em' }}>PREVIEW</p>
+                  <div style={{ borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.07)' }}>
+                    <SiteBanner banner={{ message: bannerMsg, type: bannerType, active: true }} />
+                  </div>
+                </div>
+              )}
+
+              <button onClick={saveBanner} disabled={bannerSaving} style={{ marginTop: '16px', width: '100%', padding: '14px', borderRadius: '12px', background: bannerSaved ? '#15803d' : '#a03b00', color: 'white', fontFamily: 'Manrope, sans-serif', fontWeight: 800, fontSize: '15px', transition: 'background 0.3s', opacity: bannerSaving ? 0.7 : 1 }}>
+                {bannerSaved ? '✓ Saved!' : bannerSaving ? 'Saving…' : 'Save Banner'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── Places Tab ── */}
+        {tab === 'places' && (
+          <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+
+            {/* Edit bottom sheet */}
+            {editingPlace && (
+              <div style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'flex-end' }}>
+                <div style={{ background: 'white', borderRadius: '20px 20px 0 0', padding: '20px 16px', paddingBottom: 'calc(var(--sab) + 20px)', width: '100%', maxHeight: '82vh', overflowY: 'auto', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                    <p style={{ fontFamily: 'Epilogue, sans-serif', fontWeight: 900, fontSize: '17px', letterSpacing: '-0.5px', color: '#111' }}>{editingPlace.name}</p>
+                    <button onClick={() => setEditingPlace(null)} style={{ color: '#999', width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5', borderRadius: '50%' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
+                    </button>
+                  </div>
+                  {[
+                    { key: 'description', label: 'Description', multi: true },
+                    { key: 'hours', label: 'Hours (e.g. Mon–Sat 10am–9pm)', multi: false },
+                    { key: 'phone', label: 'Phone', multi: false },
+                    { key: 'website', label: 'Website URL', multi: false },
+                  ].map(f => (
+                    <div key={f.key} style={{ marginBottom: '14px' }}>
+                      <p style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: '12px', color: '#666', marginBottom: '6px' }}>{f.label.toUpperCase()}</p>
+                      {f.multi
+                        ? <textarea value={(editingPlace as any)[f.key] || ''} onChange={e => setEditingPlace({ ...editingPlace, [f.key]: e.target.value })} rows={3} style={{ ...inputStyle, resize: 'none' }} />
+                        : <input value={(editingPlace as any)[f.key] || ''} onChange={e => setEditingPlace({ ...editingPlace, [f.key]: e.target.value })} style={inputStyle} />
+                      }
+                    </div>
+                  ))}
+                  <button onClick={saveEditingPlace} disabled={placeSaving} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#a03b00', color: 'white', fontFamily: 'Manrope, sans-serif', fontWeight: 800, fontSize: '15px', opacity: placeSaving ? 0.7 : 1, marginTop: '4px' }}>
+                    {placeSaving ? 'Saving…' : 'Save Changes'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Search */}
+            <div style={{ position: 'relative' }}>
+              <span className="material-symbols-outlined" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#bbb', pointerEvents: 'none' }}>search</span>
+              <input value={placeSearch} onChange={e => setPlaceSearch(e.target.value)} placeholder="Search places…" style={{ ...inputStyle, paddingLeft: '38px' }} />
+            </div>
+
+            <p style={{ fontFamily: 'Manrope, sans-serif', fontSize: '12px', color: '#aaa', textAlign: 'center' }}>⭐ = Featured in Discover &nbsp;·&nbsp; ✏️ = Edit details</p>
+
+            {placesLoading ? (
+              <div style={{ textAlign: 'center', padding: '50px 0', color: '#bbb' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '36px', display: 'block', marginBottom: '10px' }}>sync</span>
+                <p style={{ fontFamily: 'Manrope, sans-serif', fontSize: '13px' }}>Loading places…</p>
+              </div>
+            ) : filtered.map(place => (
+              <div key={place.id} style={{ background: 'white', borderRadius: '14px', padding: '12px 14px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: '14px', color: '#111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: '2px' }}>{place.name}</p>
+                  <p style={{ fontFamily: 'Manrope, sans-serif', fontSize: '11px', color: '#aaa' }}>{place.category}</p>
+                </div>
+                <button onClick={() => toggleFeatured(place)} title={place.isFeatured ? 'Unfeature' : 'Feature'} style={{ width: 36, height: 36, borderRadius: '50%', flexShrink: 0, background: place.isFeatured ? 'rgba(160,59,0,0.1)' : '#f3f3f3', color: place.isFeatured ? '#a03b00' : '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px', fontVariationSettings: place.isFeatured ? "'FILL' 1" : "'FILL' 0" }}>star</span>
+                </button>
+                <button onClick={() => setEditingPlace(place)} title="Edit" style={{ width: 36, height: 36, borderRadius: '50%', flexShrink: 0, background: '#f3f3f3', color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Navigation ──────────────────────────────────────────────────────────────
 
 const NAV_ITEMS = [
@@ -2098,6 +2331,19 @@ export default function App() {
 
   const [checkInError, setCheckInError] = useState<string | null>(null);
 
+  // ── Admin & Site Banner ──
+  const [showAdmin, setShowAdmin] = useState(() => window.location.hash === '#admin');
+  const [siteBanner, setSiteBanner] = useState<BannerConfig | null>(null);
+
+  useEffect(() => {
+    getDoc(doc(fbDb, 'config', 'siteConfig')).then(snap => {
+      if (snap.exists()) {
+        const d = snap.data();
+        if (d.banner?.active) setSiteBanner(d.banner as BannerConfig);
+      }
+    });
+  }, []);
+
   const handleCheckIn = useCallback((placeId: string) => {
     // Allow un-checking without proximity
     if (checkedIn.has(placeId)) {
@@ -2176,6 +2422,29 @@ export default function App() {
 
     loadData();
   }, []);
+
+  // ── Admin route ──
+  if (showAdmin) {
+    if (!user || user.email !== ADMIN_EMAIL) {
+      return (
+        <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '32px', background: '#f5f7f5' }}>
+          <ABQUnpluggedLogo size={52} />
+          <p style={{ fontFamily: 'Epilogue, sans-serif', fontWeight: 900, fontSize: '20px', letterSpacing: '-0.5px' }}>Admin Access</p>
+          <p style={{ fontFamily: 'Manrope, sans-serif', fontSize: '14px', color: '#666', textAlign: 'center', lineHeight: 1.5 }}>
+            Sign in with the owner account ({ADMIN_EMAIL}) to access the admin panel.
+          </p>
+          <button onClick={() => setShowAuthModal(true)} style={{ padding: '13px 28px', background: '#a03b00', color: 'white', borderRadius: '12px', fontFamily: 'Manrope, sans-serif', fontWeight: 800, fontSize: '15px' }}>
+            Sign In
+          </button>
+          <button onClick={() => { setShowAdmin(false); window.history.replaceState({}, '', '#discover'); }} style={{ color: '#aaa', fontSize: '13px', fontFamily: 'Manrope, sans-serif' }}>
+            Back to App
+          </button>
+          {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
+        </div>
+      );
+    }
+    return <AdminScreen user={user} onBack={() => { setShowAdmin(false); window.history.replaceState({}, '', '#discover'); }} />;
+  }
 
   if (loading) return <LoadingScreen />;
   if (loadError) return (
@@ -2326,6 +2595,9 @@ export default function App() {
             </button>
           </div>
         </header>
+
+        {/* Site-wide announcement banner */}
+        <SiteBanner banner={siteBanner} />
 
         {/* Screen content */}
         <main className="flex-1 overflow-hidden">
