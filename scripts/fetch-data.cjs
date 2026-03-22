@@ -38,9 +38,12 @@ if (fs.existsSync(envPath)) {
 
 const TM_KEY     = process.env.TICKETMASTER_API_KEY;
 const GOOGLE_KEY = process.env.GOOGLE_PLACES_API_KEY;
+const EB_TOKEN   = process.env.EVENTBRITE_TOKEN; // optional — skipped if absent
+const SKIP_PLACES = process.env.SKIP_PLACES === 'true';
 
 if (!TM_KEY)     { console.error('Missing TICKETMASTER_API_KEY'); process.exit(1); }
-if (!GOOGLE_KEY) { console.error('Missing GOOGLE_PLACES_API_KEY'); process.exit(1); }
+if (!GOOGLE_KEY && !SKIP_PLACES) { console.error('Missing GOOGLE_PLACES_API_KEY (set SKIP_PLACES=true to skip places refresh)'); process.exit(1); }
+if (!EB_TOKEN)   { console.warn('EVENTBRITE_TOKEN not set — skipping Eventbrite fetch'); }
 
 // ─── Geographic Config ────────────────────────────────────────────────────────
 // Greater ABQ Metro bounding box:
@@ -312,6 +315,160 @@ function transformGooglePlace(raw) {
   };
 }
 
+// ─── Eventbrite ───────────────────────────────────────────────────────────────
+
+/**
+ * Fetch public events near ABQ from the Eventbrite v3 API.
+ *
+ * Docs: https://www.eventbrite.com/platform/api#/reference/event/search
+ *
+ * Requires EVENTBRITE_TOKEN (private token or OAuth bearer token).
+ * Get one at: https://www.eventbrite.com/platform/api#/introduction/authentication
+ */
+async function fetchEventbriteEvents() {
+  if (!EB_TOKEN) return [];
+  console.log('\n🎟  Fetching Eventbrite events for Greater ABQ Metro...');
+
+  const allEvents = [];
+  let pageNumber = 1;
+  let hasMore    = true;
+
+  while (hasMore && pageNumber <= 10) {
+    const params = new URLSearchParams({
+      'location.address':      'Albuquerque, NM',
+      'location.within':       '40mi',
+      'sort_by':               'date',
+      'expand':                'venue,ticket_availability,logo',
+      'page_size':             '50',
+      'page':                  String(pageNumber),
+      'start_date.range_start': new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
+    });
+
+    const url = `https://www.eventbriteapi.com/v3/events/search/?${params}`;
+
+    const data = await new Promise((resolve, reject) => {
+      const options = {
+        headers: { Authorization: `Bearer ${EB_TOKEN}` },
+      };
+      https.get(url, options, res => {
+        let body = '';
+        res.on('data', c => body += c);
+        res.on('end', () => {
+          try { resolve(JSON.parse(body)); }
+          catch (e) { reject(new Error(`Eventbrite JSON parse error: ${e.message}`)); }
+        });
+      }).on('error', reject);
+    });
+
+    if (data.error) {
+      console.warn(`  Eventbrite API error: ${data.error_description || data.error}`);
+      break;
+    }
+
+    const events = data.events || [];
+    allEvents.push(...events);
+    console.log(`  Page ${pageNumber}: ${events.length} events (total so far: ${allEvents.length})`);
+
+    // Pagination
+    const pagination = data.pagination || {};
+    hasMore = pagination.has_more_items === true;
+    pageNumber++;
+
+    if (pageNumber <= pagination.page_count) {
+      await sleep(250); // respect rate limits
+    } else {
+      hasMore = false;
+    }
+  }
+
+  console.log(`  Eventbrite: ${allEvents.length} total events found`);
+  return allEvents;
+}
+
+/**
+ * Transform a raw Eventbrite event into a normalized shape the app can merge
+ * with Ticketmaster events. We keep it as a separate format with a `_source`
+ * marker so the app can render it correctly.
+ */
+function transformEventbriteEvent(ev) {
+  const venue   = ev.venue || {};
+  const address = venue.address || {};
+  const start   = ev.start || {};
+
+  return {
+    // Core fields matching TMEvent shape so the app can consume both
+    id:       `eb-${ev.id}`,
+    name:     ev.name?.text || 'Untitled Event',
+    url:      ev.url,
+    _source:  'eventbrite',
+
+    images: ev.logo ? [{
+      url:    ev.logo.original?.url || ev.logo.url,
+      width:  ev.logo.original?.width,
+      height: ev.logo.original?.height,
+    }] : [],
+
+    dates: {
+      start: {
+        localDate: start.local ? start.local.split('T')[0] : undefined,
+        localTime: start.local ? start.local.split('T')[1]?.slice(0, 5) : undefined,
+      },
+    },
+
+    _embedded: {
+      venues: [{
+        name:    venue.name,
+        address: { line1: [address.address_1, address.address_2].filter(Boolean).join(', ') },
+        city:    { name: address.city },
+        location: venue.latitude ? {
+          latitude:  String(venue.latitude),
+          longitude: String(venue.longitude),
+        } : undefined,
+      }],
+    },
+
+    classifications: [{
+      segment: { name: mapEventbriteCategory(ev.category_id) },
+      genre:   { name: ev.subcategory_id ? `EB-${ev.subcategory_id}` : undefined },
+    }],
+
+    priceRanges: ev.ticket_availability?.minimum_ticket_price ? [{
+      min:      parseFloat(ev.ticket_availability.minimum_ticket_price.major_value || '0'),
+      max:      parseFloat(ev.ticket_availability.maximum_ticket_price?.major_value || '0'),
+      currency: ev.ticket_availability.minimum_ticket_price.currency || 'USD',
+    }] : undefined,
+
+    isFree: ev.is_free,
+  };
+}
+
+// Eventbrite category IDs → human-readable segment names
+// Full list: https://www.eventbrite.com/platform/api#/reference/category/list/
+const EB_CATEGORY_MAP = {
+  '103': 'Music',
+  '110': 'Sports',
+  '113': 'Arts & Theatre',
+  '105': 'Arts & Theatre', // performing arts
+  '107': 'Arts & Theatre', // film & media
+  '101': 'Business',
+  '102': 'Science & Tech',
+  '108': 'Holiday',
+  '109': 'Family',
+  '111': 'Food & Drink',
+  '114': 'Community',
+  '115': 'Charity',
+  '116': 'Fashion',
+  '117': 'Home & Lifestyle',
+  '118': 'Government',
+  '119': 'Spirituality',
+  '120': 'School Activities',
+  '199': 'Miscellaneous',
+};
+
+function mapEventbriteCategory(id) {
+  return EB_CATEGORY_MAP[String(id)] || 'Miscellaneous';
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 async function main() {
   console.log('=== ABQ Unplugged Data Fetcher — Greater Metro Area ===');
@@ -332,34 +489,68 @@ async function main() {
     console.error('Ticketmaster fetch failed:', e.message);
   }
 
-  // ── Google Places ──
-  let places = [];
+  // ── Eventbrite ──
+  let ebEvents = [];
   try {
-    const rawPlaces = await fetchAllGooglePlaces();
-
-    // Save raw data
-    const rawPath = path.join(__dirname, '..', 'public', 'data', 'google-places.json');
-    fs.writeFileSync(rawPath, JSON.stringify(rawPlaces, null, 2));
-    console.log(`\n✓ Saved ${rawPlaces.length} raw places → public/data/google-places.json`);
-
-    // Transform and save app-ready version
-    places = rawPlaces
-      .filter(p => p.business_status !== 'CLOSED_PERMANENTLY')
-      .map(transformGooglePlace);
-
-    const appPath = path.join(__dirname, '..', 'public', 'places-data.json');
-    fs.writeFileSync(appPath, JSON.stringify(places, null, 2));
-    console.log(`✓ Saved ${places.length} places → public/places-data.json`);
+    const rawEb = await fetchEventbriteEvents();
+    ebEvents = rawEb.map(transformEventbriteEvent);
+    const ebPath = path.join(__dirname, '..', 'public', 'data', 'eventbrite-events.json');
+    fs.writeFileSync(ebPath, JSON.stringify(ebEvents, null, 2));
+    if (EB_TOKEN) {
+      console.log(`\n✓ Saved ${ebEvents.length} events → public/data/eventbrite-events.json`);
+    } else {
+      // Write empty array so app fetch doesn't 404
+      fs.writeFileSync(ebPath, '[]');
+    }
   } catch (e) {
-    console.error('Google Places fetch failed:', e.message);
+    console.error('Eventbrite fetch failed:', e.message);
+    // Write empty array so app doesn't error on missing file
+    const ebPath = path.join(__dirname, '..', 'public', 'data', 'eventbrite-events.json');
+    if (!fs.existsSync(ebPath)) fs.writeFileSync(ebPath, '[]');
   }
 
+  // ── Google Places ──
+  let places = [];
+  if (SKIP_PLACES) {
+    console.log('\n⚡ Skipping Google Places refresh (SKIP_PLACES=true)');
+    // Load existing places if available
+    const appPath = path.join(__dirname, '..', 'public', 'places-data.json');
+    if (fs.existsSync(appPath)) {
+      try { places = JSON.parse(fs.readFileSync(appPath, 'utf8')); } catch {}
+    }
+  } else {
+    try {
+      const rawPlaces = await fetchAllGooglePlaces();
+
+      // Save raw data
+      const rawPath = path.join(__dirname, '..', 'public', 'data', 'google-places.json');
+      fs.writeFileSync(rawPath, JSON.stringify(rawPlaces, null, 2));
+      console.log(`\n✓ Saved ${rawPlaces.length} raw places → public/data/google-places.json`);
+
+      // Transform and save app-ready version
+      places = rawPlaces
+        .filter(p => p.business_status !== 'CLOSED_PERMANENTLY')
+        .map(transformGooglePlace);
+
+      const appPath = path.join(__dirname, '..', 'public', 'places-data.json');
+      fs.writeFileSync(appPath, JSON.stringify(places, null, 2));
+      console.log(`✓ Saved ${places.length} places → public/places-data.json`);
+    } catch (e) {
+      console.error('Google Places fetch failed:', e.message);
+    }
+  }
+
+  const totalEvents = tmEvents.length + ebEvents.length;
   console.log('\n=== Done! ===');
-  console.log(`Events: ${tmEvents.length}  |  Places: ${places.length}`);
-  console.log('\nNext steps:');
-  console.log('  git add public/data public/places-data.json');
-  console.log('  git commit -m "data: refresh for Greater ABQ Metro (40-mile radius)"');
-  console.log('  git push origin main');
+  console.log(`Ticketmaster: ${tmEvents.length} events`);
+  console.log(`Eventbrite:   ${ebEvents.length} events`);
+  console.log(`Total events: ${totalEvents}  |  Places: ${places.length}`);
+  if (!process.env.CI) {
+    console.log('\nNext steps:');
+    console.log('  git add public/data public/places-data.json');
+    console.log('  git commit -m "data: refresh for Greater ABQ Metro"');
+    console.log('  git push origin main');
+  }
 }
 
 main().catch(e => { console.error(e); process.exit(1); });
