@@ -7,7 +7,7 @@ import {
 } from 'firebase/auth';
 import {
   getFirestore, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc,
-  collection, query, orderBy, limit, onSnapshot, serverTimestamp,
+  collection, query, orderBy, limit, where, onSnapshot, serverTimestamp, Timestamp,
 } from 'firebase/firestore';
 
 // ─── Firebase Setup ──────────────────────────────────────────────────────────
@@ -87,6 +87,17 @@ interface TMEvent {
 
 interface GeoCoords { lat: number; lng: number; }
 
+interface Review {
+  id: string;
+  placeId: string;
+  userId: string;
+  userName: string;
+  rating: number;
+  text: string;
+  createdAt: Timestamp | null;
+  helpful: number;
+}
+
 // ─── Utilities ──────────────────────────────────────────────────────────────
 
 function hiResUrl(url: string): string {
@@ -155,6 +166,43 @@ function getLevel(count: number): { label: string; emoji: string; next: number }
   if (count >= 10) return { label: 'Adventurer', emoji: '✦',  next: 20 };
   if (count >= 5)  return { label: 'Explorer',   emoji: '⚡', next: 10 };
   return                 { label: 'Newcomer',    emoji: '✿',  next: 5 };
+}
+
+// ─── Profanity Filter ────────────────────────────────────────────────────────
+
+// Each entry: [regex pattern, [funny alt1, funny alt2, funny alt3]]
+// Alternatives are chosen to be genuinely funny while staying PG
+const PROFANITY_ALTS: Array<[RegExp, string[]]> = [
+  [/\bf+u+c+k+\b/gi,           ['fudge', 'forget', 'flip']],
+  [/\bsh[i1!]+t+\b/gi,         ['shoot', 'sugar', 'shucks']],
+  [/\ba+s+h+o+l+e+\b/gi,       ['armadillo', 'ankle', 'aardvark']],
+  [/\ba+s+s+\b/gi,              ['donkey', 'bottom', 'bum']],
+  [/\bb+i+t+c+h+\b/gi,         ['witch', 'beach', 'bench']],
+  [/\bd+a+m+n+\b/gi,            ['darn', 'dang', 'drat']],
+  [/\bh+e+l+l+\b/gi,            ['heck', 'the bad place', 'Hades']],
+  [/\bc+r+a+p+\b/gi,            ['crud', 'garbage', 'rubbish']],
+  [/\bs+u+c+k+s?\b/gi,          ['stinks', 'disappoints', 'bums me out']],
+  [/\bb+a+s+t+a+r+d+\b/gi,     ['rascal', 'scoundrel', 'rapscallion']],
+  [/\bp+i+s+s+\b/gi,            ['tinkle', 'mist', 'sprinkle']],
+  [/\bd+i+c+k+\b/gi,            ['pickle', 'dude', 'Richard']],
+  [/\bc+o+c+k+\b/gi,            ['rooster', 'cockatoo', 'weathervane']],
+  [/\bb+u+l+l+s+h+i+t+\b/gi,   ['baloney', 'hogwash', 'poppycock']],
+  [/\bm+o+t+h+e+r+f+\w+\b/gi,  ['motherfudger', 'full of malarkey', 'incredibly frustrated person']],
+  [/\bw+t+f+\b/gi,              ['what the fudge', 'wow that\'s fishy', 'well that\'s funny']],
+  [/\bstfu\b/gi,                ['zip it please', 'kindly hush', 'shhh friend']],
+  [/\bpos\b/gi,                  ['not great', 'lacking', 'a bit rubbish']],
+  [/\bffs\b/gi,                  ['for fudge\'s sake', 'oh come on', 'really though']],
+  [/\bomfg\b/gi,                 ['oh my goodness', 'oh my gosh', 'oh my gravy']],
+];
+
+interface ProfanityMatch { found: string; alts: string[]; }
+
+function checkProfanity(text: string): ProfanityMatch | null {
+  for (const [pattern, alts] of PROFANITY_ALTS) {
+    const match = text.match(pattern);
+    if (match) return { found: match[0], alts };
+  }
+  return null;
 }
 
 // ─── Geolocation Hook ────────────────────────────────────────────────────────
@@ -558,7 +606,7 @@ function EventCard({ event, onClick }: { event: TMEvent; onClick: () => void }) 
 // ─── Place Detail Modal ──────────────────────────────────────────────────────
 
 function PlaceDetailModal({
-  place, onClose, isCheckedIn, onCheckIn, checkInError, tooFar,
+  place, onClose, isCheckedIn, onCheckIn, checkInError, tooFar, user, onShowAuth,
 }: {
   place: Place;
   onClose: () => void;
@@ -566,6 +614,8 @@ function PlaceDetailModal({
   onCheckIn: () => void;
   checkInError?: string | null;
   tooFar?: boolean;
+  user: User | null;
+  onShowAuth: () => void;
 }) {
   const catEmoji = PLACE_CATEGORIES.find(c => c.label === place.category)?.icon || '';
   const mapsQuery = encodeURIComponent((place.address || place.name) + ' Albuquerque NM');
@@ -715,7 +765,330 @@ function PlaceDetailModal({
         >
           GET DIRECTIONS →
         </a>
+
+        {/* Reviews */}
+        <ReviewSection
+          placeId={place.id}
+          isCheckedIn={isCheckedIn}
+          user={user}
+          onShowAuth={onShowAuth}
+        />
       </div>
+    </div>
+  );
+}
+
+// ─── Review Components ───────────────────────────────────────────────────────
+
+function OutletRating({
+  value, onChange, size = 'md',
+}: {
+  value: number;
+  onChange?: (v: number) => void;
+  size?: 'sm' | 'md' | 'lg';
+}) {
+  const [hovered, setHovered] = useState(0);
+  const px = { sm: '18px', md: '24px', lg: '30px' }[size];
+  const display = hovered || value;
+  return (
+    <div className="flex gap-0.5" role="group" aria-label="Rate this place">
+      {[1, 2, 3, 4, 5].map(i => (
+        <span
+          key={i}
+          role={onChange ? 'button' : 'img'}
+          aria-label={`${i} outlet${i !== 1 ? 's' : ''}`}
+          className="material-symbols-outlined select-none transition-all"
+          style={{
+            fontSize: px,
+            color: i <= display ? '#a03b00' : '#d1d5db',
+            cursor: onChange ? 'pointer' : 'default',
+            fontVariationSettings: i <= display ? "'FILL' 1, 'wght' 600" : "'FILL' 0, 'wght' 300",
+            transform: onChange && i <= display ? 'scale(1.1)' : 'scale(1)',
+          }}
+          onMouseEnter={() => onChange && setHovered(i)}
+          onMouseLeave={() => onChange && setHovered(0)}
+          onClick={() => onChange?.(i)}
+        >
+          outlet
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function ReviewCard({ review }: { review: Review }) {
+  const date = review.createdAt?.toDate?.();
+  const dateStr = date
+    ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : 'Just now';
+  const initials = review.userName
+    .split(' ')
+    .map(w => w[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase() || '?';
+
+  return (
+    <div className="bg-white rounded-2xl p-4" style={{ boxShadow: '0 1px 6px rgba(0,0,0,0.07)' }}>
+      <div className="flex items-start gap-3 mb-2">
+        <div
+          className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-black text-white flex-shrink-0"
+          style={{ background: 'linear-gradient(135deg, #a03b00, #ff793b)', fontFamily: 'Epilogue, sans-serif' }}
+        >
+          {initials}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <span className="text-sm font-black text-gray-900 truncate" style={{ fontFamily: 'Epilogue, sans-serif' }}>
+              {review.userName}
+            </span>
+            <span className="text-xs text-gray-400 flex-shrink-0">{dateStr}</span>
+          </div>
+          <OutletRating value={review.rating} size="sm" />
+        </div>
+      </div>
+      {review.text && (
+        <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'Manrope, sans-serif' }}>
+          {review.text}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function ReviewSection({
+  placeId, isCheckedIn, user, onShowAuth,
+}: {
+  placeId: string;
+  isCheckedIn: boolean;
+  user: User | null;
+  onShowAuth: () => void;
+}) {
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [rating, setRating] = useState(0);
+  const [text, setText] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [profWarn, setProfWarn] = useState<ProfanityMatch | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+
+  // Load reviews
+  useEffect(() => {
+    setLoading(true);
+    const q = query(collection(fbDb, 'reviews'), where('placeId', '==', placeId));
+    const unsub = onSnapshot(q, snap => {
+      const loaded: Review[] = snap.docs.map(d => ({
+        id: d.id,
+        ...(d.data() as Omit<Review, 'id'>),
+      }));
+      // Sort client-side: newest first
+      loaded.sort((a, b) => {
+        const at = a.createdAt?.toMillis?.() ?? 0;
+        const bt = b.createdAt?.toMillis?.() ?? 0;
+        return bt - at;
+      });
+      setReviews(loaded);
+      setLoading(false);
+    }, () => setLoading(false));
+    return unsub;
+  }, [placeId]);
+
+  // Check if this user already reviewed this place
+  const alreadyReviewed = user ? reviews.some(r => r.userId === user.uid) : false;
+
+  const avgRating = reviews.length > 0
+    ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
+    : 0;
+
+  const handleTextChange = (val: string) => {
+    setText(val);
+    setProfWarn(checkProfanity(val));
+  };
+
+  const handleSubmit = async () => {
+    if (!user) { onShowAuth(); return; }
+    if (rating === 0) { setError('Please select an outlet rating first!'); return; }
+    setError(null);
+    setSubmitting(true);
+    try {
+      await addDoc(collection(fbDb, 'reviews'), {
+        placeId,
+        userId: user.uid,
+        userName: user.displayName || user.email?.split('@')[0] || 'Explorer',
+        rating,
+        text: text.trim(),
+        createdAt: serverTimestamp(),
+        helpful: 0,
+      });
+      setText('');
+      setRating(0);
+      setProfWarn(null);
+      setSubmitted(true);
+      setShowForm(false);
+      setTimeout(() => setSubmitted(false), 3000);
+    } catch {
+      setError('Could not save review. Please try again.');
+    }
+    setSubmitting(false);
+  };
+
+  return (
+    <div className="mt-6">
+      {/* Header row */}
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <h3 className="font-black text-gray-900 text-base" style={{ fontFamily: 'Epilogue, sans-serif' }}>
+            Reviews
+          </h3>
+          {reviews.length > 0 && (
+            <div className="flex items-center gap-2 mt-0.5">
+              <OutletRating value={Math.round(avgRating)} size="sm" />
+              <span className="text-xs text-gray-500 font-semibold">
+                {avgRating.toFixed(1)} · {reviews.length} review{reviews.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+          )}
+        </div>
+        {isCheckedIn && !alreadyReviewed && !showForm && (
+          user
+            ? <button
+                onClick={() => setShowForm(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black text-white"
+                style={{ background: '#a03b00', fontFamily: 'Epilogue, sans-serif' }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>edit</span>
+                Write Review
+              </button>
+            : <button
+                onClick={onShowAuth}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black text-white"
+                style={{ background: '#a03b00', fontFamily: 'Epilogue, sans-serif' }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>login</span>
+                Sign in to Review
+              </button>
+        )}
+        {isCheckedIn && alreadyReviewed && (
+          <span className="text-xs text-gray-400 font-semibold flex items-center gap-1">
+            <span className="material-symbols-outlined" style={{ fontSize: '14px', color: '#a03b00', fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+            Reviewed
+          </span>
+        )}
+      </div>
+
+      {/* Gate message for non-checked-in users */}
+      {!isCheckedIn && (
+        <div className="mb-4 rounded-2xl p-3 flex items-center gap-3" style={{ background: 'rgba(160,59,0,0.06)' }}>
+          <span className="material-symbols-outlined" style={{ color: '#a03b00', fontSize: '20px' }}>lock</span>
+          <p className="text-xs text-gray-600 flex-1" style={{ fontFamily: 'Manrope, sans-serif' }}>
+            Check in here first to leave a review
+          </p>
+        </div>
+      )}
+
+      {/* Success toast */}
+      {submitted && (
+        <div className="mb-3 rounded-2xl p-3 flex items-center gap-2" style={{ background: 'rgba(160,59,0,0.08)' }}>
+          <span className="material-symbols-outlined" style={{ color: '#a03b00', fontSize: '18px', fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+          <p className="text-xs font-bold" style={{ color: '#a03b00' }}>Review posted — thanks! ✓</p>
+        </div>
+      )}
+
+      {/* Review form */}
+      {showForm && isCheckedIn && user && !alreadyReviewed && (
+        <div className="mb-4 rounded-2xl p-4" style={{ background: 'white', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
+          <div className="mb-3">
+            <p className="text-xs font-bold text-gray-600 mb-2" style={{ fontFamily: 'Manrope, sans-serif' }}>
+              How many outlets does this place get?
+            </p>
+            <OutletRating value={rating} onChange={setRating} size="lg" />
+          </div>
+
+          <textarea
+            value={text}
+            onChange={e => handleTextChange(e.target.value)}
+            placeholder="Tell people what made this place worth visiting (or not)..."
+            rows={3}
+            className="w-full text-sm rounded-xl border border-gray-200 p-3 resize-none focus:outline-none"
+            style={{
+              fontFamily: 'Manrope, sans-serif',
+              background: '#fafafa',
+              borderColor: profWarn ? '#fbbf24' : undefined,
+            }}
+          />
+
+          {/* Profanity warning */}
+          {profWarn && (
+            <div className="mt-2 rounded-xl p-3 text-xs leading-relaxed" style={{ background: '#fffbeb', border: '1px solid #fde68a', color: '#92400e' }}>
+              <p className="font-bold mb-1">
+                Whoa there! Kids use this app — let's try other words. 😄
+              </p>
+              <p>
+                Instead of <strong>"{profWarn.found}"</strong>, how about{' '}
+                {profWarn.alts.map((a, i) => (
+                  <span key={a}>
+                    <button
+                      className="font-bold underline hover:no-underline"
+                      style={{ color: '#a03b00' }}
+                      onClick={() => {
+                        const newText = text.replace(new RegExp(profWarn.found, 'gi'), a);
+                        handleTextChange(newText);
+                      }}
+                    >
+                      "{a}"
+                    </button>
+                    {i < profWarn.alts.length - 1 ? (i === profWarn.alts.length - 2 ? ', or ' : ', ') : ''}
+                  </span>
+                ))}
+                ? You can still post your review, but maybe it's time to expand your vocabulary 😄
+              </p>
+            </div>
+          )}
+
+          {error && (
+            <p className="text-xs text-red-500 mt-2 font-semibold">{error}</p>
+          )}
+
+          <div className="flex gap-2 mt-3">
+            <button
+              onClick={() => { setShowForm(false); setProfWarn(null); setError(null); }}
+              className="flex-1 py-2.5 rounded-xl text-xs font-bold text-gray-500 bg-gray-100"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={submitting || rating === 0}
+              className="flex-1 py-2.5 rounded-xl text-xs font-black text-white transition-all"
+              style={{
+                background: submitting || rating === 0 ? '#d1d5db' : '#a03b00',
+                fontFamily: 'Epilogue, sans-serif',
+              }}
+            >
+              {submitting ? 'Posting…' : 'Post Review'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Reviews list */}
+      {loading && (
+        <p className="text-xs text-gray-400 text-center py-4" style={{ fontFamily: 'Manrope, sans-serif' }}>
+          Loading reviews…
+        </p>
+      )}
+      {!loading && reviews.length === 0 && (
+        <p className="text-xs text-gray-400 text-center py-4" style={{ fontFamily: 'Manrope, sans-serif' }}>
+          No reviews yet — be the first!
+        </p>
+      )}
+      {!loading && reviews.length > 0 && (
+        <div className="flex flex-col gap-3">
+          {reviews.map(r => <ReviewCard key={r.id} review={r} />)}
+        </div>
+      )}
     </div>
   );
 }
@@ -3293,6 +3666,8 @@ export default function App() {
           onCheckIn={() => handleCheckIn(selectedPlace.id)}
           checkInError={checkInError}
           tooFar={tooFarPlaceId === selectedPlace.id}
+          user={user}
+          onShowAuth={() => setShowAuthModal(true)}
         />
       )}
       {selectedEvent && (
