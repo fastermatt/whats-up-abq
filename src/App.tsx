@@ -879,7 +879,7 @@ function DiscoverScreen({
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: '#a03b00', fontFamily: 'Manrope, sans-serif' }}
         >
-          Albuquerque, NM
+          Greater ABQ Metro
         </p>
         <h1
           className="text-4xl font-black uppercase tracking-tighter leading-none mt-1"
@@ -888,7 +888,7 @@ function DiscoverScreen({
           Get Out &<br />Unplug Today
         </h1>
         <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: 'Manrope, sans-serif' }}>
-          {places.length} places Â· {events.length} events in ABQ
+          {places.length} places · {events.length} events in Greater ABQ
         </p>
       </div>
 
@@ -1199,9 +1199,32 @@ function EventsScreen({
         const seg = e.classifications?.[0]?.segment?.name || '';
         const gen = e.classifications?.[0]?.genre?.name || '';
         if (selectedGenre === 'Outdoor') {
+          // Match genuine outdoor venues (amphitheaters, outdoor parks) and
+          // explicitly outdoor-themed events. Exclude sports stadiums and arenas
+          // (e.g. "Isotopes Park" is a baseball stadium; "Dream Style Arena" is indoor).
           const venueName = (e._embedded?.venues?.[0]?.name || '').toLowerCase();
           const eventName = e.name.toLowerCase();
-          return venueName.includes('outdoor') || venueName.includes('amphitheater') || venueName.includes('park') || venueName.includes('field') || venueName.includes('arena') || eventName.includes('outdoor') || gen === 'Outdoor';
+          const isAmphi = venueName.includes('amphitheater') || venueName.includes('amphitheatre');
+          const isOutdoorVenue = venueName.includes('outdoor') ||
+            (venueName.includes('balloon fiesta') || venueName === 'balloon fiesta park');
+          const isOutdoorEvent = eventName.includes('outdoor') ||
+            eventName.includes('festival') || eventName.includes(' fair') ||
+            eventName.includes('balloon fiesta') || eventName.includes('garden') ||
+            eventName.includes('nature') || eventName.includes('hiking') ||
+            eventName.includes('trail') || eventName.includes('fiesta');
+          return isAmphi || isOutdoorVenue || isOutdoorEvent || gen === 'Outdoor';
+        }
+        if (selectedGenre === 'Family') {
+          // TM rarely classifies ABQ events as Family segment/genre.
+          // Broaden with keyword matching on event names.
+          const eventName = e.name.toLowerCase();
+          const familyKeywords = [
+            'family', 'kids', 'children', 'child', 'junior', 'youth',
+            'disney', 'sesame', 'circus', 'magic show', 'puppet',
+            'ballet', 'nutcracker', 'ice show', 'princess', 'wizard',
+          ];
+          return seg === 'Family' || gen === 'Family' ||
+            familyKeywords.some(k => eventName.includes(k));
         }
         return seg === selectedGenre || gen === selectedGenre;
       });
@@ -1243,7 +1266,7 @@ function EventsScreen({
           Live Events<br />Near You
         </h1>
         <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: 'Manrope, sans-serif' }}>
-          {events.length} upcoming events in ABQ
+          {events.length} upcoming events in Greater ABQ
         </p>
       </div>
 
@@ -1390,7 +1413,7 @@ function PlacesScreen({
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: '#a03b00', fontFamily: 'Manrope, sans-serif' }}
         >
-          Explore ABQ
+          Explore Greater ABQ
         </p>
         <h1
           className="text-4xl font-black uppercase tracking-tighter leading-none mt-1"
@@ -1399,7 +1422,7 @@ function PlacesScreen({
           Places<br />to Go
         </h1>
         <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: 'Manrope, sans-serif' }}>
-          {places.length} spots across Albuquerque
+          {places.length} spots across Greater ABQ
         </p>
       </div>
 
@@ -1774,7 +1797,7 @@ function ProfileScreen({
           <p className="font-black text-lg truncate" style={{ fontFamily: 'Epilogue, sans-serif' }}>
             {user?.displayName || 'ABQ Explorer'}
           </p>
-          <p className="text-sm text-gray-500">Albuquerque, NM</p>
+          <p className="text-sm text-gray-500">Greater ABQ Metro</p>
           <p className="text-xs font-semibold mt-0.5" style={{ color: '#a03b00', fontFamily: 'Manrope, sans-serif' }}>
             {level.emoji} {level.label}
           </p>
