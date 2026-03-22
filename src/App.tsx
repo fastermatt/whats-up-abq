@@ -10,7 +10,7 @@ import {
   limit, onSnapshot, serverTimestamp,
 } from 'firebase/firestore';
 
-// ─── Firebase Setup ──────────────────────────────────────────────────────────
+// âââ Firebase Setup ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const firebaseConfig = {
   apiKey: "AIzaSyAVL8hY7QZjgbgny7GKDWA7ti2hoBU2Xvs",
@@ -25,7 +25,7 @@ const fbApp  = initializeApp(firebaseConfig);
 const fbAuth = getAuth(fbApp);
 const fbDb   = getFirestore(fbApp);
 
-// ─── Types ──────────────────────────────────────────────────────────────────
+// âââ Types ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 interface Place {
   id: string;
@@ -87,7 +87,7 @@ interface TMEvent {
 
 interface GeoCoords { lat: number; lng: number; }
 
-// ─── Utilities ──────────────────────────────────────────────────────────────
+// âââ Utilities ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function hiResUrl(url: string): string {
   if (!url || !url.includes('places.googleapis.com')) return url;
@@ -149,15 +149,15 @@ function formatDist(miles: number): string {
 }
 
 function getLevel(count: number): { label: string; emoji: string; next: number } {
-  if (count >= 50) return { label: 'Legend', emoji: '🏆', next: count }; // max level
-  if (count >= 35) return { label: 'Pioneer', emoji: '🥇', next: 50 };
-  if (count >= 20) return { label: 'Trailblazer', emoji: '🥈', next: 35 };
-  if (count >= 10) return { label: 'Adventurer', emoji: '🥉', next: 20 };
-  if (count >= 5)  return { label: 'Explorer', emoji: '⚡', next: 10 };
-  return { label: 'Newcomer', emoji: '🌱', next: 5 };
+  if (count >= 50) return { label: 'Legend', emoji: 'ð', next: count }; // max level
+  if (count >= 35) return { label: 'Pioneer', emoji: 'ð¥', next: 50 };
+  if (count >= 20) return { label: 'Trailblazer', emoji: 'ð¥', next: 35 };
+  if (count >= 10) return { label: 'Adventurer', emoji: 'ð¥', next: 20 };
+  if (count >= 5)  return { label: 'Explorer', emoji: 'â¡', next: 10 };
+  return { label: 'Newcomer', emoji: 'ð±', next: 5 };
 }
 
-// ─── Geolocation Hook ────────────────────────────────────────────────────────
+// âââ Geolocation Hook ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function useGeolocation() {
   const [coords, setCoords] = useState<GeoCoords | null>(null);
@@ -181,7 +181,7 @@ function useGeolocation() {
   return { coords, error, requested, request };
 }
 
-// ─── Check-In Storage ────────────────────────────────────────────────────────
+// âââ Check-In Storage ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function loadCheckins(): Set<string> {
   try {
@@ -212,7 +212,7 @@ async function syncCheckinsToFirestore(uid: string, checkIns: Set<string>, displ
   }
 }
 
-// ─── SVG Logo ───────────────────────────────────────────────────────────────
+// âââ SVG Logo âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function ABQUnpluggedLogo({ size = 28 }: { size?: number }) {
   return (
@@ -232,7 +232,7 @@ function ABQUnpluggedLogo({ size = 28 }: { size?: number }) {
   );
 }
 
-// ─── ImageWithFallback ──────────────────────────────────────────────────────
+// âââ ImageWithFallback ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const FALLBACK_GRADIENTS = [
   'linear-gradient(135deg,#a03b00,#ff793b)',
@@ -284,29 +284,29 @@ function ImageWithFallback({
   );
 }
 
-// ─── Category Data ──────────────────────────────────────────────────────────
+// âââ Category Data ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const PLACE_CATEGORIES = [
-  { label: 'All', icon: '✨' },
-  { label: 'Restaurant', icon: '🍽️' },
-  { label: 'Coffee & Tea', icon: '☕' },
-  { label: 'Bar', icon: '🍺' },
-  { label: 'Bakery', icon: '🥐' },
-  { label: 'Park', icon: '🌳' },
-  { label: 'Museum', icon: '🏛️' },
-  { label: 'Art Gallery', icon: '🎨' },
-  { label: 'Attraction', icon: '🎡' },
-  { label: 'Shopping', icon: '🛍️' },
-  { label: 'Nightlife', icon: '🌙' },
-  { label: 'Spa & Wellness', icon: '💆' },
-  { label: 'Gym & Fitness', icon: '💪' },
-  { label: 'Movie Theater', icon: '🎬' },
-  { label: 'Library', icon: '📚' },
+  { label: 'All', icon: 'â¨' },
+  { label: 'Restaurant', icon: 'ð½ï¸' },
+  { label: 'Coffee & Tea', icon: 'â' },
+  { label: 'Bar', icon: 'ðº' },
+  { label: 'Bakery', icon: 'ð¥' },
+  { label: 'Park', icon: 'ð³' },
+  { label: 'Museum', icon: 'ðï¸' },
+  { label: 'Art Gallery', icon: 'ð¨' },
+  { label: 'Attraction', icon: 'ð¡' },
+  { label: 'Shopping', icon: 'ðï¸' },
+  { label: 'Nightlife', icon: 'ð' },
+  { label: 'Spa & Wellness', icon: 'ð' },
+  { label: 'Gym & Fitness', icon: 'ðª' },
+  { label: 'Movie Theater', icon: 'ð¬' },
+  { label: 'Library', icon: 'ð' },
 ];
 
 const EVENT_GENRES = ['All', 'Music', 'Sports', 'Arts & Theatre', 'Comedy', 'Family', 'Outdoor'];
 
-// ─── Geo Banner ──────────────────────────────────────────────────────────────
+// âââ Geo Banner ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function GeoBanner({
   coords, error, requested, onRequest,
@@ -337,7 +337,7 @@ function GeoBanner({
   if (requested) return (
     <div className="mx-5 mb-4 rounded-2xl p-3 flex items-center gap-3" style={{ background: 'rgba(160,59,0,0.06)' }}>
       <span className="material-symbols-outlined flex-shrink-0" style={{ color: '#a03b00', fontSize: '20px' }}>my_location</span>
-      <p className="text-xs text-gray-500 flex-1" style={{ fontFamily: 'Manrope, sans-serif' }}>Getting your location…</p>
+      <p className="text-xs text-gray-500 flex-1" style={{ fontFamily: 'Manrope, sans-serif' }}>Getting your locationâ¦</p>
     </div>
   );
 
@@ -367,7 +367,7 @@ function GeoBanner({
   );
 }
 
-// ─── Place Card ─────────────────────────────────────────────────────────────
+// âââ Place Card âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function PlaceCard({
   place, onClick, distance, isCheckedIn, onCheckIn,
@@ -378,7 +378,7 @@ function PlaceCard({
   isCheckedIn?: boolean;
   onCheckIn?: (e: React.MouseEvent) => void;
 }) {
-  const catEmoji = PLACE_CATEGORIES.find(c => c.label === place.category)?.icon || '📍';
+  const catEmoji = PLACE_CATEGORIES.find(c => c.label === place.category)?.icon || 'ð';
   return (
     <button
       onClick={onClick}
@@ -419,7 +419,7 @@ function PlaceCard({
               className="text-xs font-bold text-white px-1.5 py-0.5 rounded-full"
               style={{ background: 'rgba(160,59,0,0.85)' }}
             >
-              ✓ Visited
+              â Visited
             </span>
           </div>
         )}
@@ -434,7 +434,7 @@ function PlaceCard({
         <div className="flex items-center justify-between mt-1.5 gap-1">
           {place.rating ? (
             <div className="flex items-center gap-1 flex-1 min-w-0">
-              <span className="text-yellow-400 text-xs">★</span>
+              <span className="text-yellow-400 text-xs">â</span>
               <span className="text-xs font-bold text-gray-700">{place.rating.toFixed(1)}</span>
               {place.reviewCount ? (
                 <span className="text-xs text-gray-400 truncate">
@@ -452,7 +452,7 @@ function PlaceCard({
                 color: isCheckedIn ? '#a03b00' : 'white',
               }}
             >
-              {isCheckedIn ? '✓ Visited' : 'Check In'}
+              {isCheckedIn ? 'â Visited' : 'Check In'}
             </button>
           )}
         </div>
@@ -461,7 +461,7 @@ function PlaceCard({
   );
 }
 
-// ─── Event Card ─────────────────────────────────────────────────────────────
+// âââ Event Card âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function EventCard({ event, onClick }: { event: TMEvent; onClick: () => void }) {
   const imgSrc = getBestEventImage(event.images);
@@ -483,7 +483,7 @@ function EventCard({ event, onClick }: { event: TMEvent; onClick: () => void }) 
             className="w-full h-full flex items-center justify-center"
             style={{ background: 'linear-gradient(135deg, #a03b00, #ff793b)' }}
           >
-            <span className="text-3xl">🎵</span>
+            <span className="text-3xl">ðµ</span>
           </div>
         )}
       </div>
@@ -512,7 +512,7 @@ function EventCard({ event, onClick }: { event: TMEvent; onClick: () => void }) 
           <div className="flex items-center justify-between mt-1">
             <p className="text-xs font-bold" style={{ color: '#a03b00' }}>
               {event.dates?.start?.localDate ? formatDate(event.dates.start.localDate) : 'Date TBD'}
-              {event.dates?.start?.localTime ? ' · ' + formatTime(event.dates.start.localTime) : ''}
+              {event.dates?.start?.localTime ? ' Â· ' + formatTime(event.dates.start.localTime) : ''}
             </p>
             {price && (
               <p className="text-xs text-gray-500">From ${Math.round(price.min || 0)}</p>
@@ -524,7 +524,7 @@ function EventCard({ event, onClick }: { event: TMEvent; onClick: () => void }) 
   );
 }
 
-// ─── Place Detail Modal ──────────────────────────────────────────────────────
+// âââ Place Detail Modal ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function PlaceDetailModal({
   place, onClose, isCheckedIn, onCheckIn, checkInError,
@@ -535,7 +535,7 @@ function PlaceDetailModal({
   onCheckIn: () => void;
   checkInError?: string | null;
 }) {
-  const catEmoji = PLACE_CATEGORIES.find(c => c.label === place.category)?.icon || '📍';
+  const catEmoji = PLACE_CATEGORIES.find(c => c.label === place.category)?.icon || 'ð';
   const mapsQuery = encodeURIComponent((place.address || place.name) + ' Albuquerque NM');
 
   return (
@@ -576,7 +576,7 @@ function PlaceDetailModal({
         <div className="flex items-center gap-2 mb-4 flex-wrap">
           {place.rating && (
             <div className="flex items-center gap-1 bg-white rounded-xl px-3 py-2" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}>
-              <span className="text-yellow-400">★</span>
+              <span className="text-yellow-400">â</span>
               <span className="font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif' }}>
                 {place.rating.toFixed(1)}
               </span>
@@ -604,7 +604,7 @@ function PlaceDetailModal({
             <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
               {isCheckedIn ? 'check_circle' : 'add_location_alt'}
             </span>
-            {isCheckedIn ? 'Visited! ✓' : 'Check In'}
+            {isCheckedIn ? 'Visited! â' : 'Check In'}
           </button>
         </div>
 
@@ -663,12 +663,12 @@ function PlaceDetailModal({
           <div className="flex gap-2 mt-2 mb-4 flex-wrap">
             {place.isKidFriendly && (
               <span className="text-xs font-semibold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full">
-                👨‍👩‍👧 Kid Friendly
+                ð¨âð©âð§ Kid Friendly
               </span>
             )}
             {place.isAccessible && (
               <span className="text-xs font-semibold bg-green-50 text-green-700 px-2.5 py-1 rounded-full">
-                ♿ Accessible
+                â¿ Accessible
               </span>
             )}
           </div>
@@ -681,14 +681,14 @@ function PlaceDetailModal({
           className="block w-full py-4 text-center text-white font-black text-sm rounded-2xl mt-2"
           style={{ background: 'linear-gradient(135deg, #a03b00, #ff793b)', fontFamily: 'Epilogue, sans-serif' }}
         >
-          GET DIRECTIONS →
+          GET DIRECTIONS â
         </a>
       </div>
     </div>
   );
 }
 
-// ─── Event Detail Modal ──────────────────────────────────────────────────────
+// âââ Event Detail Modal ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => void }) {
   const imgSrc = getBestEventImage(event.images);
@@ -709,7 +709,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
             className="w-full h-full flex items-center justify-center"
             style={{ background: 'linear-gradient(135deg, #a03b00, #ff793b)' }}
           >
-            <span style={{ fontSize: '72px' }}>🎵</span>
+            <span style={{ fontSize: '72px' }}>ðµ</span>
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
@@ -768,7 +768,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
             <div className="col-span-2 bg-white rounded-2xl p-3" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
               <p className="text-xs text-gray-400 mb-1">Price</p>
               <p className="font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif' }}>
-                ${Math.round(price.min || 0)} – ${Math.round(price.max || 0)}
+                ${Math.round(price.min || 0)} â ${Math.round(price.max || 0)}
               </p>
             </div>
           )}
@@ -793,7 +793,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
             className="font-black text-sm mb-1"
             style={{ fontFamily: 'Epilogue, sans-serif', color: '#a03b00' }}
           >
-            ⚡ UNPLUGGING TIP
+            â¡ UNPLUGGING TIP
           </p>
           <p className="text-xs text-gray-600" style={{ fontFamily: 'Manrope, sans-serif' }}>
             Put your phone away for the first 30 minutes. Let yourself fully arrive before documenting.
@@ -808,7 +808,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
             className="block w-full py-4 text-center text-white font-black text-sm rounded-2xl"
             style={{ background: 'linear-gradient(135deg, #a03b00, #ff793b)', fontFamily: 'Epilogue, sans-serif' }}
           >
-            GET TICKETS →
+            GET TICKETS â
           </a>
         ) : (
           <a
@@ -818,7 +818,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
             className="block w-full py-4 text-center text-white font-black text-sm rounded-2xl"
             style={{ background: 'linear-gradient(135deg, #a03b00, #ff793b)', fontFamily: 'Epilogue, sans-serif' }}
           >
-            GET DIRECTIONS →
+            GET DIRECTIONS â
           </a>
         )}
       </div>
@@ -826,7 +826,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
   );
 }
 
-// ─── Discover Screen (Mixed Feed) ─────────────────────────────────────────────
+// âââ Discover Screen (Mixed Feed) âââââââââââââââââââââââââââââââââââââââââââââ
 
 function DiscoverScreen({
   places, events, onPlaceSelect, onEventSelect,
@@ -888,7 +888,7 @@ function DiscoverScreen({
           Get Out &<br />Unplug Today
         </h1>
         <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: 'Manrope, sans-serif' }}>
-          {places.length} places · {events.length} events in ABQ
+          {places.length} places Â· {events.length} events in ABQ
         </p>
       </div>
 
@@ -911,7 +911,7 @@ function DiscoverScreen({
               This Week
             </h2>
             <span className="text-xs font-semibold" style={{ color: '#a03b00', fontFamily: 'Manrope, sans-serif' }}>
-              🎟 Live events
+              ð Live events
             </span>
           </div>
           <div className="flex gap-3 px-5 pb-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
@@ -933,7 +933,7 @@ function DiscoverScreen({
                         className="w-full h-full flex items-center justify-center"
                         style={{ background: 'linear-gradient(135deg, #a03b00, #ff793b)' }}
                       >
-                        <span className="text-4xl">🎵</span>
+                        <span className="text-4xl">ðµ</span>
                       </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -957,7 +957,7 @@ function DiscoverScreen({
                   <div className="px-3 py-2">
                     <p className="text-xs font-bold" style={{ color: '#a03b00', fontFamily: 'Manrope, sans-serif' }}>
                       {event.dates?.start?.localDate ? formatDate(event.dates.start.localDate) : 'TBD'}
-                      {event.dates?.start?.localTime ? ' · ' + formatTime(event.dates.start.localTime) : ''}
+                      {event.dates?.start?.localTime ? ' Â· ' + formatTime(event.dates.start.localTime) : ''}
                     </p>
                     {venue && (
                       <p className="text-xs text-gray-400 truncate">{venue.name}</p>
@@ -995,12 +995,12 @@ function DiscoverScreen({
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
               <div className="absolute top-3 left-3">
                 <span className="text-xs font-bold text-white bg-[#a03b00] px-2 py-1 rounded-full">
-                  ⚡ Featured
+                  â¡ Featured
                 </span>
               </div>
               {checkedIn.has(featured[0].id) && (
                 <div className="absolute top-3 right-3">
-                  <span className="text-xs font-bold text-white px-2 py-1 rounded-full" style={{ background: 'rgba(160,59,0,0.85)' }}>✓ Visited</span>
+                  <span className="text-xs font-bold text-white px-2 py-1 rounded-full" style={{ background: 'rgba(160,59,0,0.85)' }}>â Visited</span>
                 </div>
               )}
               <div className="absolute bottom-3 left-3 right-3 text-left">
@@ -1030,7 +1030,7 @@ function DiscoverScreen({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 {checkedIn.has(place.id) && (
                   <div className="absolute top-2 right-2">
-                    <span className="text-white text-xs px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(160,59,0,0.85)' }}>✓</span>
+                    <span className="text-white text-xs px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(160,59,0,0.85)' }}>â</span>
                   </div>
                 )}
                 <div className="absolute bottom-2.5 left-2.5 right-2.5 text-left">
@@ -1090,7 +1090,7 @@ function DiscoverScreen({
                   </div>
                   {checkedIn.has(place.id) && (
                     <div className="absolute top-2 right-2">
-                      <span className="text-white text-xs px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(160,59,0,0.85)' }}>✓</span>
+                      <span className="text-white text-xs px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(160,59,0,0.85)' }}>â</span>
                     </div>
                   )}
                 </div>
@@ -1120,7 +1120,7 @@ function DiscoverScreen({
               Hidden Gems
             </h2>
             <span className="text-xs font-semibold" style={{ color: '#a03b00', fontFamily: 'Manrope, sans-serif' }}>
-              ★ 4.5+ rated
+              â 4.5+ rated
             </span>
           </div>
           <div className="flex gap-3 px-5 pb-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
@@ -1140,13 +1140,13 @@ function DiscoverScreen({
                         className="text-xs font-bold text-white px-1.5 py-0.5 rounded-full"
                         style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}
                       >
-                        ★ {place.rating.toFixed(1)}
+                        â {place.rating.toFixed(1)}
                       </span>
                     </div>
                   )}
                   {checkedIn.has(place.id) && (
                     <div className="absolute top-2 right-2">
-                      <span className="text-white text-xs px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(160,59,0,0.85)' }}>✓</span>
+                      <span className="text-white text-xs px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(160,59,0,0.85)' }}>â</span>
                     </div>
                   )}
                 </div>
@@ -1174,13 +1174,13 @@ function DiscoverScreen({
         <p className="text-white/80 text-sm mt-1" style={{ fontFamily: 'Manrope, sans-serif' }}>
           Real experiences create memories no screen can replicate. Get out there, ABQ.
         </p>
-        <span className="absolute right-4 bottom-2 text-5xl opacity-20">⚡</span>
+        <span className="absolute right-4 bottom-2 text-5xl opacity-20">â¡</span>
       </div>
     </div>
   );
 }
 
-// ─── Events Screen ────────────────────────────────────────────────────────────
+// âââ Events Screen ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function EventsScreen({
   events,
@@ -1316,7 +1316,7 @@ function EventsScreen({
   );
 }
 
-// ─── Places Screen ────────────────────────────────────────────────────────────
+// âââ Places Screen ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function PlacesScreen({
   places, onPlaceSelect, coords, geoRequested, geoError, onRequestGeo,
@@ -1458,7 +1458,7 @@ function PlacesScreen({
         {([
           { id: 'top', label: 'Top Rated' },
           { id: 'near', label: 'Near Me', disabled: !coords },
-          { id: 'az', label: 'A–Z' },
+          { id: 'az', label: 'AâZ' },
         ] as const).map(s => (
           <button
             key={s.id}
@@ -1515,7 +1515,7 @@ function PlacesScreen({
   );
 }
 
-// ─── Auth Modal ──────────────────────────────────────────────────────────────
+// âââ Auth Modal ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function AuthModal({ onClose }: { onClose: () => void }) {
   const [mode, setMode] = useState<'choose' | 'email'>('choose');
@@ -1563,7 +1563,7 @@ function AuthModal({ onClose }: { onClose: () => void }) {
           <h2 className="text-2xl font-black uppercase tracking-tighter" style={{ fontFamily: 'Epilogue, sans-serif' }}>
             {mode === 'choose' ? 'Sign In' : (isSignUp ? 'Create Account' : 'Sign In')}
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 text-2xl leading-none">×</button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 text-2xl leading-none">Ã</button>
         </div>
         <p className="text-sm text-gray-500 mb-5" style={{ fontFamily: 'Manrope, sans-serif' }}>
           Sign in to sync your check-ins across devices and appear on the leaderboard.
@@ -1626,12 +1626,12 @@ function AuthModal({ onClose }: { onClose: () => void }) {
               className="w-full rounded-2xl py-3.5 font-bold text-sm text-white"
               style={{ background: '#a03b00', fontFamily: 'Manrope, sans-serif', opacity: loading ? 0.7 : 1 }}
             >
-              {loading ? 'Please wait…' : (isSignUp ? 'Create Account' : 'Sign In')}
+              {loading ? 'Please waitâ¦' : (isSignUp ? 'Create Account' : 'Sign In')}
             </button>
             <button type="button" onClick={() => setMode('choose')}
               className="text-xs text-gray-400 text-center mt-1"
               style={{ fontFamily: 'Manrope, sans-serif' }}
-            >← Back</button>
+            >â Back</button>
           </form>
         )}
       </div>
@@ -1639,7 +1639,7 @@ function AuthModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-// ─── Profile Screen ────────────────────────────────────────────────────────────
+// âââ Profile Screen ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const LEADERBOARD_SEEDS = [
   { name: 'xplorer_abq',      count: 47 },
@@ -1704,12 +1704,12 @@ function ProfileScreen({
   }, [lbRows, myCount, user]);
 
   const ACHIEVEMENTS = [
-    { id: 'first', emoji: '🌱', label: 'First Check-in', unlocked: myCount >= 1 },
-    { id: 'five', emoji: '⚡', label: 'Explorer (5)', unlocked: myCount >= 5 },
-    { id: 'ten', emoji: '🥉', label: 'Adventurer (10)', unlocked: myCount >= 10 },
-    { id: 'twenty', emoji: '🥈', label: 'Trailblazer (20)', unlocked: myCount >= 20 },
-    { id: 'thirty5', emoji: '🥇', label: 'Pioneer (35)', unlocked: myCount >= 35 },
-    { id: 'fifty', emoji: '🏆', label: 'Legend (50)', unlocked: myCount >= 50 },
+    { id: 'first', emoji: 'ð±', label: 'First Check-in', unlocked: myCount >= 1 },
+    { id: 'five', emoji: 'â¡', label: 'Explorer (5)', unlocked: myCount >= 5 },
+    { id: 'ten', emoji: 'ð¥', label: 'Adventurer (10)', unlocked: myCount >= 10 },
+    { id: 'twenty', emoji: 'ð¥', label: 'Trailblazer (20)', unlocked: myCount >= 20 },
+    { id: 'thirty5', emoji: 'ð¥', label: 'Pioneer (35)', unlocked: myCount >= 35 },
+    { id: 'fifty', emoji: 'ð', label: 'Legend (50)', unlocked: myCount >= 50 },
   ];
 
   const nextLevel = getLevel(myCount + 1);
@@ -1785,8 +1785,8 @@ function ProfileScreen({
       <div className="grid grid-cols-3 gap-3 mb-4">
         {[
           { label: 'Places\nVisited', val: myCount.toString() },
-          { label: 'Next\nLevel', val: myCount >= 50 ? '🏆' : (level.next - myCount).toString() + ' away' },
-          { label: 'Rank', val: leaderboard.find(r => r.isMe)?.rank ? '#' + leaderboard.find(r => r.isMe)!.rank : '—' },
+          { label: 'Next\nLevel', val: myCount >= 50 ? 'ð' : (level.next - myCount).toString() + ' away' },
+          { label: 'Rank', val: leaderboard.find(r => r.isMe)?.rank ? '#' + leaderboard.find(r => r.isMe)!.rank : 'â' },
         ].map(s => (
           <div
             key={s.label}
@@ -1807,9 +1807,9 @@ function ProfileScreen({
       {/* Progress bar */}
       {myCount >= 50 ? (
         <div className="bg-white rounded-2xl p-4 mb-4 text-center" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
-          <span style={{ fontSize: '28px' }}>🏆</span>
+          <span style={{ fontSize: '28px' }}>ð</span>
           <p className="font-black text-sm mt-1" style={{ fontFamily: 'Epilogue, sans-serif', color: '#a03b00' }}>Max Level Reached!</p>
-          <p className="text-xs text-gray-400 mt-0.5" style={{ fontFamily: 'Manrope, sans-serif' }}>You're a Legend — {myCount} places explored!</p>
+          <p className="text-xs text-gray-400 mt-0.5" style={{ fontFamily: 'Manrope, sans-serif' }}>You're a Legend â {myCount} places explored!</p>
         </div>
       ) : (
         <div className="bg-white rounded-2xl p-4 mb-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
@@ -1850,7 +1850,7 @@ function ProfileScreen({
               opacity: a.unlocked ? 1 : 0.4,
             }}
           >
-            <span style={{ fontSize: '24px' }}>{a.unlocked ? a.emoji : '🔒'}</span>
+            <span style={{ fontSize: '24px' }}>{a.unlocked ? a.emoji : 'ð'}</span>
             <p className="text-xs font-semibold text-gray-600 leading-tight text-center" style={{ fontFamily: 'Manrope, sans-serif' }}>
               {a.label}
             </p>
@@ -1885,7 +1885,7 @@ function ProfileScreen({
               className="font-black text-sm w-6 text-center flex-shrink-0"
               style={{ fontFamily: 'Epilogue, sans-serif', color: row.rank <= 3 ? '#a03b00' : '#999' }}
             >
-              {row.rank === 1 ? '🥇' : row.rank === 2 ? '🥈' : row.rank === 3 ? '🥉' : `#${row.rank}`}
+              {row.rank === 1 ? 'ð¥' : row.rank === 2 ? 'ð¥' : row.rank === 3 ? 'ð¥' : `#${row.rank}`}
             </span>
             <div
               className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -1917,7 +1917,7 @@ function ProfileScreen({
         style={{ background: 'rgba(160,59,0,0.06)' }}
       >
         <p className="text-xs text-gray-500 text-center" style={{ fontFamily: 'Manrope, sans-serif' }}>
-          🎖️ Rankings are based on self-reported check-ins. We can't verify visits, but we trust you to explore honestly. The real prize is the memories you make!
+          ðï¸ Rankings are based on self-reported check-ins. We can't verify visits, but we trust you to explore honestly. The real prize is the memories you make!
         </p>
       </div>
 
@@ -1951,7 +1951,7 @@ function ProfileScreen({
                     <p className="text-sm font-bold truncate" style={{ fontFamily: 'Epilogue, sans-serif' }}>{p.name}</p>
                     <p className="text-xs text-gray-400" style={{ fontFamily: 'Manrope, sans-serif' }}>{p.category}</p>
                   </div>
-                  <span className="text-xs font-bold flex-shrink-0" style={{ color: '#a03b00' }}>✓</span>
+                  <span className="text-xs font-bold flex-shrink-0" style={{ color: '#a03b00' }}>â</span>
                 </div>
               ))
             }
@@ -1962,7 +1962,7 @@ function ProfileScreen({
   );
 }
 
-// ─── Loading Screen ────────────────────────────────────────────────────────────
+// âââ Loading Screen ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function LoadingScreen() {
   return (
@@ -1978,7 +1978,7 @@ function LoadingScreen() {
         ABQ Unplugged
       </h1>
       <p className="text-sm text-gray-400 mt-1" style={{ fontFamily: 'Manrope, sans-serif' }}>
-        Loading your city…
+        Loading your cityâ¦
       </p>
       <div
         className="mt-6 rounded-full overflow-hidden"
@@ -1993,7 +1993,7 @@ function LoadingScreen() {
   );
 }
 
-// ─── Site Banner ─────────────────────────────────────────────────────────────
+// âââ Site Banner âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const ADMIN_EMAIL = '4mattcarlson@gmail.com';
 
@@ -2009,7 +2009,7 @@ function SiteBanner({ banner }: { banner: BannerConfig | null }) {
   );
 }
 
-// ─── Admin Screen ─────────────────────────────────────────────────────────────
+// âââ Admin Screen âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function AdminScreen({ user, onBack }: { user: User | null; onBack: () => void }) {
   const [tab, setTab] = useState<'banner' | 'places'>('banner');
@@ -2111,7 +2111,7 @@ function AdminScreen({ user, onBack }: { user: User | null; onBack: () => void }
       {/* Content */}
       <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
 
-        {/* ── Banner Tab ── */}
+        {/* ââ Banner Tab ââ */}
         {tab === 'banner' && (
           <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{ background: 'white', borderRadius: '16px', padding: '18px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
@@ -2131,14 +2131,14 @@ function AdminScreen({ user, onBack }: { user: User | null; onBack: () => void }
               <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
                 {(['info', 'success', 'warning'] as const).map(ty => (
                   <button key={ty} onClick={() => setBannerType(ty)} style={{ flex: 1, padding: '8px 4px', borderRadius: '10px', fontSize: '13px', fontFamily: 'Manrope, sans-serif', fontWeight: 700, textTransform: 'capitalize', background: bannerType === ty ? '#a03b00' : '#f3f3f3', color: bannerType === ty ? 'white' : '#777', transition: 'all 0.15s' }}>
-                    {ty === 'info' ? '🔵 Info' : ty === 'success' ? '🟢 Good' : '🟡 Alert'}
+                    {ty === 'info' ? 'ðµ Info' : ty === 'success' ? 'ð¢ Good' : 'ð¡ Alert'}
                   </button>
                 ))}
               </div>
 
               {/* Message */}
               <p style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: '12px', color: '#666', marginBottom: '8px' }}>MESSAGE</p>
-              <textarea value={bannerMsg} onChange={e => setBannerMsg(e.target.value)} placeholder="e.g. 🎉 Balloon Fiesta this weekend — check the Events tab!" rows={3} style={{ ...inputStyle, resize: 'none' }} />
+              <textarea value={bannerMsg} onChange={e => setBannerMsg(e.target.value)} placeholder="e.g. ð Balloon Fiesta this weekend â check the Events tab!" rows={3} style={{ ...inputStyle, resize: 'none' }} />
 
               {/* Preview */}
               {bannerMsg && (
@@ -2151,13 +2151,13 @@ function AdminScreen({ user, onBack }: { user: User | null; onBack: () => void }
               )}
 
               <button onClick={saveBanner} disabled={bannerSaving} style={{ marginTop: '16px', width: '100%', padding: '14px', borderRadius: '12px', background: bannerSaved ? '#15803d' : '#a03b00', color: 'white', fontFamily: 'Manrope, sans-serif', fontWeight: 800, fontSize: '15px', transition: 'background 0.3s', opacity: bannerSaving ? 0.7 : 1 }}>
-                {bannerSaved ? '✓ Saved!' : bannerSaving ? 'Saving…' : 'Save Banner'}
+                {bannerSaved ? 'â Saved!' : bannerSaving ? 'Savingâ¦' : 'Save Banner'}
               </button>
             </div>
           </div>
         )}
 
-        {/* ── Places Tab ── */}
+        {/* ââ Places Tab ââ */}
         {tab === 'places' && (
           <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
 
@@ -2173,7 +2173,7 @@ function AdminScreen({ user, onBack }: { user: User | null; onBack: () => void }
                   </div>
                   {[
                     { key: 'description', label: 'Description', multi: true },
-                    { key: 'hours', label: 'Hours (e.g. Mon–Sat 10am–9pm)', multi: false },
+                    { key: 'hours', label: 'Hours (e.g. MonâSat 10amâ9pm)', multi: false },
                     { key: 'phone', label: 'Phone', multi: false },
                     { key: 'website', label: 'Website URL', multi: false },
                   ].map(f => (
@@ -2186,7 +2186,7 @@ function AdminScreen({ user, onBack }: { user: User | null; onBack: () => void }
                     </div>
                   ))}
                   <button onClick={saveEditingPlace} disabled={placeSaving} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#a03b00', color: 'white', fontFamily: 'Manrope, sans-serif', fontWeight: 800, fontSize: '15px', opacity: placeSaving ? 0.7 : 1, marginTop: '4px' }}>
-                    {placeSaving ? 'Saving…' : 'Save Changes'}
+                    {placeSaving ? 'Savingâ¦' : 'Save Changes'}
                   </button>
                 </div>
               </div>
@@ -2195,15 +2195,15 @@ function AdminScreen({ user, onBack }: { user: User | null; onBack: () => void }
             {/* Search */}
             <div style={{ position: 'relative' }}>
               <span className="material-symbols-outlined" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#bbb', pointerEvents: 'none' }}>search</span>
-              <input value={placeSearch} onChange={e => setPlaceSearch(e.target.value)} placeholder="Search places…" style={{ ...inputStyle, paddingLeft: '38px' }} />
+              <input value={placeSearch} onChange={e => setPlaceSearch(e.target.value)} placeholder="Search placesâ¦" style={{ ...inputStyle, paddingLeft: '38px' }} />
             </div>
 
-            <p style={{ fontFamily: 'Manrope, sans-serif', fontSize: '12px', color: '#aaa', textAlign: 'center' }}>⭐ = Featured in Discover &nbsp;·&nbsp; ✏️ = Edit details</p>
+            <p style={{ fontFamily: 'Manrope, sans-serif', fontSize: '12px', color: '#aaa', textAlign: 'center' }}>â­ = Featured in Discover &nbsp;Â·&nbsp; âï¸ = Edit details</p>
 
             {placesLoading ? (
               <div style={{ textAlign: 'center', padding: '50px 0', color: '#bbb' }}>
                 <span className="material-symbols-outlined" style={{ fontSize: '36px', display: 'block', marginBottom: '10px' }}>sync</span>
-                <p style={{ fontFamily: 'Manrope, sans-serif', fontSize: '13px' }}>Loading places…</p>
+                <p style={{ fontFamily: 'Manrope, sans-serif', fontSize: '13px' }}>Loading placesâ¦</p>
               </div>
             ) : filtered.map(place => (
               <div key={place.id} style={{ background: 'white', borderRadius: '14px', padding: '12px 14px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -2226,7 +2226,7 @@ function AdminScreen({ user, onBack }: { user: User | null; onBack: () => void }
   );
 }
 
-// ─── Navigation ──────────────────────────────────────────────────────────────
+// âââ Navigation ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const NAV_ITEMS = [
   { id: 'discover', label: 'Discover', icon: 'explore' },
@@ -2237,7 +2237,7 @@ const NAV_ITEMS = [
 
 type TabId = (typeof NAV_ITEMS)[number]['id'];
 
-// ─── Main App ──────────────────────────────────────────────────────────────────
+// âââ Main App ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>('discover');
@@ -2249,7 +2249,7 @@ export default function App() {
   const [selectedEvent, setSelectedEvent] = useState<TMEvent | null>(null);
   const [checkedIn, setCheckedIn] = useState<Set<string>>(loadCheckins);
 
-  // ── Firebase Auth ──
+  // ââ Firebase Auth ââ
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -2289,7 +2289,7 @@ export default function App() {
 
   const { coords, error: geoError, requested: geoRequested, request: requestGeo } = useGeolocation();
 
-  // ── Browser history management (prevents swipe-back leaving the site) ──
+  // ââ Browser history management (prevents swipe-back leaving the site) ââ
   const navigateTab = useCallback((tab: TabId) => {
     setActiveTab(tab);
     window.history.pushState({ tab, modal: null }, '', `#${tab}`);
@@ -2308,11 +2308,26 @@ export default function App() {
   const closePlaceModal = useCallback(() => setSelectedPlace(null), []);
   const closeEventModal = useCallback(() => setSelectedEvent(null), []);
 
+  // ── Admin ──
+  const [showAdmin, setShowAdmin] = useState(() => window.location.hash === '#admin');
+
+  // Listen for hash changes so navigating to #admin after mount works
   useEffect(() => {
-    // Set initial history entry (preserve #admin so the admin panel can mount)
-    if (window.location.hash !== '#admin') {
-      window.history.replaceState({ tab: 'discover', modal: null }, '', '#discover');
-    }
+    const handleHashChange = () => {
+      if (window.location.hash === '#admin') {
+        setShowAdmin(true);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  useEffect(() => {
+    // When admin panel is open, don't manipulate the URL at all
+    if (showAdmin) return;
+
+    // Set initial history entry
+    window.history.replaceState({ tab: 'discover', modal: null }, '', '#discover');
 
     const handlePopState = (e: PopStateEvent) => {
       const state = e.state;
@@ -2329,23 +2344,9 @@ export default function App() {
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [selectedPlace, selectedEvent, activeTab]);
+  }, [selectedPlace, selectedEvent, activeTab, showAdmin]);
 
   const [checkInError, setCheckInError] = useState<string | null>(null);
-
-  // ── Admin & Site Banner ──
-  const [showAdmin, setShowAdmin] = useState(() => window.location.hash === '#admin');
-
-  // Listen for hash changes so navigating to #admin after mount works
-  useEffect(() => {
-    const handleHashChange = () => {
-      if (window.location.hash === '#admin') {
-        setShowAdmin(true);
-      }
-    };
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
 
   const [siteBanner, setSiteBanner] = useState<BannerConfig | null>(null);
 
@@ -2373,7 +2374,7 @@ export default function App() {
 
     // Require location for checking IN
     if (!coords) {
-      setCheckInError('Enable location to check in — you need to be near the place!');
+      setCheckInError('Enable location to check in â you need to be near the place!');
       requestGeo();
       setTimeout(() => setCheckInError(null), 5000);
       return;
@@ -2384,20 +2385,20 @@ export default function App() {
     if (place?.lat && place?.lng) {
       const dist = distanceMiles(coords.lat, coords.lng, place.lat, place.lng);
       if (dist > 0.5) {
-        setCheckInError(`You're ${formatDist(dist)} away — get within 0.5 mi to check in!`);
+        setCheckInError(`You're ${formatDist(dist)} away â get within 0.5 mi to check in!`);
         setTimeout(() => setCheckInError(null), 5000);
         return;
       }
     }
 
-    // If place has no coordinates, we can't verify proximity — block check-in
+    // If place has no coordinates, we can't verify proximity â block check-in
     if (place && !place.lat && !place.lng) {
-      setCheckInError('Check-in unavailable — this place has no location data.');
+      setCheckInError('Check-in unavailable â this place has no location data.');
       setTimeout(() => setCheckInError(null), 4000);
       return;
     }
 
-    // Proximity OK → check in
+    // Proximity OK â check in
     // Haptic feedback: iOS/Android vibration on successful check-in
     if ('vibrate' in navigator) { try { navigator.vibrate([12, 40, 12]); } catch {} }
     setCheckedIn(prev => {
@@ -2437,7 +2438,7 @@ export default function App() {
     loadData();
   }, []);
 
-  // ── Admin route ──
+  // ââ Admin route ââ
   if (showAdmin) {
     if (!user || user.email !== ADMIN_EMAIL) {
       return (
@@ -2482,11 +2483,11 @@ export default function App() {
         @import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@400;700;900&family=Manrope:wght@400;500;600;700;800&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
 
-        /* ── Reset ── */
+        /* ââ Reset ââ */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root { color-scheme: light; }
 
-        /* ── Safe-area CSS variables (Apple HIG: viewport-fit=cover) ── */
+        /* ââ Safe-area CSS variables (Apple HIG: viewport-fit=cover) ââ */
         :root {
           --sat: env(safe-area-inset-top, 0px);
           --sab: env(safe-area-inset-bottom, 0px);
@@ -2494,7 +2495,7 @@ export default function App() {
           --sar: env(safe-area-inset-right, 0px);
         }
 
-        /* ── Base document ── */
+        /* ââ Base document ââ */
         html {
           -webkit-text-size-adjust: 100%;
           text-size-adjust: 100%;
@@ -2505,18 +2506,18 @@ export default function App() {
           font-family: -apple-system, 'Manrope', system-ui, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
-          /* NOTE: no position:fixed here — that blocks iOS Safari address-bar auto-hide.
+          /* NOTE: no position:fixed here â that blocks iOS Safari address-bar auto-hide.
              The app root div uses height:100dvh to fill the visual viewport instead. */
           overflow: hidden;
           overscroll-behavior: none;
           height: 100%;
         }
 
-        /* ── Scrollbars: hidden (native iOS feel) ── */
+        /* ââ Scrollbars: hidden (native iOS feel) ââ */
         ::-webkit-scrollbar { display: none; }
         * { scrollbar-width: none; }
 
-        /* ── Touch: Apple HIG ≥ 44×44pt tap targets ── */
+        /* ââ Touch: Apple HIG â¥ 44Ã44pt tap targets ââ */
         button, a, [role="button"], [role="tab"] {
           min-height: 44px;
           -webkit-tap-highlight-color: transparent;
@@ -2525,32 +2526,32 @@ export default function App() {
           cursor: pointer;
         }
 
-        /* ── Press state: iOS-style spring-back ── */
+        /* ââ Press state: iOS-style spring-back ââ */
         button:active, [role="button"]:active {
           opacity: 0.65;
           transform: scale(0.96);
         }
         button { transition: opacity 0.12s ease, transform 0.12s ease; }
 
-        /* ── Prevent unwanted text selection on UI chrome ── */
+        /* ââ Prevent unwanted text selection on UI chrome ââ */
         header, nav, button, [role="button"] {
           -webkit-user-select: none;
           user-select: none;
         }
 
-        /* ── Momentum scrolling + contain overscroll ── */
+        /* ââ Momentum scrolling + contain overscroll ââ */
         .overflow-y-auto, .overflow-x-auto {
           -webkit-overflow-scrolling: touch;
           overscroll-behavior: contain;
         }
 
-        /* ── Input font-size ≥ 16px prevents iOS auto-zoom on focus ── */
+        /* ââ Input font-size â¥ 16px prevents iOS auto-zoom on focus ââ */
         input, textarea, select {
           font-size: max(16px, 1rem) !important;
           -webkit-tap-highlight-color: transparent;
         }
 
-        /* ── iOS Liquid Glass (iOS 26 HIG) — saturate + blur backdrop ── */
+        /* ââ iOS Liquid Glass (iOS 26 HIG) â saturate + blur backdrop ââ */
         .glass {
           background: rgba(245, 247, 245, 0.76);
           backdrop-filter: saturate(180%) blur(28px);
@@ -2568,7 +2569,7 @@ export default function App() {
         className="flex flex-col mx-auto relative"
         style={{ maxWidth: '480px', height: '100dvh', background: '#f5f7f5', overflow: 'hidden' }}
       >
-        {/* Glassmorphism header — Liquid Glass (iOS 26 HIG) with Dynamic Island / notch safe area */}
+        {/* Glassmorphism header â Liquid Glass (iOS 26 HIG) with Dynamic Island / notch safe area */}
         <header
           className="glass flex-shrink-0 px-5 flex items-center justify-between"
           style={{
@@ -2655,7 +2656,7 @@ export default function App() {
           )}
         </main>
 
-        {/* Bottom navigation — Liquid Glass with home indicator safe area */}
+        {/* Bottom navigation â Liquid Glass with home indicator safe area */}
         <nav
           className="glass flex-shrink-0 flex items-center px-2"
           style={{
