@@ -2503,7 +2503,7 @@ function TagRulesTab() {
 
   const addCat = () => {
     const name = prompt('New tag category name (e.g. "nightlife"):');
-    if (name && name.trim()) setRules(r => ({ ...r, categoryKeywords: { ...r.categoryKeywords, [name.trim()]: [] } })));
+    if (name && name.trim()) setRules(r => ({ ...r, categoryKeywords: { ...r.categoryKeywords, [name.trim()]: [] } }));
   };
 
   const removeCat = (cat: string) => setRules(r => {
@@ -2748,5 +2748,491 @@ function AdminScreen({ user, onBack }: { user: User | null; onBack: () => void }
         )}
       </div>
     </div>
+  );
+}
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState<TabId>('discover');
+  const [places, setPlaces] = useState<Place[]>([]);
+  const [events, setEvents] = useState<TMEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<TMEvent | null>(null);
+  const [checkedIn, setCheckedIn] = useState<Set<string>>(loadCheckins);
+
+  // ââ Firebase Auth ââ
+  const [user, setUser] = useState<User | null>(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const syncTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(fbAuth, async (u) => {
+      setUser(u);
+      setAuthReady(true);
+      if (u) {
+        // Load check-ins from Firestore on sign-in
+        try {
+          const snap = await getDoc(doc(fbDb, 'users', u.uid));
+          if (snap.exists()) {
+            const data = snap.data();
+            if (Array.isArray(data.checkIns) && data.checkIns.length > 0) {
+              const merged = new Set<string>([...loadCheckins(), ...data.checkIns]);
+              setCheckedIn(merged);
+              saveCheckins(merged);
+            }
+          }
+        } catch (err) { console.error('Load checkins error:', err); }
+      }
+    });
+    return unsub;
+  }, []);
+
+  // Debounced Firestore sync when checkedIn changes and user is signed in
+  useEffect(() => {
+    if (!user || !authReady) return;
+    if (syncTimeout.current) clearTimeout(syncTimeout.current);
+    syncTimeout.current = setTimeout(() => {
+      syncCheckinsToFirestore(user.uid, checkedIn, user.displayName || user.email || 'Explorer');
+    }, 1500);
+    return () => { if (syncTimeout.current) clearTimeout(syncTimeout.current); };
+  }, [checkedIn, user, authReady]);
+
+  const { coords, error: geoError, requested: geoRequested, request: requestGeo } = useGeolocation();
+
+  // ââ Browser history management (prevents swipe-back leaving the site) ââ
+  const navigateTab = useCallback((tab: TabId) => {
+    setActiveTab(tab);
+    window.history.pushState({ tab, modal: null }, '', `#${tab}`);
+  }, []);
+
+  const openPlaceModal = useCallback((place: Place) => {
+    setSelectedPlace(place);
+    window.history.pushState({ tab: null, modal: 'place', id: place.id }, '', `#place/${place.id}`);
+  }, []);
+
+  const openEventModal = useCallback((event: TMEvent) => {
+    setSelectedEvent(event);
+    window.history.pushState({ tab: null, modal: 'event', id: event.id }, '', `#event/${event.id}`);
+  }, []);
+
+  const closePlaceModal = useCallback(() => setSelectedPlace(null), []);
+  const closeEventModal = useCallback(() => setSelectedEvent(null), []);
+
+  // ── Admin ──
+  const [currentHash, setCurrentHash] = useState(() => window.location.hash);
+  const showAdmin = currentHash === '#admin';
+
+  // Listen for hash changes so navigating to #admin after mount works
+  // Keep currentHash in sync with all navigation methods (hashchange + popstate)
+  useEffect(() => {
+    const syncHash = () => setCurrentHash(window.location.hash);
+    window.addEventListener('hashchange', syncHash);
+    window.addEventListener('popstate', syncHash);
+    return () => {
+      window.removeEventListener('hashchange', syncHash);
+      window.removeEventListener('popstate', syncHash);
+    };
+  }, []);
+
+  useEffect(() => {
+    // When admin panel is open, don't manipulate the URL at all
+    if (showAdmin) return;
+
+    // Set initial history entry
+    window.history.replaceState({ tab: 'discover', modal: null }, '', '#discover');
+
+    const handlePopState = (e: PopStateEvent) => {
+      const state = e.state;
+      // If going back from a modal, close it
+      if (selectedPlace) { setSelectedPlace(null); return; }
+      if (selectedEvent) { setSelectedEvent(null); return; }
+      // If going back between tabs, go to that tab (or default to discover)
+      if (state?.tab) {
+        setActiveTab(state.tab);
+      } else {
+        // Push a new state to prevent leaving the site
+        window.history.pushState({ tab: activeTab, modal: null }, '', `#${activeTab}`);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [selectedPlace, selectedEvent, activeTab, showAdmin]);
+
+  const [checkInError, setCheckInError] = useState<string | null>(null);
+
+  const [siteBanner, setSiteBanner] = useState<BannerConfig | null>(null);
+
+  useEffect(() => {
+    getDoc(doc(fbDb, 'config', 'siteConfig')).then(snap => {
+      if (snap.exists()) {
+        const d = snap.data();
+        if (d.banner?.active) setSiteBanner(d.banner as BannerConfig);
+      }
+    });
+  }, []);
+
+  const handleCheckIn = useCallback((placeId: string) => {
+    // Allow un-checking without proximity
+    if (checkedIn.has(placeId)) {
+      setCheckedIn(prev => {
+        const next = new Set(prev);
+        next.delete(placeId);
+        saveCheckins(next);
+        return next;
+      });
+      setCheckInError(null);
+      return;
+    }
+
+    // Require location for checking IN
+    if (!coords) {
+      setCheckInError('Enable location to check in â you need to be near the place!');
+      requestGeo();
+      setTimeout(() => setCheckInError(null), 5000);
+      return;
+    }
+
+    // Find the place and verify proximity (within 0.5 miles)
+    const place = places.find(p => p.id === placeId);
+    if (place?.lat && place?.lng) {
+      const dist = distanceMiles(coords.lat, coords.lng, place.lat, place.lng);
+      if (dist > 0.5) {
+        setCheckInError(`You're ${formatDist(dist)} away â get within 0.5 mi to check in!`);
+        setTimeout(() => setCheckInError(null), 5000);
+        return;
+      }
+    }
+
+    // If place has no coordinates, we can't verify proximity â block check-in
+    if (place && !place.lat && !place.lng) {
+      setCheckInError('Check-in unavailable â this place has no location data.');
+      setTimeout(() => setCheckInError(null), 4000);
+      return;
+    }
+
+    // Proximity OK â check in
+    // Haptic feedback: iOS/Android vibration on successful check-in
+    if ('vibrate' in navigator) { try { navigator.vibrate([12, 40, 12]); } catch {} }
+    setCheckedIn(prev => {
+      const next = new Set(prev);
+      next.add(placeId);
+      saveCheckins(next);
+      return next;
+    });
+    setCheckInError(null);
+  }, [checkedIn, coords, places, requestGeo]);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [placesResult, eventsResult] = await Promise.allSettled([
+          fetch('/places-data.json').then(r => r.json()),
+          fetch('/data/ticketmaster-events.json').then(r => r.json()),
+        ]);
+
+        if (placesResult.status === 'fulfilled') {
+          const data = placesResult.value;
+          setPlaces(Array.isArray(data) ? data : []);
+        }
+
+        if (eventsResult.status === 'fulfilled') {
+          const data = eventsResult.value;
+          setEvents(Array.isArray(data) ? data : []);
+        }
+      } catch (err) {
+        console.error('Failed to load data:', err);
+        setLoadError(true);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, []);
+
+  // ââ Admin route ââ
+  if (showAdmin) {
+    if (!user || user.email !== ADMIN_EMAIL) {
+      return (
+        <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '32px', background: '#f5f7f5' }}>
+          <ABQUnpluggedLogo size={52} />
+          <p style={{ fontFamily: 'Epilogue, sans-serif', fontWeight: 900, fontSize: '20px', letterSpacing: '-0.5px' }}>Admin Access</p>
+          <p style={{ fontFamily: 'Manrope, sans-serif', fontSize: '14px', color: '#666', textAlign: 'center', lineHeight: 1.5 }}>
+            Sign in with the owner account ({ADMIN_EMAIL}) to access the admin panel.
+          </p>
+          <button onClick={() => setShowAuthModal(true)} style={{ padding: '13px 28px', background: '#a03b00', color: 'white', borderRadius: '12px', fontFamily: 'Manrope, sans-serif', fontWeight: 800, fontSize: '15px' }}>
+            Sign In
+          </button>
+          <button onClick={() => { setCurrentHash("#discover"); window.history.replaceState({}, '', '#discover'); }} style={{ color: '#aaa', fontSize: '13px', fontFamily: 'Manrope, sans-serif' }}>
+            Back to App
+          </button>
+          {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
+        </div>
+      );
+    }
+    return <AdminScreen user={user} onBack={() => { setCurrentHash("#discover"); window.history.replaceState({}, '', '#discover'); }} />;
+  }
+
+  if (loading) return <LoadingScreen />;
+  if (loadError) return (
+    <div className="fixed inset-0 flex flex-col items-center justify-center gap-3 px-8" style={{ background: '#f5f7f5' }}>
+      <ABQUnpluggedLogo size={56} />
+      <h2 className="text-xl font-black uppercase tracking-tighter text-center" style={{ fontFamily: 'Epilogue, sans-serif', color: '#a03b00' }}>Couldn't Load Content</h2>
+      <p className="text-sm text-gray-500 text-center" style={{ fontFamily: 'Manrope, sans-serif' }}>Check your connection and try again.</p>
+      <button
+        onClick={() => { setLoadError(false); setLoading(true); }}
+        className="mt-2 px-6 py-3 rounded-2xl font-bold text-sm text-white"
+        style={{ background: '#a03b00', fontFamily: 'Manrope, sans-serif' }}
+      >
+        Retry
+      </button>
+    </div>
+  );
+
+  return (
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@400;700;900&family=Manrope:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+        /* ââ Reset ââ */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root { color-scheme: light; }
+
+        /* ââ Safe-area CSS variables (Apple HIG: viewport-fit=cover) ââ */
+        :root {
+          --sat: env(safe-area-inset-top, 0px);
+          --sab: env(safe-area-inset-bottom, 0px);
+          --sal: env(safe-area-inset-left, 0px);
+          --sar: env(safe-area-inset-right, 0px);
+        }
+
+        /* ââ Base document ââ */
+        html {
+          -webkit-text-size-adjust: 100%;
+          text-size-adjust: 100%;
+          height: 100%;
+        }
+        body {
+          background: #f5f7f5;
+          font-family: -apple-system, 'Manrope', system-ui, sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          /* NOTE: no position:fixed here â that blocks iOS Safari address-bar auto-hide.
+             The app root div uses height:100dvh to fill the visual viewport instead. */
+          overflow: hidden;
+          overscroll-behavior: none;
+          height: 100%;
+        }
+
+        /* ââ Scrollbars: hidden (native iOS feel) ââ */
+        ::-webkit-scrollbar { display: none; }
+        * { scrollbar-width: none; }
+
+        /* ââ Touch: Apple HIG â¥ 44Ã44pt tap targets ââ */
+        button, a, [role="button"], [role="tab"] {
+          min-height: 44px;
+          -webkit-tap-highlight-color: transparent;
+          tap-highlight-color: transparent;
+          touch-action: manipulation;
+          cursor: pointer;
+        }
+
+        /* ââ Press state: iOS-style spring-back ââ */
+        button:active, [role="button"]:active {
+          opacity: 0.65;
+          transform: scale(0.96);
+        }
+        button { transition: opacity 0.12s ease, transform 0.12s ease; }
+
+        /* ââ Prevent unwanted text selection on UI chrome ââ */
+        header, nav, button, [role="button"] {
+          -webkit-user-select: none;
+          user-select: none;
+        }
+
+        /* ââ Momentum scrolling + contain overscroll ââ */
+        .overflow-y-auto, .overflow-x-auto {
+          -webkit-overflow-scrolling: touch;
+          overscroll-behavior: contain;
+        }
+
+        /* ââ Input font-size â¥ 16px prevents iOS auto-zoom on focus ââ */
+        input, textarea, select {
+          font-size: max(16px, 1rem) !important;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        /* ââ iOS Liquid Glass (iOS 26 HIG) â saturate + blur backdrop ââ */
+        .glass {
+          background: rgba(245, 247, 245, 0.76);
+          backdrop-filter: saturate(180%) blur(28px);
+          -webkit-backdrop-filter: saturate(180%) blur(28px);
+        }
+        .glass-card {
+          background: rgba(255, 255, 255, 0.82);
+          backdrop-filter: saturate(160%) blur(20px);
+          -webkit-backdrop-filter: saturate(160%) blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.55);
+        }
+      `}</style>
+
+      <div
+        className="flex flex-col mx-auto relative"
+        style={{ maxWidth: '480px', height: '100dvh', background: '#f5f7f5', overflow: 'hidden' }}
+      >
+        {/* Glassmorphism header â Liquid Glass (iOS 26 HIG) with Dynamic Island / notch safe area */}
+        <header
+          className="glass flex-shrink-0 px-5 flex items-center justify-between"
+          style={{
+            paddingTop: 'calc(var(--sat) + 12px)',
+            paddingBottom: '12px',
+            borderBottom: '1px solid rgba(0,0,0,0.06)',
+            zIndex: 40,
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <ABQUnpluggedLogo size={30} />
+            <span
+              className="font-black uppercase tracking-tighter text-base"
+              style={{ fontFamily: 'Epilogue, sans-serif', color: '#a03b00' }}
+            >
+              ABQ Unplugged
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            {/* Location indicator */}
+            <button
+              onClick={requestGeo}
+              className="w-11 h-11 rounded-full flex items-center justify-center"
+              style={{ background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}
+              title={coords ? 'Location active' : 'Enable location'}
+              aria-label={coords ? 'Location active' : 'Enable location'}
+            >
+              <span
+                className="material-symbols-outlined"
+                style={{
+                  fontSize: '18px',
+                  color: coords ? '#a03b00' : '#bbb',
+                  fontVariationSettings: coords ? "'FILL' 1" : "'FILL' 0",
+                }}
+              >
+                my_location
+              </span>
+            </button>
+          </div>
+        </header>
+
+        {/* Site-wide announcement banner */}
+        <SiteBanner banner={siteBanner} />
+
+        {/* Screen content */}
+        <main className="flex-1 overflow-hidden">
+          {activeTab === 'discover' && (
+            <DiscoverScreen
+              places={places}
+              events={events}
+              onPlaceSelect={openPlaceModal}
+              onEventSelect={openEventModal}
+              coords={coords}
+              geoRequested={geoRequested}
+              geoError={geoError}
+              onRequestGeo={requestGeo}
+              checkedIn={checkedIn}
+              onCheckIn={handleCheckIn}
+            />
+          )}
+          {activeTab === 'events' && (
+            <EventsScreen events={events} onEventSelect={openEventModal} />
+          )}
+          {activeTab === 'places' && (
+            <PlacesScreen
+              places={places}
+              onPlaceSelect={openPlaceModal}
+              coords={coords}
+              geoRequested={geoRequested}
+              geoError={geoError}
+              onRequestGeo={requestGeo}
+              checkedIn={checkedIn}
+              onCheckIn={handleCheckIn}
+            />
+          )}
+          {activeTab === 'profile' && (
+            <ProfileScreen
+              checkedIn={checkedIn}
+              user={user}
+              places={places}
+              onSignIn={() => setShowAuthModal(true)}
+              onSignOut={() => signOut(fbAuth)}
+            />
+          )}
+        </main>
+
+        {/* Bottom navigation â Liquid Glass with home indicator safe area */}
+        <nav
+          className="glass flex-shrink-0 flex items-center px-2"
+          style={{
+            paddingTop: '8px',
+            paddingBottom: 'calc(var(--sab) + 8px)',
+            borderTop: '1px solid rgba(0,0,0,0.07)',
+            zIndex: 40,
+          }}
+        >
+          {NAV_ITEMS.map(item => (
+            <button
+              key={item.id}
+              onClick={() => navigateTab(item.id)}
+              aria-label={item.label}
+              className="flex-1 flex flex-col items-center gap-0.5 py-1 transition-all"
+              style={{ minHeight: '44px' }}
+            >
+              <span
+                className="material-symbols-outlined"
+                style={{
+                  fontSize: '24px',
+                  color: activeTab === item.id ? '#a03b00' : '#bbb',
+                  fontVariationSettings:
+                    activeTab === item.id
+                      ? "'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24"
+                      : "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24",
+                  transition: 'all 0.2s',
+                }}
+              >
+                {item.icon}
+              </span>
+              <span
+                className="text-xs font-semibold"
+                style={{
+                  color: activeTab === item.id ? '#a03b00' : '#bbb',
+                  fontFamily: 'Manrope, sans-serif',
+                  fontSize: '10px',
+                }}
+              >
+                {item.label}
+              </span>
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      {/* Detail Modals */}
+      {selectedPlace && (
+        <PlaceDetailModal
+          place={selectedPlace}
+          onClose={() => { closePlaceModal(); window.history.back(); }}
+          isCheckedIn={checkedIn.has(selectedPlace.id)}
+          onCheckIn={() => handleCheckIn(selectedPlace.id)}
+          checkInError={checkInError}
+        />
+      )}
+      {selectedEvent && (
+        <EventDetailModal event={selectedEvent} onClose={() => { closeEventModal(); window.history.back(); }} />
+      )}
+      {showAuthModal && (
+        <AuthModal onClose={() => setShowAuthModal(false)} />
+      )}
+    </>
   );
 }
