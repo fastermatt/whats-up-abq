@@ -3367,24 +3367,33 @@ export default function App() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [placesResult, tmResult, ebResult] = await Promise.allSettled([
-          fetch('/places-data.json').then(r => r.json()),
-          fetch('/data/ticketmaster-events.json').then(r => r.json()),
-          fetch('/data/eventbrite-events.json').then(r => r.ok ? r.json() : []),
-        ]);
+        const safeJson = (r: Response) => r.ok ? r.json() : Promise.resolve([]);
+        const [placesResult, tmResult, ebResult, sgResult, bitResult, muResult] =
+          await Promise.allSettled([
+            fetch('/places-data.json').then(r => r.json()),
+            fetch('/data/ticketmaster-events.json').then(r => r.json()),
+            fetch('/data/eventbrite-events.json').then(safeJson),
+            fetch('/data/seatgeek-events.json').then(safeJson),
+            fetch('/data/bandsintown-events.json').then(safeJson),
+            fetch('/data/meetup-events.json').then(safeJson),
+          ]);
 
         if (placesResult.status === 'fulfilled') {
           const data = placesResult.value;
           setPlaces(Array.isArray(data) ? data : []);
         }
 
-        // Merge Ticketmaster + Eventbrite events, deduplicated by id
-        const tmEvents = tmResult.status === 'fulfilled' && Array.isArray(tmResult.value)
-          ? tmResult.value : [];
-        const ebEvents = ebResult.status === 'fulfilled' && Array.isArray(ebResult.value)
-          ? ebResult.value : [];
+        // Merge all event sources, deduplicating by id
+        const toArr = (r: PromiseSettledResult<unknown>) =>
+          r.status === 'fulfilled' && Array.isArray(r.value) ? r.value : [];
         const seen = new Set<string>();
-        const merged = [...tmEvents, ...ebEvents].filter(e => {
+        const merged = [
+          ...toArr(tmResult),
+          ...toArr(ebResult),
+          ...toArr(sgResult),
+          ...toArr(bitResult),
+          ...toArr(muResult),
+        ].filter((e: TMEvent) => {
           if (!e?.id || seen.has(e.id)) return false;
           seen.add(e.id);
           return true;

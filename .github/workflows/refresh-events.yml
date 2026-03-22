@@ -36,10 +36,13 @@ jobs:
       - name: Install dependencies
         run: npm ci --ignore-scripts
 
-      - name: Fetch Ticketmaster events & Eventbrite events & Google Places
+      - name: Fetch events from all sources & Google Places
         env:
-          TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
-          EVENTBRITE_TOKEN: ${{ secrets.EVENTBRITE_TOKEN }}
+          TICKETMASTER_API_KEY:  ${{ secrets.TICKETMASTER_API_KEY }}
+          EVENTBRITE_TOKEN:      ${{ secrets.EVENTBRITE_TOKEN }}
+          SEATGEEK_CLIENT_ID:    ${{ secrets.SEATGEEK_CLIENT_ID }}
+          BANDSINTOWN_APP_ID:    ${{ secrets.BANDSINTOWN_APP_ID }}
+          MEETUP_API_KEY:        ${{ secrets.MEETUP_API_KEY }}
           GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
           SKIP_PLACES: ${{ github.event.inputs.skip_places || 'false' }}
         run: node scripts/fetch-data.cjs
@@ -58,13 +61,24 @@ jobs:
           git config user.email "bot@abq-unplugged.app"
           git add public/data/ticketmaster-events.json \
                   public/data/eventbrite-events.json \
+                  public/data/seatgeek-events.json \
+                  public/data/bandsintown-events.json \
+                  public/data/meetup-events.json \
                   public/data/google-places.json \
                   public/places-data.json
           COUNT=$(node -e "
+            const files = [
+              './public/data/ticketmaster-events.json',
+              './public/data/eventbrite-events.json',
+              './public/data/seatgeek-events.json',
+              './public/data/bandsintown-events.json',
+              './public/data/meetup-events.json',
+            ];
             try {
-              const tm = require('./public/data/ticketmaster-events.json');
-              const eb = require('./public/data/eventbrite-events.json');
-              console.log((tm.length||0) + (eb.length||0));
+              const total = files.reduce((s,f) => {
+                try { return s + (require(f).length||0); } catch { return s; }
+              }, 0);
+              console.log(total);
             } catch { console.log('?'); }
           ")
           DATE=$(date -u '+%Y-%m-%d %H:%M UTC')
@@ -80,17 +94,22 @@ jobs:
         run: |
           echo "### Data Refresh Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          TM=0; EB=0; PL=0
-          [ -f public/data/ticketmaster-events.json ] && \
-            TM=$(node -e "try{console.log(require('./public/data/ticketmaster-events.json').length)}catch{console.log(0)}")
-          [ -f public/data/eventbrite-events.json ] && \
-            EB=$(node -e "try{console.log(require('./public/data/eventbrite-events.json').length)}catch{console.log(0)}")
-          [ -f public/places-data.json ] && \
-            PL=$(node -e "try{console.log(require('./public/places-data.json').length)}catch{console.log(0)}")
+          cnt() { node -e "try{console.log(require('$1').length)}catch{console.log(0)}"; }
+          TM=$(cnt ./public/data/ticketmaster-events.json)
+          EB=$(cnt ./public/data/eventbrite-events.json)
+          SG=$(cnt ./public/data/seatgeek-events.json)
+          BIT=$(cnt ./public/data/bandsintown-events.json)
+          MU=$(cnt ./public/data/meetup-events.json)
+          PL=$(cnt ./public/places-data.json)
+          TOTAL=$((TM + EB + SG + BIT + MU))
           echo "| Source | Count |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Ticketmaster events | $TM |" >> $GITHUB_STEP_SUMMARY
-          echo "| Eventbrite events   | $EB |" >> $GITHUB_STEP_SUMMARY
-          echo "| Places              | $PL |" >> $GITHUB_STEP_SUMMARY
+          echo "| Ticketmaster | $TM |" >> $GITHUB_STEP_SUMMARY
+          echo "| Eventbrite   | $EB |" >> $GITHUB_STEP_SUMMARY
+          echo "| SeatGeek     | $SG |" >> $GITHUB_STEP_SUMMARY
+          echo "| Bandsintown  | $BIT |" >> $GITHUB_STEP_SUMMARY
+          echo "| Meetup       | $MU |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Total events** | **$TOTAL** |" >> $GITHUB_STEP_SUMMARY
+          echo "| Places       | $PL |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Run at: $(date -u '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
