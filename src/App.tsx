@@ -2335,6 +2335,18 @@ export default function App() {
 
   // ── Admin & Site Banner ──
   const [showAdmin, setShowAdmin] = useState(() => window.location.hash === '#admin');
+
+  // Listen for hash changes so navigating to #admin after mount works
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash === '#admin') {
+        setShowAdmin(true);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
   const [siteBanner, setSiteBanner] = useState<BannerConfig | null>(null);
 
   useEffect(() => {
