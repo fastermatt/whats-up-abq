@@ -2751,6 +2751,17 @@ function AdminScreen({ user, onBack }: { user: User | null; onBack: () => void }
   );
 }
 
+// ─── Navigation ───────────────────────────────────────────────────────────────
+
+const NAV_ITEMS = [
+  { id: 'discover', label: 'Discover', icon: 'explore' },
+  { id: 'events',   label: 'Events',   icon: 'confirmation_number' },
+  { id: 'places',   label: 'Places',   icon: 'storefront' },
+  { id: 'profile',  label: 'Profile',  icon: 'person' },
+] as const;
+
+type TabId = (typeof NAV_ITEMS)[number]['id'];
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>('discover');
   const [places, setPlaces] = useState<Place[]>([]);
