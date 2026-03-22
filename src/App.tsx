@@ -3367,9 +3367,10 @@ export default function App() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [placesResult, eventsResult] = await Promise.allSettled([
+        const [placesResult, tmResult, ebResult] = await Promise.allSettled([
           fetch('/places-data.json').then(r => r.json()),
           fetch('/data/ticketmaster-events.json').then(r => r.json()),
+          fetch('/data/eventbrite-events.json').then(r => r.ok ? r.json() : []),
         ]);
 
         if (placesResult.status === 'fulfilled') {
@@ -3377,10 +3378,18 @@ export default function App() {
           setPlaces(Array.isArray(data) ? data : []);
         }
 
-        if (eventsResult.status === 'fulfilled') {
-          const data = eventsResult.value;
-          setEvents(Array.isArray(data) ? data : []);
-        }
+        // Merge Ticketmaster + Eventbrite events, deduplicated by id
+        const tmEvents = tmResult.status === 'fulfilled' && Array.isArray(tmResult.value)
+          ? tmResult.value : [];
+        const ebEvents = ebResult.status === 'fulfilled' && Array.isArray(ebResult.value)
+          ? ebResult.value : [];
+        const seen = new Set<string>();
+        const merged = [...tmEvents, ...ebEvents].filter(e => {
+          if (!e?.id || seen.has(e.id)) return false;
+          seen.add(e.id);
+          return true;
+        });
+        setEvents(merged);
       } catch (err) {
         console.error('Failed to load data:', err);
         setLoadError(true);

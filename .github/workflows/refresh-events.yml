@@ -1,0 +1,96 @@
+name: Refresh Event & Places Data
+
+on:
+  # Daily at 4 AM Mountain Time (11:00 UTC, accounting for MDT UTC-6)
+  schedule:
+    - cron: '0 11 * * *'
+
+  # Allow manual trigger from the GitHub Actions tab
+  workflow_dispatch:
+    inputs:
+      skip_places:
+        description: 'Skip Google Places refresh (faster, events only)'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  refresh-data:
+    name: Fetch fresh events & places
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          # Use a PAT so the push can trigger Netlify's deploy webhook
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Fetch Ticketmaster events & Eventbrite events & Google Places
+        env:
+          TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
+          EVENTBRITE_TOKEN: ${{ secrets.EVENTBRITE_TOKEN }}
+          GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
+          SKIP_PLACES: ${{ github.event.inputs.skip_places || 'false' }}
+        run: node scripts/fetch-data.cjs
+
+      - name: Check for data changes
+        id: diff
+        run: |
+          git diff --stat public/data/ public/places-data.json || true
+          CHANGED=$(git diff --name-only public/data/ public/places-data.json | wc -l)
+          echo "changed=$CHANGED" >> "$GITHUB_OUTPUT"
+
+      - name: Commit & push updated data
+        if: steps.diff.outputs.changed != '0'
+        run: |
+          git config user.name  "ABQ Unplugged Bot"
+          git config user.email "bot@abq-unplugged.app"
+          git add public/data/ticketmaster-events.json \
+                  public/data/eventbrite-events.json \
+                  public/data/google-places.json \
+                  public/places-data.json
+          COUNT=$(node -e "
+            try {
+              const tm = require('./public/data/ticketmaster-events.json');
+              const eb = require('./public/data/eventbrite-events.json');
+              console.log((tm.length||0) + (eb.length||0));
+            } catch { console.log('?'); }
+          ")
+          DATE=$(date -u '+%Y-%m-%d %H:%M UTC')
+          git commit -m "data: refresh events & places — ${COUNT} events as of ${DATE}"
+          git push
+
+      - name: No changes detected
+        if: steps.diff.outputs.changed == '0'
+        run: echo "Data is already up to date — no commit needed."
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "### Data Refresh Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          TM=0; EB=0; PL=0
+          [ -f public/data/ticketmaster-events.json ] && \
+            TM=$(node -e "try{console.log(require('./public/data/ticketmaster-events.json').length)}catch{console.log(0)}")
+          [ -f public/data/eventbrite-events.json ] && \
+            EB=$(node -e "try{console.log(require('./public/data/eventbrite-events.json').length)}catch{console.log(0)}")
+          [ -f public/places-data.json ] && \
+            PL=$(node -e "try{console.log(require('./public/places-data.json').length)}catch{console.log(0)}")
+          echo "| Source | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Ticketmaster events | $TM |" >> $GITHUB_STEP_SUMMARY
+          echo "| Eventbrite events   | $EB |" >> $GITHUB_STEP_SUMMARY
+          echo "| Places              | $PL |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Run at: $(date -u '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
