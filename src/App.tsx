@@ -2309,8 +2309,10 @@ export default function App() {
   const closeEventModal = useCallback(() => setSelectedEvent(null), []);
 
   useEffect(() => {
-    // Set initial history entry
-    window.history.replaceState({ tab: 'discover', modal: null }, '', '#discover');
+    // Set initial history entry (preserve #admin so the admin panel can mount)
+    if (window.location.hash !== '#admin') {
+      window.history.replaceState({ tab: 'discover', modal: null }, '', '#discover');
+    }
 
     const handlePopState = (e: PopStateEvent) => {
       const state = e.state;
