@@ -2309,17 +2309,19 @@ export default function App() {
   const closeEventModal = useCallback(() => setSelectedEvent(null), []);
 
   // ── Admin ──
-  const [showAdmin, setShowAdmin] = useState(() => window.location.hash === '#admin');
+  const [currentHash, setCurrentHash] = useState(() => window.location.hash);
+  const showAdmin = currentHash === '#admin';
 
   // Listen for hash changes so navigating to #admin after mount works
+  // Keep currentHash in sync with all navigation methods (hashchange + popstate)
   useEffect(() => {
-    const handleHashChange = () => {
-      if (window.location.hash === '#admin') {
-        setShowAdmin(true);
-      }
+    const syncHash = () => setCurrentHash(window.location.hash);
+    window.addEventListener('hashchange', syncHash);
+    window.addEventListener('popstate', syncHash);
+    return () => {
+      window.removeEventListener('hashchange', syncHash);
+      window.removeEventListener('popstate', syncHash);
     };
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   useEffect(() => {
