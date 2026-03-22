@@ -2015,10 +2015,6 @@ function SiteBanner({ banner }: { banner: BannerConfig | null }) {
 // ─── Admin Screen ─────────────────────────────────────────────────────────────
 // ─────────────────────────────────────────────────────────────────────────────
 
-type AdminTab = 'dashboard' | 'places' | 'events' | 'tagrules' | 'settings';// ─────────────────────────────────────────────────────────────────────────────
-// ─── Admin Screen ─────────────────────────────────────────────────────────────
-// ─────────────────────────────────────────────────────────────────────────────
-
 type AdminTab = 'dashboard' | 'places' | 'events' | 'tagrules' | 'settings';
 
 interface PlaceDoc {
@@ -2136,9 +2132,9 @@ function DashboardTab({ places, lbEntries }: { places: PlaceDoc[]; lbEntries: Lb
   const totalCheckIns = lbEntries.reduce((s, e) => s + (e.count || 0), 0);
   const featured = places.filter(p => p.isFeatured).length;
   const stats = [
-    { label: 'Total Places', value: places.length, icon: '📍' },
+    { label: 'Total Places', value: places.length, icon: '@' },
     { label: 'Featured',     value: featured,       icon: '⭐' },
-    { label: 'Users',        value: lbEntries.length, icon: '👤' },
+    { label: 'Users',        value: lbEntries.length, icon: 'U' },
     { label: 'Check-ins',   value: totalCheckIns,  icon: '✅' },
   ];
   return (
@@ -2154,7 +2150,7 @@ function DashboardTab({ places, lbEntries }: { places: PlaceDoc[]; lbEntries: Lb
         ))}
       </div>
       <div style={{ ...cardSty }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: '#1f2937', marginBottom: 12 }}🏆 Top Check-in Leaders</h3>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: '#1f2937', marginBottom: 12 }}>Top Check-in Leaders</h3>
         {lbEntries.slice(0, 10).map((entry, i) => (
           <div key={entry.uid} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < Math.min(lbEntries.length - 1, 9) ? '1px solid #f3f4f6' : 'none' }}>
             <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: i < 3 ? '#fbbf24' : '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 12 }}>{i + 1}</div>
@@ -2200,7 +2196,7 @@ function PlacesTab({ places, setPlaces }: { places: PlaceDoc[]; setPlaces: (fn: 
         setPlaces(prev => prev.map(p => p.id === editTarget.id ? { ...p, ...form } : p));
         flash('Place updated ✓'); setMode('list');
       } else {
-        const ref = await addDoc(collection(fbDb, 'places', form as Record<string,unknown>);
+        const ref = await addDoc(collection(fbDb, 'places'), form as Record<string,unknown>);
         setPlaces(prev => [...prev, { id: ref.id, ...form }]);
         flash('Place added ✓'); setMode('list');
       }
@@ -2237,7 +2233,7 @@ function PlacesTab({ places, setPlaces }: { places: PlaceDoc[]; setPlaces: (fn: 
   if (mode === 'add' || mode === 'edit') {
     return (
       <div>
-        <button style={{ ...btnSec, marginBottom: 16 }} onClick={() => setMode('list')}← Back to List</button>
+        <button style={{ ...btnSec, marginBottom: 16 }} onClick={() => setMode('list')}>← Back to List</button>
         <h2 style={{ fontSize: 20, fontWeight: 700, color: '#1f2937', marginBottom: 16 }}>
           {mode === 'edit' ? `Edit: ${editTarget?.name}` : 'Add New Place'}
         </h2>
@@ -2338,9 +2334,9 @@ function PlacesTab({ places, setPlaces }: { places: PlaceDoc[]; setPlaces: (fn: 
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                 <span style={{ fontSize: 15, fontWeight: 700, color: '#1f2937' }}>{p.name}</span>
-                {p.isFeatured && <span style={{ fontSize: 11, backgroundColor: '#fef3c7', color: '#92400e', padding: '2px 7px', borderRadius: 999 }}>⭐ Featured</span>}
+                {p.isFeatured && <span style={{ fontSize: 11, backgroundColor: '#fef3c7', color: '#92400e', padding: '2px 7px', borderRadius: 999 }}>* Featured</span>}
                 <span style={{ fontSize: 11, backgroundColor: '#f3f4f6', color: '#6b7280', padding: '2px 7px', borderRadius: 999 }}>{p.category}</span>
-                {p.rating ? <span style={{ fontSize: 11, color: '#9ca3af' }}★ {p.rating}</span> : null}
+                {p.rating ? <span style={{ fontSize: 11, color: '#9ca3af' }}>★ {p.rating}</span> : null}
               </div>
               {p.address && <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 2 }}>{p.address}</div>}
               {(p.tags||[]).length > 0 && (
@@ -2353,8 +2349,8 @@ function PlacesTab({ places, setPlaces }: { places: PlaceDoc[]; setPlaces: (fn: 
               <button onClick={() => toggleFeatured(p)} style={{ ...btnSec, padding: '4px 10px', fontSize: 12, backgroundColor: p.isFeatured ? '#fef3c7' : 'white' }}>
                 {p.isFeatured ? '★ Unfeature' : '☆ Feature'}
               </button>
-              <button onClick={() => startEdit(p)} style={{ ...btnSec, padding: '4px 10px', fontSize: 12 }}✏️ Edit</button>
-              <button onClick={() => deletePlace(p)} style={{ padding: '4px 10px', fontSize: 12, borderRadius: 6, border: '1px solid #fca5a5', background: '#fff5f5', color: '#dc2626', cursor: 'pointer' }}🗑 Delete</button>
+              <button onClick={() => startEdit(p)} style={{ ...btnSec, padding: '4px 10px', fontSize: 12 }}>Edit</button>
+              <button onClick={() => deletePlace(p)} style={{ padding: '4px 10px', fontSize: 12, borderRadius: 6, border: '1px solid #fca5a5', background: '#fff5f5', color: '#dc2626', cursor: 'pointer' }}>Delete</button>
             </div>
           </div>
         ))}
@@ -2457,14 +2453,14 @@ function EventsTab() {
             <div key={o.eventId} style={{ ...cardSty, display: 'flex', alignItems: 'flex-start', gap: 12 }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: '#1f2937' }}>{o.eventName || '(unnamed event)'}</div>
-                {o.venueName && <div style={{ fontSize: 12, color: '#6b7280' }}📍 {o.venueName}</div>}
+                {o.venueName && <div style={{ fontSize: 12, color: '#6b7280' }}>{o.venueName}</div>}
                 <div style={{ fontSize: 11, color: '#9ca3af', fontFamily: 'monospace', marginTop: 2 }}>ID: {o.eventId}</div>
                 {o.notes && <div style={{ fontSize: 12, color: '#6b7280', fontStyle: 'italic', marginTop: 2 }}>{o.notes}</div>}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
                   {o.customTags.map(t => <span key={t} style={{ fontSize: 11, backgroundColor: '#ede9e0', color: '#6b4c2a', padding: '2px 8px', borderRadius: 999 }}>{t}</span>)}
                 </div>
               </div>
-              <button onClick={() => deleteOverride(o.eventId)} style={{ padding: '4px 10px', fontSize: 12, borderRadius: 6, border: '1px solid #fca5a5', background: '#fff5f5', color: '#dc2626', cursor: 'pointer', flexShrink: 0 }}🗑 Delete</button>
+              <button onClick={() => deleteOverride(o.eventId)} style={{ padding: '4px 10px', fontSize: 12, borderRadius: 6, border: '1px solid #fca5a5', background: '#fff5f5', color: '#dc2626', cursor: 'pointer', flexShrink: 0 }}>Delete</button>
             </div>
           ))}
           {overrides.length === 0 && <p style={{ textAlign: 'center', color: '#9ca3af', padding: 40 }}>No overrides yet. Add one above to manually tag specific events.</p>}
@@ -2507,7 +2503,7 @@ function TagRulesTab() {
 
   const addCat = () => {
     const name = prompt('New tag category name (e.g. "nightlife"):');
-    if (name && name.trim()) setRules(r => ({ ...r, categoryKeywords: { ...r.categoryKeywords, [name.trim()]: [] } }));
+    if (name && name.trim()) setRules(r => ({ ...r, categoryKeywords: { ...r.categoryKeywords, [name.trim()]: [] } })));
   };
 
   const removeCat = (cat: string) => setRules(r => {
@@ -2523,7 +2519,7 @@ function TagRulesTab() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, color: '#1f2937', flex: 1 }}>Tag Detection Rules</h2>
         <button style={{ ...btnPrim, opacity: saving ? 0.7 : 1 }} onClick={saveRules} disabled={saving}>
-          {saving ? 'Saving…' : '💾 Save Rules'}
+          {saving ? 'Saving…' : 'Save Rules'}
         </button>
       </div>
       <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 16 }}>
@@ -2535,7 +2531,7 @@ function TagRulesTab() {
       {/* Outdoor */}
       <div style={{ ...cardSty, marginBottom: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-          <span style={{ fontSize: 22 }}🌿</span>
+          <span style={{ fontSize: 22 }}>~</span>
           <h3 style={{ fontSize: 15, fontWeight: 700, color: '#1f2937' }}>Outdoor Keywords</h3>
         </div>
         <p style={{ fontSize: 12, color: '#9ca3af', marginBottom: 8 }}>
@@ -2556,7 +2552,7 @@ function TagRulesTab() {
       {/* Indoor */}
       <div style={{ ...cardSty, marginBottom: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-          <span style={{ fontSize: 22 }}🏛️</span>
+          <span style={{ fontSize: 22 }}>B</span>
           <h3 style={{ fontSize: 15, fontWeight: 700, color: '#1f2937' }}>Indoor Keywords</h3>
         </div>
         <p style={{ fontSize: 12, color: '#9ca3af', marginBottom: 8 }}>
@@ -2576,7 +2572,7 @@ function TagRulesTab() {
       {/* Category keywords */}
       <div style={{ ...cardSty }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-          <span style={{ fontSize: 22 }}🏷️</span>
+          <span style={{ fontSize: 22 }}>T</span>
           <h3 style={{ fontSize: 15, fontWeight: 700, color: '#1f2937', flex: 1 }}>Category Tag Keywords</h3>
           <button style={{ ...btnSec, fontSize: 13, padding: '5px 12px' }} onClick={addCat}>+ Add Category</button>
         </div>
@@ -2587,8 +2583,8 @@ function TagRulesTab() {
           {Object.entries(rules.categoryKeywords).map(([cat, words]) => (
             <div key={cat}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                <label style={{ fontSize: 13, fontWeight: 600, color: '#374151', flex: 1 }}🏷 {cat}</label>
-                <button onClick={() => removeCat(cat)} style={{ fontSize: 11, color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}✕ remove</button>
+                <label style={{ fontSize: 13, fontWeight: 600, color: '#374151', flex: 1 }}>{cat}</label>
+                <button onClick={() => removeCat(cat)} style={{ fontSize: 11, color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>✕ remove</button>
               </div>
               <textarea
                 value={words.join(', ')}
@@ -2646,7 +2642,7 @@ function SettingsTab() {
       <h2 style={{ fontSize: 20, fontWeight: 700, color: '#1f2937', marginBottom: 16 }}>Site Settings</h2>
       <FlashMsg msg={msg} />
       <div style={{ ...cardSty }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: '#1f2937', marginBottom: 14 }}📢 Site Banner</h3>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: '#1f2937', marginBottom: 14 }}>Site Banner</h3>
         <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, cursor: 'pointer', marginBottom: 12 }}>
           <input type="checkbox" checked={bannerActive} onChange={e => setBannerActive(e.target.checked)} style={{ width: 16, height: 16 }} />
           <span style={{ fontWeight: 600 }}>Show banner to all users</span>
@@ -2672,7 +2668,7 @@ function SettingsTab() {
           </div>
         </div>
         <button style={{ ...btnPrim, opacity: saving ? 0.7 : 1 }} onClick={save} disabled={saving}>
-          {saving ? 'Saving…' : '💾 Save Settings'}
+          {saving ? 'Saving…' : 'Save Settings'}
         </button>
       </div>
     </div>
@@ -2702,11 +2698,11 @@ function AdminScreen({ user, onBack }: { user: User | null; onBack: () => void }
   }, []);
 
   const TABS: { key: AdminTab; label: string; icon: string }[] = [
-    { key: 'dashboard', label: 'Dashboard', icon: '📊' },
-    { key: 'places',    label: 'Places',    icon: '📍' },
-    { key: 'events',    label: 'Events',    icon: '🎭' },
-    { key: 'tagrules',  label: 'Tag Rules', icon: '🏷️' },
-    { key: 'settings',  label: 'Settings',  icon: '⚙️' },
+    { key: 'dashboard', label: 'Dashboard', icon: '#' },
+    { key: 'places',    label: 'Places',    icon: '@' },
+    { key: 'events',    label: 'Events',    icon: '~' },
+    { key: 'tagrules',  label: 'Tag Rules', icon: 'T' },
+    { key: 'settings',  label: 'Settings',  icon: '*' },
   ];
 
   const setPlacesFn = (fn: (prev: PlaceDoc[]) => PlaceDoc[]) => setPlaces(fn);
@@ -2715,7 +2711,7 @@ function AdminScreen({ user, onBack }: { user: User | null; onBack: () => void }
     <div style={{ minHeight: '100vh', backgroundColor: '#faf7f4' }}>
       {/* Header */}
       <div style={{ backgroundColor: ADMIN_ACCENT, color: 'white', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, position: 'sticky', top: 0, zIndex: 100 }}>
-        <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: 8, color: 'white', padding: '6px 14px', cursor: 'pointer', fontSize: 14, fontWeight: 600 }}← Back</button>
+        <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: 8, color: 'white', padding: '6px 14px', cursor: 'pointer', fontSize: 14, fontWeight: 600 }}>← Back</button>
         <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 700, fontSize: 18 }}>ABQ Unplugged Admin</div>
           <div style={{ fontSize: 12, opacity: 0.85 }}>{user?.email}</div>
