@@ -2299,7 +2299,7 @@ function AuthModal({ onClose }: { onClose: () => void }) {
   async function handleGoogle() {
     setError(''); setLoading(true);
     try {
-      await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }));
+      await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
       onClose();
     } catch (e: any) { setError(e.message || 'Sign-in failed'); }
     setLoading(false);
