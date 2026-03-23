@@ -1569,6 +1569,95 @@ function DiscoverScreen({
         </div>
       )}
 
+      {/* Explore by Vibe */}
+      <div className="mx-5 mb-6">
+        <p className="text-xs font-black tracking-widest text-gray-400 uppercase mb-3" style={{ fontFamily: 'Manrope, sans-serif' }}>EXPLORE BY VIBE</p>
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { emoji: '🏕️', label: 'Outdoor', bg: '#e8f5e9', color: '#2e7d32' },
+            { emoji: '🍽️', label: 'Food & Drink', bg: '#fff3e0', color: '#e65100' },
+            { emoji: '🎨', label: 'Arts & Culture', bg: '#f3e5f5', color: '#6a1b9a' },
+            { emoji: '🎶', label: 'Live Music', bg: '#e3f2fd', color: '#1565c0' },
+            { emoji: '👨‍👩‍👧', label: 'Family Fun', bg: '#fff8e1', color: '#f57f17' },
+            { emoji: '🏃', label: 'Active', bg: '#fce4ec', color: '#c62828' },
+          ].map(({ emoji, label, bg, color }) => (
+            <button key={label} className="rounded-2xl p-3 flex flex-col items-center gap-1 active:scale-95 transition-transform" style={{ backgroundColor: bg }}>
+              <span className="text-2xl">{emoji}</span>
+              <span className="text-xs font-bold text-center leading-tight" style={{ fontFamily: 'Manrope, sans-serif', color }}>{label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ABQ Neighborhoods */}
+      <div className="mx-5 mb-6">
+        <p className="text-xs font-black tracking-widest text-gray-400 uppercase mb-3" style={{ fontFamily: 'Manrope, sans-serif' }}>ABQ NEIGHBORHOODS</p>
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { name: 'Old Town', desc: 'History, art & adobe', emoji: '🏺', bg: '#a03b00' },
+            { name: 'Nob Hill', desc: 'Eclectic & walkable', emoji: '☕', bg: '#1a237e' },
+            { name: 'Downtown', desc: 'Nightlife & events', emoji: '🌃', bg: '#1b5e20' },
+            { name: 'Rio Grande', desc: 'Nature & trails', emoji: '🌿', bg: '#006064' },
+            { name: 'NE Heights', desc: 'Views & dining', emoji: '🏔️', bg: '#4a148c' },
+            { name: 'South Valley', desc: 'Local flavor', emoji: '🌶️', bg: '#b71c1c' },
+          ].map(({ name, desc, emoji, bg }) => (
+            <button key={name} className="rounded-2xl p-4 text-left active:scale-95 transition-transform" style={{ backgroundColor: bg }}>
+              <span className="text-2xl">{emoji}</span>
+              <p className="text-white font-black text-sm mt-1" style={{ fontFamily: 'Epilogue, sans-serif' }}>{name}</p>
+              <p className="text-white/70 text-xs" style={{ fontFamily: 'Manrope, sans-serif' }}>{desc}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Did You Know */}
+      <div className="mx-5 mb-6">
+        <p className="text-xs font-black tracking-widest text-gray-400 uppercase mb-3" style={{ fontFamily: 'Manrope, sans-serif' }}>DID YOU KNOW?</p>
+        <div className="flex flex-col gap-2">
+          {[
+            { fact: 'ABQ sits at 5,312 ft elevation — higher than Denver.', icon: '⛰️' },
+            { fact: '310+ days of sunshine per year — one of the sunniest cities in the US.', icon: '☀️' },
+            { fact: 'The International Balloon Fiesta draws 900,000+ visitors every October.', icon: '🎈' },
+            { fact: 'Old Town was founded in 1706, making it one of the oldest towns in New Mexico.', icon: '🏺' },
+            { fact: 'Breaking Bad was filmed entirely in ABQ — you can visit real filming locations.', icon: '🎬' },
+            { fact: 'New Mexico is the only state with an official state question: "Red or green?"', icon: '🌶️' },
+          ].map(({ fact, icon }) => (
+            <div key={fact} className="bg-gray-50 rounded-2xl p-4 flex items-start gap-3">
+              <span className="text-xl mt-0.5">{icon}</span>
+              <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'Manrope, sans-serif' }}>{fact}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Weekend Planner */}
+      <div className="mx-5 mb-6">
+        <p className="text-xs font-black tracking-widest text-gray-400 uppercase mb-3" style={{ fontFamily: 'Manrope, sans-serif' }}>PLAN YOUR WEEKEND</p>
+        <div className="flex flex-col gap-3">
+          {[
+            { title: 'Morning Hike + Brunch', steps: ['Sandia Mountain foothills trail', 'Coffee at Flying Star Café', 'Brunch in Nob Hill'], bg: '#e8f5e9', accent: '#2e7d32', emoji: '🥾' },
+            { title: 'Culture Day', steps: ['Explora Science Center', 'Lunch in Old Town', 'Albuquerque Museum'], bg: '#e3f2fd', accent: '#1565c0', emoji: '🎨' },
+            { title: 'Local Food Crawl', steps: ['Green chile breakfast at Frontier', 'Lunch at El Modelo', 'Drinks on Central Ave'], bg: '#fff3e0', accent: '#e65100', emoji: '🌮' },
+            { title: 'Nature Escape', steps: ['Rio Grande Bosque trail', 'Tingley Beach', 'Sunset at Petroglyph National Monument'], bg: '#f3e5f5', accent: '#6a1b9a', emoji: '🌅' },
+          ].map(({ title, steps, bg, accent, emoji }) => (
+            <div key={title} className="rounded-2xl p-4" style={{ backgroundColor: bg }}>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xl">{emoji}</span>
+                <p className="font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif', color: accent }}>{title}</p>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                {steps.map((step, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <span className="text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center text-white flex-shrink-0" style={{ backgroundColor: accent }}>{i + 1}</span>
+                    <p className="text-xs text-gray-700" style={{ fontFamily: 'Manrope, sans-serif' }}>{step}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Why Unplug */}
       <div
         className="mx-5 mb-28 rounded-2xl p-4 relative overflow-hidden"
