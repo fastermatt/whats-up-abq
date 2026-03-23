@@ -26,6 +26,35 @@
 const fs   = require('fs');
 const path = require('path');
 const https = require('https');
+// ── Supabase client (service-role key for writes) ──
+const { createClient: createSupabaseClient } = require('@supabase/supabase-js');
+const _sbUrl = process.env.SUPABASE_URL || '';
+const _sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const _sb = (_sbUrl && _sbKey) ? createSupabaseClient(_sbUrl, _sbKey) : null;
+
+async function _upsertEvents(source, rawArr) {
+  if (!_sb || !rawArr || rawArr.length === 0) return;
+  const rows = rawArr.map(raw => {
+    let d = raw.dates?.start?.localDate || raw.datetime_local?.split('T')[0]
+           || raw.datetime_utc?.split('T')[0] || raw.start?.local?.split('T')[0]
+           || raw.date?.split('T')[0] || null;
+    return { id: source+'_'+String(raw.id||raw.event_id||raw.uid||Math.random()), source, raw, event_date: d };
+  });
+  const {error} = await _sb.from('events').upsert(rows, {onConflict:'id'});
+  if (error) console.error('[Supabase] events error:', source, error.message);
+  else console.log('[Supabase] upserted', rows.length, source, 'events');
+}
+
+async function _upsertPlaces(rawArr) {
+  if (!_sb || !rawArr || rawArr.length === 0) return;
+  const rows = rawArr.map(raw => ({
+    id: 'google_'+(raw.place_id||raw.id||Math.random()), source:'google', raw
+  }));
+  const {error} = await _sb.from('places').upsert(rows, {onConflict:'id'});
+  if (error) console.error('[Supabase] places error:', error.message);
+  else console.log('[Supabase] upserted', rows.length, 'places');
+}
+
 
 // Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Load .env if present Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 const envPath = path.join(__dirname, '..', '.env');
@@ -752,6 +781,7 @@ async function main() {
     tmEvents = await fetchTicketmasterEvents();
     const tmPath = path.join(__dirname, '..', 'public', 'data', 'ticketmaster-events.json');
     fs.writeFileSync(tmPath, JSON.stringify(tmEvents, null, 2));
+  await _upsertEvents('ticketmaster', Array.isArray(tmEvents) ? tmEvents : (tmEvents.events||[]));
     console.log(`\nÃ¢ÂÂ Saved ${tmEvents.length} events Ã¢ÂÂ public/data/ticketmaster-events.json`);
   } catch (e) {
     console.error('Ticketmaster fetch failed:', e.message);
@@ -784,6 +814,7 @@ async function main() {
     sgEvents = rawSg.map(transformSeatGeekEvent);
     const sgPath = path.join(__dirname, '..', 'public', 'data', 'seatgeek-events.json');
     fs.writeFileSync(sgPath, JSON.stringify(sgEvents, null, 2));
+  await _upsertEvents('seatgeek', Array.isArray(sgEvents) ? sgEvents : (sgEvents.events||[]));
     if (SG_CLIENT_ID) console.log(`\nÃ¢ÂÂ Saved ${sgEvents.length} events Ã¢ÂÂ public/data/seatgeek-events.json`);
     else fs.writeFileSync(sgPath, '[]');
   } catch (e) {
@@ -799,6 +830,7 @@ async function main() {
     bitEvents = rawBit.map(transformBandsintownEvent);
     const bitPath = path.join(__dirname, '..', 'public', 'data', 'bandsintown-events.json');
     fs.writeFileSync(bitPath, JSON.stringify(bitEvents, null, 2));
+  await _upsertEvents('bandsintown', Array.isArray(bitEvents) ? bitEvents : (bitEvents.events||[]));
     if (BIT_APP_ID) console.log(`\nÃ¢ÂÂ Saved ${bitEvents.length} events Ã¢ÂÂ public/data/bandsintown-events.json`);
     else fs.writeFileSync(bitPath, '[]');
   } catch (e) {
@@ -814,6 +846,7 @@ async function main() {
     meetupEvents = rawMu.map(transformMeetupEvent);
     const muPath = path.join(__dirname, '..', 'public', 'data', 'meetup-events.json');
     fs.writeFileSync(muPath, JSON.stringify(meetupEvents, null, 2));
+  await _upsertEvents('musicbrainz', Array.isArray(meetupEvents) ? meetupEvents : (meetupEvents.events||[]));
     if (MEETUP_KEY) console.log(`\nÃ¢ÂÂ Saved ${meetupEvents.length} events Ã¢ÂÂ public/data/meetup-events.json`);
     else fs.writeFileSync(muPath, '[]');
   } catch (e) {
@@ -838,6 +871,7 @@ async function main() {
       // Save raw data
       const rawPath = path.join(__dirname, '..', 'public', 'data', 'google-places.json');
       fs.writeFileSync(rawPath, JSON.stringify(rawPlaces, null, 2));
+  await _upsertPlaces(Array.isArray(rawPlaces) ? rawPlaces : (rawPlaces.results||rawPlaces.places||[]));
       console.log(`\nÃ¢ÂÂ Saved ${rawPlaces.length} raw places Ã¢ÂÂ public/data/google-places.json`);
 
       // Transform and save app-ready version
