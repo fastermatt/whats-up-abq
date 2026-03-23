@@ -5998,9 +5998,9 @@
           ],
           "upcomingEvents": {
             "tmr": 14,
-            "ticketmaster": 18,
+            "ticketmaster": 15,
             "ticketweb": 2,
-            "_total": 34,
+            "_total": 31,
             "_filtered": 0
           },
           "_links": {
@@ -11838,6 +11838,7 @@
         "description": "LIVE NATION 3PE EVENT / NTL / USA"
       }
     ],
+    "accessibility": {},
     "ageRestrictions": {
       "legalAgeEnforced": false
     },
@@ -11849,7 +11850,7 @@
         "enabled": false
       }
     },
-    "nameOrigin": "custom",
+    "nameOrigin": "primaryAttraction",
     "_links": {
       "self": {
         "href": "/discovery/v2/events/G5vzZbMaDndMc?locale=en-us"
@@ -13628,7 +13629,7 @@
         "enabled": true
       }
     },
-    "nameOrigin": "custom",
+    "nameOrigin": "primaryAttraction",
     "_links": {
       "self": {
         "href": "/discovery/v2/events/G5vzZbz2jzr-X?locale=en-us"
@@ -19622,7 +19623,7 @@
         "enabled": false
       }
     },
-    "nameOrigin": "custom",
+    "nameOrigin": "primaryAttraction",
     "_links": {
       "self": {
         "href": "/discovery/v2/events/G5vzZbyvD7xIY?locale=en-us"
@@ -24098,6 +24099,7 @@
         "description": "LIVE NATION 3PE EVENT / NTL / USA"
       }
     ],
+    "accessibility": {},
     "ageRestrictions": {
       "legalAgeEnforced": false
     },
@@ -24109,7 +24111,7 @@
         "enabled": false
       }
     },
-    "nameOrigin": "custom",
+    "nameOrigin": "primaryAttraction",
     "_links": {
       "self": {
         "href": "/discovery/v2/events/G5vzZbUL2SziW?locale=en-us"
@@ -30506,8 +30508,8 @@
           ],
           "upcomingEvents": {
             "tmr": 7,
-            "ticketmaster": 8,
-            "_total": 15,
+            "ticketmaster": 9,
+            "_total": 16,
             "_filtered": 0
           },
           "_links": {
@@ -37999,7 +38001,7 @@
         "enabled": true
       }
     },
-    "nameOrigin": "custom",
+    "nameOrigin": "primaryAttraction",
     "_links": {
       "self": {
         "href": "/discovery/v2/events/G5vzZ_deSu__j?locale=en-us"
@@ -38230,9 +38232,10 @@
           ],
           "upcomingEvents": {
             "universe": 1,
+            "mfx-es": 1,
             "ticketmaster": 3,
             "trium": 2,
-            "_total": 6,
+            "_total": 7,
             "_filtered": 0
           },
           "_links": {
@@ -38817,7 +38820,7 @@
         "enabled": false
       }
     },
-    "nameOrigin": "custom",
+    "nameOrigin": "primaryAttraction",
     "_links": {
       "self": {
         "href": "/discovery/v2/events/G5vzZ_dnQlPZ7?locale=en-us"
@@ -41048,7 +41051,7 @@
         "enabled": true
       }
     },
-    "nameOrigin": "custom",
+    "nameOrigin": "primaryAttraction",
     "_links": {
       "self": {
         "href": "/discovery/v2/events/G5vzZ_eNSlnhe?locale=en-us"
@@ -49516,7 +49519,7 @@
         "enabled": true
       }
     },
-    "nameOrigin": "custom",
+    "nameOrigin": "primaryAttraction",
     "_links": {
       "self": {
         "href": "/discovery/v2/events/G5vzZbg6pv4Gv?locale=en-us"
@@ -59505,7 +59508,7 @@
         "enabled": true
       }
     },
-    "nameOrigin": "custom",
+    "nameOrigin": "primaryAttraction",
     "_links": {
       "self": {
         "href": "/discovery/v2/events/G5vzZbUwTjF9s?locale=en-us"
@@ -59943,7 +59946,7 @@
         "enabled": true
       }
     },
-    "nameOrigin": "custom",
+    "nameOrigin": "primaryAttraction",
     "_links": {
       "self": {
         "href": "/discovery/v2/events/G5vzZ_kUiwB6s?locale=en-us"
@@ -67808,7 +67811,7 @@
         "enabled": true
       }
     },
-    "nameOrigin": "custom",
+    "nameOrigin": "primaryAttraction",
     "linkMoreInfo": {
       "descriptions": {
         "en-nz": "Legends Theater at Route 66 Casino",
@@ -70072,7 +70075,7 @@
         "enabled": false
       }
     },
-    "nameOrigin": "custom",
+    "nameOrigin": "primaryAttraction",
     "_links": {
       "self": {
         "href": "/discovery/v2/events/G5vzZ_k3Koz7o?locale=en-us"
@@ -75258,7 +75261,7 @@
         "enabled": true
       }
     },
-    "nameOrigin": "custom",
+    "nameOrigin": "primaryAttraction",
     "_links": {
       "self": {
         "href": "/discovery/v2/events/G5vzZ_A1vc486?locale=en-us"
@@ -79462,7 +79465,7 @@
         "enabled": true
       }
     },
-    "nameOrigin": "custom",
+    "nameOrigin": "primaryAttraction",
     "_links": {
       "self": {
         "href": "/discovery/v2/events/G5vzZ_7wUwqGQ?locale=en-us"
@@ -81657,8 +81660,8 @@
           ],
           "upcomingEvents": {
             "tmr": 39,
-            "ticketmaster": 121,
-            "_total": 160,
+            "ticketmaster": 120,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -82179,8 +82182,8 @@
           ],
           "upcomingEvents": {
             "tmr": 39,
-            "ticketmaster": 121,
-            "_total": 160,
+            "ticketmaster": 120,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -82643,8 +82646,8 @@
           ],
           "upcomingEvents": {
             "tmr": 39,
-            "ticketmaster": 121,
-            "_total": 160,
+            "ticketmaster": 120,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -83165,8 +83168,8 @@
           ],
           "upcomingEvents": {
             "tmr": 39,
-            "ticketmaster": 121,
-            "_total": 160,
+            "ticketmaster": 120,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -83629,8 +83632,8 @@
           ],
           "upcomingEvents": {
             "tmr": 39,
-            "ticketmaster": 121,
-            "_total": 160,
+            "ticketmaster": 120,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -84151,8 +84154,8 @@
           ],
           "upcomingEvents": {
             "tmr": 39,
-            "ticketmaster": 121,
-            "_total": 160,
+            "ticketmaster": 120,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -129869,7 +129872,7 @@
         "enabled": true
       }
     },
-    "nameOrigin": "custom",
+    "nameOrigin": "primaryAttraction",
     "linkMoreInfo": {
       "descriptions": {
         "en-nz": "For Box, Suite and Season Ticket information see below link",
@@ -134506,7 +134509,7 @@
         "enabled": true
       }
     },
-    "nameOrigin": "custom",
+    "nameOrigin": "primaryAttraction",
     "linkMoreInfo": {
       "descriptions": {
         "en-nz": "For Box, Suite and Season Ticket information see below link",
@@ -139727,6 +139730,7 @@
         "description": "LIVE NATION 3PE EVENT / NTL / USA"
       }
     ],
+    "accessibility": {},
     "ageRestrictions": {
       "legalAgeEnforced": false
     },
@@ -139738,7 +139742,7 @@
         "enabled": false
       }
     },
-    "nameOrigin": "custom",
+    "nameOrigin": "primaryAttraction",
     "_links": {
       "self": {
         "href": "/discovery/v2/events/G5vzZ_kmn0zdR?locale=en-us"
