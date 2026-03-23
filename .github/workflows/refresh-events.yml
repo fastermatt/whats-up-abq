@@ -4,7 +4,6 @@ on:
   # Daily at 4 AM Mountain Time (11:00 UTC, accounting for MDT UTC-6)
   schedule:
     - cron: '0 11 * * *'
-
   # Allow manual trigger from the GitHub Actions tab
   workflow_dispatch:
     inputs:
@@ -37,17 +36,16 @@ jobs:
 
       - name: Fetch events from all sources & Google Places
         env:
-          TICKETMASTER_API_KEY:  ${{ secrets.TICKETMASTER_API_KEY }}
-          EVENTBRITE_TOKEN:      ${{ secrets.EVENTBRITE_TOKEN }}
-          SEATGEEK_CLIENT_ID:    ${{ secrets.SEATGEEK_CLIENT_ID }}
-          BANDSINTOWN_APP_ID:    ${{ secrets.BANDSINTOWN_APP_ID }}
-          MEETUP_API_KEY:        ${{ secrets.MEETUP_API_KEY }}
+          TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
+          EVENTBRITE_TOKEN: ${{ secrets.EVENTBRITE_TOKEN }}
+          SEATGEEK_CLIENT_ID: ${{ secrets.SEATGEEK_CLIENT_ID }}
+          BANDSINTOWN_APP_ID: ${{ secrets.BANDSINTOWN_APP_ID }}
+          MEETUP_API_KEY: ${{ secrets.MEETUP_API_KEY }}
           GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
           SKIP_PLACES: ${{ github.event.inputs.skip_places || 'false' }}
-        run: node scripts/fetch-data.cjs
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-
+        run: node scripts/fetch-data.cjs
 
       - name: Purge past events from Supabase
         run: |
@@ -66,7 +64,7 @@ jobs:
       - name: Commit & push updated data
         if: steps.diff.outputs.changed != '0'
         run: |
-          git config user.name  "ABQ Unplugged Bot"
+          git config user.name "ABQ Unplugged Bot"
           git config user.email "bot@abq-unplugged.app"
           git add public/data/ticketmaster-events.json \
                   public/data/eventbrite-events.json \
@@ -114,11 +112,11 @@ jobs:
           echo "| Source | Count |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Ticketmaster | $TM |" >> $GITHUB_STEP_SUMMARY
-          echo "| Eventbrite   | $EB |" >> $GITHUB_STEP_SUMMARY
-          echo "| SeatGeek     | $SG |" >> $GITHUB_STEP_SUMMARY
-          echo "| Bandsintown  | $BIT |" >> $GITHUB_STEP_SUMMARY
-          echo "| Meetup       | $MU |" >> $GITHUB_STEP_SUMMARY
+          echo "| Eventbrite | $EB |" >> $GITHUB_STEP_SUMMARY
+          echo "| SeatGeek | $SG |" >> $GITHUB_STEP_SUMMARY
+          echo "| Bandsintown | $BIT |" >> $GITHUB_STEP_SUMMARY
+          echo "| Meetup | $MU |" >> $GITHUB_STEP_SUMMARY
           echo "| **Total events** | **$TOTAL** |" >> $GITHUB_STEP_SUMMARY
-          echo "| Places       | $PL |" >> $GITHUB_STEP_SUMMARY
+          echo "| Places | $PL |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Run at: $(date -u '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
