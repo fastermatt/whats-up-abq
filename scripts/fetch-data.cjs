@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * ABQ Unplugged — Data Fetcher
+ * ABQ Unplugged â Data Fetcher
  *
  * Fetches events and places for the Greater ABQ Metro area:
  *   Albuquerque, Rio Rancho, Bernalillo, Cedar Crest, Tijeras,
  *   Bosque Farms, Corrales, Los Lunas (nearby), East Mountains.
  *
- * Geographic center:  35.1053° N, 106.6464° W
+ * Geographic center:  35.1053Â° N, 106.6464Â° W
  * Search radius:      40 miles (covers full metro)
  *
  * Usage:
@@ -27,7 +27,7 @@ const fs   = require('fs');
 const path = require('path');
 const https = require('https');
 
-// ─── Load .env if present ────────────────────────────────────────────────────
+// âââ Load .env if present ââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const envPath = path.join(__dirname, '..', '.env');
 if (fs.existsSync(envPath)) {
   fs.readFileSync(envPath, 'utf8').split('\n').forEach(line => {
@@ -39,9 +39,9 @@ if (fs.existsSync(envPath)) {
 const TM_KEY         = process.env.TICKETMASTER_API_KEY;
 const GOOGLE_KEY     = process.env.GOOGLE_PLACES_API_KEY;
 const EB_TOKEN       = process.env.EVENTBRITE_TOKEN;      // optional
-const SG_CLIENT_ID   = process.env.SEATGEEK_CLIENT_ID;    // optional — register at seatgeek.com/account/develop
-const BIT_APP_ID     = process.env.BANDSINTOWN_APP_ID;    // optional — register at bandsintown.com/v3/api
-const MEETUP_KEY     = process.env.MEETUP_API_KEY;        // optional — register at secure.meetup.com/meetup_api
+const SG_CLIENT_ID   = process.env.SEATGEEK_CLIENT_ID;    // optional â register at seatgeek.com/account/develop
+const BIT_APP_ID     = process.env.BANDSINTOWN_APP_ID;    // optional â register at bandsintown.com/v3/api
+const MEETUP_KEY     = process.env.MEETUP_API_KEY;        // optional â register at secure.meetup.com/meetup_api
 const SKIP_PLACES    = process.env.SKIP_PLACES === 'true';
 
 if (!TM_KEY)     { console.error('Missing TICKETMASTER_API_KEY'); process.exit(1); }
@@ -54,15 +54,15 @@ for (const [name, val] of [
   ['BANDSINTOWN_APP_ID',  BIT_APP_ID],
   ['MEETUP_API_KEY',      MEETUP_KEY],
 ]) {
-  if (!val) console.warn(`  [optional] ${name} not set — skipping that source`);
+  if (!val) console.warn(`  [optional] ${name} not set â skipping that source`);
 }
 
-// ─── Geographic Config ────────────────────────────────────────────────────────
+// âââ Geographic Config ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 // Greater ABQ Metro bounding box:
-//   North: Bernalillo / Rio Rancho north  (~35.45°)
-//   South: Bosque Farms / Los Lunas       (~34.80°)
-//   East:  Cedar Crest / Tijeras          (~106.30°)
-//   West:  West Rio Rancho                (~107.10°)
+//   North: Bernalillo / Rio Rancho north  (~35.45Â°)
+//   South: Bosque Farms / Los Lunas       (~34.80Â°)
+//   East:  Cedar Crest / Tijeras          (~106.30Â°)
+//   West:  West Rio Rancho                (~107.10Â°)
 
 const METRO_CENTER = { lat: 35.1053, lng: -106.6464 };
 const METRO_RADIUS_MILES = 40;
@@ -87,7 +87,7 @@ const PLACES_TYPES = [
   'stadium', 'campground', 'hiking_area',
 ];
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// âââ Helpers âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function get(url) {
   return new Promise((resolve, reject) => {
     https.get(url, res => {
@@ -107,9 +107,9 @@ function ensureDir(p) {
   if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
 }
 
-// ─── Ticketmaster ─────────────────────────────────────────────────────────────
+// âââ Ticketmaster âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 async function fetchTicketmasterEvents() {
-  console.log('\n📅  Fetching Ticketmaster events for Greater ABQ Metro...');
+  console.log('\nð  Fetching Ticketmaster events for Greater ABQ Metro...');
   console.log(`    Center: ${METRO_CENTER.lat}, ${METRO_CENTER.lng}  |  Radius: ${METRO_RADIUS_MILES} miles`);
 
   const allEvents = [];
@@ -157,11 +157,11 @@ async function fetchTicketmasterEvents() {
     return true;
   });
 
-  console.log(`    ✓ ${unique.length} unique events fetched`);
+  console.log(`    â ${unique.length} unique events fetched`);
   return unique;
 }
 
-// ─── Google Places ────────────────────────────────────────────────────────────
+// âââ Google Places ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 async function fetchGooglePlacesForArea(area, type) {
   const url = [
     'https://maps.googleapis.com/maps/api/place/nearbysearch/json',
@@ -177,7 +177,7 @@ async function fetchGooglePlacesForArea(area, type) {
     throw new Error(`Google Places API denied: ${data.error_message}`);
   }
   if (data.status === 'OVER_QUERY_LIMIT') {
-    console.warn('    ⚠ Rate limited — sleeping 2s...');
+    console.warn('    â  Rate limited â sleeping 2s...');
     await sleep(2000);
     return fetchGooglePlacesForArea(area, type);
   }
@@ -200,7 +200,7 @@ async function fetchGooglePlacesForArea(area, type) {
 }
 
 async function fetchAllGooglePlaces() {
-  console.log('\n📍  Fetching Google Places for Greater ABQ Metro...');
+  console.log('\nð  Fetching Google Places for Greater ABQ Metro...');
 
   const allPlaces = [];
   const seenIds = new Set();
@@ -221,17 +221,17 @@ async function fetchAllGooglePlaces() {
         if (added > 0) process.stdout.write(`    ${type}: +${added}  `);
         await sleep(100);
       } catch (e) {
-        console.error(`    ✗ ${type}: ${e.message}`);
+        console.error(`    â ${type}: ${e.message}`);
       }
     }
     console.log('');
   }
 
-  console.log(`\n    ✓ ${allPlaces.length} unique places fetched`);
+  console.log(`\n    â ${allPlaces.length} unique places fetched`);
   return allPlaces;
 }
 
-// ─── Transform Google Place → app Place ──────────────────────────────────────
+// âââ Transform Google Place â app Place ââââââââââââââââââââââââââââââââââââââ
 function placeTypeToCategory(types) {
   if (!types) return 'other';
   if (types.includes('restaurant') || types.includes('food')) return 'restaurant';
@@ -327,7 +327,7 @@ function transformGooglePlace(raw) {
   };
 }
 
-// ─── Eventbrite ───────────────────────────────────────────────────────────────
+// âââ Eventbrite âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 /**
  * Fetch public events near ABQ from the Eventbrite v3 API.
@@ -338,63 +338,16 @@ function transformGooglePlace(raw) {
  * Get one at: https://www.eventbrite.com/platform/api#/introduction/authentication
  */
 async function fetchEventbriteEvents() {
-  if (!EB_TOKEN) return [];
-  console.log('\n🎟  Fetching Eventbrite events for Greater ABQ Metro...');
-
-  const allEvents = [];
-  let pageNumber = 1;
-  let hasMore    = true;
-
-  while (hasMore && pageNumber <= 10) {
-    const params = new URLSearchParams({
-      'location.address':      'Albuquerque, NM',
-      'location.within':       '40mi',
-      'sort_by':               'date',
-      'expand':                'venue,ticket_availability,logo',
-      'page_size':             '50',
-      'page':                  String(pageNumber),
-      'start_date.range_start': new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
-    });
-
-    const url = `https://www.eventbriteapi.com/v3/events/search/?${params}`;
-
-    const data = await new Promise((resolve, reject) => {
-      const options = {
-        headers: { Authorization: `Bearer ${EB_TOKEN}` },
-      };
-      https.get(url, options, res => {
-        let body = '';
-        res.on('data', c => body += c);
-        res.on('end', () => {
-          try { resolve(JSON.parse(body)); }
-          catch (e) { reject(new Error(`Eventbrite JSON parse error: ${e.message}`)); }
-        });
-      }).on('error', reject);
-    });
-
-    if (data.error) {
-      console.warn(`  Eventbrite API error: ${data.error_description || data.error}`);
-      break;
-    }
-
-    const events = data.events || [];
-    allEvents.push(...events);
-    console.log(`  Page ${pageNumber}: ${events.length} events (total so far: ${allEvents.length})`);
-
-    // Pagination
-    const pagination = data.pagination || {};
-    hasMore = pagination.has_more_items === true;
-    pageNumber++;
-
-    if (pageNumber <= pagination.page_count) {
-      await sleep(250); // respect rate limits
-    } else {
-      hasMore = false;
-    }
+  // NOTE: Eventbrite's public location-based event search (/v3/events/search/)
+  // was deprecated and shut down on December 12, 2019. No public replacement
+  // exists for searching events by city/radius. The current public API only
+  // supports fetching by event ID, venue ID, or organization ID.
+  // See: https://www.eventbrite.com/platform/docs/by-location
+  if (EB_TOKEN) {
+    console.log('\n🎟 Eventbrite: public location search deprecated Dec 2019 — skipping.');
+    console.log('   No public endpoint for location-based search. See: https://www.eventbrite.com/platform/docs/by-location');
   }
-
-  console.log(`  Eventbrite: ${allEvents.length} total events found`);
-  return allEvents;
+  return [];
 }
 
 /**
@@ -454,7 +407,7 @@ function transformEventbriteEvent(ev) {
   };
 }
 
-// Eventbrite category IDs → human-readable segment names
+// Eventbrite category IDs â human-readable segment names
 // Full list: https://www.eventbrite.com/platform/api#/reference/category/list/
 const EB_CATEGORY_MAP = {
   '103': 'Music',
@@ -481,7 +434,7 @@ function mapEventbriteCategory(id) {
   return EB_CATEGORY_MAP[String(id)] || 'Miscellaneous';
 }
 
-// ─── SeatGeek ─────────────────────────────────────────────────────────────────
+// âââ SeatGeek âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 /**
  * Fetch events near ABQ from SeatGeek's public platform API.
  *
@@ -489,12 +442,12 @@ function mapEventbriteCategory(id) {
  * Free registration: https://seatgeek.com/account/develop
  *
  * SeatGeek aggregates inventory from many sources including AXS, Dice,
- * venue box offices, and resale marketplaces — catching shows that
+ * venue box offices, and resale marketplaces â catching shows that
  * Ticketmaster doesn't list.
  */
 async function fetchSeatGeekEvents() {
   if (!SG_CLIENT_ID) return [];
-  console.log('\n🎟  Fetching SeatGeek events near ABQ...');
+  console.log('\nð  Fetching SeatGeek events near ABQ...');
 
   const allEvents = [];
   let page = 1;
@@ -588,7 +541,7 @@ function mapSeatGeekType(type) {
   return SG_TYPE_MAP[type] || 'Miscellaneous';
 }
 
-// ─── Bandsintown ──────────────────────────────────────────────────────────────
+// âââ Bandsintown ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 /**
  * Fetch music events near ABQ from Bandsintown.
  *
@@ -602,7 +555,7 @@ function mapSeatGeekType(type) {
  */
 async function fetchBandsintownEvents() {
   if (!BIT_APP_ID) return [];
-  console.log('\n🎸  Fetching Bandsintown events near ABQ...');
+  console.log('\nð¸  Fetching Bandsintown events near ABQ...');
 
   const params = new URLSearchParams({
     app_id:   BIT_APP_ID,
@@ -658,7 +611,7 @@ function transformBandsintownEvent(ev) {
   };
 }
 
-// ─── Meetup ───────────────────────────────────────────────────────────────────
+// âââ Meetup âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 /**
  * Fetch local group events near ABQ from Meetup.com.
  *
@@ -666,7 +619,7 @@ function transformBandsintownEvent(ev) {
  * platform carries: hiking groups, tech meetups, book clubs, language
  * exchanges, craft nights, outdoor adventures, etc.
  *
- * Docs: https://www.meetup.com/api/guide/ (GraphQL — no key required for
+ * Docs: https://www.meetup.com/api/guide/ (GraphQL â no key required for
  * public events via the Open Events endpoint)
  *
  * Note: Meetup deprecated its v2 REST API. The v3 / GraphQL API requires
@@ -675,7 +628,7 @@ function transformBandsintownEvent(ev) {
  */
 async function fetchMeetupEvents() {
   if (!MEETUP_KEY) return [];
-  console.log('\n☕  Fetching Meetup events near ABQ...');
+  console.log('\nâ  Fetching Meetup events near ABQ...');
 
   // Meetup GraphQL endpoint
   const query = `
@@ -782,27 +735,27 @@ function transformMeetupEvent(ev) {
   };
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
+// âââ Main âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 async function main() {
-  console.log('=== ABQ Unplugged Data Fetcher — Greater Metro Area ===');
+  console.log('=== ABQ Unplugged Data Fetcher â Greater Metro Area ===');
   console.log(`Coverage: ${METRO_RADIUS_MILES}-mile radius from ABQ city center`);
   console.log(`Communities: Albuquerque, Rio Rancho, Bernalillo, Cedar Crest,`);
   console.log(`             Tijeras, Bosque Farms, Corrales, East Mountains\n`);
 
   ensureDir(path.join(__dirname, '..', 'public', 'data'));
 
-  // ── Ticketmaster ──
+  // ââ Ticketmaster ââ
   let tmEvents = [];
   try {
     tmEvents = await fetchTicketmasterEvents();
     const tmPath = path.join(__dirname, '..', 'public', 'data', 'ticketmaster-events.json');
     fs.writeFileSync(tmPath, JSON.stringify(tmEvents, null, 2));
-    console.log(`\n✓ Saved ${tmEvents.length} events → public/data/ticketmaster-events.json`);
+    console.log(`\nâ Saved ${tmEvents.length} events â public/data/ticketmaster-events.json`);
   } catch (e) {
     console.error('Ticketmaster fetch failed:', e.message);
   }
 
-  // ── Eventbrite ──
+  // ââ Eventbrite ââ
   let ebEvents = [];
   try {
     const rawEb = await fetchEventbriteEvents();
@@ -810,7 +763,7 @@ async function main() {
     const ebPath = path.join(__dirname, '..', 'public', 'data', 'eventbrite-events.json');
     fs.writeFileSync(ebPath, JSON.stringify(ebEvents, null, 2));
     if (EB_TOKEN) {
-      console.log(`\n✓ Saved ${ebEvents.length} events → public/data/eventbrite-events.json`);
+      console.log(`\nâ Saved ${ebEvents.length} events â public/data/eventbrite-events.json`);
     } else {
       // Write empty array so app fetch doesn't 404
       fs.writeFileSync(ebPath, '[]');
@@ -822,14 +775,14 @@ async function main() {
     if (!fs.existsSync(ebPath)) fs.writeFileSync(ebPath, '[]');
   }
 
-  // ── SeatGeek ──
+  // ââ SeatGeek ââ
   let sgEvents = [];
   try {
     const rawSg = await fetchSeatGeekEvents();
     sgEvents = rawSg.map(transformSeatGeekEvent);
     const sgPath = path.join(__dirname, '..', 'public', 'data', 'seatgeek-events.json');
     fs.writeFileSync(sgPath, JSON.stringify(sgEvents, null, 2));
-    if (SG_CLIENT_ID) console.log(`\n✓ Saved ${sgEvents.length} events → public/data/seatgeek-events.json`);
+    if (SG_CLIENT_ID) console.log(`\nâ Saved ${sgEvents.length} events â public/data/seatgeek-events.json`);
     else fs.writeFileSync(sgPath, '[]');
   } catch (e) {
     console.error('SeatGeek fetch failed:', e.message);
@@ -837,14 +790,14 @@ async function main() {
     if (!fs.existsSync(p)) fs.writeFileSync(p, '[]');
   }
 
-  // ── Bandsintown ──
+  // ââ Bandsintown ââ
   let bitEvents = [];
   try {
     const rawBit = await fetchBandsintownEvents();
     bitEvents = rawBit.map(transformBandsintownEvent);
     const bitPath = path.join(__dirname, '..', 'public', 'data', 'bandsintown-events.json');
     fs.writeFileSync(bitPath, JSON.stringify(bitEvents, null, 2));
-    if (BIT_APP_ID) console.log(`\n✓ Saved ${bitEvents.length} events → public/data/bandsintown-events.json`);
+    if (BIT_APP_ID) console.log(`\nâ Saved ${bitEvents.length} events â public/data/bandsintown-events.json`);
     else fs.writeFileSync(bitPath, '[]');
   } catch (e) {
     console.error('Bandsintown fetch failed:', e.message);
@@ -852,14 +805,14 @@ async function main() {
     if (!fs.existsSync(p)) fs.writeFileSync(p, '[]');
   }
 
-  // ── Meetup ──
+  // ââ Meetup ââ
   let meetupEvents = [];
   try {
     const rawMu = await fetchMeetupEvents();
     meetupEvents = rawMu.map(transformMeetupEvent);
     const muPath = path.join(__dirname, '..', 'public', 'data', 'meetup-events.json');
     fs.writeFileSync(muPath, JSON.stringify(meetupEvents, null, 2));
-    if (MEETUP_KEY) console.log(`\n✓ Saved ${meetupEvents.length} events → public/data/meetup-events.json`);
+    if (MEETUP_KEY) console.log(`\nâ Saved ${meetupEvents.length} events â public/data/meetup-events.json`);
     else fs.writeFileSync(muPath, '[]');
   } catch (e) {
     console.error('Meetup fetch failed:', e.message);
@@ -867,10 +820,10 @@ async function main() {
     if (!fs.existsSync(p)) fs.writeFileSync(p, '[]');
   }
 
-  // ── Google Places ──
+  // ââ Google Places ââ
   let places = [];
   if (SKIP_PLACES) {
-    console.log('\n⚡ Skipping Google Places refresh (SKIP_PLACES=true)');
+    console.log('\nâ¡ Skipping Google Places refresh (SKIP_PLACES=true)');
     // Load existing places if available
     const appPath = path.join(__dirname, '..', 'public', 'places-data.json');
     if (fs.existsSync(appPath)) {
@@ -883,7 +836,7 @@ async function main() {
       // Save raw data
       const rawPath = path.join(__dirname, '..', 'public', 'data', 'google-places.json');
       fs.writeFileSync(rawPath, JSON.stringify(rawPlaces, null, 2));
-      console.log(`\n✓ Saved ${rawPlaces.length} raw places → public/data/google-places.json`);
+      console.log(`\nâ Saved ${rawPlaces.length} raw places â public/data/google-places.json`);
 
       // Transform and save app-ready version
       places = rawPlaces
@@ -892,7 +845,7 @@ async function main() {
 
       const appPath = path.join(__dirname, '..', 'public', 'places-data.json');
       fs.writeFileSync(appPath, JSON.stringify(places, null, 2));
-      console.log(`✓ Saved ${places.length} places → public/places-data.json`);
+      console.log(`â Saved ${places.length} places â public/places-data.json`);
     } catch (e) {
       console.error('Google Places fetch failed:', e.message);
     }
