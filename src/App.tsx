@@ -2061,7 +2061,10 @@ function EventsScreen({
 
       <div className="px-5 pb-28 flex flex-col gap-3">
         {sorted.map(event => (
-          <EventCard key={event.id} event={event} onClick={() => onEventSelect(event)} />
+          <div key={event.id} style={{position:'relative'}}>
+            <EventCard event={event} onClick={() => onEventSelect(event)} />
+            <button style={{position:'absolute',top:8,right:8,zIndex:10,background:'rgba(0,0,0,0.6)',border:'none',borderRadius:'50%',width:32,height:32,color:'white',fontSize:18,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:event.id,type:'event',name:event.name});}}>♡</button>
+          </div>
         ))}
         {sorted.length === 0 && (
           <div className="text-center py-16 text-gray-400">
@@ -2245,14 +2248,16 @@ function PlacesScreen({
       <div className="px-5 pb-28">
         <div className="grid grid-cols-2 gap-3">
           {sorted.map(place => (
-            <PlaceCard
-              key={place.id}
-              place={place}
-              onClick={() => onPlaceSelect(place)}
-              distance={distMap.get(place.id)}
-              isCheckedIn={checkedIn.has(place.id)}
-              onCheckIn={e => { e.stopPropagation(); onCheckIn(place.id); }}
-            />
+            <div key={place.id} style={{position:'relative'}}>
+              <PlaceCard
+                place={place}
+                onClick={() => onPlaceSelect(place)}
+                distance={distMap.get(place.id)}
+                isCheckedIn={checkedIn.has(place.id)}
+                onCheckIn={e => { e.stopPropagation(); onCheckIn(place.id); }}
+                />
+              <button style={{position:'absolute',top:8,right:8,zIndex:10,background:'rgba(0,0,0,0.6)',border:'none',borderRadius:'50%',width:32,height:32,color:'white',fontSize:18,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:place.id,type:'place',name:place.name});}}>♡</button>
+            </div>
           ))}
         </div>
         {sorted.length === 0 && (
