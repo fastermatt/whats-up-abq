@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { initializeApp } from 'firebase/app';
+import { fetchEventsFromDB, fetchPlacesFromDB } from './lib/db';
 import {
   getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword,
   createUserWithEmailAndPassword, signOut, onAuthStateChanged, type User,
@@ -3369,14 +3370,32 @@ export default function App() {
       try {
         const safeJson = (r: Response) => r.ok ? r.json() : Promise.resolve([]);
         const [placesResult, tmResult, ebResult, sgResult, bitResult, muResult] =
-          await Promise.allSettled([
-            fetch('/places-data.json').then(r => r.json()),
-            fetch('/data/ticketmaster-events.json').then(r => r.json()),
-            fetch('/data/eventbrite-events.json').then(safeJson),
-            fetch('/data/seatgeek-events.json').then(safeJson),
-            fetch('/data/bandsintown-events.json').then(safeJson),
-            fetch('/data/meetup-events.json').then(safeJson),
-          ]);
+          await (async () => {
+            try {
+              const [sbPlaces, sbEvents] = await Promise.all([
+                fetchPlacesFromDB(),
+                fetchEventsFromDB()
+              ]);
+              return [
+                { status: 'fulfilled' as const, value: sbPlaces },
+                { status: 'fulfilled' as const, value: { events: sbEvents['ticketmaster'] || [] } },
+                { status: 'fulfilled' as const, value: { events: [] } },
+                { status: 'fulfilled' as const, value: { events: sbEvents['seatgeek'] || [] } },
+                { status: 'fulfilled' as const, value: { events: sbEvents['bandsintown'] || [] } },
+                { status: 'fulfilled' as const, value: { events: sbEvents['musicbrainz'] || [] } }
+              ];
+            } catch (err) {
+              console.warn('[Data] Supabase load failed, falling back to JSON files:', err);
+              return Promise.allSettled([
+                fetch('/places-data.json').then(r => r.json()),
+                fetch('/data/ticketmaster-events.json').then(r => r.json()),
+                fetch('/data/eventbrite-events.json').then(r => r.json()),
+                fetch('/data/seatgeek-events.json').then(r => r.json()),
+                fetch('/data/bandsintown-events.json').then(r => r.json()),
+                fetch('/data/musicbrainz-events.json').then(r => r.json()),
+              ]);
+            }
+          })()
 
         if (placesResult.status === 'fulfilled') {
           const data = placesResult.value;
