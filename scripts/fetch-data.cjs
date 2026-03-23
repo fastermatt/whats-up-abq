@@ -694,7 +694,7 @@ async function fetchMeetupEvents() {
     const body = JSON.stringify({ query });
     const options = {
       hostname: 'api.meetup.com',
-      path:     '/gql',
+      path:     '/gql-ext',
       method:   'POST',
       headers: {
         'Content-Type':   'application/json',
@@ -846,7 +846,7 @@ async function main() {
     meetupEvents = rawMu.map(transformMeetupEvent);
     const muPath = path.join(__dirname, '..', 'public', 'data', 'meetup-events.json');
     fs.writeFileSync(muPath, JSON.stringify(meetupEvents, null, 2));
-  await _upsertEvents('musicbrainz', Array.isArray(meetupEvents) ? meetupEvents : (meetupEvents.events||[]));
+  await _upsertEvents('meetup', Array.isArray(meetupEvents) ? meetupEvents : (meetupEvents.events||[]));
     if (MEETUP_KEY) console.log(`\nÃ¢ÂÂ Saved ${meetupEvents.length} events Ã¢ÂÂ public/data/meetup-events.json`);
     else fs.writeFileSync(muPath, '[]');
   } catch (e) {
