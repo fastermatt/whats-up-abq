@@ -574,37 +574,22 @@ function mapSeatGeekType(type) {
 
 // Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Bandsintown Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 /**
- * Fetch music events near ABQ from Bandsintown.
+ * BLOCKED: Bandsintown API fully locked down — all endpoints require B2B auth.
  *
- * Bandsintown specializes in concert discovery, especially for smaller
- * local venues and touring acts that don't sell through Ticketmaster.
- * Common ABQ venues it covers: Sunshine Theater, El Rey, Meow Wolf,
- * Launchpad, Tractor Brewing, Low Spirits, Sister Bar, etc.
+ * As of 2025, Bandsintown requires a paid B2B partnership for ALL API access.
+ * Both the geographic search and artist-specific endpoints return auth errors:
+ *   - /events/search?app_id=...         → "Missing Authentication Token"
+ *   - /artists/{name}/events?app_id=... → "User is not authorized to access this resource"
  *
- * Docs: https://bandsintown.com/api/v3 (requires free app_id registration)
- * Register: https://help.artists.bandsintown.com/en/articles/9186477-api-documentation
+ * The BANDSINTOWN_APP_ID env var is retained as a placeholder in case B2B
+ * access is obtained in the future.
+ * To pursue B2B partnership: https://bandsintown.com/contact
  */
 async function fetchBandsintownEvents() {
   if (!BIT_APP_ID) return [];
-  console.log('\nÃ°ÂÂÂ¸  Fetching Bandsintown events near ABQ...');
-
-  const params = new URLSearchParams({
-    app_id:   BIT_APP_ID,
-    location: 'Albuquerque, NM, US',
-    radius:   '40',
-    per_page: '100',
-    date:     'upcoming',
-  });
-  const url = `https://rest.bandsintown.com/events/search?${params}`;
-  const data = await get(url);
-
-  if (!Array.isArray(data)) {
-    console.warn('  Bandsintown returned unexpected format');
-    return [];
-  }
-
-  console.log(`  Bandsintown: ${data.length} events found`);
-  return data;
+  console.log('\n🎸 Bandsintown: API requires B2B partnership — skipping (0 events).');
+  console.log('   Both /events/search and /artists/{name}/events require auth beyond app_id.');
+  return [];
 }
 
 function transformBandsintownEvent(ev) {
