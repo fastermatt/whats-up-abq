@@ -1,30 +1,37 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { initializeApp } from 'firebase/app';
-import { fetchEventsFromDB, fetchPlacesFromDB } from './lib/db';
-import {
-  getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword,
-  createUserWithEmailAndPassword, signOut, onAuthStateChanged, type User,
-  updateProfile,
-} from 'firebase/auth';
-import {
-  getFirestore, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc,
-  collection, query, orderBy, limit, where, onSnapshot, serverTimestamp, Timestamp,
-} from 'firebase/firestore';
+import { supabase } from './lib/supabase';
 
-// ─── Firebase Setup ──────────────────────────────────────────────────────────
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAVL8hY7QZjgbgny7GKDWA7ti2hoBU2Xvs",
-  authDomain: "abq-unplugged.firebaseapp.com",
-  projectId: "abq-unplugged",
-  storageBucket: "abq-unplugged.firebasestorage.app",
-  messagingSenderId: "587816012900",
-  appId: "1:587816012900:web:bba5f7bc9f43b64ce76371",
+// Supabase compat helpers (replace Firebase Firestore API)
+const _fbGetDoc = async (table: string, id: string, idField = 'id') => {
+  const { data } = await (supabase.from as any)(table).select('*').eq(idField, id).single();
+  return { data: () => data, exists: () => data !== null, id };
+};
+const _fbGetDocsByField = async (table: string, field: string, value: any) => {
+  const { data } = await (supabase.from as any)(table).select('*').eq(field, value);
+  return { docs: (data || []).map((d: any) => ({ id: d.id, data: () => d })), empty: !data?.length, size: data?.length || 0 };
+};
+const _fbGetAllDocs = async (table: string, orderCol?: string, orderAsc = true) => {
+  let q = (supabase.from as any)(table).select('*');
+  if (orderCol) q = q.order(orderCol, { ascending: orderAsc });
+  const { data } = await q;
+  return { docs: (data || []).map((d: any) => ({ id: d.id, data: () => d })), empty: !data?.length, size: data?.length || 0 };
+};
+const _fbSetDoc = async (table: string, id: string, docData: any) => {
+  await (supabase.from as any)(table).upsert({ id, ...docData });
+};
+const _fbSetConfigDoc = async (key: string, value: any) => {
+  await (supabase.from as any)('config').upsert({ key, value });
+};
+const _fbUpdateDoc = async (table: string, id: string, docData: any) => {
+  await (supabase.from as any)(table).update(docData).eq('id', id);
+};
+const _fbAddDoc = async (table: string, docData: any) => {
+  const { data } = await (supabase.from as any)(table).insert(docData).select().single();
+  return { id: (data as any)?.id };
+};
+const _fbDeleteDoc = async (table: string, id: string, idField = 'id') => {
+  await (supabase.from as any)(table).delete().eq(idField, id);
 };
 
-const fbApp  = initializeApp(firebaseConfig);
-const fbAuth = getAuth(fbApp);
-const fbDb   = getFirestore(fbApp);
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -277,12 +284,12 @@ function saveCheckins(s: Set<string>) {
 async function syncCheckinsToFirestore(uid: string, checkIns: Set<string>, displayName: string) {
   try {
     const count = checkIns.size;
-    await setDoc(doc(fbDb, 'users', uid), {
+    await _fbSetDoc('users', uid, {
       checkIns: [...checkIns],
       updatedAt: serverTimestamp(),
-    }, { merge: true });
+    });
     // Update leaderboard entry
-    await setDoc(doc(fbDb, 'leaderboard', uid), {
+    await _fbSetDoc('leaderboard', uid, {
       displayName: displayName || 'Anonymous',
       count,
       updatedAt: serverTimestamp(),
@@ -878,7 +885,7 @@ function ReviewSection({
   // Load reviews
   useEffect(() => {
     setLoading(true);
-    const q = query(collection(fbDb, 'reviews'), where('placeId', '==', placeId));
+    const _q_table = 'reviews'; const _q_field = 'placeId'; const _q_val = placeId;
     const unsub = onSnapshot(q, snap => {
       const loaded: Review[] = snap.docs.map(d => ({
         id: d.id,
@@ -897,7 +904,7 @@ function ReviewSection({
   }, [placeId]);
 
   // Check if this user already reviewed this place
-  const alreadyReviewed = user ? reviews.some(r => r.userId === user.uid) : false;
+  const alreadyReviewed = user ? reviews.some(r => r.userId === user.id) : false;
 
   const avgRating = reviews.length > 0
     ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
@@ -914,10 +921,10 @@ function ReviewSection({
     setError(null);
     setSubmitting(true);
     try {
-      await addDoc(collection(fbDb, 'reviews'), {
+      await _fbAddDoc('reviews', {
         placeId,
-        userId: user.uid,
-        userName: user.displayName || user.email?.split('@')[0] || 'Explorer',
+        userId: user.id,
+        userName: (user.user_metadata?.display_name || user.email) || user.email?.split('@')[0] || 'Explorer',
         rating,
         text: text.trim(),
         createdAt: serverTimestamp(),
@@ -2292,7 +2299,7 @@ function AuthModal({ onClose }: { onClose: () => void }) {
   async function handleGoogle() {
     setError(''); setLoading(true);
     try {
-      await signInWithPopup(fbAuth, new GoogleAuthProvider());
+      await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }));
       onClose();
     } catch (e: any) { setError(e.message || 'Sign-in failed'); }
     setLoading(false);
@@ -2302,10 +2309,10 @@ function AuthModal({ onClose }: { onClose: () => void }) {
     e.preventDefault(); setError(''); setLoading(true);
     try {
       if (isSignUp) {
-        const cred = await createUserWithEmailAndPassword(fbAuth, email, password);
+        const cred = await supabase.auth.signUp({ email: email, password: password });
         if (displayName) await updateProfile(cred.user, { displayName });
       } else {
-        await signInWithEmailAndPassword(fbAuth, email, password);
+        await supabase.auth.signInWithPassword({ email: email, password: password });
       }
       onClose();
     } catch (e: any) { setError(e.message?.replace('Firebase: ', '') || 'Auth failed'); }
@@ -2432,7 +2439,7 @@ function ProfileScreen({
 
   // Subscribe to live leaderboard from Firestore
   useEffect(() => {
-    const q = query(collection(fbDb, 'leaderboard'), orderBy('count', 'desc'), limit(20));
+    const q = { _table: 'leaderboard' }, limit(20));
     const unsub = onSnapshot(q, snap => {
       const rows: LeaderboardRow[] = snap.docs.map((d, i) => ({
         rank: i + 1,
@@ -2955,11 +2962,11 @@ function PlacesTab({ places, setPlaces }: { places: PlaceDoc[]; setPlaces: (fn: 
     setSaving(true);
     try {
       if (mode === 'edit' && editTarget) {
-        await updateDoc(doc(fbDb, 'places', editTarget.id), form as Record<string,unknown>);
+        await _fbUpdateDoc('places', editTarget.id, form as Record<string,unknown>);
         setPlaces(prev => prev.map(p => p.id === editTarget.id ? { ...p, ...form } : p));
         flash('Place updated ✓'); setMode('list');
       } else {
-        const ref = await addDoc(collection(fbDb, 'places'), form as Record<string,unknown>);
+        const ref = await _fbAddDoc('places', form as Record<string,unknown>);
         setPlaces(prev => [...prev, { id: ref.id, ...form }]);
         flash('Place added ✓'); setMode('list');
       }
@@ -2969,14 +2976,14 @@ function PlacesTab({ places, setPlaces }: { places: PlaceDoc[]; setPlaces: (fn: 
 
   const deletePlace = async (p: PlaceDoc) => {
     if (!confirm('Delete "' + p.name + '"? This cannot be undone.')) return;
-    await deleteDoc(doc(fbDb, 'places', p.id));
+    await _fbDeleteDoc('places', p.id);
     setPlaces(prev => prev.filter(x => x.id !== p.id));
     flash('Deleted ✓');
   };
 
   const toggleFeatured = async (p: PlaceDoc) => {
     const next = !p.isFeatured;
-    await updateDoc(doc(fbDb, 'places', p.id), { isFeatured: next });
+    await _fbUpdateDoc('places', p.id, { isFeatured: next });
     setPlaces(prev => prev.map(x => x.id === p.id ? { ...x, isFeatured: next } : x));
   };
 
@@ -3134,7 +3141,7 @@ function EventsTab() {
   const [form, setForm] = useState(EMPTY_FORM);
 
   useEffect(() => {
-    getDocs(collection(fbDb, 'eventOverrides')).then(snap => {
+    _fbGetAllDocs('eventOverrides').then(snap => {
       setOverrides(snap.docs.map(d => ({ eventId: d.id, ...d.data() } as EventOverrideDoc)));
       setLoading(false);
     });
@@ -3147,7 +3154,7 @@ function EventsTab() {
     setSaving(true);
     try {
       const data = { customTags: form.customTags, eventName: form.eventName, venueName: form.venueName, notes: form.notes };
-      await setDoc(doc(fbDb, 'eventOverrides', form.eventId.trim()), data);
+      await _fbSetDoc('event_overrides', form.eventId.trim(), data);
       setOverrides(prev => {
         const i = prev.findIndex(o => o.eventId === form.eventId.trim());
         const item = { eventId: form.eventId.trim(), ...data };
@@ -3160,7 +3167,7 @@ function EventsTab() {
   };
 
   const deleteOverride = async (id: string) => {
-    await deleteDoc(doc(fbDb, 'eventOverrides', id));
+    await _fbDeleteDoc('event_overrides', id);
     setOverrides(prev => prev.filter(o => o.eventId !== id));
     flash('Deleted ✓');
   };
@@ -3241,7 +3248,7 @@ function TagRulesTab() {
   const [msg, setMsg] = useState('');
 
   useEffect(() => {
-    getDoc(doc(fbDb, 'config', 'tagRules')).then(snap => {
+    _fbGetDoc('config', 'tagRules', 'key').then(snap => {
       if (snap.exists()) setRules({ ...DEFAULT_RULES, ...(snap.data() as TagRulesConfig) });
       setLoading(false);
     });
@@ -3252,7 +3259,7 @@ function TagRulesTab() {
   const saveRules = async () => {
     setSaving(true);
     try {
-      await setDoc(doc(fbDb, 'config', 'tagRules'), rules);
+      await _fbSetConfigDoc('tagRules', rules);
       flash('Tag rules saved ✓ — reload the app to apply changes');
     } catch (e) { flash('Error: ' + (e as Error).message); }
     setSaving(false);
@@ -3373,7 +3380,7 @@ function SettingsTab() {
   const [msg, setMsg] = useState('');
 
   useEffect(() => {
-    getDoc(doc(fbDb, 'config', 'siteConfig')).then(snap => {
+    _fbGetDoc('config', 'siteConfig', 'key').then(snap => {
       if (snap.exists()) {
         const d = snap.data();
         setBannerMsg(d.banner?.message || '');
@@ -3389,8 +3396,7 @@ function SettingsTab() {
   const save = async () => {
     setSaving(true);
     try {
-      await setDoc(doc(fbDb, 'config', 'siteConfig'),
-        { banner: { message: bannerMsg, active: bannerActive, color: bannerColor } },
+      await _fbSetConfigDoc('siteConfig', { banner: { message: bannerMsg, active: bannerActive, color: bannerColor } },
         { merge: true }
       );
       flash('Saved ✓');
@@ -3447,8 +3453,8 @@ function AdminScreen({ user, onBack }: { user: User | null; onBack: () => void }
 
   useEffect(() => {
     Promise.all([
-      getDocs(collection(fbDb, 'places')),
-      getDocs(collection(fbDb, 'leaderboard')),
+      _fbGetAllDocs('places'),
+      _fbGetAllDocs('leaderboard', 'count', false),
     ]).then(([plSnap, lbSnap]) => {
       setPlaces(plSnap.docs.map(d => ({ id: d.id, tags: [], ...d.data() } as PlaceDoc)));
       setLbEntries(
@@ -3542,13 +3548,13 @@ export default function App() {
   const syncTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(fbAuth, async (u) => {
+    const unsub = onAuthStateChanged(/* TODO:/* /* _auth_migrated_ */-unfixed */ */, async (u) => {
       setUser(u);
       setAuthReady(true);
       if (u) {
         // Load check-ins from Firestore on sign-in
         try {
-          const snap = await getDoc(doc(fbDb, 'users', u.uid));
+          const snap = await _fbGetDoc('profiles', u.uid);
           if (snap.exists()) {
             const data = snap.data();
             if (Array.isArray(data.checkIns) && data.checkIns.length > 0) {
@@ -3568,7 +3574,7 @@ export default function App() {
     if (!user || !authReady) return;
     if (syncTimeout.current) clearTimeout(syncTimeout.current);
     syncTimeout.current = setTimeout(() => {
-      syncCheckinsToFirestore(user.uid, checkedIn, user.displayName || user.email || 'Explorer');
+      syncCheckinsToFirestore(user.id, checkedIn, (user.user_metadata?.display_name || user.email) || user.email || 'Explorer');
     }, 1500);
     return () => { if (syncTimeout.current) clearTimeout(syncTimeout.current); };
   }, [checkedIn, user, authReady]);
@@ -3640,7 +3646,7 @@ export default function App() {
   const [siteBanner, setSiteBanner] = useState<BannerConfig | null>(null);
 
   useEffect(() => {
-    getDoc(doc(fbDb, 'config', 'siteConfig')).then(snap => {
+    _fbGetDoc('config', 'siteConfig', 'key').then(snap => {
       if (snap.exists()) {
         const d = snap.data();
         if (d.banner?.active) setSiteBanner(d.banner as BannerConfig);
@@ -3976,7 +3982,7 @@ export default function App() {
               user={user}
               places={places}
               onSignIn={() => setShowAuthModal(true)}
-              onSignOut={() => signOut(fbAuth)}
+              onSignOut={() => supabase.auth.signOut()}
             />
           )}
         </main>
