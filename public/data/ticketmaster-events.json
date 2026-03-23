@@ -23912,9 +23912,9 @@
           "upcomingEvents": {
             "mfx-se": 1,
             "tmr": 7,
-            "ticketmaster": 18,
+            "ticketmaster": 17,
             "mfx-no": 1,
-            "_total": 27,
+            "_total": 26,
             "_filtered": 0
           },
           "_links": {
@@ -24098,7 +24098,6 @@
         "description": "LIVE NATION 3PE EVENT / NTL / USA"
       }
     ],
-    "accessibility": {},
     "ageRestrictions": {
       "legalAgeEnforced": false
     },
@@ -24308,9 +24307,9 @@
           "upcomingEvents": {
             "mfx-se": 1,
             "tmr": 7,
-            "ticketmaster": 18,
+            "ticketmaster": 17,
             "mfx-no": 1,
-            "_total": 27,
+            "_total": 26,
             "_filtered": 0
           },
           "_links": {
@@ -89957,10 +89956,10 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 6,
+            "tmr": 5,
             "mfx-nl": 1,
-            "ticketmaster": 16,
-            "_total": 23,
+            "ticketmaster": 15,
+            "_total": 21,
             "_filtered": 0
           },
           "_links": {
@@ -93219,11 +93218,11 @@
             "ticketnet": 2,
             "mfx-ch": 1,
             "tmr": 4,
-            "ticketmaster": 37,
+            "ticketmaster": 36,
             "ticketweb": 5,
             "mfx-no": 1,
             "mfx-pl": 1,
-            "_total": 51,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -139542,10 +139541,10 @@
             "mfx-be": 3,
             "mticket": 1,
             "tmr": 4,
-            "ticketmaster": 31,
+            "ticketmaster": 30,
             "trium": 2,
             "mfx-pl": 1,
-            "_total": 42,
+            "_total": 41,
             "_filtered": 0
           },
           "_links": {
@@ -139728,7 +139727,6 @@
         "description": "LIVE NATION 3PE EVENT / NTL / USA"
       }
     ],
-    "accessibility": {},
     "ageRestrictions": {
       "legalAgeEnforced": false
     },
@@ -139983,10 +139981,10 @@
             "mfx-be": 3,
             "mticket": 1,
             "tmr": 4,
-            "ticketmaster": 31,
+            "ticketmaster": 30,
             "trium": 2,
             "mfx-pl": 1,
-            "_total": 42,
+            "_total": 41,
             "_filtered": 0
           },
           "_links": {
