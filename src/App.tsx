@@ -885,22 +885,24 @@ function ReviewSection({
   // Load reviews
   useEffect(() => {
     setLoading(true);
-    const _q_table = 'reviews'; const _q_field = 'placeId'; const _q_val = placeId;
-    const unsub = onSnapshot(q, snap => {
-      const loaded: Review[] = snap.docs.map(d => ({
-        id: d.id,
-        ...(d.data() as Omit<Review, 'id'>),
-      }));
-      // Sort client-side: newest first
-      loaded.sort((a, b) => {
-        const at = a.createdAt?.toMillis?.() ?? 0;
-        const bt = b.createdAt?.toMillis?.() ?? 0;
-        return bt - at;
-      });
-      setReviews(loaded);
-      setLoading(false);
-    }, () => setLoading(false));
-    return unsub;
+    let cancelled = false;
+    _fbGetDocsByField('reviews', 'place_id', placeId).then(snap => {
+      if (!cancelled) {
+        const loaded: Review[] = snap.docs.map(d => ({
+          id: d.id,
+          ...(d.data() as Omit<Review, 'id'>),
+        }));
+        // Sort client-side: newest first
+        loaded.sort((a, b) => {
+          const at = (a as any).created_at ? new Date((a as any).created_at).getTime() : 0;
+          const bt = (b as any).created_at ? new Date((b as any).created_at).getTime() : 0;
+          return bt - at;
+        });
+        setReviews(loaded);
+        setLoading(false);
+      }
+    }).catch(() => setLoading(false));
+    return () => { cancelled = true; };
   }, [placeId]);
 
   // Check if this user already reviewed this place
@@ -2439,19 +2441,21 @@ function ProfileScreen({
 
   // Subscribe to live leaderboard from Firestore
   useEffect(() => {
-    const q = { _table: 'leaderboard' }, limit(20));
-    const unsub = onSnapshot(q, snap => {
-      const rows: LeaderboardRow[] = snap.docs.map((d, i) => ({
-        rank: i + 1,
-        name: (d.data().displayName as string) || 'Explorer',
-        count: (d.data().count as number) || 0,
-        isMe: d.id === user?.uid,
-        uid: d.id,
-      }));
-      setLbRows(rows);
-    }, () => {/* ignore errors */ });
-    return unsub;
-  }, [user?.uid]);
+      let cancelled = false;
+      _fbGetAllDocs('leaderboard', 'count', false).then(snap => {
+        if (!cancelled) {
+          const rows: LeaderboardRow[] = snap.docs.map((d, i) => ({
+            rank: i + 1,
+            name: (d.data().display_name as string) || 'Explorer',
+            count: (d.data().count as number) || 0,
+            isMe: d.id === user?.id,
+            uid: d.id,
+          }));
+          setLbRows(rows);
+        }
+      });
+      return () => { cancelled = true; };
+  }, [user?.id]);
 
   // Build leaderboard: if user signed in, they'll appear from Firestore; otherwise inject "You" locally
   const leaderboard = useMemo<LeaderboardRow[]>(() => {
@@ -3548,7 +3552,8 @@ export default function App() {
   const syncTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(/* TODO:/* /* _auth_migrated_ */-unfixed */ */, async (u) => {
+    const { data: { subscription: unsub } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const u = session?.user ?? null;
       setUser(u);
       setAuthReady(true);
       if (u) {
@@ -3566,7 +3571,7 @@ export default function App() {
         } catch (err) { console.error('Load checkins error:', err); }
       }
     });
-    return unsub;
+    return () => unsub.unsubscribe();
   }, []);
 
   // Debounced Firestore sync when checkedIn changes and user is signed in
