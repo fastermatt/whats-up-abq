@@ -8234,13 +8234,13 @@
           ],
           "upcomingEvents": {
             "mfx-dk": 3,
-            "ticketnet": 9,
+            "ticketnet": 8,
             "mfx-be": 1,
-            "tmr": 8,
+            "tmr": 7,
             "mfx-nl": 3,
             "ticketmaster": 29,
             "trium": 1,
-            "_total": 54,
+            "_total": 52,
             "_filtered": 0
           },
           "_links": {
@@ -24986,9 +24986,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 37,
+            "tmr": 36,
             "ticketmaster": 79,
-            "_total": 116,
+            "_total": 115,
             "_filtered": 0
           },
           "_links": {
@@ -26264,9 +26264,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 37,
+            "tmr": 36,
             "ticketmaster": 79,
-            "_total": 116,
+            "_total": 115,
             "_filtered": 0
           },
           "_links": {
@@ -27604,9 +27604,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 37,
+            "tmr": 36,
             "ticketmaster": 79,
-            "_total": 116,
+            "_total": 115,
             "_filtered": 0
           },
           "_links": {
@@ -28724,9 +28724,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 37,
+            "tmr": 36,
             "ticketmaster": 79,
-            "_total": 116,
+            "_total": 115,
             "_filtered": 0
           },
           "_links": {
@@ -29443,9 +29443,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 37,
+            "tmr": 36,
             "ticketmaster": 79,
-            "_total": 116,
+            "_total": 115,
             "_filtered": 0
           },
           "_links": {
@@ -29778,9 +29778,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 37,
+            "tmr": 36,
             "ticketmaster": 79,
-            "_total": 116,
+            "_total": 115,
             "_filtered": 0
           },
           "_links": {
@@ -35920,7 +35920,6 @@
         "description": "PROMOTED BY VENUE / NTL / USA"
       }
     ],
-    "accessibility": {},
     "ageRestrictions": {
       "legalAgeEnforced": false
     },
