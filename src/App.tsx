@@ -1,6 +1,29 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { supabase } from './lib/supabase';
 
+// ─── Scroll fade-in hook ─────────────────────────────────────────────────────
+function useFadeIn(delay = 0) {
+  const ref = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(16px)';
+    el.style.transition = `opacity 0.5s ease ${delay}ms, transform 0.5s ease ${delay}ms`;
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        el.style.opacity = '1';
+        el.style.transform = 'none';
+        io.disconnect();
+      }
+    }, { threshold: 0.06, rootMargin: '0px 0px -24px 0px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [delay]);
+  return ref as React.RefObject<any>;
+}
+
+
 // Supabase compat helpers (replace Firebase Firestore API)
 const _fbGetDoc = async (table: string, id: string, idField = 'id') => {
   const { data } = await (supabase.from as any)(table).select('*').eq(idField, id).single();
@@ -369,6 +392,8 @@ function ImageWithFallback({
       src={resolvedSrc}
       alt={alt || ''}
       className={className}
+      loading="lazy"
+      decoding="async"
       onError={() => setError(true)}
     />
   );
@@ -459,7 +484,7 @@ function GeoBanner({
 
 // ─── Place Card ─────────────────────────────────────────────────────────────
 
-function PlaceCard({
+const PlaceCard = React.memo(function PlaceCard({
   place, onClick, distance, isCheckedIn, onCheckIn,
 }: {
   place: Place;
@@ -469,8 +494,10 @@ function PlaceCard({
   onCheckIn?: (e: React.MouseEvent) => void;
 }) {
   const catEmoji = PLACE_CATEGORIES.find(c => c.label === place.category)?.icon || '';
+  const fadeRef = useFadeIn();
   return (
     <button
+      ref={fadeRef}
       onClick={onClick}
       className="bg-white rounded-2xl overflow-hidden text-left w-full"
       style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
@@ -549,18 +576,20 @@ function PlaceCard({
       </div>
     </button>
   );
-}
+});
 
 // ─── Event Card ─────────────────────────────────────────────────────────────
 
-function EventCard({ event, onClick }: { event: TMEvent; onClick: () => void }) {
+const EventCard = React.memo(function EventCard({ event, onClick }: { event: TMEvent; onClick: () => void }) {
   const imgSrc = getBestEventImage(event.images);
   const venue = event._embedded?.venues?.[0];
   const category = getEventCategory(event);
   const price = event.priceRanges?.[0];
 
+  const fadeRef = useFadeIn();
   return (
     <button
+      ref={fadeRef}
       onClick={onClick}
       className="bg-white rounded-2xl overflow-hidden text-left w-full flex"
       style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', minHeight: '100px' }}
@@ -612,7 +641,7 @@ function EventCard({ event, onClick }: { event: TMEvent; onClick: () => void }) 
       </div>
     </button>
   );
-}
+});
 
 // ─── Place Detail Modal ──────────────────────────────────────────────────────
 
