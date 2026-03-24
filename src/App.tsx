@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { supabase } from './lib/supabase';
 
 // ─── Scroll fade-in hook ─────────────────────────────────────────────
@@ -2499,6 +2500,8 @@ function PlacesScreen({
 
 function AuthModal({ onClose }: { onClose: () => void }) {
   const [mode, setMode] = useState<'choose' | 'email'>('choose');
+  const captchaRef = useRef<HCaptcha>(null);
+  const [captchaToken, setCaptchaToken] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -2519,10 +2522,10 @@ function AuthModal({ onClose }: { onClose: () => void }) {
     e.preventDefault(); setError(''); setLoading(true);
     try {
       if (isSignUp) {
-        const cred = await supabase.auth.signUp({ email: email, password: password });
+        const cred = await supabase.auth.signUp({ email: email, password: password, options: { captchaToken } });
         if (displayName) await updateProfile(cred.user, { displayName });
       } else {
-        await supabase.auth.signInWithPassword({ email: email, password: password });
+        await supabase.auth.signInWithPassword({ email: email, password: password, options: { captchaToken } });
       }
       onClose();
     } catch (e: any) { setError(e.message?.replace('Firebase: ', '') || 'Auth failed'); }
@@ -2602,6 +2605,12 @@ function AuthModal({ onClose }: { onClose: () => void }) {
             />
             {error && <p className="text-red-500 text-xs">{error}</p>}
             <button
+              <HCaptcha
+                ref={captchaRef}
+                sitekey={import.meta.env.VITE_HCAPTCHA_SITE_KEY}
+                onVerify={tok => setCaptchaToken(tok)}
+                onExpire={() => setCaptchaToken('')}
+              />
               type="submit" disabled={loading}
               className="w-full rounded-2xl py-3.5 font-bold text-sm text-white"
               style={{ background: '#a03b00', fontFamily: 'Manrope, sans-serif', opacity: loading ? 0.7 : 1 }}
