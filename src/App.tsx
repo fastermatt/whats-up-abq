@@ -433,21 +433,16 @@ function ImageWithFallback({
 // ─── Category Data ──────────────────────────────────────────────────────────
 
 const PLACE_CATEGORIES = [
-  { label: 'All',           icon: '✨' },
-  { label: 'Restaurant',    icon: '' },
-  { label: 'Coffee & Tea',  icon: '☕' },
-  { label: 'Bar',           icon: '' },
-  { label: 'Bakery',        icon: '' },
-  { label: 'Park',          icon: '' },
-  { label: 'Museum',        icon: '' },
-  { label: 'Art Gallery',   icon: '' },
-  { label: 'Attraction',    icon: '' },
-  { label: 'Shopping',      icon: '' },
-  { label: 'Nightlife',     icon: '' },
-  { label: 'Spa & Wellness',icon: '' },
-  { label: 'Gym & Fitness', icon: '' },
-  { label: 'Movie Theater', icon: '' },
-  { label: 'Library',       icon: '' },
+  { label: 'All',            icon: '✨', value: 'All' },
+  { label: 'Restaurants',    icon: '🍽️', value: 'restaurant' },
+  { label: 'Bars',           icon: '🍺', value: 'bar' },
+  { label: 'Parks',          icon: '🌳', value: 'park' },
+  { label: 'Fitness',        icon: '💪', value: 'fitness' },
+  { label: 'Arts',           icon: '🎨', value: 'arts' },
+  { label: 'Shopping',       icon: '🛍️', value: 'shop' },
+  { label: 'Entertainment',  icon: '🎭', value: 'entertainment' },
+  { label: 'Museums',        icon: '🏗️', value: 'museum' },
+  { label: 'Hotels',         icon: '🏨', value: 'hotel' },
 ];
 
 const EVENT_GENRES = ['All', 'Music', 'Sports', 'Arts & Theatre', 'Comedy', 'Family', 'Outdoor'];
@@ -1696,6 +1691,7 @@ function DiscoverScreen({
   places, events, onPlaceSelect, onEventSelect,
   coords, geoRequested, geoError, onRequestGeo,
   checkedIn, onCheckIn,
+  onNavigatePlaces,
 }: {
   places: Place[];
   events: TMEvent[];
@@ -1707,7 +1703,16 @@ function DiscoverScreen({
   onRequestGeo: () => void;
   checkedIn: Set<string>;
   onCheckIn: (id: string) => void;
+  onNavigatePlaces?: (cat: string, search: string) => void;
 }) {
+  const HERO_PHRASES = ['Go Do Something', 'Time to Get Outside', 'Stop Doomscrolling', 'Put the Phone Down', 'Touch Some Grass', 'Go See People', 'Time to Unplug', 'Get Out of the House'];
+  const [heroDisplay, setHeroDisplay] = useState('');
+  useEffect(() => {
+    const p = HERO_PHRASES[Math.floor(Math.random() * HERO_PHRASES.length)];
+    let i = 0;
+    const iv = setInterval(() => { i++; setHeroDisplay(p.slice(0, i)); if (i >= p.length) clearInterval(iv); }, 55);
+    return () => clearInterval(iv);
+  }, []);
   const featured = places.filter(p => p.isFeatured && !BLOCKED_VENUES.some(b => p.name?.toLowerCase().includes(b.toLowerCase()))).slice(0, 5);
 
   const upcomingEvents = useMemo(() => {
@@ -1749,7 +1754,7 @@ function DiscoverScreen({
           className="text-4xl font-black uppercase tracking-tighter leading-none mt-1"
           style={{ fontFamily: 'Epilogue, sans-serif' }}
         >
-          Get Out &<br />Unplug Today
+          {heroDisplay || ' '}
         </h1>
         <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: 'Manrope, sans-serif' }}>
           {places.length} places · {events.length} events in Greater ABQ
@@ -2039,7 +2044,8 @@ function DiscoverScreen({
             { emoji: '👨‍👩‍👧', label: 'Family Fun', bg: '#fff8e1', color: '#f57f17' },
             { emoji: '🏃', label: 'Active', bg: '#fce4ec', color: '#c62828' },
           ].map(({ emoji, label, bg, color }) => (
-            <button key={label} className="rounded-2xl p-3 flex flex-col items-center gap-1 active:scale-95 transition-transform" style={{ backgroundColor: bg }}>
+            <button key={label} className="rounded-2xl p-3 flex flex-col items-center gap-1 active:scale-95 transition-transform" style={{ backgroundColor: bg }}
+              onClick={() => { const m={'Outdoor':'park','Food & Drink':'restaurant','Arts & Culture':'arts','Live Music':'entertainment','Family Fun':'park','Active':'fitness'}; onNavigatePlaces?.(m[label]||'All', ''); }}>
               <span className="text-2xl">{emoji}</span>
               <span className="text-xs font-bold text-center leading-tight" style={{ fontFamily: 'Manrope, sans-serif', color }}>{label}</span>
             </button>
@@ -2059,7 +2065,8 @@ function DiscoverScreen({
             { name: 'NE Heights', desc: 'Views & dining', emoji: '🏔️', bg: '#4a148c' },
             { name: 'South Valley', desc: 'Local flavor', emoji: '🌶️', bg: '#b71c1c' },
           ].map(({ name, desc, emoji, bg }) => (
-            <button key={name} className="rounded-2xl p-4 text-left active:scale-95 transition-transform" style={{ backgroundColor: bg }}>
+            <button key={name} className="rounded-2xl p-4 text-left active:scale-95 transition-transform" style={{ backgroundColor: bg }}
+              onClick={() => { onNavigatePlaces?.('All', name); }}>
               <span className="text-2xl">{emoji}</span>
               <p className="text-white font-black text-sm mt-1" style={{ fontFamily: 'Epilogue, sans-serif' }}>{name}</p>
               <p className="text-white/70 text-xs" style={{ fontFamily: 'Manrope, sans-serif' }}>{desc}</p>
@@ -2287,6 +2294,7 @@ function EventsScreen({
 function PlacesScreen({
   places, onPlaceSelect, coords, geoRequested, geoError, onRequestGeo,
   checkedIn, onCheckIn,
+  navKey = 0, navCat = 'All', navSearch = '',
 }: {
   places: Place[];
   onPlaceSelect: (p: Place) => void;
@@ -2296,10 +2304,14 @@ function PlacesScreen({
   onRequestGeo: () => void;
   checkedIn: Set<string>;
   onCheckIn: (id: string) => void;
+  navKey?: number;
+  navCat?: string;
+  navSearch?: string;
 }) {
   const [selectedCat, setSelectedCat] = useState('All');
   const [search, setSearch] = useState('');
   const [sortMode, setSortMode] = useState<'top' | 'near' | 'az'>('top');
+  useEffect(() => { if (navKey > 0) { setSelectedCat(navCat || 'All'); setSearch(navSearch || ''); } }, [navKey]);
 
   const filtered = useMemo(() => {
     let result = places;
@@ -2404,13 +2416,13 @@ function PlacesScreen({
         {PLACE_CATEGORIES.map(cat => (
           <button
             key={cat.label}
-            onClick={() => setSelectedCat(cat.label)}
+            onClick={() => setSelectedCat(cat.value)}
             className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-semibold transition-all"
             style={{
               fontFamily: 'Manrope, sans-serif',
-              background: selectedCat === cat.label ? '#a03b00' : 'white',
-              color: selectedCat === cat.label ? 'white' : '#333',
-              boxShadow: selectedCat === cat.label ? '0 4px 12px rgba(160,59,0,0.3)' : '0 1px 4px rgba(0,0,0,0.1)',
+              background: selectedCat === cat.value ? '#a03b00' : 'white',
+              color: selectedCat === cat.value ? 'white' : '#333',
+              boxShadow: selectedCat === cat.value ? '0 4px 12px rgba(160,59,0,0.3)' : '0 1px 4px rgba(0,0,0,0.1)',
             }}
           >
             <span>{cat.icon}</span>
@@ -3733,6 +3745,9 @@ type TabId = (typeof NAV_ITEMS)[number]['id'];
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>('discover');
+  const [placesNavKey, setPlacesNavKey] = useState(0);
+  const [placesNavCat, setPlacesNavCat] = useState('All');
+  const [placesNavSearch, setPlacesNavSearch] = useState('');
   const [places, setPlaces] = useState<Place[]>([]);
   const [events, setEvents] = useState<TMEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -4258,7 +4273,8 @@ export default function App() {
               onRequestGeo={requestGeo}
               checkedIn={checkedIn}
               onCheckIn={handleCheckIn}
-            />
+            
+              onNavigatePlaces={(cat, search) => { setPlacesNavCat(cat); setPlacesNavSearch(search); setPlacesNavKey(k => k + 1); setActiveTab('places'); }}/>
           )}
           {activeTab === 'events' && (
             <EventsScreen events={events} onEventSelect={openEventModal} />
@@ -4273,7 +4289,10 @@ export default function App() {
               onRequestGeo={requestGeo}
               checkedIn={checkedIn}
               onCheckIn={handleCheckIn}
-            />
+            
+              navKey={placesNavKey}
+              navCat={placesNavCat}
+              navSearch={placesNavSearch}/>
           )}
           {activeTab === 'profile' && (
             <ProfileScreen
