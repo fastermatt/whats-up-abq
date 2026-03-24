@@ -3745,6 +3745,8 @@ type TabId = (typeof NAV_ITEMS)[number]['id'];
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>('discover');
+  const [showSearch, setShowSearch] = useState(false);
+  const [globalSearch, setGlobalSearch] = useState('');
   const [placesNavKey, setPlacesNavKey] = useState(0);
   const [placesNavCat, setPlacesNavCat] = useState('All');
   const [placesNavSearch, setPlacesNavSearch] = useState('');
@@ -4234,7 +4236,10 @@ export default function App() {
             </span>
           </div>
           <div className="flex items-center gap-1.5">
-            {/* Location indicator */}
+            {            <button onClick={() => setShowSearch(true)} className="w-11 h-11 rounded-full flex items-center justify-center" style={{ background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '22px', color: '#a03b00' }}>search</span>
+            </button>
+/* Location indicator */}
             <button
               onClick={requestGeo}
               className="w-11 h-11 rounded-full flex items-center justify-center"
@@ -4327,7 +4332,7 @@ export default function App() {
                 className="material-symbols-outlined"
                 style={{
                   fontSize: '24px',
-                  color: activeTab === item.id ? '#a03b00' : '#bbb',
+                  color: activeTab === item.id ? '#a03b00' : '#555',
                   fontVariationSettings:
                     activeTab === item.id
                       ? "'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24"
@@ -4340,7 +4345,7 @@ export default function App() {
               <span
                 className="text-xs font-semibold"
                 style={{
-                  color: activeTab === item.id ? '#a03b00' : '#bbb',
+                  color: activeTab === item.id ? '#a03b00' : '#555',
                   fontFamily: 'Manrope, sans-serif',
                   fontSize: '10px',
                 }}
@@ -4350,7 +4355,21 @@ export default function App() {
             </button>
           ))}
         </nav>
-      </div>
+            {showSearch && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 200, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '60px' }} onClick={() => setShowSearch(false)}>
+          <div style={{ background: 'white', borderRadius: '16px', width: '90%', maxWidth: '480px', padding: '16px', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+              <span className="material-symbols-outlined" style={{ color: '#a03b00', fontSize: '22px' }}>search</span>
+              <input autoFocus type="text" placeholder="Search places, events..." value={globalSearch} onChange={e => setGlobalSearch(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && globalSearch.trim()) { setPlacesNavCat('All'); setPlacesNavSearch(globalSearch.trim()); setPlacesNavKey(k => k + 1); setActiveTab('places'); setShowSearch(false); } }} style={{ flex: 1, border: 'none', outline: 'none', fontSize: '16px', fontFamily: 'Manrope, sans-serif' }} />
+              <button onClick={() => setShowSearch(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px' }}><span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#666' }}>close</span></button>
+            </div>
+            {globalSearch.trim() && (
+              <button onClick={() => { setPlacesNavCat('All'); setPlacesNavSearch(globalSearch.trim()); setPlacesNavKey(k => k + 1); setActiveTab('places'); setShowSearch(false); }} style={{ width: '100%', padding: '12px', background: '#a03b00', color: 'white', border: 'none', borderRadius: '10px', fontSize: '15px', fontFamily: 'Manrope, sans-serif', fontWeight: '600', cursor: 'pointer' }}>Search places for "{globalSearch}"</button>
+            )}
+          </div>
+        </div>
+      )}
+</div>
 
       {/* Detail Modals */}
       {selectedPlace && (
