@@ -3747,6 +3747,25 @@ export default function App() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const syncTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Fix: vertical wheel scroll passes through horizontal carousels
+  useEffect(() => {
+    const fn = (e: WheelEvent) => {
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+      let el = e.target as HTMLElement | null;
+      while (el && el !== document.body) {
+        const cs = getComputedStyle(el);
+        if ((cs.overflowX === 'auto' || cs.overflowX === 'scroll') && el.scrollWidth > el.clientWidth) {
+          e.preventDefault();
+          window.scrollBy({ top: e.deltaY });
+          return;
+        }
+        el = el.parentElement;
+      }
+    };
+    window.addEventListener('wheel', fn, { passive: false });
+    return () => window.removeEventListener('wheel', fn);
+  }, []);
+
   useEffect(() => {
     const { data: { subscription: unsub } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const u = session?.user ?? null;
