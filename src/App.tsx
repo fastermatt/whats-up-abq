@@ -1270,6 +1270,121 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
   );
 }
 
+// ─── Why Unplug? Rotating Research Quotes ────────────────────────────────────
+
+const UNPLUG_QUOTES = [
+  // Social connection & health
+  { text: "People with strong social ties have a 50% increased likelihood of survival compared to those with weaker ties.", source: "Holt-Lunstad et al., PLOS Medicine", icon: "🤝" },
+  { text: "Loneliness is as harmful to health as smoking 15 cigarettes a day.", source: "Holt-Lunstad, Brigham Young University", icon: "🤝" },
+  { text: "Face-to-face contact is the bread and butter of social life — it's how we evolved to connect.", source: "Robin Dunbar, Oxford University", icon: "🤝" },
+  { text: "Just 10 minutes of conversation with another person can improve memory and mental performance.", source: "Ybarra et al., University of Michigan", icon: "🤝" },
+  { text: "People who feel more connected report 3× more daily joy than those who feel isolated.", source: "Journal of Happiness Studies", icon: "🤝" },
+  { text: "Having five or more in-person friends reduces your risk of depression by 70%.", source: "Melbourne Institute of Applied Economic Research", icon: "🤝" },
+  // Experiences vs objects
+  { text: "People over-estimate happiness from buying things, and underestimate it from experiences.", source: "Van Boven & Gilovich, Cornell University", icon: "✨" },
+  { text: "Experiences get better every time you think about them. Objects don't.", source: "Thomas Gilovich, Cornell Psychology", icon: "✨" },
+  { text: "Novel real-world experiences create richer, more detailed memories than screen-based ones.", source: "Maguire et al., Nature Neuroscience", icon: "✨" },
+  { text: "Shared experiences — even with strangers — make us happier than having them alone.", source: "Boothby et al., Psychological Science", icon: "✨" },
+  { text: "You can't get the same neurological hit from watching something as from being in the room.", source: "Dr. Paul Zak, Claremont Graduate University", icon: "✨" },
+  // Urban exploration
+  { text: "Walking through new neighborhoods activates the hippocampus — the brain's exploration center.", source: "O'Keefe & Moser, Nobel Prize in Medicine 2014", icon: "🏙️" },
+  { text: "People who explore local culture report significantly higher life satisfaction.", source: "American Journal of Community Psychology", icon: "🏙️" },
+  { text: "Exploring your own city produces the same mood boost as traveling far away.", source: "Nawijn et al., Applied Research in Quality of Life", icon: "🏙️" },
+  { text: "Local exploration builds place identity — a key predictor of resilience and belonging.", source: "Lewicka, Journal of Environmental Psychology", icon: "🏙️" },
+  { text: "Cities with vibrant arts and live events see measurably lower rates of depression.", source: "World Health Organization, 2019", icon: "🏙️" },
+  // Presence & phones
+  { text: "A wandering mind is an unhappy mind. Being present is one of the strongest predictors of happiness.", source: "Killingsworth & Gilbert, Harvard — Science 2010", icon: "💫" },
+  { text: "People who put their phones away during meals enjoy both the food and company significantly more.", source: "Dwyer et al., Journal of Experimental Social Psychology", icon: "💫" },
+  { text: "The mere presence of a smartphone — even face down — reduces available cognitive capacity.", source: "Ward et al., Journal of Consumer Research", icon: "💫" },
+  { text: "Brief moments of undivided attention with another person build real trust and emotional closeness.", source: "Turkle, MIT Media Lab", icon: "💫" },
+  { text: "Screen-free time directly correlates with increased creativity and cognitive flexibility.", source: "Leroy, University of Washington", icon: "💫" },
+  // Health & longevity
+  { text: "Community engagement is one of the strongest predictors of longevity — stronger than diet or exercise alone.", source: "Blue Zones research, National Geographic", icon: "❤️" },
+  { text: "Going to live events and performances is associated with a 14% lower risk of early death.", source: "Fancourt & Finn, BMJ 2019", icon: "❤️" },
+  { text: "Physical presence activates oxytocin — the bonding hormone — in ways video calls cannot replicate.", source: "Dunbar, Evolutionary Psychology", icon: "❤️" },
+  { text: "Social activities lower cortisol levels as effectively as meditation.", source: "Post, International Journal of Service Learning", icon: "❤️" },
+  // Belonging & community
+  { text: "Brief interactions with cashiers, neighbors, and café regulars improve mood more than most people predict.", source: "Epley & Schroeder, Journal of Experimental Psychology", icon: "🌟" },
+  { text: "Feeling you belong to a place is associated with 40% higher reported wellbeing.", source: "Knight Foundation, Soul of the Community study", icon: "🌟" },
+  { text: "Attending community events 3+ times a month doubles your sense of belonging.", source: "Pew Research Center, Community Connections Study", icon: "🌟" },
+  { text: "People who regularly attend local events have stronger support networks in times of crisis.", source: "Putnam, Bowling Alone, Harvard University Press", icon: "🌟" },
+  { text: "Even watching live sports alongside strangers creates real feelings of tribal belonging.", source: "Wann, Journal of Sport Behavior", icon: "🌟" },
+  // Science bonus
+  { text: "The brain produces far more dopamine from live, unpredictable experiences than from pre-recorded content.", source: "Schultz, Annual Review of Neuroscience", icon: "⚡" },
+  { text: "Live music physically synchronizes heartbeats across audience members — a measurable form of group bonding.", source: "Vickhoff et al., Frontiers in Psychology", icon: "⚡" },
+  { text: "Attending a cultural event even once a month is associated with a 31% increase in reported happiness.", source: "ONS Wellbeing Study, UK Office for National Statistics", icon: "⚡" },
+  { text: "Humans who belong to meaningful community groups recover from illness faster.", source: "Cohen & Wills, Psychological Bulletin", icon: "⚡" },
+  { text: "Children who play outside with others develop stronger empathy than screen-first peers.", source: "Gray, American Journal of Play", icon: "⚡" },
+];
+
+function WhyUnplugCard() {
+  const [idx, setIdx] = useState(() => Math.floor(Math.random() * UNPLUG_QUOTES.length));
+  const [animKey, setAnimKey] = useState(0);
+
+  useEffect(() => {
+    if (!document.getElementById('unplug-anim-styles')) {
+      const s = document.createElement('style');
+      s.id = 'unplug-anim-styles';
+      s.textContent = `
+        @keyframes unplugSpark {
+          0%   { opacity:0; transform:translateY(7px) scale(0.98); filter:brightness(1.8); }
+          35%  { opacity:1; transform:translateY(-2px) scale(1.01); filter:brightness(1.15); }
+          100% { opacity:1; transform:translateY(0) scale(1); filter:brightness(1); }
+        }
+        @keyframes unplugIconFloat {
+          0%,100% { transform:scale(1) rotate(-2deg); opacity:0.18; }
+          50%     { transform:scale(1.14) rotate(4deg); opacity:0.28; }
+        }
+        @keyframes unplugShimmer {
+          0%   { left:-80%; }
+          100% { left:160%; }
+        }
+        .unplug-spark { animation: unplugSpark 0.6s cubic-bezier(0.22,1,0.36,1) both; }
+        .unplug-icon-float { animation: unplugIconFloat 4.5s ease-in-out infinite; }
+        .unplug-wrap::before {
+          content:''; position:absolute; top:0; left:-80%; width:55%; height:100%;
+          background:linear-gradient(90deg,transparent,rgba(255,255,255,0.07),transparent);
+          animation:unplugShimmer 3.5s ease-in-out infinite;
+          pointer-events:none; border-radius:1rem;
+        }
+      `;
+      document.head.appendChild(s);
+    }
+    const t = setInterval(() => {
+      setIdx(prev => {
+        let next: number;
+        do { next = Math.floor(Math.random() * UNPLUG_QUOTES.length); } while (next === prev);
+        return next;
+      });
+      setAnimKey(k => k + 1);
+    }, 7000);
+    return () => clearInterval(t);
+  }, []);
+
+  const q = UNPLUG_QUOTES[idx];
+  return (
+    <div
+      className="mx-5 mb-28 rounded-2xl p-4 relative overflow-hidden unplug-wrap"
+      style={{ background: 'linear-gradient(135deg, #a03b00, #ff793b)', minHeight: '94px' }}
+    >
+      <span className="absolute right-3 bottom-2 text-5xl unplug-icon-float select-none" style={{ pointerEvents: 'none' }}>
+        {q.icon}
+      </span>
+      <div key={animKey} className="unplug-spark">
+        <p className="text-white font-black text-sm leading-tight mb-1 pr-10" style={{ fontFamily: 'Epilogue, sans-serif' }}>
+          WHY UNPLUG?
+        </p>
+        <p className="text-white/90 text-xs leading-snug pr-10" style={{ fontFamily: 'Manrope, sans-serif' }}>
+          "{q.text}"
+        </p>
+        <p className="text-white/50 mt-1.5 italic pr-10" style={{ fontFamily: 'Manrope, sans-serif', fontSize: '10px' }}>
+          — {q.source}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ─── Discover Screen (Mixed Feed) ─────────────────────────────────────────────
 
 // ─── ABQ FACTS (100+ for Did You Know rotating card) ────────────────────────
@@ -1937,18 +2052,7 @@ function DiscoverScreen({
       <MyWishlist />
 
       {/* Why Unplug */}
-      <div
-        className="mx-5 mb-28 rounded-2xl p-4 relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #a03b00, #ff793b)' }}
-      >
-        <p className="text-white font-black text-lg leading-tight" style={{ fontFamily: 'Epilogue, sans-serif' }}>
-          WHY UNPLUG?
-        </p>
-        <p className="text-white/80 text-sm mt-1" style={{ fontFamily: 'Manrope, sans-serif' }}>
-          Real experiences create memories no screen can replicate. Get out there, ABQ.
-        </p>
-        <span className="absolute right-4 bottom-2 text-5xl opacity-20">⚡</span>
-      </div>
+      <WhyUnplugCard />
     </div>
   );
 }
