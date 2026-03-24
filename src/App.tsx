@@ -1286,6 +1286,8 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
                 style={{
                   background: link.source === 'Ticketmaster'
                     ? 'linear-gradient(135deg, #026cdf, #02a7f0)'
+                    : link.source === 'Eventbrite'
+                    ? 'linear-gradient(135deg, #f05537, #ff7a5c)'
                     : 'linear-gradient(135deg, #d4184a, #ff5c5c)',
                   fontFamily: 'Epilogue, sans-serif',
                 }}
@@ -2276,7 +2278,7 @@ function EventsScreen({
         {sorted.map(event => (
           <div key={event.id} style={{position:'relative'}}>
             <EventCard event={event} onClick={() => onEventSelect(event)} />
-            <button style={{position:'absolute',top:8,right:8,zIndex:10,background:'rgba(0,0,0,0.6)',border:'none',borderRadius:'50%',width:32,height:32,color:'white',fontSize:18,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:event.id,type:'event',name:event.name});}}>♡</button>
+            <button style={{position:'absolute',top:8,right:8,zIndex:10,background:'rgba(0,0,0,0.6)',border:'none',borderRadius:'50%',width:36,height:36,minHeight:0,color:'white',fontSize:18,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:event.id,type:'event',name:event.name});}}>♡</button>
           </div>
         ))}
         {sorted.length === 0 && (
@@ -2474,7 +2476,7 @@ function PlacesScreen({
                 isCheckedIn={checkedIn.has(place.id)}
                 onCheckIn={e => { e.stopPropagation(); onCheckIn(place.id); }}
                 />
-              <button style={{position:'absolute',top:8,right:8,zIndex:10,background:'rgba(0,0,0,0.6)',border:'none',borderRadius:'50%',width:32,height:32,color:'white',fontSize:18,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:place.id,type:'place',name:place.name});}}>♡</button>
+              <button style={{position:'absolute',top:8,right:8,zIndex:10,background:'rgba(0,0,0,0.6)',border:'none',borderRadius:'50%',width:36,height:36,minHeight:0,color:'white',fontSize:18,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:place.id,type:'place',name:place.name});}}>♡</button>
             </div>
           ))}
         </div>
@@ -4034,10 +4036,26 @@ export default function App() {
           }
         }
 
+        const _ebEvents = toArr(ebResult);
+        const _ebOnlyEvents: typeof _ebEvents = [];
+        for (const eb of _ebEvents) {
+          const k = normTitle(eb.name || '') + '|' + (eb.dates?.start?.localDate || '');
+          const tmMatch = _tmIndex.get(k);
+          if (tmMatch) {
+            if (!tmMatch.ticketLinks) {
+              tmMatch.ticketLinks = tmMatch.url
+                ? [{ source: 'Ticketmaster', url: tmMatch.url }]
+                : [];
+            }
+            if (eb.url) tmMatch.ticketLinks.push({ source: 'Eventbrite', url: eb.url });
+          } else {
+            _ebOnlyEvents.push(eb);
+          }
+        }
         const seen = new Set<string>();
         const merged = [
           ..._tmEvents,
-          ...toArr(ebResult),
+          ..._ebOnlyEvents,
           ..._sgOnlyEvents,
           ...toArr(bitResult),
           ...toArr(muResult),
@@ -4369,11 +4387,14 @@ export default function App() {
           <div style={{ background: 'white', borderRadius: '16px', width: '90%', maxWidth: '480px', padding: '16px', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
               <span className="material-symbols-outlined" style={{ color: '#a03b00', fontSize: '22px' }}>search</span>
-              <input autoFocus type="text" placeholder="Search places, events..." value={globalSearch} onChange={e => setGlobalSearch(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && globalSearch.trim()) { setPlacesNavCat('All'); setPlacesNavSearch(globalSearch.trim()); setPlacesNavKey(k => k + 1); setActiveTab('places'); setShowSearch(false); } }} style={{ flex: 1, border: 'none', outline: 'none', fontSize: '16px', fontFamily: 'Manrope, sans-serif' }} />
+              <input autoFocus type="text" placeholder="Search places, events..." value={globalSearch} onChange={e => setGlobalSearch(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && globalSearch.trim()) { setSearch(globalSearch.trim()); setActiveTab('events'); setShowSearch(false); } }} style={{ flex: 1, border: 'none', outline: 'none', fontSize: '16px', fontFamily: 'Manrope, sans-serif' }} />
               <button onClick={() => setShowSearch(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px' }}><span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#666' }}>close</span></button>
             </div>
-            {globalSearch.trim() && (
-              <button onClick={() => { setPlacesNavCat('All'); setPlacesNavSearch(globalSearch.trim()); setPlacesNavKey(k => k + 1); setActiveTab('places'); setShowSearch(false); }} style={{ width: '100%', padding: '12px', background: '#a03b00', color: 'white', border: 'none', borderRadius: '10px', fontSize: '15px', fontFamily: 'Manrope, sans-serif', fontWeight: '600', cursor: 'pointer' }}>Search places for "{globalSearch}"</button>
+            {{globalSearch.trim() && (
+              <div style={{display:'flex',gap:'8px',width:'100%'}}>
+                <button onClick={() => { setSearch(globalSearch.trim()); setActiveTab('events'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'#a03b00',color:'white',border:'none',borderRadius:'10px',fontSize:'15px',fontFamily:'Manrope, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Events</button>
+                <button onClick={() => { setPlacesNavCat('All'); setPlacesNavSearch(globalSearch.trim()); setPlacesNavKey(k => k + 1); setActiveTab('places'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'#026cdf',color:'white',border:'none',borderRadius:'10px',fontSize:'15px',fontFamily:'Manrope, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Places</button>
+              </div>
             )}
           </div>
         </div>
