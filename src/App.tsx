@@ -70,6 +70,8 @@ interface TMEvent {
   id: string;
   name: string;
   url?: string;
+  _source?: string;
+  ticketLinks?: Array<{ source: string; url: string }>;
   images?: TMImage[];
   dates?: {
     start?: { localDate?: string; localTime?: string };
@@ -1215,13 +1217,39 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
           </p>
         </div>
 
-        {event.url ? (
+        {event.ticketLinks && event.ticketLinks.length > 0 ? (
+          <div className="flex flex-col gap-2">
+            {event.ticketLinks.map((link) => (
+              <a
+                key={link.source}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between w-full px-5 py-3 text-white font-black text-sm rounded-2xl"
+                style={{
+                  background: link.source === 'Ticketmaster'
+                    ? 'linear-gradient(135deg, #026cdf, #02a7f0)'
+                    : 'linear-gradient(135deg, #d4184a, #ff5c5c)',
+                  fontFamily: 'Epilogue, sans-serif',
+                }}
+              >
+                <span>{link.source}</span>
+                <span>GET TICKETS →</span>
+              </a>
+            ))}
+          </div>
+        ) : event.url ? (
           <a
             href={event.url}
             target="_blank"
             rel="noopener noreferrer"
             className="block w-full py-4 text-center text-white font-black text-sm rounded-2xl"
-            style={{ background: 'linear-gradient(135deg, #a03b00, #ff793b)', fontFamily: 'Epilogue, sans-serif' }}
+            style={{
+              background: event._source === 'seatgeek'
+                ? 'linear-gradient(135deg, #d4184a, #ff5c5c)'
+                : 'linear-gradient(135deg, #a03b00, #ff793b)',
+              fontFamily: 'Epilogue, sans-serif',
+            }}
           >
             GET TICKETS →
           </a>
@@ -3747,14 +3775,46 @@ export default function App() {
           setPlaces(Array.isArray(data) ? data : []);
         }
 
-        // Merge all event sources, deduplicating by id
+        // Merge all event sources with cross-source fuzzy deduplication
         const toArr = (r: PromiseSettledResult<unknown>) =>
           r.status === 'fulfilled' && Array.isArray(r.value) ? r.value : [];
+
+        // Normalize title for fuzzy matching: lowercase, strip non-alphanumeric, cap length
+        const normTitle = (s: string) =>
+          s.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
+
+        // Index TM events by normalizedTitle|date so we can detect SeatGeek duplicates
+        const _tmEvents: TMEvent[] = toArr(tmResult);
+        const _tmIndex = new Map<string, TMEvent>();
+        for (const e of _tmEvents) {
+          const k = normTitle(e.name || '') + '|' + (e.dates?.start?.localDate || '');
+          if (k !== '|') _tmIndex.set(k, e);
+        }
+
+        // For each SeatGeek event: merge ticket link into matched TM event, or keep as unique
+        const _sgEvents: TMEvent[] = toArr(sgResult);
+        const _sgOnlyEvents: TMEvent[] = [];
+        for (const sg of _sgEvents) {
+          const k = normTitle(sg.name || '') + '|' + (sg.dates?.start?.localDate || '');
+          const tmMatch = _tmIndex.get(k);
+          if (tmMatch) {
+            // Duplicate: merge ticket links from both platforms into one card
+            if (!tmMatch.ticketLinks) {
+              tmMatch.ticketLinks = tmMatch.url
+                ? [{ source: 'Ticketmaster', url: tmMatch.url }]
+                : [];
+            }
+            if (sg.url) tmMatch.ticketLinks.push({ source: 'SeatGeek', url: sg.url });
+          } else {
+            _sgOnlyEvents.push(sg);
+          }
+        }
+
         const seen = new Set<string>();
         const merged = [
-          ...toArr(tmResult),
+          ..._tmEvents,
           ...toArr(ebResult),
-          ...toArr(sgResult),
+          ..._sgOnlyEvents,
           ...toArr(bitResult),
           ...toArr(muResult),
         ].filter((e: TMEvent) => {
