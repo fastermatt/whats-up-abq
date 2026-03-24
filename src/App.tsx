@@ -1638,7 +1638,7 @@ function DayPlanner() {
             <button onClick={() => toggle(item.id)} className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 transition-colors" style={{ border: `2px solid ${item.done ? '#22c55e' : '#d1d5db'}`, backgroundColor: item.done ? '#22c55e' : 'transparent' }}>
               {item.done && <span className="text-white text-xs font-bold">✓</span>}
             </button>
-            <p className="flex-1 text-sm" style={{ fontFamily: 'Manrope, sans-serif', textDecoration: item.done ? 'line-through' : 'none', color: item.done ? '#9ca3af' : '#111827' }}>{item.text}</p>
+            <a href={`https://maps.google.com/?q=${encodeURIComponent(item.text + ' Albuquerque NM')}`} target="_blank" rel="noopener noreferrer" className="flex-1 text-sm" style={{ fontFamily: 'Manrope, sans-serif', textDecoration: item.done ? 'line-through' : 'none', color: item.done ? '#9ca3af' : '#111827', display: 'flex', alignItems: 'center' }}>{item.text}</a>
             <button onClick={() => remove(item.id)} className="text-gray-200 hover:text-gray-400 text-sm ml-2">✕</button>
           </div>
         ))}
@@ -2099,7 +2099,7 @@ function DiscoverScreen({
                 {steps.map((step, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <span className="text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center text-white flex-shrink-0" style={{ backgroundColor: accent }}>{i + 1}</span>
-                    <p className="text-xs text-gray-700" style={{ fontFamily: 'Manrope, sans-serif' }}>{step}</p>
+                    <a href={`https://maps.google.com/?q=${encodeURIComponent(step + ' Albuquerque NM')}`} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-700 hover:text-blue-600 hover:underline transition-colors" style={{ fontFamily: 'Manrope, sans-serif' }}>{step}</a>
                   </div>
                 ))}
               </div>
@@ -3747,7 +3747,7 @@ export default function App() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const syncTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Fix: vertical wheel scroll passes through horizontal carousels
+  //   // Fix: vertical wheel scroll passes through horizontal carousels
   useEffect(() => {
     const fn = (e: WheelEvent) => {
       if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
@@ -3755,6 +3755,17 @@ export default function App() {
       while (el && el !== document.body) {
         const cs = getComputedStyle(el);
         if ((cs.overflowX === 'auto' || cs.overflowX === 'scroll') && el.scrollWidth > el.clientWidth) {
+          // Find nearest vertically-scrollable ancestor and scroll it
+          let p = el.parentElement;
+          while (p && p !== document.body) {
+            const ps = getComputedStyle(p);
+            if ((ps.overflowY === 'auto' || ps.overflowY === 'scroll') && p.scrollHeight > p.clientHeight) {
+              e.preventDefault();
+              p.scrollBy({ top: e.deltaY });
+              return;
+            }
+            p = p.parentElement;
+          }
           e.preventDefault();
           window.scrollBy({ top: e.deltaY });
           return;
