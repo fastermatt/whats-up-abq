@@ -1272,6 +1272,8 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
 
 // ─── Why Unplug? Rotating Research Quotes ────────────────────────────────────
 
+const BLOCKED_VENUES = ['Hooters', 'Twin Peaks', 'Twin Peaks Restaurant', 'Coyote Ugly', 'Tilted Kilt'];
+
 const UNPLUG_QUOTES = [
   // Social connection & health
   { text: "People with strong social ties have a 50% increased likelihood of survival compared to those with weaker ties.", source: "Holt-Lunstad et al., PLOS Medicine", icon: "🤝" },
@@ -1319,182 +1321,75 @@ const UNPLUG_QUOTES = [
 
 function WhyUnplugCard() {
   const [idx, setIdx] = useState(() => Math.floor(Math.random() * UNPLUG_QUOTES.length));
-  const [animKey, setAnimKey] = useState(0);
+  const [phase, setPhase] = useState<'in' | 'out'>('in');
 
   useEffect(() => {
     if (!document.getElementById('unplug-anim-styles')) {
       const s = document.createElement('style');
       s.id = 'unplug-anim-styles';
       s.textContent = `
-        @keyframes unplugSpark {
-          0%   { opacity:0; transform:translateY(7px) scale(0.98); filter:brightness(1.8); }
-          35%  { opacity:1; transform:translateY(-2px) scale(1.01); filter:brightness(1.15); }
-          100% { opacity:1; transform:translateY(0) scale(1); filter:brightness(1); }
+        @keyframes unplugIn {
+          0%   { opacity:0; transform:translateX(-44px) skewX(-5deg); filter:blur(8px); }
+          55%  { filter:blur(0); }
+          100% { opacity:1; transform:translateX(0) skewX(0); filter:blur(0); }
         }
-        @keyframes unplugIconFloat {
-          0%,100% { transform:scale(1) rotate(-2deg); opacity:0.18; }
-          50%     { transform:scale(1.14) rotate(4deg); opacity:0.28; }
+        @keyframes unplugOut {
+          0%   { opacity:1; transform:translateX(0) skewX(0); filter:blur(0); }
+          100% { opacity:0; transform:translateX(52px) skewX(5deg); filter:blur(6px); }
         }
-        @keyframes unplugShimmer {
-          0%   { left:-80%; }
-          100% { left:160%; }
+        .unplug-in .unplug-label {
+          animation: unplugIn 0.5s cubic-bezier(0.16,1,0.3,1) 0ms both;
         }
-        .unplug-spark { animation: unplugSpark 0.6s cubic-bezier(0.22,1,0.36,1) both; }
-        .unplug-icon-float { animation: unplugIconFloat 4.5s ease-in-out infinite; }
-        .unplug-wrap::before {
-          content:''; position:absolute; top:0; left:-80%; width:55%; height:100%;
-          background:linear-gradient(90deg,transparent,rgba(255,255,255,0.07),transparent);
-          animation:unplugShimmer 3.5s ease-in-out infinite;
-          pointer-events:none; border-radius:1rem;
+        .unplug-in .unplug-quote {
+          animation: unplugIn 0.6s cubic-bezier(0.16,1,0.3,1) 75ms both;
+        }
+        .unplug-in .unplug-source {
+          animation: unplugIn 0.55s cubic-bezier(0.16,1,0.3,1) 155ms both;
+        }
+        .unplug-out .unplug-label {
+          animation: unplugOut 0.28s cubic-bezier(0.4,0,1,1) 0ms forwards;
+        }
+        .unplug-out .unplug-quote {
+          animation: unplugOut 0.28s cubic-bezier(0.4,0,1,1) 40ms forwards;
+        }
+        .unplug-out .unplug-source {
+          animation: unplugOut 0.28s cubic-bezier(0.4,0,1,1) 80ms forwards;
         }
       `;
       document.head.appendChild(s);
     }
     const t = setInterval(() => {
-      setIdx(prev => {
-        let next: number;
-        do { next = Math.floor(Math.random() * UNPLUG_QUOTES.length); } while (next === prev);
-        return next;
-      });
-      setAnimKey(k => k + 1);
-    }, 7000);
+      setPhase('out');
+      setTimeout(() => {
+        setIdx(prev => {
+          let next: number;
+          do { next = Math.floor(Math.random() * UNPLUG_QUOTES.length); } while (next === prev);
+          return next;
+        });
+        setPhase('in');
+      }, 420);
+    }, 20000);
     return () => clearInterval(t);
   }, []);
 
   const q = UNPLUG_QUOTES[idx];
   return (
-    <div
-      className="mx-5 mb-28 rounded-2xl p-4 relative overflow-hidden unplug-wrap"
-      style={{ background: 'linear-gradient(135deg, #a03b00, #ff793b)', minHeight: '94px' }}
-    >
-      <span className="absolute right-3 bottom-2 text-5xl unplug-icon-float select-none" style={{ pointerEvents: 'none' }}>
-        {q.icon}
-      </span>
-      <div key={animKey} className="unplug-spark">
-        <p className="text-white font-black text-sm leading-tight mb-1 pr-10" style={{ fontFamily: 'Epilogue, sans-serif' }}>
-          WHY UNPLUG?
-        </p>
-        <p className="text-white/90 text-xs leading-snug pr-10" style={{ fontFamily: 'Manrope, sans-serif' }}>
-          "{q.text}"
-        </p>
-        <p className="text-white/50 mt-1.5 italic pr-10" style={{ fontFamily: 'Manrope, sans-serif', fontSize: '10px' }}>
-          — {q.source}
-        </p>
+    <div className={`mx-5 mb-28 unplug-${phase}`} style={{ minHeight: '88px' }}>
+      <div className="unplug-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+        <span style={{ fontSize: '18px', lineHeight: '1' }}>{q.icon}</span>
+        <span style={{ fontFamily: 'Epilogue, sans-serif', fontSize: '10px', fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: '#d4450a' }}>
+          Why Unplug?
+        </span>
       </div>
+      <p className="unplug-quote" style={{ fontFamily: 'Manrope, sans-serif', fontSize: '15px', fontWeight: 600, lineHeight: 1.5, color: '#1a1a1a', marginBottom: '8px', marginTop: 0 }}>
+        "{q.text}"
+      </p>
+      <p className="unplug-source" style={{ fontFamily: 'Manrope, sans-serif', fontSize: '11px', fontStyle: 'italic', color: '#888', margin: 0 }}>
+        — {q.source}
+      </p>
     </div>
   );
 }
-
-// ─── Discover Screen (Mixed Feed) ─────────────────────────────────────────────
-
-// ─── ABQ FACTS (100+ for Did You Know rotating card) ────────────────────────
-const ABQ_FACTS = [
-  { icon: '⛰️', fact: 'ABQ sits at 5,312 ft elevation — higher than Denver, CO.' },
-  { icon: '☀️', fact: 'Albuquerque averages 310+ days of sunshine per year — one of the sunniest cities in the US.' },
-  { icon: '🎈', fact: 'The Albuquerque International Balloon Fiesta draws 900,000+ visitors every October and is the largest hot air balloon event on Earth.' },
-  { icon: '🏺', fact: 'Old Town Albuquerque was founded in 1706, making it one of the oldest European settlements in New Mexico.' },
-  { icon: '🎬', fact: 'Breaking Bad was filmed almost entirely in ABQ — you can tour real filming locations around the city.' },
-  { icon: '🌶️', fact: 'New Mexico is the only US state with an official state question: "Red or green?" — referring to chile sauce.' },
-  { icon: '🏔️', fact: 'The Sandia Mountains turn vivid watermelon-pink at sunset — locals call the phenomenon "the watermelon."' },
-  { icon: '🚡', fact: 'The Sandia Peak Tramway climbs 2,600 feet in just 15 minutes, offering a jaw-dropping view of the city below.' },
-  { icon: '🌊', fact: 'The Rio Grande Bosque in ABQ is one of the largest cottonwood riparian forests in North America.' },
-  { icon: '🦅', fact: 'The Rio Grande Bosque is a critical flyway for 400+ bird species, including sandhill cranes every winter.' },
-  { icon: '🗿', fact: 'Petroglyph National Monument protects 20,000+ ancient rock carvings made by Ancestral Puebloans 400–700 years ago.' },
-  { icon: '🛣️', fact: 'Historic Route 66 runs right through Central Avenue in ABQ — cruise it for retro diners, neon signs, and local flavor.' },
-  { icon: '🎭', fact: 'The KiMo Theatre, built in 1927, is a stunning example of Pueblo Deco architecture and a National Historic Landmark.' },
-  { icon: '🍺', fact: 'New Mexico has one of the highest concentrations of craft breweries per capita in the western US.' },
-  { icon: '🌵', fact: 'ABQ sits in the high Chihuahuan Desert — expect warm sunny days and surprisingly cool evenings year-round.' },
-  { icon: '🐍', fact: "The International Rattlesnake Museum in Old Town holds the world's largest collection of live rattlesnake species." },
-  { icon: '💎', fact: "New Mexico's official state gem is turquoise — and the Turquoise Museum in ABQ has the world's largest private collection." },
-  { icon: '🏜️', fact: 'The Albuquerque Volcanoes — a line of five cinder cones on the West Mesa — are visible from much of the city and are under 150,000 years old.' },
-  { icon: '🎓', fact: 'New Mexico has more PhD holders per capita than almost any other US state.' },
-  { icon: '⚛️', fact: "The world's first atomic bomb was detonated at Trinity Site, just 90 miles south of ABQ, on July 16, 1945." },
-  { icon: '🌯', fact: 'The green chile cheeseburger is an unofficial state dish of New Mexico — and dozens of ABQ spots make an exceptional one.' },
-  { icon: '🦎', fact: "New Mexico's state reptile is the New Mexico whiptail lizard — and it's all-female, reproducing without males." },
-  { icon: '🌺', fact: 'The ABQ BioPark complex includes a world-class zoo, botanic garden, aquarium, and Tingley Beach — all connected by a scenic rail.' },
-  { icon: '🏛️', fact: 'The National Museum of Nuclear Science and History in ABQ is the only congressionally chartered museum of its kind in the US.' },
-  { icon: '🎶', fact: 'Meow Wolf opened its ABQ location (Convergence Station) in Denver — but its artistic roots trace to the NM creative community.' },
-  { icon: '🎪', fact: 'The Balloon Fiesta has been held every October since 1972 — it started with just 13 balloons; now it attracts 500+.' },
-  { icon: '🚀', fact: "Spaceport America, the world's first purpose-built commercial spaceport, is just 2.5 hours south of ABQ." },
-  { icon: '🌅', fact: '"Sandia" means watermelon in Spanish — the mountains were named for the deep pink glow they cast at dusk.' },
-  { icon: '🏘️', fact: 'ABQ is nicknamed "The Duke City" after the Duke of Alburquerque (Spain) — an extra "r" was dropped over the centuries.' },
-  { icon: '🌿', fact: 'Green chile season in late summer fills ABQ with the unmistakable smoky-sweet aroma of roasting chiles on street corners.' },
-  { icon: '🎨', fact: 'New Mexico is said to have more registered artists per capita than any other US state.' },
-  { icon: '🌄', fact: "ABQ's West Mesa is thought to be one of the best spots in the state to watch the sunset — especially during Balloon Fiesta." },
-  { icon: '🏃', fact: 'The Paseo del Bosque Trail runs 16 miles along the Rio Grande and is entirely car-free — great for biking, jogging, or walking.' },
-  { icon: '🐦', fact: "New Mexico's state bird is the Greater Roadrunner — and yes, they really do run fast (up to 20 mph)." },
-  { icon: '🫙', fact: 'The biscochito is the official state cookie of New Mexico — an anise-flavored shortbread traditionally made with lard.' },
-  { icon: '🏗️', fact: 'The University of New Mexico was founded in 1889 and is known for its Pueblo Revival architecture.' },
-  { icon: '🌍', fact: "About 38% of ABQ residents speak Spanish at home, reflecting the city's deep Hispanic roots." },
-  { icon: '🧭', fact: 'ABQ is at the crossroads of Interstates 25 and 40 — roughly the geographic center of New Mexico.' },
-  { icon: '🍽️', fact: 'The Frontier Restaurant near UNM has been serving students since 1971 and is famous for its cinnamon rolls.' },
-  { icon: '🌐', fact: 'New Mexico became the 47th US state on January 6, 1912.' },
-  { icon: '❄️', fact: 'It snows in ABQ — usually a few times a winter, but it rarely lasts more than a day or two at lower elevations.' },
-  { icon: '🦜', fact: 'Rio Grande Nature Center is a 270-acre state park within the city that protects wetlands and native wildlife.' },
-  { icon: '🏹', fact: "ABQ's Maxwell Museum of Anthropology at UNM holds artifacts spanning 12,000+ years of human history in the region." },
-  { icon: '⛺', fact: 'Kasha-Katuwe Tent Rocks National Monument — famous for its cone-shaped volcanic rock formations — is only 45 min from ABQ.' },
-  { icon: '🎯', fact: "Kirtland Air Force Base on ABQ's south side is one of the largest military installations in New Mexico and a major local employer." },
-  { icon: '🎠', fact: 'Old Town ABQ hosts festive markets throughout the year, including Luminaria Night every December.' },
-  { icon: '📚', fact: 'The Albuquerque Museum was founded in 1967 and its permanent collection spans 400 years of Rio Grande history.' },
-  { icon: '🚲', fact: 'ABQ has over 400 miles of bicycle routes — one of the most bike-friendly cities in the Southwest.' },
-  { icon: '🧪', fact: 'Sandia National Laboratories in ABQ employs 14,000+ scientists and engineers and drives cutting-edge research.' },
-  { icon: '🌙', fact: "ABQ's clear skies and high elevation make it one of the best cities in the US for amateur stargazing." },
-  { icon: '🎲', fact: 'The original spelling of the city was "Alburquerque" — matching the Spanish town. The extra "r" disappeared in the 1800s.' },
-  { icon: '🌋', fact: 'The Albuquerque Volcanoes are a row of five cinder cones that erupted 150,000 years ago — their lava flow forms the West Mesa.' },
-  { icon: '🎻', fact: 'The National Hispanic Cultural Center in ABQ is one of the largest institutions dedicated to Hispanic arts and culture in the world.' },
-  { icon: '🏊', fact: 'ABQ has a vibrant Día de los Muertos celebration every November — one of the largest outside of Mexico.' },
-  { icon: '🦋', fact: "Bosque Preserve's cottonwoods turn golden every fall, creating a brilliant canopy that draws thousands of visitors." },
-  { icon: '🎡', fact: 'The New Mexico State Fair (held in ABQ every September) is one of the top 10 largest state fairs in the US.' },
-  { icon: '🏆', fact: 'ABQ is home to the Isotopes, the AAA Minor League affiliate of the Colorado Rockies — a beloved local team.' },
-  { icon: '🌱', fact: 'New Mexico leads the US in production of chiles, piñon nuts, and pinto beans.' },
-  { icon: '💫', fact: "The original Nob Hill neighborhood was inspired by San Francisco's wealthy Nob Hill and became ABQ's eclectic arts & dining hub." },
-  { icon: '🦊', fact: "Coyotes are commonly spotted in the Rio Grande Bosque and even in ABQ's urban neighborhoods — especially at dawn and dusk." },
-  { icon: '🎤', fact: "ABQ's cultural scene includes the New Mexico Symphony, the Albuquerque Repertory Theatre, and dozens of live music venues." },
-  { icon: '🔭', fact: 'The Turquoise Trail — a scenic byway from ABQ to Santa Fe — passes through ghost towns including Madrid, once a coal-mining hub.' },
-  { icon: '🛤️', fact: "ABQ's Rail Runner Express connects the city to Santa Fe — a 90-minute train ride through stunning high-desert scenery." },
-  { icon: '🌊', fact: 'The Rio Grande has flowed through New Mexico for over a million years, carving river valleys that Puebloans called home.' },
-  { icon: '🐢', fact: "New Mexico's state reptile is the western box turtle — commonly found in the scrublands around ABQ." },
-  { icon: '🎸', fact: 'ABQ has a thriving local music scene spanning indie rock, mariachi, flamenco, and hip-hop.' },
-  { icon: '🧠', fact: 'Los Alamos National Lab (90 min from ABQ) employs more PhDs per capita than almost any city in the world.' },
-  { icon: '🏄', fact: 'The Adobe Bar at Taos Inn (2 hrs north of ABQ) has been pouring margaritas since 1936 — a legendary NM bucket list stop.' },
-  { icon: '🌯', fact: "New Mexico's Official State Vegetables are the chile and the pinto bean — both officially adopted in 1965." },
-];
-
-// ─── Wishlist localStorage helpers ────────────────────────────────────────────
-const getWishlist = (): { id: string; name: string; type: string; category: string }[] => {
-  try { return JSON.parse(localStorage.getItem('abq_wishlist') || '[]'); }
-  catch { return []; }
-};
-const saveWishlist = (items: { id: string; name: string; type: string; category: string }[]) => {
-  localStorage.setItem('abq_wishlist', JSON.stringify(items));
-  window.dispatchEvent(new Event('abq_wishlist_changed'));
-};
-const toggleWishlist = (item: { id: string; name: string; type: string; category: string }) => {
-  const current = getWishlist();
-  const exists = current.some(w => w.id === item.id);
-  saveWishlist(exists ? current.filter(w => w.id !== item.id) : [...current, item]);
-};
-const isWishlisted = (id: string) => getWishlist().some(w => w.id === id);
-
-// ─── Day Plan localStorage helpers ────────────────────────────────────────────
-const getDayPlan = (): { date: string; items: { id: string; text: string; done: boolean }[] } => {
-  const today = new Date().toDateString();
-  try {
-    const s = JSON.parse(localStorage.getItem('abq_day_plan') || 'null');
-    return s?.date === today ? s : { date: today, items: [] };
-  } catch { return { date: today, items: [] }; }
-};
-const saveDayPlan = (plan: { date: string; items: { id: string; text: string; done: boolean }[] }) => {
-  localStorage.setItem('abq_day_plan', JSON.stringify(plan));
-  window.dispatchEvent(new Event('abq_plan_changed'));
-};
-const addToDayPlan = (steps: string[]) => {
-  const plan = getDayPlan();
-  const newItems = steps.map(text => ({ id: Date.now().toString() + Math.random(), text, done: false }));
-  saveDayPlan({ ...plan, items: [...plan.items, ...newItems] });
-};
-
-// ─── AnimatedFact component ────────────────────────────────────────────────────
 function AnimatedFact() {
   const [facts] = useState(() => [...ABQ_FACTS].sort(() => Math.random() - 0.5));
   const [idx, setIdx] = useState(0);
@@ -1645,7 +1540,7 @@ function DiscoverScreen({
   checkedIn: Set<string>;
   onCheckIn: (id: string) => void;
 }) {
-  const featured = places.filter(p => p.isFeatured).slice(0, 5);
+  const featured = places.filter(p => p.isFeatured && !BLOCKED_VENUES.some(b => p.name?.toLowerCase().includes(b.toLowerCase()))).slice(0, 5);
 
   const upcomingEvents = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
@@ -1669,7 +1564,7 @@ function DiscoverScreen({
   }, [places, coords]);
 
   const hiddenGems = places
-    .filter(p => !p.isFeatured && p.rating && p.rating >= 4.5)
+    .filter(p => !p.isFeatured && p.rating && p.rating >= 4.5 && !BLOCKED_VENUES.some(b => p.name?.toLowerCase().includes(b.toLowerCase())))
     .slice(0, 10);
 
   return (
