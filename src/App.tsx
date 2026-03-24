@@ -2604,13 +2604,13 @@ function AuthModal({ onClose }: { onClose: () => void }) {
               style={{ fontFamily: 'Manrope, sans-serif' }}
             />
             {error && <p className="text-red-500 text-xs">{error}</p>}
+            <HCaptcha
+              ref={captchaRef}
+              sitekey={import.meta.env.VITE_HCAPTCHA_SITE_KEY}
+              onVerify={tok => setCaptchaToken(tok)}
+              onExpire={() => setCaptchaToken('')}
+            />
             <button
-              <HCaptcha
-                ref={captchaRef}
-                sitekey={import.meta.env.VITE_HCAPTCHA_SITE_KEY}
-                onVerify={tok => setCaptchaToken(tok)}
-                onExpire={() => setCaptchaToken('')}
-              />
               type="submit" disabled={loading}
               className="w-full rounded-2xl py-3.5 font-bold text-sm text-white"
               style={{ background: '#a03b00', fontFamily: 'Manrope, sans-serif', opacity: loading ? 0.7 : 1 }}
