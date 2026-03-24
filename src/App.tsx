@@ -1,3 +1,4 @@
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { supabase } from './lib/supabase';
 
 // Supabase compat helpers (replace Firebase Firestore API)
