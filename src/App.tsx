@@ -1,15 +1,16 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { supabase } from './lib/supabase';
 
-// ─── Scroll fade-in hook ─────────────────────────────────────────────────────
+// ─── Scroll fade-in hook ─────────────────────────────────────────────
 function useFadeIn(delay = 0) {
   const ref = useRef<HTMLElement>(null);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     el.style.opacity = '0';
     el.style.transform = 'translateY(16px)';
-    el.style.transition = `opacity 0.5s ease ${delay}ms, transform 0.5s ease ${delay}ms`;
+    el.style.transition = `opacity 0.4s cubic-bezier(0.4,0,0.2,1) ${delay}ms, transform 0.4s cubic-bezier(0.4,0,0.2,1) ${delay}ms`;
     const io = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         el.style.opacity = '1';
@@ -23,6 +24,36 @@ function useFadeIn(delay = 0) {
   return ref as React.RefObject<any>;
 }
 
+
+// ─── Error Boundary ───────────────────────────────────────────
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { error: Error | null }
+> {
+  state = { error: null as Error | null };
+  static getDerivedStateFromError(e: Error) { return { error: e }; }
+  componentDidCatch(e: Error, info: React.ErrorInfo) {
+    console.error('[ABQ Error]', e.message, info.componentStack);
+  }
+  render() {
+    if (this.state.error) {
+      const msg = this.state.error.message;
+      return (
+        <div style={{padding:'24px',fontFamily:'-apple-system,BlinkMacSystemFont,sans-serif',background:'#F2F2F7',minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <div style={{maxWidth:'480px',width:'100%',background:'#fff',borderRadius:'20px',padding:'28px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)'}}>
+            <div style={{fontSize:'38px',marginBottom:'12px'}}>{'⚠️'}</div>
+            <div style={{fontSize:'20px',fontWeight:700,color:'#1C1C1E',marginBottom:'8px'}}>Something went wrong</div>
+            <div style={{fontSize:'13px',color:'#FF3B30',fontFamily:'monospace',background:'#FFF5F5',borderRadius:'10px',padding:'12px',overflowX:'auto',marginBottom:'16px',wordBreak:'break-word'}}>{msg}</div>
+            <button onClick={() => window.location.reload()} style={{width:'100%',padding:'14px 24px',background:'#007AFF',color:'#fff',border:'none',borderRadius:'12px',fontSize:'17px',fontWeight:600,cursor:'pointer',minHeight:'50px'}}>
+              Reload App
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 // Supabase compat helpers (replace Firebase Firestore API)
 const _fbGetDoc = async (table: string, id: string, idField = 'id') => {
@@ -4011,7 +4042,7 @@ export default function App() {
   );
 
   return (
-    <>
+    <ErrorBoundary>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@400;700;900&family=Manrope:wght@400;500;600;700;800&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
@@ -4096,7 +4127,43 @@ export default function App() {
           -webkit-backdrop-filter: saturate(160%) blur(20px);
           border: 1px solid rgba(255, 255, 255, 0.55);
         }
-      `}</style>
+      
+        /* ─── Apple HIG globals ────────────────────────────────────── */
+        :root {
+          --sys-font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+          --ios-blue: #007AFF;
+          --ios-bg: #F2F2F7;
+          --ios-card: #FFFFFF;
+          --ios-text: #1C1C1E;
+          --ios-subtext: #8E8E93;
+          --ios-sep: #C6C6C8;
+          --ios-r-sm: 8px;
+          --ios-r-md: 12px;
+          --ios-r-lg: 16px;
+        }
+        @media (prefers-color-scheme: dark) {
+          :root {
+            --ios-bg: #000000;
+            --ios-card: #1C1C1E;
+            --ios-text: #FFFFFF;
+            --ios-subtext: #8E8E93;
+            --ios-sep: #38383A;
+          }
+        }
+        html, body {
+          font-family: var(--sys-font);
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          -webkit-text-size-adjust: 100%;
+          scroll-behavior: smooth;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            transition-duration: 0.01ms !important;
+          }
+        }
+`}</style>
 
       <div
         className="flex flex-col mx-auto relative"
@@ -4255,6 +4322,6 @@ export default function App() {
       {showAuthModal && (
         <AuthModal onClose={() => setShowAuthModal(false)} />
       )}
-    </>
+    </ErrorBoundary>
   );
 }
