@@ -2135,11 +2135,14 @@ function DiscoverScreen({
 function EventsScreen({
   events,
   onEventSelect,
+  initialSearch = '',
 }: {
   events: TMEvent[];
   onEventSelect: (e: TMEvent) => void;
+  initialSearch?: string;
 }) {
   const [search, setSearch] = useState('');
+  useEffect(() => { if (initialSearch) setSearch(initialSearch); }, [initialSearch]);
   const [selectedGenre, setSelectedGenre] = useState('All');
 
   const filtered = useMemo(() => {
@@ -3763,6 +3766,7 @@ export default function App() {
   const [placesNavSearch, setPlacesNavSearch] = useState('');
   const [places, setPlaces] = useState<Place[]>([]);
   const [events, setEvents] = useState<TMEvent[]>([]);
+  const [eventsNavSearch, setEventsNavSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
@@ -4309,7 +4313,7 @@ export default function App() {
               onNavigatePlaces={(cat, search) => { setPlacesNavCat(cat); setPlacesNavSearch(search); setPlacesNavKey(k => k + 1); setActiveTab('places'); }}/>
           )}
           {activeTab === 'events' && (
-            <EventsScreen events={events} onEventSelect={openEventModal} />
+            <EventsScreen events={events} onEventSelect={openEventModal}  initialSearch={eventsNavSearch} />
           )}
           {activeTab === 'places' && (
             <PlacesScreen
@@ -4387,12 +4391,12 @@ export default function App() {
           <div style={{ background: 'white', borderRadius: '16px', width: '90%', maxWidth: '480px', padding: '16px', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
               <span className="material-symbols-outlined" style={{ color: '#a03b00', fontSize: '22px' }}>search</span>
-              <input autoFocus type="text" placeholder="Search places, events..." value={globalSearch} onChange={e => setGlobalSearch(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && globalSearch.trim()) { setSearch(globalSearch.trim()); setActiveTab('events'); setShowSearch(false); } }} style={{ flex: 1, border: 'none', outline: 'none', fontSize: '16px', fontFamily: 'Manrope, sans-serif' }} />
+              <input autoFocus type="text" placeholder="Search places, events..." value={globalSearch} onChange={e => setGlobalSearch(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && globalSearch.trim()) { setEventsNavSearch(globalSearch.trim()); setActiveTab('events'); setShowSearch(false); } }} style={{ flex: 1, border: 'none', outline: 'none', fontSize: '16px', fontFamily: 'Manrope, sans-serif' }} />
               <button onClick={() => setShowSearch(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px' }}><span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#666' }}>close</span></button>
             </div>
             {globalSearch.trim() && (
               <div style={{display:'flex',gap:'8px',width:'100%'}}>
-                <button onClick={() => { setSearch(globalSearch.trim()); setActiveTab('events'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'#a03b00',color:'white',border:'none',borderRadius:'10px',fontSize:'15px',fontFamily:'Manrope, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Events</button>
+                <button onClick={() => { setEventsNavSearch(globalSearch.trim()); setActiveTab('events'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'#a03b00',color:'white',border:'none',borderRadius:'10px',fontSize:'15px',fontFamily:'Manrope, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Events</button>
                 <button onClick={() => { setPlacesNavCat('All'); setPlacesNavSearch(globalSearch.trim()); setPlacesNavKey(k => k + 1); setActiveTab('places'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'#026cdf',color:'white',border:'none',borderRadius:'10px',fontSize:'15px',fontFamily:'Manrope, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Places</button>
               </div>
             )}
