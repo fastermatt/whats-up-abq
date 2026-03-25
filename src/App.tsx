@@ -4056,7 +4056,21 @@ export default function App() {
             _ebOnlyEvents.push(eb);
           }
         }
-        const seen = new Set<string>();
+                // Auto-generate SeatGeek & Eventbrite search links for all TM events
+        for (const tmEv of _tmEvents) {
+          if (!tmEv.ticketLinks) {
+            tmEv.ticketLinks = tmEv.url ? [{source: 'Ticketmaster', url: tmEv.url}] : [];
+          }
+          const _hasSG = tmEv.ticketLinks.some(l => l.source === 'SeatGeek');
+          const _hasEB = tmEv.ticketLinks.some(l => l.source === 'Eventbrite');
+          const _q = encodeURIComponent(tmEv.name || '');
+          if (!_hasSG) tmEv.ticketLinks.push({source: 'SeatGeek', url: `https://seatgeek.com/search?q=${_q}&current_location=albuquerque`});
+          if (!_hasEB) {
+            const _slug = (tmEv.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+            tmEv.ticketLinks.push({source: 'Eventbrite', url: `https://www.eventbrite.com/d/nm--albuquerque/${_slug}/`});
+          }
+        }
+const seen = new Set<string>();
         const merged = [
           ..._tmEvents,
           ..._ebOnlyEvents,
