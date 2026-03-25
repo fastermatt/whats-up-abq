@@ -4017,8 +4017,13 @@ export default function App() {
         }
 
         // Merge all event sources with cross-source fuzzy deduplication
-        const toArr = (r: PromiseSettledResult<unknown>) =>
-          r.status === 'fulfilled' && Array.isArray(r.value) ? r.value : [];
+        const toArr = (r: PromiseSettledResult<unknown>) => {
+          if (r.status !== 'fulfilled') return [];
+          const v = r.value as unknown;
+          if (Array.isArray(v)) return v;
+          if (v && typeof v === 'object' && Array.isArray((v as Record<string,unknown>).events)) return (v as Record<string,unknown>).events as unknown[];
+          return [];
+        };
 
         // Normalize title for fuzzy matching: lowercase, strip non-alphanumeric, cap length
         const normTitle = (s: string) =>
