@@ -62,7 +62,7 @@ export interface Event {
 const U = (id: string, w = 800, h = 500) =>
   `https://images.unsplash.com/photo-${id}?w=${w}&h=${h}&fit=crop&q=80`;
 
-// ─── Cinema images for movies ──────────────────────────────────────────────────
+// âââ Cinema images for movies ââââââââââââââââââââââââââââââââââââââââââââââââââ
 const CINEMA_IMG  = U("1489599849927-2ee91cede3ba");
 const CINEMA2_IMG = U("1524985069026-dd778c4ab7db");
 
@@ -82,9 +82,9 @@ const ALL_THEATERS = [
 
 export const ALL_EVENTS: Event[] = [
 
-  // ═══════════════════════════════════════════════════════════
-  // MOVIES — Now Playing (March 17 – April 3, 2026)
-  // ═══════════════════════════════════════════════════════════
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+  // MOVIES â Now Playing (March 17 â April 3, 2026)
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
   {
     id: "mv-1",
     title: "Project Hail Mary",
@@ -95,8 +95,8 @@ export const ALL_EVENTS: Event[] = [
     location: "Multiple ABQ Theaters",
     address: "Check Fandango for nearest theater",
     description:
-      "Ryan Gosling stars in this stunning sci-fi adaptation of Andy Weir's bestselling novel. An astronaut wakes alone on a deep-space mission with no memory of how he got there — and discovers the fate of Earth rests entirely on his shoulders. Director Phil Lord delivers a film already being called one of the decade's great science fiction experiences.",
-    price: "$13–$22",
+      "Ryan Gosling stars in this stunning sci-fi adaptation of Andy Weir's bestselling novel. An astronaut wakes alone on a deep-space mission with no memory of how he got there â and discovers the fate of Earth rests entirely on his shoulders. Director Phil Lord delivers a film already being called one of the decade's great science fiction experiences.",
+    price: "$13â$22",
     priceNum: 13,
     image: "https://upload.wikimedia.org/wikipedia/en/3/3b/Project_Hail_Mary_poster.jpg",
     gradient: "linear-gradient(135deg, #1e3a5f 0%, #0f2027 100%)",
@@ -124,8 +124,8 @@ export const ALL_EVENTS: Event[] = [
     location: "Multiple ABQ Theaters",
     address: "Check Fandango for nearest theater",
     description:
-      "Pixar's newest animated adventure follows Mabel, an animal-obsessed kid who discovers technology that lets her 'hop' into robotic creatures and experience a hidden world beneath our feet. A visually breathtaking, heartfelt film with Pixar's signature emotional depth — expect tears and standing ovations.",
-    price: "$13–$20",
+      "Pixar's newest animated adventure follows Mabel, an animal-obsessed kid who discovers technology that lets her 'hop' into robotic creatures and experience a hidden world beneath our feet. A visually breathtaking, heartfelt film with Pixar's signature emotional depth â expect tears and standing ovations.",
+    price: "$13â$20",
     priceNum: 13,
     image: CINEMA_IMG,
     gradient: "linear-gradient(135deg, #16a34a 0%, #15803d 100%)",
@@ -152,8 +152,8 @@ export const ALL_EVENTS: Event[] = [
     location: "Multiple ABQ Theaters",
     address: "Check Fandango for nearest theater",
     description:
-      "Maggie Gyllenhaal directs and Jessie Buckley stars in this bold, feminist reimagining of the Bride of Frankenstein — set in 1930s Chicago. A gothic thriller that's being called the most audacious film of the year, blending horror, romance, and sharp social commentary with stunning cinematography.",
-    price: "$13–$18",
+      "Maggie Gyllenhaal directs and Jessie Buckley stars in this bold, feminist reimagining of the Bride of Frankenstein â set in 1930s Chicago. A gothic thriller that's being called the most audacious film of the year, blending horror, romance, and sharp social commentary with stunning cinematography.",
+    price: "$13â$18",
     priceNum: 13,
     image: CINEMA2_IMG,
     gradient: "linear-gradient(135deg, #1e1b4b 0%, #4c1d95 100%)",
@@ -180,7 +180,7 @@ export const ALL_EVENTS: Event[] = [
     address: "Check Fandango for nearest theater",
     description:
       "Disney's stunning live-action reimagining of the classic fairy tale stars Rachel Zegler as Snow White and Gal Gadot as the Evil Queen. A lavish, musical fantasy with breathtaking production design and new original songs from the composers of La La Land.",
-    price: "$13–$22",
+    price: "$13â$22",
     priceNum: 13,
     image: "https://upload.wikimedia.org/wikipedia/en/1/1f/Snow_White_%282025_film%29_final_poster.jpg",
     gradient: "linear-gradient(135deg, #dc2626 0%, #9f1239 100%)",
@@ -198,34 +198,6 @@ export const ALL_EVENTS: Event[] = [
     ticketUrl: "https://www.fandango.com/albuquerque_nm_movietimes",
   },
   {
-    id: "mv-lobo-1",
-    title: "Lobo Theater: Classic Film Night — Casablanca",
-    category: "Movie",
-    date: "2026-03-21",
-    time: "7:30 PM",
-    endTime: "9:45 PM",
-    location: "The Lobo Theater",
-    address: "3013 Central Ave NE, Albuquerque, NM 87106",
-    description:
-      "The historic Lobo Theater on Route 66 — Albuquerque's beloved art-house cinema — presents Casablanca (1942) in a digitally restored 4K print. Pre-show cocktail hour at 6:30 PM with themed drinks. The Lobo is one of Albuquerque's most treasured cultural landmarks, with its original 1939 neon sign illuminating Nob Hill.",
-    price: "$12",
-    priceNum: 12,
-    image: "https://static.wixstatic.com/media/196694_6ff81fbc7923461aae31da31d5400fa9%7Emv2.png/v1/fit/w_2500,h_1330,al_c/196694_6ff81fbc7923461aae31da31d5400fa9%7Emv2.png",
-    gradient: "linear-gradient(135deg, #78350f 0%, #92400e 100%)",
-    featured: false,
-    movieRating: "NR",
-    movieRuntime: "1h 42m",
-    movieGenre: "Classic / Drama",
-    theaters: ["The Lobo Theater"],
-    tags: ["classic film", "Route 66", "art house", "historic venue"],
-    isKidFriendly: false,
-    isOutdoor: false,
-    isAccessible: true,
-    source: "The Paper ABQ",
-    website: "https://www.loboabq.com",
-    accessibility: "Historic venue with accessible seating",
-  },
-  {
     id: "mv-5",
     title: "A Minecraft Movie",
     category: "Movie",
@@ -235,8 +207,8 @@ export const ALL_EVENTS: Event[] = [
     location: "Multiple ABQ Theaters",
     address: "Check Fandango for nearest theater",
     description:
-      "The biggest video game movie ever made hits theaters. Jack Black stars as Steve alongside Jason Momoa in a live-action/animated adventure that takes a group of misfits from our world into the Overworld — where they must battle the Ender Dragon to save both realms. Directed by Jared Hess.",
-    price: "$13–$22",
+      "The biggest video game movie ever made hits theaters. Jack Black stars as Steve alongside Jason Momoa in a live-action/animated adventure that takes a group of misfits from our world into the Overworld â where they must battle the Ender Dragon to save both realms. Directed by Jared Hess.",
+    price: "$13â$22",
     priceNum: 13,
     image: "https://upload.wikimedia.org/wikipedia/en/6/66/A_Minecraft_Movie_poster.jpg",
     gradient: "linear-gradient(135deg, #16a34a 0%, #0891b2 100%)",
@@ -263,8 +235,8 @@ export const ALL_EVENTS: Event[] = [
     location: "Multiple ABQ Theaters",
     address: "Check Fandango for nearest theater",
     description:
-      "The massive sequel to The Super Mario Bros. Movie takes Mario and friends to space — across galaxies, through black holes, and toward a final showdown with Bowser on a moon-sized airship. Chris Pratt, Anya Taylor-Joy, and Charlie Day return, joined by new cast. The most anticipated animated movie of 2026.",
-    price: "$13–$22",
+      "The massive sequel to The Super Mario Bros. Movie takes Mario and friends to space â across galaxies, through black holes, and toward a final showdown with Bowser on a moon-sized airship. Chris Pratt, Anya Taylor-Joy, and Charlie Day return, joined by new cast. The most anticipated animated movie of 2026.",
+    price: "$13â$22",
     priceNum: 13,
     image: U("1446776811953-b23d57bd21aa"),
     gradient: "linear-gradient(135deg, #dc2626 0%, #7c3aed 100%)",
@@ -291,8 +263,8 @@ export const ALL_EVENTS: Event[] = [
     location: "Multiple ABQ Theaters",
     address: "Check Fandango for nearest theater",
     description:
-      "Samara Weaving returns as Grace in this wickedly funny horror-thriller sequel. Having survived one murderous family, Grace is drawn into an even deadlier game — this time on an international stage. Sharper, wilder, and bloodier than the original.",
-    price: "$13–$18",
+      "Samara Weaving returns as Grace in this wickedly funny horror-thriller sequel. Having survived one murderous family, Grace is drawn into an even deadlier game â this time on an international stage. Sharper, wilder, and bloodier than the original.",
+    price: "$13â$18",
     priceNum: 13,
     image: U("1440404653325-ab127d49abc1"),
     gradient: "linear-gradient(135deg, #7f1d1d 0%, #1c1917 100%)",
@@ -318,8 +290,8 @@ export const ALL_EVENTS: Event[] = [
     location: "Multiple ABQ Theaters",
     address: "Check Fandango for nearest theater",
     description:
-      "Antoine Fuqua's epic biopic of Michael Jackson, starring Jaafar Jackson as his uncle. The film explores Michael's extraordinary rise, creative genius, personal relationships, and the controversies that defined his later years — told through the lens of his art and the people who knew him best.",
-    price: "$13–$22",
+      "Antoine Fuqua's epic biopic of Michael Jackson, starring Jaafar Jackson as his uncle. The film explores Michael's extraordinary rise, creative genius, personal relationships, and the controversies that defined his later years â told through the lens of his art and the people who knew him best.",
+    price: "$13â$22",
     priceNum: 13,
     image: "https://upload.wikimedia.org/wikipedia/en/e/e2/Michael_2023_film_poster.jpg",
     gradient: "linear-gradient(135deg, #111827 0%, #1f2937 100%)",
@@ -337,25 +309,25 @@ export const ALL_EVENTS: Event[] = [
     ticketUrl: "https://www.fandango.com/albuquerque_nm_movietimes",
   },
 
-  // ═══════════════════════════════════════════════════════════
-  // LIVE MUSIC — MARCH 21-22
-  // ═══════════════════════════════════════════════════════════
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+  // LIVE MUSIC â MARCH 21-22
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
-  // ═══════════════════════════════════════════════════════════
-  // FARMERS MARKET — MARCH 21-22
-  // ═══════════════════════════════════════════════════════════
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+  // FARMERS MARKET â MARCH 21-22
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
-  // ═══════════════════════════════════════════════════════════
-  // OUTDOORS — MARCH 21-22
-  // ═══════════════════════════════════════════════════════════
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+  // OUTDOORS â MARCH 21-22
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
-  // ═══════════════════════════════════════════════════════════
-  // COMMUNITY — MARCH 21-22
-  // ═══════════════════════════════════════════════════════════
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+  // COMMUNITY â MARCH 21-22
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
-  // ═══════════════════════════════════════════════════════════
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
   // MARCH 28-29
-  // ═══════════════════════════════════════════════════════════
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
   {
     id: "m28-1",
     title: "Rio Grande Jazz Festival",
@@ -407,7 +379,7 @@ export const ALL_EVENTS: Event[] = [
   },
   {
     id: "m28-3",
-    title: "Luke Bryan · Country on Tour",
+    title: "Luke Bryan Â· Country on Tour",
     category: "Live Music",
     date: "2026-03-28",
     time: "7:30 PM",
@@ -416,7 +388,7 @@ export const ALL_EVENTS: Event[] = [
     address: "5601 University Blvd SE, Albuquerque, NM 87106",
     description:
       "Country superstar Luke Bryan brings his arena tour to Isleta Amphitheater under the New Mexico stars. The open-air amphitheater on the banks of the Rio Grande is one of the country's great outdoor concert settings. Lawn seating available.",
-    price: "$39–$150",
+    price: "$39â$150",
     priceNum: 39,
     image: U("1501386761578-eac5c94b800a"),
     gradient: "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)",
@@ -489,7 +461,7 @@ export const ALL_EVENTS: Event[] = [
     address: "203 Cornell Dr NE, Albuquerque, NM 87106",
     description:
       "UNM's Department of Theatre & Dance presents Arthur Miller's American masterpiece in a stunning new production that transplants Willy Loman's story to contemporary Albuquerque. Director Maria Padilla's vision transforms the classic into a vivid portrait of the modern Southwest.",
-    price: "$15–$25",
+    price: "$15â$25",
     priceNum: 15,
     image: U("1503095396-9c0b0111a4be"),
     gradient: "linear-gradient(135deg, #292524 0%, #44403c 100%)",
@@ -534,7 +506,7 @@ export const ALL_EVENTS: Event[] = [
     location: "UNM Art Museum",
     address: "203 Cornell Dr NE, Albuquerque, NM 87106",
     description:
-      "Opening day of a landmark exhibition celebrating New Mexico light — the quality of luminescence that has drawn artists to the state for over a century. 120 works spanning landscape painting, experimental photography, and video installation.",
+      "Opening day of a landmark exhibition celebrating New Mexico light â the quality of luminescence that has drawn artists to the state for over a century. 120 works spanning landscape painting, experimental photography, and video installation.",
     price: "Free",
     priceNum: 0,
     image: U("1571115177098-24ec42ed204d"),
@@ -548,12 +520,12 @@ export const ALL_EVENTS: Event[] = [
     accessibility: "Fully accessible museum",
   },
 
-  // ═══════════════════════════════════════════════════════════
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
   // APRIL 4-5
-  // ═══════════════════════════════════════════════════════════
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
   {
     id: "a04-1",
-    title: "Downtown Growers' Market — Opening Day",
+    title: "Downtown Growers' Market â Opening Day",
     category: "Farmers Market",
     date: "2026-04-04",
     time: "8:00 AM",
@@ -561,7 +533,7 @@ export const ALL_EVENTS: Event[] = [
     location: "Robinson Park",
     address: "810 Copper Ave NW, Albuquerque, NM 87102",
     description:
-      "It's back! The Downtown Growers' Market kicks off its 30th anniversary season at Robinson Park — ABQ's longest-running, producer-only market. 80+ vendors with spring produce, fresh-cut flowers, organic seedlings, honey, artisan bread, and handcrafted goods every Saturday through November.",
+      "It's back! The Downtown Growers' Market kicks off its 30th anniversary season at Robinson Park â ABQ's longest-running, producer-only market. 80+ vendors with spring produce, fresh-cut flowers, organic seedlings, honey, artisan bread, and handcrafted goods every Saturday through November.",
     price: "Free",
     priceNum: 0,
     image: U("1464226184884-fa280b87c399"),
@@ -577,7 +549,7 @@ export const ALL_EVENTS: Event[] = [
   },
   {
     id: "a05-1",
-    title: "Rail Yards Market · Spring Opening",
+    title: "Rail Yards Market Â· Spring Opening",
     category: "Farmers Market",
     date: "2026-04-05",
     time: "9:00 AM",
@@ -585,7 +557,7 @@ export const ALL_EVENTS: Event[] = [
     location: "Historic Rail Yards",
     address: "777 1st St SW, Albuquerque, NM 87102",
     description:
-      "The Rail Yards Market celebrates its spring opening in Albuquerque's 1914 locomotive repair shops — a stunning market venue open only on Sundays. Local growers, artisans, restaurateurs, and live musicians fill the soaring machine shops with community energy.",
+      "The Rail Yards Market celebrates its spring opening in Albuquerque's 1914 locomotive repair shops â a stunning market venue open only on Sundays. Local growers, artisans, restaurateurs, and live musicians fill the soaring machine shops with community energy.",
     price: "Free",
     priceNum: 0,
     image: U("1507003211169-0a1dd7228f2d"),
@@ -647,12 +619,12 @@ export const ALL_EVENTS: Event[] = [
     accessibility: "Fully accessible zoo grounds",
   },
 
-  // ═══════════════════════════════════════════════════════════
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
   // APRIL 11-12
-  // ═══════════════════════════════════════════════════════════
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
   {
     id: "a11-2",
-    title: "Machine Gun Kelly · Mainstream Sellout Tour",
+    title: "Machine Gun Kelly Â· Mainstream Sellout Tour",
     category: "Live Music",
     date: "2026-04-11",
     time: "7:00 PM",
@@ -661,7 +633,7 @@ export const ALL_EVENTS: Event[] = [
     address: "401 2nd St NW, Albuquerque, NM 87102",
     description:
       "Pop-punk icon Machine Gun Kelly brings his explosive live show to the historic Kiva Auditorium in Downtown ABQ. Known for one of music's highest-energy live performances, MGK delivers 2+ hours of hits. Jelly Roll opens at 7PM.",
-    price: "$50–$130",
+    price: "$50â$130",
     priceNum: 50,
     image: U("1493225457124-a3eb161ffa5f"),
     gradient: "linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)",
@@ -685,7 +657,7 @@ export const ALL_EVENTS: Event[] = [
     location: "Petroglyph National Monument",
     address: "6001 Unser Blvd NW, Albuquerque, NM 87120",
     description:
-      "The ABQ Astronomy Society hosts monthly dark-sky stargazing on the West Mesa. Six research-grade telescopes reveal Saturn's rings, Jupiter's moons, and spring nebulae. NM boasts some of the darkest skies in the country — expert guides included.",
+      "The ABQ Astronomy Society hosts monthly dark-sky stargazing on the West Mesa. Six research-grade telescopes reveal Saturn's rings, Jupiter's moons, and spring nebulae. NM boasts some of the darkest skies in the country â expert guides included.",
     price: "$12",
     priceNum: 12,
     image: U("1419242902214-272b3f66ee7a"),
@@ -725,9 +697,9 @@ export const ALL_EVENTS: Event[] = [
     accessibility: "Accessible fairgrounds",
   },
 
-  // ═══════════════════════════════════════════════════════════
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
   // APRIL 18-19
-  // ═══════════════════════════════════════════════════════════
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
   {
     id: "a18-2",
     title: "Mariachi Spectacular de Albuquerque",
@@ -738,8 +710,8 @@ export const ALL_EVENTS: Event[] = [
     location: "Kiva Auditorium",
     address: "401 2nd St NW, Albuquerque, NM 87102",
     description:
-      "One of the premier mariachi events in the Southwest brings together top professional ensembles from New Mexico, Arizona, and California. Jaw-dropping performances in colorful trajes de charro — soaring vocals and the sound of vihuela fill the historic Kiva.",
-    price: "$25–$75",
+      "One of the premier mariachi events in the Southwest brings together top professional ensembles from New Mexico, Arizona, and California. Jaw-dropping performances in colorful trajes de charro â soaring vocals and the sound of vihuela fill the historic Kiva.",
+    price: "$25â$75",
     priceNum: 25,
     image: U("1460661419201-fd4cecdf8a8b"),
     gradient: "linear-gradient(135deg, #dc2626 0%, #fbbf24 100%)",
@@ -764,7 +736,7 @@ export const ALL_EVENTS: Event[] = [
     address: "Central Ave & Carlisle Blvd NE, Albuquerque, NM",
     description:
       "Annual road cycling event along the Turquoise Trail Scenic Byway through Sandia foothills and Tijeras Canyon. Three distances: 25, 50, and 100 miles. Supported rest stops with green chile energy snacks, mechanical support, and a finisher fiesta.",
-    price: "$45–$80",
+    price: "$45â$80",
     priceNum: 45,
     image: U("1476480862126-209bfaa8edc8"),
     gradient: "linear-gradient(135deg, #0891b2 0%, #16a34a 100%)",
@@ -786,7 +758,7 @@ export const ALL_EVENTS: Event[] = [
     location: "The Box Performance Space",
     address: "1025 Lomas Blvd NW, Albuquerque, NM 87102",
     description:
-      "Four touring comedians — including a Netflix special regular — take the stage at The Box, one of ABQ's best intimate comedy venues. From sharp cultural commentary to absurdist Southwest humor, this lineup covers all the bases. One of the month's hottest comedy tickets.",
+      "Four touring comedians â including a Netflix special regular â take the stage at The Box, one of ABQ's best intimate comedy venues. From sharp cultural commentary to absurdist Southwest humor, this lineup covers all the bases. One of the month's hottest comedy tickets.",
     price: "$20",
     priceNum: 20,
     image: U("1516450360452-9312f5e86fc7"),
@@ -811,7 +783,7 @@ export const ALL_EVENTS: Event[] = [
     location: "Casa de Benavidez",
     address: "8032 4th St NW, Albuquerque, NM 87114",
     description:
-      "ABQ's most popular Latin dance night. Free beginner salsa lesson at 8 PM, social dancing 9 PM–1 AM with a live Latin band and DJ sets. The floor fills with everyone from first-timers to competition dancers sharing the joy of Latin rhythms.",
+      "ABQ's most popular Latin dance night. Free beginner salsa lesson at 8 PM, social dancing 9 PMâ1 AM with a live Latin band and DJ sets. The floor fills with everyone from first-timers to competition dancers sharing the joy of Latin rhythms.",
     price: "$15",
     priceNum: 15,
     image: U("1533174072545-7a4b6ad7a6c3"),
@@ -826,12 +798,12 @@ export const ALL_EVENTS: Event[] = [
     accessibility: "Accessible venue, parking lot",
   },
 
-  // ═══════════════════════════════════════════════════════════
-  // APRIL 24-25 — Gathering of Nations
-  // ═══════════════════════════════════════════════════════════
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+  // APRIL 24-25 â Gathering of Nations
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
   {
     id: "e24-1",
-    title: "Gathering of Nations — The Last Dance",
+    title: "Gathering of Nations â The Last Dance",
     category: "Festival",
     date: "2026-04-24",
     endDate: "2026-04-25",
@@ -840,8 +812,8 @@ export const ALL_EVENTS: Event[] = [
     location: "Tingley Coliseum, Expo NM",
     address: "300 San Pedro Dr NE, Albuquerque, NM 87108",
     description:
-      "The world's largest Native American powwow — and its final edition. 'The Last Dance' brings together 800+ tribes and 3,000 dancers and singers from across North America for two unmissable days. Awe-inspiring traditional dances, drum competitions, crowning of Miss Indian World, Indian Traders Market, Stage 49 contemporary Indigenous music, and the Horse & Rider Regalia Parade.",
-    price: "$20/day · $35 weekend",
+      "The world's largest Native American powwow â and its final edition. 'The Last Dance' brings together 800+ tribes and 3,000 dancers and singers from across North America for two unmissable days. Awe-inspiring traditional dances, drum competitions, crowning of Miss Indian World, Indian Traders Market, Stage 49 contemporary Indigenous music, and the Horse & Rider Regalia Parade.",
+    price: "$20/day Â· $35 weekend",
     priceNum: 20,
     image: U("1506905925346-21bda4d32df4"),
     gradient: "linear-gradient(135deg, #92400e 0%, #dc2626 100%)",
@@ -865,8 +837,8 @@ export const ALL_EVENTS: Event[] = [
     location: "Balloon Fiesta Park",
     address: "5000 Balloon Fiesta Pkwy NE, Albuquerque, NM 87113",
     description:
-      "The New Mexico Symphony Orchestra performs John Williams' most beloved film scores outdoors — Star Wars, Indiana Jones, Schindler's List, E.T. Bring a blanket, a picnic, and the whole family. Gates open at 6 PM; food vendors and wine available on site.",
-    price: "$25 · $12 students",
+      "The New Mexico Symphony Orchestra performs John Williams' most beloved film scores outdoors â Star Wars, Indiana Jones, Schindler's List, E.T. Bring a blanket, a picnic, and the whole family. Gates open at 6 PM; food vendors and wine available on site.",
+    price: "$25 Â· $12 students",
     priceNum: 25,
     image: U("1508739773316-c4218c6546f4"),
     gradient: "linear-gradient(135deg, #1e1b4b 0%, #4f46e5 100%)",
@@ -881,9 +853,9 @@ export const ALL_EVENTS: Event[] = [
     accessibility: "Open field venue, accessible parking",
   },
 
-  // ═══════════════════════════════════════════════════════════
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
   // MAY 2-3
-  // ═══════════════════════════════════════════════════════════
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
   {
     id: "m02-1",
     title: "Cinco de Mayo Festival Preview",
@@ -894,7 +866,7 @@ export const ALL_EVENTS: Event[] = [
     location: "Old Town Albuquerque",
     address: "Old Town Plaza, Albuquerque, NM 87104",
     description:
-      "Old Town kicks off Cinco de Mayo week with a live mariachi stage, ballet folklórico performances, traditional Mexican cuisine, artisan markets, and ABQ's famous lowrider car show starting at 2 PM. A celebration of the deep Mexican-American cultural roots of Nuevo México.",
+      "Old Town kicks off Cinco de Mayo week with a live mariachi stage, ballet folklÃ³rico performances, traditional Mexican cuisine, artisan markets, and ABQ's famous lowrider car show starting at 2 PM. A celebration of the deep Mexican-American cultural roots of Nuevo MÃ©xico.",
     price: "Free",
     priceNum: 0,
     image: U("1543702054-5e85e40a04f3"),
@@ -918,7 +890,7 @@ export const ALL_EVENTS: Event[] = [
     location: "Balloon Fiesta Park",
     address: "5000 Balloon Fiesta Pkwy NE, Albuquerque, NM 87113",
     description:
-      "Albuquerque is the balloon capital of the world — experience it at sunrise. Rainbow Ryders' luxury flights launch at dawn, drift over the Rio Grande valley with the Sandia Mountains glowing pink, and land with a traditional champagne toast. Small groups of 4–12 passengers.",
+      "Albuquerque is the balloon capital of the world â experience it at sunrise. Rainbow Ryders' luxury flights launch at dawn, drift over the Rio Grande valley with the Sandia Mountains glowing pink, and land with a traditional champagne toast. Small groups of 4â12 passengers.",
     price: "$180/person",
     priceNum: 180,
     image: U("1472791108553-c9405341e956"),
@@ -934,12 +906,12 @@ export const ALL_EVENTS: Event[] = [
     accessibility: "Requires ability to step into basket",
   },
 
-  // ═══════════════════════════════════════════════════════════
-  // MAY 15-16 — BOOTS IN THE PARK (REAL!)
-  // ═══════════════════════════════════════════════════════════
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+  // MAY 15-16 â BOOTS IN THE PARK (REAL!)
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
   {
     id: "bitp-1",
-    title: "Boots in the Park 2026 · Post Malone & Jelly Roll",
+    title: "Boots in the Park 2026 Â· Post Malone & Jelly Roll",
     category: "Festival",
     date: "2026-05-15",
     endDate: "2026-05-16",
@@ -948,8 +920,8 @@ export const ALL_EVENTS: Event[] = [
     location: "Balloon Fiesta Park",
     address: "5000 Balloon Fiesta Pkwy NE, Albuquerque, NM 87113",
     description:
-      "The biggest music event of the year in Albuquerque. Post Malone headlines Saturday; Jelly Roll headlines Friday. Also: Carín León, Jessie Murph, Koe Wetzel, Cody Jinks, The Band Perry, Randy Rogers Band, and 15+ more across multiple stages including the brand-new Texas Country Stage. Line dancing, whiskey & tequila tastings, craft food, immersive art installations. Don't miss this.",
-    price: "$89–$350+",
+      "The biggest music event of the year in Albuquerque. Post Malone headlines Saturday; Jelly Roll headlines Friday. Also: CarÃ­n LeÃ³n, Jessie Murph, Koe Wetzel, Cody Jinks, The Band Perry, Randy Rogers Band, and 15+ more across multiple stages including the brand-new Texas Country Stage. Line dancing, whiskey & tequila tastings, craft food, immersive art installations. Don't miss this.",
+    price: "$89â$350+",
     priceNum: 89,
     image: "https://bootsinthepark.com/wp-content/uploads/2025/07/Share.jpg",
     gradient: "linear-gradient(135deg, #7c3aed 0%, #ec4899 100%)",
@@ -963,37 +935,6 @@ export const ALL_EVENTS: Event[] = [
     website: "https://www.visitalbuquerque.org/event/boots-in-the-park/61852/",
     ticketUrl: "https://www.vividseats.com/boots-in-the-park-tickets-albuquerque-balloon-fiesta-park-5-15-2026--concerts-music-festivals/production/6194492",
     accessibility: "Accessible grounds; ADA viewing areas available",
-  },
-  {
-    id: "tm-260324-0",
-    title: "Dinastia Tour by Peso Pluma & Tito Double P with Friends",
-    category: "Live Music",
-    date: "2026-03-24",
-    time: "20:00",
-    location: "First Financial Credit Union Amphitheater",
-    address: "5601 University Blvd. SE, Albuquerque, NM",
-    description: "For Box, Suite and Season Ticket information see below link",
-    price: "See website",
-    priceNum: 0,
-    image: "https://s1.ticketm.net/dam/a/446/08f6dd47-7e05-419a-8e8c-39492752b446_SOURCE",
-    gradient: "from-purple-900 to-indigo-900",
-    source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/dinastia-tour-by-peso-pluma-tito-albuquerque-new-mexico-03-24-2026/event/1E00642D956566F8",
-  },
-  {
-    id: "tm-260324-1",
-    title: "Peso Pluma PSS VIP Parking",
-    category: "Community",
-    date: "2026-03-24",
-    time: "20:00",
-    location: "First Financial Credit Union Amphitheater",
-    address: "5601 University Blvd. SE, Albuquerque, NM",
-    description: "Peso Pluma PSS VIP Parking at First Financial Credit Union Amphitheater. Check website for details.",
-    price: "See website",
-    priceNum: 0,
-    image: "https://s1.ticketm.net/dam/c/8cf/a6653880-7899-4f67-8067-1f95f4d158cf_124761_TABLET_LANDSCAPE_LARGE_16_9.jpg",
-    gradient: "from-blue-900 to-cyan-900",
-    source: "Ticketmaster",
   },
   {
     id: "tm-260327-2",
@@ -1046,22 +987,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: true,
   },
   {
-    id: "tm-260329-5",
-    title: "Los Angeles Azules",
-    category: "Live Music",
-    date: "2026-03-29",
-    time: "19:00",
-    location: "Kiva Auditorium at the Albuquerque Convention Center",
-    address: "401 2ND STREET NW, Albuquerque, NM",
-    description: "We hereby inform you that, due to circumstances beyond the control of the artist and production, the Los Ángeles Azules show scheduled for March 29 at the Kiva Auditorium in Albuquerque has been cance",
-    price: "See website",
-    priceNum: 0,
-    image: "https://s1.ticketm.net/dam/a/417/074a3194-c3ac-4a0e-a8d5-117a93e1a417_SOURCE",
-    gradient: "from-yellow-900 to-amber-900",
-    source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/los-angeles-azules-albuquerque-new-mexico-03-29-2026/event/1E006351F3025CA0",
-  },
-  {
     id: "tm-260331-6",
     title: "Albuquerque Isotopes vs. Reno Aces",
     category: "Sports",
@@ -1077,36 +1002,6 @@ export const ALL_EVENTS: Event[] = [
     source: "Ticketmaster",
     ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-reno-aces-albuquerque-new-mexico-03-31-2026/event/1E006429AB2A713C",
     isOutdoor: true,
-  },
-  {
-    id: "tm-260331-7",
-    title: "2026 Ballpark Pass Holding Event",
-    category: "Community",
-    date: "2026-03-31",
-    time: "23:59",
-    location: "RGCU Field at Isotopes Park",
-    address: "Albuquerque, NM",
-    description: "2026 Ballpark Pass Holding Event at RGCU Field at Isotopes Park. Check website for details.",
-    price: "See website",
-    priceNum: 0,
-    image: "https://s1.ticketm.net/dam/c/8cf/a6653880-7899-4f67-8067-1f95f4d158cf_124761_TABLET_LANDSCAPE_LARGE_16_9.jpg",
-    gradient: "from-blue-900 to-cyan-900",
-    source: "Ticketmaster",
-  },
-  {
-    id: "tm-260331-8",
-    title: "Additional Group Items",
-    category: "Community",
-    date: "2026-03-31",
-    time: "23:59",
-    location: "RGCU Field at Isotopes Park",
-    address: "Albuquerque, NM",
-    description: "Additional Group Items at RGCU Field at Isotopes Park. Check website for details.",
-    price: "See website",
-    priceNum: 0,
-    image: "https://s1.ticketm.net/dam/c/8cf/a6653880-7899-4f67-8067-1f95f4d158cf_124761_TABLET_LANDSCAPE_LARGE_16_9.jpg",
-    gradient: "from-green-900 to-teal-900",
-    source: "Ticketmaster",
   },
   {
     id: "tm-260401-9",
@@ -1529,23 +1424,456 @@ export const ALL_EVENTS: Event[] = [
   },
 ];
 
-// ─── Categories ───────────────────────────────────────────────────────────────
+// âââ Categories âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 export const CATEGORIES: { label: EventCategory; emoji: string; color: string }[] = [
-  { label: "Movie",          emoji: "🎬", color: "#6366f1" },
-  { label: "Live Music",     emoji: "🎸", color: "#dc2626" },
-  { label: "Festival",       emoji: "🎉", color: "#f97316" },
-  { label: "Theater & Comedy", emoji: "🎭", color: "#7c3aed" },
-  { label: "Farmers Market", emoji: "🌽", color: "#16a34a" },
-  { label: "Arts & Culture", emoji: "🎨", color: "#ea580c" },
-  { label: "Food & Drink",   emoji: "🍽️", color: "#ca8a04" },
-  { label: "Outdoors",       emoji: "🌲", color: "#0891b2" },
-  { label: "Sports",         emoji: "🏆", color: "#65a30d" },
-  { label: "Community",      emoji: "🏘️", color: "#9333ea" },
-  { label: "Nightlife",      emoji: "🌙", color: "#1d4ed8" },
-  { label: "Family",         emoji: "👨‍👩‍👧", color: "#0d9488" },
+  { label: "Movie",          emoji: "ð¬", color: "#6366f1" },
+  { label: "Live Music",     emoji: "ð¸", color: "#dc2626" },
+  { label: "Festival",       emoji: "ð", color: "#f97316" },
+  { label: "Theater & Comedy", emoji: "ð­", color: "#7c3aed" },
+  { label: "Farmers Market", emoji: "ð½", color: "#16a34a" },
+  { label: "Arts & Culture", emoji: "ð¨", color: "#ea580c" },
+  { label: "Food & Drink",   emoji: "ð½ï¸", color: "#ca8a04" },
+  { label: "Outdoors",       emoji: "ð²", color: "#0891b2" },
+  { label: "Sports",         emoji: "ð", color: "#65a30d" },
+  { label: "Community",      emoji: "ðï¸", color: "#9333ea" },
+  { label: "Nightlife",      emoji: "ð", color: "#1d4ed8" },
+  { label: "Family",         emoji: "ð¨âð©âð§", color: "#0d9488" },
+
+  {
+    id: "tm-260327-pbr-fri",
+    title: "PBR: Unleash The Beast — Albuquerque (Friday)",
+    category: "Sports",
+    date: "2026-03-27",
+    time: "18:45",
+    location: "Dream Style Arena – The Pit",
+    address: "1414 University Blvd SE, Albuquerque, NM",
+    description: "Professional Bull Riders Unleash The Beast tour returns to Albuquerque's The Pit for three nights of elite bull riding action.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-yellow-900 to-orange-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/event/Za5ju3rKuqZDd-86v6FwyZK_XUyWiHFYgW",
+  },
+  {
+    id: "tm-260328-pbr-sat",
+    title: "PBR: Unleash The Beast — Albuquerque (Saturday)",
+    category: "Sports",
+    date: "2026-03-28",
+    time: "18:45",
+    location: "Dream Style Arena – The Pit",
+    address: "1414 University Blvd SE, Albuquerque, NM",
+    description: "Professional Bull Riders Unleash The Beast — Saturday night showdown at The Pit.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-yellow-900 to-orange-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/event/Za5ju3rKuqZDdP5XVT4gaC8DqkMg-9psTd",
+  },
+  {
+    id: "tm-260329-pbr-sun",
+    title: "PBR: Unleash The Beast — Albuquerque (Sunday)",
+    category: "Sports",
+    date: "2026-03-29",
+    time: "13:45",
+    location: "Dream Style Arena – The Pit",
+    address: "1414 University Blvd SE, Albuquerque, NM",
+    description: "Professional Bull Riders Unleash The Beast — Sunday afternoon finale at The Pit.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-yellow-900 to-orange-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/event/Za5ju3rKuqZDdvXydcymskzaaqHFuLqohC",
+  },
+  {
+    id: "tm-260401-iso-reno",
+    title: "Albuquerque Isotopes vs. Reno Aces",
+    category: "Sports",
+    date: "2026-04-01",
+    time: "18:35",
+    location: "Rio Grande Credit Union Field at Isotopes Park",
+    address: "1601 Avenida Cesar Chavez SE, Albuquerque, NM",
+    description: "Albuquerque Isotopes AAA baseball vs. Reno Aces.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-blue-900 to-teal-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-reno-aces-albuquerque-new-mexico-04-01-2026/event/1E006429AB2F7140",
+  },
+  {
+    id: "tm-260402-iso-reno",
+    title: "Albuquerque Isotopes vs. Reno Aces",
+    category: "Sports",
+    date: "2026-04-02",
+    time: "12:05",
+    location: "Rio Grande Credit Union Field at Isotopes Park",
+    address: "1601 Avenida Cesar Chavez SE, Albuquerque, NM",
+    description: "Albuquerque Isotopes AAA baseball vs. Reno Aces. Afternoon game.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-blue-900 to-teal-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-reno-aces-albuquerque-new-mexico-04-02-2026/event/1E006429AB35714E",
+  },
+  {
+    id: "tm-260403-iso-reno",
+    title: "Albuquerque Isotopes vs. Reno Aces",
+    category: "Sports",
+    date: "2026-04-03",
+    time: "18:35",
+    location: "Rio Grande Credit Union Field at Isotopes Park",
+    address: "1601 Avenida Cesar Chavez SE, Albuquerque, NM",
+    description: "Albuquerque Isotopes AAA baseball vs. Reno Aces.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-blue-900 to-teal-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-reno-aces-albuquerque-new-mexico-04-03-2026/event/1E006429AC3172B7",
+  },
+  {
+    id: "tm-260404-iso-reno",
+    title: "Albuquerque Isotopes vs. Reno Aces",
+    category: "Sports",
+    date: "2026-04-04",
+    time: "18:35",
+    location: "Rio Grande Credit Union Field at Isotopes Park",
+    address: "1601 Avenida Cesar Chavez SE, Albuquerque, NM",
+    description: "Albuquerque Isotopes AAA baseball vs. Reno Aces.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-blue-900 to-teal-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-reno-aces-albuquerque-new-mexico-04-04-2026/event/1E006429AC3672BC",
+  },
+  {
+    id: "tm-260405-iso-reno",
+    title: "Albuquerque Isotopes vs. Reno Aces",
+    category: "Sports",
+    date: "2026-04-05",
+    time: "13:35",
+    location: "Rio Grande Credit Union Field at Isotopes Park",
+    address: "1601 Avenida Cesar Chavez SE, Albuquerque, NM",
+    description: "Albuquerque Isotopes AAA baseball vs. Reno Aces. Sunday afternoon game.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-blue-900 to-teal-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-reno-aces-albuquerque-new-mexico-04-05-2026/event/1E006429AC3C72C1",
+  },
+  {
+    id: "tm-260415-iso-okc",
+    title: "Albuquerque Isotopes vs. Oklahoma City Comets",
+    category: "Sports",
+    date: "2026-04-15",
+    time: "18:35",
+    location: "Rio Grande Credit Union Field at Isotopes Park",
+    address: "1601 Avenida Cesar Chavez SE, Albuquerque, NM",
+    description: "Albuquerque Isotopes AAA baseball vs. Oklahoma City Comets.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-blue-900 to-teal-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-oklahoma-city-comets-albuquerque-new-mexico-04-15-2026/event/1E006429AB3F715B",
+  },
+  {
+    id: "tm-260416-iso-okc",
+    title: "Albuquerque Isotopes vs. Oklahoma City Comets",
+    category: "Sports",
+    date: "2026-04-16",
+    time: "12:05",
+    location: "Rio Grande Credit Union Field at Isotopes Park",
+    address: "1601 Avenida Cesar Chavez SE, Albuquerque, NM",
+    description: "Albuquerque Isotopes AAA baseball vs. Oklahoma City Comets. Afternoon game.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-blue-900 to-teal-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-oklahoma-city-comets-albuquerque-new-mexico-04-16-2026/event/1E006429AB44715E",
+  },
+  {
+    id: "tm-260429-iso-elpaso",
+    title: "Albuquerque Isotopes vs. El Paso Chihuahuas",
+    category: "Sports",
+    date: "2026-04-29",
+    time: "18:05",
+    location: "Rio Grande Credit Union Field at Isotopes Park",
+    address: "1601 Avenida Cesar Chavez SE, Albuquerque, NM",
+    description: "Albuquerque Isotopes AAA baseball vs. El Paso Chihuahuas.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-blue-900 to-teal-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-el-paso-chihuahuas-albuquerque-new-mexico-04-29-2026/event/1E006429AB4E716C",
+  },
+  {
+    id: "tm-260430-iso-elpaso",
+    title: "Albuquerque Isotopes vs. El Paso Chihuahuas",
+    category: "Sports",
+    date: "2026-04-30",
+    time: "11:05",
+    location: "Rio Grande Credit Union Field at Isotopes Park",
+    address: "1601 Avenida Cesar Chavez SE, Albuquerque, NM",
+    description: "Albuquerque Isotopes AAA baseball vs. El Paso Chihuahuas. Morning game.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-blue-900 to-teal-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-el-paso-chihuahuas-albuquerque-new-mexico-04-30-2026/event/1E006429AB537173",
+  },
+  {
+    id: "tm-260501-tommy",
+    title: "Tommy Emmanuel, CGP",
+    category: "Live Music",
+    date: "2026-05-01",
+    time: "19:30",
+    location: "KiMo Theatre",
+    address: "423 Central Ave NW, Albuquerque, NM",
+    description: "Legendary Australian guitarist Tommy Emmanuel brings his virtuosic fingerpicking to Albuquerque's historic KiMo Theatre. One of the world's great live performers.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/a/818/7e2af2fb-b190-4f5c-bbc4-fcc710435818_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-amber-900 to-yellow-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7poC3",
+  },
+  {
+    id: "tm-260501-iso-elpaso",
+    title: "Albuquerque Isotopes vs. El Paso Chihuahuas",
+    category: "Sports",
+    date: "2026-05-01",
+    time: "18:35",
+    location: "Rio Grande Credit Union Field at Isotopes Park",
+    address: "1601 Avenida Cesar Chavez SE, Albuquerque, NM",
+    description: "Albuquerque Isotopes AAA baseball vs. El Paso Chihuahuas.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-blue-900 to-teal-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-el-paso-chihuahuas-albuquerque-new-mexico-05-01-2026/event/1E006429AC5172F3",
+  },
+  {
+    id: "tm-260502-kool",
+    title: "Kool & the Gang",
+    category: "Live Music",
+    date: "2026-05-02",
+    time: "19:00",
+    location: "Route 66 Casino",
+    address: "14500 Central Ave SW, Albuquerque, NM",
+    description: "Funk and R&B legends Kool & the Gang perform classic hits like Celebration, Get Down on It, and Jungle Boogie live at Route 66 Casino.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/a/e7b/82a11a20-04a5-4c32-874a-978f352cfe7b_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-orange-900 to-red-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/kool-the-gang-albuquerque-new-mexico-05-02-2026/event/1E006430B335965C",
+  },
+  {
+    id: "tm-260502-architects",
+    title: "Architects",
+    category: "Live Music",
+    date: "2026-05-02",
+    time: "20:00",
+    location: "Revel Entertainment Center",
+    address: "4720 Alexander Blvd NE, Albuquerque, NM",
+    description: "British metalcore band Architects bring their powerful live show to Revel Entertainment Center.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/a/ed1/26c6cce6-2e31-42d6-aa00-4f6e83fb5ed1_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-slate-900 to-zinc-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OYjv",
+  },
+  {
+    id: "tm-260502-iso-elpaso",
+    title: "Albuquerque Isotopes vs. El Paso Chihuahuas",
+    category: "Sports",
+    date: "2026-05-02",
+    time: "18:35",
+    location: "Rio Grande Credit Union Field at Isotopes Park",
+    address: "1601 Avenida Cesar Chavez SE, Albuquerque, NM",
+    description: "Albuquerque Isotopes AAA baseball vs. El Paso Chihuahuas.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-blue-900 to-teal-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-el-paso-chihuahuas-albuquerque-new-mexico-05-02-2026/event/1E006429AC5672FA",
+  },
+  {
+    id: "tm-260503-iso-elpaso",
+    title: "Albuquerque Isotopes vs. El Paso Chihuahuas",
+    category: "Sports",
+    date: "2026-05-03",
+    time: "13:35",
+    location: "Rio Grande Credit Union Field at Isotopes Park",
+    address: "1601 Avenida Cesar Chavez SE, Albuquerque, NM",
+    description: "Albuquerque Isotopes AAA baseball vs. El Paso Chihuahuas. Sunday afternoon game.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-blue-900 to-teal-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-el-paso-chihuahuas-albuquerque-new-mexico-05-03-2026/event/1E006429AD1273DF",
+  },
+  {
+    id: "tm-260506-nmu-elpaso",
+    title: "New Mexico United vs. El Paso Locomotive FC",
+    category: "Sports",
+    date: "2026-05-06",
+    time: "18:55",
+    location: "Rio Grande Credit Union Field at Isotopes Park",
+    address: "1601 Avenida Cesar Chavez SE, Albuquerque, NM",
+    description: "New Mexico United USL soccer hosts rival El Paso Locomotive FC at Isotopes Park.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/c/093/c74cfd95-af21-4e64-9f85-47677b951093_105651_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-red-900 to-rose-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OF0S",
+  },
+  {
+    id: "tm-260509-nmu-lvlights",
+    title: "New Mexico United vs. Las Vegas Lights FC",
+    category: "Sports",
+    date: "2026-05-09",
+    time: "18:55",
+    location: "Rio Grande Credit Union Field at Isotopes Park",
+    address: "1601 Avenida Cesar Chavez SE, Albuquerque, NM",
+    description: "New Mexico United USL soccer vs. Las Vegas Lights FC at Isotopes Park.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/c/093/c74cfd95-af21-4e64-9f85-47677b951093_105651_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-red-900 to-rose-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OF0V",
+  },
+  {
+    id: "tm-260509-seth",
+    title: "Seth Meyers Live",
+    category: "Theater & Comedy",
+    date: "2026-05-09",
+    time: "19:00",
+    location: "Route 66 Casino",
+    address: "14500 Central Ave SW, Albuquerque, NM",
+    description: "Late Night with Seth Meyers host brings his stand-up comedy tour to Route 66 Casino in Albuquerque.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/a/639/c860f8e9-1fb4-48a9-981f-607b28429639_RETINA_LANDSCAPE_16_9.jpg",
+    gradient: "from-purple-900 to-violet-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/seth-meyers-albuquerque-new-mexico-05-09-2026/event/1E006428F3AEA6C2",
+  },
+  {
+    id: "tm-260512-iso-okc",
+    title: "Albuquerque Isotopes vs. Oklahoma City Comets",
+    category: "Sports",
+    date: "2026-05-12",
+    time: "18:35",
+    location: "Rio Grande Credit Union Field at Isotopes Park",
+    address: "1601 Avenida Cesar Chavez SE, Albuquerque, NM",
+    description: "Albuquerque Isotopes AAA baseball vs. Oklahoma City Comets.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-blue-900 to-teal-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-oklahoma-city-comets-albuquerque-new-mexico-05-12-2026/event/1E006429AB587179",
+  },
+  {
+    id: "tm-260513-iso-okc",
+    title: "Albuquerque Isotopes vs. Oklahoma City Comets",
+    category: "Sports",
+    date: "2026-05-13",
+    time: "18:05",
+    location: "Rio Grande Credit Union Field at Isotopes Park",
+    address: "1601 Avenida Cesar Chavez SE, Albuquerque, NM",
+    description: "Albuquerque Isotopes AAA baseball vs. Oklahoma City Comets.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-blue-900 to-teal-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-oklahoma-city-comets-albuquerque-new-mexico-05-13-2026/event/1E006429AB5D717F",
+  },
+  {
+    id: "tm-260514-iso-okc",
+    title: "Albuquerque Isotopes vs. Oklahoma City Comets",
+    category: "Sports",
+    date: "2026-05-14",
+    time: "11:05",
+    location: "Rio Grande Credit Union Field at Isotopes Park",
+    address: "1601 Avenida Cesar Chavez SE, Albuquerque, NM",
+    description: "Albuquerque Isotopes AAA baseball vs. Oklahoma City Comets. Thursday matinee.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-blue-900 to-teal-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-oklahoma-city-comets-albuquerque-new-mexico-05-14-2026/event/1E006429AB627188",
+  },
+  {
+    id: "tm-260515-iso-okc",
+    title: "Albuquerque Isotopes vs. Oklahoma City Comets",
+    category: "Sports",
+    date: "2026-05-15",
+    time: "18:35",
+    location: "Rio Grande Credit Union Field at Isotopes Park",
+    address: "1601 Avenida Cesar Chavez SE, Albuquerque, NM",
+    description: "Albuquerque Isotopes AAA baseball vs. Oklahoma City Comets.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-blue-900 to-teal-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-oklahoma-city-comets-albuquerque-new-mexico-05-15-2026/event/1E006429AC5B7300",
+  },
+  {
+    id: "tm-260516-iso-okc",
+    title: "Albuquerque Isotopes vs. Oklahoma City Comets",
+    category: "Sports",
+    date: "2026-05-16",
+    time: "18:35",
+    location: "Rio Grande Credit Union Field at Isotopes Park",
+    address: "1601 Avenida Cesar Chavez SE, Albuquerque, NM",
+    description: "Albuquerque Isotopes AAA baseball vs. Oklahoma City Comets.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-blue-900 to-teal-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-oklahoma-city-comets-albuquerque-new-mexico-05-16-2026/event/1E006429AC607304",
+  },
+  {
+    id: "tm-260517-iso-okc",
+    title: "Albuquerque Isotopes vs. Oklahoma City Comets",
+    category: "Sports",
+    date: "2026-05-17",
+    time: "13:35",
+    location: "Rio Grande Credit Union Field at Isotopes Park",
+    address: "1601 Avenida Cesar Chavez SE, Albuquerque, NM",
+    description: "Albuquerque Isotopes AAA baseball vs. Oklahoma City Comets. Sunday afternoon game.",
+    price: "See website",
+    priceNum: 0,
+    image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
+    gradient: "from-blue-900 to-teal-900",
+    source: "Ticketmaster",
+    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-oklahoma-city-comets-albuquerque-new-mexico-05-17-2026/event/1E006429AC65730F",
+  },
 ];
 
-// ─── Source meta ──────────────────────────────────────────────────────────────
+// âââ Source meta ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 export const SOURCE_META: Record<EventSource, { color: string; url: string }> = {
   "ABQ365":      { color: "#f97316", url: "https://www.visitalbuquerque.org/abq365/events/" },
   "The Paper ABQ": { color: "#3b82f6", url: "https://calendar.abq.news/" },
@@ -1561,7 +1889,7 @@ export const SOURCE_META: Record<EventSource, { color: string; url: string }> = 
   "Downtown ABQ":{ color: "#64748b", url: "https://dtabqmainstreet.org/events" },
 };
 
-// ─── Time helpers ─────────────────────────────────────────────────────────────
+// âââ Time helpers âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 export function getEventHour(time: string): number {
   if (time === "Various showtimes") return 14; // treat movies as afternoon
   const p = time.match(/(\d+):(\d+)\s*(AM|PM)/i);
@@ -1581,7 +1909,7 @@ export function getTimeOfDay(hour: number): TimeOfDay {
   return "night";
 }
 
-// ─── Date helpers ─────────────────────────────────────────────────────────────
+// âââ Date helpers âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 export function formatDate(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
