@@ -345,13 +345,13 @@ async function syncCheckinsToFirestore(uid: string, checkIns: Set<string>, displ
     const count = checkIns.size;
     await _fbSetDoc('users', uid, {
       checkIns: [...checkIns],
-      updatedAt: serverTimestamp(),
+      updatedAt: new Date().toISOString(),
     });
     // Update leaderboard entry
     await _fbSetDoc('leaderboard', uid, {
       displayName: displayName || 'Anonymous',
       count,
-      updatedAt: serverTimestamp(),
+      updatedAt: new Date().toISOString(),
     }, { merge: true });
   } catch (err) {
     console.error('Firestore sync error:', err);
@@ -989,7 +989,7 @@ function ReviewSection({
         userName: (user.user_metadata?.display_name || user.email) || user.email?.split('@')[0] || 'Explorer',
         rating,
         text: text.trim(),
-        createdAt: serverTimestamp(),
+        createdAt: new Date().toISOString(),
         helpful: 0,
       });
       setText('');
@@ -2530,12 +2530,12 @@ function AuthModal({ onClose }: { onClose: () => void }) {
     try {
       if (isSignUp) {
         const cred = await supabase.auth.signUp({ email: email, password: password, options: { captchaToken } });
-        if (displayName) await updateProfile(cred.user, { displayName });
+        if (displayName) await supabase.auth.updateUser({ data: { display_name: displayName } });
       } else {
         await supabase.auth.signInWithPassword({ email: email, password: password, options: { captchaToken } });
       }
       onClose();
-    } catch (e: any) { setError(e.message?.replace('Firebase: ', '') || 'Auth failed'); }
+    } catch (e: any) { setError(e.message || 'Auth failed'); }
     setLoading(false);
   }
 
