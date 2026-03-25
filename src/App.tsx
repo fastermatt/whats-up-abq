@@ -1276,7 +1276,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
 
         {event.ticketLinks && event.ticketLinks.length > 0 ? (
           <div className="flex flex-col gap-2">
-            {event.ticketLinks.map((link) => (
+            {event.ticketLinks.filter(l => l.source === 'Ticketmaster').map((link) => (
               <a
                 key={link.source}
                 href={link.url}
@@ -1844,14 +1844,14 @@ function DiscoverScreen({
 
       {/* Trending Bento Grid */}
       {featured.length > 0 && (
-        <div className="px-5 pb-5">
+        <div className="pb-5">
           <h2
-            className="text-lg font-black uppercase tracking-tight mb-3"
+            className="text-lg font-black uppercase tracking-tight mb-3 px-5"
             style={{ fontFamily: 'Epilogue, sans-serif' }}
           >
             Trending Now
           </h2>
-          <div className="grid gap-2" style={{ gridTemplateColumns: '1fr 1fr' }}>
+          <div className="grid gap-2 px-5" style={{ gridTemplateColumns: '1fr 1fr' }}>
             {/* Hero card */}
             <button
               onClick={() => onPlaceSelect(featured[0])}
@@ -2517,9 +2517,10 @@ function AuthModal({ onClose }: { onClose: () => void }) {
   async function handleGoogle() {
     setError(''); setLoading(true);
     try {
-      await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
+      const { error: authError } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
+      if (authError) throw new Error('Login is having issues right now, sorry!');
       onClose();
-    } catch (e: any) { setError(e.message || 'Sign-in failed'); }
+    } catch (e: any) { setError(e.message || 'Login is having issues right now, sorry!'); }
     setLoading(false);
   }
 
