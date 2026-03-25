@@ -2091,7 +2091,7 @@ function DiscoverScreen({
             { title: 'Local Food Crawl', steps: ['Green chile breakfast at Frontier', 'Lunch at El Modelo', 'Drinks on Central Ave'], bg: '#fff3e0', accent: '#e65100', emoji: '🌮' },
             { title: 'Nature Escape', steps: ['Rio Grande Bosque trail', 'Tingley Beach', 'Sunset at Petroglyph Monument'], bg: '#f3e5f5', accent: '#6a1b9a', emoji: '🌅' },
           ].map(({ title, steps, bg, accent, emoji }) => (
-            <div key={title} className="rounded-2xl p-4" style={{ backgroundColor: bg }}>
+            <div key={title} className="rounded-2xl p-5 shadow-md" style={{ backgroundColor: bg }}>
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-xl">{emoji}</span>
@@ -2105,11 +2105,11 @@ function DiscoverScreen({
                   + Add to plan
                 </button>
               </div>
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2 mt-1"">
                 {steps.map((step, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <span className="text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center text-white flex-shrink-0" style={{ backgroundColor: accent }}>{i + 1}</span>
-                    <a href={`https://maps.google.com/?q=${encodeURIComponent(step + ' Albuquerque NM')}`} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-gray-700 hover:text-blue-600 hover:underline transition-colors" style={{ fontFamily: 'Manrope, sans-serif' }}>{step}</a>
+                  <div key={i} className="flex items-center gap-2 bg-white/25 rounded-xl px-3 py-2">
+                    <span className="text-sm font-bold rounded-full w-7 h-7 flex items-center justify-center text-white flex-shrink-0 shadow-sm"" style={{ backgroundColor: accent }}>{i + 1}</span>
+                    <button onClick={() => window.dispatchEvent(new CustomEvent('plan-step-click',{detail:step}))} className="text-sm font-semibold text-gray-800 hover:text-blue-700 transition-colors text-left leading-snug flex-1" style={{ fontFamily: 'Manrope, sans-serif' }}>{step}</button>
                   </div>
                 ))}
               </div>
@@ -3780,6 +3780,15 @@ export default function App() {
   const syncTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   //   // Fix: vertical wheel scroll passes through horizontal carousels
+  useEffect(() => {
+    const _psh = (e: Event) => {
+      setPlacesNavSearch((e as CustomEvent).detail as string);
+      setActiveTab('places');
+    };
+    window.addEventListener('plan-step-click', _psh);
+    return () => window.removeEventListener('plan-step-click', _psh);
+  }, []);
+
   useEffect(() => {
     const fn = (e: WheelEvent) => {
       if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
