@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { supabase } from './lib/supabase';
+import { fetchPlacesFromDB, fetchEventsFromDB } from './lib/db';
 
 // ─── Scroll fade-in hook ─────────────────────────────────────────────
 function useFadeIn(delay = 0) {
@@ -2686,7 +2687,7 @@ function ProfileScreen({
       // Use Firestore data; if user not in list, inject them
       const userInList = user && lbRows.some(r => r.isMe);
       if (!userInList && myCount > 0) {
-        const merged = [...lbRows, { rank: 0, name: user?.displayName || 'You', count: myCount, isMe: true }];
+        const merged = [...lbRows, { rank: 0, name: user?.user_metadata?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'You', count: myCount, isMe: true }];
         merged.sort((a, b) => b.count - a.count);
         return merged.map((r, i) => ({ ...r, rank: i + 1 })).slice(0, 10);
       }
@@ -2725,7 +2726,7 @@ function ProfileScreen({
           className="text-4xl font-black uppercase tracking-tighter leading-none mt-1"
           style={{ fontFamily: 'Epilogue, sans-serif' }}
         >
-          Hey,<br />{user?.displayName?.split(' ')[0] || 'Explorer'}
+          Hey,<br />{{(user?.user_metadata?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Explorer').split(' ')[0]}}
         </h1>
       </div>
 
@@ -2769,7 +2770,7 @@ function ProfileScreen({
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-black text-lg truncate" style={{ fontFamily: 'Epilogue, sans-serif' }}>
-            {user?.displayName || 'ABQ Explorer'}
+            {user?.user_metadata?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'ABQ Explorer'}
           </p>
           <p className="text-sm text-gray-500">Greater ABQ Metro</p>
           <p className="text-xs font-semibold mt-0.5" style={{ color: '#a03b00', fontFamily: 'Manrope, sans-serif' }}>
@@ -3827,7 +3828,7 @@ export default function App() {
       if (u) {
         // Load check-ins from Firestore on sign-in
         try {
-          const snap = await _fbGetDoc('profiles', u.uid);
+          const snap = await _fbGetDoc('profiles', u.id);
           if (snap.exists()) {
             const data = snap.data();
             if (Array.isArray(data.checkIns) && data.checkIns.length > 0) {
