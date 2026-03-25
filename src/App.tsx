@@ -2105,10 +2105,10 @@ function DiscoverScreen({
                   + Add to plan
                 </button>
               </div>
-              <div className="flex flex-col gap-2 mt-1"">
+              <div className="flex flex-col gap-2 mt-1">
                 {steps.map((step, i) => (
                   <div key={i} className="flex items-center gap-2 bg-white/25 rounded-xl px-3 py-2">
-                    <span className="text-sm font-bold rounded-full w-7 h-7 flex items-center justify-center text-white flex-shrink-0 shadow-sm"" style={{ backgroundColor: accent }}>{i + 1}</span>
+                    <span className="text-sm font-bold rounded-full w-7 h-7 flex items-center justify-center text-white flex-shrink-0 shadow-sm" style={{ backgroundColor: accent }}>{i + 1}</span>
                     <button onClick={() => window.dispatchEvent(new CustomEvent('plan-step-click',{detail:step}))} className="text-sm font-semibold text-gray-800 hover:text-blue-700 transition-colors text-left leading-snug flex-1" style={{ fontFamily: 'Manrope, sans-serif' }}>{step}</button>
                   </div>
                 ))}
