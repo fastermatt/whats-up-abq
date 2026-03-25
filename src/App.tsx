@@ -2095,7 +2095,7 @@ function DiscoverScreen({
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-xl">{emoji}</span>
-                  <p className="font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif', color: accent }}>{title}</p>
+                  <p className="font-black text-lg" style={{ fontFamily: 'Epilogue, sans-serif', color: accent }}>{title}</p>
                 </div>
                 <button
                   onClick={() => addToDayPlan(steps)}
@@ -2109,7 +2109,7 @@ function DiscoverScreen({
                 {steps.map((step, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <span className="text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center text-white flex-shrink-0" style={{ backgroundColor: accent }}>{i + 1}</span>
-                    <a href={`https://maps.google.com/?q=${encodeURIComponent(step + ' Albuquerque NM')}`} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-700 hover:text-blue-600 hover:underline transition-colors" style={{ fontFamily: 'Manrope, sans-serif' }}>{step}</a>
+                    <a href={`https://maps.google.com/?q=${encodeURIComponent(step + ' Albuquerque NM')}`} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-gray-700 hover:text-blue-600 hover:underline transition-colors" style={{ fontFamily: 'Manrope, sans-serif' }}>{step}</a>
                   </div>
                 ))}
               </div>
