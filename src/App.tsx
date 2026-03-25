@@ -2726,7 +2726,7 @@ function ProfileScreen({
           className="text-4xl font-black uppercase tracking-tighter leading-none mt-1"
           style={{ fontFamily: 'Epilogue, sans-serif' }}
         >
-          Hey,<br />{{(user?.user_metadata?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Explorer').split(' ')[0]}}
+          Hey,<br />{(user?.user_metadata?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Explorer').split(' ')[0]}
         </h1>
       </div>
 
