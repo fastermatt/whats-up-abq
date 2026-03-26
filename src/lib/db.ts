@@ -2,6 +2,44 @@ import { supabase } from './supabase';
 
 const GOOGLE_KEY = 'AIzaSyDn-W5LqhBBAK2VaZhORgRW8oQagpCVq6k';
 
+function placeTypeToCategory(types: string[]): string {
+  if (!types) return 'other';
+  if (types.includes('restaurant') || types.includes('food')) return 'restaurant';
+  if (types.includes('bar') || types.includes('night_club')) return 'bar';
+  if (types.includes('cafe')) return 'coffee';
+  if (types.includes('park') || types.includes('campground') || types.includes('hiking_area')) return 'park';
+  if (types.includes('museum')) return 'museum';
+  if (types.includes('art_gallery')) return 'arts';
+  if (types.includes('gym') || types.includes('spa')) return 'fitness';
+  if (types.includes('lodging')) return 'hotel';
+  if (types.includes('shopping_mall') || types.includes('store')) return 'shop';
+  if (types.includes('stadium') || types.includes('amusement_park') || types.includes('bowling_alley') ||
+      types.includes('movie_theater') || types.includes('zoo') || types.includes('aquarium') ||
+      types.includes('tourist_attraction')) return 'entertainment';
+  return 'other';
+}
+
+function placeTypesToTags(types: string[], name: string): string[] {
+  const tags: string[] = [];
+  const n = (name || '').toLowerCase();
+  if (types.includes('park') || types.includes('campground') || types.includes('hiking_area') ||
+      n.includes('trail') || n.includes('park') || n.includes('canyon') ||
+      n.includes('mountain') || n.includes('bosque') || n.includes('petroglyph'))
+    tags.push('outdoor');
+  if (types.includes('museum') || types.includes('art_gallery') || types.includes('movie_theater') ||
+      types.includes('bowling_alley') || n.includes('theater') || n.includes('theatre') ||
+      n.includes('cinema') || n.includes('gallery'))
+    tags.push('indoor');
+  if (types.includes('amusement_park') || types.includes('zoo') || types.includes('aquarium') ||
+      n.includes('family') || n.includes('children') || n.includes('kid'))
+    tags.push('family-friendly');
+  if (n.includes('dog') || n.includes('paw') || n.includes('leash')) tags.push('dog-friendly');
+  if (n.includes('music') || n.includes('jazz') || n.includes('blues') ||
+      n.includes('concert') || n.includes('lounge')) tags.push('live-music');
+  if (n.includes('patio') || n.includes('rooftop') || n.includes('terrace')) tags.push('patio');
+  return [...new Set(tags)];
+}
+
 const GRADIENTS = [
   'linear-gradient(135deg,#a03b00,#c4622d)',
   'linear-gradient(135deg,#1a3a2a,#2d6a4f)',
@@ -29,10 +67,11 @@ function transformGoogleRaw(raw: Record<string, unknown>): Record<string, unknow
   const geometry = raw.geometry as { location?: { lat: number; lng: number } } | undefined;
   const openingHours = raw.opening_hours as { open_now?: boolean } | undefined;
 
+  const types = (raw.types as string[]) || [];
   return {
     id: raw.place_id,
     name: raw.name,
-    category: 'place',
+    category: placeTypeToCategory(types),
     isFeatured: false,
     description: '',
     address: raw.vicinity || '',
@@ -46,7 +85,7 @@ function transformGoogleRaw(raw: Record<string, unknown>): Record<string, unknow
     hours: openingHours?.open_now != null
       ? (openingHours.open_now ? 'Open now' : 'Closed now')
       : undefined,
-    tags: [],
+    tags: placeTypesToTags(types, raw.name as string),
     source: 'google_places',
   };
 }
