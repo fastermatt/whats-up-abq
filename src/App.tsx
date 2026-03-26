@@ -203,11 +203,11 @@ function formatTime(timeStr?: string): string {
 }
 
 function getEventCategory(event: TMEvent): string {
-  return (
-    event.classifications?.[0]?.segment?.name ||
-    event.classifications?.[0]?.genre?.name ||
-    'Event'
-  );
+  const seg = event.classifications?.[0]?.segment?.name;
+  const gen = event.classifications?.[0]?.genre?.name;
+  const val = (seg && seg !== 'Undefined' ? seg : null) ||
+              (gen && gen !== 'Undefined' ? gen : null);
+  return val || 'Event';
 }
 
 function distanceMiles(lat1: number, lng1: number, lat2: number, lng2: number): number {
