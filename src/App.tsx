@@ -4241,6 +4241,10 @@ export default function App() {
     // When admin panel is open, don't manipulate the URL at all
     if (showAdmin) return;
 
+    // CRITICAL: Don't strip OAuth tokens — Supabase needs the #access_token hash to establish the session.
+    // Once Supabase reads the tokens (async), onAuthStateChange will fire and set the correct tab.
+    if (window.location.hash.includes('access_token')) return;
+
     // Sync URL to current active tab (do NOT hardcode 'discover' — that overrides post-login navigation)
     window.history.replaceState({ tab: activeTab, modal: null }, '', `#${activeTab}`);
 
