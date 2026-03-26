@@ -575,8 +575,8 @@
             "latitude": "35.067"
           },
           "upcomingEvents": {
-            "archtics": 6,
-            "_total": 6,
+            "archtics": 3,
+            "_total": 3,
             "_filtered": 0
           },
           "_links": {
@@ -1378,9 +1378,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 25,
+            "tmr": 27,
             "ticketmaster": 3,
-            "_total": 28,
+            "_total": 30,
             "_filtered": 0
           },
           "_links": {
@@ -1968,8 +1968,8 @@
             "latitude": "35.067"
           },
           "upcomingEvents": {
-            "archtics": 6,
-            "_total": 6,
+            "archtics": 3,
+            "_total": 3,
             "_filtered": 0
           },
           "_links": {
@@ -2140,8 +2140,8 @@
             "latitude": "35.067"
           },
           "upcomingEvents": {
-            "archtics": 6,
-            "_total": 6,
+            "archtics": 3,
+            "_total": 3,
             "_filtered": 0
           },
           "_links": {
@@ -6236,8 +6236,8 @@
             }
           ],
           "upcomingEvents": {
-            "ticketmaster": 22,
-            "_total": 22,
+            "ticketmaster": 20,
+            "_total": 20,
             "_filtered": 0
           },
           "_links": {
@@ -6652,8 +6652,8 @@
             }
           ],
           "upcomingEvents": {
-            "ticketmaster": 22,
-            "_total": 22,
+            "ticketmaster": 21,
+            "_total": 21,
             "_filtered": 0
           },
           "_links": {
@@ -7102,13 +7102,13 @@
           ],
           "upcomingEvents": {
             "mfx-dk": 3,
-            "ticketnet": 7,
+            "ticketnet": 6,
             "mfx-be": 1,
-            "tmr": 7,
+            "tmr": 6,
             "mfx-nl": 3,
-            "ticketmaster": 28,
+            "ticketmaster": 26,
             "trium": 1,
-            "_total": 50,
+            "_total": 46,
             "_filtered": 0
           },
           "_links": {
@@ -10380,9 +10380,9 @@
           ],
           "upcomingEvents": {
             "tmr": 1,
-            "ticketmaster": 25,
+            "ticketmaster": 23,
             "mfx-de": 1,
-            "_total": 27,
+            "_total": 25,
             "_filtered": 0
           },
           "_links": {
@@ -10515,9 +10515,9 @@
             "mfx-dk": 1,
             "tmr": 1,
             "mfx-nl": 1,
-            "ticketmaster": 32,
+            "ticketmaster": 30,
             "mfx-no": 2,
-            "_total": 37,
+            "_total": 35,
             "_filtered": 0
           },
           "_links": {
@@ -10963,9 +10963,9 @@
           ],
           "upcomingEvents": {
             "tmr": 1,
-            "ticketmaster": 25,
+            "ticketmaster": 23,
             "mfx-de": 1,
-            "_total": 27,
+            "_total": 25,
             "_filtered": 0
           },
           "_links": {
@@ -11098,9 +11098,9 @@
             "mfx-dk": 1,
             "tmr": 1,
             "mfx-nl": 1,
-            "ticketmaster": 32,
+            "ticketmaster": 30,
             "mfx-no": 2,
-            "_total": 37,
+            "_total": 35,
             "_filtered": 0
           },
           "_links": {
@@ -11265,9 +11265,9 @@
             }
           ],
           "upcomingEvents": {
-            "ticketmaster": 24,
+            "ticketmaster": 22,
             "mfx-de": 1,
-            "_total": 25,
+            "_total": 23,
             "_filtered": 0
           },
           "_links": {
@@ -11397,9 +11397,9 @@
             }
           ],
           "upcomingEvents": {
-            "ticketmaster": 25,
+            "ticketmaster": 23,
             "moshtix": 4,
-            "_total": 29,
+            "_total": 27,
             "_filtered": 0
           },
           "_links": {
@@ -13285,8 +13285,8 @@
             }
           ],
           "upcomingEvents": {
-            "ticketmaster": 11,
-            "_total": 11,
+            "ticketmaster": 9,
+            "_total": 9,
             "_filtered": 0
           },
           "draftStatus": "ACCEPTED",
@@ -16577,7 +16577,7 @@
       },
       {
         "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/e90/38e0c356-6bcb-4cd2-ab5d-97809a77ce90_EVENT_DETAIL_PAGE_16_9.jpg",
+        "url": "https://s1.ticketm.net/dbimages/754529a.jpg",
         "width": 205,
         "height": 115,
         "fallback": false
@@ -23853,9 +23853,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 36,
+            "tmr": 35,
             "ticketmaster": 79,
-            "_total": 115,
+            "_total": 114,
             "_filtered": 0
           },
           "_links": {
@@ -25131,9 +25131,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 36,
+            "tmr": 35,
             "ticketmaster": 79,
-            "_total": 115,
+            "_total": 114,
             "_filtered": 0
           },
           "_links": {
@@ -26471,9 +26471,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 36,
+            "tmr": 35,
             "ticketmaster": 79,
-            "_total": 115,
+            "_total": 114,
             "_filtered": 0
           },
           "_links": {
@@ -27591,9 +27591,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 36,
+            "tmr": 35,
             "ticketmaster": 79,
-            "_total": 115,
+            "_total": 114,
             "_filtered": 0
           },
           "_links": {
@@ -28310,9 +28310,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 36,
+            "tmr": 35,
             "ticketmaster": 79,
-            "_total": 115,
+            "_total": 114,
             "_filtered": 0
           },
           "_links": {
@@ -28645,9 +28645,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 36,
+            "tmr": 35,
             "ticketmaster": 79,
-            "_total": 115,
+            "_total": 114,
             "_filtered": 0
           },
           "_links": {
@@ -29997,9 +29997,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -37099,10 +37099,11 @@
           ],
           "upcomingEvents": {
             "universe": 1,
+            "tmr": 1,
             "mfx-es": 1,
-            "ticketmaster": 3,
+            "ticketmaster": 4,
             "trium": 2,
-            "_total": 7,
+            "_total": 9,
             "_filtered": 0
           },
           "_links": {
@@ -40106,8 +40107,8 @@
           ],
           "upcomingEvents": {
             "tmr": 2,
-            "ticketmaster": 11,
-            "_total": 13,
+            "ticketmaster": 13,
+            "_total": 15,
             "_filtered": 0
           },
           "_links": {
@@ -47880,11 +47881,11 @@
           ],
           "upcomingEvents": {
             "mticket": 1,
-            "mfx-ch": 2,
+            "mfx-ch": 4,
             "tmr": 2,
             "ticketmaster": 35,
             "mfx-no": 3,
-            "_total": 43,
+            "_total": 45,
             "_filtered": 0
           },
           "_links": {
@@ -48216,9 +48217,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -59054,9 +59055,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 3,
+            "tmr": 4,
             "ticketmaster": 11,
-            "_total": 14,
+            "_total": 15,
             "_filtered": 0
           },
           "_links": {
@@ -60313,8 +60314,8 @@
             }
           ],
           "upcomingEvents": {
-            "ticketmaster": 15,
-            "_total": 15,
+            "ticketmaster": 20,
+            "_total": 20,
             "_filtered": 0
           },
           "_links": {
@@ -60846,9 +60847,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -65546,8 +65547,8 @@
           ],
           "upcomingEvents": {
             "tmr": 7,
-            "ticketmaster": 13,
-            "_total": 20,
+            "ticketmaster": 14,
+            "_total": 21,
             "_filtered": 0
           },
           "_links": {
@@ -76485,9 +76486,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -78120,9 +78121,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -89122,9 +89123,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -92389,9 +92390,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -92809,9 +92810,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 25,
+            "tmr": 27,
             "ticketmaster": 3,
-            "_total": 28,
+            "_total": 30,
             "_filtered": 0
           },
           "_links": {
@@ -95907,9 +95908,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -102239,9 +102240,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -103743,9 +103744,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -107637,9 +107638,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -111801,9 +111802,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 13,
+            "tmr": 14,
             "ticketmaster": 19,
-            "_total": 32,
+            "_total": 33,
             "_filtered": 0
           },
           "_links": {
@@ -116315,8 +116316,8 @@
           ],
           "upcomingEvents": {
             "ticketmaster": 5,
-            "ticketweb": 1,
-            "_total": 6,
+            "ticketweb": 2,
+            "_total": 7,
             "_filtered": 0
           },
           "_links": {
@@ -120061,9 +120062,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -122609,9 +122610,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -129684,9 +129685,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -130169,9 +130170,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 6,
-            "ticketmaster": 29,
-            "_total": 35,
+            "tmr": 5,
+            "ticketmaster": 26,
+            "_total": 31,
             "_filtered": 0
           },
           "_links": {
@@ -132249,9 +132250,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -134177,9 +134178,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -135553,9 +135554,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -136693,9 +136694,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -137113,9 +137114,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 25,
+            "tmr": 26,
             "ticketmaster": 3,
-            "_total": 28,
+            "_total": 29,
             "_filtered": 0
           },
           "_links": {
@@ -138565,9 +138566,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -138901,8 +138902,8 @@
           ],
           "upcomingEvents": {
             "tmr": 121,
-            "ticketmaster": 129,
-            "_total": 250,
+            "ticketmaster": 128,
+            "_total": 249,
             "_filtered": 0
           },
           "_links": {
@@ -139236,8 +139237,8 @@
           ],
           "upcomingEvents": {
             "tmr": 121,
-            "ticketmaster": 129,
-            "_total": 250,
+            "ticketmaster": 128,
+            "_total": 249,
             "_filtered": 0
           },
           "_links": {
@@ -139637,10 +139638,10 @@
             "mfx-be": 3,
             "mticket": 1,
             "tmr": 4,
-            "ticketmaster": 29,
+            "ticketmaster": 30,
             "trium": 2,
             "mfx-pl": 1,
-            "_total": 40,
+            "_total": 41,
             "_filtered": 0
           },
           "_links": {
@@ -139823,7 +139824,6 @@
         "description": "LIVE NATION 3PE EVENT / NTL / USA"
       }
     ],
-    "accessibility": {},
     "ageRestrictions": {
       "legalAgeEnforced": false
     },
@@ -140078,10 +140078,10 @@
             "mfx-be": 3,
             "mticket": 1,
             "tmr": 4,
-            "ticketmaster": 29,
+            "ticketmaster": 30,
             "trium": 2,
             "mfx-pl": 1,
-            "_total": 40,
+            "_total": 41,
             "_filtered": 0
           },
           "_links": {
@@ -140415,8 +140415,8 @@
           ],
           "upcomingEvents": {
             "tmr": 121,
-            "ticketmaster": 129,
-            "_total": 250,
+            "ticketmaster": 128,
+            "_total": 249,
             "_filtered": 0
           },
           "_links": {
@@ -140914,8 +140914,8 @@
           ],
           "upcomingEvents": {
             "tmr": 121,
-            "ticketmaster": 129,
-            "_total": 250,
+            "ticketmaster": 128,
+            "_total": 249,
             "_filtered": 0
           },
           "_links": {
@@ -141539,8 +141539,8 @@
           ],
           "upcomingEvents": {
             "tmr": 121,
-            "ticketmaster": 129,
-            "_total": 250,
+            "ticketmaster": 128,
+            "_total": 249,
             "_filtered": 0
           },
           "_links": {
@@ -142038,8 +142038,8 @@
           ],
           "upcomingEvents": {
             "tmr": 121,
-            "ticketmaster": 129,
-            "_total": 250,
+            "ticketmaster": 128,
+            "_total": 249,
             "_filtered": 0
           },
           "_links": {
@@ -142373,8 +142373,8 @@
           ],
           "upcomingEvents": {
             "tmr": 121,
-            "ticketmaster": 129,
-            "_total": 250,
+            "ticketmaster": 128,
+            "_total": 249,
             "_filtered": 0
           },
           "_links": {
@@ -143576,8 +143576,8 @@
           ],
           "upcomingEvents": {
             "tmr": 80,
-            "ticketmaster": 64,
-            "_total": 144,
+            "ticketmaster": 62,
+            "_total": 142,
             "_filtered": 0
           },
           "_links": {
@@ -143911,8 +143911,8 @@
           ],
           "upcomingEvents": {
             "tmr": 80,
-            "ticketmaster": 64,
-            "_total": 144,
+            "ticketmaster": 62,
+            "_total": 142,
             "_filtered": 0
           },
           "_links": {
@@ -144246,8 +144246,8 @@
           ],
           "upcomingEvents": {
             "tmr": 80,
-            "ticketmaster": 64,
-            "_total": 144,
+            "ticketmaster": 62,
+            "_total": 142,
             "_filtered": 0
           },
           "_links": {
@@ -144581,8 +144581,8 @@
           ],
           "upcomingEvents": {
             "tmr": 80,
-            "ticketmaster": 64,
-            "_total": 144,
+            "ticketmaster": 62,
+            "_total": 142,
             "_filtered": 0
           },
           "_links": {
@@ -144916,8 +144916,8 @@
           ],
           "upcomingEvents": {
             "tmr": 80,
-            "ticketmaster": 64,
-            "_total": 144,
+            "ticketmaster": 62,
+            "_total": 142,
             "_filtered": 0
           },
           "_links": {
@@ -145251,8 +145251,8 @@
           ],
           "upcomingEvents": {
             "tmr": 80,
-            "ticketmaster": 64,
-            "_total": 144,
+            "ticketmaster": 62,
+            "_total": 142,
             "_filtered": 0
           },
           "_links": {
@@ -145586,8 +145586,8 @@
           ],
           "upcomingEvents": {
             "tmr": 80,
-            "ticketmaster": 64,
-            "_total": 144,
+            "ticketmaster": 62,
+            "_total": 142,
             "_filtered": 0
           },
           "_links": {
@@ -145921,8 +145921,8 @@
           ],
           "upcomingEvents": {
             "tmr": 80,
-            "ticketmaster": 64,
-            "_total": 144,
+            "ticketmaster": 62,
+            "_total": 142,
             "_filtered": 0
           },
           "_links": {
@@ -147421,9 +147421,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -147585,9 +147585,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -147749,9 +147749,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -147913,9 +147913,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -148086,9 +148086,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -148259,9 +148259,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -148432,9 +148432,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -148605,9 +148605,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -148778,9 +148778,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -148951,9 +148951,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -149124,9 +149124,9 @@
             "latitude": "34.9887105"
           },
           "upcomingEvents": {
-            "archtics": 31,
-            "ticketmaster": 21,
-            "_total": 52,
+            "archtics": 30,
+            "ticketmaster": 20,
+            "_total": 50,
             "_filtered": 0
           },
           "_links": {
@@ -151654,9 +151654,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 139,
+            "tmr": 145,
             "ticketmaster": 32,
-            "_total": 171,
+            "_total": 177,
             "_filtered": 0
           },
           "_links": {
@@ -151989,9 +151989,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 139,
+            "tmr": 145,
             "ticketmaster": 32,
-            "_total": 171,
+            "_total": 177,
             "_filtered": 0
           },
           "_links": {
@@ -152324,9 +152324,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 139,
+            "tmr": 145,
             "ticketmaster": 32,
-            "_total": 171,
+            "_total": 177,
             "_filtered": 0
           },
           "_links": {
@@ -152659,9 +152659,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 139,
+            "tmr": 145,
             "ticketmaster": 32,
-            "_total": 171,
+            "_total": 177,
             "_filtered": 0
           },
           "_links": {
@@ -152994,9 +152994,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 139,
+            "tmr": 145,
             "ticketmaster": 32,
-            "_total": 171,
+            "_total": 177,
             "_filtered": 0
           },
           "_links": {
@@ -153329,9 +153329,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 139,
+            "tmr": 145,
             "ticketmaster": 32,
-            "_total": 171,
+            "_total": 177,
             "_filtered": 0
           },
           "_links": {
@@ -153664,530 +153664,14 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 139,
+            "tmr": 145,
             "ticketmaster": 32,
-            "_total": 171,
+            "_total": 177,
             "_filtered": 0
           },
           "_links": {
             "self": {
               "href": "/discovery/v2/attractions/K8vZ917raF0?locale=en-us"
-            }
-          }
-        }
-      ]
-    }
-  },
-  {
-    "name": "PBR: Unleash The Beast - Albuquerque, NM (Friday)",
-    "type": "event",
-    "id": "Za5ju3rKuqZDd0shtdKVcGBlxbKS96qZOR",
-    "test": false,
-    "locale": "en-us",
-    "images": [
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_RETINA_PORTRAIT_16_9.jpg",
-        "width": 640,
-        "height": 360,
-        "fallback": true
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_RETINA_PORTRAIT_3_2.jpg",
-        "width": 640,
-        "height": 427,
-        "fallback": true
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_TABLET_LANDSCAPE_LARGE_16_9.jpg",
-        "width": 2048,
-        "height": 1152,
-        "fallback": true
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_EVENT_DETAIL_PAGE_16_9.jpg",
-        "width": 205,
-        "height": 115,
-        "fallback": true
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_ARTIST_PAGE_3_2.jpg",
-        "width": 305,
-        "height": 203,
-        "fallback": true
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_TABLET_LANDSCAPE_16_9.jpg",
-        "width": 1024,
-        "height": 576,
-        "fallback": true
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_RECOMENDATION_16_9.jpg",
-        "width": 100,
-        "height": 56,
-        "fallback": true
-      },
-      {
-        "ratio": "4_3",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_CUSTOM.jpg",
-        "width": 305,
-        "height": 225,
-        "fallback": true
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_RETINA_LANDSCAPE_16_9.jpg",
-        "width": 1136,
-        "height": 639,
-        "fallback": true
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_TABLET_LANDSCAPE_3_2.jpg",
-        "width": 1024,
-        "height": 683,
-        "fallback": true
-      }
-    ],
-    "distance": 2.76,
-    "units": "MILES",
-    "dates": {
-      "start": {
-        "localDate": "2027-04-23",
-        "localTime": "18:45:00",
-        "dateTime": "2027-04-24T00:45:00Z",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBA": false,
-        "noSpecificTime": false
-      },
-      "end": {
-        "localDate": "2027-04-23",
-        "localTime": "22:45:00",
-        "dateTime": "2027-04-24T04:45:00Z",
-        "approximate": false,
-        "noSpecificTime": false
-      },
-      "timezone": "America/Denver",
-      "status": {
-        "code": "offsale"
-      },
-      "spanMultipleDays": false
-    },
-    "classifications": [
-      {
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nl",
-          "name": "Undefined"
-        },
-        "family": false
-      }
-    ],
-    "ticketing": {
-      "safeTix": {
-        "enabled": true
-      }
-    },
-    "nameOrigin": "custom",
-    "_links": {
-      "self": {
-        "href": "/discovery/v2/events/Za5ju3rKuqZDd0shtdKVcGBlxbKS96qZOR?locale=en-us"
-      },
-      "venues": [
-        {
-          "href": "/discovery/v2/venues/Za5ju3rKuqZDeBJX95QW_7Qnzzb6b7isrZ?locale=en-us"
-        }
-      ]
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Dream Style Arena - The Pit",
-          "type": "venue",
-          "id": "Za5ju3rKuqZDeBJX95QW_7Qnzzb6b7isrZ",
-          "test": false,
-          "locale": "en-us",
-          "distance": 2.76,
-          "units": "MILES",
-          "postalCode": "87106",
-          "timezone": "America/Denver",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "1414 University Blvd SE"
-          },
-          "location": {
-            "longitude": "-106.632300000000015",
-            "latitude": "35.067"
-          },
-          "upcomingEvents": {
-            "archtics": 6,
-            "_total": 6,
-            "_filtered": 0
-          },
-          "_links": {
-            "self": {
-              "href": "/discovery/v2/venues/Za5ju3rKuqZDeBJX95QW_7Qnzzb6b7isrZ?locale=en-us"
-            }
-          }
-        }
-      ]
-    }
-  },
-  {
-    "name": "PBR: Unleash The Beast - Albuquerque, NM (Sat)",
-    "type": "event",
-    "id": "Za5ju3rKuqZDvwsizpqjWF3lfPRVIrZGat",
-    "test": false,
-    "locale": "en-us",
-    "images": [
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_RETINA_PORTRAIT_16_9.jpg",
-        "width": 640,
-        "height": 360,
-        "fallback": true
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_RETINA_PORTRAIT_3_2.jpg",
-        "width": 640,
-        "height": 427,
-        "fallback": true
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_TABLET_LANDSCAPE_LARGE_16_9.jpg",
-        "width": 2048,
-        "height": 1152,
-        "fallback": true
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_EVENT_DETAIL_PAGE_16_9.jpg",
-        "width": 205,
-        "height": 115,
-        "fallback": true
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_ARTIST_PAGE_3_2.jpg",
-        "width": 305,
-        "height": 203,
-        "fallback": true
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_TABLET_LANDSCAPE_16_9.jpg",
-        "width": 1024,
-        "height": 576,
-        "fallback": true
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_RECOMENDATION_16_9.jpg",
-        "width": 100,
-        "height": 56,
-        "fallback": true
-      },
-      {
-        "ratio": "4_3",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_CUSTOM.jpg",
-        "width": 305,
-        "height": 225,
-        "fallback": true
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_RETINA_LANDSCAPE_16_9.jpg",
-        "width": 1136,
-        "height": 639,
-        "fallback": true
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_TABLET_LANDSCAPE_3_2.jpg",
-        "width": 1024,
-        "height": 683,
-        "fallback": true
-      }
-    ],
-    "distance": 2.76,
-    "units": "MILES",
-    "dates": {
-      "start": {
-        "localDate": "2027-04-24",
-        "localTime": "18:45:00",
-        "dateTime": "2027-04-25T00:45:00Z",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBA": false,
-        "noSpecificTime": false
-      },
-      "end": {
-        "localDate": "2027-04-24",
-        "localTime": "22:45:00",
-        "dateTime": "2027-04-25T04:45:00Z",
-        "approximate": false,
-        "noSpecificTime": false
-      },
-      "timezone": "America/Denver",
-      "status": {
-        "code": "offsale"
-      },
-      "spanMultipleDays": false
-    },
-    "classifications": [
-      {
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nl",
-          "name": "Undefined"
-        },
-        "family": false
-      }
-    ],
-    "ticketing": {
-      "safeTix": {
-        "enabled": true
-      }
-    },
-    "nameOrigin": "custom",
-    "_links": {
-      "self": {
-        "href": "/discovery/v2/events/Za5ju3rKuqZDvwsizpqjWF3lfPRVIrZGat?locale=en-us"
-      },
-      "venues": [
-        {
-          "href": "/discovery/v2/venues/Za5ju3rKuqZDeBJX95QW_7Qnzzb6b7isrZ?locale=en-us"
-        }
-      ]
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Dream Style Arena - The Pit",
-          "type": "venue",
-          "id": "Za5ju3rKuqZDeBJX95QW_7Qnzzb6b7isrZ",
-          "test": false,
-          "locale": "en-us",
-          "distance": 2.76,
-          "units": "MILES",
-          "postalCode": "87106",
-          "timezone": "America/Denver",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "1414 University Blvd SE"
-          },
-          "location": {
-            "longitude": "-106.632300000000015",
-            "latitude": "35.067"
-          },
-          "upcomingEvents": {
-            "archtics": 6,
-            "_total": 6,
-            "_filtered": 0
-          },
-          "_links": {
-            "self": {
-              "href": "/discovery/v2/venues/Za5ju3rKuqZDeBJX95QW_7Qnzzb6b7isrZ?locale=en-us"
-            }
-          }
-        }
-      ]
-    }
-  },
-  {
-    "name": "PBR: Unleash The Beast - Albuquerque, NM (Sunday)",
-    "type": "event",
-    "id": "Za5ju3rKuqZDeDeEfDE7uuDDp3bjv4gJBW",
-    "test": false,
-    "locale": "en-us",
-    "images": [
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_RETINA_PORTRAIT_16_9.jpg",
-        "width": 640,
-        "height": 360,
-        "fallback": true
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_RETINA_PORTRAIT_3_2.jpg",
-        "width": 640,
-        "height": 427,
-        "fallback": true
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_TABLET_LANDSCAPE_LARGE_16_9.jpg",
-        "width": 2048,
-        "height": 1152,
-        "fallback": true
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_EVENT_DETAIL_PAGE_16_9.jpg",
-        "width": 205,
-        "height": 115,
-        "fallback": true
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_ARTIST_PAGE_3_2.jpg",
-        "width": 305,
-        "height": 203,
-        "fallback": true
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_TABLET_LANDSCAPE_16_9.jpg",
-        "width": 1024,
-        "height": 576,
-        "fallback": true
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_RECOMENDATION_16_9.jpg",
-        "width": 100,
-        "height": 56,
-        "fallback": true
-      },
-      {
-        "ratio": "4_3",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_CUSTOM.jpg",
-        "width": 305,
-        "height": 225,
-        "fallback": true
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_RETINA_LANDSCAPE_16_9.jpg",
-        "width": 1136,
-        "height": 639,
-        "fallback": true
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/c/f51/ee785ed6-f806-4195-98f4-69f67e09df51_106201_TABLET_LANDSCAPE_3_2.jpg",
-        "width": 1024,
-        "height": 683,
-        "fallback": true
-      }
-    ],
-    "distance": 2.76,
-    "units": "MILES",
-    "dates": {
-      "start": {
-        "localDate": "2027-04-25",
-        "localTime": "13:45:00",
-        "dateTime": "2027-04-25T19:45:00Z",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBA": false,
-        "noSpecificTime": false
-      },
-      "end": {
-        "localDate": "2027-04-25",
-        "localTime": "17:45:00",
-        "dateTime": "2027-04-25T23:45:00Z",
-        "approximate": false,
-        "noSpecificTime": false
-      },
-      "timezone": "America/Denver",
-      "status": {
-        "code": "offsale"
-      },
-      "spanMultipleDays": false
-    },
-    "classifications": [
-      {
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nl",
-          "name": "Undefined"
-        },
-        "family": false
-      }
-    ],
-    "ticketing": {
-      "safeTix": {
-        "enabled": true
-      }
-    },
-    "nameOrigin": "custom",
-    "_links": {
-      "self": {
-        "href": "/discovery/v2/events/Za5ju3rKuqZDeDeEfDE7uuDDp3bjv4gJBW?locale=en-us"
-      },
-      "venues": [
-        {
-          "href": "/discovery/v2/venues/Za5ju3rKuqZDeBJX95QW_7Qnzzb6b7isrZ?locale=en-us"
-        }
-      ]
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Dream Style Arena - The Pit",
-          "type": "venue",
-          "id": "Za5ju3rKuqZDeBJX95QW_7Qnzzb6b7isrZ",
-          "test": false,
-          "locale": "en-us",
-          "distance": 2.76,
-          "units": "MILES",
-          "postalCode": "87106",
-          "timezone": "America/Denver",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "1414 University Blvd SE"
-          },
-          "location": {
-            "longitude": "-106.632300000000015",
-            "latitude": "35.067"
-          },
-          "upcomingEvents": {
-            "archtics": 6,
-            "_total": 6,
-            "_filtered": 0
-          },
-          "_links": {
-            "self": {
-              "href": "/discovery/v2/venues/Za5ju3rKuqZDeBJX95QW_7Qnzzb6b7isrZ?locale=en-us"
             }
           }
         }
