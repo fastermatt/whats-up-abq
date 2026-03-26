@@ -4136,12 +4136,31 @@ export default function App() {
     return () => window.removeEventListener('wheel', fn);
   }, []);
 
+  // ── Guaranteed session pickup on mount (fallback for PKCE race condition) ──
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser(session.user);
+        setAuthReady(true);
+        const pendingTab = sessionStorage.getItem('abq_post_auth_redirect') as TabId | null;
+        if (pendingTab) {
+          sessionStorage.removeItem('abq_post_auth_redirect');
+          setActiveTab(pendingTab);
+          if (!session.user.user_metadata?.display_name) setShowUsernameSetup(true);
+        }
+      } else {
+        setAuthReady(true);
+      }
+    });
+  }, []);
+
   useEffect(() => {
     const { data: { subscription: unsub } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const u = session?.user ?? null;
       setUser(u);
-      setAuthReady(true);
+      if (!u) setAuthReady(true);
       if (u) {
+        setAuthReady(true);
         // If a Google OAuth sign-in just completed, redirect to Profile and show
         // the username setup modal if needed. The flag was set before the redirect
         // so it works regardless of which event Supabase fires (SIGNED_IN vs INITIAL_SESSION).
