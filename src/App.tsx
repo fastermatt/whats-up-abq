@@ -360,7 +360,7 @@ async function syncCheckinsToFirestore(uid: string, checkIns: Set<string>, displ
 
 // ─── PNG Logo ───────────────────────────────────────────────────────────────
 
-function ABQUnpluggedLogo({ size = 36 }: { size?: number }) {
+function ABQUnpluggedLogo({ size = 43 }: { size?: number }) {
   // New logo is 2144×434px — ~4.94:1 aspect ratio
   const width = Math.round(size * 4.94);
   return (
@@ -2728,8 +2728,12 @@ function ProfileSettingsPane({ user, onUsernameChange }: { user: User | null; on
     if (hasProfanity(t)) { setUsernameError('Please choose a different username'); return; }
     setUsernameError('');
     try {
-      await supabase.auth.updateUser({ data: { display_name: t } });
-      onUsernameChange?.(t);
+      const { error: updateErr } = await supabase.auth.updateUser({ data: { display_name: t } });
+      if (updateErr) throw updateErr;
+      // Refresh user state so the display name shows immediately
+      const { data: { user: freshUser } } = await supabase.auth.getUser();
+      if (freshUser) onUsernameChange?.(t);
+      setUsernameInput(t);
       setUsernameSaved(true);
       setTimeout(() => setUsernameSaved(false), 2500);
     } catch { setUsernameError('Failed to save — try again'); }
@@ -2743,10 +2747,10 @@ function ProfileSettingsPane({ user, onUsernameChange }: { user: User | null; on
         style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)', fontFamily: 'Manrope, sans-serif' }}
       >
         <div className="flex items-center gap-2">
-          <span className="material-symbols-rounded text-base" style={{ color: '#a03b00' }}>tune</span>
+          <span style={{ fontSize: '16px' }}>⚙️</span>
           <span className="font-bold text-sm text-gray-800">Customize Your Experience</span>
         </div>
-        <span className="material-symbols-rounded text-sm text-gray-400">{open ? 'expand_less' : 'expand_more'}</span>
+        <span style={{ fontSize: '12px', color: '#999' }}>{open ? '▲' : '▼'}</span>
       </button>
 
       {open && (
@@ -2931,7 +2935,7 @@ function ProfileScreen({
           style={{ background: 'linear-gradient(135deg, #a03b00, #ff793b)', fontFamily: 'Manrope, sans-serif', boxShadow: '0 2px 8px rgba(160,59,0,0.25)' }}
         >
           <span>Sign in to sync check-ins & join the leaderboard</span>
-          <span className="material-symbols-rounded text-base">login</span>
+          <span style={{ fontSize: '16px' }}>→</span>
         </button>
       ) : (
         <div className="flex items-center justify-between mb-4 px-1">
@@ -3164,7 +3168,7 @@ function LoadingScreen() {
       className="fixed inset-0 flex flex-col items-center justify-center"
       style={{ background: '#f5f7f5' }}
     >
-      <ABQUnpluggedLogo size={94} />
+      <ABQUnpluggedLogo size={113} />
       <p className="text-sm text-gray-400 mt-1" style={{ fontFamily: 'Manrope, sans-serif' }}>
         Loading your city…
       </p>
@@ -4022,6 +4026,10 @@ export default function App() {
       const u = session?.user ?? null;
       setUser(u);
       setAuthReady(true);
+      if (_event === 'SIGNED_IN') {
+        setActiveTab('profile');
+        window.history.pushState({ tab: 'profile', modal: null }, '', '#profile');
+      }
       if (u) {
         // Load check-ins from Firestore on sign-in
         try {
@@ -4312,7 +4320,7 @@ const seen = new Set<string>();
     if (!user || user.email !== ADMIN_EMAIL) {
       return (
         <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '32px', background: '#f5f7f5' }}>
-          <ABQUnpluggedLogo size={68} />
+          <ABQUnpluggedLogo size={82} />
           <p style={{ fontFamily: 'Epilogue, sans-serif', fontWeight: 900, fontSize: '20px', letterSpacing: '-0.5px' }}>Admin Access</p>
           <p style={{ fontFamily: 'Manrope, sans-serif', fontSize: '14px', color: '#666', textAlign: 'center', lineHeight: 1.5 }}>
             Sign in with the owner account ({ADMIN_EMAIL}) to access the admin panel.
@@ -4333,7 +4341,7 @@ const seen = new Set<string>();
   if (loading) return <LoadingScreen />;
   if (loadError) return (
     <div className="fixed inset-0 flex flex-col items-center justify-center gap-3 px-8" style={{ background: '#f5f7f5' }}>
-      <ABQUnpluggedLogo size={73} />
+      <ABQUnpluggedLogo size={88} />
       <h2 className="text-xl font-black uppercase tracking-tighter text-center" style={{ fontFamily: 'Epilogue, sans-serif', color: '#a03b00' }}>Couldn't Load Content</h2>
       <p className="text-sm text-gray-500 text-center" style={{ fontFamily: 'Manrope, sans-serif' }}>Check your connection and try again.</p>
       <button
@@ -4485,7 +4493,7 @@ const seen = new Set<string>();
           }}
         >
           <div className="flex items-center gap-2">
-            <ABQUnpluggedLogo size={39} />
+            <ABQUnpluggedLogo size={47} />
           </div>
           <div className="flex items-center gap-1.5">
             {            <button onClick={() => setShowSearch(true)} className="w-11 h-11 rounded-full flex items-center justify-center" style={{ background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}>
@@ -4559,7 +4567,7 @@ const seen = new Set<string>();
               places={places}
               onSignIn={() => setShowAuthModal(true)}
               onSignOut={() => supabase.auth.signOut()}
-              onUsernameChange={() => setUser(u => u ? { ...u } : null)}
+              onUsernameChange={async () => { const { data: { user: fresh } } = await supabase.auth.getUser(); if (fresh) setUser(fresh); }}
             />
           )}
         </main>
