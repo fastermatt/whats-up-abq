@@ -4712,7 +4712,10 @@ const seen = new Set<string>();
               user={user}
               places={places}
               onSignIn={() => setShowAuthModal(true)}
-              onSignOut={() => supabase.auth.signOut()}
+              onSignOut={async () => {
+                await supabase.auth.signOut({ scope: 'local' });
+                setUser(null);
+              }}
               onUsernameChange={async () => { const { data: { user: fresh } } = await supabase.auth.getUser(); if (fresh) setUser(fresh); }}
             />
           )}
