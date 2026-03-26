@@ -4725,9 +4725,13 @@ const seen = new Set<string>();
               user={user}
               places={places}
               onSignIn={() => setShowAuthModal(true)}
-              onSignOut={async () => {
-                await supabase.auth.signOut({ scope: 'local' });
+              onSignOut={() => {
+                // Clear session immediately (sync) so UI updates right away on mobile
+                const sbKey = Object.keys(localStorage).find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
+                if (sbKey) localStorage.removeItem(sbKey);
                 setUser(null);
+                // Also do the async server-side invalidation in the background
+                supabase.auth.signOut({ scope: 'local' }).catch(() => {});
               }}
               onUsernameChange={async () => { const { data: { user: fresh } } = await supabase.auth.getUser(); if (fresh) setUser(fresh); }}
             />
