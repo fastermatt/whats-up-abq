@@ -2693,6 +2693,94 @@ function AuthModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+// ─── Username Setup Modal (shown once right after first login) ────────────────
+function UsernameSetupModal({ user, onDone }: { user: User | null; onDone: (name?: string) => void }) {
+  const [input, setInput] = useState(
+    user?.user_metadata?.full_name?.split(' ')[0] || ''
+  );
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const handleSave = async () => {
+    const t = input.trim();
+    if (!t) { setError("Username can't be empty"); return; }
+    if (t.length < 3) { setError('Too short (min 3 chars)'); return; }
+    if (t.length > 20) { setError('Too long (max 20 chars)'); return; }
+    if (!/^[a-zA-Z0-9_]+$/.test(t)) { setError('Letters, numbers, and underscores only'); return; }
+    if (hasProfanity(t)) { setError('Please choose a different username'); return; }
+    setError(''); setSaving(true);
+    try {
+      const { error: updateErr } = await supabase.auth.updateUser({ data: { display_name: t } });
+      if (updateErr) throw updateErr;
+      setSaved(true);
+      setTimeout(() => onDone(t), 900);
+    } catch { setError('Failed to save — try again'); }
+    setSaving(false);
+  };
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 9999,
+      background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '24px', fontFamily: 'Manrope, sans-serif',
+    }}>
+      <div style={{
+        background: 'white', borderRadius: '24px', padding: '32px 28px',
+        width: '100%', maxWidth: '380px', boxShadow: '0 8px 40px rgba(0,0,0,0.2)',
+        textAlign: 'center',
+      }}>
+        <div style={{ fontSize: '40px', marginBottom: '12px' }}>👋</div>
+        <h2 style={{ fontFamily: 'Epilogue, sans-serif', fontWeight: 900, fontSize: '22px', margin: '0 0 6px' }}>
+          Pick your username
+        </h2>
+        <p style={{ color: '#777', fontSize: '14px', margin: '0 0 24px', lineHeight: 1.5 }}>
+          This shows up on the leaderboard and your profile. You can always change it later.
+        </p>
+        <input
+          type="text"
+          value={input}
+          onChange={e => { setInput(e.target.value); setError(''); }}
+          onKeyDown={e => e.key === 'Enter' && handleSave()}
+          placeholder="e.g. xplorer_abq"
+          maxLength={20}
+          autoFocus
+          style={{
+            width: '100%', boxSizing: 'border-box',
+            border: `1.5px solid ${error ? '#e53935' : '#e0e0e0'}`,
+            borderRadius: '12px', padding: '12px 14px', fontSize: '16px',
+            fontFamily: 'Manrope, sans-serif', outline: 'none', marginBottom: '8px',
+          }}
+        />
+        {error && <p style={{ color: '#e53935', fontSize: '13px', margin: '0 0 8px' }}>{error}</p>}
+        <button
+          onClick={handleSave}
+          disabled={saving || saved}
+          style={{
+            width: '100%', padding: '13px', borderRadius: '12px', border: 'none',
+            background: saved ? '#2e7d32' : '#a03b00', color: 'white',
+            fontSize: '15px', fontWeight: 700, cursor: saving || saved ? 'default' : 'pointer',
+            fontFamily: 'Manrope, sans-serif', marginBottom: '10px',
+            transition: 'background 0.2s',
+          }}
+        >
+          {saved ? '✓ All set!' : saving ? 'Saving…' : 'Set Username'}
+        </button>
+        <button
+          onClick={() => onDone()}
+          style={{
+            background: 'none', border: 'none', color: '#aaa', fontSize: '13px',
+            cursor: 'pointer', fontFamily: 'Manrope, sans-serif',
+          }}
+        >
+          Skip for now
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Profile Settings Pane ────────────────────────────────────────────────────
 function ProfileSettingsPane({ user, onUsernameChange }: { user: User | null; onUsernameChange?: (name: string) => void }) {
   const [prefs, setPrefs] = useState<UserPrefs>(getPrefs);
@@ -3973,6 +4061,7 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showUsernameSetup, setShowUsernameSetup] = useState(false);
   const syncTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [prefs, setPrefs] = useState<UserPrefs>(getPrefs);
   // Re-sync prefs state when ProfileSettingsPane saves changes
@@ -4029,6 +4118,9 @@ export default function App() {
       if (_event === 'SIGNED_IN') {
         setActiveTab('profile');
         window.history.pushState({ tab: 'profile', modal: null }, '', '#profile');
+        // If the user hasn't set a custom display name yet, prompt them to pick one
+        const hasUsername = !!(session?.user?.user_metadata?.display_name);
+        if (!hasUsername) setShowUsernameSetup(true);
       }
       if (u) {
         // Load check-ins from Firestore on sign-in
@@ -4654,6 +4746,18 @@ const seen = new Set<string>();
       )}
       {showAuthModal && (
         <AuthModal onClose={() => setShowAuthModal(false)} />
+      )}
+      {showUsernameSetup && (
+        <UsernameSetupModal
+          user={user}
+          onDone={async (name) => {
+            setShowUsernameSetup(false);
+            if (name) {
+              const { data: { user: fresh } } = await supabase.auth.getUser();
+              if (fresh) setUser(fresh);
+            }
+          }}
+        />
       )}
     </ErrorBoundary>
   );
