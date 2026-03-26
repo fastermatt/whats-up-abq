@@ -360,7 +360,7 @@ async function syncCheckinsToFirestore(uid: string, checkIns: Set<string>, displ
 
 // ─── PNG Logo ───────────────────────────────────────────────────────────────
 
-function ABQUnpluggedLogo({ size = 28 }: { size?: number }) {
+function ABQUnpluggedLogo({ size = 36 }: { size?: number }) {
   // New logo is 2144×434px — ~4.94:1 aspect ratio
   const width = Math.round(size * 4.94);
   return (
@@ -1517,6 +1517,65 @@ const ABQ_FACTS = [
   { icon: '🌯', fact: "New Mexico's Official State Vegetables are the chile and the pinto bean — both officially adopted in 1965." },
 ];
 
+// ─── User Preferences ─────────────────────────────────────────────────────────
+interface UserPrefs {
+  hiddenSections: string[];
+  preferredInterests: string[];
+}
+const PREF_DEFAULT: UserPrefs = { hiddenSections: [], preferredInterests: [] };
+const getPrefs = (): UserPrefs => {
+  try { return { ...PREF_DEFAULT, ...JSON.parse(localStorage.getItem('abq_user_prefs') || '{}') }; }
+  catch { return { ...PREF_DEFAULT }; }
+};
+const savePrefs = (p: UserPrefs) => { try { localStorage.setItem('abq_user_prefs', JSON.stringify(p)); } catch {} };
+
+const PROFANITY_BLOCKED = ['fuck','shit','bitch','cunt','cock','pussy','nigger','nigga','faggot','retard','whore','slut'];
+const hasProfanity = (s: string) => { const c = s.toLowerCase().replace(/[^a-z]/g, ''); return PROFANITY_BLOCKED.some(w => c.includes(w)); };
+
+const DISCOVER_SECTIONS = [
+  { id: 'thisWeek',      label: 'This Week Events',  emoji: '🗓️' },
+  { id: 'nearYou',       label: 'Near You',          emoji: '📍' },
+  { id: 'hiddenGems',    label: 'Hidden Gems',       emoji: '💎' },
+  { id: 'vibes',         label: 'Explore by Vibe',   emoji: '✨' },
+  { id: 'neighborhoods', label: 'Neighborhoods',     emoji: '🏘️' },
+  { id: 'planWeekend',   label: 'Plan Your Weekend', emoji: '🗺️' },
+  { id: 'todayPlan',     label: "Today's Plan",      emoji: '📋' },
+  { id: 'wishlist',      label: 'My Wishlist',       emoji: '🤍' },
+];
+
+const INTEREST_OPTIONS = [
+  { id: 'music',    label: '🎵 Music',        categories: ['entertainment'] },
+  { id: 'sports',   label: '🏆 Sports',       categories: ['fitness', 'park'] },
+  { id: 'arts',     label: '🎨 Arts',         categories: ['arts', 'museum'] },
+  { id: 'outdoor',  label: '🌿 Outdoor',      categories: ['park'] },
+  { id: 'family',   label: '👨‍👩‍👧 Family',     categories: ['entertainment', 'park'] },
+  { id: 'active',   label: '🏃 Active',       categories: ['fitness'] },
+  { id: 'coffee',   label: '☕ Coffee',       categories: ['restaurant'] },
+  { id: 'food',     label: '🍽️ Food & Drink', categories: ['restaurant'] },
+  { id: 'bars',     label: '🍺 Bars',         categories: ['bar'] },
+  { id: 'parks',    label: '🌳 Parks',        categories: ['park'] },
+  { id: 'shopping', label: '🛍️ Shopping',    categories: ['shopping'] },
+  { id: 'museums',  label: '🏛️ Museums',     categories: ['arts', 'museum'] },
+];
+
+const placeMatchesInterests = (category: string, interests: string[]) =>
+  interests.some(id => INTEREST_OPTIONS.find(o => o.id === id)?.categories.includes(category.toLowerCase()));
+
+const sortByInterests = <T extends { category: string }>(items: T[], interests: string[]): T[] => {
+  if (!interests.length) return items;
+  return [...items].sort((a, b) =>
+    (placeMatchesInterests(b.category, interests) ? 1 : 0) - (placeMatchesInterests(a.category, interests) ? 1 : 0)
+  );
+};
+
+const EVENT_INTEREST_GENRES: Record<string, string[]> = {
+  music: ['music'], sports: ['sports', 'sport'], arts: ['arts', 'theatre'], family: ['family'], outdoor: ['outdoor'],
+};
+const eventMatchesInterests = (event: TMEvent, interests: string[]) =>
+  interests.some(id => EVENT_INTEREST_GENRES[id]?.some(g =>
+    (event.classifications?.[0]?.segment?.name || '').toLowerCase().includes(g)
+  ));
+
 // ─── Wishlist localStorage helpers ────────────────────────────────────────────
 const getWishlist = (): { id: string; name: string; type: string; category: string }[] => {
   try { return JSON.parse(localStorage.getItem('abq_wishlist') || '[]'); }
@@ -1691,7 +1750,7 @@ function DiscoverScreen({
   places, events, onPlaceSelect, onEventSelect,
   coords, geoRequested, geoError, onRequestGeo,
   checkedIn, onCheckIn,
-  onNavigatePlaces,
+  onNavigatePlaces, prefs,
 }: {
   places: Place[];
   events: TMEvent[];
@@ -1704,7 +1763,10 @@ function DiscoverScreen({
   checkedIn: Set<string>;
   onCheckIn: (id: string) => void;
   onNavigatePlaces?: (cat: string, search: string) => void;
+  prefs?: UserPrefs;
 }) {
+  const hidden = prefs?.hiddenSections ?? [];
+  const interests = prefs?.preferredInterests ?? [];
   const HERO_PHRASES = ['Go Do Something', 'Time to Get Outside', 'Stop Doomscrolling', 'Put the Phone Down', 'Touch Some Grass', 'Go See People', 'Time to Unplug', 'Get Out of the House'];
   const [heroDisplay, setHeroDisplay] = useState('');
   useEffect(() => {
@@ -1770,7 +1832,7 @@ function DiscoverScreen({
       />
 
       {/* This Week Events - horizontal scroll */}
-      {upcomingEvents.length > 0 && (
+      {!hidden.includes('thisWeek') && upcomingEvents.length > 0 && (
         <div className="pb-5">
           <div className="flex items-center justify-between px-5 mb-3">
             <h2
@@ -1784,7 +1846,7 @@ function DiscoverScreen({
             </span>
           </div>
           <div className="flex gap-3 px-5 pb-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-            {upcomingEvents.map(event => {
+            {[...upcomingEvents].sort((a, b) => (eventMatchesInterests(b, interests) ? 1 : 0) - (eventMatchesInterests(a, interests) ? 1 : 0)).map(event => {
               const imgSrc = getBestEventImage(event.images);
               const venue = event._embedded?.venues?.[0];
               return (
@@ -1918,7 +1980,7 @@ function DiscoverScreen({
       )}
 
       {/* Near You */}
-      {coords && nearbyPlaces.length > 0 && (
+      {!hidden.includes('nearYou') && coords && nearbyPlaces.length > 0 && (
         <div className="pb-5">
           <div className="flex items-center justify-between px-5 mb-3">
             <h2
@@ -1933,7 +1995,7 @@ function DiscoverScreen({
             </span>
           </div>
           <div className="flex gap-3 px-5 pb-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-            {nearbyPlaces.map(({ place, dist }) => (
+            {[...nearbyPlaces].sort((a, b) => (placeMatchesInterests(b.place.category, interests) ? 1 : 0) - (placeMatchesInterests(a.place.category, interests) ? 1 : 0)).map(({ place, dist }) => (
               <button
                 key={place.id}
                 onClick={() => onPlaceSelect(place)}
@@ -1979,7 +2041,7 @@ function DiscoverScreen({
       )}
 
       {/* Hidden Gems */}
-      {hiddenGems.length > 0 && (
+      {!hidden.includes('hiddenGems') && hiddenGems.length > 0 && (
         <div className="pb-5">
           <div className="flex items-center justify-between px-5 mb-3">
             <h2
@@ -1993,7 +2055,7 @@ function DiscoverScreen({
             </span>
           </div>
           <div className="flex gap-3 px-5 pb-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-            {hiddenGems.map(place => (
+            {sortByInterests(hiddenGems, interests).map(place => (
               <button key={place.id} onClick={() => onPlaceSelect(place)} className="flex-shrink-0" style={{ width: '136px' }}>
                 <div className="relative rounded-2xl overflow-hidden mb-2" style={{ width: '136px', height: '136px' }}>
                   <ImageWithFallback
@@ -2033,7 +2095,7 @@ function DiscoverScreen({
       )}
 
       {/* Explore by Vibe */}
-      <div className="mx-5 mb-6">
+      {!hidden.includes('vibes') && <div className="mx-5 mb-6">
         <p className="text-xs font-black tracking-widest text-gray-400 uppercase mb-3" style={{ fontFamily: 'Manrope, sans-serif' }}>EXPLORE BY VIBE</p>
         <div className="grid grid-cols-3 gap-2">
           {[
@@ -2051,10 +2113,10 @@ function DiscoverScreen({
             </button>
           ))}
         </div>
-      </div>
+      </div>}
 
       {/* ABQ Neighborhoods */}
-      <div className="mx-5 mb-6">
+      {!hidden.includes('neighborhoods') && <div className="mx-5 mb-6">
         <p className="text-xs font-black tracking-widest text-gray-400 uppercase mb-3" style={{ fontFamily: 'Manrope, sans-serif' }}>ABQ NEIGHBORHOODS</p>
         <div className="grid grid-cols-2 gap-2">
           {[
@@ -2073,13 +2135,13 @@ function DiscoverScreen({
             </button>
           ))}
         </div>
-      </div>
+      </div>}
 
       {/* Did You Know - animated rotating card */}
       <AnimatedFact />
 
       {/* Weekend Planner */}
-      <div className="mx-5 mb-6">
+      {!hidden.includes('planWeekend') && <div className="mx-5 mb-6">
         <p className="text-xs font-black tracking-widest text-gray-400 uppercase mb-3" style={{ fontFamily: 'Manrope, sans-serif' }}>PLAN YOUR WEEKEND</p>
         <div className="flex flex-col gap-3">
           {[
@@ -2113,13 +2175,13 @@ function DiscoverScreen({
             </div>
           ))}
         </div>
-      </div>
+      </div>}
 
       {/* Day Planner */}
-      <DayPlanner />
+      {!hidden.includes('todayPlan') && <DayPlanner />}
 
       {/* Wishlist */}
-      <MyWishlist />
+      {!hidden.includes('wishlist') && <MyWishlist />}
 
       {/* Why Unplug */}
       <WhyUnplugCard />
@@ -2631,6 +2693,140 @@ function AuthModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+// ─── Profile Settings Pane ────────────────────────────────────────────────────
+function ProfileSettingsPane({ user, onUsernameChange }: { user: User | null; onUsernameChange?: (name: string) => void }) {
+  const [prefs, setPrefs] = useState<UserPrefs>(getPrefs);
+  const [open, setOpen] = useState(false);
+  const [usernameInput, setUsernameInput] = useState(
+    user?.user_metadata?.display_name || user?.user_metadata?.full_name?.split(' ')[0] || ''
+  );
+  const [usernameError, setUsernameError] = useState('');
+  const [usernameSaved, setUsernameSaved] = useState(false);
+
+  const updatePrefs = (next: UserPrefs) => { setPrefs(next); savePrefs(next); window.dispatchEvent(new Event('abq_prefs_changed')); };
+
+  const toggleSection = (id: string) => {
+    const hidden = prefs.hiddenSections.includes(id)
+      ? prefs.hiddenSections.filter(s => s !== id)
+      : [...prefs.hiddenSections, id];
+    updatePrefs({ ...prefs, hiddenSections: hidden });
+  };
+
+  const toggleInterest = (id: string) => {
+    const next = prefs.preferredInterests.includes(id)
+      ? prefs.preferredInterests.filter(i => i !== id)
+      : [...prefs.preferredInterests, id];
+    updatePrefs({ ...prefs, preferredInterests: next });
+  };
+
+  const handleUsernameSave = async () => {
+    const t = usernameInput.trim();
+    if (!t) { setUsernameError("Username can't be empty"); return; }
+    if (t.length < 3) { setUsernameError('Too short (min 3 chars)'); return; }
+    if (t.length > 20) { setUsernameError('Too long (max 20 chars)'); return; }
+    if (!/^[a-zA-Z0-9_]+$/.test(t)) { setUsernameError('Letters, numbers, and underscores only'); return; }
+    if (hasProfanity(t)) { setUsernameError('Please choose a different username'); return; }
+    setUsernameError('');
+    try {
+      await supabase.auth.updateUser({ data: { display_name: t } });
+      onUsernameChange?.(t);
+      setUsernameSaved(true);
+      setTimeout(() => setUsernameSaved(false), 2500);
+    } catch { setUsernameError('Failed to save — try again'); }
+  };
+
+  return (
+    <div className="mb-4">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between bg-white rounded-2xl px-4 py-3"
+        style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)', fontFamily: 'Manrope, sans-serif' }}
+      >
+        <div className="flex items-center gap-2">
+          <span className="material-symbols-rounded text-base" style={{ color: '#a03b00' }}>tune</span>
+          <span className="font-bold text-sm text-gray-800">Customize Your Experience</span>
+        </div>
+        <span className="material-symbols-rounded text-sm text-gray-400">{open ? 'expand_less' : 'expand_more'}</span>
+      </button>
+
+      {open && (
+        <div className="mt-2 flex flex-col gap-3">
+
+          {/* Username — signed-in only */}
+          {user && (
+            <div className="bg-white rounded-2xl p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2" style={{ fontFamily: 'Manrope, sans-serif' }}>Username</p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={usernameInput}
+                  onChange={e => { setUsernameInput(e.target.value); setUsernameError(''); setUsernameSaved(false); }}
+                  placeholder="e.g. xplorer_abq"
+                  maxLength={20}
+                  className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-sm"
+                  style={{ fontFamily: 'Manrope, sans-serif', outline: 'none' }}
+                />
+                <button
+                  onClick={handleUsernameSave}
+                  className="px-4 py-2 rounded-xl text-white text-sm font-bold flex-shrink-0"
+                  style={{ background: usernameSaved ? '#2e7d32' : '#a03b00', fontFamily: 'Manrope, sans-serif', minWidth: 64 }}
+                >
+                  {usernameSaved ? '✓ Saved' : 'Save'}
+                </button>
+              </div>
+              {usernameError && <p className="text-xs mt-1.5" style={{ color: '#c62828', fontFamily: 'Manrope, sans-serif' }}>{usernameError}</p>}
+              <p className="text-xs text-gray-400 mt-1.5" style={{ fontFamily: 'Manrope, sans-serif' }}>Shown on the leaderboard. Letters, numbers & underscores only.</p>
+            </div>
+          )}
+
+          {/* Homescreen Sections */}
+          <div className="bg-white rounded-2xl p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3" style={{ fontFamily: 'Manrope, sans-serif' }}>Homescreen Sections</p>
+            <div className="flex flex-col gap-3">
+              {DISCOVER_SECTIONS.map(sec => {
+                const visible = !prefs.hiddenSections.includes(sec.id);
+                return (
+                  <button key={sec.id} onClick={() => toggleSection(sec.id)} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">{sec.emoji}</span>
+                      <span className="text-sm font-medium text-gray-700" style={{ fontFamily: 'Manrope, sans-serif' }}>{sec.label}</span>
+                    </div>
+                    <div className="w-11 h-6 rounded-full flex items-center px-0.5 transition-colors" style={{ background: visible ? '#a03b00' : '#d1d5db' }}>
+                      <div className="w-5 h-5 bg-white rounded-full shadow transition-transform" style={{ transform: visible ? 'translateX(20px)' : 'translateX(0)' }} />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Interests */}
+          <div className="bg-white rounded-2xl p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1" style={{ fontFamily: 'Manrope, sans-serif' }}>Your Interests</p>
+            <p className="text-xs text-gray-400 mb-3" style={{ fontFamily: 'Manrope, sans-serif' }}>Selected interests appear first in your feed</p>
+            <div className="flex flex-wrap gap-2">
+              {INTEREST_OPTIONS.map(opt => {
+                const active = prefs.preferredInterests.includes(opt.id);
+                return (
+                  <button
+                    key={opt.id}
+                    onClick={() => toggleInterest(opt.id)}
+                    className="px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
+                    style={{ fontFamily: 'Manrope, sans-serif', background: active ? '#a03b00' : '#f3f4f6', color: active ? 'white' : '#374151', boxShadow: active ? '0 2px 6px rgba(160,59,0,0.25)' : 'none' }}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Profile Screen ────────────────────────────────────────────────────────────
 
 const LEADERBOARD_SEEDS = [
@@ -2647,13 +2843,14 @@ const LEADERBOARD_SEEDS = [
 interface LeaderboardRow { rank: number; name: string; count: number; isMe: boolean; uid?: string; }
 
 function ProfileScreen({
-  checkedIn, user, onSignIn, onSignOut, places,
+  checkedIn, user, onSignIn, onSignOut, places, onUsernameChange,
 }: {
   checkedIn: Set<string>;
   user: User | null;
   onSignIn: () => void;
   onSignOut: () => void;
   places: Place[];
+  onUsernameChange?: (name: string) => void;
 }) {
   const myCount = checkedIn.size;
   const level = getLevel(myCount);
@@ -2746,6 +2943,9 @@ function ProfileScreen({
           </button>
         </div>
       )}
+
+      {/* Customize Settings */}
+      <ProfileSettingsPane user={user} onUsernameChange={onUsernameChange} />
 
       {/* Profile card */}
       <div
@@ -2964,7 +3164,7 @@ function LoadingScreen() {
       className="fixed inset-0 flex flex-col items-center justify-center"
       style={{ background: '#f5f7f5' }}
     >
-      <ABQUnpluggedLogo size={72} />
+      <ABQUnpluggedLogo size={94} />
       <p className="text-sm text-gray-400 mt-1" style={{ fontFamily: 'Manrope, sans-serif' }}>
         Loading your city…
       </p>
@@ -3770,6 +3970,13 @@ export default function App() {
   const [authReady, setAuthReady] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const syncTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [prefs, setPrefs] = useState<UserPrefs>(getPrefs);
+  // Re-sync prefs state when ProfileSettingsPane saves changes
+  useEffect(() => {
+    const handler = () => setPrefs(getPrefs());
+    window.addEventListener('abq_prefs_changed', handler);
+    return () => window.removeEventListener('abq_prefs_changed', handler);
+  }, []);
 
   //   // Fix: vertical wheel scroll passes through horizontal carousels
   useEffect(() => {
@@ -4105,7 +4312,7 @@ const seen = new Set<string>();
     if (!user || user.email !== ADMIN_EMAIL) {
       return (
         <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '32px', background: '#f5f7f5' }}>
-          <ABQUnpluggedLogo size={52} />
+          <ABQUnpluggedLogo size={68} />
           <p style={{ fontFamily: 'Epilogue, sans-serif', fontWeight: 900, fontSize: '20px', letterSpacing: '-0.5px' }}>Admin Access</p>
           <p style={{ fontFamily: 'Manrope, sans-serif', fontSize: '14px', color: '#666', textAlign: 'center', lineHeight: 1.5 }}>
             Sign in with the owner account ({ADMIN_EMAIL}) to access the admin panel.
@@ -4126,7 +4333,7 @@ const seen = new Set<string>();
   if (loading) return <LoadingScreen />;
   if (loadError) return (
     <div className="fixed inset-0 flex flex-col items-center justify-center gap-3 px-8" style={{ background: '#f5f7f5' }}>
-      <ABQUnpluggedLogo size={56} />
+      <ABQUnpluggedLogo size={73} />
       <h2 className="text-xl font-black uppercase tracking-tighter text-center" style={{ fontFamily: 'Epilogue, sans-serif', color: '#a03b00' }}>Couldn't Load Content</h2>
       <p className="text-sm text-gray-500 text-center" style={{ fontFamily: 'Manrope, sans-serif' }}>Check your connection and try again.</p>
       <button
@@ -4278,7 +4485,7 @@ const seen = new Set<string>();
           }}
         >
           <div className="flex items-center gap-2">
-            <ABQUnpluggedLogo size={30} />
+            <ABQUnpluggedLogo size={39} />
           </div>
           <div className="flex items-center gap-1.5">
             {            <button onClick={() => setShowSearch(true)} className="w-11 h-11 rounded-full flex items-center justify-center" style={{ background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}>
@@ -4324,7 +4531,8 @@ const seen = new Set<string>();
               checkedIn={checkedIn}
               onCheckIn={handleCheckIn}
             
-              onNavigatePlaces={(cat, search) => { setPlacesNavCat(cat); setPlacesNavSearch(search); setPlacesNavKey(k => k + 1); setActiveTab('places'); }}/>
+              onNavigatePlaces={(cat, search) => { setPlacesNavCat(cat); setPlacesNavSearch(search); setPlacesNavKey(k => k + 1); setActiveTab('places'); }}
+              prefs={prefs}/>
           )}
           {activeTab === 'events' && (
             <EventsScreen events={events} onEventSelect={openEventModal}  initialSearch={eventsNavSearch} />
@@ -4351,6 +4559,7 @@ const seen = new Set<string>();
               places={places}
               onSignIn={() => setShowAuthModal(true)}
               onSignOut={() => supabase.auth.signOut()}
+              onUsernameChange={() => setUser(u => u ? { ...u } : null)}
             />
           )}
         </main>
