@@ -361,11 +361,11 @@ async function syncCheckinsToFirestore(uid: string, checkIns: Set<string>, displ
 // ─── PNG Logo ───────────────────────────────────────────────────────────────
 
 function ABQUnpluggedLogo({ size = 28 }: { size?: number }) {
-  // Maintain the original square footprint; the PNG is wide so scale height proportionally
-  const width = Math.round(size * 3.2);
+  // New logo is 2144×434px — ~4.94:1 aspect ratio
+  const width = Math.round(size * 4.94);
   return (
     <img
-      src="/abq_unplug_grey.png"
+      src="/abq_unplugged_logo.png"
       alt="ABQ Unplugged"
       width={width}
       height={size}
