@@ -358,23 +358,19 @@ async function syncCheckinsToFirestore(uid: string, checkIns: Set<string>, displ
   }
 }
 
-// ─── SVG Logo ───────────────────────────────────────────────────────────────
+// ─── PNG Logo ───────────────────────────────────────────────────────────────
 
 function ABQUnpluggedLogo({ size = 28 }: { size?: number }) {
+  // Maintain the original square footprint; the PNG is wide so scale height proportionally
+  const width = Math.round(size * 3.2);
   return (
-    <svg width={size} height={size} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <radialGradient id="balloonGrad" cx="40%" cy="35%" r="65%">
-          <stop offset="0%" stopColor="#ff793b" />
-          <stop offset="100%" stopColor="#a03b00" />
-        </radialGradient>
-      </defs>
-      <ellipse cx="20" cy="17" rx="12" ry="13" fill="url(#balloonGrad)" />
-      <path d="M22 9 L17 18 L21 18 L18 27 L23 16 L19 16 Z" fill="white" opacity="0.95" />
-      <rect x="17" y="30" width="6" height="4" rx="1.5" fill="#a03b00" />
-      <line x1="18" y1="30" x2="16" y2="28" stroke="#a03b00" strokeWidth="1" />
-      <line x1="22" y1="30" x2="24" y2="28" stroke="#a03b00" strokeWidth="1" />
-    </svg>
+    <img
+      src="/abq_unplug_grey.png"
+      alt="ABQ Unplugged"
+      width={width}
+      height={size}
+      style={{ objectFit: 'contain', display: 'block' }}
+    />
   );
 }
 
@@ -2969,12 +2965,6 @@ function LoadingScreen() {
       style={{ background: '#f5f7f5' }}
     >
       <ABQUnpluggedLogo size={72} />
-      <h1
-        className="text-3xl font-black uppercase tracking-tighter mt-4"
-        style={{ fontFamily: 'Epilogue, sans-serif', color: '#a03b00' }}
-      >
-        ABQ Unplugged
-      </h1>
       <p className="text-sm text-gray-400 mt-1" style={{ fontFamily: 'Manrope, sans-serif' }}>
         Loading your city…
       </p>
@@ -4289,12 +4279,6 @@ const seen = new Set<string>();
         >
           <div className="flex items-center gap-2">
             <ABQUnpluggedLogo size={30} />
-            <span
-              className="font-black uppercase tracking-tighter text-base"
-              style={{ fontFamily: 'Epilogue, sans-serif', color: '#a03b00' }}
-            >
-              ABQ Unplugged
-            </span>
           </div>
           <div className="flex items-center gap-1.5">
             {            <button onClick={() => setShowSearch(true)} className="w-11 h-11 rounded-full flex items-center justify-center" style={{ background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}>
