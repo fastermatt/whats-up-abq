@@ -2782,7 +2782,7 @@ function UsernameSetupModal({ user, onDone }: { user: User | null; onDone: (name
 }
 
 // ─── Profile Settings Pane ────────────────────────────────────────────────────
-function ProfileSettingsPane({ user, onUsernameChange }: { user: User | null; onUsernameChange?: (name: string) => void }) {
+function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User | null; onUsernameChange?: (name: string) => void; onSignIn?: () => void }) {
   const [prefs, setPrefs] = useState<UserPrefs>(getPrefs);
   const [open, setOpen] = useState(false);
   const [usernameInput, setUsernameInput] = useState(
@@ -2844,8 +2844,8 @@ function ProfileSettingsPane({ user, onUsernameChange }: { user: User | null; on
       {open && (
         <div className="mt-2 flex flex-col gap-3">
 
-          {/* Username — signed-in only */}
-          {user && (
+          {/* Username */}
+          {user ? (
             <div className="bg-white rounded-2xl p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2" style={{ fontFamily: 'Manrope, sans-serif' }}>Username</p>
               <div className="flex gap-2">
@@ -2869,6 +2869,19 @@ function ProfileSettingsPane({ user, onUsernameChange }: { user: User | null; on
               {usernameError && <p className="text-xs mt-1.5" style={{ color: '#c62828', fontFamily: 'Manrope, sans-serif' }}>{usernameError}</p>}
               <p className="text-xs text-gray-400 mt-1.5" style={{ fontFamily: 'Manrope, sans-serif' }}>Shown on the leaderboard. Letters, numbers & underscores only.</p>
             </div>
+          ) : (
+            <button
+              onClick={onSignIn}
+              className="w-full bg-white rounded-2xl p-4 flex items-center gap-3 text-left"
+              style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)', fontFamily: 'Manrope, sans-serif' }}
+            >
+              <span style={{ fontSize: '20px' }}>🏷️</span>
+              <div>
+                <p className="text-sm font-bold text-gray-800">Set your username</p>
+                <p className="text-xs text-gray-400 mt-0.5">Sign in to pick a name for your profile & leaderboard</p>
+              </div>
+              <span style={{ marginLeft: 'auto', color: '#a03b00', fontWeight: 700, fontSize: '13px' }}>Sign in →</span>
+            </button>
           )}
 
           {/* Homescreen Sections */}
@@ -3037,7 +3050,7 @@ function ProfileScreen({
       )}
 
       {/* Customize Settings */}
-      <ProfileSettingsPane user={user} onUsernameChange={onUsernameChange} />
+      <ProfileSettingsPane user={user} onUsernameChange={onUsernameChange} onSignIn={onSignIn} />
 
       {/* Profile card */}
       <div
