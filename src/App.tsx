@@ -2716,10 +2716,18 @@ function UsernameSetupModal({ user, onDone }: { user: User | null; onDone: (name
     if (hasProfanity(t)) { setError('Please choose a different username'); return; }
     setError(''); setSaving(true);
     try {
-      const { error: updateErr } = await supabase.auth.updateUser({ data: { display_name: t } });
-      if (updateErr) throw updateErr;
-      setSaved(true);
-      setTimeout(() => onDone(t), 900);
+      await supabase.auth.updateUser({ data: { display_name: t } });
+    } catch { /* continue — server may have accepted even if client throws */ }
+    try {
+      // Verify via getUser() — Supabase logs confirm server returns 200
+      // even when the JS client throws due to implicit-flow token refresh quirks
+      const { data: { user: fresh } } = await supabase.auth.getUser();
+      if (fresh?.user_metadata?.display_name === t) {
+        setSaved(true);
+        setTimeout(() => onDone(t), 900);
+      } else {
+        setError('Failed to save — try again');
+      }
     } catch { setError('Failed to save — try again'); }
     setSaving(false);
   };
@@ -2821,14 +2829,19 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
     if (hasProfanity(t)) { setUsernameError('Please choose a different username'); return; }
     setUsernameError('');
     try {
-      const { error: updateErr } = await supabase.auth.updateUser({ data: { display_name: t } });
-      if (updateErr) throw updateErr;
-      // Refresh user state so the display name shows immediately
+      await supabase.auth.updateUser({ data: { display_name: t } });
+    } catch { /* continue — server may have accepted even if client throws */ }
+    try {
+      // Verify via getUser() rather than trusting client return value
       const { data: { user: freshUser } } = await supabase.auth.getUser();
-      if (freshUser) onUsernameChange?.(t);
-      setUsernameInput(t);
-      setUsernameSaved(true);
-      setTimeout(() => setUsernameSaved(false), 2500);
+      if (freshUser?.user_metadata?.display_name === t) {
+        onUsernameChange?.(t);
+        setUsernameInput(t);
+        setUsernameSaved(true);
+        setTimeout(() => setUsernameSaved(false), 2500);
+      } else {
+        setUsernameError('Failed to save — try again');
+      }
     } catch { setUsernameError('Failed to save — try again'); }
   };
 
