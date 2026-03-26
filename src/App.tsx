@@ -2576,8 +2576,13 @@ function AuthModal({ onClose }: { onClose: () => void }) {
   async function handleGoogle() {
     setError(''); setLoading(true);
     try {
+      // Flag tells onAuthStateChange to redirect to Profile after OAuth completes
+      sessionStorage.setItem('abq_post_auth_redirect', 'profile');
       const { error: authError } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
-      if (authError) throw new Error('Login is having issues right now, sorry!');
+      if (authError) {
+        sessionStorage.removeItem('abq_post_auth_redirect');
+        throw new Error('Login is having issues right now, sorry!');
+      }
       onClose();
     } catch (e: any) { setError(e.message || 'Login is having issues right now, sorry!'); }
     setLoading(false);
@@ -3039,11 +3044,19 @@ function ProfileScreen({
           <span style={{ fontSize: '16px' }}>→</span>
         </button>
       ) : (
-        <div className="flex items-center justify-between mb-4 px-1">
-          <p className="text-xs text-gray-400" style={{ fontFamily: 'Manrope, sans-serif' }}>
-            Signed in as {user.email}
-          </p>
-          <button onClick={onSignOut} className="text-xs font-bold" style={{ color: '#a03b00', fontFamily: 'Manrope, sans-serif' }}>
+        <div
+          className="w-full flex items-center justify-between rounded-2xl px-4 py-3 mb-4"
+          style={{ background: 'linear-gradient(135deg, #1b5e20, #2e7d32)', fontFamily: 'Manrope, sans-serif', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}
+        >
+          <div>
+            <p className="text-white font-bold text-sm">✅ Signed in & syncing your check-ins</p>
+            <p className="text-green-200 text-xs mt-0.5">Check out the leaderboard below</p>
+          </div>
+          <button
+            onClick={onSignOut}
+            className="text-xs font-bold text-green-200 flex-shrink-0 ml-3"
+            style={{ fontFamily: 'Manrope, sans-serif', background: 'none', border: 'none', cursor: 'pointer' }}
+          >
             Sign out
           </button>
         </div>
@@ -4128,12 +4141,17 @@ export default function App() {
       const u = session?.user ?? null;
       setUser(u);
       setAuthReady(true);
-      if (_event === 'SIGNED_IN') {
-        setActiveTab('profile');
-        window.history.pushState({ tab: 'profile', modal: null }, '', '#profile');
-        // If the user hasn't set a custom display name yet, prompt them to pick one
-        const hasUsername = !!(session?.user?.user_metadata?.display_name);
-        if (!hasUsername) setShowUsernameSetup(true);
+      if (u) {
+        // If a Google OAuth sign-in just completed, redirect to Profile and show
+        // the username setup modal if needed. The flag was set before the redirect
+        // so it works regardless of which event Supabase fires (SIGNED_IN vs INITIAL_SESSION).
+        const pendingTab = sessionStorage.getItem('abq_post_auth_redirect') as TabId | null;
+        if (pendingTab) {
+          sessionStorage.removeItem('abq_post_auth_redirect');
+          setActiveTab(pendingTab);
+          const hasUsername = !!(u.user_metadata?.display_name);
+          if (!hasUsername) setShowUsernameSetup(true);
+        }
       }
       if (u) {
         // Load check-ins from Firestore on sign-in
@@ -4204,8 +4222,8 @@ export default function App() {
     // When admin panel is open, don't manipulate the URL at all
     if (showAdmin) return;
 
-    // Set initial history entry
-    window.history.replaceState({ tab: 'discover', modal: null }, '', '#discover');
+    // Sync URL to current active tab (do NOT hardcode 'discover' — that overrides post-login navigation)
+    window.history.replaceState({ tab: activeTab, modal: null }, '', `#${activeTab}`);
 
     const handlePopState = (e: PopStateEvent) => {
       const state = e.state;
