@@ -2689,13 +2689,13 @@ function PlacesScreen({
         {PLACE_CATEGORIES.map(cat => (
           <button
             key={cat.label}
-            onClick={() => setSelectedCat(cat.value)}
+            onClick={() => setSelectedCat(cat.label)}
             className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-semibold transition-all"
             style={{
               fontFamily: 'Manrope, sans-serif',
-              background: selectedCat === cat.value ? '#a03b00' : 'white',
-              color: selectedCat === cat.value ? 'white' : '#333',
-              boxShadow: selectedCat === cat.value ? '0 4px 12px rgba(160,59,0,0.3)' : '0 1px 4px rgba(0,0,0,0.1)',
+              background: selectedCat === cat.label ? '#a03b00' : 'white',
+              color: selectedCat === cat.label ? 'white' : '#333',
+              boxShadow: selectedCat === cat.label ? '0 4px 12px rgba(160,59,0,0.3)' : '0 1px 4px rgba(0,0,0,0.1)',
             }}
           >
             <span>{cat.icon}</span>
