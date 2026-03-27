@@ -1422,23 +1422,6 @@ export const ALL_EVENTS: Event[] = [
     source: "Ticketmaster",
     ticketUrl: "https://www.ticketmaster.com/kid-cudi-presents-the-rebel-ragers-albuquerque-new-mexico-04-29-2026/event/1E00642FA7E181C9",
   },
-];
-
-// âââ Categories âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-export const CATEGORIES: { label: EventCategory; emoji: string; color: string }[] = [
-  { label: "Movie",          emoji: "ð¬", color: "#6366f1" },
-  { label: "Live Music",     emoji: "ð¸", color: "#dc2626" },
-  { label: "Festival",       emoji: "ð", color: "#f97316" },
-  { label: "Theater & Comedy", emoji: "ð­", color: "#7c3aed" },
-  { label: "Farmers Market", emoji: "ð½", color: "#16a34a" },
-  { label: "Arts & Culture", emoji: "ð¨", color: "#ea580c" },
-  { label: "Food & Drink",   emoji: "ð½ï¸", color: "#ca8a04" },
-  { label: "Outdoors",       emoji: "ð²", color: "#0891b2" },
-  { label: "Sports",         emoji: "ð", color: "#65a30d" },
-  { label: "Community",      emoji: "ðï¸", color: "#9333ea" },
-  { label: "Nightlife",      emoji: "ð", color: "#1d4ed8" },
-  { label: "Family",         emoji: "ð¨âð©âð§", color: "#0d9488" },
-
   {
     id: "tm-260327-pbr-fri",
     title: "PBR: Unleash The Beast — Albuquerque (Friday)",
@@ -3896,6 +3879,22 @@ export const CATEGORIES: { label: EventCategory; emoji: string; color: string }[
     source: "ABQToDo",
     ticketUrl: "https://abqtodo.com/event/old-town-walking-tours-53/",
   },
+];
+
+// âââ Categories âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+export const CATEGORIES: { label: EventCategory; emoji: string; color: string }[] = [
+  { label: "Movie",          emoji: "ð¬", color: "#6366f1" },
+  { label: "Live Music",     emoji: "ð¸", color: "#dc2626" },
+  { label: "Festival",       emoji: "ð", color: "#f97316" },
+  { label: "Theater & Comedy", emoji: "ð­", color: "#7c3aed" },
+  { label: "Farmers Market", emoji: "ð½", color: "#16a34a" },
+  { label: "Arts & Culture", emoji: "ð¨", color: "#ea580c" },
+  { label: "Food & Drink",   emoji: "ð½ï¸", color: "#ca8a04" },
+  { label: "Outdoors",       emoji: "ð²", color: "#0891b2" },
+  { label: "Sports",         emoji: "ð", color: "#65a30d" },
+  { label: "Community",      emoji: "ðï¸", color: "#9333ea" },
+  { label: "Nightlife",      emoji: "ð", color: "#1d4ed8" },
+  { label: "Family",         emoji: "ð¨âð©âð§", color: "#0d9488" },
 ];
 
 // âââ Source meta ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
