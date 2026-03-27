@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { supabase } from './lib/supabase';
 import { fetchPlacesFromDB, fetchEventsFromDB } from './lib/db';
+import { ALL_EVENTS, type Event as StaticEvent } from './data/events';
 
 // ─── Scroll fade-in hook ─────────────────────────────────────────────
 function useFadeIn(delay = 0) {
@@ -164,6 +165,54 @@ interface Review {
   createdAt: Timestamp | null;
   helpful: number;
 }
+
+// ─── Static event → TMEvent adapter ────────────────────────────────────────
+function staticEventToTMEvent(ev: StaticEvent): TMEvent {
+  const toLocal24h = (t?: string): string | undefined => {
+    if (!t) return undefined;
+    const m = t.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!m) return undefined;
+    let h = parseInt(m[1]);
+    const min = m[2];
+    const period = m[3].toUpperCase();
+    if (period === 'PM' && h !== 12) h += 12;
+    if (period === 'AM' && h === 12) h = 0;
+    return `${h.toString().padStart(2, '0')}:${min}`;
+  };
+  // Determine ticket link label based on source
+  const isFreeInfo = ['ABQToDo', 'City of ABQ', 'ABQ365', 'Visit ABQ', 'Old Town ABQ', 'Downtown ABQ'].includes(ev.source || '');
+  const tm: TMEvent = {
+    id: ev.id,
+    name: ev.title,
+    url: ev.ticketUrl || undefined,
+    _source: isFreeInfo ? 'local' : (ev.source || '').toLowerCase().replace(/\s+/g, ''),
+    images: ev.image ? [{ url: ev.image }] : undefined,
+    dates: {
+      start: {
+        localDate: ev.date,
+        localTime: toLocal24h(ev.time),
+      },
+    },
+    _embedded: {
+      venues: [{
+        name: ev.location || undefined,
+        address: ev.address ? { line1: ev.address } : undefined,
+        city: { name: 'Albuquerque' },
+      }],
+    },
+    classifications: ev.category ? [{ segment: { name: ev.category }, genre: { name: ev.category } }] : undefined,
+    priceRanges: (ev.priceNum !== undefined && ev.priceNum > 0)
+      ? [{ min: ev.priceNum, max: ev.priceNum, currency: 'USD' }]
+      : undefined,
+  };
+  return tm;
+}
+
+// Pre-convert all static events once (filter out today-or-past at load time)
+const TODAY = new Date().toISOString().split('T')[0];
+const STATIC_TM_EVENTS: TMEvent[] = ALL_EVENTS
+  .filter(ev => ev.date >= TODAY)
+  .map(staticEventToTMEvent);
 
 // ─── Utilities ──────────────────────────────────────────────────────────────
 
@@ -1303,11 +1352,13 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
             style={{
               background: event._source === 'seatgeek'
                 ? 'linear-gradient(135deg, #d4184a, #ff5c5c)'
+                : event._source === 'local'
+                ? 'linear-gradient(135deg, #0369a1, #38bdf8)'
                 : 'linear-gradient(135deg, #a03b00, #ff793b)',
               fontFamily: 'Epilogue, sans-serif',
             }}
           >
-            GET TICKETS →
+            {event._source === 'local' ? 'MORE INFO →' : 'GET TICKETS →'}
           </a>
         ) : (
           <a
@@ -4451,7 +4502,8 @@ export default function App() {
           }
         }
 const seen = new Set<string>();
-        const merged = [
+        // Build merged list: live API events first, then static events that aren't duplicates
+        const liveEvents = [
           ..._tmEvents,
           ..._ebOnlyEvents,
           ..._sgOnlyEvents,
@@ -4462,6 +4514,18 @@ const seen = new Set<string>();
           seen.add(e.id);
           return true;
         });
+
+        // Add static events, skipping IDs already seen from live sources
+        const normT = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
+        const liveTitles = new Set(liveEvents.map(e => normT(e.name || '')));
+        const staticOnly = STATIC_TM_EVENTS.filter(e => {
+          if (seen.has(e.id)) return false;
+          if (liveTitles.has(normT(e.name || ''))) return false;
+          seen.add(e.id);
+          return true;
+        });
+
+        const merged = [...liveEvents, ...staticOnly];
         setEvents(merged);
       } catch (err) {
         console.error('Failed to load data:', err);
