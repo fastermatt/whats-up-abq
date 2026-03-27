@@ -111,6 +111,7 @@ interface Place {
   lat?: number;
   lng?: number;
   image?: string;
+  thumbnail?: string;
   additionalImages?: string[];
   gradient?: string;
   rating?: number;
@@ -586,15 +587,15 @@ const PlaceCard = React.memo(function PlaceCard({
     <button
       onClick={onClick}
       className="bg-white rounded-2xl overflow-hidden text-left w-full"
-      style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animation: 'cardFadeIn 0.3s ease both' }}
+      style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animation: 'cardFadeIn 0.3s ease both', contain: 'layout paint' }}
     >
       <div className="relative" style={{ height: '140px' }}>
         <ImageWithFallback
-          src={place.image}
+          src={place.thumbnail || place.image}
           alt={place.name}
           className="w-full h-full object-cover"
           gradient={place.gradient}
-          showLabel
+          showLabel={!place.image}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
         <div className="absolute top-2 left-2">
@@ -761,6 +762,8 @@ function PlacePhotoGallery({ place }: { place: Place }) {
           src={src}
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
+          loading={i === 0 ? 'eager' : 'lazy'}
+          decoding="async"
           style={{
             opacity: i === idx ? 1 : 0,
             transition: 'opacity 0.35s ease',
@@ -2627,10 +2630,12 @@ function PlacesScreen({
     return () => io.disconnect();
   }, [sorted]);
 
-  const visiblePlaces = sorted.slice(0, displayCount);
+  // Only show places that have a real photo — no gradient placeholders in the grid
+  const withPhotos = sorted.filter(p => !!p.image);
+  const visiblePlaces = withPhotos.slice(0, displayCount);
 
   return (
-    <div className="h-full overflow-y-auto" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+    <div className="h-full overflow-y-auto" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', willChange: 'transform' } as React.CSSProperties}>
       <div className="px-5 pt-5 pb-3">
         <p
           className="text-xs font-semibold tracking-widest uppercase"
@@ -2725,7 +2730,7 @@ function PlacesScreen({
           </button>
         ))}
         <p className="ml-auto text-xs text-gray-400 self-center" style={{ fontFamily: 'Manrope, sans-serif' }}>
-          {sorted.length} results
+          {withPhotos.length} results
         </p>
       </div>
 
@@ -2746,14 +2751,14 @@ function PlacesScreen({
           ))}
         </div>
         {/* Infinite scroll sentinel */}
-        {displayCount < sorted.length && (
+        {displayCount < withPhotos.length && (
           <div ref={sentinelRef} style={{ height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span className="text-xs text-gray-400" style={{ fontFamily: 'Manrope, sans-serif' }}>
               Loading more…
             </span>
           </div>
         )}
-        {sorted.length === 0 && (
+        {withPhotos.length === 0 && (
           <div className="text-center py-16 text-gray-400">
             <span className="material-symbols-outlined" style={{ fontSize: '48px', display: 'block', marginBottom: '8px' }}>search_off</span>
             <p className="font-semibold text-sm" style={{ fontFamily: 'Manrope, sans-serif' }}>No places found</p>
