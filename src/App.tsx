@@ -2584,8 +2584,29 @@ function PlacesScreen({
   // Reset pagination when filters change
   useEffect(() => { setDisplayCount(PAGE_SIZE); }, [selectedCat, search, sortMode]);
 
+  // ── ABQ metro filter for places ───────────────────────────────────────────
+  // Google Places addresses look like: "123 Main St, Albuquerque, NM 87106, USA"
+  // The city segment is typically the part between the first and second commas.
+  // We keep places whose city is in the greater ABQ metro, plus any place with
+  // no address at all (manual/admin entries may omit it).
+  const PLACE_METRO_CITIES = new Set([
+    'albuquerque', 'rio rancho', 'corrales', 'bernalillo', 'placitas',
+    'edgewood', 'tijeras', 'cedar crest', 'sandia park', 'los lunas',
+    'belen', 'bosque farms', 'moriarty', 'estancia', 'mountainair',
+    'peralta', 'isleta', 'paradise hills', 'kirtland', 'south valley',
+    'north valley', 'west mesa',
+  ]);
+  const isPlaceInMetro = (p: Place): boolean => {
+    if (!p.address) return true; // no address info → keep
+    // Extract city: second comma-separated segment, strip zip/state noise
+    const parts = p.address.split(',');
+    if (parts.length < 2) return true; // can't determine city → keep
+    const city = parts[1].trim().toLowerCase().replace(/\s+nm.*$/i, '').trim();
+    return PLACE_METRO_CITIES.has(city);
+  };
+
   const filtered = useMemo(() => {
-    let result = places;
+    let result = places.filter(isPlaceInMetro);
     if (selectedCat !== 'All') result = result.filter(p => p.category === selectedCat);
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -2597,6 +2618,7 @@ function PlacesScreen({
       );
     }
     return result;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [places, selectedCat, search]);
 
   const sorted = useMemo(() => {
@@ -4802,7 +4824,34 @@ export default function App() {
         });
         console.log('[Static] staticOnly count:', staticOnly.length, 'merged total:', liveEvents.length + staticOnly.length);
 
-        const merged = [...liveEvents, ...staticOnly];
+        // ── ABQ metro geo filter ─────────────────────────────────────────────
+        // Only show events whose venue city is in the greater ABQ metro area.
+        // If no city is provided (e.g. static events hardcoded to ABQ), keep them.
+        const ABQ_METRO_CITIES = new Set([
+          'albuquerque', 'rio rancho', 'corrales', 'bernalillo', 'placitas',
+          'edgewood', 'tijeras', 'cedar crest', 'sandia park', 'los lunas',
+          'belen', 'bosque farms', 'moriarty', 'estancia', 'mountainair',
+          'peralta', 'isleta', 'paradise hills', 'four hills', 'kirtland',
+          'south valley', 'north valley', 'west mesa', 'rio rancho nm',
+        ]);
+        const isInMetro = (ev: TMEvent): boolean => {
+          const city = (ev._embedded?.venues?.[0]?.city?.name || '').toLowerCase().trim();
+          if (!city) return true; // no city info → assume local (static events)
+          return ABQ_METRO_CITIES.has(city);
+        };
+
+        // ── CTA filter ───────────────────────────────────────────────────────
+        // Hide events that have no actionable link (no ticket URL, no info URL).
+        // These would otherwise dead-end at a "GET DIRECTIONS" button.
+        const hasActionableLink = (ev: TMEvent): boolean => {
+          if (ev.url) return true;
+          if (ev.ticketLinks && ev.ticketLinks.some(l => l.url)) return true;
+          return false;
+        };
+
+        const merged = [...liveEvents, ...staticOnly]
+          .filter(isInMetro)
+          .filter(hasActionableLink);
         setEvents(merged);
       } catch (err) {
         console.error('[Events] Failed to load events:', err);
