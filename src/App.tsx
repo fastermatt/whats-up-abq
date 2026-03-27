@@ -28,6 +28,14 @@ function useFadeIn(delay = 0) {
 }
 
 
+// Inject global keyframe for card fade-in (CSS-only, no JS observers)
+if (typeof document !== 'undefined' && !document.getElementById('card-fade-style')) {
+  const s = document.createElement('style');
+  s.id = 'card-fade-style';
+  s.textContent = '@keyframes cardFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }';
+  document.head.appendChild(s);
+}
+
 // ─── Error Boundary ───────────────────────────────────────────
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -574,13 +582,11 @@ const PlaceCard = React.memo(function PlaceCard({
   onCheckIn?: (e: React.MouseEvent) => void;
 }) {
   const catEmoji = PLACE_CATEGORIES.find(c => c.label === place.category)?.icon || '';
-  const fadeRef = useFadeIn();
   return (
     <button
-      ref={fadeRef}
       onClick={onClick}
       className="bg-white rounded-2xl overflow-hidden text-left w-full"
-      style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+      style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animation: 'cardFadeIn 0.3s ease both' }}
     >
       <div className="relative" style={{ height: '140px' }}>
         <ImageWithFallback
@@ -2542,10 +2548,24 @@ function PlacesScreen({
   navCat?: string;
   navSearch?: string;
 }) {
+  const PAGE_SIZE = 48;
   const [selectedCat, setSelectedCat] = useState('All');
   const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const [sortMode, setSortMode] = useState<'top' | 'near' | 'az'>('top');
-  useEffect(() => { if (navKey > 0) { setSelectedCat(navCat || 'All'); setSearch(navSearch || ''); } }, [navKey]);
+  const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  // Debounce search input by 250ms
+  useEffect(() => {
+    const t = setTimeout(() => setSearch(searchInput), 250);
+    return () => clearTimeout(t);
+  }, [searchInput]);
+
+  useEffect(() => { if (navKey > 0) { setSelectedCat(navCat || 'All'); setSearchInput(navSearch || ''); setSearch(navSearch || ''); } }, [navKey]);
+
+  // Reset pagination when filters change
+  useEffect(() => { setDisplayCount(PAGE_SIZE); }, [selectedCat, search, sortMode]);
 
   const filtered = useMemo(() => {
     let result = places;
@@ -2575,7 +2595,6 @@ function PlacesScreen({
     if (sortMode === 'az') {
       return [...filtered].sort((a, b) => a.name.localeCompare(b.name));
     }
-    // top rated
     return [...filtered].sort((a, b) => {
       const ra = a.rating || 0;
       const rb = b.rating || 0;
@@ -2584,16 +2603,31 @@ function PlacesScreen({
     });
   }, [filtered, sortMode, coords]);
 
+  // Only compute distances when in 'near' mode or when coords arrive
   const distMap = useMemo(() => {
     if (!coords) return new Map<string, number>();
     const m = new Map<string, number>();
-    places.forEach(p => {
+    // Only compute for the visible slice to keep it cheap
+    sorted.slice(0, displayCount + PAGE_SIZE).forEach(p => {
       if (p.lat != null && p.lng != null) {
         m.set(p.id, distanceMiles(coords.lat, coords.lng, p.lat, p.lng));
       }
     });
     return m;
-  }, [places, coords]);
+  }, [sorted, coords, displayCount]);
+
+  // Infinite scroll: load more when sentinel enters viewport
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) setDisplayCount(c => c + PAGE_SIZE);
+    }, { rootMargin: '200px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [sorted]);
+
+  const visiblePlaces = sorted.slice(0, displayCount);
 
   return (
     <div className="h-full overflow-y-auto" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
@@ -2633,12 +2667,12 @@ function PlacesScreen({
           <input
             className="flex-1 bg-transparent outline-none text-sm text-gray-800"
             placeholder="Search places..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
+            value={searchInput}
+            onChange={e => setSearchInput(e.target.value)}
             style={{ fontFamily: 'Manrope, sans-serif' }}
           />
-          {search && (
-            <button onClick={() => setSearch('')}>
+          {searchInput && (
+            <button onClick={() => { setSearchInput(''); setSearch(''); }}>
               <span className="material-symbols-outlined text-gray-400" style={{ fontSize: '18px' }}>close</span>
             </button>
           )}
@@ -2698,7 +2732,7 @@ function PlacesScreen({
       {/* Grid */}
       <div className="px-5 pb-28">
         <div className="grid grid-cols-2 gap-3">
-          {sorted.map(place => (
+          {visiblePlaces.map(place => (
             <div key={place.id} style={{position:'relative'}}>
               <PlaceCard
                 place={place}
@@ -2711,12 +2745,20 @@ function PlacesScreen({
             </div>
           ))}
         </div>
+        {/* Infinite scroll sentinel */}
+        {displayCount < sorted.length && (
+          <div ref={sentinelRef} style={{ height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span className="text-xs text-gray-400" style={{ fontFamily: 'Manrope, sans-serif' }}>
+              Loading more…
+            </span>
+          </div>
+        )}
         {sorted.length === 0 && (
           <div className="text-center py-16 text-gray-400">
             <span className="material-symbols-outlined" style={{ fontSize: '48px', display: 'block', marginBottom: '8px' }}>search_off</span>
             <p className="font-semibold text-sm" style={{ fontFamily: 'Manrope, sans-serif' }}>No places found</p>
             <button
-              onClick={() => { setSelectedCat('All'); setSearch(''); }}
+              onClick={() => { setSelectedCat('All'); setSearchInput(''); setSearch(''); }}
               className="mt-3 text-xs font-bold"
               style={{ color: '#a03b00' }}
             >
