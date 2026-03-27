@@ -740,7 +740,8 @@ function PlaceDetailModal({
   const mapsQuery = encodeURIComponent((place.address || place.name) + ' Albuquerque NM');
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto" style={{ background: '#f5f7f5' }}>
+    <div className="fixed inset-0 z-50 flex justify-center" style={{ background: 'rgba(0,0,0,0.3)' }}>
+      <div className="flex flex-col overflow-y-auto w-full" style={{ maxWidth: '480px', background: '#f5f7f5' }}>
       <div className="relative flex-shrink-0" style={{ height: '260px' }}>
         <ImageWithFallback
           src={place.image}
@@ -894,6 +895,7 @@ function PlaceDetailModal({
         />
       </div>
     </div>
+  </div>
   );
 }
 
@@ -1226,7 +1228,8 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto" style={{ background: '#f5f7f5' }}>
+    <div className="fixed inset-0 z-50 flex justify-center" style={{ background: 'rgba(0,0,0,0.3)' }}>
+      <div className="flex flex-col overflow-y-auto w-full" style={{ maxWidth: '480px', background: '#f5f7f5' }}>
       <div className="relative flex-shrink-0" style={{ height: '260px' }}>
         {imgSrc ? (
           <img src={hiResUrl(imgSrc)} alt={event.name} className="w-full h-full object-cover" />
@@ -1379,6 +1382,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
         )}
       </div>
     </div>
+  </div>
   );
 }
 
