@@ -211,7 +211,7 @@ function staticEventToTMEvent(ev: StaticEvent): TMEvent {
 // Pre-convert all static events once (filter out today-or-past at load time)
 const TODAY = new Date().toISOString().split('T')[0];
 const STATIC_TM_EVENTS: TMEvent[] = ALL_EVENTS
-  .filter(ev => ev.date >= TODAY)
+  .filter(ev => (ev.endDate ?? ev.date) >= TODAY)
   .map(staticEventToTMEvent);
 
 // ─── Utilities ──────────────────────────────────────────────────────────────
@@ -4516,6 +4516,7 @@ const seen = new Set<string>();
         });
 
         // Add static events, skipping IDs already seen from live sources
+        console.log('[Static] STATIC_TM_EVENTS count:', STATIC_TM_EVENTS.length, 'TODAY:', TODAY);
         const normT = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
         const liveTitles = new Set(liveEvents.map(e => normT(e.name || '')));
         const staticOnly = STATIC_TM_EVENTS.filter(e => {
@@ -4524,6 +4525,7 @@ const seen = new Set<string>();
           seen.add(e.id);
           return true;
         });
+        console.log('[Static] staticOnly count:', staticOnly.length, 'merged total:', liveEvents.length + staticOnly.length);
 
         const merged = [...liveEvents, ...staticOnly];
         setEvents(merged);
