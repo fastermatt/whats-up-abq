@@ -2561,8 +2561,9 @@
             }
           ],
           "upcomingEvents": {
+            "tmr": 1,
             "ticketmaster": 12,
-            "_total": 12,
+            "_total": 13,
             "_filtered": 0
           },
           "_links": {
@@ -7102,13 +7103,12 @@
           ],
           "upcomingEvents": {
             "mfx-dk": 3,
-            "ticketnet": 6,
+            "ticketnet": 5,
             "mfx-be": 1,
-            "tmr": 6,
+            "tmr": 4,
             "mfx-nl": 3,
             "ticketmaster": 26,
-            "trium": 1,
-            "_total": 46,
+            "_total": 42,
             "_filtered": 0
           },
           "_links": {
@@ -10706,6 +10706,7 @@
         "description": "LIVE NATION 3PE EVENT / NTL / USA"
       }
     ],
+    "accessibility": {},
     "ageRestrictions": {
       "legalAgeEnforced": false
     },
@@ -10717,7 +10718,7 @@
         "enabled": false
       }
     },
-    "nameOrigin": "primaryAttraction",
+    "nameOrigin": "custom",
     "_links": {
       "self": {
         "href": "/discovery/v2/events/G5vzZbMaDndMc?locale=en-us"
@@ -18490,7 +18491,7 @@
         "enabled": false
       }
     },
-    "nameOrigin": "primaryAttraction",
+    "nameOrigin": "custom",
     "_links": {
       "self": {
         "href": "/discovery/v2/events/G5vzZbyvD7xIY?locale=en-us"
@@ -22978,7 +22979,7 @@
         "enabled": false
       }
     },
-    "nameOrigin": "primaryAttraction",
+    "nameOrigin": "custom",
     "_links": {
       "self": {
         "href": "/discovery/v2/events/G5vzZbUL2SziW?locale=en-us"
@@ -23518,9 +23519,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 12,
+            "tmr": 13,
             "ticketmaster": 13,
-            "_total": 25,
+            "_total": 26,
             "_filtered": 0
           },
           "_links": {
@@ -23853,9 +23854,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 35,
+            "tmr": 34,
             "ticketmaster": 79,
-            "_total": 114,
+            "_total": 113,
             "_filtered": 0
           },
           "_links": {
@@ -25131,9 +25132,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 35,
+            "tmr": 34,
             "ticketmaster": 79,
-            "_total": 114,
+            "_total": 113,
             "_filtered": 0
           },
           "_links": {
@@ -26471,9 +26472,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 35,
+            "tmr": 34,
             "ticketmaster": 79,
-            "_total": 114,
+            "_total": 113,
             "_filtered": 0
           },
           "_links": {
@@ -27591,9 +27592,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 35,
+            "tmr": 34,
             "ticketmaster": 79,
-            "_total": 114,
+            "_total": 113,
             "_filtered": 0
           },
           "_links": {
@@ -28310,9 +28311,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 35,
+            "tmr": 34,
             "ticketmaster": 79,
-            "_total": 114,
+            "_total": 113,
             "_filtered": 0
           },
           "_links": {
@@ -28645,9 +28646,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 35,
+            "tmr": 34,
             "ticketmaster": 79,
-            "_total": 114,
+            "_total": 113,
             "_filtered": 0
           },
           "_links": {
@@ -37688,7 +37689,7 @@
         "enabled": false
       }
     },
-    "nameOrigin": "primaryAttraction",
+    "nameOrigin": "custom",
     "_links": {
       "self": {
         "href": "/discovery/v2/events/G5vzZ_dnQlPZ7?locale=en-us"
@@ -47882,10 +47883,10 @@
           "upcomingEvents": {
             "mticket": 1,
             "mfx-ch": 4,
-            "tmr": 2,
+            "tmr": 3,
             "ticketmaster": 35,
             "mfx-no": 3,
-            "_total": 45,
+            "_total": 46,
             "_filtered": 0
           },
           "_links": {
@@ -63202,8 +63203,8 @@
           ],
           "upcomingEvents": {
             "tmr": 8,
-            "ticketmaster": 16,
-            "_total": 24,
+            "ticketmaster": 17,
+            "_total": 25,
             "_filtered": 0
           },
           "_links": {
@@ -65546,8 +65547,8 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 7,
-            "ticketmaster": 14,
+            "tmr": 8,
+            "ticketmaster": 13,
             "_total": 21,
             "_filtered": 0
           },
@@ -68943,7 +68944,7 @@
         "enabled": false
       }
     },
-    "nameOrigin": "primaryAttraction",
+    "nameOrigin": "custom",
     "_links": {
       "self": {
         "href": "/discovery/v2/events/G5vzZ_k3Koz7o?locale=en-us"
@@ -78566,8 +78567,8 @@
           ],
           "upcomingEvents": {
             "tmr": 9,
-            "ticketmaster": 27,
-            "_total": 36,
+            "ticketmaster": 28,
+            "_total": 37,
             "_filtered": 0
           },
           "_links": {
@@ -92086,14 +92087,14 @@
             }
           ],
           "upcomingEvents": {
-            "ticketnet": 2,
+            "ticketnet": 1,
             "mfx-ch": 1,
             "tmr": 4,
             "ticketmaster": 34,
             "ticketweb": 5,
             "mfx-no": 1,
             "mfx-pl": 1,
-            "_total": 48,
+            "_total": 47,
             "_filtered": 0
           },
           "_links": {
@@ -131912,8 +131913,9 @@
             }
           ],
           "upcomingEvents": {
+            "tmr": 1,
             "ticketmaster": 27,
-            "_total": 27,
+            "_total": 28,
             "_filtered": 0
           },
           "_links": {
@@ -132077,9 +132079,10 @@
             }
           ],
           "upcomingEvents": {
+            "tmr": 1,
             "ticketmaster": 28,
             "ticketweb": 1,
-            "_total": 29,
+            "_total": 30,
             "_filtered": 0
           },
           "_links": {
@@ -139637,8 +139640,8 @@
           "upcomingEvents": {
             "mfx-be": 3,
             "mticket": 1,
-            "tmr": 4,
-            "ticketmaster": 30,
+            "tmr": 5,
+            "ticketmaster": 29,
             "trium": 2,
             "mfx-pl": 1,
             "_total": 41,
@@ -139824,6 +139827,7 @@
         "description": "LIVE NATION 3PE EVENT / NTL / USA"
       }
     ],
+    "accessibility": {},
     "ageRestrictions": {
       "legalAgeEnforced": false
     },
@@ -139835,7 +139839,7 @@
         "enabled": false
       }
     },
-    "nameOrigin": "primaryAttraction",
+    "nameOrigin": "custom",
     "_links": {
       "self": {
         "href": "/discovery/v2/events/G5vzZ_kmn0zdR?locale=en-us"
@@ -140077,8 +140081,8 @@
           "upcomingEvents": {
             "mfx-be": 3,
             "mticket": 1,
-            "tmr": 4,
-            "ticketmaster": 30,
+            "tmr": 5,
+            "ticketmaster": 29,
             "trium": 2,
             "mfx-pl": 1,
             "_total": 41,
@@ -146372,8 +146376,8 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 11,
-            "_total": 11,
+            "tmr": 12,
+            "_total": 12,
             "_filtered": 0
           },
           "_links": {
@@ -151654,9 +151658,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 145,
+            "tmr": 148,
             "ticketmaster": 32,
-            "_total": 177,
+            "_total": 180,
             "_filtered": 0
           },
           "_links": {
@@ -151989,9 +151993,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 145,
+            "tmr": 148,
             "ticketmaster": 32,
-            "_total": 177,
+            "_total": 180,
             "_filtered": 0
           },
           "_links": {
@@ -152324,9 +152328,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 145,
+            "tmr": 148,
             "ticketmaster": 32,
-            "_total": 177,
+            "_total": 180,
             "_filtered": 0
           },
           "_links": {
@@ -152659,9 +152663,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 145,
+            "tmr": 148,
             "ticketmaster": 32,
-            "_total": 177,
+            "_total": 180,
             "_filtered": 0
           },
           "_links": {
@@ -152994,9 +152998,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 145,
+            "tmr": 148,
             "ticketmaster": 32,
-            "_total": 177,
+            "_total": 180,
             "_filtered": 0
           },
           "_links": {
@@ -153329,9 +153333,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 145,
+            "tmr": 148,
             "ticketmaster": 32,
-            "_total": 177,
+            "_total": 180,
             "_filtered": 0
           },
           "_links": {
@@ -153664,9 +153668,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 145,
+            "tmr": 148,
             "ticketmaster": 32,
-            "_total": 177,
+            "_total": 180,
             "_filtered": 0
           },
           "_links": {
@@ -154005,9 +154009,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
+            "tmr": 106,
             "ticketmaster": 48,
-            "_total": 155,
+            "_total": 154,
             "_filtered": 0
           },
           "_links": {
@@ -154346,9 +154350,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
+            "tmr": 106,
             "ticketmaster": 48,
-            "_total": 155,
+            "_total": 154,
             "_filtered": 0
           },
           "_links": {
@@ -154687,9 +154691,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
+            "tmr": 106,
             "ticketmaster": 48,
-            "_total": 155,
+            "_total": 154,
             "_filtered": 0
           },
           "_links": {
@@ -155028,9 +155032,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
+            "tmr": 106,
             "ticketmaster": 48,
-            "_total": 155,
+            "_total": 154,
             "_filtered": 0
           },
           "_links": {
@@ -155369,9 +155373,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
+            "tmr": 106,
             "ticketmaster": 48,
-            "_total": 155,
+            "_total": 154,
             "_filtered": 0
           },
           "_links": {
@@ -155710,9 +155714,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
+            "tmr": 106,
             "ticketmaster": 48,
-            "_total": 155,
+            "_total": 154,
             "_filtered": 0
           },
           "_links": {
@@ -156051,9 +156055,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
+            "tmr": 106,
             "ticketmaster": 48,
-            "_total": 155,
+            "_total": 154,
             "_filtered": 0
           },
           "_links": {
@@ -156392,9 +156396,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
+            "tmr": 106,
             "ticketmaster": 48,
-            "_total": 155,
+            "_total": 154,
             "_filtered": 0
           },
           "_links": {
