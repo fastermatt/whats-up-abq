@@ -1609,7 +1609,7 @@ const ABQ_FACTS = [
   { icon: '🦎', fact: "New Mexico's state reptile is the New Mexico whiptail lizard — and it's all-female, reproducing without males." },
   { icon: '🌺', fact: 'The ABQ BioPark complex includes a world-class zoo, botanic garden, aquarium, and Tingley Beach — all connected by a scenic rail.' },
   { icon: '🏛️', fact: 'The National Museum of Nuclear Science and History in ABQ is the only congressionally chartered museum of its kind in the US.' },
-  { icon: '🎶', fact: 'Meow Wolf opened its ABQ location (Convergence Station) in Denver — but its artistic roots trace to the NM creative community.' },
+  { icon: '🎨', fact: 'Meow Wolf was founded in Santa Fe, NM — the original House of Eternal Return is just an hour up I-25 and worth the trip.' },
   { icon: '🎪', fact: 'The Balloon Fiesta has been held every October since 1972 — it started with just 13 balloons; now it attracts 500+.' },
   { icon: '🚀', fact: "Spaceport America, the world's first purpose-built commercial spaceport, is just 2.5 hours south of ABQ." },
   { icon: '🌅', fact: '"Sandia" means watermelon in Spanish — the mountains were named for the deep pink glow they cast at dusk.' },
@@ -4642,13 +4642,18 @@ export default function App() {
   useEffect(() => {
     async function loadData() {
       // ── Phase 1: Load places first — unblocks the UI immediately ──────────
+      // Wrap with an 8-second timeout so a slow mobile connection never hangs
+      // on the 5 sequential Supabase paginated requests (4600+ rows).
+      const withTimeout = <T,>(p: Promise<T>, ms: number): Promise<T> =>
+        Promise.race([p, new Promise<T>((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
+
       let placesLoaded = false;
       try {
-        const sbPlaces = await fetchPlacesFromDB();
+        const sbPlaces = await withTimeout(fetchPlacesFromDB(), 8000);
         setPlaces(Array.isArray(sbPlaces) ? sbPlaces : []);
         placesLoaded = true;
       } catch (err) {
-        console.warn('[Places] Supabase failed, trying JSON fallback:', err);
+        console.warn('[Places] Supabase failed or timed out, trying JSON fallback:', err);
         try {
           const r = await fetch('/places-data.json');
           if (r.ok) { setPlaces(await r.json()); placesLoaded = true; }
