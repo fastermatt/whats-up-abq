@@ -482,17 +482,23 @@ function ImageWithFallback({
 const PLACE_CATEGORIES = [
   { label: 'All',            icon: '✨', value: 'All' },
   { label: 'Restaurants',    icon: '🍽️', value: 'restaurant' },
+  { label: 'Cafes',          icon: '☕', value: 'coffee' },
   { label: 'Bars',           icon: '🍺', value: 'bar' },
   { label: 'Parks',          icon: '🌳', value: 'park' },
   { label: 'Fitness',        icon: '💪', value: 'fitness' },
   { label: 'Arts',           icon: '🎨', value: 'arts' },
   { label: 'Shopping',       icon: '🛍️', value: 'shop' },
   { label: 'Entertainment',  icon: '🎭', value: 'entertainment' },
-  { label: 'Museums',        icon: '🏗️', value: 'museum' },
+  { label: 'Museums',        icon: '🏛️', value: 'museum' },
   { label: 'Hotels',         icon: '🏨', value: 'hotel' },
 ];
 
-const EVENT_GENRES = ['All', 'Music', 'Sports', 'Arts & Theatre', 'Comedy', 'Family', 'Outdoor'];
+const EVENT_GENRES = [
+  'All', 'Live Music', 'Sports', 'Arts & Culture', 'Film & Movies',
+  'Festival', 'Theater & Comedy', 'Food & Drink', 'Community',
+  'Nightlife', 'Family', 'Outdoors', 'Farmers Market',
+  'Health & Wellness', 'Fitness', 'Comedy', 'Business', 'Technology',
+];
 
 // ─── Geo Banner ──────────────────────────────────────────────────────────────
 
@@ -2261,35 +2267,74 @@ function EventsScreen({
       result = result.filter(e => {
         const seg = e.classifications?.[0]?.segment?.name || '';
         const gen = e.classifications?.[0]?.genre?.name || '';
-        if (selectedGenre === 'Outdoor') {
-          // Match genuine outdoor venues (amphitheaters, outdoor parks) and
-          // explicitly outdoor-themed events. Exclude sports stadiums and arenas
-          // (e.g. "Isotopes Park" is a baseball stadium; "Dream Style Arena" is indoor).
-          const venueName = (e._embedded?.venues?.[0]?.name || '').toLowerCase();
-          const eventName = e.name.toLowerCase();
-          const isAmphi = venueName.includes('amphitheater') || venueName.includes('amphitheatre');
-          const isOutdoorVenue = venueName.includes('outdoor') ||
-            (venueName.includes('balloon fiesta') || venueName === 'balloon fiesta park');
-          const isOutdoorEvent = eventName.includes('outdoor') ||
-            eventName.includes('festival') || eventName.includes(' fair') ||
-            eventName.includes('balloon fiesta') || eventName.includes('garden') ||
-            eventName.includes('nature') || eventName.includes('hiking') ||
-            eventName.includes('trail') || eventName.includes('fiesta');
-          return isAmphi || isOutdoorVenue || isOutdoorEvent || gen === 'Outdoor';
+        const eventName = e.name.toLowerCase();
+        const venueName = (e._embedded?.venues?.[0]?.name || '').toLowerCase();
+        // Match both TM segment/genre names AND static event category names (stored in seg/gen via staticEventToTMEvent)
+        switch (selectedGenre) {
+          case 'Live Music':
+            return seg === 'Music' || seg === 'Live Music' || gen === 'Live Music';
+          case 'Sports':
+            return seg === 'Sports';
+          case 'Arts & Culture':
+            return seg === 'Arts & Theatre' || seg === 'Arts & Culture' || gen === 'Arts & Culture';
+          case 'Film & Movies':
+            return seg === 'Film' || seg === 'Movie' || gen === 'Film' || gen === 'Movie' ||
+              eventName.includes('film') || eventName.includes('cinema') || eventName.includes('movie');
+          case 'Festival':
+            return seg === 'Festival' || gen === 'Festival' ||
+              eventName.includes('festival') || eventName.includes(' fest ') || eventName.endsWith(' fest');
+          case 'Theater & Comedy':
+            return seg === 'Theater & Comedy' || seg === 'Theatre' || seg === 'Comedy' ||
+              gen === 'Theater & Comedy' || gen === 'Comedy' ||
+              eventName.includes('theater') || eventName.includes('theatre') || eventName.includes('comedy');
+          case 'Food & Drink':
+            return seg === 'Food & Drink' || gen === 'Food & Drink' ||
+              eventName.includes('food') || eventName.includes('tasting') || eventName.includes('wine') ||
+              eventName.includes('beer') || eventName.includes('culinary') || eventName.includes('chef');
+          case 'Community':
+            return seg === 'Community' || gen === 'Community';
+          case 'Nightlife':
+            return seg === 'Nightlife' || gen === 'Nightlife';
+          case 'Family': {
+            const familyKeywords = ['family', 'kids', 'children', 'child', 'junior', 'youth',
+              'disney', 'sesame', 'circus', 'magic show', 'puppet', 'ballet', 'nutcracker',
+              'ice show', 'princess', 'wizard'];
+            return seg === 'Family' || gen === 'Family' || familyKeywords.some(k => eventName.includes(k));
+          }
+          case 'Outdoors': {
+            const isAmphi = venueName.includes('amphitheater') || venueName.includes('amphitheatre');
+            const isOutdoorVenue = venueName.includes('outdoor') || venueName.includes('balloon fiesta');
+            const isOutdoorEvent = seg === 'Outdoors' || gen === 'Outdoors' ||
+              eventName.includes('outdoor') || eventName.includes('festival') ||
+              eventName.includes(' fair') || eventName.includes('balloon fiesta') ||
+              eventName.includes('garden') || eventName.includes('hiking') ||
+              eventName.includes('trail') || eventName.includes('fiesta');
+            return isAmphi || isOutdoorVenue || isOutdoorEvent;
+          }
+          case 'Farmers Market':
+            return seg === 'Farmers Market' || gen === 'Farmers Market' ||
+              eventName.includes('farmer') || eventName.includes('market');
+          case 'Health & Wellness':
+            return seg === 'Health & Wellness' || gen === 'Health & Wellness' ||
+              eventName.includes('wellness') || eventName.includes('yoga') ||
+              eventName.includes('meditation') || eventName.includes('health');
+          case 'Fitness':
+            return seg === 'Fitness' || gen === 'Fitness' ||
+              eventName.includes('fitness') || eventName.includes('workout') ||
+              eventName.includes('run') || eventName.includes('cycling');
+          case 'Comedy':
+            return seg === 'Comedy' || gen === 'Comedy' || eventName.includes('comedy');
+          case 'Business':
+            return seg === 'Business' || gen === 'Business' ||
+              eventName.includes('business') || eventName.includes('networking') ||
+              eventName.includes('conference') || eventName.includes('summit');
+          case 'Technology':
+            return seg === 'Technology' || gen === 'Technology' ||
+              eventName.includes('tech') || eventName.includes('code') ||
+              eventName.includes('ai ') || eventName.includes('startup');
+          default:
+            return seg === selectedGenre || gen === selectedGenre;
         }
-        if (selectedGenre === 'Family') {
-          // TM rarely classifies ABQ events as Family segment/genre.
-          // Broaden with keyword matching on event names.
-          const eventName = e.name.toLowerCase();
-          const familyKeywords = [
-            'family', 'kids', 'children', 'child', 'junior', 'youth',
-            'disney', 'sesame', 'circus', 'magic show', 'puppet',
-            'ballet', 'nutcracker', 'ice show', 'princess', 'wizard',
-          ];
-          return seg === 'Family' || gen === 'Family' ||
-            familyKeywords.some(k => eventName.includes(k));
-        }
-        return seg === selectedGenre || gen === selectedGenre;
       });
     }
     if (search.trim()) {

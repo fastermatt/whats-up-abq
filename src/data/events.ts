@@ -10,7 +10,13 @@ export type EventCategory =
   | "Sports"
   | "Community"
   | "Nightlife"
-  | "Family";
+  | "Family"
+  | "Health & Wellness"
+  | "Film"
+  | "Fitness"
+  | "Comedy"
+  | "Business"
+  | "Technology";
 
 export type EventSource =
   | "ABQ365"
@@ -3895,6 +3901,12 @@ export const CATEGORIES: { label: EventCategory; emoji: string; color: string }[
   { label: "Community",      emoji: "ðï¸", color: "#9333ea" },
   { label: "Nightlife",      emoji: "ð", color: "#1d4ed8" },
   { label: "Family",         emoji: "ð¨âð©âð§", color: "#0d9488" },
+  { label: "Health & Wellness", emoji: "💚", color: "#059669" },
+  { label: "Film",              emoji: "🎬", color: "#4338ca" },
+  { label: "Fitness",           emoji: "💪", color: "#16a34a" },
+  { label: "Comedy",            emoji: "😂", color: "#f59e0b" },
+  { label: "Business",          emoji: "💼", color: "#64748b" },
+  { label: "Technology",        emoji: "💻", color: "#0284c7" },
 ];
 
 // âââ Source meta ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
