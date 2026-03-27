@@ -3539,6 +3539,192 @@ function ProfileScreen({
   );
 }
 
+// ─── Add-to-Home-Screen Prompt ─────────────────────────────────────────────────
+// Shows once on iOS Safari (not in standalone mode) after a short delay.
+// Dismissed state is stored in localStorage for 14 days.
+
+const INSTALL_DISMISSED_KEY = 'abq_install_dismissed';
+const INSTALL_DISMISSED_DAYS = 14;
+
+function isIosSafari(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent;
+  // iOS device check
+  const isIos = /iphone|ipad|ipod/i.test(ua);
+  // Safari check (not Chrome/Firefox/etc on iOS)
+  const isSafari = /safari/i.test(ua) && !/chrome|crios|fxios|opios|mercury/i.test(ua);
+  return isIos && isSafari;
+}
+
+function isInStandaloneMode(): boolean {
+  return (
+    ('standalone' in window.navigator && (window.navigator as any).standalone === true) ||
+    window.matchMedia('(display-mode: standalone)').matches
+  );
+}
+
+function AddToHomePrompt() {
+  const [visible, setVisible] = useState(false);
+  const [hiding, setHiding] = useState(false);
+
+  useEffect(() => {
+    // Only show on iOS Safari, not already installed
+    if (!isIosSafari() || isInStandaloneMode()) return;
+    // Check if recently dismissed
+    const dismissed = localStorage.getItem(INSTALL_DISMISSED_KEY);
+    if (dismissed) {
+      const age = Date.now() - parseInt(dismissed, 10);
+      if (age < INSTALL_DISMISSED_DAYS * 24 * 60 * 60 * 1000) return;
+    }
+    // Show after 4 seconds
+    const t = setTimeout(() => setVisible(true), 4000);
+    return () => clearTimeout(t);
+  }, []);
+
+  const dismiss = () => {
+    setHiding(true);
+    localStorage.setItem(INSTALL_DISMISSED_KEY, String(Date.now()));
+    setTimeout(() => setVisible(false), 380);
+  };
+
+  if (!visible) return null;
+
+  return (
+    <>
+      <style>{`
+        @keyframes abqPromptSlideUp {
+          from { opacity: 0; transform: translateY(100%); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes abqPromptSlideDown {
+          from { opacity: 1; transform: translateY(0); }
+          to   { opacity: 0; transform: translateY(100%); }
+        }
+        @keyframes abqBounce {
+          0%, 100% { transform: translateY(0); }
+          40%       { transform: translateY(-10px); }
+          60%       { transform: translateY(-5px); }
+        }
+        @keyframes abqArrowPulse {
+          0%, 100% { opacity: 0.6; transform: translateY(0) scaleY(1); }
+          50%       { opacity: 1;   transform: translateY(4px) scaleY(1.1); }
+        }
+      `}</style>
+
+      {/* Backdrop tap-to-dismiss */}
+      <div
+        onClick={dismiss}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 9998,
+          background: 'rgba(0,0,0,0.35)',
+          animation: hiding ? 'abqPromptSlideDown 0.38s ease forwards' : 'none',
+          opacity: hiding ? 0 : 1, transition: hiding ? 'opacity 0.38s' : 'none',
+        }}
+      />
+
+      {/* Bottom sheet */}
+      <div style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999,
+        background: '#fff',
+        borderRadius: '24px 24px 0 0',
+        boxShadow: '0 -8px 40px rgba(0,0,0,0.18)',
+        padding: '20px 24px calc(28px + env(safe-area-inset-bottom))',
+        fontFamily: 'Manrope, -apple-system, sans-serif',
+        animation: hiding
+          ? 'abqPromptSlideDown 0.38s ease forwards'
+          : 'abqPromptSlideUp 0.44s cubic-bezier(0.34,1.56,0.64,1) forwards',
+      }}>
+        {/* Drag handle */}
+        <div style={{ width: 40, height: 4, borderRadius: 2, background: '#e0e0e0', margin: '0 auto 18px' }} />
+
+        {/* Dismiss X */}
+        <button
+          onClick={dismiss}
+          style={{
+            position: 'absolute', top: 18, right: 20,
+            width: 32, height: 32, borderRadius: '50%',
+            background: '#f2f2f2', border: 'none', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 16, color: '#666', lineHeight: 1,
+          }}
+          aria-label="Dismiss"
+        >✕</button>
+
+        {/* Icon + headline */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
+          <img
+            src="/apple-touch-icon-180.png"
+            alt="ABQ Unplugged"
+            style={{ width: 56, height: 56, borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}
+          />
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 17, color: '#1c1c1e', lineHeight: 1.2 }}>
+              Add to Home Screen
+            </div>
+            <div style={{ fontSize: 13, color: '#888', marginTop: 3 }}>
+              Get the full-screen app experience
+            </div>
+          </div>
+        </div>
+
+        {/* Steps */}
+        {[
+          {
+            num: '1',
+            icon: (
+              /* Share icon SVG */
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a03b00" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/>
+                <polyline points="16 6 12 2 8 6"/>
+                <line x1="12" y1="2" x2="12" y2="15"/>
+              </svg>
+            ),
+            text: <>Tap the <strong>Share</strong> button in Safari's bottom bar</>,
+          },
+          {
+            num: '2',
+            icon: (
+              /* Plus-in-square icon */
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a03b00" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="3"/>
+                <line x1="12" y1="8" x2="12" y2="16"/>
+                <line x1="8" y1="12" x2="16" y2="12"/>
+              </svg>
+            ),
+            text: <>Scroll down and tap <strong>"Add to Home Screen"</strong></>,
+          },
+        ].map(({ num, icon, text }) => (
+          <div key={num} style={{
+            display: 'flex', alignItems: 'center', gap: 14,
+            padding: '12px 16px', borderRadius: 14,
+            background: '#faf8f6', marginBottom: 10,
+          }}>
+            <div style={{
+              width: 28, height: 28, borderRadius: '50%',
+              background: '#a03b00', color: '#fff',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontWeight: 800, fontSize: 13, flexShrink: 0,
+            }}>{num}</div>
+            <div style={{ width: 28, flexShrink: 0, display: 'flex', alignItems: 'center' }}>{icon}</div>
+            <div style={{ fontSize: 14, color: '#333', lineHeight: 1.4 }}>{text}</div>
+          </div>
+        ))}
+
+        {/* Bouncing arrow pointing down (toward Safari toolbar) */}
+        <div style={{
+          textAlign: 'center', marginTop: 10,
+          animation: 'abqBounce 1.6s ease-in-out infinite',
+          fontSize: 26, color: '#a03b00',
+          lineHeight: 1,
+        }}>↓</div>
+        <div style={{ textAlign: 'center', fontSize: 12, color: '#aaa', marginTop: 4 }}>
+          The Share button is in Safari's bottom toolbar
+        </div>
+      </div>
+    </>
+  );
+}
+
 // ─── Loading Screen ────────────────────────────────────────────────────────────
 
 const LOADING_MESSAGES = [
@@ -4930,17 +5116,24 @@ export default function App() {
           -webkit-text-size-adjust: 100%;
           text-size-adjust: 100%;
           height: 100%;
+          height: -webkit-fill-available;
         }
         body {
           background: #f5f7f5;
           font-family: -apple-system, 'Manrope', system-ui, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
-          /* NOTE: no position:fixed here — that blocks iOS Safari address-bar auto-hide.
-             The app root div uses height:100dvh to fill the visual viewport instead. */
           overflow: hidden;
           overscroll-behavior: none;
           height: 100%;
+          height: -webkit-fill-available;
+        }
+        /* Fill the true visible viewport on iOS Safari (hides address bar on scroll) */
+        #root {
+          height: 100%;
+          height: -webkit-fill-available;
+          display: flex;
+          flex-direction: column;
         }
 
         /* ── Scrollbars: hidden (native iOS feel) ── */
@@ -5031,9 +5224,10 @@ export default function App() {
         }
 `}</style>
 
+      <AddToHomePrompt />
       <div
         className="flex flex-col mx-auto relative"
-        style={{ maxWidth: '480px', height: '100dvh', background: '#f5f7f5', overflow: 'hidden' }}
+        style={{ maxWidth: '480px', height: '100dvh', minHeight: '-webkit-fill-available', background: '#f5f7f5', overflow: 'hidden' }}
       >
         {/* Glassmorphism header — Liquid Glass (iOS 26 HIG) with Dynamic Island / notch safe area */}
         <header
