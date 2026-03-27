@@ -1886,13 +1886,14 @@ function MyWishlist() {
 }
 
 function DiscoverScreen({
-  places, events, onPlaceSelect, onEventSelect,
+  places, events, eventsLoading, onPlaceSelect, onEventSelect,
   coords, geoRequested, geoError, onRequestGeo,
   checkedIn, onCheckIn,
   onNavigatePlaces, prefs,
 }: {
   places: Place[];
   events: TMEvent[];
+  eventsLoading?: boolean;
   onPlaceSelect: (p: Place) => void;
   onEventSelect: (e: TMEvent) => void;
   coords: GeoCoords | null;
@@ -1971,6 +1972,19 @@ function DiscoverScreen({
       />
 
       {/* This Week Events - horizontal scroll */}
+      {!hidden.includes('thisWeek') && eventsLoading && upcomingEvents.length === 0 && (
+        <div className="pb-5">
+          <div className="flex items-center justify-between px-5 mb-3">
+            <h2 className="text-lg font-black uppercase tracking-tight" style={{ fontFamily: 'Epilogue, sans-serif' }}>This Week</h2>
+            <span className="text-xs font-semibold" style={{ color: '#a03b00', fontFamily: 'Manrope, sans-serif' }}>Loading…</span>
+          </div>
+          <div className="flex gap-3 px-5 pb-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+            {[0,1,2].map(i => (
+              <div key={i} className="flex-shrink-0 rounded-2xl overflow-hidden" style={{ width: '200px', height: '160px', background: '#e8e8e8', opacity: 0.5 + i * 0.15 }} />
+            ))}
+          </div>
+        </div>
+      )}
       {!hidden.includes('thisWeek') && upcomingEvents.length > 0 && (
         <div className="pb-5">
           <div className="flex items-center justify-between px-5 mb-3">
@@ -4372,6 +4386,7 @@ export default function App() {
   const [events, setEvents] = useState<TMEvent[]>([]);
   const [eventsNavSearch, setEventsNavSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [eventsLoading, setEventsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<TMEvent | null>(null);
@@ -4626,40 +4641,65 @@ export default function App() {
 
   useEffect(() => {
     async function loadData() {
+      // ── Phase 1: Load places first — unblocks the UI immediately ──────────
+      let placesLoaded = false;
       try {
-        const safeJson = (r: Response) => r.ok ? r.json() : Promise.resolve([]);
-        const [placesResult, tmResult, ebResult, sgResult, bitResult, muResult] =
-          await (async () => {
-            try {
-              const [sbPlaces, sbEvents] = await Promise.all([
-                fetchPlacesFromDB(),
-                fetchEventsFromDB()
-              ]);
-              return [
-                { status: 'fulfilled' as const, value: sbPlaces },
-                { status: 'fulfilled' as const, value: { events: sbEvents['ticketmaster'] || [] } },
-                { status: 'fulfilled' as const, value: { events: [] } },
-                { status: 'fulfilled' as const, value: { events: sbEvents['seatgeek'] || [] } },
-                { status: 'fulfilled' as const, value: { events: sbEvents['bandsintown'] || [] } },
-                { status: 'fulfilled' as const, value: { events: sbEvents['musicbrainz'] || [] } }
-              ];
-            } catch (err) {
-              console.warn('[Data] Supabase load failed, falling back to JSON files:', err);
-              return Promise.allSettled([
-                fetch('/places-data.json').then(r => r.json()),
-                fetch('/data/ticketmaster-events.json').then(r => r.json()),
-                fetch('/data/eventbrite-events.json').then(r => r.json()),
-                fetch('/data/seatgeek-events.json').then(r => r.json()),
-                fetch('/data/bandsintown-events.json').then(r => r.json()),
-                fetch('/data/musicbrainz-events.json').then(r => r.json()),
-              ]);
-            }
-          })()
+        const sbPlaces = await fetchPlacesFromDB();
+        setPlaces(Array.isArray(sbPlaces) ? sbPlaces : []);
+        placesLoaded = true;
+      } catch (err) {
+        console.warn('[Places] Supabase failed, trying JSON fallback:', err);
+        try {
+          const r = await fetch('/places-data.json');
+          if (r.ok) { setPlaces(await r.json()); placesLoaded = true; }
+        } catch {}
+      } finally {
+        setLoading(false); // ← Show the app NOW; events will stream in shortly
+      }
 
-        if (placesResult.status === 'fulfilled') {
-          const data = placesResult.value;
-          setPlaces(Array.isArray(data) ? data : []);
+      if (!placesLoaded) {
+        setLoadError(true);
+        return;
+      }
+
+      // ── Phase 2: Load events in the background (non-blocking) ─────────────
+      setEventsLoading(true);
+      try {
+        let tmEvents: TMEvent[] = [];
+        let ebEvents: TMEvent[] = [];
+        let sgEvents: TMEvent[] = [];
+        let bitEvents: TMEvent[] = [];
+        let muEvents: TMEvent[] = [];
+
+        try {
+          const sbEvents = await fetchEventsFromDB();
+          tmEvents = sbEvents['ticketmaster'] || [];
+          sgEvents = sbEvents['seatgeek'] || [];
+          bitEvents = sbEvents['bandsintown'] || [];
+          muEvents = sbEvents['musicbrainz'] || [];
+        } catch (err) {
+          console.warn('[Events] Supabase failed, trying JSON fallback:', err);
+          const [tmR, ebR, sgR, bitR, muR] = await Promise.allSettled([
+            fetch('/data/ticketmaster-events.json').then(r => r.json()),
+            fetch('/data/eventbrite-events.json').then(r => r.json()),
+            fetch('/data/seatgeek-events.json').then(r => r.json()),
+            fetch('/data/bandsintown-events.json').then(r => r.json()),
+            fetch('/data/musicbrainz-events.json').then(r => r.json()),
+          ]);
+          const safeArr = (r: PromiseSettledResult<unknown>) =>
+            r.status === 'fulfilled' && r.value && typeof r.value === 'object' && Array.isArray((r.value as any).events)
+              ? (r.value as any).events : (r.status === 'fulfilled' && Array.isArray(r.value) ? r.value : []);
+          tmEvents = safeArr(tmR); ebEvents = safeArr(ebR);
+          sgEvents = safeArr(sgR); bitEvents = safeArr(bitR); muEvents = safeArr(muR);
         }
+
+        // Synthetic result objects so the merge logic below stays unchanged
+        const placesResult = { status: 'fulfilled' as const, value: [] };
+        const tmResult   = { status: 'fulfilled' as const, value: { events: tmEvents } };
+        const ebResult   = { status: 'fulfilled' as const, value: { events: ebEvents } };
+        const sgResult   = { status: 'fulfilled' as const, value: { events: sgEvents } };
+        const bitResult  = { status: 'fulfilled' as const, value: { events: bitEvents } };
+        const muResult   = { status: 'fulfilled' as const, value: { events: muEvents } };
 
         // Merge all event sources with cross-source fuzzy deduplication
         const toArr = (r: PromiseSettledResult<unknown>) => {
@@ -4717,7 +4757,7 @@ export default function App() {
             _ebOnlyEvents.push(eb);
           }
         }
-                // Auto-generate SeatGeek & Eventbrite search links for all TM events
+        // Auto-generate SeatGeek & Eventbrite search links for all TM events
         for (const tmEv of _tmEvents) {
           if (!tmEv.ticketLinks) {
             tmEv.ticketLinks = tmEv.url ? [{source: 'Ticketmaster', url: tmEv.url}] : [];
@@ -4731,7 +4771,7 @@ export default function App() {
             tmEv.ticketLinks.push({source: 'Eventbrite', url: `https://www.eventbrite.com/d/nm--albuquerque/${_slug}/`});
           }
         }
-const seen = new Set<string>();
+        const seen = new Set<string>();
         // Build merged list: live API events first, then static events that aren't duplicates
         const liveEvents = [
           ..._tmEvents,
@@ -4760,10 +4800,14 @@ const seen = new Set<string>();
         const merged = [...liveEvents, ...staticOnly];
         setEvents(merged);
       } catch (err) {
-        console.error('Failed to load data:', err);
-        setLoadError(true);
+        console.error('[Events] Failed to load events:', err);
+        // Events failing is non-fatal — static events are still available
+        const normT = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
+        const seen = new Set<string>();
+        const staticOnly = STATIC_TM_EVENTS.filter(e => { if (seen.has(e.id)) return false; seen.add(e.id); return true; });
+        setEvents(staticOnly);
       } finally {
-        setLoading(false);
+        setEventsLoading(false);
       }
     }
 
@@ -4985,6 +5029,7 @@ const seen = new Set<string>();
             <DiscoverScreen
               places={places}
               events={events}
+              eventsLoading={eventsLoading}
               onPlaceSelect={openPlaceModal}
               onEventSelect={openEventModal}
               coords={coords}
@@ -4993,7 +5038,7 @@ const seen = new Set<string>();
               onRequestGeo={requestGeo}
               checkedIn={checkedIn}
               onCheckIn={handleCheckIn}
-            
+
               onNavigatePlaces={(cat, search) => { setPlacesNavCat(cat); setPlacesNavSearch(search); setPlacesNavKey(k => k + 1); setActiveTab('places'); }}
               prefs={prefs}/>
           )}
