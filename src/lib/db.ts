@@ -63,6 +63,9 @@ function transformGoogleRaw(raw: Record<string, unknown>): Record<string, unknow
   const imageUrl = photoRef
     ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photoRef}&key=${GOOGLE_KEY}`
     : undefined;
+  const additionalImages = photos?.slice(1, 6).map(
+    p => `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${p.photo_reference}&key=${GOOGLE_KEY}`
+  );
 
   const geometry = raw.geometry as { location?: { lat: number; lng: number } } | undefined;
   const openingHours = raw.opening_hours as { open_now?: boolean } | undefined;
@@ -78,6 +81,7 @@ function transformGoogleRaw(raw: Record<string, unknown>): Record<string, unknow
     lat: geometry?.location?.lat,
     lng: geometry?.location?.lng,
     image: imageUrl,
+    additionalImages: additionalImages?.length ? additionalImages : undefined,
     gradient: GRADIENTS[_gradIdx++ % GRADIENTS.length],
     rating: raw.rating,
     reviewCount: raw.user_ratings_total,

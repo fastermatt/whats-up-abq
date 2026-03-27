@@ -103,6 +103,7 @@ interface Place {
   lat?: number;
   lng?: number;
   image?: string;
+  additionalImages?: string[];
   gradient?: string;
   rating?: number;
   reviewCount?: number;
@@ -724,6 +725,79 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
 
 // ─── Place Detail Modal ──────────────────────────────────────────────────────
 
+function PlacePhotoGallery({ place }: { place: Place }) {
+  const allPhotos = [place.image, ...(place.additionalImages ?? [])].filter(Boolean) as string[];
+  const [idx, setIdx] = useState(0);
+  const touchStartX = useRef<number | null>(null);
+
+  const prev = () => setIdx(i => (i - 1 + allPhotos.length) % allPhotos.length);
+  const next = () => setIdx(i => (i + 1) % allPhotos.length);
+
+  const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(dx) > 40) dx < 0 ? next() : prev();
+    touchStartX.current = null;
+  };
+
+  if (allPhotos.length === 0) {
+    return (
+      <div className="w-full h-full" style={{ background: place.gradient || 'linear-gradient(135deg,#a03b00,#ff793b)' }} />
+    );
+  }
+
+  return (
+    <div className="w-full h-full relative overflow-hidden" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+      {allPhotos.map((src, i) => (
+        <img
+          key={src}
+          src={src}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{
+            opacity: i === idx ? 1 : 0,
+            transition: 'opacity 0.35s ease',
+            pointerEvents: 'none',
+          }}
+        />
+      ))}
+      {allPhotos.length > 1 && (
+        <>
+          <button
+            onClick={prev}
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center"
+            style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)', zIndex: 2 }}
+          >
+            <span className="material-symbols-outlined text-white" style={{ fontSize: '18px' }}>chevron_left</span>
+          </button>
+          <button
+            onClick={next}
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center"
+            style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)', zIndex: 2 }}
+          >
+            <span className="material-symbols-outlined text-white" style={{ fontSize: '18px' }}>chevron_right</span>
+          </button>
+          <div className="absolute bottom-14 left-0 right-0 flex justify-center gap-1.5" style={{ zIndex: 2 }}>
+            {allPhotos.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setIdx(i)}
+                className="rounded-full transition-all"
+                style={{
+                  width: i === idx ? '18px' : '6px',
+                  height: '6px',
+                  background: i === idx ? 'white' : 'rgba(255,255,255,0.5)',
+                }}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function PlaceDetailModal({
   place, onClose, isCheckedIn, onCheckIn, checkInError, tooFar, user, onShowAuth,
 }: {
@@ -743,24 +817,19 @@ function PlaceDetailModal({
     <div className="fixed inset-0 z-50 flex justify-center" style={{ background: 'rgba(0,0,0,0.3)' }}>
       <div className="flex flex-col overflow-y-auto w-full" style={{ maxWidth: '480px', background: '#f5f7f5' }}>
       <div className="relative flex-shrink-0" style={{ height: '260px' }}>
-        <ImageWithFallback
-          src={place.image}
-          alt={place.name}
-          className="w-full h-full object-cover"
-          gradient={place.gradient}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+        <PlacePhotoGallery place={place} />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
         <button
           onClick={onClose}
           className="absolute top-4 left-4 w-10 h-10 rounded-full flex items-center justify-center"
-          style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)' }}
+          style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', zIndex: 3 }}
         >
           <span className="material-symbols-outlined text-white">arrow_back</span>
         </button>
-        <div className="absolute bottom-4 left-4 right-4">
+        <div className="absolute bottom-4 left-4 right-4" style={{ zIndex: 3, pointerEvents: 'none' }}>
           <span
             className="text-xs font-bold text-white px-2.5 py-1 rounded-full"
-            style={{ background: '#a03b00' }}
+            style={{ background: '#a03b00', pointerEvents: 'auto' }}
           >
             {catEmoji} {place.category}
           </span>
@@ -3389,26 +3458,91 @@ function ProfileScreen({
 
 // ─── Loading Screen ────────────────────────────────────────────────────────────
 
+const LOADING_MESSAGES = [
+  'Loading fun…',
+  'Asking Albuquerque what there is to do…',
+  'Loading stuff to do…',
+  'Just a sec…',
+  'Gimme a sec…',
+  'ABQ weather is the best ☀️',
+  'Not a long wait longer…',
+  'Finding your next adventure…',
+  'Green chile is always the answer 🌶️',
+  'Scanning the Duke City…',
+];
+
 function LoadingScreen() {
+  const [msgIdx, setMsgIdx] = useState(0);
+  const [fadeIn, setFadeIn] = useState(true);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setFadeIn(false);
+      setTimeout(() => {
+        setMsgIdx(i => (i + 1) % LOADING_MESSAGES.length);
+        setFadeIn(true);
+      }, 280);
+    }, 2400);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
-    <div
-      className="fixed inset-0 flex flex-col items-center justify-center"
-      style={{ background: '#f5f7f5' }}
-    >
-      <ABQUnpluggedLogo size={113} />
-      <p className="text-sm text-gray-400 mt-1" style={{ fontFamily: 'Manrope, sans-serif' }}>
-        Loading your city…
-      </p>
+    <>
+      <style>{`
+        @keyframes abqLogoEntry {
+          0%   { opacity: 0; transform: scale(0.72) translateY(24px); }
+          55%  { opacity: 1; transform: scale(1.06) translateY(-5px); }
+          75%  { transform: scale(0.97) translateY(2px); }
+          100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes loadingShimmer {
+          0%   { transform: translateX(-200%); }
+          100% { transform: translateX(500%); }
+        }
+        @keyframes msgIn {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes msgOut {
+          from { opacity: 1; transform: translateY(0); }
+          to   { opacity: 0; transform: translateY(-8px); }
+        }
+      `}</style>
       <div
-        className="mt-6 rounded-full overflow-hidden"
-        style={{ width: '48px', height: '4px', background: '#e0e0e0' }}
+        className="fixed inset-0 flex flex-col items-center justify-center"
+        style={{ background: '#f5f7f5' }}
       >
+        <div style={{ animation: 'abqLogoEntry 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' }}>
+          <ABQUnpluggedLogo size={113} />
+        </div>
+        <p
+          key={msgIdx}
+          className="text-sm text-gray-400 mt-4"
+          style={{
+            fontFamily: 'Manrope, sans-serif',
+            minHeight: '22px',
+            textAlign: 'center',
+            maxWidth: '260px',
+            animation: fadeIn ? 'msgIn 0.28s ease forwards' : 'msgOut 0.28s ease forwards',
+          }}
+        >
+          {LOADING_MESSAGES[msgIdx]}
+        </p>
         <div
-          className="h-full rounded-full"
-          style={{ background: '#a03b00', width: '60%', animation: 'pulse 1.5s ease-in-out infinite' }}
-        />
+          className="mt-5 rounded-full overflow-hidden"
+          style={{ width: '120px', height: '3px', background: '#e8e8e8', position: 'relative' }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(90deg, transparent 0%, #a03b00 40%, #ff793b 60%, transparent 100%)',
+              animation: 'loadingShimmer 1.5s ease-in-out infinite',
+            }}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
