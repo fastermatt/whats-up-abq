@@ -4,9 +4,9 @@ const GOOGLE_KEY = 'AIzaSyDn-W5LqhBBAK2VaZhORgRW8oQagpCVq6k';
 
 function placeTypeToCategory(types: string[]): string {
   if (!types) return 'other';
+  if (types.includes('cafe')) return 'coffee';
   if (types.includes('restaurant') || types.includes('food')) return 'restaurant';
   if (types.includes('bar') || types.includes('night_club')) return 'bar';
-  if (types.includes('cafe')) return 'coffee';
   if (types.includes('park') || types.includes('campground') || types.includes('hiking_area')) return 'park';
   if (types.includes('museum')) return 'museum';
   if (types.includes('art_gallery')) return 'arts';
