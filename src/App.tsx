@@ -1859,7 +1859,7 @@ function KoFiBanner() {
           </p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <a href="https://ko-fi.com/abqunplugged" target="_blank" rel="noopener noreferrer"
+          <a href="https://ko-fi.com/stopscrolling" target="_blank" rel="noopener noreferrer"
             className="text-xs font-black px-3 py-2 rounded-xl text-white"
             style={{ background: '#FF5E5B', fontFamily: 'Manrope, sans-serif', whiteSpace: 'nowrap' }}>
             Support ♥
