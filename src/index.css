@@ -64,18 +64,22 @@
     margin: 0;
     padding: 0;
   }
-  /* Let html/body flow naturally so the viewport (not an inner div) scrolls.
-     This is required for mobile browser chrome (address bar) to auto-hide on scroll. */
+  /* ADDRESS BAR AUTO-HIDE: The viewport must be the scroll container.
+     html is exactly viewport-height; body grows with content and overflows it.
+     NO overflow-x/clip/hidden on html, body, OR #root — those can create
+     inner scroll containers or clip contexts that trap scroll events.
+     Horizontal clipping lives ONLY on the inner 480px app container. */
   html {
+    height: 100%;
     background-color: #F4F4F0;
     -webkit-text-size-adjust: 100%;
   }
   body {
+    min-height: 100%;
     -webkit-overflow-scrolling: touch;
   }
   #root {
-    min-height: 100dvh;
-    overflow-x: clip;
+    min-height: 100%;
   }
 }
 
