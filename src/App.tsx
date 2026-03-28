@@ -1749,6 +1749,129 @@ const addToDayPlan = (steps: string[]) => {
   saveDayPlan({ ...plan, items: [...plan.items, ...newItems] });
 };
 
+// ─── Streak tracker ────────────────────────────────────────────────────────────
+const STREAK_KEY = 'abq_streak';
+function getStreak(): { count: number; lastVisit: string } {
+  try { const raw = localStorage.getItem(STREAK_KEY); if (!raw) return { count: 0, lastVisit: '' }; return JSON.parse(raw); }
+  catch { return { count: 0, lastVisit: '' }; }
+}
+function tickStreak(): { count: number; isNew: boolean } {
+  const today = new Date().toISOString().slice(0, 10);
+  const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+  const s = getStreak();
+  if (s.lastVisit === today) return { count: s.count, isNew: false };
+  const newCount = s.lastVisit === yesterday ? s.count + 1 : 1;
+  try { localStorage.setItem(STREAK_KEY, JSON.stringify({ count: newCount, lastVisit: today })); } catch {}
+  return { count: newCount, isNew: true };
+}
+
+function StreakBanner() {
+  const [info] = useState(() => tickStreak());
+  const [visible, setVisible] = useState(true);
+  if (!visible || info.count < 2) return null;
+  const emoji = info.count >= 7 ? '🔥' : info.count >= 3 ? '⚡' : '👋';
+  const label = info.count >= 7
+    ? `${info.count}-day streak! You're officially a local.`
+    : info.count >= 3
+    ? `${info.count} days running — ABQ local in the making 🌶️`
+    : `Welcome back! Day ${info.count} in a row.`;
+  return (
+    <div className="mx-5 mb-3 rounded-2xl flex items-center justify-between gap-3 px-4 py-3"
+      style={{ background: 'linear-gradient(135deg, #a03b00 0%, #ff6b2b 100%)', animation: 'cardFadeIn 0.4s ease both' }}>
+      <div className="flex items-center gap-2 min-w-0">
+        <span style={{ fontSize: '22px', lineHeight: 1 }}>{emoji}</span>
+        <span className="text-white text-sm font-bold truncate" style={{ fontFamily: 'Manrope, sans-serif' }}>{label}</span>
+      </div>
+      <button onClick={() => setVisible(false)} className="text-white/60 flex-shrink-0" style={{ fontSize: '18px', lineHeight: 1 }}>✕</button>
+    </div>
+  );
+}
+
+// ─── Daily Gem (date-seeded spot of the day) ──────────────────────────────────
+function DailyGem({ places, onSelect }: { places: Place[]; onSelect: (p: Place) => void }) {
+  const gem = useMemo(() => {
+    if (!places.length) return null;
+    const today = new Date().toISOString().slice(0, 10);
+    let hash = 0;
+    for (let i = 0; i < today.length; i++) hash = (hash * 31 + today.charCodeAt(i)) >>> 0;
+    const pool = places.filter(p => p.rating && p.rating >= 4.2 && p.image);
+    if (!pool.length) return null;
+    return pool[hash % pool.length];
+  }, [places]);
+
+  if (!gem) return null;
+  const dayOfWeek = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+
+  return (
+    <div className="px-5 pb-5">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-lg font-black uppercase tracking-tight" style={{ fontFamily: 'Epilogue, sans-serif' }}>{dayOfWeek}'s Spot</h2>
+        <span className="text-xs font-semibold" style={{ color: '#a03b00', fontFamily: 'Manrope, sans-serif' }}>🗓 Changes daily</span>
+      </div>
+      <button onClick={() => onSelect(gem)} className="w-full relative rounded-2xl overflow-hidden text-left"
+        style={{ height: '180px', boxShadow: '0 4px 20px rgba(160,59,0,0.22)', animation: 'cardFadeIn 0.45s ease both' }}>
+        {gem.image && <img src={gem.image} alt={gem.name} className="w-full h-full object-cover" style={{ filter: 'brightness(0.82)' }} />}
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, rgba(160,59,0,0.18) 0%, rgba(0,0,0,0.72) 100%)' }} />
+        <div className="absolute top-3 left-3">
+          <span className="text-xs font-black text-white px-3 py-1 rounded-full"
+            style={{ background: '#a03b00', fontFamily: 'Manrope, sans-serif', letterSpacing: '0.05em' }}>
+            ⭐ Spot of the Day
+          </span>
+        </div>
+        <div className="absolute top-3 right-3">
+          <span className="text-white/80 text-sm font-bold w-8 h-8 rounded-full flex items-center justify-center"
+            style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(6px)' }}>→</span>
+        </div>
+        <div className="absolute bottom-3 left-3 right-3">
+          <p className="text-white font-black text-xl leading-tight" style={{ fontFamily: 'Epilogue, sans-serif' }}>{gem.name}</p>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-white/80 text-xs font-semibold" style={{ fontFamily: 'Manrope, sans-serif' }}>{gem.category}</span>
+            {gem.rating && (<><span className="text-white/40 text-xs">·</span><span className="text-yellow-300 text-xs font-bold">★ {gem.rating.toFixed(1)}</span></>)}
+            {gem.reviewCount && (<><span className="text-white/40 text-xs">·</span><span className="text-white/60 text-xs">{gem.reviewCount >= 1000 ? (gem.reviewCount/1000).toFixed(1)+'k' : gem.reviewCount} reviews</span></>)}
+          </div>
+          {gem.description && (
+            <p className="text-white/70 text-xs mt-1 leading-snug"
+              style={{ display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' } as React.CSSProperties}>
+              {gem.description}
+            </p>
+          )}
+        </div>
+      </button>
+    </div>
+  );
+}
+
+// ─── Ko-fi Support Banner ─────────────────────────────────────────────────────
+function KoFiBanner() {
+  const [dismissed, setDismissed] = useState(() => {
+    try { return localStorage.getItem('abq_kofi_dismissed') === '1'; } catch { return false; }
+  });
+  if (dismissed) return null;
+  return (
+    <div className="mx-5 mb-6 rounded-2xl overflow-hidden"
+      style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #2d1a00 100%)', animation: 'cardFadeIn 0.5s ease both' }}>
+      <div className="px-4 py-4 flex items-center gap-3">
+        <span style={{ fontSize: '28px', lineHeight: 1 }}>☕</span>
+        <div className="flex-1 min-w-0">
+          <p className="text-white font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif' }}>Built for ABQ, by ABQ</p>
+          <p className="text-white/60 text-xs mt-0.5" style={{ fontFamily: 'Manrope, sans-serif' }}>
+            Free forever. If it helped you find something great — buy us a coffee.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <a href="https://ko-fi.com/abqunplugged" target="_blank" rel="noopener noreferrer"
+            className="text-xs font-black px-3 py-2 rounded-xl text-white"
+            style={{ background: '#FF5E5B', fontFamily: 'Manrope, sans-serif', whiteSpace: 'nowrap' }}>
+            Support ♥
+          </a>
+          <button onClick={() => { try { localStorage.setItem('abq_kofi_dismissed','1'); } catch {} setDismissed(true); }}
+            className="text-white/40" style={{ fontSize:'18px', lineHeight:1 }}>✕</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── AnimatedFact component ────────────────────────────────────────────────────
 
 function AnimatedFact() {
@@ -1944,6 +2067,9 @@ function DiscoverScreen({
 
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+      {/* Streak Banner */}
+      <StreakBanner />
+
       {/* Hero */}
       <div className="px-5 pt-5 pb-3">
         <p
@@ -2053,6 +2179,9 @@ function DiscoverScreen({
           </div>
         </div>
       )}
+
+      {/* Daily Gem — spot of the day, date-seeded */}
+      {places.length > 0 && <DailyGem places={places} onSelect={onPlaceSelect} />}
 
       {/* Trending Bento Grid */}
       {featured.length > 0 && (
@@ -2335,6 +2464,9 @@ function DiscoverScreen({
 
       {/* Wishlist */}
       {!hidden.includes('wishlist') && <MyWishlist />}
+
+      {/* Ko-fi support banner */}
+      <KoFiBanner />
 
       {/* Why Unplug */}
       <WhyUnplugCard />
