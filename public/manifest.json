@@ -1,4 +1,5 @@
 {
+  "id": "/",
   "name": "ABQ Unplugged",
   "short_name": "ABQ Unplugged",
   "description": "Explore events, places & culture in Albuquerque. Check in, earn levels, discover ABQ.",
@@ -35,7 +36,8 @@
       "src": "/screenshots/discover.png",
       "sizes": "390x844",
       "type": "image/png",
-      "label": "Discover screen"
+      "form_factor": "narrow",
+      "label": "Discover events and places in Albuquerque"
     }
   ]
 }
