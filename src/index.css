@@ -64,16 +64,18 @@
     margin: 0;
     padding: 0;
   }
-  /* ADDRESS BAR AUTO-HIDE + CENTERING FIX
-     1. html/body have NO height constraints — content overflows viewport naturally,
-        letting mobile browsers detect the scroll and auto-hide the address bar.
-     2. html has overflow-x:hidden to prevent horizontal scroll from carousel items
-        that overflow the 480px container. This propagates to the viewport per CSS spec.
-        overflow-y stays auto (computed from hidden+visible pair) which is normal scroll. */
-  html {
+  /* MOBILE LAYOUT:
+     - overflow-x:hidden on html+body prevents horizontal scroll on ALL iOS versions
+       (overflow-x:clip only works on iOS 16+; hidden works everywhere)
+     - No height constraints on html/body so the document grows naturally with
+       content, letting the viewport scroll and mobile browser chrome auto-hide
+     - The inner 480px container also has overflow-x:hidden as a second layer */
+  html, body {
     overflow-x: hidden;
-    background-color: #F4F4F0;
     -webkit-text-size-adjust: 100%;
+  }
+  html {
+    background-color: #F4F4F0;
   }
   body {
     -webkit-overflow-scrolling: touch;
