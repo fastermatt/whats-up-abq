@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 
-const GOOGLE_KEY = 'AIzaSyDn-W5LqhBBAK2VaZhORgRW8oQagpCVq6k';
+const GOOGLE_KEY = import.meta.env.VITE_GOOGLE_PLACES_KEY as string;
+if (!GOOGLE_KEY) throw new Error('VITE_GOOGLE_PLACES_KEY is not set');
 
 function placeTypeToCategory(types: string[]): string {
   if (!types) return 'other';
