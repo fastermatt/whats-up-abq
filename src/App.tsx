@@ -4849,17 +4849,52 @@ export default function App() {
 
   useEffect(() => {
     async function loadData() {
-      // ── Phase 1: Load places first — unblocks the UI immediately ──────────
-      // Wrap with an 8-second timeout so a slow mobile connection never hangs
-      // on the 5 sequential Supabase paginated requests (4600+ rows).
+      // ── Phase 1: Load places — serve from cache instantly, refresh in bg ──
+      const CACHE_KEY = 'abq_places_v1';
+      const CACHE_TTL = 60 * 60 * 1000; // 1 hour
+
+      let placesLoaded = false;
+
+      // Serve from cache immediately (skips splash on repeat visits)
+      try {
+        const raw = localStorage.getItem(CACHE_KEY);
+        if (raw) {
+          const { data, ts } = JSON.parse(raw);
+          if (Array.isArray(data) && data.length > 0) {
+            setPlaces(data);
+            setLoading(false);
+            placesLoaded = true;
+            // Cache still fresh — skip places network call, just load events
+            if (Date.now() - ts < CACHE_TTL) {
+              setEventsLoading(true);
+              try {
+                const sbEvents = await fetchEventsFromDB();
+                const allEvts = [
+                  ...(sbEvents['ticketmaster'] || []),
+                  ...(sbEvents['seatgeek'] || []),
+                  ...(sbEvents['bandsintown'] || []),
+                  ...(sbEvents['musicbrainz'] || []),
+                ];
+                setEvents(allEvts);
+              } catch (err) { console.warn('[Events] fast path failed:', err); }
+              setEventsLoading(false);
+              return;
+            }
+          }
+        }
+      } catch {}
+
+      // Fetch fresh from network
       const withTimeout = <T,>(p: Promise<T>, ms: number): Promise<T> =>
         Promise.race([p, new Promise<T>((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
 
-      let placesLoaded = false;
       try {
         const sbPlaces = await withTimeout(fetchPlacesFromDB(), 8000);
-        setPlaces(Array.isArray(sbPlaces) ? sbPlaces : []);
-        placesLoaded = true;
+        if (Array.isArray(sbPlaces) && sbPlaces.length > 0) {
+          setPlaces(sbPlaces);
+          placesLoaded = true;
+          try { localStorage.setItem(CACHE_KEY, JSON.stringify({ data: sbPlaces, ts: Date.now() })); } catch {}
+        }
       } catch (err) {
         console.warn('[Places] Supabase failed or timed out, trying JSON fallback:', err);
         try {
@@ -5115,24 +5150,19 @@ export default function App() {
         html {
           -webkit-text-size-adjust: 100%;
           text-size-adjust: 100%;
-          height: 100%;
-          height: -webkit-fill-available;
         }
         body {
           background: #f5f7f5;
           font-family: -apple-system, 'Manrope', system-ui, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
-          overscroll-behavior: none;
-          height: 100%;
-          height: -webkit-fill-available;
+          overscroll-behavior-x: none;
         }
-        /* Fill the true visible viewport on iOS Safari (hides address bar on scroll) */
+        /* root grows with content — document overflows so Safari hides address bar on scroll */
         #root {
-          height: 100%;
-          height: -webkit-fill-available;
           display: flex;
           flex-direction: column;
+          min-height: 100dvh;
         }
 
         /* ── Scrollbars: hidden (native iOS feel) ── */
@@ -5226,7 +5256,7 @@ export default function App() {
       <AddToHomePrompt />
       <div
         className="flex flex-col mx-auto relative"
-        style={{ maxWidth: '480px', minHeight: '100dvh', minHeight: '-webkit-fill-available', background: '#f5f7f5' }}
+        style={{ maxWidth: '480px', minHeight: '100dvh', background: '#f5f7f5' }}
       >
         {/* Glassmorphism header — Liquid Glass (iOS 26 HIG) with Dynamic Island / notch safe area */}
         <header
