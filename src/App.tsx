@@ -1943,7 +1943,7 @@ function DiscoverScreen({
     .slice(0, 10);
 
   return (
-    <div className="h-full overflow-y-auto" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+    <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
       {/* Hero */}
       <div className="px-5 pt-5 pb-3">
         <p
@@ -2455,7 +2455,7 @@ function EventsScreen({
   );
 
   return (
-    <div className="h-full overflow-y-auto" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+    <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
       <div className="px-5 pt-5 pb-3">
         <p
           className="text-xs font-semibold tracking-widest uppercase"
@@ -2671,7 +2671,7 @@ function PlacesScreen({
   const visiblePlaces = withPhotos.slice(0, displayCount);
 
   return (
-    <div className="h-full overflow-y-auto" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', willChange: 'transform' } as React.CSSProperties}>
+    <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', willChange: 'transform' } as React.CSSProperties}>
       <div className="px-5 pt-5 pb-3">
         <p
           className="text-xs font-semibold tracking-widest uppercase"
@@ -3282,7 +3282,7 @@ function ProfileScreen({
   const progressPct = myCount === 0 ? 0 : Math.min(100, Math.round((myCount / level.next) * 100));
 
   return (
-    <div className="h-full overflow-y-auto px-5 pb-28" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+    <div className="w-full px-5 pb-28" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
       <div className="pt-5 pb-4">
         <p
           className="text-xs font-semibold tracking-widest uppercase"
@@ -5123,7 +5123,6 @@ export default function App() {
           font-family: -apple-system, 'Manrope', system-ui, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
-          overflow: hidden;
           overscroll-behavior: none;
           height: 100%;
           height: -webkit-fill-available;
@@ -5227,12 +5226,14 @@ export default function App() {
       <AddToHomePrompt />
       <div
         className="flex flex-col mx-auto relative"
-        style={{ maxWidth: '480px', height: '100dvh', minHeight: '-webkit-fill-available', background: '#f5f7f5', overflow: 'hidden' }}
+        style={{ maxWidth: '480px', minHeight: '100dvh', minHeight: '-webkit-fill-available', background: '#f5f7f5' }}
       >
         {/* Glassmorphism header — Liquid Glass (iOS 26 HIG) with Dynamic Island / notch safe area */}
         <header
           className="glass flex-shrink-0 px-5 flex items-center justify-between"
           style={{
+            position: 'sticky',
+            top: 0,
             paddingTop: 'calc(var(--sat) + 12px)',
             paddingBottom: '12px',
             borderBottom: '1px solid rgba(0,0,0,0.06)',
@@ -5272,7 +5273,7 @@ export default function App() {
         <SiteBanner banner={siteBanner} />
 
         {/* Screen content */}
-        <main className="flex-1 overflow-hidden">
+        <main className="flex-1" style={{ paddingBottom: 'calc(var(--sab) + 72px)' }}>
           {activeTab === 'discover' && (
             <DiscoverScreen
               places={places}
@@ -5329,8 +5330,14 @@ export default function App() {
 
         {/* Bottom navigation — Liquid Glass with home indicator safe area */}
         <nav
-          className="glass flex-shrink-0 flex items-center px-2"
+          className="glass flex items-center px-2"
           style={{
+            position: 'fixed',
+            bottom: 0,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '100%',
+            maxWidth: '480px',
             paddingTop: '8px',
             paddingBottom: 'calc(var(--sab) + 8px)',
             borderTop: '1px solid rgba(0,0,0,0.07)',
