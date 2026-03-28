@@ -504,10 +504,7 @@ const PLACE_CATEGORIES = [
 ];
 
 const EVENT_GENRES = [
-  'All', 'Live Music', 'Sports', 'Arts & Culture', 'Film & Movies',
-  'Festival', 'Theater & Comedy', 'Food & Drink', 'Community',
-  'Nightlife', 'Family', 'Outdoors', 'Farmers Market',
-  'Health & Wellness', 'Fitness', 'Comedy', 'Business', 'Technology',
+  'All', 'Music', 'Sports', 'Comedy', 'Arts', 'Community', 'Free',
 ];
 
 // ─── Geo Banner ──────────────────────────────────────────────────────────────
@@ -641,7 +638,7 @@ const PlaceCard = React.memo(function PlaceCard({
               <span className="text-yellow-400 text-xs">★</span>
               <span className="text-xs font-bold text-gray-700">{place.rating.toFixed(1)}</span>
               {place.reviewCount ? (
-                <span className="text-xs text-gray-400 truncate">
+                <span className="text-xs truncate" style={{ color: '#666' }}>
                   ({place.reviewCount >= 1000 ? (place.reviewCount / 1000).toFixed(1) + 'k' : place.reviewCount})
                 </span>
               ) : null}
@@ -861,7 +858,7 @@ function PlaceDetailModal({
                 {place.rating.toFixed(1)}
               </span>
               {place.reviewCount && (
-                <span className="text-xs text-gray-400">({place.reviewCount.toLocaleString()})</span>
+                <span className="text-xs" style={{ color: '#666' }}>({place.reviewCount.toLocaleString()})</span>
               )}
             </div>
           )}
@@ -2071,7 +2068,7 @@ function DiscoverScreen({
       <StreakBanner />
 
       {/* Hero */}
-      <div className="px-5 pt-5 pb-3">
+      <div className="px-5 pt-5 pb-3" style={{ background: 'linear-gradient(180deg, rgba(160,59,0,0.06) 0%, transparent 100%)' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: '#a03b00', fontFamily: 'Manrope, sans-serif' }}
@@ -2170,7 +2167,7 @@ function DiscoverScreen({
                       {event.dates?.start?.localTime ? ' · ' + formatTime(event.dates.start.localTime) : ''}
                     </p>
                     {venue && (
-                      <p className="text-xs text-gray-400 truncate">{venue.name}</p>
+                      <p className="text-xs truncate" style={{ color: '#666' }}>{venue.name}</p>
                     )}
                   </div>
                 </button>
@@ -2314,7 +2311,7 @@ function DiscoverScreen({
                   >
                     {place.name}
                   </p>
-                  <p className="text-xs text-gray-400">{place.category}</p>
+                  <p className="text-xs" style={{ color: '#666' }}>{place.category}</p>
                 </div>
               </button>
             ))}
@@ -2369,7 +2366,7 @@ function DiscoverScreen({
                 >
                   {place.name}
                 </p>
-                <p className="text-xs text-gray-400 text-left">{place.category}</p>
+                <p className="text-xs text-left" style={{ color: '#666' }}>{place.category}</p>
               </button>
             ))}
           </div>
@@ -2497,69 +2494,29 @@ function EventsScreen({
         const gen = e.classifications?.[0]?.genre?.name || '';
         const eventName = e.name.toLowerCase();
         const venueName = (e._embedded?.venues?.[0]?.name || '').toLowerCase();
-        // Match both TM segment/genre names AND static event category names (stored in seg/gen via staticEventToTMEvent)
         switch (selectedGenre) {
-          case 'Live Music':
-            return seg === 'Music' || seg === 'Live Music' || gen === 'Live Music';
+          case 'Music':
+            return seg === 'Music' || seg === 'Live Music' || gen === 'Live Music' || gen === 'Music';
           case 'Sports':
-            return seg === 'Sports';
-          case 'Arts & Culture':
-            return seg === 'Arts & Theatre' || seg === 'Arts & Culture' || gen === 'Arts & Culture';
-          case 'Film & Movies':
-            return seg === 'Film' || seg === 'Movie' || gen === 'Film' || gen === 'Movie' ||
-              eventName.includes('film') || eventName.includes('cinema') || eventName.includes('movie');
-          case 'Festival':
-            return seg === 'Festival' || gen === 'Festival' ||
-              eventName.includes('festival') || eventName.includes(' fest ') || eventName.endsWith(' fest');
-          case 'Theater & Comedy':
-            return seg === 'Theater & Comedy' || seg === 'Theatre' || seg === 'Comedy' ||
-              gen === 'Theater & Comedy' || gen === 'Comedy' ||
-              eventName.includes('theater') || eventName.includes('theatre') || eventName.includes('comedy');
-          case 'Food & Drink':
-            return seg === 'Food & Drink' || gen === 'Food & Drink' ||
-              eventName.includes('food') || eventName.includes('tasting') || eventName.includes('wine') ||
-              eventName.includes('beer') || eventName.includes('culinary') || eventName.includes('chef');
-          case 'Community':
-            return seg === 'Community' || gen === 'Community';
-          case 'Nightlife':
-            return seg === 'Nightlife' || gen === 'Nightlife';
-          case 'Family': {
-            const familyKeywords = ['family', 'kids', 'children', 'child', 'junior', 'youth',
-              'disney', 'sesame', 'circus', 'magic show', 'puppet', 'ballet', 'nutcracker',
-              'ice show', 'princess', 'wizard'];
-            return seg === 'Family' || gen === 'Family' || familyKeywords.some(k => eventName.includes(k));
-          }
-          case 'Outdoors': {
-            const isAmphi = venueName.includes('amphitheater') || venueName.includes('amphitheatre');
-            const isOutdoorVenue = venueName.includes('outdoor') || venueName.includes('balloon fiesta');
-            const isOutdoorEvent = seg === 'Outdoors' || gen === 'Outdoors' ||
-              eventName.includes('outdoor') || eventName.includes('festival') ||
-              eventName.includes(' fair') || eventName.includes('balloon fiesta') ||
-              eventName.includes('garden') || eventName.includes('hiking') ||
-              eventName.includes('trail') || eventName.includes('fiesta');
-            return isAmphi || isOutdoorVenue || isOutdoorEvent;
-          }
-          case 'Farmers Market':
-            return seg === 'Farmers Market' || gen === 'Farmers Market' ||
-              eventName.includes('farmer') || eventName.includes('market');
-          case 'Health & Wellness':
-            return seg === 'Health & Wellness' || gen === 'Health & Wellness' ||
-              eventName.includes('wellness') || eventName.includes('yoga') ||
-              eventName.includes('meditation') || eventName.includes('health');
-          case 'Fitness':
-            return seg === 'Fitness' || gen === 'Fitness' ||
-              eventName.includes('fitness') || eventName.includes('workout') ||
-              eventName.includes('run') || eventName.includes('cycling');
+            return seg === 'Sports' || gen === 'Sports';
           case 'Comedy':
-            return seg === 'Comedy' || gen === 'Comedy' || eventName.includes('comedy');
-          case 'Business':
-            return seg === 'Business' || gen === 'Business' ||
-              eventName.includes('business') || eventName.includes('networking') ||
-              eventName.includes('conference') || eventName.includes('summit');
-          case 'Technology':
-            return seg === 'Technology' || gen === 'Technology' ||
-              eventName.includes('tech') || eventName.includes('code') ||
-              eventName.includes('ai ') || eventName.includes('startup');
+            return seg === 'Comedy' || gen === 'Comedy' || seg === 'Theater & Comedy' ||
+              eventName.includes('comedy') || eventName.includes('stand-up') || eventName.includes('standup');
+          case 'Arts':
+            return seg === 'Arts & Theatre' || seg === 'Arts & Culture' || gen === 'Arts & Culture' ||
+              seg === 'Film' || gen === 'Theatre' || eventName.includes('art') || eventName.includes('gallery') ||
+              eventName.includes('museum') || eventName.includes('theater') || eventName.includes('theatre');
+          case 'Community':
+            return seg === 'Community' || gen === 'Community' || seg === 'Festival' || gen === 'Festival' ||
+              eventName.includes('festival') || eventName.includes('market') || eventName.includes('fair') ||
+              eventName.includes('community') || eventName.includes('fiesta');
+          case 'Free': {
+            const prices = e.priceRanges;
+            const isFree = !prices || prices.length === 0 ||
+              prices.some(p => (p.min === 0 || p.min === undefined) && (p.max === 0 || p.max === undefined)) ||
+              eventName.includes('free');
+            return isFree;
+          }
           default:
             return seg === selectedGenre || gen === selectedGenre;
         }
@@ -2588,7 +2545,7 @@ function EventsScreen({
 
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-      <div className="px-5 pt-5 pb-3">
+      <div className="px-5 pt-5 pb-3" style={{ background: 'linear-gradient(180deg, rgba(160,59,0,0.06) 0%, transparent 100%)' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: '#a03b00', fontFamily: 'Manrope, sans-serif' }}
@@ -2627,17 +2584,17 @@ function EventsScreen({
         </div>
       </div>
 
-      <div className="flex gap-2 px-5 pb-4 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+      <div className="flex gap-2 px-5 pb-4 overflow-x-auto" style={{ scrollbarWidth: 'none', position: 'sticky', top: 'calc(var(--sat) + 72px)', zIndex: 30, background: 'linear-gradient(180deg, #f5f7f5 80%, transparent 100%)', paddingTop: '4px' }}>
         {EVENT_GENRES.map(genre => (
           <button
             key={genre}
             onClick={() => setSelectedGenre(genre)}
-            className="flex-shrink-0 px-3.5 py-2 rounded-full text-sm font-semibold transition-all"
+            className="flex-shrink-0 px-4 py-2 rounded-full text-sm font-bold transition-all"
             style={{
               fontFamily: 'Manrope, sans-serif',
               background: selectedGenre === genre ? '#a03b00' : 'white',
-              color: selectedGenre === genre ? 'white' : '#333',
-              boxShadow: selectedGenre === genre ? '0 4px 12px rgba(160,59,0,0.3)' : '0 1px 4px rgba(0,0,0,0.1)',
+              color: selectedGenre === genre ? 'white' : '#555',
+              boxShadow: selectedGenre === genre ? '0 4px 12px rgba(160,59,0,0.3)' : '0 1px 4px rgba(0,0,0,0.08)',
             }}
           >
             {genre}
@@ -2804,7 +2761,7 @@ function PlacesScreen({
 
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', willChange: 'transform' } as React.CSSProperties}>
-      <div className="px-5 pt-5 pb-3">
+      <div className="px-5 pt-5 pb-3" style={{ background: 'linear-gradient(180deg, rgba(160,59,0,0.06) 0%, transparent 100%)' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: '#a03b00', fontFamily: 'Manrope, sans-serif' }}
@@ -3402,12 +3359,12 @@ function ProfileScreen({
   }, [lbRows, myCount, user]);
 
   const ACHIEVEMENTS = [
-    { id: 'first', emoji: '✿', label: 'First Check-in', unlocked: myCount >= 1 },
-    { id: 'five', emoji: '⚡', label: 'Explorer (5)', unlocked: myCount >= 5 },
-    { id: 'ten', emoji: '', label: 'Adventurer (10)', unlocked: myCount >= 10 },
-    { id: 'twenty', emoji: '', label: 'Trailblazer (20)', unlocked: myCount >= 20 },
-    { id: 'thirty5', emoji: '', label: 'Pioneer (35)', unlocked: myCount >= 35 },
-    { id: 'fifty', emoji: '★', label: 'Legend (50)', unlocked: myCount >= 50 },
+    { id: 'first', emoji: '✿', label: 'First Check-in', unlocked: myCount >= 1, color: '#e8f5e9', accent: '#2e7d32' },
+    { id: 'five', emoji: '⚡', label: 'Explorer (5)', unlocked: myCount >= 5, color: '#fff3e0', accent: '#e65100' },
+    { id: 'ten', emoji: '', label: 'Adventurer (10)', unlocked: myCount >= 10, color: '#e3f2fd', accent: '#1565c0' },
+    { id: 'twenty', emoji: '', label: 'Trailblazer (20)', unlocked: myCount >= 20, color: '#fce4ec', accent: '#c62828' },
+    { id: 'thirty5', emoji: '', label: 'Pioneer (35)', unlocked: myCount >= 35, color: '#f3e5f5', accent: '#7b1fa2' },
+    { id: 'fifty', emoji: '★', label: 'Legend (50)', unlocked: myCount >= 50, color: '#fff8e1', accent: '#f57f17' },
   ];
 
   const nextLevel = getLevel(myCount + 1);
@@ -3415,7 +3372,7 @@ function ProfileScreen({
 
   return (
     <div className="w-full px-5 pb-28" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-      <div className="pt-5 pb-4">
+      <div className="pt-5 pb-4" style={{ background: 'linear-gradient(180deg, rgba(160,59,0,0.06) 0%, transparent 100%)', marginLeft: '-20px', marginRight: '-20px', paddingLeft: '20px', paddingRight: '20px' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: '#a03b00', fontFamily: 'Manrope, sans-serif' }}
@@ -3553,14 +3510,18 @@ function ProfileScreen({
         {ACHIEVEMENTS.map(a => (
           <div
             key={a.id}
-            className="bg-white rounded-2xl p-3 text-center flex flex-col items-center gap-1"
+            className="rounded-2xl p-3 text-center flex flex-col items-center gap-1"
             style={{
-              boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-              opacity: a.unlocked ? 1 : 0.4,
+              background: a.unlocked ? a.color : `${a.color}88`,
+              boxShadow: a.unlocked ? `0 2px 8px ${a.accent}22` : '0 1px 4px rgba(0,0,0,0.04)',
+              border: a.unlocked ? `2px solid ${a.accent}33` : '2px solid transparent',
             }}
           >
-            <span style={{ fontSize: '24px' }}>{a.unlocked ? a.emoji : '○'}</span>
-            <p className="text-xs font-semibold text-gray-600 leading-tight text-center" style={{ fontFamily: 'Manrope, sans-serif' }}>
+            <span style={{ fontSize: '24px', opacity: a.unlocked ? 1 : 0.4, filter: a.unlocked ? 'none' : 'grayscale(0.5)' }}>{a.emoji}</span>
+            <p className="text-xs font-semibold leading-tight text-center" style={{
+              fontFamily: 'Manrope, sans-serif',
+              color: a.unlocked ? a.accent : '#999',
+            }}>
               {a.label}
             </p>
           </div>
@@ -3658,7 +3619,7 @@ function ProfileScreen({
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold truncate" style={{ fontFamily: 'Epilogue, sans-serif' }}>{p.name}</p>
-                    <p className="text-xs text-gray-400" style={{ fontFamily: 'Manrope, sans-serif' }}>{p.category}</p>
+                    <p className="text-xs" style={{ fontFamily: 'Manrope, sans-serif', color: '#666' }}>{p.category}</p>
                   </div>
                   <span className="text-xs font-bold flex-shrink-0" style={{ color: '#a03b00' }}>✓</span>
                 </div>
