@@ -5349,7 +5349,7 @@ export default function App() {
       <AddToHomePrompt />
       <div
         className="flex flex-col mx-auto relative"
-        style={{ maxWidth: '480px', minHeight: '100dvh', background: '#f5f7f5', overflowX: 'hidden' }}
+        style={{ maxWidth: '480px', minHeight: '100dvh', background: '#f5f7f5', overflowX: 'clip' }}
       >
         {/* Glassmorphism header — Liquid Glass (iOS 26 HIG) with Dynamic Island / notch safe area */}
         <header
