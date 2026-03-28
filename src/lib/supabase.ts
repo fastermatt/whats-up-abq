@@ -5,7 +5,7 @@ const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || 'e
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    flowType: 'implicit',       // tokens in URL hash, processed before React mounts
+    flowType: 'pkce',           // PKCE is more secure than implicit; tokens not exposed in URL hash
     detectSessionInUrl: true,   // auto-read hash tokens on load
     persistSession: true,       // keep session in localStorage
   },
