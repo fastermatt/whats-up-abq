@@ -64,24 +64,27 @@
     margin: 0;
     padding: 0;
   }
-  /* MOBILE LAYOUT:
-     - overflow-x:hidden on html+body prevents horizontal scroll on ALL iOS versions
-       (overflow-x:clip only works on iOS 16+; hidden works everywhere)
-     - No height constraints on html/body so the document grows naturally with
-       content, letting the viewport scroll and mobile browser chrome auto-hide
-     - The inner 480px container also has overflow-x:hidden as a second layer */
-  html, body {
-    overflow-x: hidden;
-    -webkit-text-size-adjust: 100%;
-  }
+  /* MOBILE LAYOUT — iOS safe approach:
+     - overflow-x:hidden ONLY on html (propagates to viewport per CSS spec).
+       Do NOT put overflow-x:hidden on body: on iOS Safari, body becomes a BFC
+       scroll container whose layout width follows its content (480px), not the
+       viewport (390px), so max-width:480px + mx-auto stops centering correctly.
+     - width:100% on #root explicitly ties it to the viewport width so its
+       children (the 480px container) are always properly constrained.
+     - The 480px container also gets width:100% + overflow-x:hidden as a
+       second containment layer for carousel overflow. */
   html {
+    overflow-x: hidden;
     background-color: #F4F4F0;
+    -webkit-text-size-adjust: 100%;
   }
   body {
     -webkit-overflow-scrolling: touch;
   }
   #root {
+    width: 100%;
     min-height: 100dvh;
+    overflow-x: hidden;
   }
 }
 
