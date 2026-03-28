@@ -64,22 +64,22 @@
     margin: 0;
     padding: 0;
   }
-  /* ADDRESS BAR AUTO-HIDE: The viewport must be the scroll container.
-     html is exactly viewport-height; body grows with content and overflows it.
-     NO overflow-x/clip/hidden on html, body, OR #root — those can create
-     inner scroll containers or clip contexts that trap scroll events.
-     Horizontal clipping lives ONLY on the inner 480px app container. */
+  /* ADDRESS BAR AUTO-HIDE + CENTERING FIX
+     1. html/body have NO height constraints — content overflows viewport naturally,
+        letting mobile browsers detect the scroll and auto-hide the address bar.
+     2. html has overflow-x:hidden to prevent horizontal scroll from carousel items
+        that overflow the 480px container. This propagates to the viewport per CSS spec.
+        overflow-y stays auto (computed from hidden+visible pair) which is normal scroll. */
   html {
-    height: 100%;
+    overflow-x: hidden;
     background-color: #F4F4F0;
     -webkit-text-size-adjust: 100%;
   }
   body {
-    min-height: 100%;
     -webkit-overflow-scrolling: touch;
   }
   #root {
-    min-height: 100%;
+    min-height: 100dvh;
   }
 }
 
