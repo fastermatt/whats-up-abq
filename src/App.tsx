@@ -3705,20 +3705,27 @@ function ProfileScreen({
 }
 
 // ─── Add-to-Home-Screen Prompt ─────────────────────────────────────────────────
-// Shows once on iOS Safari (not in standalone mode) after a short delay.
-// Dismissed state is stored in localStorage for 14 days.
+// Branded bottom sheet prompt for iOS Safari and Android Chrome.
+// Shows after 30s on the 2nd+ visit. Dismissed state remembered for 30 days.
 
 const INSTALL_DISMISSED_KEY = 'abq_install_dismissed';
-const INSTALL_DISMISSED_DAYS = 14;
+const INSTALL_VISIT_KEY     = 'abq_visit_count';
+const INSTALL_DISMISSED_DAYS = 30;
+const SHOW_AFTER_MS   = 30_000; // 30 seconds
+const SHOW_AFTER_VISITS = 2;
 
 function isIosSafari(): boolean {
   if (typeof navigator === 'undefined') return false;
   const ua = navigator.userAgent;
-  // iOS device check
   const isIos = /iphone|ipad|ipod/i.test(ua);
-  // Safari check (not Chrome/Firefox/etc on iOS)
   const isSafari = /safari/i.test(ua) && !/chrome|crios|fxios|opios|mercury/i.test(ua);
   return isIos && isSafari;
+}
+
+function isAndroidChrome(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent;
+  return /android/i.test(ua) && /chrome/i.test(ua) && !/firefox|edg/i.test(ua);
 }
 
 function isInStandaloneMode(): boolean {
@@ -3729,161 +3736,298 @@ function isInStandaloneMode(): boolean {
 }
 
 function AddToHomePrompt() {
-  const [visible, setVisible] = useState(false);
-  const [hiding, setHiding] = useState(false);
+  const [visible, setVisible]         = useState(false);
+  const [hiding, setHiding]           = useState(false);
+  const [isIos, setIsIos]             = useState(false);
+  const [deferredPrompt, setDeferred] = useState<any>(null);
 
   useEffect(() => {
-    // Only show on iOS Safari, not already installed
-    if (!isIosSafari() || isInStandaloneMode()) return;
-    // Check if recently dismissed
+    // Don't show if already installed as PWA
+    if (isInStandaloneMode()) return;
+
+    // Track sessions (not re-mounts) using sessionStorage
+    const sessionKey = 'abq_session_counted';
+    if (!sessionStorage.getItem(sessionKey)) {
+      sessionStorage.setItem(sessionKey, '1');
+      const prev = parseInt(localStorage.getItem(INSTALL_VISIT_KEY) || '0', 10);
+      localStorage.setItem(INSTALL_VISIT_KEY, String(prev + 1));
+    }
+    const visits = parseInt(localStorage.getItem(INSTALL_VISIT_KEY) || '0', 10);
+
+    // Don't show if recently dismissed
     const dismissed = localStorage.getItem(INSTALL_DISMISSED_KEY);
     if (dismissed) {
       const age = Date.now() - parseInt(dismissed, 10);
       if (age < INSTALL_DISMISSED_DAYS * 24 * 60 * 60 * 1000) return;
     }
-    // Show after 4 seconds
-    const t = setTimeout(() => setVisible(true), 4000);
-    return () => clearTimeout(t);
+
+    if (visits < SHOW_AFTER_VISITS) return;
+
+    const ios = isIosSafari();
+    const android = isAndroidChrome();
+    if (!ios && !android) return;
+
+    setIsIos(ios);
+
+    if (ios) {
+      const t = setTimeout(() => setVisible(true), SHOW_AFTER_MS);
+      return () => clearTimeout(t);
+    }
+
+    // Android: capture the native beforeinstallprompt event
+    const onPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferred(e);
+      const t = setTimeout(() => setVisible(true), SHOW_AFTER_MS);
+      return () => clearTimeout(t);
+    };
+    window.addEventListener('beforeinstallprompt', onPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', onPrompt);
   }, []);
 
   const dismiss = () => {
     setHiding(true);
     localStorage.setItem(INSTALL_DISMISSED_KEY, String(Date.now()));
-    setTimeout(() => setVisible(false), 380);
+    setTimeout(() => setVisible(false), 400);
+  };
+
+  const installAndroid = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') dismiss();
   };
 
   if (!visible) return null;
 
+  const RUST = '#a03b00';
+  const RUST_LIGHT = '#fdf0e8';
+
   return (
     <>
       <style>{`
-        @keyframes abqPromptSlideUp {
+        @keyframes a2hsSlideUp {
           from { opacity: 0; transform: translateY(100%); }
           to   { opacity: 1; transform: translateY(0); }
         }
-        @keyframes abqPromptSlideDown {
+        @keyframes a2hsSlideDown {
           from { opacity: 1; transform: translateY(0); }
           to   { opacity: 0; transform: translateY(100%); }
         }
-        @keyframes abqBounce {
-          0%, 100% { transform: translateY(0); }
-          40%       { transform: translateY(-10px); }
-          60%       { transform: translateY(-5px); }
+        @keyframes a2hsFadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
         }
-        @keyframes abqArrowPulse {
-          0%, 100% { opacity: 0.6; transform: translateY(0) scaleY(1); }
-          50%       { opacity: 1;   transform: translateY(4px) scaleY(1.1); }
+        @keyframes a2hsBounce {
+          0%, 100% { transform: translateY(0); }
+          45%       { transform: translateY(-8px); }
+          65%       { transform: translateY(-4px); }
+        }
+        @keyframes a2hsShimmer {
+          0%   { background-position: -200% center; }
+          100% { background-position:  200% center; }
+        }
+        .a2hs-icon-pulse {
+          animation: a2hsBounce 2.2s ease-in-out infinite;
         }
       `}</style>
 
-      {/* Backdrop tap-to-dismiss */}
+      {/* Dimmed backdrop */}
       <div
         onClick={dismiss}
         style={{
-          position: 'fixed', inset: 0, zIndex: 9998,
-          background: 'rgba(0,0,0,0.35)',
-          animation: hiding ? 'abqPromptSlideDown 0.38s ease forwards' : 'none',
-          opacity: hiding ? 0 : 1, transition: hiding ? 'opacity 0.38s' : 'none',
+          position: 'fixed', inset: 0, zIndex: 9000,
+          background: 'rgba(0,0,0,0.45)',
+          backdropFilter: 'blur(2px)',
+          WebkitBackdropFilter: 'blur(2px)',
+          animation: hiding ? 'a2hsFadeIn 0.4s ease reverse forwards' : 'a2hsFadeIn 0.3s ease forwards',
         }}
       />
 
       {/* Bottom sheet */}
       <div style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999,
+        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9001,
         background: '#fff',
-        borderRadius: '24px 24px 0 0',
-        boxShadow: '0 -8px 40px rgba(0,0,0,0.18)',
-        padding: '20px 24px calc(28px + env(safe-area-inset-bottom))',
-        fontFamily: 'Manrope, -apple-system, sans-serif',
+        borderRadius: '28px 28px 0 0',
+        boxShadow: '0 -12px 60px rgba(0,0,0,0.22)',
+        overflow: 'hidden',
+        fontFamily: 'Manrope, -apple-system, BlinkMacSystemFont, sans-serif',
         animation: hiding
-          ? 'abqPromptSlideDown 0.38s ease forwards'
-          : 'abqPromptSlideUp 0.44s cubic-bezier(0.34,1.56,0.64,1) forwards',
+          ? 'a2hsSlideDown 0.4s cubic-bezier(0.4,0,1,1) forwards'
+          : 'a2hsSlideUp 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards',
       }}>
-        {/* Drag handle */}
-        <div style={{ width: 40, height: 4, borderRadius: 2, background: '#e0e0e0', margin: '0 auto 18px' }} />
 
-        {/* Dismiss X */}
-        <button
-          onClick={dismiss}
-          style={{
-            position: 'absolute', top: 18, right: 20,
-            width: 32, height: 32, borderRadius: '50%',
-            background: '#f2f2f2', border: 'none', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 16, color: '#666', lineHeight: 1,
-          }}
-          aria-label="Dismiss"
-        >✕</button>
+        {/* Gradient header band */}
+        <div style={{
+          background: `linear-gradient(135deg, ${RUST} 0%, #c45000 50%, #8b2800 100%)`,
+          padding: '22px 24px 20px',
+          position: 'relative',
+          overflow: 'hidden',
+        }}>
+          {/* Subtle radial glow */}
+          <div style={{
+            position: 'absolute', inset: 0, pointerEvents: 'none',
+            background: 'radial-gradient(circle at 80% 50%, rgba(255,255,255,0.12) 0%, transparent 60%)',
+          }} />
 
-        {/* Icon + headline */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
-          <img
-            src="/apple-touch-icon-180.png"
-            alt="ABQ Unplugged"
-            style={{ width: 56, height: 56, borderRadius: 4, boxShadow: '3px 3px 0 rgba(0,0,0,0.15)' }}
-          />
-          <div>
-            <div style={{ fontWeight: 800, fontSize: 17, color: '#1c1c1e', lineHeight: 1.2 }}>
-              Add to Home Screen
+          {/* Drag handle */}
+          <div style={{
+            width: 36, height: 4, borderRadius: 2,
+            background: 'rgba(255,255,255,0.35)',
+            margin: '0 auto 18px',
+          }} />
+
+          {/* Dismiss */}
+          <button
+            onClick={dismiss}
+            aria-label="Dismiss"
+            style={{
+              position: 'absolute', top: 16, right: 16,
+              width: 30, height: 30, borderRadius: '50%',
+              background: 'rgba(255,255,255,0.18)',
+              border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'rgba(255,255,255,0.9)', fontSize: 15, fontWeight: 700,
+            }}
+          >✕</button>
+
+          {/* App icon + branding */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div className="a2hs-icon-pulse" style={{ flexShrink: 0 }}>
+              <img
+                src="/apple-touch-icon-180.png"
+                alt="ABQ Unplugged icon"
+                style={{
+                  width: 64, height: 64,
+                  borderRadius: 16,
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                  border: '2px solid rgba(255,255,255,0.25)',
+                }}
+              />
             </div>
-            <div style={{ fontSize: 13, color: '#888', marginTop: 3 }}>
-              Get the full-screen app experience
+            <div>
+              <div style={{
+                fontWeight: 900, fontSize: 18,
+                color: '#fff',
+                letterSpacing: '-0.3px',
+                lineHeight: 1.15,
+                textShadow: '0 1px 3px rgba(0,0,0,0.2)',
+              }}>
+                ABQ Unplugged
+              </div>
+              <div style={{
+                fontSize: 13, color: 'rgba(255,255,255,0.75)',
+                marginTop: 2, fontWeight: 500,
+              }}>
+                explore-abq.netlify.app
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Steps */}
-        {[
-          {
-            num: '1',
-            icon: (
-              /* Share icon SVG */
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke='var(--brand)' strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/>
-                <polyline points="16 6 12 2 8 6"/>
-                <line x1="12" y1="2" x2="12" y2="15"/>
-              </svg>
-            ),
-            text: <>Tap the <strong>Share</strong> button in Safari's bottom bar</>,
-          },
-          {
-            num: '2',
-            icon: (
-              /* Plus-in-square icon */
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke='var(--brand)' strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="3"/>
-                <line x1="12" y1="8" x2="12" y2="16"/>
-                <line x1="8" y1="12" x2="16" y2="12"/>
-              </svg>
-            ),
-            text: <>Scroll down and tap <strong>"Add to Home Screen"</strong></>,
-          },
-        ].map(({ num, icon, text }) => (
-          <div key={num} style={{
-            display: 'flex', alignItems: 'center', gap: 14,
-            padding: '12px 16px', borderRadius: 4,
-            background: '#faf8f6', marginBottom: 10,
-          }}>
-            <div style={{
-              width: 28, height: 28, borderRadius: '50%',
-              background: 'var(--brand)', color: '#fff',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 800, fontSize: 13, flexShrink: 0,
-            }}>{num}</div>
-            <div style={{ width: 28, flexShrink: 0, display: 'flex', alignItems: 'center' }}>{icon}</div>
-            <div style={{ fontSize: 14, color: '#333', lineHeight: 1.4 }}>{text}</div>
-          </div>
-        ))}
+        {/* Body */}
+        <div style={{ padding: '20px 24px calc(20px + env(safe-area-inset-bottom, 16px))' }}>
 
-        {/* Bouncing arrow pointing down (toward Safari toolbar) */}
-        <div style={{
-          textAlign: 'center', marginTop: 10,
-          animation: 'abqBounce 1.6s ease-in-out infinite',
-          fontSize: 26, color: 'var(--brand)',
-          lineHeight: 1,
-        }}>↓</div>
-        <div style={{ textAlign: 'center', fontSize: 12, color: '#aaa', marginTop: 4 }}>
-          The Share button is in Safari's bottom toolbar
+          {/* Headline */}
+          <div style={{
+            fontSize: 20, fontWeight: 800, color: '#1c1c1e',
+            letterSpacing: '-0.4px', lineHeight: 1.25, marginBottom: 4,
+          }}>
+            Take ABQ Unplugged everywhere.
+          </div>
+          <div style={{ fontSize: 14, color: '#666', marginBottom: 20, lineHeight: 1.5 }}>
+            Add it to your home screen for the full app experience — no browser bars, instant open.
+          </div>
+
+          {isIos ? (
+            /* iOS instructions */
+            <>
+              {[
+                {
+                  num: 1,
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={RUST} strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/>
+                      <polyline points="16 6 12 2 8 6"/>
+                      <line x1="12" y1="2" x2="12" y2="15"/>
+                    </svg>
+                  ),
+                  label: 'Tap the Share button',
+                  sub: "Bottom center of Safari's toolbar",
+                },
+                {
+                  num: 2,
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={RUST} strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="3"/>
+                      <line x1="12" y1="8" x2="12" y2="16"/>
+                      <line x1="8" y1="12" x2="16" y2="12"/>
+                    </svg>
+                  ),
+                  label: 'Tap "Add to Home Screen"',
+                  sub: 'Scroll down in the share sheet',
+                },
+              ].map(({ num, icon, label, sub }) => (
+                <div key={num} style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '11px 14px', borderRadius: 14,
+                  background: RUST_LIGHT, marginBottom: 8,
+                  border: `1px solid rgba(160,59,0,0.1)`,
+                }}>
+                  <div style={{
+                    width: 26, height: 26, borderRadius: '50%',
+                    background: RUST, color: '#fff',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontWeight: 800, fontSize: 12, flexShrink: 0,
+                  }}>{num}</div>
+                  <div style={{
+                    width: 26, flexShrink: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>{icon}</div>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: '#1c1c1e' }}>{label}</div>
+                    <div style={{ fontSize: 12, color: '#888', marginTop: 1 }}>{sub}</div>
+                  </div>
+                </div>
+              ))}
+
+              {/* Bouncing arrow */}
+              <div style={{
+                textAlign: 'center', marginTop: 14,
+                animation: 'a2hsBounce 1.8s ease-in-out infinite',
+                fontSize: 24, color: RUST, lineHeight: 1,
+              }}>↓</div>
+              <div style={{ textAlign: 'center', fontSize: 12, color: '#aaa', marginTop: 3 }}>
+                Share button is in Safari's bottom bar
+              </div>
+            </>
+          ) : (
+            /* Android install button */
+            <>
+              <button
+                onClick={installAndroid}
+                style={{
+                  width: '100%', padding: '15px 20px',
+                  borderRadius: 16, border: 'none', cursor: 'pointer',
+                  background: `linear-gradient(135deg, ${RUST} 0%, #c45000 100%)`,
+                  color: '#fff', fontSize: 16, fontWeight: 800,
+                  letterSpacing: '-0.2px',
+                  boxShadow: `0 4px 16px rgba(160,59,0,0.35)`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                  <path d="M2 17l10 5 10-5"/>
+                  <path d="M2 12l10 5 10-5"/>
+                </svg>
+                Install App
+              </button>
+              <div style={{ textAlign: 'center', fontSize: 12, color: '#aaa', marginTop: 10 }}>
+                Installs instantly · No App Store required
+              </div>
+            </>
+          )}
         </div>
       </div>
     </>
@@ -5478,8 +5622,7 @@ export default function App() {
   return (
     <ErrorBoundary>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@400;700;900&family=Manrope:wght@400;500;600;700;800&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+        /* Fonts loaded via <link> in index.html to avoid Safari ITP cross-site warnings */
 
         /* ── Reset ── */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

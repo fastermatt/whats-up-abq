@@ -5,6 +5,17 @@
 [build.environment]
   NODE_VERSION = "22"
 
+# ─── Security headers ─────────────────────────────────────────────────────────
+# Applied to all routes; specific cache rules below still override Cache-Control.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(self), payment=()"
+    X-XSS-Protection = "1; mode=block"
+
 # ─── Cache headers ────────────────────────────────────────────────────────────
 # NOTE: In Netlify, later rules override earlier ones when both match.
 # Order: catch-all first, specific overrides last.
