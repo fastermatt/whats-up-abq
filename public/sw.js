@@ -5,7 +5,7 @@
 //   - Supabase API calls: Network-only (live data required)
 //   - places-data.json: Cache-first (large file, rarely changes)
 
-const CACHE_VERSION = 'abq-v2';
+const CACHE_VERSION = 'abq-202603290607';
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const ASSET_CACHE = `${CACHE_VERSION}-assets`;
 const DATA_CACHE  = `${CACHE_VERSION}-data`;
@@ -144,7 +144,7 @@ async function networkFirst(cacheName, request, fallbackPath) {
       <meta name="viewport" content="width=device-width,initial-scale=1">
       <style>body{font-family:system-ui;background:#1a1a2e;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;text-align:center;padding:24px}
       h1{font-size:2rem;margin-bottom:8px}p{color:#aaa;margin-bottom:24px}
-      button{background:#a03b00;color:#fff;border:none;border-radius:12px;padding:12px 24px;font-size:1rem;cursor:pointer}</style>
+      button{background:#566500;color:#fff;border:none;border-radius:12px;padding:12px 24px;font-size:1rem;cursor:pointer}</style>
       </head><body>
       <div><div style="font-size:3rem">📡</div>
       <h1>You're offline</h1>

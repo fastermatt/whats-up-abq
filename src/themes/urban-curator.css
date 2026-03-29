@@ -1,0 +1,183 @@
+/* ═══════════════════════════════════════════════════════════════════
+   ABQ UNPLUGGED — URBAN CURATOR THEME
+   Neon Moss × Deep Electric · Epilogue headlines · Hard 4px shadows
+   Designed for legibility, editorial confidence, and future-swap ease.
+
+   To activate: in src/index.css change the import line to:
+     @import './themes/urban-curator.css';
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Google Fonts: Epilogue (headlines) + Inter (body) ───────────── */
+@import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
+
+/* ── shadcn/ui design tokens ──────────────────────────────────────── */
+@layer base {
+  :root {
+    /* Palette
+       Neon Moss primary:   #566500 / #D4EF4D
+       Deep Electric secondary: #0057c2 / #1C6FEA
+       Gallery White bg:    #F8FAF8                     */
+
+    --background:            120 15% 98%;   /* #F8FAF8 Gallery White */
+    --foreground:            0 0% 10%;      /* #1A1A1A near-black */
+
+    --card:                  0 0% 100%;
+    --card-foreground:       0 0% 10%;
+
+    --popover:               0 0% 100%;
+    --popover-foreground:    0 0% 10%;
+
+    --primary:               69 100% 20%;   /* #566500 Neon Moss dark */
+    --primary-foreground:    0 0% 100%;     /* white */
+
+    --secondary:             213 100% 38%;  /* #0057c2 Deep Electric */
+    --secondary-foreground:  0 0% 100%;     /* white */
+
+    --muted:                 120 8% 95%;    /* #EFF3EF */
+    --muted-foreground:      180 4% 37%;    /* #5A6060 */
+
+    --accent:                70 83% 62%;    /* #D4EF4D Neon Moss bright */
+    --accent-foreground:     69 100% 20%;   /* #566500 */
+
+    --destructive:           0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border:                120 7% 86%;    /* #D8E0D8 */
+    --input:                 120 7% 86%;
+    --ring:                  70 83% 62%;    /* neon moss */
+
+    --radius:                0.25rem;       /* 4px — precision corners */
+    --ios-blur:              blur(20px) saturate(180%);
+
+    /* ── Inline-style bridge vars (App.tsx style={} props) ── */
+    /* Every hardcoded hex in App.tsx is mapped here so a future theme
+       swap only requires changing this one file. */
+    --brand:                 #566500;
+    --brand-light:           #8a9e00;
+    --brand-gradient:        linear-gradient(135deg, #566500 0%, #8a9e00 100%);
+    --brand-bg-screen:       #F8FAF8;
+    --brand-bg-subtle:       rgba(86, 101, 0, 0.10);
+    --brand-tint-bg:         rgba(212, 239, 77, 0.15);
+    --brand-tint-border:     rgba(212, 239, 77, 0.50);
+    --brand-ring-color:      #D4EF4D;
+  }
+
+  /* Dark mode — deep ink + bright moss */
+  .dark {
+    --background:            0 0% 8%;       /* #141414 */
+    --foreground:            120 8% 95%;    /* #EFF3EF */
+
+    --card:                  0 0% 11%;
+    --card-foreground:       120 8% 95%;
+
+    --popover:               0 0% 11%;
+    --popover-foreground:    120 8% 95%;
+
+    --primary:               70 83% 62%;    /* #D4EF4D bright moss in dark */
+    --primary-foreground:    0 0% 8%;
+
+    --secondary:             216 83% 51%;   /* #1C6FEA lighter electric */
+    --secondary-foreground:  0 0% 100%;
+
+    --muted:                 0 0% 15%;
+    --muted-foreground:      0 0% 55%;
+
+    --accent:                69 100% 20%;   /* #566500 */
+    --accent-foreground:     70 83% 62%;
+
+    --destructive:           0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border:                0 0% 20%;
+    --input:                 0 0% 20%;
+    --ring:                  70 83% 62%;
+
+    --brand:                 #D4EF4D;
+    --brand-light:           #eeff7a;
+    --brand-gradient:        linear-gradient(135deg, #8a9e00 0%, #D4EF4D 100%);
+    --brand-bg-screen:       #141414;
+    --brand-bg-subtle:       rgba(212, 239, 77, 0.12);
+    --brand-tint-bg:         rgba(212, 239, 77, 0.10);
+    --brand-tint-border:     rgba(212, 239, 77, 0.30);
+    --brand-ring-color:      #D4EF4D;
+  }
+}
+
+/* ── html background (outside React root) ─────────────────────────── */
+html { background-color: #F8FAF8; }
+
+/* ── Typography: Epilogue for headlines, Inter for body ─────────────*/
+* {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+h1, h2, h3, h4, h5, h6,
+.font-black, .font-extrabold, .font-bold,
+[class*="text-xl"], [class*="text-2xl"], [class*="text-3xl"] {
+  font-family: 'Epilogue', sans-serif;
+}
+
+/* ── Dot texture (4px dots, 20px grid) ───────────────────────────── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle, #b8c8a0 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
+}
+#root { position: relative; z-index: 1; }
+
+/* ── Hard offset shadow utilities ────────────────────────────────────*/
+.uc-shadow { box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.75); }
+.uc-shadow-sm { box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.75); }
+.uc-shadow-accent { box-shadow: 4px 4px 0 #566500; }
+
+/* ── Animated ABQ logo — Neon Moss shimmer ───────────────────────── */
+.logo-abq-shimmer {
+  background: linear-gradient(90deg, #566500 0%, #D4EF4D 35%, #8a9e00 55%, #566500 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: logo-shimmer 3s linear infinite;
+}
+
+/* ── Filter-button pulse ring — Neon Moss ─────────────────────────── */
+.pulse-ring::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 9999px;
+  border: 2px solid #D4EF4D;
+  animation: ring-pulse 1.8s ease-out infinite;
+  pointer-events: none;
+}
+
+/* ── Card & button overrides ─────────────────────────────────────── */
+/* Cards get hard shadows and squared corners */
+.event-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 4px 7px 0 rgba(0, 0, 0, 0.70);
+}
+
+/* Primary button feel: hard border + offset */
+button[class*="bg-primary"],
+.btn-primary {
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.70);
+  transition: box-shadow 0.1s ease, transform 0.1s ease;
+}
+button[class*="bg-primary"]:active,
+.btn-primary:active {
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.70);
+  transform: translate(2px, 2px);
+}
+
+/* ── Frosted glass — tinted gallery white for this theme ─────────── */
+.glass-light {
+  background: rgba(248, 250, 248, 0.82);
+  backdrop-filter: var(--ios-blur);
+  -webkit-backdrop-filter: var(--ios-blur);
+  border: 1px solid rgba(86, 101, 0, 0.12);
+}
