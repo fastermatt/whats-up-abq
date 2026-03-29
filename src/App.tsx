@@ -417,19 +417,44 @@ async function syncCheckinsToFirestore(uid: string, checkIns: Set<string>, displ
   }
 }
 
-// ─── PNG Logo ───────────────────────────────────────────────────────────────
+// ─── Typographic Logo — Urban Curator style ──────────────────────────────────
+// "ABQ" on neon-moss lime block  +  "UNPLUGGED" in heavy Epilogue caps
+// Matches the brutalist mockup: boxed accent word + uppercase tracking label
 
 function ABQUnpluggedLogo({ size = 43 }: { size?: number }) {
-  // New logo is 2144×434px — ~4.94:1 aspect ratio
-  const width = Math.round(size * 4.94);
+  const blockH   = Math.round(size * 0.72);          // height of the ABQ block
+  const abqSize  = Math.round(blockH * 0.62);        // ABQ font size
+  const unplSize = Math.round(blockH * 0.38);        // UNPLUGGED font size
   return (
-    <img
-      src="/abq_unplugged_logo.png"
-      alt="ABQ Unplugged"
-      width={width}
-      height={size}
-      style={{ objectFit: 'contain', display: 'block' }}
-    />
+    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', userSelect: 'none' }}>
+      {/* Lime accent block */}
+      <div style={{
+        background: '#D4EF4D',
+        padding: `2px ${Math.round(blockH * 0.28)}px`,
+        display: 'inline-flex',
+        alignItems: 'center',
+        border: '2px solid #1A1A1A',
+      }}>
+        <span style={{
+          fontFamily: 'Epilogue, Inter, sans-serif',
+          fontWeight: 900,
+          fontSize: `${abqSize}px`,
+          color: '#1A1A1A',
+          letterSpacing: '-0.03em',
+          lineHeight: 1,
+        }}>ABQ</span>
+      </div>
+      {/* Wordmark */}
+      <span style={{
+        fontFamily: 'Epilogue, Inter, sans-serif',
+        fontWeight: 900,
+        fontSize: `${unplSize}px`,
+        color: '#1A1A1A',
+        letterSpacing: '0.06em',
+        textTransform: 'uppercase',
+        lineHeight: 1,
+      }}>UNPLUGGED</span>
+    </div>
   );
 }
 
@@ -520,15 +545,15 @@ function GeoBanner({
   if (coords) return null;
 
   if (error) return (
-    <div className="mx-5 mb-4 rounded-lg p-3 flex items-center gap-3" style={{ background: 'rgba(160,59,0,0.08)' }}>
-      <span className="material-symbols-outlined flex-shrink-0" style={{ color: 'var(--brand)', fontSize: '20px' }}>location_off</span>
-      <p className="text-xs text-gray-600 flex-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="px-4 py-3 flex items-center gap-3" style={{ background: '#1ebaeb', borderBottom: '2px solid #1A1A1A' }}>
+      <span className="material-symbols-outlined flex-shrink-0" style={{ color: '#1A1A1A', fontSize: '20px' }}>location_off</span>
+      <p className="text-xs font-bold flex-1" style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A' }}>
         Enable location to see distances &amp; sort by nearby
       </p>
       <button
         onClick={onRequest}
-        className="text-xs font-bold px-3 py-1.5 rounded-lg text-white flex-shrink-0"
-        style={{ background: 'var(--brand)' }}
+        className="text-xs font-black px-3 py-1.5 flex-shrink-0"
+        style={{ background: '#1A1A1A', color: 'white', border: '2px solid #1A1A1A', fontFamily: 'Inter, sans-serif' }}
       >
         Retry
       </button>
@@ -536,31 +561,26 @@ function GeoBanner({
   );
 
   if (requested) return (
-    <div className="mx-5 mb-4 rounded-lg p-3 flex items-center gap-3" style={{ background: 'rgba(160,59,0,0.06)' }}>
-      <span className="material-symbols-outlined flex-shrink-0" style={{ color: 'var(--brand)', fontSize: '20px' }}>my_location</span>
-      <p className="text-xs text-gray-500 flex-1" style={{ fontFamily: 'Inter, sans-serif' }}>Getting your location…</p>
+    <div className="px-4 py-3 flex items-center gap-3" style={{ background: '#1ebaeb', borderBottom: '2px solid #1A1A1A' }}>
+      <span className="material-symbols-outlined flex-shrink-0" style={{ color: '#1A1A1A', fontSize: '20px' }}>my_location</span>
+      <p className="text-xs font-bold flex-1" style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A' }}>Getting your location…</p>
     </div>
   );
 
   return (
     <div
-      className="mx-5 mb-4 rounded-lg p-3 flex items-center gap-3"
-      style={{ background: 'white', boxShadow: '3px 3px 0 rgba(0,0,0,0.12)' }}
+      className="px-4 py-3 flex items-center gap-3"
+      style={{ background: '#1ebaeb', borderBottom: '2px solid #1A1A1A' }}
     >
-      <div
-        className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-        style={{ background: 'var(--brand-bg-subtle)' }}
-      >
-        <span className="material-symbols-outlined" style={{ color: 'var(--brand)', fontSize: '20px' }}>near_me</span>
-      </div>
+      <span className="material-symbols-outlined flex-shrink-0" style={{ color: '#1A1A1A', fontSize: '20px' }}>near_me</span>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>Find things near you</p>
-        <p className="text-xs text-gray-400">Share location for distances &amp; "Near Me"</p>
+        <p className="text-sm font-black" style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A' }}>Find things near you</p>
+        <p className="text-xs" style={{ color: 'rgba(0,0,0,0.6)', fontFamily: 'Inter, sans-serif' }}>Share location for distances &amp; "Near Me"</p>
       </div>
       <button
         onClick={onRequest}
-        className="text-xs font-bold px-3 py-1.5 rounded-lg text-white flex-shrink-0"
-        style={{ background: 'var(--brand)' }}
+        className="text-xs font-black px-3 py-1.5 flex-shrink-0"
+        style={{ background: '#1A1A1A', color: 'white', border: '2px solid #1A1A1A', fontFamily: 'Inter, sans-serif' }}
       >
         Enable
       </button>
@@ -1802,8 +1822,8 @@ function DailyGem({ places, onSelect }: { places: Place[]; onSelect: (p: Place) 
   return (
     <div className="px-5 pb-5">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-black uppercase tracking-tight" style={{ fontFamily: 'Epilogue, sans-serif' }}>{dayOfWeek}'s Spot</h2>
-        <span className="text-xs font-semibold" style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}>🗓 Changes daily</span>
+        <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Epilogue, sans-serif' }}>{dayOfWeek}'s Spot</h2>
+        <span className="text-xs font-black uppercase" style={{ color: '#666', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em' }}>🗓 Changes daily</span>
       </div>
       <button onClick={() => onSelect(gem)} className="w-full relative rounded-lg overflow-hidden text-left"
         style={{ height: '180px', boxShadow: '4px 4px 0 var(--brand)', animation: 'cardFadeIn 0.45s ease both' }}>
@@ -2068,21 +2088,21 @@ function DiscoverScreen({
       <StreakBanner />
 
       {/* Hero */}
-      <div className="px-5 pt-5 pb-3" style={{ background: 'linear-gradient(180deg, rgba(160,59,0,0.06) 0%, transparent 100%)' }}>
+      <div className="px-5 pt-5 pb-4" style={{ background: 'white', borderBottom: '2px solid #1A1A1A' }}>
         <p
-          className="text-xs font-semibold tracking-widest uppercase"
-          style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}
+          className="text-xs font-black uppercase mb-1"
+          style={{ color: '#888', fontFamily: 'Inter, sans-serif', letterSpacing: '0.12em' }}
         >
           Greater ABQ Metro
         </p>
         <h1
-          className="text-4xl font-black uppercase tracking-tighter leading-none mt-1"
-          style={{ fontFamily: 'Epilogue, sans-serif' }}
+          className="font-black uppercase leading-none"
+          style={{ fontFamily: 'Epilogue, sans-serif', fontSize: '48px', letterSpacing: '-0.04em', color: '#1A1A1A', lineHeight: 1 }}
         >
           {heroDisplay || ' '}
         </h1>
-        <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
-          {places.length} places · {events.length} events in Greater ABQ
+        <p className="mt-2" style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', color: '#666', fontWeight: 600, letterSpacing: '0.04em' }}>
+          {places.length} places · {events.length} events
         </p>
       </div>
 
@@ -2097,9 +2117,9 @@ function DiscoverScreen({
       {/* This Week Events - horizontal scroll */}
       {!hidden.includes('thisWeek') && eventsLoading && upcomingEvents.length === 0 && (
         <div className="pb-5">
-          <div className="flex items-center justify-between px-5 mb-3">
-            <h2 className="text-lg font-black uppercase tracking-tight" style={{ fontFamily: 'Epilogue, sans-serif' }}>This Week</h2>
-            <span className="text-xs font-semibold" style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}>Loading…</span>
+          <div className="flex items-center justify-between px-5 py-3 mb-0" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
+            <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Epilogue, sans-serif' }}>This Week</h2>
+            <span className="text-xs font-black uppercase" style={{ color: '#666', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em' }}>Loading…</span>
           </div>
           <div className="flex gap-3 px-5 pb-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
             {[0,1,2].map(i => (
@@ -2110,14 +2130,14 @@ function DiscoverScreen({
       )}
       {!hidden.includes('thisWeek') && upcomingEvents.length > 0 && (
         <div className="pb-5">
-          <div className="flex items-center justify-between px-5 mb-3">
+          <div className="flex items-center justify-between px-5 py-3 mb-0" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
             <h2
-              className="text-lg font-black uppercase tracking-tight"
-              style={{ fontFamily: 'Epilogue, sans-serif' }}
+              className="text-sm font-black uppercase"
+              style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em' }}
             >
               This Week
             </h2>
-            <span className="text-xs font-semibold" style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}>
+            <span className="text-xs font-black uppercase" style={{ color: '#666', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em' }}>
                Live events
             </span>
           </div>
@@ -2261,9 +2281,9 @@ function DiscoverScreen({
       {/* Near You */}
       {!hidden.includes('nearYou') && coords && nearbyPlaces.length > 0 && (
         <div className="pb-5">
-          <div className="flex items-center justify-between px-5 mb-3">
+          <div className="flex items-center justify-between px-5 py-3 mb-0" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
             <h2
-              className="text-lg font-black uppercase tracking-tight"
+              className="text-sm font-black uppercase"
               style={{ fontFamily: 'Epilogue, sans-serif' }}
             >
               Near You
@@ -2322,14 +2342,14 @@ function DiscoverScreen({
       {/* Hidden Gems */}
       {!hidden.includes('hiddenGems') && hiddenGems.length > 0 && (
         <div className="pb-5">
-          <div className="flex items-center justify-between px-5 mb-3">
+          <div className="flex items-center justify-between px-5 py-3 mb-0" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
             <h2
-              className="text-lg font-black uppercase tracking-tight"
+              className="text-sm font-black uppercase"
               style={{ fontFamily: 'Epilogue, sans-serif' }}
             >
               Hidden Gems
             </h2>
-            <span className="text-xs font-semibold" style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}>
+            <span className="text-xs font-black uppercase" style={{ color: '#666', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em' }}>
               ★ 4.5+ rated
             </span>
           </div>
@@ -2545,7 +2565,7 @@ function EventsScreen({
 
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-      <div className="px-5 pt-5 pb-3" style={{ background: 'linear-gradient(180deg, rgba(160,59,0,0.06) 0%, transparent 100%)' }}>
+      <div className="px-5 pt-5 pb-4" style={{ background: 'white', borderBottom: '2px solid #1A1A1A' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}
@@ -2553,8 +2573,8 @@ function EventsScreen({
           What's Happening
         </p>
         <h1
-          className="text-4xl font-black uppercase tracking-tighter leading-none mt-1"
-          style={{ fontFamily: 'Epilogue, sans-serif' }}
+          className="font-black uppercase leading-none mt-1"
+          style={{ fontFamily: 'Epilogue, sans-serif', fontSize: '48px', letterSpacing: '-0.04em', color: '#1A1A1A' }}
         >
           Live Events<br />Near You
         </h1>
@@ -2563,10 +2583,10 @@ function EventsScreen({
         </p>
       </div>
 
-      <div className="px-5 pb-3">
+      <div className="px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A' }}>
         <div
-          className="flex items-center gap-2 bg-white rounded-lg px-4 py-3"
-          style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.12)' }}
+          className="flex items-center gap-2 bg-white px-4 py-3"
+          style={{ border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A' }}
         >
           <span className="material-symbols-outlined text-gray-400" style={{ fontSize: '20px' }}>search</span>
           <input
@@ -2584,17 +2604,23 @@ function EventsScreen({
         </div>
       </div>
 
-      <div className="flex gap-2 px-5 pb-4 overflow-x-auto" style={{ scrollbarWidth: 'none', position: 'sticky', top: 'calc(var(--sat) + 72px)', zIndex: 30, background: 'linear-gradient(180deg, var(--brand-bg-screen) 80%, transparent 100%)', paddingTop: '4px' }}>
+      <div className="flex px-5 overflow-x-auto" style={{ scrollbarWidth: 'none', position: 'sticky', top: 'calc(var(--sat) + 72px)', zIndex: 30, background: 'white', paddingTop: '12px', paddingBottom: '0px', borderBottom: '2px solid #1A1A1A' }}>
         {EVENT_GENRES.map(genre => (
           <button
             key={genre}
             onClick={() => setSelectedGenre(genre)}
-            className="flex-shrink-0 px-4 py-2 rounded text-sm font-bold transition-all"
+            className="flex-shrink-0 px-3 py-2 text-xs font-black uppercase transition-all"
             style={{
               fontFamily: 'Inter, sans-serif',
-              background: selectedGenre === genre ? 'var(--brand)' : 'white',
-              color: selectedGenre === genre ? 'white' : '#555',
-              boxShadow: selectedGenre === genre ? '3px 3px 0 var(--brand)' : '3px 3px 0 rgba(0,0,0,0.10)',
+              letterSpacing: '0.1em',
+              background: selectedGenre === genre ? '#1A1A1A' : 'white',
+              color: selectedGenre === genre ? 'white' : '#1A1A1A',
+              border: '1.5px solid #1A1A1A',
+              marginRight: '-1.5px',
+              borderRadius: 0,
+              position: 'relative',
+              zIndex: selectedGenre === genre ? 1 : 0,
+              marginBottom: '12px',
             }}
           >
             {genre}
@@ -2761,7 +2787,7 @@ function PlacesScreen({
 
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', willChange: 'transform' } as React.CSSProperties}>
-      <div className="px-5 pt-5 pb-3" style={{ background: 'linear-gradient(180deg, rgba(160,59,0,0.06) 0%, transparent 100%)' }}>
+      <div className="px-5 pt-5 pb-4" style={{ background: 'white', borderBottom: '2px solid #1A1A1A' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}
@@ -2769,8 +2795,8 @@ function PlacesScreen({
           Explore Greater ABQ
         </p>
         <h1
-          className="text-4xl font-black uppercase tracking-tighter leading-none mt-1"
-          style={{ fontFamily: 'Epilogue, sans-serif' }}
+          className="font-black uppercase leading-none mt-1"
+          style={{ fontFamily: 'Epilogue, sans-serif', fontSize: '48px', letterSpacing: '-0.04em', color: '#1A1A1A' }}
         >
           Places<br />to Go
         </h1>
@@ -2810,17 +2836,22 @@ function PlacesScreen({
       </div>
 
       {/* Category pills */}
-      <div className="flex gap-2 px-5 pb-3 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+      <div className="flex px-5 pb-0 overflow-x-auto" style={{ scrollbarWidth: 'none', borderBottom: '2px solid #1A1A1A', paddingBottom: '12px', paddingTop: '12px' }}>
         {PLACE_CATEGORIES.map(cat => (
           <button
             key={cat.label}
             onClick={() => setSelectedCat(cat.value)}
-            className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded text-sm font-semibold transition-all"
+            className="flex-shrink-0 flex items-center gap-1 px-3 py-2 text-xs font-black uppercase transition-all"
             style={{
               fontFamily: 'Inter, sans-serif',
-              background: selectedCat === cat.value ? 'var(--brand)' : 'white',
-              color: selectedCat === cat.value ? 'white' : '#333',
-              boxShadow: selectedCat === cat.value ? '3px 3px 0 var(--brand)' : '3px 3px 0 rgba(0,0,0,0.12)',
+              letterSpacing: '0.1em',
+              background: selectedCat === cat.value ? '#1A1A1A' : 'white',
+              color: selectedCat === cat.value ? 'white' : '#1A1A1A',
+              border: '1.5px solid #1A1A1A',
+              marginRight: '-1.5px',
+              borderRadius: 0,
+              position: 'relative',
+              zIndex: selectedCat === cat.value ? 1 : 0,
             }}
           >
             <span>{cat.icon}</span>
@@ -3372,7 +3403,7 @@ function ProfileScreen({
 
   return (
     <div className="w-full px-5 pb-28" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-      <div className="pt-5 pb-4" style={{ background: 'linear-gradient(180deg, rgba(160,59,0,0.06) 0%, transparent 100%)', marginLeft: '-20px', marginRight: '-20px', paddingLeft: '20px', paddingRight: '20px' }}>
+      <div className="pt-5 pb-4" style={{ background: 'white', borderBottom: '2px solid #1A1A1A', marginLeft: '-20px', marginRight: '-20px', paddingLeft: '20px', paddingRight: '20px' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}
@@ -3380,8 +3411,8 @@ function ProfileScreen({
           Your Profile
         </p>
         <h1
-          className="text-4xl font-black uppercase tracking-tighter leading-none mt-1"
-          style={{ fontFamily: 'Epilogue, sans-serif' }}
+          className="font-black uppercase leading-none mt-1"
+          style={{ fontFamily: 'Epilogue, sans-serif', fontSize: '48px', letterSpacing: '-0.04em', color: '#1A1A1A' }}
         >
           Hey,<br />{(user?.user_metadata?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Explorer').split(' ')[0]}
         </h1>
@@ -5528,30 +5559,30 @@ export default function App() {
         className="flex flex-col mx-auto relative"
         style={{ width: '100%', maxWidth: '480px', minHeight: '100dvh', background: 'var(--brand-bg-screen)', overflowX: 'hidden' }}
       >
-        {/* Glassmorphism header — Liquid Glass (iOS 26 HIG) with Dynamic Island / notch safe area */}
+        {/* Header — Urban Curator: white + hard 2px border-bottom */}
         <header
-          className="glass flex-shrink-0 px-5 flex items-center justify-between"
+          className="flex-shrink-0 px-4 flex items-center justify-between"
           style={{
             position: 'sticky',
             top: 0,
             paddingTop: 'calc(var(--sat) + 12px)',
             paddingBottom: '12px',
-            borderBottom: '1px solid rgba(0,0,0,0.06)',
+            background: 'white',
+            borderBottom: '2px solid #1A1A1A',
             zIndex: 40,
           }}
         >
           <div className="flex items-center gap-2">
             <ABQUnpluggedLogo size={47} />
           </div>
-          <div className="flex items-center gap-1.5">
-            {            <button onClick={() => setShowSearch(true)} className="w-11 h-11 rounded-full flex items-center justify-center" style={{ background: 'white', boxShadow: '3px 3px 0 rgba(0,0,0,0.15)' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '22px', color: 'var(--brand)' }}>search</span>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setShowSearch(true)} className="w-9 h-9 flex items-center justify-center" style={{ background: 'white', border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#1A1A1A' }}>search</span>
             </button>
-/* Location indicator */}
             <button
               onClick={requestGeo}
-              className="w-11 h-11 rounded-full flex items-center justify-center"
-              style={{ background: 'white', boxShadow: '3px 3px 0 rgba(0,0,0,0.15)' }}
+              className="w-9 h-9 flex items-center justify-center"
+              style={{ background: 'white', border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A' }}
               title={coords ? 'Location active' : 'Enable location'}
               aria-label={coords ? 'Location active' : 'Enable location'}
             >
@@ -5559,7 +5590,7 @@ export default function App() {
                 className="material-symbols-outlined"
                 style={{
                   fontSize: '18px',
-                  color: coords ? 'var(--brand)' : '#bbb',
+                  color: coords ? '#566500' : '#888',
                   fontVariationSettings: coords ? "'FILL' 1" : "'FILL' 0",
                 }}
               >
@@ -5640,7 +5671,7 @@ export default function App() {
             maxWidth: '480px',
             paddingTop: '8px',
             paddingBottom: 'calc(var(--sab) + 8px)',
-            borderTop: '1px solid rgba(0,0,0,0.07)',
+            borderTop: '2px solid #1A1A1A',
             zIndex: 40,
           }}
         >
