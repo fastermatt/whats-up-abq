@@ -591,7 +591,7 @@ const PlaceCard = React.memo(function PlaceCard({
           src={place.thumbnail || place.image}
           alt={place.name}
           className="w-full h-full object-cover"
-          gradient={place.gradient}
+          gradient={'var(--brand-gradient)'}
           showLabel={!place.image}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
@@ -747,7 +747,7 @@ function PlacePhotoGallery({ place }: { place: Place }) {
 
   if (allPhotos.length === 0) {
     return (
-      <div className="w-full h-full" style={{ background: place.gradient || 'var(--brand-gradient)' }} />
+      <div className="w-full h-full" style={{ background: 'var(--brand-gradient)' }} />
     );
   }
 
@@ -2235,7 +2235,7 @@ function DiscoverScreen({
                   src={place.image}
                   alt={place.name}
                   className="w-full h-full object-cover"
-                  gradient={place.gradient}
+                  gradient={'var(--brand-gradient)'}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 {checkedIn.has(place.id) && (
@@ -2286,7 +2286,7 @@ function DiscoverScreen({
                     src={place.image}
                     alt={place.name}
                     className="w-full h-full object-cover"
-                    gradient={place.gradient}
+                    gradient={'var(--brand-gradient)'}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                   <div className="absolute bottom-2 left-2">
@@ -2341,7 +2341,7 @@ function DiscoverScreen({
                     src={place.image}
                     alt={place.name}
                     className="w-full h-full object-cover"
-                    gradient={place.gradient}
+                    gradient={'var(--brand-gradient)'}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                   {place.rating && (
