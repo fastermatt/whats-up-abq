@@ -2037,7 +2037,7 @@ function DiscoverScreen({
   places, events, eventsLoading, onPlaceSelect, onEventSelect,
   coords, geoRequested, geoError, onRequestGeo,
   checkedIn, onCheckIn,
-  onNavigatePlaces, prefs,
+  onNavigatePlaces, onNavigateEvents, prefs,
 }: {
   places: Place[];
   events: TMEvent[];
@@ -2051,6 +2051,7 @@ function DiscoverScreen({
   checkedIn: Set<string>;
   onCheckIn: (id: string) => void;
   onNavigatePlaces?: (cat: string, search: string) => void;
+  onNavigateEvents?: () => void;
   prefs?: UserPrefs;
 }) {
   const hidden = prefs?.hiddenSections ?? [];
@@ -2122,86 +2123,84 @@ function DiscoverScreen({
         onRequest={onRequestGeo}
       />
 
-      {/* This Week Events - horizontal scroll */}
+      {/* This Week Events — brutalist table layout */}
       {!hidden.includes('thisWeek') && eventsLoading && upcomingEvents.length === 0 && (
-        <div className="pb-5">
-          <div className="flex items-center justify-between px-5 py-3 mb-0" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
-            <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Epilogue, sans-serif' }}>This Week</h2>
-            <span className="text-xs font-black uppercase" style={{ color: '#666', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em' }}>Loading…</span>
+        <div className="mb-5 mx-5" style={{ border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A' }}>
+          <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '2px solid #1A1A1A', backgroundColor: '#fff' }}>
+            <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em' }}>Events This Week</h2>
+            <span className="text-xs font-black" style={{ color: '#aaa' }}>Loading…</span>
           </div>
-          <div className="flex gap-3 px-5 pb-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-            {[0,1,2].map(i => (
-              <div key={i} className="flex-shrink-0 rounded-lg overflow-hidden" style={{ width: '200px', height: '160px', background: '#e8e8e8', opacity: 0.5 + i * 0.15 }} />
-            ))}
-          </div>
+          {[0,1,2].map(i => (
+            <div key={i} className="flex" style={{ borderBottom: i < 2 ? '1px solid #1A1A1A' : 'none', height: 64 }}>
+              <div style={{ width: 62, backgroundColor: '#e8e8e8' }} />
+              <div className="flex-1 px-3 py-2" style={{ backgroundColor: '#f5f5f5', opacity: 0.7 }} />
+              <div style={{ width: 48, backgroundColor: '#e8e8e8', borderLeft: '1px solid #ccc' }} />
+            </div>
+          ))}
         </div>
       )}
       {!hidden.includes('thisWeek') && upcomingEvents.length > 0 && (
-        <div className="pb-5">
-          <div className="flex items-center justify-between px-5 py-3 mb-0" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
-            <h2
-              className="text-sm font-black uppercase"
-              style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em' }}
-            >
-              This Week
+        <div className="mb-5 mx-5" style={{ border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A' }}>
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '2px solid #1A1A1A', backgroundColor: '#fff' }}>
+            <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>
+              Events This Week
             </h2>
-            <span className="text-xs font-black uppercase" style={{ color: '#666', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em' }}>
-               Live events
-            </span>
+            <button
+              onClick={() => onNavigateEvents?.()}
+              className="text-xs font-black uppercase"
+              style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A', letterSpacing: '0.06em' }}
+            >
+              → SEE ALL
+            </button>
           </div>
-          <div className="flex gap-3 px-5 pb-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-            {[...upcomingEvents].sort((a, b) => (eventMatchesInterests(b, interests) ? 1 : 0) - (eventMatchesInterests(a, interests) ? 1 : 0)).map(event => {
-              const imgSrc = getBestEventImage(event.images);
+          {/* Rows — top 6, sorted by date */}
+          {[...upcomingEvents]
+            .sort((a, b) => (a.dates?.start?.localDate || '').localeCompare(b.dates?.start?.localDate || ''))
+            .slice(0, 6)
+            .map((event, idx, arr) => {
+              const dateStr = event.dates?.start?.localDate;
+              const timeStr = event.dates?.start?.localTime;
               const venue = event._embedded?.venues?.[0];
+              const d = dateStr ? new Date(dateStr + 'T12:00:00') : null;
+              const month = d ? d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase() : '';
+              const day = d ? d.getDate() : '';
+              const time = timeStr ? formatTime(timeStr) : '';
+              const venueName = venue?.name ? venue.name.toUpperCase() : '';
               return (
                 <button
                   key={event.id}
                   onClick={() => onEventSelect(event)}
-                  className="flex-shrink-0 bg-white rounded-lg overflow-hidden text-left"
-                  style={{ width: '200px', boxShadow: '3px 3px 0 rgba(0,0,0,0.12)' }}
+                  className="flex w-full text-left"
+                  style={{ borderBottom: idx < arr.length - 1 ? '1px solid #D0D0D0' : 'none', backgroundColor: '#fff' }}
                 >
-                  <div className="relative" style={{ height: '120px' }}>
-                    {imgSrc ? (
-                      <img src={hiResUrl(imgSrc)} alt={event.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div
-                        className="w-full h-full flex items-center justify-center"
-                        style={{ background: 'var(--brand-gradient)' }}
-                      >
-                        <span className="text-4xl">♪</span>
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    <div className="absolute top-2 left-2">
-                      <span
-                        className="text-xs font-bold text-white px-1.5 py-0.5 rounded"
-                        style={{ background: 'var(--brand)' }}
-                      >
-                        {getEventCategory(event)}
-                      </span>
-                    </div>
-                    <div className="absolute bottom-2 left-2 right-2">
-                      <p
-                        className="text-white font-black text-xs leading-tight"
-                        style={{ fontFamily: 'Epilogue, sans-serif', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}
-                      >
-                        {event.name}
-                      </p>
-                    </div>
+                  {/* Date block */}
+                  <div className="flex flex-col items-center justify-center flex-shrink-0"
+                    style={{ width: 62, backgroundColor: '#1A1A1A', minHeight: 64 }}>
+                    <span className="font-black uppercase" style={{ fontSize: 10, color: '#D4EF4D', fontFamily: 'Inter, sans-serif', letterSpacing: '0.06em', lineHeight: 1 }}>
+                      {month}
+                    </span>
+                    <span className="font-black" style={{ fontSize: 30, color: '#fff', fontFamily: 'Epilogue, sans-serif', lineHeight: 1.05 }}>
+                      {day}
+                    </span>
                   </div>
-                  <div className="px-3 py-2">
-                    <p className="text-xs font-bold" style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}>
-                      {event.dates?.start?.localDate ? formatDate(event.dates.start.localDate) : 'TBD'}
-                      {event.dates?.start?.localTime ? ' · ' + formatTime(event.dates.start.localTime) : ''}
+                  {/* Content */}
+                  <div className="flex-1 px-3 py-2 flex flex-col justify-center overflow-hidden">
+                    <p className="font-black text-sm leading-tight" style={{ fontFamily: 'Epilogue, sans-serif', color: '#1A1A1A', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}>
+                      {event.name}
                     </p>
-                    {venue && (
-                      <p className="text-xs truncate" style={{ color: '#666' }}>{venue.name}</p>
-                    )}
+                    <p className="text-xs mt-0.5 truncate" style={{ color: '#888', fontFamily: 'Inter, sans-serif', letterSpacing: '0.02em' }}>
+                      {[time, venueName].filter(Boolean).join(' · ')}
+                    </p>
+                  </div>
+                  {/* Arrow */}
+                  <div className="flex items-center justify-center flex-shrink-0"
+                    style={{ width: 48, backgroundColor: '#D4EF4D', borderLeft: '1px solid #1A1A1A' }}>
+                    <span className="font-black" style={{ fontSize: 18, color: '#1A1A1A' }}>→</span>
                   </div>
                 </button>
               );
             })}
-          </div>
         </div>
       )}
 
@@ -5669,6 +5668,7 @@ export default function App() {
               onCheckIn={handleCheckIn}
 
               onNavigatePlaces={(cat, search) => { setPlacesNavCat(cat); setPlacesNavSearch(search); setPlacesNavKey(k => k + 1); setActiveTab('places'); }}
+              onNavigateEvents={() => setActiveTab('events')}
               prefs={prefs}/>
           )}
           {activeTab === 'events' && (
