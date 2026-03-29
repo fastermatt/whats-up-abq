@@ -51,7 +51,7 @@ class ErrorBoundary extends React.Component<
       const msg = this.state.error.message;
       return (
         <div style={{padding:'24px',fontFamily:'-apple-system,BlinkMacSystemFont,sans-serif',background:'#F2F2F7',minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>
-          <div style={{maxWidth:'480px',width:'100%',background:'#fff',borderRadius:'20px',padding:'28px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)'}}>
+          <div style={{maxWidth:'480px',width:'100%',background:'#fff',borderRadius:'4px',padding:'28px',boxShadow:'4px 4px 0 rgba(0,0,0,0.12)'}}>
             <div style={{fontSize:'38px',marginBottom:'12px'}}>{'⚠️'}</div>
             <div style={{fontSize:'20px',fontWeight:700,color:'#1C1C1E',marginBottom:'8px'}}>Something went wrong</div>
             <div style={{fontSize:'13px',color:'#FF3B30',fontFamily:'monospace',background:'#FFF5F5',borderRadius:'10px',padding:'12px',overflowX:'auto',marginBottom:'16px',wordBreak:'break-word'}}>{msg}</div>
@@ -520,14 +520,14 @@ function GeoBanner({
   if (coords) return null;
 
   if (error) return (
-    <div className="mx-5 mb-4 rounded-2xl p-3 flex items-center gap-3" style={{ background: 'rgba(160,59,0,0.08)' }}>
+    <div className="mx-5 mb-4 rounded-lg p-3 flex items-center gap-3" style={{ background: 'rgba(160,59,0,0.08)' }}>
       <span className="material-symbols-outlined flex-shrink-0" style={{ color: 'var(--brand)', fontSize: '20px' }}>location_off</span>
       <p className="text-xs text-gray-600 flex-1" style={{ fontFamily: 'Inter, sans-serif' }}>
         Enable location to see distances &amp; sort by nearby
       </p>
       <button
         onClick={onRequest}
-        className="text-xs font-bold px-3 py-1.5 rounded-xl text-white flex-shrink-0"
+        className="text-xs font-bold px-3 py-1.5 rounded-lg text-white flex-shrink-0"
         style={{ background: 'var(--brand)' }}
       >
         Retry
@@ -536,7 +536,7 @@ function GeoBanner({
   );
 
   if (requested) return (
-    <div className="mx-5 mb-4 rounded-2xl p-3 flex items-center gap-3" style={{ background: 'rgba(160,59,0,0.06)' }}>
+    <div className="mx-5 mb-4 rounded-lg p-3 flex items-center gap-3" style={{ background: 'rgba(160,59,0,0.06)' }}>
       <span className="material-symbols-outlined flex-shrink-0" style={{ color: 'var(--brand)', fontSize: '20px' }}>my_location</span>
       <p className="text-xs text-gray-500 flex-1" style={{ fontFamily: 'Inter, sans-serif' }}>Getting your location…</p>
     </div>
@@ -544,11 +544,11 @@ function GeoBanner({
 
   return (
     <div
-      className="mx-5 mb-4 rounded-2xl p-3 flex items-center gap-3"
-      style={{ background: 'white', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+      className="mx-5 mb-4 rounded-lg p-3 flex items-center gap-3"
+      style={{ background: 'white', boxShadow: '3px 3px 0 rgba(0,0,0,0.12)' }}
     >
       <div
-        className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+        className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
         style={{ background: 'var(--brand-bg-subtle)' }}
       >
         <span className="material-symbols-outlined" style={{ color: 'var(--brand)', fontSize: '20px' }}>near_me</span>
@@ -559,7 +559,7 @@ function GeoBanner({
       </div>
       <button
         onClick={onRequest}
-        className="text-xs font-bold px-3 py-1.5 rounded-xl text-white flex-shrink-0"
+        className="text-xs font-bold px-3 py-1.5 rounded-lg text-white flex-shrink-0"
         style={{ background: 'var(--brand)' }}
       >
         Enable
@@ -583,8 +583,8 @@ const PlaceCard = React.memo(function PlaceCard({
   return (
     <button
       onClick={onClick}
-      className="bg-white rounded-2xl overflow-hidden text-left w-full"
-      style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animation: 'cardFadeIn 0.3s ease both', contain: 'layout paint' }}
+      className="bg-white rounded-lg overflow-hidden text-left w-full"
+      style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.12)', animation: 'cardFadeIn 0.3s ease both', contain: 'layout paint' }}
     >
       <div className="relative" style={{ height: '140px' }}>
         <ImageWithFallback
@@ -617,7 +617,7 @@ const PlaceCard = React.memo(function PlaceCard({
         {isCheckedIn && (
           <div className="absolute bottom-2 left-2">
             <span
-              className="text-xs font-bold text-white px-1.5 py-0.5 rounded-full"
+              className="text-xs font-bold text-white px-1.5 py-0.5 rounded"
               style={{ background: 'rgba(160,59,0,0.85)' }}
             >
               ✓ Visited
@@ -647,7 +647,7 @@ const PlaceCard = React.memo(function PlaceCard({
           {onCheckIn && (
             <button
               onClick={onCheckIn}
-              className="text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0"
+              className="text-xs font-bold px-2 py-0.5 rounded flex-shrink-0"
               style={{
                 background: isCheckedIn ? 'var(--brand-bg-subtle)' : 'var(--brand)',
                 color: isCheckedIn ? 'var(--brand)' : 'white',
@@ -675,8 +675,8 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
     <button
       ref={fadeRef}
       onClick={onClick}
-      className="bg-white rounded-2xl overflow-hidden text-left w-full flex"
-      style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', minHeight: '100px' }}
+      className="bg-white rounded-lg overflow-hidden text-left w-full flex"
+      style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.12)', minHeight: '100px' }}
     >
       <div className="flex-shrink-0 relative overflow-hidden" style={{ width: '110px' }}>
         {imgSrc ? (
@@ -693,7 +693,7 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
       <div className="flex-1 p-3 flex flex-col justify-between min-w-0">
         <div>
           <span
-            className="text-xs font-bold text-white px-2 py-0.5 rounded-full inline-block mb-1.5"
+            className="text-xs font-bold text-white px-2 py-0.5 rounded inline-block mb-1.5"
             style={{ background: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}
           >
             {category}
@@ -834,7 +834,7 @@ function PlaceDetailModal({
         </button>
         <div className="absolute bottom-4 left-4 right-4" style={{ zIndex: 3, pointerEvents: 'none' }}>
           <span
-            className="text-xs font-bold text-white px-2.5 py-1 rounded-full"
+            className="text-xs font-bold text-white px-2.5 py-1 rounded"
             style={{ background: 'var(--brand)', pointerEvents: 'auto' }}
           >
             {catEmoji} {place.category}
@@ -852,7 +852,7 @@ function PlaceDetailModal({
         {/* Rating + Check In row */}
         <div className="flex items-center gap-2 mb-4 flex-wrap">
           {place.rating && (
-            <div className="flex items-center gap-1 bg-white rounded-xl px-3 py-2" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}>
+            <div className="flex items-center gap-1 bg-white rounded-lg px-3 py-2" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.12)' }}>
               <span className="text-yellow-400">★</span>
               <span className="font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif' }}>
                 {place.rating.toFixed(1)}
@@ -863,7 +863,7 @@ function PlaceDetailModal({
             </div>
           )}
           {place.priceLevel != null && place.priceLevel > 0 && (
-            <div className="bg-white rounded-xl px-3 py-2" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}>
+            <div className="bg-white rounded-lg px-3 py-2" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.12)' }}>
               <span className="font-black text-sm text-green-600">
                 {'$'.repeat(Math.min(place.priceLevel, 4))}
               </span>
@@ -871,7 +871,7 @@ function PlaceDetailModal({
           )}
           <button
             onClick={onCheckIn}
-            className="ml-auto flex items-center gap-1.5 px-4 py-2 rounded-xl font-black text-sm transition-all"
+            className="ml-auto flex items-center gap-1.5 px-4 py-2 rounded-lg font-black text-sm transition-all"
             style={{
               background: tooFar ? '#dc2626' : isCheckedIn ? 'var(--brand-bg-subtle)' : 'var(--brand)',
               color: isCheckedIn && !tooFar ? 'var(--brand)' : 'white',
@@ -886,7 +886,7 @@ function PlaceDetailModal({
         </div>
 
         {checkInError && (
-          <div className="mb-4 px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-2" style={{ background: 'var(--brand-tint-bg)', color: 'var(--brand)', border: '1px solid #ffe0b2' }}>
+          <div className="mb-4 px-4 py-3 rounded-lg text-sm font-semibold flex items-center gap-2" style={{ background: 'var(--brand-tint-bg)', color: 'var(--brand)', border: '1px solid #ffe0b2' }}>
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>location_off</span>
             {checkInError}
           </div>
@@ -907,8 +907,8 @@ function PlaceDetailModal({
           .map((item: any, i) => (
             <div
               key={i}
-              className="flex items-start gap-3 mb-3 bg-white rounded-xl p-3"
-              style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}
+              className="flex items-start gap-3 mb-3 bg-white rounded-lg p-3"
+              style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}
             >
               <span
                 className="material-symbols-outlined flex-shrink-0"
@@ -924,7 +924,7 @@ function PlaceDetailModal({
 
         {/* Map */}
         {(place.address || place.lat) && (
-          <div className="rounded-2xl overflow-hidden mb-4" style={{ height: '180px' }}>
+          <div className="rounded-lg overflow-hidden mb-4" style={{ height: '180px' }}>
             <iframe
               title={`Map for ${place.name}`}
               width="100%"
@@ -939,12 +939,12 @@ function PlaceDetailModal({
         {(place.isKidFriendly || place.isAccessible) && (
           <div className="flex gap-2 mt-2 mb-4 flex-wrap">
             {place.isKidFriendly && (
-              <span className="text-xs font-semibold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full">
+              <span className="text-xs font-semibold bg-blue-50 text-blue-700 px-2.5 py-1 rounded">
                 ‍‍ Kid Friendly
               </span>
             )}
             {place.isAccessible && (
-              <span className="text-xs font-semibold bg-green-50 text-green-700 px-2.5 py-1 rounded-full">
+              <span className="text-xs font-semibold bg-green-50 text-green-700 px-2.5 py-1 rounded">
                 ♿ Accessible
               </span>
             )}
@@ -955,7 +955,7 @@ function PlaceDetailModal({
           href={`https://maps.google.com/?q=${mapsQuery}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="block w-full py-4 text-center text-white font-black text-sm rounded-2xl mt-2"
+          className="block w-full py-4 text-center text-white font-black text-sm rounded-lg mt-2"
           style={{ background: 'var(--brand-gradient)', fontFamily: 'Epilogue, sans-serif' }}
         >
           GET DIRECTIONS →
@@ -1025,7 +1025,7 @@ function ReviewCard({ review }: { review: Review }) {
     .toUpperCase() || '?';
 
   return (
-    <div className="bg-white rounded-2xl p-4" style={{ boxShadow: '0 1px 6px rgba(0,0,0,0.07)' }}>
+    <div className="bg-white rounded-lg p-4" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
       <div className="flex items-start gap-3 mb-2">
         <div
           className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-black text-white flex-shrink-0"
@@ -1153,7 +1153,7 @@ function ReviewSection({
           user
             ? <button
                 onClick={() => setShowForm(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black text-white"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black text-white"
                 style={{ background: 'var(--brand)', fontFamily: 'Epilogue, sans-serif' }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>edit</span>
@@ -1161,7 +1161,7 @@ function ReviewSection({
               </button>
             : <button
                 onClick={onShowAuth}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black text-white"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black text-white"
                 style={{ background: 'var(--brand)', fontFamily: 'Epilogue, sans-serif' }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>login</span>
@@ -1178,7 +1178,7 @@ function ReviewSection({
 
       {/* Gate message for non-checked-in users */}
       {!isCheckedIn && (
-        <div className="mb-4 rounded-2xl p-3 flex items-center gap-3" style={{ background: 'rgba(160,59,0,0.06)' }}>
+        <div className="mb-4 rounded-lg p-3 flex items-center gap-3" style={{ background: 'rgba(160,59,0,0.06)' }}>
           <span className="material-symbols-outlined" style={{ color: 'var(--brand)', fontSize: '20px' }}>lock</span>
           <p className="text-xs text-gray-600 flex-1" style={{ fontFamily: 'Inter, sans-serif' }}>
             Check in here first to leave a review
@@ -1188,7 +1188,7 @@ function ReviewSection({
 
       {/* Success toast */}
       {submitted && (
-        <div className="mb-3 rounded-2xl p-3 flex items-center gap-2" style={{ background: 'rgba(160,59,0,0.08)' }}>
+        <div className="mb-3 rounded-lg p-3 flex items-center gap-2" style={{ background: 'rgba(160,59,0,0.08)' }}>
           <span className="material-symbols-outlined" style={{ color: 'var(--brand)', fontSize: '18px', fontVariationSettings: "'FILL' 1" }}>check_circle</span>
           <p className="text-xs font-bold" style={{ color: 'var(--brand)' }}>Review posted — thanks! ✓</p>
         </div>
@@ -1196,7 +1196,7 @@ function ReviewSection({
 
       {/* Review form */}
       {showForm && isCheckedIn && user && !alreadyReviewed && (
-        <div className="mb-4 rounded-2xl p-4" style={{ background: 'white', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
+        <div className="mb-4 rounded-lg p-4" style={{ background: 'white', boxShadow: '4px 4px 0 rgba(0,0,0,0.12)' }}>
           <div className="mb-3">
             <p className="text-xs font-bold text-gray-600 mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
               How many outlets does this place get?
@@ -1209,7 +1209,7 @@ function ReviewSection({
             onChange={e => handleTextChange(e.target.value)}
             placeholder="Tell people what made this place worth visiting (or not)..."
             rows={3}
-            className="w-full text-sm rounded-xl border border-gray-200 p-3 resize-none focus:outline-none"
+            className="w-full text-sm rounded-lg border border-gray-200 p-3 resize-none focus:outline-none"
             style={{
               fontFamily: 'Inter, sans-serif',
               background: '#fafafa',
@@ -1219,7 +1219,7 @@ function ReviewSection({
 
           {/* Profanity warning */}
           {profWarn && (
-            <div className="mt-2 rounded-xl p-3 text-xs leading-relaxed" style={{ background: '#fffbeb', border: '1px solid #fde68a', color: '#92400e' }}>
+            <div className="mt-2 rounded-lg p-3 text-xs leading-relaxed" style={{ background: '#fffbeb', border: '1px solid #fde68a', color: '#92400e' }}>
               <p className="font-bold mb-1">
                 Whoa there! Kids use this app — let's try other words. 😄
               </p>
@@ -1252,14 +1252,14 @@ function ReviewSection({
           <div className="flex gap-2 mt-3">
             <button
               onClick={() => { setShowForm(false); setProfWarn(null); setError(null); }}
-              className="flex-1 py-2.5 rounded-xl text-xs font-bold text-gray-500 bg-gray-100"
+              className="flex-1 py-2.5 rounded-lg text-xs font-bold text-gray-500 bg-gray-100"
             >
               Cancel
             </button>
             <button
               onClick={handleSubmit}
               disabled={submitting || rating === 0}
-              className="flex-1 py-2.5 rounded-xl text-xs font-black text-white transition-all"
+              className="flex-1 py-2.5 rounded-lg text-xs font-black text-white transition-all"
               style={{
                 background: submitting || rating === 0 ? '#d1d5db' : 'var(--brand)',
                 fontFamily: 'Epilogue, sans-serif',
@@ -1326,7 +1326,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
         </button>
         <div className="absolute bottom-4 left-4 right-4">
           <span
-            className="text-xs font-bold text-white px-2.5 py-1 rounded-full"
+            className="text-xs font-bold text-white px-2.5 py-1 rounded"
             style={{ background: 'var(--brand)' }}
           >
             {category}
@@ -1342,13 +1342,13 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
 
       <div className="px-5 py-4 pb-10">
         <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="bg-white rounded-2xl p-3" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
+          <div className="bg-white rounded-lg p-3" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
             <p className="text-xs text-gray-400 mb-1">Date</p>
             <p className="font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif', color: 'var(--brand)' }}>
               {event.dates?.start?.localDate ? formatDate(event.dates.start.localDate) : 'TBD'}
             </p>
           </div>
-          <div className="bg-white rounded-2xl p-3" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
+          <div className="bg-white rounded-lg p-3" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
             <p className="text-xs text-gray-400 mb-1">Time</p>
             <p className="font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif', color: 'var(--brand)' }}>
               {event.dates?.start?.localTime ? formatTime(event.dates.start.localTime) : 'TBD'}
@@ -1356,8 +1356,8 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
           </div>
           {venue && (
             <div
-              className="col-span-2 bg-white rounded-2xl p-3"
-              style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}
+              className="col-span-2 bg-white rounded-lg p-3"
+              style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}
             >
               <p className="text-xs text-gray-400 mb-1">Venue</p>
               <p className="font-bold text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -1369,7 +1369,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
             </div>
           )}
           {price && (
-            <div className="col-span-2 bg-white rounded-2xl p-3" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
+            <div className="col-span-2 bg-white rounded-lg p-3" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
               <p className="text-xs text-gray-400 mb-1">Price</p>
               <p className="font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif' }}>
                 ${Math.round(price.min || 0)} – ${Math.round(price.max || 0)}
@@ -1380,7 +1380,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
 
         {/* Venue map */}
         {venue?.address?.line1 && (
-          <div className="rounded-2xl overflow-hidden mb-4" style={{ height: '160px' }}>
+          <div className="rounded-lg overflow-hidden mb-4" style={{ height: '160px' }}>
             <iframe
               title={`Map for ${venue.name}`}
               width="100%"
@@ -1392,7 +1392,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
           </div>
         )}
 
-        <div className="rounded-2xl p-4 mb-4" style={{ background: 'rgba(160,59,0,0.08)' }}>
+        <div className="rounded-lg p-4 mb-4" style={{ background: 'rgba(160,59,0,0.08)' }}>
           <p
             className="font-black text-sm mb-1"
             style={{ fontFamily: 'Epilogue, sans-serif', color: 'var(--brand)' }}
@@ -1412,7 +1412,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-between w-full px-5 py-3 text-white font-black text-sm rounded-2xl"
+                className="flex items-center justify-between w-full px-5 py-3 text-white font-black text-sm rounded-lg"
                 style={{
                   background: link.source === 'Ticketmaster'
                     ? 'linear-gradient(135deg, #026cdf, #02a7f0)'
@@ -1432,7 +1432,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
             href={event.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="block w-full py-4 text-center text-white font-black text-sm rounded-2xl"
+            className="block w-full py-4 text-center text-white font-black text-sm rounded-lg"
             style={{
               background: event._source === 'seatgeek'
                 ? 'linear-gradient(135deg, #d4184a, #ff5c5c)'
@@ -1449,7 +1449,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
             href={`https://maps.google.com/?q=${mapsQuery}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="block w-full py-4 text-center text-white font-black text-sm rounded-2xl"
+            className="block w-full py-4 text-center text-white font-black text-sm rounded-lg"
             style={{ background: 'var(--brand-gradient)', fontFamily: 'Epilogue, sans-serif' }}
           >
             GET DIRECTIONS →
@@ -1773,7 +1773,7 @@ function StreakBanner() {
     ? `${info.count} days running — ABQ local in the making 🌶️`
     : `Welcome back! Day ${info.count} in a row.`;
   return (
-    <div className="mx-5 mb-3 rounded-2xl flex items-center justify-between gap-3 px-4 py-3"
+    <div className="mx-5 mb-3 rounded-lg flex items-center justify-between gap-3 px-4 py-3"
       style={{ background: 'var(--brand-gradient)', animation: 'cardFadeIn 0.4s ease both' }}>
       <div className="flex items-center gap-2 min-w-0">
         <span style={{ fontSize: '22px', lineHeight: 1 }}>{emoji}</span>
@@ -1805,12 +1805,12 @@ function DailyGem({ places, onSelect }: { places: Place[]; onSelect: (p: Place) 
         <h2 className="text-lg font-black uppercase tracking-tight" style={{ fontFamily: 'Epilogue, sans-serif' }}>{dayOfWeek}'s Spot</h2>
         <span className="text-xs font-semibold" style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}>🗓 Changes daily</span>
       </div>
-      <button onClick={() => onSelect(gem)} className="w-full relative rounded-2xl overflow-hidden text-left"
-        style={{ height: '180px', boxShadow: '0 4px 20px rgba(160,59,0,0.22)', animation: 'cardFadeIn 0.45s ease both' }}>
+      <button onClick={() => onSelect(gem)} className="w-full relative rounded-lg overflow-hidden text-left"
+        style={{ height: '180px', boxShadow: '4px 4px 0 var(--brand)', animation: 'cardFadeIn 0.45s ease both' }}>
         {gem.image && <img src={gem.image} alt={gem.name} className="w-full h-full object-cover" style={{ filter: 'brightness(0.82)' }} />}
         <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, rgba(160,59,0,0.18) 0%, rgba(0,0,0,0.72) 100%)' }} />
         <div className="absolute top-3 left-3">
-          <span className="text-xs font-black text-white px-3 py-1 rounded-full"
+          <span className="text-xs font-black text-white px-3 py-1 rounded"
             style={{ background: 'var(--brand)', fontFamily: 'Inter, sans-serif', letterSpacing: '0.05em' }}>
             ⭐ Spot of the Day
           </span>
@@ -1845,7 +1845,7 @@ function KoFiBanner() {
   });
   if (dismissed) return null;
   return (
-    <div className="mx-5 mb-6 rounded-2xl overflow-hidden"
+    <div className="mx-5 mb-6 rounded-lg overflow-hidden"
       style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #2d1a00 100%)', animation: 'cardFadeIn 0.5s ease both' }}>
       <div className="px-4 py-4 flex items-center gap-3">
         <span style={{ fontSize: '28px', lineHeight: 1 }}>☕</span>
@@ -1857,7 +1857,7 @@ function KoFiBanner() {
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <a href="https://ko-fi.com/stopscrolling" target="_blank" rel="noopener noreferrer"
-            className="text-xs font-black px-3 py-2 rounded-xl text-white"
+            className="text-xs font-black px-3 py-2 rounded-lg text-white"
             style={{ background: '#FF5E5B', fontFamily: 'Inter, sans-serif', whiteSpace: 'nowrap' }}>
             Support ♥
           </a>
@@ -1889,7 +1889,7 @@ function AnimatedFact() {
   return (
     <div className="mx-5 mb-6">
       <p className="text-xs font-black tracking-widest text-gray-400 uppercase mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>DID YOU KNOW?</p>
-      <button onClick={next} className="w-full rounded-2xl p-5 text-left active:scale-95 transition-transform" style={{ background: 'linear-gradient(135deg, rgba(212,239,77,0.06), rgba(212,239,77,0.16))', minHeight: 96 }}>
+      <button onClick={next} className="w-full rounded-lg p-5 text-left active:scale-95 transition-transform" style={{ background: 'linear-gradient(135deg, rgba(212,239,77,0.06), rgba(212,239,77,0.16))', minHeight: 96 }}>
         <div style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.35s ease' }}>
           <span className="text-3xl">{facts[idx].icon}</span>
           <p className="text-sm text-gray-800 mt-2 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>{facts[idx].fact}</p>
@@ -1931,7 +1931,7 @@ function DayPlanner() {
         <p className="text-xs font-black tracking-widest text-gray-400 uppercase" style={{ fontFamily: 'Inter, sans-serif' }}>TODAY'S PLAN</p>
         <span className="text-xs text-gray-400" style={{ fontFamily: 'Inter, sans-serif' }}>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</span>
       </div>
-      <div className="bg-white rounded-2xl overflow-hidden" style={{ border: '1px solid #f3f4f6' }}>
+      <div className="bg-white rounded-lg overflow-hidden" style={{ border: '1px solid #f3f4f6' }}>
         {plan.items.length > 0 && (
           <div className="flex items-center gap-2 px-4 pt-3 pb-1">
             <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
@@ -1956,8 +1956,8 @@ function DayPlanner() {
           </div>
         ))}
         <div className="flex gap-2 p-3">
-          <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && addItem(input)} placeholder="Add something to do..." className="flex-1 text-sm rounded-xl px-3 py-2 outline-none" style={{ fontFamily: 'Inter, sans-serif', backgroundColor: '#f9fafb' }} />
-          <button onClick={() => addItem(input)} className="text-white rounded-xl px-4 py-2 text-sm font-bold" style={{ backgroundColor: '#f97316', fontFamily: 'Inter, sans-serif' }}>+</button>
+          <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && addItem(input)} placeholder="Add something to do..." className="flex-1 text-sm rounded-lg px-3 py-2 outline-none" style={{ fontFamily: 'Inter, sans-serif', backgroundColor: '#f9fafb' }} />
+          <button onClick={() => addItem(input)} className="text-white rounded-lg px-4 py-2 text-sm font-bold" style={{ backgroundColor: '#f97316', fontFamily: 'Inter, sans-serif' }}>+</button>
         </div>
       </div>
     </div>
@@ -1983,14 +1983,14 @@ function MyWishlist() {
         {items.length > 0 && <span className="text-xs font-bold" style={{ color: '#f97316', fontFamily: 'Inter, sans-serif' }}>{items.length} saved</span>}
       </div>
       {items.length === 0 ? (
-        <div className="bg-gray-50 rounded-2xl p-5 flex items-center gap-3">
+        <div className="bg-gray-50 rounded-lg p-5 flex items-center gap-3">
           <span className="text-2xl flex-shrink-0">🤍</span>
           <p className="text-sm text-gray-500 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>Tap ♡ on any event or place to save it here for later</p>
         </div>
       ) : (
         <div className="flex flex-col gap-2">
           {items.map(item => (
-            <div key={item.id} className="bg-white rounded-2xl p-4 flex items-center gap-3" style={{ border: '1px solid #f3f4f6' }}>
+            <div key={item.id} className="bg-white rounded-lg p-4 flex items-center gap-3" style={{ border: '1px solid #f3f4f6' }}>
               <span className="text-xl flex-shrink-0">{item.type === 'event' ? '📅' : '📍'}</span>
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>{item.name}</p>
@@ -2103,7 +2103,7 @@ function DiscoverScreen({
           </div>
           <div className="flex gap-3 px-5 pb-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
             {[0,1,2].map(i => (
-              <div key={i} className="flex-shrink-0 rounded-2xl overflow-hidden" style={{ width: '200px', height: '160px', background: '#e8e8e8', opacity: 0.5 + i * 0.15 }} />
+              <div key={i} className="flex-shrink-0 rounded-lg overflow-hidden" style={{ width: '200px', height: '160px', background: '#e8e8e8', opacity: 0.5 + i * 0.15 }} />
             ))}
           </div>
         </div>
@@ -2129,8 +2129,8 @@ function DiscoverScreen({
                 <button
                   key={event.id}
                   onClick={() => onEventSelect(event)}
-                  className="flex-shrink-0 bg-white rounded-2xl overflow-hidden text-left"
-                  style={{ width: '200px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+                  className="flex-shrink-0 bg-white rounded-lg overflow-hidden text-left"
+                  style={{ width: '200px', boxShadow: '3px 3px 0 rgba(0,0,0,0.12)' }}
                 >
                   <div className="relative" style={{ height: '120px' }}>
                     {imgSrc ? (
@@ -2146,7 +2146,7 @@ function DiscoverScreen({
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                     <div className="absolute top-2 left-2">
                       <span
-                        className="text-xs font-bold text-white px-1.5 py-0.5 rounded-full"
+                        className="text-xs font-bold text-white px-1.5 py-0.5 rounded"
                         style={{ background: 'var(--brand)' }}
                       >
                         {getEventCategory(event)}
@@ -2193,7 +2193,7 @@ function DiscoverScreen({
             {/* Hero card */}
             <button
               onClick={() => onPlaceSelect(featured[0])}
-              className="relative overflow-hidden rounded-2xl col-span-2"
+              className="relative overflow-hidden rounded-lg col-span-2"
               style={{ height: '176px' }}
             >
               <ImageWithFallback
@@ -2204,13 +2204,13 @@ function DiscoverScreen({
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
               <div className="absolute top-3 left-3">
-                <span className="text-xs font-bold text-white bg-primary px-2 py-1 rounded-full">
+                <span className="text-xs font-bold text-white bg-primary px-2 py-1 rounded">
                   ⚡ Featured
                 </span>
               </div>
               {checkedIn.has(featured[0].id) && (
                 <div className="absolute top-3 right-3">
-                  <span className="text-xs font-bold text-white px-2 py-1 rounded-full" style={{ background: 'rgba(160,59,0,0.85)' }}>✓ Visited</span>
+                  <span className="text-xs font-bold text-white px-2 py-1 rounded" style={{ background: 'rgba(160,59,0,0.85)' }}>✓ Visited</span>
                 </div>
               )}
               <div className="absolute bottom-3 left-3 right-3 text-left">
@@ -2228,7 +2228,7 @@ function DiscoverScreen({
               <button
                 key={place.id}
                 onClick={() => onPlaceSelect(place)}
-                className="relative overflow-hidden rounded-2xl"
+                className="relative overflow-hidden rounded-lg"
                 style={{ height: '128px' }}
               >
                 <ImageWithFallback
@@ -2240,7 +2240,7 @@ function DiscoverScreen({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 {checkedIn.has(place.id) && (
                   <div className="absolute top-2 right-2">
-                    <span className="text-white text-xs px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(160,59,0,0.85)' }}>✓</span>
+                    <span className="text-white text-xs px-1.5 py-0.5 rounded" style={{ background: 'rgba(160,59,0,0.85)' }}>✓</span>
                   </div>
                 )}
                 <div className="absolute bottom-2.5 left-2.5 right-2.5 text-left">
@@ -2278,8 +2278,8 @@ function DiscoverScreen({
               <button
                 key={place.id}
                 onClick={() => onPlaceSelect(place)}
-                className="flex-shrink-0 bg-white rounded-2xl overflow-hidden text-left"
-                style={{ width: '144px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+                className="flex-shrink-0 bg-white rounded-lg overflow-hidden text-left"
+                style={{ width: '144px', boxShadow: '3px 3px 0 rgba(0,0,0,0.12)' }}
               >
                 <div className="relative" style={{ height: '100px' }}>
                   <ImageWithFallback
@@ -2291,7 +2291,7 @@ function DiscoverScreen({
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                   <div className="absolute bottom-2 left-2">
                     <span
-                      className="text-xs font-bold text-white px-1.5 py-0.5 rounded-full flex items-center gap-0.5"
+                      className="text-xs font-bold text-white px-1.5 py-0.5 rounded flex items-center gap-0.5"
                       style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }}
                     >
                       <span className="material-symbols-outlined" style={{ fontSize: '10px' }}>near_me</span>
@@ -2300,7 +2300,7 @@ function DiscoverScreen({
                   </div>
                   {checkedIn.has(place.id) && (
                     <div className="absolute top-2 right-2">
-                      <span className="text-white text-xs px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(160,59,0,0.85)' }}>✓</span>
+                      <span className="text-white text-xs px-1.5 py-0.5 rounded" style={{ background: 'rgba(160,59,0,0.85)' }}>✓</span>
                     </div>
                   )}
                 </div>
@@ -2336,7 +2336,7 @@ function DiscoverScreen({
           <div className="flex gap-3 px-5 pb-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
             {sortByInterests(hiddenGems, interests).map(place => (
               <button key={place.id} onClick={() => onPlaceSelect(place)} className="flex-shrink-0" style={{ width: '136px' }}>
-                <div className="relative rounded-2xl overflow-hidden mb-2" style={{ width: '136px', height: '136px' }}>
+                <div className="relative rounded-lg overflow-hidden mb-2" style={{ width: '136px', height: '136px' }}>
                   <ImageWithFallback
                     src={place.image}
                     alt={place.name}
@@ -2347,7 +2347,7 @@ function DiscoverScreen({
                   {place.rating && (
                     <div className="absolute bottom-2 left-2">
                       <span
-                        className="text-xs font-bold text-white px-1.5 py-0.5 rounded-full"
+                        className="text-xs font-bold text-white px-1.5 py-0.5 rounded"
                         style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}
                       >
                         ★ {place.rating.toFixed(1)}
@@ -2356,7 +2356,7 @@ function DiscoverScreen({
                   )}
                   {checkedIn.has(place.id) && (
                     <div className="absolute top-2 right-2">
-                      <span className="text-white text-xs px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(160,59,0,0.85)' }}>✓</span>
+                      <span className="text-white text-xs px-1.5 py-0.5 rounded" style={{ background: 'rgba(160,59,0,0.85)' }}>✓</span>
                     </div>
                   )}
                 </div>
@@ -2385,7 +2385,7 @@ function DiscoverScreen({
             { emoji: '👨‍👩‍👧', label: 'Family Fun', bg: '#fff8e1', color: '#f57f17' },
             { emoji: '🏃', label: 'Active', bg: '#fce4ec', color: '#c62828' },
           ].map(({ emoji, label, bg, color }) => (
-            <button key={label} className="rounded-2xl p-3 flex flex-col items-center gap-1 active:scale-95 transition-transform" style={{ backgroundColor: bg }}
+            <button key={label} className="rounded-lg p-3 flex flex-col items-center gap-1 active:scale-95 transition-transform" style={{ backgroundColor: bg }}
               onClick={() => { const m={'Outdoor':'park','Food & Drink':'restaurant','Arts & Culture':'arts','Live Music':'entertainment','Family Fun':'park','Active':'fitness'}; onNavigatePlaces?.(m[label]||'All', ''); }}>
               <span className="text-2xl">{emoji}</span>
               <span className="text-xs font-bold text-center leading-tight" style={{ fontFamily: 'Inter, sans-serif', color }}>{label}</span>
@@ -2406,7 +2406,7 @@ function DiscoverScreen({
             { name: 'NE Heights', desc: 'Views & dining', emoji: '🏔️', bg: '#4a148c' },
             { name: 'South Valley', desc: 'Local flavor', emoji: '🌶️', bg: '#b71c1c' },
           ].map(({ name, desc, emoji, bg }) => (
-            <button key={name} className="rounded-2xl p-4 text-left active:scale-95 transition-transform" style={{ backgroundColor: bg }}
+            <button key={name} className="rounded-lg p-4 text-left active:scale-95 transition-transform" style={{ backgroundColor: bg }}
               onClick={() => { onNavigatePlaces?.('All', name); }}>
               <span className="text-2xl">{emoji}</span>
               <p className="text-white font-black text-sm mt-1" style={{ fontFamily: 'Epilogue, sans-serif' }}>{name}</p>
@@ -2429,7 +2429,7 @@ function DiscoverScreen({
             { title: 'Local Food Crawl', steps: ['Green chile breakfast at Frontier', 'Lunch at El Modelo', 'Drinks on Central Ave'], bg: 'rgba(212,239,77,0.18)', accent: '#566500', emoji: '🌮' },
             { title: 'Nature Escape', steps: ['Rio Grande Bosque trail', 'Tingley Beach', 'Sunset at Petroglyph Monument'], bg: '#f3e5f5', accent: '#6a1b9a', emoji: '🌅' },
           ].map(({ title, steps, bg, accent, emoji }) => (
-            <div key={title} className="rounded-2xl p-5 shadow-md" style={{ backgroundColor: bg }}>
+            <div key={title} className="rounded-lg p-5 shadow-md" style={{ backgroundColor: bg }}>
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-xl">{emoji}</span>
@@ -2437,7 +2437,7 @@ function DiscoverScreen({
                 </div>
                 <button
                   onClick={() => addToDayPlan(steps)}
-                  className="text-xs font-bold px-3 py-1.5 rounded-xl text-white active:scale-95 transition-transform"
+                  className="text-xs font-bold px-3 py-1.5 rounded-lg text-white active:scale-95 transition-transform"
                   style={{ backgroundColor: accent, fontFamily: 'Inter, sans-serif' }}
                 >
                   + Add to plan
@@ -2445,7 +2445,7 @@ function DiscoverScreen({
               </div>
               <div className="flex flex-col gap-2 mt-1">
                 {steps.map((step, i) => (
-                  <div key={i} className="flex items-center gap-2 bg-white/25 rounded-xl px-3 py-2">
+                  <div key={i} className="flex items-center gap-2 bg-white/25 rounded-lg px-3 py-2">
                     <span className="text-sm font-bold rounded-full w-7 h-7 flex items-center justify-center text-white flex-shrink-0 shadow-sm" style={{ backgroundColor: accent }}>{i + 1}</span>
                     <button onClick={() => window.dispatchEvent(new CustomEvent('plan-step-click',{detail:step}))} className="text-sm font-semibold text-gray-800 hover:text-blue-700 transition-colors text-left leading-snug flex-1" style={{ fontFamily: 'Inter, sans-serif' }}>{step}</button>
                   </div>
@@ -2565,8 +2565,8 @@ function EventsScreen({
 
       <div className="px-5 pb-3">
         <div
-          className="flex items-center gap-2 bg-white rounded-2xl px-4 py-3"
-          style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+          className="flex items-center gap-2 bg-white rounded-lg px-4 py-3"
+          style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.12)' }}
         >
           <span className="material-symbols-outlined text-gray-400" style={{ fontSize: '20px' }}>search</span>
           <input
@@ -2589,12 +2589,12 @@ function EventsScreen({
           <button
             key={genre}
             onClick={() => setSelectedGenre(genre)}
-            className="flex-shrink-0 px-4 py-2 rounded-full text-sm font-bold transition-all"
+            className="flex-shrink-0 px-4 py-2 rounded text-sm font-bold transition-all"
             style={{
               fontFamily: 'Inter, sans-serif',
               background: selectedGenre === genre ? 'var(--brand)' : 'white',
               color: selectedGenre === genre ? 'white' : '#555',
-              boxShadow: selectedGenre === genre ? '0 4px 12px rgba(160,59,0,0.3)' : '0 1px 4px rgba(0,0,0,0.08)',
+              boxShadow: selectedGenre === genre ? '3px 3px 0 var(--brand)' : '3px 3px 0 rgba(0,0,0,0.10)',
             }}
           >
             {genre}
@@ -2790,8 +2790,8 @@ function PlacesScreen({
       {/* Search */}
       <div className="px-5 pb-3">
         <div
-          className="flex items-center gap-2 bg-white rounded-2xl px-4 py-3"
-          style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+          className="flex items-center gap-2 bg-white rounded-lg px-4 py-3"
+          style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.12)' }}
         >
           <span className="material-symbols-outlined text-gray-400" style={{ fontSize: '20px' }}>search</span>
           <input
@@ -2815,12 +2815,12 @@ function PlacesScreen({
           <button
             key={cat.label}
             onClick={() => setSelectedCat(cat.value)}
-            className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-semibold transition-all"
+            className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded text-sm font-semibold transition-all"
             style={{
               fontFamily: 'Inter, sans-serif',
               background: selectedCat === cat.value ? 'var(--brand)' : 'white',
               color: selectedCat === cat.value ? 'white' : '#333',
-              boxShadow: selectedCat === cat.value ? '0 4px 12px rgba(160,59,0,0.3)' : '0 1px 4px rgba(0,0,0,0.1)',
+              boxShadow: selectedCat === cat.value ? '3px 3px 0 var(--brand)' : '3px 3px 0 rgba(0,0,0,0.12)',
             }}
           >
             <span>{cat.icon}</span>
@@ -2839,12 +2839,12 @@ function PlacesScreen({
           <button
             key={s.id}
             onClick={() => { if (s.disabled) { onRequestGeo(); } else { setSortMode(s.id); } }}
-            className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+            className="flex-shrink-0 px-3 py-1.5 rounded text-xs font-bold transition-all"
             title={s.disabled ? 'Enable location to sort by distance' : undefined}
             style={{
               background: sortMode === s.id ? '#111' : 'white',
               color: sortMode === s.id ? 'white' : s.disabled ? '#ccc' : '#555',
-              boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+              boxShadow: '3px 3px 0 rgba(0,0,0,0.12)',
               opacity: s.disabled ? 0.6 : 1,
             }}
           >
@@ -2968,7 +2968,7 @@ function AuthModal({ onClose }: { onClose: () => void }) {
             <button
               onClick={handleGoogle}
               disabled={loading}
-              className="flex items-center justify-center gap-3 w-full rounded-2xl py-3.5 font-bold text-sm border border-gray-200"
+              className="flex items-center justify-center gap-3 w-full rounded-lg py-3.5 font-bold text-sm border border-gray-200"
               style={{ fontFamily: 'Inter, sans-serif', background: '#fff' }}
             >
               <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-3.58-13.47-8.71l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
@@ -2976,7 +2976,7 @@ function AuthModal({ onClose }: { onClose: () => void }) {
             </button>
             <button
               onClick={() => setMode('email')}
-              className="w-full rounded-2xl py-3.5 font-bold text-sm text-white"
+              className="w-full rounded-lg py-3.5 font-bold text-sm text-white"
               style={{ fontFamily: 'Inter, sans-serif', background: 'var(--brand)' }}
             >
               Continue with Email
@@ -2989,7 +2989,7 @@ function AuthModal({ onClose }: { onClose: () => void }) {
               {['Sign In', 'Sign Up'].map((t, i) => (
                 <button key={t} type="button"
                   onClick={() => setIsSignUp(i === 1)}
-                  className="flex-1 rounded-xl py-2 text-sm font-bold transition-all"
+                  className="flex-1 rounded-lg py-2 text-sm font-bold transition-all"
                   style={{ background: isSignUp === (i === 1) ? 'var(--brand)' : '#f5f5f5', color: isSignUp === (i === 1) ? 'white' : '#666', fontFamily: 'Inter, sans-serif' }}
                 >{t}</button>
               ))}
@@ -2998,20 +2998,20 @@ function AuthModal({ onClose }: { onClose: () => void }) {
               <input
                 type="text" placeholder="Display name (e.g. xplorer_abq)" value={displayName}
                 onChange={e => setDisplayName(e.target.value)}
-                className="w-full rounded-xl px-4 py-3 text-sm border border-gray-200 outline-none"
+                className="w-full rounded-lg px-4 py-3 text-sm border border-gray-200 outline-none"
                 style={{ fontFamily: 'Inter, sans-serif' }}
               />
             )}
             <input
               type="email" placeholder="Email" required value={email}
               onChange={e => setEmail(e.target.value)}
-              className="w-full rounded-xl px-4 py-3 text-sm border border-gray-200 outline-none"
+              className="w-full rounded-lg px-4 py-3 text-sm border border-gray-200 outline-none"
               style={{ fontFamily: 'Inter, sans-serif' }}
             />
             <input
               type="password" placeholder="Password (min 6 chars)" required value={password}
               onChange={e => setPassword(e.target.value)} minLength={6}
-              className="w-full rounded-xl px-4 py-3 text-sm border border-gray-200 outline-none"
+              className="w-full rounded-lg px-4 py-3 text-sm border border-gray-200 outline-none"
               style={{ fontFamily: 'Inter, sans-serif' }}
             />
             {error && <p className="text-red-500 text-xs">{error}</p>}
@@ -3023,7 +3023,7 @@ function AuthModal({ onClose }: { onClose: () => void }) {
             />
             <button
               type="submit" disabled={loading}
-              className="w-full rounded-2xl py-3.5 font-bold text-sm text-white"
+              className="w-full rounded-lg py-3.5 font-bold text-sm text-white"
               style={{ background: 'var(--brand)', fontFamily: 'Inter, sans-serif', opacity: loading ? 0.7 : 1 }}
             >
               {loading ? 'Please wait…' : (isSignUp ? 'Create Account' : 'Sign In')}
@@ -3190,8 +3190,8 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
     <div className="mb-4">
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between bg-white rounded-2xl px-4 py-3"
-        style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)', fontFamily: 'Inter, sans-serif' }}
+        className="w-full flex items-center justify-between bg-white rounded-lg px-4 py-3"
+        style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', fontFamily: 'Inter, sans-serif' }}
       >
         <div className="flex items-center gap-2">
           <span style={{ fontSize: '16px' }}>⚙️</span>
@@ -3205,7 +3205,7 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
 
           {/* Username */}
           {user ? (
-            <div className="bg-white rounded-2xl p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
+            <div className="bg-white rounded-lg p-4" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>Username</p>
               <div className="flex gap-2">
                 <input
@@ -3214,12 +3214,12 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
                   onChange={e => { setUsernameInput(e.target.value); setUsernameError(''); setUsernameSaved(false); }}
                   placeholder="e.g. xplorer_abq"
                   maxLength={20}
-                  className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-sm"
+                  className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm"
                   style={{ fontFamily: 'Inter, sans-serif', outline: 'none' }}
                 />
                 <button
                   onClick={handleUsernameSave}
-                  className="px-4 py-2 rounded-xl text-white text-sm font-bold flex-shrink-0"
+                  className="px-4 py-2 rounded-lg text-white text-sm font-bold flex-shrink-0"
                   style={{ background: usernameSaved ? '#2e7d32' : 'var(--brand)', fontFamily: 'Inter, sans-serif', minWidth: 64 }}
                 >
                   {usernameSaved ? '✓ Saved' : 'Save'}
@@ -3231,8 +3231,8 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
           ) : (
             <button
               onClick={onSignIn}
-              className="w-full bg-white rounded-2xl p-4 flex items-center gap-3 text-left"
-              style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)', fontFamily: 'Inter, sans-serif' }}
+              className="w-full bg-white rounded-lg p-4 flex items-center gap-3 text-left"
+              style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', fontFamily: 'Inter, sans-serif' }}
             >
               <span style={{ fontSize: '20px' }}>🏷️</span>
               <div>
@@ -3244,7 +3244,7 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
           )}
 
           {/* Homescreen Sections */}
-          <div className="bg-white rounded-2xl p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
+          <div className="bg-white rounded-lg p-4" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>Homescreen Sections</p>
             <div className="flex flex-col gap-3">
               {DISCOVER_SECTIONS.map(sec => {
@@ -3265,7 +3265,7 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
           </div>
 
           {/* Interests */}
-          <div className="bg-white rounded-2xl p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
+          <div className="bg-white rounded-lg p-4" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1" style={{ fontFamily: 'Inter, sans-serif' }}>Your Interests</p>
             <p className="text-xs text-gray-400 mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>Selected interests appear first in your feed</p>
             <div className="flex flex-wrap gap-2">
@@ -3275,8 +3275,8 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
                   <button
                     key={opt.id}
                     onClick={() => toggleInterest(opt.id)}
-                    className="px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
-                    style={{ fontFamily: 'Inter, sans-serif', background: active ? 'var(--brand)' : '#f3f4f6', color: active ? 'white' : '#374151', boxShadow: active ? '0 2px 6px rgba(160,59,0,0.25)' : 'none' }}
+                    className="px-3 py-1.5 rounded text-sm font-semibold transition-all"
+                    style={{ fontFamily: 'Inter, sans-serif', background: active ? 'var(--brand)' : '#f3f4f6', color: active ? 'white' : '#374151', boxShadow: active ? '2px 2px 0 var(--brand)' : 'none' }}
                   >
                     {opt.label}
                   </button>
@@ -3391,16 +3391,16 @@ function ProfileScreen({
       {!user ? (
         <button
           onClick={onSignIn}
-          className="w-full flex items-center justify-between rounded-2xl px-4 py-3 mb-4 text-white font-bold text-sm"
-          style={{ background: 'var(--brand-gradient)', fontFamily: 'Inter, sans-serif', boxShadow: '0 2px 8px rgba(160,59,0,0.25)' }}
+          className="w-full flex items-center justify-between rounded-lg px-4 py-3 mb-4 text-white font-bold text-sm"
+          style={{ background: 'var(--brand-gradient)', fontFamily: 'Inter, sans-serif', boxShadow: '3px 3px 0 var(--brand)' }}
         >
           <span>Sign in to sync check-ins & join the leaderboard</span>
           <span style={{ fontSize: '16px' }}>→</span>
         </button>
       ) : (
         <div
-          className="w-full flex items-center justify-between rounded-2xl px-4 py-3 mb-4"
-          style={{ background: 'linear-gradient(135deg, #1b5e20, #2e7d32)', fontFamily: 'Inter, sans-serif', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}
+          className="w-full flex items-center justify-between rounded-lg px-4 py-3 mb-4"
+          style={{ background: 'linear-gradient(135deg, #1b5e20, #2e7d32)', fontFamily: 'Inter, sans-serif', boxShadow: '3px 3px 0 rgba(0,0,0,0.15)' }}
         >
           <div>
             <p className="text-white font-bold text-sm">✅ Signed in & syncing your check-ins</p>
@@ -3421,11 +3421,11 @@ function ProfileScreen({
 
       {/* Profile card */}
       <div
-        className="flex items-center gap-4 bg-white rounded-2xl p-4 mb-4"
-        style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+        className="flex items-center gap-4 bg-white rounded-lg p-4 mb-4"
+        style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.12)' }}
       >
         <div
-          className="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden"
+          className="w-16 h-16 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden"
           style={{ background: 'var(--brand-gradient)' }}
         >
           {user?.photoURL ? (
@@ -3456,8 +3456,8 @@ function ProfileScreen({
         ].map(s => (
           <div
             key={s.label}
-            className="bg-white rounded-2xl p-3 text-center"
-            style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}
+            className="bg-white rounded-lg p-3 text-center"
+            style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}
           >
             <p
               className="text-2xl font-black"
@@ -3472,13 +3472,13 @@ function ProfileScreen({
 
       {/* Progress bar */}
       {myCount >= 50 ? (
-        <div className="bg-white rounded-2xl p-4 mb-4 text-center" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
+        <div className="bg-white rounded-lg p-4 mb-4 text-center" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
           <span style={{ fontSize: '28px' }}>★</span>
           <p className="font-black text-sm mt-1" style={{ fontFamily: 'Epilogue, sans-serif', color: 'var(--brand)' }}>Max Level Reached!</p>
           <p className="text-xs text-gray-400 mt-0.5" style={{ fontFamily: 'Inter, sans-serif' }}>You're a Legend — {myCount} places explored!</p>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl p-4 mb-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
+        <div className="bg-white rounded-lg p-4 mb-4" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs font-bold text-gray-700" style={{ fontFamily: 'Inter, sans-serif' }}>
               Progress to {nextLevel.label}
@@ -3510,7 +3510,7 @@ function ProfileScreen({
         {ACHIEVEMENTS.map(a => (
           <div
             key={a.id}
-            className="rounded-2xl p-3 text-center flex flex-col items-center gap-1"
+            className="rounded-lg p-3 text-center flex flex-col items-center gap-1"
             style={{
               background: a.unlocked ? a.color : `${a.color}88`,
               boxShadow: a.unlocked ? `0 2px 8px ${a.accent}22` : '0 1px 4px rgba(0,0,0,0.04)',
@@ -3545,9 +3545,9 @@ function ProfileScreen({
         {leaderboard.map((row) => (
           <div
             key={row.uid || `${row.name}_${row.rank}`}
-            className="flex items-center gap-3 bg-white rounded-2xl px-4 py-3"
+            className="flex items-center gap-3 bg-white rounded-lg px-4 py-3"
             style={{
-              boxShadow: row.isMe ? '0 0 0 2px var(--brand), 0 2px 8px var(--brand-bg-subtle)' : '0 1px 4px rgba(0,0,0,0.08)',
+              boxShadow: row.isMe ? '0 0 0 2px var(--brand), 0 2px 8px var(--brand-bg-subtle)' : '3px 3px 0 rgba(0,0,0,0.10)',
               background: row.isMe ? 'var(--brand-bg-subtle)' : 'white',
             }}
           >
@@ -3558,7 +3558,7 @@ function ProfileScreen({
               {row.rank === 1 ? '' : row.rank === 2 ? '' : row.rank === 3 ? '' : `#${row.rank}`}
             </span>
             <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
               style={{ background: row.isMe ? 'var(--brand-gradient)' : '#f0f0f0' }}
             >
               <span className="text-xs font-black" style={{ color: row.isMe ? 'white' : '#999' }}>
@@ -3583,7 +3583,7 @@ function ProfileScreen({
       </div>
 
       <div
-        className="rounded-2xl p-4 mb-5"
+        className="rounded-lg p-4 mb-5"
         style={{ background: 'rgba(160,59,0,0.06)' }}
       >
         <p className="text-xs text-gray-500 text-center" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -3606,11 +3606,11 @@ function ProfileScreen({
               .map(p => (
                 <div
                   key={p.id}
-                  className="flex items-center gap-3 bg-white rounded-2xl px-4 py-3"
-                  style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}
+                  className="flex items-center gap-3 bg-white rounded-lg px-4 py-3"
+                  style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}
                 >
                   <div
-                    className="w-10 h-10 rounded-xl flex-shrink-0 overflow-hidden"
+                    className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden"
                     style={{ background: hashGradient(p.name) }}
                   >
                     {p.image && (
@@ -3748,7 +3748,7 @@ function AddToHomePrompt() {
           <img
             src="/apple-touch-icon-180.png"
             alt="ABQ Unplugged"
-            style={{ width: 56, height: 56, borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}
+            style={{ width: 56, height: 56, borderRadius: 4, boxShadow: '3px 3px 0 rgba(0,0,0,0.15)' }}
           />
           <div>
             <div style={{ fontWeight: 800, fontSize: 17, color: '#1c1c1e', lineHeight: 1.2 }}>
@@ -3789,7 +3789,7 @@ function AddToHomePrompt() {
         ].map(({ num, icon, text }) => (
           <div key={num} style={{
             display: 'flex', alignItems: 'center', gap: 14,
-            padding: '12px 16px', borderRadius: 14,
+            padding: '12px 16px', borderRadius: 4,
             background: '#faf8f6', marginBottom: 10,
           }}>
             <div style={{
@@ -3913,7 +3913,7 @@ function AndroidInstallPrompt() {
           <img
             src="/apple-touch-icon-180.png"
             alt="ABQ Unplugged"
-            style={{ width: 56, height: 56, borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}
+            style={{ width: 56, height: 56, borderRadius: 4, boxShadow: '3px 3px 0 rgba(0,0,0,0.15)' }}
           />
           <div>
             <div style={{ fontWeight: 800, fontSize: 17, color: '#1c1c1e', lineHeight: 1.2 }}>
@@ -3928,7 +3928,7 @@ function AndroidInstallPrompt() {
           <button
             onClick={dismiss}
             style={{
-              flex: 1, padding: '13px 0', borderRadius: 14,
+              flex: 1, padding: '13px 0', borderRadius: 4,
               background: '#f2f2f2', border: 'none', cursor: 'pointer',
               fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: 15, color: '#333',
             }}
@@ -3936,7 +3936,7 @@ function AndroidInstallPrompt() {
           <button
             onClick={install}
             style={{
-              flex: 2, padding: '13px 0', borderRadius: 14,
+              flex: 2, padding: '13px 0', borderRadius: 4,
               background: 'var(--brand)', border: 'none', cursor: 'pointer',
               fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: 15, color: '#fff',
             }}
@@ -4205,7 +4205,7 @@ const inputSty = {
 };
 const cardSty = {
   backgroundColor: 'white', borderRadius: 12, padding: 16,
-  boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+  boxShadow: '2px 2px 0 rgba(0,0,0,0.10)',
 };
 const btnPrim = {
   padding: '8px 18px', borderRadius: 8, border: 'none' as const,
@@ -5388,7 +5388,7 @@ export default function App() {
       <p className="text-sm text-gray-500 text-center" style={{ fontFamily: 'Inter, sans-serif' }}>Check your connection and try again.</p>
       <button
         onClick={() => { setLoadError(false); setLoading(true); }}
-        className="mt-2 px-6 py-3 rounded-2xl font-bold text-sm text-white"
+        className="mt-2 px-6 py-3 rounded-lg font-bold text-sm text-white"
         style={{ background: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}
       >
         Retry
@@ -5544,14 +5544,14 @@ export default function App() {
             <ABQUnpluggedLogo size={47} />
           </div>
           <div className="flex items-center gap-1.5">
-            {            <button onClick={() => setShowSearch(true)} className="w-11 h-11 rounded-full flex items-center justify-center" style={{ background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}>
+            {            <button onClick={() => setShowSearch(true)} className="w-11 h-11 rounded-full flex items-center justify-center" style={{ background: 'white', boxShadow: '3px 3px 0 rgba(0,0,0,0.15)' }}>
               <span className="material-symbols-outlined" style={{ fontSize: '22px', color: 'var(--brand)' }}>search</span>
             </button>
 /* Location indicator */}
             <button
               onClick={requestGeo}
               className="w-11 h-11 rounded-full flex items-center justify-center"
-              style={{ background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}
+              style={{ background: 'white', boxShadow: '3px 3px 0 rgba(0,0,0,0.15)' }}
               title={coords ? 'Location active' : 'Enable location'}
               aria-label={coords ? 'Location active' : 'Enable location'}
             >
@@ -5681,7 +5681,7 @@ export default function App() {
         </nav>
             {showSearch && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 200, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '60px' }} onClick={() => setShowSearch(false)}>
-          <div style={{ background: 'white', borderRadius: '16px', width: '90%', maxWidth: '480px', padding: '16px', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }} onClick={e => e.stopPropagation()}>
+          <div style={{ background: 'white', borderRadius: '4px', width: '90%', maxWidth: '480px', padding: '16px', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
               <span className="material-symbols-outlined" style={{ color: 'var(--brand)', fontSize: '22px' }}>search</span>
               <input autoFocus type="text" placeholder="Search places, events..." value={globalSearch} onChange={e => setGlobalSearch(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && globalSearch.trim()) { setEventsNavSearch(globalSearch.trim()); setActiveTab('events'); setShowSearch(false); } }} style={{ flex: 1, border: 'none', outline: 'none', fontSize: '16px', fontFamily: 'Inter, sans-serif' }} />
