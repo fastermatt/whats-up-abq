@@ -4093,9 +4093,16 @@ function LoadingScreen() {
         className="fixed inset-0 flex flex-col items-center justify-center"
         style={{ background: 'var(--brand-bg-screen)' }}
       >
-        <div style={{ animation: 'abqLogoEntry 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' }}>
-          <ABQUnpluggedLogo size={113} />
-        </div>
+        <video
+          key="splash-video"
+          autoPlay
+          muted
+          playsInline
+          style={{ width: '280px', height: 'auto', display: 'block' }}
+        >
+          <source src="/logo-animation.webm" type="video/webm" />
+          <source src="/logo-animation.mp4" type="video/mp4" />
+        </video>
         <p
           key={msgIdx}
           className="text-sm text-gray-400 mt-4"
@@ -5586,7 +5593,7 @@ export default function App() {
           }}
         >
           <div className="flex items-center gap-2">
-            <ABQUnpluggedLogo size={47} />
+            <img src="/logo-static.png" alt="ABQ Unplugged" style={{ height: '32px', width: 'auto' }} />
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => setShowSearch(true)} className="w-9 h-9 flex items-center justify-center" style={{ background: 'white', border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A' }}>
