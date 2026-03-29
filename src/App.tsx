@@ -845,7 +845,7 @@ function PlaceDetailModal({
 
   return (
     <div className="fixed inset-0 z-50 flex justify-center" style={{ background: 'rgba(0,0,0,0.3)' }}>
-      <div className="flex flex-col overflow-y-auto w-full" style={{ maxWidth: '480px', background: 'var(--brand-bg-screen)' }}>
+      <div className="flex flex-col overflow-y-auto w-full" style={{ maxWidth: '480px', background: 'transparent' }}>
       <div className="relative flex-shrink-0" style={{ height: '260px' }}>
         <PlacePhotoGallery place={place} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
@@ -1328,7 +1328,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
 
   return (
     <div className="fixed inset-0 z-50 flex justify-center" style={{ background: 'rgba(0,0,0,0.3)' }}>
-      <div className="flex flex-col overflow-y-auto w-full" style={{ maxWidth: '480px', background: 'var(--brand-bg-screen)' }}>
+      <div className="flex flex-col overflow-y-auto w-full" style={{ maxWidth: '480px', background: 'transparent' }}>
       <div className="relative flex-shrink-0" style={{ height: '260px' }}>
         {imgSrc ? (
           <img src={hiResUrl(imgSrc)} alt={event.name} className="w-full h-full object-cover" />
@@ -2096,7 +2096,7 @@ function DiscoverScreen({
       <StreakBanner />
 
       {/* Hero */}
-      <div className="px-5 pt-5 pb-4" style={{ background: 'white', borderBottom: '2px solid #1A1A1A' }}>
+      <div className="px-5 pt-5 pb-4" style={{ background: 'transparent', borderBottom: '2px solid #1A1A1A' }}>
         <p
           className="text-xs font-black uppercase mb-1"
           style={{ color: '#888', fontFamily: 'Inter, sans-serif', letterSpacing: '0.12em' }}
@@ -5585,7 +5585,7 @@ export default function App() {
       <OfflineBanner />
       <div
         className="flex flex-col mx-auto relative"
-        style={{ width: '100%', maxWidth: '480px', minHeight: '100dvh', background: 'var(--brand-bg-screen)', overflowX: 'hidden' }}
+        style={{ width: '100%', maxWidth: '480px', minHeight: '100dvh', background: "url('/hero-texture.jpg') center/600px auto repeat, #F8F4EE", overflowX: 'hidden' }}
       >
         {/* Header — Urban Curator: white + hard 2px border-bottom */}
         <header
