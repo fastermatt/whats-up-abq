@@ -2284,7 +2284,7 @@ function DiscoverScreen({
 
       {/* Near You */}
       {!hidden.includes('nearYou') && coords && nearbyPlaces.length > 0 && (
-        <div className="pb-5">
+        <div className="py-4">
           <div className="flex items-center justify-between px-5 py-3 mb-0" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
             <h2
               className="text-sm font-black uppercase"
@@ -2297,13 +2297,13 @@ function DiscoverScreen({
               Live location
             </span>
           </div>
-          <div className="flex gap-3 px-5 pb-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+          <div className="flex gap-3 px-5 py-3 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
             {[...nearbyPlaces].sort((a, b) => (placeMatchesInterests(b.place.category, interests) ? 1 : 0) - (placeMatchesInterests(a.place.category, interests) ? 1 : 0)).map(({ place, dist }) => (
               <button
                 key={place.id}
                 onClick={() => onPlaceSelect(place)}
-                className="flex-shrink-0 bg-white rounded-lg overflow-hidden text-left"
-                style={{ width: '144px', boxShadow: '3px 3px 0 rgba(0,0,0,0.12)' }}
+                className="flex-shrink-0 bg-white overflow-hidden text-left"
+                style={{ width: '144px', border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A' }}
               >
                 <div className="relative" style={{ height: '100px' }}>
                   <ImageWithFallback
@@ -2315,8 +2315,8 @@ function DiscoverScreen({
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                   <div className="absolute bottom-2 left-2">
                     <span
-                      className="text-xs font-bold text-white px-1.5 py-0.5 rounded flex items-center gap-0.5"
-                      style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }}
+                      className="text-xs font-bold text-white px-1.5 py-0.5 flex items-center gap-0.5"
+                      style={{ background: 'rgba(0,0,0,0.45)' }}
                     >
                       <span className="material-symbols-outlined" style={{ fontSize: '10px' }}>near_me</span>
                       {formatDist(dist)}
@@ -2324,7 +2324,7 @@ function DiscoverScreen({
                   </div>
                   {checkedIn.has(place.id) && (
                     <div className="absolute top-2 right-2">
-                      <span className="text-white text-xs px-1.5 py-0.5 rounded" style={{ background: 'rgba(160,59,0,0.85)' }}>✓</span>
+                      <span className="text-white text-xs px-1.5 py-0.5" style={{ background: 'rgba(160,59,0,0.85)' }}>✓</span>
                     </div>
                   )}
                 </div>
@@ -2345,7 +2345,7 @@ function DiscoverScreen({
 
       {/* Hidden Gems */}
       {!hidden.includes('hiddenGems') && hiddenGems.length > 0 && (
-        <div className="pb-5">
+        <div className="py-4">
           <div className="flex items-center justify-between px-5 py-3 mb-0" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
             <h2
               className="text-sm font-black uppercase"
@@ -2357,10 +2357,10 @@ function DiscoverScreen({
               ★ 4.5+ rated
             </span>
           </div>
-          <div className="flex gap-3 px-5 pb-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+          <div className="flex gap-3 px-5 py-3 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
             {sortByInterests(hiddenGems, interests).map(place => (
-              <button key={place.id} onClick={() => onPlaceSelect(place)} className="flex-shrink-0" style={{ width: '136px' }}>
-                <div className="relative rounded-lg overflow-hidden mb-2" style={{ width: '136px', height: '136px' }}>
+              <button key={place.id} onClick={() => onPlaceSelect(place)} className="flex-shrink-0" style={{ width: '136px', boxShadow: '4px 4px 0 #1A1A1A' }}>
+                <div className="relative overflow-hidden mb-0" style={{ width: '136px', height: '136px', border: '2px solid #1A1A1A' }}>
                   <ImageWithFallback
                     src={place.image}
                     alt={place.name}
@@ -2371,8 +2371,8 @@ function DiscoverScreen({
                   {place.rating && (
                     <div className="absolute bottom-2 left-2">
                       <span
-                        className="text-xs font-bold text-white px-1.5 py-0.5 rounded"
-                        style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}
+                        className="text-xs font-bold text-white px-1.5 py-0.5"
+                        style={{ background: 'rgba(0,0,0,0.4)' }}
                       >
                         ★ {place.rating.toFixed(1)}
                       </span>
@@ -2380,12 +2380,12 @@ function DiscoverScreen({
                   )}
                   {checkedIn.has(place.id) && (
                     <div className="absolute top-2 right-2">
-                      <span className="text-white text-xs px-1.5 py-0.5 rounded" style={{ background: 'rgba(160,59,0,0.85)' }}>✓</span>
+                      <span className="text-white text-xs px-1.5 py-0.5" style={{ background: 'rgba(160,59,0,0.85)' }}>✓</span>
                     </div>
                   )}
                 </div>
                 <p
-                  className="text-xs font-bold text-gray-900 leading-tight text-left truncate"
+                  className="text-xs font-bold text-gray-900 leading-tight text-left truncate mt-1"
                   style={{ fontFamily: 'Inter, sans-serif' }}
                 >
                   {place.name}
