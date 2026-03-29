@@ -3818,6 +3818,181 @@ function AddToHomePrompt() {
   );
 }
 
+
+// --- Android / Chrome Install Prompt ----------------------------------------
+// Captures the beforeinstallprompt event and shows a polished install banner.
+
+const ANDROID_DISMISSED_KEY = 'abq_android_install_dismissed';
+const ANDROID_DISMISSED_DAYS = 14;
+
+function AndroidInstallPrompt() {
+  const [prompt, setPrompt] = useState<Event | null>(null);
+  const [visible, setVisible] = useState(false);
+  const [hiding, setHiding] = useState(false);
+
+  useEffect(() => {
+    if (window.matchMedia('(display-mode: standalone)').matches) return;
+    const dismissed = localStorage.getItem(ANDROID_DISMISSED_KEY);
+    if (dismissed) {
+      const age = Date.now() - parseInt(dismissed, 10);
+      if (age < ANDROID_DISMISSED_DAYS * 24 * 60 * 60 * 1000) return;
+    }
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setPrompt(e);
+      setTimeout(() => setVisible(true), 3000);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const dismiss = () => {
+    setHiding(true);
+    localStorage.setItem(ANDROID_DISMISSED_KEY, String(Date.now()));
+    setTimeout(() => { setVisible(false); setPrompt(null); }, 380);
+  };
+
+  const install = async () => {
+    if (!prompt) return;
+    (prompt as any).prompt();
+    const { outcome } = await (prompt as any).userChoice;
+    if (outcome === 'accepted') {
+      setVisible(false);
+      setPrompt(null);
+    } else {
+      dismiss();
+    }
+  };
+
+  if (!visible || !prompt) return null;
+
+  return (
+    <>
+      <style>{`
+        @keyframes abqAndroidSlideUp {
+          from { opacity: 0; transform: translateY(100%); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes abqAndroidSlideDown {
+          from { opacity: 1; transform: translateY(0); }
+          to   { opacity: 0; transform: translateY(100%); }
+        }
+      `}</style>
+      <div
+        onClick={dismiss}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 9998,
+          background: 'rgba(0,0,0,0.35)',
+          opacity: hiding ? 0 : 1, transition: 'opacity 0.38s',
+        }}
+      />
+      <div style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999,
+        background: '#fff',
+        borderRadius: '24px 24px 0 0',
+        boxShadow: '0 -8px 40px rgba(0,0,0,0.18)',
+        padding: '20px 24px calc(28px + env(safe-area-inset-bottom))',
+        fontFamily: 'Manrope, -apple-system, sans-serif',
+        animation: hiding
+          ? 'abqAndroidSlideDown 0.38s ease forwards'
+          : 'abqAndroidSlideUp 0.44s cubic-bezier(0.34,1.56,0.64,1) forwards',
+      }}>
+        <div style={{ width: 40, height: 4, borderRadius: 2, background: '#e0e0e0', margin: '0 auto 18px' }} />
+        <button
+          onClick={dismiss}
+          style={{
+            position: 'absolute', top: 18, right: 20,
+            width: 32, height: 32, borderRadius: '50%',
+            background: '#f2f2f2', border: 'none', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 16, color: '#666', lineHeight: 1,
+          }}
+          aria-label="Dismiss"
+        >✕</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
+          <img
+            src="/apple-touch-icon-180.png"
+            alt="ABQ Unplugged"
+            style={{ width: 56, height: 56, borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}
+          />
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 17, color: '#1c1c1e', lineHeight: 1.2 }}>
+              Install ABQ Unplugged
+            </div>
+            <div style={{ fontSize: 13, color: '#888', marginTop: 3 }}>
+              Add to your home screen for the best experience
+            </div>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button
+            onClick={dismiss}
+            style={{
+              flex: 1, padding: '13px 0', borderRadius: 14,
+              background: '#f2f2f2', border: 'none', cursor: 'pointer',
+              fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: 15, color: '#333',
+            }}
+          >Not now</button>
+          <button
+            onClick={install}
+            style={{
+              flex: 2, padding: '13px 0', borderRadius: 14,
+              background: '#a03b00', border: 'none', cursor: 'pointer',
+              fontFamily: 'Manrope, sans-serif', fontWeight: 800, fontSize: 15, color: '#fff',
+            }}
+          >Install App</button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// --- Offline Banner ----------------------------------------------------------
+// Shows a non-intrusive top banner when the device loses connectivity.
+
+function OfflineBanner() {
+  const [isOffline, setIsOffline] = useState(false);
+
+  useEffect(() => {
+    const goOffline = () => setIsOffline(true);
+    const goOnline  = () => setIsOffline(false);
+    window.addEventListener('offline', goOffline);
+    window.addEventListener('online', goOnline);
+    if (!navigator.onLine) setIsOffline(true);
+    return () => {
+      window.removeEventListener('offline', goOffline);
+      window.removeEventListener('online', goOnline);
+    };
+  }, []);
+
+  if (!isOffline) return null;
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 10000,
+        background: '#1c1c1e',
+        color: '#fff',
+        textAlign: 'center',
+        fontSize: 13,
+        fontFamily: 'Manrope, sans-serif',
+        fontWeight: 600,
+        padding: 'calc(env(safe-area-inset-top) + 8px) 16px 10px',
+        boxShadow: '0 2px 12px rgba(0,0,0,0.25)',
+        letterSpacing: 0.1,
+      }}
+    >
+      📡 You’re offline — showing cached content
+    </div>
+  );
+}
+
 // ─── Loading Screen ────────────────────────────────────────────────────────────
 
 const LOADING_MESSAGES = [
@@ -5347,6 +5522,8 @@ export default function App() {
 `}</style>
 
       <AddToHomePrompt />
+      <AndroidInstallPrompt />
+      <OfflineBanner />
       <div
         className="flex flex-col mx-auto relative"
         style={{ width: '100%', maxWidth: '480px', minHeight: '100dvh', background: '#f5f7f5', overflowX: 'hidden' }}
