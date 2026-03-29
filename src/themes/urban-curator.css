@@ -8,8 +8,6 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 /* ── Google Fonts: Epilogue (headlines) + Inter (body) ───────────── */
-@import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
-
 /* ── shadcn/ui design tokens ──────────────────────────────────────── */
 @layer base {
   :root {
@@ -106,14 +104,20 @@
 /* ── html background (outside React root) ─────────────────────────── */
 html { background-color: #F8FAF8; }
 
-/* ── Typography: Epilogue for headlines, Inter for body ─────────────*/
-* {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+/* ── Typography: Epilogue (headlines) + Inter (body) ────────────────
+   Using !important to reliably override Tailwind's preflight
+   html { font-family: ui-sans-serif } and any utility classes.
+   Fonts are loaded via <link> in index.html for guaranteed delivery. */
+html, body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif !important;
 }
-h1, h2, h3, h4, h5, h6,
-.font-black, .font-extrabold, .font-bold,
-[class*="text-xl"], [class*="text-2xl"], [class*="text-3xl"] {
-  font-family: 'Epilogue', sans-serif;
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Epilogue', 'Inter', sans-serif !important;
+  letter-spacing: -0.02em;
+}
+/* Tailwind font-weight utilities used as headings */
+.font-black:not(span):not(p), .font-extrabold:not(span):not(p) {
+  font-family: 'Epilogue', 'Inter', sans-serif !important;
 }
 
 /* ── Dot texture (4px dots, 20px grid) ───────────────────────────── */
