@@ -603,8 +603,8 @@ const PlaceCard = React.memo(function PlaceCard({
   return (
     <button
       onClick={onClick}
-      className="bg-white rounded-lg overflow-hidden text-left w-full"
-      style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.12)', animation: 'cardFadeIn 0.3s ease both', contain: 'layout paint' }}
+      className="bg-white overflow-hidden text-left w-full"
+      style={{ border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A', animation: 'cardFadeIn 0.3s ease both', contain: 'layout paint' }}
     >
       <div className="relative" style={{ height: '140px' }}>
         <ImageWithFallback
@@ -617,8 +617,8 @@ const PlaceCard = React.memo(function PlaceCard({
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
         <div className="absolute top-2 left-2">
           <span
-            className="text-xs font-bold text-white px-2 py-0.5 rounded-lg"
-            style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)' }}
+            className="text-xs font-bold text-white px-2 py-0.5"
+            style={{ background: 'rgba(0,0,0,0.6)' }}
           >
             {catEmoji}
           </span>
@@ -626,8 +626,8 @@ const PlaceCard = React.memo(function PlaceCard({
         {distance != null && (
           <div className="absolute top-2 right-2">
             <span
-              className="text-xs font-bold text-white px-1.5 py-0.5 rounded-lg flex items-center gap-0.5"
-              style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}
+              className="text-xs font-bold text-white px-1.5 py-0.5 flex items-center gap-0.5"
+              style={{ background: 'rgba(0,0,0,0.6)' }}
             >
               <span className="material-symbols-outlined" style={{ fontSize: '11px' }}>near_me</span>
               {formatDist(distance)}
@@ -637,8 +637,8 @@ const PlaceCard = React.memo(function PlaceCard({
         {isCheckedIn && (
           <div className="absolute bottom-2 left-2">
             <span
-              className="text-xs font-bold text-white px-1.5 py-0.5 rounded"
-              style={{ background: 'rgba(160,59,0,0.85)' }}
+              className="text-xs font-bold text-white px-1.5 py-0.5"
+              style={{ background: '#1A1A1A' }}
             >
               ✓ Visited
             </span>
@@ -667,10 +667,14 @@ const PlaceCard = React.memo(function PlaceCard({
           {onCheckIn && (
             <button
               onClick={onCheckIn}
-              className="text-xs font-bold px-2 py-0.5 rounded flex-shrink-0"
+              className="text-xs font-black px-2 py-1 flex-shrink-0"
               style={{
-                background: isCheckedIn ? 'var(--brand-bg-subtle)' : 'var(--brand)',
-                color: isCheckedIn ? 'var(--brand)' : 'white',
+                fontFamily: 'Inter, sans-serif',
+                letterSpacing: '0.06em',
+                background: isCheckedIn ? '#1A1A1A' : '#1ebaeb',
+                color: isCheckedIn ? 'white' : '#1A1A1A',
+                border: '1.5px solid #1A1A1A',
+                borderRadius: 0,
               }}
             >
               {isCheckedIn ? '✓ Visited' : 'Check In'}
@@ -2829,8 +2833,8 @@ function PlacesScreen({
       {/* Search */}
       <div className="px-5 pb-3">
         <div
-          className="flex items-center gap-2 bg-white rounded-lg px-4 py-3"
-          style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.12)' }}
+          className="flex items-center gap-2 bg-white px-4 py-3"
+          style={{ border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A' }}
         >
           <span className="material-symbols-outlined text-gray-400" style={{ fontSize: '20px' }}>search</span>
           <input
@@ -2874,7 +2878,7 @@ function PlacesScreen({
       </div>
 
       {/* Sort tabs */}
-      <div className="flex gap-2 px-5 pb-4">
+      <div className="flex gap-2 px-5 pb-4 pt-3">
         {([
           { id: 'top', label: 'Top Rated' },
           { id: 'near', label: 'Near Me', disabled: !coords },
@@ -2883,13 +2887,17 @@ function PlacesScreen({
           <button
             key={s.id}
             onClick={() => { if (s.disabled) { onRequestGeo(); } else { setSortMode(s.id); } }}
-            className="flex-shrink-0 px-3 py-1.5 rounded text-xs font-bold transition-all"
+            className="flex-shrink-0 px-3 py-1.5 text-xs font-black uppercase transition-all"
             title={s.disabled ? 'Enable location to sort by distance' : undefined}
             style={{
-              background: sortMode === s.id ? '#111' : 'white',
-              color: sortMode === s.id ? 'white' : s.disabled ? '#ccc' : '#555',
-              boxShadow: '3px 3px 0 rgba(0,0,0,0.12)',
-              opacity: s.disabled ? 0.6 : 1,
+              fontFamily: 'Inter, sans-serif',
+              letterSpacing: '0.08em',
+              background: sortMode === s.id ? '#1A1A1A' : 'white',
+              color: sortMode === s.id ? 'white' : s.disabled ? '#bbb' : '#1A1A1A',
+              border: '2px solid #1A1A1A',
+              boxShadow: sortMode === s.id ? '4px 4px 0 #1A1A1A' : '3px 3px 0 rgba(0,0,0,0.15)',
+              borderRadius: 0,
+              opacity: s.disabled ? 0.5 : 1,
             }}
           >
             {s.id === 'near' && !coords && (
@@ -2915,7 +2923,7 @@ function PlacesScreen({
                 isCheckedIn={checkedIn.has(place.id)}
                 onCheckIn={e => { e.stopPropagation(); onCheckIn(place.id); }}
                 />
-              <button style={{position:'absolute',top:8,right:8,zIndex:10,background:'rgba(0,0,0,0.6)',border:'none',borderRadius:'50%',width:36,height:36,minHeight:0,color:'white',fontSize:18,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:place.id,type:'place',name:place.name});}}>♡</button>
+              <button style={{position:'absolute',top:8,right:8,zIndex:10,background:'white',border:'2px solid #1A1A1A',borderRadius:0,width:32,height:32,minHeight:0,color:'#1A1A1A',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'2px 2px 0 #1A1A1A'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:place.id,type:'place',name:place.name});}}>♡</button>
             </div>
           ))}
         </div>
@@ -3447,12 +3455,12 @@ function ProfileScreen({
           style={{ background: 'linear-gradient(135deg, #1b5e20, #2e7d32)', fontFamily: 'Inter, sans-serif', boxShadow: '3px 3px 0 rgba(0,0,0,0.15)' }}
         >
           <div>
-            <p className="text-white font-bold text-sm">✅ Signed in & syncing your check-ins</p>
-            <p className="text-green-200 text-xs mt-0.5">Check out the leaderboard below</p>
+            <p className="font-bold text-sm" style={{ color: '#1A1A1A' }}>✅ Signed in & syncing your check-ins</p>
+            <p className="text-xs mt-0.5" style={{ color: '#566500' }}>Check out the leaderboard below</p>
           </div>
           <button
             onClick={onSignOut}
-            className="text-xs font-bold text-green-200 flex-shrink-0 ml-3"
+            className="text-xs font-bold flex-shrink-0 ml-3" style={{ color: '#1A1A1A' }}
             style={{ fontFamily: 'Inter, sans-serif', background: 'none', border: 'none', cursor: 'pointer' }}
           >
             Sign out
