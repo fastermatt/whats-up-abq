@@ -2096,7 +2096,7 @@ function DiscoverScreen({
       <StreakBanner />
 
       {/* Hero */}
-      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/600px auto repeat, #F8F4EE", borderBottom: '2px solid #1A1A1A' }}>
+      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, white", borderBottom: '2px solid #1A1A1A' }}>
         <p
           className="text-xs font-black uppercase mb-1"
           style={{ color: '#888', fontFamily: 'Inter, sans-serif', letterSpacing: '0.12em' }}
@@ -2582,7 +2582,7 @@ function EventsScreen({
 
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-      <div className="px-5 pt-5 pb-4" style={{ background: 'white', borderBottom: '2px solid #1A1A1A' }}>
+      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, white", borderBottom: '2px solid #1A1A1A' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}
@@ -2804,7 +2804,7 @@ function PlacesScreen({
 
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', willChange: 'transform' } as React.CSSProperties}>
-      <div className="px-5 pt-5 pb-4" style={{ background: 'white', borderBottom: '2px solid #1A1A1A' }}>
+      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, white", borderBottom: '2px solid #1A1A1A' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}
@@ -3424,7 +3424,7 @@ function ProfileScreen({
 
   return (
     <div className="w-full px-5 pb-28" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-      <div className="pt-5 pb-4" style={{ background: 'white', borderBottom: '2px solid #1A1A1A', marginLeft: '-20px', marginRight: '-20px', paddingLeft: '20px', paddingRight: '20px' }}>
+      <div className="pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, white", borderBottom: '2px solid #1A1A1A', marginLeft: '-20px', marginRight: '-20px', paddingLeft: '20px', paddingRight: '20px' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}
