@@ -3,6 +3,7 @@ import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { supabase } from './lib/supabase';
 import { fetchPlacesFromDB, fetchEventsFromDB } from './lib/db';
 import { ALL_EVENTS, type Event as StaticEvent } from './data/events';
+import AdminPanel from './AdminPanel';
 
 // ─── Scroll fade-in hook ─────────────────────────────────────────────
 function useFadeIn(delay = 0) {
@@ -4249,11 +4250,10 @@ function SiteBanner({ banner }: { banner: BannerConfig | null }) {
   );
 }
 
-// ─── Admin Screen ─────────────────────────────────────────────────────────────
-
-// ─────────────────────────────────────────────────────────────────────────────
-// ─── Admin Screen ─────────────────────────────────────────────────────────────
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Admin (see AdminPanel.tsx) ───────────────────────────────────────────────
+// The full admin panel is in src/AdminPanel.tsx.
+// The types below are kept here only for the existing DashboardTab/PlacesTab helpers
+// that are still referenced; they will be removed once full migration is complete.
 
 type AdminTab = 'dashboard' | 'places' | 'events' | 'tagrules' | 'settings';
 
@@ -5551,7 +5551,7 @@ export default function App() {
         </div>
       );
     }
-    return <AdminScreen user={user} onBack={() => { setCurrentHash("#discover"); window.history.replaceState({}, '', '#discover'); }} />;
+    return <AdminPanel user={user} onBack={() => { setCurrentHash("#discover"); window.history.replaceState({}, '', '#discover'); }} />;
   }
 
   if (loading) return <LoadingScreen />;
