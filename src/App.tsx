@@ -139,6 +139,7 @@ interface TMEvent {
   name: string;
   url?: string;
   _source?: string;
+  _isAdult?: boolean;   // flagged as 21+ / adult content — hidden by default
   ticketLinks?: Array<{ source: string; url: string }>;
   images?: TMImage[];
   dates?: {
@@ -176,6 +177,36 @@ interface Review {
   helpful: number;
 }
 
+// ─── Adult / junk content detection ─────────────────────────────────────────
+const ADULT_NAME_KEYWORDS = [
+  'drag', 'burlesque', '21+', '18+', 'adults only', 'adult comedy',
+  'late night', 'hookah', 'bar crawl', 'girls night out', 'hunks',
+  'strip', 'cabaret', 'bingo loco', 'sochial', 'speakeasy', 'nude',
+];
+const ADULT_VENUE_KEYWORDS = [
+  'albuquerque social club', 'abq social club',
+];
+// Ticketmaster sometimes inserts garbage placeholder / parking entries
+const JUNK_NAME_PATTERNS = [
+  /pss vip parking/i, /non-manifested shell event/i,
+  /gift cards?$/i, /replica game ball/i,
+];
+
+function tagAdultEvent(ev: TMEvent): TMEvent {
+  const name  = (ev.name || '').toLowerCase();
+  const venue = (ev._embedded?.venues?.[0]?.name || '').toLowerCase();
+  if (
+    ADULT_NAME_KEYWORDS.some(k => name.includes(k)) ||
+    ADULT_VENUE_KEYWORDS.some(k => venue.includes(k))
+  ) {
+    return { ...ev, _isAdult: true };
+  }
+  return ev;
+}
+function isJunkEvent(ev: TMEvent): boolean {
+  return JUNK_NAME_PATTERNS.some(p => p.test(ev.name || ''));
+}
+
 // ─── Static event → TMEvent adapter ────────────────────────────────────────
 function staticEventToTMEvent(ev: StaticEvent): TMEvent {
   const toLocal24h = (t?: string): string | undefined => {
@@ -196,6 +227,7 @@ function staticEventToTMEvent(ev: StaticEvent): TMEvent {
     name: ev.title,
     url: ev.ticketUrl || undefined,
     _source: isFreeInfo ? 'local' : (ev.source || '').toLowerCase().replace(/\s+/g, ''),
+    _isAdult: ev.is21Plus === true || undefined,
     images: ev.image ? [{ url: ev.image }] : undefined,
     dates: {
       start: {
@@ -722,6 +754,14 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
           >
             {category}
           </span>
+          {event._isAdult && (
+            <span
+              className="text-xs font-bold px-2 py-0.5 rounded inline-block mb-1.5 ml-1"
+              style={{ background: '#1c1c1e', color: '#fff', fontFamily: 'Inter, sans-serif', letterSpacing: '0.04em' }}
+            >
+              21+
+            </span>
+          )}
           <p
             className="font-black text-sm leading-snug text-gray-900"
             style={{ fontFamily: 'Epilogue, sans-serif', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}
@@ -2074,6 +2114,7 @@ function DiscoverScreen({
         const d = e.dates?.start?.localDate || '';
         return d >= today && d <= twoWeeks;
       })
+      .filter(e => !e._isAdult)  // Discover "This Week" is always family-friendly
       .sort((a, b) => (a.dates?.start?.localDate || '').localeCompare(b.dates?.start?.localDate || ''))
       .slice(0, 6);
   }, [events]);
@@ -2514,17 +2555,21 @@ function EventsScreen({
   events,
   onEventSelect,
   initialSearch = '',
+  show21Plus = false,
+  onToggle21Plus,
 }: {
   events: TMEvent[];
   onEventSelect: (e: TMEvent) => void;
   initialSearch?: string;
+  show21Plus?: boolean;
+  onToggle21Plus?: () => void;
 }) {
   const [search, setSearch] = useState('');
   useEffect(() => { if (initialSearch) setSearch(initialSearch); }, [initialSearch]);
   const [selectedGenre, setSelectedGenre] = useState('All');
 
   const filtered = useMemo(() => {
-    let result = events;
+    let result = show21Plus ? events : events.filter(e => !e._isAdult);
     if (selectedGenre !== 'All') {
       result = result.filter(e => {
         const seg = e.classifications?.[0]?.segment?.name || '';
@@ -2645,7 +2690,7 @@ function EventsScreen({
         ))}
       </div>
 
-      <div className="px-5 pb-2">
+      <div className="px-5 pb-2 flex items-center justify-between" style={{ borderBottom: '1px solid #eee', paddingTop: 10, paddingBottom: 10 }}>
         <p className="text-sm font-semibold text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>
           {sorted.length} event{sorted.length !== 1 ? 's' : ''}
           {(selectedGenre !== 'All' || search) && (
@@ -2658,6 +2703,32 @@ function EventsScreen({
             </button>
           )}
         </p>
+        {/* 21+ toggle */}
+        <button
+          onClick={onToggle21Plus}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            fontSize: 12, fontFamily: 'Inter, sans-serif', fontWeight: 700,
+            color: show21Plus ? '#a03b00' : '#999',
+            background: 'none', border: 'none', cursor: 'pointer',
+            padding: '4px 8px', borderRadius: 8,
+            outline: show21Plus ? '1.5px solid #a03b00' : '1.5px solid #ddd',
+          }}
+        >
+          <span style={{ fontSize: 14 }}>🔞</span>
+          21+ events
+          <span style={{
+            width: 28, height: 16, borderRadius: 8, display: 'inline-block',
+            background: show21Plus ? '#a03b00' : '#ccc', position: 'relative',
+            transition: 'background 0.2s', flexShrink: 0,
+          }}>
+            <span style={{
+              position: 'absolute', top: 2, left: show21Plus ? 14 : 2,
+              width: 12, height: 12, borderRadius: '50%', background: 'white',
+              transition: 'left 0.2s',
+            }} />
+          </span>
+        </button>
       </div>
 
       <div className="px-5 pb-28 flex flex-col gap-3">
@@ -4940,6 +5011,7 @@ export default function App() {
   const [places, setPlaces] = useState<Place[]>([]);
   const [events, setEvents] = useState<TMEvent[]>([]);
   const [eventsNavSearch, setEventsNavSearch] = useState('');
+  const [show21Plus, setShow21Plus] = useState(false);
   const [loading, setLoading] = useState(true);
   const [eventsLoading, setEventsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -5200,6 +5272,10 @@ export default function App() {
       const CACHE_KEY = 'abq_places_v1';
       const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
+      // Timeout helper — defined at top so fast path can use it too
+      const withTimeout = <T,>(p: Promise<T>, ms: number): Promise<T> =>
+        Promise.race([p, new Promise<T>((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
+
       let placesLoaded = false;
 
       // Serve from cache immediately (skips splash on repeat visits)
@@ -5215,25 +5291,38 @@ export default function App() {
             if (Date.now() - ts < CACHE_TTL) {
               setEventsLoading(true);
               try {
-                const sbEvents = await fetchEventsFromDB();
+                // Timeout added: if Supabase hangs, fall back to static events
+                const sbEvents = await withTimeout(fetchEventsFromDB(), 8000);
                 const allEvts = [
                   ...(sbEvents['ticketmaster'] || []),
                   ...(sbEvents['seatgeek'] || []),
                   ...(sbEvents['bandsintown'] || []),
                   ...(sbEvents['musicbrainz'] || []),
                 ];
-                setEvents(allEvts);
-              } catch (err) { console.warn('[Events] fast path failed:', err); }
+                // Merge in static events so "This Week" always has content
+                const seenFast = new Set(allEvts.map((e: TMEvent) => e.id));
+                const normFast = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
+                const liveTitlesFast = new Set(allEvts.map((e: TMEvent) => normFast(e.name || '')));
+                const staticFast = STATIC_TM_EVENTS.filter(e => {
+                  if (seenFast.has(e.id)) return false;
+                  if (liveTitlesFast.has(normFast(e.name || ''))) return false;
+                  seenFast.add(e.id);
+                  return true;
+                });
+                const fastMerged = [...allEvts, ...staticFast]
+                  .filter(e => !isJunkEvent(e))
+                  .map(tagAdultEvent);
+                setEvents(fastMerged);
+              } catch (err) {
+                console.warn('[Events] fast path failed, using static fallback:', err);
+                setEvents(STATIC_TM_EVENTS.filter(e => !isJunkEvent(e)).map(tagAdultEvent));
+              }
               setEventsLoading(false);
               return;
             }
           }
         }
       } catch {}
-
-      // Fetch fresh from network
-      const withTimeout = <T,>(p: Promise<T>, ms: number): Promise<T> =>
-        Promise.race([p, new Promise<T>((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
 
       try {
         const sbPlaces = await withTimeout(fetchPlacesFromDB(), 8000);
@@ -5267,13 +5356,14 @@ export default function App() {
         let muEvents: TMEvent[] = [];
 
         try {
-          const sbEvents = await fetchEventsFromDB();
+          // Timeout: if Supabase hangs, throw so the catch can serve static fallback
+          const sbEvents = await withTimeout(fetchEventsFromDB(), 8000);
           tmEvents = sbEvents['ticketmaster'] || [];
           sgEvents = sbEvents['seatgeek'] || [];
           bitEvents = sbEvents['bandsintown'] || [];
           muEvents = sbEvents['musicbrainz'] || [];
         } catch (err) {
-          console.warn('[Events] Supabase failed, trying JSON fallback:', err);
+          console.warn('[Events] Supabase failed or timed out, using static fallback:', err);
           const [tmR, ebR, sgR, bitR, muR] = await Promise.allSettled([
             fetch('/data/ticketmaster-events.json').then(r => r.json()),
             fetch('/data/eventbrite-events.json').then(r => r.json()),
@@ -5419,14 +5509,19 @@ export default function App() {
 
         const merged = [...liveEvents, ...staticOnly]
           .filter(isInMetro)
-          .filter(hasActionableLink);
+          .filter(hasActionableLink)
+          .filter(e => !isJunkEvent(e))
+          .map(tagAdultEvent);
         setEvents(merged);
       } catch (err) {
         console.error('[Events] Failed to load events:', err);
         // Events failing is non-fatal — static events are still available
         const normT = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
         const seen = new Set<string>();
-        const staticOnly = STATIC_TM_EVENTS.filter(e => { if (seen.has(e.id)) return false; seen.add(e.id); return true; });
+        const staticOnly = STATIC_TM_EVENTS
+          .filter(e => { if (seen.has(e.id)) return false; seen.add(e.id); return true; })
+          .filter(e => !isJunkEvent(e))
+          .map(tagAdultEvent);
         setEvents(staticOnly);
       } finally {
         setEventsLoading(false);
@@ -5672,7 +5767,8 @@ export default function App() {
               prefs={prefs}/>
           )}
           {activeTab === 'events' && (
-            <EventsScreen events={events} onEventSelect={openEventModal}  initialSearch={eventsNavSearch} />
+            <EventsScreen events={events} onEventSelect={openEventModal} initialSearch={eventsNavSearch}
+              show21Plus={show21Plus} onToggle21Plus={() => setShow21Plus(v => !v)} />
           )}
           {activeTab === 'places' && (
             <PlacesScreen
