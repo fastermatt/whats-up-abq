@@ -10,7 +10,11 @@
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en-US",
-  "categories": ["travel", "lifestyle", "entertainment"],
+  "categories": [
+    "travel",
+    "lifestyle",
+    "entertainment"
+  ],
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -38,6 +42,13 @@
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Discover events and places in Albuquerque"
+    },
+    {
+      "src": "/screenshots/wide.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "ABQ Unplugged on tablet and desktop"
     }
   ]
 }
