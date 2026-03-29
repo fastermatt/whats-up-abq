@@ -2403,10 +2403,10 @@ function DiscoverScreen({
 
       {/* Explore by Vibe */}
       {!hidden.includes('vibes') && <div className="mb-6">
-        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', marginBottom: '12px' }}>
+        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
           <p className="text-sm font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>Explore by Vibe</p>
         </div>
-        <div className="grid grid-cols-3 px-5" style={{ gap: '0', borderLeft: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
+        <div className="grid grid-cols-3" style={{ gap: '0', borderLeft: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', borderRight: '2px solid #1A1A1A' }}>
           {[
             { emoji: '🏕️', label: 'Outdoor', cat: 'park' },
             { emoji: '🍽️', label: 'Food & Drink', cat: 'restaurant' },
@@ -2428,10 +2428,10 @@ function DiscoverScreen({
 
       {/* ABQ Neighborhoods */}
       {!hidden.includes('neighborhoods') && <div className="mb-6">
-        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', marginBottom: '12px' }}>
+        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
           <p className="text-sm font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>ABQ Neighborhoods</p>
         </div>
-        <div className="grid grid-cols-2 px-5" style={{ gap: '0', borderLeft: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
+        <div className="grid grid-cols-2" style={{ gap: '0', borderLeft: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', borderRight: '2px solid #1A1A1A' }}>
           {[
             { name: 'Old Town', desc: 'History, art & adobe', emoji: '🏺', bg: '#566500' },
             { name: 'Nob Hill', desc: 'Eclectic & walkable', emoji: '☕', bg: '#0057c2' },
