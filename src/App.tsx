@@ -2459,34 +2459,35 @@ function DiscoverScreen({
         <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', marginBottom: '12px' }}>
           <p className="text-sm font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>Plan Your Weekend</p>
         </div>
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {[
-            { title: 'Morning Hike + Brunch', steps: ['Sandia Mountain foothills trail', 'Coffee at Flying Star Café', 'Brunch in Nob Hill'], bg: '#e8f5e9', accent: '#2e7d32', emoji: '🥾' },
-            { title: 'Culture Day', steps: ['Explora Science Center', 'Lunch in Old Town', 'Albuquerque Museum'], bg: '#e3f2fd', accent: '#1565c0', emoji: '🎨' },
-            { title: 'Local Food Crawl', steps: ['Green chile breakfast at Frontier', 'Lunch at El Modelo', 'Drinks on Central Ave'], bg: 'rgba(212,239,77,0.18)', accent: '#566500', emoji: '🌮' },
-            { title: 'Nature Escape', steps: ['Rio Grande Bosque trail', 'Tingley Beach', 'Sunset at Petroglyph Monument'], bg: '#f3e5f5', accent: '#6a1b9a', emoji: '🌅' },
-          ].map(({ title, steps, bg, accent, emoji }) => (
-            <div key={title} className="p-5" style={{ backgroundColor: bg, border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 rgba(0,0,0,0.5)' }}>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">{emoji}</span>
-                  <p className="font-black text-lg" style={{ fontFamily: 'Epilogue, sans-serif', color: accent }}>{title}</p>
+            { title: 'Morning Hike + Brunch', steps: ['Sandia Mountain foothills trail', 'Coffee at Flying Star Café', 'Brunch in Nob Hill'], bar: '#D4EF4D' },
+            { title: 'Culture Day', steps: ['Explora Science Center', 'Lunch in Old Town', 'Albuquerque Museum'], bar: '#1ebaeb' },
+            { title: 'Local Food Crawl', steps: ['Green chile breakfast at Frontier', 'Lunch at El Modelo', 'Drinks on Central Ave'], bar: '#D4EF4D' },
+            { title: 'Nature Escape', steps: ['Rio Grande Bosque trail', 'Tingley Beach', 'Sunset at Petroglyph Monument'], bar: '#1ebaeb' },
+          ].map(({ title, steps, bar }) => (
+            <div key={title} className="flex" style={{ border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A', backgroundColor: '#fff' }}>
+              {/* left accent bar */}
+              <div style={{ width: 4, flexShrink: 0, backgroundColor: bar }} />
+              <div className="flex-1 px-3 py-2">
+                <div className="flex items-center justify-between mb-1.5">
+                  <p className="text-xs font-black uppercase" style={{ fontFamily: 'Epilogue, sans-serif', color: '#1A1A1A', letterSpacing: '0.09em' }}>{title}</p>
+                  <button
+                    onClick={() => addToDayPlan(steps)}
+                    className="text-xs font-black px-2 py-0.5"
+                    style={{ backgroundColor: '#D4EF4D', color: '#1A1A1A', border: '1.5px solid #1A1A1A', fontFamily: 'Inter, sans-serif', letterSpacing: '0.04em' }}
+                  >
+                    + plan
+                  </button>
                 </div>
-                <button
-                  onClick={() => addToDayPlan(steps)}
-                  className="text-xs font-black px-3 py-1.5"
-                  style={{ backgroundColor: '#1A1A1A', color: 'white', border: '2px solid #1A1A1A', fontFamily: 'Inter, sans-serif', letterSpacing: '0.05em' }}
-                >
-                  + Add to plan
-                </button>
-              </div>
-              <div className="flex flex-col gap-2 mt-1">
-                {steps.map((step, i) => (
-                  <div key={i} className="flex items-center gap-2 px-3 py-2" style={{ background: 'rgba(255,255,255,0.25)' }}>
-                    <span className="text-sm font-black w-7 h-7 flex items-center justify-center flex-shrink-0" style={{ backgroundColor: accent, color: accent === '#566500' || accent === '#2e7d32' || accent === '#1565c0' || accent === '#6a1b9a' ? 'white' : '#1A1A1A' }}>{i + 1}</span>
-                    <button onClick={() => window.dispatchEvent(new CustomEvent('plan-step-click',{detail:step}))} className="text-sm font-semibold text-gray-800 hover:text-blue-700 transition-colors text-left leading-snug flex-1" style={{ fontFamily: 'Inter, sans-serif' }}>{step}</button>
-                  </div>
-                ))}
+                <div className="flex flex-col gap-0.5">
+                  {steps.map((step, i) => (
+                    <div key={i} className="flex items-center gap-1.5">
+                      <span className="text-xs font-black w-5 h-5 flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#1A1A1A', color: '#D4EF4D' }}>{i + 1}</span>
+                      <button onClick={() => window.dispatchEvent(new CustomEvent('plan-step-click',{detail:step}))} className="text-xs text-left leading-tight flex-1" style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A' }}>{step}</button>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           ))}
