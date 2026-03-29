@@ -1907,22 +1907,26 @@ function AnimatedFact() {
     setTimeout(() => { setIdx(i => (i + 1) % facts.length); setVisible(true); }, 250);
   };
   return (
-    <div className="mx-5 mb-6">
-      <p className="text-xs font-black tracking-widest text-gray-400 uppercase mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>DID YOU KNOW?</p>
-      <button onClick={next} className="w-full rounded-lg p-5 text-left active:scale-95 transition-transform" style={{ background: 'linear-gradient(135deg, rgba(212,239,77,0.06), rgba(212,239,77,0.16))', minHeight: 96 }}>
-        <div style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.35s ease' }}>
-          <span className="text-3xl">{facts[idx].icon}</span>
-          <p className="text-sm text-gray-800 mt-2 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>{facts[idx].fact}</p>
-        </div>
-        <div className="flex items-center justify-between mt-3">
-          <div className="flex gap-1">
-            {[0,1,2,3,4].map(d => (
-              <div key={d} className="w-1.5 h-1.5 rounded-full transition-colors" style={{ backgroundColor: d === idx % 5 ? '#f97316' : '#e5e7eb' }} />
-            ))}
+    <div className="mb-6">
+      <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', marginBottom: '12px' }}>
+        <p className="text-sm font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>Did You Know?</p>
+      </div>
+      <div className="px-5">
+        <button onClick={next} className="w-full p-5 text-left" style={{ background: '#D4EF4D', border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A', minHeight: 96, borderRadius: 0 }}>
+          <div style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.35s ease' }}>
+            <span className="text-3xl">{facts[idx].icon}</span>
+            <p className="text-sm mt-2 leading-relaxed font-semibold" style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A' }}>{facts[idx].fact}</p>
           </div>
-          <span className="text-xs text-gray-400" style={{ fontFamily: 'Inter, sans-serif' }}>tap for next ›</span>
-        </div>
-      </button>
+          <div className="flex items-center justify-between mt-3">
+            <div className="flex gap-1">
+              {[0,1,2,3,4].map(d => (
+                <div key={d} className="w-1.5 h-1.5 transition-colors" style={{ backgroundColor: d === idx % 5 ? '#1A1A1A' : 'rgba(0,0,0,0.2)' }} />
+              ))}
+            </div>
+            <span className="text-xs font-black" style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A', letterSpacing: '0.05em' }}>TAP FOR NEXT ›</span>
+          </div>
+        </button>
+      </div>
     </div>
   );
 }
@@ -2394,43 +2398,50 @@ function DiscoverScreen({
       )}
 
       {/* Explore by Vibe */}
-      {!hidden.includes('vibes') && <div className="mx-5 mb-6">
-        <p className="text-xs font-black tracking-widest text-gray-400 uppercase mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>EXPLORE BY VIBE</p>
-        <div className="grid grid-cols-3 gap-2">
+      {!hidden.includes('vibes') && <div className="mb-6">
+        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', marginBottom: '12px' }}>
+          <p className="text-sm font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>Explore by Vibe</p>
+        </div>
+        <div className="grid grid-cols-3 px-5" style={{ gap: '0', borderLeft: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
           {[
-            { emoji: '🏕️', label: 'Outdoor', bg: '#e8f5e9', color: '#2e7d32' },
-            { emoji: '🍽️', label: 'Food & Drink', bg: 'rgba(212,239,77,0.18)', color: '#566500' },
-            { emoji: '🎨', label: 'Arts & Culture', bg: '#f3e5f5', color: '#6a1b9a' },
-            { emoji: '🎶', label: 'Live Music', bg: '#e3f2fd', color: '#1565c0' },
-            { emoji: '👨‍👩‍👧', label: 'Family Fun', bg: '#fff8e1', color: '#f57f17' },
-            { emoji: '🏃', label: 'Active', bg: '#fce4ec', color: '#c62828' },
-          ].map(({ emoji, label, bg, color }) => (
-            <button key={label} className="rounded-lg p-3 flex flex-col items-center gap-1 active:scale-95 transition-transform" style={{ backgroundColor: bg }}
-              onClick={() => { const m={'Outdoor':'park','Food & Drink':'restaurant','Arts & Culture':'arts','Live Music':'entertainment','Family Fun':'park','Active':'fitness'}; onNavigatePlaces?.(m[label]||'All', ''); }}>
+            { emoji: '🏕️', label: 'Outdoor', cat: 'park' },
+            { emoji: '🍽️', label: 'Food & Drink', cat: 'restaurant' },
+            { emoji: '🎨', label: 'Arts & Culture', cat: 'arts' },
+            { emoji: '🎶', label: 'Live Music', cat: 'entertainment' },
+            { emoji: '👨‍👩‍👧', label: 'Family Fun', cat: 'park' },
+            { emoji: '🏃', label: 'Active', cat: 'fitness' },
+          ].map(({ emoji, label, cat }) => (
+            <button key={label}
+              className="flex flex-col items-center gap-1 p-3 transition-all active:bg-gray-100"
+              style={{ background: 'white', border: 'none', borderRight: '2px solid #1A1A1A', borderBottom: '2px solid #1A1A1A', borderRadius: 0 }}
+              onClick={() => onNavigatePlaces?.(cat, '')}>
               <span className="text-2xl">{emoji}</span>
-              <span className="text-xs font-bold text-center leading-tight" style={{ fontFamily: 'Inter, sans-serif', color }}>{label}</span>
+              <span className="text-center leading-tight font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', fontSize: '9px', letterSpacing: '0.08em', color: '#1A1A1A' }}>{label}</span>
             </button>
           ))}
         </div>
       </div>}
 
       {/* ABQ Neighborhoods */}
-      {!hidden.includes('neighborhoods') && <div className="mx-5 mb-6">
-        <p className="text-xs font-black tracking-widest text-gray-400 uppercase mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>ABQ NEIGHBORHOODS</p>
-        <div className="grid grid-cols-2 gap-2">
+      {!hidden.includes('neighborhoods') && <div className="mb-6">
+        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', marginBottom: '12px' }}>
+          <p className="text-sm font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>ABQ Neighborhoods</p>
+        </div>
+        <div className="grid grid-cols-2 px-5" style={{ gap: '0', borderLeft: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
           {[
-            { name: 'Old Town', desc: 'History, art & adobe', emoji: '🏺', bg: 'var(--brand)' },
-            { name: 'Nob Hill', desc: 'Eclectic & walkable', emoji: '☕', bg: '#1a237e' },
-            { name: 'Downtown', desc: 'Nightlife & events', emoji: '🌃', bg: '#1b5e20' },
-            { name: 'Rio Grande', desc: 'Nature & trails', emoji: '🌿', bg: '#006064' },
-            { name: 'NE Heights', desc: 'Views & dining', emoji: '🏔️', bg: '#4a148c' },
-            { name: 'South Valley', desc: 'Local flavor', emoji: '🌶️', bg: '#b71c1c' },
+            { name: 'Old Town', desc: 'History, art & adobe', emoji: '🏺', bg: '#566500' },
+            { name: 'Nob Hill', desc: 'Eclectic & walkable', emoji: '☕', bg: '#0057c2' },
+            { name: 'Downtown', desc: 'Nightlife & events', emoji: '🌃', bg: '#1A1A1A' },
+            { name: 'Rio Grande', desc: 'Nature & trails', emoji: '🌿', bg: '#1C6FEA' },
+            { name: 'NE Heights', desc: 'Views & dining', emoji: '🏔️', bg: '#8a9e00' },
+            { name: 'South Valley', desc: 'Local flavor', emoji: '🌶️', bg: '#D4EF4D' },
           ].map(({ name, desc, emoji, bg }) => (
-            <button key={name} className="rounded-lg p-4 text-left active:scale-95 transition-transform" style={{ backgroundColor: bg }}
-              onClick={() => { onNavigatePlaces?.('All', name); }}>
+            <button key={name} className="p-4 text-left transition-all"
+              style={{ backgroundColor: bg, borderRight: '2px solid #1A1A1A', borderBottom: '2px solid #1A1A1A', borderRadius: 0 }}
+              onClick={() => onNavigatePlaces?.('All', name)}>
               <span className="text-2xl">{emoji}</span>
-              <p className="text-white font-black text-sm mt-1" style={{ fontFamily: 'Epilogue, sans-serif' }}>{name}</p>
-              <p className="text-white/70 text-xs" style={{ fontFamily: 'Inter, sans-serif' }}>{desc}</p>
+              <p className="font-black text-sm mt-1" style={{ fontFamily: 'Epilogue, sans-serif', color: bg === '#D4EF4D' ? '#1A1A1A' : 'white' }}>{name}</p>
+              <p className="text-xs" style={{ fontFamily: 'Inter, sans-serif', color: bg === '#D4EF4D' ? 'rgba(0,0,0,0.65)' : 'rgba(255,255,255,0.75)' }}>{desc}</p>
             </button>
           ))}
         </div>
@@ -2440,8 +2451,10 @@ function DiscoverScreen({
       <AnimatedFact />
 
       {/* Weekend Planner */}
-      {!hidden.includes('planWeekend') && <div className="mx-5 mb-6">
-        <p className="text-xs font-black tracking-widest text-gray-400 uppercase mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>PLAN YOUR WEEKEND</p>
+      {!hidden.includes('planWeekend') && <div className="mb-6">
+        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', marginBottom: '12px' }}>
+          <p className="text-sm font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>Plan Your Weekend</p>
+        </div>
         <div className="flex flex-col gap-3">
           {[
             { title: 'Morning Hike + Brunch', steps: ['Sandia Mountain foothills trail', 'Coffee at Flying Star Café', 'Brunch in Nob Hill'], bg: '#e8f5e9', accent: '#2e7d32', emoji: '🥾' },
@@ -2449,7 +2462,7 @@ function DiscoverScreen({
             { title: 'Local Food Crawl', steps: ['Green chile breakfast at Frontier', 'Lunch at El Modelo', 'Drinks on Central Ave'], bg: 'rgba(212,239,77,0.18)', accent: '#566500', emoji: '🌮' },
             { title: 'Nature Escape', steps: ['Rio Grande Bosque trail', 'Tingley Beach', 'Sunset at Petroglyph Monument'], bg: '#f3e5f5', accent: '#6a1b9a', emoji: '🌅' },
           ].map(({ title, steps, bg, accent, emoji }) => (
-            <div key={title} className="rounded-lg p-5 shadow-md" style={{ backgroundColor: bg }}>
+            <div key={title} className="p-5" style={{ backgroundColor: bg, border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 rgba(0,0,0,0.5)' }}>
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-xl">{emoji}</span>
@@ -2457,16 +2470,16 @@ function DiscoverScreen({
                 </div>
                 <button
                   onClick={() => addToDayPlan(steps)}
-                  className="text-xs font-bold px-3 py-1.5 rounded-lg text-white active:scale-95 transition-transform"
-                  style={{ backgroundColor: accent, fontFamily: 'Inter, sans-serif' }}
+                  className="text-xs font-black px-3 py-1.5"
+                  style={{ backgroundColor: '#1A1A1A', color: 'white', border: '2px solid #1A1A1A', fontFamily: 'Inter, sans-serif', letterSpacing: '0.05em' }}
                 >
                   + Add to plan
                 </button>
               </div>
               <div className="flex flex-col gap-2 mt-1">
                 {steps.map((step, i) => (
-                  <div key={i} className="flex items-center gap-2 bg-white/25 rounded-lg px-3 py-2">
-                    <span className="text-sm font-bold rounded-full w-7 h-7 flex items-center justify-center text-white flex-shrink-0 shadow-sm" style={{ backgroundColor: accent }}>{i + 1}</span>
+                  <div key={i} className="flex items-center gap-2 px-3 py-2" style={{ background: 'rgba(255,255,255,0.25)' }}>
+                    <span className="text-sm font-black w-7 h-7 flex items-center justify-center flex-shrink-0" style={{ backgroundColor: accent, color: accent === '#566500' || accent === '#2e7d32' || accent === '#1565c0' || accent === '#6a1b9a' ? 'white' : '#1A1A1A' }}>{i + 1}</span>
                     <button onClick={() => window.dispatchEvent(new CustomEvent('plan-step-click',{detail:step}))} className="text-sm font-semibold text-gray-800 hover:text-blue-700 transition-colors text-left leading-snug flex-1" style={{ fontFamily: 'Inter, sans-serif' }}>{step}</button>
                   </div>
                 ))}
