@@ -3411,12 +3411,12 @@ function ProfileScreen({
   }, [lbRows, myCount, user]);
 
   const ACHIEVEMENTS = [
-    { id: 'first', emoji: '✿', label: 'First Check-in', unlocked: myCount >= 1, color: '#e8f5e9', accent: '#2e7d32' },
-    { id: 'five', emoji: '⚡', label: 'Explorer (5)', unlocked: myCount >= 5, color: 'rgba(212,239,77,0.18)', accent: '#566500' },
-    { id: 'ten', emoji: '', label: 'Adventurer (10)', unlocked: myCount >= 10, color: '#e3f2fd', accent: '#1565c0' },
-    { id: 'twenty', emoji: '', label: 'Trailblazer (20)', unlocked: myCount >= 20, color: '#fce4ec', accent: '#c62828' },
-    { id: 'thirty5', emoji: '', label: 'Pioneer (35)', unlocked: myCount >= 35, color: '#f3e5f5', accent: '#7b1fa2' },
-    { id: 'fifty', emoji: '★', label: 'Legend (50)', unlocked: myCount >= 50, color: '#fff8e1', accent: '#f57f17' },
+    { id: 'first',   icon: 'where_to_vote', label: 'First Check-in',  sub: '1 place',   unlocked: myCount >= 1  },
+    { id: 'five',    icon: 'explore',       label: 'Explorer',        sub: '5 places',  unlocked: myCount >= 5  },
+    { id: 'ten',     icon: 'hiking',        label: 'Adventurer',      sub: '10 places', unlocked: myCount >= 10 },
+    { id: 'twenty',  icon: 'forest',        label: 'Trailblazer',     sub: '20 places', unlocked: myCount >= 20 },
+    { id: 'thirty5', icon: 'footprint',     label: 'Pioneer',         sub: '35 places', unlocked: myCount >= 35 },
+    { id: 'fifty',   icon: 'military_tech', label: 'Legend',          sub: '50 places', unlocked: myCount >= 50 },
   ];
 
   const nextLevel = getLevel(myCount + 1);
@@ -3552,29 +3552,49 @@ function ProfileScreen({
       )}
 
       {/* Achievements */}
-      <h2
-        className="font-black text-base uppercase tracking-tight mb-3"
-        style={{ fontFamily: 'Epilogue, sans-serif' }}
-      >
-        Achievements
-      </h2>
-      <div className="grid grid-cols-3 gap-3 mb-5">
+      <div className="flex items-center px-0 py-3 mb-0" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
+        <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Epilogue, sans-serif' }}>Achievements</h2>
+      </div>
+      {/* Abutting border grid — no gap, container has left+top, cells have right+bottom */}
+      <div className="grid grid-cols-3 mb-5" style={{ gap: 0, borderLeft: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', borderRight: '2px solid #1A1A1A' }}>
         {ACHIEVEMENTS.map(a => (
           <div
             key={a.id}
-            className="rounded-lg p-3 text-center flex flex-col items-center gap-1"
+            className="flex flex-col items-center justify-center gap-1 py-5 px-2"
             style={{
-              background: a.unlocked ? a.color : `${a.color}88`,
-              boxShadow: a.unlocked ? `0 2px 8px ${a.accent}22` : '0 1px 4px rgba(0,0,0,0.04)',
-              border: a.unlocked ? `2px solid ${a.accent}33` : '2px solid transparent',
+              borderRight: '2px solid #1A1A1A',
+              borderBottom: '2px solid #1A1A1A',
+              background: a.unlocked ? '#D4EF4D' : 'white',
+              marginRight: '-2px',
             }}
           >
-            <span style={{ fontSize: '24px', opacity: a.unlocked ? 1 : 0.4, filter: a.unlocked ? 'none' : 'grayscale(0.5)' }}>{a.emoji}</span>
-            <p className="text-xs font-semibold leading-tight text-center" style={{
+            <span
+              className="material-symbols-outlined"
+              style={{
+                fontSize: '36px',
+                color: a.unlocked ? '#1A1A1A' : '#D0D0D0',
+                fontVariationSettings: a.unlocked
+                  ? "'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 48"
+                  : "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 48",
+              }}
+            >
+              {a.icon}
+            </span>
+            <p className="text-center leading-tight font-black uppercase" style={{
               fontFamily: 'Inter, sans-serif',
-              color: a.unlocked ? a.accent : '#999',
+              fontSize: '8px',
+              letterSpacing: '0.08em',
+              color: a.unlocked ? '#1A1A1A' : '#CCCCCC',
             }}>
               {a.label}
+            </p>
+            <p className="text-center" style={{
+              fontFamily: 'Inter, sans-serif',
+              fontSize: '8px',
+              color: a.unlocked ? '#566500' : '#DDDDDD',
+              letterSpacing: '0.04em',
+            }}>
+              {a.sub}
             </p>
           </div>
         ))}
