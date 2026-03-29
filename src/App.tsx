@@ -1793,13 +1793,13 @@ function StreakBanner() {
     ? `${info.count} days running — ABQ local in the making 🌶️`
     : `Welcome back! Day ${info.count} in a row.`;
   return (
-    <div className="mx-5 mb-3 rounded-lg flex items-center justify-between gap-3 px-4 py-3"
-      style={{ background: 'var(--brand-gradient)', animation: 'cardFadeIn 0.4s ease both' }}>
+    <div className="flex items-center justify-between gap-3 px-4 py-3"
+      style={{ background: '#1ebaeb', borderBottom: '2px solid #1A1A1A', animation: 'cardFadeIn 0.4s ease both' }}>
       <div className="flex items-center gap-2 min-w-0">
-        <span style={{ fontSize: '22px', lineHeight: 1 }}>{emoji}</span>
-        <span className="text-white text-sm font-bold truncate" style={{ fontFamily: 'Inter, sans-serif' }}>{label}</span>
+        <span style={{ fontSize: '20px', lineHeight: 1 }}>{emoji}</span>
+        <span className="text-sm font-black truncate" style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A' }}>{label}</span>
       </div>
-      <button onClick={() => setVisible(false)} className="text-white/60 flex-shrink-0" style={{ fontSize: '18px', lineHeight: 1 }}>✕</button>
+      <button onClick={() => setVisible(false)} className="flex-shrink-0 font-black" style={{ fontSize: '16px', lineHeight: 1, color: '#1A1A1A' }}>✕</button>
     </div>
   );
 }
@@ -1825,19 +1825,19 @@ function DailyGem({ places, onSelect }: { places: Place[]; onSelect: (p: Place) 
         <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Epilogue, sans-serif' }}>{dayOfWeek}'s Spot</h2>
         <span className="text-xs font-black uppercase" style={{ color: '#666', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em' }}>🗓 Changes daily</span>
       </div>
-      <button onClick={() => onSelect(gem)} className="w-full relative rounded-lg overflow-hidden text-left"
-        style={{ height: '180px', boxShadow: '4px 4px 0 var(--brand)', animation: 'cardFadeIn 0.45s ease both' }}>
+      <button onClick={() => onSelect(gem)} className="w-full relative overflow-hidden text-left"
+        style={{ height: '180px', boxShadow: '4px 4px 0 #1A1A1A', border: '2px solid #1A1A1A', animation: 'cardFadeIn 0.45s ease both', borderRadius: 0 }}>
         {gem.image && <img src={gem.image} alt={gem.name} className="w-full h-full object-cover" style={{ filter: 'brightness(0.82)' }} />}
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, rgba(160,59,0,0.18) 0%, rgba(0,0,0,0.72) 100%)' }} />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, rgba(28,111,234,0.12) 0%, rgba(0,0,0,0.72) 100%)' }} />
         <div className="absolute top-3 left-3">
-          <span className="text-xs font-black text-white px-3 py-1 rounded"
-            style={{ background: 'var(--brand)', fontFamily: 'Inter, sans-serif', letterSpacing: '0.05em' }}>
-            ⭐ Spot of the Day
+          <span className="text-xs font-black px-3 py-1"
+            style={{ background: '#1ebaeb', color: '#1A1A1A', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase', border: '1.5px solid #1A1A1A', borderRadius: 0 }}>
+            ★ SPOT OF THE DAY
           </span>
         </div>
         <div className="absolute top-3 right-3">
-          <span className="text-white/80 text-sm font-bold w-8 h-8 rounded-full flex items-center justify-center"
-            style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(6px)' }}>→</span>
+          <span className="text-sm font-black w-8 h-8 flex items-center justify-center"
+            style={{ background: '#1A1A1A', color: 'white', border: '2px solid white' }}>→</span>
         </div>
         <div className="absolute bottom-3 left-3 right-3">
           <p className="text-white font-black text-xl leading-tight" style={{ fontFamily: 'Epilogue, sans-serif' }}>{gem.name}</p>
@@ -5674,7 +5674,7 @@ export default function App() {
 
         {/* Bottom navigation — Liquid Glass with home indicator safe area */}
         <nav
-          className="glass flex items-center px-2"
+          className="flex items-stretch"
           style={{
             position: 'fixed',
             bottom: 0,
@@ -5682,40 +5682,45 @@ export default function App() {
             transform: 'translateX(-50%)',
             width: '100%',
             maxWidth: '480px',
-            paddingTop: '8px',
-            paddingBottom: 'calc(var(--sab) + 8px)',
+            paddingBottom: 'var(--sab)',
             borderTop: '2px solid #1A1A1A',
+            background: 'white',
             zIndex: 40,
           }}
         >
-          {NAV_ITEMS.map(item => (
+          {NAV_ITEMS.map((item, idx) => (
             <button
               key={item.id}
               onClick={() => navigateTab(item.id)}
               aria-label={item.label}
-              className="flex-1 flex flex-col items-center gap-0.5 py-1 transition-all"
-              style={{ minHeight: '44px' }}
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 transition-none"
+              style={{
+                minHeight: '52px',
+                background: activeTab === item.id ? '#1A1A1A' : 'white',
+                borderRight: idx < NAV_ITEMS.length - 1 ? '1.5px solid #1A1A1A' : 'none',
+                borderRadius: 0,
+              }}
             >
               <span
                 className="material-symbols-outlined"
                 style={{
-                  fontSize: '24px',
-                  color: activeTab === item.id ? 'var(--brand)' : '#555',
+                  fontSize: '22px',
+                  color: activeTab === item.id ? 'white' : '#555',
                   fontVariationSettings:
                     activeTab === item.id
                       ? "'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24"
                       : "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24",
-                  transition: 'all 0.2s',
                 }}
               >
                 {item.icon}
               </span>
               <span
-                className="text-xs font-semibold"
+                className="font-black uppercase"
                 style={{
-                  color: activeTab === item.id ? 'var(--brand)' : '#555',
+                  color: activeTab === item.id ? 'white' : '#555',
                   fontFamily: 'Inter, sans-serif',
-                  fontSize: '10px',
+                  fontSize: '8px',
+                  letterSpacing: '0.1em',
                 }}
               >
                 {item.label}
