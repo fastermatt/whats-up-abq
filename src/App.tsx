@@ -100,6 +100,38 @@ const _fbDeleteDoc = async (table: string, id: string, idField = 'id') => {
 };
 
 
+// ─── Analytics ───────────────────────────────────────────────────────────────
+// Fire-and-forget: never awaited, never blocks render.
+
+function getSessionId(): string {
+  const KEY = 'abq_session_id';
+  let sid = sessionStorage.getItem(KEY);
+  if (!sid) {
+    sid = 'sess_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    try { sessionStorage.setItem(KEY, sid); } catch {}
+  }
+  return sid;
+}
+
+function getDevice(): string {
+  const ua = navigator.userAgent;
+  if (/iPad/.test(ua)) return 'tablet';
+  if (/iPhone|Android.*Mobile/.test(ua)) return 'mobile';
+  return 'desktop';
+}
+
+function trackEvent(eventType: string, data: Record<string, unknown> = {}) {
+  try {
+    (supabase.from as any)('analytics').insert({
+      event_type: eventType,
+      session_id: getSessionId(),
+      data,
+      device: getDevice(),
+    }).then(() => {/* fire-and-forget */}).catch(() => {/* silent */});
+  } catch {}
+}
+
+
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 interface Place {
@@ -384,12 +416,14 @@ function useGeolocation() {
       pos => {
         setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         try { localStorage.setItem(GEO_GRANTED_KEY, 'true'); } catch {}
+        trackEvent('location_granted');
       },
       err => {
         setError(err.message);
         // Clear saved grant if user denied / revoked
         if (err.code === 1 /* PERMISSION_DENIED */) {
           try { localStorage.removeItem(GEO_GRANTED_KEY); } catch {}
+          trackEvent('location_denied');
         }
       },
       { enableHighAccuracy: true, timeout: 10000 }
@@ -3984,7 +4018,10 @@ function AndroidInstallPrompt() {
     const handler = (e: Event) => {
       e.preventDefault();
       setPrompt(e);
-      setTimeout(() => setVisible(true), 3000);
+      setTimeout(() => {
+        setVisible(true);
+        trackEvent('a2hs_shown');
+      }, 3000);
     };
     window.addEventListener('beforeinstallprompt', handler);
     return () => window.removeEventListener('beforeinstallprompt', handler);
@@ -4001,6 +4038,7 @@ function AndroidInstallPrompt() {
     (prompt as any).prompt();
     const { outcome } = await (prompt as any).userChoice;
     if (outcome === 'accepted') {
+      trackEvent('a2hs_accepted');
       setVisible(false);
       setPrompt(null);
     } else {
@@ -5138,20 +5176,32 @@ export default function App() {
 
   const { coords, error: geoError, requested: geoRequested, request: requestGeo } = useGeolocation();
 
+  // ── Analytics: session_start (fires once per browser session) ──
+  useEffect(() => {
+    const KEY = 'abq_session_tracked';
+    if (!sessionStorage.getItem(KEY)) {
+      try { sessionStorage.setItem(KEY, '1'); } catch {}
+      trackEvent('session_start');
+    }
+  }, []);
+
   // ── Browser history management (prevents swipe-back leaving the site) ──
   const navigateTab = useCallback((tab: TabId) => {
     setActiveTab(tab);
     window.history.pushState({ tab, modal: null }, '', `#${tab}`);
+    trackEvent('pageview', { tab });
   }, []);
 
   const openPlaceModal = useCallback((place: Place) => {
     setSelectedPlace(place);
     window.history.pushState({ tab: null, modal: 'place', id: place.id }, '', `#place/${place.id}`);
+    trackEvent('place_click', { place_id: place.id, place_name: place.name });
   }, []);
 
   const openEventModal = useCallback((event: TMEvent) => {
     setSelectedEvent(event);
     window.history.pushState({ tab: null, modal: 'event', id: event.id }, '', `#event/${event.id}`);
+    trackEvent('event_click', { event_id: event.id, event_name: event.name });
   }, []);
 
   const closePlaceModal = useCallback(() => setSelectedPlace(null), []);
@@ -5257,6 +5307,7 @@ export default function App() {
     // Proximity OK → check in
     // Haptic feedback: iOS/Android vibration on successful check-in
     if ('vibrate' in navigator) { try { navigator.vibrate([12, 40, 12]); } catch {} }
+    trackEvent('checkin', { place_id: placeId });
     setCheckedIn(prev => {
       const next = new Set(prev);
       next.add(placeId);
@@ -5533,24 +5584,7 @@ export default function App() {
 
   // ── Admin route ──
   if (showAdmin) {
-    if (!user || user.email !== ADMIN_EMAIL) {
-      return (
-        <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '32px', background: 'var(--brand-bg-screen)' }}>
-          <ABQUnpluggedLogo size={82} />
-          <p style={{ fontFamily: 'Epilogue, sans-serif', fontWeight: 900, fontSize: '20px', letterSpacing: '-0.5px' }}>Admin Access</p>
-          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', color: '#666', textAlign: 'center', lineHeight: 1.5 }}>
-            Sign in with the owner account ({ADMIN_EMAIL}) to access the admin panel.
-          </p>
-          <button onClick={() => setShowAuthModal(true)} style={{ padding: '13px 28px', background: 'var(--brand)', color: 'white', borderRadius: '12px', fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '15px' }}>
-            Sign In
-          </button>
-          <button onClick={() => { setCurrentHash("#discover"); window.history.replaceState({}, '', '#discover'); }} style={{ color: '#aaa', fontSize: '13px', fontFamily: 'Inter, sans-serif' }}>
-            Back to App
-          </button>
-          {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
-        </div>
-      );
-    }
+    // AdminPanel handles its own auth (Supabase email OR hardcoded password)
     return <AdminPanel user={user} onBack={() => { setCurrentHash("#discover"); window.history.replaceState({}, '', '#discover'); }} />;
   }
 
@@ -5865,13 +5899,13 @@ export default function App() {
           <div style={{ background: 'white', borderRadius: '4px', width: '90%', maxWidth: '480px', padding: '16px', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
               <span className="material-symbols-outlined" style={{ color: 'var(--brand)', fontSize: '22px' }}>search</span>
-              <input autoFocus type="text" placeholder="Search places, events..." value={globalSearch} onChange={e => setGlobalSearch(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && globalSearch.trim()) { setEventsNavSearch(globalSearch.trim()); setActiveTab('events'); setShowSearch(false); } }} style={{ flex: 1, border: 'none', outline: 'none', fontSize: '16px', fontFamily: 'Inter, sans-serif' }} />
+              <input autoFocus type="text" placeholder="Search places, events..." value={globalSearch} onChange={e => setGlobalSearch(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && globalSearch.trim()) { trackEvent('search', { query: globalSearch.trim(), context: 'events' }); setEventsNavSearch(globalSearch.trim()); setActiveTab('events'); setShowSearch(false); } }} style={{ flex: 1, border: 'none', outline: 'none', fontSize: '16px', fontFamily: 'Inter, sans-serif' }} />
               <button onClick={() => setShowSearch(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px' }}><span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#666' }}>close</span></button>
             </div>
             {globalSearch.trim() && (
               <div style={{display:'flex',gap:'8px',width:'100%'}}>
-                <button onClick={() => { setEventsNavSearch(globalSearch.trim()); setActiveTab('events'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'var(--brand)',color:'white',border:'none',borderRadius:'10px',fontSize:'15px',fontFamily:'Manrope, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Events</button>
-                <button onClick={() => { setPlacesNavCat('All'); setPlacesNavSearch(globalSearch.trim()); setPlacesNavKey(k => k + 1); setActiveTab('places'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'#026cdf',color:'white',border:'none',borderRadius:'10px',fontSize:'15px',fontFamily:'Manrope, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Places</button>
+                <button onClick={() => { trackEvent('search', { query: globalSearch.trim(), context: 'events' }); setEventsNavSearch(globalSearch.trim()); setActiveTab('events'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'var(--brand)',color:'white',border:'none',borderRadius:'10px',fontSize:'15px',fontFamily:'Manrope, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Events</button>
+                <button onClick={() => { trackEvent('search', { query: globalSearch.trim(), context: 'places' }); setPlacesNavCat('All'); setPlacesNavSearch(globalSearch.trim()); setPlacesNavKey(k => k + 1); setActiveTab('places'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'#026cdf',color:'white',border:'none',borderRadius:'10px',fontSize:'15px',fontFamily:'Manrope, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Places</button>
               </div>
             )}
           </div>
