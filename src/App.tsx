@@ -2246,9 +2246,13 @@ function DiscoverScreen({
         return d >= today && d <= sevenDays;
       })
       .filter(e => !e._isAdult);  // Discover "This Week" is always family-friendly
-    // Shuffle and pick 4
+    // Shuffle, pick 4, then sort by earliest date first
     const shuffled = [...pool].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 4);
+    return shuffled.slice(0, 4).sort((a, b) => {
+      const da = a.dates?.start?.localDate || '';
+      const db = b.dates?.start?.localDate || '';
+      return da.localeCompare(db);
+    });
   }, [events]);
 
   const nearbyPlaces = useMemo(() => {
