@@ -5505,7 +5505,7 @@ export default function App() {
   useEffect(() => {
     async function loadData() {
       // ── Phase 1: Load places — serve from cache instantly, refresh in bg ──
-      const CACHE_KEY = 'abq_places_v1';
+      const CACHE_KEY = 'abq_places_v2';
       const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
       // Timeout helper — defined at top so fast path can use it too
