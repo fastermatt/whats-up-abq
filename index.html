@@ -3,10 +3,12 @@
   <head>
     <meta charset="UTF-8" />
 
-    <!-- ─── Fonts: Epilogue (headlines) + Inter (body) — Urban Curator theme ─── -->
+    <!-- ─── Fonts: loaded as <link> (not @import) to avoid Safari ITP cross-site warnings ─── -->
+    <!-- Epilogue (headlines) + Inter (body) — Urban Curator theme -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,700;0,800;0,900;1,700&family=Inter:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
     <!-- ─── Viewport: viewport-fit=cover for iOS Dynamic Island / notch (Apple HIG) ─── -->
     <!-- NOTE: user-scalable removed — WCAG 1.4.4 requires pinch-zoom be available for low-vision users -->
@@ -26,8 +28,8 @@
     <meta name="application-name" content="ABQ Unplugged" />
 
     <!-- ─── Theme colour: matches app background / header (Liquid Glass era) ─── -->
-    <meta name="theme-color" content="#F8FAF8" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#141414" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#D4EF4D" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1A1A1A" media="(prefers-color-scheme: dark)" />
 
     <!-- ─── Description / social ─── -->
     <meta

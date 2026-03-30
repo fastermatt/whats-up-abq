@@ -5,7 +5,7 @@
 //   - Supabase API calls: Network-only (live data required)
 //   - places-data.json: Cache-first (large file, rarely changes)
 
-const CACHE_VERSION = 'abq-202603292054';
+const CACHE_VERSION = 'abq-202603291923';
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const ASSET_CACHE = `${CACHE_VERSION}-assets`;
 const DATA_CACHE  = `${CACHE_VERSION}-data`;
@@ -140,16 +140,53 @@ async function networkFirst(cacheName, request, fallbackPath) {
       if (fallback) return fallback;
     }
     return new Response(
-      `<!DOCTYPE html><html><head><meta charset="utf-8"><title>ABQ Unplugged — Offline</title>
-      <meta name="viewport" content="width=device-width,initial-scale=1">
-      <style>body{font-family:system-ui;background:#1a1a2e;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;text-align:center;padding:24px}
-      h1{font-size:2rem;margin-bottom:8px}p{color:#aaa;margin-bottom:24px}
-      button{background:#566500;color:#fff;border:none;border-radius:12px;padding:12px 24px;font-size:1rem;cursor:pointer}</style>
+      `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+      <title>ABQ Unplugged — Offline</title>
+      <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+      <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{
+          font-family:'Helvetica Neue',system-ui,sans-serif;
+          background:#f5f0e8;
+          display:flex;align-items:center;justify-content:center;
+          min-height:100dvh;padding:32px 24px;text-align:center;
+        }
+        .card{
+          background:#fff;border-radius:20px;padding:40px 32px;
+          box-shadow:4px 4px 0 rgba(0,0,0,0.08);max-width:360px;width:100%;
+        }
+        .logo{
+          width:72px;height:72px;border-radius:16px;
+          background:linear-gradient(135deg,#8B3A0F,#c45000);
+          display:flex;align-items:center;justify-content:center;
+          margin:0 auto 20px;box-shadow:0 4px 16px rgba(139,58,15,0.35);
+        }
+        .logo svg{width:40px;height:40px}
+        h1{font-size:22px;font-weight:900;color:#1a1a1a;letter-spacing:-0.03em;margin-bottom:8px}
+        p{font-size:14px;color:#666;line-height:1.55;margin-bottom:28px}
+        button{
+          width:100%;padding:14px 20px;
+          background:linear-gradient(135deg,#8B3A0F,#c45000);
+          color:#fff;border:none;border-radius:14px;
+          font-size:15px;font-weight:800;cursor:pointer;
+          letter-spacing:-0.01em;
+          box-shadow:0 4px 12px rgba(139,58,15,0.3);
+        }
+        .signal{font-size:48px;margin-bottom:20px}
+      </style>
       </head><body>
-      <div><div style="font-size:3rem">📡</div>
-      <h1>You're offline</h1>
-      <p>ABQ Unplugged needs a connection to load fresh data.<br>Check your signal and try again.</p>
-      <button onclick="location.reload()">Try Again</button></div>
+      <div class="card">
+        <div class="signal">📡</div>
+        <div class="logo">
+          <svg viewBox="0 0 40 40" fill="none">
+            <text x="50%" y="62%" dominant-baseline="middle" text-anchor="middle"
+              font-family="Georgia,serif" font-weight="900" font-size="22" fill="white">ABQ</text>
+          </svg>
+        </div>
+        <h1>You're offline</h1>
+        <p>ABQ Unplugged needs a connection to show fresh events and places.<br>Check your signal and try again.</p>
+        <button onclick="location.reload()">Try Again</button>
+      </div>
       </body></html>`,
       { status: 200, headers: { 'Content-Type': 'text/html' } }
     );

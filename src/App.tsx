@@ -3,6 +3,7 @@ import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { supabase } from './lib/supabase';
 import { fetchPlacesFromDB, fetchEventsFromDB } from './lib/db';
 import { ALL_EVENTS, type Event as StaticEvent } from './data/events';
+import AdminPanel from './AdminPanel';
 
 // ─── Scroll fade-in hook ─────────────────────────────────────────────
 function useFadeIn(delay = 0) {
@@ -99,6 +100,38 @@ const _fbDeleteDoc = async (table: string, id: string, idField = 'id') => {
 };
 
 
+// ─── Analytics ───────────────────────────────────────────────────────────────
+// Fire-and-forget: never awaited, never blocks render.
+
+function getSessionId(): string {
+  const KEY = 'abq_session_id';
+  let sid = sessionStorage.getItem(KEY);
+  if (!sid) {
+    sid = 'sess_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    try { sessionStorage.setItem(KEY, sid); } catch {}
+  }
+  return sid;
+}
+
+function getDevice(): string {
+  const ua = navigator.userAgent;
+  if (/iPad/.test(ua)) return 'tablet';
+  if (/iPhone|Android.*Mobile/.test(ua)) return 'mobile';
+  return 'desktop';
+}
+
+function trackEvent(eventType: string, data: Record<string, unknown> = {}) {
+  try {
+    (supabase.from as any)('analytics').insert({
+      event_type: eventType,
+      session_id: getSessionId(),
+      data,
+      device: getDevice(),
+    }).then(() => {/* fire-and-forget */}).catch(() => {/* silent */});
+  } catch {}
+}
+
+
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 interface Place {
@@ -139,6 +172,7 @@ interface TMEvent {
   name: string;
   url?: string;
   _source?: string;
+  _isAdult?: boolean;   // flagged as 21+ / adult content — hidden by default
   ticketLinks?: Array<{ source: string; url: string }>;
   images?: TMImage[];
   dates?: {
@@ -176,6 +210,36 @@ interface Review {
   helpful: number;
 }
 
+// ─── Adult / junk content detection ─────────────────────────────────────────
+const ADULT_NAME_KEYWORDS = [
+  'drag', 'burlesque', '21+', '18+', 'adults only', 'adult comedy',
+  'late night', 'hookah', 'bar crawl', 'girls night out', 'hunks',
+  'strip', 'cabaret', 'bingo loco', 'sochial', 'speakeasy', 'nude',
+];
+const ADULT_VENUE_KEYWORDS = [
+  'albuquerque social club', 'abq social club',
+];
+// Ticketmaster sometimes inserts garbage placeholder / parking entries
+const JUNK_NAME_PATTERNS = [
+  /pss vip parking/i, /non-manifested shell event/i,
+  /gift cards?$/i, /replica game ball/i,
+];
+
+function tagAdultEvent(ev: TMEvent): TMEvent {
+  const name  = (ev.name || '').toLowerCase();
+  const venue = (ev._embedded?.venues?.[0]?.name || '').toLowerCase();
+  if (
+    ADULT_NAME_KEYWORDS.some(k => name.includes(k)) ||
+    ADULT_VENUE_KEYWORDS.some(k => venue.includes(k))
+  ) {
+    return { ...ev, _isAdult: true };
+  }
+  return ev;
+}
+function isJunkEvent(ev: TMEvent): boolean {
+  return JUNK_NAME_PATTERNS.some(p => p.test(ev.name || ''));
+}
+
 // ─── Static event → TMEvent adapter ────────────────────────────────────────
 function staticEventToTMEvent(ev: StaticEvent): TMEvent {
   const toLocal24h = (t?: string): string | undefined => {
@@ -196,6 +260,7 @@ function staticEventToTMEvent(ev: StaticEvent): TMEvent {
     name: ev.title,
     url: ev.ticketUrl || undefined,
     _source: isFreeInfo ? 'local' : (ev.source || '').toLowerCase().replace(/\s+/g, ''),
+    _isAdult: ev.is21Plus === true || undefined,
     images: ev.image ? [{ url: ev.image }] : undefined,
     dates: {
       start: {
@@ -351,12 +416,14 @@ function useGeolocation() {
       pos => {
         setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         try { localStorage.setItem(GEO_GRANTED_KEY, 'true'); } catch {}
+        trackEvent('location_granted');
       },
       err => {
         setError(err.message);
         // Clear saved grant if user denied / revoked
         if (err.code === 1 /* PERMISSION_DENIED */) {
           try { localStorage.removeItem(GEO_GRANTED_KEY); } catch {}
+          trackEvent('location_denied');
         }
       },
       { enableHighAccuracy: true, timeout: 10000 }
@@ -417,19 +484,44 @@ async function syncCheckinsToFirestore(uid: string, checkIns: Set<string>, displ
   }
 }
 
-// ─── PNG Logo ───────────────────────────────────────────────────────────────
+// ─── Typographic Logo — Urban Curator style ──────────────────────────────────
+// "ABQ" on neon-moss lime block  +  "UNPLUGGED" in heavy Epilogue caps
+// Matches the brutalist mockup: boxed accent word + uppercase tracking label
 
 function ABQUnpluggedLogo({ size = 43 }: { size?: number }) {
-  // New logo is 2144×434px — ~4.94:1 aspect ratio
-  const width = Math.round(size * 4.94);
+  const blockH   = Math.round(size * 0.72);          // height of the ABQ block
+  const abqSize  = Math.round(blockH * 0.62);        // ABQ font size
+  const unplSize = Math.round(blockH * 0.38);        // UNPLUGGED font size
   return (
-    <img
-      src="/abq_unplugged_logo.png"
-      alt="ABQ Unplugged"
-      width={width}
-      height={size}
-      style={{ objectFit: 'contain', display: 'block' }}
-    />
+    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', userSelect: 'none' }}>
+      {/* Lime accent block */}
+      <div style={{
+        background: '#D4EF4D',
+        padding: `2px ${Math.round(blockH * 0.28)}px`,
+        display: 'inline-flex',
+        alignItems: 'center',
+        border: '2px solid #1A1A1A',
+      }}>
+        <span style={{
+          fontFamily: 'Epilogue, Inter, sans-serif',
+          fontWeight: 900,
+          fontSize: `${abqSize}px`,
+          color: '#1A1A1A',
+          letterSpacing: '-0.03em',
+          lineHeight: 1,
+        }}>ABQ</span>
+      </div>
+      {/* Wordmark */}
+      <span style={{
+        fontFamily: 'Epilogue, Inter, sans-serif',
+        fontWeight: 900,
+        fontSize: `${unplSize}px`,
+        color: '#1A1A1A',
+        letterSpacing: '0.06em',
+        textTransform: 'uppercase',
+        lineHeight: 1,
+      }}>UNPLUGGED</span>
+    </div>
   );
 }
 
@@ -520,15 +612,15 @@ function GeoBanner({
   if (coords) return null;
 
   if (error) return (
-    <div className="mx-5 mb-4 rounded-lg p-3 flex items-center gap-3" style={{ background: 'rgba(160,59,0,0.08)' }}>
-      <span className="material-symbols-outlined flex-shrink-0" style={{ color: 'var(--brand)', fontSize: '20px' }}>location_off</span>
-      <p className="text-xs text-gray-600 flex-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="px-4 py-3 flex items-center gap-3" style={{ background: '#1ebaeb', borderBottom: '2px solid #1A1A1A' }}>
+      <span className="material-symbols-outlined flex-shrink-0" style={{ color: '#1A1A1A', fontSize: '20px' }}>location_off</span>
+      <p className="text-xs font-bold flex-1" style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A' }}>
         Enable location to see distances &amp; sort by nearby
       </p>
       <button
         onClick={onRequest}
-        className="text-xs font-bold px-3 py-1.5 rounded-lg text-white flex-shrink-0"
-        style={{ background: 'var(--brand)' }}
+        className="text-xs font-black px-3 py-1.5 flex-shrink-0"
+        style={{ background: '#1A1A1A', color: 'white', border: '2px solid #1A1A1A', fontFamily: 'Inter, sans-serif' }}
       >
         Retry
       </button>
@@ -536,31 +628,26 @@ function GeoBanner({
   );
 
   if (requested) return (
-    <div className="mx-5 mb-4 rounded-lg p-3 flex items-center gap-3" style={{ background: 'rgba(160,59,0,0.06)' }}>
-      <span className="material-symbols-outlined flex-shrink-0" style={{ color: 'var(--brand)', fontSize: '20px' }}>my_location</span>
-      <p className="text-xs text-gray-500 flex-1" style={{ fontFamily: 'Inter, sans-serif' }}>Getting your location…</p>
+    <div className="px-4 py-3 flex items-center gap-3" style={{ background: '#1ebaeb', borderBottom: '2px solid #1A1A1A' }}>
+      <span className="material-symbols-outlined flex-shrink-0" style={{ color: '#1A1A1A', fontSize: '20px' }}>my_location</span>
+      <p className="text-xs font-bold flex-1" style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A' }}>Getting your location…</p>
     </div>
   );
 
   return (
     <div
-      className="mx-5 mb-4 rounded-lg p-3 flex items-center gap-3"
-      style={{ background: 'white', boxShadow: '3px 3px 0 rgba(0,0,0,0.12)' }}
+      className="px-4 py-3 flex items-center gap-3"
+      style={{ background: '#1ebaeb', borderBottom: '2px solid #1A1A1A' }}
     >
-      <div
-        className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-        style={{ background: 'var(--brand-bg-subtle)' }}
-      >
-        <span className="material-symbols-outlined" style={{ color: 'var(--brand)', fontSize: '20px' }}>near_me</span>
-      </div>
+      <span className="material-symbols-outlined flex-shrink-0" style={{ color: '#1A1A1A', fontSize: '20px' }}>near_me</span>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>Find things near you</p>
-        <p className="text-xs text-gray-400">Share location for distances &amp; "Near Me"</p>
+        <p className="text-sm font-black" style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A' }}>Find things near you</p>
+        <p className="text-xs" style={{ color: 'rgba(0,0,0,0.6)', fontFamily: 'Inter, sans-serif' }}>Share location for distances &amp; "Near Me"</p>
       </div>
       <button
         onClick={onRequest}
-        className="text-xs font-bold px-3 py-1.5 rounded-lg text-white flex-shrink-0"
-        style={{ background: 'var(--brand)' }}
+        className="text-xs font-black px-3 py-1.5 flex-shrink-0"
+        style={{ background: '#1A1A1A', color: 'white', border: '2px solid #1A1A1A', fontFamily: 'Inter, sans-serif' }}
       >
         Enable
       </button>
@@ -585,11 +672,8 @@ const PlaceCard = React.memo(function PlaceCard({
     // div instead of button — avoids nested-button HTML invalidity that breaks tap on iOS Safari
     <div
       onClick={onClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}
-      className="bg-white rounded-lg overflow-hidden text-left w-full"
-      style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.12)', animation: 'cardFadeIn 0.3s ease both', contain: 'layout paint', cursor: 'pointer' }}
+      className="bg-white overflow-hidden text-left w-full"
+      style={{ border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A', animation: 'cardFadeIn 0.3s ease both', contain: 'layout paint' }}
     >
       <div className="relative" style={{ height: '140px' }}>
         <ImageWithFallback
@@ -602,8 +686,8 @@ const PlaceCard = React.memo(function PlaceCard({
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
         <div className="absolute top-2 left-2">
           <span
-            className="text-xs font-bold text-white px-2 py-0.5 rounded-lg"
-            style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)' }}
+            className="text-xs font-bold text-white px-2 py-0.5"
+            style={{ background: 'rgba(0,0,0,0.6)' }}
           >
             {catEmoji}
           </span>
@@ -611,8 +695,8 @@ const PlaceCard = React.memo(function PlaceCard({
         {distance != null && (
           <div className="absolute top-2 right-2">
             <span
-              className="text-xs font-bold text-white px-1.5 py-0.5 rounded-lg flex items-center gap-0.5"
-              style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}
+              className="text-xs font-bold text-white px-1.5 py-0.5 flex items-center gap-0.5"
+              style={{ background: 'rgba(0,0,0,0.6)' }}
             >
               <span className="material-symbols-outlined" style={{ fontSize: '11px' }}>near_me</span>
               {formatDist(distance)}
@@ -622,8 +706,8 @@ const PlaceCard = React.memo(function PlaceCard({
         {isCheckedIn && (
           <div className="absolute bottom-2 left-2">
             <span
-              className="text-xs font-bold text-white px-1.5 py-0.5 rounded"
-              style={{ background: 'rgba(160,59,0,0.85)' }}
+              className="text-xs font-bold text-white px-1.5 py-0.5"
+              style={{ background: '#1A1A1A' }}
             >
               ✓ Visited
             </span>
@@ -652,16 +736,14 @@ const PlaceCard = React.memo(function PlaceCard({
           {onCheckIn && (
             <button
               onClick={onCheckIn}
-              className="text-xs font-bold flex-shrink-0"
+              className="text-xs font-black px-2 py-1 flex-shrink-0"
               style={{
-                background: tooFar ? '#dc2626' : isCheckedIn ? 'var(--brand-bg-subtle)' : 'var(--brand)',
-                color: tooFar ? 'white' : isCheckedIn ? 'var(--brand)' : 'white',
-                border: 'none',
-                borderRadius: 4,
-                padding: '6px 10px',
-                minHeight: 34,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
+                fontFamily: 'Inter, sans-serif',
+                letterSpacing: '0.06em',
+                background: isCheckedIn ? '#1A1A1A' : '#1ebaeb',
+                color: isCheckedIn ? 'white' : '#1A1A1A',
+                border: '1.5px solid #1A1A1A',
+                borderRadius: 0,
               }}
             >
               {tooFar ? '📍 Get Closer' : isCheckedIn ? '✓ Visited' : 'Check In'}
@@ -686,8 +768,8 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
     <button
       ref={fadeRef}
       onClick={onClick}
-      className="bg-white rounded-lg overflow-hidden text-left w-full flex"
-      style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.12)', minHeight: '100px' }}
+      className="bg-white overflow-hidden text-left w-full flex"
+      style={{ border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A', borderRadius: 0, minHeight: '100px' }}
     >
       <div className="flex-shrink-0 relative overflow-hidden" style={{ width: '110px' }}>
         {imgSrc ? (
@@ -704,11 +786,19 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
       <div className="flex-1 p-3 flex flex-col justify-between min-w-0">
         <div>
           <span
-            className="text-xs font-bold text-white px-2 py-0.5 rounded inline-block mb-1.5"
-            style={{ background: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}
+            className="text-xs font-bold text-white px-2 py-0.5 inline-block mb-1.5"
+            style={{ background: '#1A1A1A', fontFamily: 'Inter, sans-serif', borderRadius: 0, letterSpacing: '0.05em', textTransform: 'uppercase' }}
           >
             {category}
           </span>
+          {event._isAdult && (
+            <span
+              className="text-xs font-bold px-2 py-0.5 rounded inline-block mb-1.5 ml-1"
+              style={{ background: '#1c1c1e', color: '#fff', fontFamily: 'Inter, sans-serif', letterSpacing: '0.04em' }}
+            >
+              21+
+            </span>
+          )}
           <p
             className="font-black text-sm leading-snug text-gray-900"
             style={{ fontFamily: 'Epilogue, sans-serif', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}
@@ -832,7 +922,7 @@ function PlaceDetailModal({
 
   return (
     <div className="fixed inset-0 z-50 flex justify-center" style={{ background: 'rgba(0,0,0,0.3)' }}>
-      <div className="flex flex-col overflow-y-auto w-full" style={{ maxWidth: '480px', background: 'var(--brand-bg-screen)' }}>
+      <div className="flex flex-col overflow-y-auto w-full" style={{ maxWidth: '480px', background: 'white' }}>
       <div className="relative flex-shrink-0" style={{ height: '260px' }}>
         <PlacePhotoGallery place={place} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
@@ -1315,7 +1405,7 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
 
   return (
     <div className="fixed inset-0 z-50 flex justify-center" style={{ background: 'rgba(0,0,0,0.3)' }}>
-      <div className="flex flex-col overflow-y-auto w-full" style={{ maxWidth: '480px', background: 'var(--brand-bg-screen)' }}>
+      <div className="flex flex-col overflow-y-auto w-full" style={{ maxWidth: '480px', background: 'white' }}>
       <div className="relative flex-shrink-0" style={{ height: '260px' }}>
         {imgSrc ? (
           <img src={hiResUrl(imgSrc)} alt={event.name} className="w-full h-full object-cover" />
@@ -1784,13 +1874,13 @@ function StreakBanner() {
     ? `${info.count} days running — ABQ local in the making 🌶️`
     : `Welcome back! Day ${info.count} in a row.`;
   return (
-    <div className="mx-5 mb-3 rounded-lg flex items-center justify-between gap-3 px-4 py-3"
-      style={{ background: 'var(--brand-gradient)', animation: 'cardFadeIn 0.4s ease both' }}>
+    <div className="flex items-center justify-between gap-3 px-4 py-3"
+      style={{ background: '#1ebaeb', borderBottom: '2px solid #1A1A1A', animation: 'cardFadeIn 0.4s ease both' }}>
       <div className="flex items-center gap-2 min-w-0">
-        <span style={{ fontSize: '22px', lineHeight: 1 }}>{emoji}</span>
-        <span className="text-white text-sm font-bold truncate" style={{ fontFamily: 'Inter, sans-serif' }}>{label}</span>
+        <span style={{ fontSize: '20px', lineHeight: 1 }}>{emoji}</span>
+        <span className="text-sm font-black truncate" style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A' }}>{label}</span>
       </div>
-      <button onClick={() => setVisible(false)} className="text-white/60 flex-shrink-0" style={{ fontSize: '18px', lineHeight: 1 }}>✕</button>
+      <button onClick={() => setVisible(false)} className="flex-shrink-0 font-black" style={{ fontSize: '16px', lineHeight: 1, color: '#1A1A1A' }}>✕</button>
     </div>
   );
 }
@@ -1813,22 +1903,22 @@ function DailyGem({ places, onSelect }: { places: Place[]; onSelect: (p: Place) 
   return (
     <div className="px-5 pb-5">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-black uppercase tracking-tight" style={{ fontFamily: 'Epilogue, sans-serif' }}>{dayOfWeek}'s Spot</h2>
-        <span className="text-xs font-semibold" style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}>🗓 Changes daily</span>
+        <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Epilogue, sans-serif' }}>{dayOfWeek}'s Spot</h2>
+        <span className="text-xs font-black uppercase" style={{ color: '#666', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em' }}>🗓 Changes daily</span>
       </div>
-      <button onClick={() => onSelect(gem)} className="w-full relative rounded-lg overflow-hidden text-left"
-        style={{ height: '180px', boxShadow: '4px 4px 0 var(--brand)', animation: 'cardFadeIn 0.45s ease both' }}>
+      <button onClick={() => onSelect(gem)} className="w-full relative overflow-hidden text-left"
+        style={{ height: '180px', boxShadow: '4px 4px 0 #1A1A1A', border: '2px solid #1A1A1A', animation: 'cardFadeIn 0.45s ease both', borderRadius: 0 }}>
         {gem.image && <img src={gem.image} alt={gem.name} className="w-full h-full object-cover" style={{ filter: 'brightness(0.82)' }} />}
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, rgba(160,59,0,0.18) 0%, rgba(0,0,0,0.72) 100%)' }} />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, rgba(28,111,234,0.12) 0%, rgba(0,0,0,0.72) 100%)' }} />
         <div className="absolute top-3 left-3">
-          <span className="text-xs font-black text-white px-3 py-1 rounded"
-            style={{ background: 'var(--brand)', fontFamily: 'Inter, sans-serif', letterSpacing: '0.05em' }}>
-            ⭐ Spot of the Day
+          <span className="text-xs font-black px-3 py-1"
+            style={{ background: '#1ebaeb', color: '#1A1A1A', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase', border: '1.5px solid #1A1A1A', borderRadius: 0 }}>
+            ★ SPOT OF THE DAY
           </span>
         </div>
         <div className="absolute top-3 right-3">
-          <span className="text-white/80 text-sm font-bold w-8 h-8 rounded-full flex items-center justify-center"
-            style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(6px)' }}>→</span>
+          <span className="text-sm font-black w-8 h-8 flex items-center justify-center"
+            style={{ background: '#1A1A1A', color: 'white', border: '2px solid white' }}>→</span>
         </div>
         <div className="absolute bottom-3 left-3 right-3">
           <p className="text-white font-black text-xl leading-tight" style={{ fontFamily: 'Epilogue, sans-serif' }}>{gem.name}</p>
@@ -1898,22 +1988,26 @@ function AnimatedFact() {
     setTimeout(() => { setIdx(i => (i + 1) % facts.length); setVisible(true); }, 250);
   };
   return (
-    <div className="mx-5 mb-6">
-      <p className="text-xs font-black tracking-widest text-gray-400 uppercase mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>DID YOU KNOW?</p>
-      <button onClick={next} className="w-full rounded-lg p-5 text-left active:scale-95 transition-transform" style={{ background: 'linear-gradient(135deg, rgba(212,239,77,0.06), rgba(212,239,77,0.16))', minHeight: 96 }}>
-        <div style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.35s ease' }}>
-          <span className="text-3xl">{facts[idx].icon}</span>
-          <p className="text-sm text-gray-800 mt-2 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>{facts[idx].fact}</p>
-        </div>
-        <div className="flex items-center justify-between mt-3">
-          <div className="flex gap-1">
-            {[0,1,2,3,4].map(d => (
-              <div key={d} className="w-1.5 h-1.5 rounded-full transition-colors" style={{ backgroundColor: d === idx % 5 ? '#f97316' : '#e5e7eb' }} />
-            ))}
+    <div className="mb-6">
+      <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', marginBottom: '12px' }}>
+        <p className="text-sm font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>Did You Know?</p>
+      </div>
+      <div className="px-5">
+        <button onClick={next} className="w-full p-5 text-left" style={{ background: '#D4EF4D', border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A', minHeight: 96, borderRadius: 0 }}>
+          <div style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.35s ease' }}>
+            <span className="text-3xl">{facts[idx].icon}</span>
+            <p className="text-sm mt-2 leading-relaxed font-semibold" style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A' }}>{facts[idx].fact}</p>
           </div>
-          <span className="text-xs text-gray-400" style={{ fontFamily: 'Inter, sans-serif' }}>tap for next ›</span>
-        </div>
-      </button>
+          <div className="flex items-center justify-between mt-3">
+            <div className="flex gap-1">
+              {[0,1,2,3,4].map(d => (
+                <div key={d} className="w-1.5 h-1.5 transition-colors" style={{ backgroundColor: d === idx % 5 ? '#1A1A1A' : 'rgba(0,0,0,0.2)' }} />
+              ))}
+            </div>
+            <span className="text-xs font-black" style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A', letterSpacing: '0.05em' }}>TAP FOR NEXT ›</span>
+          </div>
+        </button>
+      </div>
     </div>
   );
 }
@@ -2020,7 +2114,7 @@ function DiscoverScreen({
   places, events, eventsLoading, onPlaceSelect, onEventSelect,
   coords, geoRequested, geoError, onRequestGeo,
   checkedIn, onCheckIn,
-  onNavigatePlaces, prefs,
+  onNavigatePlaces, onNavigateEvents, prefs,
 }: {
   places: Place[];
   events: TMEvent[];
@@ -2034,6 +2128,7 @@ function DiscoverScreen({
   checkedIn: Set<string>;
   onCheckIn: (id: string) => void;
   onNavigatePlaces?: (cat: string, search: string) => void;
+  onNavigateEvents?: () => void;
   prefs?: UserPrefs;
 }) {
   const hidden = prefs?.hiddenSections ?? [];
@@ -2056,6 +2151,7 @@ function DiscoverScreen({
         const d = e.dates?.start?.localDate || '';
         return d >= today && d <= twoWeeks;
       })
+      .filter(e => !e._isAdult)  // Discover "This Week" is always family-friendly
       .sort((a, b) => (a.dates?.start?.localDate || '').localeCompare(b.dates?.start?.localDate || ''))
       .slice(0, 6);
   }, [events]);
@@ -2079,21 +2175,21 @@ function DiscoverScreen({
       <StreakBanner />
 
       {/* Hero */}
-      <div className="px-5 pt-5 pb-3" style={{ background: 'linear-gradient(180deg, rgba(160,59,0,0.06) 0%, transparent 100%)' }}>
+      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #1ebaeb', borderBottom: '2px solid #1A1A1A' }}>
         <p
-          className="text-xs font-semibold tracking-widest uppercase"
-          style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}
+          className="text-xs font-black uppercase mb-1"
+          style={{ color: '#888', fontFamily: 'Inter, sans-serif', letterSpacing: '0.12em' }}
         >
           Greater ABQ Metro
         </p>
         <h1
-          className="text-4xl font-black uppercase tracking-tighter leading-none mt-1"
-          style={{ fontFamily: 'Epilogue, sans-serif' }}
+          className="font-black uppercase leading-none"
+          style={{ fontFamily: 'Epilogue, sans-serif', fontSize: '48px', letterSpacing: '-0.04em', color: '#1A1A1A', lineHeight: 1 }}
         >
           {heroDisplay || ' '}
         </h1>
-        <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
-          {places.length} places · {events.length} events in Greater ABQ
+        <p className="mt-2" style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', color: '#666', fontWeight: 600, letterSpacing: '0.04em' }}>
+          {places.length} places · {events.length} events
         </p>
       </div>
 
@@ -2105,86 +2201,84 @@ function DiscoverScreen({
         onRequest={onRequestGeo}
       />
 
-      {/* This Week Events - horizontal scroll */}
+      {/* This Week Events — brutalist table layout */}
       {!hidden.includes('thisWeek') && eventsLoading && upcomingEvents.length === 0 && (
-        <div className="pb-5">
-          <div className="flex items-center justify-between px-5 mb-3">
-            <h2 className="text-lg font-black uppercase tracking-tight" style={{ fontFamily: 'Epilogue, sans-serif' }}>This Week</h2>
-            <span className="text-xs font-semibold" style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}>Loading…</span>
+        <div className="mb-5 mx-5" style={{ border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A' }}>
+          <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '2px solid #1A1A1A', backgroundColor: '#fff' }}>
+            <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em' }}>Events This Week</h2>
+            <span className="text-xs font-black" style={{ color: '#aaa' }}>Loading…</span>
           </div>
-          <div className="flex gap-3 px-5 pb-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-            {[0,1,2].map(i => (
-              <div key={i} className="flex-shrink-0 rounded-lg overflow-hidden" style={{ width: '200px', height: '160px', background: '#e8e8e8', opacity: 0.5 + i * 0.15 }} />
-            ))}
-          </div>
+          {[0,1,2].map(i => (
+            <div key={i} className="flex" style={{ borderBottom: i < 2 ? '1px solid #1A1A1A' : 'none', height: 64 }}>
+              <div style={{ width: 62, backgroundColor: '#e8e8e8' }} />
+              <div className="flex-1 px-3 py-2" style={{ backgroundColor: '#f5f5f5', opacity: 0.7 }} />
+              <div style={{ width: 48, backgroundColor: '#e8e8e8', borderLeft: '1px solid #ccc' }} />
+            </div>
+          ))}
         </div>
       )}
       {!hidden.includes('thisWeek') && upcomingEvents.length > 0 && (
-        <div className="pb-5">
-          <div className="flex items-center justify-between px-5 mb-3">
-            <h2
-              className="text-lg font-black uppercase tracking-tight"
-              style={{ fontFamily: 'Epilogue, sans-serif' }}
-            >
-              This Week
+        <div className="mb-5 mx-5" style={{ border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A' }}>
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '2px solid #1A1A1A', backgroundColor: '#fff' }}>
+            <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>
+              Events This Week
             </h2>
-            <span className="text-xs font-semibold" style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}>
-               Live events
-            </span>
+            <button
+              onClick={() => onNavigateEvents?.()}
+              className="text-xs font-black uppercase"
+              style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A', letterSpacing: '0.06em' }}
+            >
+              → SEE ALL
+            </button>
           </div>
-          <div className="flex gap-3 px-5 pb-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-            {[...upcomingEvents].sort((a, b) => (eventMatchesInterests(b, interests) ? 1 : 0) - (eventMatchesInterests(a, interests) ? 1 : 0)).map(event => {
-              const imgSrc = getBestEventImage(event.images);
+          {/* Rows — top 6, sorted by date */}
+          {[...upcomingEvents]
+            .sort((a, b) => (a.dates?.start?.localDate || '').localeCompare(b.dates?.start?.localDate || ''))
+            .slice(0, 6)
+            .map((event, idx, arr) => {
+              const dateStr = event.dates?.start?.localDate;
+              const timeStr = event.dates?.start?.localTime;
               const venue = event._embedded?.venues?.[0];
+              const d = dateStr ? new Date(dateStr + 'T12:00:00') : null;
+              const month = d ? d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase() : '';
+              const day = d ? d.getDate() : '';
+              const time = timeStr ? formatTime(timeStr) : '';
+              const venueName = venue?.name ? venue.name.toUpperCase() : '';
               return (
                 <button
                   key={event.id}
                   onClick={() => onEventSelect(event)}
-                  className="flex-shrink-0 bg-white rounded-lg overflow-hidden text-left"
-                  style={{ width: '200px', boxShadow: '3px 3px 0 rgba(0,0,0,0.12)' }}
+                  className="flex w-full text-left"
+                  style={{ borderBottom: idx < arr.length - 1 ? '1px solid #D0D0D0' : 'none', backgroundColor: '#fff' }}
                 >
-                  <div className="relative" style={{ height: '120px' }}>
-                    {imgSrc ? (
-                      <img src={hiResUrl(imgSrc)} alt={event.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div
-                        className="w-full h-full flex items-center justify-center"
-                        style={{ background: 'var(--brand-gradient)' }}
-                      >
-                        <span className="text-4xl">♪</span>
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    <div className="absolute top-2 left-2">
-                      <span
-                        className="text-xs font-bold text-white px-1.5 py-0.5 rounded"
-                        style={{ background: 'var(--brand)' }}
-                      >
-                        {getEventCategory(event)}
-                      </span>
-                    </div>
-                    <div className="absolute bottom-2 left-2 right-2">
-                      <p
-                        className="text-white font-black text-xs leading-tight"
-                        style={{ fontFamily: 'Epilogue, sans-serif', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}
-                      >
-                        {event.name}
-                      </p>
-                    </div>
+                  {/* Date block */}
+                  <div className="flex flex-col items-center justify-center flex-shrink-0"
+                    style={{ width: 62, backgroundColor: '#1A1A1A', minHeight: 64 }}>
+                    <span className="font-black uppercase" style={{ fontSize: 10, color: '#D4EF4D', fontFamily: 'Inter, sans-serif', letterSpacing: '0.06em', lineHeight: 1 }}>
+                      {month}
+                    </span>
+                    <span className="font-black" style={{ fontSize: 30, color: '#fff', fontFamily: 'Epilogue, sans-serif', lineHeight: 1.05 }}>
+                      {day}
+                    </span>
                   </div>
-                  <div className="px-3 py-2">
-                    <p className="text-xs font-bold" style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}>
-                      {event.dates?.start?.localDate ? formatDate(event.dates.start.localDate) : 'TBD'}
-                      {event.dates?.start?.localTime ? ' · ' + formatTime(event.dates.start.localTime) : ''}
+                  {/* Content */}
+                  <div className="flex-1 px-3 py-2 flex flex-col justify-center overflow-hidden">
+                    <p className="font-black text-sm leading-tight" style={{ fontFamily: 'Epilogue, sans-serif', color: '#1A1A1A', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}>
+                      {event.name}
                     </p>
-                    {venue && (
-                      <p className="text-xs truncate" style={{ color: '#666' }}>{venue.name}</p>
-                    )}
+                    <p className="text-xs mt-0.5 truncate" style={{ color: '#888', fontFamily: 'Inter, sans-serif', letterSpacing: '0.02em' }}>
+                      {[time, venueName].filter(Boolean).join(' · ')}
+                    </p>
+                  </div>
+                  {/* Arrow */}
+                  <div className="flex items-center justify-center flex-shrink-0"
+                    style={{ width: 48, backgroundColor: '#D4EF4D', borderLeft: '1px solid #1A1A1A' }}>
+                    <span className="font-black" style={{ fontSize: 18, color: '#1A1A1A' }}>→</span>
                   </div>
                 </button>
               );
             })}
-          </div>
         </div>
       )}
 
@@ -2271,10 +2365,10 @@ function DiscoverScreen({
 
       {/* Near You */}
       {!hidden.includes('nearYou') && coords && nearbyPlaces.length > 0 && (
-        <div className="pb-5">
-          <div className="flex items-center justify-between px-5 mb-3">
+        <div className="py-4">
+          <div className="flex items-center justify-between px-5 py-3 mb-0" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
             <h2
-              className="text-lg font-black uppercase tracking-tight"
+              className="text-sm font-black uppercase"
               style={{ fontFamily: 'Epilogue, sans-serif' }}
             >
               Near You
@@ -2284,13 +2378,13 @@ function DiscoverScreen({
               Live location
             </span>
           </div>
-          <div className="flex gap-3 px-5 pb-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+          <div className="flex gap-3 px-5 py-3 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
             {[...nearbyPlaces].sort((a, b) => (placeMatchesInterests(b.place.category, interests) ? 1 : 0) - (placeMatchesInterests(a.place.category, interests) ? 1 : 0)).map(({ place, dist }) => (
               <button
                 key={place.id}
                 onClick={() => onPlaceSelect(place)}
-                className="flex-shrink-0 bg-white rounded-lg overflow-hidden text-left"
-                style={{ width: '144px', boxShadow: '3px 3px 0 rgba(0,0,0,0.12)' }}
+                className="flex-shrink-0 bg-white overflow-hidden text-left"
+                style={{ width: '144px', border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A' }}
               >
                 <div className="relative" style={{ height: '100px' }}>
                   <ImageWithFallback
@@ -2302,8 +2396,8 @@ function DiscoverScreen({
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                   <div className="absolute bottom-2 left-2">
                     <span
-                      className="text-xs font-bold text-white px-1.5 py-0.5 rounded flex items-center gap-0.5"
-                      style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }}
+                      className="text-xs font-bold text-white px-1.5 py-0.5 flex items-center gap-0.5"
+                      style={{ background: 'rgba(0,0,0,0.45)' }}
                     >
                       <span className="material-symbols-outlined" style={{ fontSize: '10px' }}>near_me</span>
                       {formatDist(dist)}
@@ -2311,7 +2405,7 @@ function DiscoverScreen({
                   </div>
                   {checkedIn.has(place.id) && (
                     <div className="absolute top-2 right-2">
-                      <span className="text-white text-xs px-1.5 py-0.5 rounded" style={{ background: 'rgba(160,59,0,0.85)' }}>✓</span>
+                      <span className="text-white text-xs px-1.5 py-0.5" style={{ background: 'rgba(160,59,0,0.85)' }}>✓</span>
                     </div>
                   )}
                 </div>
@@ -2332,22 +2426,22 @@ function DiscoverScreen({
 
       {/* Hidden Gems */}
       {!hidden.includes('hiddenGems') && hiddenGems.length > 0 && (
-        <div className="pb-5">
-          <div className="flex items-center justify-between px-5 mb-3">
+        <div className="py-4">
+          <div className="flex items-center justify-between px-5 py-3 mb-0" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
             <h2
-              className="text-lg font-black uppercase tracking-tight"
+              className="text-sm font-black uppercase"
               style={{ fontFamily: 'Epilogue, sans-serif' }}
             >
               Hidden Gems
             </h2>
-            <span className="text-xs font-semibold" style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}>
+            <span className="text-xs font-black uppercase" style={{ color: '#666', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em' }}>
               ★ 4.5+ rated
             </span>
           </div>
-          <div className="flex gap-3 px-5 pb-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+          <div className="flex gap-3 px-5 py-3 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
             {sortByInterests(hiddenGems, interests).map(place => (
-              <button key={place.id} onClick={() => onPlaceSelect(place)} className="flex-shrink-0" style={{ width: '136px' }}>
-                <div className="relative rounded-lg overflow-hidden mb-2" style={{ width: '136px', height: '136px' }}>
+              <button key={place.id} onClick={() => onPlaceSelect(place)} className="flex-shrink-0" style={{ width: '136px', boxShadow: '4px 4px 0 #1A1A1A' }}>
+                <div className="relative overflow-hidden mb-0" style={{ width: '136px', height: '136px', border: '2px solid #1A1A1A' }}>
                   <ImageWithFallback
                     src={place.image}
                     alt={place.name}
@@ -2358,8 +2452,8 @@ function DiscoverScreen({
                   {place.rating && (
                     <div className="absolute bottom-2 left-2">
                       <span
-                        className="text-xs font-bold text-white px-1.5 py-0.5 rounded"
-                        style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}
+                        className="text-xs font-bold text-white px-1.5 py-0.5"
+                        style={{ background: 'rgba(0,0,0,0.4)' }}
                       >
                         ★ {place.rating.toFixed(1)}
                       </span>
@@ -2367,12 +2461,12 @@ function DiscoverScreen({
                   )}
                   {checkedIn.has(place.id) && (
                     <div className="absolute top-2 right-2">
-                      <span className="text-white text-xs px-1.5 py-0.5 rounded" style={{ background: 'rgba(160,59,0,0.85)' }}>✓</span>
+                      <span className="text-white text-xs px-1.5 py-0.5" style={{ background: 'rgba(160,59,0,0.85)' }}>✓</span>
                     </div>
                   )}
                 </div>
                 <p
-                  className="text-xs font-bold text-gray-900 leading-tight text-left truncate"
+                  className="text-xs font-bold text-gray-900 leading-tight text-left truncate mt-1"
                   style={{ fontFamily: 'Inter, sans-serif' }}
                 >
                   {place.name}
@@ -2385,43 +2479,50 @@ function DiscoverScreen({
       )}
 
       {/* Explore by Vibe */}
-      {!hidden.includes('vibes') && <div className="mx-5 mb-6">
-        <p className="text-xs font-black tracking-widest text-gray-400 uppercase mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>EXPLORE BY VIBE</p>
-        <div className="grid grid-cols-3 gap-2">
+      {!hidden.includes('vibes') && <div className="mb-6">
+        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
+          <p className="text-sm font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>Explore by Vibe</p>
+        </div>
+        <div className="grid grid-cols-3" style={{ gap: '0', borderLeft: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', borderRight: '2px solid #1A1A1A' }}>
           {[
-            { emoji: '🏕️', label: 'Outdoor', bg: '#e8f5e9', color: '#2e7d32' },
-            { emoji: '🍽️', label: 'Food & Drink', bg: 'rgba(212,239,77,0.18)', color: '#566500' },
-            { emoji: '🎨', label: 'Arts & Culture', bg: '#f3e5f5', color: '#6a1b9a' },
-            { emoji: '🎶', label: 'Live Music', bg: '#e3f2fd', color: '#1565c0' },
-            { emoji: '👨‍👩‍👧', label: 'Family Fun', bg: '#fff8e1', color: '#f57f17' },
-            { emoji: '🏃', label: 'Active', bg: '#fce4ec', color: '#c62828' },
-          ].map(({ emoji, label, bg, color }) => (
-            <button key={label} className="rounded-lg p-3 flex flex-col items-center gap-1 active:scale-95 transition-transform" style={{ backgroundColor: bg }}
-              onClick={() => { const m={'Outdoor':'park','Food & Drink':'restaurant','Arts & Culture':'arts','Live Music':'entertainment','Family Fun':'park','Active':'fitness'}; onNavigatePlaces?.(m[label]||'All', ''); }}>
-              <span className="text-2xl">{emoji}</span>
-              <span className="text-xs font-bold text-center leading-tight" style={{ fontFamily: 'Inter, sans-serif', color }}>{label}</span>
+            { icon: 'park', label: 'Outdoor', cat: 'park' },
+            { icon: 'restaurant', label: 'Food & Drink', cat: 'restaurant' },
+            { icon: 'palette', label: 'Arts & Culture', cat: 'arts' },
+            { icon: 'music_note', label: 'Live Music', cat: 'entertainment' },
+            { icon: 'child_care', label: 'Family Fun', cat: 'park' },
+            { icon: 'directions_run', label: 'Active', cat: 'fitness' },
+          ].map(({ icon, label, cat }) => (
+            <button key={label}
+              className="flex flex-col items-center gap-1 p-3 transition-all active:bg-gray-100"
+              style={{ background: 'white', border: 'none', borderRight: '2px solid #1A1A1A', borderBottom: '2px solid #1A1A1A', borderRadius: 0 }}
+              onClick={() => onNavigatePlaces?.(cat, '')}>
+              <span className="material-symbols-outlined" style={{ fontSize: '26px', color: '#1A1A1A', fontVariationSettings: "'FILL' 0, 'wght' 300" }}>{icon}</span>
+              <span className="text-center leading-tight font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', fontSize: '9px', letterSpacing: '0.08em', color: '#1A1A1A' }}>{label}</span>
             </button>
           ))}
         </div>
       </div>}
 
       {/* ABQ Neighborhoods */}
-      {!hidden.includes('neighborhoods') && <div className="mx-5 mb-6">
-        <p className="text-xs font-black tracking-widest text-gray-400 uppercase mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>ABQ NEIGHBORHOODS</p>
-        <div className="grid grid-cols-2 gap-2">
+      {!hidden.includes('neighborhoods') && <div className="mb-6">
+        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
+          <p className="text-sm font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>ABQ Neighborhoods</p>
+        </div>
+        <div className="grid grid-cols-2" style={{ gap: '0', borderLeft: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', borderRight: '2px solid #1A1A1A' }}>
           {[
-            { name: 'Old Town', desc: 'History, art & adobe', emoji: '🏺', bg: 'var(--brand)' },
-            { name: 'Nob Hill', desc: 'Eclectic & walkable', emoji: '☕', bg: '#1a237e' },
-            { name: 'Downtown', desc: 'Nightlife & events', emoji: '🌃', bg: '#1b5e20' },
-            { name: 'Rio Grande', desc: 'Nature & trails', emoji: '🌿', bg: '#006064' },
-            { name: 'NE Heights', desc: 'Views & dining', emoji: '🏔️', bg: '#4a148c' },
-            { name: 'South Valley', desc: 'Local flavor', emoji: '🌶️', bg: '#b71c1c' },
-          ].map(({ name, desc, emoji, bg }) => (
-            <button key={name} className="rounded-lg p-4 text-left active:scale-95 transition-transform" style={{ backgroundColor: bg }}
-              onClick={() => { onNavigatePlaces?.('All', name); }}>
-              <span className="text-2xl">{emoji}</span>
-              <p className="text-white font-black text-sm mt-1" style={{ fontFamily: 'Epilogue, sans-serif' }}>{name}</p>
-              <p className="text-white/70 text-xs" style={{ fontFamily: 'Inter, sans-serif' }}>{desc}</p>
+            { name: 'Old Town', desc: 'History, art & adobe', icon: 'account_balance', bg: '#566500' },
+            { name: 'Nob Hill', desc: 'Eclectic & walkable', icon: 'local_cafe', bg: '#0057c2' },
+            { name: 'Downtown', desc: 'Nightlife & events', icon: 'nightlife', bg: '#1A1A1A' },
+            { name: 'Rio Grande', desc: 'Nature & trails', icon: 'nature', bg: '#1C6FEA' },
+            { name: 'NE Heights', desc: 'Views & dining', icon: 'landscape', bg: '#8a9e00' },
+            { name: 'South Valley', desc: 'Local flavor', icon: 'storefront', bg: '#D4EF4D' },
+          ].map(({ name, desc, icon, bg }) => (
+            <button key={name} className="p-4 text-left transition-all"
+              style={{ backgroundColor: bg, borderRight: '2px solid #1A1A1A', borderBottom: '2px solid #1A1A1A', borderRadius: 0 }}
+              onClick={() => onNavigatePlaces?.('All', name)}>
+              <span className="material-symbols-outlined" style={{ fontSize: '24px', color: bg === '#D4EF4D' ? '#1A1A1A' : 'white', fontVariationSettings: "'FILL' 0, 'wght' 300" }}>{icon}</span>
+              <p className="font-black text-sm mt-1" style={{ fontFamily: 'Epilogue, sans-serif', color: bg === '#D4EF4D' ? '#1A1A1A' : 'white' }}>{name}</p>
+              <p className="text-xs" style={{ fontFamily: 'Inter, sans-serif', color: bg === '#D4EF4D' ? 'rgba(0,0,0,0.65)' : 'rgba(255,255,255,0.75)' }}>{desc}</p>
             </button>
           ))}
         </div>
@@ -2431,36 +2532,39 @@ function DiscoverScreen({
       <AnimatedFact />
 
       {/* Weekend Planner */}
-      {!hidden.includes('planWeekend') && <div className="mx-5 mb-6">
-        <p className="text-xs font-black tracking-widest text-gray-400 uppercase mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>PLAN YOUR WEEKEND</p>
-        <div className="flex flex-col gap-3">
+      {!hidden.includes('planWeekend') && <div className="mb-6">
+        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', marginBottom: '12px' }}>
+          <p className="text-sm font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>Plan Your Weekend</p>
+        </div>
+        <div className="flex flex-col gap-2">
           {[
-            { title: 'Morning Hike + Brunch', steps: ['Sandia Mountain foothills trail', 'Coffee at Flying Star Café', 'Brunch in Nob Hill'], bg: '#e8f5e9', accent: '#2e7d32', emoji: '🥾' },
-            { title: 'Culture Day', steps: ['Explora Science Center', 'Lunch in Old Town', 'Albuquerque Museum'], bg: '#e3f2fd', accent: '#1565c0', emoji: '🎨' },
-            { title: 'Local Food Crawl', steps: ['Green chile breakfast at Frontier', 'Lunch at El Modelo', 'Drinks on Central Ave'], bg: 'rgba(212,239,77,0.18)', accent: '#566500', emoji: '🌮' },
-            { title: 'Nature Escape', steps: ['Rio Grande Bosque trail', 'Tingley Beach', 'Sunset at Petroglyph Monument'], bg: '#f3e5f5', accent: '#6a1b9a', emoji: '🌅' },
-          ].map(({ title, steps, bg, accent, emoji }) => (
-            <div key={title} className="rounded-lg p-5 shadow-md" style={{ backgroundColor: bg }}>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">{emoji}</span>
-                  <p className="font-black text-lg" style={{ fontFamily: 'Epilogue, sans-serif', color: accent }}>{title}</p>
+            { title: 'Morning Hike + Brunch', steps: ['Sandia Mountain foothills trail', 'Coffee at Flying Star Café', 'Brunch in Nob Hill'], bar: '#D4EF4D' },
+            { title: 'Culture Day', steps: ['Explora Science Center', 'Lunch in Old Town', 'Albuquerque Museum'], bar: '#1ebaeb' },
+            { title: 'Local Food Crawl', steps: ['Green chile breakfast at Frontier', 'Lunch at El Modelo', 'Drinks on Central Ave'], bar: '#D4EF4D' },
+            { title: 'Nature Escape', steps: ['Rio Grande Bosque trail', 'Tingley Beach', 'Sunset at Petroglyph Monument'], bar: '#1ebaeb' },
+          ].map(({ title, steps, bar }) => (
+            <div key={title} className="flex" style={{ border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A', backgroundColor: '#fff' }}>
+              {/* left accent bar */}
+              <div style={{ width: 4, flexShrink: 0, backgroundColor: bar }} />
+              <div className="flex-1 px-3 py-2">
+                <div className="flex items-center justify-between mb-1.5">
+                  <p className="text-xs font-black uppercase" style={{ fontFamily: 'Epilogue, sans-serif', color: '#1A1A1A', letterSpacing: '0.09em' }}>{title}</p>
+                  <button
+                    onClick={() => addToDayPlan(steps)}
+                    className="text-xs font-black px-2 py-0.5"
+                    style={{ backgroundColor: '#D4EF4D', color: '#1A1A1A', border: '1.5px solid #1A1A1A', fontFamily: 'Inter, sans-serif', letterSpacing: '0.04em' }}
+                  >
+                    + plan
+                  </button>
                 </div>
-                <button
-                  onClick={() => addToDayPlan(steps)}
-                  className="text-xs font-bold px-3 py-1.5 rounded-lg text-white active:scale-95 transition-transform"
-                  style={{ backgroundColor: accent, fontFamily: 'Inter, sans-serif' }}
-                >
-                  + Add to plan
-                </button>
-              </div>
-              <div className="flex flex-col gap-2 mt-1">
-                {steps.map((step, i) => (
-                  <div key={i} className="flex items-center gap-2 bg-white/25 rounded-lg px-3 py-2">
-                    <span className="text-sm font-bold rounded-full w-7 h-7 flex items-center justify-center text-white flex-shrink-0 shadow-sm" style={{ backgroundColor: accent }}>{i + 1}</span>
-                    <button onClick={() => window.dispatchEvent(new CustomEvent('plan-step-click',{detail:step}))} className="text-sm font-semibold text-gray-800 hover:text-blue-700 transition-colors text-left leading-snug flex-1" style={{ fontFamily: 'Inter, sans-serif' }}>{step}</button>
-                  </div>
-                ))}
+                <div className="flex flex-col gap-0.5">
+                  {steps.map((step, i) => (
+                    <div key={i} className="flex items-center gap-1.5">
+                      <span className="text-xs font-black w-5 h-5 flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#1A1A1A', color: '#D4EF4D' }}>{i + 1}</span>
+                      <button onClick={() => window.dispatchEvent(new CustomEvent('plan-step-click',{detail:step}))} className="text-xs text-left leading-tight flex-1" style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A' }}>{step}</button>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           ))}
@@ -2488,17 +2592,21 @@ function EventsScreen({
   events,
   onEventSelect,
   initialSearch = '',
+  show21Plus = false,
+  onToggle21Plus,
 }: {
   events: TMEvent[];
   onEventSelect: (e: TMEvent) => void;
   initialSearch?: string;
+  show21Plus?: boolean;
+  onToggle21Plus?: () => void;
 }) {
   const [search, setSearch] = useState('');
   useEffect(() => { if (initialSearch) setSearch(initialSearch); }, [initialSearch]);
   const [selectedGenre, setSelectedGenre] = useState('All');
 
   const filtered = useMemo(() => {
-    let result = events;
+    let result = show21Plus ? events : events.filter(e => !e._isAdult);
     if (selectedGenre !== 'All') {
       result = result.filter(e => {
         const seg = e.classifications?.[0]?.segment?.name || '';
@@ -2556,7 +2664,7 @@ function EventsScreen({
 
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-      <div className="px-5 pt-5 pb-3" style={{ background: 'linear-gradient(180deg, rgba(160,59,0,0.06) 0%, transparent 100%)' }}>
+      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #1ebaeb', borderBottom: '2px solid #1A1A1A' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}
@@ -2564,8 +2672,8 @@ function EventsScreen({
           What's Happening
         </p>
         <h1
-          className="text-4xl font-black uppercase tracking-tighter leading-none mt-1"
-          style={{ fontFamily: 'Epilogue, sans-serif' }}
+          className="font-black uppercase leading-none mt-1"
+          style={{ fontFamily: 'Epilogue, sans-serif', fontSize: '48px', letterSpacing: '-0.04em', color: '#1A1A1A' }}
         >
           Live Events<br />Near You
         </h1>
@@ -2574,10 +2682,10 @@ function EventsScreen({
         </p>
       </div>
 
-      <div className="px-5 pb-3">
+      <div className="px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A' }}>
         <div
-          className="flex items-center gap-2 bg-white rounded-lg px-4 py-3"
-          style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.12)' }}
+          className="flex items-center gap-2 bg-white px-4 py-3"
+          style={{ border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A' }}
         >
           <span className="material-symbols-outlined text-gray-400" style={{ fontSize: '20px' }}>search</span>
           <input
@@ -2595,17 +2703,23 @@ function EventsScreen({
         </div>
       </div>
 
-      <div className="flex gap-2 px-5 pb-4 overflow-x-auto" style={{ scrollbarWidth: 'none', position: 'sticky', top: 'calc(var(--sat) + 72px)', zIndex: 30, background: 'linear-gradient(180deg, var(--brand-bg-screen) 80%, transparent 100%)', paddingTop: '4px' }}>
+      <div className="flex px-5 overflow-x-auto" style={{ scrollbarWidth: 'none', position: 'sticky', top: 'calc(var(--sat) + 72px)', zIndex: 30, background: 'white', paddingTop: '12px', paddingBottom: '0px', borderBottom: '2px solid #1A1A1A' }}>
         {EVENT_GENRES.map(genre => (
           <button
             key={genre}
             onClick={() => setSelectedGenre(genre)}
-            className="flex-shrink-0 px-4 py-2 rounded text-sm font-bold transition-all"
+            className="flex-shrink-0 px-3 py-2 text-xs font-black uppercase transition-all"
             style={{
               fontFamily: 'Inter, sans-serif',
-              background: selectedGenre === genre ? 'var(--brand)' : 'white',
-              color: selectedGenre === genre ? 'white' : '#555',
-              boxShadow: selectedGenre === genre ? '3px 3px 0 var(--brand)' : '3px 3px 0 rgba(0,0,0,0.10)',
+              letterSpacing: '0.1em',
+              background: selectedGenre === genre ? '#1A1A1A' : 'white',
+              color: selectedGenre === genre ? 'white' : '#1A1A1A',
+              border: '1.5px solid #1A1A1A',
+              marginRight: '-1.5px',
+              borderRadius: 0,
+              position: 'relative',
+              zIndex: selectedGenre === genre ? 1 : 0,
+              marginBottom: '12px',
             }}
           >
             {genre}
@@ -2613,7 +2727,7 @@ function EventsScreen({
         ))}
       </div>
 
-      <div className="px-5 pb-2">
+      <div className="px-5 pb-2 flex items-center justify-between" style={{ borderBottom: '1px solid #eee', paddingTop: 10, paddingBottom: 10 }}>
         <p className="text-sm font-semibold text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>
           {sorted.length} event{sorted.length !== 1 ? 's' : ''}
           {(selectedGenre !== 'All' || search) && (
@@ -2626,13 +2740,39 @@ function EventsScreen({
             </button>
           )}
         </p>
+        {/* 21+ toggle */}
+        <button
+          onClick={onToggle21Plus}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            fontSize: 12, fontFamily: 'Inter, sans-serif', fontWeight: 700,
+            color: show21Plus ? '#a03b00' : '#999',
+            background: 'none', border: 'none', cursor: 'pointer',
+            padding: '4px 8px', borderRadius: 8,
+            outline: show21Plus ? '1.5px solid #a03b00' : '1.5px solid #ddd',
+          }}
+        >
+          <span style={{ fontSize: 14 }}>🔞</span>
+          21+ events
+          <span style={{
+            width: 28, height: 16, borderRadius: 8, display: 'inline-block',
+            background: show21Plus ? '#a03b00' : '#ccc', position: 'relative',
+            transition: 'background 0.2s', flexShrink: 0,
+          }}>
+            <span style={{
+              position: 'absolute', top: 2, left: show21Plus ? 14 : 2,
+              width: 12, height: 12, borderRadius: '50%', background: 'white',
+              transition: 'left 0.2s',
+            }} />
+          </span>
+        </button>
       </div>
 
       <div className="px-5 pb-28 flex flex-col gap-3">
         {sorted.map(event => (
           <div key={event.id} style={{position:'relative'}}>
             <EventCard event={event} onClick={() => onEventSelect(event)} />
-            <button style={{position:'absolute',top:8,right:8,zIndex:10,background:'rgba(0,0,0,0.6)',border:'none',borderRadius:'50%',width:36,height:36,minHeight:0,color:'white',fontSize:18,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:event.id,type:'event',name:event.name});}}>♡</button>
+            <button style={{position:'absolute',top:8,right:8,zIndex:10,background:'white',border:'2px solid #1A1A1A',borderRadius:0,width:34,height:34,minHeight:0,color:'#1A1A1A',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'2px 2px 0 #1A1A1A'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:event.id,type:'event',name:event.name});}}><span className="material-symbols-outlined" style={{fontSize:'18px',fontVariationSettings:"'FILL' 0, 'wght' 400"}}>favorite</span></button>
           </div>
         ))}
         {sorted.length === 0 && (
@@ -2796,7 +2936,7 @@ function PlacesScreen({
 
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', willChange: 'transform' } as React.CSSProperties}>
-      <div className="px-5 pt-5 pb-3" style={{ background: 'linear-gradient(180deg, rgba(160,59,0,0.06) 0%, transparent 100%)' }}>
+      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #1ebaeb', borderBottom: '2px solid #1A1A1A' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}
@@ -2804,8 +2944,8 @@ function PlacesScreen({
           Explore Greater ABQ
         </p>
         <h1
-          className="text-4xl font-black uppercase tracking-tighter leading-none mt-1"
-          style={{ fontFamily: 'Epilogue, sans-serif' }}
+          className="font-black uppercase leading-none mt-1"
+          style={{ fontFamily: 'Epilogue, sans-serif', fontSize: '48px', letterSpacing: '-0.04em', color: '#1A1A1A' }}
         >
           Places<br />to Go
         </h1>
@@ -2827,8 +2967,8 @@ function PlacesScreen({
       {/* Search */}
       <div className="px-5 pb-3">
         <div
-          className="flex items-center gap-2 bg-white rounded-lg px-4 py-3"
-          style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.12)' }}
+          className="flex items-center gap-2 bg-white px-4 py-3"
+          style={{ border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A' }}
         >
           <span className="material-symbols-outlined text-gray-400" style={{ fontSize: '20px' }}>search</span>
           <input
@@ -2847,17 +2987,22 @@ function PlacesScreen({
       </div>
 
       {/* Category pills */}
-      <div className="flex gap-2 px-5 pb-3 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+      <div className="flex px-5 pb-0 overflow-x-auto" style={{ scrollbarWidth: 'none', borderBottom: '2px solid #1A1A1A', paddingBottom: '12px', paddingTop: '12px' }}>
         {PLACE_CATEGORIES.map(cat => (
           <button
             key={cat.label}
             onClick={() => setSelectedCat(cat.value)}
-            className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded text-sm font-semibold transition-all"
+            className="flex-shrink-0 flex items-center gap-1 px-3 py-2 text-xs font-black uppercase transition-all"
             style={{
               fontFamily: 'Inter, sans-serif',
-              background: selectedCat === cat.value ? 'var(--brand)' : 'white',
-              color: selectedCat === cat.value ? 'white' : '#333',
-              boxShadow: selectedCat === cat.value ? '3px 3px 0 var(--brand)' : '3px 3px 0 rgba(0,0,0,0.12)',
+              letterSpacing: '0.1em',
+              background: selectedCat === cat.value ? '#1A1A1A' : 'white',
+              color: selectedCat === cat.value ? 'white' : '#1A1A1A',
+              border: '1.5px solid #1A1A1A',
+              marginRight: '-1.5px',
+              borderRadius: 0,
+              position: 'relative',
+              zIndex: selectedCat === cat.value ? 1 : 0,
             }}
           >
             <span>{cat.icon}</span>
@@ -2867,7 +3012,7 @@ function PlacesScreen({
       </div>
 
       {/* Sort tabs */}
-      <div className="flex gap-2 px-5 pb-4">
+      <div className="flex gap-2 px-5 pb-4 pt-3">
         {([
           { id: 'top', label: 'Top Rated' },
           { id: 'near', label: 'Near Me', disabled: !coords },
@@ -2876,13 +3021,17 @@ function PlacesScreen({
           <button
             key={s.id}
             onClick={() => { if (s.disabled) { onRequestGeo(); } else { setSortMode(s.id); } }}
-            className="flex-shrink-0 px-3 py-1.5 rounded text-xs font-bold transition-all"
+            className="flex-shrink-0 px-3 py-1.5 text-xs font-black uppercase transition-all"
             title={s.disabled ? 'Enable location to sort by distance' : undefined}
             style={{
-              background: sortMode === s.id ? '#111' : 'white',
-              color: sortMode === s.id ? 'white' : s.disabled ? '#ccc' : '#555',
-              boxShadow: '3px 3px 0 rgba(0,0,0,0.12)',
-              opacity: s.disabled ? 0.6 : 1,
+              fontFamily: 'Inter, sans-serif',
+              letterSpacing: '0.08em',
+              background: sortMode === s.id ? '#1A1A1A' : 'white',
+              color: sortMode === s.id ? 'white' : s.disabled ? '#bbb' : '#1A1A1A',
+              border: '2px solid #1A1A1A',
+              boxShadow: sortMode === s.id ? '4px 4px 0 #1A1A1A' : '3px 3px 0 rgba(0,0,0,0.15)',
+              borderRadius: 0,
+              opacity: s.disabled ? 0.5 : 1,
             }}
           >
             {s.id === 'near' && !coords && (
@@ -2909,7 +3058,7 @@ function PlacesScreen({
                 tooFar={tooFarPlaceId === place.id}
                 onCheckIn={e => { e.stopPropagation(); onCheckIn(place.id); }}
                 />
-              <button style={{position:'absolute',top:8,right:8,zIndex:10,background:'rgba(0,0,0,0.6)',border:'none',borderRadius:'50%',width:36,height:36,minHeight:0,color:'white',fontSize:18,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:place.id,type:'place',name:place.name});}}>♡</button>
+              <button style={{position:'absolute',top:8,right:8,zIndex:10,background:'white',border:'2px solid #1A1A1A',borderRadius:0,width:32,height:32,minHeight:0,color:'#1A1A1A',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'2px 2px 0 #1A1A1A'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:place.id,type:'place',name:place.name});}}>♡</button>
             </div>
           ))}
         </div>
@@ -3389,12 +3538,12 @@ function ProfileScreen({
   }, [lbRows, myCount, user]);
 
   const ACHIEVEMENTS = [
-    { id: 'first', emoji: '✿', label: 'First Check-in', unlocked: myCount >= 1, color: '#e8f5e9', accent: '#2e7d32' },
-    { id: 'five', emoji: '⚡', label: 'Explorer (5)', unlocked: myCount >= 5, color: 'rgba(212,239,77,0.18)', accent: '#566500' },
-    { id: 'ten', emoji: '', label: 'Adventurer (10)', unlocked: myCount >= 10, color: '#e3f2fd', accent: '#1565c0' },
-    { id: 'twenty', emoji: '', label: 'Trailblazer (20)', unlocked: myCount >= 20, color: '#fce4ec', accent: '#c62828' },
-    { id: 'thirty5', emoji: '', label: 'Pioneer (35)', unlocked: myCount >= 35, color: '#f3e5f5', accent: '#7b1fa2' },
-    { id: 'fifty', emoji: '★', label: 'Legend (50)', unlocked: myCount >= 50, color: '#fff8e1', accent: '#f57f17' },
+    { id: 'first',   icon: 'where_to_vote', label: 'First Check-in',  sub: '1 place',   unlocked: myCount >= 1  },
+    { id: 'five',    icon: 'explore',       label: 'Explorer',        sub: '5 places',  unlocked: myCount >= 5  },
+    { id: 'ten',     icon: 'hiking',        label: 'Adventurer',      sub: '10 places', unlocked: myCount >= 10 },
+    { id: 'twenty',  icon: 'forest',        label: 'Trailblazer',     sub: '20 places', unlocked: myCount >= 20 },
+    { id: 'thirty5', icon: 'footprint',     label: 'Pioneer',         sub: '35 places', unlocked: myCount >= 35 },
+    { id: 'fifty',   icon: 'military_tech', label: 'Legend',          sub: '50 places', unlocked: myCount >= 50 },
   ];
 
   const nextLevel = getLevel(myCount + 1);
@@ -3402,7 +3551,7 @@ function ProfileScreen({
 
   return (
     <div className="w-full px-5 pb-28" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-      <div className="pt-5 pb-4" style={{ background: 'linear-gradient(180deg, rgba(160,59,0,0.06) 0%, transparent 100%)', marginLeft: '-20px', marginRight: '-20px', paddingLeft: '20px', paddingRight: '20px' }}>
+      <div className="pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #1ebaeb', borderBottom: '2px solid #1A1A1A', marginLeft: '-20px', marginRight: '-20px', paddingLeft: '20px', paddingRight: '20px' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}
@@ -3410,8 +3559,8 @@ function ProfileScreen({
           Your Profile
         </p>
         <h1
-          className="text-4xl font-black uppercase tracking-tighter leading-none mt-1"
-          style={{ fontFamily: 'Epilogue, sans-serif' }}
+          className="font-black uppercase leading-none mt-1"
+          style={{ fontFamily: 'Epilogue, sans-serif', fontSize: '48px', letterSpacing: '-0.04em', color: '#1A1A1A' }}
         >
           Hey,<br />{(user?.user_metadata?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Explorer').split(' ')[0]}
         </h1>
@@ -3433,12 +3582,12 @@ function ProfileScreen({
           style={{ background: 'linear-gradient(135deg, #1b5e20, #2e7d32)', fontFamily: 'Inter, sans-serif', boxShadow: '3px 3px 0 rgba(0,0,0,0.15)' }}
         >
           <div>
-            <p className="text-white font-bold text-sm">✅ Signed in & syncing your check-ins</p>
-            <p className="text-green-200 text-xs mt-0.5">Check out the leaderboard below</p>
+            <p className="font-bold text-sm" style={{ color: '#1A1A1A' }}>✅ Signed in & syncing your check-ins</p>
+            <p className="text-xs mt-0.5" style={{ color: '#566500' }}>Check out the leaderboard below</p>
           </div>
           <button
             onClick={onSignOut}
-            className="text-xs font-bold text-green-200 flex-shrink-0 ml-3"
+            className="text-xs font-bold flex-shrink-0 ml-3" style={{ color: '#1A1A1A' }}
             style={{ fontFamily: 'Inter, sans-serif', background: 'none', border: 'none', cursor: 'pointer' }}
           >
             Sign out
@@ -3530,29 +3679,49 @@ function ProfileScreen({
       )}
 
       {/* Achievements */}
-      <h2
-        className="font-black text-base uppercase tracking-tight mb-3"
-        style={{ fontFamily: 'Epilogue, sans-serif' }}
-      >
-        Achievements
-      </h2>
-      <div className="grid grid-cols-3 gap-3 mb-5">
+      <div className="flex items-center px-0 py-3 mb-0" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
+        <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Epilogue, sans-serif' }}>Achievements</h2>
+      </div>
+      {/* Abutting border grid — no gap, container has left+top, cells have right+bottom */}
+      <div className="grid grid-cols-3 mb-5" style={{ gap: 0, borderLeft: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', borderRight: '2px solid #1A1A1A' }}>
         {ACHIEVEMENTS.map(a => (
           <div
             key={a.id}
-            className="rounded-lg p-3 text-center flex flex-col items-center gap-1"
+            className="flex flex-col items-center justify-center gap-1 py-5 px-2"
             style={{
-              background: a.unlocked ? a.color : `${a.color}88`,
-              boxShadow: a.unlocked ? `0 2px 8px ${a.accent}22` : '0 1px 4px rgba(0,0,0,0.04)',
-              border: a.unlocked ? `2px solid ${a.accent}33` : '2px solid transparent',
+              borderRight: '2px solid #1A1A1A',
+              borderBottom: '2px solid #1A1A1A',
+              background: a.unlocked ? '#D4EF4D' : 'white',
+              marginRight: '-2px',
             }}
           >
-            <span style={{ fontSize: '24px', opacity: a.unlocked ? 1 : 0.4, filter: a.unlocked ? 'none' : 'grayscale(0.5)' }}>{a.emoji}</span>
-            <p className="text-xs font-semibold leading-tight text-center" style={{
+            <span
+              className="material-symbols-outlined"
+              style={{
+                fontSize: '36px',
+                color: a.unlocked ? '#1A1A1A' : '#D0D0D0',
+                fontVariationSettings: a.unlocked
+                  ? "'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 48"
+                  : "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 48",
+              }}
+            >
+              {a.icon}
+            </span>
+            <p className="text-center leading-tight font-black uppercase" style={{
               fontFamily: 'Inter, sans-serif',
-              color: a.unlocked ? a.accent : '#999',
+              fontSize: '8px',
+              letterSpacing: '0.08em',
+              color: a.unlocked ? '#1A1A1A' : '#CCCCCC',
             }}>
               {a.label}
+            </p>
+            <p className="text-center" style={{
+              fontFamily: 'Inter, sans-serif',
+              fontSize: '8px',
+              color: a.unlocked ? '#566500' : '#DDDDDD',
+              letterSpacing: '0.04em',
+            }}>
+              {a.sub}
             </p>
           </div>
         ))}
@@ -3764,7 +3933,182 @@ function InstallPrompt() {
   const dismiss = () => {
     setHiding(true);
     localStorage.setItem(INSTALL_DISMISSED_KEY, String(Date.now()));
-    setTimeout(() => { setVisible(false); setAndroidPrompt(null); }, 320);
+    setTimeout(() => setVisible(false), 380);
+  };
+
+  if (!visible) return null;
+
+  return (
+    <>
+      <style>{`
+        @keyframes abqPromptSlideUp {
+          from { opacity: 0; transform: translateY(100%); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes abqPromptSlideDown {
+          from { opacity: 1; transform: translateY(0); }
+          to   { opacity: 0; transform: translateY(100%); }
+        }
+        @keyframes abqBounce {
+          0%, 100% { transform: translateY(0); }
+          40%       { transform: translateY(-10px); }
+          60%       { transform: translateY(-5px); }
+        }
+        @keyframes abqArrowPulse {
+          0%, 100% { opacity: 0.6; transform: translateY(0) scaleY(1); }
+          50%       { opacity: 1;   transform: translateY(4px) scaleY(1.1); }
+        }
+      `}</style>
+
+      {/* Backdrop tap-to-dismiss */}
+      <div
+        onClick={dismiss}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 9998,
+          background: 'rgba(0,0,0,0.35)',
+          animation: hiding ? 'abqPromptSlideDown 0.38s ease forwards' : 'none',
+          opacity: hiding ? 0 : 1, transition: hiding ? 'opacity 0.38s' : 'none',
+        }}
+      />
+
+      {/* Bottom sheet */}
+      <div style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999,
+        background: '#fff',
+        borderRadius: '24px 24px 0 0',
+        boxShadow: '0 -8px 40px rgba(0,0,0,0.18)',
+        padding: '20px 24px calc(28px + env(safe-area-inset-bottom))',
+        fontFamily: 'Manrope, -apple-system, sans-serif',
+        animation: hiding
+          ? 'abqPromptSlideDown 0.38s ease forwards'
+          : 'abqPromptSlideUp 0.44s cubic-bezier(0.34,1.56,0.64,1) forwards',
+      }}>
+        {/* Drag handle */}
+        <div style={{ width: 40, height: 4, borderRadius: 2, background: '#e0e0e0', margin: '0 auto 18px' }} />
+
+        {/* Dismiss X */}
+        <button
+          onClick={dismiss}
+          style={{
+            position: 'absolute', top: 18, right: 20,
+            width: 32, height: 32, borderRadius: '50%',
+            background: '#f2f2f2', border: 'none', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 16, color: '#666', lineHeight: 1,
+          }}
+          aria-label="Dismiss"
+        >✕</button>
+
+        {/* Icon + headline */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
+          <img
+            src="/apple-touch-icon-180.png"
+            alt="ABQ Unplugged"
+            style={{ width: 56, height: 56, borderRadius: 4, boxShadow: '3px 3px 0 rgba(0,0,0,0.15)' }}
+          />
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 17, color: '#1c1c1e', lineHeight: 1.2 }}>
+              Add to Home Screen
+            </div>
+            <div style={{ fontSize: 13, color: '#888', marginTop: 3 }}>
+              Get the full-screen app experience
+            </div>
+          </div>
+        </div>
+
+        {/* Steps */}
+        {[
+          {
+            num: '1',
+            icon: (
+              /* Share icon SVG */
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke='var(--brand)' strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/>
+                <polyline points="16 6 12 2 8 6"/>
+                <line x1="12" y1="2" x2="12" y2="15"/>
+              </svg>
+            ),
+            text: <>Tap the <strong>Share</strong> button in Safari's bottom bar</>,
+          },
+          {
+            num: '2',
+            icon: (
+              /* Plus-in-square icon */
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke='var(--brand)' strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="3"/>
+                <line x1="12" y1="8" x2="12" y2="16"/>
+                <line x1="8" y1="12" x2="16" y2="12"/>
+              </svg>
+            ),
+            text: <>Scroll down and tap <strong>"Add to Home Screen"</strong></>,
+          },
+        ].map(({ num, icon, text }) => (
+          <div key={num} style={{
+            display: 'flex', alignItems: 'center', gap: 14,
+            padding: '12px 16px', borderRadius: 4,
+            background: '#faf8f6', marginBottom: 10,
+          }}>
+            <div style={{
+              width: 28, height: 28, borderRadius: '50%',
+              background: 'var(--brand)', color: '#fff',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontWeight: 800, fontSize: 13, flexShrink: 0,
+            }}>{num}</div>
+            <div style={{ width: 28, flexShrink: 0, display: 'flex', alignItems: 'center' }}>{icon}</div>
+            <div style={{ fontSize: 14, color: '#333', lineHeight: 1.4 }}>{text}</div>
+          </div>
+        ))}
+
+        {/* Bouncing arrow pointing down (toward Safari toolbar) */}
+        <div style={{
+          textAlign: 'center', marginTop: 10,
+          animation: 'abqBounce 1.6s ease-in-out infinite',
+          fontSize: 26, color: 'var(--brand)',
+          lineHeight: 1,
+        }}>↓</div>
+        <div style={{ textAlign: 'center', fontSize: 12, color: '#aaa', marginTop: 4 }}>
+          The Share button is in Safari's bottom toolbar
+        </div>
+      </div>
+    </>
+  );
+}
+
+
+// --- Android / Chrome Install Prompt ----------------------------------------
+// Captures the beforeinstallprompt event and shows a polished install banner.
+
+const ANDROID_DISMISSED_KEY = 'abq_android_install_dismissed';
+const ANDROID_DISMISSED_DAYS = 14;
+
+function AndroidInstallPrompt() {
+  const [prompt, setPrompt] = useState<Event | null>(null);
+  const [visible, setVisible] = useState(false);
+  const [hiding, setHiding] = useState(false);
+
+  useEffect(() => {
+    if (window.matchMedia('(display-mode: standalone)').matches) return;
+    const dismissed = localStorage.getItem(ANDROID_DISMISSED_KEY);
+    if (dismissed) {
+      const age = Date.now() - parseInt(dismissed, 10);
+      if (age < ANDROID_DISMISSED_DAYS * 24 * 60 * 60 * 1000) return;
+    }
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setPrompt(e);
+      setTimeout(() => {
+        setVisible(true);
+        trackEvent('a2hs_shown');
+      }, 3000);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const dismiss = () => {
+    setHiding(true);
+    localStorage.setItem(ANDROID_DISMISSED_KEY, String(Date.now()));
+    setTimeout(() => { setVisible(false); setPrompt(null); }, 380);
   };
 
   const install = async () => {
@@ -3772,7 +4116,7 @@ function InstallPrompt() {
     (androidPrompt as any).prompt();
     const { outcome } = await (androidPrompt as any).userChoice;
     if (outcome === 'accepted') {
-      localStorage.setItem(INSTALL_DISMISSED_KEY, String(Date.now()));
+      trackEvent('a2hs_accepted');
       setVisible(false);
       setAndroidPrompt(null);
     } else {
@@ -3982,9 +4326,16 @@ function LoadingScreen() {
         className="fixed inset-0 flex flex-col items-center justify-center"
         style={{ background: 'var(--brand-bg-screen)' }}
       >
-        <div style={{ animation: 'abqLogoEntry 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' }}>
-          <ABQUnpluggedLogo size={113} />
-        </div>
+        <video
+          key="splash-video"
+          autoPlay
+          muted
+          playsInline
+          style={{ width: '280px', height: 'auto', display: 'block' }}
+        >
+          <source src="/logo-animation.webm" type="video/webm" />
+          <source src="/logo-animation.mp4" type="video/mp4" />
+        </video>
         <p
           key={msgIdx}
           className="text-sm text-gray-400 mt-4"
@@ -4032,11 +4383,10 @@ function SiteBanner({ banner }: { banner: BannerConfig | null }) {
   );
 }
 
-// ─── Admin Screen ─────────────────────────────────────────────────────────────
-
-// ─────────────────────────────────────────────────────────────────────────────
-// ─── Admin Screen ─────────────────────────────────────────────────────────────
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Admin (see AdminPanel.tsx) ───────────────────────────────────────────────
+// The full admin panel is in src/AdminPanel.tsx.
+// The types below are kept here only for the existing DashboardTab/PlacesTab helpers
+// that are still referenced; they will be removed once full migration is complete.
 
 type AdminTab = 'dashboard' | 'places' | 'events' | 'tagrules' | 'settings';
 
@@ -4794,6 +5144,7 @@ export default function App() {
   const [places, setPlaces] = useState<Place[]>([]);
   const [events, setEvents] = useState<TMEvent[]>([]);
   const [eventsNavSearch, setEventsNavSearch] = useState('');
+  const [show21Plus, setShow21Plus] = useState(false);
   const [loading, setLoading] = useState(true);
   const [eventsLoading, setEventsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -4920,20 +5271,32 @@ export default function App() {
 
   const { coords, error: geoError, requested: geoRequested, request: requestGeo } = useGeolocation();
 
+  // ── Analytics: session_start (fires once per browser session) ──
+  useEffect(() => {
+    const KEY = 'abq_session_tracked';
+    if (!sessionStorage.getItem(KEY)) {
+      try { sessionStorage.setItem(KEY, '1'); } catch {}
+      trackEvent('session_start');
+    }
+  }, []);
+
   // ── Browser history management (prevents swipe-back leaving the site) ──
   const navigateTab = useCallback((tab: TabId) => {
     setActiveTab(tab);
     window.history.pushState({ tab, modal: null }, '', `#${tab}`);
+    trackEvent('pageview', { tab });
   }, []);
 
   const openPlaceModal = useCallback((place: Place) => {
     setSelectedPlace(place);
     window.history.pushState({ tab: null, modal: 'place', id: place.id }, '', `#place/${place.id}`);
+    trackEvent('place_click', { place_id: place.id, place_name: place.name });
   }, []);
 
   const openEventModal = useCallback((event: TMEvent) => {
     setSelectedEvent(event);
     window.history.pushState({ tab: null, modal: 'event', id: event.id }, '', `#event/${event.id}`);
+    trackEvent('event_click', { event_id: event.id, event_name: event.name });
   }, []);
 
   const closePlaceModal = useCallback(() => setSelectedPlace(null), []);
@@ -5039,6 +5402,7 @@ export default function App() {
     // Proximity OK → check in
     // Haptic feedback: iOS/Android vibration on successful check-in
     if ('vibrate' in navigator) { try { navigator.vibrate([12, 40, 12]); } catch {} }
+    trackEvent('checkin', { place_id: placeId });
     setCheckedIn(prev => {
       const next = new Set(prev);
       next.add(placeId);
@@ -5053,6 +5417,10 @@ export default function App() {
       // ── Phase 1: Load places — serve from cache instantly, refresh in bg ──
       const CACHE_KEY = 'abq_places_v1';
       const CACHE_TTL = 60 * 60 * 1000; // 1 hour
+
+      // Timeout helper — defined at top so fast path can use it too
+      const withTimeout = <T,>(p: Promise<T>, ms: number): Promise<T> =>
+        Promise.race([p, new Promise<T>((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
 
       let placesLoaded = false;
 
@@ -5069,25 +5437,38 @@ export default function App() {
             if (Date.now() - ts < CACHE_TTL) {
               setEventsLoading(true);
               try {
-                const sbEvents = await fetchEventsFromDB();
+                // Timeout added: if Supabase hangs, fall back to static events
+                const sbEvents = await withTimeout(fetchEventsFromDB(), 8000);
                 const allEvts = [
                   ...(sbEvents['ticketmaster'] || []),
                   ...(sbEvents['seatgeek'] || []),
                   ...(sbEvents['bandsintown'] || []),
                   ...(sbEvents['musicbrainz'] || []),
                 ];
-                setEvents(allEvts);
-              } catch (err) { console.warn('[Events] fast path failed:', err); }
+                // Merge in static events so "This Week" always has content
+                const seenFast = new Set(allEvts.map((e: TMEvent) => e.id));
+                const normFast = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
+                const liveTitlesFast = new Set(allEvts.map((e: TMEvent) => normFast(e.name || '')));
+                const staticFast = STATIC_TM_EVENTS.filter(e => {
+                  if (seenFast.has(e.id)) return false;
+                  if (liveTitlesFast.has(normFast(e.name || ''))) return false;
+                  seenFast.add(e.id);
+                  return true;
+                });
+                const fastMerged = [...allEvts, ...staticFast]
+                  .filter(e => !isJunkEvent(e))
+                  .map(tagAdultEvent);
+                setEvents(fastMerged);
+              } catch (err) {
+                console.warn('[Events] fast path failed, using static fallback:', err);
+                setEvents(STATIC_TM_EVENTS.filter(e => !isJunkEvent(e)).map(tagAdultEvent));
+              }
               setEventsLoading(false);
               return;
             }
           }
         }
       } catch {}
-
-      // Fetch fresh from network
-      const withTimeout = <T,>(p: Promise<T>, ms: number): Promise<T> =>
-        Promise.race([p, new Promise<T>((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
 
       try {
         const sbPlaces = await withTimeout(fetchPlacesFromDB(), 8000);
@@ -5121,13 +5502,14 @@ export default function App() {
         let muEvents: TMEvent[] = [];
 
         try {
-          const sbEvents = await fetchEventsFromDB();
+          // Timeout: if Supabase hangs, throw so the catch can serve static fallback
+          const sbEvents = await withTimeout(fetchEventsFromDB(), 8000);
           tmEvents = sbEvents['ticketmaster'] || [];
           sgEvents = sbEvents['seatgeek'] || [];
           bitEvents = sbEvents['bandsintown'] || [];
           muEvents = sbEvents['musicbrainz'] || [];
         } catch (err) {
-          console.warn('[Events] Supabase failed, trying JSON fallback:', err);
+          console.warn('[Events] Supabase failed or timed out, using static fallback:', err);
           const [tmR, ebR, sgR, bitR, muR] = await Promise.allSettled([
             fetch('/data/ticketmaster-events.json').then(r => r.json()),
             fetch('/data/eventbrite-events.json').then(r => r.json()),
@@ -5273,14 +5655,19 @@ export default function App() {
 
         const merged = [...liveEvents, ...staticOnly]
           .filter(isInMetro)
-          .filter(hasActionableLink);
+          .filter(hasActionableLink)
+          .filter(e => !isJunkEvent(e))
+          .map(tagAdultEvent);
         setEvents(merged);
       } catch (err) {
         console.error('[Events] Failed to load events:', err);
         // Events failing is non-fatal — static events are still available
         const normT = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
         const seen = new Set<string>();
-        const staticOnly = STATIC_TM_EVENTS.filter(e => { if (seen.has(e.id)) return false; seen.add(e.id); return true; });
+        const staticOnly = STATIC_TM_EVENTS
+          .filter(e => { if (seen.has(e.id)) return false; seen.add(e.id); return true; })
+          .filter(e => !isJunkEvent(e))
+          .map(tagAdultEvent);
         setEvents(staticOnly);
       } finally {
         setEventsLoading(false);
@@ -5292,25 +5679,8 @@ export default function App() {
 
   // ── Admin route ──
   if (showAdmin) {
-    if (!user || user.email !== ADMIN_EMAIL) {
-      return (
-        <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '32px', background: 'var(--brand-bg-screen)' }}>
-          <ABQUnpluggedLogo size={82} />
-          <p style={{ fontFamily: 'Epilogue, sans-serif', fontWeight: 900, fontSize: '20px', letterSpacing: '-0.5px' }}>Admin Access</p>
-          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', color: '#666', textAlign: 'center', lineHeight: 1.5 }}>
-            Sign in with the owner account ({ADMIN_EMAIL}) to access the admin panel.
-          </p>
-          <button onClick={() => setShowAuthModal(true)} style={{ padding: '13px 28px', background: 'var(--brand)', color: 'white', borderRadius: '12px', fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '15px' }}>
-            Sign In
-          </button>
-          <button onClick={() => { setCurrentHash("#discover"); window.history.replaceState({}, '', '#discover'); }} style={{ color: '#aaa', fontSize: '13px', fontFamily: 'Inter, sans-serif' }}>
-            Back to App
-          </button>
-          {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
-        </div>
-      );
-    }
-    return <AdminScreen user={user} onBack={() => { setCurrentHash("#discover"); window.history.replaceState({}, '', '#discover'); }} />;
+    // AdminPanel handles its own auth (Supabase email OR hardcoded password)
+    return <AdminPanel user={user} onBack={() => { setCurrentHash("#discover"); window.history.replaceState({}, '', '#discover'); }} />;
   }
 
   if (loading) return <LoadingScreen />;
@@ -5458,32 +5828,32 @@ export default function App() {
       <OfflineBanner />
       <div
         className="flex flex-col mx-auto relative"
-        style={{ width: '100%', maxWidth: '480px', minHeight: '100dvh', background: 'var(--brand-bg-screen)', overflowX: 'hidden' }}
+        style={{ width: '100%', maxWidth: '480px', minHeight: '100dvh', background: 'white', overflowX: 'hidden' }}
       >
-        {/* Glassmorphism header — Liquid Glass (iOS 26 HIG) with Dynamic Island / notch safe area */}
+        {/* Header — Urban Curator: white + hard 2px border-bottom */}
         <header
-          className="glass flex-shrink-0 px-5 flex items-center justify-between"
+          className="flex-shrink-0 px-4 flex items-center justify-between"
           style={{
             position: 'sticky',
             top: 0,
             paddingTop: 'calc(var(--sat) + 12px)',
             paddingBottom: '12px',
-            borderBottom: '1px solid rgba(0,0,0,0.06)',
+            background: 'white',
+            borderBottom: '2px solid #1A1A1A',
             zIndex: 40,
           }}
         >
           <div className="flex items-center gap-2">
-            <ABQUnpluggedLogo size={47} />
+            <img src="/logo-static.png" alt="ABQ Unplugged" style={{ height: '32px', width: 'auto' }} />
           </div>
-          <div className="flex items-center gap-1.5">
-            {            <button onClick={() => setShowSearch(true)} className="w-11 h-11 rounded-full flex items-center justify-center" style={{ background: 'white', boxShadow: '3px 3px 0 rgba(0,0,0,0.15)' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '22px', color: 'var(--brand)' }}>search</span>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setShowSearch(true)} className="w-9 h-9 flex items-center justify-center" style={{ background: 'white', border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#1A1A1A' }}>search</span>
             </button>
-/* Location indicator */}
             <button
               onClick={requestGeo}
-              className="w-11 h-11 rounded-full flex items-center justify-center"
-              style={{ background: 'white', boxShadow: '3px 3px 0 rgba(0,0,0,0.15)' }}
+              className="w-9 h-9 flex items-center justify-center"
+              style={{ background: 'white', border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A' }}
               title={coords ? 'Location active' : 'Enable location'}
               aria-label={coords ? 'Location active' : 'Enable location'}
             >
@@ -5491,7 +5861,7 @@ export default function App() {
                 className="material-symbols-outlined"
                 style={{
                   fontSize: '18px',
-                  color: coords ? 'var(--brand)' : '#bbb',
+                  color: coords ? '#566500' : '#888',
                   fontVariationSettings: coords ? "'FILL' 1" : "'FILL' 0",
                 }}
               >
@@ -5521,10 +5891,12 @@ export default function App() {
               onCheckIn={handleCheckIn}
 
               onNavigatePlaces={(cat, search) => { setPlacesNavCat(cat); setPlacesNavSearch(search); setPlacesNavKey(k => k + 1); setActiveTab('places'); }}
+              onNavigateEvents={() => setActiveTab('events')}
               prefs={prefs}/>
           )}
           {activeTab === 'events' && (
-            <EventsScreen events={events} onEventSelect={openEventModal}  initialSearch={eventsNavSearch} />
+            <EventsScreen events={events} onEventSelect={openEventModal} initialSearch={eventsNavSearch}
+              show21Plus={show21Plus} onToggle21Plus={() => setShow21Plus(v => !v)} />
           )}
           {activeTab === 'places' && (
             <PlacesScreen
@@ -5563,7 +5935,7 @@ export default function App() {
 
         {/* Bottom navigation — Liquid Glass with home indicator safe area */}
         <nav
-          className="glass flex items-center px-2"
+          className="flex items-stretch"
           style={{
             position: 'fixed',
             bottom: 0,
@@ -5571,40 +5943,45 @@ export default function App() {
             transform: 'translateX(-50%)',
             width: '100%',
             maxWidth: '480px',
-            paddingTop: '8px',
-            paddingBottom: 'calc(var(--sab) + 8px)',
-            borderTop: '1px solid rgba(0,0,0,0.07)',
+            paddingBottom: 'var(--sab)',
+            borderTop: '2px solid #1A1A1A',
+            background: 'white',
             zIndex: 40,
           }}
         >
-          {NAV_ITEMS.map(item => (
+          {NAV_ITEMS.map((item, idx) => (
             <button
               key={item.id}
               onClick={() => navigateTab(item.id)}
               aria-label={item.label}
-              className="flex-1 flex flex-col items-center gap-0.5 py-1 transition-all"
-              style={{ minHeight: '44px' }}
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 transition-none"
+              style={{
+                minHeight: '52px',
+                background: activeTab === item.id ? '#1A1A1A' : 'white',
+                borderRight: idx < NAV_ITEMS.length - 1 ? '1.5px solid #1A1A1A' : 'none',
+                borderRadius: 0,
+              }}
             >
               <span
                 className="material-symbols-outlined"
                 style={{
-                  fontSize: '24px',
-                  color: activeTab === item.id ? 'var(--brand)' : '#555',
+                  fontSize: '22px',
+                  color: activeTab === item.id ? 'white' : '#555',
                   fontVariationSettings:
                     activeTab === item.id
                       ? "'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24"
                       : "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24",
-                  transition: 'all 0.2s',
                 }}
               >
                 {item.icon}
               </span>
               <span
-                className="text-xs font-semibold"
+                className="font-black uppercase"
                 style={{
-                  color: activeTab === item.id ? 'var(--brand)' : '#555',
+                  color: activeTab === item.id ? 'white' : '#555',
                   fontFamily: 'Inter, sans-serif',
-                  fontSize: '10px',
+                  fontSize: '8px',
+                  letterSpacing: '0.1em',
                 }}
               >
                 {item.label}
@@ -5617,13 +5994,13 @@ export default function App() {
           <div style={{ background: 'white', borderRadius: '4px', width: '90%', maxWidth: '480px', padding: '16px', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
               <span className="material-symbols-outlined" style={{ color: 'var(--brand)', fontSize: '22px' }}>search</span>
-              <input autoFocus type="text" placeholder="Search places, events..." value={globalSearch} onChange={e => setGlobalSearch(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && globalSearch.trim()) { setEventsNavSearch(globalSearch.trim()); setActiveTab('events'); setShowSearch(false); } }} style={{ flex: 1, border: 'none', outline: 'none', fontSize: '16px', fontFamily: 'Inter, sans-serif' }} />
+              <input autoFocus type="text" placeholder="Search places, events..." value={globalSearch} onChange={e => setGlobalSearch(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && globalSearch.trim()) { trackEvent('search', { query: globalSearch.trim(), context: 'events' }); setEventsNavSearch(globalSearch.trim()); setActiveTab('events'); setShowSearch(false); } }} style={{ flex: 1, border: 'none', outline: 'none', fontSize: '16px', fontFamily: 'Inter, sans-serif' }} />
               <button onClick={() => setShowSearch(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px' }}><span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#666' }}>close</span></button>
             </div>
             {globalSearch.trim() && (
               <div style={{display:'flex',gap:'8px',width:'100%'}}>
-                <button onClick={() => { setEventsNavSearch(globalSearch.trim()); setActiveTab('events'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'var(--brand)',color:'white',border:'none',borderRadius:'10px',fontSize:'15px',fontFamily:'Manrope, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Events</button>
-                <button onClick={() => { setPlacesNavCat('All'); setPlacesNavSearch(globalSearch.trim()); setPlacesNavKey(k => k + 1); setActiveTab('places'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'#026cdf',color:'white',border:'none',borderRadius:'10px',fontSize:'15px',fontFamily:'Manrope, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Places</button>
+                <button onClick={() => { trackEvent('search', { query: globalSearch.trim(), context: 'events' }); setEventsNavSearch(globalSearch.trim()); setActiveTab('events'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'var(--brand)',color:'white',border:'none',borderRadius:'10px',fontSize:'15px',fontFamily:'Manrope, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Events</button>
+                <button onClick={() => { trackEvent('search', { query: globalSearch.trim(), context: 'places' }); setPlacesNavCat('All'); setPlacesNavSearch(globalSearch.trim()); setPlacesNavKey(k => k + 1); setActiveTab('places'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'#026cdf',color:'white',border:'none',borderRadius:'10px',fontSize:'15px',fontFamily:'Manrope, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Places</button>
               </div>
             )}
           </div>
