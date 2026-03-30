@@ -2536,8 +2536,13 @@ function DiscoverScreen({
           </div>
           <div className="flex gap-3 px-5 py-3 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
             {sortByInterests(hiddenGems, interests).map(place => (
-              <button key={place.id} onClick={() => onPlaceSelect(place)} className="flex-shrink-0" style={{ width: '136px', boxShadow: '4px 4px 0 #1A1A1A' }}>
-                <div className="relative overflow-hidden mb-0" style={{ width: '136px', height: '136px', border: '2px solid #1A1A1A' }}>
+              <button
+                key={place.id}
+                onClick={() => onPlaceSelect(place)}
+                className="flex-shrink-0 bg-white overflow-hidden text-left"
+                style={{ width: '144px', border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A' }}
+              >
+                <div className="relative" style={{ height: '100px' }}>
                   <ImageWithFallback
                     src={place.image}
                     alt={place.name}
@@ -2561,13 +2566,15 @@ function DiscoverScreen({
                     </div>
                   )}
                 </div>
-                <p
-                  className="text-xs font-bold text-gray-900 leading-tight text-left truncate mt-1"
-                  style={{ fontFamily: 'Inter, sans-serif' }}
-                >
-                  {place.name}
-                </p>
-                <p className="text-xs text-left" style={{ color: '#666' }}>{place.category}</p>
+                <div className="p-2">
+                  <p
+                    className="text-xs font-bold text-gray-900 leading-tight truncate"
+                    style={{ fontFamily: 'Inter, sans-serif' }}
+                  >
+                    {place.name}
+                  </p>
+                  <p className="text-xs" style={{ color: '#666' }}>{place.category}</p>
+                </div>
               </button>
             ))}
           </div>
