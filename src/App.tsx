@@ -5225,8 +5225,628 @@ const NAV_ITEMS = [
 
 type TabId = (typeof NAV_ITEMS)[number]['id'];
 
+
+// ─── Desktop Layout ──────────────────────────────────────────────────────────
+interface DesktopAppProps {
+  events: TMEvent[];
+  places: Place[];
+  coords: GeoCoords | null;
+  loading: boolean;
+  eventsLoading: boolean;
+  onPlaceSelect: (p: Place) => void;
+  onEventSelect: (e: TMEvent) => void;
+}
+
+type DesktopTab = 'discover' | 'events' | 'places';
+
+const DESKTOP_DATE_COLORS = ['#566500', '#0057c2', '#1a1a1a'];
+const fmtLocalDate = (d: string) => {
+  if (!d) return { month: '???', day: '??', dow: '???' };
+  const dt = new Date(d + 'T12:00:00');
+  return {
+    month: dt.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
+    day: String(dt.getDate()),
+    dow: dt.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase(),
+  };
+};
+const fmtLocalTime = (t?: string) => {
+  if (!t) return '';
+  const [h, m] = t.split(':').map(Number);
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const hr = h % 12 || 12;
+  return `${hr}:${String(m).padStart(2,'0')} ${ampm}`;
+};
+const getEventVenue = (ev: TMEvent) => ev._embedded?.venues?.[0]?.name || '';
+const getEventCity  = (ev: TMEvent) => ev._embedded?.venues?.[0]?.city?.name || '';
+const getEventGenre = (ev: TMEvent) => ev.classifications?.[0]?.segment?.name || ev.classifications?.[0]?.genre?.name || '';
+const getEventPrice = (ev: TMEvent) => {
+  const pr = ev.priceRanges?.[0];
+  if (!pr) return ev._source === 'local' ? 'FREE' : null;
+  return pr.min === 0 ? 'FREE' : `From $${Math.round(pr.min)}`;
+};
+const getEventImage = (ev: TMEvent) => ev.images?.find(i => i.ratio === '16_9' && i.width > 400)?.url || ev.images?.[0]?.url || '';
+const GENRE_COLORS: Record<string, string> = {
+  Music: '#0057c2', Sports: '#c2570a', Arts: '#7c3aed',
+  Family: '#166534', Comedy: '#b45309', Miscellaneous: '#374151',
+};
+const genreColor = (ev: TMEvent) => GENRE_COLORS[getEventGenre(ev)] || '#374151';
+
+const dBLUE  = { background: '#0057c2' } as const;
+const dGREEN = { background: '#566500' } as const;
+const dDARK  = { background: '#1a1a1a' } as const;
+
+function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSelect, onEventSelect }: DesktopAppProps) {
+  const [tab, setTab]       = useState<DesktopTab>('discover');
+  const [cat, setCat]       = useState('All');
+  const [search, setSearch] = useState('');
+  const [sort, setSort]     = useState<'top' | 'near' | 'az'>('top');
+  const [detail, setDetail] = useState<{ type: 'place'; data: Place } | { type: 'event'; data: TMEvent } | null>(null);
+
+  // This-week events
+  const weekEvents = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    const plus7 = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10);
+    return events
+      .filter(e => { const d = e.dates?.start?.localDate || ''; return d >= today && d <= plus7; })
+      .filter(e => !e._isAdult)
+      .sort((a, b) => (a.dates?.start?.localDate || '').localeCompare(b.dates?.start?.localDate || ''));
+  }, [events]);
+
+  // All upcoming events (events tab)
+  const upcomingEvents = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    return events
+      .filter(e => !e._isAdult && (e.dates?.start?.localDate || '') >= today)
+      .sort((a, b) => (a.dates?.start?.localDate || '').localeCompare(b.dates?.start?.localDate || ''))
+      .slice(0, 60);
+  }, [events]);
+
+  // Filtered places
+  const filteredPlaces = useMemo(() => {
+    let r = places.filter(p => cat === 'All' || p.category === cat);
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      r = r.filter(p => p.name.toLowerCase().includes(q) || (p.address || '').toLowerCase().includes(q) || (p.category || '').includes(q));
+    }
+    if (sort === 'near' && coords)
+      return [...r].filter(p => p.lat && p.lng)
+        .sort((a, b) => distanceMiles(coords.lat, coords.lng, a.lat!, a.lng!) - distanceMiles(coords.lat, coords.lng, b.lat!, b.lng!));
+    if (sort === 'az') return [...r].sort((a, b) => a.name.localeCompare(b.name));
+    return [...r].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+  }, [places, cat, search, sort, coords]);
+
+  const nearbyPlaces = useMemo(() => {
+    if (!coords) return [];
+    return places
+      .filter(p => p.lat && p.lng && !BLOCKED_VENUES.some(b => p.name?.toLowerCase().includes(b.toLowerCase())))
+      .map(p => ({ place: p, dist: distanceMiles(coords.lat, coords.lng, p.lat!, p.lng!) }))
+      .sort((a, b) => a.dist - b.dist).slice(0, 8);
+  }, [places, coords]);
+
+  const hiddenGems = useMemo(() =>
+    places.filter(p => p.rating && p.rating >= 4.5 && !BLOCKED_VENUES.some(b => p.name?.toLowerCase().includes(b.toLowerCase()))).slice(0, 8),
+    [places]);
+
+  const s = {
+    root:   { display:'flex', flexDirection:'column' as const, height:'100vh', overflow:'hidden', background:'#f8faf8', fontFamily:'Inter,system-ui,sans-serif', color:'#1a1a1a' },
+    header: { height:'56px', background:'#fff', borderBottom:'2px solid #1a1a1a', display:'flex', alignItems:'center', flexShrink:0 as const, zIndex:100 },
+    logo:   { width:'232px', borderRight:'2px solid #1a1a1a', height:'100%', display:'flex', alignItems:'center', padding:'0 18px', gap:'10px', flexShrink:0 as const },
+    logoBadge: { background:'linear-gradient(135deg,#566500,#8a9e00)', padding:'5px 9px', border:'2px solid #1a1a1a', fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'13px', letterSpacing:'-0.01em', color:'#d4ef4d' },
+    headerSearch: { flex:1, height:'100%', display:'flex', alignItems:'center', padding:'0 18px', gap:'10px', borderRight:'2px solid #1a1a1a' },
+    searchBox: { flex:1, maxWidth:'480px', height:'36px', border:'2px solid #1a1a1a', background:'#f8faf8', display:'flex', alignItems:'center', padding:'0 12px', gap:'8px' },
+    headerRight: { width:'356px', height:'100%', display:'flex', alignItems:'center', padding:'0 16px', gap:'8px', flexShrink:0 as const },
+    layout: { display:'flex', flex:1, overflow:'hidden' },
+    sidebar: { width:'232px', borderRight:'2px solid #1a1a1a', background:'#fff', display:'flex', flexDirection:'column' as const, overflowY:'auto' as const, flexShrink:0 as const },
+    main: { flex:1, display:'flex', flexDirection:'column' as const, overflow:'hidden', borderRight:'2px solid #1a1a1a' },
+    toolbar: { height:'44px', borderBottom:'2px solid #1a1a1a', display:'flex', alignItems:'center', padding:'0 16px', gap:'10px', background:'#fff', flexShrink:0 as const },
+    scroll: { flex:1, overflowY:'auto' as const, padding:'16px' },
+    right: { width:'356px', background:'#fff', display:'flex', flexDirection:'column' as const, overflow:'hidden', flexShrink:0 as const },
+  };
+
+  const pillBase = { height:'27px', padding:'0 9px', border:'1.5px solid #1a1a1a', fontSize:'10px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase' as const, display:'flex', alignItems:'center', gap:'4px', cursor:'pointer', background:'#fff', color:'#1a1a1a' };
+  const catBtnBase = { height:'30px', border:'1.5px solid #d0d8d0', background:'#f8faf8', display:'flex', alignItems:'center', justifyContent:'center', gap:'3px', fontSize:'10px', fontWeight:700, letterSpacing:'0.04em', textTransform:'uppercase' as const, cursor:'pointer', color:'#5c6660' };
+
+  const NavItem = ({ icon, label, id, count }: { icon:string; label:string; id:DesktopTab|string; count?:number }) => (
+    <div onClick={() => typeof id === 'string' && ['discover','events','places'].includes(id) && setTab(id as DesktopTab)}
+      style={{ display:'flex', alignItems:'center', gap:'9px', padding:'9px 14px', fontSize:'13px', fontWeight:600, cursor:'pointer',
+        color: tab === id ? '#566500' : '#5c6660', borderLeft: tab === id ? '3px solid #566500' : '3px solid transparent',
+        background: tab === id ? '#5665001a' : 'transparent' }}>
+      <span className="material-symbols-outlined" style={{ fontSize:'18px' }}>{icon}</span>
+      {label}
+      {count !== undefined && <span style={{ marginLeft:'auto', fontSize:'10px', fontWeight:800, background: tab===id ? '#566500' : '#1a1a1a', color:'#d4ef4d', padding:'1px 6px', minWidth:'20px', textAlign:'center' }}>{count.toLocaleString()}</span>}
+    </div>
+  );
+
+  const CatBtn = ({ icon, label, val }: { icon:string; label:string; val:string }) => (
+    <div onClick={() => { setCat(val); if (tab !== 'places') setTab('places'); }}
+      style={{ ...catBtnBase, ...(cat===val ? { border:'1.5px solid #1a1a1a', background:'#1a1a1a', color:'#d4ef4d', boxShadow:'2px 2px 0 #1a1a1a' } : {}) }}>
+      <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>{icon}</span>
+      {label}
+    </div>
+  );
+
+  // ── Event card (discover view) ─────────────────────────────────────────────
+  const EventCard = ({ ev, idx }: { ev: TMEvent; idx: number }) => {
+    const { month, day } = fmtLocalDate(ev.dates?.start?.localDate || '');
+    const genre = getEventGenre(ev);
+    const price = getEventPrice(ev);
+    const img = getEventImage(ev);
+    const gc = genreColor(ev);
+    return (
+      <div onClick={() => { setDetail({ type:'event', data:ev }); onEventSelect(ev); }}
+        style={{ border:'2px solid #1a1a1a', background:'#fff', boxShadow:'3px 3px 0 #1a1a1a', cursor:'pointer', overflow:'hidden', transition:'transform 0.1s' }}
+        onMouseEnter={e => (e.currentTarget.style.transform='translate(-2px,-2px)')}
+        onMouseLeave={e => (e.currentTarget.style.transform='')}>
+        <div style={{ height:'90px', background: img ? 'transparent' : `linear-gradient(135deg,${DESKTOP_DATE_COLORS[idx%3]},${DESKTOP_DATE_COLORS[(idx+1)%3]})`, position:'relative', overflow:'hidden' }}>
+          {img && <img src={img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
+          <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(0,0,0,0.55) 0%,transparent 55%)' }} />
+          <div style={{ position:'absolute', top:7, left:7, background:'#d4ef4d', border:'1.5px solid #1a1a1a', padding:'2px 7px', fontSize:'9px', fontWeight:800, letterSpacing:'0.06em', textTransform:'uppercase' }}>
+            {month} {day}
+          </div>
+          {genre && <div style={{ position:'absolute', bottom:7, right:7, background:gc, color:'#fff', padding:'2px 7px', fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase' }}>{genre}</div>}
+        </div>
+        <div style={{ padding:'9px 11px 11px' }}>
+          <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:800, fontSize:'12px', lineHeight:1.25, marginBottom:'4px', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' as const, overflow:'hidden' }}>{ev.name}</div>
+          <div style={{ fontSize:'10px', color:'#5c6660', display:'flex', alignItems:'center', gap:'5px', marginBottom:'6px' }}>
+            <span className="material-symbols-outlined" style={{ fontSize:'11px' }}>location_on</span>
+            <span style={{ overflow:'hidden', whiteSpace:'nowrap', textOverflow:'ellipsis' }}>{getEventVenue(ev) || getEventCity(ev) || 'Albuquerque'}</span>
+          </div>
+          {price && <span style={{ fontSize:'9px', fontWeight:800, letterSpacing:'0.04em', color: price==='FREE' ? '#566500' : '#0057c2', background: price==='FREE' ? '#5665000d' : '#dbeafe', border: price==='FREE' ? '1px solid #8a9e00' : '1px solid #93c5fd', padding:'1px 6px' }}>{price}</span>}
+        </div>
+      </div>
+    );
+  };
+
+  // ── Place card (compact horizontal) ───────────────────────────────────────
+  const PlaceCard = ({ p, dist }: { p: Place; dist?: number }) => (
+    <div onClick={() => { setDetail({ type:'place', data:p }); onPlaceSelect(p); }}
+      style={{ border:'2px solid #1a1a1a', background:'#fff', boxShadow:'3px 3px 0 #1a1a1a', cursor:'pointer', display:'flex', overflow:'hidden', transition:'transform 0.1s' }}
+      onMouseEnter={e => (e.currentTarget.style.transform='translate(-2px,-2px)')}
+      onMouseLeave={e => (e.currentTarget.style.transform='')}>
+      <div style={{ width:'72px', flexShrink:0, background: p.image ? 'transparent' : 'linear-gradient(135deg,#566500,#8a9e00)', overflow:'hidden' }}>
+        {(p.thumbnail || p.image) && <img src={p.thumbnail || p.image} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
+      </div>
+      <div style={{ flex:1, padding:'9px 11px', minWidth:0 }}>
+        <div style={{ fontWeight:700, fontSize:'12px', marginBottom:'2px', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{p.name}</div>
+        <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', color:'#5c6660', marginBottom:'5px' }}>{p.category}</div>
+        <div style={{ display:'flex', alignItems:'center', gap:'7px' }}>
+          {p.rating && <span style={{ fontSize:'10px', fontWeight:800, color:'#566500' }}>★ {p.rating.toFixed(1)}</span>}
+          {dist !== undefined && <span style={{ fontSize:'9px', color:'#5c6660', display:'flex', alignItems:'center', gap:'2px' }}>
+            <span className="material-symbols-outlined" style={{ fontSize:'10px' }}>near_me</span>{formatDist(dist)}
+          </span>}
+        </div>
+      </div>
+    </div>
+  );
+
+  // ── Place grid card (places tab) ───────────────────────────────────────────
+  const PlaceGridCard = ({ p }: { p: Place }) => (
+    <div onClick={() => { setDetail({ type:'place', data:p }); onPlaceSelect(p); }}
+      style={{ border:'2px solid #1a1a1a', background:'#fff', boxShadow:'3px 3px 0 #1a1a1a', cursor:'pointer', overflow:'hidden', transition:'transform 0.1s' }}
+      onMouseEnter={e => (e.currentTarget.style.transform='translate(-2px,-2px)')}
+      onMouseLeave={e => (e.currentTarget.style.transform='')}>
+      <div style={{ height:'96px', background: p.image ? 'transparent' : 'linear-gradient(135deg,#566500,#8a9e00)', position:'relative', overflow:'hidden' }}>
+        {(p.thumbnail || p.image) && <img src={p.thumbnail || p.image} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
+        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(0,0,0,0.45) 0%,transparent 55%)' }} />
+        {p.rating && <div style={{ position:'absolute', bottom:6, left:6, background:'rgba(0,0,0,0.55)', color:'#fff', fontSize:'10px', fontWeight:700, padding:'2px 7px' }}>★ {p.rating.toFixed(1)}</div>}
+      </div>
+      <div style={{ padding:'8px 9px 10px' }}>
+        <div style={{ fontWeight:700, fontSize:'11px', marginBottom:'2px', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{p.name}</div>
+        <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', color:'#5c6660' }}>{p.category}</div>
+      </div>
+    </div>
+  );
+
+  // ── Event list row (events tab) ────────────────────────────────────────────
+  const EventRow = ({ ev, idx }: { ev: TMEvent; idx: number }) => {
+    const { month, day, dow } = fmtLocalDate(ev.dates?.start?.localDate || '');
+    const price = getEventPrice(ev);
+    const img = getEventImage(ev);
+    const color = DESKTOP_DATE_COLORS[idx % 3];
+    const isFree = price === 'FREE';
+    return (
+      <div onClick={() => { setDetail({ type:'event', data:ev }); onEventSelect(ev); }}
+        style={{ border:'2px solid #1a1a1a', background:'#fff', display:'flex', alignItems:'stretch', cursor:'pointer', boxShadow:'3px 3px 0 #1a1a1a', transition:'transform 0.1s' }}
+        onMouseEnter={e => (e.currentTarget.style.transform='translate(-2px,-2px)')}
+        onMouseLeave={e => (e.currentTarget.style.transform='')}>
+        <div style={{ width:'54px', flexShrink:0, background:color, color:'#d4ef4d', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'10px 2px' }}>
+          <div style={{ fontSize:'9px', fontWeight:800, letterSpacing:'0.1em' }}>{month}</div>
+          <div style={{ fontFamily:'Epilogue,sans-serif', fontSize:'22px', fontWeight:900, lineHeight:1 }}>{day}</div>
+          <div style={{ fontSize:'8px', fontWeight:600, letterSpacing:'0.06em', opacity:0.75 }}>{dow}</div>
+        </div>
+        <div style={{ width:'60px', flexShrink:0, background: img ? 'transparent' : `linear-gradient(135deg,${color},${DESKTOP_DATE_COLORS[(idx+1)%3]})`, overflow:'hidden' }}>
+          {img && <img src={img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
+        </div>
+        <div style={{ flex:1, padding:'11px 13px', minWidth:0 }}>
+          <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:800, fontSize:'13px', marginBottom:'3px', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{ev.name}</div>
+          <div style={{ fontSize:'11px', color:'#5c6660', display:'flex', alignItems:'center', gap:'7px', marginBottom:'7px' }}>
+            <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>location_on</span>
+            {getEventVenue(ev) || getEventCity(ev) || 'Albuquerque'}
+            {ev.dates?.start?.localTime && <><span style={{ color:'#d0d8d0' }}>·</span>{fmtLocalTime(ev.dates.start.localTime)}</>}
+          </div>
+          <div style={{ display:'flex', gap:'5px', flexWrap:'wrap' }}>
+            {getEventGenre(ev) && <span style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', border:'1px solid #d0d8d0', padding:'1px 6px', color:'#5c6660' }}>{getEventGenre(ev)}</span>}
+            {isFree && <span style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', border:'1px solid #8a9e00', padding:'1px 6px', color:'#566500', background:'#5665000d' }}>Free</span>}
+          </div>
+        </div>
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', justifyContent:'space-between', padding:'11px 13px', flexShrink:0 }}>
+          <span style={{ fontSize:'11px', fontWeight:800, color: isFree ? '#566500' : '#0057c2' }}>{price || ''}</span>
+          <button onClick={e => { e.stopPropagation(); if(ev.url) window.open(ev.url,'_blank'); }}
+            style={{ height:'27px', padding:'0 9px', background: isFree ? '#566500' : '#0057c2', color:'#fff', border:'none', fontFamily:'Inter,sans-serif', fontSize:'9px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'4px' }}>
+            <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>{isFree ? 'open_in_new' : 'confirmation_number'}</span>
+            {isFree ? 'Info' : 'Tickets'}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  // ── Detail panel ──────────────────────────────────────────────────────────
+  const DetailPanel = () => {
+    if (!detail) return (
+      <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'24px', textAlign:'center', color:'#5c6660' }}>
+        <span className="material-symbols-outlined" style={{ fontSize:'36px', color:'#d0d8d0', marginBottom:'10px' }}>touch_app</span>
+        <p style={{ fontSize:'12px', fontWeight:600 }}>Click any card to preview details here</p>
+      </div>
+    );
+    if (detail.type === 'event') {
+      const ev = detail.data;
+      const { month, day, dow } = fmtLocalDate(ev.dates?.start?.localDate || '');
+      const price = getEventPrice(ev);
+      const isFree = price === 'FREE';
+      const img = getEventImage(ev);
+      const color = isFree ? '#566500' : '#0057c2';
+      return (
+        <div style={{ flex:1, overflowY:'auto' }}>
+          <div style={{ height:'160px', background: img ? 'transparent' : `linear-gradient(135deg,${color},#1a1a1a)`, position:'relative', overflow:'hidden' }}>
+            {img && <img src={img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
+            <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(0,0,0,0.7),transparent 60%)' }} />
+            <div style={{ position:'absolute', bottom:10, left:12 }}>
+              <div style={{ background:'#d4ef4d', border:'1.5px solid #1a1a1a', display:'inline-block', padding:'3px 9px', fontSize:'10px', fontWeight:800, letterSpacing:'0.06em' }}>{month} {day} · {dow}</div>
+            </div>
+            <button onClick={() => setDetail(null)} style={{ position:'absolute', top:8, right:8, width:'28px', height:'28px', border:'1.5px solid rgba(255,255,255,0.5)', background:'rgba(0,0,0,0.4)', color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <span className="material-symbols-outlined" style={{ fontSize:'16px' }}>close</span>
+            </button>
+          </div>
+          <div style={{ padding:'14px 16px' }}>
+            <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.1em', textTransform:'uppercase', color:color, marginBottom:'4px', display:'flex', alignItems:'center', gap:'4px' }}>
+              <span className="material-symbols-outlined" style={{ fontSize:'11px' }}>confirmation_number</span>
+              {getEventGenre(ev) || 'Event'}{isFree ? ' · Free' : ''}
+            </div>
+            <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'16px', lineHeight:1.2, marginBottom:'10px' }}>{ev.name}</div>
+            <div style={{ fontSize:'11px', color:'#5c6660', display:'flex', alignItems:'center', gap:'5px', marginBottom:'6px' }}>
+              <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>location_on</span>
+              {getEventVenue(ev)}{getEventCity(ev) ? ` · ${getEventCity(ev)}` : ''}
+            </div>
+            {ev.dates?.start?.localTime && (
+              <div style={{ fontSize:'11px', color:'#5c6660', display:'flex', alignItems:'center', gap:'5px', marginBottom:'14px' }}>
+                <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>schedule</span>
+                {fmtLocalTime(ev.dates.start.localTime)}
+              </div>
+            )}
+            <div style={{ display:'flex', gap:'6px' }}>
+              {ev.url && <button onClick={() => window.open(ev.url,'_blank')}
+                style={{ flex:1, height:'32px', background: isFree ? '#566500' : '#0057c2', color:'#fff', border:'2px solid #1a1a1a', fontFamily:'Inter,sans-serif', fontSize:'10px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'4px', boxShadow:'2px 2px 0 #1a1a1a' }}>
+                <span className="material-symbols-outlined" style={{ fontSize:'13px' }}>{isFree ? 'open_in_new' : 'confirmation_number'}</span>
+                {isFree ? 'More Info' : 'Get Tickets'}
+              </button>}
+              <button style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'2px 2px 0 #1a1a1a' }}>
+                <span className="material-symbols-outlined" style={{ fontSize:'16px' }}>bookmark_add</span>
+              </button>
+              <button style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'2px 2px 0 #1a1a1a' }}>
+                <span className="material-symbols-outlined" style={{ fontSize:'16px' }}>share</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    // Place detail
+    const p = detail.data;
+    return (
+      <div style={{ flex:1, overflowY:'auto' }}>
+        <div style={{ height:'160px', background: p.image ? 'transparent' : 'linear-gradient(135deg,#566500,#8a9e00)', position:'relative', overflow:'hidden' }}>
+          {(p.thumbnail || p.image) && <img src={p.image || p.thumbnail} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
+          <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(0,0,0,0.65),transparent 55%)' }} />
+          <button onClick={() => setDetail(null)} style={{ position:'absolute', top:8, right:8, width:'28px', height:'28px', border:'1.5px solid rgba(255,255,255,0.5)', background:'rgba(0,0,0,0.4)', color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <span className="material-symbols-outlined" style={{ fontSize:'16px' }}>close</span>
+          </button>
+        </div>
+        <div style={{ padding:'14px 16px' }}>
+          <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.1em', textTransform:'uppercase', color:'#566500', marginBottom:'4px', display:'flex', alignItems:'center', gap:'4px' }}>
+            <span className="material-symbols-outlined" style={{ fontSize:'11px' }}>storefront</span>
+            {p.category}{p.hours ? ` · ${p.hours}` : ''}
+          </div>
+          <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'16px', lineHeight:1.2, marginBottom:'8px' }}>{p.name}</div>
+          {p.rating && <div style={{ fontSize:'12px', fontWeight:700, color:'#566500', marginBottom:'8px' }}>★ {p.rating.toFixed(1)}{p.reviewCount ? <span style={{ fontWeight:400, color:'#5c6660', fontSize:'11px' }}> ({p.reviewCount.toLocaleString()} reviews)</span> : ''}</div>}
+          {p.address && <div style={{ fontSize:'11px', color:'#5c6660', display:'flex', alignItems:'center', gap:'5px', marginBottom:'14px' }}>
+            <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>location_on</span>{p.address}
+          </div>}
+          <div style={{ display:'flex', gap:'6px' }}>
+            <button onClick={() => onPlaceSelect(p)} style={{ flex:1, height:'32px', background:'#1a1a1a', color:'#d4ef4d', border:'2px solid #1a1a1a', fontFamily:'Inter,sans-serif', fontSize:'10px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'4px', boxShadow:'2px 2px 0 #1a1a1a' }}>
+              <span className="material-symbols-outlined" style={{ fontSize:'13px' }}>info</span>
+              Full Details
+            </button>
+            {p.address && <button onClick={() => window.open(`https://maps.google.com/?q=${encodeURIComponent(p.address||'')}`, '_blank')}
+              style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background:'#0057c2', color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'2px 2px 0 #1a1a1a' }}>
+              <span className="material-symbols-outlined" style={{ fontSize:'16px' }}>directions</span>
+            </button>}
+            <button style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'2px 2px 0 #1a1a1a' }}>
+              <span className="material-symbols-outlined" style={{ fontSize:'16px' }}>bookmark_add</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // ── Map panel ──────────────────────────────────────────────────────────────
+  const MapPanel = () => (
+    <div style={{ flex:1, background:'#ecf0e8', position:'relative', overflow:'hidden', minHeight:'200px' }}>
+      <div style={{ position:'absolute', inset:0,
+        background:'repeating-linear-gradient(0deg,rgba(86,101,0,0.05) 0px,transparent 1px,transparent 31px,rgba(86,101,0,0.05) 32px),repeating-linear-gradient(90deg,rgba(86,101,0,0.05) 0px,transparent 1px,transparent 31px,rgba(86,101,0,0.05) 32px),#ecf0e8' }} />
+      {/* Simulated roads */}
+      <div style={{ position:'absolute', height:'5px', left:0, right:0, top:'42%', background:'rgba(255,255,255,0.9)', boxShadow:'0 0 0 1px rgba(0,0,0,0.1)' }} />
+      <div style={{ position:'absolute', width:'5px', top:0, bottom:0, left:'35%', background:'rgba(255,255,255,0.9)', boxShadow:'0 0 0 1px rgba(0,0,0,0.1)' }} />
+      <div style={{ position:'absolute', height:'3px', left:0, right:0, top:'65%', background:'rgba(255,255,255,0.7)' }} />
+      <div style={{ position:'absolute', width:'3px', top:0, bottom:0, left:'65%', background:'rgba(255,255,255,0.7)' }} />
+      {/* You are here dot */}
+      <div style={{ position:'absolute', top:'50%', left:'43%', width:'12px', height:'12px', background:'#d4ef4d', border:'2.5px solid #1a1a1a', borderRadius:'50%', transform:'translate(-50%,-50%)', boxShadow:'0 0 0 5px rgba(212,239,77,0.3)' }} />
+      {/* Map watermark */}
+      <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', pointerEvents:'none' }}>
+        <div style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.1em', textTransform:'uppercase', color:'rgba(86,101,0,0.35)' }}>Albuquerque · NM</div>
+      </div>
+      {/* Map controls */}
+      <div style={{ position:'absolute', top:8, right:8, display:'flex', flexDirection:'column', gap:'3px' }}>
+        {['+','−'].map((c,i) => (
+          <div key={i} style={{ width:'26px', height:'26px', background:'#fff', border:'1.5px solid #1a1a1a', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', fontSize:'14px', fontWeight:700, boxShadow:'2px 2px 0 rgba(0,0,0,0.1)' }}>{c}</div>
+        ))}
+        <div style={{ width:'26px', height:'26px', background:'#0057c2', border:'1.5px solid #1a1a1a', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', boxShadow:'2px 2px 0 rgba(0,0,0,0.1)' }}>
+          <span className="material-symbols-outlined" style={{ fontSize:'14px', color:'#fff' }}>my_location</span>
+        </div>
+      </div>
+      {/* Map filter strip */}
+      <div style={{ position:'absolute', bottom:8, left:8, display:'flex', gap:'4px' }}>
+        {[{icon:'confirmation_number',label:'Events',bg:'#1a1a1a'},{icon:'storefront',label:'Places',bg:'#566500'}].map(c => (
+          <div key={c.label} style={{ height:'22px', padding:'0 7px', background:c.bg, border:'1.5px solid #1a1a1a', fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'3px', color:'#d4ef4d', boxShadow:'2px 2px 0 rgba(0,0,0,0.1)' }}>
+            <span className="material-symbols-outlined" style={{ fontSize:'11px' }}>{c.icon}</span>{c.label}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // ── Today/this-week date strip ─────────────────────────────────────────────
+  const today = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+
+  return (
+    <div style={s.root}>
+      {/* Header */}
+      <header style={s.header}>
+        <div style={s.logo}>
+          <div style={s.logoBadge}>ABQ</div>
+          <div>
+            <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'14px', letterSpacing:'-0.01em', lineHeight:1 }}>Unplugged</div>
+            <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.12em', textTransform:'uppercase', color:'#5c6660', marginTop:'1px' }}>Greater ABQ</div>
+          </div>
+        </div>
+        <div style={s.headerSearch}>
+          <div style={s.searchBox}>
+            <span className="material-symbols-outlined" style={{ fontSize:'16px', color:'#5c6660' }}>search</span>
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search events, places, neighborhoods…"
+              style={{ border:'none', background:'transparent', fontFamily:'Inter,sans-serif', fontSize:'13px', color:'#1a1a1a', outline:'none', flex:1 }} />
+            {search && <span className="material-symbols-outlined" onClick={() => setSearch('')} style={{ fontSize:'16px', color:'#5c6660', cursor:'pointer' }}>close</span>}
+          </div>
+          <div style={{ display:'flex', gap:'6px' }}>
+            {(['discover','events','places'] as DesktopTab[]).map(t => (
+              <div key={t} onClick={() => { setTab(t); setCat('All'); }}
+                style={{ ...pillBase, ...(tab===t ? { background:'#1a1a1a', color:'#d4ef4d' } : {}) }}>
+                {t === 'discover' ? 'Discover' : t === 'events' ? 'Events' : 'Places'}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={s.headerRight}>
+          <div style={{ display:'flex', alignItems:'center', gap:'5px', border:'1.5px solid #8a9e00', padding:'4px 9px', background:'#5665001a', fontSize:'10px', fontWeight:700, color:'#566500', letterSpacing:'0.04em', marginRight:'4px' }}>
+            <span className="material-symbols-outlined" style={{ fontSize:'12px', color:'#566500' }}>my_location</span>
+            Downtown ABQ
+          </div>
+          {[{icon:'search',label:'Search'},{icon:'notifications',label:'Alerts'},{icon:'person',label:'Profile'}].map((btn, i) => (
+            <div key={btn.icon} style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background: i===2 ? '#1a1a1a' : '#fff', color: i===2 ? '#d4ef4d' : '#1a1a1a', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', flexShrink:0 }}>
+              <span className="material-symbols-outlined" style={{ fontSize:'17px' }}>{btn.icon}</span>
+            </div>
+          ))}
+        </div>
+      </header>
+
+      {/* Three-panel body */}
+      <div style={s.layout}>
+
+        {/* ── Sidebar ── */}
+        <aside style={s.sidebar}>
+          {/* Navigation */}
+          <div style={{ borderBottom:'2px solid #1a1a1a', paddingBottom:'8px', paddingTop:'14px' }}>
+            <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', color:'#5c6660', padding:'0 14px 8px' }}>Browse</div>
+            <NavItem icon="explore"           label="Discover" id="discover" />
+            <NavItem icon="confirmation_number" label="Events"   id="events"   count={weekEvents.length} />
+            <NavItem icon="storefront"         label="Places"   id="places"   count={places.length} />
+          </div>
+
+          {/* Categories */}
+          <div style={{ borderBottom:'2px solid #1a1a1a', padding:'14px 0' }}>
+            <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', color:'#5c6660', padding:'0 14px 10px' }}>Category</div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'5px', padding:'0 11px 4px' }}>
+              <CatBtn icon="grid_view"     label="All"     val="All" />
+              <CatBtn icon="restaurant"    label="Food"    val="restaurant" />
+              <CatBtn icon="local_cafe"    label="Coffee"  val="coffee" />
+              <CatBtn icon="sports_bar"    label="Bars"    val="bar" />
+              <CatBtn icon="park"          label="Parks"   val="park" />
+              <CatBtn icon="palette"       label="Arts"    val="arts" />
+              <CatBtn icon="museum"        label="Museums" val="museum" />
+              <CatBtn icon="local_activity" label="Fun"    val="entertainment" />
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div style={{ borderBottom:'2px solid #1a1a1a', padding:'14px' }}>
+            <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', color:'#5c6660', marginBottom:'10px' }}>This Week</div>
+            {[
+              { label:'Events happening', val: weekEvents.length },
+              { label:'Free events', val: weekEvents.filter(e => getEventPrice(e) === 'FREE').length },
+              { label:'Spots in ABQ', val: places.length },
+            ].map(row => (
+              <div key={row.label} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'8px' }}>
+                <span style={{ fontSize:'10px', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.06em', color:'#5c6660' }}>{row.label}</span>
+                <span style={{ fontSize:'13px', fontWeight:800, color:'#566500' }}>{row.val.toLocaleString()}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Sort (places) */}
+          <div style={{ padding:'14px' }}>
+            <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', color:'#5c6660', marginBottom:'10px' }}>Sort Places</div>
+            <div style={{ display:'flex', flexDirection:'column', gap:'4px' }}>
+              {([['top','Top Rated','star'],['near','Near Me','near_me'],['az','A–Z','sort_by_alpha']] as const).map(([val, label, icon]) => (
+                <div key={val} onClick={() => setSort(val)} style={{ display:'flex', alignItems:'center', gap:'8px', padding:'6px 8px', cursor:'pointer', fontSize:'12px', fontWeight:600, border:'1.5px solid', borderColor: sort===val ? (val==='near' ? '#0057c2' : '#566500') : 'transparent', background: sort===val ? (val==='near' ? '#dbeafe' : '#5665000d') : 'transparent', color: sort===val ? (val==='near' ? '#0057c2' : '#566500') : '#5c6660' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize:'15px' }}>{icon}</span>{label}
+                </div>
+              ))}
+            </div>
+          </div>
+        </aside>
+
+        {/* ── Main Content ── */}
+        <main style={s.main}>
+          <div style={s.toolbar}>
+            <span style={{ fontSize:'11px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', color:'#5c6660' }}>
+              {tab === 'discover' && <><strong style={{ color:'#1a1a1a' }}>{places.length.toLocaleString()}</strong> places · <strong style={{ color:'#1a1a1a' }}>{weekEvents.length}</strong> events this week</>}
+              {tab === 'events'   && <><strong style={{ color:'#1a1a1a' }}>{upcomingEvents.length}</strong> upcoming events · <strong style={{ color:'#0057c2' }}>{upcomingEvents.filter(e => getEventPrice(e) === 'FREE').length}</strong> free</>}
+              {tab === 'places'   && <><strong style={{ color:'#1a1a1a' }}>{filteredPlaces.length.toLocaleString()}</strong> {cat !== 'All' ? cat : ''} places</>}
+            </span>
+            <div style={{ flex:1 }} />
+            {tab === 'places' && (
+              <select value={sort} onChange={e => setSort(e.target.value as typeof sort)}
+                style={{ height:'27px', border:'1.5px solid #1a1a1a', background:'#fff', fontFamily:'Inter,sans-serif', fontSize:'10px', fontWeight:700, letterSpacing:'0.04em', textTransform:'uppercase', padding:'0 8px', cursor:'pointer', outline:'none', color:'#1a1a1a' }}>
+                <option value="top">Sort: Top Rated</option>
+                <option value="near">Sort: Near Me</option>
+                <option value="az">Sort: A–Z</option>
+              </select>
+            )}
+          </div>
+
+          <div style={{ ...s.scroll, overflowX:'hidden' }}>
+            {/* ── DISCOVER ── */}
+            {tab === 'discover' && (
+              <>
+                {/* Hero */}
+                <div style={{ background:'linear-gradient(135deg,#566500,#8a9e00)', border:'2px solid #1a1a1a', boxShadow:'4px 4px 0 #1a1a1a', padding:'24px 28px 20px', marginBottom:'24px', position:'relative', overflow:'hidden' }}>
+                  <div style={{ position:'absolute', top:'-30px', right:'-30px', width:'180px', height:'180px', background:'rgba(212,239,77,0.1)', borderRadius:'50%' }} />
+                  <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.16em', textTransform:'uppercase', color:'#d4ef4d', marginBottom:'5px' }}>✦ Your City, Unplugged</div>
+                  <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'28px', lineHeight:1.05, letterSpacing:'-0.02em', color:'#fff', marginBottom:'8px' }}>Find Something<br/>Worth Leaving<br/>the House For</div>
+                  <div style={{ fontSize:'12px', color:'rgba(255,255,255,0.75)', marginBottom:'16px' }}>{today} · {places.length.toLocaleString()} spots across Greater ABQ</div>
+                  <div style={{ display:'flex', gap:'8px' }}>
+                    <button onClick={() => setTab('events')} style={{ height:'34px', padding:'0 14px', background:'#d4ef4d', border:'2px solid #1a1a1a', boxShadow:'2px 2px 0 #1a1a1a', fontSize:'10px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'5px', color:'#1a1a1a' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize:'14px' }}>confirmation_number</span>Browse Events
+                    </button>
+                    <button onClick={() => setTab('places')} style={{ height:'34px', padding:'0 14px', background:'rgba(255,255,255,0.15)', border:'2px solid rgba(255,255,255,0.4)', fontSize:'10px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'5px', color:'#fff' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize:'14px' }}>storefront</span>Browse Places
+                    </button>
+                  </div>
+                </div>
+
+                {/* Events This Week */}
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'12px', paddingBottom:'10px', borderBottom:'2px solid #1a1a1a' }}>
+                  <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'12px', letterSpacing:'0.08em', textTransform:'uppercase' }}>Events This Week</div>
+                  <span style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', color:'#5c6660' }}>{today.split(',')[0]} – +7 days</span>
+                  <span onClick={() => setTab('events')} style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', color:'#566500', cursor:'pointer', display:'flex', alignItems:'center', gap:'2px' }}>
+                    All {weekEvents.length} events <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>arrow_forward</span>
+                  </span>
+                </div>
+                {eventsLoading ? (
+                  <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'10px', marginBottom:'24px' }}>
+                    {[0,1,2].map(i => <div key={i} style={{ height:'170px', background:'#f0f0f0', border:'2px solid #d0d0d0', animation:'pulse 1.5s ease-in-out infinite' }} />)}
+                  </div>
+                ) : (
+                  <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'10px', marginBottom:'24px' }}>
+                    {weekEvents.slice(0,3).map((ev, i) => <EventCard key={ev.id} ev={ev} idx={i} />)}
+                  </div>
+                )}
+
+                {/* Near You */}
+                {nearbyPlaces.length > 0 && <>
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'12px', paddingBottom:'10px', borderBottom:'2px solid #1a1a1a' }}>
+                    <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'12px', letterSpacing:'0.08em', textTransform:'uppercase' }}>Near You</div>
+                    <span style={{ fontSize:'10px', fontWeight:700, color:'#566500', display:'flex', alignItems:'center', gap:'4px' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>my_location</span>Live location
+                    </span>
+                    <span onClick={() => setTab('places')} style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', color:'#566500', cursor:'pointer', display:'flex', alignItems:'center', gap:'2px' }}>
+                      All places <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>arrow_forward</span>
+                    </span>
+                  </div>
+                  <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:'8px', marginBottom:'24px' }}>
+                    {nearbyPlaces.slice(0,4).map(({ place, dist }) => <PlaceCard key={place.id} p={place} dist={dist} />)}
+                  </div>
+                </>}
+
+                {/* Hidden Gems */}
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'12px', paddingBottom:'10px', borderBottom:'2px solid #1a1a1a' }}>
+                  <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'12px', letterSpacing:'0.08em', textTransform:'uppercase' }}>Hidden Gems</div>
+                  <span style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', color:'#5c6660' }}>★ 4.5+ Rated</span>
+                </div>
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:'8px', marginBottom:'24px' }}>
+                  {hiddenGems.slice(0,4).map(p => <PlaceCard key={p.id} p={p} />)}
+                </div>
+              </>
+            )}
+
+            {/* ── EVENTS TAB ── */}
+            {tab === 'events' && (
+              <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
+                {upcomingEvents.length === 0 && eventsLoading && (
+                  <div style={{ textAlign:'center', padding:'40px', color:'#5c6660' }}>
+                    <div style={{ fontWeight:700 }}>Loading events…</div>
+                  </div>
+                )}
+                {upcomingEvents.map((ev, i) => <EventRow key={ev.id} ev={ev} idx={i} />)}
+              </div>
+            )}
+
+            {/* ── PLACES TAB ── */}
+            {tab === 'places' && (
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'10px' }}>
+                {filteredPlaces.slice(0,60).map(p => <PlaceGridCard key={p.id} p={p} />)}
+              </div>
+            )}
+          </div>
+        </main>
+
+        {/* ── Right Panel ── */}
+        <aside style={s.right}>
+          <MapPanel />
+          <div style={{ borderTop:'2px solid #1a1a1a', flex:1, display:'flex', flexDirection:'column', overflow:'hidden', minHeight:0 }}>
+            <DetailPanel />
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+// ─── useIsDesktop hook ────────────────────────────────────────────────────────
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1024);
+  useEffect(() => {
+    const handler = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+  return isDesktop;
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>('discover');
+  const isDesktop = useIsDesktop();
+
   const [showSearch, setShowSearch] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
   const [placesNavKey, setPlacesNavKey] = useState(0);
@@ -5774,6 +6394,48 @@ export default function App() {
   }
 
   if (loading) return <LoadingScreen />;
+  // ── Desktop layout ──────────────────────────────────────────────────────────
+  if (isDesktop) return (
+    <ErrorBoundary>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@700;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #f8faf8; -webkit-font-smoothing: antialiased; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #d0d8d0; }
+        :root {
+          --brand: #566500;
+          --brand-gradient: linear-gradient(135deg, #566500 0%, #8a9e00 100%);
+          --brand-bg-screen: #f8faf8;
+        }
+      `}</style>
+      <DesktopApp
+        events={events}
+        places={places}
+        coords={coords}
+        loading={loading}
+        eventsLoading={eventsLoading}
+        onPlaceSelect={(p) => setSelectedPlace(p)}
+        onEventSelect={(e) => setSelectedEvent(e)}
+      />
+      {selectedPlace && (
+        <PlaceDetailModal
+          place={selectedPlace}
+          onClose={() => { closePlaceModal(); window.history.back(); }}
+          isCheckedIn={checkedIn.has(selectedPlace.id)}
+          onCheckIn={() => handleCheckIn(selectedPlace.id)}
+          checkInError={checkInError}
+          tooFar={tooFarPlaceId === selectedPlace.id}
+          user={user}
+          onShowAuth={() => setShowAuthModal(true)}
+        />
+      )}
+      {selectedEvent && <EventDetailModal event={selectedEvent} onClose={() => { closeEventModal(); window.history.back(); }} />}
+      {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
+    </ErrorBoundary>
+  );
+
   if (loadError) return (
     <div className="fixed inset-0 flex flex-col items-center justify-center gap-3 px-8" style={{ background: 'var(--brand-bg-screen)' }}>
       <ABQUnpluggedLogo size={88} />
