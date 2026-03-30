@@ -5481,6 +5481,42 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
     );
   };
 
+  // ── Dark-themed event row (Discover tab Events This Week) ──────────────────
+  const DarkEventRow = ({ ev, idx }: { ev: TMEvent; idx: number }) => {
+    const { month, day } = fmtLocalDate(ev.dates?.start?.localDate || '');
+    const venue = getEventVenue(ev) || getEventCity(ev) || 'Albuquerque';
+    const time = ev.dates?.start?.localTime ? fmtLocalTime(ev.dates.start.localTime) : '';
+    const price = getEventPrice(ev);
+    const isFree = price === 'FREE';
+    const isLast = idx === Math.min(weekEvents.length, 4) - 1;
+    return (
+      <div onClick={() => { setDetail({ type:'event', data:ev }); onEventSelect(ev); }}
+        style={{ display:'flex', alignItems:'stretch', cursor:'pointer', borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.08)', transition:'background 0.12s' }}
+        onMouseEnter={e => (e.currentTarget.style.background='rgba(255,255,255,0.04)')}
+        onMouseLeave={e => (e.currentTarget.style.background='')}>
+        {/* Date block */}
+        <div style={{ width:'72px', flexShrink:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'18px 8px' }}>
+          <div style={{ fontSize:'10px', fontWeight:800, letterSpacing:'0.12em', textTransform:'uppercase', color:'#d4ef4d' }}>{month}</div>
+          <div style={{ fontFamily:'Epilogue,sans-serif', fontSize:'34px', fontWeight:900, lineHeight:1, color:'#ffffff' }}>{day}</div>
+        </div>
+        {/* Content */}
+        <div style={{ flex:1, padding:'16px 12px 16px 4px', minWidth:0, display:'flex', flexDirection:'column', justifyContent:'center' }}>
+          <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'15px', lineHeight:1.2, color:'#ffffff', marginBottom:'5px', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{ev.name}</div>
+          <div style={{ fontSize:'11px', color:'rgba(255,255,255,0.5)', fontWeight:600, letterSpacing:'0.04em', textTransform:'uppercase', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
+            {venue}{time ? ` · ${time}` : ''}
+          </div>
+          {isFree && <div style={{ marginTop:'5px', display:'inline-block', fontSize:'9px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', color:'#d4ef4d', border:'1px solid #d4ef4d', padding:'1px 6px', width:'fit-content' }}>FREE</div>}
+        </div>
+        {/* Arrow */}
+        <div style={{ width:'52px', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <div style={{ width:'34px', height:'34px', background:'#d4ef4d', display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <span className="material-symbols-outlined" style={{ fontSize:'18px', color:'#1a1a1a', fontWeight:700 }}>arrow_forward</span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // ── Detail panel ──────────────────────────────────────────────────────────
   const DetailPanel = () => {
     if (!detail) return (
@@ -5755,22 +5791,23 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
                 </div>
 
                 {/* Events This Week */}
-                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'12px', paddingBottom:'10px', borderBottom:'2px solid #1a1a1a' }}>
-                  <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'12px', letterSpacing:'0.08em', textTransform:'uppercase' }}>Events This Week</div>
-                  <span style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', color:'#5c6660' }}>{today.split(',')[0]} – +7 days</span>
-                  <span onClick={() => setTab('events')} style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', color:'#566500', cursor:'pointer', display:'flex', alignItems:'center', gap:'2px' }}>
-                    All {weekEvents.length} events <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>arrow_forward</span>
-                  </span>
+                <div style={{ marginBottom:'24px' }}>
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0', padding:'12px 16px 12px', background:'#1a1a1a', borderBottom:'2px solid #1a1a1a' }}>
+                    <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'13px', letterSpacing:'0.08em', textTransform:'uppercase', color:'#fff' }}>Events This Week</div>
+                    <span onClick={() => setTab('events')} style={{ fontSize:'10px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', color:'#d4ef4d', cursor:'pointer', display:'flex', alignItems:'center', gap:'4px' }}>
+                      → SEE ALL
+                    </span>
+                  </div>
+                  <div style={{ background:'#1a1a1a', border:'2px solid #1a1a1a', boxShadow:'4px 4px 0 #1a1a1a' }}>
+                    {eventsLoading && weekEvents.length === 0 ? (
+                      [0,1,2,3].map(i => (
+                        <div key={i} style={{ height:'72px', borderBottom: i < 3 ? '1px solid rgba(255,255,255,0.08)' : 'none', background:'rgba(255,255,255,0.03)', animation:'pulse 1.5s ease-in-out infinite' }} />
+                      ))
+                    ) : (
+                      weekEvents.slice(0,4).map((ev, i) => <DarkEventRow key={ev.id} ev={ev} idx={i} />)
+                    )}
+                  </div>
                 </div>
-                {eventsLoading ? (
-                  <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'10px', marginBottom:'24px' }}>
-                    {[0,1,2].map(i => <div key={i} style={{ height:'170px', background:'#f0f0f0', border:'2px solid #d0d0d0', animation:'pulse 1.5s ease-in-out infinite' }} />)}
-                  </div>
-                ) : (
-                  <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'10px', marginBottom:'24px' }}>
-                    {weekEvents.slice(0,3).map((ev, i) => <EventCard key={ev.id} ev={ev} idx={i} />)}
-                  </div>
-                )}
 
                 {/* Near You */}
                 {nearbyPlaces.length > 0 && <>
