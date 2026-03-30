@@ -5774,38 +5774,41 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
             {/* ── DISCOVER ── */}
             {tab === 'discover' && (
               <>
-                {/* Hero */}
-                <div style={{ background:'linear-gradient(135deg,#566500,#8a9e00)', border:'2px solid #1a1a1a', boxShadow:'4px 4px 0 #1a1a1a', padding:'24px 28px 20px', marginBottom:'24px', position:'relative', overflow:'hidden' }}>
-                  <div style={{ position:'absolute', top:'-30px', right:'-30px', width:'180px', height:'180px', background:'rgba(212,239,77,0.1)', borderRadius:'50%' }} />
-                  <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.16em', textTransform:'uppercase', color:'#d4ef4d', marginBottom:'5px' }}>✦ Your City, Unplugged</div>
-                  <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'28px', lineHeight:1.05, letterSpacing:'-0.02em', color:'#fff', marginBottom:'8px' }}>Find Something<br/>Worth Leaving<br/>the House For</div>
-                  <div style={{ fontSize:'12px', color:'rgba(255,255,255,0.75)', marginBottom:'16px' }}>{today} · {places.length.toLocaleString()} spots across Greater ABQ</div>
-                  <div style={{ display:'flex', gap:'8px' }}>
-                    <button onClick={() => setTab('events')} style={{ height:'34px', padding:'0 14px', background:'#d4ef4d', border:'2px solid #1a1a1a', boxShadow:'2px 2px 0 #1a1a1a', fontSize:'10px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'5px', color:'#1a1a1a' }}>
-                      <span className="material-symbols-outlined" style={{ fontSize:'14px' }}>confirmation_number</span>Browse Events
-                    </button>
-                    <button onClick={() => setTab('places')} style={{ height:'34px', padding:'0 14px', background:'rgba(255,255,255,0.15)', border:'2px solid rgba(255,255,255,0.4)', fontSize:'10px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'5px', color:'#fff' }}>
-                      <span className="material-symbols-outlined" style={{ fontSize:'14px' }}>storefront</span>Browse Places
-                    </button>
+                {/* Hero + Events This Week — side by side */}
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0', marginBottom:'24px', border:'2px solid #1a1a1a', boxShadow:'4px 4px 0 #1a1a1a' }}>
+                  {/* Hero */}
+                  <div style={{ background:'linear-gradient(135deg,#566500,#8a9e00)', padding:'24px 28px 20px', position:'relative', overflow:'hidden' }}>
+                    <div style={{ position:'absolute', top:'-30px', right:'-30px', width:'180px', height:'180px', background:'rgba(212,239,77,0.1)', borderRadius:'50%' }} />
+                    <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.16em', textTransform:'uppercase', color:'#d4ef4d', marginBottom:'5px' }}>✦ Your City, Unplugged</div>
+                    <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'26px', lineHeight:1.05, letterSpacing:'-0.02em', color:'#fff', marginBottom:'8px' }}>Find Something<br/>Worth Leaving<br/>the House For</div>
+                    <div style={{ fontSize:'11px', color:'rgba(255,255,255,0.75)', marginBottom:'16px' }}>{today} · {places.length.toLocaleString()} spots across Greater ABQ</div>
+                    <div style={{ display:'flex', gap:'8px' }}>
+                      <button onClick={() => setTab('events')} style={{ height:'32px', padding:'0 12px', background:'#d4ef4d', border:'2px solid #1a1a1a', boxShadow:'2px 2px 0 #1a1a1a', fontSize:'9px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'5px', color:'#1a1a1a' }}>
+                        <span className="material-symbols-outlined" style={{ fontSize:'13px' }}>confirmation_number</span>Browse Events
+                      </button>
+                      <button onClick={() => setTab('places')} style={{ height:'32px', padding:'0 12px', background:'rgba(255,255,255,0.15)', border:'2px solid rgba(255,255,255,0.4)', fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'5px', color:'#fff' }}>
+                        <span className="material-symbols-outlined" style={{ fontSize:'13px' }}>storefront</span>Browse Places
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                {/* Events This Week */}
-                <div style={{ marginBottom:'24px' }}>
-                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0', padding:'12px 16px 12px', background:'#1a1a1a', borderBottom:'2px solid #1a1a1a' }}>
-                    <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'13px', letterSpacing:'0.08em', textTransform:'uppercase', color:'#fff' }}>Events This Week</div>
-                    <span onClick={() => setTab('events')} style={{ fontSize:'10px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', color:'#d4ef4d', cursor:'pointer', display:'flex', alignItems:'center', gap:'4px' }}>
-                      → SEE ALL
-                    </span>
-                  </div>
-                  <div style={{ background:'#1a1a1a', border:'2px solid #1a1a1a', boxShadow:'4px 4px 0 #1a1a1a' }}>
-                    {eventsLoading && weekEvents.length === 0 ? (
-                      [0,1,2,3].map(i => (
-                        <div key={i} style={{ height:'72px', borderBottom: i < 3 ? '1px solid rgba(255,255,255,0.08)' : 'none', background:'rgba(255,255,255,0.03)', animation:'pulse 1.5s ease-in-out infinite' }} />
-                      ))
-                    ) : (
-                      weekEvents.slice(0,4).map((ev, i) => <DarkEventRow key={ev.id} ev={ev} idx={i} />)
-                    )}
+                  {/* Events This Week */}
+                  <div style={{ background:'#1a1a1a', borderLeft:'2px solid #1a1a1a', display:'flex', flexDirection:'column' }}>
+                    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 16px', borderBottom:'1px solid rgba(255,255,255,0.1)', flexShrink:0 }}>
+                      <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'12px', letterSpacing:'0.1em', textTransform:'uppercase', color:'#fff' }}>Events This Week</div>
+                      <span onClick={() => setTab('events')} style={{ fontSize:'10px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', color:'#d4ef4d', cursor:'pointer' }}>
+                        → SEE ALL
+                      </span>
+                    </div>
+                    <div style={{ flex:1, display:'flex', flexDirection:'column' }}>
+                      {eventsLoading && weekEvents.length === 0 ? (
+                        [0,1,2,3].map(i => (
+                          <div key={i} style={{ flex:1, minHeight:'52px', borderBottom: i < 3 ? '1px solid rgba(255,255,255,0.06)' : 'none', background:'rgba(255,255,255,0.02)', animation:'pulse 1.5s ease-in-out infinite' }} />
+                        ))
+                      ) : (
+                        weekEvents.slice(0,4).map((ev, i) => <DarkEventRow key={ev.id} ev={ev} idx={i} />)
+                      )}
+                    </div>
                   </div>
                 </div>
 
