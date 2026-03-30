@@ -582,17 +582,17 @@ function ImageWithFallback({
 // ─── Category Data ──────────────────────────────────────────────────────────
 
 const PLACE_CATEGORIES = [
-  { label: 'All',            icon: '✨', value: 'All' },
-  { label: 'Restaurants',    icon: '🍽️', value: 'restaurant' },
-  { label: 'Coffee',         icon: '☕', value: 'coffee' },
-  { label: 'Bars',           icon: '🍺', value: 'bar' },
-  { label: 'Parks',          icon: '🌳', value: 'park' },
-  { label: 'Fitness',        icon: '💪', value: 'fitness' },
-  { label: 'Arts',           icon: '🎨', value: 'arts' },
-  { label: 'Shopping',       icon: '🛍️', value: 'shop' },
-  { label: 'Entertainment',  icon: '🎭', value: 'entertainment' },
-  { label: 'Museums',        icon: '🏛️', value: 'museum' },
-  { label: 'Hotels',         icon: '🏨', value: 'hotel' },
+  { label: 'All',            icon: 'grid',          value: 'All' },
+  { label: 'Restaurants',    icon: 'food',          value: 'restaurant' },
+  { label: 'Coffee',         icon: 'coffee',        value: 'coffee' },
+  { label: 'Bars',           icon: 'beer',          value: 'bar' },
+  { label: 'Parks',          icon: 'park',          value: 'park' },
+  { label: 'Fitness',        icon: 'fitness',       value: 'fitness' },
+  { label: 'Arts',           icon: 'art',           value: 'arts' },
+  { label: 'Shopping',       icon: 'shop',          value: 'shop' },
+  { label: 'Entertainment',  icon: 'entertainment', value: 'entertainment' },
+  { label: 'Museums',        icon: 'museum',        value: 'museum' },
+  { label: 'Hotels',         icon: 'hotel',         value: 'hotel' },
 ];
 
 const EVENT_GENRES = [
@@ -601,18 +601,18 @@ const EVENT_GENRES = [
 
 // Per-category icon and gradient for event cards
 const EVENT_TYPE_META: Record<string, { icon: string; bg: string }> = {
-  'Music':       { icon: '🎵', bg: 'linear-gradient(135deg,#8B3A0F,#c0552a)' },
-  'Sports':      { icon: '🏟️', bg: 'linear-gradient(135deg,#1d4ed8,#3b82f6)' },
-  'Arts':        { icon: '🎨', bg: 'linear-gradient(135deg,#6d28d9,#8b5cf6)' },
-  'Arts & Theatre': { icon: '🎭', bg: 'linear-gradient(135deg,#6d28d9,#8b5cf6)' },
-  'Comedy':      { icon: '😄', bg: 'linear-gradient(135deg,#b45309,#d97706)' },
-  'Family':      { icon: '👨‍👩‍👧', bg: 'linear-gradient(135deg,#047857,#10b981)' },
-  'Outdoor':     { icon: '🌿', bg: 'linear-gradient(135deg,#065f46,#059669)' },
-  'Community':   { icon: '🤝', bg: 'linear-gradient(135deg,#0e7490,#06b6d4)' },
-  'Festival':    { icon: '🎪', bg: 'linear-gradient(135deg,#7c3aed,#a78bfa)' },
-  'Film':        { icon: '🎬', bg: 'linear-gradient(135deg,#1f2937,#4b5563)' },
-  'Free':        { icon: '🎫', bg: 'linear-gradient(135deg,#047857,#10b981)' },
-  'Event':       { icon: '🎫', bg: 'linear-gradient(135deg,#1A1A1A,#374151)' },
+  'Music':          { icon: 'music',         bg: 'linear-gradient(135deg,#8B3A0F,#c0552a)' },
+  'Sports':         { icon: 'sports',        bg: 'linear-gradient(135deg,#1d4ed8,#3b82f6)' },
+  'Arts':           { icon: 'art',           bg: 'linear-gradient(135deg,#6d28d9,#8b5cf6)' },
+  'Arts & Theatre': { icon: 'theatre',       bg: 'linear-gradient(135deg,#6d28d9,#8b5cf6)' },
+  'Comedy':         { icon: 'comedy',        bg: 'linear-gradient(135deg,#b45309,#d97706)' },
+  'Family':         { icon: 'family',        bg: 'linear-gradient(135deg,#047857,#10b981)' },
+  'Outdoor':        { icon: 'outdoor',       bg: 'linear-gradient(135deg,#065f46,#059669)' },
+  'Community':      { icon: 'community',     bg: 'linear-gradient(135deg,#0e7490,#06b6d4)' },
+  'Festival':       { icon: 'festival',      bg: 'linear-gradient(135deg,#7c3aed,#a78bfa)' },
+  'Film':           { icon: 'film',          bg: 'linear-gradient(135deg,#1f2937,#4b5563)' },
+  'Free':           { icon: 'free',          bg: 'linear-gradient(135deg,#047857,#10b981)' },
+  'Event':          { icon: 'event',         bg: 'linear-gradient(135deg,#1A1A1A,#374151)' },
 };
 
 function getEventTypeMeta(event: TMEvent): { icon: string; bg: string } {
@@ -627,6 +627,70 @@ function getEventTypeMeta(event: TMEvent): { icon: string; bg: string } {
   if (name.includes('art') || name.includes('gallery') || name.includes('museum')) return EVENT_TYPE_META['Arts'];
   return EVENT_TYPE_META['Event'];
 }
+
+// ─── Flat SVG Icon System ─────────────────────────────────────────────────────
+const FlatIcon = React.memo(function FlatIcon({
+  name, size = 14, color = '#1A1A1A',
+}: { name: string; size?: number; color?: string }) {
+  const S = { stroke: color, strokeWidth: 1.5, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: 'none' as const };
+  const F = { fill: color, stroke: 'none' as const };
+  const map: Record<string, React.ReactNode> = {
+    // Event type icons
+    music:         <><polyline points="7.5,12 7.5,4 13,4 13,10" {...S}/><circle cx="5.5" cy="12" r="2" {...F}/><circle cx="11" cy="10" r="2" {...F}/></>,
+    sports:        <><path d="M5 3h6v4c0 2.8-1.3 4-3 4s-3-1.2-3-4Z" {...S}/><path d="M5 5H3.5a1.5 1.5 0 0 0 0 3H5" {...S}/><path d="M11 5h1.5a1.5 1.5 0 0 1 0 3H11" {...S}/><line x1="8" y1="11" x2="8" y2="13.5" {...S}/><line x1="5.5" y1="13.5" x2="10.5" y2="13.5" {...S}/></>,
+    comedy:        <><circle cx="8" cy="8" r="6" {...S}/><path d="M5.5 9.5Q8 12 10.5 9.5" {...S}/><circle cx="6" cy="7" r="0.8" {...F}/><circle cx="10" cy="7" r="0.8" {...F}/></>,
+    art:           <><path d="M8 2a6 6 0 1 0 5.2 9" {...S}/><path d="M13.5 9.5c1.5-1 1.5-2.5 0-2.5s-1.5 2.5 0 2.5Z" {...F}/><circle cx="5.5" cy="6.5" r="1" {...F}/><circle cx="9.5" cy="5" r="1" {...F}/><circle cx="11" cy="9" r="1" {...F}/></>,
+    theatre:       <><path d="M2 5.5c0 2.5 2 4.5 4.5 4.5S11 8 11 5.5L6.5 3Z" {...S}/><path d="M5 7.5c.5.7 1.5.7 2 0" {...S}/><circle cx="12" cy="10.5" r="3" {...S}/><path d="M10.5 12c.5-.8 1.5-.8 2 0" {...S}/></>,
+    family:        <><path d="M2 14L8 3l6 11Z" {...S}/><line x1="8" y1="14" x2="8" y2="9" {...S}/><line x1="5" y1="14" x2="11" y2="14" {...S}/></>,
+    outdoor:       <><path d="M1 14L6 6l5 8Z" {...S}/><path d="M6 14l4-6 4 6Z" {...S}/><circle cx="13.5" cy="3.5" r="1.5" {...S}/></>,
+    community:     <><circle cx="8" cy="5" r="2" {...S}/><path d="M4 14c0-2.5 8-2.5 8 0" {...S}/><circle cx="3" cy="7" r="1.5" {...S}/><path d="M1 13c0-2 4-2 4 0" {...S}/><circle cx="13" cy="7" r="1.5" {...S}/><path d="M11 13c0-2 4-2 4 0" {...S}/></>,
+    festival:      <><path d="M8 2l1.6 4.5H15l-4 2.9 1.5 4.6L8 11.2l-4.5 2.8L5 9.4 1 6.5h5.4Z" {...S}/></>,
+    film:          <><rect x="2" y="4" width="12" height="8" rx="1" {...S}/><line x1="2" y1="6.5" x2="14" y2="6.5" {...S}/><line x1="2" y1="9.5" x2="14" y2="9.5" {...S}/><line x1="4.5" y1="4" x2="4.5" y2="6.5" {...S}/><line x1="11.5" y1="4" x2="11.5" y2="6.5" {...S}/><line x1="4.5" y1="9.5" x2="4.5" y2="12" {...S}/><line x1="11.5" y1="9.5" x2="11.5" y2="12" {...S}/></>,
+    free:          <><rect x="2" y="4" width="12" height="8" rx="1" {...S}/><path d="M5.5 7v3M5.5 7h2c.8 0 .8 2 0 2H5.5" {...S}/><line x1="10.5" y1="7" x2="10.5" y2="10" {...S}/></>,
+    event:         <><rect x="2" y="3" width="12" height="11" rx="1" {...S}/><line x1="2" y1="7" x2="14" y2="7" {...S}/><line x1="5" y1="1.5" x2="5" y2="4.5" {...S}/><line x1="11" y1="1.5" x2="11" y2="4.5" {...S}/><circle cx="5" cy="10.5" r="0.8" {...F}/><circle cx="8" cy="10.5" r="0.8" {...F}/><circle cx="11" cy="10.5" r="0.8" {...F}/></>,
+    // Place category icons
+    food:          <><line x1="5.5" y1="2" x2="5.5" y2="8" {...S}/><path d="M4 3v4a1.5 1.5 0 0 0 3 0V3" {...S}/><line x1="5.5" y1="8" x2="5.5" y2="14" {...S}/><line x1="11" y1="2" x2="11" y2="14" {...S}/><path d="M9 2L13 5M9 8h4" {...S}/></>,
+    coffee:        <><path d="M4 5h8l-1 7a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1Z" {...S}/><path d="M12 7h1.5a1.5 1.5 0 0 1 0 3H12" {...S}/><path d="M7 2q1-1.5 2 0" {...S}/></>,
+    beer:          <><path d="M4 4v9a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4Z" {...S}/><path d="M12 7h1.5a1.5 1.5 0 0 1 0 3H12" {...S}/><line x1="4" y1="6" x2="12" y2="6" {...S}/></>,
+    park:          <><circle cx="8" cy="6.5" r="4" {...S}/><line x1="8" y1="10.5" x2="8" y2="14" {...S}/><line x1="5.5" y1="14" x2="10.5" y2="14" {...S}/></>,
+    fitness:       <><line x1="4.5" y1="8" x2="11.5" y2="8" {...S}/><rect x="1.5" y="6" width="3" height="4" rx="0.5" {...S}/><rect x="11.5" y="6" width="3" height="4" rx="0.5" {...S}/><rect x="4.5" y="5" width="2" height="6" rx="0.5" {...S}/><rect x="9.5" y="5" width="2" height="6" rx="0.5" {...S}/></>,
+    shop:          <><rect x="3" y="6" width="10" height="8" rx="1" {...S}/><path d="M5.5 6C5.5 3.5 10.5 3.5 10.5 6" {...S}/><line x1="5.5" y1="9.5" x2="10.5" y2="9.5" {...S}/></>,
+    entertainment: <><path d="M8 2l1.6 4.5H15l-4 2.9 1.5 4.6L8 11.2l-4.5 2.8L5 9.4 1 6.5h5.4Z" {...S}/></>,
+    museum:        <><path d="M2 6L8 2l6 4" {...S}/><line x1="2" y1="6" x2="14" y2="6" {...S}/><line x1="2" y1="14" x2="14" y2="14" {...S}/><line x1="4.5" y1="6" x2="4.5" y2="14" {...S}/><line x1="8" y1="6" x2="8" y2="14" {...S}/><line x1="11.5" y1="6" x2="11.5" y2="14" {...S}/></>,
+    hotel:         <><rect x="3" y="2" width="10" height="12" {...S}/><line x1="3" y1="9" x2="13" y2="9" {...S}/><rect x="7" y="9" width="2" height="5" {...S}/><rect x="5" y="4" width="1.5" height="2" {...S}/><rect x="9.5" y="4" width="1.5" height="2" {...S}/><rect x="5" y="6.5" width="1.5" height="2" {...S}/><rect x="9.5" y="6.5" width="1.5" height="2" {...S}/></>,
+    grid:          <><rect x="2" y="2" width="5" height="5" rx="0.5" {...S}/><rect x="9" y="2" width="5" height="5" rx="0.5" {...S}/><rect x="2" y="9" width="5" height="5" rx="0.5" {...S}/><rect x="9" y="9" width="5" height="5" rx="0.5" {...S}/></>,
+    // ABQ fact & quote icons
+    mountain:      <><path d="M1 14L7 5l6 9Z" {...S}/><path d="M7 14l4-5.5 4 5.5Z" {...S}/></>,
+    sun:           <><circle cx="8" cy="8" r="3" {...S}/><line x1="8" y1="1.5" x2="8" y2="3.5" {...S}/><line x1="8" y1="12.5" x2="8" y2="14.5" {...S}/><line x1="1.5" y1="8" x2="3.5" y2="8" {...S}/><line x1="12.5" y1="8" x2="14.5" y2="8" {...S}/><line x1="3.4" y1="3.4" x2="4.8" y2="4.8" {...S}/><line x1="11.2" y1="11.2" x2="12.6" y2="12.6" {...S}/><line x1="12.6" y1="3.4" x2="11.2" y2="4.8" {...S}/><line x1="4.8" y1="11.2" x2="3.4" y2="12.6" {...S}/></>,
+    balloon:       <><ellipse cx="8" cy="7" rx="4.5" ry="5" {...S}/><rect x="6.5" y="12.5" width="3" height="1.5" rx="0.3" {...S}/><line x1="7" y1="12.5" x2="6.5" y2="10.5" {...S}/><line x1="9" y1="12.5" x2="9.5" y2="10.5" {...S}/></>,
+    history:       <><path d="M5 2.5v11c0 0 2-1 6 0V2.5c-4-1-6 0-6 0Z" {...S}/><line x1="7" y1="5.5" x2="9" y2="5.5" {...S}/><line x1="7" y1="7.5" x2="9" y2="7.5" {...S}/><line x1="7" y1="9.5" x2="9" y2="9.5" {...S}/></>,
+    wave:          <><path d="M1 7.5C3 5.5 5 10 7 8c2-2 4 2.5 6 .5 1.5-1.5 2-1 2-1" {...S}/><path d="M1 11C3 9 5 13.5 7 11.5c2-2 4 2.5 6 .5 1.5-1.5 2-1 2-1" {...S}/></>,
+    bird:          <><path d="M1 8C4 7 7 9 8 9C9 9 12 7 15 7" {...S}/><path d="M8 9v5" {...S}/><path d="M1.5 6.5C2.5 5.5 4.5 5.5 5.5 6" {...S}/></>,
+    road:          <><path d="M4 14L6 2h4l2 12Z" {...S}/><line x1="8" y1="4" x2="8" y2="6.5" {...S}/><line x1="8" y1="8.5" x2="8" y2="11" {...S}/></>,
+    gem:           <><path d="M4 6L8 2l4 4-4 8Z" {...S}/><line x1="4" y1="6" x2="12" y2="6" {...S}/></>,
+    science:       <><circle cx="8" cy="8" r="2.5" {...S}/><ellipse cx="8" cy="8" rx="6.5" ry="2.5" {...S}/><ellipse cx="8" cy="8" rx="2.5" ry="6.5" {...S}/></>,
+    rocket:        <><path d="M8 2c-2 3-3 6.5-3 9l3 3 3-3c0-2.5-1-6-3-9Z" {...S}/><circle cx="8" cy="7.5" r="1.5" {...S}/><path d="M5 11L3 13" {...S}/><path d="M11 11l2 2" {...S}/></>,
+    leaf:          <><path d="M3 13C3 13 5 6 13 3c0 0-3 8-10 10Z" {...S}/><line x1="3" y1="13" x2="11" y2="5" {...S}/></>,
+    book:          <><path d="M4 2v11.5s3-1 4 0V2C6 1 4 2 4 2Z" {...S}/><path d="M8 2v11.5s3-1 4 0V2C10 1 8 2 8 2Z" {...S}/></>,
+    bicycle:       <><circle cx="4.5" cy="10.5" r="2.5" {...S}/><circle cx="11.5" cy="10.5" r="2.5" {...S}/><path d="M4.5 10.5L7.5 5l4 5.5" {...S}/><line x1="7.5" y1="5" x2="9.5" y2="5" {...S}/></>,
+    moon:          <><path d="M12.5 10C10 13.5 4 13 3 9a6 6 0 0 1 9.5-7A5 5 0 0 0 12.5 10Z" {...F}/></>,
+    cactus:        <><line x1="8" y1="14" x2="8" y2="3" {...S}/><path d="M8 7H5v3" {...S}/><path d="M8 9h3v3" {...S}/></>,
+    building:      <><rect x="3" y="2" width="10" height="12" {...S}/><line x1="3" y1="7" x2="13" y2="7" {...S}/><line x1="7" y1="2" x2="7" y2="14" {...S}/><line x1="11" y1="2" x2="11" y2="14" {...S}/><rect x="7" y="10" width="2" height="4" {...S}/></>,
+    sprout:        <><line x1="8" y1="14" x2="8" y2="6" {...S}/><path d="M8 10C8 7 5 5 2 6" {...S}/><path d="M8 8C8 5 11 3 14 4" {...S}/></>,
+    compass:       <><circle cx="8" cy="8" r="6" {...S}/><circle cx="8" cy="8" r="1.5" {...F}/><path d="M8 2v1.5M8 12.5V14M2 8h1.5M12.5 8H14" {...S}/></>,
+    volcano:       <><path d="M2 14L6 8l2 2 2-2 4 6Z" {...S}/><path d="M7 5L8 2l1 3" {...S}/></>,
+    snowflake:     <><line x1="8" y1="2" x2="8" y2="14" {...S}/><line x1="2" y1="8" x2="14" y2="8" {...S}/><line x1="4" y1="4" x2="12" y2="12" {...S}/><line x1="12" y1="4" x2="4" y2="12" {...S}/></>,
+    star:          <><path d="M8 2l1.5 4.5H15l-4 3 1.5 4.5L8 11.5l-4.5 2.5L5 9.5 1 6.5h5.5Z" {...S}/></>,
+    heart:         <><path d="M8 13L3.5 8.5A3 3 0 0 1 8 4a3 3 0 0 1 4.5 4.5Z" {...F}/></>,
+    bolt:          <><path d="M10 2L5 9h4l-3 5 7-8H9Z" {...F}/></>,
+    pin:           <><circle cx="8" cy="7" r="3" {...S}/><path d="M8 10c0 0-4 3.5-4 5h8c0-1.5-4-5-4-5Z" {...S}/></>,
+  };
+  return (
+    <svg viewBox="0 0 16 16" width={size} height={size} fill="none" style={{ display: 'block', flexShrink: 0 }}>
+      {map[name] ?? map.star}
+    </svg>
+  );
+});
 
 // ─── Geo Banner ──────────────────────────────────────────────────────────────
 
@@ -697,7 +761,9 @@ const PlaceCard = React.memo(function PlaceCard({
   tooFar?: boolean;
 }) {
   // Match by value (e.g. 'restaurant') OR label (e.g. 'Restaurants') — data may use either
-  const catEmoji = (PLACE_CATEGORIES.find(c => c.value === place.category) || PLACE_CATEGORIES.find(c => c.label === place.category))?.icon || '📍';
+  const catMeta = PLACE_CATEGORIES.find(c => c.value === place.category) || PLACE_CATEGORIES.find(c => c.label === place.category);
+  const catIconName = catMeta?.icon || 'pin';
+  const catLabel = catMeta?.label || place.category || '';
   return (
     // div instead of button — avoids nested-button HTML invalidity that breaks tap on iOS Safari
     <div
@@ -714,15 +780,6 @@ const PlaceCard = React.memo(function PlaceCard({
           showLabel={!place.image}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-        {/* Category type icon badge — bottom-left corner */}
-        <div style={{
-          position: 'absolute', bottom: 6, left: 6,
-          background: 'rgba(0,0,0,0.72)', borderRadius: 3,
-          width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 14, lineHeight: 1,
-        }}>
-          {catEmoji}
-        </div>
         {distance != null && (
           <div className="absolute top-2 right-2">
             <span
@@ -746,6 +803,11 @@ const PlaceCard = React.memo(function PlaceCard({
         )}
       </div>
       <div className="p-3">
+        {/* Category inline label with flat icon */}
+        <div className="flex items-center gap-1 mb-1" style={{ opacity: 0.6 }}>
+          <FlatIcon name={catIconName} size={11} color="#1A1A1A" />
+          <span className="text-xs font-bold uppercase" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em', fontSize: 9 }}>{catLabel}</span>
+        </div>
         <p
           className="font-black text-sm leading-snug text-gray-900"
           style={{ fontFamily: 'Epilogue, sans-serif', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}
@@ -777,7 +839,7 @@ const PlaceCard = React.memo(function PlaceCard({
                 borderRadius: 0,
               }}
             >
-              {tooFar ? '📍 Get Closer' : isCheckedIn ? '✓ Visited' : 'Check In'}
+              {tooFar ? 'Get Closer' : isCheckedIn ? '✓ Visited' : 'Check In'}
             </button>
           )}
         </div>
@@ -811,28 +873,23 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
             className="w-full h-full flex flex-col items-center justify-center gap-1"
             style={{ background: typeMeta.bg }}
           >
-            <span style={{ fontSize: 30, lineHeight: 1 }}>{typeMeta.icon}</span>
-            <span style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.8)', letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: 'Inter, sans-serif', textAlign: 'center', padding: '0 4px' }}>{category}</span>
+            <FlatIcon name={typeMeta.icon} size={28} color="white" />
+            <span style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.8)', letterSpacing: '0.08em', textTransform: 'uppercase' as const, fontFamily: 'Inter, sans-serif', textAlign: 'center' as const, padding: '0 4px' }}>{category}</span>
           </div>
         )}
-        {/* Type icon badge — always visible bottom-left corner of image */}
-        <div style={{
-          position: 'absolute', bottom: 4, left: 4,
-          background: 'rgba(0,0,0,0.72)', borderRadius: 3,
-          width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 13, lineHeight: 1,
-        }}>
-          {typeMeta.icon}
-        </div>
       </div>
       <div className="flex-1 p-3 flex flex-col justify-between min-w-0">
         <div>
-          <span
-            className="text-xs font-bold text-white px-2 py-0.5 inline-block mb-1.5"
-            style={{ background: '#1A1A1A', fontFamily: 'Inter, sans-serif', borderRadius: 0, letterSpacing: '0.05em', textTransform: 'uppercase' }}
-          >
-            {category}
-          </span>
+          {/* Inline icon + category label */}
+          <div className="flex items-center gap-1 mb-1.5">
+            <FlatIcon name={typeMeta.icon} size={12} color="#1A1A1A" />
+            <span
+              className="text-xs font-bold"
+              style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#1A1A1A', fontSize: 9 }}
+            >
+              {category}
+            </span>
+          </div>
           <p
             className="font-black text-sm leading-snug text-gray-900"
             style={{ fontFamily: 'Epilogue, sans-serif', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}
@@ -951,7 +1008,9 @@ function PlaceDetailModal({
   user: User | null;
   onShowAuth: () => void;
 }) {
-  const catEmoji = (PLACE_CATEGORIES.find(c => c.value === place.category) || PLACE_CATEGORIES.find(c => c.label === place.category))?.icon || '📍';
+  const detailCatMeta = PLACE_CATEGORIES.find(c => c.value === place.category) || PLACE_CATEGORIES.find(c => c.label === place.category);
+  const detailCatIcon = detailCatMeta?.icon || 'pin';
+  const detailCatLabel = detailCatMeta?.label || place.category || '';
   const mapsQuery = encodeURIComponent((place.address || place.name) + ' Albuquerque NM');
 
   return (
@@ -969,10 +1028,11 @@ function PlaceDetailModal({
         </button>
         <div className="absolute bottom-4 left-4 right-4" style={{ zIndex: 3, pointerEvents: 'none' }}>
           <span
-            className="text-xs font-bold text-white px-2.5 py-1 rounded"
+            className="text-xs font-bold text-white px-2.5 py-1 rounded inline-flex items-center gap-1"
             style={{ background: 'var(--brand)', pointerEvents: 'auto' }}
           >
-            {catEmoji} {place.category}
+            <FlatIcon name={detailCatIcon} size={11} color="white" />
+            {detailCatLabel}
           </span>
           <h2
             className="text-white font-black text-2xl mt-2 leading-tight"
@@ -1602,47 +1662,47 @@ const BLOCKED_VENUES = ['Hooters', 'Twin Peaks', 'Twin Peaks Restaurant', 'Coyot
 
 const UNPLUG_QUOTES = [
   // Social connection & health
-  { text: "People with strong social ties have a 50% increased likelihood of survival compared to those with weaker ties.", source: "Holt-Lunstad et al., PLOS Medicine", icon: "🤝" },
-  { text: "Loneliness is as harmful to health as smoking 15 cigarettes a day.", source: "Holt-Lunstad, Brigham Young University", icon: "🤝" },
-  { text: "Face-to-face contact is the bread and butter of social life — it's how we evolved to connect.", source: "Robin Dunbar, Oxford University", icon: "🤝" },
-  { text: "Just 10 minutes of conversation with another person can improve memory and mental performance.", source: "Ybarra et al., University of Michigan", icon: "🤝" },
-  { text: "People who feel more connected report 3× more daily joy than those who feel isolated.", source: "Journal of Happiness Studies", icon: "🤝" },
-  { text: "Having five or more in-person friends reduces your risk of depression by 70%.", source: "Melbourne Institute of Applied Economic Research", icon: "🤝" },
+  { text: "People with strong social ties have a 50% increased likelihood of survival compared to those with weaker ties.", source: "Holt-Lunstad et al., PLOS Medicine", icon: "community" },
+  { text: "Loneliness is as harmful to health as smoking 15 cigarettes a day.", source: "Holt-Lunstad, Brigham Young University", icon: "community" },
+  { text: "Face-to-face contact is the bread and butter of social life — it's how we evolved to connect.", source: "Robin Dunbar, Oxford University", icon: "community" },
+  { text: "Just 10 minutes of conversation with another person can improve memory and mental performance.", source: "Ybarra et al., University of Michigan", icon: "community" },
+  { text: "People who feel more connected report 3× more daily joy than those who feel isolated.", source: "Journal of Happiness Studies", icon: "community" },
+  { text: "Having five or more in-person friends reduces your risk of depression by 70%.", source: "Melbourne Institute of Applied Economic Research", icon: "community" },
   // Experiences vs objects
-  { text: "People over-estimate happiness from buying things, and underestimate it from experiences.", source: "Van Boven & Gilovich, Cornell University", icon: "✨" },
-  { text: "Experiences get better every time you think about them. Objects don't.", source: "Thomas Gilovich, Cornell Psychology", icon: "✨" },
-  { text: "Novel real-world experiences create richer, more detailed memories than screen-based ones.", source: "Maguire et al., Nature Neuroscience", icon: "✨" },
-  { text: "Shared experiences — even with strangers — make us happier than having them alone.", source: "Boothby et al., Psychological Science", icon: "✨" },
-  { text: "You can't get the same neurological hit from watching something as from being in the room.", source: "Dr. Paul Zak, Claremont Graduate University", icon: "✨" },
+  { text: "People over-estimate happiness from buying things, and underestimate it from experiences.", source: "Van Boven & Gilovich, Cornell University", icon: "star" },
+  { text: "Experiences get better every time you think about them. Objects don't.", source: "Thomas Gilovich, Cornell Psychology", icon: "star" },
+  { text: "Novel real-world experiences create richer, more detailed memories than screen-based ones.", source: "Maguire et al., Nature Neuroscience", icon: "star" },
+  { text: "Shared experiences — even with strangers — make us happier than having them alone.", source: "Boothby et al., Psychological Science", icon: "star" },
+  { text: "You can't get the same neurological hit from watching something as from being in the room.", source: "Dr. Paul Zak, Claremont Graduate University", icon: "star" },
   // Urban exploration
-  { text: "Walking through new neighborhoods activates the hippocampus — the brain's exploration center.", source: "O'Keefe & Moser, Nobel Prize in Medicine 2014", icon: "🏙️" },
-  { text: "People who explore local culture report significantly higher life satisfaction.", source: "American Journal of Community Psychology", icon: "🏙️" },
-  { text: "Exploring your own city produces the same mood boost as traveling far away.", source: "Nawijn et al., Applied Research in Quality of Life", icon: "🏙️" },
-  { text: "Local exploration builds place identity — a key predictor of resilience and belonging.", source: "Lewicka, Journal of Environmental Psychology", icon: "🏙️" },
-  { text: "Cities with vibrant arts and live events see measurably lower rates of depression.", source: "World Health Organization, 2019", icon: "🏙️" },
+  { text: "Walking through new neighborhoods activates the hippocampus — the brain's exploration center.", source: "O'Keefe & Moser, Nobel Prize in Medicine 2014", icon: "building" },
+  { text: "People who explore local culture report significantly higher life satisfaction.", source: "American Journal of Community Psychology", icon: "building" },
+  { text: "Exploring your own city produces the same mood boost as traveling far away.", source: "Nawijn et al., Applied Research in Quality of Life", icon: "building" },
+  { text: "Local exploration builds place identity — a key predictor of resilience and belonging.", source: "Lewicka, Journal of Environmental Psychology", icon: "building" },
+  { text: "Cities with vibrant arts and live events see measurably lower rates of depression.", source: "World Health Organization, 2019", icon: "building" },
   // Presence & phones
-  { text: "A wandering mind is an unhappy mind. Being present is one of the strongest predictors of happiness.", source: "Killingsworth & Gilbert, Harvard — Science 2010", icon: "💫" },
-  { text: "People who put their phones away during meals enjoy both the food and company significantly more.", source: "Dwyer et al., Journal of Experimental Social Psychology", icon: "💫" },
-  { text: "The mere presence of a smartphone — even face down — reduces available cognitive capacity.", source: "Ward et al., Journal of Consumer Research", icon: "💫" },
-  { text: "Brief moments of undivided attention with another person build real trust and emotional closeness.", source: "Turkle, MIT Media Lab", icon: "💫" },
-  { text: "Screen-free time directly correlates with increased creativity and cognitive flexibility.", source: "Leroy, University of Washington", icon: "💫" },
+  { text: "A wandering mind is an unhappy mind. Being present is one of the strongest predictors of happiness.", source: "Killingsworth & Gilbert, Harvard — Science 2010", icon: "star" },
+  { text: "People who put their phones away during meals enjoy both the food and company significantly more.", source: "Dwyer et al., Journal of Experimental Social Psychology", icon: "star" },
+  { text: "The mere presence of a smartphone — even face down — reduces available cognitive capacity.", source: "Ward et al., Journal of Consumer Research", icon: "star" },
+  { text: "Brief moments of undivided attention with another person build real trust and emotional closeness.", source: "Turkle, MIT Media Lab", icon: "star" },
+  { text: "Screen-free time directly correlates with increased creativity and cognitive flexibility.", source: "Leroy, University of Washington", icon: "star" },
   // Health & longevity
-  { text: "Community engagement is one of the strongest predictors of longevity — stronger than diet or exercise alone.", source: "Blue Zones research, National Geographic", icon: "❤️" },
-  { text: "Going to live events and performances is associated with a 14% lower risk of early death.", source: "Fancourt & Finn, BMJ 2019", icon: "❤️" },
-  { text: "Physical presence activates oxytocin — the bonding hormone — in ways video calls cannot replicate.", source: "Dunbar, Evolutionary Psychology", icon: "❤️" },
-  { text: "Social activities lower cortisol levels as effectively as meditation.", source: "Post, International Journal of Service Learning", icon: "❤️" },
+  { text: "Community engagement is one of the strongest predictors of longevity — stronger than diet or exercise alone.", source: "Blue Zones research, National Geographic", icon: "heart" },
+  { text: "Going to live events and performances is associated with a 14% lower risk of early death.", source: "Fancourt & Finn, BMJ 2019", icon: "heart" },
+  { text: "Physical presence activates oxytocin — the bonding hormone — in ways video calls cannot replicate.", source: "Dunbar, Evolutionary Psychology", icon: "heart" },
+  { text: "Social activities lower cortisol levels as effectively as meditation.", source: "Post, International Journal of Service Learning", icon: "heart" },
   // Belonging & community
-  { text: "Brief interactions with cashiers, neighbors, and café regulars improve mood more than most people predict.", source: "Epley & Schroeder, Journal of Experimental Psychology", icon: "🌟" },
-  { text: "Feeling you belong to a place is associated with 40% higher reported wellbeing.", source: "Knight Foundation, Soul of the Community study", icon: "🌟" },
-  { text: "Attending community events 3+ times a month doubles your sense of belonging.", source: "Pew Research Center, Community Connections Study", icon: "🌟" },
-  { text: "People who regularly attend local events have stronger support networks in times of crisis.", source: "Putnam, Bowling Alone, Harvard University Press", icon: "🌟" },
-  { text: "Even watching live sports alongside strangers creates real feelings of tribal belonging.", source: "Wann, Journal of Sport Behavior", icon: "🌟" },
+  { text: "Brief interactions with cashiers, neighbors, and café regulars improve mood more than most people predict.", source: "Epley & Schroeder, Journal of Experimental Psychology", icon: "star" },
+  { text: "Feeling you belong to a place is associated with 40% higher reported wellbeing.", source: "Knight Foundation, Soul of the Community study", icon: "star" },
+  { text: "Attending community events 3+ times a month doubles your sense of belonging.", source: "Pew Research Center, Community Connections Study", icon: "star" },
+  { text: "People who regularly attend local events have stronger support networks in times of crisis.", source: "Putnam, Bowling Alone, Harvard University Press", icon: "star" },
+  { text: "Even watching live sports alongside strangers creates real feelings of tribal belonging.", source: "Wann, Journal of Sport Behavior", icon: "star" },
   // Science bonus
-  { text: "The brain produces far more dopamine from live, unpredictable experiences than from pre-recorded content.", source: "Schultz, Annual Review of Neuroscience", icon: "⚡" },
-  { text: "Live music physically synchronizes heartbeats across audience members — a measurable form of group bonding.", source: "Vickhoff et al., Frontiers in Psychology", icon: "⚡" },
-  { text: "Attending a cultural event even once a month is associated with a 31% increase in reported happiness.", source: "ONS Wellbeing Study, UK Office for National Statistics", icon: "⚡" },
-  { text: "Humans who belong to meaningful community groups recover from illness faster.", source: "Cohen & Wills, Psychological Bulletin", icon: "⚡" },
-  { text: "Children who play outside with others develop stronger empathy than screen-first peers.", source: "Gray, American Journal of Play", icon: "⚡" },
+  { text: "The brain produces far more dopamine from live, unpredictable experiences than from pre-recorded content.", source: "Schultz, Annual Review of Neuroscience", icon: "bolt" },
+  { text: "Live music physically synchronizes heartbeats across audience members — a measurable form of group bonding.", source: "Vickhoff et al., Frontiers in Psychology", icon: "bolt" },
+  { text: "Attending a cultural event even once a month is associated with a 31% increase in reported happiness.", source: "ONS Wellbeing Study, UK Office for National Statistics", icon: "bolt" },
+  { text: "Humans who belong to meaningful community groups recover from illness faster.", source: "Cohen & Wills, Psychological Bulletin", icon: "bolt" },
+  { text: "Children who play outside with others develop stronger empathy than screen-first peers.", source: "Gray, American Journal of Play", icon: "bolt" },
 ];
 
 function WhyUnplugCard() {
@@ -1702,7 +1762,7 @@ function WhyUnplugCard() {
   return (
     <div className={`mx-5 mb-28 unplug-${phase}`} style={{ minHeight: '88px' }}>
       <div className="unplug-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-        <span style={{ fontSize: '18px', lineHeight: '1' }}>{q.icon}</span>
+        <FlatIcon name={q.icon} size={18} color="#1A1A1A" />
         <span style={{ fontFamily: 'Epilogue, sans-serif', fontSize: '10px', fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: '#d4450a' }}>
           Why Unplug?
         </span>
@@ -1717,75 +1777,75 @@ function WhyUnplugCard() {
   );
 }
 const ABQ_FACTS = [
-  { icon: '⛰️', fact: 'ABQ sits at 5,312 ft elevation — higher than Denver, CO.' },
-  { icon: '☀️', fact: 'Albuquerque averages 310+ days of sunshine per year — one of the sunniest cities in the US.' },
-  { icon: '🎈', fact: 'The Albuquerque International Balloon Fiesta draws 900,000+ visitors every October and is the largest hot air balloon event on Earth.' },
-  { icon: '🏺', fact: 'Old Town Albuquerque was founded in 1706, making it one of the oldest European settlements in New Mexico.' },
-  { icon: '🎬', fact: 'Breaking Bad was filmed almost entirely in ABQ — you can tour real filming locations around the city.' },
-  { icon: '🌶️', fact: 'New Mexico is the only US state with an official state question: "Red or green?" — referring to chile sauce.' },
-  { icon: '🏔️', fact: 'The Sandia Mountains turn vivid watermelon-pink at sunset — locals call the phenomenon "the watermelon."' },
-  { icon: '🚡', fact: 'The Sandia Peak Tramway climbs 2,600 feet in just 15 minutes, offering a jaw-dropping view of the city below.' },
-  { icon: '🌊', fact: 'The Rio Grande Bosque in ABQ is one of the largest cottonwood riparian forests in North America.' },
-  { icon: '🦅', fact: 'The Rio Grande Bosque is a critical flyway for 400+ bird species, including sandhill cranes every winter.' },
-  { icon: '🗿', fact: 'Petroglyph National Monument protects 20,000+ ancient rock carvings made by Ancestral Puebloans 400–700 years ago.' },
-  { icon: '🛣️', fact: 'Historic Route 66 runs right through Central Avenue in ABQ — cruise it for retro diners, neon signs, and local flavor.' },
-  { icon: '🎭', fact: 'The KiMo Theatre, built in 1927, is a stunning example of Pueblo Deco architecture and a National Historic Landmark.' },
-  { icon: '🍺', fact: 'New Mexico has one of the highest concentrations of craft breweries per capita in the western US.' },
-  { icon: '🌵', fact: 'ABQ sits in the high Chihuahuan Desert — expect warm sunny days and surprisingly cool evenings year-round.' },
-  { icon: '🐍', fact: "The International Rattlesnake Museum in Old Town holds the world's largest collection of live rattlesnake species." },
-  { icon: '💎', fact: "New Mexico's official state gem is turquoise — and the Turquoise Museum in ABQ has the world's largest private collection." },
-  { icon: '🏜️', fact: 'The Albuquerque Volcanoes — a line of five cinder cones on the West Mesa — are visible from much of the city and are under 150,000 years old.' },
-  { icon: '🎓', fact: 'New Mexico has more PhD holders per capita than almost any other US state.' },
-  { icon: '⚛️', fact: "The world's first atomic bomb was detonated at Trinity Site, just 90 miles south of ABQ, on July 16, 1945." },
-  { icon: '🌯', fact: 'The green chile cheeseburger is an unofficial state dish of New Mexico — and dozens of ABQ spots make an exceptional one.' },
-  { icon: '🦎', fact: "New Mexico's state reptile is the New Mexico whiptail lizard — and it's all-female, reproducing without males." },
-  { icon: '🌺', fact: 'The ABQ BioPark complex includes a world-class zoo, botanic garden, aquarium, and Tingley Beach — all connected by a scenic rail.' },
-  { icon: '🏛️', fact: 'The National Museum of Nuclear Science and History in ABQ is the only congressionally chartered museum of its kind in the US.' },
-  { icon: '🎨', fact: 'Meow Wolf was founded in Santa Fe, NM — the original House of Eternal Return is just an hour up I-25 and worth the trip.' },
-  { icon: '🎪', fact: 'The Balloon Fiesta has been held every October since 1972 — it started with just 13 balloons; now it attracts 500+.' },
-  { icon: '🚀', fact: "Spaceport America, the world's first purpose-built commercial spaceport, is just 2.5 hours south of ABQ." },
-  { icon: '🌅', fact: '"Sandia" means watermelon in Spanish — the mountains were named for the deep pink glow they cast at dusk.' },
-  { icon: '🏘️', fact: 'ABQ is nicknamed "The Duke City" after the Duke of Alburquerque (Spain) — an extra "r" was dropped over the centuries.' },
-  { icon: '🌿', fact: 'Green chile season in late summer fills ABQ with the unmistakable smoky-sweet aroma of roasting chiles on street corners.' },
-  { icon: '🎨', fact: 'New Mexico is said to have more registered artists per capita than any other US state.' },
-  { icon: '🌄', fact: "ABQ's West Mesa is thought to be one of the best spots in the state to watch the sunset — especially during Balloon Fiesta." },
-  { icon: '🏃', fact: 'The Paseo del Bosque Trail runs 16 miles along the Rio Grande and is entirely car-free — great for biking, jogging, or walking.' },
-  { icon: '🐦', fact: "New Mexico's state bird is the Greater Roadrunner — and yes, they really do run fast (up to 20 mph)." },
-  { icon: '🫙', fact: 'The biscochito is the official state cookie of New Mexico — an anise-flavored shortbread traditionally made with lard.' },
-  { icon: '🏗️', fact: 'The University of New Mexico was founded in 1889 and is known for its Pueblo Revival architecture.' },
-  { icon: '🌍', fact: "About 38% of ABQ residents speak Spanish at home, reflecting the city's deep Hispanic roots." },
-  { icon: '🧭', fact: 'ABQ is at the crossroads of Interstates 25 and 40 — roughly the geographic center of New Mexico.' },
-  { icon: '🍽️', fact: 'The Frontier Restaurant near UNM has been serving students since 1971 and is famous for its cinnamon rolls.' },
-  { icon: '🌐', fact: 'New Mexico became the 47th US state on January 6, 1912.' },
-  { icon: '❄️', fact: 'It snows in ABQ — usually a few times a winter, but it rarely lasts more than a day or two at lower elevations.' },
-  { icon: '🦜', fact: 'Rio Grande Nature Center is a 270-acre state park within the city that protects wetlands and native wildlife.' },
-  { icon: '🏹', fact: "ABQ's Maxwell Museum of Anthropology at UNM holds artifacts spanning 12,000+ years of human history in the region." },
-  { icon: '⛺', fact: 'Kasha-Katuwe Tent Rocks National Monument — famous for its cone-shaped volcanic rock formations — is only 45 min from ABQ.' },
-  { icon: '🎯', fact: "Kirtland Air Force Base on ABQ's south side is one of the largest military installations in New Mexico and a major local employer." },
-  { icon: '🎠', fact: 'Old Town ABQ hosts festive markets throughout the year, including Luminaria Night every December.' },
-  { icon: '📚', fact: 'The Albuquerque Museum was founded in 1967 and its permanent collection spans 400 years of Rio Grande history.' },
-  { icon: '🚲', fact: 'ABQ has over 400 miles of bicycle routes — one of the most bike-friendly cities in the Southwest.' },
-  { icon: '🧪', fact: 'Sandia National Laboratories in ABQ employs 14,000+ scientists and engineers and drives cutting-edge research.' },
-  { icon: '🌙', fact: "ABQ's clear skies and high elevation make it one of the best cities in the US for amateur stargazing." },
-  { icon: '🎲', fact: 'The original spelling of the city was "Alburquerque" — matching the Spanish town. The extra "r" disappeared in the 1800s.' },
-  { icon: '🌋', fact: 'The Albuquerque Volcanoes are a row of five cinder cones that erupted 150,000 years ago — their lava flow forms the West Mesa.' },
-  { icon: '🎻', fact: 'The National Hispanic Cultural Center in ABQ is one of the largest institutions dedicated to Hispanic arts and culture in the world.' },
-  { icon: '🏊', fact: 'ABQ has a vibrant Día de los Muertos celebration every November — one of the largest outside of Mexico.' },
-  { icon: '🦋', fact: "Bosque Preserve's cottonwoods turn golden every fall, creating a brilliant canopy that draws thousands of visitors." },
-  { icon: '🎡', fact: 'The New Mexico State Fair (held in ABQ every September) is one of the top 10 largest state fairs in the US.' },
-  { icon: '🏆', fact: 'ABQ is home to the Isotopes, the AAA Minor League affiliate of the Colorado Rockies — a beloved local team.' },
-  { icon: '🌱', fact: 'New Mexico leads the US in production of chiles, piñon nuts, and pinto beans.' },
-  { icon: '💫', fact: "The original Nob Hill neighborhood was inspired by San Francisco's wealthy Nob Hill and became ABQ's eclectic arts & dining hub." },
-  { icon: '🦊', fact: "Coyotes are commonly spotted in the Rio Grande Bosque and even in ABQ's urban neighborhoods — especially at dawn and dusk." },
-  { icon: '🎤', fact: "ABQ's cultural scene includes the New Mexico Symphony, the Albuquerque Repertory Theatre, and dozens of live music venues." },
-  { icon: '🔭', fact: 'The Turquoise Trail — a scenic byway from ABQ to Santa Fe — passes through ghost towns including Madrid, once a coal-mining hub.' },
-  { icon: '🛤️', fact: "ABQ's Rail Runner Express connects the city to Santa Fe — a 90-minute train ride through stunning high-desert scenery." },
-  { icon: '🌊', fact: 'The Rio Grande has flowed through New Mexico for over a million years, carving river valleys that Puebloans called home.' },
-  { icon: '🐢', fact: "New Mexico's state reptile is the western box turtle — commonly found in the scrublands around ABQ." },
-  { icon: '🎸', fact: 'ABQ has a thriving local music scene spanning indie rock, mariachi, flamenco, and hip-hop.' },
-  { icon: '🧠', fact: 'Los Alamos National Lab (90 min from ABQ) employs more PhDs per capita than almost any city in the world.' },
-  { icon: '🏄', fact: 'The Adobe Bar at Taos Inn (2 hrs north of ABQ) has been pouring margaritas since 1936 — a legendary NM bucket list stop.' },
-  { icon: '🌯', fact: "New Mexico's Official State Vegetables are the chile and the pinto bean — both officially adopted in 1965." },
+  { icon: 'mountain',  fact: 'ABQ sits at 5,312 ft elevation — higher than Denver, CO.' },
+  { icon: 'sun',       fact: 'Albuquerque averages 310+ days of sunshine per year — one of the sunniest cities in the US.' },
+  { icon: 'balloon',   fact: 'The Albuquerque International Balloon Fiesta draws 900,000+ visitors every October and is the largest hot air balloon event on Earth.' },
+  { icon: 'history',   fact: 'Old Town Albuquerque was founded in 1706, making it one of the oldest European settlements in New Mexico.' },
+  { icon: 'film',      fact: 'Breaking Bad was filmed almost entirely in ABQ — you can tour real filming locations around the city.' },
+  { icon: 'food',      fact: 'New Mexico is the only US state with an official state question: "Red or green?" — referring to chile sauce.' },
+  { icon: 'mountain',  fact: 'The Sandia Mountains turn vivid watermelon-pink at sunset — locals call the phenomenon "the watermelon."' },
+  { icon: 'mountain',  fact: 'The Sandia Peak Tramway climbs 2,600 feet in just 15 minutes, offering a jaw-dropping view of the city below.' },
+  { icon: 'wave',      fact: 'The Rio Grande Bosque in ABQ is one of the largest cottonwood riparian forests in North America.' },
+  { icon: 'bird',      fact: 'The Rio Grande Bosque is a critical flyway for 400+ bird species, including sandhill cranes every winter.' },
+  { icon: 'history',   fact: 'Petroglyph National Monument protects 20,000+ ancient rock carvings made by Ancestral Puebloans 400–700 years ago.' },
+  { icon: 'road',      fact: 'Historic Route 66 runs right through Central Avenue in ABQ — cruise it for retro diners, neon signs, and local flavor.' },
+  { icon: 'theatre',   fact: 'The KiMo Theatre, built in 1927, is a stunning example of Pueblo Deco architecture and a National Historic Landmark.' },
+  { icon: 'beer',      fact: 'New Mexico has one of the highest concentrations of craft breweries per capita in the western US.' },
+  { icon: 'cactus',    fact: 'ABQ sits in the high Chihuahuan Desert — expect warm sunny days and surprisingly cool evenings year-round.' },
+  { icon: 'leaf',      fact: "The International Rattlesnake Museum in Old Town holds the world's largest collection of live rattlesnake species." },
+  { icon: 'gem',       fact: "New Mexico's official state gem is turquoise — and the Turquoise Museum in ABQ has the world's largest private collection." },
+  { icon: 'volcano',   fact: 'The Albuquerque Volcanoes — a line of five cinder cones on the West Mesa — are visible from much of the city and are under 150,000 years old.' },
+  { icon: 'book',      fact: 'New Mexico has more PhD holders per capita than almost any other US state.' },
+  { icon: 'science',   fact: "The world's first atomic bomb was detonated at Trinity Site, just 90 miles south of ABQ, on July 16, 1945." },
+  { icon: 'food',      fact: 'The green chile cheeseburger is an unofficial state dish of New Mexico — and dozens of ABQ spots make an exceptional one.' },
+  { icon: 'leaf',      fact: "New Mexico's state reptile is the New Mexico whiptail lizard — and it's all-female, reproducing without males." },
+  { icon: 'park',      fact: 'The ABQ BioPark complex includes a world-class zoo, botanic garden, aquarium, and Tingley Beach — all connected by a scenic rail.' },
+  { icon: 'museum',    fact: 'The National Museum of Nuclear Science and History in ABQ is the only congressionally chartered museum of its kind in the US.' },
+  { icon: 'art',       fact: 'Meow Wolf was founded in Santa Fe, NM — the original House of Eternal Return is just an hour up I-25 and worth the trip.' },
+  { icon: 'balloon',   fact: 'The Balloon Fiesta has been held every October since 1972 — it started with just 13 balloons; now it attracts 500+.' },
+  { icon: 'rocket',    fact: "Spaceport America, the world's first purpose-built commercial spaceport, is just 2.5 hours south of ABQ." },
+  { icon: 'sun',       fact: '"Sandia" means watermelon in Spanish — the mountains were named for the deep pink glow they cast at dusk.' },
+  { icon: 'building',  fact: 'ABQ is nicknamed "The Duke City" after the Duke of Alburquerque (Spain) — an extra "r" was dropped over the centuries.' },
+  { icon: 'leaf',      fact: 'Green chile season in late summer fills ABQ with the unmistakable smoky-sweet aroma of roasting chiles on street corners.' },
+  { icon: 'art',       fact: 'New Mexico is said to have more registered artists per capita than any other US state.' },
+  { icon: 'sun',       fact: "ABQ's West Mesa is thought to be one of the best spots in the state to watch the sunset — especially during Balloon Fiesta." },
+  { icon: 'bicycle',   fact: 'The Paseo del Bosque Trail runs 16 miles along the Rio Grande and is entirely car-free — great for biking, jogging, or walking.' },
+  { icon: 'bird',      fact: "New Mexico's state bird is the Greater Roadrunner — and yes, they really do run fast (up to 20 mph)." },
+  { icon: 'food',      fact: 'The biscochito is the official state cookie of New Mexico — an anise-flavored shortbread traditionally made with lard.' },
+  { icon: 'building',  fact: 'The University of New Mexico was founded in 1889 and is known for its Pueblo Revival architecture.' },
+  { icon: 'community', fact: "About 38% of ABQ residents speak Spanish at home, reflecting the city's deep Hispanic roots." },
+  { icon: 'compass',   fact: 'ABQ is at the crossroads of Interstates 25 and 40 — roughly the geographic center of New Mexico.' },
+  { icon: 'food',      fact: 'The Frontier Restaurant near UNM has been serving students since 1971 and is famous for its cinnamon rolls.' },
+  { icon: 'building',  fact: 'New Mexico became the 47th US state on January 6, 1912.' },
+  { icon: 'snowflake', fact: 'It snows in ABQ — usually a few times a winter, but it rarely lasts more than a day or two at lower elevations.' },
+  { icon: 'bird',      fact: 'Rio Grande Nature Center is a 270-acre state park within the city that protects wetlands and native wildlife.' },
+  { icon: 'history',   fact: "ABQ's Maxwell Museum of Anthropology at UNM holds artifacts spanning 12,000+ years of human history in the region." },
+  { icon: 'mountain',  fact: 'Kasha-Katuwe Tent Rocks National Monument — famous for its cone-shaped volcanic rock formations — is only 45 min from ABQ.' },
+  { icon: 'star',      fact: "Kirtland Air Force Base on ABQ's south side is one of the largest military installations in New Mexico and a major local employer." },
+  { icon: 'festival',  fact: 'Old Town ABQ hosts festive markets throughout the year, including Luminaria Night every December.' },
+  { icon: 'museum',    fact: 'The Albuquerque Museum was founded in 1967 and its permanent collection spans 400 years of Rio Grande history.' },
+  { icon: 'bicycle',   fact: 'ABQ has over 400 miles of bicycle routes — one of the most bike-friendly cities in the Southwest.' },
+  { icon: 'science',   fact: 'Sandia National Laboratories in ABQ employs 14,000+ scientists and engineers and drives cutting-edge research.' },
+  { icon: 'moon',      fact: "ABQ's clear skies and high elevation make it one of the best cities in the US for amateur stargazing." },
+  { icon: 'star',      fact: 'The original spelling of the city was "Alburquerque" — matching the Spanish town. The extra "r" disappeared in the 1800s.' },
+  { icon: 'volcano',   fact: 'The Albuquerque Volcanoes are a row of five cinder cones that erupted 150,000 years ago — their lava flow forms the West Mesa.' },
+  { icon: 'music',     fact: 'The National Hispanic Cultural Center in ABQ is one of the largest institutions dedicated to Hispanic arts and culture in the world.' },
+  { icon: 'community', fact: 'ABQ has a vibrant Día de los Muertos celebration every November — one of the largest outside of Mexico.' },
+  { icon: 'leaf',      fact: "Bosque Preserve's cottonwoods turn golden every fall, creating a brilliant canopy that draws thousands of visitors." },
+  { icon: 'festival',  fact: 'The New Mexico State Fair (held in ABQ every September) is one of the top 10 largest state fairs in the US.' },
+  { icon: 'sports',    fact: 'ABQ is home to the Isotopes, the AAA Minor League affiliate of the Colorado Rockies — a beloved local team.' },
+  { icon: 'sprout',    fact: 'New Mexico leads the US in production of chiles, piñon nuts, and pinto beans.' },
+  { icon: 'art',       fact: "The original Nob Hill neighborhood was inspired by San Francisco's wealthy Nob Hill and became ABQ's eclectic arts & dining hub." },
+  { icon: 'leaf',      fact: "Coyotes are commonly spotted in the Rio Grande Bosque and even in ABQ's urban neighborhoods — especially at dawn and dusk." },
+  { icon: 'music',     fact: "ABQ's cultural scene includes the New Mexico Symphony, the Albuquerque Repertory Theatre, and dozens of live music venues." },
+  { icon: 'road',      fact: 'The Turquoise Trail — a scenic byway from ABQ to Santa Fe — passes through ghost towns including Madrid, once a coal-mining hub.' },
+  { icon: 'road',      fact: "ABQ's Rail Runner Express connects the city to Santa Fe — a 90-minute train ride through stunning high-desert scenery." },
+  { icon: 'wave',      fact: 'The Rio Grande has flowed through New Mexico for over a million years, carving river valleys that Puebloans called home.' },
+  { icon: 'leaf',      fact: "New Mexico's state reptile is the western box turtle — commonly found in the scrublands around ABQ." },
+  { icon: 'music',     fact: 'ABQ has a thriving local music scene spanning indie rock, mariachi, flamenco, and hip-hop.' },
+  { icon: 'science',   fact: 'Los Alamos National Lab (90 min from ABQ) employs more PhDs per capita than almost any city in the world.' },
+  { icon: 'wave',      fact: 'The Adobe Bar at Taos Inn (2 hrs north of ABQ) has been pouring margaritas since 1936 — a legendary NM bucket list stop.' },
+  { icon: 'food',      fact: "New Mexico's Official State Vegetables are the chile and the pinto bean — both officially adopted in 1965." },
 ];
 
 // ─── User Preferences ─────────────────────────────────────────────────────────
@@ -2029,7 +2089,7 @@ function AnimatedFact() {
       <div className="px-5">
         <button onClick={next} className="w-full p-5 text-left" style={{ background: '#D4EF4D', border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A', minHeight: 96, borderRadius: 0 }}>
           <div style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.35s ease' }}>
-            <span className="text-3xl">{facts[idx].icon}</span>
+            <FlatIcon name={facts[idx].icon} size={28} color="#1A1A1A" />
             <p className="text-sm mt-2 leading-relaxed font-semibold" style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A' }}>{facts[idx].fact}</p>
           </div>
           <div className="flex items-center justify-between mt-3">
@@ -2179,15 +2239,16 @@ function DiscoverScreen({
 
   const upcomingEvents = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
-    const twoWeeks = new Date(Date.now() + 14 * 864e5).toISOString().slice(0, 10);
-    return events
+    const sevenDays = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10);
+    const pool = events
       .filter(e => {
         const d = e.dates?.start?.localDate || '';
-        return d >= today && d <= twoWeeks;
+        return d >= today && d <= sevenDays;
       })
-      .filter(e => !e._isAdult)  // Discover "This Week" is always family-friendly
-      .sort((a, b) => (a.dates?.start?.localDate || '').localeCompare(b.dates?.start?.localDate || ''))
-      .slice(0, 6);
+      .filter(e => !e._isAdult);  // Discover "This Week" is always family-friendly
+    // Shuffle and pick 4
+    const shuffled = [...pool].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 4);
   }, [events]);
 
   const nearbyPlaces = useMemo(() => {
@@ -2266,11 +2327,8 @@ function DiscoverScreen({
               → SEE ALL
             </button>
           </div>
-          {/* Rows — top 6, sorted by date */}
-          {[...upcomingEvents]
-            .sort((a, b) => (a.dates?.start?.localDate || '').localeCompare(b.dates?.start?.localDate || ''))
-            .slice(0, 6)
-            .map((event, idx, arr) => {
+          {/* Rows — 4 randomized events from next 7 days */}
+          {upcomingEvents.map((event, idx, arr) => {
               const dateStr = event.dates?.start?.localDate;
               const timeStr = event.dates?.start?.localTime;
               const venue = event._embedded?.venues?.[0];
@@ -3027,7 +3085,7 @@ function PlacesScreen({
               zIndex: selectedCat === cat.value ? 1 : 0,
             }}
           >
-            <span>{cat.icon}</span>
+            <FlatIcon name={cat.icon} size={13} color={selectedCat === cat.value ? 'white' : '#1A1A1A'} />
             <span>{cat.label}</span>
           </button>
         ))}
@@ -4300,7 +4358,7 @@ const LOADING_MESSAGES = [
   'Loading stuff to do…',
   'Just a sec…',
   'Gimme a sec…',
-  'ABQ weather is the best ☀️',
+  'ABQ weather is the best',
   'Not a long wait longer…',
   'Finding your next adventure…',
   'Green chile is always the answer 🌶️',
