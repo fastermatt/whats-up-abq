@@ -571,20 +571,25 @@ function GeoBanner({
 // ─── Place Card ─────────────────────────────────────────────────────────────
 
 const PlaceCard = React.memo(function PlaceCard({
-  place, onClick, distance, isCheckedIn, onCheckIn,
+  place, onClick, distance, isCheckedIn, onCheckIn, tooFar,
 }: {
   place: Place;
   onClick: () => void;
   distance?: number;
   isCheckedIn?: boolean;
   onCheckIn?: (e: React.MouseEvent) => void;
+  tooFar?: boolean;
 }) {
   const catEmoji = PLACE_CATEGORIES.find(c => c.label === place.category)?.icon || '';
   return (
-    <button
+    // div instead of button — avoids nested-button HTML invalidity that breaks tap on iOS Safari
+    <div
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}
       className="bg-white rounded-lg overflow-hidden text-left w-full"
-      style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.12)', animation: 'cardFadeIn 0.3s ease both', contain: 'layout paint' }}
+      style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.12)', animation: 'cardFadeIn 0.3s ease both', contain: 'layout paint', cursor: 'pointer' }}
     >
       <div className="relative" style={{ height: '140px' }}>
         <ImageWithFallback
@@ -647,18 +652,24 @@ const PlaceCard = React.memo(function PlaceCard({
           {onCheckIn && (
             <button
               onClick={onCheckIn}
-              className="text-xs font-bold px-2 py-0.5 rounded flex-shrink-0"
+              className="text-xs font-bold flex-shrink-0"
               style={{
-                background: isCheckedIn ? 'var(--brand-bg-subtle)' : 'var(--brand)',
-                color: isCheckedIn ? 'var(--brand)' : 'white',
+                background: tooFar ? '#dc2626' : isCheckedIn ? 'var(--brand-bg-subtle)' : 'var(--brand)',
+                color: tooFar ? 'white' : isCheckedIn ? 'var(--brand)' : 'white',
+                border: 'none',
+                borderRadius: 4,
+                padding: '6px 10px',
+                minHeight: 34,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
               }}
             >
-              {isCheckedIn ? '✓ Visited' : 'Check In'}
+              {tooFar ? '📍 Get Closer' : isCheckedIn ? '✓ Visited' : 'Check In'}
             </button>
           )}
         </div>
       </div>
-    </button>
+    </div>
   );
 });
 
@@ -2639,7 +2650,7 @@ function EventsScreen({
 
 function PlacesScreen({
   places, onPlaceSelect, coords, geoRequested, geoError, onRequestGeo,
-  checkedIn, onCheckIn,
+  checkedIn, onCheckIn, tooFarPlaceId,
   navKey = 0, navCat = 'All', navSearch = '',
 }: {
   places: Place[];
@@ -2650,6 +2661,7 @@ function PlacesScreen({
   onRequestGeo: () => void;
   checkedIn: Set<string>;
   onCheckIn: (id: string) => void;
+  tooFarPlaceId?: string | null;
   navKey?: number;
   navCat?: string;
   navSearch?: string;
@@ -2694,17 +2706,40 @@ function PlacesScreen({
     return PLACE_METRO_CITIES.has(city);
   };
 
+  const NEIGHBORHOOD_BOUNDS: Record<string, { minLat: number; maxLat: number; minLng: number; maxLng: number }> = {
+    'NE Heights':   { minLat: 35.067, maxLat: 35.220, minLng: -106.616, maxLng: -106.465 },
+    'Old Town':     { minLat: 35.088, maxLat: 35.108, minLng: -106.682, maxLng: -106.655 },
+    'Nob Hill':     { minLat: 35.073, maxLat: 35.092, minLng: -106.640, maxLng: -106.595 },
+    'Downtown':     { minLat: 35.070, maxLat: 35.098, minLng: -106.665, maxLng: -106.635 },
+    'Rio Grande':   { minLat: 35.020, maxLat: 35.220, minLng: -106.745, maxLng: -106.660 },
+    'South Valley': { minLat: 34.960, maxLat: 35.068, minLng: -106.740, maxLng: -106.620 },
+  };
+
   const filtered = useMemo(() => {
     let result = places.filter(isPlaceInMetro);
     if (selectedCat !== 'All') result = result.filter(p => p.category === selectedCat);
     if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(
-        p =>
-          p.name.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q) ||
-          (p.description || '').toLowerCase().includes(q)
-      );
+      const neighborhoodBounds = NEIGHBORHOOD_BOUNDS[search.trim()];
+      if (neighborhoodBounds) {
+        // Geographic bounding box filter for neighborhood selectors
+        result = result.filter(p => {
+          if (p.lat == null || p.lng == null) return false;
+          return (
+            p.lat >= neighborhoodBounds.minLat &&
+            p.lat <= neighborhoodBounds.maxLat &&
+            p.lng >= neighborhoodBounds.minLng &&
+            p.lng <= neighborhoodBounds.maxLng
+          );
+        });
+      } else {
+        const q = search.toLowerCase();
+        result = result.filter(
+          p =>
+            p.name.toLowerCase().includes(q) ||
+            p.category.toLowerCase().includes(q) ||
+            (p.description || '').toLowerCase().includes(q)
+        );
+      }
     }
     return result;
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -2775,7 +2810,9 @@ function PlacesScreen({
           Places<br />to Go
         </h1>
         <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
-          {places.length} spots across Greater ABQ
+          {search.trim() && NEIGHBORHOOD_BOUNDS[search.trim()]
+            ? `${filtered.length} spot${filtered.length !== 1 ? 's' : ''} in ${search.trim()}`
+            : `${places.length} spots across Greater ABQ`}
         </p>
       </div>
 
@@ -2869,6 +2906,7 @@ function PlacesScreen({
                 onClick={() => onPlaceSelect(place)}
                 distance={distMap.get(place.id)}
                 isCheckedIn={checkedIn.has(place.id)}
+                tooFar={tooFarPlaceId === place.id}
                 onCheckIn={e => { e.stopPropagation(); onCheckIn(place.id); }}
                 />
               <button style={{position:'absolute',top:8,right:8,zIndex:10,background:'rgba(0,0,0,0.6)',border:'none',borderRadius:'50%',width:36,height:36,minHeight:0,color:'white',fontSize:18,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:place.id,type:'place',name:place.name});}}>♡</button>
@@ -3293,21 +3331,13 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
 
 // ─── Profile Screen ────────────────────────────────────────────────────────────
 
-const LEADERBOARD_SEEDS = [
-  { name: 'xplorer_abq',      count: 47 },
-  { name: 'roadrunner505',     count: 38 },
-  { name: 'balloon_fiesta',    count: 31 },
-  { name: 'oldtown_local',     count: 26 },
-  { name: 'riograndevibes',    count: 19 },
-  { name: 'nob_hill_nights',   count: 14 },
-  { name: 'sandia_sunrise',    count: 9  },
-  { name: 'tortilla_factory',  count: 6  },
-];
+// No seed data — leaderboard starts empty and grows with real check-ins
+const LEADERBOARD_SEEDS: { name: string; count: number }[] = [];
 
 interface LeaderboardRow { rank: number; name: string; count: number; isMe: boolean; uid?: string; }
 
 function ProfileScreen({
-  checkedIn, user, onSignIn, onSignOut, places, onUsernameChange,
+  checkedIn, user, onSignIn, onSignOut, places, onUsernameChange, onAdmin,
 }: {
   checkedIn: Set<string>;
   user: User | null;
@@ -3315,6 +3345,7 @@ function ProfileScreen({
   onSignOut: () => void;
   places: Place[];
   onUsernameChange?: (name: string) => void;
+  onAdmin?: () => void;
 }) {
   const myCount = checkedIn.size;
   const level = getLevel(myCount);
@@ -3350,12 +3381,11 @@ function ProfileScreen({
       }
       return lbRows.slice(0, 10);
     }
-    // Fallback: seed data + local user
-    const rows = LEADERBOARD_SEEDS.map((s, i) => ({ rank: i + 1, name: s.name, count: s.count, isMe: false }));
-    const insertAt = rows.findIndex(r => myCount >= r.count);
-    const meEntry = { rank: 0, name: 'You', count: myCount, isMe: true };
-    if (insertAt === -1) rows.push(meEntry); else rows.splice(insertAt, 0, meEntry);
-    return rows.map((r, i) => ({ ...r, rank: i + 1 })).slice(0, 10);
+    // No data yet — just show the current user if they have any check-ins
+    if (myCount > 0) {
+      return [{ rank: 1, name: user?.user_metadata?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'You', count: myCount, isMe: true }];
+    }
+    return [];
   }, [lbRows, myCount, user]);
 
   const ACHIEVEMENTS = [
@@ -3542,6 +3572,13 @@ function ProfileScreen({
       </div>
 
       <div className="flex flex-col gap-2 mb-5">
+        {leaderboard.length === 0 && (
+          <div className="text-center py-8" style={{ background: 'white', borderRadius: 8, boxShadow: '3px 3px 0 rgba(0,0,0,0.08)' }}>
+            <div style={{ fontSize: 32, marginBottom: 8 }}>🏁</div>
+            <p className="font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif', color: '#1a1a1a' }}>No explorers yet — be first!</p>
+            <p className="text-xs text-gray-400 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>Check in at places around ABQ to climb the board.</p>
+          </div>
+        )}
         {leaderboard.map((row) => (
           <div
             key={row.uid || `${row.name}_${row.rank}`}
@@ -3628,324 +3665,220 @@ function ProfileScreen({
           </div>
         </>
       )}
+
+      {/* Admin panel shortcut — only visible to admin account */}
+      {onAdmin && (
+        <div style={{ marginTop: 32, borderTop: '2px solid #000', paddingTop: 20 }}>
+          <button
+            onClick={onAdmin}
+            style={{
+              width: '100%',
+              padding: '14px',
+              background: '#000',
+              color: '#fff',
+              border: '2px solid #000',
+              borderRadius: 0,
+              fontFamily: 'Epilogue, sans-serif',
+              fontWeight: 900,
+              fontSize: 14,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase' as const,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>admin_panel_settings</span>
+            Admin Panel
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
-// ─── Add-to-Home-Screen Prompt ─────────────────────────────────────────────────
-// Shows once on iOS Safari (not in standalone mode) after a short delay.
-// Dismissed state is stored in localStorage for 14 days.
+// Legacy component stub — superseded by InstallPrompt below
+function AddToHomePrompt() { return null; }
+
+
+// ─── Install Prompt — brutalist design (iOS + Android unified) ──────────────
+// Shows on 2nd visit or after 30s. Dismissed for 7 days.
 
 const INSTALL_DISMISSED_KEY = 'abq_install_dismissed';
-const INSTALL_DISMISSED_DAYS = 14;
+const INSTALL_DISMISS_DAYS = 7;
+const INSTALL_VISIT_KEY = 'abq_install_visits';
 
-function isIosSafari(): boolean {
-  if (typeof navigator === 'undefined') return false;
+function _isIosSafari(): boolean {
   const ua = navigator.userAgent;
-  // iOS device check
-  const isIos = /iphone|ipad|ipod/i.test(ua);
-  // Safari check (not Chrome/Firefox/etc on iOS)
-  const isSafari = /safari/i.test(ua) && !/chrome|crios|fxios|opios|mercury/i.test(ua);
-  return isIos && isSafari;
+  const isIos = /iPad|iPhone|iPod/.test(ua);
+  const isInStandalone = ('standalone' in window.navigator) && (window.navigator as any).standalone;
+  const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua);
+  return isIos && isSafari && !isInStandalone;
 }
 
-function isInStandaloneMode(): boolean {
-  return (
-    ('standalone' in window.navigator && (window.navigator as any).standalone === true) ||
-    window.matchMedia('(display-mode: standalone)').matches
-  );
+function shouldShowPrompt(): boolean {
+  if (window.matchMedia('(display-mode: standalone)').matches) return false;
+  if (('standalone' in window.navigator) && (window.navigator as any).standalone) return false;
+  const dismissed = localStorage.getItem(INSTALL_DISMISSED_KEY);
+  if (dismissed) {
+    const age = Date.now() - parseInt(dismissed, 10);
+    if (age < INSTALL_DISMISS_DAYS * 24 * 60 * 60 * 1000) return false;
+  }
+  return true;
 }
 
-function AddToHomePrompt() {
+function InstallPrompt() {
   const [visible, setVisible] = useState(false);
   const [hiding, setHiding] = useState(false);
+  const [androidPrompt, setAndroidPrompt] = useState<Event | null>(null);
+  const ios = _isIosSafari();
 
   useEffect(() => {
-    // Only show on iOS Safari, not already installed
-    if (!isIosSafari() || isInStandaloneMode()) return;
-    // Check if recently dismissed
-    const dismissed = localStorage.getItem(INSTALL_DISMISSED_KEY);
-    if (dismissed) {
-      const age = Date.now() - parseInt(dismissed, 10);
-      if (age < INSTALL_DISMISSED_DAYS * 24 * 60 * 60 * 1000) return;
+    if (!shouldShowPrompt()) return;
+
+    // Track visit count
+    const visits = parseInt(localStorage.getItem(INSTALL_VISIT_KEY) || '0', 10) + 1;
+    localStorage.setItem(INSTALL_VISIT_KEY, String(visits));
+
+    // Android: wait for beforeinstallprompt
+    if (!ios) {
+      const handler = (e: Event) => {
+        e.preventDefault();
+        setAndroidPrompt(e);
+        // Show on 2nd+ visit immediately, otherwise after 30s
+        const delay = visits >= 2 ? 4000 : 30000;
+        setTimeout(() => setVisible(true), delay);
+      };
+      window.addEventListener('beforeinstallprompt', handler);
+      return () => window.removeEventListener('beforeinstallprompt', handler);
     }
-    // Show after 4 seconds
-    const t = setTimeout(() => setVisible(true), 4000);
+
+    // iOS: no event, just show after delay
+    const delay = visits >= 2 ? 3000 : 30000;
+    const t = setTimeout(() => setVisible(true), delay);
     return () => clearTimeout(t);
-  }, []);
+  }, [ios]);
 
   const dismiss = () => {
     setHiding(true);
     localStorage.setItem(INSTALL_DISMISSED_KEY, String(Date.now()));
-    setTimeout(() => setVisible(false), 380);
-  };
-
-  if (!visible) return null;
-
-  return (
-    <>
-      <style>{`
-        @keyframes abqPromptSlideUp {
-          from { opacity: 0; transform: translateY(100%); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes abqPromptSlideDown {
-          from { opacity: 1; transform: translateY(0); }
-          to   { opacity: 0; transform: translateY(100%); }
-        }
-        @keyframes abqBounce {
-          0%, 100% { transform: translateY(0); }
-          40%       { transform: translateY(-10px); }
-          60%       { transform: translateY(-5px); }
-        }
-        @keyframes abqArrowPulse {
-          0%, 100% { opacity: 0.6; transform: translateY(0) scaleY(1); }
-          50%       { opacity: 1;   transform: translateY(4px) scaleY(1.1); }
-        }
-      `}</style>
-
-      {/* Backdrop tap-to-dismiss */}
-      <div
-        onClick={dismiss}
-        style={{
-          position: 'fixed', inset: 0, zIndex: 9998,
-          background: 'rgba(0,0,0,0.35)',
-          animation: hiding ? 'abqPromptSlideDown 0.38s ease forwards' : 'none',
-          opacity: hiding ? 0 : 1, transition: hiding ? 'opacity 0.38s' : 'none',
-        }}
-      />
-
-      {/* Bottom sheet */}
-      <div style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999,
-        background: '#fff',
-        borderRadius: '24px 24px 0 0',
-        boxShadow: '0 -8px 40px rgba(0,0,0,0.18)',
-        padding: '20px 24px calc(28px + env(safe-area-inset-bottom))',
-        fontFamily: 'Manrope, -apple-system, sans-serif',
-        animation: hiding
-          ? 'abqPromptSlideDown 0.38s ease forwards'
-          : 'abqPromptSlideUp 0.44s cubic-bezier(0.34,1.56,0.64,1) forwards',
-      }}>
-        {/* Drag handle */}
-        <div style={{ width: 40, height: 4, borderRadius: 2, background: '#e0e0e0', margin: '0 auto 18px' }} />
-
-        {/* Dismiss X */}
-        <button
-          onClick={dismiss}
-          style={{
-            position: 'absolute', top: 18, right: 20,
-            width: 32, height: 32, borderRadius: '50%',
-            background: '#f2f2f2', border: 'none', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 16, color: '#666', lineHeight: 1,
-          }}
-          aria-label="Dismiss"
-        >✕</button>
-
-        {/* Icon + headline */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
-          <img
-            src="/apple-touch-icon-180.png"
-            alt="ABQ Unplugged"
-            style={{ width: 56, height: 56, borderRadius: 4, boxShadow: '3px 3px 0 rgba(0,0,0,0.15)' }}
-          />
-          <div>
-            <div style={{ fontWeight: 800, fontSize: 17, color: '#1c1c1e', lineHeight: 1.2 }}>
-              Add to Home Screen
-            </div>
-            <div style={{ fontSize: 13, color: '#888', marginTop: 3 }}>
-              Get the full-screen app experience
-            </div>
-          </div>
-        </div>
-
-        {/* Steps */}
-        {[
-          {
-            num: '1',
-            icon: (
-              /* Share icon SVG */
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke='var(--brand)' strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/>
-                <polyline points="16 6 12 2 8 6"/>
-                <line x1="12" y1="2" x2="12" y2="15"/>
-              </svg>
-            ),
-            text: <>Tap the <strong>Share</strong> button in Safari's bottom bar</>,
-          },
-          {
-            num: '2',
-            icon: (
-              /* Plus-in-square icon */
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke='var(--brand)' strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="3"/>
-                <line x1="12" y1="8" x2="12" y2="16"/>
-                <line x1="8" y1="12" x2="16" y2="12"/>
-              </svg>
-            ),
-            text: <>Scroll down and tap <strong>"Add to Home Screen"</strong></>,
-          },
-        ].map(({ num, icon, text }) => (
-          <div key={num} style={{
-            display: 'flex', alignItems: 'center', gap: 14,
-            padding: '12px 16px', borderRadius: 4,
-            background: '#faf8f6', marginBottom: 10,
-          }}>
-            <div style={{
-              width: 28, height: 28, borderRadius: '50%',
-              background: 'var(--brand)', color: '#fff',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 800, fontSize: 13, flexShrink: 0,
-            }}>{num}</div>
-            <div style={{ width: 28, flexShrink: 0, display: 'flex', alignItems: 'center' }}>{icon}</div>
-            <div style={{ fontSize: 14, color: '#333', lineHeight: 1.4 }}>{text}</div>
-          </div>
-        ))}
-
-        {/* Bouncing arrow pointing down (toward Safari toolbar) */}
-        <div style={{
-          textAlign: 'center', marginTop: 10,
-          animation: 'abqBounce 1.6s ease-in-out infinite',
-          fontSize: 26, color: 'var(--brand)',
-          lineHeight: 1,
-        }}>↓</div>
-        <div style={{ textAlign: 'center', fontSize: 12, color: '#aaa', marginTop: 4 }}>
-          The Share button is in Safari's bottom toolbar
-        </div>
-      </div>
-    </>
-  );
-}
-
-
-// --- Android / Chrome Install Prompt ----------------------------------------
-// Captures the beforeinstallprompt event and shows a polished install banner.
-
-const ANDROID_DISMISSED_KEY = 'abq_android_install_dismissed';
-const ANDROID_DISMISSED_DAYS = 14;
-
-function AndroidInstallPrompt() {
-  const [prompt, setPrompt] = useState<Event | null>(null);
-  const [visible, setVisible] = useState(false);
-  const [hiding, setHiding] = useState(false);
-
-  useEffect(() => {
-    if (window.matchMedia('(display-mode: standalone)').matches) return;
-    const dismissed = localStorage.getItem(ANDROID_DISMISSED_KEY);
-    if (dismissed) {
-      const age = Date.now() - parseInt(dismissed, 10);
-      if (age < ANDROID_DISMISSED_DAYS * 24 * 60 * 60 * 1000) return;
-    }
-    const handler = (e: Event) => {
-      e.preventDefault();
-      setPrompt(e);
-      setTimeout(() => setVisible(true), 3000);
-    };
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
-
-  const dismiss = () => {
-    setHiding(true);
-    localStorage.setItem(ANDROID_DISMISSED_KEY, String(Date.now()));
-    setTimeout(() => { setVisible(false); setPrompt(null); }, 380);
+    setTimeout(() => { setVisible(false); setAndroidPrompt(null); }, 320);
   };
 
   const install = async () => {
-    if (!prompt) return;
-    (prompt as any).prompt();
-    const { outcome } = await (prompt as any).userChoice;
+    if (!androidPrompt) return;
+    (androidPrompt as any).prompt();
+    const { outcome } = await (androidPrompt as any).userChoice;
     if (outcome === 'accepted') {
+      localStorage.setItem(INSTALL_DISMISSED_KEY, String(Date.now()));
       setVisible(false);
-      setPrompt(null);
+      setAndroidPrompt(null);
     } else {
       dismiss();
     }
   };
 
-  if (!visible || !prompt) return null;
+  if (!visible) return null;
+  if (!ios && !androidPrompt) return null;
+
+  const slideAnim: React.CSSProperties = {
+    animation: hiding
+      ? 'abqSlideDown 0.3s ease forwards'
+      : 'abqSlideUp 0.35s ease forwards',
+  };
 
   return (
     <>
       <style>{`
-        @keyframes abqAndroidSlideUp {
-          from { opacity: 0; transform: translateY(100%); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes abqAndroidSlideDown {
-          from { opacity: 1; transform: translateY(0); }
-          to   { opacity: 0; transform: translateY(100%); }
-        }
+        @keyframes abqSlideUp   { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes abqSlideDown { from { transform: translateY(0); opacity: 1; } to { transform: translateY(100%); opacity: 0; } }
       `}</style>
+
+      {/* Backdrop */}
       <div
         onClick={dismiss}
-        style={{
-          position: 'fixed', inset: 0, zIndex: 9998,
-          background: 'rgba(0,0,0,0.35)',
-          opacity: hiding ? 0 : 1, transition: 'opacity 0.38s',
-        }}
+        style={{ position: 'fixed', inset: 0, zIndex: 9998, background: 'rgba(0,0,0,0.6)' }}
       />
+
+      {/* Brutalist panel */}
       <div style={{
         position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999,
         background: '#fff',
-        borderRadius: '24px 24px 0 0',
-        boxShadow: '0 -8px 40px rgba(0,0,0,0.18)',
-        padding: '20px 24px calc(28px + env(safe-area-inset-bottom))',
-        fontFamily: 'Manrope, -apple-system, sans-serif',
-        animation: hiding
-          ? 'abqAndroidSlideDown 0.38s ease forwards'
-          : 'abqAndroidSlideUp 0.44s cubic-bezier(0.34,1.56,0.64,1) forwards',
+        border: '3px solid #000',
+        borderBottom: 'none',
+        padding: '0 0 calc(env(safe-area-inset-bottom) + 4px)',
+        fontFamily: 'Epilogue, sans-serif',
+        ...slideAnim,
       }}>
-        <div style={{ width: 40, height: 4, borderRadius: 2, background: '#e0e0e0', margin: '0 auto 18px' }} />
-        <button
-          onClick={dismiss}
-          style={{
-            position: 'absolute', top: 18, right: 20,
-            width: 32, height: 32, borderRadius: '50%',
-            background: '#f2f2f2', border: 'none', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 16, color: '#666', lineHeight: 1,
-          }}
-          aria-label="Dismiss"
-        >✕</button>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
-          <img
-            src="/apple-touch-icon-180.png"
-            alt="ABQ Unplugged"
-            style={{ width: 56, height: 56, borderRadius: 4, boxShadow: '3px 3px 0 rgba(0,0,0,0.15)' }}
-          />
-          <div>
-            <div style={{ fontWeight: 800, fontSize: 17, color: '#1c1c1e', lineHeight: 1.2 }}>
-              Install ABQ Unplugged
-            </div>
-            <div style={{ fontSize: 13, color: '#888', marginTop: 3 }}>
-              Add to your home screen for the best experience
-            </div>
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: 10 }}>
+        {/* Header bar */}
+        <div style={{
+          background: '#000', color: '#fff',
+          padding: '12px 20px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        }}>
+          <span style={{ fontWeight: 900, fontSize: 13, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            ABQ Unplugged
+          </span>
           <button
             onClick={dismiss}
-            style={{
-              flex: 1, padding: '13px 0', borderRadius: 4,
-              background: '#f2f2f2', border: 'none', cursor: 'pointer',
-              fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: 15, color: '#333',
-            }}
-          >Not now</button>
-          <button
-            onClick={install}
-            style={{
-              flex: 2, padding: '13px 0', borderRadius: 4,
-              background: 'var(--brand)', border: 'none', cursor: 'pointer',
-              fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: 15, color: '#fff',
-            }}
-          >Install App</button>
+            style={{ background: 'none', border: '2px solid #fff', color: '#fff', width: 28, height: 28, cursor: 'pointer', fontWeight: 900, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}
+            aria-label="Dismiss"
+          >✕</button>
+        </div>
+
+        <div style={{ padding: '20px 20px 16px' }}>
+          {/* Headline */}
+          <div style={{ fontWeight: 900, fontSize: 22, lineHeight: 1.1, textTransform: 'uppercase', letterSpacing: '-0.5px', marginBottom: 6 }}>
+            INSTALL ABQ UNPLUGGED
+          </div>
+          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#444', marginBottom: 20, lineHeight: 1.4 }}>
+            Add to your home screen. No app store. No BS.
+          </div>
+
+          {ios ? (
+            // iOS instructions
+            <div style={{ border: '2px solid #000', padding: '14px 16px' }}>
+              <div style={{ fontWeight: 800, fontSize: 13, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 10 }}>
+                How to install on iPhone
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {[
+                  { step: '1', text: 'Tap the Share button', icon: '↑' },
+                  { step: '2', text: 'Scroll down and tap "Add to Home Screen"', icon: '＋' },
+                  { step: '3', text: 'Tap "Add" in the top right', icon: '✓' },
+                ].map(({ step, text, icon }) => (
+                  <div key={step} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ minWidth: 32, height: 32, background: '#000', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 16 }}>{icon}</div>
+                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#1a1a1a' }}>{text}</span>
+                  </div>
+                ))}
+              </div>
+              <button
+                onClick={dismiss}
+                style={{ marginTop: 16, width: '100%', padding: '14px', background: '#000', color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'Epilogue, sans-serif', fontWeight: 900, fontSize: 15, letterSpacing: '0.05em', textTransform: 'uppercase' }}
+              >GOT IT</button>
+            </div>
+          ) : (
+            // Android install button
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                onClick={dismiss}
+                style={{ flex: 1, padding: '14px', background: '#fff', border: '2px solid #000', cursor: 'pointer', fontFamily: 'Epilogue, sans-serif', fontWeight: 900, fontSize: 14, textTransform: 'uppercase' }}
+              >NOT NOW</button>
+              <button
+                onClick={install}
+                style={{ flex: 2, padding: '14px', background: '#000', color: '#fff', border: '2px solid #000', cursor: 'pointer', fontFamily: 'Epilogue, sans-serif', fontWeight: 900, fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.05em' }}
+              >INSTALL NOW</button>
+            </div>
+          )}
         </div>
       </div>
     </>
   );
 }
+
 
 // --- Offline Banner ----------------------------------------------------------
 // Shows a non-intrusive top banner when the device loses connectivity.
@@ -5521,8 +5454,7 @@ export default function App() {
         }
 `}</style>
 
-      <AddToHomePrompt />
-      <AndroidInstallPrompt />
+      <InstallPrompt />
       <OfflineBanner />
       <div
         className="flex flex-col mx-auto relative"
@@ -5604,7 +5536,7 @@ export default function App() {
               onRequestGeo={requestGeo}
               checkedIn={checkedIn}
               onCheckIn={handleCheckIn}
-            
+              tooFarPlaceId={tooFarPlaceId}
               navKey={placesNavKey}
               navCat={placesNavCat}
               navSearch={placesNavSearch}/>
@@ -5624,6 +5556,7 @@ export default function App() {
                 supabase.auth.signOut({ scope: 'local' }).catch(() => {});
               }}
               onUsernameChange={async () => { const { data: { user: fresh } } = await supabase.auth.getUser(); if (fresh) setUser(fresh); }}
+              onAdmin={user?.email === ADMIN_EMAIL ? () => { setCurrentHash('#admin'); window.history.pushState({}, '', '#admin'); } : undefined}
             />
           )}
         </main>
