@@ -2746,9 +2746,10 @@ function EventsScreen({
               eventName.includes('festival') || eventName.includes('market') || eventName.includes('fair') ||
               eventName.includes('community') || eventName.includes('fiesta');
           case 'Free': {
-            // Only show events explicitly priced at $0 or with "free" in the name
+            // Show events priced at $0, with free in name, or local/curated events (no priceRanges = free)
             const prices = e.priceRanges;
             const isFree =
+              e._source === 'local' ||
               eventName.includes('free') || eventName.includes('no cover') || eventName.includes('no charge') ||
               (prices != null && prices.length > 0 && prices.every(p => (p.min ?? 1) === 0));
             return isFree;
