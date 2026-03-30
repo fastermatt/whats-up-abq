@@ -109,17 +109,23 @@ function DashboardSection({ onNav }: { onNav:(s:AdminSection)=>void }) {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     async function load() {
-      const [evR, plR, rvR, anR, cfg, rlog] = await Promise.all([
-        sb('events').select('id',{count:'exact',head:true}).eq('hidden',false),
-        sb('places').select('id',{count:'exact',head:true}).eq('hidden',false),
-        sb('reviews').select('id',{count:'exact',head:true}),
-        sb('analytics').select('id',{count:'exact',head:true}),
-        cfgGet('banners'),
-        cfgGet('refreshLog'),
-      ]);
-      setStats({ events:evR.count??0, places:plR.count??0, banners:(cfg||[]).filter((b:Banner)=>b.active).length, reviews:rvR.count??0, analytics:anR.count??0 });
-      if (rlog?.lastRun) setLastRefresh(rlog.lastRun);
-      setLoading(false);
+      try {
+        const [evR, plR, rvR, anR, cfg, rlog] = await Promise.all([
+          sb('events').select('id',{count:'exact',head:true}).eq('hidden',false),
+          sb('places').select('id',{count:'exact',head:true}).eq('hidden',false),
+          sb('reviews').select('id',{count:'exact',head:true}),
+          sb('analytics').select('id',{count:'exact',head:true}),
+          cfgGet('banners'),
+          cfgGet('refreshLog'),
+        ]);
+        const bannerList = Array.isArray(cfg) ? cfg : [];
+        setStats({ events:evR.count??0, places:plR.count??0, banners:bannerList.filter((b:Banner)=>b.active).length, reviews:rvR.count??0, analytics:anR.count??0 });
+        if (rlog?.lastRun) setLastRefresh(rlog.lastRun);
+      } catch (e) {
+        console.error('Dashboard load error:', e);
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, []);
@@ -169,7 +175,7 @@ function BannersSection() {
   const [saving,  setSaving]  = useState(false);
   const [loading, setLoading] = useState(true);
   const [confirm, setConfirm] = useState<string|null>(null);
-  useEffect(() => { cfgGet('banners').then(v => { setBanners(v||[]); setLoading(false); }); }, []);
+  useEffect(() => { cfgGet('banners').then(v => { setBanners(Array.isArray(v)?v:[]); setLoading(false); }).catch(() => setLoading(false)); }, []);
   const persist = async (list:Banner[]) => { setBanners(list); await cfgSet('banners',list); };
   const upsert  = async () => {
     if (!editing) return;
@@ -266,12 +272,19 @@ function EventsSection() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    let q = sb('events').select('id,source,event_date,hidden,featured,raw', {count:'exact'}).order('event_date',{ascending:true});
-    if (search)    q = q.ilike('raw->>name', `%${search}%`);
-    if (filterSrc) q = q.eq('source', filterSrc);
-    q = q.range(page*PAGE,(page+1)*PAGE-1);
-    const { data, count } = await q;
-    setRows(data||[]); setTotal(count??0); setLoading(false);
+    try {
+      let q = sb('events').select('id,source,event_date,hidden,featured,raw', {count:'exact'}).order('event_date',{ascending:true});
+      if (search)    q = q.ilike('raw->>name', `%${search}%`);
+      if (filterSrc) q = q.eq('source', filterSrc);
+      q = q.range(page*PAGE,(page+1)*PAGE-1);
+      const { data, count, error } = await q;
+      if (error) toast('Load error: '+error.message, 'err');
+      setRows(data||[]); setTotal(count??0);
+    } catch (e: any) {
+      toast('Load error: '+(e?.message||'unknown'), 'err');
+    } finally {
+      setLoading(false);
+    }
   }, [page, search, filterSrc]);
 
   useEffect(() => { load(); }, [load]);
@@ -291,9 +304,9 @@ function EventsSection() {
     if (error) { toast('Error: '+error.message,'err'); } else { toast('Event added ✓'); setShowAdd(false); setForm({name:'',date:'',time:'',venue:'',ticketUrl:'',category:'Music',source:'manual',is21Plus:false,tags:[]}); load(); }
     setSaving(false);
   };
-  const hideEv   = async (id:string, val:boolean) => { await sb('events').update({hidden:val}).eq('id',id); toast(val?'Hidden':'Restored'); load(); };
-  const featEv   = async (r:any) => { await sb('events').update({featured:!r.featured}).eq('id',r.id); toast(r.featured?'Removed from spotlight':'Spotlight ✓'); load(); };
-  const deleteEv = async (id:string) => { await sb('events').delete().eq('id',id); toast('Deleted'); setConfirm(null); load(); };
+  const hideEv   = async (id:string, val:boolean) => { const {error} = await sb('events').update({hidden:val}).eq('id',id); if(error) toast('Error: '+error.message,'err'); else toast(val?'Hidden':'Restored'); load(); };
+  const featEv   = async (r:any) => { const {error} = await sb('events').update({featured:!r.featured}).eq('id',r.id); if(error) toast('Error: '+error.message,'err'); else toast(r.featured?'Removed from spotlight':'Spotlight ✓'); load(); };
+  const deleteEv = async (id:string) => { const {error} = await sb('events').delete().eq('id',id); if(error) toast('Error: '+error.message,'err'); else toast('Deleted'); setConfirm(null); load(); };
   const toggleSel = (id:string) => setSelected(prev => { const n=new Set(prev); n.has(id)?n.delete(id):n.add(id); return n; });
   const doBulk = async () => {
     const ids = Array.from(selected);
@@ -404,11 +417,18 @@ function PlacesSection() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    let q = sb('places').select('id,source,hidden,featured,raw',{count:'exact'}).order('raw->>name',{ascending:true});
-    if (search) q = q.ilike('raw->>name',`%${search}%`);
-    q = q.range(page*PAGE,(page+1)*PAGE-1);
-    const { data, count } = await q;
-    setRows(data||[]); setTotal(count??0); setLoading(false);
+    try {
+      let q = sb('places').select('id,source,hidden,featured,raw',{count:'exact'}).order('raw->>name',{ascending:true});
+      if (search) q = q.ilike('raw->>name',`%${search}%`);
+      q = q.range(page*PAGE,(page+1)*PAGE-1);
+      const { data, count, error } = await q;
+      if (error) toast('Load error: '+error.message, 'err');
+      setRows(data||[]); setTotal(count??0);
+    } catch (e: any) {
+      toast('Load error: '+(e?.message||'unknown'), 'err');
+    } finally {
+      setLoading(false);
+    }
   }, [page, search]);
 
   useEffect(() => { load(); }, [load]);
@@ -418,9 +438,9 @@ function PlacesSection() {
   const pAddr  = (r:any) => r.raw?.vicinity || r.raw?.address || '—';
   const pRating= (r:any) => r.raw?.rating ? `⭐ ${r.raw.rating}` : '—';
 
-  const hidePlace = async (id:string, val:boolean) => { await sb('places').update({hidden:val}).eq('id',id); toast(val?'Hidden':'Restored'); load(); };
-  const featPlace = async (r:any) => { await sb('places').update({featured:!r.featured}).eq('id',r.id); toast(r.featured?'Removed from featured':'Featured ✓'); load(); };
-  const delPlace  = async (id:string) => { await sb('places').delete().eq('id',id); toast('Deleted'); setConfirm(null); load(); };
+  const hidePlace = async (id:string, val:boolean) => { const {error} = await sb('places').update({hidden:val}).eq('id',id); if(error) toast('Error: '+error.message,'err'); else toast(val?'Hidden':'Restored'); load(); };
+  const featPlace = async (r:any) => { const {error} = await sb('places').update({featured:!r.featured}).eq('id',r.id); if(error) toast('Error: '+error.message,'err'); else toast(r.featured?'Removed from featured':'Featured ✓'); load(); };
+  const delPlace  = async (id:string) => { const {error} = await sb('places').delete().eq('id',id); if(error) toast('Error: '+error.message,'err'); else toast('Deleted'); setConfirm(null); load(); };
   const toggleSel = (id:string) => setSelected(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n;});
   const doBulkCat = async () => {
     if (!selected.size||!bulkCat) return;
@@ -499,7 +519,7 @@ function CategoriesSection() {
   const [loading, setLoading] = useState(true);
   const [saving,  setSaving]  = useState(false);
   const [filter,  setFilter]  = useState<'all'|'event'|'place'>('all');
-  useEffect(() => { cfgGet('categories').then(v=>{ if(v?.length) setCats(v); setLoading(false); }); }, []);
+  useEffect(() => { cfgGet('categories').then(v=>{ if(v?.length) setCats(v); setLoading(false); }).catch(()=>setLoading(false)); }, []);
   const persist = async (list:CatEntry[]) => { await cfgSet('categories',list); setCats(list); };
   const addCat  = async () => {
     const name=prompt('Category name:'); if(!name?.trim()) return;
@@ -569,7 +589,7 @@ function ContentSection() {
   const [loading, setLoading] = useState(true);
   const [saving,  setSaving]  = useState(false);
   const [editVibe, setEditVibe] = useState<ContentCfg['vibes'][0]|null>(null);
-  useEffect(() => { cfgGet('content').then(v=>{ if(v) setCfg({...DEF_CONTENT,...v}); setLoading(false); }); }, []);
+  useEffect(() => { cfgGet('content').then(v=>{ if(v) setCfg({...DEF_CONTENT,...v}); setLoading(false); }).catch(()=>setLoading(false)); }, []);
   const save = async () => { setSaving(true); await cfgSet('content',cfg); setSaving(false); toast('Saved ✓'); };
   if (loading) return <p style={{textAlign:'center',color:'#9ca3af',padding:40}}>Loading…</p>;
   return (
@@ -656,6 +676,7 @@ function AnalyticsSection() {
   useEffect(() => {
     async function load() {
       setLoading(true);
+      try {
       const { data: allRows } = await sb('analytics').select('event_type,session_id,data,device,created_at').gte('created_at',since);
       const rows = allRows || [];
 
@@ -699,7 +720,11 @@ function AnalyticsSection() {
       setDailyActive(Object.entries(daySessions).sort((a,b)=>a[0].localeCompare(b[0])).map(([day,s])=>({day,sessions:s.size})));
 
       setTotals(typeCount);
-      setLoading(false);
+      } catch(e:any) {
+        console.error('Analytics load error:', e);
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, [range, since]);
@@ -855,7 +880,7 @@ function RefreshSection() {
   const [logs, setLogs]       = useState<any[]>([]);
   const [lastRun, setLastRun] = useState<string|null>(null);
   const [loading, setLoading] = useState(true);
-  useEffect(() => { cfgGet('refreshLog').then(v=>{ if(v?.logs) setLogs(v.logs); if(v?.lastRun) setLastRun(v.lastRun); setLoading(false); }); }, []);
+  useEffect(() => { cfgGet('refreshLog').then(v=>{ if(v?.logs) setLogs(v.logs); if(v?.lastRun) setLastRun(v.lastRun); setLoading(false); }).catch(()=>setLoading(false)); }, []);
   const run = async () => {
     setRunning(true); toast('Checking…','info');
     const {count:before}=await sb('events').select('id',{count:'exact',head:true});
@@ -915,10 +940,18 @@ function ReviewsSection() {
   const [confirm,setConfirm]=useState<string|null>(null);
   const load = useCallback(async()=>{
     setLoading(true);
-    let q=sb('reviews').select('*',{count:'exact'}).order('created_at',{ascending:false});
-    if(search) q=q.ilike('text',`%${search}%`);
-    q=q.range(page*PAGE,(page+1)*PAGE-1);
-    const {data,count}=await q; setRows(data||[]); setTotal(count??0); setLoading(false);
+    try {
+      let q=sb('reviews').select('*',{count:'exact'}).order('created_at',{ascending:false});
+      if(search) q=q.ilike('text',`%${search}%`);
+      q=q.range(page*PAGE,(page+1)*PAGE-1);
+      const {data,count,error}=await q;
+      if(error) toast('Load error: '+error.message,'err');
+      setRows(data||[]); setTotal(count??0);
+    } catch(e:any) {
+      toast('Load error: '+(e?.message||'unknown'),'err');
+    } finally {
+      setLoading(false);
+    }
   },[search,page]);
   useEffect(()=>{load();},[load]);
   const del  = async(id:string)=>{await sb('reviews').delete().eq('id',id);toast('Deleted');setConfirm(null);load();};
@@ -976,7 +1009,7 @@ function TagRulesSection() {
   const [rules,setRules]=useState<TagRulesConfig>(DEF_RULES);
   const [loading,setLoading]=useState(true);
   const [saving,setSaving]=useState(false);
-  useEffect(()=>{cfgGet('tagRules').then(v=>{if(v) setRules({...DEF_RULES,...v}); setLoading(false);});},[]);
+  useEffect(()=>{cfgGet('tagRules').then(v=>{if(v) setRules({...DEF_RULES,...v}); setLoading(false);}).catch(()=>setLoading(false));},[]);
   const save=async()=>{setSaving(true);await cfgSet('tagRules',rules);toast('Saved ✓ — reload app to apply');setSaving(false);};
   if(loading) return <p style={{textAlign:'center',color:'#9ca3af',padding:40}}>Loading…</p>;
   return (
@@ -1011,7 +1044,7 @@ function SettingsSection() {
   const [active,setActive]=useState(false);
   const [loading,setLoading]=useState(true);
   const [saving,setSaving]=useState(false);
-  useEffect(()=>{cfgGet('siteConfig').then(v=>{if(v){setMsg(v.banner?.message||'');setActive(v.banner?.active??false);setType(v.banner?.type||'info');}setLoading(false);});},[]);
+  useEffect(()=>{cfgGet('siteConfig').then(v=>{if(v){setMsg(v.banner?.message||'');setActive(v.banner?.active??false);setType(v.banner?.type||'info');}setLoading(false);}).catch(()=>setLoading(false));},[]);
   const save=async()=>{setSaving(true);await cfgSet('siteConfig',{banner:{message:msg,active,type}});toast('Saved ✓');setSaving(false);};
   if(loading) return <p style={{textAlign:'center',color:'#9ca3af',padding:40}}>Loading…</p>;
   return (
