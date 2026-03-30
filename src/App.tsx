@@ -596,8 +596,37 @@ const PLACE_CATEGORIES = [
 ];
 
 const EVENT_GENRES = [
-  'All', 'Music', 'Sports', 'Comedy', 'Arts', 'Community', 'Free',
+  'All', 'Music', 'Sports', 'Comedy', 'Arts', 'Family', 'Outdoor', 'Community', 'Free',
 ];
+
+// Per-category icon and gradient for event cards
+const EVENT_TYPE_META: Record<string, { icon: string; bg: string }> = {
+  'Music':       { icon: '🎵', bg: 'linear-gradient(135deg,#8B3A0F,#c0552a)' },
+  'Sports':      { icon: '🏟️', bg: 'linear-gradient(135deg,#1d4ed8,#3b82f6)' },
+  'Arts':        { icon: '🎨', bg: 'linear-gradient(135deg,#6d28d9,#8b5cf6)' },
+  'Arts & Theatre': { icon: '🎭', bg: 'linear-gradient(135deg,#6d28d9,#8b5cf6)' },
+  'Comedy':      { icon: '😄', bg: 'linear-gradient(135deg,#b45309,#d97706)' },
+  'Family':      { icon: '👨‍👩‍👧', bg: 'linear-gradient(135deg,#047857,#10b981)' },
+  'Outdoor':     { icon: '🌿', bg: 'linear-gradient(135deg,#065f46,#059669)' },
+  'Community':   { icon: '🤝', bg: 'linear-gradient(135deg,#0e7490,#06b6d4)' },
+  'Festival':    { icon: '🎪', bg: 'linear-gradient(135deg,#7c3aed,#a78bfa)' },
+  'Film':        { icon: '🎬', bg: 'linear-gradient(135deg,#1f2937,#4b5563)' },
+  'Free':        { icon: '🎫', bg: 'linear-gradient(135deg,#047857,#10b981)' },
+  'Event':       { icon: '🎫', bg: 'linear-gradient(135deg,#1A1A1A,#374151)' },
+};
+
+function getEventTypeMeta(event: TMEvent): { icon: string; bg: string } {
+  const cat = getEventCategory(event);
+  if (EVENT_TYPE_META[cat]) return EVENT_TYPE_META[cat];
+  const name = event.name.toLowerCase();
+  if (name.includes('comedy') || name.includes('stand-up')) return EVENT_TYPE_META['Comedy'];
+  if (name.includes('family') || name.includes('kids')) return EVENT_TYPE_META['Family'];
+  if (name.includes('outdoor') || name.includes('hike') || name.includes('trail') || name.includes('run')) return EVENT_TYPE_META['Outdoor'];
+  if (name.includes('festival') || name.includes('fiesta')) return EVENT_TYPE_META['Festival'];
+  if (name.includes('film') || name.includes('movie') || name.includes('cinema')) return EVENT_TYPE_META['Film'];
+  if (name.includes('art') || name.includes('gallery') || name.includes('museum')) return EVENT_TYPE_META['Arts'];
+  return EVENT_TYPE_META['Event'];
+}
 
 // ─── Geo Banner ──────────────────────────────────────────────────────────────
 
@@ -667,7 +696,8 @@ const PlaceCard = React.memo(function PlaceCard({
   onCheckIn?: (e: React.MouseEvent) => void;
   tooFar?: boolean;
 }) {
-  const catEmoji = PLACE_CATEGORIES.find(c => c.label === place.category)?.icon || '';
+  // Match by value (e.g. 'restaurant') OR label (e.g. 'Restaurants') — data may use either
+  const catEmoji = (PLACE_CATEGORIES.find(c => c.value === place.category) || PLACE_CATEGORIES.find(c => c.label === place.category))?.icon || '📍';
   return (
     // div instead of button — avoids nested-button HTML invalidity that breaks tap on iOS Safari
     <div
@@ -684,13 +714,14 @@ const PlaceCard = React.memo(function PlaceCard({
           showLabel={!place.image}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-        <div className="absolute top-2 left-2">
-          <span
-            className="text-xs font-bold text-white px-2 py-0.5"
-            style={{ background: 'rgba(0,0,0,0.6)' }}
-          >
-            {catEmoji}
-          </span>
+        {/* Category type icon badge — bottom-left corner */}
+        <div style={{
+          position: 'absolute', bottom: 6, left: 6,
+          background: 'rgba(0,0,0,0.72)', borderRadius: 3,
+          width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 14, lineHeight: 1,
+        }}>
+          {catEmoji}
         </div>
         {distance != null && (
           <div className="absolute top-2 right-2">
@@ -762,6 +793,7 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
   const venue = event._embedded?.venues?.[0];
   const category = getEventCategory(event);
   const price = event.priceRanges?.[0];
+  const typeMeta = getEventTypeMeta(event);
 
   const fadeRef = useFadeIn();
   return (
@@ -776,12 +808,22 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
           <img src={hiResUrl(imgSrc)} alt={event.name} className="w-full h-full object-cover" />
         ) : (
           <div
-            className="w-full h-full flex items-center justify-center"
-            style={{ background: 'var(--brand-gradient)' }}
+            className="w-full h-full flex flex-col items-center justify-center gap-1"
+            style={{ background: typeMeta.bg }}
           >
-            <span className="text-3xl">♪</span>
+            <span style={{ fontSize: 30, lineHeight: 1 }}>{typeMeta.icon}</span>
+            <span style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.8)', letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: 'Inter, sans-serif', textAlign: 'center', padding: '0 4px' }}>{category}</span>
           </div>
         )}
+        {/* Type icon badge — always visible bottom-left corner of image */}
+        <div style={{
+          position: 'absolute', bottom: 4, left: 4,
+          background: 'rgba(0,0,0,0.72)', borderRadius: 3,
+          width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 13, lineHeight: 1,
+        }}>
+          {typeMeta.icon}
+        </div>
       </div>
       <div className="flex-1 p-3 flex flex-col justify-between min-w-0">
         <div>
@@ -791,14 +833,6 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
           >
             {category}
           </span>
-          {event._isAdult && (
-            <span
-              className="text-xs font-bold px-2 py-0.5 rounded inline-block mb-1.5 ml-1"
-              style={{ background: '#1c1c1e', color: '#fff', fontFamily: 'Inter, sans-serif', letterSpacing: '0.04em' }}
-            >
-              21+
-            </span>
-          )}
           <p
             className="font-black text-sm leading-snug text-gray-900"
             style={{ fontFamily: 'Epilogue, sans-serif', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}
@@ -819,7 +853,7 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
               {event.dates?.start?.localTime ? ' · ' + formatTime(event.dates.start.localTime) : ''}
             </p>
             {price && (
-              <p className="text-xs text-gray-500">From ${Math.round(price.min || 0)}</p>
+              <p className="text-xs text-gray-500">{(price.min ?? 0) === 0 ? 'Free' : `From $${Math.round(price.min || 0)}`}</p>
             )}
           </div>
         </div>
@@ -917,7 +951,7 @@ function PlaceDetailModal({
   user: User | null;
   onShowAuth: () => void;
 }) {
-  const catEmoji = PLACE_CATEGORIES.find(c => c.label === place.category)?.icon || '';
+  const catEmoji = (PLACE_CATEGORIES.find(c => c.value === place.category) || PLACE_CATEGORIES.find(c => c.label === place.category))?.icon || '📍';
   const mapsQuery = encodeURIComponent((place.address || place.name) + ' Albuquerque NM');
 
   return (
@@ -2592,21 +2626,17 @@ function EventsScreen({
   events,
   onEventSelect,
   initialSearch = '',
-  show21Plus = false,
-  onToggle21Plus,
 }: {
   events: TMEvent[];
   onEventSelect: (e: TMEvent) => void;
   initialSearch?: string;
-  show21Plus?: boolean;
-  onToggle21Plus?: () => void;
 }) {
   const [search, setSearch] = useState('');
   useEffect(() => { if (initialSearch) setSearch(initialSearch); }, [initialSearch]);
   const [selectedGenre, setSelectedGenre] = useState('All');
 
   const filtered = useMemo(() => {
-    let result = show21Plus ? events : events.filter(e => !e._isAdult);
+    let result = events.filter(e => !e._isAdult);
     if (selectedGenre !== 'All') {
       result = result.filter(e => {
         const seg = e.classifications?.[0]?.segment?.name || '';
@@ -2625,15 +2655,33 @@ function EventsScreen({
             return seg === 'Arts & Theatre' || seg === 'Arts & Culture' || gen === 'Arts & Culture' ||
               seg === 'Film' || gen === 'Theatre' || eventName.includes('art') || eventName.includes('gallery') ||
               eventName.includes('museum') || eventName.includes('theater') || eventName.includes('theatre');
+          case 'Family':
+            return seg === 'Family' || gen === 'Family' ||
+              eventName.includes('family') || eventName.includes(' kids') || eventName.includes('for kids') ||
+              eventName.includes('children') || eventName.includes('youth') || eventName.includes('junior') ||
+              eventName.includes('circus') || eventName.includes('carnival') || eventName.includes('puppet') ||
+              eventName.includes('storytime') || eventName.includes('story time') || eventName.includes('disney') ||
+              eventName.includes('sesame') || eventName.includes('paw patrol') || eventName.includes('pokemon');
+          case 'Outdoor':
+            return seg === 'Outdoor' ||
+              eventName.includes('outdoor') || eventName.includes('trail') || eventName.includes('hike') ||
+              eventName.includes('hiking') || eventName.includes(' run') || eventName.includes('5k') ||
+              eventName.includes('10k') || eventName.includes('marathon') || eventName.includes('triathlon') ||
+              eventName.includes('bike') || eventName.includes('cycling') || eventName.includes('kayak') ||
+              eventName.includes('camp') || eventName.includes('nature walk') || eventName.includes('garden') ||
+              eventName.includes('farm') || eventName.includes('amphitheater') || eventName.includes('amphitheatre') ||
+              venueName.includes('park') || venueName.includes('amphitheater') || venueName.includes('amphitheatre') ||
+              venueName.includes('outdoor') || venueName.includes('fairground') || venueName.includes('plaza');
           case 'Community':
             return seg === 'Community' || gen === 'Community' || seg === 'Festival' || gen === 'Festival' ||
               eventName.includes('festival') || eventName.includes('market') || eventName.includes('fair') ||
               eventName.includes('community') || eventName.includes('fiesta');
           case 'Free': {
+            // Only show events explicitly priced at $0 or with "free" in the name
             const prices = e.priceRanges;
-            const isFree = !prices || prices.length === 0 ||
-              prices.some(p => (p.min === 0 || p.min === undefined) && (p.max === 0 || p.max === undefined)) ||
-              eventName.includes('free');
+            const isFree =
+              eventName.includes('free') || eventName.includes('no cover') || eventName.includes('no charge') ||
+              (prices != null && prices.length > 0 && prices.every(p => (p.min ?? 1) === 0));
             return isFree;
           }
           default:
@@ -2740,32 +2788,6 @@ function EventsScreen({
             </button>
           )}
         </p>
-        {/* 21+ toggle */}
-        <button
-          onClick={onToggle21Plus}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            fontSize: 12, fontFamily: 'Inter, sans-serif', fontWeight: 700,
-            color: show21Plus ? '#a03b00' : '#999',
-            background: 'none', border: 'none', cursor: 'pointer',
-            padding: '4px 8px', borderRadius: 8,
-            outline: show21Plus ? '1.5px solid #a03b00' : '1.5px solid #ddd',
-          }}
-        >
-          <span style={{ fontSize: 14 }}>🔞</span>
-          21+ events
-          <span style={{
-            width: 28, height: 16, borderRadius: 8, display: 'inline-block',
-            background: show21Plus ? '#a03b00' : '#ccc', position: 'relative',
-            transition: 'background 0.2s', flexShrink: 0,
-          }}>
-            <span style={{
-              position: 'absolute', top: 2, left: show21Plus ? 14 : 2,
-              width: 12, height: 12, borderRadius: '50%', background: 'white',
-              transition: 'left 0.2s',
-            }} />
-          </span>
-        </button>
       </div>
 
       <div className="px-5 pb-28 flex flex-col gap-3">
@@ -5144,7 +5166,6 @@ export default function App() {
   const [places, setPlaces] = useState<Place[]>([]);
   const [events, setEvents] = useState<TMEvent[]>([]);
   const [eventsNavSearch, setEventsNavSearch] = useState('');
-  const [show21Plus, setShow21Plus] = useState(false);
   const [loading, setLoading] = useState(true);
   const [eventsLoading, setEventsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -5895,8 +5916,7 @@ export default function App() {
               prefs={prefs}/>
           )}
           {activeTab === 'events' && (
-            <EventsScreen events={events} onEventSelect={openEventModal} initialSearch={eventsNavSearch}
-              show21Plus={show21Plus} onToggle21Plus={() => setShow21Plus(v => !v)} />
+            <EventsScreen events={events} onEventSelect={openEventModal} initialSearch={eventsNavSearch} />
           )}
           {activeTab === 'places' && (
             <PlacesScreen
