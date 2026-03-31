@@ -1153,7 +1153,7 @@ function PlacePhotoGallery({ place }: { place: Place }) {
 }
 
 function PlaceDetailModal({
-  place, onClose, isCheckedIn, onCheckIn, checkInError, tooFar, user, onShowAuth, isSaved, onToggleSave,
+  place, onClose, isCheckedIn, onCheckIn, checkInError, tooFar, user, onShowAuth, isSaved, onToggleSave, mapProvider,
 }: {
   place: Place;
   onClose: () => void;
@@ -1165,12 +1165,17 @@ function PlaceDetailModal({
   onShowAuth: () => void;
   isSaved?: boolean;
   onToggleSave?: () => void;
+  mapProvider?: 'google' | 'apple';
 }) {
   const [shared, setShared] = useState(false);
   const detailCatMeta = PLACE_CATEGORIES.find(c => c.value === place.category) || PLACE_CATEGORIES.find(c => c.label === place.category);
   const detailCatIcon = detailCatMeta?.icon || 'pin';
   const detailCatLabel = detailCatMeta?.label || place.category || '';
-  const mapsQuery = encodeURIComponent((place.address || place.name) + ' Albuquerque NM');
+  const rawQuery = (place.address || place.name) + ' Albuquerque NM';
+  const mapsQuery = encodeURIComponent(rawQuery);
+  const directionsUrl = (mapProvider === 'apple')
+    ? `https://maps.apple.com/?q=${mapsQuery}`
+    : `https://maps.google.com/?q=${mapsQuery}`;
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -1285,10 +1290,10 @@ function PlaceDetailModal({
           </p>
         )}
 
-        {/* Address — taps to Google Maps */}
+        {/* Address — taps to Maps */}
         {place.address && (
           <a
-            href={`https://maps.google.com/?q=${mapsQuery}`}
+            href={directionsUrl}
             target="_blank" rel="noopener noreferrer"
             className="flex items-start gap-3 mb-3 bg-white p-3 w-full text-left"
             style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', textDecoration: 'none' }}
@@ -1296,7 +1301,7 @@ function PlaceDetailModal({
             <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)', marginTop: '1px' }}>location_on</span>
             <div className="min-w-0">
               <p className="text-sm text-gray-700" style={{ fontFamily: 'Inter, sans-serif' }}>{place.address}</p>
-              <p className="text-xs font-bold mt-0.5" style={{ color: 'var(--brand)' }}>Open in Maps →</p>
+              <p className="text-xs font-bold mt-0.5" style={{ color: 'var(--brand)' }}>Open in {mapProvider === 'apple' ? 'Apple Maps' : 'Google Maps'} →</p>
             </div>
           </a>
         )}
@@ -1372,7 +1377,7 @@ function PlaceDetailModal({
         )}
 
         <a
-          href={`https://maps.google.com/?q=${mapsQuery}`}
+          href={directionsUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="block w-full py-4 text-center text-white font-black text-sm rounded-lg mt-2"
@@ -1768,7 +1773,7 @@ async function shareEvent(event: TMEvent) {
 
 // ─── Event Detail Modal ──────────────────────────────────────────────────────
 
-function EventDetailModal({ event, onClose, isSaved, onToggleSave }: { event: TMEvent; onClose: () => void; isSaved?: boolean; onToggleSave?: () => void }) {
+function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }: { event: TMEvent; onClose: () => void; isSaved?: boolean; onToggleSave?: () => void; mapProvider?: 'google' | 'apple' }) {
   const [shared, setShared] = useState(false);
   const venue = event._embedded?.venues?.[0];
   const category = getEventCategory(event);
@@ -1776,6 +1781,9 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave }: { event: TM
   const mapsQuery = encodeURIComponent(
     (venue?.address?.line1 || venue?.name || event.name) + ' Albuquerque NM'
   );
+  const directionsUrl = (mapProvider === 'apple')
+    ? `https://maps.apple.com/?q=${mapsQuery}`
+    : `https://maps.google.com/?q=${mapsQuery}`;
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -1964,7 +1972,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave }: { event: TM
           </a>
         ) : (
           <a
-            href={`https://maps.google.com/?q=${mapsQuery}`}
+            href={directionsUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full py-4 text-center text-white font-black text-sm"
@@ -6758,12 +6766,14 @@ export default function App() {
   const [tooFarPlaceId, setTooFarPlaceId] = useState<string | null>(null);
 
   const [siteBanner, setSiteBanner] = useState<BannerConfig | null>(null);
+  const [mapProvider, setMapProvider] = useState<'google' | 'apple'>('google');
 
   useEffect(() => {
     _fbGetDoc('config', 'siteConfig', 'key').then(snap => {
       if (snap.exists()) {
         const d = snap.data();
         if (d.banner?.active) setSiteBanner(d.banner as BannerConfig);
+        if (d.mapProvider) setMapProvider(d.mapProvider as 'google' | 'apple');
       }
     });
   }, []);
@@ -7134,9 +7144,10 @@ export default function App() {
           onShowAuth={() => setShowAuthModal(true)}
           isSaved={isPlaceSaved(selectedPlace.id)}
           onToggleSave={() => toggleSavedPlace(selectedPlace)}
+          mapProvider={mapProvider}
         />
       )}
-      {selectedEvent && <EventDetailModal event={selectedEvent} onClose={() => { closeEventModal(); window.history.back(); }} isSaved={isEventSaved(selectedEvent.id)} onToggleSave={() => toggleSavedEvent(selectedEvent)} />}
+      {selectedEvent && <EventDetailModal event={selectedEvent} onClose={() => { closeEventModal(); window.history.back(); }} isSaved={isEventSaved(selectedEvent.id)} onToggleSave={() => toggleSavedEvent(selectedEvent)} mapProvider={mapProvider} />}
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
     </ErrorBoundary>
   );
@@ -7488,10 +7499,11 @@ export default function App() {
           onShowAuth={() => setShowAuthModal(true)}
           isSaved={isPlaceSaved(selectedPlace.id)}
           onToggleSave={() => toggleSavedPlace(selectedPlace)}
+          mapProvider={mapProvider}
         />
       )}
       {selectedEvent && (
-        <EventDetailModal event={selectedEvent} onClose={() => { closeEventModal(); window.history.back(); }} isSaved={isEventSaved(selectedEvent.id)} onToggleSave={() => toggleSavedEvent(selectedEvent)} />
+        <EventDetailModal event={selectedEvent} onClose={() => { closeEventModal(); window.history.back(); }} isSaved={isEventSaved(selectedEvent.id)} onToggleSave={() => toggleSavedEvent(selectedEvent)} mapProvider={mapProvider} />
       )}
       {showAuthModal && (
         <AuthModal onClose={() => setShowAuthModal(false)} />

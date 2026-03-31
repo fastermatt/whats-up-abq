@@ -61,14 +61,16 @@ function transformGoogleRaw(raw: Record<string, unknown>): Record<string, unknow
 
   const photos = raw.photos as Array<{ photo_reference: string }> | undefined;
   const photoRef = photos?.[0]?.photo_reference;
+  // Admin-set photo override takes precedence over Google photo
+  const overridePhoto = raw.overridePhoto as string | undefined;
   // Full-res image for detail modal hero
-  const imageUrl = photoRef
+  const imageUrl = overridePhoto || (photoRef
     ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photoRef}&key=${GOOGLE_KEY}`
-    : undefined;
+    : undefined);
   // Smaller thumbnail for list cards (saves ~60% bandwidth)
-  const thumbnailUrl = photoRef
+  const thumbnailUrl = overridePhoto || (photoRef
     ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoRef}&key=${GOOGLE_KEY}`
-    : undefined;
+    : undefined);
   // Up to 5 additional photos for gallery (6 total)
   const additionalImages = photos?.slice(1, 6).map(
     p => `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${p.photo_reference}&key=${GOOGLE_KEY}`
