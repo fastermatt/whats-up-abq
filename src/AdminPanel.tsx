@@ -35,6 +35,7 @@ export type AdminSection =
 interface Banner {
   id: string; message: string; type: 'info'|'warning'|'promo';
   startDate: string; endDate: string; linkUrl: string; linkText: string; active: boolean;
+  bgColor?: string; textColor?: string;
 }
 interface TagRulesConfig {
   outdoorKeywords: string[]; indoorKeywords: string[];
@@ -168,7 +169,7 @@ function DashboardSection({ onNav }: { onNav:(s:AdminSection)=>void }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // BANNERS
 // ─────────────────────────────────────────────────────────────────────────────
-const EMPTY_B: Banner = { id:'', message:'', type:'info', startDate:'', endDate:'', linkUrl:'', linkText:'', active:false };
+const EMPTY_B: Banner = { id:'', message:'', type:'info', startDate:'', endDate:'', linkUrl:'', linkText:'', active:false, bgColor:'', textColor:'' };
 function BannersSection() {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [editing, setEditing] = useState<Banner|null>(null);
@@ -186,12 +187,14 @@ function BannersSection() {
   };
   const del = async (id:string) => { await persist(banners.filter(b=>b.id!==id)); toast('Deleted'); setConfirm(null); };
   const toggle = async (id:string) => { await persist(banners.map(b=>b.id===id?{...b,active:!b.active}:b)); toast('Updated'); };
-  const pvStyle = (b:Banner): React.CSSProperties => ({
-    padding:'10px 14px', borderRadius:8, fontSize:13, fontWeight:600,
-    background:b.type==='warning'?'#fef3c7':b.type==='promo'?'#fce7f3':'#dbeafe',
-    color:b.type==='warning'?'#92400e':b.type==='promo'?'#9d174d':'#1e40af',
-    border:`1px solid ${b.type==='warning'?'#fcd34d':b.type==='promo'?'#fbcfe8':'#bfdbfe'}`,
-  });
+  const pvStyle = (b:Banner): React.CSSProperties => {
+    if (b.bgColor) return { padding:'10px 14px', borderRadius:8, fontSize:13, fontWeight:600, background:b.bgColor, color:b.textColor||'#ffffff', border:`1px solid ${b.bgColor}` };
+    return { padding:'10px 14px', borderRadius:8, fontSize:13, fontWeight:600,
+      background:b.type==='warning'?'#fef3c7':b.type==='promo'?'#fce7f3':'#dbeafe',
+      color:b.type==='warning'?'#92400e':b.type==='promo'?'#9d174d':'#1e40af',
+      border:`1px solid ${b.type==='warning'?'#fcd34d':b.type==='promo'?'#fbcfe8':'#bfdbfe'}`,
+    };
+  };
   const now = new Date().toISOString().split('T')[0];
   return (
     <div>
@@ -211,6 +214,27 @@ function BannersSection() {
                   <label style={{display:'flex',alignItems:'center',gap:10,cursor:'pointer',fontSize:14,fontWeight:600}}>
                     <input type="checkbox" checked={editing.active} onChange={e=>setEditing(v=>v&&{...v,active:e.target.checked})} style={{width:18,height:18}} /> Active
                   </label></div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+                <div>
+                  <label style={lbl}>Background Color <span style={{color:'#9ca3af',fontWeight:400}}>(optional — overrides type)</span></label>
+                  <div style={{display:'flex',alignItems:'center',gap:8}}>
+                    <input type="color" value={editing.bgColor||'#1ebaeb'} onChange={e=>setEditing(v=>v&&{...v,bgColor:e.target.value})}
+                      style={{width:44,height:36,border:'1px solid #d1d5db',borderRadius:6,cursor:'pointer',padding:2}} />
+                    <input value={editing.bgColor||''} onChange={e=>setEditing(v=>v&&{...v,bgColor:e.target.value})}
+                      placeholder="#hex or empty for type default" style={{...inp,flex:1,marginBottom:0}} />
+                    {editing.bgColor && <button onClick={()=>setEditing(v=>v&&{...v,bgColor:'',textColor:''})} style={{fontSize:11,color:'#9ca3af',cursor:'pointer',background:'none',border:'none',padding:'0 2px'}}>✕ clear</button>}
+                  </div>
+                </div>
+                <div>
+                  <label style={lbl}>Text Color <span style={{color:'#9ca3af',fontWeight:400}}>(optional)</span></label>
+                  <div style={{display:'flex',alignItems:'center',gap:8}}>
+                    <input type="color" value={editing.textColor||'#1A1A1A'} onChange={e=>setEditing(v=>v&&{...v,textColor:e.target.value})}
+                      style={{width:44,height:36,border:'1px solid #d1d5db',borderRadius:6,cursor:'pointer',padding:2}} />
+                    <input value={editing.textColor||''} onChange={e=>setEditing(v=>v&&{...v,textColor:e.target.value})}
+                      placeholder="#hex or empty" style={{...inp,flex:1,marginBottom:0}} />
+                  </div>
+                </div>
               </div>
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
                 <div><label style={lbl}>Start Date</label><input type="date" value={editing.startDate} onChange={e=>setEditing(v=>v&&{...v,startDate:e.target.value})} style={inp} /></div>

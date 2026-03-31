@@ -5337,7 +5337,7 @@ function LoadingScreen() {
 
 const ADMIN_EMAIL = '4mattcarlson@gmail.com';
 
-interface BannerConfig { message: string; type: 'info' | 'success' | 'warning' | 'promo'; active: boolean; linkUrl?: string; linkText?: string; }
+interface BannerConfig { message: string; type: 'info' | 'success' | 'warning' | 'promo'; active: boolean; linkUrl?: string; linkText?: string; bgColor?: string; textColor?: string; }
 
 function SiteBanner({ banner }: { banner: BannerConfig | null }) {
   if (!banner?.active || !banner.message) return null;
@@ -5347,14 +5347,17 @@ function SiteBanner({ banner }: { banner: BannerConfig | null }) {
     warning: { bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.25)',  text: '#92400e' },
     promo:   { bg: '#1ebaeb',               border: '#1A1A1A',                text: '#1A1A1A' },
   };
-  const color = colorMap[banner.type] ?? colorMap.info;
+  const typeColor = colorMap[banner.type] ?? colorMap.info;
+  const bg   = banner.bgColor   || typeColor.bg;
+  const text = banner.textColor || typeColor.text;
+  const border = banner.bgColor || typeColor.border;
   return (
-    <div style={{ background: color.bg, borderBottom: `2px solid ${color.border}`, padding: '10px 16px', textAlign: 'center' }}>
-      <p style={{ fontSize: '13px', fontWeight: 700, color: color.text, fontFamily: 'Inter, sans-serif', lineHeight: 1.4 }}>
+    <div style={{ background: bg, borderBottom: `2px solid ${border}`, padding: '10px 16px', textAlign: 'center' }}>
+      <p style={{ fontSize: '13px', fontWeight: 700, color: text, fontFamily: 'Inter, sans-serif', lineHeight: 1.4 }}>
         {banner.message}
         {banner.linkUrl && banner.linkText && (
           <a href={banner.linkUrl} target="_blank" rel="noopener noreferrer"
-            style={{ marginLeft: 8, textDecoration: 'underline', fontWeight: 800, color: color.text }}
+            style={{ marginLeft: 8, textDecoration: 'underline', fontWeight: 800, color: text }}
           >{banner.linkText} →</a>
         )}
       </p>
@@ -7221,7 +7224,7 @@ export default function App() {
           (!b.endDate   || b.endDate   >= today)
         ) as any;
         if (active) {
-          setSiteBanner({ message: active.message, type: active.type ?? 'info', active: true, linkUrl: active.linkUrl, linkText: active.linkText });
+          setSiteBanner({ message: active.message, type: active.type ?? 'info', active: true, linkUrl: active.linkUrl, linkText: active.linkText, bgColor: active.bgColor, textColor: active.textColor });
         }
       }
     });
