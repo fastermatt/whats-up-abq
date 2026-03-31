@@ -269,6 +269,9 @@ function EventsSection() {
   const [confirm, setConfirm] = useState<string|null>(null);
   const [bulkAct, setBulkAct] = useState('');
   const [form, setForm]       = useState({ name:'', date:'', time:'', venue:'', ticketUrl:'', category:'Music', source:'manual', is21Plus:false, tags:[] as string[] });
+  const [editEvent, setEditEvent] = useState<any|null>(null);
+  const [editForm, setEditForm]   = useState({ name:'', date:'', time:'', venue:'' });
+  const [editSaving, setEditSaving] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -315,6 +318,37 @@ function EventsSection() {
     if (bulkAct==='delete') for (const id of ids) await sb('events').delete().eq('id',id);
     toast(`${ids.length} events ${bulkAct==='hide'?'hidden':'deleted'}`);
     setSelected(new Set()); setBulkAct(''); load();
+  };
+
+  const openEditEvent = (r: any) => {
+    const raw = typeof r.raw === 'string' ? JSON.parse(r.raw) : r.raw;
+    setEditEvent(r);
+    setEditForm({
+      name: raw?.name || '',
+      date: raw?.dates?.start?.localDate || r.event_date || '',
+      time: raw?.dates?.start?.localTime?.slice(0,5) || '',
+      venue: raw?._embedded?.venues?.[0]?.name || raw?.venue || '',
+    });
+  };
+  const saveEditEvent = async () => {
+    if (!editEvent) return;
+    if (!editForm.name.trim() || !editForm.date) { toast('Name and date required', 'err'); return; }
+    setEditSaving(true);
+    const raw = typeof editEvent.raw === 'string' ? JSON.parse(editEvent.raw) : { ...editEvent.raw };
+    raw.name = editForm.name.trim();
+    if (!raw.dates) raw.dates = {};
+    if (!raw.dates.start) raw.dates.start = {};
+    raw.dates.start.localDate = editForm.date;
+    raw.dates.start.localTime = editForm.time ? editForm.time + ':00' : undefined;
+    if (!raw._embedded) raw._embedded = {};
+    if (!raw._embedded.venues) raw._embedded.venues = [{}];
+    raw._embedded.venues[0].name = editForm.venue;
+    const { error } = await sb('events').update({ raw, event_date: editForm.date }).eq('id', editEvent.id);
+    setEditSaving(false);
+    if (error) { toast('Error: '+error.message, 'err'); return; }
+    toast('Event updated ✓');
+    setEditEvent(null);
+    load();
   };
 
   return (
@@ -381,6 +415,7 @@ function EventsSection() {
                   <td style={td}><div style={{display:'flex',gap:5}}>
                     <button onClick={()=>featEv(r)} style={{...btnS,fontSize:11,padding:'3px 7px',color:r.featured?'#d97706':'#9ca3af'}} title="Spotlight">★</button>
                     <button onClick={()=>hideEv(r.id,!r.hidden)} style={{...btnS,fontSize:11,padding:'3px 7px'}}>{r.hidden?'Show':'Hide'}</button>
+                    <button onClick={()=>openEditEvent(r)} style={{...btnS,fontSize:11,padding:'3px 7px'}}>Edit</button>
                     <button onClick={()=>setConfirm(r.id)} style={btnD}>Del</button>
                   </div></td>
                 </tr>
@@ -398,6 +433,32 @@ function EventsSection() {
         </div>
       </div>}
       {confirm&&<Confirm msg="Delete this event permanently?" onOk={()=>deleteEv(confirm)} onCancel={()=>setConfirm(null)} />}
+
+      {editEvent&&(
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.55)',zIndex:9998,display:'flex',alignItems:'center',justifyContent:'center',padding:16}} onClick={e=>{if(e.target===e.currentTarget)setEditEvent(null);}}>
+          <div style={{background:'#fff',borderRadius:14,padding:28,maxWidth:500,width:'100%',boxShadow:'0 8px 40px rgba(0,0,0,0.25)',maxHeight:'90vh',overflowY:'auto'}}>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
+              <h3 style={{fontSize:16,fontWeight:800,color:'#18181b',margin:0}}>Edit Event</h3>
+              <button onClick={()=>setEditEvent(null)} style={{...btnS,padding:'4px 10px',fontSize:13}}>✕</button>
+            </div>
+            <div style={{display:'flex',flexDirection:'column',gap:14}}>
+              <div><label style={lbl}>Event Name *</label><input value={editForm.name} onChange={e=>setEditForm(f=>({...f,name:e.target.value}))} style={inp} /></div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+                <div><label style={lbl}>Date *</label><input type="date" value={editForm.date} onChange={e=>setEditForm(f=>({...f,date:e.target.value}))} style={inp} /></div>
+                <div>
+                  <label style={lbl}>Start Time <span style={{fontWeight:400,color:'#9ca3af'}}>(correct it here)</span></label>
+                  <input type="time" value={editForm.time} onChange={e=>setEditForm(f=>({...f,time:e.target.value}))} style={inp} />
+                </div>
+              </div>
+              <div><label style={lbl}>Venue</label><input value={editForm.venue} onChange={e=>setEditForm(f=>({...f,venue:e.target.value}))} style={inp} /></div>
+              <div style={{display:'flex',gap:8,justifyContent:'flex-end'}}>
+                <button style={btnS} onClick={()=>setEditEvent(null)}>Cancel</button>
+                <button style={{...btnP,opacity:editSaving?0.7:1}} onClick={saveEditEvent} disabled={editSaving}>{editSaving?'Saving…':'Save Changes'}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -414,6 +475,9 @@ function PlacesSection() {
   const [confirm, setConfirm] = useState<string|null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkCat, setBulkCat] = useState('');
+  const [editPlace, setEditPlace] = useState<any|null>(null);
+  const [editPhotoUrl, setEditPhotoUrl] = useState('');
+  const [editSaving, setEditSaving] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -451,6 +515,24 @@ function PlacesSection() {
     toast(`${selected.size} places → ${bulkCat}`); setSelected(new Set()); setBulkCat(''); load();
   };
 
+  const openEdit = (r: any) => { setEditPlace(r); setEditPhotoUrl(r.raw?.overridePhoto || ''); };
+  const saveEdit = async () => {
+    if (!editPlace) return;
+    setEditSaving(true);
+    const updatedRaw = { ...editPlace.raw };
+    if (editPhotoUrl.trim()) {
+      updatedRaw.overridePhoto = editPhotoUrl.trim();
+    } else {
+      delete updatedRaw.overridePhoto;
+    }
+    const { error } = await sb('places').update({ raw: updatedRaw }).eq('id', editPlace.id);
+    setEditSaving(false);
+    if (error) { toast('Error: '+error.message, 'err'); return; }
+    toast(editPhotoUrl.trim() ? 'Photo override saved ✓' : 'Override cleared ✓');
+    setEditPlace(null);
+    load();
+  };
+
   return (
     <div>
       <SectionHeader title="Places" sub={`${total.toLocaleString()} total`} />
@@ -484,6 +566,9 @@ function PlacesSection() {
                   <td style={td}><div style={{display:'flex',gap:5}}>
                     <button onClick={()=>featPlace(r)} style={{...btnS,fontSize:11,padding:'3px 7px',color:r.featured?'#d97706':'#9ca3af'}}>★</button>
                     <button onClick={()=>hidePlace(r.id,!r.hidden)} style={{...btnS,fontSize:11,padding:'3px 7px'}}>{r.hidden?'Show':'Hide'}</button>
+                    <button onClick={()=>openEdit(r)} style={{...btnS,fontSize:11,padding:'3px 7px',color:r.raw?.overridePhoto?'#7c3aed':'inherit'}}>
+                      {r.raw?.overridePhoto?'📷 Edit':'Edit'}
+                    </button>
                     <button onClick={()=>setConfirm(r.id)} style={btnD}>Del</button>
                   </div></td>
                 </tr>
@@ -501,6 +586,47 @@ function PlacesSection() {
         </div>
       </div>}
       {confirm&&<Confirm msg="Delete this place permanently?" onOk={()=>delPlace(confirm)} onCancel={()=>setConfirm(null)} />}
+
+      {editPlace&&(
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.55)',zIndex:9998,display:'flex',alignItems:'center',justifyContent:'center',padding:16}} onClick={e=>{if(e.target===e.currentTarget)setEditPlace(null);}}>
+          <div style={{background:'#fff',borderRadius:14,padding:28,maxWidth:520,width:'100%',boxShadow:'0 8px 40px rgba(0,0,0,0.25)',maxHeight:'90vh',overflowY:'auto'}}>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
+              <h3 style={{fontSize:16,fontWeight:800,color:'#18181b',margin:0}}>Edit Place Photo</h3>
+              <button onClick={()=>setEditPlace(null)} style={{...btnS,padding:'4px 10px',fontSize:13}}>✕</button>
+            </div>
+            <p style={{fontSize:14,fontWeight:700,color:'#374151',marginBottom:16}}>{editPlace.raw?.name}</p>
+            {/* Current photo preview */}
+            {editPlace.raw?.photos?.[0]?.photo_reference && (
+              <div style={{marginBottom:16}}>
+                <label style={lbl}>Current Google Photo</label>
+                <img
+                  src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${editPlace.raw.photos[0].photo_reference}&key=${import.meta.env.VITE_GOOGLE_PLACES_KEY}`}
+                  style={{width:'100%',height:180,objectFit:'cover',borderRadius:8,border:'1px solid #e5e7eb'}}
+                  alt="Current Google photo"
+                />
+              </div>
+            )}
+            {/* Override URL input */}
+            <div style={{marginBottom:editPhotoUrl?12:16}}>
+              <label style={lbl}>Override Photo URL <span style={{fontWeight:400,color:'#9ca3af'}}>(leave blank to use Google photo)</span></label>
+              <input value={editPhotoUrl} onChange={e=>setEditPhotoUrl(e.target.value)} style={inp} placeholder="https://example.com/photo.jpg" />
+              {editPlace.raw?.overridePhoto&&<p style={{fontSize:11,color:'#7c3aed',marginTop:4}}>✓ Override active on this place</p>}
+            </div>
+            {/* Override preview */}
+            {editPhotoUrl&&(
+              <div style={{marginBottom:16}}>
+                <label style={lbl}>Override Preview</label>
+                <img src={editPhotoUrl} style={{width:'100%',height:180,objectFit:'cover',borderRadius:8,border:'2px solid #7c3aed'}} alt="Override preview" onError={e=>{(e.currentTarget as HTMLImageElement).style.display='none';}} />
+              </div>
+            )}
+            <div style={{display:'flex',gap:8,justifyContent:'flex-end',flexWrap:'wrap'}}>
+              <button style={btnS} onClick={()=>setEditPlace(null)}>Cancel</button>
+              {editPlace.raw?.overridePhoto&&<button style={{...btnS,color:'#dc2626',borderColor:'#fca5a5'}} onClick={()=>setEditPhotoUrl('')}>Clear Override</button>}
+              <button style={{...btnP,opacity:editSaving?0.7:1}} onClick={saveEdit} disabled={editSaving}>{editSaving?'Saving…':'Save Photo'}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1059,10 +1185,11 @@ function SettingsSection() {
   const [msg,setMsg]=useState('');
   const [type,setType]=useState<'info'|'success'|'warning'>('info');
   const [active,setActive]=useState(false);
+  const [mapProvider,setMapProvider]=useState<'google'|'apple'>('google');
   const [loading,setLoading]=useState(true);
   const [saving,setSaving]=useState(false);
-  useEffect(()=>{cfgGet('siteConfig').then(v=>{if(v){setMsg(v.banner?.message||'');setActive(v.banner?.active??false);setType(v.banner?.type||'info');}setLoading(false);}).catch(()=>setLoading(false));},[]);
-  const save=async()=>{setSaving(true);await cfgSet('siteConfig',{banner:{message:msg,active,type}});toast('Saved ✓');setSaving(false);};
+  useEffect(()=>{cfgGet('siteConfig').then(v=>{if(v){setMsg(v.banner?.message||'');setActive(v.banner?.active??false);setType(v.banner?.type||'info');setMapProvider(v.mapProvider||'google');}setLoading(false);}).catch(()=>setLoading(false));},[]);
+  const save=async()=>{setSaving(true);await cfgSet('siteConfig',{banner:{message:msg,active,type},mapProvider});toast('Saved ✓');setSaving(false);};
   if(loading) return <p style={{textAlign:'center',color:'#9ca3af',padding:40}}>Loading…</p>;
   return (
     <div>
@@ -1079,7 +1206,20 @@ function SettingsSection() {
             <option value="info">ℹ️ Info</option><option value="success">✅ Success</option><option value="warning">⚠️ Warning</option>
           </select></div>
         {msg&&<div style={{marginBottom:14,padding:'10px 14px',borderRadius:8,background:type==='warning'?'#fef3c7':type==='success'?'#d1fae5':'#dbeafe',fontSize:13,fontWeight:600,color:type==='warning'?'#92400e':type==='success'?'#065f46':'#1e40af'}}>{msg}</div>}
-        <button style={{...btnP,opacity:saving?0.7:1}} onClick={save} disabled={saving}>{saving?'Saving…':'Save'}</button>
+        <div style={{marginTop:24,paddingTop:20,borderTop:'1px solid #e5e7eb'}}>
+          <h3 style={{fontSize:15,fontWeight:700,marginBottom:8}}>Map Provider</h3>
+          <p style={{fontSize:12,color:'#9ca3af',marginBottom:12}}>Which map app to open when users tap "Get Directions".</p>
+          <div style={{display:'flex',gap:10}}>
+            {(['google','apple'] as const).map(p=>(
+              <button key={p} onClick={()=>setMapProvider(p)} style={{padding:'10px 20px',borderRadius:10,border:`2px solid ${mapProvider===p?ACCENT:'#e5e7eb'}`,background:mapProvider===p?ACCENT:'#fff',color:mapProvider===p?'#fff':'#374151',fontWeight:700,fontSize:14,cursor:'pointer',display:'flex',alignItems:'center',gap:8,transition:'all 0.15s'}}>
+                {p==='google'?'🗺️':'🍎'} {p==='google'?'Google Maps':'Apple Maps'}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div style={{marginTop:20}}>
+          <button style={{...btnP,opacity:saving?0.7:1}} onClick={save} disabled={saving}>{saving?'Saving…':'Save'}</button>
+        </div>
       </div>
     </div>
   );
