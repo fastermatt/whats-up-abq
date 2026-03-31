@@ -3183,6 +3183,12 @@ function EventsScreen({
   useEffect(() => { if (initialSearch) setSearch(initialSearch); }, [initialSearch]);
   const [selectedGenre, setSelectedGenre] = useState('All');
   const [followedGenres, setFollowedGenres] = useState<string[]>(() => getFollowedGenres());
+  const [wishlistVersion, setWishlistVersion] = useState(0);
+  useEffect(() => {
+    const handler = () => setWishlistVersion(v => v + 1);
+    window.addEventListener('abq_wishlist_changed', handler);
+    return () => window.removeEventListener('abq_wishlist_changed', handler);
+  }, []);
 
   function toggleFollowGenre(genre: string) {
     setFollowedGenres(prev => {
@@ -3469,7 +3475,9 @@ function EventsScreen({
                   {count} showtimes
                 </div>
               )}
-              <button style={{position:'absolute',top:8,right:8,zIndex:10,background:'white',border:'2px solid #1A1A1A',borderRadius:0,width:34,height:34,minHeight:0,color:'#1A1A1A',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'2px 2px 0 #1A1A1A'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:event.id,type:'event',name:event.name});}}><span className="material-symbols-outlined" style={{fontSize:'18px',fontVariationSettings:"'FILL' 0, 'wght' 400"}}>favorite</span></button>
+              {(() => { const liked = isWishlisted(event.id); return (
+              <button style={{position:'absolute',top:8,right:8,zIndex:10,background: liked ? '#1A1A1A' : 'white',border:'2px solid #1A1A1A',borderRadius:0,width:34,height:34,minHeight:0,color: liked ? '#d4ef4d' : '#1A1A1A',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'2px 2px 0 #1A1A1A'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:event.id,type:'event',name:event.name,category:'event'});}}><span className="material-symbols-outlined" style={{fontSize:'18px',fontVariationSettings: liked ? "'FILL' 1, 'wght' 700" : "'FILL' 0, 'wght' 400"}}>favorite</span></button>
+              ); })()}
             </div>
           );
         })}
@@ -3515,6 +3523,12 @@ function PlacesScreen({
   // Tracks whether the user tapped "Near Me" before location was available,
   // so we can auto-activate the near sort once coords arrive (no second tap).
   const pendingNearSort = useRef(false);
+  const [wishlistVersion, setWishlistVersion] = useState(0);
+  useEffect(() => {
+    const handler = () => setWishlistVersion(v => v + 1);
+    window.addEventListener('abq_wishlist_changed', handler);
+    return () => window.removeEventListener('abq_wishlist_changed', handler);
+  }, []);
 
   // Debounce search input by 250ms
   useEffect(() => {
@@ -3790,7 +3804,9 @@ function PlacesScreen({
                 tooFar={tooFarPlaceId === place.id}
                 onCheckIn={e => { e.stopPropagation(); onCheckIn(place.id); }}
                 />
-              <button style={{position:'absolute',top:8,right:8,zIndex:10,background:'white',border:'2px solid #1A1A1A',borderRadius:0,width:32,height:32,minHeight:0,color:'#1A1A1A',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'2px 2px 0 #1A1A1A'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:place.id,type:'place',name:place.name});}}>♡</button>
+              {(() => { const liked = isWishlisted(place.id); return (
+              <button style={{position:'absolute',top:8,right:8,zIndex:10,background: liked ? '#1A1A1A' : 'white',border:'2px solid #1A1A1A',borderRadius:0,width:32,height:32,minHeight:0,color: liked ? '#d4ef4d' : '#1A1A1A',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'2px 2px 0 #1A1A1A'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:place.id,type:'place',name:place.name,category:place.category});}}><span className="material-symbols-outlined" style={{fontSize:'16px',fontVariationSettings: liked ? "'FILL' 1, 'wght' 700" : "'FILL' 0, 'wght' 400"}}>favorite</span></button>
+              ); })()}
             </div>
           ))}
         </div>
