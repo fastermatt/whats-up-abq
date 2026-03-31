@@ -223,6 +223,14 @@ const ADULT_VENUE_KEYWORDS = [
 const JUNK_NAME_PATTERNS = [
   /pss vip parking/i, /non-manifested shell event/i,
   /gift cards?$/i, /replica game ball/i,
+  // Season-ticket / deposit placeholder events (not real discrete events)
+  /\bseason\s+(ticket|pass)\b/i, /\bdeposits?\b/i,
+  /\b(amp\.?|amphitheater)\s+series\b/i,
+  /\bpremium\s+season\b/i,
+  // Souvenir-only listings (not a real event entry)
+  /souvenir\s+ticket/i,
+  // VIP upgrade listings that duplicate the main event
+  /\bvip\s+upgrade\b/i, /\bvip\s+package\b/i,
 ];
 
 function tagAdultEvent(ev: TMEvent): TMEvent {
@@ -4882,6 +4890,15 @@ const LOADING_MESSAGES = [
 function LoadingScreen() {
   const [msgIdx, setMsgIdx] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
+  // Don't show anything for the first 800 ms. Fast connections and cache hits
+  // will finish loading before this fires, so the screen is never visible.
+  // Only slow/first-time connections will ever see the loading UI.
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const showTimer = setTimeout(() => setVisible(true), 800);
+    return () => clearTimeout(showTimer);
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -4893,6 +4910,8 @@ function LoadingScreen() {
     }, 2400);
     return () => clearInterval(timer);
   }, []);
+
+  if (!visible) return null;
 
   return (
     <>
@@ -6545,10 +6564,27 @@ export default function App() {
   const [placesNavKey, setPlacesNavKey] = useState(0);
   const [placesNavCat, setPlacesNavCat] = useState('All');
   const [placesNavSearch, setPlacesNavSearch] = useState('');
-  const [places, setPlaces] = useState<Place[]>([]);
+  // Pre-seed places from the localStorage cache so returning users see the app
+  // immediately without waiting for a network fetch.
+  const [places, setPlaces] = useState<Place[]>(() => {
+    try {
+      const raw = localStorage.getItem('abq_places_v2');
+      if (!raw) return [];
+      const { data } = JSON.parse(raw) as { data: Place[]; ts: number };
+      return Array.isArray(data) && data.length > 0 ? data : [];
+    } catch { return []; }
+  });
   const [events, setEvents] = useState<TMEvent[]>([]);
   const [eventsNavSearch, setEventsNavSearch] = useState('');
-  const [loading, setLoading] = useState(true);
+  // Only block on the loading screen if there's no cached data to show.
+  const [loading, setLoading] = useState(() => {
+    try {
+      const raw = localStorage.getItem('abq_places_v2');
+      if (!raw) return true;
+      const { data } = JSON.parse(raw) as { data: Place[]; ts: number };
+      return !(Array.isArray(data) && data.length > 0);
+    } catch { return true; }
+  });
   const [eventsLoading, setEventsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
@@ -6788,14 +6824,18 @@ export default function App() {
   const resolvedMapProvider: 'google' | 'apple' =
     mapProvider === 'auto' ? (isIOS ? 'apple' : 'google') : mapProvider;
 
+  // siteConfig is stored in the Supabase `config` table (AdminPanel uses cfgSet/cfgGet)
   useEffect(() => {
-    _fbGetDoc('config', 'siteConfig', 'key').then(snap => {
-      if (snap.exists()) {
-        const d = snap.data();
-        if (d.banner?.active) setSiteBanner(d.banner as BannerConfig);
+    (supabase.from as any)('config')
+      .select('value')
+      .eq('key', 'siteConfig')
+      .maybeSingle()
+      .then(({ data }: { data: { value: Record<string, unknown> } | null }) => {
+        const d = data?.value;
+        if (!d) return;
+        if ((d.banner as any)?.active) setSiteBanner(d.banner as BannerConfig);
         if (d.mapProvider) setMapProvider(d.mapProvider as 'google' | 'apple' | 'auto');
-      }
-    });
+      });
   }, []);
 
   // ── Load theme config from Supabase and inject CSS variables ──────────────
@@ -7071,9 +7111,29 @@ export default function App() {
           }
         }
         const seen = new Set<string>();
+        const normT = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
+
+        // ── Deduplicate TM events by name+date before building the live list.
+        // TM sometimes returns the same show under slightly different venue-name
+        // spellings (e.g. "El Rey Theatre" vs "El Rey - NM"), producing duplicates
+        // that the per-ID seen-set can't catch.  The _tmIndex map already groups by
+        // normTitle|date, so iterating its values gives one entry per show.
+        const dedupedTM = [..._tmIndex.values()];
+
+        // ── 90-day horizon cap ───────────────────────────────────────────────
+        // Showing events 12+ months out overwhelms the list for no practical gain.
+        const horizonDate = new Date();
+        horizonDate.setDate(horizonDate.getDate() + 90);
+        const horizonStr = horizonDate.toISOString().split('T')[0];
+        const isWithinHorizon = (ev: TMEvent): boolean => {
+          const d = ev.dates?.start?.localDate;
+          if (!d) return true; // no date → keep (e.g. ongoing/static events)
+          return d <= horizonStr;
+        };
+
         // Build merged list: live API events first, then static events that aren't duplicates
         const liveEvents = [
-          ..._tmEvents,
+          ...dedupedTM,
           ..._ebOnlyEvents,
           ..._sgOnlyEvents,
           ...toArr(bitResult),
@@ -7084,9 +7144,7 @@ export default function App() {
           return true;
         });
 
-        // Add static events, skipping IDs already seen from live sources
-        console.log('[Static] STATIC_TM_EVENTS count:', STATIC_TM_EVENTS.length, 'TODAY:', TODAY);
-        const normT = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
+        // Add static events, skipping IDs/titles already seen from live sources
         const liveTitles = new Set(liveEvents.map(e => normT(e.name || '')));
         const staticOnly = STATIC_TM_EVENTS.filter(e => {
           if (seen.has(e.id)) return false;
@@ -7094,7 +7152,6 @@ export default function App() {
           seen.add(e.id);
           return true;
         });
-        console.log('[Static] staticOnly count:', staticOnly.length, 'merged total:', liveEvents.length + staticOnly.length);
 
         // ── ABQ metro geo filter ─────────────────────────────────────────────
         // Only show events whose venue city is in the greater ABQ metro area.
@@ -7124,6 +7181,7 @@ export default function App() {
         const merged = [...liveEvents, ...staticOnly]
           .filter(isInMetro)
           .filter(hasActionableLink)
+          .filter(isWithinHorizon)
           .filter(e => !isJunkEvent(e))
           .map(tagAdultEvent);
         setEvents(merged);
