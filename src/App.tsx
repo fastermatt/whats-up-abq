@@ -5723,7 +5723,7 @@ function PlanScreen({
           <div className="flex flex-col gap-3">
             {events.map(({ data: ev }) => {
               const { month, day } = fmtLocalDate(ev.dates?.start?.localDate || '');
-              const img = getBestEventImage(ev);
+              const img = getBestEventImage(ev.images);
               const venue = ev._embedded?.venues?.[0];
               const mapsQ = encodeURIComponent((venue?.address?.line1 || venue?.name || ev.name) + ' Albuquerque NM');
               return (
