@@ -285,6 +285,8 @@ function staticEventToTMEvent(ev: StaticEvent): TMEvent {
     url: ev.ticketUrl || ev.website || undefined,
     _source: isFreeInfo ? 'local' : (ev.source || '').toLowerCase().replace(/\s+/g, ''),
     _isAdult: ev.is21Plus === true || undefined,
+    info: ev.description || undefined,
+    pleaseNote: ev.pleaseNote || undefined,
     images: ev.image ? [{ url: ev.image }] : undefined,
     dates: {
       start: {
