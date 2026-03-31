@@ -266,7 +266,7 @@ function staticEventToTMEvent(ev: StaticEvent): TMEvent {
   const tm: TMEvent = {
     id: ev.id,
     name: ev.title,
-    url: ev.ticketUrl || undefined,
+    url: ev.ticketUrl || ev.website || undefined,
     _source: isFreeInfo ? 'local' : (ev.source || '').toLowerCase().replace(/\s+/g, ''),
     _isAdult: ev.is21Plus === true || undefined,
     images: ev.image ? [{ url: ev.image }] : undefined,
@@ -411,7 +411,11 @@ const GEO_GRANTED_KEY = 'abq_geo_granted';
 function useGeolocation() {
   const [coords, setCoords] = useState<GeoCoords | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [requested, setRequested] = useState(false);
+  // Start as "requested" if the user already granted permission before —
+  // prevents a flash of the "Enable location" prompt on every page load.
+  const [requested, setRequested] = useState(() => {
+    try { return localStorage.getItem(GEO_GRANTED_KEY) === 'true'; } catch { return false; }
+  });
 
   const request = useCallback(() => {
     if (!navigator.geolocation) {
