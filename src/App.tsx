@@ -5920,6 +5920,9 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
   const [search, setSearch] = useState('');
   const [sort, setSort]     = useState<'top' | 'near' | 'az'>('top');
   const [detail, setDetail] = useState<{ type: 'place'; data: Place } | { type: 'event'; data: TMEvent } | null>(null);
+  const windowWidth         = useWindowWidth();
+  // Below 1280px the main panel is too narrow for hero+events side-by-side
+  const isNarrowDesktop     = windowWidth < 1280;
 
   // This-week events
   const weekEvents = useMemo(() => {
@@ -6413,8 +6416,8 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
             {/* ── DISCOVER ── */}
             {tab === 'discover' && (
               <>
-                {/* Hero + Events This Week — side by side */}
-                <div style={{ display:'grid', gridTemplateColumns:'minmax(0,3fr) minmax(0,2fr)', gap:'0', marginBottom:'24px', border:'2px solid #1a1a1a', boxShadow:'4px 4px 0 #1a1a1a' }}>
+                {/* Hero + Events This Week — side by side on wide desktop, stacked on narrow */}
+                <div style={{ display:'grid', gridTemplateColumns: isNarrowDesktop ? '1fr' : 'minmax(0,3fr) minmax(0,2fr)', gap:'0', marginBottom:'24px', border:'2px solid #1a1a1a', boxShadow:'4px 4px 0 #1a1a1a' }}>
                   {/* Hero */}
                   <div style={{ background:'linear-gradient(135deg,#566500,#8a9e00)', padding:'clamp(14px,2vw,24px) clamp(14px,2vw,28px) clamp(12px,1.5vw,20px)', position:'relative', overflow:'hidden', minWidth:0 }}>
                     <div style={{ position:'absolute', top:'-30px', right:'-30px', width:'180px', height:'180px', background:'rgba(212,239,77,0.1)', borderRadius:'50%' }} />
@@ -6432,7 +6435,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
                   </div>
 
                   {/* Events This Week */}
-                  <div style={{ background:'#1a1a1a', borderLeft:'2px solid #1a1a1a', display:'flex', flexDirection:'column', minWidth:0 }}>
+                  <div style={{ background:'#1a1a1a', borderLeft: isNarrowDesktop ? 'none' : '2px solid #1a1a1a', borderTop: isNarrowDesktop ? '2px solid #1a1a1a' : 'none', display:'flex', flexDirection:'column', minWidth:0 }}>
                     <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 16px', borderBottom:'1px solid rgba(255,255,255,0.1)', flexShrink:0 }}>
                       <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'12px', letterSpacing:'0.1em', textTransform:'uppercase', color:'#fff' }}>Events This Week</div>
                       <span onClick={() => setTab('events')} style={{ fontSize:'10px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', color:'#d4ef4d', cursor:'pointer' }}>
@@ -6462,7 +6465,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
                       All places <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>arrow_forward</span>
                     </span>
                   </div>
-                  <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:'8px', marginBottom:'24px' }}>
+                  <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(220px, 1fr))', gap:'8px', marginBottom:'24px' }}>
                     {nearbyPlaces.slice(0,4).map(({ place, dist }) => <PlaceCard key={place.id} p={place} dist={dist} />)}
                   </div>
                 </>}
@@ -6472,7 +6475,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
                   <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'12px', letterSpacing:'0.08em', textTransform:'uppercase' }}>Hidden Gems</div>
                   <span style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', color:'#5c6660' }}>★ 4.5+ Rated</span>
                 </div>
-                <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:'8px', marginBottom:'24px' }}>
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(220px, 1fr))', gap:'8px', marginBottom:'24px' }}>
                   {hiddenGems.slice(0,4).map(p => <PlaceCard key={p.id} p={p} />)}
                 </div>
               </>
@@ -6492,7 +6495,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
 
             {/* ── PLACES TAB ── */}
             {tab === 'places' && (
-              <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'10px' }}>
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(175px, 1fr))', gap:'10px' }}>
                 {filteredPlaces.slice(0,60).map(p => <PlaceGridCard key={p.id} p={p} />)}
               </div>
             )}
@@ -6520,6 +6523,17 @@ function useIsDesktop() {
     return () => window.removeEventListener('resize', handler);
   }, []);
   return isDesktop;
+}
+
+// Tracks the live window width so layouts can adapt within the desktop range
+function useWindowWidth() {
+  const [width, setWidth] = useState(() => typeof window !== 'undefined' ? window.innerWidth : 1440);
+  useEffect(() => {
+    const handler = () => setWidth(window.innerWidth);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+  return width;
 }
 
 export default function App() {
