@@ -111,6 +111,24 @@ html { background-color: #F8FAF8; }
 html, body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif !important;
 }
+/* Preserve Material Symbols icon font — must not be overridden */
+.material-symbols-outlined,
+.material-symbols-rounded,
+.material-symbols-sharp,
+.material-icons {
+  font-family: 'Material Symbols Outlined', 'Material Icons' !important;
+  font-style: normal;
+  font-weight: normal;
+  font-size: inherit;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+}
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Epilogue', 'Inter', sans-serif !important;
   letter-spacing: -0.02em;
