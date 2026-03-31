@@ -33,7 +33,7 @@ function useFadeIn(delay = 0) {
 if (typeof document !== 'undefined' && !document.getElementById('card-fade-style')) {
   const s = document.createElement('style');
   s.id = 'card-fade-style';
-  s.textContent = '@keyframes cardFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
+  s.textContent = '@keyframes cardFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes kenBurns0 { from { transform: scale(1.05) translate(0%,0%); } to { transform: scale(1.18) translate(-2%,-1%); } } @keyframes kenBurns1 { from { transform: scale(1.1) translate(-1%,1%); } to { transform: scale(1.2) translate(2%,-2%); } } @keyframes kenBurns2 { from { transform: scale(1.08) translate(1%,-1%); } to { transform: scale(1.18) translate(-1%,2%); } } @keyframes kenBurns3 { from { transform: scale(1.12) translate(-2%,0%); } to { transform: scale(1.05) translate(1%,-1%); } }';
   document.head.appendChild(s);
 }
 
@@ -750,6 +750,93 @@ function GeoBanner({
 
 // ─── Place Card ─────────────────────────────────────────────────────────────
 
+// ─── Ken Burns Photo Slider (PlaceCard) ─────────────────────────────────────
+function PlaceCardImageSlider({ place }: { place: Place }) {
+  const allPhotos = [place.thumbnail || place.image, ...(place.additionalImages ?? [])].filter(Boolean) as string[];
+  const [idx, setIdx] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+  const autoRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const count = allPhotos.length;
+
+  const scheduleNext = useCallback(() => {
+    if (autoRef.current) clearTimeout(autoRef.current);
+    if (count > 1) {
+      autoRef.current = setTimeout(() => {
+        setIdx(i => (i + 1) % count);
+      }, 4200);
+    }
+  }, [count]);
+
+  useEffect(() => {
+    if (!paused) scheduleNext();
+    return () => { if (autoRef.current) clearTimeout(autoRef.current); };
+  }, [idx, paused, scheduleNext]);
+
+  const goTo = (i: number, pauseMs = 0) => {
+    setIdx(i);
+    if (pauseMs) { setPaused(true); setTimeout(() => setPaused(false), pauseMs); }
+  };
+
+  const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; setPaused(true); };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(dx) > 40) goTo(dx < 0 ? (idx + 1) % count : (idx - 1 + count) % count, 3000);
+    else setTimeout(() => setPaused(false), 500);
+    touchStartX.current = null;
+  };
+
+  if (allPhotos.length === 0) return <div className="w-full h-full" style={{ background: 'var(--brand-gradient)' }} />;
+
+  return (
+    <div
+      className="w-full h-full relative overflow-hidden"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+    >
+      {allPhotos.map((src, i) => (
+        <div
+          key={src}
+          className="absolute inset-0"
+          style={{ opacity: i === idx ? 1 : 0, transition: 'opacity 0.65s ease', overflow: 'hidden' }}
+        >
+          <img
+            src={src}
+            alt=""
+            loading={i === 0 ? 'eager' : 'lazy'}
+            decoding="async"
+            style={{
+              width: '100%', height: '100%', objectFit: 'cover',
+              animation: i === idx ? `kenBurns${i % 4} 8s ease-in-out forwards` : 'none',
+              transformOrigin: 'center center',
+              willChange: 'transform',
+            }}
+          />
+        </div>
+      ))}
+      {count > 1 && (
+        <div className="absolute bottom-1.5 left-0 right-0 flex justify-center gap-1" style={{ zIndex: 2 }}>
+          {allPhotos.map((_, i) => (
+            <button
+              key={i}
+              onClick={e => { e.stopPropagation(); goTo(i, 3000); }}
+              style={{
+                width: i === idx ? '14px' : '5px', height: '5px', borderRadius: '3px',
+                background: i === idx ? 'white' : 'rgba(255,255,255,0.5)',
+                border: 'none', padding: 0, minHeight: 0, cursor: 'pointer',
+                transition: 'width 0.3s ease, background 0.3s ease',
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const PlaceCard = React.memo(function PlaceCard({
   place, onClick, distance, isCheckedIn, onCheckIn, tooFar,
 }: {
@@ -772,14 +859,8 @@ const PlaceCard = React.memo(function PlaceCard({
       style={{ border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A', animation: 'cardFadeIn 0.3s ease both', contain: 'layout paint' }}
     >
       <div className="relative" style={{ height: '140px' }}>
-        <ImageWithFallback
-          src={place.thumbnail || place.image}
-          alt={place.name}
-          className="w-full h-full object-cover"
-          gradient={'var(--brand-gradient)'}
-          showLabel={!place.image}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+        <PlaceCardImageSlider place={place} />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
         {distance != null && (
           <div className="absolute top-2 right-2">
             <span
@@ -833,8 +914,8 @@ const PlaceCard = React.memo(function PlaceCard({
               style={{
                 fontFamily: 'Inter, sans-serif',
                 letterSpacing: '0.06em',
-                background: isCheckedIn ? '#1A1A1A' : '#1ebaeb',
-                color: isCheckedIn ? 'white' : '#1A1A1A',
+                background: tooFar ? '#888' : isCheckedIn ? '#1A1A1A' : '#1ebaeb',
+                color: tooFar ? 'white' : isCheckedIn ? 'white' : '#1A1A1A',
                 border: '1.5px solid #1A1A1A',
                 borderRadius: 0,
               }}
@@ -2821,7 +2902,7 @@ function EventsScreen({
         </div>
       </div>
 
-      <div className="flex px-5 overflow-x-auto" style={{ scrollbarWidth: 'none', position: 'sticky', top: 'calc(var(--sat) + 72px)', zIndex: 30, background: 'white', paddingTop: '12px', paddingBottom: '0px', borderBottom: '2px solid #1A1A1A' }}>
+      <div className="flex px-5 overflow-x-auto" style={{ scrollbarWidth: 'none', position: 'sticky', top: 'calc(var(--sat) + 58px)', zIndex: 30, background: 'white', paddingTop: '12px', paddingBottom: '0px', borderBottom: '2px solid #1A1A1A' }}>
         {EVENT_GENRES.map(genre => (
           <button
             key={genre}
@@ -2939,7 +3020,7 @@ function PlacesScreen({
   };
 
   const NEIGHBORHOOD_BOUNDS: Record<string, { minLat: number; maxLat: number; minLng: number; maxLng: number }> = {
-    'NE Heights':   { minLat: 35.067, maxLat: 35.220, minLng: -106.616, maxLng: -106.465 },
+    'NE Heights':   { minLat: 35.067, maxLat: 35.220, minLng: -106.652, maxLng: -106.465 },
     'Old Town':     { minLat: 35.088, maxLat: 35.108, minLng: -106.682, maxLng: -106.655 },
     'Nob Hill':     { minLat: 35.073, maxLat: 35.092, minLng: -106.640, maxLng: -106.595 },
     'Downtown':     { minLat: 35.070, maxLat: 35.098, minLng: -106.665, maxLng: -106.635 },
@@ -6767,7 +6848,7 @@ export default function App() {
         <SiteBanner banner={siteBanner} />
 
         {/* Screen content */}
-        <main className="flex-1" style={{ paddingBottom: 'calc(var(--sab) + 72px)' }}>
+        <main className="flex-1" style={{ paddingBottom: 'calc(var(--sab) + 80px)' }}>
           {activeTab === 'discover' && (
             <DiscoverScreen
               places={places}
@@ -6845,9 +6926,9 @@ export default function App() {
               key={item.id}
               onClick={() => navigateTab(item.id)}
               aria-label={item.label}
-              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 transition-none"
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-3 transition-none"
               style={{
-                minHeight: '52px',
+                minHeight: '64px',
                 background: activeTab === item.id ? '#1A1A1A' : 'white',
                 borderRight: idx < NAV_ITEMS.length - 1 ? '1.5px solid #1A1A1A' : 'none',
                 borderRadius: 0,
