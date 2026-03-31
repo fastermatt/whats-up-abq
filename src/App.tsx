@@ -1153,7 +1153,7 @@ function PlacePhotoGallery({ place }: { place: Place }) {
 }
 
 function PlaceDetailModal({
-  place, onClose, isCheckedIn, onCheckIn, checkInError, tooFar, user, onShowAuth,
+  place, onClose, isCheckedIn, onCheckIn, checkInError, tooFar, user, onShowAuth, isSaved, onToggleSave,
 }: {
   place: Place;
   onClose: () => void;
@@ -1163,6 +1163,8 @@ function PlaceDetailModal({
   tooFar?: boolean;
   user: User | null;
   onShowAuth: () => void;
+  isSaved?: boolean;
+  onToggleSave?: () => void;
 }) {
   const [shared, setShared] = useState(false);
   const detailCatMeta = PLACE_CATEGORIES.find(c => c.value === place.category) || PLACE_CATEGORIES.find(c => c.label === place.category);
@@ -1170,9 +1172,15 @@ function PlaceDetailModal({
   const detailCatLabel = detailCatMeta?.label || place.category || '';
   const mapsQuery = encodeURIComponent((place.address || place.name) + ' Albuquerque NM');
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 z-50 flex justify-center" style={{ background: 'rgba(0,0,0,0.3)' }}>
-      <div className="flex flex-col overflow-y-auto w-full" style={{ maxWidth: '480px', background: 'white' }}>
+    <div className="fixed inset-0 z-[150] flex justify-center" style={{ background: 'rgba(0,0,0,0.5)' }} onClick={onClose}>
+      <div className="flex flex-col overflow-y-auto w-full" style={{ maxWidth: '480px', background: 'white' }} onClick={e => e.stopPropagation()}>
       <div className="relative flex-shrink-0" style={{ height: '260px' }}>
         <PlacePhotoGallery place={place} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
@@ -1184,18 +1192,30 @@ function PlaceDetailModal({
           >
             <span className="material-symbols-outlined text-white">arrow_back</span>
           </button>
-          <button
-            onClick={async () => {
-              if (navigator.share) {
-                try { await navigator.share({ title: place.name, text: `${place.name} — ${place.description || place.category || ''}`, url: place.website || 'https://abqunplugged.com' }); setShared(true); setTimeout(() => setShared(false), 2000); return; } catch { /* fall through */ }
-              }
-              try { await navigator.clipboard.writeText(`${place.name}\n${place.address || ''}\n${place.website || 'https://abqunplugged.com'}`); setShared(true); setTimeout(() => setShared(false), 2000); } catch { /* ignore */ }
-            }}
-            className="w-10 h-10 rounded-full flex items-center justify-center"
-            style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)' }}
-          >
-            <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>{shared ? 'check' : 'share'}</span>
-          </button>
+          <div className="flex items-center gap-2">
+            {onToggleSave && (
+              <button
+                onClick={onToggleSave}
+                className="w-10 h-10 rounded-full flex items-center justify-center"
+                style={{ background: isSaved ? 'var(--brand)' : 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)' }}
+                title={isSaved ? 'Remove from plan' : 'Save to plan'}
+              >
+                <span className="material-symbols-outlined text-white" style={{ fontSize: '20px', fontVariationSettings: isSaved ? "'FILL' 1" : "'FILL' 0" }}>bookmark</span>
+              </button>
+            )}
+            <button
+              onClick={async () => {
+                if (navigator.share) {
+                  try { await navigator.share({ title: place.name, text: `${place.name} — ${place.description || place.category || ''}`, url: place.website || 'https://abqunplugged.com' }); setShared(true); setTimeout(() => setShared(false), 2000); return; } catch { /* fall through */ }
+                }
+                try { await navigator.clipboard.writeText(`${place.name}\n${place.address || ''}\n${place.website || 'https://abqunplugged.com'}`); setShared(true); setTimeout(() => setShared(false), 2000); } catch { /* ignore */ }
+              }}
+              className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)' }}
+            >
+              <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>{shared ? 'check' : 'share'}</span>
+            </button>
+          </div>
         </div>
         <div className="absolute bottom-4 left-4 right-4" style={{ zIndex: 3, pointerEvents: 'none' }}>
           <span
@@ -1747,7 +1767,7 @@ async function shareEvent(event: TMEvent) {
 
 // ─── Event Detail Modal ──────────────────────────────────────────────────────
 
-function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => void }) {
+function EventDetailModal({ event, onClose, isSaved, onToggleSave }: { event: TMEvent; onClose: () => void; isSaved?: boolean; onToggleSave?: () => void }) {
   const [shared, setShared] = useState(false);
   const venue = event._embedded?.venues?.[0];
   const category = getEventCategory(event);
@@ -1756,9 +1776,15 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
     (venue?.address?.line1 || venue?.name || event.name) + ' Albuquerque NM'
   );
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 z-50 flex justify-center" style={{ background: 'rgba(0,0,0,0.3)' }}>
-      <div className="flex flex-col overflow-y-auto w-full" style={{ maxWidth: '480px', background: 'white' }}>
+    <div className="fixed inset-0 z-[150] flex justify-center" style={{ background: 'rgba(0,0,0,0.5)' }} onClick={onClose}>
+      <div className="flex flex-col overflow-y-auto w-full" style={{ maxWidth: '480px', background: 'white' }} onClick={e => e.stopPropagation()}>
       <div className="relative flex-shrink-0" style={{ height: '280px' }}>
         <EventCardImageSlider event={event} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent pointer-events-none" />
@@ -1771,15 +1797,27 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
           >
             <span className="material-symbols-outlined text-white">arrow_back</span>
           </button>
-          <button
-            onClick={async () => { await shareEvent(event); setShared(true); setTimeout(() => setShared(false), 2000); }}
-            className="w-10 h-10 rounded-full flex items-center justify-center"
-            style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)' }}
-          >
-            <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>
-              {shared ? 'check' : 'share'}
-            </span>
-          </button>
+          <div className="flex items-center gap-2">
+            {onToggleSave && (
+              <button
+                onClick={onToggleSave}
+                className="w-10 h-10 rounded-full flex items-center justify-center"
+                style={{ background: isSaved ? 'var(--brand)' : 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)' }}
+                title={isSaved ? 'Remove from plan' : 'Save to plan'}
+              >
+                <span className="material-symbols-outlined text-white" style={{ fontSize: '20px', fontVariationSettings: isSaved ? "'FILL' 1" : "'FILL' 0" }}>bookmark</span>
+              </button>
+            )}
+            <button
+              onClick={async () => { await shareEvent(event); setShared(true); setTimeout(() => setShared(false), 2000); }}
+              className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)' }}
+            >
+              <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>
+                {shared ? 'check' : 'share'}
+              </span>
+            </button>
+          </div>
         </div>
         <div className="absolute bottom-4 left-4 right-4" style={{ zIndex: 3, pointerEvents: 'none' }}>
           <span
@@ -5597,12 +5635,143 @@ function AdminScreen({ user, onBack }: { user: User | null; onBack: () => void }
   );
 }
 
+// ─── Plan Screen ──────────────────────────────────────────────────────────────
+
+type SavedPlanItem = { type: 'place'; data: Place } | { type: 'event'; data: TMEvent };
+
+function PlanScreen({
+  savedPlan, onPlaceSelect, onEventSelect, onRemovePlace, onRemoveEvent, onClearAll,
+}: {
+  savedPlan: SavedPlanItem[];
+  onPlaceSelect: (p: Place) => void;
+  onEventSelect: (e: TMEvent) => void;
+  onRemovePlace: (id: string) => void;
+  onRemoveEvent: (id: string) => void;
+  onClearAll: () => void;
+}) {
+  const places = savedPlan.filter(i => i.type === 'place') as { type: 'place'; data: Place }[];
+  const events = savedPlan.filter(i => i.type === 'event') as { type: 'event'; data: TMEvent }[];
+
+  if (savedPlan.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center px-8 text-center" style={{ paddingTop: '100px', paddingBottom: '60px' }}>
+        <span className="material-symbols-outlined" style={{ fontSize: '64px', color: '#d0d8d0', marginBottom: '16px' }}>bookmark</span>
+        <h2 className="font-black text-xl mb-2" style={{ fontFamily: 'Epilogue, sans-serif', color: '#1a1a1a' }}>Your plan is empty</h2>
+        <p className="text-sm" style={{ color: '#888', fontFamily: 'Inter, sans-serif', lineHeight: 1.6 }}>
+          Browse places and events, then tap the <strong>bookmark icon</strong> in any detail view to save them here.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="pb-10">
+      {/* Header */}
+      <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-white border-b-2 border-black">
+        <div>
+          <h1 className="font-black text-xl leading-tight" style={{ fontFamily: 'Epilogue, sans-serif' }}>My Plan</h1>
+          <p className="text-xs mt-0.5" style={{ color: '#888', fontFamily: 'Inter, sans-serif' }}>{savedPlan.length} {savedPlan.length === 1 ? 'stop' : 'stops'}</p>
+        </div>
+        <button onClick={onClearAll} className="text-xs font-bold px-3 py-1.5" style={{ border: '1.5px solid #1a1a1a', fontFamily: 'Inter, sans-serif', color: '#dc2626' }}>
+          Clear All
+        </button>
+      </div>
+
+      {/* Places section */}
+      {places.length > 0 && (
+        <div className="px-5 pt-5">
+          <h2 className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: '#888', fontFamily: 'Inter, sans-serif' }}>
+            📍 Places ({places.length})
+          </h2>
+          <div className="flex flex-col gap-3">
+            {places.map(({ data: p }) => (
+              <div key={p.id} className="flex items-stretch gap-3 bg-white" style={{ border: '2px solid #1a1a1a', boxShadow: '3px 3px 0 #1a1a1a' }}>
+                <button onClick={() => onPlaceSelect(p)} className="flex items-center gap-3 flex-1 p-3 text-left">
+                  <div className="flex-shrink-0 rounded overflow-hidden" style={{ width: 56, height: 56, background: '#f0f0f0' }}>
+                    {(p.thumbnail || p.image) && <img src={p.thumbnail || p.image} alt="" className="w-full h-full object-cover" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-black text-sm truncate" style={{ fontFamily: 'Epilogue, sans-serif' }}>{p.name}</p>
+                    <p className="text-xs mt-0.5 truncate" style={{ color: '#888', fontFamily: 'Inter, sans-serif' }}>{p.category}</p>
+                    {p.address && <p className="text-xs mt-0.5 truncate" style={{ color: '#aaa', fontFamily: 'Inter, sans-serif' }}>{p.address.split(',')[0]}</p>}
+                  </div>
+                </button>
+                <div className="flex flex-col border-l-2 border-black">
+                  {p.address && (
+                    <a href={`https://maps.google.com/?q=${encodeURIComponent(p.address + ' Albuquerque NM')}`} target="_blank" rel="noopener noreferrer"
+                      className="flex-1 flex flex-col items-center justify-center px-3 gap-0.5" style={{ background: 'var(--brand)', color: 'white', textDecoration: 'none', minWidth: '60px' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>directions</span>
+                      <span className="text-[9px] font-black uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>Go</span>
+                    </a>
+                  )}
+                  <button onClick={() => onRemovePlace(p.id)} className="flex items-center justify-center px-3 py-2" style={{ borderTop: '1.5px solid #1a1a1a', background: 'white' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#dc2626' }}>close</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Events section */}
+      {events.length > 0 && (
+        <div className="px-5 pt-5">
+          <h2 className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: '#888', fontFamily: 'Inter, sans-serif' }}>
+            🎟 Events ({events.length})
+          </h2>
+          <div className="flex flex-col gap-3">
+            {events.map(({ data: ev }) => {
+              const { month, day } = fmtLocalDate(ev.dates?.start?.localDate || '');
+              const img = getBestEventImage(ev);
+              const venue = ev._embedded?.venues?.[0];
+              const mapsQ = encodeURIComponent((venue?.address?.line1 || venue?.name || ev.name) + ' Albuquerque NM');
+              return (
+                <div key={ev.id} className="flex items-stretch gap-3 bg-white" style={{ border: '2px solid #1a1a1a', boxShadow: '3px 3px 0 #1a1a1a' }}>
+                  <button onClick={() => onEventSelect(ev)} className="flex items-center gap-3 flex-1 p-3 text-left">
+                    <div className="flex-shrink-0 rounded overflow-hidden" style={{ width: 56, height: 56, background: '#1a1a1a' }}>
+                      {img ? <img src={img} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><span className="material-symbols-outlined text-white" style={{ fontSize: '22px' }}>confirmation_number</span></div>}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-black text-sm truncate" style={{ fontFamily: 'Epilogue, sans-serif' }}>{ev.name}</p>
+                      <p className="text-xs mt-0.5" style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>{month} {day}</p>
+                      {venue && <p className="text-xs mt-0.5 truncate" style={{ color: '#aaa', fontFamily: 'Inter, sans-serif' }}>{venue.name}</p>}
+                    </div>
+                  </button>
+                  <div className="flex flex-col border-l-2 border-black">
+                    <a href={`https://maps.google.com/?q=${mapsQ}`} target="_blank" rel="noopener noreferrer"
+                      className="flex-1 flex flex-col items-center justify-center px-3 gap-0.5" style={{ background: '#0057c2', color: 'white', textDecoration: 'none', minWidth: '60px' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>directions</span>
+                      <span className="text-[9px] font-black uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>Go</span>
+                    </a>
+                    <button onClick={() => onRemoveEvent(ev.id)} className="flex items-center justify-center px-3 py-2" style={{ borderTop: '1.5px solid #1a1a1a', background: 'white' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#dc2626' }}>close</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Share plan hint */}
+      <div className="mx-5 mt-6 p-4 text-center" style={{ background: '#f8faf8', border: '1.5px dashed #ccc' }}>
+        <p className="text-xs" style={{ color: '#888', fontFamily: 'Inter, sans-serif', lineHeight: 1.6 }}>
+          💡 Tap <strong>Go</strong> on any item to get directions, or tap the card to see full details and check in when you arrive.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ─── Navigation ───────────────────────────────────────────────────────────────
 
 const NAV_ITEMS = [
   { id: 'discover', label: 'Discover', icon: 'explore' },
   { id: 'events',   label: 'Events',   icon: 'confirmation_number' },
   { id: 'places',   label: 'Places',   icon: 'storefront' },
+  { id: 'plan',     label: 'Plan',     icon: 'bookmark' },
   { id: 'profile',  label: 'Profile',  icon: 'person' },
 ] as const;
 
@@ -5618,6 +5787,11 @@ interface DesktopAppProps {
   eventsLoading: boolean;
   onPlaceSelect: (p: Place) => void;
   onEventSelect: (e: TMEvent) => void;
+  savedPlan: SavedPlanItem[];
+  onToggleSavePlace: (p: Place) => void;
+  onToggleSaveEvent: (e: TMEvent) => void;
+  isPlaceSaved: (id: string) => boolean;
+  isEventSaved: (id: string) => boolean;
 }
 
 type DesktopTab = 'discover' | 'events' | 'places';
@@ -5658,7 +5832,7 @@ const dBLUE  = { background: '#0057c2' } as const;
 const dGREEN = { background: '#566500' } as const;
 const dDARK  = { background: '#1a1a1a' } as const;
 
-function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSelect, onEventSelect }: DesktopAppProps) {
+function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSelect, onEventSelect, savedPlan: _savedPlan, onToggleSavePlace, onToggleSaveEvent, isPlaceSaved, isEventSaved }: DesktopAppProps) {
   const [tab, setTab]       = useState<DesktopTab>('discover');
   const [cat, setCat]       = useState('All');
   const [search, setSearch] = useState('');
@@ -5949,10 +6123,10 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
                 <span className="material-symbols-outlined" style={{ fontSize:'13px' }}>{isFree ? 'open_in_new' : 'confirmation_number'}</span>
                 {isFree ? 'More Info' : 'Get Tickets'}
               </button>}
-              <button style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'2px 2px 0 #1a1a1a' }}>
-                <span className="material-symbols-outlined" style={{ fontSize:'16px' }}>bookmark_add</span>
+              <button onClick={() => onToggleSaveEvent(ev)} title={isEventSaved(ev.id) ? 'Remove from plan' : 'Save to plan'} style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background: isEventSaved(ev.id) ? 'var(--brand)' : '#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'2px 2px 0 #1a1a1a' }}>
+                <span className="material-symbols-outlined" style={{ fontSize:'16px', color: isEventSaved(ev.id) ? '#fff' : '#1a1a1a', fontVariationSettings: isEventSaved(ev.id) ? "'FILL' 1" : "'FILL' 0" }}>bookmark</span>
               </button>
-              <button style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'2px 2px 0 #1a1a1a' }}>
+              <button onClick={() => shareEvent(ev)} style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'2px 2px 0 #1a1a1a' }}>
                 <span className="material-symbols-outlined" style={{ fontSize:'16px' }}>share</span>
               </button>
             </div>
@@ -5990,8 +6164,8 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
               style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background:'#0057c2', color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'2px 2px 0 #1a1a1a' }}>
               <span className="material-symbols-outlined" style={{ fontSize:'16px' }}>directions</span>
             </button>}
-            <button style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'2px 2px 0 #1a1a1a' }}>
-              <span className="material-symbols-outlined" style={{ fontSize:'16px' }}>bookmark_add</span>
+            <button onClick={() => onToggleSavePlace(p)} title={isPlaceSaved(p.id) ? 'Remove from plan' : 'Save to plan'} style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background: isPlaceSaved(p.id) ? 'var(--brand)' : '#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'2px 2px 0 #1a1a1a' }}>
+              <span className="material-symbols-outlined" style={{ fontSize:'16px', color: isPlaceSaved(p.id) ? '#fff' : '#1a1a1a', fontVariationSettings: isPlaceSaved(p.id) ? "'FILL' 1" : "'FILL' 0" }}>bookmark</span>
             </button>
           </div>
         </div>
@@ -6284,6 +6458,30 @@ export default function App() {
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<TMEvent | null>(null);
   const [checkedIn, setCheckedIn] = useState<Set<string>>(loadCheckins);
+
+  // ── Plan / Saved Items ──
+  const [savedPlan, setSavedPlan] = useState<SavedPlanItem[]>(() => {
+    try { const s = localStorage.getItem('abq-saved-plan'); return s ? JSON.parse(s) : []; } catch { return []; }
+  });
+  const savePlanToStorage = (items: SavedPlanItem[]) => {
+    try { localStorage.setItem('abq-saved-plan', JSON.stringify(items)); } catch { /* ignore */ }
+  };
+  const toggleSavedPlace = (place: Place) => {
+    setSavedPlan(prev => {
+      const exists = prev.some(p => p.type === 'place' && (p.data as Place).id === place.id);
+      const next = exists ? prev.filter(p => !(p.type === 'place' && (p.data as Place).id === place.id)) : [...prev, { type: 'place' as const, data: place }];
+      savePlanToStorage(next); return next;
+    });
+  };
+  const toggleSavedEvent = (event: TMEvent) => {
+    setSavedPlan(prev => {
+      const exists = prev.some(p => p.type === 'event' && (p.data as TMEvent).id === event.id);
+      const next = exists ? prev.filter(p => !(p.type === 'event' && (p.data as TMEvent).id === event.id)) : [...prev, { type: 'event' as const, data: event }];
+      savePlanToStorage(next); return next;
+    });
+  };
+  const isPlaceSaved = (id: string) => savedPlan.some(p => p.type === 'place' && (p.data as Place).id === id);
+  const isEventSaved = (id: string) => savedPlan.some(p => p.type === 'event' && (p.data as TMEvent).id === id);
 
   // ── Firebase Auth ──
   const [user, setUser] = useState<User | null>(null);
@@ -6844,6 +7042,11 @@ export default function App() {
         eventsLoading={eventsLoading}
         onPlaceSelect={(p) => setSelectedPlace(p)}
         onEventSelect={(e) => setSelectedEvent(e)}
+        savedPlan={savedPlan}
+        onToggleSavePlace={toggleSavedPlace}
+        onToggleSaveEvent={toggleSavedEvent}
+        isPlaceSaved={isPlaceSaved}
+        isEventSaved={isEventSaved}
       />
       {selectedPlace && (
         <PlaceDetailModal
@@ -6855,9 +7058,11 @@ export default function App() {
           tooFar={tooFarPlaceId === selectedPlace.id}
           user={user}
           onShowAuth={() => setShowAuthModal(true)}
+          isSaved={isPlaceSaved(selectedPlace.id)}
+          onToggleSave={() => toggleSavedPlace(selectedPlace)}
         />
       )}
-      {selectedEvent && <EventDetailModal event={selectedEvent} onClose={() => { closeEventModal(); window.history.back(); }} />}
+      {selectedEvent && <EventDetailModal event={selectedEvent} onClose={() => { closeEventModal(); window.history.back(); }} isSaved={isEventSaved(selectedEvent.id)} onToggleSave={() => toggleSavedEvent(selectedEvent)} />}
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
     </ErrorBoundary>
   );
@@ -7091,6 +7296,16 @@ export default function App() {
               navCat={placesNavCat}
               navSearch={placesNavSearch}/>
           )}
+          {activeTab === 'plan' && (
+            <PlanScreen
+              savedPlan={savedPlan}
+              onPlaceSelect={openPlaceModal}
+              onEventSelect={openEventModal}
+              onRemovePlace={(id) => { setSavedPlan(prev => { const n = prev.filter(p => !(p.type === 'place' && (p.data as Place).id === id)); savePlanToStorage(n); return n; }); }}
+              onRemoveEvent={(id) => { setSavedPlan(prev => { const n = prev.filter(p => !(p.type === 'event' && (p.data as TMEvent).id === id)); savePlanToStorage(n); return n; }); }}
+              onClearAll={() => { setSavedPlan([]); localStorage.removeItem('abq-saved-plan'); }}
+            />
+          )}
           {activeTab === 'profile' && (
             <ProfileScreen
               checkedIn={checkedIn}
@@ -7197,10 +7412,12 @@ export default function App() {
           tooFar={tooFarPlaceId === selectedPlace.id}
           user={user}
           onShowAuth={() => setShowAuthModal(true)}
+          isSaved={isPlaceSaved(selectedPlace.id)}
+          onToggleSave={() => toggleSavedPlace(selectedPlace)}
         />
       )}
       {selectedEvent && (
-        <EventDetailModal event={selectedEvent} onClose={() => { closeEventModal(); window.history.back(); }} />
+        <EventDetailModal event={selectedEvent} onClose={() => { closeEventModal(); window.history.back(); }} isSaved={isEventSaved(selectedEvent.id)} onToggleSave={() => toggleSavedEvent(selectedEvent)} />
       )}
       {showAuthModal && (
         <AuthModal onClose={() => setShowAuthModal(false)} />
