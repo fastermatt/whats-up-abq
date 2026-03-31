@@ -287,7 +287,9 @@ function staticEventToTMEvent(ev: StaticEvent): TMEvent {
     _isAdult: ev.is21Plus === true || undefined,
     info: ev.description || undefined,
     pleaseNote: ev.pleaseNote || undefined,
-    images: ev.image ? [{ url: ev.image }] : undefined,
+    images: ev.image
+      ? [{ url: ev.image, width: 1600, height: 900 }, ...(ev.additionalImages ?? []).map(u => ({ url: u }))]
+      : undefined,
     dates: {
       start: {
         localDate: ev.date,

@@ -49,6 +49,7 @@ export interface Event {
   price: string;
   priceNum?: number;      // 0=free, >0=price floor; undefined treated as 0
   image?: string;
+  additionalImages?: string[];  // extra photos shown in the modal image slider
   gradient?: string;
   featured?: boolean;
   tags?: string[];
@@ -4895,7 +4896,14 @@ export const ALL_EVENTS: Event[] = [
     date: '2026-04-05',
     time: '7:30 AM',
     category: 'Community',
-    image: 'https://easterabq.com/wp-content/uploads/2019-wide-03.jpg',
+    image: 'https://easterabq.com/wp-content/uploads/Easter-Sunrise-2026-Logo.webp',
+    additionalImages: [
+      'https://easterabq.com/wp-content/uploads/2019-wide-03.jpg',
+      'https://easterabq.com/wp-content/uploads/2019-wide-01.jpg',
+      'https://easterabq.com/wp-content/uploads/2019-wide-02.jpg',
+      'https://easterabq.com/wp-content/uploads/2019-tall-01.webp',
+      'https://easterabq.com/wp-content/uploads/2019-tall-02.webp',
+    ],
     description: "New Mexico's biggest Easter sunrise service at UNM Stadium. Featuring worship by Calvary MSC and Grammy-nominated Tim Timmons, with a message by Pastor Skip Heitzig. Free admission — no tickets required. Spanish translation and deaf interpretation available. Doors open 6:30 AM. Also broadcasting live on KRQE at 7am, and noon on FOX, CW, and NM 50.",
     pleaseNote: "No backpacks — all bags subject to inspection. Doors open 6:30 AM, service starts 7:30 AM. No tickets required, free admission. Spanish translation and deaf interpretation available.",
     ticketUrl: 'https://easterabq.com/',
