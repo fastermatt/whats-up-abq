@@ -1187,10 +1187,11 @@ function PlaceDetailModal({
         <div className="absolute top-4 left-4 right-4 flex items-center justify-between" style={{ zIndex: 3 }}>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="w-10 h-10 rounded-full flex items-center justify-center"
             style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)' }}
           >
-            <span className="material-symbols-outlined text-white">arrow_back</span>
+            <span className="material-symbols-outlined text-white" style={{ fontSize: '22px' }}>close</span>
           </button>
           <div className="flex items-center gap-2">
             {onToggleSave && (
@@ -1792,10 +1793,11 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave }: { event: TM
         <div className="absolute top-4 left-4 right-4 flex items-center justify-between" style={{ zIndex: 3 }}>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="w-10 h-10 rounded-full flex items-center justify-center"
             style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)' }}
           >
-            <span className="material-symbols-outlined text-white">arrow_back</span>
+            <span className="material-symbols-outlined text-white" style={{ fontSize: '22px' }}>close</span>
           </button>
           <div className="flex items-center gap-2">
             {onToggleSave && (
@@ -3102,6 +3104,32 @@ function EventsScreen({
     [filtered]
   );
 
+  // Deduplicate same-title + same-date events (e.g. multiple TM showtimes for the
+  // same movie listed as separate events). Keep only the first (earliest showtime).
+  // A "showtimes" count badge is shown for collapsed duplicates.
+  const { deduped, showtimeCounts } = useMemo(() => {
+    const seen = new Map<string, number>(); // key → count
+    const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 50);
+    sorted.forEach(e => {
+      const key = norm(e.name) + '|' + (e.dates?.start?.localDate || '') + '|' + (e._embedded?.venues?.[0]?.name || '');
+      seen.set(key, (seen.get(key) || 0) + 1);
+    });
+    const usedKeys = new Set<string>();
+    const deduped = sorted.filter(e => {
+      const key = norm(e.name) + '|' + (e.dates?.start?.localDate || '') + '|' + (e._embedded?.venues?.[0]?.name || '');
+      if (usedKeys.has(key)) return false;
+      usedKeys.add(key);
+      return true;
+    });
+    return { deduped, showtimeCounts: seen };
+  }, [sorted]);
+
+  const getShowtimeCount = (e: TMEvent) => {
+    const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 50);
+    const key = norm(e.name) + '|' + (e.dates?.start?.localDate || '') + '|' + (e._embedded?.venues?.[0]?.name || '');
+    return showtimeCounts.get(key) || 1;
+  };
+
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
       <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #1ebaeb', borderBottom: '2px solid #1A1A1A' }}>
@@ -3169,7 +3197,10 @@ function EventsScreen({
 
       <div className="px-5 pb-2 flex items-center justify-between" style={{ borderBottom: '1px solid #eee', paddingTop: 10, paddingBottom: 10 }}>
         <p className="text-sm font-semibold text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>
-          {sorted.length} event{sorted.length !== 1 ? 's' : ''}
+          {deduped.length} event{deduped.length !== 1 ? 's' : ''}
+          {deduped.length < sorted.length && (
+            <span className="ml-2 text-xs text-gray-400">({sorted.length - deduped.length} duplicate showtimes hidden)</span>
+          )}
           {(selectedGenre !== 'All' || search) && (
             <button
               onClick={() => { setSelectedGenre('All'); setSearch(''); }}
@@ -3183,13 +3214,24 @@ function EventsScreen({
       </div>
 
       <div className="px-5 pb-28 flex flex-col gap-3">
-        {sorted.map(event => (
-          <div key={event.id} style={{position:'relative'}}>
-            <EventCard event={event} onClick={() => onEventSelect(event)} />
-            <button style={{position:'absolute',top:8,right:8,zIndex:10,background:'white',border:'2px solid #1A1A1A',borderRadius:0,width:34,height:34,minHeight:0,color:'#1A1A1A',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'2px 2px 0 #1A1A1A'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:event.id,type:'event',name:event.name});}}><span className="material-symbols-outlined" style={{fontSize:'18px',fontVariationSettings:"'FILL' 0, 'wght' 400"}}>favorite</span></button>
-          </div>
-        ))}
-        {sorted.length === 0 && (
+        {deduped.map(event => {
+          const count = getShowtimeCount(event);
+          return (
+            <div key={event.id} style={{position:'relative'}}>
+              <EventCard event={event} onClick={() => onEventSelect(event)} />
+              {/* Showtime count badge — only shown when > 1 showtime was collapsed */}
+              {count > 1 && (
+                <div
+                  style={{ position:'absolute', bottom:8, left:8, background:'#1A1A1A', color:'#d4ef4d', fontSize:'9px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', padding:'2px 7px', border:'1.5px solid #1A1A1A', pointerEvents:'none' }}
+                >
+                  {count} showtimes
+                </div>
+              )}
+              <button style={{position:'absolute',top:8,right:8,zIndex:10,background:'white',border:'2px solid #1A1A1A',borderRadius:0,width:34,height:34,minHeight:0,color:'#1A1A1A',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'2px 2px 0 #1A1A1A'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:event.id,type:'event',name:event.name});}}><span className="material-symbols-outlined" style={{fontSize:'18px',fontVariationSettings:"'FILL' 0, 'wght' 400"}}>favorite</span></button>
+            </div>
+          );
+        })}
+        {deduped.length === 0 && (
           <div className="text-center py-16 text-gray-400">
             <span className="material-symbols-outlined" style={{ fontSize: '48px', display: 'block', marginBottom: '8px' }}>event_busy</span>
             <p className="font-semibold text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>No events found</p>
@@ -3227,6 +3269,9 @@ function PlacesScreen({
   const [sortMode, setSortMode] = useState<'top' | 'near' | 'az'>('top');
   const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  // Tracks whether the user tapped "Near Me" before location was available,
+  // so we can auto-activate the near sort once coords arrive (no second tap).
+  const pendingNearSort = useRef(false);
 
   // Debounce search input by 250ms
   useEffect(() => {
@@ -3235,6 +3280,15 @@ function PlacesScreen({
   }, [searchInput]);
 
   useEffect(() => { if (navKey > 0) { setSelectedCat(navCat || 'All'); setSearchInput(navSearch || ''); setSearch(navSearch || ''); } }, [navKey]);
+
+  // Auto-activate Near Me sort as soon as coords become available
+  // (fires when pendingNearSort was set because the user tapped before geo was ready)
+  useEffect(() => {
+    if (pendingNearSort.current && coords) {
+      setSortMode('near');
+      pendingNearSort.current = false;
+    }
+  }, [coords]);
 
   // Reset pagination when filters change
   useEffect(() => { setDisplayCount(PAGE_SIZE); }, [selectedCat, search, sortMode]);
@@ -3271,8 +3325,12 @@ function PlacesScreen({
 
   const filtered = useMemo(() => {
     let result = places.filter(isPlaceInMetro);
-    if (selectedCat !== 'All') result = result.filter(p => p.category === selectedCat);
-    if (search.trim()) {
+    // When a search query is active it overrides the category filter so users
+    // always search across ALL places — preventing the confusing "0 results"
+    // you get when a category is locked and the search term doesn't match it.
+    const searchActive = search.trim().length > 0;
+    if (selectedCat !== 'All' && !searchActive) result = result.filter(p => p.category === selectedCat);
+    if (searchActive) {
       const neighborhoodBounds = NEIGHBORHOOD_BOUNDS[search.trim()];
       if (neighborhoodBounds) {
         // Geographic bounding box filter for neighborhood selectors
@@ -3400,6 +3458,22 @@ function PlacesScreen({
         </div>
       </div>
 
+      {/* Search-scope badge: shown when a category is active AND a search is typed.
+          Lets the user know search is now global (overrides category), and offers
+          a one-tap way to jump back into the category they had selected. */}
+      {search.trim() && selectedCat !== 'All' && (
+        <div className="flex items-center gap-2 px-5 pb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <span className="text-xs text-gray-500">Searching all places · was in:</span>
+          <button
+            onClick={() => { setSearchInput(''); setSearch(''); }}
+            className="flex items-center gap-1 px-2 py-0.5 text-xs font-black uppercase"
+            style={{ background: 'var(--brand)', color: '#fff', border: '1.5px solid #1A1A1A', boxShadow: '2px 2px 0 #1A1A1A', letterSpacing: '0.08em' }}
+          >
+            {selectedCat} <span style={{ fontSize: '14px', lineHeight: 1 }}>×</span>
+          </button>
+        </div>
+      )}
+
       {/* Category pills */}
       <div className="flex px-5 pb-0 overflow-x-auto" style={{ scrollbarWidth: 'none', borderBottom: '2px solid #1A1A1A', paddingBottom: '12px', paddingTop: '12px' }}>
         {PLACE_CATEGORIES.map(cat => (
@@ -3434,7 +3508,7 @@ function PlacesScreen({
         ] as const).map(s => (
           <button
             key={s.id}
-            onClick={() => { if (s.disabled) { onRequestGeo(); } else { setSortMode(s.id); } }}
+            onClick={() => { if (s.disabled) { pendingNearSort.current = true; onRequestGeo(); } else { setSortMode(s.id); } }}
             className="flex-shrink-0 px-3 py-1.5 text-xs font-black uppercase transition-all"
             title={s.disabled ? 'Enable location to sort by distance' : undefined}
             style={{
