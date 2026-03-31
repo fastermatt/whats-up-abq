@@ -5,8 +5,10 @@ const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || 'e
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    flowType: 'pkce',           // PKCE is more secure than implicit; tokens not exposed in URL hash
-    detectSessionInUrl: true,   // auto-read hash tokens on load
-    persistSession: true,       // keep session in localStorage
+    flowType: 'pkce',            // PKCE is more secure than implicit; tokens not exposed in URL hash
+    detectSessionInUrl: true,    // auto-read hash tokens on load
+    persistSession: true,        // keep session in localStorage across app closes
+    autoRefreshToken: true,      // proactively refresh access token before it expires
+    storageKey: 'abq-unplugged-auth', // explicit key prevents conflicts
   },
 });

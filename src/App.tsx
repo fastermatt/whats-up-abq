@@ -929,71 +929,139 @@ const PlaceCard = React.memo(function PlaceCard({
   );
 });
 
+// ─── Event Card Image Slider ─────────────────────────────────────────────────
+function EventCardImageSlider({ event }: { event: TMEvent }) {
+  const typeMeta = getEventTypeMeta(event);
+  const category = getEventCategory(event);
+
+  const allPhotos = useMemo(() => {
+    const imgs = event.images ?? [];
+    const nonFallback = imgs.filter(img => !img.fallback);
+    const pool = nonFallback.length > 0 ? nonFallback : imgs;
+    const seen = new Set<string>();
+    return pool
+      .filter(img => { if (seen.has(img.url)) return false; seen.add(img.url); return true; })
+      .sort((a, b) => (b.width || 0) * (b.height || 0) - (a.width || 0) * (a.height || 0))
+      .slice(0, 5)
+      .map(img => hiResUrl(img.url));
+  }, [event.images]);
+
+  const [idx, setIdx] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+  const autoRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const count = allPhotos.length;
+
+  const scheduleNext = useCallback(() => {
+    if (autoRef.current) clearTimeout(autoRef.current);
+    if (count > 1) autoRef.current = setTimeout(() => setIdx(i => (i + 1) % count), 4200);
+  }, [count]);
+
+  useEffect(() => {
+    if (!paused) scheduleNext();
+    return () => { if (autoRef.current) clearTimeout(autoRef.current); };
+  }, [idx, paused, scheduleNext]);
+
+  const goTo = (i: number, pauseMs = 0) => {
+    setIdx(i);
+    if (pauseMs) { setPaused(true); setTimeout(() => setPaused(false), pauseMs); }
+  };
+
+  const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; setPaused(true); };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(dx) > 40) goTo(dx < 0 ? (idx + 1) % count : (idx - 1 + count) % count, 3000);
+    else setTimeout(() => setPaused(false), 500);
+    touchStartX.current = null;
+  };
+
+  if (allPhotos.length === 0) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center gap-1.5" style={{ background: typeMeta.bg }}>
+        <FlatIcon name={typeMeta.icon} size={32} color="white" />
+        <span style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.85)', letterSpacing: '0.1em', textTransform: 'uppercase' as const, fontFamily: 'Inter, sans-serif' }}>{category}</span>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="w-full h-full relative overflow-hidden"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+    >
+      {allPhotos.map((src, i) => (
+        <div key={src} className="absolute inset-0" style={{ opacity: i === idx ? 1 : 0, transition: 'opacity 0.65s ease', overflow: 'hidden' }}>
+          <img
+            src={src} alt="" loading={i === 0 ? 'eager' : 'lazy'} decoding="async"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', animation: i === idx ? `kenBurns${i % 4} 8s ease-in-out forwards` : 'none', transformOrigin: 'center center', willChange: 'transform' }}
+          />
+        </div>
+      ))}
+      {count > 1 && (
+        <div className="absolute bottom-1.5 left-0 right-0 flex justify-center gap-1" style={{ zIndex: 2 }}>
+          {allPhotos.map((_, i) => (
+            <button key={i} onClick={e => { e.stopPropagation(); goTo(i, 3000); }}
+              style={{ width: i === idx ? '14px' : '5px', height: '5px', borderRadius: '3px', background: i === idx ? 'white' : 'rgba(255,255,255,0.5)', border: 'none', padding: 0, minHeight: 0, cursor: 'pointer', transition: 'width 0.3s ease, background 0.3s ease' }} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Event Card ─────────────────────────────────────────────────────────────
 
 const EventCard = React.memo(function EventCard({ event, onClick }: { event: TMEvent; onClick: () => void }) {
-  const imgSrc = getBestEventImage(event.images);
   const venue = event._embedded?.venues?.[0];
   const category = getEventCategory(event);
   const price = event.priceRanges?.[0];
   const typeMeta = getEventTypeMeta(event);
-
   const fadeRef = useFadeIn();
+
   return (
     <button
       ref={fadeRef}
       onClick={onClick}
-      className="bg-white overflow-hidden text-left w-full flex"
-      style={{ border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A', borderRadius: 0, minHeight: '100px' }}
+      className="bg-white overflow-hidden text-left w-full"
+      style={{ border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A', borderRadius: 0, animation: 'cardFadeIn 0.3s ease both' }}
     >
-      <div className="flex-shrink-0 relative overflow-hidden" style={{ width: '110px' }}>
-        {imgSrc ? (
-          <img src={hiResUrl(imgSrc)} alt={event.name} className="w-full h-full object-cover" />
-        ) : (
-          <div
-            className="w-full h-full flex flex-col items-center justify-center gap-1"
-            style={{ background: typeMeta.bg }}
-          >
-            <FlatIcon name={typeMeta.icon} size={28} color="white" />
-            <span style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.8)', letterSpacing: '0.08em', textTransform: 'uppercase' as const, fontFamily: 'Inter, sans-serif', textAlign: 'center' as const, padding: '0 4px' }}>{category}</span>
-          </div>
-        )}
-      </div>
-      <div className="flex-1 p-3 flex flex-col justify-between min-w-0">
-        <div>
-          {/* Inline icon + category label */}
-          <div className="flex items-center gap-1 mb-1.5">
-            <FlatIcon name={typeMeta.icon} size={12} color="#1A1A1A" />
-            <span
-              className="text-xs font-bold"
-              style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#1A1A1A', fontSize: 9 }}
-            >
-              {category}
-            </span>
-          </div>
-          <p
-            className="font-black text-sm leading-snug text-gray-900"
-            style={{ fontFamily: 'Epilogue, sans-serif', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}
-          >
-            {event.name}
-          </p>
+      <div className="relative" style={{ height: '160px' }}>
+        <EventCardImageSlider event={event} />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
+        <div className="absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5" style={{ background: 'rgba(0,0,0,0.55)', zIndex: 1 }}>
+          <FlatIcon name={typeMeta.icon} size={10} color="white" />
+          <span style={{ fontSize: 9, fontWeight: 800, color: 'white', letterSpacing: '0.08em', textTransform: 'uppercase' as const, fontFamily: 'Inter, sans-serif' }}>{category}</span>
         </div>
-        <div className="mt-2">
-          {venue && (
-            <p className="text-xs text-gray-500 flex items-center gap-0.5 truncate">
-              <span className="material-symbols-outlined" style={{ fontSize: '13px' }}>location_on</span>
-              {venue.name}
-            </p>
-          )}
-          <div className="flex items-center justify-between mt-1">
+      </div>
+      <div className="p-3">
+        <p
+          className="font-black text-sm leading-snug text-gray-900"
+          style={{ fontFamily: 'Epilogue, sans-serif', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}
+        >
+          {event.name}
+        </p>
+        <div className="mt-1.5 flex items-center justify-between gap-2">
+          <div className="min-w-0 flex-1">
             <p className="text-xs font-bold" style={{ color: 'var(--brand)' }}>
               {event.dates?.start?.localDate ? formatDate(event.dates.start.localDate) : 'Date TBD'}
               {event.dates?.start?.localTime ? ' · ' + formatTime(event.dates.start.localTime) : ''}
             </p>
-            {price && (
-              <p className="text-xs text-gray-500">{(price.min ?? 0) === 0 ? 'Free' : `From $${Math.round(price.min || 0)}`}</p>
+            {venue && (
+              <p className="text-xs text-gray-500 flex items-center gap-0.5 truncate mt-0.5">
+                <span className="material-symbols-outlined" style={{ fontSize: '12px' }}>location_on</span>
+                {venue.name}
+              </p>
             )}
           </div>
+          {price && (
+            <span className="text-xs font-bold flex-shrink-0" style={{ color: '#1A1A1A' }}>
+              {(price.min ?? 0) === 0 ? 'Free' : `From $${Math.round(price.min || 0)}`}
+            </span>
+          )}
         </div>
       </div>
     </button>
@@ -6154,7 +6222,10 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const { data: { subscription: unsub } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription: unsub } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // Don't sign the user out on a transient token-refresh failure (e.g. brief network drop).
+      // The client will retry; we just keep the current user state.
+      if (event === 'TOKEN_REFRESH_FAILED') return;
       const u = session?.user ?? null;
       setUser(u);
       if (!u) setAuthReady(true);
