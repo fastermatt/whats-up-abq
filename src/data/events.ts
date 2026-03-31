@@ -88,7 +88,7 @@ const ALL_THEATERS = [
 export const ALL_EVENTS: Event[] = [
 
   // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-  // MOVIES â Now Playing (March 17 â April 3, 2026)
+  // MOVIES — Now Playing (March 17 â April 3, 2026)
   // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
   {
     id: "mv-1",
@@ -100,7 +100,7 @@ export const ALL_EVENTS: Event[] = [
     location: "Multiple ABQ Theaters",
     address: "Check Fandango for nearest theater",
     description:
-      "Ryan Gosling stars in this stunning sci-fi adaptation of Andy Weir's bestselling novel. An astronaut wakes alone on a deep-space mission with no memory of how he got there â and discovers the fate of Earth rests entirely on his shoulders. Director Phil Lord delivers a film already being called one of the decade's great science fiction experiences.",
+      "Ryan Gosling stars in this stunning sci-fi adaptation of Andy Weir's bestselling novel. An astronaut wakes alone on a deep-space mission with no memory of how he got there — and discovers the fate of Earth rests entirely on his shoulders. Director Phil Lord delivers a film already being called one of the decade's great science fiction experiences.",
     price: "$13â$22",
     priceNum: 13,
     image: "https://upload.wikimedia.org/wikipedia/en/3/3b/Project_Hail_Mary_poster.jpg",
@@ -129,7 +129,7 @@ export const ALL_EVENTS: Event[] = [
     location: "Multiple ABQ Theaters",
     address: "Check Fandango for nearest theater",
     description:
-      "Pixar's newest animated adventure follows Mabel, an animal-obsessed kid who discovers technology that lets her 'hop' into robotic creatures and experience a hidden world beneath our feet. A visually breathtaking, heartfelt film with Pixar's signature emotional depth â expect tears and standing ovations.",
+      "Pixar's newest animated adventure follows Mabel, an animal-obsessed kid who discovers technology that lets her 'hop' into robotic creatures and experience a hidden world beneath our feet. A visually breathtaking, heartfelt film with Pixar's signature emotional depth — expect tears and standing ovations.",
     price: "$13â$20",
     priceNum: 13,
     image: CINEMA_IMG,
@@ -157,7 +157,7 @@ export const ALL_EVENTS: Event[] = [
     location: "Multiple ABQ Theaters",
     address: "Check Fandango for nearest theater",
     description:
-      "Maggie Gyllenhaal directs and Jessie Buckley stars in this bold, feminist reimagining of the Bride of Frankenstein â set in 1930s Chicago. A gothic thriller that's being called the most audacious film of the year, blending horror, romance, and sharp social commentary with stunning cinematography.",
+      "Maggie Gyllenhaal directs and Jessie Buckley stars in this bold, feminist reimagining of the Bride of Frankenstein — set in 1930s Chicago. A gothic thriller that's being called the most audacious film of the year, blending horror, romance, and sharp social commentary with stunning cinematography.",
     price: "$13â$18",
     priceNum: 13,
     image: CINEMA2_IMG,
@@ -212,7 +212,7 @@ export const ALL_EVENTS: Event[] = [
     location: "Multiple ABQ Theaters",
     address: "Check Fandango for nearest theater",
     description:
-      "The biggest video game movie ever made hits theaters. Jack Black stars as Steve alongside Jason Momoa in a live-action/animated adventure that takes a group of misfits from our world into the Overworld â where they must battle the Ender Dragon to save both realms. Directed by Jared Hess.",
+      "The biggest video game movie ever made hits theaters. Jack Black stars as Steve alongside Jason Momoa in a live-action/animated adventure that takes a group of misfits from our world into the Overworld — where they must battle the Ender Dragon to save both realms. Directed by Jared Hess.",
     price: "$13â$22",
     priceNum: 13,
     image: "https://upload.wikimedia.org/wikipedia/en/6/66/A_Minecraft_Movie_poster.jpg",
@@ -240,7 +240,7 @@ export const ALL_EVENTS: Event[] = [
     location: "Multiple ABQ Theaters",
     address: "Check Fandango for nearest theater",
     description:
-      "The massive sequel to The Super Mario Bros. Movie takes Mario and friends to space â across galaxies, through black holes, and toward a final showdown with Bowser on a moon-sized airship. Chris Pratt, Anya Taylor-Joy, and Charlie Day return, joined by new cast. The most anticipated animated movie of 2026.",
+      "The massive sequel to The Super Mario Bros. Movie takes Mario and friends to space — across galaxies, through black holes, and toward a final showdown with Bowser on a moon-sized airship. Chris Pratt, Anya Taylor-Joy, and Charlie Day return, joined by new cast. The most anticipated animated movie of 2026.",
     price: "$13â$22",
     priceNum: 13,
     image: U("1446776811953-b23d57bd21aa"),
@@ -268,7 +268,7 @@ export const ALL_EVENTS: Event[] = [
     location: "Multiple ABQ Theaters",
     address: "Check Fandango for nearest theater",
     description:
-      "Samara Weaving returns as Grace in this wickedly funny horror-thriller sequel. Having survived one murderous family, Grace is drawn into an even deadlier game â this time on an international stage. Sharper, wilder, and bloodier than the original.",
+      "Samara Weaving returns as Grace in this wickedly funny horror-thriller sequel. Having survived one murderous family, Grace is drawn into an even deadlier game — this time on an international stage. Sharper, wilder, and bloodier than the original.",
     price: "$13â$18",
     priceNum: 13,
     image: U("1440404653325-ab127d49abc1"),
@@ -295,7 +295,7 @@ export const ALL_EVENTS: Event[] = [
     location: "Multiple ABQ Theaters",
     address: "Check Fandango for nearest theater",
     description:
-      "Antoine Fuqua's epic biopic of Michael Jackson, starring Jaafar Jackson as his uncle. The film explores Michael's extraordinary rise, creative genius, personal relationships, and the controversies that defined his later years â told through the lens of his art and the people who knew him best.",
+      "Antoine Fuqua's epic biopic of Michael Jackson, starring Jaafar Jackson as his uncle. The film explores Michael's extraordinary rise, creative genius, personal relationships, and the controversies that defined his later years — told through the lens of his art and the people who knew him best.",
     price: "$13â$22",
     priceNum: 13,
     image: "https://upload.wikimedia.org/wikipedia/en/e/e2/Michael_2023_film_poster.jpg",
@@ -315,19 +315,19 @@ export const ALL_EVENTS: Event[] = [
   },
 
   // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-  // LIVE MUSIC â MARCH 21-22
+  // LIVE MUSIC — MARCH 21-22
   // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
   // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-  // FARMERS MARKET â MARCH 21-22
+  // FARMERS MARKET — MARCH 21-22
   // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
   // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-  // OUTDOORS â MARCH 21-22
+  // OUTDOORS — MARCH 21-22
   // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
   // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-  // COMMUNITY â MARCH 21-22
+  // COMMUNITY — MARCH 21-22
   // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
   // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
@@ -363,7 +363,7 @@ export const ALL_EVENTS: Event[] = [
   // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
   {
     id: "a04-1",
-    title: "Downtown Growers' Market â Opening Day",
+    title: "Downtown Growers' Market — Opening Day",
     category: "Farmers Market",
     date: "2026-04-04",
     time: "8:00 AM",
@@ -371,7 +371,7 @@ export const ALL_EVENTS: Event[] = [
     location: "Robinson Park",
     address: "810 Copper Ave NW, Albuquerque, NM 87102",
     description:
-      "It's back! The Downtown Growers' Market kicks off its 30th anniversary season at Robinson Park â ABQ's longest-running, producer-only market. 80+ vendors with spring produce, fresh-cut flowers, organic seedlings, honey, artisan bread, and handcrafted goods every Saturday through November.",
+      "It's back! The Downtown Growers' Market kicks off its 30th anniversary season at Robinson Park — ABQ's longest-running, producer-only market. 80+ vendors with spring produce, fresh-cut flowers, organic seedlings, honey, artisan bread, and handcrafted goods every Saturday through November.",
     price: "Free",
     priceNum: 0,
     image: U("1464226184884-fa280b87c399"),
@@ -387,7 +387,7 @@ export const ALL_EVENTS: Event[] = [
   },
   {
     id: "a05-1",
-    title: "Rail Yards Market Â· Spring Opening",
+    title: "Rail Yards Market · Spring Opening",
     category: "Farmers Market",
     date: "2026-04-05",
     time: "9:00 AM",
@@ -395,7 +395,7 @@ export const ALL_EVENTS: Event[] = [
     location: "Historic Rail Yards",
     address: "777 1st St SW, Albuquerque, NM 87102",
     description:
-      "The Rail Yards Market celebrates its spring opening in Albuquerque's 1914 locomotive repair shops â a stunning market venue open only on Sundays. Local growers, artisans, restaurateurs, and live musicians fill the soaring machine shops with community energy.",
+      "The Rail Yards Market celebrates its spring opening in Albuquerque's 1914 locomotive repair shops — a stunning market venue open only on Sundays. Local growers, artisans, restaurateurs, and live musicians fill the soaring machine shops with community energy.",
     price: "Free",
     priceNum: 0,
     image: U("1507003211169-0a1dd7228f2d"),
@@ -462,7 +462,7 @@ export const ALL_EVENTS: Event[] = [
   // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
   {
     id: "a11-2",
-    title: "Machine Gun Kelly Â· Mainstream Sellout Tour",
+    title: "Machine Gun Kelly · Mainstream Sellout Tour",
     category: "Live Music",
     date: "2026-04-11",
     time: "7:00 PM",
@@ -495,7 +495,7 @@ export const ALL_EVENTS: Event[] = [
     location: "Petroglyph National Monument",
     address: "6001 Unser Blvd NW, Albuquerque, NM 87120",
     description:
-      "The ABQ Astronomy Society hosts monthly dark-sky stargazing on the West Mesa. Six research-grade telescopes reveal Saturn's rings, Jupiter's moons, and spring nebulae. NM boasts some of the darkest skies in the country â expert guides included.",
+      "The ABQ Astronomy Society hosts monthly dark-sky stargazing on the West Mesa. Six research-grade telescopes reveal Saturn's rings, Jupiter's moons, and spring nebulae. NM boasts some of the darkest skies in the country — expert guides included.",
     price: "$12",
     priceNum: 12,
     image: U("1419242902214-272b3f66ee7a"),
@@ -548,7 +548,7 @@ export const ALL_EVENTS: Event[] = [
     location: "Kiva Auditorium",
     address: "401 2nd St NW, Albuquerque, NM 87102",
     description:
-      "One of the premier mariachi events in the Southwest brings together top professional ensembles from New Mexico, Arizona, and California. Jaw-dropping performances in colorful trajes de charro â soaring vocals and the sound of vihuela fill the historic Kiva.",
+      "One of the premier mariachi events in the Southwest brings together top professional ensembles from New Mexico, Arizona, and California. Jaw-dropping performances in colorful trajes de charro — soaring vocals and the sound of vihuela fill the historic Kiva.",
     price: "$25â$75",
     priceNum: 25,
     image: U("1460661419201-fd4cecdf8a8b"),
@@ -596,7 +596,7 @@ export const ALL_EVENTS: Event[] = [
     location: "The Box Performance Space",
     address: "1025 Lomas Blvd NW, Albuquerque, NM 87102",
     description:
-      "Four touring comedians â including a Netflix special regular â take the stage at The Box, one of ABQ's best intimate comedy venues. From sharp cultural commentary to absurdist Southwest humor, this lineup covers all the bases. One of the month's hottest comedy tickets.",
+      "Four touring comedians — including a Netflix special regular — take the stage at The Box, one of ABQ's best intimate comedy venues. From sharp cultural commentary to absurdist Southwest humor, this lineup covers all the bases. One of the month's hottest comedy tickets.",
     price: "$20",
     priceNum: 20,
     image: U("1516450360452-9312f5e86fc7"),
@@ -637,11 +637,11 @@ export const ALL_EVENTS: Event[] = [
   },
 
   // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-  // APRIL 24-25 â Gathering of Nations
+  // APRIL 24-25 — Gathering of Nations
   // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
   {
     id: "e24-1",
-    title: "Gathering of Nations â The Last Dance",
+    title: "Gathering of Nations — The Last Dance",
     category: "Festival",
     date: "2026-04-24",
     endDate: "2026-04-25",
@@ -650,8 +650,8 @@ export const ALL_EVENTS: Event[] = [
     location: "Tingley Coliseum, Expo NM",
     address: "300 San Pedro Dr NE, Albuquerque, NM 87108",
     description:
-      "The world's largest Native American powwow â and its final edition. 'The Last Dance' brings together 800+ tribes and 3,000 dancers and singers from across North America for two unmissable days. Awe-inspiring traditional dances, drum competitions, crowning of Miss Indian World, Indian Traders Market, Stage 49 contemporary Indigenous music, and the Horse & Rider Regalia Parade.",
-    price: "$20/day Â· $35 weekend",
+      "The world's largest Native American powwow — and its final edition. 'The Last Dance' brings together 800+ tribes and 3,000 dancers and singers from across North America for two unmissable days. Awe-inspiring traditional dances, drum competitions, crowning of Miss Indian World, Indian Traders Market, Stage 49 contemporary Indigenous music, and the Horse & Rider Regalia Parade.",
+    price: "$20/day · $35 weekend",
     priceNum: 20,
     image: U("1506905925346-21bda4d32df4"),
     gradient: "linear-gradient(135deg, #92400e 0%, #dc2626 100%)",
@@ -675,8 +675,8 @@ export const ALL_EVENTS: Event[] = [
     location: "Balloon Fiesta Park",
     address: "5000 Balloon Fiesta Pkwy NE, Albuquerque, NM 87113",
     description:
-      "The New Mexico Symphony Orchestra performs John Williams' most beloved film scores outdoors â Star Wars, Indiana Jones, Schindler's List, E.T. Bring a blanket, a picnic, and the whole family. Gates open at 6 PM; food vendors and wine available on site.",
-    price: "$25 Â· $12 students",
+      "The New Mexico Symphony Orchestra performs John Williams' most beloved film scores outdoors — Star Wars, Indiana Jones, Schindler's List, E.T. Bring a blanket, a picnic, and the whole family. Gates open at 6 PM; food vendors and wine available on site.",
+    price: "$25 · $12 students",
     priceNum: 25,
     image: U("1508739773316-c4218c6546f4"),
     gradient: "linear-gradient(135deg, #1e1b4b 0%, #4f46e5 100%)",
@@ -704,7 +704,7 @@ export const ALL_EVENTS: Event[] = [
     location: "Old Town Albuquerque",
     address: "Old Town Plaza, Albuquerque, NM 87104",
     description:
-      "Old Town kicks off Cinco de Mayo week with a live mariachi stage, ballet folklÃ³rico performances, traditional Mexican cuisine, artisan markets, and ABQ's famous lowrider car show starting at 2 PM. A celebration of the deep Mexican-American cultural roots of Nuevo MÃ©xico.",
+      "Old Town kicks off Cinco de Mayo week with a live mariachi stage, ballet folklórico performances, traditional Mexican cuisine, artisan markets, and ABQ's famous lowrider car show starting at 2 PM. A celebration of the deep Mexican-American cultural roots of Nuevo México.",
     price: "Free",
     priceNum: 0,
     image: U("1543702054-5e85e40a04f3"),
@@ -728,7 +728,7 @@ export const ALL_EVENTS: Event[] = [
     location: "Balloon Fiesta Park",
     address: "5000 Balloon Fiesta Pkwy NE, Albuquerque, NM 87113",
     description:
-      "Albuquerque is the balloon capital of the world â experience it at sunrise. Rainbow Ryders' luxury flights launch at dawn, drift over the Rio Grande valley with the Sandia Mountains glowing pink, and land with a traditional champagne toast. Small groups of 4â12 passengers.",
+      "Albuquerque is the balloon capital of the world — experience it at sunrise. Rainbow Ryders' luxury flights launch at dawn, drift over the Rio Grande valley with the Sandia Mountains glowing pink, and land with a traditional champagne toast. Small groups of 4â12 passengers.",
     price: "$180/person",
     priceNum: 180,
     image: U("1472791108553-c9405341e956"),
@@ -745,11 +745,11 @@ export const ALL_EVENTS: Event[] = [
   },
 
   // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-  // MAY 15-16 â BOOTS IN THE PARK (REAL!)
+  // MAY 15-16 — BOOTS IN THE PARK (REAL!)
   // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
   {
     id: "bitp-1",
-    title: "Boots in the Park 2026 Â· Post Malone & Jelly Roll",
+    title: "Boots in the Park 2026 · Post Malone & Jelly Roll",
     category: "Festival",
     date: "2026-05-15",
     endDate: "2026-05-16",
@@ -758,7 +758,7 @@ export const ALL_EVENTS: Event[] = [
     location: "Balloon Fiesta Park",
     address: "5000 Balloon Fiesta Pkwy NE, Albuquerque, NM 87113",
     description:
-      "The biggest music event of the year in Albuquerque. Post Malone headlines Saturday; Jelly Roll headlines Friday. Also: CarÃ­n LeÃ³n, Jessie Murph, Koe Wetzel, Cody Jinks, The Band Perry, Randy Rogers Band, and 15+ more across multiple stages including the brand-new Texas Country Stage. Line dancing, whiskey & tequila tastings, craft food, immersive art installations. Don't miss this.",
+      "The biggest music event of the year in Albuquerque. Post Malone headlines Saturday; Jelly Roll headlines Friday. Also: CarÃ­n León, Jessie Murph, Koe Wetzel, Cody Jinks, The Band Perry, Randy Rogers Band, and 15+ more across multiple stages including the brand-new Texas Country Stage. Line dancing, whiskey & tequila tastings, craft food, immersive art installations. Don't miss this.",
     price: "$89â$350+",
     priceNum: 89,
     image: "https://bootsinthepark.com/wp-content/uploads/2025/07/Share.jpg",
