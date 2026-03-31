@@ -173,17 +173,33 @@ interface TMEvent {
   url?: string;
   _source?: string;
   _isAdult?: boolean;   // flagged as 21+ / adult content — hidden by default
+  info?: string;        // event description / additional info from Ticketmaster
+  pleaseNote?: string;  // important notices (age, bags, weather policy, etc.)
   ticketLinks?: Array<{ source: string; url: string }>;
   images?: TMImage[];
   dates?: {
     start?: { localDate?: string; localTime?: string };
   };
+  seatmap?: { staticUrl?: string };
+  ageRestrictions?: { legalAgeEnforced?: boolean };
+  accessibility?: { ticketLimit?: number };
+  promoter?: { name?: string };
   _embedded?: {
     venues?: Array<{
       name?: string;
+      url?: string;
       address?: { line1?: string };
       city?: { name?: string };
       location?: { longitude?: string; latitude?: string };
+      generalInfo?: { childRule?: string; generalRule?: string };
+      boxOfficeInfo?: {
+        phoneNumberDetail?: string;
+        openHoursDetail?: string;
+        willCallDetail?: string;
+        acceptedPaymentDetail?: string;
+      };
+      parkingDetail?: string;
+      accessibleSeatingDetail?: string;
     }>;
   };
   classifications?: Array<{
@@ -1803,6 +1819,7 @@ async function shareEvent(event: TMEvent) {
 
 function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }: { event: TMEvent; onClose: () => void; isSaved?: boolean; onToggleSave?: () => void; mapProvider?: 'google' | 'apple' }) {
   const [shared, setShared] = useState(false);
+  const [venueExpanded, setVenueExpanded] = useState(false);
   const venue = event._embedded?.venues?.[0];
   const category = getEventCategory(event);
   const price = event.priceRanges?.[0];
@@ -1874,103 +1891,215 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
       </div>
 
       <div className="px-5 py-4 pb-10">
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="bg-white rounded-lg p-3" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
-            <p className="text-xs text-gray-400 mb-1">Date</p>
-            <p className="font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif', color: 'var(--brand)' }}>
-              {event.dates?.start?.localDate ? formatDate(event.dates.start.localDate) : 'TBD'}
+
+        {/* ── WHEN + WHERE ─────────────────────────────────── */}
+        <div className="flex gap-3 mb-3">
+          {/* When: date + time combined */}
+          <div className="flex-1 bg-white p-3" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', border: '1.5px solid #f0f0f0' }}>
+            <div className="flex items-center gap-1.5 mb-1">
+              <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'var(--brand)' }}>calendar_today</span>
+              <p className="text-xs font-bold uppercase tracking-wide" style={{ color: '#999', letterSpacing: '0.07em' }}>When</p>
+            </div>
+            <p className="font-black text-sm leading-snug" style={{ fontFamily: 'Epilogue, sans-serif', color: 'var(--brand)' }}>
+              {event.dates?.start?.localDate ? formatDate(event.dates.start.localDate) : 'Date TBD'}
+            </p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {event.dates?.start?.localTime ? formatTime(event.dates.start.localTime) : 'Time TBD'}
             </p>
           </div>
-          <div className="bg-white rounded-lg p-3" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
-            <p className="text-xs text-gray-400 mb-1">Time</p>
-            <p className="font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif', color: 'var(--brand)' }}>
-              {event.dates?.start?.localTime ? formatTime(event.dates.start.localTime) : 'TBD'}
-            </p>
-          </div>
-          {venue && (
-            <div
-              className="col-span-2 bg-white rounded-lg p-3"
-              style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}
-            >
-              <p className="text-xs text-gray-400 mb-1">Venue</p>
-              <p className="font-bold text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>
-                {venue.name}
+          {/* Price */}
+          {price ? (
+            <div className="flex-1 bg-white p-3" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', border: '1.5px solid #f0f0f0' }}>
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'var(--brand)' }}>sell</span>
+                <p className="text-xs font-bold uppercase tracking-wide" style={{ color: '#999', letterSpacing: '0.07em' }}>Price</p>
+              </div>
+              <p className="font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif', color: '#1a1a1a' }}>
+                {(price.min || 0) === 0 && (price.max || 0) === 0 ? 'Free' : price.min === price.max ? `$${Math.round(price.min || 0)}` : `$${Math.round(price.min || 0)} – $${Math.round(price.max || 0)}`}
               </p>
-              {venue.address?.line1 && (
-                <p className="text-xs text-gray-500 mt-0.5">{venue.address.line1}</p>
-              )}
+              {price.currency && price.currency !== 'USD' && <p className="text-xs text-gray-400 mt-0.5">{price.currency}</p>}
             </div>
-          )}
-          {price && (
-            <div className="col-span-2 bg-white rounded-lg p-3" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
-              <p className="text-xs text-gray-400 mb-1">Price</p>
-              <p className="font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif' }}>
-                ${Math.round(price.min || 0)} – ${Math.round(price.max || 0)}
-              </p>
-            </div>
+          ) : (
+            /* Age restriction badge if no price */
+            event.ageRestrictions?.legalAgeEnforced ? (
+              <div className="flex-1 bg-white p-3" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', border: '1.5px solid #f0f0f0' }}>
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="material-symbols-outlined" style={{ fontSize: '13px', color: '#dc2626' }}>18_up_rating</span>
+                  <p className="text-xs font-bold uppercase tracking-wide" style={{ color: '#999', letterSpacing: '0.07em' }}>Age</p>
+                </div>
+                <p className="font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif', color: '#dc2626' }}>21+ Event</p>
+              </div>
+            ) : null
           )}
         </div>
 
-        {/* Venue map */}
+        {/* Venue card — tappable to open in maps */}
+        {venue && (
+          <a
+            href={directionsUrl}
+            target="_blank" rel="noopener noreferrer"
+            className="flex items-start gap-3 mb-3 bg-white p-3 w-full"
+            style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', border: '1.5px solid #f0f0f0', textDecoration: 'none' }}
+          >
+            <span className="material-symbols-outlined flex-shrink-0 mt-0.5" style={{ fontSize: '18px', color: 'var(--brand)' }}>location_on</span>
+            <div className="min-w-0 flex-1">
+              <p className="font-bold text-sm text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>{venue.name}</p>
+              {venue.address?.line1 && <p className="text-xs text-gray-500 mt-0.5">{venue.address.line1}{venue.city?.name ? `, ${venue.city.name}` : ''}</p>}
+              <p className="text-xs font-bold mt-1" style={{ color: 'var(--brand)' }}>Open in {mapProvider === 'apple' ? 'Apple Maps' : 'Google Maps'} →</p>
+            </div>
+          </a>
+        )}
+
+        {/* ── PLEASE NOTE callout (amber warning) ──────────── */}
+        {event.pleaseNote && (
+          <div className="flex gap-3 mb-3 p-3" style={{ background: '#fffbeb', border: '1.5px solid #f59e0b', borderLeft: '4px solid #f59e0b' }}>
+            <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '16px', color: '#d97706', marginTop: '1px' }}>warning</span>
+            <div>
+              <p className="text-xs font-black uppercase tracking-wide mb-1" style={{ color: '#92400e', letterSpacing: '0.06em' }}>Please Note</p>
+              <p className="text-xs text-amber-900 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>{event.pleaseNote}</p>
+            </div>
+          </div>
+        )}
+
+        {/* ── ABOUT THIS EVENT ─────────────────────────────── */}
+        {event.info && (
+          <div className="mb-3 bg-white p-3" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', border: '1.5px solid #f0f0f0' }}>
+            <p className="text-xs font-black uppercase tracking-wide mb-2" style={{ color: 'var(--brand)', letterSpacing: '0.07em' }}>About This Event</p>
+            <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>{event.info}</p>
+          </div>
+        )}
+
+        {/* ── KNOW BEFORE YOU GO (expandable) ─────────────── */}
+        {(venue?.boxOfficeInfo?.phoneNumberDetail || venue?.parkingDetail || venue?.generalInfo?.childRule || venue?.accessibleSeatingDetail || venue?.boxOfficeInfo?.openHoursDetail || venue?.boxOfficeInfo?.acceptedPaymentDetail) && (
+          <div className="mb-3" style={{ border: '1.5px solid #e5e7eb' }}>
+            <button
+              onClick={() => setVenueExpanded(v => !v)}
+              className="w-full flex items-center justify-between p-3 bg-white"
+              style={{ fontFamily: 'Epilogue, sans-serif' }}
+            >
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--brand)' }}>info</span>
+                <span className="font-black text-sm" style={{ color: '#1a1a1a' }}>Know Before You Go</span>
+              </div>
+              <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#9ca3af', transform: venueExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>expand_more</span>
+            </button>
+            {venueExpanded && (
+              <div className="px-3 pb-3 flex flex-col gap-3" style={{ background: '#fafafa', borderTop: '1px solid #e5e7eb' }}>
+
+                {/* Box office phone */}
+                {venue?.boxOfficeInfo?.phoneNumberDetail && (
+                  <div className="pt-3">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'var(--brand)' }}>phone</span>
+                      <p className="text-xs font-black uppercase" style={{ color: '#6b7280', letterSpacing: '0.06em' }}>Box Office</p>
+                    </div>
+                    <p className="text-xs text-gray-700 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>{venue.boxOfficeInfo.phoneNumberDetail}</p>
+                  </div>
+                )}
+
+                {/* Box office hours */}
+                {venue?.boxOfficeInfo?.openHoursDetail && (
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'var(--brand)' }}>schedule</span>
+                      <p className="text-xs font-black uppercase" style={{ color: '#6b7280', letterSpacing: '0.06em' }}>Box Office Hours</p>
+                    </div>
+                    <p className="text-xs text-gray-700 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>{venue.boxOfficeInfo.openHoursDetail}</p>
+                  </div>
+                )}
+
+                {/* Parking */}
+                {venue?.parkingDetail && (
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'var(--brand)' }}>local_parking</span>
+                      <p className="text-xs font-black uppercase" style={{ color: '#6b7280', letterSpacing: '0.06em' }}>Parking</p>
+                    </div>
+                    <p className="text-xs text-gray-700 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>{venue.parkingDetail}</p>
+                  </div>
+                )}
+
+                {/* Kids policy */}
+                {venue?.generalInfo?.childRule && (
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'var(--brand)' }}>child_care</span>
+                      <p className="text-xs font-black uppercase" style={{ color: '#6b7280', letterSpacing: '0.06em' }}>Kids Policy</p>
+                    </div>
+                    <p className="text-xs text-gray-700 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>{venue.generalInfo.childRule}</p>
+                  </div>
+                )}
+
+                {/* Accessibility */}
+                {venue?.accessibleSeatingDetail && (
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'var(--brand)' }}>accessible</span>
+                      <p className="text-xs font-black uppercase" style={{ color: '#6b7280', letterSpacing: '0.06em' }}>Accessibility</p>
+                    </div>
+                    <p className="text-xs text-gray-700 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>{venue.accessibleSeatingDetail}</p>
+                  </div>
+                )}
+
+                {/* Payment */}
+                {venue?.boxOfficeInfo?.acceptedPaymentDetail && (
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'var(--brand)' }}>credit_card</span>
+                      <p className="text-xs font-black uppercase" style={{ color: '#6b7280', letterSpacing: '0.06em' }}>Accepted Payment</p>
+                    </div>
+                    <p className="text-xs text-gray-700 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>{venue.boxOfficeInfo.acceptedPaymentDetail}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── MAP ──────────────────────────────────────────── */}
         {venue?.address?.line1 && (
-          <div className="rounded-lg overflow-hidden mb-4" style={{ height: '160px' }}>
+          <div className="overflow-hidden mb-4" style={{ height: '150px', border: '1.5px solid #e5e7eb' }}>
             <iframe
               title={`Map for ${venue.name}`}
-              width="100%"
-              height="160"
-              style={{ border: 0 }}
+              width="100%" height="150" style={{ border: 0 }}
               src={`https://maps.google.com/maps?q=${mapsQuery}&output=embed&z=15`}
               allowFullScreen
             />
           </div>
         )}
 
-        <div className="rounded-lg p-4 mb-4" style={{ background: 'rgba(160,59,0,0.08)' }}>
-          <p
-            className="font-black text-sm mb-1"
-            style={{ fontFamily: 'Epilogue, sans-serif', color: 'var(--brand)' }}
-          >
-            ⚡ UNPLUGGING TIP
-          </p>
-          <p className="text-xs text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
-            Put your phone away for the first 30 minutes. Let yourself fully arrive before documenting.
-          </p>
-        </div>
+        {/* ── UNPLUGGING TIP (subtle, only if no real info) ── */}
+        {!event.info && !event.pleaseNote && (
+          <div className="flex gap-3 mb-4 p-3" style={{ background: 'var(--brand-bg-subtle)', border: '1.5px solid var(--brand-tint-border)' }}>
+            <span style={{ fontSize: '16px', lineHeight: 1.4 }}>⚡</span>
+            <div>
+              <p className="text-xs font-black uppercase tracking-wide mb-0.5" style={{ color: 'var(--brand)', letterSpacing: '0.06em' }}>Unplugging Tip</p>
+              <p className="text-xs text-gray-600 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>Put your phone away for the first 30 minutes. Let yourself fully arrive before documenting.</p>
+            </div>
+          </div>
+        )}
 
-        {/* Add to Calendar */}
+        {/* ── ADD TO CALENDAR ───────────────────────────────── */}
         {event.dates?.start?.localDate && (
           <button
             onClick={() => addToCalendar(event)}
             className="flex items-center justify-center gap-2 w-full py-3 mb-2 font-black text-sm"
-            style={{
-              border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A', borderRadius: 0,
-              background: 'white', color: '#1A1A1A', fontFamily: 'Epilogue, sans-serif',
-            }}
+            style={{ border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A', borderRadius: 0, background: 'white', color: '#1A1A1A', fontFamily: 'Epilogue, sans-serif' }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>calendar_add_on</span>
             ADD TO CALENDAR
           </button>
         )}
 
-        {/* Get Tickets / More Info */}
+        {/* ── GET TICKETS / MORE INFO ───────────────────────── */}
         {event.ticketLinks && event.ticketLinks.length > 0 ? (
           <div className="flex flex-col gap-2">
             {event.ticketLinks.filter(l => l.source === 'Ticketmaster').map((link) => (
-              <a
-                key={link.source}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
+              <a key={link.source} href={link.url} target="_blank" rel="noopener noreferrer"
                 className="flex items-center justify-between w-full px-5 py-3 text-white font-black text-sm"
-                style={{
-                  borderRadius: 0, border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A',
-                  background: link.source === 'Ticketmaster'
-                    ? 'linear-gradient(135deg, #026cdf, #02a7f0)'
-                    : link.source === 'Eventbrite'
-                    ? 'linear-gradient(135deg, #f05537, #ff7a5c)'
-                    : 'linear-gradient(135deg, #d4184a, #ff5c5c)',
-                  fontFamily: 'Epilogue, sans-serif',
-                }}
+                style={{ borderRadius: 0, border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A',
+                  background: link.source === 'Ticketmaster' ? 'linear-gradient(135deg, #026cdf, #02a7f0)' : link.source === 'Eventbrite' ? 'linear-gradient(135deg, #f05537, #ff7a5c)' : 'linear-gradient(135deg, #d4184a, #ff5c5c)',
+                  fontFamily: 'Epilogue, sans-serif' }}
               >
                 <span>{link.source}</span>
                 <span>GET TICKETS →</span>
@@ -1978,31 +2107,17 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
             ))}
           </div>
         ) : event.url ? (
-          <a
-            href={event.url}
-            target="_blank"
-            rel="noopener noreferrer"
+          <a href={event.url} target="_blank" rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full py-4 text-center text-white font-black text-sm"
-            style={{
-              borderRadius: 0, border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A',
-              background: event._source === 'seatgeek'
-                ? 'linear-gradient(135deg, #d4184a, #ff5c5c)'
-                : event._source === 'local'
-                ? 'linear-gradient(135deg, #0369a1, #38bdf8)'
-                : 'var(--brand-gradient)',
-              fontFamily: 'Epilogue, sans-serif',
-            }}
+            style={{ borderRadius: 0, border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A',
+              background: event._source === 'seatgeek' ? 'linear-gradient(135deg, #d4184a, #ff5c5c)' : event._source === 'local' ? 'linear-gradient(135deg, #0369a1, #38bdf8)' : 'var(--brand-gradient)',
+              fontFamily: 'Epilogue, sans-serif' }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
-              {event._source === 'local' ? 'info' : 'confirmation_number'}
-            </span>
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>{event._source === 'local' ? 'info' : 'confirmation_number'}</span>
             {event._source === 'local' ? 'MORE INFO →' : 'GET TICKETS →'}
           </a>
         ) : (
-          <a
-            href={directionsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+          <a href={directionsUrl} target="_blank" rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full py-4 text-center text-white font-black text-sm"
             style={{ borderRadius: 0, background: 'var(--brand-gradient)', fontFamily: 'Epilogue, sans-serif' }}
           >
