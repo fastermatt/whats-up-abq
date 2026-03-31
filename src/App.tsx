@@ -1787,16 +1787,16 @@ function addToCalendar(event: TMEvent) {
 
 async function shareEvent(event: TMEvent) {
   const venue = event._embedded?.venues?.[0];
-  const ticketUrl = event.ticketLinks?.[0]?.url || event.url || '';
+  const deepLink = `https://abqunplugged.com/#event/${encodeURIComponent(event.id)}`;
   const dateStr = event.dates?.start?.localDate
     ? formatDate(event.dates.start.localDate) + (event.dates.start.localTime ? ' · ' + formatTime(event.dates.start.localTime) : '')
     : '';
   const text = [event.name, dateStr, venue?.name ? `at ${venue.name}` : ''].filter(Boolean).join(' — ');
   if (navigator.share) {
-    try { await navigator.share({ title: event.name, text, url: ticketUrl || 'https://abqunplugged.com' }); return; } catch { /* fall through */ }
+    try { await navigator.share({ title: event.name, text, url: deepLink }); return; } catch { /* fall through */ }
   }
-  // Fallback: copy to clipboard
-  try { await navigator.clipboard.writeText(`${text}\n${ticketUrl || 'https://abqunplugged.com'}`); } catch { /* ignore */ }
+  // Fallback: copy deep-link to clipboard
+  try { await navigator.clipboard.writeText(deepLink); } catch { /* ignore */ }
 }
 
 // ─── Event Detail Modal ──────────────────────────────────────────────────────
@@ -6170,6 +6170,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
   const [search, setSearch] = useState('');
   const [sort, setSort]     = useState<'top' | 'near' | 'az'>('top');
   const [detail, setDetail] = useState<{ type: 'place'; data: Place } | { type: 'event'; data: TMEvent } | null>(null);
+  const [shareToast, setShareToast] = useState(false);
   const windowWidth         = useWindowWidth();
   // Below 1280px the main panel is too narrow for hero+events side-by-side
   const isNarrowDesktop     = windowWidth < 1280;
@@ -6461,8 +6462,8 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
               <button onClick={() => onToggleSaveEvent(ev)} title={isEventSaved(ev.id) ? 'Remove from plan' : 'Save to plan'} style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background: isEventSaved(ev.id) ? 'var(--brand)' : '#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'2px 2px 0 #1a1a1a' }}>
                 <span className="material-symbols-outlined" style={{ fontSize:'16px', color: isEventSaved(ev.id) ? '#fff' : '#1a1a1a', fontVariationSettings: isEventSaved(ev.id) ? "'FILL' 1" : "'FILL' 0" }}>bookmark</span>
               </button>
-              <button onClick={() => shareEvent(ev)} style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'2px 2px 0 #1a1a1a' }}>
-                <span className="material-symbols-outlined" style={{ fontSize:'16px' }}>share</span>
+              <button onClick={async () => { await shareEvent(ev); setShareToast(true); setTimeout(() => setShareToast(false), 2000); }} title="Copy shareable link" style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background: shareToast ? '#d4ef4d' : '#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'2px 2px 0 #1a1a1a', transition:'background 0.2s' }}>
+                <span className="material-symbols-outlined" style={{ fontSize:'16px' }}>{shareToast ? 'check' : 'share'}</span>
               </button>
             </div>
           </div>
@@ -6807,6 +6808,10 @@ export default function App() {
   });
   const [events, setEvents] = useState<TMEvent[]>([]);
   const [eventsNavSearch, setEventsNavSearch] = useState('');
+  // Deep-link: capture #event/{id} from URL on mount so we can open it once events load
+  const pendingDeepLinkId = useRef<string | null>(
+    (() => { const m = window.location.hash.match(/^#event\/(.+)$/); return m ? decodeURIComponent(m[1]) : null; })()
+  );
   // Only block on the loading screen if there's no cached data to show.
   const [loading, setLoading] = useState(() => {
     try {
@@ -7022,6 +7027,9 @@ export default function App() {
     // CRITICAL: Don't strip OAuth tokens — Supabase needs the #access_token hash to establish the session.
     // Once Supabase reads the tokens (async), onAuthStateChange will fire and set the correct tab.
     if (window.location.hash.includes('access_token')) return;
+
+    // Don't overwrite a deep-link event URL until it has been consumed
+    if (pendingDeepLinkId.current && window.location.hash.startsWith('#event/')) return;
 
     // Sync URL to current active tab (do NOT hardcode 'discover' — that overrides post-login navigation)
     window.history.replaceState({ tab: activeTab, modal: null }, '', `#${activeTab}`);
@@ -7437,6 +7445,20 @@ export default function App() {
 
     loadData();
   }, []);
+
+  // ── Deep-link handler: open #event/{id} once events are available ──────────
+  useEffect(() => {
+    const id = pendingDeepLinkId.current;
+    if (!id || events.length === 0) return;
+    pendingDeepLinkId.current = null; // consume it — only fires once
+    const found = events.find(e => e.id === id);
+    if (found) {
+      setActiveTab('events');
+      setSelectedEvent(found);
+      // Clean up the URL so it looks like a normal #events page after opening
+      window.history.replaceState({ tab: 'events', modal: id }, '', `#event/${encodeURIComponent(id)}`);
+    }
+  }, [events]);
 
   // ── Admin route ──
   if (showAdmin) {
