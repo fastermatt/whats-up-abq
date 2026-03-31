@@ -895,6 +895,13 @@ const PlaceCard = React.memo(function PlaceCard({
         >
           {place.name}
         </p>
+        {/* Address snippet or neighborhood */}
+        {(place.address || (place as any).neighborhood) && (
+          <p className="text-xs mt-0.5 truncate flex items-center gap-0.5" style={{ color: '#888', fontFamily: 'Inter, sans-serif' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '10px' }}>location_on</span>
+            {(place as any).neighborhood || place.address?.split(',')[0]}
+          </p>
+        )}
         <div className="flex items-center justify-between mt-1.5 gap-1">
           {place.rating ? (
             <div className="flex items-center gap-1 flex-1 min-w-0">
@@ -1157,6 +1164,7 @@ function PlaceDetailModal({
   user: User | null;
   onShowAuth: () => void;
 }) {
+  const [shared, setShared] = useState(false);
   const detailCatMeta = PLACE_CATEGORIES.find(c => c.value === place.category) || PLACE_CATEGORIES.find(c => c.label === place.category);
   const detailCatIcon = detailCatMeta?.icon || 'pin';
   const detailCatLabel = detailCatMeta?.label || place.category || '';
@@ -1168,13 +1176,27 @@ function PlaceDetailModal({
       <div className="relative flex-shrink-0" style={{ height: '260px' }}>
         <PlacePhotoGallery place={place} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
-        <button
-          onClick={onClose}
-          className="absolute top-4 left-4 w-10 h-10 rounded-full flex items-center justify-center"
-          style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', zIndex: 3 }}
-        >
-          <span className="material-symbols-outlined text-white">arrow_back</span>
-        </button>
+        <div className="absolute top-4 left-4 right-4 flex items-center justify-between" style={{ zIndex: 3 }}>
+          <button
+            onClick={onClose}
+            className="w-10 h-10 rounded-full flex items-center justify-center"
+            style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)' }}
+          >
+            <span className="material-symbols-outlined text-white">arrow_back</span>
+          </button>
+          <button
+            onClick={async () => {
+              if (navigator.share) {
+                try { await navigator.share({ title: place.name, text: `${place.name} — ${place.description || place.category || ''}`, url: place.website || 'https://abqunplugged.com' }); setShared(true); setTimeout(() => setShared(false), 2000); return; } catch { /* fall through */ }
+              }
+              try { await navigator.clipboard.writeText(`${place.name}\n${place.address || ''}\n${place.website || 'https://abqunplugged.com'}`); setShared(true); setTimeout(() => setShared(false), 2000); } catch { /* ignore */ }
+            }}
+            className="w-10 h-10 rounded-full flex items-center justify-center"
+            style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)' }}
+          >
+            <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>{shared ? 'check' : 'share'}</span>
+          </button>
+        </div>
         <div className="absolute bottom-4 left-4 right-4" style={{ zIndex: 3, pointerEvents: 'none' }}>
           <span
             className="text-xs font-bold text-white px-2.5 py-1 rounded inline-flex items-center gap-1"
@@ -1242,29 +1264,62 @@ function PlaceDetailModal({
           </p>
         )}
 
-        {[
-          place.address && { icon: 'location_on', text: place.address },
-          place.hours && { icon: 'schedule', text: place.hours },
-          place.phone && { icon: 'phone', text: place.phone },
-        ]
-          .filter(Boolean)
-          .map((item: any, i) => (
-            <div
-              key={i}
-              className="flex items-start gap-3 mb-3 bg-white rounded-lg p-3"
-              style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}
-            >
-              <span
-                className="material-symbols-outlined flex-shrink-0"
-                style={{ fontSize: '18px', color: 'var(--brand)', marginTop: '1px' }}
-              >
-                {item.icon}
-              </span>
-              <p className="text-sm text-gray-700" style={{ fontFamily: 'Inter, sans-serif' }}>
-                {item.text}
-              </p>
+        {/* Address — taps to Google Maps */}
+        {place.address && (
+          <a
+            href={`https://maps.google.com/?q=${mapsQuery}`}
+            target="_blank" rel="noopener noreferrer"
+            className="flex items-start gap-3 mb-3 bg-white p-3 w-full text-left"
+            style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', textDecoration: 'none' }}
+          >
+            <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)', marginTop: '1px' }}>location_on</span>
+            <div className="min-w-0">
+              <p className="text-sm text-gray-700" style={{ fontFamily: 'Inter, sans-serif' }}>{place.address}</p>
+              <p className="text-xs font-bold mt-0.5" style={{ color: 'var(--brand)' }}>Open in Maps →</p>
             </div>
-          ))}
+          </a>
+        )}
+
+        {/* Hours */}
+        {place.hours && (
+          <div className="flex items-start gap-3 mb-3 bg-white p-3" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
+            <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)', marginTop: '1px' }}>schedule</span>
+            <p className="text-sm text-gray-700" style={{ fontFamily: 'Inter, sans-serif' }}>{place.hours}</p>
+          </div>
+        )}
+
+        {/* Phone — taps to call */}
+        {place.phone && (
+          <a
+            href={`tel:${place.phone.replace(/\D/g, '')}`}
+            className="flex items-center gap-3 mb-3 bg-white p-3 w-full"
+            style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', textDecoration: 'none' }}
+          >
+            <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)' }}>phone</span>
+            <div className="min-w-0">
+              <p className="text-sm text-gray-700" style={{ fontFamily: 'Inter, sans-serif' }}>{place.phone}</p>
+              <p className="text-xs font-bold mt-0.5" style={{ color: 'var(--brand)' }}>Tap to call →</p>
+            </div>
+          </a>
+        )}
+
+        {/* Website */}
+        {place.website && (
+          <a
+            href={place.website.startsWith('http') ? place.website : `https://${place.website}`}
+            target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-3 mb-3 bg-white p-3 w-full"
+            style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', textDecoration: 'none' }}
+          >
+            <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)' }}>language</span>
+            <div className="min-w-0">
+              <p className="text-sm text-gray-700 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
+                {place.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}
+              </p>
+              <p className="text-xs font-bold mt-0.5" style={{ color: 'var(--brand)' }}>Visit website →</p>
+            </div>
+          </a>
+        )}
 
         {/* Map */}
         {(place.address || place.lat) && (
@@ -1635,10 +1690,65 @@ function ReviewSection({
   );
 }
 
+// ─── Calendar / Share helpers ────────────────────────────────────────────────
+function makeCalendarICS(event: TMEvent): string {
+  const venue = event._embedded?.venues?.[0];
+  const start = event.dates?.start;
+  if (!start?.localDate) return '';
+  const dateStr = start.localDate.replace(/-/g, '');
+  const timeStr = start.localTime ? start.localTime.replace(/:/g, '').substring(0, 6) : '120000';
+  const startMS = new Date(`${start.localDate}T${start.localTime || '12:00:00'}`).getTime();
+  const endDate = new Date(startMS + 2 * 60 * 60 * 1000);
+  const endDateStr = endDate.toISOString().substring(0, 10).replace(/-/g, '');
+  const endTimeStr = endDate.toTimeString().substring(0, 8).replace(/:/g, '');
+  const ticketUrl = event.ticketLinks?.[0]?.url || event.url || '';
+  const locationStr = [venue?.name, venue?.address?.line1, 'Albuquerque, NM'].filter(Boolean).join(', ');
+  const lines = [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//ABQ Unplugged//EN', 'CALSCALE:GREGORIAN',
+    'BEGIN:VEVENT',
+    `UID:${event.id}@abqunplugged.com`,
+    `DTSTAMP:${new Date().toISOString().replace(/[-:.]/g, '').substring(0, 15)}Z`,
+    `DTSTART;TZID=America/Denver:${dateStr}T${timeStr}`,
+    `DTEND;TZID=America/Denver:${endDateStr}T${endTimeStr}`,
+    `SUMMARY:${event.name}`,
+    locationStr ? `LOCATION:${locationStr}` : '',
+    ticketUrl ? `URL:${ticketUrl}` : '',
+    ticketUrl ? `DESCRIPTION:Get tickets: ${ticketUrl}` : 'DESCRIPTION:Added from ABQ Unplugged',
+    'END:VEVENT', 'END:VCALENDAR',
+  ].filter(Boolean).join('\r\n');
+  return lines;
+}
+
+function addToCalendar(event: TMEvent) {
+  const ics = makeCalendarICS(event);
+  if (!ics) return;
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${event.name.replace(/[^a-z0-9]/gi, '_').substring(0, 40)}.ics`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function shareEvent(event: TMEvent) {
+  const venue = event._embedded?.venues?.[0];
+  const ticketUrl = event.ticketLinks?.[0]?.url || event.url || '';
+  const dateStr = event.dates?.start?.localDate
+    ? formatDate(event.dates.start.localDate) + (event.dates.start.localTime ? ' · ' + formatTime(event.dates.start.localTime) : '')
+    : '';
+  const text = [event.name, dateStr, venue?.name ? `at ${venue.name}` : ''].filter(Boolean).join(' — ');
+  if (navigator.share) {
+    try { await navigator.share({ title: event.name, text, url: ticketUrl || 'https://abqunplugged.com' }); return; } catch { /* fall through */ }
+  }
+  // Fallback: copy to clipboard
+  try { await navigator.clipboard.writeText(`${text}\n${ticketUrl || 'https://abqunplugged.com'}`); } catch { /* ignore */ }
+}
+
 // ─── Event Detail Modal ──────────────────────────────────────────────────────
 
 function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => void }) {
-  const imgSrc = getBestEventImage(event.images);
+  const [shared, setShared] = useState(false);
   const venue = event._embedded?.venues?.[0];
   const category = getEventCategory(event);
   const price = event.priceRanges?.[0];
@@ -1649,29 +1759,32 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
   return (
     <div className="fixed inset-0 z-50 flex justify-center" style={{ background: 'rgba(0,0,0,0.3)' }}>
       <div className="flex flex-col overflow-y-auto w-full" style={{ maxWidth: '480px', background: 'white' }}>
-      <div className="relative flex-shrink-0" style={{ height: '260px' }}>
-        {imgSrc ? (
-          <img src={hiResUrl(imgSrc)} alt={event.name} className="w-full h-full object-cover" />
-        ) : (
-          <div
-            className="w-full h-full flex items-center justify-center"
-            style={{ background: 'var(--brand-gradient)' }}
+      <div className="relative flex-shrink-0" style={{ height: '280px' }}>
+        <EventCardImageSlider event={event} />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent pointer-events-none" />
+        {/* Top bar: back + share */}
+        <div className="absolute top-4 left-4 right-4 flex items-center justify-between" style={{ zIndex: 3 }}>
+          <button
+            onClick={onClose}
+            className="w-10 h-10 rounded-full flex items-center justify-center"
+            style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)' }}
           >
-            <span style={{ fontSize: '72px' }}>♪</span>
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-        <button
-          onClick={onClose}
-          className="absolute top-4 left-4 w-10 h-10 rounded-full flex items-center justify-center"
-          style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)' }}
-        >
-          <span className="material-symbols-outlined text-white">arrow_back</span>
-        </button>
-        <div className="absolute bottom-4 left-4 right-4">
+            <span className="material-symbols-outlined text-white">arrow_back</span>
+          </button>
+          <button
+            onClick={async () => { await shareEvent(event); setShared(true); setTimeout(() => setShared(false), 2000); }}
+            className="w-10 h-10 rounded-full flex items-center justify-center"
+            style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)' }}
+          >
+            <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>
+              {shared ? 'check' : 'share'}
+            </span>
+          </button>
+        </div>
+        <div className="absolute bottom-4 left-4 right-4" style={{ zIndex: 3, pointerEvents: 'none' }}>
           <span
             className="text-xs font-bold text-white px-2.5 py-1 rounded"
-            style={{ background: 'var(--brand)' }}
+            style={{ background: 'var(--brand)', pointerEvents: 'auto' }}
           >
             {category}
           </span>
@@ -1748,6 +1861,22 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
           </p>
         </div>
 
+        {/* Add to Calendar */}
+        {event.dates?.start?.localDate && (
+          <button
+            onClick={() => addToCalendar(event)}
+            className="flex items-center justify-center gap-2 w-full py-3 mb-2 font-black text-sm"
+            style={{
+              border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A', borderRadius: 0,
+              background: 'white', color: '#1A1A1A', fontFamily: 'Epilogue, sans-serif',
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>calendar_add_on</span>
+            ADD TO CALENDAR
+          </button>
+        )}
+
+        {/* Get Tickets / More Info */}
         {event.ticketLinks && event.ticketLinks.length > 0 ? (
           <div className="flex flex-col gap-2">
             {event.ticketLinks.filter(l => l.source === 'Ticketmaster').map((link) => (
@@ -1756,8 +1885,9 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-between w-full px-5 py-3 text-white font-black text-sm rounded-lg"
+                className="flex items-center justify-between w-full px-5 py-3 text-white font-black text-sm"
                 style={{
+                  borderRadius: 0, border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A',
                   background: link.source === 'Ticketmaster'
                     ? 'linear-gradient(135deg, #026cdf, #02a7f0)'
                     : link.source === 'Eventbrite'
@@ -1776,8 +1906,9 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
             href={event.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="block w-full py-4 text-center text-white font-black text-sm rounded-lg"
+            className="flex items-center justify-center gap-2 w-full py-4 text-center text-white font-black text-sm"
             style={{
+              borderRadius: 0, border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A',
               background: event._source === 'seatgeek'
                 ? 'linear-gradient(135deg, #d4184a, #ff5c5c)'
                 : event._source === 'local'
@@ -1786,6 +1917,9 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
               fontFamily: 'Epilogue, sans-serif',
             }}
           >
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+              {event._source === 'local' ? 'info' : 'confirmation_number'}
+            </span>
             {event._source === 'local' ? 'MORE INFO →' : 'GET TICKETS →'}
           </a>
         ) : (
@@ -1793,9 +1927,10 @@ function EventDetailModal({ event, onClose }: { event: TMEvent; onClose: () => v
             href={`https://maps.google.com/?q=${mapsQuery}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="block w-full py-4 text-center text-white font-black text-sm rounded-lg"
-            style={{ background: 'var(--brand-gradient)', fontFamily: 'Epilogue, sans-serif' }}
+            className="flex items-center justify-center gap-2 w-full py-4 text-center text-white font-black text-sm"
+            style={{ borderRadius: 0, background: 'var(--brand-gradient)', fontFamily: 'Epilogue, sans-serif' }}
           >
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>directions</span>
             GET DIRECTIONS →
           </a>
         )}

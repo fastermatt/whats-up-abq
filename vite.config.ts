@@ -9,4 +9,8 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    // lightningcss rejects some Tailwind arbitrary-value CSS; disable CSS minify
+    cssMinify: false,
+  },
 });
