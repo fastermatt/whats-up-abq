@@ -393,8 +393,8 @@ function EventsSection() {
       {total>PAGE&&<div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginTop:14}}>
         <span style={{fontSize:13,color:'#9ca3af'}}>{page*PAGE+1}–{Math.min((page+1)*PAGE,total)} of {total}</span>
         <div style={{display:'flex',gap:8}}>
-          <button style={{...btnS,opacity:page===0?0.4:1}} onClick={()=>setPage(p=>Math.max(0,p-1))} disabled={page===0}>← Prev</button>
-          <button style={{...btnS,opacity:(page+1)*PAGE>=total?0.4:1}} onClick={()=>setPage(p=>p+1)} disabled={(page+1)*PAGE>=total}>Next →</button>
+          <button style={{...btnS,opacity:page===0?0.4:1}} onClick={()=>{setPage(p=>Math.max(0,p-1));setSelected(new Set());}} disabled={page===0}>← Prev</button>
+          <button style={{...btnS,opacity:(page+1)*PAGE>=total?0.4:1}} onClick={()=>{setPage(p=>p+1);setSelected(new Set());}} disabled={(page+1)*PAGE>=total}>Next →</button>
         </div>
       </div>}
       {confirm&&<Confirm msg="Delete this event permanently?" onOk={()=>deleteEv(confirm)} onCancel={()=>setConfirm(null)} />}
@@ -496,8 +496,8 @@ function PlacesSection() {
       {total>PAGE&&<div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginTop:14}}>
         <span style={{fontSize:13,color:'#9ca3af'}}>{page*PAGE+1}–{Math.min((page+1)*PAGE,total)} of {total}</span>
         <div style={{display:'flex',gap:8}}>
-          <button style={{...btnS,opacity:page===0?0.4:1}} onClick={()=>setPage(p=>Math.max(0,p-1))} disabled={page===0}>← Prev</button>
-          <button style={{...btnS,opacity:(page+1)*PAGE>=total?0.4:1}} onClick={()=>setPage(p=>p+1)} disabled={(page+1)*PAGE>=total}>Next →</button>
+          <button style={{...btnS,opacity:page===0?0.4:1}} onClick={()=>{setPage(p=>Math.max(0,p-1));setSelected(new Set());}} disabled={page===0}>← Prev</button>
+          <button style={{...btnS,opacity:(page+1)*PAGE>=total?0.4:1}} onClick={()=>{setPage(p=>p+1);setSelected(new Set());}} disabled={(page+1)*PAGE>=total}>Next →</button>
         </div>
       </div>}
       {confirm&&<Confirm msg="Delete this place permanently?" onOk={()=>delPlace(confirm)} onCancel={()=>setConfirm(null)} />}
@@ -519,13 +519,13 @@ function CategoriesSection() {
   const [loading, setLoading] = useState(true);
   const [saving,  setSaving]  = useState(false);
   const [filter,  setFilter]  = useState<'all'|'event'|'place'>('all');
+  const [addForm, setAddForm] = useState<{name:string;type:'event'|'place'}|null>(null);
   useEffect(() => { cfgGet('categories').then(v=>{ if(v?.length) setCats(v); setLoading(false); }).catch(()=>setLoading(false)); }, []);
   const persist = async (list:CatEntry[]) => { await cfgSet('categories',list); setCats(list); };
   const addCat  = async () => {
-    const name=prompt('Category name:'); if(!name?.trim()) return;
-    const type=(prompt('Type (event or place)?')||'event') as 'event'|'place';
-    const nc:CatEntry = {id:type+'-'+name.trim().toLowerCase(),name:name.trim(),icon:'📁',color:'#6b7280',type,order:cats.length};
-    await persist([...cats,nc]); toast('Added ✓');
+    if (!addForm?.name?.trim()) { toast('Name required','err'); return; }
+    const nc:CatEntry = {id:addForm.type+'-'+addForm.name.trim().toLowerCase(),name:addForm.name.trim(),icon:'📁',color:'#6b7280',type:addForm.type,order:cats.length};
+    await persist([...cats,nc]); toast('Added ✓'); setAddForm(null);
   };
   const move = async (id:string,dir:-1|1) => {
     const i=cats.findIndex(c=>c.id===id); if(i<0) return;
@@ -537,10 +537,23 @@ function CategoriesSection() {
   if (loading) return <p style={{textAlign:'center',color:'#9ca3af',padding:40}}>Loading…</p>;
   return (
     <div>
-      <SectionHeader title="Categories" sub="Manage event and place categories" action={<button style={btnP} onClick={addCat}>+ New</button>} />
+      <SectionHeader title="Categories" sub="Manage event and place categories" action={<button style={btnP} onClick={()=>setAddForm({name:'',type:'event'})}>+ New</button>} />
+      {addForm&&(
+        <div style={{...card,marginBottom:20,border:`2px solid ${ACCENT}`}}>
+          <h3 style={{fontSize:15,fontWeight:700,marginBottom:14}}>New Category</h3>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))',gap:12,marginBottom:12}}>
+            <div><label style={lbl}>Name *</label><input value={addForm.name} onChange={e=>setAddForm(v=>v&&{...v,name:e.target.value})} style={inp} autoFocus placeholder="Category name" /></div>
+            <div><label style={lbl}>Type</label><select value={addForm.type} onChange={e=>setAddForm(v=>v&&{...v,type:e.target.value as 'event'|'place'})} style={inp}><option value="event">Event</option><option value="place">Place</option></select></div>
+          </div>
+          <div style={{display:'flex',gap:8,justifyContent:'flex-end'}}>
+            <button style={btnS} onClick={()=>setAddForm(null)}>Cancel</button>
+            <button style={btnP} onClick={addCat}>Add Category</button>
+          </div>
+        </div>
+      )}
       {editing&&(
         <div style={{...card,marginBottom:20,border:`2px solid ${ACCENT}`}}>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 80px 120px 100px',gap:12}}>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(120px,1fr))',gap:12}}>
             <div><label style={lbl}>Name</label><input value={editing.name} onChange={e=>setEditing(v=>v&&{...v,name:e.target.value})} style={inp} /></div>
             <div><label style={lbl}>Icon</label><input value={editing.icon} onChange={e=>setEditing(v=>v&&{...v,icon:e.target.value})} style={inp} /></div>
             <div><label style={lbl}>Color</label><input type="color" value={editing.color} onChange={e=>setEditing(v=>v&&{...v,color:e.target.value})} style={{...inp,padding:4,height:38}} /></div>
@@ -671,9 +684,9 @@ function AnalyticsSection() {
   const [sectionEngagement,setSectionEngagement]=useState<{tab:string;count:number}[]>([]);
 
   const days = range==='7d'?7:range==='30d'?30:90;
-  const since = new Date(Date.now()-days*86400000).toISOString();
 
   useEffect(() => {
+    const since = new Date(Date.now()-days*86400000).toISOString();
     async function load() {
       setLoading(true);
       try {
@@ -683,7 +696,6 @@ function AnalyticsSection() {
       // Totals by event_type
       const typeCount: Record<string,number> = {};
       for (const r of rows) typeCount[r.event_type] = (typeCount[r.event_type]||0)+1;
-      setTotals(typeCount);
 
       // Unique sessions
       const uniqueSessions = new Set(rows.filter(r=>r.session_id).map((r:any)=>r.session_id)).size;
@@ -719,7 +731,7 @@ function AnalyticsSection() {
       rows.filter(r=>r.session_id).forEach((r:any)=>{ const day=r.created_at.split('T')[0]; if(!daySessions[day]) daySessions[day]=new Set(); daySessions[day].add(r.session_id); });
       setDailyActive(Object.entries(daySessions).sort((a,b)=>a[0].localeCompare(b[0])).map(([day,s])=>({day,sessions:s.size})));
 
-      setTotals(typeCount);
+      setTotals({...typeCount});
       } catch(e:any) {
         console.error('Analytics load error:', e);
       } finally {
@@ -727,7 +739,7 @@ function AnalyticsSection() {
       }
     }
     load();
-  }, [range, since]);
+  }, [range]);
 
   const maxDA = Math.max(...dailyActive.map(d=>d.sessions),1);
   const maxSE = Math.max(...sectionEngagement.map(d=>d.count),1);
@@ -1009,8 +1021,10 @@ function TagRulesSection() {
   const [rules,setRules]=useState<TagRulesConfig>(DEF_RULES);
   const [loading,setLoading]=useState(true);
   const [saving,setSaving]=useState(false);
+  const [newTag,setNewTag]=useState('');
   useEffect(()=>{cfgGet('tagRules').then(v=>{if(v) setRules({...DEF_RULES,...v}); setLoading(false);}).catch(()=>setLoading(false));},[]);
   const save=async()=>{setSaving(true);await cfgSet('tagRules',rules);toast('Saved ✓ — reload app to apply');setSaving(false);};
+  const addTag=()=>{const n=newTag.trim();if(!n){toast('Tag name required','err');return;}setRules(r=>({...r,categoryKeywords:{...r.categoryKeywords,[n]:[]}}));setNewTag('');};
   if(loading) return <p style={{textAlign:'center',color:'#9ca3af',padding:40}}>Loading…</p>;
   return (
     <div>
@@ -1021,9 +1035,12 @@ function TagRulesSection() {
           <textarea value={(rules as any)[type+'Keywords'].join(', ')} onChange={e=>setRules(r=>({...r,[type+'Keywords']:e.target.value.split(',').map((s:string)=>s.trim()).filter(Boolean)}))} rows={3} style={{...inp,fontFamily:'monospace',fontSize:13,resize:'vertical'}} />
         </div>
       ))}
-      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10,flexWrap:'wrap',gap:8}}>
         <h3 style={{fontSize:14,fontWeight:700}}>Category Keywords</h3>
-        <button style={btnS} onClick={()=>{const n=prompt('New tag name:');if(n?.trim()) setRules(r=>({...r,categoryKeywords:{...r.categoryKeywords,[n.trim()]:[]}}));}}>+ Add</button>
+        <div style={{display:'flex',gap:6,alignItems:'center'}}>
+          <input value={newTag} onChange={e=>setNewTag(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addTag()} placeholder="new tag name" style={{...inp,width:160,padding:'5px 10px'}} />
+          <button style={btnS} onClick={addTag}>+ Add</button>
+        </div>
       </div>
       {Object.entries(rules.categoryKeywords).map(([cat,kws])=>(
         <div key={cat} style={{...card,marginBottom:8}}>
