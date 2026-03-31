@@ -6932,8 +6932,15 @@ export default function App() {
         }
       } catch {}
 
+      // Kick off events fetch NOW — in parallel with places — so Supabase only
+      // needs to wake up once. Both promises race concurrently.
+      setEventsLoading(true);
+      const eventsPromise = withTimeout(fetchEventsFromDB(), 12000);
+
       try {
-        const sbPlaces = await withTimeout(fetchPlacesFromDB(), 8000);
+        // Timeout raised to 20 s: parallel page fetches in db.ts complete in
+        // ~2 s on a warm connection, but give a generous window for cold starts.
+        const sbPlaces = await withTimeout(fetchPlacesFromDB(), 20000);
         if (Array.isArray(sbPlaces) && sbPlaces.length > 0) {
           setPlaces(sbPlaces);
           placesLoaded = true;
@@ -6954,8 +6961,7 @@ export default function App() {
         return;
       }
 
-      // ── Phase 2: Load events in the background (non-blocking) ─────────────
-      setEventsLoading(true);
+      // ── Phase 2: Await the events fetch that was already running ──────────
       try {
         let tmEvents: TMEvent[] = [];
         let ebEvents: TMEvent[] = [];
@@ -6964,8 +6970,8 @@ export default function App() {
         let muEvents: TMEvent[] = [];
 
         try {
-          // Timeout: if Supabase hangs, throw so the catch can serve static fallback
-          const sbEvents = await withTimeout(fetchEventsFromDB(), 8000);
+          // Await the promise that was started in parallel with places above
+          const sbEvents = await eventsPromise;
           tmEvents = sbEvents['ticketmaster'] || [];
           sgEvents = sbEvents['seatgeek'] || [];
           bitEvents = sbEvents['bandsintown'] || [];

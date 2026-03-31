@@ -124,26 +124,37 @@ export async function fetchEventsFromDB(): Promise<Record<string, unknown[]>> {
 }
 
 export async function fetchPlacesFromDB(): Promise<unknown[]> {
-  // Paginate to get all places past Supabase's 1000-row default limit
   const PAGE = 1000;
-  let allRows: unknown[] = [];
-  let from = 0;
 
-  while (true) {
-    const { data, error } = await supabase
-      .from('places')
-      .select('raw')
-      .range(from, from + PAGE - 1);
+  // Get the total row count so we can fire all page requests in parallel
+  // instead of sequentially (sequential was ~5 × 2s = 10s on cold Supabase,
+  // which triggered the 8 s timeout and fell back to the stale static JSON).
+  const { count, error: countErr } = await supabase
+    .from('places')
+    .select('*', { count: 'exact', head: true });
+  if (countErr) throw countErr;
+
+  const total = count ?? 0;
+  if (total === 0) return [];
+
+  const pageCount = Math.ceil(total / PAGE);
+
+  // Fire all page fetches concurrently — ~5× faster than sequential pagination
+  const pageResults = await Promise.all(
+    Array.from({ length: pageCount }, (_, i) =>
+      supabase
+        .from('places')
+        .select('raw')
+        .range(i * PAGE, (i + 1) * PAGE - 1)
+    )
+  );
+
+  const allRows: unknown[] = [];
+  for (const { data, error } of pageResults) {
     if (error) throw error;
-    const rows = data ?? [];
-    allRows = allRows.concat(
-      rows.map((row: { raw: unknown }) => {
-        const raw = row.raw as Record<string, unknown>;
-        return transformGoogleRaw(raw);
-      })
-    );
-    if (rows.length < PAGE) break;
-    from += PAGE;
+    for (const row of (data ?? [])) {
+      allRows.push(transformGoogleRaw((row as { raw: Record<string, unknown> }).raw));
+    }
   }
 
   return allRows;
