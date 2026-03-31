@@ -30,7 +30,7 @@ async function cfgSet(key: string, value: any) {
 export type AdminSection =
   | 'dashboard' | 'banners' | 'events' | 'places'
   | 'categories' | 'content' | 'refresh' | 'reviews'
-  | 'analytics' | 'tagrules' | 'settings';
+  | 'analytics' | 'tagrules' | 'settings' | 'theme';
 
 interface Banner {
   id: string; message: string; type: 'info'|'warning'|'promo';
@@ -1185,10 +1185,10 @@ function SettingsSection() {
   const [msg,setMsg]=useState('');
   const [type,setType]=useState<'info'|'success'|'warning'>('info');
   const [active,setActive]=useState(false);
-  const [mapProvider,setMapProvider]=useState<'google'|'apple'>('google');
+  const [mapProvider,setMapProvider]=useState<'google'|'apple'|'auto'>('auto');
   const [loading,setLoading]=useState(true);
   const [saving,setSaving]=useState(false);
-  useEffect(()=>{cfgGet('siteConfig').then(v=>{if(v){setMsg(v.banner?.message||'');setActive(v.banner?.active??false);setType(v.banner?.type||'info');setMapProvider(v.mapProvider||'google');}setLoading(false);}).catch(()=>setLoading(false));},[]);
+  useEffect(()=>{cfgGet('siteConfig').then(v=>{if(v){setMsg(v.banner?.message||'');setActive(v.banner?.active??false);setType(v.banner?.type||'info');setMapProvider(v.mapProvider||'auto');}setLoading(false);}).catch(()=>setLoading(false));},[]);
   const save=async()=>{setSaving(true);await cfgSet('siteConfig',{banner:{message:msg,active,type},mapProvider});toast('Saved ✓');setSaving(false);};
   if(loading) return <p style={{textAlign:'center',color:'#9ca3af',padding:40}}>Loading…</p>;
   return (
@@ -1209,17 +1209,165 @@ function SettingsSection() {
         <div style={{marginTop:24,paddingTop:20,borderTop:'1px solid #e5e7eb'}}>
           <h3 style={{fontSize:15,fontWeight:700,marginBottom:8}}>Map Provider</h3>
           <p style={{fontSize:12,color:'#9ca3af',marginBottom:12}}>Which map app to open when users tap "Get Directions".</p>
-          <div style={{display:'flex',gap:10}}>
-            {(['google','apple'] as const).map(p=>(
-              <button key={p} onClick={()=>setMapProvider(p)} style={{padding:'10px 20px',borderRadius:10,border:`2px solid ${mapProvider===p?ACCENT:'#e5e7eb'}`,background:mapProvider===p?ACCENT:'#fff',color:mapProvider===p?'#fff':'#374151',fontWeight:700,fontSize:14,cursor:'pointer',display:'flex',alignItems:'center',gap:8,transition:'all 0.15s'}}>
-                {p==='google'?'🗺️':'🍎'} {p==='google'?'Google Maps':'Apple Maps'}
+          <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+            {([['auto','📍','Auto (iOS→Apple, others→Google)'],['google','🗺️','Google Maps'],['apple','🍎','Apple Maps']] as const).map(([p,icon,label])=>(
+              <button key={p} onClick={()=>setMapProvider(p)} style={{padding:'10px 16px',borderRadius:10,border:`2px solid ${mapProvider===p?ACCENT:'#e5e7eb'}`,background:mapProvider===p?ACCENT:'#fff',color:mapProvider===p?'#fff':'#374151',fontWeight:700,fontSize:13,cursor:'pointer',display:'flex',alignItems:'center',gap:8,transition:'all 0.15s'}}>
+                {icon} {label}
               </button>
             ))}
           </div>
+          <p style={{fontSize:11,color:'#9ca3af',marginTop:8}}>💡 "Auto" is recommended — automatically uses Apple Maps on iPhone/iPad and Google Maps everywhere else.</p>
         </div>
         <div style={{marginTop:20}}>
           <button style={{...btnP,opacity:saving?0.7:1}} onClick={save} disabled={saving}>{saving?'Saving…':'Save'}</button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THEME SECTION
+// ─────────────────────────────────────────────────────────────────────────────
+interface ThemeConfig {
+  brand: string;
+  brandLight: string;
+  accent: string;
+  bgScreen: string;
+}
+
+const THEME_PRESETS: {name:string;emoji:string;config:ThemeConfig}[] = [
+  { name:'Neon Moss',    emoji:'🌿', config:{ brand:'#566500', brandLight:'#8a9e00', accent:'#D4EF4D', bgScreen:'#F8FAF8' } },
+  { name:'Terracotta',   emoji:'🏔️', config:{ brand:'#a03b00', brandLight:'#c4622d', accent:'#ff9a6c', bgScreen:'#f5f0ed' } },
+  { name:'Electric Blue',emoji:'⚡', config:{ brand:'#0057c2', brandLight:'#1C6FEA', accent:'#93c5fd', bgScreen:'#f0f6ff' } },
+  { name:'Desert Purple',emoji:'💜', config:{ brand:'#5b21b6', brandLight:'#7c3aed', accent:'#c4b5fd', bgScreen:'#f5f3ff' } },
+  { name:'Sandstone',    emoji:'🌸', config:{ brand:'#9d174d', brandLight:'#db2777', accent:'#fbcfe8', bgScreen:'#fdf2f8' } },
+  { name:'Forest Teal',  emoji:'🌲', config:{ brand:'#065f46', brandLight:'#059669', accent:'#6ee7b7', bgScreen:'#f0fdf4' } },
+];
+
+function applyThemePreview(cfg: ThemeConfig) {
+  const root = document.documentElement;
+  root.style.setProperty('--brand', cfg.brand);
+  root.style.setProperty('--brand-light', cfg.brandLight);
+  root.style.setProperty('--brand-gradient', `linear-gradient(135deg, ${cfg.brand} 0%, ${cfg.brandLight} 100%)`);
+  root.style.setProperty('--brand-bg-screen', cfg.bgScreen);
+  root.style.setProperty('--brand-bg-subtle', cfg.brand + '1a');
+  root.style.setProperty('--brand-tint-bg', cfg.accent + '26');
+  root.style.setProperty('--brand-tint-border', cfg.accent + '80');
+  root.style.setProperty('--brand-ring-color', cfg.accent);
+}
+
+function ThemeSection() {
+  const DEF: ThemeConfig = THEME_PRESETS[0].config;
+  const [cfg, setCfg] = useState<ThemeConfig>(DEF);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [activePreset, setActivePreset] = useState<string>('Neon Moss');
+
+  useEffect(()=>{
+    cfgGet('themeConfig').then(v=>{
+      if(v?.brand){
+        setCfg(v as ThemeConfig);
+        applyThemePreview(v as ThemeConfig);
+        const match = THEME_PRESETS.find(p=>p.config.brand===v.brand);
+        setActivePreset(match?.name||'Custom');
+      }
+      setLoading(false);
+    }).catch(()=>setLoading(false));
+  },[]);
+
+  const applyPreset = (preset: typeof THEME_PRESETS[0]) => {
+    setCfg(preset.config);
+    setActivePreset(preset.name);
+    applyThemePreview(preset.config);
+  };
+
+  const handleColorChange = (key: keyof ThemeConfig, val: string) => {
+    const next = {...cfg,[key]:val};
+    setCfg(next);
+    setActivePreset('Custom');
+    applyThemePreview(next);
+  };
+
+  const save = async () => {
+    setSaving(true);
+    await cfgSet('themeConfig', cfg);
+    applyThemePreview(cfg);
+    toast('Theme saved ✓ — live on next app load');
+    setSaving(false);
+  };
+
+  if(loading) return <p style={{textAlign:'center',color:'#9ca3af',padding:40}}>Loading…</p>;
+
+  return (
+    <div>
+      <SectionHeader title="Theme & Colors" sub="Customize the app's brand color scheme — changes apply live on next visitor load" />
+
+      {/* Preset grid */}
+      <div style={{...card,maxWidth:600,marginBottom:24}}>
+        <h3 style={{fontSize:15,fontWeight:700,marginBottom:6}}>Preset Themes</h3>
+        <p style={{fontSize:12,color:'#9ca3af',marginBottom:14}}>Click a preset to preview instantly. Save to make it permanent.</p>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:10}}>
+          {THEME_PRESETS.map(p=>(
+            <button key={p.name} onClick={()=>applyPreset(p)}
+              style={{padding:'12px 14px',border:`2px solid ${activePreset===p.name?ACCENT:'#e5e7eb'}`,borderRadius:10,background:activePreset===p.name?'#fff7ed':'#fff',cursor:'pointer',textAlign:'left',transition:'all 0.15s',boxShadow:activePreset===p.name?`0 0 0 2px ${ACCENT}`:'none'}}>
+              <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}>
+                <span style={{fontSize:18}}>{p.emoji}</span>
+                <span style={{fontSize:13,fontWeight:700,color:'#18181b'}}>{p.name}</span>
+                {activePreset===p.name && <span style={{marginLeft:'auto',fontSize:10,fontWeight:800,color:ACCENT}}>✓ Active</span>}
+              </div>
+              <div style={{display:'flex',gap:4}}>
+                {[p.config.brand,p.config.brandLight,p.config.accent].map((c,i)=>(
+                  <div key={i} style={{width:20,height:20,borderRadius:4,background:c,border:'1px solid rgba(0,0,0,0.1)'}} />
+                ))}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Custom color pickers */}
+      <div style={{...card,maxWidth:520,marginBottom:24}}>
+        <h3 style={{fontSize:15,fontWeight:700,marginBottom:6}}>Custom Colors</h3>
+        <p style={{fontSize:12,color:'#9ca3af',marginBottom:16}}>Fine-tune individual colors. Preview updates instantly.</p>
+        {([
+          ['brand',      'Primary Brand Color',   'Main buttons, links, active states'],
+          ['brandLight', 'Secondary Brand Color',  'Hover states, gradients'],
+          ['accent',     'Accent / Highlight Color','Badges, tags, rings'],
+          ['bgScreen',   'Background Color',        'App background tint'],
+        ] as [keyof ThemeConfig,string,string][]).map(([key,label,hint])=>(
+          <div key={key} style={{display:'flex',alignItems:'center',gap:12,marginBottom:14,padding:'10px 12px',border:'1px solid #f3f4f6',borderRadius:8,background:'#fafafa'}}>
+            <input type="color" value={cfg[key]} onChange={e=>handleColorChange(key,e.target.value)}
+              style={{width:44,height:44,padding:2,border:'2px solid #e5e7eb',borderRadius:8,cursor:'pointer',background:'#fff'}} />
+            <div style={{flex:1}}>
+              <div style={{fontSize:13,fontWeight:700,color:'#18181b'}}>{label}</div>
+              <div style={{fontSize:11,color:'#9ca3af'}}>{hint}</div>
+            </div>
+            <code style={{fontSize:11,background:'#f3f4f6',padding:'3px 7px',borderRadius:4,color:'#374151',fontFamily:'monospace'}}>{cfg[key]}</code>
+          </div>
+        ))}
+      </div>
+
+      {/* Preview swatch */}
+      <div style={{...card,maxWidth:520,marginBottom:24}}>
+        <h3 style={{fontSize:15,fontWeight:700,marginBottom:12}}>Live Preview</h3>
+        <div style={{background:cfg.bgScreen,border:'2px solid #1a1a1a',borderRadius:8,padding:16,boxShadow:'4px 4px 0 #1a1a1a'}}>
+          <div style={{background:`linear-gradient(135deg,${cfg.brand},${cfg.brandLight})`,borderRadius:6,padding:'14px 18px',marginBottom:12}}>
+            <div style={{fontSize:9,fontWeight:700,letterSpacing:'0.16em',textTransform:'uppercase',color:cfg.accent,marginBottom:4}}>✦ Your City, Unplugged</div>
+            <div style={{fontFamily:'Epilogue,sans-serif',fontWeight:900,fontSize:18,color:'#fff',lineHeight:1.1}}>Find Something<br/>Worth Leaving<br/>the House For</div>
+          </div>
+          <div style={{display:'flex',gap:8}}>
+            <div style={{padding:'8px 14px',background:cfg.accent,border:'2px solid #1a1a1a',boxShadow:'2px 2px 0 #1a1a1a',fontSize:10,fontWeight:800,letterSpacing:'0.06em',textTransform:'uppercase',cursor:'pointer',color:'#1a1a1a'}}>Browse Events</div>
+            <div style={{padding:'8px 14px',background:cfg.brand,border:`2px solid ${cfg.brand}`,fontSize:10,fontWeight:700,letterSpacing:'0.06em',textTransform:'uppercase',cursor:'pointer',color:'#fff'}}>Browse Places</div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{maxWidth:520}}>
+        <button style={{...btnP,opacity:saving?0.7:1}} onClick={save} disabled={saving}>
+          {saving?'Saving…':'💾 Save Theme'}
+        </button>
+        <p style={{fontSize:11,color:'#9ca3af',marginTop:8}}>Saved themes take effect for all users on their next page load.</p>
       </div>
     </div>
   );
@@ -1240,6 +1388,7 @@ const NAV: {id:AdminSection;label:string;icon:string;group:string}[] = [
   {id:'refresh',   label:'Data Refresh',     icon:'🔄', group:'Tools'},
   {id:'tagrules',  label:'Tag Rules',        icon:'🔖', group:'Tools'},
   {id:'settings',  label:'Settings',         icon:'⚙️', group:'Tools'},
+  {id:'theme',     label:'Theme & Colors',   icon:'🎨', group:'Tools'},
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1363,6 +1512,7 @@ export default function AdminPanel({ user, onBack }: { user: User|null; onBack: 
           {section==='refresh'    && <RefreshSection />}
           {section==='tagrules'   && <TagRulesSection />}
           {section==='settings'   && <SettingsSection />}
+          {section==='theme'      && <ThemeSection />}
         </div>
       </div>
     </div>

@@ -6414,14 +6414,14 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
             {tab === 'discover' && (
               <>
                 {/* Hero + Events This Week — side by side */}
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0', marginBottom:'24px', border:'2px solid #1a1a1a', boxShadow:'4px 4px 0 #1a1a1a' }}>
+                <div style={{ display:'grid', gridTemplateColumns:'minmax(0,3fr) minmax(0,2fr)', gap:'0', marginBottom:'24px', border:'2px solid #1a1a1a', boxShadow:'4px 4px 0 #1a1a1a' }}>
                   {/* Hero */}
-                  <div style={{ background:'linear-gradient(135deg,#566500,#8a9e00)', padding:'24px 28px 20px', position:'relative', overflow:'hidden' }}>
+                  <div style={{ background:'linear-gradient(135deg,#566500,#8a9e00)', padding:'clamp(14px,2vw,24px) clamp(14px,2vw,28px) clamp(12px,1.5vw,20px)', position:'relative', overflow:'hidden', minWidth:0 }}>
                     <div style={{ position:'absolute', top:'-30px', right:'-30px', width:'180px', height:'180px', background:'rgba(212,239,77,0.1)', borderRadius:'50%' }} />
                     <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.16em', textTransform:'uppercase', color:'#d4ef4d', marginBottom:'5px' }}>✦ Your City, Unplugged</div>
-                    <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'26px', lineHeight:1.05, letterSpacing:'-0.02em', color:'#fff', marginBottom:'8px' }}>Find Something<br/>Worth Leaving<br/>the House For</div>
-                    <div style={{ fontSize:'11px', color:'rgba(255,255,255,0.75)', marginBottom:'16px' }}>{today} · {places.length.toLocaleString()} spots across Greater ABQ</div>
-                    <div style={{ display:'flex', gap:'8px' }}>
+                    <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'clamp(16px,2.2vw,26px)', lineHeight:1.05, letterSpacing:'-0.02em', color:'#fff', marginBottom:'8px' }}>Find Something<br/>Worth Leaving<br/>the House For</div>
+                    <div style={{ fontSize:'clamp(9px,1vw,11px)', color:'rgba(255,255,255,0.75)', marginBottom:'clamp(10px,1.5vw,16px)' }}>{today} · {places.length.toLocaleString()} spots across Greater ABQ</div>
+                    <div style={{ display:'flex', gap:'8px', flexWrap:'wrap' }}>
                       <button onClick={() => setTab('events')} style={{ height:'32px', padding:'0 12px', background:'#d4ef4d', border:'2px solid #1a1a1a', boxShadow:'2px 2px 0 #1a1a1a', fontSize:'9px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'5px', color:'#1a1a1a' }}>
                         <span className="material-symbols-outlined" style={{ fontSize:'13px' }}>confirmation_number</span>Browse Events
                       </button>
@@ -6432,7 +6432,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
                   </div>
 
                   {/* Events This Week */}
-                  <div style={{ background:'#1a1a1a', borderLeft:'2px solid #1a1a1a', display:'flex', flexDirection:'column' }}>
+                  <div style={{ background:'#1a1a1a', borderLeft:'2px solid #1a1a1a', display:'flex', flexDirection:'column', minWidth:0 }}>
                     <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 16px', borderBottom:'1px solid rgba(255,255,255,0.1)', flexShrink:0 }}>
                       <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'12px', letterSpacing:'0.1em', textTransform:'uppercase', color:'#fff' }}>Events This Week</div>
                       <span onClick={() => setTab('events')} style={{ fontSize:'10px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', color:'#d4ef4d', cursor:'pointer' }}>
@@ -6766,16 +6766,46 @@ export default function App() {
   const [tooFarPlaceId, setTooFarPlaceId] = useState<string | null>(null);
 
   const [siteBanner, setSiteBanner] = useState<BannerConfig | null>(null);
-  const [mapProvider, setMapProvider] = useState<'google' | 'apple'>('google');
+  const [mapProvider, setMapProvider] = useState<'google' | 'apple' | 'auto'>('auto');
+
+  // Resolve 'auto' → Apple Maps on iOS/iPadOS, Google Maps elsewhere
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const resolvedMapProvider: 'google' | 'apple' =
+    mapProvider === 'auto' ? (isIOS ? 'apple' : 'google') : mapProvider;
 
   useEffect(() => {
     _fbGetDoc('config', 'siteConfig', 'key').then(snap => {
       if (snap.exists()) {
         const d = snap.data();
         if (d.banner?.active) setSiteBanner(d.banner as BannerConfig);
-        if (d.mapProvider) setMapProvider(d.mapProvider as 'google' | 'apple');
+        if (d.mapProvider) setMapProvider(d.mapProvider as 'google' | 'apple' | 'auto');
       }
     });
+  }, []);
+
+  // ── Load theme config from Supabase and inject CSS variables ──────────────
+  useEffect(() => {
+    (supabase.from as any)('config')
+      .select('value')
+      .eq('key', 'themeConfig')
+      .maybeSingle()
+      .then(({ data }: { data: { value: Record<string, string> } | null }) => {
+        const t = data?.value;
+        if (!t?.brand) return; // no custom theme saved — keep CSS defaults
+        const root = document.documentElement;
+        root.style.setProperty('--brand', t.brand);
+        if (t.brandLight) root.style.setProperty('--brand-light', t.brandLight);
+        if (t.brand && t.brandLight)
+          root.style.setProperty('--brand-gradient', `linear-gradient(135deg, ${t.brand} 0%, ${t.brandLight} 100%)`);
+        if (t.bgScreen) root.style.setProperty('--brand-bg-screen', t.bgScreen);
+        if (t.brand) root.style.setProperty('--brand-bg-subtle', t.brand + '1a');
+        if (t.accent) {
+          root.style.setProperty('--brand-ring-color', t.accent);
+          root.style.setProperty('--brand-tint-bg', t.accent + '26');
+          root.style.setProperty('--brand-tint-border', t.accent + '80');
+        }
+      });
   }, []);
 
   const handleCheckIn = useCallback((placeId: string) => {
@@ -7144,10 +7174,10 @@ export default function App() {
           onShowAuth={() => setShowAuthModal(true)}
           isSaved={isPlaceSaved(selectedPlace.id)}
           onToggleSave={() => toggleSavedPlace(selectedPlace)}
-          mapProvider={mapProvider}
+          mapProvider={resolvedMapProvider}
         />
       )}
-      {selectedEvent && <EventDetailModal event={selectedEvent} onClose={() => { closeEventModal(); window.history.back(); }} isSaved={isEventSaved(selectedEvent.id)} onToggleSave={() => toggleSavedEvent(selectedEvent)} mapProvider={mapProvider} />}
+      {selectedEvent && <EventDetailModal event={selectedEvent} onClose={() => { closeEventModal(); window.history.back(); }} isSaved={isEventSaved(selectedEvent.id)} onToggleSave={() => toggleSavedEvent(selectedEvent)} mapProvider={resolvedMapProvider} />}
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
     </ErrorBoundary>
   );
@@ -7499,11 +7529,11 @@ export default function App() {
           onShowAuth={() => setShowAuthModal(true)}
           isSaved={isPlaceSaved(selectedPlace.id)}
           onToggleSave={() => toggleSavedPlace(selectedPlace)}
-          mapProvider={mapProvider}
+          mapProvider={resolvedMapProvider}
         />
       )}
       {selectedEvent && (
-        <EventDetailModal event={selectedEvent} onClose={() => { closeEventModal(); window.history.back(); }} isSaved={isEventSaved(selectedEvent.id)} onToggleSave={() => toggleSavedEvent(selectedEvent)} mapProvider={mapProvider} />
+        <EventDetailModal event={selectedEvent} onClose={() => { closeEventModal(); window.history.back(); }} isSaved={isEventSaved(selectedEvent.id)} onToggleSave={() => toggleSavedEvent(selectedEvent)} mapProvider={resolvedMapProvider} />
       )}
       {showAuthModal && (
         <AuthModal onClose={() => setShowAuthModal(false)} />
