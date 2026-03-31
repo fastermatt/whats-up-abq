@@ -33,7 +33,7 @@ function useFadeIn(delay = 0) {
 if (typeof document !== 'undefined' && !document.getElementById('card-fade-style')) {
   const s = document.createElement('style');
   s.id = 'card-fade-style';
-  s.textContent = '@keyframes cardFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }';
+  s.textContent = '@keyframes cardFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
   document.head.appendChild(s);
 }
 
@@ -3679,12 +3679,41 @@ function ProfileScreen({
           </div>
           <button
             onClick={onSignOut}
-            className="text-xs font-bold flex-shrink-0 ml-3" style={{ color: '#1A1A1A' }}
-            style={{ fontFamily: 'Inter, sans-serif', background: 'none', border: 'none', cursor: 'pointer' }}
+            className="text-xs font-bold flex-shrink-0 ml-3"
+            style={{ fontFamily: 'Inter, sans-serif', background: 'none', border: 'none', cursor: 'pointer', color: '#1A1A1A' }}
           >
             Sign out
           </button>
         </div>
+      )}
+
+      {/* Admin panel shortcut — top of profile, immediately visible to admin */}
+      {onAdmin && (
+        <button
+          onClick={onAdmin}
+          style={{
+            width: '100%',
+            padding: '14px',
+            background: '#000',
+            color: '#fff',
+            border: '2px solid #000',
+            borderRadius: 0,
+            fontFamily: 'Epilogue, sans-serif',
+            fontWeight: 900,
+            fontSize: 14,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase' as const,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            marginBottom: 16,
+          }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>admin_panel_settings</span>
+          Admin Panel
+        </button>
       )}
 
       {/* Customize Settings */}
@@ -3927,41 +3956,110 @@ function ProfileScreen({
         </>
       )}
 
-      {/* Admin panel shortcut — only visible to admin account */}
-      {onAdmin && (
-        <div style={{ marginTop: 32, borderTop: '2px solid #000', paddingTop: 20 }}>
-          <button
-            onClick={onAdmin}
-            style={{
-              width: '100%',
-              padding: '14px',
-              background: '#000',
-              color: '#fff',
-              border: '2px solid #000',
-              borderRadius: 0,
-              fontFamily: 'Epilogue, sans-serif',
-              fontWeight: 900,
-              fontSize: 14,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase' as const,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-            }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>admin_panel_settings</span>
-            Admin Panel
-          </button>
-        </div>
-      )}
     </div>
   );
 }
 
 // Legacy component stub — superseded by InstallPrompt below
 function AddToHomePrompt() { return null; }
+
+// ─── Pull-to-Refresh ────────────────────────────────────────────────────────
+// Custom PTR since overscroll-behavior:contain blocks the native browser PTR.
+// Triggers a full page reload (clears SW cache for fresh data).
+function PullToRefresh() {
+  const [pullY, setPullY] = React.useState(0);
+  const [refreshing, setRefreshing] = React.useState(false);
+  const startY = React.useRef<number | null>(null);
+  const threshold = 72;
+
+  const onTouchStart = React.useCallback((e: TouchEvent) => {
+    // Only activate when scrolled to top
+    if (window.scrollY === 0) {
+      startY.current = e.touches[0].clientY;
+    }
+  }, []);
+
+  const onTouchMove = React.useCallback((e: TouchEvent) => {
+    if (startY.current === null) return;
+    const dy = e.touches[0].clientY - startY.current;
+    if (dy > 0) {
+      setPullY(Math.min(dy * 0.45, threshold + 20)); // dampen
+    }
+  }, [threshold]);
+
+  const onTouchEnd = React.useCallback(() => {
+    if (pullY >= threshold) {
+      setRefreshing(true);
+      // Clear SW cache then reload
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          Promise.all(names.map(n => caches.delete(n))).then(() => window.location.reload());
+        });
+      } else {
+        window.location.reload();
+      }
+    } else {
+      setPullY(0);
+      startY.current = null;
+    }
+  }, [pullY, threshold]);
+
+  React.useEffect(() => {
+    document.addEventListener('touchstart', onTouchStart, { passive: true });
+    document.addEventListener('touchmove', onTouchMove, { passive: true });
+    document.addEventListener('touchend', onTouchEnd, { passive: true });
+    return () => {
+      document.removeEventListener('touchstart', onTouchStart);
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [onTouchStart, onTouchMove, onTouchEnd]);
+
+  if (pullY === 0 && !refreshing) return null;
+
+  const progress = Math.min(pullY / threshold, 1);
+  const ready = pullY >= threshold;
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '100%',
+        maxWidth: 480,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: refreshing ? 56 : Math.max(pullY, 0),
+        background: 'var(--brand, #D4EF4D)',
+        zIndex: 9999,
+        transition: refreshing ? 'height 0.2s ease' : 'none',
+        overflow: 'hidden',
+      }}
+    >
+      {refreshing ? (
+        <span className="material-symbols-outlined" style={{ fontSize: 24, animation: 'spin 0.8s linear infinite', color: '#1A1A1A' }}>refresh</span>
+      ) : (
+        <span
+          className="material-symbols-outlined"
+          style={{
+            fontSize: 24,
+            color: '#1A1A1A',
+            transform: `rotate(${ready ? 180 : progress * 160}deg)`,
+            transition: 'transform 0.15s ease',
+            opacity: progress,
+          }}
+        >
+          arrow_downward
+        </span>
+      )}
+    </div>
+  );
+}
+
+
 
 
 // ─── Install Prompt — brutalist design (iOS + Android unified) ──────────────
@@ -6618,6 +6716,7 @@ export default function App() {
 `}</style>
 
       <InstallPrompt />
+      <PullToRefresh />
       <OfflineBanner />
       <div
         className="flex flex-col mx-auto relative"
