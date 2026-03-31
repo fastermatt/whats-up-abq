@@ -411,9 +411,10 @@ const GEO_GRANTED_KEY = 'abq_geo_granted';
 function useGeolocation() {
   const [coords, setCoords] = useState<GeoCoords | null>(null);
   const [error, setError] = useState<string | null>(null);
-  // Start as "requested" if the user already granted permission before —
-  // prevents a flash of the "Enable location" prompt on every page load.
-  const [requested, setRequested] = useState(() => {
+  const [requested, setRequested] = useState(false);
+  // True while silently re-fetching on page load for a user who already granted.
+  // During this window we hide the banner entirely instead of flashing "Enable".
+  const [silentPending, setSilentPending] = useState(() => {
     try { return localStorage.getItem(GEO_GRANTED_KEY) === 'true'; } catch { return false; }
   });
 
@@ -427,10 +428,12 @@ function useGeolocation() {
     navigator.geolocation.getCurrentPosition(
       pos => {
         setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setSilentPending(false);
         try { localStorage.setItem(GEO_GRANTED_KEY, 'true'); } catch {}
         trackEvent('location_granted');
       },
       err => {
+        setSilentPending(false);
         setError(err.message);
         // Clear saved grant if user denied / revoked
         if (err.code === 1 /* PERMISSION_DENIED */) {
@@ -462,7 +465,7 @@ function useGeolocation() {
     }
   }, [request]);
 
-  return { coords, error, requested, request };
+  return { coords, error, requested, silentPending, request };
 }
 
 // ─── Check-In Storage ────────────────────────────────────────────────────────
@@ -707,14 +710,17 @@ const FlatIcon = React.memo(function FlatIcon({
 // ─── Geo Banner ──────────────────────────────────────────────────────────────
 
 function GeoBanner({
-  coords, error, requested, onRequest,
+  coords, error, requested, silentPending, onRequest,
 }: {
   coords: GeoCoords | null;
   error: string | null;
   requested: boolean;
+  silentPending: boolean;
   onRequest: () => void;
 }) {
   if (coords) return null;
+  // Silently re-fetching for a returning user — don't flash the Enable prompt
+  if (silentPending && !error) return null;
 
   if (error) return (
     <div className="px-4 py-3 flex items-center gap-3" style={{ background: '#1ebaeb', borderBottom: '2px solid #1A1A1A' }}>
@@ -2550,7 +2556,7 @@ function MyWishlist() {
 
 function DiscoverScreen({
   places, events, eventsLoading, onPlaceSelect, onEventSelect,
-  coords, geoRequested, geoError, onRequestGeo,
+  coords, geoRequested, geoSilentPending, geoError, onRequestGeo,
   checkedIn, onCheckIn,
   onNavigatePlaces, onNavigateEvents, prefs,
 }: {
@@ -2561,6 +2567,7 @@ function DiscoverScreen({
   onEventSelect: (e: TMEvent) => void;
   coords: GeoCoords | null;
   geoRequested: boolean;
+  geoSilentPending: boolean;
   geoError: string | null;
   onRequestGeo: () => void;
   checkedIn: Set<string>;
@@ -2641,6 +2648,7 @@ function DiscoverScreen({
         coords={coords}
         error={geoError}
         requested={geoRequested}
+        silentPending={geoSilentPending}
         onRequest={onRequestGeo}
       />
 
@@ -3278,7 +3286,7 @@ function EventsScreen({
 // ─── Places Screen ────────────────────────────────────────────────────────────
 
 function PlacesScreen({
-  places, onPlaceSelect, coords, geoRequested, geoError, onRequestGeo,
+  places, onPlaceSelect, coords, geoRequested, geoSilentPending = false, geoError, onRequestGeo,
   checkedIn, onCheckIn, tooFarPlaceId,
   navKey = 0, navCat = 'All', navSearch = '',
 }: {
@@ -3286,6 +3294,7 @@ function PlacesScreen({
   onPlaceSelect: (p: Place) => void;
   coords: GeoCoords | null;
   geoRequested: boolean;
+  geoSilentPending?: boolean;
   geoError: string | null;
   onRequestGeo: () => void;
   checkedIn: Set<string>;
@@ -3466,6 +3475,7 @@ function PlacesScreen({
         coords={coords}
         error={geoError}
         requested={geoRequested}
+        silentPending={geoSilentPending}
         onRequest={onRequestGeo}
       />
 
@@ -6752,7 +6762,7 @@ export default function App() {
     return () => { if (syncTimeout.current) clearTimeout(syncTimeout.current); };
   }, [checkedIn, user, authReady]);
 
-  const { coords, error: geoError, requested: geoRequested, request: requestGeo } = useGeolocation();
+  const { coords, error: geoError, requested: geoRequested, silentPending: geoSilentPending, request: requestGeo } = useGeolocation();
 
   // ── Analytics: session_start (fires once per browser session) ──
   useEffect(() => {
@@ -6833,7 +6843,7 @@ export default function App() {
   const [tooFarPlaceId, setTooFarPlaceId] = useState<string | null>(null);
 
   const [siteBanner, setSiteBanner] = useState<BannerConfig | null>(null);
-  const [mapProvider, setMapProvider] = useState<'google' | 'apple' | 'auto'>('auto');
+  const [mapProvider, setMapProvider] = useState<'google' | 'apple' | 'auto'>('apple');
 
   // Resolve 'auto' → Apple Maps on iOS/iPadOS, Google Maps elsewhere
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -7467,6 +7477,7 @@ export default function App() {
               onEventSelect={openEventModal}
               coords={coords}
               geoRequested={geoRequested}
+              geoSilentPending={geoSilentPending}
               geoError={geoError}
               onRequestGeo={requestGeo}
               checkedIn={checkedIn}
@@ -7485,6 +7496,7 @@ export default function App() {
               onPlaceSelect={openPlaceModal}
               coords={coords}
               geoRequested={geoRequested}
+              geoSilentPending={geoSilentPending}
               geoError={geoError}
               onRequestGeo={requestGeo}
               checkedIn={checkedIn}
