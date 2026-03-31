@@ -1241,8 +1241,8 @@ function PlaceDetailModal({
           <button
             onClick={onClose}
             aria-label="Close"
-            className="w-10 h-10 rounded-full flex items-center justify-center"
-            style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)' }}
+            className="w-10 h-10 flex items-center justify-center"
+            style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%' }}
           >
             <span className="material-symbols-outlined text-white" style={{ fontSize: '22px' }}>close</span>
           </button>
@@ -1250,8 +1250,8 @@ function PlaceDetailModal({
             {onToggleSave && (
               <button
                 onClick={onToggleSave}
-                className="w-10 h-10 rounded-full flex items-center justify-center"
-                style={{ background: isSaved ? 'var(--brand)' : 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)' }}
+                className="w-10 h-10 flex items-center justify-center"
+                style={{ background: isSaved ? 'var(--brand)' : 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%' }}
                 title={isSaved ? 'Remove from plan' : 'Save to plan'}
               >
                 <span className="material-symbols-outlined text-white" style={{ fontSize: '20px', fontVariationSettings: isSaved ? "'FILL' 1" : "'FILL' 0" }}>bookmark</span>
@@ -1264,8 +1264,8 @@ function PlaceDetailModal({
                 }
                 try { await navigator.clipboard.writeText(`${place.name}\n${place.address || ''}\n${place.website || 'https://abqunplugged.com'}`); setShared(true); setTimeout(() => setShared(false), 2000); } catch { /* ignore */ }
               }}
-              className="w-10 h-10 rounded-full flex items-center justify-center"
-              style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)' }}
+              className="w-10 h-10 flex items-center justify-center"
+              style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%' }}
             >
               <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>{shared ? 'check' : 'share'}</span>
             </button>
@@ -1851,8 +1851,8 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
           <button
             onClick={onClose}
             aria-label="Close"
-            className="w-10 h-10 rounded-full flex items-center justify-center"
-            style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)' }}
+            className="w-10 h-10 flex items-center justify-center"
+            style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%' }}
           >
             <span className="material-symbols-outlined text-white" style={{ fontSize: '22px' }}>close</span>
           </button>
@@ -1860,8 +1860,8 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
             {onToggleSave && (
               <button
                 onClick={onToggleSave}
-                className="w-10 h-10 rounded-full flex items-center justify-center"
-                style={{ background: isSaved ? 'var(--brand)' : 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)' }}
+                className="w-10 h-10 flex items-center justify-center"
+                style={{ background: isSaved ? 'var(--brand)' : 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%' }}
                 title={isSaved ? 'Remove from plan' : 'Save to plan'}
               >
                 <span className="material-symbols-outlined text-white" style={{ fontSize: '20px', fontVariationSettings: isSaved ? "'FILL' 1" : "'FILL' 0" }}>bookmark</span>
@@ -1869,8 +1869,8 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
             )}
             <button
               onClick={async () => { await shareEvent(event); setShared(true); setTimeout(() => setShared(false), 2000); }}
-              className="w-10 h-10 rounded-full flex items-center justify-center"
-              style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)' }}
+              className="w-10 h-10 flex items-center justify-center"
+              style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%' }}
             >
               <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>
                 {shared ? 'check' : 'share'}
