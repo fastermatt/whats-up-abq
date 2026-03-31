@@ -3045,7 +3045,20 @@ function EventsScreen({
   const [selectedGenre, setSelectedGenre] = useState('All');
 
   const filtered = useMemo(() => {
-    let result = events.filter(e => !e._isAdult);
+    // 90-day horizon cap: only apply when no search/filter is active so that
+    // searching for a future event (e.g. a comedian in October) still works.
+    const isSearchActive = search.trim() !== '' || selectedGenre !== 'All';
+    const horizonDate = new Date();
+    horizonDate.setDate(horizonDate.getDate() + 90);
+    const horizonStr = horizonDate.toISOString().split('T')[0];
+    let result = events.filter(e => {
+      if (e._isAdult) return false;
+      if (!isSearchActive) {
+        const d = e.dates?.start?.localDate;
+        if (d && d > horizonStr) return false;
+      }
+      return true;
+    });
     if (selectedGenre !== 'All') {
       result = result.filter(e => {
         const seg = e.classifications?.[0]?.segment?.name || '';
@@ -7120,17 +7133,6 @@ export default function App() {
         // normTitle|date, so iterating its values gives one entry per show.
         const dedupedTM = [..._tmIndex.values()];
 
-        // ── 90-day horizon cap ───────────────────────────────────────────────
-        // Showing events 12+ months out overwhelms the list for no practical gain.
-        const horizonDate = new Date();
-        horizonDate.setDate(horizonDate.getDate() + 90);
-        const horizonStr = horizonDate.toISOString().split('T')[0];
-        const isWithinHorizon = (ev: TMEvent): boolean => {
-          const d = ev.dates?.start?.localDate;
-          if (!d) return true; // no date → keep (e.g. ongoing/static events)
-          return d <= horizonStr;
-        };
-
         // Build merged list: live API events first, then static events that aren't duplicates
         const liveEvents = [
           ...dedupedTM,
@@ -7181,7 +7183,6 @@ export default function App() {
         const merged = [...liveEvents, ...staticOnly]
           .filter(isInMetro)
           .filter(hasActionableLink)
-          .filter(isWithinHorizon)
           .filter(e => !isJunkEvent(e))
           .map(tagAdultEvent);
         setEvents(merged);
