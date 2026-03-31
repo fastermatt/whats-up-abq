@@ -3675,7 +3675,7 @@
     }
   },
   {
-    "name": "Limited Edition 100 Year Golden Replica Game Ball by Spalding\u00ae",
+    "name": "Limited Edition 100 Year Golden Replica Game Ball by Spalding®",
     "type": "event",
     "id": "G5vzZbsBwdNdR",
     "test": false,
@@ -3817,8 +3817,8 @@
         "description": "HARLEM GLOBETROTTERS / NTL / USA"
       }
     ],
-    "info": "THIS IS AN OPTIONAL UPGRADE. TICKET TO THE MAIN EVENT IS ALSO REQUIRED. How to Redeem Your Limited Edition 100 Year Golden Replica Game Ball by Spalding\u00ae To pick up your exclusive game ball, visit the Harlem Globetrotters Merchandise Stand located inside the venue on game day. Pick-up is only available during pre-game, half-time, or post-game. Ball MUST be picked up at the venue on the date of your ticketed event. No alternate pick-up dates, locations, nor shipping options are available. This purchase is NON TRANSFERABLE.",
-    "pleaseNote": "THIS IS AN OPTIONAL UPGRADE. TICKET TO THE MAIN EVENT IS ALSO REQUIRED. How to Redeem Your Limited Edition 100 Year Golden Replica Game Ball by Spalding\u00ae To pick up your exclusive game ball, visit the Harlem Globetrotters Merchandise Stand located inside the venue on game day. Pick-up is only available during pre-game, half-time, or post-game. Ball MUST be picked up at the venue on the date of your ticketed event. No alternate pick-up dates, locations, nor shipping options are available. This purchase is NON TRANSFERABLE.",
+    "info": "THIS IS AN OPTIONAL UPGRADE. TICKET TO THE MAIN EVENT IS ALSO REQUIRED. How to Redeem Your Limited Edition 100 Year Golden Replica Game Ball by Spalding® To pick up your exclusive game ball, visit the Harlem Globetrotters Merchandise Stand located inside the venue on game day. Pick-up is only available during pre-game, half-time, or post-game. Ball MUST be picked up at the venue on the date of your ticketed event. No alternate pick-up dates, locations, nor shipping options are available. This purchase is NON TRANSFERABLE.",
+    "pleaseNote": "THIS IS AN OPTIONAL UPGRADE. TICKET TO THE MAIN EVENT IS ALSO REQUIRED. How to Redeem Your Limited Edition 100 Year Golden Replica Game Ball by Spalding® To pick up your exclusive game ball, visit the Harlem Globetrotters Merchandise Stand located inside the venue on game day. Pick-up is only available during pre-game, half-time, or post-game. Ball MUST be picked up at the venue on the date of your ticketed event. No alternate pick-up dates, locations, nor shipping options are available. This purchase is NON TRANSFERABLE.",
     "products": [
       {
         "name": "All-New Magic Pass Pre-Show Event (5:30pm-6:00pm)",
@@ -4201,7 +4201,7 @@
         {
           "startDateTime": "2025-09-09T16:00:00Z",
           "endDateTime": "2025-09-22T04:00:00Z",
-          "name": "Citi\u00ae Cardmember Presale"
+          "name": "Citi® Cardmember Presale"
         },
         {
           "startDateTime": "2025-09-15T16:00:00Z",
@@ -4216,7 +4216,7 @@
         {
           "startDateTime": "2025-09-22T16:00:00Z",
           "endDateTime": "2026-03-04T05:00:00Z",
-          "name": "Citi\u00ae Cardmember Preferred Tickets"
+          "name": "Citi® Cardmember Preferred Tickets"
         }
       ]
     },
@@ -10153,7 +10153,7 @@
         "family": false
       }
     ],
-    "info": "Timeless. Majestic. Unforgettable. Step into the world of Swan Lake: a story of love, magic, and triumph, brought to life through the powerful choreography of Marius Petipa and Lev Ivanov, set to Tchaikovskys iconic score. This production features all-new, hand-painted sets and over 200 custom-designed scenery elements, transforming the stage into a dreamlike landscape. With world-renown ballet artists from Italy, Spain, Georgia, Ireland, Turkey, Brazil, Great Britain, Ukraine, Japan, Tajikistan, Moldova, and Kazakhstan, this performance embodies the spirit of international artistry and excellence. Every scene, from the poetic Dance of the Little Swans to Odiles dazzling 32 fouett\u00e9 turns, is a celebration of classical ballet in its most pure and expressive form. Ballet in Two Acts with one intermission Family-friendly, suitable for ages 3 and up",
+    "info": "Timeless. Majestic. Unforgettable. Step into the world of Swan Lake: a story of love, magic, and triumph, brought to life through the powerful choreography of Marius Petipa and Lev Ivanov, set to Tchaikovskys iconic score. This production features all-new, hand-painted sets and over 200 custom-designed scenery elements, transforming the stage into a dreamlike landscape. With world-renown ballet artists from Italy, Spain, Georgia, Ireland, Turkey, Brazil, Great Britain, Ukraine, Japan, Tajikistan, Moldova, and Kazakhstan, this performance embodies the spirit of international artistry and excellence. Every scene, from the poetic Dance of the Little Swans to Odiles dazzling 32 fouetté turns, is a celebration of classical ballet in its most pure and expressive form. Ballet in Two Acts with one intermission Family-friendly, suitable for ages 3 and up",
     "seatmap": {
       "staticUrl": "https://mapsapi.tmol.io/maps/geometry/3/event/1E0062E7D5C8246C/staticImage?type=png&systemId=HOST"
     },
@@ -16256,7 +16256,7 @@
         {
           "startDateTime": "2025-11-14T17:00:00Z",
           "endDateTime": "2026-03-21T04:00:00Z",
-          "name": "Citi\u00ae Cardmember Preferred Tickets"
+          "name": "Citi® Cardmember Preferred Tickets"
         },
         {
           "startDateTime": "2025-11-12T17:00:00Z",
@@ -16286,7 +16286,7 @@
         {
           "startDateTime": "2025-11-11T17:00:00Z",
           "endDateTime": "2025-11-14T05:00:00Z",
-          "name": "Citi\u00ae Cardmember Presale"
+          "name": "Citi® Cardmember Presale"
         },
         {
           "startDateTime": "2025-11-11T17:00:00Z",
@@ -29032,7 +29032,7 @@
         {
           "startDateTime": "2026-01-27T18:00:00Z",
           "endDateTime": "2026-01-30T05:00:00Z",
-          "name": "Citi\u00ae Cardmember Presale"
+          "name": "Citi® Cardmember Presale"
         },
         {
           "startDateTime": "2026-01-28T17:00:00Z",
@@ -29062,7 +29062,7 @@
         {
           "startDateTime": "2026-01-30T17:00:00Z",
           "endDateTime": "2026-03-30T04:00:00Z",
-          "name": "Citi\u00ae Cardmember Preferred Tickets"
+          "name": "Citi® Cardmember Preferred Tickets"
         },
         {
           "startDateTime": "2026-03-11T16:00:00Z",
@@ -29477,10 +29477,10 @@
           "boxOfficeInfo": {
             "phoneNumberDetail": "Business Number: (505) 452-5100",
             "openHoursDetail": "Our Box Office is open on the Day of Show only. We open at 1pm and typically close around 9:30pm.",
-            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they\u2019ll exchange cash for card (for free).",
+            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they’ll exchange cash for card (for free).",
             "willCallDetail": "Will Call is available on the Day of Show only, from 3pm thru close of the box office. BRING YOUR I.D. for will call. It is also recommended to have your confirmation email & the credit card used."
           },
-          "parkingDetail": "General Parking Guidelines \u2022General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. \u2022Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) \u2022Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. \u2022Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. \u2022Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. \u2022Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. \u2022VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
+          "parkingDetail": "General Parking Guidelines •General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. •Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) •Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. •Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. •Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. •Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. •VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
           "accessibleSeatingDetail": "Accessible seating is available at almost every price level & assistive listening devices are available. Companion seats are available up to applicable ticket limit. First Financial Credit Union Amphitheater strives to make our venue and live experiences inclusive and accessible to everyone. For more questions, or information not mentioned below, don't hesitate to get in touch with us at FFCUAmpinfo@livenation.com or (505) 452-5100.",
           "generalInfo": {
             "generalRule": "Please visit https://www.firstfinancialamp.com/visit#faq for a full list of Frequently Asked Questions and Rules",
@@ -44544,12 +44544,12 @@
         {
           "startDateTime": "2025-09-22T18:00:00Z",
           "endDateTime": "2025-09-25T04:00:00Z",
-          "name": "Citi\u00ae Cardmember Presale"
+          "name": "Citi® Cardmember Presale"
         },
         {
           "startDateTime": "2025-09-25T18:00:00Z",
           "endDateTime": "2026-04-21T04:00:00Z",
-          "name": "Citi\u00ae Cardmember Preferred Tickets"
+          "name": "Citi® Cardmember Preferred Tickets"
         },
         {
           "startDateTime": "2025-09-24T18:00:00Z",
@@ -44948,10 +44948,10 @@
           "boxOfficeInfo": {
             "phoneNumberDetail": "Business Number: (505) 452-5100",
             "openHoursDetail": "Our Box Office is open on the Day of Show only. We open at 1pm and typically close around 9:30pm.",
-            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they\u2019ll exchange cash for card (for free).",
+            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they’ll exchange cash for card (for free).",
             "willCallDetail": "Will Call is available on the Day of Show only, from 3pm thru close of the box office. BRING YOUR I.D. for will call. It is also recommended to have your confirmation email & the credit card used."
           },
-          "parkingDetail": "General Parking Guidelines \u2022General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. \u2022Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) \u2022Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. \u2022Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. \u2022Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. \u2022Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. \u2022VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
+          "parkingDetail": "General Parking Guidelines •General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. •Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) •Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. •Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. •Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. •Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. •VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
           "accessibleSeatingDetail": "Accessible seating is available at almost every price level & assistive listening devices are available. Companion seats are available up to applicable ticket limit. First Financial Credit Union Amphitheater strives to make our venue and live experiences inclusive and accessible to everyone. For more questions, or information not mentioned below, don't hesitate to get in touch with us at FFCUAmpinfo@livenation.com or (505) 452-5100.",
           "generalInfo": {
             "generalRule": "Please visit https://www.firstfinancialamp.com/visit#faq for a full list of Frequently Asked Questions and Rules",
@@ -47615,7 +47615,7 @@
         "description": "LEO PRESENTS / REG / MINNEAPOLIS"
       }
     ],
-    "info": "Albuquerque! K-pop boy group AMPERSBorn To Define. Known for their exciting performances and energetic music, the group is ready to meet fans and create an unforgettable night together.AMPERS&ONE (\uc570\ud37c\uc0cc\ub4dc\uc6d0) is a 7-member boy group consisting of Kamden, Brian, Jiho, Siyun, Mackiah, Kyrell, and Seungmo.Tickets for AMPERS&ONE will go on sale March 27 at 10:00AM CST.General Admission: $50 - This is a first come first serve ticket to see AMPERS&ONE.General Admission + Hi Touch: $75 - This is your ticket to the AMPERS&ONE concert + the Hi Touch after the show! *LIMITED!*\u2028\u2028VIP: $125 - This ticket Includes:\u2028- Your AMPERS&ONE concert ticket\u2028- Skip The Line- Sound Check Party- Group Photo- Hi Touch after the show\u2028 *LIMITED!* Please arrive by 4pm!!\u2028VVIP: $150 - This ticket Includes: \u2028- Your AMPERS&ONE concert ticket\u2028- Skip The Line\u2028- Sound Check Party \u2028- Group Photo\u2028- Hi Touch after the show\u2028- AMPERS&ONE Fan Sign!! \u2028*LIMITED* Please arrive by 4pm!!Everything Ticket: $250 - This ticket Includes: - Your AMPERS&ONE concert ticket\u2028- Skip The Line- Sound Check Party \u2028- Group Photo- Hi Touch after the show\u2028- AMPERS&ONE Fan Sign\u2028- Seven Selfie Tickets\u2028- You+ *LIMITED* Please arrive by 4pm!!UPGRADES:You+: $75 - This is a solo photo of You + the group, taken by us! *LIMITED!* (This does not include a concert ticket)\u2028\u2028Selfie Ticket: $20 - This ticket allows you to take a selfie with any one member of AMPERS&ONE! If you would like a selfie with all seven members, you will need to buy seven selfie tickets. (This does not include a concert ticket)Selfie Bundle: $75 - This selfie bundle buys you seven selfie tickets so you can take a selfie with each member of AMPERS&ONE *LIMITED!* (This does not include a concert ticket)Skip The Line: $20 - This ticket allows you early access to the venue lobby and early access to AMPERS&ONE merchandise! Skip The Line doors open around 5pm. (This does not include a concert ticket)www.LeoPresents.com",
+    "info": "Albuquerque! K-pop boy group AMPERSBorn To Define. Known for their exciting performances and energetic music, the group is ready to meet fans and create an unforgettable night together.AMPERS&ONE (앰퍼샌드원) is a 7-member boy group consisting of Kamden, Brian, Jiho, Siyun, Mackiah, Kyrell, and Seungmo.Tickets for AMPERS&ONE will go on sale March 27 at 10:00AM CST.General Admission: $50 - This is a first come first serve ticket to see AMPERS&ONE.General Admission + Hi Touch: $75 - This is your ticket to the AMPERS&ONE concert + the Hi Touch after the show! *LIMITED!*  VIP: $125 - This ticket Includes: - Your AMPERS&ONE concert ticket - Skip The Line- Sound Check Party- Group Photo- Hi Touch after the show  *LIMITED!* Please arrive by 4pm!! VVIP: $150 - This ticket Includes:  - Your AMPERS&ONE concert ticket - Skip The Line - Sound Check Party  - Group Photo - Hi Touch after the show - AMPERS&ONE Fan Sign!!  *LIMITED* Please arrive by 4pm!!Everything Ticket: $250 - This ticket Includes: - Your AMPERS&ONE concert ticket - Skip The Line- Sound Check Party  - Group Photo- Hi Touch after the show - AMPERS&ONE Fan Sign - Seven Selfie Tickets - You+ *LIMITED* Please arrive by 4pm!!UPGRADES:You+: $75 - This is a solo photo of You + the group, taken by us! *LIMITED!* (This does not include a concert ticket)  Selfie Ticket: $20 - This ticket allows you to take a selfie with any one member of AMPERS&ONE! If you would like a selfie with all seven members, you will need to buy seven selfie tickets. (This does not include a concert ticket)Selfie Bundle: $75 - This selfie bundle buys you seven selfie tickets so you can take a selfie with each member of AMPERS&ONE *LIMITED!* (This does not include a concert ticket)Skip The Line: $20 - This ticket allows you early access to the venue lobby and early access to AMPERS&ONE merchandise! Skip The Line doors open around 5pm. (This does not include a concert ticket)www.LeoPresents.com",
     "priceRanges": [
       {
         "type": "standard",
@@ -49304,10 +49304,10 @@
           "boxOfficeInfo": {
             "phoneNumberDetail": "Business Number: (505) 452-5100",
             "openHoursDetail": "Our Box Office is open on the Day of Show only. We open at 1pm and typically close around 9:30pm.",
-            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they\u2019ll exchange cash for card (for free).",
+            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they’ll exchange cash for card (for free).",
             "willCallDetail": "Will Call is available on the Day of Show only, from 3pm thru close of the box office. BRING YOUR I.D. for will call. It is also recommended to have your confirmation email & the credit card used."
           },
-          "parkingDetail": "General Parking Guidelines \u2022General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. \u2022Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) \u2022Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. \u2022Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. \u2022Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. \u2022Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. \u2022VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
+          "parkingDetail": "General Parking Guidelines •General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. •Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) •Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. •Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. •Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. •Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. •VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
           "accessibleSeatingDetail": "Accessible seating is available at almost every price level & assistive listening devices are available. Companion seats are available up to applicable ticket limit. First Financial Credit Union Amphitheater strives to make our venue and live experiences inclusive and accessible to everyone. For more questions, or information not mentioned below, don't hesitate to get in touch with us at FFCUAmpinfo@livenation.com or (505) 452-5100.",
           "generalInfo": {
             "generalRule": "Please visit https://www.firstfinancialamp.com/visit#faq for a full list of Frequently Asked Questions and Rules",
@@ -55788,16 +55788,16 @@
         {
           "startDateTime": "2026-02-18T15:00:00Z",
           "endDateTime": "2026-02-20T16:00:00Z",
-          "name": "Citi\u00ae Cardmember Presale",
-          "description": "To access the sale, use the first 6 digits of your eligible Citi\u00ae credit card or Citibank Debit Card as your presale code. You will also need to use your Citi\u00ae card to successfully complete your purchase.",
-          "shortDescription": "Exclusive Presale for Citi\u00ae Cardmembers"
+          "name": "Citi® Cardmember Presale",
+          "description": "To access the sale, use the first 6 digits of your eligible Citi® credit card or Citibank Debit Card as your presale code. You will also need to use your Citi® card to successfully complete your purchase.",
+          "shortDescription": "Exclusive Presale for Citi® Cardmembers"
         },
         {
           "startDateTime": "2026-02-20T17:00:00Z",
           "endDateTime": "2026-06-06T01:30:00Z",
-          "name": "Citi\u00ae Cardmember Preferred Tickets",
-          "description": "To access the sale, use the first 6 digits of your eligible Citi\u00ae credit card or Citibank Debit Card as your presale code. You will also need to use your Citi\u00ae card to successfully complete your purchase.",
-          "shortDescription": "For Citi\u00ae Cardmembers"
+          "name": "Citi® Cardmember Preferred Tickets",
+          "description": "To access the sale, use the first 6 digits of your eligible Citi® credit card or Citibank Debit Card as your presale code. You will also need to use your Citi® card to successfully complete your purchase.",
+          "shortDescription": "For Citi® Cardmembers"
         },
         {
           "startDateTime": "2026-02-18T17:00:00Z",
@@ -57980,16 +57980,16 @@
         {
           "startDateTime": "2026-01-27T15:00:00Z",
           "endDateTime": "2026-01-30T05:00:00Z",
-          "name": "Citi\u00ae Cardmember Presale",
-          "description": "To access the sale, use the first 6 digits of your eligible Citi\u00ae credit card or Citibank Debit Card as your presale code. You will also need to use your Citi\u00ae card to successfully complete your purchase.",
-          "shortDescription": "Exclusive Presale for Citi\u00ae Cardmembers"
+          "name": "Citi® Cardmember Presale",
+          "description": "To access the sale, use the first 6 digits of your eligible Citi® credit card or Citibank Debit Card as your presale code. You will also need to use your Citi® card to successfully complete your purchase.",
+          "shortDescription": "Exclusive Presale for Citi® Cardmembers"
         },
         {
           "startDateTime": "2026-01-30T17:00:00Z",
           "endDateTime": "2026-05-17T04:00:00Z",
-          "name": "Citi\u00ae Cardmember Preferred Tickets",
-          "description": "To access the sale, use the first 6 digits of your eligible Citi\u00ae credit card or Citibank Debit Card as your presale code. You will also need to use your Citi\u00ae card to successfully complete your purchase.",
-          "shortDescription": "For Citi\u00ae Cardmembers"
+          "name": "Citi® Cardmember Preferred Tickets",
+          "description": "To access the sale, use the first 6 digits of your eligible Citi® credit card or Citibank Debit Card as your presale code. You will also need to use your Citi® card to successfully complete your purchase.",
+          "shortDescription": "For Citi® Cardmembers"
         },
         {
           "startDateTime": "2026-01-29T17:00:00Z",
@@ -58018,7 +58018,7 @@
         {
           "startDateTime": "2026-01-27T15:00:00Z",
           "endDateTime": "2026-01-28T14:59:00Z",
-          "name": "Citi\u00ae Cardmember VIP Packages Presale"
+          "name": "Citi® Cardmember VIP Packages Presale"
         },
         {
           "startDateTime": "2026-01-28T15:00:00Z",
@@ -58381,10 +58381,10 @@
           "boxOfficeInfo": {
             "phoneNumberDetail": "Business Number: (505) 452-5100",
             "openHoursDetail": "Our Box Office is open on the Day of Show only. We open at 1pm and typically close around 9:30pm.",
-            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they\u2019ll exchange cash for card (for free).",
+            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they’ll exchange cash for card (for free).",
             "willCallDetail": "Will Call is available on the Day of Show only, from 3pm thru close of the box office. BRING YOUR I.D. for will call. It is also recommended to have your confirmation email & the credit card used."
           },
-          "parkingDetail": "General Parking Guidelines \u2022General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. \u2022Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) \u2022Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. \u2022Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. \u2022Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. \u2022Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. \u2022VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
+          "parkingDetail": "General Parking Guidelines •General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. •Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) •Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. •Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. •Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. •Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. •VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
           "accessibleSeatingDetail": "Accessible seating is available at almost every price level & assistive listening devices are available. Companion seats are available up to applicable ticket limit. First Financial Credit Union Amphitheater strives to make our venue and live experiences inclusive and accessible to everyone. For more questions, or information not mentioned below, don't hesitate to get in touch with us at FFCUAmpinfo@livenation.com or (505) 452-5100.",
           "generalInfo": {
             "generalRule": "Please visit https://www.firstfinancialamp.com/visit#faq for a full list of Frequently Asked Questions and Rules",
@@ -73790,9 +73790,9 @@
         {
           "startDateTime": "2026-03-02T17:00:00Z",
           "endDateTime": "2026-03-04T05:00:00Z",
-          "name": "Citi\u00ae Cardmember Presale",
-          "description": "To access the sale, use the first 6 digits of your eligible Citi\u00ae credit card or Citibank Debit Card as your presale code. You will also need to use your Citi\u00ae card to successfully complete your purchase.",
-          "shortDescription": "Exclusive Presale for Citi\u00ae Cardmembers"
+          "name": "Citi® Cardmember Presale",
+          "description": "To access the sale, use the first 6 digits of your eligible Citi® credit card or Citibank Debit Card as your presale code. You will also need to use your Citi® card to successfully complete your purchase.",
+          "shortDescription": "Exclusive Presale for Citi® Cardmembers"
         },
         {
           "startDateTime": "2026-03-04T17:00:00Z",
@@ -73841,9 +73841,9 @@
         {
           "startDateTime": "2026-03-05T17:00:00Z",
           "endDateTime": "2026-06-02T04:00:00Z",
-          "name": "Citi\u00ae Cardmember Preferred Tickets",
-          "description": "To access the sale, use the first 6 digits of your eligible Citi\u00ae credit card or Citibank Debit Card as your presale code. You will also need to use your Citi\u00ae card to successfully complete your purchase.",
-          "shortDescription": "For Citi\u00ae Cardmembers"
+          "name": "Citi® Cardmember Preferred Tickets",
+          "description": "To access the sale, use the first 6 digits of your eligible Citi® credit card or Citibank Debit Card as your presale code. You will also need to use your Citi® card to successfully complete your purchase.",
+          "shortDescription": "For Citi® Cardmembers"
         }
       ]
     },
@@ -74217,10 +74217,10 @@
           "boxOfficeInfo": {
             "phoneNumberDetail": "Business Number: (505) 452-5100",
             "openHoursDetail": "Our Box Office is open on the Day of Show only. We open at 1pm and typically close around 9:30pm.",
-            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they\u2019ll exchange cash for card (for free).",
+            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they’ll exchange cash for card (for free).",
             "willCallDetail": "Will Call is available on the Day of Show only, from 3pm thru close of the box office. BRING YOUR I.D. for will call. It is also recommended to have your confirmation email & the credit card used."
           },
-          "parkingDetail": "General Parking Guidelines \u2022General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. \u2022Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) \u2022Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. \u2022Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. \u2022Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. \u2022Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. \u2022VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
+          "parkingDetail": "General Parking Guidelines •General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. •Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) •Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. •Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. •Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. •Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. •VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
           "accessibleSeatingDetail": "Accessible seating is available at almost every price level & assistive listening devices are available. Companion seats are available up to applicable ticket limit. First Financial Credit Union Amphitheater strives to make our venue and live experiences inclusive and accessible to everyone. For more questions, or information not mentioned below, don't hesitate to get in touch with us at FFCUAmpinfo@livenation.com or (505) 452-5100.",
           "generalInfo": {
             "generalRule": "Please visit https://www.firstfinancialamp.com/visit#faq for a full list of Frequently Asked Questions and Rules",
@@ -75419,7 +75419,7 @@
         {
           "startDateTime": "2025-12-02T15:00:00Z",
           "endDateTime": "2025-12-05T05:00:00Z",
-          "name": "Citi\u00ae Cardmember Presale"
+          "name": "Citi® Cardmember Presale"
         },
         {
           "startDateTime": "2025-12-02T19:00:00Z",
@@ -75833,10 +75833,10 @@
           "boxOfficeInfo": {
             "phoneNumberDetail": "Business Number: (505) 452-5100",
             "openHoursDetail": "Our Box Office is open on the Day of Show only. We open at 1pm and typically close around 9:30pm.",
-            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they\u2019ll exchange cash for card (for free).",
+            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they’ll exchange cash for card (for free).",
             "willCallDetail": "Will Call is available on the Day of Show only, from 3pm thru close of the box office. BRING YOUR I.D. for will call. It is also recommended to have your confirmation email & the credit card used."
           },
-          "parkingDetail": "General Parking Guidelines \u2022General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. \u2022Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) \u2022Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. \u2022Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. \u2022Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. \u2022Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. \u2022VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
+          "parkingDetail": "General Parking Guidelines •General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. •Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) •Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. •Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. •Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. •Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. •VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
           "accessibleSeatingDetail": "Accessible seating is available at almost every price level & assistive listening devices are available. Companion seats are available up to applicable ticket limit. First Financial Credit Union Amphitheater strives to make our venue and live experiences inclusive and accessible to everyone. For more questions, or information not mentioned below, don't hesitate to get in touch with us at FFCUAmpinfo@livenation.com or (505) 452-5100.",
           "generalInfo": {
             "generalRule": "Please visit https://www.firstfinancialamp.com/visit#faq for a full list of Frequently Asked Questions and Rules",
@@ -86422,16 +86422,16 @@
         {
           "startDateTime": "2026-02-24T17:00:00Z",
           "endDateTime": "2026-02-27T05:00:00Z",
-          "name": "Citi\u00ae Cardmember Presale",
-          "description": "To access the sale, use the first 6 digits of your eligible Citi\u00ae credit card or Citibank Debit Card as your presale code. You will also need to use your Citi\u00ae card to successfully complete your purchase.",
-          "shortDescription": "Exclusive Presale for Citi\u00ae Cardmembers"
+          "name": "Citi® Cardmember Presale",
+          "description": "To access the sale, use the first 6 digits of your eligible Citi® credit card or Citibank Debit Card as your presale code. You will also need to use your Citi® card to successfully complete your purchase.",
+          "shortDescription": "Exclusive Presale for Citi® Cardmembers"
         },
         {
           "startDateTime": "2026-02-27T17:00:00Z",
           "endDateTime": "2026-06-25T04:00:00Z",
-          "name": "Citi\u00ae Cardmember Preferred Tickets",
-          "description": "To access the sale, use the first 6 digits of your eligible Citi\u00ae credit card or Citibank Debit Card as your presale code. You will also need to use your Citi\u00ae card to successfully complete your purchase.",
-          "shortDescription": "For Citi\u00ae Cardmembers"
+          "name": "Citi® Cardmember Preferred Tickets",
+          "description": "To access the sale, use the first 6 digits of your eligible Citi® credit card or Citibank Debit Card as your presale code. You will also need to use your Citi® card to successfully complete your purchase.",
+          "shortDescription": "For Citi® Cardmembers"
         },
         {
           "startDateTime": "2026-02-26T17:00:00Z",
@@ -86445,12 +86445,12 @@
         {
           "startDateTime": "2026-02-24T17:00:00Z",
           "endDateTime": "2026-02-25T16:45:00Z",
-          "name": "Citi\u00ae Cardmember Aisle Offer"
+          "name": "Citi® Cardmember Aisle Offer"
         },
         {
           "startDateTime": "2026-02-24T17:00:00Z",
           "endDateTime": "2026-02-25T16:45:00Z",
-          "name": "Citi\u00ae Cardmember Presale VIP Package"
+          "name": "Citi® Cardmember Presale VIP Package"
         },
         {
           "startDateTime": "2026-02-25T17:00:00Z",
@@ -86844,10 +86844,10 @@
           "boxOfficeInfo": {
             "phoneNumberDetail": "Business Number: (505) 452-5100",
             "openHoursDetail": "Our Box Office is open on the Day of Show only. We open at 1pm and typically close around 9:30pm.",
-            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they\u2019ll exchange cash for card (for free).",
+            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they’ll exchange cash for card (for free).",
             "willCallDetail": "Will Call is available on the Day of Show only, from 3pm thru close of the box office. BRING YOUR I.D. for will call. It is also recommended to have your confirmation email & the credit card used."
           },
-          "parkingDetail": "General Parking Guidelines \u2022General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. \u2022Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) \u2022Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. \u2022Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. \u2022Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. \u2022Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. \u2022VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
+          "parkingDetail": "General Parking Guidelines •General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. •Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) •Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. •Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. •Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. •Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. •VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
           "accessibleSeatingDetail": "Accessible seating is available at almost every price level & assistive listening devices are available. Companion seats are available up to applicable ticket limit. First Financial Credit Union Amphitheater strives to make our venue and live experiences inclusive and accessible to everyone. For more questions, or information not mentioned below, don't hesitate to get in touch with us at FFCUAmpinfo@livenation.com or (505) 452-5100.",
           "generalInfo": {
             "generalRule": "Please visit https://www.firstfinancialamp.com/visit#faq for a full list of Frequently Asked Questions and Rules",
@@ -89565,16 +89565,16 @@
         {
           "startDateTime": "2026-02-03T17:00:00Z",
           "endDateTime": "2026-02-06T05:00:00Z",
-          "name": "Citi\u00ae Cardmember Presale",
-          "description": "To access the sale, use the first 6 digits of your eligible Citi\u00ae credit card or Citibank Debit Card as your presale code. You will also need to use your Citi\u00ae card to successfully complete your purchase.",
-          "shortDescription": "Exclusive Presale for Citi\u00ae Cardmembers"
+          "name": "Citi® Cardmember Presale",
+          "description": "To access the sale, use the first 6 digits of your eligible Citi® credit card or Citibank Debit Card as your presale code. You will also need to use your Citi® card to successfully complete your purchase.",
+          "shortDescription": "Exclusive Presale for Citi® Cardmembers"
         },
         {
           "startDateTime": "2026-02-06T17:00:00Z",
           "endDateTime": "2026-06-29T04:00:00Z",
-          "name": "Citi\u00ae Cardmember Preferred Tickets",
-          "description": "To access the sale, use the first 6 digits of your eligible Citi\u00ae credit card or Citibank Debit Card as your presale code. You will also need to use your Citi\u00ae card to successfully complete your purchase.",
-          "shortDescription": "For Citi\u00ae Cardmembers"
+          "name": "Citi® Cardmember Preferred Tickets",
+          "description": "To access the sale, use the first 6 digits of your eligible Citi® credit card or Citibank Debit Card as your presale code. You will also need to use your Citi® card to successfully complete your purchase.",
+          "shortDescription": "For Citi® Cardmembers"
         },
         {
           "startDateTime": "2026-02-03T19:00:00Z",
@@ -89960,10 +89960,10 @@
           "boxOfficeInfo": {
             "phoneNumberDetail": "Business Number: (505) 452-5100",
             "openHoursDetail": "Our Box Office is open on the Day of Show only. We open at 1pm and typically close around 9:30pm.",
-            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they\u2019ll exchange cash for card (for free).",
+            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they’ll exchange cash for card (for free).",
             "willCallDetail": "Will Call is available on the Day of Show only, from 3pm thru close of the box office. BRING YOUR I.D. for will call. It is also recommended to have your confirmation email & the credit card used."
           },
-          "parkingDetail": "General Parking Guidelines \u2022General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. \u2022Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) \u2022Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. \u2022Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. \u2022Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. \u2022Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. \u2022VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
+          "parkingDetail": "General Parking Guidelines •General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. •Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) •Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. •Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. •Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. •Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. •VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
           "accessibleSeatingDetail": "Accessible seating is available at almost every price level & assistive listening devices are available. Companion seats are available up to applicable ticket limit. First Financial Credit Union Amphitheater strives to make our venue and live experiences inclusive and accessible to everyone. For more questions, or information not mentioned below, don't hesitate to get in touch with us at FFCUAmpinfo@livenation.com or (505) 452-5100.",
           "generalInfo": {
             "generalRule": "Please visit https://www.firstfinancialamp.com/visit#faq for a full list of Frequently Asked Questions and Rules",
@@ -93638,16 +93638,16 @@
         {
           "startDateTime": "2026-02-10T19:00:00Z",
           "endDateTime": "2026-02-13T05:00:00Z",
-          "name": "Citi\u00ae Cardmember Presale",
-          "description": "To access the sale, use the first 6 digits of your eligible Citi\u00ae credit card or Citibank Debit Card as your presale code. You will also need to use your Citi\u00ae card to successfully complete your purchase.",
-          "shortDescription": "Exclusive Presale for Citi\u00ae Cardmembers"
+          "name": "Citi® Cardmember Presale",
+          "description": "To access the sale, use the first 6 digits of your eligible Citi® credit card or Citibank Debit Card as your presale code. You will also need to use your Citi® card to successfully complete your purchase.",
+          "shortDescription": "Exclusive Presale for Citi® Cardmembers"
         },
         {
           "startDateTime": "2026-02-13T17:00:00Z",
           "endDateTime": "2026-07-09T04:00:00Z",
-          "name": "Citi\u00ae Cardmember Preferred Tickets",
-          "description": "To access the sale, use the first 6 digits of your eligible Citi\u00ae credit card or Citibank Debit Card as your presale code. You will also need to use your Citi\u00ae card to successfully complete your purchase.",
-          "shortDescription": "For Citi\u00ae Cardmembers"
+          "name": "Citi® Cardmember Preferred Tickets",
+          "description": "To access the sale, use the first 6 digits of your eligible Citi® credit card or Citibank Debit Card as your presale code. You will also need to use your Citi® card to successfully complete your purchase.",
+          "shortDescription": "For Citi® Cardmembers"
         },
         {
           "startDateTime": "2026-02-11T17:00:00Z",
@@ -94008,10 +94008,10 @@
           "boxOfficeInfo": {
             "phoneNumberDetail": "Business Number: (505) 452-5100",
             "openHoursDetail": "Our Box Office is open on the Day of Show only. We open at 1pm and typically close around 9:30pm.",
-            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they\u2019ll exchange cash for card (for free).",
+            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they’ll exchange cash for card (for free).",
             "willCallDetail": "Will Call is available on the Day of Show only, from 3pm thru close of the box office. BRING YOUR I.D. for will call. It is also recommended to have your confirmation email & the credit card used."
           },
-          "parkingDetail": "General Parking Guidelines \u2022General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. \u2022Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) \u2022Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. \u2022Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. \u2022Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. \u2022Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. \u2022VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
+          "parkingDetail": "General Parking Guidelines •General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. •Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) •Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. •Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. •Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. •Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. •VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
           "accessibleSeatingDetail": "Accessible seating is available at almost every price level & assistive listening devices are available. Companion seats are available up to applicable ticket limit. First Financial Credit Union Amphitheater strives to make our venue and live experiences inclusive and accessible to everyone. For more questions, or information not mentioned below, don't hesitate to get in touch with us at FFCUAmpinfo@livenation.com or (505) 452-5100.",
           "generalInfo": {
             "generalRule": "Please visit https://www.firstfinancialamp.com/visit#faq for a full list of Frequently Asked Questions and Rules",
@@ -99948,12 +99948,12 @@
         {
           "startDateTime": "2025-12-09T17:00:00Z",
           "endDateTime": "2025-12-12T05:00:00Z",
-          "name": "Citi\u00ae Cardmember Presale"
+          "name": "Citi® Cardmember Presale"
         },
         {
           "startDateTime": "2025-12-12T17:00:00Z",
           "endDateTime": "2026-07-12T04:00:00Z",
-          "name": "Citi\u00ae Cardmember Preferred Tickets"
+          "name": "Citi® Cardmember Preferred Tickets"
         },
         {
           "startDateTime": "2025-12-10T17:00:00Z",
@@ -100332,10 +100332,10 @@
           "boxOfficeInfo": {
             "phoneNumberDetail": "Business Number: (505) 452-5100",
             "openHoursDetail": "Our Box Office is open on the Day of Show only. We open at 1pm and typically close around 9:30pm.",
-            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they\u2019ll exchange cash for card (for free).",
+            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they’ll exchange cash for card (for free).",
             "willCallDetail": "Will Call is available on the Day of Show only, from 3pm thru close of the box office. BRING YOUR I.D. for will call. It is also recommended to have your confirmation email & the credit card used."
           },
-          "parkingDetail": "General Parking Guidelines \u2022General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. \u2022Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) \u2022Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. \u2022Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. \u2022Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. \u2022Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. \u2022VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
+          "parkingDetail": "General Parking Guidelines •General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. •Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) •Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. •Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. •Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. •Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. •VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
           "accessibleSeatingDetail": "Accessible seating is available at almost every price level & assistive listening devices are available. Companion seats are available up to applicable ticket limit. First Financial Credit Union Amphitheater strives to make our venue and live experiences inclusive and accessible to everyone. For more questions, or information not mentioned below, don't hesitate to get in touch with us at FFCUAmpinfo@livenation.com or (505) 452-5100.",
           "generalInfo": {
             "generalRule": "Please visit https://www.firstfinancialamp.com/visit#faq for a full list of Frequently Asked Questions and Rules",
@@ -101586,16 +101586,16 @@
         {
           "startDateTime": "2026-01-28T16:00:00Z",
           "endDateTime": "2026-01-30T05:00:00Z",
-          "name": "Citi\u00ae Cardmember Presale",
-          "description": "To access the sale, use the first 6 digits of your eligible Citi\u00ae credit card or Citibank Debit Card as your presale code. You will also need to use your Citi\u00ae card to successfully complete your purchase.",
-          "shortDescription": "Exclusive Presale for Citi\u00ae Cardmembers"
+          "name": "Citi® Cardmember Presale",
+          "description": "To access the sale, use the first 6 digits of your eligible Citi® credit card or Citibank Debit Card as your presale code. You will also need to use your Citi® card to successfully complete your purchase.",
+          "shortDescription": "Exclusive Presale for Citi® Cardmembers"
         },
         {
           "startDateTime": "2026-01-30T17:00:00Z",
           "endDateTime": "2026-07-20T04:00:00Z",
-          "name": "Citi\u00ae Cardmember Preferred Tickets",
-          "description": "To access the sale, use the first 6 digits of your eligible Citi\u00ae credit card or Citibank Debit Card as your presale code. You will also need to use your Citi\u00ae card to successfully complete your purchase.",
-          "shortDescription": "For Citi\u00ae Cardmembers"
+          "name": "Citi® Cardmember Preferred Tickets",
+          "description": "To access the sale, use the first 6 digits of your eligible Citi® credit card or Citibank Debit Card as your presale code. You will also need to use your Citi® card to successfully complete your purchase.",
+          "shortDescription": "For Citi® Cardmembers"
         },
         {
           "startDateTime": "2026-01-29T17:00:00Z",
@@ -102022,10 +102022,10 @@
           "boxOfficeInfo": {
             "phoneNumberDetail": "Business Number: (505) 452-5100",
             "openHoursDetail": "Our Box Office is open on the Day of Show only. We open at 1pm and typically close around 9:30pm.",
-            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they\u2019ll exchange cash for card (for free).",
+            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they’ll exchange cash for card (for free).",
             "willCallDetail": "Will Call is available on the Day of Show only, from 3pm thru close of the box office. BRING YOUR I.D. for will call. It is also recommended to have your confirmation email & the credit card used."
           },
-          "parkingDetail": "General Parking Guidelines \u2022General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. \u2022Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) \u2022Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. \u2022Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. \u2022Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. \u2022Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. \u2022VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
+          "parkingDetail": "General Parking Guidelines •General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. •Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) •Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. •Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. •Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. •Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. •VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
           "accessibleSeatingDetail": "Accessible seating is available at almost every price level & assistive listening devices are available. Companion seats are available up to applicable ticket limit. First Financial Credit Union Amphitheater strives to make our venue and live experiences inclusive and accessible to everyone. For more questions, or information not mentioned below, don't hesitate to get in touch with us at FFCUAmpinfo@livenation.com or (505) 452-5100.",
           "generalInfo": {
             "generalRule": "Please visit https://www.firstfinancialamp.com/visit#faq for a full list of Frequently Asked Questions and Rules",
@@ -105500,7 +105500,7 @@
     }
   },
   {
-    "name": "R\u00dcF\u00dcS DU SOL NORTH AMERICA 2026",
+    "name": "RÜFÜS DU SOL NORTH AMERICA 2026",
     "type": "event",
     "id": "G5vzZ_7SAiC9s",
     "test": false,
@@ -105656,8 +105656,8 @@
         "description": "LIVE NATION MUSIC / NTL / USA"
       }
     ],
-    "info": "R\u00dcF\u00dcS DU SOL is continuing their partnership with Notes for Notes on their North America Tour 2026 by donating $0.50 USD per ticket sold, to help fund a project opening a music studio that will be free and accessible to youth. For more information, see www.notesfornotes.org. No portion of the purchase price is tax-deductible. For Box, Suite and Season Ticket information see below link",
-    "pleaseNote": "General Parking will be included in the final purchase price. R\u00dcF\u00dcS DU SOL is continuing their partnership with Notes for Notes on their North America Tour 2026 by donating $0.50 USD per ticket sold, to help fund a project opening a music studio that will be free and accessible to youth. For more information, see www.notesfornotes.org. No portion of the purchase price is tax-deductible.",
+    "info": "RÜFÜS DU SOL is continuing their partnership with Notes for Notes on their North America Tour 2026 by donating $0.50 USD per ticket sold, to help fund a project opening a music studio that will be free and accessible to youth. For more information, see www.notesfornotes.org. No portion of the purchase price is tax-deductible. For Box, Suite and Season Ticket information see below link",
+    "pleaseNote": "General Parking will be included in the final purchase price. RÜFÜS DU SOL is continuing their partnership with Notes for Notes on their North America Tour 2026 by donating $0.50 USD per ticket sold, to help fund a project opening a music studio that will be free and accessible to youth. For more information, see www.notesfornotes.org. No portion of the purchase price is tax-deductible.",
     "products": [
       {
         "name": "Blanket: Rufus Du Sol - Not a Concert Ticket",
@@ -105937,10 +105937,10 @@
           "boxOfficeInfo": {
             "phoneNumberDetail": "Business Number: (505) 452-5100",
             "openHoursDetail": "Our Box Office is open on the Day of Show only. We open at 1pm and typically close around 9:30pm.",
-            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they\u2019ll exchange cash for card (for free).",
+            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they’ll exchange cash for card (for free).",
             "willCallDetail": "Will Call is available on the Day of Show only, from 3pm thru close of the box office. BRING YOUR I.D. for will call. It is also recommended to have your confirmation email & the credit card used."
           },
-          "parkingDetail": "General Parking Guidelines \u2022General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. \u2022Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) \u2022Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. \u2022Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. \u2022Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. \u2022Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. \u2022VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
+          "parkingDetail": "General Parking Guidelines •General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. •Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) •Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. •Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. •Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. •Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. •VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
           "accessibleSeatingDetail": "Accessible seating is available at almost every price level & assistive listening devices are available. Companion seats are available up to applicable ticket limit. First Financial Credit Union Amphitheater strives to make our venue and live experiences inclusive and accessible to everyone. For more questions, or information not mentioned below, don't hesitate to get in touch with us at FFCUAmpinfo@livenation.com or (505) 452-5100.",
           "generalInfo": {
             "generalRule": "Please visit https://www.firstfinancialamp.com/visit#faq for a full list of Frequently Asked Questions and Rules",
@@ -105961,7 +105961,7 @@
       ],
       "attractions": [
         {
-          "name": "R\u00dcF\u00dcS DU SOL",
+          "name": "RÜFÜS DU SOL",
           "type": "attraction",
           "id": "K8vZ9173ujV",
           "test": false,
@@ -106149,7 +106149,7 @@
           }
         },
         {
-          "name": "Ben B\u00f6hmer",
+          "name": "Ben Böhmer",
           "type": "attraction",
           "id": "K8vZ9179XA0",
           "test": false,
@@ -117770,7 +117770,7 @@
         {
           "startDateTime": "2026-02-03T17:00:00Z",
           "endDateTime": "2026-02-06T16:00:00Z",
-          "name": "Citi\u00ae Cardmember Presale"
+          "name": "Citi® Cardmember Presale"
         },
         {
           "startDateTime": "2026-02-03T19:00:00Z",
@@ -117805,9 +117805,9 @@
         {
           "startDateTime": "2026-02-06T17:00:00Z",
           "endDateTime": "2026-08-08T04:00:00Z",
-          "name": "Citi\u00ae Cardmember Preferred Tickets",
-          "description": "To access the sale, use the first 6 digits of your eligible Citi\u00ae credit card or Citibank Debit Card as your presale code. You will also need to use your Citi\u00ae card to successfully complete your purchase.",
-          "shortDescription": "For Citi\u00ae Cardmembers"
+          "name": "Citi® Cardmember Preferred Tickets",
+          "description": "To access the sale, use the first 6 digits of your eligible Citi® credit card or Citibank Debit Card as your presale code. You will also need to use your Citi® card to successfully complete your purchase.",
+          "shortDescription": "For Citi® Cardmembers"
         }
       ]
     },
@@ -118181,10 +118181,10 @@
           "boxOfficeInfo": {
             "phoneNumberDetail": "Business Number: (505) 452-5100",
             "openHoursDetail": "Our Box Office is open on the Day of Show only. We open at 1pm and typically close around 9:30pm.",
-            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they\u2019ll exchange cash for card (for free).",
+            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they’ll exchange cash for card (for free).",
             "willCallDetail": "Will Call is available on the Day of Show only, from 3pm thru close of the box office. BRING YOUR I.D. for will call. It is also recommended to have your confirmation email & the credit card used."
           },
-          "parkingDetail": "General Parking Guidelines \u2022General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. \u2022Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) \u2022Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. \u2022Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. \u2022Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. \u2022Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. \u2022VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
+          "parkingDetail": "General Parking Guidelines •General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. •Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) •Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. •Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. •Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. •Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. •VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
           "accessibleSeatingDetail": "Accessible seating is available at almost every price level & assistive listening devices are available. Companion seats are available up to applicable ticket limit. First Financial Credit Union Amphitheater strives to make our venue and live experiences inclusive and accessible to everyone. For more questions, or information not mentioned below, don't hesitate to get in touch with us at FFCUAmpinfo@livenation.com or (505) 452-5100.",
           "generalInfo": {
             "generalRule": "Please visit https://www.firstfinancialamp.com/visit#faq for a full list of Frequently Asked Questions and Rules",
@@ -120141,7 +120141,7 @@
     }
   },
   {
-    "name": "The Return Of The Carnival Of Sins: M\u00f6tley Cr\u00fce",
+    "name": "The Return Of The Carnival Of Sins: Mötley Crüe",
     "type": "event",
     "id": "G5vzZbUBOtMoq",
     "test": false,
@@ -120239,7 +120239,7 @@
         {
           "startDateTime": "2025-11-19T16:00:00Z",
           "endDateTime": "2025-11-21T05:00:00Z",
-          "name": "Citi\u00ae Cardmember Presale"
+          "name": "Citi® Cardmember Presale"
         },
         {
           "startDateTime": "2025-11-19T19:00:00Z",
@@ -120351,7 +120351,7 @@
     "pleaseNote": "General Parking will be included in the final purchase price.",
     "products": [
       {
-        "name": "Lawn Chair Rental: M\u00f6tley Cr\u00fce - Not a Concert Ticket",
+        "name": "Lawn Chair Rental: Mötley Crüe - Not a Concert Ticket",
         "id": "G5vzZbUBi6IZ2",
         "url": "https://www.ticketmaster.com/lawn-chair-rental-motley-crue-not-albuquerque-new-mexico-09-13-2026/event/1E00636EAC1E800F",
         "type": "Merchandise Voucher",
@@ -120383,7 +120383,7 @@
         ]
       },
       {
-        "name": "First Financial Credit Union VIP Club Access: M\u00f6tley Cr\u00fce",
+        "name": "First Financial Credit Union VIP Club Access: Mötley Crüe",
         "id": "G5vzZbUBi7ETW",
         "url": "https://www.ticketmaster.com/first-financial-credit-union-vip-club-albuquerque-new-mexico-09-13-2026/event/1E00636EAC127FFD",
         "type": "Club Access",
@@ -120415,7 +120415,7 @@
         ]
       },
       {
-        "name": "Fast Lane Access: M\u00f6tley Cr\u00fce - Not a Concert Ticket",
+        "name": "Fast Lane Access: Mötley Crüe - Not a Concert Ticket",
         "id": "G5vzZbUBiA6TT",
         "url": "https://www.ticketmaster.com/fast-lane-access-motley-crue-not-albuquerque-new-mexico-09-13-2026/event/1E00636EAC147FFF",
         "type": "Special Entry",
@@ -120447,7 +120447,7 @@
         ]
       },
       {
-        "name": "M\u00f6tley Cr\u00fce - Upgrades & Extras",
+        "name": "Mötley Crüe - Upgrades & Extras",
         "id": "G5vzZbUBiAIZ7",
         "url": "https://www.ticketmaster.com/motley-crue-upgrades-extras-albuquerque-new-mexico-09-13-2026/event/1E00636EAC168004",
         "type": "Upsell Shell Event",
@@ -120479,7 +120479,7 @@
         ]
       },
       {
-        "name": "NOS Sellovers: M\u00f6tley Cr\u00fce - Not A Concert Ticket",
+        "name": "NOS Sellovers: Mötley Crüe - Not A Concert Ticket",
         "id": "G5vzZbUBiFbZf",
         "url": "https://www.ticketmaster.com/nos-sellovers-motley-crue-not-a-albuquerque-new-mexico-09-13-2026/event/1E00636EAC218014",
         "type": "Merchandise Voucher",
@@ -120511,7 +120511,7 @@
         ]
       },
       {
-        "name": "Blanket: M\u00f6tley Cr\u00fce - Not a Concert Ticket",
+        "name": "Blanket: Mötley Crüe - Not a Concert Ticket",
         "id": "G5vzZbUBikFZk",
         "url": "https://www.ticketmaster.com/blanket-motley-crue-not-a-concert-albuquerque-new-mexico-09-13-2026/event/1E00636EAC188006",
         "type": "Merchandise Voucher",
@@ -120543,7 +120543,7 @@
         ]
       },
       {
-        "name": "Premier Parking: M\u00f6tley Cr\u00fce - Not A Concert Ticket",
+        "name": "Premier Parking: Mötley Crüe - Not A Concert Ticket",
         "id": "G5vzZbUBikIZ1",
         "url": "https://www.ticketmaster.com/premier-parking-motley-crue-not-a-albuquerque-new-mexico-09-13-2026/event/1E00636EAC1A800A",
         "type": "Parking",
@@ -120727,10 +120727,10 @@
           "boxOfficeInfo": {
             "phoneNumberDetail": "Business Number: (505) 452-5100",
             "openHoursDetail": "Our Box Office is open on the Day of Show only. We open at 1pm and typically close around 9:30pm.",
-            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they\u2019ll exchange cash for card (for free).",
+            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they’ll exchange cash for card (for free).",
             "willCallDetail": "Will Call is available on the Day of Show only, from 3pm thru close of the box office. BRING YOUR I.D. for will call. It is also recommended to have your confirmation email & the credit card used."
           },
-          "parkingDetail": "General Parking Guidelines \u2022General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. \u2022Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) \u2022Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. \u2022Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. \u2022Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. \u2022Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. \u2022VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
+          "parkingDetail": "General Parking Guidelines •General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. •Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) •Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. •Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. •Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. •Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. •VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
           "accessibleSeatingDetail": "Accessible seating is available at almost every price level & assistive listening devices are available. Companion seats are available up to applicable ticket limit. First Financial Credit Union Amphitheater strives to make our venue and live experiences inclusive and accessible to everyone. For more questions, or information not mentioned below, don't hesitate to get in touch with us at FFCUAmpinfo@livenation.com or (505) 452-5100.",
           "generalInfo": {
             "generalRule": "Please visit https://www.firstfinancialamp.com/visit#faq for a full list of Frequently Asked Questions and Rules",
@@ -120751,7 +120751,7 @@
       ],
       "attractions": [
         {
-          "name": "M\u00f6tley Cr\u00fce",
+          "name": "Mötley Crüe",
           "type": "attraction",
           "id": "K8vZ9171Gb7",
           "test": false,
@@ -127659,16 +127659,16 @@
         {
           "startDateTime": "2026-01-14T17:00:00Z",
           "endDateTime": "2026-01-16T06:59:00Z",
-          "name": "Citi\u00ae Cardmember Presale",
-          "description": "To access the sale, use the first 6 digits of your eligible Citi\u00ae credit card or Citibank Debit Card as your presale code. You will also need to use your Citi\u00ae card to successfully complete your purchase.",
-          "shortDescription": "Exclusive Presale for Citi\u00ae Cardmembers"
+          "name": "Citi® Cardmember Presale",
+          "description": "To access the sale, use the first 6 digits of your eligible Citi® credit card or Citibank Debit Card as your presale code. You will also need to use your Citi® card to successfully complete your purchase.",
+          "shortDescription": "Exclusive Presale for Citi® Cardmembers"
         },
         {
           "startDateTime": "2026-01-16T17:00:00Z",
           "endDateTime": "2026-08-25T04:00:00Z",
-          "name": "Citi\u00ae Cardmember Preferred Tickets",
-          "description": "To access the sale, use the first 6 digits of your eligible Citi\u00ae credit card or Citibank Debit Card as your presale code. You will also need to use your Citi\u00ae card to successfully complete your purchase.",
-          "shortDescription": "For Citi\u00ae Cardmembers"
+          "name": "Citi® Cardmember Preferred Tickets",
+          "description": "To access the sale, use the first 6 digits of your eligible Citi® credit card or Citibank Debit Card as your presale code. You will also need to use your Citi® card to successfully complete your purchase.",
+          "shortDescription": "For Citi® Cardmembers"
         },
         {
           "startDateTime": "2026-01-14T17:00:00Z",
@@ -128022,10 +128022,10 @@
           "boxOfficeInfo": {
             "phoneNumberDetail": "Business Number: (505) 452-5100",
             "openHoursDetail": "Our Box Office is open on the Day of Show only. We open at 1pm and typically close around 9:30pm.",
-            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they\u2019ll exchange cash for card (for free).",
+            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they’ll exchange cash for card (for free).",
             "willCallDetail": "Will Call is available on the Day of Show only, from 3pm thru close of the box office. BRING YOUR I.D. for will call. It is also recommended to have your confirmation email & the credit card used."
           },
-          "parkingDetail": "General Parking Guidelines \u2022General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. \u2022Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) \u2022Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. \u2022Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. \u2022Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. \u2022Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. \u2022VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
+          "parkingDetail": "General Parking Guidelines •General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. •Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) •Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. •Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. •Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. •Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. •VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
           "accessibleSeatingDetail": "Accessible seating is available at almost every price level & assistive listening devices are available. Companion seats are available up to applicable ticket limit. First Financial Credit Union Amphitheater strives to make our venue and live experiences inclusive and accessible to everyone. For more questions, or information not mentioned below, don't hesitate to get in touch with us at FFCUAmpinfo@livenation.com or (505) 452-5100.",
           "generalInfo": {
             "generalRule": "Please visit https://www.firstfinancialamp.com/visit#faq for a full list of Frequently Asked Questions and Rules",
@@ -130155,9 +130155,9 @@
         {
           "startDateTime": "2026-03-24T16:00:00Z",
           "endDateTime": "2026-03-27T04:00:00Z",
-          "name": "Citi\u00ae Cardmember Presale",
-          "description": "To access the sale, use the first 6 digits of your eligible Citi\u00ae credit card or Citibank Debit Card as your presale code. You will also need to use your Citi\u00ae card to successfully complete your purchase.",
-          "shortDescription": "Exclusive Presale for Citi\u00ae Cardmembers"
+          "name": "Citi® Cardmember Presale",
+          "description": "To access the sale, use the first 6 digits of your eligible Citi® credit card or Citibank Debit Card as your presale code. You will also need to use your Citi® card to successfully complete your purchase.",
+          "shortDescription": "Exclusive Presale for Citi® Cardmembers"
         },
         {
           "startDateTime": "2026-03-26T16:00:00Z",
@@ -130171,9 +130171,9 @@
         {
           "startDateTime": "2026-03-27T16:00:00Z",
           "endDateTime": "2026-08-29T04:00:00Z",
-          "name": "Citi\u00ae Cardmember Preferred Tickets",
-          "description": "To access the sale, use the first 6 digits of your eligible Citi\u00ae credit card or Citibank Debit Card as your presale code. You will also need to use your Citi\u00ae card to successfully complete your purchase.",
-          "shortDescription": "For Citi\u00ae Cardmembers"
+          "name": "Citi® Cardmember Preferred Tickets",
+          "description": "To access the sale, use the first 6 digits of your eligible Citi® credit card or Citibank Debit Card as your presale code. You will also need to use your Citi® card to successfully complete your purchase.",
+          "shortDescription": "For Citi® Cardmembers"
         },
         {
           "startDateTime": "2026-03-24T16:00:00Z",
@@ -130554,10 +130554,10 @@
           "boxOfficeInfo": {
             "phoneNumberDetail": "Business Number: (505) 452-5100",
             "openHoursDetail": "Our Box Office is open on the Day of Show only. We open at 1pm and typically close around 9:30pm.",
-            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they\u2019ll exchange cash for card (for free).",
+            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they’ll exchange cash for card (for free).",
             "willCallDetail": "Will Call is available on the Day of Show only, from 3pm thru close of the box office. BRING YOUR I.D. for will call. It is also recommended to have your confirmation email & the credit card used."
           },
-          "parkingDetail": "General Parking Guidelines \u2022General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. \u2022Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) \u2022Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. \u2022Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. \u2022Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. \u2022Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. \u2022VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
+          "parkingDetail": "General Parking Guidelines •General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. •Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) •Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. •Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. •Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. •Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. •VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
           "accessibleSeatingDetail": "Accessible seating is available at almost every price level & assistive listening devices are available. Companion seats are available up to applicable ticket limit. First Financial Credit Union Amphitheater strives to make our venue and live experiences inclusive and accessible to everyone. For more questions, or information not mentioned below, don't hesitate to get in touch with us at FFCUAmpinfo@livenation.com or (505) 452-5100.",
           "generalInfo": {
             "generalRule": "Please visit https://www.firstfinancialamp.com/visit#faq for a full list of Frequently Asked Questions and Rules",
@@ -132489,10 +132489,10 @@
           "boxOfficeInfo": {
             "phoneNumberDetail": "Business Number: (505) 452-5100",
             "openHoursDetail": "Our Box Office is open on the Day of Show only. We open at 1pm and typically close around 9:30pm.",
-            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they\u2019ll exchange cash for card (for free).",
+            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they’ll exchange cash for card (for free).",
             "willCallDetail": "Will Call is available on the Day of Show only, from 3pm thru close of the box office. BRING YOUR I.D. for will call. It is also recommended to have your confirmation email & the credit card used."
           },
-          "parkingDetail": "General Parking Guidelines \u2022General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. \u2022Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) \u2022Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. \u2022Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. \u2022Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. \u2022Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. \u2022VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
+          "parkingDetail": "General Parking Guidelines •General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. •Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) •Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. •Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. •Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. •Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. •VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
           "accessibleSeatingDetail": "Accessible seating is available at almost every price level & assistive listening devices are available. Companion seats are available up to applicable ticket limit. First Financial Credit Union Amphitheater strives to make our venue and live experiences inclusive and accessible to everyone. For more questions, or information not mentioned below, don't hesitate to get in touch with us at FFCUAmpinfo@livenation.com or (505) 452-5100.",
           "generalInfo": {
             "generalRule": "Please visit https://www.firstfinancialamp.com/visit#faq for a full list of Frequently Asked Questions and Rules",
@@ -133128,16 +133128,16 @@
         {
           "startDateTime": "2026-02-18T17:00:00Z",
           "endDateTime": "2026-02-20T06:59:00Z",
-          "name": "Citi\u00ae Cardmember Presale",
-          "description": "To access the sale, use the first 6 digits of your eligible Citi\u00ae credit card or Citibank Debit Card as your presale code. You will also need to use your Citi\u00ae card to successfully complete your purchase.",
-          "shortDescription": "Exclusive Presale for Citi\u00ae Cardmembers"
+          "name": "Citi® Cardmember Presale",
+          "description": "To access the sale, use the first 6 digits of your eligible Citi® credit card or Citibank Debit Card as your presale code. You will also need to use your Citi® card to successfully complete your purchase.",
+          "shortDescription": "Exclusive Presale for Citi® Cardmembers"
         },
         {
           "startDateTime": "2026-02-20T17:00:00Z",
           "endDateTime": "2026-09-08T04:00:00Z",
-          "name": "Citi\u00ae Cardmember Preferred Tickets",
-          "description": "To access the sale, use the first 6 digits of your eligible Citi\u00ae credit card or Citibank Debit Card as your presale code. You will also need to use your Citi\u00ae card to successfully complete your purchase.",
-          "shortDescription": "For Citi\u00ae Cardmembers"
+          "name": "Citi® Cardmember Preferred Tickets",
+          "description": "To access the sale, use the first 6 digits of your eligible Citi® credit card or Citibank Debit Card as your presale code. You will also need to use your Citi® card to successfully complete your purchase.",
+          "shortDescription": "For Citi® Cardmembers"
         },
         {
           "startDateTime": "2026-02-19T17:00:00Z",
@@ -133533,10 +133533,10 @@
           "boxOfficeInfo": {
             "phoneNumberDetail": "Business Number: (505) 452-5100",
             "openHoursDetail": "Our Box Office is open on the Day of Show only. We open at 1pm and typically close around 9:30pm.",
-            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they\u2019ll exchange cash for card (for free).",
+            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they’ll exchange cash for card (for free).",
             "willCallDetail": "Will Call is available on the Day of Show only, from 3pm thru close of the box office. BRING YOUR I.D. for will call. It is also recommended to have your confirmation email & the credit card used."
           },
-          "parkingDetail": "General Parking Guidelines \u2022General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. \u2022Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) \u2022Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. \u2022Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. \u2022Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. \u2022Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. \u2022VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
+          "parkingDetail": "General Parking Guidelines •General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. •Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) •Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. •Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. •Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. •Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. •VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
           "accessibleSeatingDetail": "Accessible seating is available at almost every price level & assistive listening devices are available. Companion seats are available up to applicable ticket limit. First Financial Credit Union Amphitheater strives to make our venue and live experiences inclusive and accessible to everyone. For more questions, or information not mentioned below, don't hesitate to get in touch with us at FFCUAmpinfo@livenation.com or (505) 452-5100.",
           "generalInfo": {
             "generalRule": "Please visit https://www.firstfinancialamp.com/visit#faq for a full list of Frequently Asked Questions and Rules",
@@ -134903,10 +134903,10 @@
           "boxOfficeInfo": {
             "phoneNumberDetail": "Business Number: (505) 452-5100",
             "openHoursDetail": "Our Box Office is open on the Day of Show only. We open at 1pm and typically close around 9:30pm.",
-            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they\u2019ll exchange cash for card (for free).",
+            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they’ll exchange cash for card (for free).",
             "willCallDetail": "Will Call is available on the Day of Show only, from 3pm thru close of the box office. BRING YOUR I.D. for will call. It is also recommended to have your confirmation email & the credit card used."
           },
-          "parkingDetail": "General Parking Guidelines \u2022General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. \u2022Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) \u2022Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. \u2022Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. \u2022Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. \u2022Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. \u2022VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
+          "parkingDetail": "General Parking Guidelines •General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. •Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) •Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. •Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. •Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. •Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. •VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
           "accessibleSeatingDetail": "Accessible seating is available at almost every price level & assistive listening devices are available. Companion seats are available up to applicable ticket limit. First Financial Credit Union Amphitheater strives to make our venue and live experiences inclusive and accessible to everyone. For more questions, or information not mentioned below, don't hesitate to get in touch with us at FFCUAmpinfo@livenation.com or (505) 452-5100.",
           "generalInfo": {
             "generalRule": "Please visit https://www.firstfinancialamp.com/visit#faq for a full list of Frequently Asked Questions and Rules",
@@ -136094,16 +136094,16 @@
         {
           "startDateTime": "2026-02-04T17:00:00Z",
           "endDateTime": "2026-02-06T05:00:00Z",
-          "name": "Citi\u00ae Cardmember Presale",
-          "description": "To access the sale, use the first 6 digits of your eligible Citi\u00ae credit card or Citibank Debit Card as your presale code. You will also need to use your Citi\u00ae card to successfully complete your purchase.",
-          "shortDescription": "Exclusive Presale for Citi\u00ae Cardmembers"
+          "name": "Citi® Cardmember Presale",
+          "description": "To access the sale, use the first 6 digits of your eligible Citi® credit card or Citibank Debit Card as your presale code. You will also need to use your Citi® card to successfully complete your purchase.",
+          "shortDescription": "Exclusive Presale for Citi® Cardmembers"
         },
         {
           "startDateTime": "2026-02-06T17:00:00Z",
           "endDateTime": "2026-09-17T04:00:00Z",
-          "name": "Citi\u00ae Cardmember Preferred Tickets",
-          "description": "To access the sale, use the first 6 digits of your eligible Citi\u00ae credit card or Citibank Debit Card as your presale code. You will also need to use your Citi\u00ae card to successfully complete your purchase.",
-          "shortDescription": "For Citi\u00ae Cardmembers"
+          "name": "Citi® Cardmember Preferred Tickets",
+          "description": "To access the sale, use the first 6 digits of your eligible Citi® credit card or Citibank Debit Card as your presale code. You will also need to use your Citi® card to successfully complete your purchase.",
+          "shortDescription": "For Citi® Cardmembers"
         }
       ]
     },
@@ -136512,10 +136512,10 @@
           "boxOfficeInfo": {
             "phoneNumberDetail": "Business Number: (505) 452-5100",
             "openHoursDetail": "Our Box Office is open on the Day of Show only. We open at 1pm and typically close around 9:30pm.",
-            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they\u2019ll exchange cash for card (for free).",
+            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they’ll exchange cash for card (for free).",
             "willCallDetail": "Will Call is available on the Day of Show only, from 3pm thru close of the box office. BRING YOUR I.D. for will call. It is also recommended to have your confirmation email & the credit card used."
           },
-          "parkingDetail": "General Parking Guidelines \u2022General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. \u2022Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) \u2022Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. \u2022Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. \u2022Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. \u2022Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. \u2022VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
+          "parkingDetail": "General Parking Guidelines •General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. •Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) •Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. •Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. •Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. •Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. •VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
           "accessibleSeatingDetail": "Accessible seating is available at almost every price level & assistive listening devices are available. Companion seats are available up to applicable ticket limit. First Financial Credit Union Amphitheater strives to make our venue and live experiences inclusive and accessible to everyone. For more questions, or information not mentioned below, don't hesitate to get in touch with us at FFCUAmpinfo@livenation.com or (505) 452-5100.",
           "generalInfo": {
             "generalRule": "Please visit https://www.firstfinancialamp.com/visit#faq for a full list of Frequently Asked Questions and Rules",
@@ -147868,10 +147868,10 @@
           "boxOfficeInfo": {
             "phoneNumberDetail": "Business Number: (505) 452-5100",
             "openHoursDetail": "Our Box Office is open on the Day of Show only. We open at 1pm and typically close around 9:30pm.",
-            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they\u2019ll exchange cash for card (for free).",
+            "acceptedPaymentDetail": "First Financial Credit Union Amphitheater is an entirely Cashless venue. We accept All Major Cards & various places inside the venue accept Tap to Pay. If you arrive without a debit or credit card, head to the box office or an information booth and they’ll exchange cash for card (for free).",
             "willCallDetail": "Will Call is available on the Day of Show only, from 3pm thru close of the box office. BRING YOUR I.D. for will call. It is also recommended to have your confirmation email & the credit card used."
           },
-          "parkingDetail": "General Parking Guidelines \u2022General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. \u2022Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) \u2022Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. \u2022Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. \u2022Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. \u2022Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. \u2022VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
+          "parkingDetail": "General Parking Guidelines •General Parking - General parking is included in the price of your ticket. The parking lots typically open 2 hours prior to the stated show time. •Accessible Parking - Accessible Parking is located in the southwest corner of the upper parking lot or in the lower level lot (very limited.) •Motorcycle Parking - Motorcycles can park in the upper parking lot in the southwest corner. There is no additional fee for motorcycle parking. •Premier Parking - Can be purchased on our upgrades page or at the entrance to the Premier Parking lot. Premier Parking can only be purchased with credit card - cash is not accepted. •Ultra Premier - Can be purchased on our upgrades page or at the entrance to the Ultra Premier Lot. Parking can only be purchased with credit card - cash is not accepted. •Easy Out - Enjoy expedited exit from the venue! Can be purchased on our upgrades page or at the entrance of the lot - Parking can only be purchased with credit card - cash is not accepted. •VIP Parking - located in the lower lot by the VIP entrance. Limited overflow parking is available in the main level lot. Season ticket holders must have parking credentials displayed. TAILGATING IS NOT PERMITTED IN THE VENUE PARKING LOTS. Fans will be ticketed if caught tailgating in any of the venue parking lots. There is no overnight parking permitted at the venue. Any unauthorized vehicles on site prior to an event, or after, will be towed at the owner's expense.",
           "accessibleSeatingDetail": "Accessible seating is available at almost every price level & assistive listening devices are available. Companion seats are available up to applicable ticket limit. First Financial Credit Union Amphitheater strives to make our venue and live experiences inclusive and accessible to everyone. For more questions, or information not mentioned below, don't hesitate to get in touch with us at FFCUAmpinfo@livenation.com or (505) 452-5100.",
           "generalInfo": {
             "generalRule": "Please visit https://www.firstfinancialamp.com/visit#faq for a full list of Frequently Asked Questions and Rules",
