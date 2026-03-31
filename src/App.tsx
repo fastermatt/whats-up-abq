@@ -484,14 +484,16 @@ function saveCheckins(s: Set<string>) {
 async function syncCheckinsToFirestore(uid: string, checkIns: Set<string>, displayName: string) {
   try {
     const count = checkIns.size;
+    const streak = getStreak().count;
     await _fbSetDoc('users', uid, {
       checkIns: [...checkIns],
       updatedAt: new Date().toISOString(),
     });
-    // Update leaderboard entry
+    // Update leaderboard entry (merge: true preserves other fields)
     await _fbSetDoc('leaderboard', uid, {
       displayName: displayName || 'Anonymous',
       count,
+      streak,
       updatedAt: new Date().toISOString(),
     }, { merge: true });
   } catch (err) {
@@ -611,8 +613,16 @@ const PLACE_CATEGORIES = [
 ];
 
 const EVENT_GENRES = [
-  'All', 'Music', 'Sports', 'Comedy', 'Arts', 'Family', 'Outdoor', 'Community', 'Free',
+  'All', '❤️ For You', 'Music', 'Sports', 'Comedy', 'Arts', 'Family', 'Outdoor', 'Community', 'Free',
 ];
+
+const FOLLOWING_KEY = 'abq_following_genres';
+function getFollowedGenres(): string[] {
+  try { const raw = localStorage.getItem(FOLLOWING_KEY); return raw ? JSON.parse(raw) : []; } catch { return []; }
+}
+function saveFollowedGenres(genres: string[]) {
+  try { localStorage.setItem(FOLLOWING_KEY, JSON.stringify(genres)); } catch {}
+}
 
 // Per-category icon and gradient for event cards
 const EVENT_TYPE_META: Record<string, { icon: string; bg: string }> = {
@@ -3055,6 +3065,15 @@ function EventsScreen({
   const [search, setSearch] = useState('');
   useEffect(() => { if (initialSearch) setSearch(initialSearch); }, [initialSearch]);
   const [selectedGenre, setSelectedGenre] = useState('All');
+  const [followedGenres, setFollowedGenres] = useState<string[]>(() => getFollowedGenres());
+
+  function toggleFollowGenre(genre: string) {
+    setFollowedGenres(prev => {
+      const next = prev.includes(genre) ? prev.filter(g => g !== genre) : [...prev, genre];
+      saveFollowedGenres(next);
+      return next;
+    });
+  }
 
   const filtered = useMemo(() => {
     // 90-day horizon cap: only apply when no search/filter is active so that
@@ -3071,6 +3090,27 @@ function EventsScreen({
       }
       return true;
     });
+    // "For You" = union of all followed genres
+    if (selectedGenre === '❤️ For You') {
+      if (followedGenres.length === 0) return result; // show all if nothing followed yet
+      const matchesAny = (e: TMEvent) => followedGenres.some(g => {
+        const seg = e.classifications?.[0]?.segment?.name || '';
+        const gen = e.classifications?.[0]?.genre?.name || '';
+        const name = e.name.toLowerCase();
+        switch (g) {
+          case 'Music':    return seg === 'Music' || seg === 'Live Music';
+          case 'Sports':   return seg === 'Sports';
+          case 'Comedy':   return seg === 'Comedy' || seg === 'Theater & Comedy' || name.includes('comedy') || name.includes('stand-up');
+          case 'Arts':     return seg === 'Arts & Theatre' || seg === 'Arts & Culture' || name.includes('art') || name.includes('gallery') || name.includes('museum');
+          case 'Family':   return seg === 'Family' || name.includes('family') || name.includes(' kids') || name.includes('children');
+          case 'Outdoor':  return name.includes('outdoor') || name.includes('trail') || name.includes('hike') || name.includes('5k') || name.includes('bike');
+          case 'Community':return seg === 'Community' || seg === 'Festival' || name.includes('festival') || name.includes('market') || name.includes('fiesta');
+          case 'Free':     return e._source === 'local' || name.includes('free') || name.includes('no cover');
+          default:         return seg === g || gen === g;
+        }
+      });
+      return result.filter(matchesAny);
+    }
     if (selectedGenre !== 'All') {
       result = result.filter(e => {
         const seg = e.classifications?.[0]?.segment?.name || '';
@@ -3213,28 +3253,72 @@ function EventsScreen({
       </div>
 
       <div className="flex px-5 overflow-x-auto" style={{ scrollbarWidth: 'none', position: 'sticky', top: 'calc(var(--sat) + 58px)', zIndex: 30, background: 'white', paddingTop: '12px', paddingBottom: '0px', borderBottom: '2px solid #1A1A1A' }}>
-        {EVENT_GENRES.map(genre => (
-          <button
-            key={genre}
-            onClick={() => setSelectedGenre(genre)}
-            className="flex-shrink-0 px-3 py-2 text-xs font-black uppercase transition-all"
-            style={{
-              fontFamily: 'Inter, sans-serif',
-              letterSpacing: '0.1em',
-              background: selectedGenre === genre ? '#1A1A1A' : 'white',
-              color: selectedGenre === genre ? 'white' : '#1A1A1A',
-              border: '1.5px solid #1A1A1A',
-              marginRight: '-1.5px',
-              borderRadius: 0,
-              position: 'relative',
-              zIndex: selectedGenre === genre ? 1 : 0,
-              marginBottom: '12px',
-            }}
-          >
-            {genre}
-          </button>
-        ))}
+        {EVENT_GENRES.map(genre => {
+          const isForYou = genre === '❤️ For You';
+          const isSelected = selectedGenre === genre;
+          const isFollowed = !isForYou && followedGenres.includes(genre);
+          return (
+            <div key={genre} className="flex-shrink-0 flex items-stretch" style={{ marginRight: '-1.5px', position: 'relative', zIndex: isSelected ? 1 : 0, marginBottom: '12px' }}>
+              <button
+                onClick={() => setSelectedGenre(genre)}
+                className="px-3 py-2 text-xs font-black uppercase transition-all"
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  letterSpacing: '0.1em',
+                  background: isSelected ? '#1A1A1A' : isForYou && followedGenres.length > 0 ? 'var(--brand-bg-subtle)' : 'white',
+                  color: isSelected ? 'white' : '#1A1A1A',
+                  border: '1.5px solid #1A1A1A',
+                  borderRight: !isForYou && !isSelected ? 'none' : '1.5px solid #1A1A1A',
+                  borderRadius: 0,
+                }}
+              >
+                {genre}
+              </button>
+              {/* Star toggle — shown on every genre except All and For You */}
+              {!isForYou && genre !== 'All' && (
+                <button
+                  onClick={() => toggleFollowGenre(genre)}
+                  title={isFollowed ? `Remove ${genre} from For You` : `Add ${genre} to For You`}
+                  style={{
+                    background: isSelected ? '#333' : isFollowed ? 'var(--brand)' : '#f5f5f5',
+                    color: isFollowed || isSelected ? 'white' : '#999',
+                    border: '1.5px solid #1A1A1A',
+                    borderLeft: 'none',
+                    borderRadius: 0,
+                    padding: '0 6px',
+                    fontSize: '10px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  {isFollowed ? '★' : '☆'}
+                </button>
+              )}
+            </div>
+          );
+        })}
       </div>
+      {/* For You setup prompt — shown when For You is selected but nothing followed */}
+      {selectedGenre === '❤️ For You' && followedGenres.length === 0 && (
+        <div className="px-5 py-4 flex items-start gap-3" style={{ background: 'var(--brand-bg-subtle)', borderBottom: '2px solid #1A1A1A' }}>
+          <span style={{ fontSize: '24px', lineHeight: 1 }}>❤️</span>
+          <div>
+            <p className="text-sm font-black" style={{ fontFamily: 'Epilogue, sans-serif', color: '#1A1A1A' }}>Personalize your feed</p>
+            <p className="text-xs mt-0.5" style={{ fontFamily: 'Inter, sans-serif', color: '#555' }}>
+              Tap the <strong>☆</strong> star next to any genre above to add it to your <em>For You</em> feed. Starred genres are highlighted.
+            </p>
+          </div>
+        </div>
+      )}
+      {selectedGenre === '❤️ For You' && followedGenres.length > 0 && (
+        <div className="px-5 py-2 flex items-center gap-2" style={{ background: 'var(--brand-bg-subtle)', borderBottom: '1px solid #eee' }}>
+          <span style={{ fontSize: '13px' }}>❤️</span>
+          <p className="text-xs font-semibold" style={{ fontFamily: 'Inter, sans-serif', color: 'var(--brand)' }}>
+            Showing: {followedGenres.join(' · ')}
+          </p>
+        </div>
+      )}
 
       <div className="px-5 pb-2 flex items-center justify-between" style={{ borderBottom: '1px solid #eee', paddingTop: 10, paddingBottom: 10 }}>
         <p className="text-sm font-semibold text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -4014,7 +4098,7 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
 // No seed data — leaderboard starts empty and grows with real check-ins
 const LEADERBOARD_SEEDS: { name: string; count: number }[] = [];
 
-interface LeaderboardRow { rank: number; name: string; count: number; isMe: boolean; uid?: string; }
+interface LeaderboardRow { rank: number; name: string; count: number; streak?: number; isMe: boolean; uid?: string; }
 
 function ProfileScreen({
   checkedIn, user, onSignIn, onSignOut, places, onUsernameChange, onAdmin,
@@ -4028,6 +4112,7 @@ function ProfileScreen({
   onAdmin?: () => void;
 }) {
   const myCount = checkedIn.size;
+  const myStreak = getStreak().count;
   const level = getLevel(myCount);
   const [lbRows, setLbRows] = useState<LeaderboardRow[]>([]);
 
@@ -4038,8 +4123,9 @@ function ProfileScreen({
         if (!cancelled) {
           const rows: LeaderboardRow[] = snap.docs.map((d, i) => ({
             rank: i + 1,
-            name: (d.data().display_name as string) || 'Explorer',
+            name: (d.data().display_name as string) || (d.data().displayName as string) || 'Explorer',
             count: (d.data().count as number) || 0,
+            streak: (d.data().streak as number) || 0,
             isMe: d.id === user?.id,
             uid: d.id,
           }));
@@ -4069,12 +4155,15 @@ function ProfileScreen({
   }, [lbRows, myCount, user]);
 
   const ACHIEVEMENTS = [
-    { id: 'first',   icon: 'where_to_vote', label: 'First Check-in',  sub: '1 place',   unlocked: myCount >= 1  },
-    { id: 'five',    icon: 'explore',       label: 'Explorer',        sub: '5 places',  unlocked: myCount >= 5  },
-    { id: 'ten',     icon: 'hiking',        label: 'Adventurer',      sub: '10 places', unlocked: myCount >= 10 },
-    { id: 'twenty',  icon: 'forest',        label: 'Trailblazer',     sub: '20 places', unlocked: myCount >= 20 },
-    { id: 'thirty5', icon: 'footprint',     label: 'Pioneer',         sub: '35 places', unlocked: myCount >= 35 },
-    { id: 'fifty',   icon: 'military_tech', label: 'Legend',          sub: '50 places', unlocked: myCount >= 50 },
+    { id: 'first',    icon: 'where_to_vote',          label: 'First Check-in',  sub: '1 place',        unlocked: myCount  >= 1  },
+    { id: 'five',     icon: 'explore',                label: 'Explorer',        sub: '5 places',       unlocked: myCount  >= 5  },
+    { id: 'ten',      icon: 'hiking',                 label: 'Adventurer',      sub: '10 places',      unlocked: myCount  >= 10 },
+    { id: 'twenty',   icon: 'forest',                 label: 'Trailblazer',     sub: '20 places',      unlocked: myCount  >= 20 },
+    { id: 'thirty5',  icon: 'footprint',              label: 'Pioneer',         sub: '35 places',      unlocked: myCount  >= 35 },
+    { id: 'fifty',    icon: 'military_tech',          label: 'Legend',          sub: '50 places',      unlocked: myCount  >= 50 },
+    { id: 'streak3',  icon: 'local_fire_department',  label: '3-Day Streak',    sub: '3 days running', unlocked: myStreak >= 3  },
+    { id: 'streak7',  icon: 'whatshot',               label: 'Week Warrior',    sub: '7-day streak',   unlocked: myStreak >= 7  },
+    { id: 'streak30', icon: 'emoji_events',           label: 'ABQ Regular',     sub: '30-day streak',  unlocked: myStreak >= 30 },
   ];
 
   const nextLevel = getLevel(myCount + 1);
@@ -4187,9 +4276,10 @@ function ProfileScreen({
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3 mb-4">
+      <div className="grid grid-cols-2 gap-3 mb-4">
         {[
           { label: 'Places\nVisited', val: myCount.toString() },
+          { label: 'Day\nStreak', val: myStreak >= 1 ? `${myStreak}${myStreak >= 30 ? ' 🔥🔥' : myStreak >= 7 ? ' 🔥' : myStreak >= 3 ? ' ⚡' : ''}` : '—' },
           { label: 'Next\nLevel', val: myCount >= 50 ? '★' : (level.next - myCount).toString() + ' away' },
           { label: 'Rank', val: leaderboard.find(r => r.isMe)?.rank ? '#' + leaderboard.find(r => r.isMe)!.rank : '—' },
         ].map(s => (
@@ -4287,6 +4377,102 @@ function ProfileScreen({
         ))}
       </div>
 
+      {/* ABQ Explorer Challenges */}
+      {(() => {
+        const checkedInArr = [...checkedIn];
+        const CHALLENGES = [
+          {
+            id: 'old-town-5',
+            emoji: '🏛️',
+            title: 'Old Town Explorer',
+            desc: 'Check in to 5 places in Old Town ABQ',
+            target: 5,
+            progress: places.filter(p => checkedIn.has(p.id) && (p.address?.toLowerCase().includes('old town') || p.name?.toLowerCase().includes('old town') || (p.lat && p.lat >= 35.094 && p.lat <= 35.102 && p.lng && p.lng >= -106.673 && p.lng <= -106.659))).length,
+          },
+          {
+            id: 'nob-hill-3',
+            emoji: '☕',
+            title: 'Nob Hill Regular',
+            desc: 'Check in to 3 spots on Central Ave / Nob Hill',
+            target: 3,
+            progress: places.filter(p => checkedIn.has(p.id) && (p.address?.toLowerCase().includes('central ave') || p.address?.toLowerCase().includes('nob hill') || (p.lat && p.lat >= 35.076 && p.lat <= 35.082 && p.lng && p.lng >= -106.618 && p.lng <= -106.593))).length,
+          },
+          {
+            id: 'checkin-10',
+            emoji: '📍',
+            title: 'Stamped In',
+            desc: 'Reach 10 total check-ins',
+            target: 10,
+            progress: Math.min(myCount, 10),
+          },
+          {
+            id: 'diverse-5',
+            emoji: '🗺️',
+            title: 'City Sampler',
+            desc: 'Check in to 5 different place categories',
+            target: 5,
+            progress: new Set(places.filter(p => checkedIn.has(p.id)).map(p => p.type || p.category)).size,
+          },
+          {
+            id: 'streak-7',
+            emoji: '🔥',
+            title: 'Week Warrior',
+            desc: 'Keep a 7-day check-in streak',
+            target: 7,
+            progress: Math.min(myStreak, 7),
+          },
+          {
+            id: 'downtown-3',
+            emoji: '🏙️',
+            title: 'Downtown Devotee',
+            desc: 'Check in to 3 places Downtown',
+            target: 3,
+            progress: places.filter(p => checkedIn.has(p.id) && (p.address?.toLowerCase().includes('downtown') || (p.lat && p.lat >= 35.083 && p.lat <= 35.095 && p.lng && p.lng >= -106.658 && p.lng <= -106.644))).length,
+          },
+        ];
+        const allDone = CHALLENGES.every(c => c.progress >= c.target);
+        return (
+          <>
+            <div className="flex items-center px-0 py-3 mb-0 mt-1" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
+              <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Epilogue, sans-serif' }}>ABQ Explorer Challenges</h2>
+            </div>
+            <div className="flex flex-col gap-2 mb-5 mt-3">
+              {CHALLENGES.map(c => {
+                const done = c.progress >= c.target;
+                const pct = Math.min(100, Math.round((c.progress / c.target) * 100));
+                return (
+                  <div
+                    key={c.id}
+                    className="rounded-lg px-4 py-3"
+                    style={{
+                      background: done ? '#D4EF4D' : 'white',
+                      boxShadow: done ? '3px 3px 0 var(--brand)' : '3px 3px 0 rgba(0,0,0,0.10)',
+                      border: done ? '2px solid #1A1A1A' : '1px solid #eee',
+                    }}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <span style={{ fontSize: '20px', lineHeight: 1 }}>{c.emoji}</span>
+                      <span className="font-black text-sm flex-1" style={{ fontFamily: 'Epilogue, sans-serif', color: '#1A1A1A' }}>{c.title}</span>
+                      {done && <span className="text-xs font-black" style={{ color: '#566500' }}>✓ DONE</span>}
+                      {!done && <span className="text-xs font-semibold" style={{ fontFamily: 'Inter, sans-serif', color: '#999' }}>{c.progress}/{c.target}</span>}
+                    </div>
+                    <p className="text-xs mb-2" style={{ fontFamily: 'Inter, sans-serif', color: '#555' }}>{c.desc}</p>
+                    <div className="rounded-full overflow-hidden" style={{ height: '5px', background: done ? 'rgba(0,0,0,0.1)' : '#f0f0f0' }}>
+                      <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: done ? '#566500' : 'var(--brand-gradient)' }} />
+                    </div>
+                  </div>
+                );
+              })}
+              {allDone && (
+                <div className="text-center py-3 rounded-lg" style={{ background: '#1A1A1A', color: '#D4EF4D' }}>
+                  <p className="font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif' }}>🏆 All challenges complete — you're a true ABQ local!</p>
+                </div>
+              )}
+            </div>
+          </>
+        );
+      })()}
+
       {/* Leaderboard */}
       <div className="flex items-center justify-between mb-3">
         <h2
@@ -4337,6 +4523,11 @@ function ProfileScreen({
             >
               {row.isMe ? 'You' : row.name}
             </span>
+            {row.streak && row.streak >= 3 ? (
+              <span className="flex-shrink-0 text-xs" title={`${row.streak}-day streak`}>
+                {row.streak >= 30 ? '🔥🔥' : row.streak >= 7 ? '🔥' : '⚡'}
+              </span>
+            ) : null}
             <span
               className="flex-shrink-0 text-sm font-black"
               style={{ fontFamily: 'Epilogue, sans-serif', color: 'var(--brand)' }}
@@ -5011,14 +5202,27 @@ function LoadingScreen() {
 
 const ADMIN_EMAIL = '4mattcarlson@gmail.com';
 
-interface BannerConfig { message: string; type: 'info' | 'success' | 'warning'; active: boolean; }
+interface BannerConfig { message: string; type: 'info' | 'success' | 'warning' | 'promo'; active: boolean; linkUrl?: string; linkText?: string; }
 
 function SiteBanner({ banner }: { banner: BannerConfig | null }) {
   if (!banner?.active || !banner.message) return null;
-  const color = { info: { bg: 'rgba(59,130,246,0.1)', border: 'rgba(59,130,246,0.25)', text: '#1d4ed8' }, success: { bg: 'rgba(34,197,94,0.1)', border: 'rgba(34,197,94,0.25)', text: '#15803d' }, warning: { bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.25)', text: '#92400e' } }[banner.type] ?? { bg: 'rgba(59,130,246,0.1)', border: 'rgba(59,130,246,0.25)', text: '#1d4ed8' };
+  const colorMap: Record<string, { bg: string; border: string; text: string }> = {
+    info:    { bg: 'rgba(59,130,246,0.1)',  border: 'rgba(59,130,246,0.25)',  text: '#1d4ed8' },
+    success: { bg: 'rgba(34,197,94,0.1)',   border: 'rgba(34,197,94,0.25)',   text: '#15803d' },
+    warning: { bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.25)',  text: '#92400e' },
+    promo:   { bg: '#1ebaeb',               border: '#1A1A1A',                text: '#1A1A1A' },
+  };
+  const color = colorMap[banner.type] ?? colorMap.info;
   return (
-    <div style={{ background: color.bg, borderBottom: `1px solid ${color.border}`, padding: '9px 16px', textAlign: 'center' }}>
-      <p style={{ fontSize: '13px', fontWeight: 700, color: color.text, fontFamily: 'Inter, sans-serif', lineHeight: 1.4 }}>{banner.message}</p>
+    <div style={{ background: color.bg, borderBottom: `2px solid ${color.border}`, padding: '10px 16px', textAlign: 'center' }}>
+      <p style={{ fontSize: '13px', fontWeight: 700, color: color.text, fontFamily: 'Inter, sans-serif', lineHeight: 1.4 }}>
+        {banner.message}
+        {banner.linkUrl && banner.linkText && (
+          <a href={banner.linkUrl} target="_blank" rel="noopener noreferrer"
+            style={{ marginLeft: 8, textDecoration: 'underline', fontWeight: 800, color: color.text }}
+          >{banner.linkText} →</a>
+        )}
+      </p>
     </div>
   );
 }
@@ -6851,18 +7055,33 @@ export default function App() {
   const resolvedMapProvider: 'google' | 'apple' =
     mapProvider === 'auto' ? (isIOS ? 'apple' : 'google') : mapProvider;
 
-  // siteConfig is stored in the Supabase `config` table (AdminPanel uses cfgSet/cfgGet)
+  // siteConfig + banners are stored in the Supabase `config` table (AdminPanel uses cfgSet/cfgGet)
   useEffect(() => {
-    (supabase.from as any)('config')
-      .select('value')
-      .eq('key', 'siteConfig')
-      .maybeSingle()
-      .then(({ data }: { data: { value: Record<string, unknown> } | null }) => {
-        const d = data?.value;
-        if (!d) return;
+    const today = new Date().toISOString().slice(0, 10);
+    Promise.all([
+      (supabase.from as any)('config').select('value').eq('key', 'siteConfig').maybeSingle(),
+      (supabase.from as any)('config').select('value').eq('key', 'banners').maybeSingle(),
+    ]).then(([siteRes, bannersRes]: [{ data: { value: Record<string, unknown> } | null }, { data: { value: unknown[] } | null }]) => {
+      // Apply siteConfig
+      const d = siteRes.data?.value;
+      if (d) {
         if ((d.banner as any)?.active) setSiteBanner(d.banner as BannerConfig);
         if (d.mapProvider) setMapProvider(d.mapProvider as 'google' | 'apple' | 'auto');
-      });
+      }
+      // Apply banners array — find first active banner within its date window
+      const bannerArr = bannersRes.data?.value;
+      if (Array.isArray(bannerArr)) {
+        const active = bannerArr.find((b: any) =>
+          b.active &&
+          b.message?.trim() &&
+          (!b.startDate || b.startDate <= today) &&
+          (!b.endDate   || b.endDate   >= today)
+        ) as any;
+        if (active) {
+          setSiteBanner({ message: active.message, type: active.type ?? 'info', active: true, linkUrl: active.linkUrl, linkText: active.linkText });
+        }
+      }
+    });
   }, []);
 
   // ── Load theme config from Supabase and inject CSS variables ──────────────
@@ -6931,6 +7150,7 @@ export default function App() {
     // Proximity OK → check in
     // Haptic feedback: iOS/Android vibration on successful check-in
     if ('vibrate' in navigator) { try { navigator.vibrate([12, 40, 12]); } catch {} }
+    tickStreak(); // advance daily check-in streak
     trackEvent('checkin', { place_id: placeId });
     setCheckedIn(prev => {
       const next = new Set(prev);
