@@ -1132,6 +1132,8 @@ function AnalyticsSection() {
   const [deviceBreakdown,setDeviceBreakdown]=useState<{device:string;count:number}[]>([]);
   const [dailyActive,setDailyActive]=useState<{day:string;sessions:number}[]>([]);
   const [sectionEngagement,setSectionEngagement]=useState<{tab:string;count:number}[]>([]);
+  const [recentErrors, setRecentErrors] = useState<any[]>([]);
+  const [topPages, setTopPages] = useState<{path:string;count:number}[]>([]);
 
   const days = range==='7d'?7:range==='30d'?30:90;
 
@@ -1181,6 +1183,18 @@ function AnalyticsSection() {
       rows.filter(r=>r.session_id).forEach((r:any)=>{ const day=r.created_at.split('T')[0]; if(!daySessions[day]) daySessions[day]=new Set(); daySessions[day].add(r.session_id); });
       setDailyActive(Object.entries(daySessions).sort((a,b)=>a[0].localeCompare(b[0])).map(([day,s])=>({day,sessions:s.size})));
 
+      // Top pages (most viewed paths from pageview events)
+      const pageCounts: Record<string,number> = {};
+      rows.filter(r=>r.event_type==='pageview').forEach((r:any)=>{
+        const path = r.data?.path || r.data?.tab || 'unknown';
+        pageCounts[path]=(pageCounts[path]||0)+1;
+      });
+      setTopPages(Object.entries(pageCounts).sort((a,b)=>b[1]-a[1]).slice(0,15).map(([path,count])=>({path,count})));
+
+      // Recent errors
+      const errors = rows.filter(r=>r.event_type==='client_error').sort((a:any,b:any)=>b.created_at.localeCompare(a.created_at)).slice(0,30);
+      setRecentErrors(errors);
+
       setTotals({...typeCount});
       } catch(e:any) {
         console.error('Analytics load error:', e);
@@ -1222,6 +1236,7 @@ function AnalyticsSection() {
             {statCard('Place Clicks',      totals.place_click||0,      '📍','#7c3aed')}
             {statCard('Searches',          totals.search||0,           '🔍','#b45309')}
             {statCard('Check-ins',         totals.checkin||0,          '✅','#0891b2')}
+            {statCard('Errors',            totals.client_error||0,     '⚠️','#dc2626')}
             {statCard('A2HS Shown',        totals.a2hs_shown||0,       '📲','#9333ea')}
             {statCard('A2HS Accepted',     totals.a2hs_accepted||0,    '🏠','#059669')}
           </div>
@@ -1297,7 +1312,7 @@ function AnalyticsSection() {
             </div>
           </div>
 
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20}}>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginBottom:20}}>
             {/* Top events */}
             <div style={card}>
               <h3 style={{fontSize:14,fontWeight:700,marginBottom:14,color:'#374151'}}>Most Clicked Events</h3>
@@ -1327,6 +1342,54 @@ function AnalyticsSection() {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Top pages */}
+          <div style={{...card,marginBottom:20}}>
+            <h3 style={{fontSize:14,fontWeight:700,marginBottom:14,color:'#374151'}}>Top Viewed Pages</h3>
+            {!topPages.length ? <p style={{color:'#9ca3af',fontSize:13}}>No pageview data yet.</p> : (
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:8}}>
+                {topPages.map((p,i)=>(
+                  <div key={p.path} style={{display:'flex',alignItems:'center',gap:10,padding:'6px 10px',background:i===0?'#fdf3ee':'#f9fafb',borderRadius:6}}>
+                    <div style={{width:22,fontSize:12,fontWeight:800,color:i<3?ACCENT:'#9ca3af',textAlign:'right'}}>{i+1}</div>
+                    <div style={{flex:1,fontSize:13,fontWeight:i<3?700:400,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',fontFamily:'monospace'}}>{p.path}</div>
+                    <div style={{fontSize:13,fontWeight:700,color:'#374151'}}>{p.count}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Error log */}
+          <div style={{...card, borderLeft: (recentErrors.length > 0) ? '3px solid #dc2626' : '3px solid #d1d5db'}}>
+            <h3 style={{fontSize:14,fontWeight:700,marginBottom:4,color: recentErrors.length > 0 ? '#dc2626' : '#374151'}}>
+              Client Error Log {recentErrors.length > 0 && <span style={{fontSize:12,fontWeight:400,color:'#9ca3af',marginLeft:8}}>({recentErrors.length} errors in last {days} days)</span>}
+            </h3>
+            <p style={{fontSize:12,color:'#9ca3af',marginBottom:14}}>JavaScript errors captured from user browsers — use to diagnose and fix bugs.</p>
+            {!recentErrors.length ? (
+              <div style={{textAlign:'center',padding:28,color:'#9ca3af'}}>
+                <div style={{fontSize:28,marginBottom:8}}>&#10003;</div>
+                <p style={{fontSize:13,fontWeight:600}}>No errors recorded</p>
+              </div>
+            ) : (
+              <div style={{maxHeight:400,overflowY:'auto'}}>
+                {recentErrors.map((err:any,i:number)=>(
+                  <div key={i} style={{padding:'10px 12px',marginBottom:6,background:'#fef2f2',borderRadius:8,border:'1px solid #fecaca',fontSize:12}}>
+                    <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+                      <span style={{fontWeight:700,color:'#dc2626'}}>{err.data?.message?.slice(0,120) || 'Unknown error'}</span>
+                      <span style={{color:'#9ca3af',fontSize:11,flexShrink:0,marginLeft:8}}>{new Date(err.created_at).toLocaleString()}</span>
+                    </div>
+                    {err.data?.source && <div style={{color:'#6b7280',fontFamily:'monospace',fontSize:11}}>@ {err.data.source.replace(/^https?:\/\/[^/]+/,'')}:{err.data.line}</div>}
+                    {err.data?.stack && <details style={{marginTop:4}}><summary style={{cursor:'pointer',fontSize:11,color:'#9ca3af'}}>Stack trace</summary><pre style={{fontSize:10,color:'#374151',background:'#fff',padding:8,borderRadius:4,overflow:'auto',maxHeight:120,marginTop:4,border:'1px solid #e5e7eb'}}>{err.data.stack}</pre></details>}
+                    <div style={{display:'flex',gap:12,marginTop:4,fontSize:11,color:'#9ca3af'}}>
+                      <span>{err.device || '?'}</span>
+                      {err.data?.url && <span style={{fontFamily:'monospace'}}>{err.data.url.replace(/^https?:\/\/[^/]+/,'')}</span>}
+                      {err.data?.type === 'unhandledrejection' && <span style={{background:'#fef3c7',color:'#92400e',padding:'1px 6px',borderRadius:4,fontWeight:600}}>Promise</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </>
       )}
