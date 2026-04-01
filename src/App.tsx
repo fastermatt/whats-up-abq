@@ -3892,13 +3892,51 @@ function PlacesScreen({
           );
         });
       } else {
-        const q = search.toLowerCase();
-        result = result.filter(
-          p =>
-            p.name.toLowerCase().includes(q) ||
-            p.category.toLowerCase().includes(q) ||
-            (p.description || '').toLowerCase().includes(q)
-        );
+        const q = search.toLowerCase().trim();
+
+        // Build alias-expanded category set
+        const aliasedCats = new Set<string>();
+        const aliasKeys = Object.keys(SEARCH_ALIASES);
+        for (let ai = 0; ai < aliasKeys.length; ai++) {
+          const term = aliasKeys[ai];
+          const termCats = SEARCH_ALIASES[term];
+          if (q === term || q.includes(term) || term.includes(q)) {
+            for (let ci = 0; ci < termCats.length; ci++) aliasedCats.add(termCats[ci]);
+          }
+        }
+        for (let pi = 0; pi < PLACE_CATEGORIES.length; pi++) {
+          const pc = PLACE_CATEGORIES[pi];
+          if (pc.value !== 'All' && (pc.label.toLowerCase().includes(q) || q.includes(pc.value))) {
+            aliasedCats.add(pc.value);
+          }
+        }
+
+        result = result.filter(p => {
+          const pName  = p.name.toLowerCase();
+          const pAddr  = (p.address || '').toLowerCase();
+          const pCat   = (p.category || '').toLowerCase();
+          const pDesc  = (p.description || '').toLowerCase();
+          const pAbout = ((p as any).about || '').toLowerCase();
+          const pTip   = ((p as any).insiderTip || '').toLowerCase();
+          const pBestFor = (((p as any).bestFor || []) as string[]).join(' ').toLowerCase();
+          const pTags  = ((p.tags || []) as string[]).join(' ').toLowerCase();
+          const allText = `${pName} ${pAddr} ${pCat} ${pDesc} ${pAbout} ${pTip} ${pBestFor} ${pTags}`;
+
+          // 1. Direct text match across all fields
+          if (allText.includes(q)) return true;
+          // 2. Alias category expansion
+          if (aliasedCats.size > 0 && aliasedCats.has(p.category)) return true;
+          return false;
+        });
+
+        // Sort: name-starts-with first, then name-contains, then rating
+        result = [...result].sort((a, b) => {
+          const an = a.name.toLowerCase(), bn = b.name.toLowerCase();
+          const aScore = an.startsWith(q) ? 2 : an.includes(q) ? 1 : 0;
+          const bScore = bn.startsWith(q) ? 2 : bn.includes(q) ? 1 : 0;
+          if (aScore !== bScore) return bScore - aScore;
+          return (b.rating || 0) - (a.rating || 0);
+        });
       }
     }
     return result;
@@ -6701,7 +6739,6 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
           aliasedCats.add(pc.value);
         }
       }
-      console.log('[SEARCH DEBUG]', q, 'aliasedCats:', [...aliasedCats], 'r.length before filter:', r.length);
 
       r = r.filter(p => {
         const pName    = p.name.toLowerCase();
