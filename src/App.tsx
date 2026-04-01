@@ -131,6 +131,38 @@ function trackEvent(eventType: string, data: Record<string, unknown> = {}) {
   } catch {}
 }
 
+// ─── Global Error Tracking ──────────────────────────────────────────────────
+// Captures unhandled errors and promise rejections to Supabase for debugging
+(function initErrorTracking() {
+  let errorCount = 0;
+  const MAX_ERRORS_PER_SESSION = 20; // prevent runaway loops from flooding DB
+
+  window.addEventListener('error', (e) => {
+    if (++errorCount > MAX_ERRORS_PER_SESSION) return;
+    trackEvent('client_error', {
+      message: e.message || 'Unknown error',
+      source: e.filename || '',
+      line: e.lineno || 0,
+      col: e.colno || 0,
+      stack: e.error?.stack?.slice(0, 500) || '',
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+    });
+  });
+
+  window.addEventListener('unhandledrejection', (e) => {
+    if (++errorCount > MAX_ERRORS_PER_SESSION) return;
+    const reason = e.reason;
+    trackEvent('client_error', {
+      message: reason?.message || String(reason || 'Unhandled promise rejection'),
+      stack: reason?.stack?.slice(0, 500) || '',
+      type: 'unhandledrejection',
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+    });
+  });
+})();
+
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -7559,19 +7591,21 @@ export default function App() {
   const navigateTab = useCallback((tab: TabId) => {
     setActiveTab(tab);
     window.history.pushState({ tab, modal: null }, '', `#${tab}`);
-    trackEvent('pageview', { tab });
+    trackEvent('pageview', { tab, referrer: document.referrer || '', path: `#${tab}` });
   }, []);
 
   const openPlaceModal = useCallback((place: Place) => {
     setSelectedPlace(place);
     window.history.pushState({ tab: null, modal: 'place', id: place.id }, '', `#place/${place.id}`);
-    trackEvent('place_click', { place_id: place.id, place_name: place.name });
+    trackEvent('place_click', { place_id: place.id, place_name: place.name, category: place.category });
+    trackEvent('pageview', { tab: 'place_detail', place_id: place.id, place_name: place.name, path: `#place/${place.id}` });
   }, []);
 
   const openEventModal = useCallback((event: TMEvent) => {
     setSelectedEvent(event);
     window.history.pushState({ tab: null, modal: 'event', id: event.id }, '', `#event/${event.id}`);
     trackEvent('event_click', { event_id: event.id, event_name: event.name });
+    trackEvent('pageview', { tab: 'event_detail', event_id: event.id, event_name: event.name, path: `#event/${event.id}` });
   }, []);
 
   const closePlaceModal = useCallback(() => setSelectedPlace(null), []);
