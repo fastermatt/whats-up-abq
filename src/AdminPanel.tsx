@@ -502,12 +502,32 @@ function PlacesSection() {
   const [editPlace, setEditPlace] = useState<any|null>(null);
   const [editPhotoUrl, setEditPhotoUrl] = useState('');
   const [editSaving, setEditSaving] = useState(false);
+  const [enrichedEnabled, setEnrichedEnabled] = useState(true);
+  const [enrichedLoading, setEnrichedLoading] = useState(false);
+  const [filterEnriched, setFilterEnriched] = useState<'all'|'enriched'|'missing'>('all');
+
+  // Load global enriched data toggle from config
+  useEffect(() => {
+    cfgGet('enriched_data_enabled').then((v:any) => {
+      if (v !== null && v !== undefined) setEnrichedEnabled(v !== false);
+    });
+  }, []);
+
+  const toggleEnrichedEnabled = async (val: boolean) => {
+    setEnrichedLoading(true);
+    await cfgSet('enriched_data_enabled', val);
+    setEnrichedEnabled(val);
+    setEnrichedLoading(false);
+    toast(val ? 'Enriched data enabled globally ✓' : 'Enriched data hidden globally');
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      let q = sb('places').select('id,source,hidden,featured,raw',{count:'exact'}).order('raw->>name',{ascending:true});
+      let q = sb('places').select('id,source,hidden,featured,hide_enriched,enriched,raw',{count:'exact'}).order('raw->>name',{ascending:true});
       if (search) q = q.ilike('raw->>name',`%${search}%`);
+      if (filterEnriched === 'enriched') q = (q as any).not('enriched', 'is', null);
+      if (filterEnriched === 'missing')  q = (q as any).is('enriched', null);
       q = q.range(page*PAGE,(page+1)*PAGE-1);
       const { data, count, error } = await q;
       if (error) toast('Load error: '+error.message, 'err');
@@ -517,7 +537,7 @@ function PlacesSection() {
     } finally {
       setLoading(false);
     }
-  }, [page, search]);
+  }, [page, search, filterEnriched]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -528,6 +548,7 @@ function PlacesSection() {
 
   const hidePlace = async (id:string, val:boolean) => { const {error} = await sb('places').update({hidden:val}).eq('id',id); if(error) toast('Error: '+error.message,'err'); else toast(val?'Hidden':'Restored'); load(); };
   const featPlace = async (r:any) => { const {error} = await sb('places').update({featured:!r.featured}).eq('id',r.id); if(error) toast('Error: '+error.message,'err'); else toast(r.featured?'Removed from featured':'Featured ✓'); load(); };
+  const toggleHideEnriched = async (id:string, val:boolean) => { const {error} = await sb('places').update({hide_enriched:val}).eq('id',id); if(error) toast('Error: '+error.message,'err'); else toast(val?'Enriched data hidden for this place':'Enriched data shown ✓'); load(); };
   const delPlace  = async (id:string) => { const {error} = await sb('places').delete().eq('id',id); if(error) toast('Error: '+error.message,'err'); else toast('Deleted'); setConfirm(null); load(); };
   const toggleSel = (id:string) => setSelected(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n;});
   const doBulkCat = async () => {
@@ -556,12 +577,49 @@ function PlacesSection() {
     setEditPlace(null);
     load();
   };
+  const saveHideEnrichedInEdit = async (val: boolean) => {
+    if (!editPlace) return;
+    const {error} = await sb('places').update({hide_enriched: val}).eq('id', editPlace.id);
+    if (error) { toast('Error: '+error.message,'err'); return; }
+    setEditPlace((prev: any) => ({...prev, hide_enriched: val}));
+    toast(val ? 'Enriched data hidden for this place' : 'Enriched data restored ✓');
+    load();
+  };
 
   return (
     <div>
       <SectionHeader title="Places" sub={`${total.toLocaleString()} total`} />
+
+      {/* Global enriched data toggle */}
+      <div style={{...card,marginBottom:16,padding:'14px 16px',display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap'}}>
+        <div>
+          <p style={{fontSize:14,fontWeight:700,color:'#18181b',margin:0}}>Enriched Business Data</p>
+          <p style={{fontSize:12,color:'#6b7280',margin:'2px 0 0'}}>Controls whether website, phone, hours, parking &amp; local tips show in place modals across the whole app</p>
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:8,flexShrink:0}}>
+          {enrichedLoading && <span style={{fontSize:12,color:'#9ca3af'}}>Saving…</span>}
+          <button
+            onClick={()=>toggleEnrichedEnabled(!enrichedEnabled)}
+            disabled={enrichedLoading}
+            style={{
+              padding:'7px 16px',fontSize:13,fontWeight:700,borderRadius:6,border:'none',cursor:'pointer',
+              background: enrichedEnabled ? '#16a34a' : '#6b7280',
+              color: 'white',
+              opacity: enrichedLoading ? 0.6 : 1,
+            }}
+          >
+            {enrichedEnabled ? '✓ Enabled Globally' : '✗ Disabled Globally'}
+          </button>
+        </div>
+      </div>
+
       <div style={{display:'flex',gap:10,marginBottom:14,flexWrap:'wrap',alignItems:'center'}}>
         <input value={search} onChange={e=>{setSearch(e.target.value);setPage(0);}} placeholder="Search places…" style={{...inp,width:240,minWidth:0}} />
+        <select value={filterEnriched} onChange={e=>{setFilterEnriched(e.target.value as any);setPage(0);}} style={{...inp,width:160}}>
+          <option value="all">All places</option>
+          <option value="enriched">Has enriched data</option>
+          <option value="missing">Missing data</option>
+        </select>
         {selected.size>0&&<>
           <span style={{fontSize:13,color:'#9ca3af'}}>{selected.size} selected</span>
           <select value={bulkCat} onChange={e=>setBulkCat(e.target.value)} style={{...inp,width:160}}>
@@ -576,7 +634,7 @@ function PlacesSection() {
             <table style={{width:'100%',borderCollapse:'collapse',fontSize:13}}>
               <thead><tr>
                 <th style={{...th,width:36}}><input type="checkbox" onChange={e=>setSelected(e.target.checked?new Set(rows.map(r=>r.id)):new Set())} /></th>
-                <th style={th}>Name</th><th style={th}>Category</th><th style={th}>Rating</th><th style={th}>Address</th><th style={th}>Featured</th><th style={th}>Status</th><th style={th}>Actions</th>
+                <th style={th}>Name</th><th style={th}>Category</th><th style={th}>Rating</th><th style={th}>Enriched</th><th style={th}>Featured</th><th style={th}>Status</th><th style={th}>Actions</th>
               </tr></thead>
               <tbody>{rows.map(r=>(
                 <tr key={r.id} style={{background:selected.has(r.id)?'#fdf3ee':'white'}}>
@@ -584,7 +642,14 @@ function PlacesSection() {
                   <td style={{...td,fontWeight:600,maxWidth:220,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{pName(r)}</td>
                   <td style={td}><span style={{fontSize:11,background:'#f3f4f6',color:'#6b7280',padding:'2px 7px',borderRadius:4}}>{pCat(r)}</span></td>
                   <td style={td}>{pRating(r)}</td>
-                  <td style={{...td,maxWidth:180,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:'#6b7280',fontSize:12}}>{pAddr(r)}</td>
+                  <td style={td}>
+                    {r.enriched
+                      ? r.hide_enriched
+                        ? <span title="Has data but hidden for this place" style={{fontSize:11,color:'#9ca3af',cursor:'pointer'}} onClick={()=>toggleHideEnriched(r.id,false)}>🌐 Hidden</span>
+                        : <span title="Enriched data visible — click to hide" style={{fontSize:11,color:'#059669',fontWeight:700,cursor:'pointer'}} onClick={()=>toggleHideEnriched(r.id,true)}>🌐 Live</span>
+                      : <span style={{fontSize:11,color:'#d1d5db'}}>—</span>
+                    }
+                  </td>
                   <td style={td}>{r.featured?<span style={{color:'#d97706',fontWeight:700}}>★ Yes</span>:<span style={{color:'#9ca3af'}}>No</span>}</td>
                   <td style={td}>{r.hidden?<span style={{color:'#9ca3af',fontSize:12}}>Hidden</span>:<span style={{color:'#059669',fontSize:12,fontWeight:700}}>Live</span>}</td>
                   <td style={td}><div style={{display:'flex',gap:5}}>
@@ -615,10 +680,41 @@ function PlacesSection() {
         <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.55)',zIndex:9998,display:'flex',alignItems:'center',justifyContent:'center',padding:16}} onClick={e=>{if(e.target===e.currentTarget)setEditPlace(null);}}>
           <div style={{background:'#fff',borderRadius:14,padding:28,maxWidth:520,width:'100%',boxShadow:'0 8px 40px rgba(0,0,0,0.25)',maxHeight:'90vh',overflowY:'auto'}}>
             <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
-              <h3 style={{fontSize:16,fontWeight:800,color:'#18181b',margin:0}}>Edit Place Photo</h3>
+              <h3 style={{fontSize:16,fontWeight:800,color:'#18181b',margin:0}}>Edit Place</h3>
               <button onClick={()=>setEditPlace(null)} style={{...btnS,padding:'4px 10px',fontSize:13}}>✕</button>
             </div>
             <p style={{fontSize:14,fontWeight:700,color:'#374151',marginBottom:16}}>{editPlace.raw?.name}</p>
+
+            {/* Enriched data section */}
+            {editPlace.enriched ? (
+              <div style={{marginBottom:20,background:'#f9fafb',borderRadius:8,padding:14,border:'1px solid #e5e7eb'}}>
+                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}>
+                  <p style={{fontSize:13,fontWeight:700,color:'#374151',margin:0}}>🌐 Enriched Business Data</p>
+                  <button
+                    onClick={()=>saveHideEnrichedInEdit(!editPlace.hide_enriched)}
+                    style={{
+                      padding:'5px 12px',fontSize:12,fontWeight:700,borderRadius:6,border:'none',cursor:'pointer',
+                      background: editPlace.hide_enriched ? '#6b7280' : '#16a34a',
+                      color: 'white',
+                    }}
+                  >
+                    {editPlace.hide_enriched ? '✗ Hidden for this place' : '✓ Visible — click to hide'}
+                  </button>
+                </div>
+                <div style={{display:'grid',gap:6,fontSize:13,color:'#374151'}}>
+                  {editPlace.enriched.phone    && <div><span style={{fontWeight:600,color:'#6b7280'}}>📞 Phone: </span>{editPlace.enriched.phone}</div>}
+                  {editPlace.enriched.website  && <div><span style={{fontWeight:600,color:'#6b7280'}}>🔗 Website: </span><a href={editPlace.enriched.website} target="_blank" rel="noopener noreferrer" style={{color:'#2563eb'}}>{editPlace.enriched.website.replace(/^https?:\/\/(www\.)?/,'').replace(/\/$/,'')}</a></div>}
+                  {editPlace.enriched.hours    && <div><span style={{fontWeight:600,color:'#6b7280'}}>🕐 Hours: </span>{editPlace.enriched.hours.split(' | ').join(', ')}</div>}
+                  {editPlace.enriched.parking  && <div><span style={{fontWeight:600,color:'#6b7280'}}>🅿️ Parking: </span>{editPlace.enriched.parking}</div>}
+                  {editPlace.enriched.tip      && <div style={{marginTop:4,padding:'8px 10px',background:'#fffbeb',borderRadius:6,border:'1px solid #fde68a'}}><span style={{fontWeight:700,color:'#b45309'}}>💡 Tip: </span>{editPlace.enriched.tip}</div>}
+                  {editPlace.enriched.editorial && <div style={{marginTop:4,color:'#6b7280',fontSize:12,fontStyle:'italic'}}>{editPlace.enriched.editorial}</div>}
+                </div>
+              </div>
+            ) : (
+              <div style={{marginBottom:20,background:'#f9fafb',borderRadius:8,padding:14,border:'1px solid #e5e7eb'}}>
+                <p style={{fontSize:13,color:'#9ca3af',margin:0}}>No enriched data yet for this place. Run the enrichment script on your Windows PC to populate business details.</p>
+              </div>
+            )}
             {/* Current photo preview */}
             {editPlace.raw?.photos?.[0]?.photo_reference && (
               <div style={{marginBottom:16}}>
