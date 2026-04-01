@@ -636,124 +636,60 @@ const PLACE_CATEGORIES = [
 // Maps common search terms → category values they should expand to.
 // When a query matches an alias key the search also returns ALL places in
 // the mapped categories, not just those whose name contains the query.
-const SEARCH_ALIASES: Record<string, string[]> = {
-  // Drinks / Bars
+// ── Search helpers ────────────────────────────────────────────────────────────
+// CATEGORY_SYNONYMS: terms that mean "show me the whole category".
+// Only true synonyms belong here — NOT specific products/cuisines/activities.
+const CATEGORY_SYNONYMS: Record<string, string[]> = {
+  // Bars
   drinks:       ['bar', 'coffee'],
-  cocktail:     ['bar'], cocktails:    ['bar'],
-  beer:         ['bar'], beers:        ['bar'],
-  wine:         ['bar', 'restaurant'],
-  pub:          ['bar'], brewery:      ['bar'], brewpub:     ['bar'],
   nightlife:    ['bar', 'entertainment'],
-  'happy hour': ['bar'],
-  spirits:      ['bar'], whiskey:      ['bar'], tequila:     ['bar'],
-  // Coffee / Café
+  // Coffee
   cafe:         ['coffee'], café:        ['coffee'],
-  coffee:       ['coffee'], espresso:    ['coffee'],
-  latte:        ['coffee'], cappuccino:  ['coffee'],
-  tea:          ['coffee', 'restaurant'],
-  boba:         ['coffee'], 'bubble tea': ['coffee'],
-  // Food / Restaurants
+  // Food
   food:         ['restaurant', 'coffee'],
   eat:          ['restaurant', 'coffee'],
   dining:       ['restaurant'],
-  brunch:       ['restaurant', 'coffee'],
-  breakfast:    ['restaurant', 'coffee'],
-  lunch:        ['restaurant'],
-  dinner:       ['restaurant'],
-  pizza:        ['restaurant'], burger:      ['restaurant'], burgers:     ['restaurant'],
-  taco:         ['restaurant'], tacos:       ['restaurant'],
-  sushi:        ['restaurant'], ramen:       ['restaurant'],
-  mexican:      ['restaurant'], italian:     ['restaurant'], thai:        ['restaurant'],
-  chinese:      ['restaurant'], indian:      ['restaurant'], mediterranean:['restaurant'],
-  bagel:        ['restaurant', 'coffee'], bagels:     ['restaurant', 'coffee'],
-  sandwich:     ['restaurant', 'coffee'],
-  bakery:       ['restaurant', 'coffee'],
-  dessert:      ['restaurant', 'coffee'],
-  'green chile':['restaurant'],
-  'new mexican':['restaurant'],
-  // Tech / Electronics
-  electronics:  ['shop'],
-  computer:     ['shop', 'museum'], computers: ['shop', 'museum'],
-  laptop:       ['shop'], laptops:     ['shop'],
-  phone:        ['shop'], phones:      ['shop'], smartphone:  ['shop'],
-  tech:         ['shop', 'entertainment'],
-  appliance:    ['shop'], appliances:  ['shop'],
-  // Shopping
-  store:        ['shop'], stores:      ['shop'],
-  shopping:     ['shop'],
-  boutique:     ['shop'],
-  retail:       ['shop'],
-  mall:         ['shop'],
-  clothes:      ['shop'], clothing:    ['shop'], fashion:     ['shop'],
-  shoes:        ['shop'], boots:       ['shop'],
-  books:        ['shop', 'museum'], bookstore: ['shop'],
-  thrift:       ['shop'], vintage:     ['shop'],
-  jewelry:      ['shop'], gifts:       ['shop'],
-  'used goods': ['shop'],
-  // Fitness / Health
-  gym:          ['fitness'],
-  workout:      ['fitness'],
-  yoga:         ['fitness'],
-  crossfit:     ['fitness'],
-  climbing:     ['fitness', 'park'],
-  swim:         ['fitness'], swimming:    ['fitness'], pool:        ['fitness'],
-  pilates:      ['fitness'],
-  dance:        ['fitness', 'arts'],
-  'martial arts':['fitness'],
-  boxing:       ['fitness'],
-  cycling:      ['fitness', 'park'],
-  sports:       ['fitness', 'entertainment'],
-  // Arts / Culture
-  art:          ['arts', 'museum'],
-  gallery:      ['arts', 'museum'],
-  theater:      ['arts', 'entertainment'], theatre:     ['arts', 'entertainment'],
-  'live music': ['bar', 'arts', 'entertainment'],
-  concert:      ['arts', 'entertainment'],
-  comedy:       ['entertainment', 'arts'],
-  improv:       ['entertainment', 'arts'],
+  // Shopping (full category only for generic shopping terms)
+  shopping:     ['shop'], store: ['shop'], stores: ['shop'],
+  retail:       ['shop'], mall:  ['shop'],
+  // Fitness
+  gym:          ['fitness'], workout: ['fitness'],
+  'work out':   ['fitness'], exercise: ['fitness'],
+  // Arts
+  art:          ['arts', 'museum'], gallery: ['arts', 'museum'],
   // Museums
   museum:       ['museum'],
-  history:      ['museum', 'arts'],
-  science:      ['museum'],
-  exhibit:      ['museum'], exhibition:  ['museum'],
-  planetarium:  ['museum'],
-  // Hotels / Lodging
-  hotel:        ['hotel'],
-  motel:        ['hotel'],
-  lodging:      ['hotel'],
-  inn:          ['hotel'],
-  stay:         ['hotel'],
-  sleep:        ['hotel'],
-  resort:       ['hotel'],
-  airbnb:       ['hotel'],
-  // Parks / Outdoors
-  park:         ['park'],
-  trail:        ['park'], trails:      ['park'],
-  hike:         ['park'], hiking:      ['park'],
-  nature:       ['park'],
-  outdoor:      ['park', 'fitness'],
-  garden:       ['park'],
-  biking:       ['park', 'fitness'], bike:        ['park', 'fitness'],
-  'dog park':   ['park'],
+  // Hotels
+  hotel:        ['hotel'], lodging: ['hotel'],
+  // Parks
+  park:         ['park'], parks: ['park'],
+  nature:       ['park'], outdoors: ['park'],
   // Entertainment
-  movie:        ['entertainment'], movies:      ['entertainment'],
-  cinema:       ['entertainment'], film:        ['entertainment'],
-  bowling:      ['entertainment'],
-  arcade:       ['entertainment'],
-  'escape room':['entertainment'],
-  'laser tag':  ['entertainment'],
-  show:         ['entertainment', 'arts'],
-  fun:          ['entertainment'],
-  games:        ['entertainment'],
-  // "other" helpers — let hidden venues surface
-  library:      ['other', 'museum'],
-  school:       ['other'],
-  university:   ['other'],
-  medical:      ['other'], clinic:      ['other'], hospital:    ['other'],
-  cannabis:     ['other', 'entertainment'],
-  tattoo:       ['arts', 'other'],
-  spa:          ['fitness', 'other'],
-  salon:        ['other'],
+  'things to do': ['entertainment', 'arts', 'bar'],
+  entertainment:  ['entertainment'],
+};
+
+// SEARCH_BOOSTS: cross-category activity terms ONLY.
+// These are terms where a user clearly wants to see results spanning
+// multiple categories AND the term won't reliably appear in place names.
+// Do NOT add food-specific terms (pizza, bagel, etc.) — text search
+// across name/description handles those fine.
+const SEARCH_BOOSTS: Record<string, string[]> = {
+  // Cross-category activities & events
+  'live music': ['bar', 'arts', 'entertainment'],
+  concert:      ['arts', 'entertainment'],
+  theater:      ['arts', 'entertainment'], theatre: ['arts', 'entertainment'],
+  comedy:       ['entertainment', 'arts'],
+  sports:       ['fitness', 'entertainment'],
+  dance:        ['fitness', 'arts'],
+  // Outdoor activities
+  climbing:     ['fitness', 'park'],
+  outdoor:      ['park', 'fitness'],
+  biking:       ['park', 'fitness'], bike: ['park', 'fitness'],
+  trail:        ['park'], trails: ['park'], hike: ['park'], hiking: ['park'],
+  // Cross-category
+  history:      ['museum', 'arts'],
+  spa:          ['fitness'],
 };
 
 const EVENT_GENRES = [
@@ -3894,20 +3830,32 @@ function PlacesScreen({
       } else {
         const q = search.toLowerCase().trim();
 
-        // Build alias-expanded category set
-        const aliasedCats = new Set<string>();
-        const aliasKeys = Object.keys(SEARCH_ALIASES);
-        for (let ai = 0; ai < aliasKeys.length; ai++) {
-          const term = aliasKeys[ai];
-          const termCats = SEARCH_ALIASES[term];
+        // Tier 1: CATEGORY_SYNONYMS → expand to full category (e.g. "shopping" → all shops)
+        const synonymCats = new Set<string>();
+        const synKeys = Object.keys(CATEGORY_SYNONYMS);
+        for (let ai = 0; ai < synKeys.length; ai++) {
+          const term = synKeys[ai];
+          const termCats = CATEGORY_SYNONYMS[term];
           if (q === term || q.includes(term) || term.includes(q)) {
-            for (let ci = 0; ci < termCats.length; ci++) aliasedCats.add(termCats[ci]);
+            for (let ci = 0; ci < termCats.length; ci++) synonymCats.add(termCats[ci]);
           }
         }
+        // Also match category labels directly (e.g. "restaurants" → restaurant category)
         for (let pi = 0; pi < PLACE_CATEGORIES.length; pi++) {
           const pc = PLACE_CATEGORIES[pi];
           if (pc.value !== 'All' && (pc.label.toLowerCase().includes(q) || q.includes(pc.value))) {
-            aliasedCats.add(pc.value);
+            synonymCats.add(pc.value);
+          }
+        }
+
+        // Tier 2: SEARCH_BOOSTS → cross-category hints (e.g. "brunch" → restaurant + coffee)
+        const boostCats = new Set<string>();
+        const boostKeys = Object.keys(SEARCH_BOOSTS);
+        for (let bi = 0; bi < boostKeys.length; bi++) {
+          const term = boostKeys[bi];
+          const termCats = SEARCH_BOOSTS[term];
+          if (q === term || q.includes(term) || term.includes(q)) {
+            for (let ci = 0; ci < termCats.length; ci++) boostCats.add(termCats[ci]);
           }
         }
 
@@ -3922,10 +3870,13 @@ function PlacesScreen({
           const pTags  = ((p.tags || []) as string[]).join(' ').toLowerCase();
           const allText = `${pName} ${pAddr} ${pCat} ${pDesc} ${pAbout} ${pTip} ${pBestFor} ${pTags}`;
 
-          // 1. Direct text match across all fields
+          // 1. Direct text match across all fields (always wins)
           if (allText.includes(q)) return true;
-          // 2. Alias category expansion
-          if (aliasedCats.size > 0 && aliasedCats.has(p.category)) return true;
+          // 2. Category synonym → full category expansion (generic shopping terms etc.)
+          if (synonymCats.size > 0 && synonymCats.has(p.category)) return true;
+          // 3. Boost categories → include if the place's category matches a boost
+          //    (cross-category discovery like "brunch" finding coffee shops)
+          if (boostCats.size > 0 && boostCats.has(p.category)) return true;
           return false;
         });
 
@@ -6720,23 +6671,30 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
     if (search.trim()) {
       const q = search.toLowerCase().trim();
 
-      // Find which place-categories this query aliases to
-      const aliasedCats = new Set<string>();
-      const aliasKeys = Object.keys(SEARCH_ALIASES);
-      for (let ai = 0; ai < aliasKeys.length; ai++) {
-        const term = aliasKeys[ai];
-        const termCats = SEARCH_ALIASES[term];
+      // Tier 1: CATEGORY_SYNONYMS → expand to full category
+      const synonymCats = new Set<string>();
+      const synKeys = Object.keys(CATEGORY_SYNONYMS);
+      for (let ai = 0; ai < synKeys.length; ai++) {
+        const term = synKeys[ai];
+        const termCats = CATEGORY_SYNONYMS[term];
         if (q === term || q.includes(term) || term.includes(q)) {
-          for (let ci = 0; ci < termCats.length; ci++) {
-            aliasedCats.add(termCats[ci]);
-          }
+          for (let ci = 0; ci < termCats.length; ci++) synonymCats.add(termCats[ci]);
         }
       }
-      // Also match against the human-readable category labels (e.g. "restaurant" → "Restaurants")
       for (let pi = 0; pi < PLACE_CATEGORIES.length; pi++) {
         const pc = PLACE_CATEGORIES[pi];
         if (pc.value !== 'All' && (pc.label.toLowerCase().includes(q) || q.includes(pc.value))) {
-          aliasedCats.add(pc.value);
+          synonymCats.add(pc.value);
+        }
+      }
+      // Tier 2: SEARCH_BOOSTS → cross-category hints
+      const boostCats = new Set<string>();
+      const boostKeys = Object.keys(SEARCH_BOOSTS);
+      for (let bi = 0; bi < boostKeys.length; bi++) {
+        const term = boostKeys[bi];
+        const termCats = SEARCH_BOOSTS[term];
+        if (q === term || q.includes(term) || term.includes(q)) {
+          for (let ci = 0; ci < termCats.length; ci++) boostCats.add(termCats[ci]);
         }
       }
 
@@ -6751,10 +6709,9 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
         const pTags    = ((p.tags || []) as string[]).join(' ').toLowerCase();
         const allText  = `${pName} ${pAddr} ${pCat} ${pDesc} ${pAbout} ${pTip} ${pBestFor} ${pTags}`;
 
-        // 1. Direct text match across all fields
         if (allText.includes(q)) return true;
-        // 2. Alias category expansion — query maps to this place's category
-        if (aliasedCats.size > 0 && aliasedCats.has(p.category)) return true;
+        if (synonymCats.size > 0 && synonymCats.has(p.category)) return true;
+        if (boostCats.size > 0 && boostCats.has(p.category)) return true;
         return false;
       });
 
