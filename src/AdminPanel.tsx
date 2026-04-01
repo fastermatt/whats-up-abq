@@ -1541,6 +1541,23 @@ export default function AdminPanel({ user, onBack }: { user: User|null; onBack: 
 
   const logout = () => { localStorage.removeItem(PW_EXP_KEY); setPwUnlocked(false); };
 
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [googleError,   setGoogleError]   = useState('');
+
+  const signInWithGoogle = async () => {
+    setGoogleLoading(true); setGoogleError('');
+    // After OAuth redirect, App.tsx will see this flag and navigate to #admin
+    sessionStorage.setItem('abq_post_auth_redirect', 'admin');
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin },
+    });
+    if (error) { setGoogleError(error.message); setGoogleLoading(false); }
+  };
+
+  // If a Google-authed user is present but their email doesn't match, show a clear message
+  const wrongAccount = user && user.email !== ADMIN_EMAIL;
+
   const navTo = (s: AdminSection) => { setSection(s); if(isMobile) setSideOpen(false); };
 
   // ── Password gate ──────────────────────────────────────────────────────────
@@ -1552,11 +1569,39 @@ export default function AdminPanel({ user, onBack }: { user: User|null; onBack: 
           <h1 style={{fontSize:22,fontWeight:800,color:'#18181b',margin:0}}>Admin Access</h1>
           <p style={{fontSize:13,color:'#9ca3af',marginTop:6}}>ABQ Unplugged Admin Panel</p>
         </div>
+
+        {/* Google sign-in — primary method */}
+        {wrongAccount ? (
+          <div style={{background:'#fee2e2',color:'#dc2626',borderRadius:10,padding:'12px 14px',fontSize:13,marginBottom:16,fontWeight:600,textAlign:'center'}}>
+            ⛔ {user.email} is not an admin account.<br/>
+            <button onClick={()=>supabase.auth.signOut()} style={{marginTop:8,background:'none',border:'none',color:'#dc2626',cursor:'pointer',textDecoration:'underline',fontSize:12}}>Sign out and try again</button>
+          </div>
+        ) : (
+          <button onClick={signInWithGoogle} disabled={googleLoading} style={{
+            width:'100%',display:'flex',alignItems:'center',justifyContent:'center',gap:10,
+            padding:'11px 16px',borderRadius:10,border:'1.5px solid #e5e7eb',background:'#fff',
+            cursor:googleLoading?'wait':'pointer',fontSize:15,fontWeight:700,color:'#18181b',
+            boxShadow:'0 1px 3px rgba(0,0,0,0.08)',marginBottom:14,transition:'box-shadow 0.15s',
+          }}>
+            {googleLoading ? '…' : (
+              <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#4285F4" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.6 20-21 0-1.3-.2-2.7-.5-4z"/><path fill="#34A853" d="M6.3 14.7l7 5.1C15 16.1 19.1 13 24 13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3c-7.6 0-14.2 4.6-17.7 11.7z"/><path fill="#FBBC05" d="M24 45c5.9 0 11-2 14.7-5.4l-6.8-5.6C29.8 35.9 27 37 24 37c-6.1 0-10.7-4.1-11.8-9.5l-7 5.4C8 39.8 15.3 45 24 45z"/><path fill="#EA4335" d="M44.5 20H24v8.5h11.8c-.9 2.6-2.7 4.8-5 6.2l6.8 5.6C41.5 36.6 45 30.8 45 24c0-1.3-.2-2.7-.5-4z"/></svg>
+            )}
+            {googleLoading ? 'Redirecting…' : 'Continue with Google'}
+          </button>
+        )}
+        {googleError && <div style={{background:'#fee2e2',color:'#dc2626',borderRadius:8,padding:'8px 12px',fontSize:13,marginBottom:12,fontWeight:600}}>{googleError}</div>}
+
+        {/* Divider */}
+        <div style={{display:'flex',alignItems:'center',gap:10,margin:'4px 0 16px'}}>
+          <div style={{flex:1,height:1,background:'#e5e7eb'}}/>
+          <span style={{fontSize:12,color:'#9ca3af',fontWeight:600}}>or use password</span>
+          <div style={{flex:1,height:1,background:'#e5e7eb'}}/>
+        </div>
+
         <form onSubmit={tryPw}>
-          <label style={{...lbl,marginBottom:6}}>Password</label>
-          <input type="password" value={pwInput} onChange={e=>setPwInput(e.target.value)} style={{...inp,marginBottom:14,fontSize:15}} autoFocus placeholder="Admin password" />
-          {pwError&&<div style={{background:'#fee2e2',color:'#dc2626',borderRadius:8,padding:'8px 12px',fontSize:13,marginBottom:12,fontWeight:600}}>{pwError}</div>}
-          <button type="submit" style={{...btnP,width:'100%',padding:'12px',fontSize:15}}>Sign In</button>
+          <input type="password" value={pwInput} onChange={e=>setPwInput(e.target.value)} style={{...inp,marginBottom:10,fontSize:15}} placeholder="Admin password" />
+          {pwError&&<div style={{background:'#fee2e2',color:'#dc2626',borderRadius:8,padding:'8px 12px',fontSize:13,marginBottom:10,fontWeight:600}}>{pwError}</div>}
+          <button type="submit" style={{...btnP,width:'100%',padding:'11px',fontSize:15}}>Sign In</button>
         </form>
         <button onClick={onBack} style={{marginTop:14,width:'100%',background:'none',border:'none',color:'#9ca3af',cursor:'pointer',fontSize:13,padding:'8px'}}>← Back to App</button>
       </div>
