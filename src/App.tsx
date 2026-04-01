@@ -540,7 +540,7 @@ function ABQUnpluggedLogo({ size = 43 }: { size?: number }) {
         border: '2px solid #1A1A1A',
       }}>
         <span style={{
-          fontFamily: 'Epilogue, Inter, sans-serif',
+          fontFamily: 'Public Sans, sans-serif',
           fontWeight: 900,
           fontSize: `${abqSize}px`,
           color: '#1A1A1A',
@@ -550,7 +550,7 @@ function ABQUnpluggedLogo({ size = 43 }: { size?: number }) {
       </div>
       {/* Wordmark */}
       <span style={{
-        fontFamily: 'Epilogue, Inter, sans-serif',
+        fontFamily: 'Public Sans, sans-serif',
         fontWeight: 900,
         fontSize: `${unplSize}px`,
         color: '#1A1A1A',
@@ -597,7 +597,7 @@ function ImageWithFallback({
         aria-label={alt}
       >
         {showLabel && alt && (
-          <span style={{ color: 'rgba(255,255,255,0.5)', fontFamily: 'Epilogue, sans-serif', fontWeight: 900, fontSize: '13px', textAlign: 'center', padding: '8px', lineHeight: 1.2 }}>
+          <span style={{ color: 'rgba(255,255,255,0.5)', fontFamily: 'Public Sans, sans-serif', fontWeight: 900, fontSize: '13px', textAlign: 'center', padding: '8px', lineHeight: 1.2 }}>
             {alt}
           </span>
         )}
@@ -753,15 +753,15 @@ function GeoBanner({
   if (silentPending && !error) return null;
 
   if (error) return (
-    <div className="px-4 py-3 flex items-center gap-3" style={{ background: '#1ebaeb', borderBottom: '2px solid #1A1A1A' }}>
+    <div className="px-4 py-3 flex items-center gap-3" style={{ background: '#b95c43', borderBottom: '2px solid #1A1A1A' }}>
       <span className="material-symbols-outlined flex-shrink-0" style={{ color: '#1A1A1A', fontSize: '20px' }}>location_off</span>
-      <p className="text-xs font-bold flex-1" style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A' }}>
+      <p className="text-xs font-bold flex-1" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>
         Enable location to see distances &amp; sort by nearby
       </p>
       <button
         onClick={onRequest}
         className="text-xs font-black px-3 py-1.5 flex-shrink-0"
-        style={{ background: '#1A1A1A', color: 'white', border: '2px solid #1A1A1A', fontFamily: 'Inter, sans-serif' }}
+        style={{ background: '#1A1A1A', color: 'white', border: '2px solid #1A1A1A', fontFamily: 'Public Sans, sans-serif' }}
       >
         Retry
       </button>
@@ -769,26 +769,26 @@ function GeoBanner({
   );
 
   if (requested) return (
-    <div className="px-4 py-3 flex items-center gap-3" style={{ background: '#1ebaeb', borderBottom: '2px solid #1A1A1A' }}>
+    <div className="px-4 py-3 flex items-center gap-3" style={{ background: '#b95c43', borderBottom: '2px solid #1A1A1A' }}>
       <span className="material-symbols-outlined flex-shrink-0" style={{ color: '#1A1A1A', fontSize: '20px' }}>my_location</span>
-      <p className="text-xs font-bold flex-1" style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A' }}>Getting your location…</p>
+      <p className="text-xs font-bold flex-1" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>Getting your location…</p>
     </div>
   );
 
   return (
     <div
       className="px-4 py-3 flex items-center gap-3"
-      style={{ background: '#1ebaeb', borderBottom: '2px solid #1A1A1A' }}
+      style={{ background: '#b95c43', borderBottom: '2px solid #1A1A1A' }}
     >
       <span className="material-symbols-outlined flex-shrink-0" style={{ color: '#1A1A1A', fontSize: '20px' }}>near_me</span>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-black" style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A' }}>Find things near you</p>
-        <p className="text-xs" style={{ color: 'rgba(0,0,0,0.6)', fontFamily: 'Inter, sans-serif' }}>Share location for distances &amp; "Near Me"</p>
+        <p className="text-sm font-black" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>Find things near you</p>
+        <p className="text-xs" style={{ color: 'rgba(0,0,0,0.6)', fontFamily: 'Public Sans, sans-serif' }}>Share location for distances &amp; "Near Me"</p>
       </div>
       <button
         onClick={onRequest}
         className="text-xs font-black px-3 py-1.5 flex-shrink-0"
-        style={{ background: '#1A1A1A', color: 'white', border: '2px solid #1A1A1A', fontFamily: 'Inter, sans-serif' }}
+        style={{ background: '#1A1A1A', color: 'white', border: '2px solid #1A1A1A', fontFamily: 'Public Sans, sans-serif' }}
       >
         Enable
       </button>
@@ -924,17 +924,17 @@ const PlaceCard = React.memo(function PlaceCard({
         {/* Category inline label with flat icon */}
         <div className="flex items-center gap-1 mb-1" style={{ opacity: 0.6 }}>
           <FlatIcon name={catIconName} size={11} color="#1A1A1A" />
-          <span className="text-xs font-bold uppercase" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em', fontSize: 9 }}>{catLabel}</span>
+          <span className="text-xs font-bold uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em', fontSize: 9 }}>{catLabel}</span>
         </div>
         <p
           className="font-black text-sm leading-snug text-gray-900"
-          style={{ fontFamily: 'Epilogue, sans-serif', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}
+          style={{ fontFamily: 'Public Sans, sans-serif', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}
         >
           {place.name}
         </p>
         {/* Address snippet or neighborhood */}
         {(place.address || (place as any).neighborhood) && (
-          <p className="text-xs mt-0.5 truncate flex items-center gap-0.5" style={{ color: '#888', fontFamily: 'Inter, sans-serif' }}>
+          <p className="text-xs mt-0.5 truncate flex items-center gap-0.5" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif' }}>
             <span className="material-symbols-outlined" style={{ fontSize: '10px' }}>location_on</span>
             {(place as any).neighborhood || place.address?.split(',')[0]}
           </p>
@@ -951,7 +951,7 @@ const PlaceCard = React.memo(function PlaceCard({
               ) : null}
             </>) : null}
             {distance != null && (
-              <span className="flex items-center gap-0.5 text-xs font-bold" style={{ color: '#888', fontFamily: 'Inter, sans-serif', marginLeft: place.rating ? 4 : 0 }}>
+              <span className="flex items-center gap-0.5 text-xs font-bold" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif', marginLeft: place.rating ? 4 : 0 }}>
                 <span className="material-symbols-outlined" style={{ fontSize: '10px', color: '#888' }}>near_me</span>
                 {formatDist(distance)}
               </span>
@@ -962,9 +962,9 @@ const PlaceCard = React.memo(function PlaceCard({
               onClick={onCheckIn}
               className="text-xs font-black px-2 py-1 flex-shrink-0"
               style={{
-                fontFamily: 'Inter, sans-serif',
+                fontFamily: 'Public Sans, sans-serif',
                 letterSpacing: '0.06em',
-                background: tooFar ? '#888' : isCheckedIn ? '#1A1A1A' : '#1ebaeb',
+                background: tooFar ? '#888' : isCheckedIn ? '#1A1A1A' : '#b95c43',
                 color: tooFar ? 'white' : isCheckedIn ? 'white' : '#1A1A1A',
                 border: '1.5px solid #1A1A1A',
                 borderRadius: 0,
@@ -1030,7 +1030,7 @@ function EventCardImageSlider({ event }: { event: TMEvent }) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center gap-1.5" style={{ background: typeMeta.bg }}>
         <FlatIcon name={typeMeta.icon} size={32} color="white" />
-        <span style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.85)', letterSpacing: '0.1em', textTransform: 'uppercase' as const, fontFamily: 'Inter, sans-serif' }}>{category}</span>
+        <span style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.85)', letterSpacing: '0.1em', textTransform: 'uppercase' as const, fontFamily: 'Public Sans, sans-serif' }}>{category}</span>
       </div>
     );
   }
@@ -1084,13 +1084,13 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
         <div className="absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5" style={{ background: 'rgba(0,0,0,0.55)', zIndex: 1 }}>
           <FlatIcon name={typeMeta.icon} size={10} color="white" />
-          <span style={{ fontSize: 9, fontWeight: 800, color: 'white', letterSpacing: '0.08em', textTransform: 'uppercase' as const, fontFamily: 'Inter, sans-serif' }}>{category}</span>
+          <span style={{ fontSize: 9, fontWeight: 800, color: 'white', letterSpacing: '0.08em', textTransform: 'uppercase' as const, fontFamily: 'Public Sans, sans-serif' }}>{category}</span>
         </div>
       </div>
       <div className="p-3">
         <p
           className="font-black text-sm leading-snug text-gray-900"
-          style={{ fontFamily: 'Epilogue, sans-serif', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}
+          style={{ fontFamily: 'Public Sans, sans-serif', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}
         >
           {event.name}
         </p>
@@ -1303,7 +1303,7 @@ function PlaceDetailModal({
           </span>
           <h2
             className="text-white font-black text-2xl mt-2 leading-tight"
-            style={{ fontFamily: 'Epilogue, sans-serif' }}
+            style={{ fontFamily: 'Public Sans, sans-serif' }}
           >
             {place.name}
           </h2>
@@ -1316,7 +1316,7 @@ function PlaceDetailModal({
           {place.rating && (
             <div className="flex items-center gap-1 bg-white rounded-lg px-3 py-2" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.12)' }}>
               <span className="text-yellow-400">★</span>
-              <span className="font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif' }}>
+              <span className="font-black text-sm" style={{ fontFamily: 'Public Sans, sans-serif' }}>
                 {place.rating.toFixed(1)}
               </span>
               {place.reviewCount && (
@@ -1337,7 +1337,7 @@ function PlaceDetailModal({
             style={{
               background: tooFar ? '#dc2626' : isCheckedIn ? 'var(--brand-bg-subtle)' : 'var(--brand)',
               color: isCheckedIn && !tooFar ? 'var(--brand)' : 'white',
-              fontFamily: 'Epilogue, sans-serif',
+              fontFamily: 'Public Sans, sans-serif',
             }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
@@ -1355,7 +1355,7 @@ function PlaceDetailModal({
         )}
 
         {displayDesc && (
-          <p className="text-gray-700 text-sm leading-relaxed mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <p className="text-gray-700 text-sm leading-relaxed mb-4" style={{ fontFamily: 'Public Sans, sans-serif' }}>
             {displayDesc}
           </p>
         )}
@@ -1365,8 +1365,8 @@ function PlaceDetailModal({
           <div className="mb-4 p-3 flex items-start gap-2.5" style={{ background: '#fffbeb', border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A' }}>
             <span className="material-symbols-outlined flex-shrink-0 mt-0.5" style={{ fontSize: '18px', color: '#b45309' }}>tips_and_updates</span>
             <div>
-              <p className="text-xs font-black uppercase mb-1" style={{ color: '#b45309', fontFamily: 'Inter, sans-serif', letterSpacing: '0.07em' }}>Local Tip</p>
-              <p className="text-sm leading-relaxed text-gray-800" style={{ fontFamily: 'Inter, sans-serif' }}>{insiderTip}</p>
+              <p className="text-xs font-black uppercase mb-1" style={{ color: '#b45309', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.07em' }}>Local Tip</p>
+              <p className="text-sm leading-relaxed text-gray-800" style={{ fontFamily: 'Public Sans, sans-serif' }}>{insiderTip}</p>
             </div>
           </div>
         )}
@@ -1381,7 +1381,7 @@ function PlaceDetailModal({
           >
             <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)', marginTop: '1px' }}>location_on</span>
             <div className="min-w-0">
-              <p className="text-sm text-gray-700" style={{ fontFamily: 'Inter, sans-serif' }}>{place.address}</p>
+              <p className="text-sm text-gray-700" style={{ fontFamily: 'Public Sans, sans-serif' }}>{place.address}</p>
               <p className="text-xs font-bold mt-0.5" style={{ color: 'var(--brand)' }}>Open in {mapProvider === 'apple' ? 'Apple Maps' : 'Google Maps'} →</p>
             </div>
           </a>
@@ -1391,7 +1391,7 @@ function PlaceDetailModal({
         {displayHours && (
           <div className="flex items-start gap-3 mb-3 bg-white p-3" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
             <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)', marginTop: '1px' }}>schedule</span>
-            <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'Public Sans, sans-serif' }}>
               {displayHours.includes(' | ')
                 ? displayHours.split(' | ').map((line, i) => <span key={i} style={{ display: 'block' }}>{line}</span>)
                 : displayHours}
@@ -1408,7 +1408,7 @@ function PlaceDetailModal({
           >
             <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)' }}>phone</span>
             <div className="min-w-0">
-              <p className="text-sm text-gray-700" style={{ fontFamily: 'Inter, sans-serif' }}>{displayPhone}</p>
+              <p className="text-sm text-gray-700" style={{ fontFamily: 'Public Sans, sans-serif' }}>{displayPhone}</p>
               <p className="text-xs font-bold mt-0.5" style={{ color: 'var(--brand)' }}>Tap to call →</p>
             </div>
           </a>
@@ -1424,7 +1424,7 @@ function PlaceDetailModal({
           >
             <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)' }}>language</span>
             <div className="min-w-0">
-              <p className="text-sm text-gray-700 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
+              <p className="text-sm text-gray-700 truncate" style={{ fontFamily: 'Public Sans, sans-serif' }}>
                 {displayWebsite.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}
               </p>
               <p className="text-xs font-bold mt-0.5" style={{ color: 'var(--brand)' }}>Visit website →</p>
@@ -1442,7 +1442,7 @@ function PlaceDetailModal({
           >
             <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)' }}>menu_book</span>
             <div className="min-w-0">
-              <p className="text-sm font-black text-gray-800" style={{ fontFamily: 'Inter, sans-serif' }}>View Menu</p>
+              <p className="text-sm font-black text-gray-800" style={{ fontFamily: 'Public Sans, sans-serif' }}>View Menu</p>
               <p className="text-xs font-bold mt-0.5" style={{ color: 'var(--brand)' }}>See full menu →</p>
             </div>
           </a>
@@ -1453,8 +1453,8 @@ function PlaceDetailModal({
           <div className="flex items-start gap-3 mb-3 bg-white p-3" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
             <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)', marginTop: '1px' }}>local_parking</span>
             <div className="min-w-0">
-              <p className="text-xs font-black uppercase mb-0.5" style={{ color: '#6b7280', fontFamily: 'Inter, sans-serif', letterSpacing: '0.06em' }}>Parking</p>
-              <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>{displayParking}</p>
+              <p className="text-xs font-black uppercase mb-0.5" style={{ color: '#6b7280', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em' }}>Parking</p>
+              <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'Public Sans, sans-serif' }}>{displayParking}</p>
             </div>
           </div>
         )}
@@ -1493,7 +1493,7 @@ function PlaceDetailModal({
           target="_blank"
           rel="noopener noreferrer"
           className="block w-full py-4 text-center text-white font-black text-sm rounded-lg mt-2"
-          style={{ background: 'var(--brand-gradient)', fontFamily: 'Epilogue, sans-serif' }}
+          style={{ background: 'var(--brand-gradient)', fontFamily: 'Public Sans, sans-serif' }}
         >
           GET DIRECTIONS →
         </a>
@@ -1566,13 +1566,13 @@ function ReviewCard({ review }: { review: Review }) {
       <div className="flex items-start gap-3 mb-2">
         <div
           className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-black text-white flex-shrink-0"
-          style={{ background: 'var(--brand-gradient)', fontFamily: 'Epilogue, sans-serif' }}
+          style={{ background: 'var(--brand-gradient)', fontFamily: 'Public Sans, sans-serif' }}
         >
           {initials}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2 flex-wrap">
-            <span className="text-sm font-black text-gray-900 truncate" style={{ fontFamily: 'Epilogue, sans-serif' }}>
+            <span className="text-sm font-black text-gray-900 truncate" style={{ fontFamily: 'Public Sans, sans-serif' }}>
               {review.userName}
             </span>
             <span className="text-xs text-gray-400 flex-shrink-0">{dateStr}</span>
@@ -1581,7 +1581,7 @@ function ReviewCard({ review }: { review: Review }) {
         </div>
       </div>
       {review.text && (
-        <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'Public Sans, sans-serif' }}>
           {review.text}
         </p>
       )}
@@ -1674,7 +1674,7 @@ function ReviewSection({
       {/* Header row */}
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h3 className="font-black text-gray-900 text-base" style={{ fontFamily: 'Epilogue, sans-serif' }}>
+          <h3 className="font-black text-gray-900 text-base" style={{ fontFamily: 'Public Sans, sans-serif' }}>
             Reviews
           </h3>
           {reviews.length > 0 && (
@@ -1691,7 +1691,7 @@ function ReviewSection({
             ? <button
                 onClick={() => setShowForm(true)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black text-white"
-                style={{ background: 'var(--brand)', fontFamily: 'Epilogue, sans-serif' }}
+                style={{ background: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>edit</span>
                 Write Review
@@ -1699,7 +1699,7 @@ function ReviewSection({
             : <button
                 onClick={onShowAuth}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black text-white"
-                style={{ background: 'var(--brand)', fontFamily: 'Epilogue, sans-serif' }}
+                style={{ background: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>login</span>
                 Sign in to Review
@@ -1717,7 +1717,7 @@ function ReviewSection({
       {!isCheckedIn && (
         <div className="mb-4 rounded-lg p-3 flex items-center gap-3" style={{ background: 'rgba(160,59,0,0.06)' }}>
           <span className="material-symbols-outlined" style={{ color: 'var(--brand)', fontSize: '20px' }}>lock</span>
-          <p className="text-xs text-gray-600 flex-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <p className="text-xs text-gray-600 flex-1" style={{ fontFamily: 'Public Sans, sans-serif' }}>
             Check in here first to leave a review
           </p>
         </div>
@@ -1735,7 +1735,7 @@ function ReviewSection({
       {showForm && isCheckedIn && user && !alreadyReviewed && (
         <div className="mb-4 rounded-lg p-4" style={{ background: 'white', boxShadow: '4px 4px 0 rgba(0,0,0,0.12)' }}>
           <div className="mb-3">
-            <p className="text-xs font-bold text-gray-600 mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <p className="text-xs font-bold text-gray-600 mb-2" style={{ fontFamily: 'Public Sans, sans-serif' }}>
               How many outlets does this place get?
             </p>
             <OutletRating value={rating} onChange={setRating} size="lg" />
@@ -1748,7 +1748,7 @@ function ReviewSection({
             rows={3}
             className="w-full text-sm rounded-lg border border-gray-200 p-3 resize-none focus:outline-none"
             style={{
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: 'Public Sans, sans-serif',
               background: '#fafafa',
               borderColor: profWarn ? '#fbbf24' : undefined,
             }}
@@ -1799,7 +1799,7 @@ function ReviewSection({
               className="flex-1 py-2.5 rounded-lg text-xs font-black text-white transition-all"
               style={{
                 background: submitting || rating === 0 ? '#d1d5db' : 'var(--brand)',
-                fontFamily: 'Epilogue, sans-serif',
+                fontFamily: 'Public Sans, sans-serif',
               }}
             >
               {submitting ? 'Posting…' : 'Post Review'}
@@ -1810,12 +1810,12 @@ function ReviewSection({
 
       {/* Reviews list */}
       {loading && (
-        <p className="text-xs text-gray-400 text-center py-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <p className="text-xs text-gray-400 text-center py-4" style={{ fontFamily: 'Public Sans, sans-serif' }}>
           Loading reviews…
         </p>
       )}
       {!loading && reviews.length === 0 && (
-        <p className="text-xs text-gray-400 text-center py-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <p className="text-xs text-gray-400 text-center py-4" style={{ fontFamily: 'Public Sans, sans-serif' }}>
           No reviews yet — be the first!
         </p>
       )}
@@ -1951,7 +1951,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
           </span>
           <h2
             className="text-white font-black text-xl mt-2 leading-tight"
-            style={{ fontFamily: 'Epilogue, sans-serif' }}
+            style={{ fontFamily: 'Public Sans, sans-serif' }}
           >
             {event.name}
           </h2>
@@ -1968,7 +1968,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
               <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'var(--brand)' }}>calendar_today</span>
               <p className="text-xs font-bold uppercase tracking-wide" style={{ color: '#999', letterSpacing: '0.07em' }}>When</p>
             </div>
-            <p className="font-black text-sm leading-snug" style={{ fontFamily: 'Epilogue, sans-serif', color: 'var(--brand)' }}>
+            <p className="font-black text-sm leading-snug" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--brand)' }}>
               {event.dates?.start?.localDate ? formatDate(event.dates.start.localDate) : 'Date TBD'}
             </p>
             <p className="text-xs text-gray-500 mt-0.5">
@@ -1982,7 +1982,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
                 <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'var(--brand)' }}>sell</span>
                 <p className="text-xs font-bold uppercase tracking-wide" style={{ color: '#999', letterSpacing: '0.07em' }}>Price</p>
               </div>
-              <p className="font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif', color: '#1a1a1a' }}>
+              <p className="font-black text-sm" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1a1a1a' }}>
                 {(price.min || 0) === 0 && (price.max || 0) === 0 ? 'Free' : price.min === price.max ? `$${Math.round(price.min || 0)}` : `$${Math.round(price.min || 0)} – $${Math.round(price.max || 0)}`}
               </p>
               {price.currency && price.currency !== 'USD' && <p className="text-xs text-gray-400 mt-0.5">{price.currency}</p>}
@@ -1995,7 +1995,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
                   <span className="material-symbols-outlined" style={{ fontSize: '13px', color: '#dc2626' }}>18_up_rating</span>
                   <p className="text-xs font-bold uppercase tracking-wide" style={{ color: '#999', letterSpacing: '0.07em' }}>Age</p>
                 </div>
-                <p className="font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif', color: '#dc2626' }}>21+ Event</p>
+                <p className="font-black text-sm" style={{ fontFamily: 'Public Sans, sans-serif', color: '#dc2626' }}>21+ Event</p>
               </div>
             ) : null
           )}
@@ -2011,7 +2011,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
           >
             <span className="material-symbols-outlined flex-shrink-0 mt-0.5" style={{ fontSize: '18px', color: 'var(--brand)' }}>location_on</span>
             <div className="min-w-0 flex-1">
-              <p className="font-bold text-sm text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>{venue.name}</p>
+              <p className="font-bold text-sm text-gray-900 truncate" style={{ fontFamily: 'Public Sans, sans-serif' }}>{venue.name}</p>
               {venue.address?.line1 && <p className="text-xs text-gray-500 mt-0.5">{venue.address.line1}{venue.city?.name ? `, ${venue.city.name}` : ''}</p>}
               <p className="text-xs font-bold mt-1" style={{ color: 'var(--brand)' }}>Open in {mapProvider === 'apple' ? 'Apple Maps' : 'Google Maps'} →</p>
             </div>
@@ -2024,7 +2024,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
             <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '16px', color: '#d97706', marginTop: '1px' }}>warning</span>
             <div>
               <p className="text-xs font-black uppercase tracking-wide mb-1" style={{ color: '#92400e', letterSpacing: '0.06em' }}>Please Note</p>
-              <p className="text-xs text-amber-900 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>{event.pleaseNote}</p>
+              <p className="text-xs text-amber-900 leading-relaxed" style={{ fontFamily: 'Public Sans, sans-serif' }}>{event.pleaseNote}</p>
             </div>
           </div>
         )}
@@ -2033,7 +2033,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
         {event.info && (
           <div className="mb-3 bg-white p-3" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', border: '1.5px solid #f0f0f0' }}>
             <p className="text-xs font-black uppercase tracking-wide mb-2" style={{ color: 'var(--brand)', letterSpacing: '0.07em' }}>About This Event</p>
-            <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>{event.info}</p>
+            <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'Public Sans, sans-serif' }}>{event.info}</p>
           </div>
         )}
 
@@ -2043,7 +2043,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
             <button
               onClick={() => setVenueExpanded(v => !v)}
               className="w-full flex items-center justify-between p-3 bg-white"
-              style={{ fontFamily: 'Epilogue, sans-serif' }}
+              style={{ fontFamily: 'Public Sans, sans-serif' }}
             >
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--brand)' }}>info</span>
@@ -2061,7 +2061,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
                       <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'var(--brand)' }}>phone</span>
                       <p className="text-xs font-black uppercase" style={{ color: '#6b7280', letterSpacing: '0.06em' }}>Box Office</p>
                     </div>
-                    <p className="text-xs text-gray-700 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>{venue.boxOfficeInfo.phoneNumberDetail}</p>
+                    <p className="text-xs text-gray-700 leading-relaxed" style={{ fontFamily: 'Public Sans, sans-serif' }}>{venue.boxOfficeInfo.phoneNumberDetail}</p>
                   </div>
                 )}
 
@@ -2072,7 +2072,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
                       <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'var(--brand)' }}>schedule</span>
                       <p className="text-xs font-black uppercase" style={{ color: '#6b7280', letterSpacing: '0.06em' }}>Box Office Hours</p>
                     </div>
-                    <p className="text-xs text-gray-700 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>{venue.boxOfficeInfo.openHoursDetail}</p>
+                    <p className="text-xs text-gray-700 leading-relaxed" style={{ fontFamily: 'Public Sans, sans-serif' }}>{venue.boxOfficeInfo.openHoursDetail}</p>
                   </div>
                 )}
 
@@ -2083,7 +2083,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
                       <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'var(--brand)' }}>local_parking</span>
                       <p className="text-xs font-black uppercase" style={{ color: '#6b7280', letterSpacing: '0.06em' }}>Parking</p>
                     </div>
-                    <p className="text-xs text-gray-700 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>{venue.parkingDetail}</p>
+                    <p className="text-xs text-gray-700 leading-relaxed" style={{ fontFamily: 'Public Sans, sans-serif' }}>{venue.parkingDetail}</p>
                   </div>
                 )}
 
@@ -2094,7 +2094,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
                       <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'var(--brand)' }}>child_care</span>
                       <p className="text-xs font-black uppercase" style={{ color: '#6b7280', letterSpacing: '0.06em' }}>Kids Policy</p>
                     </div>
-                    <p className="text-xs text-gray-700 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>{venue.generalInfo.childRule}</p>
+                    <p className="text-xs text-gray-700 leading-relaxed" style={{ fontFamily: 'Public Sans, sans-serif' }}>{venue.generalInfo.childRule}</p>
                   </div>
                 )}
 
@@ -2105,7 +2105,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
                       <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'var(--brand)' }}>accessible</span>
                       <p className="text-xs font-black uppercase" style={{ color: '#6b7280', letterSpacing: '0.06em' }}>Accessibility</p>
                     </div>
-                    <p className="text-xs text-gray-700 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>{venue.accessibleSeatingDetail}</p>
+                    <p className="text-xs text-gray-700 leading-relaxed" style={{ fontFamily: 'Public Sans, sans-serif' }}>{venue.accessibleSeatingDetail}</p>
                   </div>
                 )}
 
@@ -2116,7 +2116,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
                       <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'var(--brand)' }}>credit_card</span>
                       <p className="text-xs font-black uppercase" style={{ color: '#6b7280', letterSpacing: '0.06em' }}>Accepted Payment</p>
                     </div>
-                    <p className="text-xs text-gray-700 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>{venue.boxOfficeInfo.acceptedPaymentDetail}</p>
+                    <p className="text-xs text-gray-700 leading-relaxed" style={{ fontFamily: 'Public Sans, sans-serif' }}>{venue.boxOfficeInfo.acceptedPaymentDetail}</p>
                   </div>
                 )}
               </div>
@@ -2142,7 +2142,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
             <span style={{ fontSize: '16px', lineHeight: 1.4 }}>⚡</span>
             <div>
               <p className="text-xs font-black uppercase tracking-wide mb-0.5" style={{ color: 'var(--brand)', letterSpacing: '0.06em' }}>Unplugging Tip</p>
-              <p className="text-xs text-gray-600 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>Put your phone away for the first 30 minutes. Let yourself fully arrive before documenting.</p>
+              <p className="text-xs text-gray-600 leading-relaxed" style={{ fontFamily: 'Public Sans, sans-serif' }}>Put your phone away for the first 30 minutes. Let yourself fully arrive before documenting.</p>
             </div>
           </div>
         )}
@@ -2152,7 +2152,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
           <button
             onClick={() => addToCalendar(event)}
             className="flex items-center justify-center gap-2 w-full py-3 mb-2 font-black text-sm"
-            style={{ border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A', borderRadius: 0, background: 'white', color: '#1A1A1A', fontFamily: 'Epilogue, sans-serif' }}
+            style={{ border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A', borderRadius: 0, background: 'white', color: '#1A1A1A', fontFamily: 'Public Sans, sans-serif' }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>calendar_add_on</span>
             ADD TO CALENDAR
@@ -2167,7 +2167,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
                 className="flex items-center justify-between w-full px-5 py-3 text-white font-black text-sm"
                 style={{ borderRadius: 0, border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A',
                   background: link.source === 'Ticketmaster' ? 'linear-gradient(135deg, #026cdf, #02a7f0)' : link.source === 'Eventbrite' ? 'linear-gradient(135deg, #f05537, #ff7a5c)' : 'linear-gradient(135deg, #d4184a, #ff5c5c)',
-                  fontFamily: 'Epilogue, sans-serif' }}
+                  fontFamily: 'Public Sans, sans-serif' }}
               >
                 <span>{link.source}</span>
                 <span>GET TICKETS →</span>
@@ -2179,7 +2179,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
             className="flex items-center justify-center gap-2 w-full py-4 text-center text-white font-black text-sm"
             style={{ borderRadius: 0, border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A',
               background: event._source === 'seatgeek' ? 'linear-gradient(135deg, #d4184a, #ff5c5c)' : event._source === 'local' ? 'linear-gradient(135deg, #0369a1, #38bdf8)' : 'var(--brand-gradient)',
-              fontFamily: 'Epilogue, sans-serif' }}
+              fontFamily: 'Public Sans, sans-serif' }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>{event._source === 'local' ? 'info' : 'confirmation_number'}</span>
             {event._source === 'local' ? 'MORE INFO →' : 'GET TICKETS →'}
@@ -2187,7 +2187,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
         ) : (
           <a href={directionsUrl} target="_blank" rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full py-4 text-center text-white font-black text-sm"
-            style={{ borderRadius: 0, background: 'var(--brand-gradient)', fontFamily: 'Epilogue, sans-serif' }}
+            style={{ borderRadius: 0, background: 'var(--brand-gradient)', fontFamily: 'Public Sans, sans-serif' }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>directions</span>
             GET DIRECTIONS →
@@ -2306,14 +2306,14 @@ function WhyUnplugCard() {
     <div className={`mx-5 mb-28 unplug-${phase}`} style={{ minHeight: '88px' }}>
       <div className="unplug-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
         <FlatIcon name={q.icon} size={18} color="#1A1A1A" />
-        <span style={{ fontFamily: 'Epilogue, sans-serif', fontSize: '10px', fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: '#d4450a' }}>
+        <span style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '10px', fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: '#d4450a' }}>
           Why Unplug?
         </span>
       </div>
-      <p className="unplug-quote" style={{ fontFamily: 'Inter, sans-serif', fontSize: '15px', fontWeight: 600, lineHeight: 1.5, color: '#1a1a1a', marginBottom: '8px', marginTop: 0 }}>
+      <p className="unplug-quote" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '15px', fontWeight: 600, lineHeight: 1.5, color: '#1a1a1a', marginBottom: '8px', marginTop: 0 }}>
         "{q.text}"
       </p>
-      <p className="unplug-source" style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', fontStyle: 'italic', color: '#888', margin: 0 }}>
+      <p className="unplug-source" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '11px', fontStyle: 'italic', color: '#888', margin: 0 }}>
         — {q.source}
       </p>
     </div>
@@ -2512,10 +2512,10 @@ function StreakBanner() {
     : `Welcome back! Day ${info.count} in a row.`;
   return (
     <div className="flex items-center justify-between gap-3 px-4 py-3"
-      style={{ background: '#1ebaeb', borderBottom: '2px solid #1A1A1A', animation: 'cardFadeIn 0.4s ease both' }}>
+      style={{ background: '#b95c43', borderBottom: '2px solid #1A1A1A', animation: 'cardFadeIn 0.4s ease both' }}>
       <div className="flex items-center gap-2 min-w-0">
         <span style={{ fontSize: '20px', lineHeight: 1 }}>{emoji}</span>
-        <span className="text-sm font-black truncate" style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A' }}>{label}</span>
+        <span className="text-sm font-black truncate" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>{label}</span>
       </div>
       <button onClick={() => setVisible(false)} className="flex-shrink-0 font-black" style={{ fontSize: '16px', lineHeight: 1, color: '#1A1A1A' }}>✕</button>
     </div>
@@ -2540,8 +2540,8 @@ function DailyGem({ places, onSelect }: { places: Place[]; onSelect: (p: Place) 
   return (
     <div className="px-5 pb-5">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Epilogue, sans-serif' }}>Today's Pick 🌶️</h2>
-        <span className="text-xs font-black uppercase" style={{ color: '#666', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em' }}>🗓 Changes daily</span>
+        <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif' }}>Today's Pick 🌶️</h2>
+        <span className="text-xs font-black uppercase" style={{ color: '#666', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em' }}>🗓 Changes daily</span>
       </div>
       <button onClick={() => onSelect(gem)} className="w-full relative overflow-hidden text-left"
         style={{ height: '180px', boxShadow: '4px 4px 0 #1A1A1A', border: '2px solid #1A1A1A', animation: 'cardFadeIn 0.45s ease both', borderRadius: 0 }}>
@@ -2549,7 +2549,7 @@ function DailyGem({ places, onSelect }: { places: Place[]; onSelect: (p: Place) 
         <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, rgba(28,111,234,0.12) 0%, rgba(0,0,0,0.72) 100%)' }} />
         <div className="absolute top-3 left-3">
           <span className="text-xs font-black px-3 py-1"
-            style={{ background: '#1ebaeb', color: '#1A1A1A', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase', border: '1.5px solid #1A1A1A', borderRadius: 0 }}>
+            style={{ background: '#b95c43', color: '#1A1A1A', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase', border: '1.5px solid #1A1A1A', borderRadius: 0 }}>
             ★ TODAY'S PICK
           </span>
         </div>
@@ -2558,9 +2558,9 @@ function DailyGem({ places, onSelect }: { places: Place[]; onSelect: (p: Place) 
             style={{ background: '#1A1A1A', color: 'white', border: '2px solid white' }}>→</span>
         </div>
         <div className="absolute bottom-3 left-3 right-3">
-          <p className="text-white font-black text-xl leading-tight" style={{ fontFamily: 'Epilogue, sans-serif' }}>{gem.name}</p>
+          <p className="text-white font-black text-xl leading-tight" style={{ fontFamily: 'Public Sans, sans-serif' }}>{gem.name}</p>
           <div className="flex items-center gap-2 mt-1">
-            <span className="text-white/80 text-xs font-semibold" style={{ fontFamily: 'Inter, sans-serif' }}>{gem.category}</span>
+            <span className="text-white/80 text-xs font-semibold" style={{ fontFamily: 'Public Sans, sans-serif' }}>{gem.category}</span>
             {gem.rating && (<><span className="text-white/40 text-xs">·</span><span className="text-yellow-300 text-xs font-bold">★ {gem.rating.toFixed(1)}</span></>)}
             {gem.reviewCount && (<><span className="text-white/40 text-xs">·</span><span className="text-white/60 text-xs">{gem.reviewCount >= 1000 ? (gem.reviewCount/1000).toFixed(1)+'k' : gem.reviewCount} reviews</span></>)}
           </div>
@@ -2588,15 +2588,15 @@ function KoFiBanner() {
       <div className="px-4 py-4 flex items-center gap-3">
         <span style={{ fontSize: '28px', lineHeight: 1 }}>☕</span>
         <div className="flex-1 min-w-0">
-          <p className="text-white font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif' }}>Built for ABQ, by ABQ</p>
-          <p className="text-white/60 text-xs mt-0.5" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <p className="text-white font-black text-sm" style={{ fontFamily: 'Public Sans, sans-serif' }}>Built for ABQ, by ABQ</p>
+          <p className="text-white/60 text-xs mt-0.5" style={{ fontFamily: 'Public Sans, sans-serif' }}>
             Free forever. If it helped you find something great — buy us a coffee.
           </p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <a href="https://ko-fi.com/stopscrolling" target="_blank" rel="noopener noreferrer"
             className="text-xs font-black px-3 py-2 rounded-lg text-white"
-            style={{ background: '#FF5E5B', fontFamily: 'Inter, sans-serif', whiteSpace: 'nowrap' }}>
+            style={{ background: '#FF5E5B', fontFamily: 'Public Sans, sans-serif', whiteSpace: 'nowrap' }}>
             Support ♥
           </a>
           <button onClick={() => { try { localStorage.setItem('abq_kofi_dismissed','1'); } catch {} setDismissed(true); }}
@@ -2627,13 +2627,13 @@ function AnimatedFact() {
   return (
     <div className="mb-6">
       <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', marginBottom: '12px' }}>
-        <p className="text-sm font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>Did You Know?</p>
+        <p className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>Did You Know?</p>
       </div>
       <div className="px-5">
         <button onClick={next} className="w-full p-5 text-left" style={{ background: '#D4EF4D', border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A', minHeight: 96, borderRadius: 0 }}>
           <div style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.35s ease' }}>
             <FlatIcon name={facts[idx].icon} size={28} color="#1A1A1A" />
-            <p className="text-sm mt-2 leading-relaxed font-semibold" style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A' }}>{facts[idx].fact}</p>
+            <p className="text-sm mt-2 leading-relaxed font-semibold" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>{facts[idx].fact}</p>
           </div>
           <div className="flex items-center justify-between mt-3">
             <div className="flex gap-1">
@@ -2641,7 +2641,7 @@ function AnimatedFact() {
                 <div key={d} className="w-1.5 h-1.5 transition-colors" style={{ backgroundColor: d === idx % 5 ? '#1A1A1A' : 'rgba(0,0,0,0.2)' }} />
               ))}
             </div>
-            <span className="text-xs font-black" style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A', letterSpacing: '0.05em' }}>TAP FOR NEXT ›</span>
+            <span className="text-xs font-black" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A', letterSpacing: '0.05em' }}>TAP FOR NEXT ›</span>
           </div>
         </button>
       </div>
@@ -2670,8 +2670,8 @@ function DayPlanner() {
   return (
     <div className="mx-5 mb-6">
       <div className="flex items-baseline justify-between mb-3">
-        <p className="text-xs font-black tracking-widest text-gray-400 uppercase" style={{ fontFamily: 'Inter, sans-serif' }}>MY ABQ</p>
-        <span className="text-xs text-gray-400" style={{ fontFamily: 'Inter, sans-serif' }}>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</span>
+        <p className="text-xs font-black tracking-widest text-gray-400 uppercase" style={{ fontFamily: 'Public Sans, sans-serif' }}>MY ABQ</p>
+        <span className="text-xs text-gray-400" style={{ fontFamily: 'Public Sans, sans-serif' }}>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</span>
       </div>
       <div className="bg-white rounded-lg overflow-hidden" style={{ border: '1px solid #f3f4f6' }}>
         {plan.items.length > 0 && (
@@ -2679,13 +2679,13 @@ function DayPlanner() {
             <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
               <div className="h-full bg-green-500 rounded-full transition-all" style={{ width: `${Math.round((done / plan.items.length) * 100)}%` }} />
             </div>
-            <span className="text-xs text-gray-400" style={{ fontFamily: 'Inter, sans-serif' }}>{done}/{plan.items.length}</span>
+            <span className="text-xs text-gray-400" style={{ fontFamily: 'Public Sans, sans-serif' }}>{done}/{plan.items.length}</span>
           </div>
         )}
         {plan.items.length === 0 && (
           <div className="py-5 text-center">
             <span className="text-2xl">📋</span>
-            <p className="text-sm text-gray-400 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>Add things to do in ABQ today</p>
+            <p className="text-sm text-gray-400 mt-1" style={{ fontFamily: 'Public Sans, sans-serif' }}>Add things to do in ABQ today</p>
           </div>
         )}
         {plan.items.map(item => (
@@ -2693,13 +2693,13 @@ function DayPlanner() {
             <button onClick={() => toggle(item.id)} className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 transition-colors" style={{ border: `2px solid ${item.done ? '#22c55e' : '#d1d5db'}`, backgroundColor: item.done ? '#22c55e' : 'transparent' }}>
               {item.done && <span className="text-white text-xs font-bold">✓</span>}
             </button>
-            <a href={`https://maps.google.com/?q=${encodeURIComponent(item.text + ' Albuquerque NM')}`} target="_blank" rel="noopener noreferrer" className="flex-1 text-sm" style={{ fontFamily: 'Inter, sans-serif', textDecoration: item.done ? 'line-through' : 'none', color: item.done ? '#9ca3af' : '#111827', display: 'flex', alignItems: 'center' }}>{item.text}</a>
+            <a href={`https://maps.google.com/?q=${encodeURIComponent(item.text + ' Albuquerque NM')}`} target="_blank" rel="noopener noreferrer" className="flex-1 text-sm" style={{ fontFamily: 'Public Sans, sans-serif', textDecoration: item.done ? 'line-through' : 'none', color: item.done ? '#9ca3af' : '#111827', display: 'flex', alignItems: 'center' }}>{item.text}</a>
             <button onClick={() => remove(item.id)} className="text-gray-200 hover:text-gray-400 text-sm ml-2">✕</button>
           </div>
         ))}
         <div className="flex gap-2 p-3">
-          <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && addItem(input)} placeholder="Add something to do..." className="flex-1 text-sm rounded-lg px-3 py-2 outline-none" style={{ fontFamily: 'Inter, sans-serif', backgroundColor: '#f9fafb' }} />
-          <button onClick={() => addItem(input)} className="text-white rounded-lg px-4 py-2 text-sm font-bold" style={{ backgroundColor: '#f97316', fontFamily: 'Inter, sans-serif' }}>+</button>
+          <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && addItem(input)} placeholder="Add something to do..." className="flex-1 text-sm rounded-lg px-3 py-2 outline-none" style={{ fontFamily: 'Public Sans, sans-serif', backgroundColor: '#f9fafb' }} />
+          <button onClick={() => addItem(input)} className="text-white rounded-lg px-4 py-2 text-sm font-bold" style={{ backgroundColor: '#f97316', fontFamily: 'Public Sans, sans-serif' }}>+</button>
         </div>
       </div>
     </div>
@@ -2721,13 +2721,13 @@ function MyWishlist() {
   return (
     <div className="mx-5 mb-6">
       <div className="flex items-baseline gap-2 mb-3">
-        <p className="text-xs font-black tracking-widest text-gray-400 uppercase" style={{ fontFamily: 'Inter, sans-serif' }}>MY WISHLIST</p>
-        {items.length > 0 && <span className="text-xs font-bold" style={{ color: '#f97316', fontFamily: 'Inter, sans-serif' }}>{items.length} saved</span>}
+        <p className="text-xs font-black tracking-widest text-gray-400 uppercase" style={{ fontFamily: 'Public Sans, sans-serif' }}>MY WISHLIST</p>
+        {items.length > 0 && <span className="text-xs font-bold" style={{ color: '#f97316', fontFamily: 'Public Sans, sans-serif' }}>{items.length} saved</span>}
       </div>
       {items.length === 0 ? (
         <div className="bg-gray-50 rounded-lg p-5 flex items-center gap-3">
           <span className="text-2xl flex-shrink-0">🤍</span>
-          <p className="text-sm text-gray-500 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>Tap ♡ on any event or place to save it here for later</p>
+          <p className="text-sm text-gray-500 leading-relaxed" style={{ fontFamily: 'Public Sans, sans-serif' }}>Tap ♡ on any event or place to save it here for later</p>
         </div>
       ) : (
         <div className="flex flex-col gap-2">
@@ -2735,8 +2735,8 @@ function MyWishlist() {
             <div key={item.id} className="bg-white rounded-lg p-4 flex items-center gap-3" style={{ border: '1px solid #f3f4f6' }}>
               <span className="text-xl flex-shrink-0">{item.type === 'event' ? '📅' : '📍'}</span>
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-sm text-gray-900 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>{item.name}</p>
-                <p className="text-xs text-gray-400" style={{ fontFamily: 'Inter, sans-serif' }}>{item.category}</p>
+                <p className="font-bold text-sm text-gray-900 truncate" style={{ fontFamily: 'Public Sans, sans-serif' }}>{item.name}</p>
+                <p className="text-xs text-gray-400" style={{ fontFamily: 'Public Sans, sans-serif' }}>{item.category}</p>
               </div>
               <button onClick={() => remove(item.id)} className="text-gray-300 hover:text-red-400 text-sm flex-shrink-0 transition-colors">✕</button>
             </div>
@@ -2818,20 +2818,20 @@ function DiscoverScreen({
       <StreakBanner />
 
       {/* Hero — value prop + primary CTA */}
-      <div style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #1ebaeb', borderBottom: '2px solid #1A1A1A' }}>
+      <div style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #b95c43', borderBottom: '2px solid #1A1A1A' }}>
         <div className="px-5 pt-5 pb-4">
-          <p className="text-xs font-black uppercase mb-2" style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif', letterSpacing: '0.12em' }}>
+          <p className="text-xs font-black uppercase mb-2" style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.12em' }}>
             Greater ABQ Metro
           </p>
-          <h1 className="font-black leading-tight mb-1" style={{ fontFamily: 'Epilogue, sans-serif', fontSize: '26px', letterSpacing: '-0.02em', color: '#1A1A1A' }}>
+          <h1 className="font-black leading-tight mb-1" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '26px', letterSpacing: '-0.02em', color: '#1A1A1A' }}>
             Find something worth<br />going to tonight
           </h1>
-          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', color: '#555', fontWeight: 500, marginBottom: '14px' }}>
+          <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '12px', color: '#555', fontWeight: 500, marginBottom: '14px' }}>
             {events.length.toLocaleString()} events · {places.length.toLocaleString()} places across Greater ABQ
           </p>
           <button
             onClick={() => onNavigateEvents?.()}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '42px', padding: '0 16px', background: '#1A1A1A', color: 'white', border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #566500', fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 800, letterSpacing: '0.03em', cursor: 'pointer', borderRadius: 0, marginBottom: '12px' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '42px', padding: '0 16px', background: '#1A1A1A', color: 'white', border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #b95c43', fontFamily: 'Public Sans, sans-serif', fontSize: '13px', fontWeight: 800, letterSpacing: '0.03em', cursor: 'pointer', borderRadius: 0, marginBottom: '12px' }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>confirmation_number</span>
             What's on tonight →
@@ -2845,7 +2845,7 @@ function DiscoverScreen({
             { label: 'Explore Places', action: () => onNavigatePlaces?.('All', '') },
           ].map(chip => (
             <button key={chip.label} onClick={chip.action}
-              style={{ flexShrink: 0, height: '28px', padding: '0 12px', background: 'white', border: '1.5px solid #1A1A1A', fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 700, letterSpacing: '0.04em', cursor: 'pointer', borderRadius: 0, whiteSpace: 'nowrap' }}>
+              style={{ flexShrink: 0, height: '28px', padding: '0 12px', background: 'white', border: '1.5px solid #1A1A1A', fontFamily: 'Public Sans, sans-serif', fontSize: '11px', fontWeight: 700, letterSpacing: '0.04em', cursor: 'pointer', borderRadius: 0, whiteSpace: 'nowrap' }}>
               {chip.label}
             </button>
           ))}
@@ -2865,7 +2865,7 @@ function DiscoverScreen({
       {!hidden.includes('thisWeek') && eventsLoading && upcomingEvents.length === 0 && (
         <div className="mb-5 mx-5" style={{ border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A' }}>
           <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '2px solid #1A1A1A', backgroundColor: '#fff' }}>
-            <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em' }}>Events This Week</h2>
+            <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em' }}>Events This Week</h2>
             <span className="text-xs font-black" style={{ color: '#aaa' }}>Loading…</span>
           </div>
           {[0,1,2].map(i => (
@@ -2881,13 +2881,13 @@ function DiscoverScreen({
         <div className="mb-5 mx-5" style={{ border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A' }}>
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '2px solid #1A1A1A', backgroundColor: '#fff' }}>
-            <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>
+            <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>
               Events This Week
             </h2>
             <button
               onClick={() => onNavigateEvents?.()}
               className="text-xs font-black uppercase"
-              style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A', letterSpacing: '0.06em' }}
+              style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A', letterSpacing: '0.06em' }}
             >
               → SEE ALL
             </button>
@@ -2912,19 +2912,19 @@ function DiscoverScreen({
                   {/* Date block */}
                   <div className="flex flex-col items-center justify-center flex-shrink-0"
                     style={{ width: 62, backgroundColor: '#1A1A1A', minHeight: 64 }}>
-                    <span className="font-black uppercase" style={{ fontSize: 10, color: '#D4EF4D', fontFamily: 'Inter, sans-serif', letterSpacing: '0.06em', lineHeight: 1 }}>
+                    <span className="font-black uppercase" style={{ fontSize: 10, color: '#D4EF4D', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em', lineHeight: 1 }}>
                       {month}
                     </span>
-                    <span className="font-black" style={{ fontSize: 30, color: '#fff', fontFamily: 'Epilogue, sans-serif', lineHeight: 1.05 }}>
+                    <span className="font-black" style={{ fontSize: 30, color: '#fff', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.05 }}>
                       {day}
                     </span>
                   </div>
                   {/* Content */}
                   <div className="flex-1 px-3 py-2 flex flex-col justify-center overflow-hidden">
-                    <p className="font-black text-sm leading-tight" style={{ fontFamily: 'Epilogue, sans-serif', color: '#1A1A1A', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}>
+                    <p className="font-black text-sm leading-tight" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}>
                       {event.name}
                     </p>
-                    <p className="text-xs mt-0.5 truncate" style={{ color: '#888', fontFamily: 'Inter, sans-serif', letterSpacing: '0.02em' }}>
+                    <p className="text-xs mt-0.5 truncate" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.02em' }}>
                       {[time, venueName].filter(Boolean).join(' · ')}
                     </p>
                   </div>
@@ -2947,7 +2947,7 @@ function DiscoverScreen({
         <div className="pb-5">
           <h2
             className="text-lg font-black uppercase tracking-tight mb-3 px-5"
-            style={{ fontFamily: 'Epilogue, sans-serif' }}
+            style={{ fontFamily: 'Public Sans, sans-serif' }}
           >
             Staff Picks
           </h2>
@@ -2978,7 +2978,7 @@ function DiscoverScreen({
               <div className="absolute bottom-3 left-3 right-3 text-left">
                 <p
                   className="text-white font-black text-base leading-tight"
-                  style={{ fontFamily: 'Epilogue, sans-serif' }}
+                  style={{ fontFamily: 'Public Sans, sans-serif' }}
                 >
                   {featured[0].name}
                 </p>
@@ -3008,7 +3008,7 @@ function DiscoverScreen({
                 <div className="absolute bottom-2.5 left-2.5 right-2.5 text-left">
                   <p
                     className="text-white font-black text-sm leading-tight"
-                    style={{ fontFamily: 'Epilogue, sans-serif', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}
+                    style={{ fontFamily: 'Public Sans, sans-serif', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}
                   >
                     {place.name}
                   </p>
@@ -3026,11 +3026,11 @@ function DiscoverScreen({
           <div className="flex items-center justify-between px-5 py-3 mb-0" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
             <h2
               className="text-sm font-black uppercase"
-              style={{ fontFamily: 'Epilogue, sans-serif' }}
+              style={{ fontFamily: 'Public Sans, sans-serif' }}
             >
               Near You
             </h2>
-            <span className="text-xs font-semibold flex items-center gap-1" style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}>
+            <span className="text-xs font-semibold flex items-center gap-1" style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}>
               <span className="material-symbols-outlined" style={{ fontSize: '13px' }}>my_location</span>
               Live location
             </span>
@@ -3069,7 +3069,7 @@ function DiscoverScreen({
                 <div className="p-2">
                   <p
                     className="text-xs font-bold text-gray-900 leading-tight truncate"
-                    style={{ fontFamily: 'Inter, sans-serif' }}
+                    style={{ fontFamily: 'Public Sans, sans-serif' }}
                   >
                     {place.name}
                   </p>
@@ -3087,11 +3087,11 @@ function DiscoverScreen({
           <div className="flex items-center justify-between px-5 py-3 mb-0" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
             <h2
               className="text-sm font-black uppercase"
-              style={{ fontFamily: 'Epilogue, sans-serif' }}
+              style={{ fontFamily: 'Public Sans, sans-serif' }}
             >
               Hidden Gems
             </h2>
-            <span className="text-xs font-black uppercase" style={{ color: '#666', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em' }}>
+            <span className="text-xs font-black uppercase" style={{ color: '#666', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em' }}>
               ★ 4.5+ rated
             </span>
           </div>
@@ -3130,7 +3130,7 @@ function DiscoverScreen({
                 <div className="p-2">
                   <p
                     className="text-xs font-bold text-gray-900 leading-tight truncate"
-                    style={{ fontFamily: 'Inter, sans-serif' }}
+                    style={{ fontFamily: 'Public Sans, sans-serif' }}
                   >
                     {place.name}
                   </p>
@@ -3145,7 +3145,7 @@ function DiscoverScreen({
       {/* Explore by Vibe */}
       {!hidden.includes('vibes') && <div className="mb-6">
         <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
-          <p className="text-sm font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>Explore by Vibe</p>
+          <p className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>Explore by Vibe</p>
         </div>
         <div className="grid grid-cols-3" style={{ gap: '0', borderLeft: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', borderRight: '2px solid #1A1A1A' }}>
           {[
@@ -3161,7 +3161,7 @@ function DiscoverScreen({
               style={{ background: 'white', border: 'none', borderRight: '2px solid #1A1A1A', borderBottom: '2px solid #1A1A1A', borderRadius: 0 }}
               onClick={() => onNavigatePlaces?.(cat, '')}>
               <span className="material-symbols-outlined" style={{ fontSize: '26px', color: '#1A1A1A', fontVariationSettings: "'FILL' 0, 'wght' 300" }}>{icon}</span>
-              <span className="text-center leading-tight font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', fontSize: '9px', letterSpacing: '0.08em', color: '#1A1A1A' }}>{label}</span>
+              <span className="text-center leading-tight font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '9px', letterSpacing: '0.08em', color: '#1A1A1A' }}>{label}</span>
             </button>
           ))}
         </div>
@@ -3170,23 +3170,23 @@ function DiscoverScreen({
       {/* ABQ Neighborhoods */}
       {!hidden.includes('neighborhoods') && <div className="mb-6">
         <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
-          <p className="text-sm font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>ABQ Neighborhoods</p>
+          <p className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>ABQ Neighborhoods</p>
         </div>
         <div className="grid grid-cols-2" style={{ gap: '0', borderLeft: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', borderRight: '2px solid #1A1A1A' }}>
           {[
-            { name: 'Old Town', desc: 'History, art & adobe', icon: 'account_balance', bg: '#566500' },
+            { name: 'Old Town', desc: 'History, art & adobe', icon: 'account_balance', bg: '#b95c43' },
             { name: 'Nob Hill', desc: 'Eclectic & walkable', icon: 'local_cafe', bg: '#0057c2' },
             { name: 'Downtown', desc: 'Nightlife & events', icon: 'nightlife', bg: '#1A1A1A' },
             { name: 'Rio Grande', desc: 'Nature & trails', icon: 'nature', bg: '#1C6FEA' },
-            { name: 'NE Heights', desc: 'Views & dining', icon: 'landscape', bg: '#8a9e00' },
+            { name: 'NE Heights', desc: 'Views & dining', icon: 'landscape', bg: '#c97a62' },
             { name: 'South Valley', desc: 'Local flavor', icon: 'storefront', bg: '#D4EF4D' },
           ].map(({ name, desc, icon, bg }) => (
             <button key={name} className="p-4 text-left transition-all"
               style={{ backgroundColor: bg, borderRight: '2px solid #1A1A1A', borderBottom: '2px solid #1A1A1A', borderRadius: 0 }}
               onClick={() => onNavigatePlaces?.('All', name)}>
               <span className="material-symbols-outlined" style={{ fontSize: '24px', color: bg === '#D4EF4D' ? '#1A1A1A' : 'white', fontVariationSettings: "'FILL' 0, 'wght' 300" }}>{icon}</span>
-              <p className="font-black text-sm mt-1" style={{ fontFamily: 'Epilogue, sans-serif', color: bg === '#D4EF4D' ? '#1A1A1A' : 'white' }}>{name}</p>
-              <p className="text-xs" style={{ fontFamily: 'Inter, sans-serif', color: bg === '#D4EF4D' ? 'rgba(0,0,0,0.65)' : 'rgba(255,255,255,0.75)' }}>{desc}</p>
+              <p className="font-black text-sm mt-1" style={{ fontFamily: 'Public Sans, sans-serif', color: bg === '#D4EF4D' ? '#1A1A1A' : 'white' }}>{name}</p>
+              <p className="text-xs" style={{ fontFamily: 'Public Sans, sans-serif', color: bg === '#D4EF4D' ? 'rgba(0,0,0,0.65)' : 'rgba(255,255,255,0.75)' }}>{desc}</p>
             </button>
           ))}
         </div>
@@ -3198,25 +3198,25 @@ function DiscoverScreen({
       {/* Weekend Planner */}
       {!hidden.includes('planWeekend') && <div className="mb-6">
         <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', marginBottom: '12px' }}>
-          <p className="text-sm font-black uppercase" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>Plan Your Weekend</p>
+          <p className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>Plan Your Weekend</p>
         </div>
         <div className="flex flex-col gap-2">
           {[
             { title: 'Morning Hike + Brunch', steps: ['Sandia Mountain foothills trail', 'Coffee at Flying Star Café', 'Brunch in Nob Hill'], bar: '#D4EF4D' },
-            { title: 'Culture Day', steps: ['Explora Science Center', 'Lunch in Old Town', 'Albuquerque Museum'], bar: '#1ebaeb' },
+            { title: 'Culture Day', steps: ['Explora Science Center', 'Lunch in Old Town', 'Albuquerque Museum'], bar: '#b95c43' },
             { title: 'Local Food Crawl', steps: ['Green chile breakfast at Frontier', 'Lunch at El Modelo', 'Drinks on Central Ave'], bar: '#D4EF4D' },
-            { title: 'Nature Escape', steps: ['Rio Grande Bosque trail', 'Tingley Beach', 'Sunset at Petroglyph Monument'], bar: '#1ebaeb' },
+            { title: 'Nature Escape', steps: ['Rio Grande Bosque trail', 'Tingley Beach', 'Sunset at Petroglyph Monument'], bar: '#b95c43' },
           ].map(({ title, steps, bar }) => (
             <div key={title} className="flex" style={{ border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A', backgroundColor: '#fff' }}>
               {/* left accent bar */}
               <div style={{ width: 4, flexShrink: 0, backgroundColor: bar }} />
               <div className="flex-1 px-3 py-2">
                 <div className="flex items-center justify-between mb-1.5">
-                  <p className="text-xs font-black uppercase" style={{ fontFamily: 'Epilogue, sans-serif', color: '#1A1A1A', letterSpacing: '0.09em' }}>{title}</p>
+                  <p className="text-xs font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A', letterSpacing: '0.09em' }}>{title}</p>
                   <button
                     onClick={() => addToDayPlan(steps)}
                     className="text-xs font-black px-2 py-0.5"
-                    style={{ backgroundColor: '#D4EF4D', color: '#1A1A1A', border: '1.5px solid #1A1A1A', fontFamily: 'Inter, sans-serif', letterSpacing: '0.04em' }}
+                    style={{ backgroundColor: '#D4EF4D', color: '#1A1A1A', border: '1.5px solid #1A1A1A', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.04em' }}
                   >
                     + plan
                   </button>
@@ -3225,7 +3225,7 @@ function DiscoverScreen({
                   {steps.map((step, i) => (
                     <div key={i} className="flex items-center gap-1.5">
                       <span className="text-xs font-black w-5 h-5 flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#1A1A1A', color: '#D4EF4D' }}>{i + 1}</span>
-                      <button onClick={() => window.dispatchEvent(new CustomEvent('plan-step-click',{detail:step}))} className="text-xs text-left leading-tight flex-1" style={{ fontFamily: 'Inter, sans-serif', color: '#1A1A1A' }}>{step}</button>
+                      <button onClick={() => window.dispatchEvent(new CustomEvent('plan-step-click',{detail:step}))} className="text-xs text-left leading-tight flex-1" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>{step}</button>
                     </div>
                   ))}
                 </div>
@@ -3441,20 +3441,20 @@ function EventsScreen({
 
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #1ebaeb', borderBottom: '2px solid #1A1A1A' }}>
+      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #b95c43', borderBottom: '2px solid #1A1A1A' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
-          style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}
+          style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}
         >
           What's Happening
         </p>
         <h1
           className="font-black leading-none mt-1"
-          style={{ fontFamily: 'Epilogue, sans-serif', fontSize: '40px', letterSpacing: '-0.04em', color: '#1A1A1A' }}
+          style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '40px', letterSpacing: '-0.04em', color: '#1A1A1A' }}
         >
           What's Happening
         </h1>
-        <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: 'Public Sans, sans-serif' }}>
           {events.length.toLocaleString()} things to do in Greater ABQ
         </p>
       </div>
@@ -3470,7 +3470,7 @@ function EventsScreen({
             placeholder="Search events, artists, venues..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            style={{ fontFamily: 'Inter, sans-serif' }}
+            style={{ fontFamily: 'Public Sans, sans-serif' }}
           />
           {search && (
             <button onClick={() => setSearch('')}>
@@ -3491,7 +3491,7 @@ function EventsScreen({
                 onClick={() => setSelectedGenre(genre)}
                 className="px-3 py-2 text-xs font-black uppercase transition-all"
                 style={{
-                  fontFamily: 'Inter, sans-serif',
+                  fontFamily: 'Public Sans, sans-serif',
                   letterSpacing: '0.1em',
                   background: isSelected ? '#1A1A1A' : isForYou && followedGenres.length > 0 ? 'var(--brand-bg-subtle)' : 'white',
                   color: isSelected ? 'white' : '#1A1A1A',
@@ -3531,12 +3531,12 @@ function EventsScreen({
       {deduped.length === 0 && !eventsLoading && (
         <div className="flex flex-col items-center justify-center px-8 text-center" style={{ paddingTop: '80px', paddingBottom: '60px' }}>
           <span className="material-symbols-outlined" style={{ fontSize: '56px', color: '#d0d8d0', marginBottom: '16px' }}>event_busy</span>
-          <h2 className="font-black text-lg mb-2" style={{ fontFamily: 'Epilogue, sans-serif', color: '#1a1a1a' }}>
+          <h2 className="font-black text-lg mb-2" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1a1a1a' }}>
             {selectedGenre === 'Tonight' ? 'Nothing scheduled for tonight' :
              selectedGenre === 'This Weekend' ? 'Nothing found this weekend' :
              `No ${selectedGenre.toLowerCase()} events found`}
           </h2>
-          <p className="text-sm mb-5" style={{ color: '#888', fontFamily: 'Inter, sans-serif', lineHeight: 1.6 }}>
+          <p className="text-sm mb-5" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.6 }}>
             {selectedGenre !== 'All'
               ? `Try "This Weekend" or browse all events.`
               : 'Try a different search term or check back soon.'}
@@ -3545,7 +3545,7 @@ function EventsScreen({
             <button
               onClick={() => setSelectedGenre('All')}
               className="px-5 py-2.5 font-black text-sm uppercase"
-              style={{ background: '#1A1A1A', color: 'white', border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #566500', fontFamily: 'Inter, sans-serif', letterSpacing: '0.06em', cursor: 'pointer' }}
+              style={{ background: '#1A1A1A', color: 'white', border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #b95c43', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em', cursor: 'pointer' }}
             >
               Browse all events
             </button>
@@ -3558,8 +3558,8 @@ function EventsScreen({
         <div className="px-5 py-4 flex items-start gap-3" style={{ background: 'var(--brand-bg-subtle)', borderBottom: '2px solid #1A1A1A' }}>
           <span style={{ fontSize: '24px', lineHeight: 1 }}>❤️</span>
           <div>
-            <p className="text-sm font-black" style={{ fontFamily: 'Epilogue, sans-serif', color: '#1A1A1A' }}>Personalize your feed</p>
-            <p className="text-xs mt-0.5" style={{ fontFamily: 'Inter, sans-serif', color: '#555' }}>
+            <p className="text-sm font-black" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>Personalize your feed</p>
+            <p className="text-xs mt-0.5" style={{ fontFamily: 'Public Sans, sans-serif', color: '#555' }}>
               Tap the <strong>☆</strong> star next to any genre above to add it to your <em>For You</em> feed. Starred genres are highlighted.
             </p>
           </div>
@@ -3568,14 +3568,14 @@ function EventsScreen({
       {selectedGenre === '❤️ For You' && followedGenres.length > 0 && (
         <div className="px-5 py-2 flex items-center gap-2" style={{ background: 'var(--brand-bg-subtle)', borderBottom: '1px solid #eee' }}>
           <span style={{ fontSize: '13px' }}>❤️</span>
-          <p className="text-xs font-semibold" style={{ fontFamily: 'Inter, sans-serif', color: 'var(--brand)' }}>
+          <p className="text-xs font-semibold" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--brand)' }}>
             Showing: {followedGenres.join(' · ')}
           </p>
         </div>
       )}
 
       <div className="px-5 pb-2 flex items-center justify-between" style={{ borderBottom: '1px solid #eee', paddingTop: 10, paddingBottom: 10 }}>
-        <p className="text-sm font-semibold text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <p className="text-sm font-semibold text-gray-500" style={{ fontFamily: 'Public Sans, sans-serif' }}>
           {deduped.length} event{deduped.length !== 1 ? 's' : ''}
           {deduped.length < sorted.length && (
             <span className="ml-2 text-xs text-gray-400">({sorted.length - deduped.length} duplicate showtimes hidden)</span>
@@ -3615,7 +3615,7 @@ function EventsScreen({
         {deduped.length === 0 && (
           <div className="text-center py-16 text-gray-400">
             <span className="material-symbols-outlined" style={{ fontSize: '48px', display: 'block', marginBottom: '8px' }}>event_busy</span>
-            <p className="font-semibold text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>No events found</p>
+            <p className="font-semibold text-sm" style={{ fontFamily: 'Public Sans, sans-serif' }}>No events found</p>
           </div>
         )}
       </div>
@@ -3832,20 +3832,20 @@ function PlacesScreen({
 
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', willChange: 'transform' } as React.CSSProperties}>
-      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #1ebaeb', borderBottom: '2px solid #1A1A1A' }}>
+      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #b95c43', borderBottom: '2px solid #1A1A1A' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
-          style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}
+          style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}
         >
           Explore Greater ABQ
         </p>
         <h1
           className="font-black leading-none mt-1"
-          style={{ fontFamily: 'Epilogue, sans-serif', fontSize: '40px', letterSpacing: '-0.04em', color: '#1A1A1A' }}
+          style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '40px', letterSpacing: '-0.04em', color: '#1A1A1A' }}
         >
           Places to Go
         </h1>
-        <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: 'Public Sans, sans-serif' }}>
           {search.trim() && NEIGHBORHOOD_BOUNDS[search.trim()]
             ? `${filtered.length} spot${filtered.length !== 1 ? 's' : ''} in ${search.trim()}`
             : `${places.length.toLocaleString()} spots across Greater ABQ`}
@@ -3873,7 +3873,7 @@ function PlacesScreen({
             placeholder="Search places, neighborhoods..."
             value={searchInput}
             onChange={e => setSearchInput(e.target.value)}
-            style={{ fontFamily: 'Inter, sans-serif' }}
+            style={{ fontFamily: 'Public Sans, sans-serif' }}
           />
           {searchInput && (
             <button onClick={() => { setSearchInput(''); setSearch(''); }}>
@@ -3887,7 +3887,7 @@ function PlacesScreen({
           Lets the user know search is now global (overrides category), and offers
           a one-tap way to jump back into the category they had selected. */}
       {search.trim() && selectedCat !== 'All' && (
-        <div className="flex items-center gap-2 px-5 pb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <div className="flex items-center gap-2 px-5 pb-2" style={{ fontFamily: 'Public Sans, sans-serif' }}>
           <span className="text-xs text-gray-500">Searching all places · was in:</span>
           <button
             onClick={() => { setSearchInput(''); setSearch(''); }}
@@ -3906,9 +3906,9 @@ function PlacesScreen({
           onClick={() => setOpenNow(v => !v)}
           className="flex-shrink-0 flex items-center gap-1 px-3 py-2 text-xs font-black uppercase transition-all"
           style={{
-            fontFamily: 'Inter, sans-serif',
+            fontFamily: 'Public Sans, sans-serif',
             letterSpacing: '0.1em',
-            background: openNow ? '#566500' : 'white',
+            background: openNow ? '#b95c43' : 'white',
             color: openNow ? 'white' : '#1A1A1A',
             border: '1.5px solid #1A1A1A',
             marginRight: '-1.5px',
@@ -3926,7 +3926,7 @@ function PlacesScreen({
             onClick={() => setSelectedCat(cat.value)}
             className="flex-shrink-0 flex items-center gap-1 px-3 py-2 text-xs font-black uppercase transition-all"
             style={{
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: 'Public Sans, sans-serif',
               letterSpacing: '0.1em',
               background: selectedCat === cat.value ? '#1A1A1A' : 'white',
               color: selectedCat === cat.value ? 'white' : '#1A1A1A',
@@ -3956,7 +3956,7 @@ function PlacesScreen({
             className="flex-shrink-0 px-3 py-1.5 text-xs font-black uppercase transition-all"
             title={s.disabled ? 'Enable location to sort by distance' : undefined}
             style={{
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: 'Public Sans, sans-serif',
               letterSpacing: '0.08em',
               background: sortMode === s.id ? '#1A1A1A' : 'white',
               color: sortMode === s.id ? 'white' : s.disabled ? '#bbb' : '#1A1A1A',
@@ -3972,7 +3972,7 @@ function PlacesScreen({
             {s.label}
           </button>
         ))}
-        <p className="ml-auto text-xs text-gray-400 self-center" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <p className="ml-auto text-xs text-gray-400 self-center" style={{ fontFamily: 'Public Sans, sans-serif' }}>
           {withPhotos.length} results
         </p>
       </div>
@@ -3999,7 +3999,7 @@ function PlacesScreen({
         {/* Infinite scroll sentinel */}
         {displayCount < withPhotos.length && (
           <div ref={sentinelRef} style={{ height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span className="text-xs text-gray-400" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <span className="text-xs text-gray-400" style={{ fontFamily: 'Public Sans, sans-serif' }}>
               Loading more…
             </span>
           </div>
@@ -4007,7 +4007,7 @@ function PlacesScreen({
         {withPhotos.length === 0 && (
           <div className="text-center py-16 text-gray-400">
             <span className="material-symbols-outlined" style={{ fontSize: '48px', display: 'block', marginBottom: '8px' }}>search_off</span>
-            <p className="font-semibold text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>No places found</p>
+            <p className="font-semibold text-sm" style={{ fontFamily: 'Public Sans, sans-serif' }}>No places found</p>
             <button
               onClick={() => { setSelectedCat('All'); setSearchInput(''); setSearch(''); }}
               className="mt-3 text-xs font-bold"
@@ -4075,12 +4075,12 @@ function AuthModal({ onClose }: { onClose: () => void }) {
         style={{ background: '#fff', boxShadow: '0 -4px 32px rgba(0,0,0,0.18)' }}
       >
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-2xl font-black uppercase tracking-tighter" style={{ fontFamily: 'Epilogue, sans-serif' }}>
+          <h2 className="text-2xl font-black uppercase tracking-tighter" style={{ fontFamily: 'Public Sans, sans-serif' }}>
             {mode === 'choose' ? 'Sign In' : (isSignUp ? 'Create Account' : 'Sign In')}
           </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-700 text-2xl leading-none">×</button>
         </div>
-        <p className="text-sm text-gray-500 mb-5" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <p className="text-sm text-gray-500 mb-5" style={{ fontFamily: 'Public Sans, sans-serif' }}>
           Sign in to sync your check-ins across devices and appear on the leaderboard.
         </p>
 
@@ -4090,7 +4090,7 @@ function AuthModal({ onClose }: { onClose: () => void }) {
               onClick={handleGoogle}
               disabled={loading}
               className="flex items-center justify-center gap-3 w-full rounded-lg py-3.5 font-bold text-sm border border-gray-200"
-              style={{ fontFamily: 'Inter, sans-serif', background: '#fff' }}
+              style={{ fontFamily: 'Public Sans, sans-serif', background: '#fff' }}
             >
               <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-3.58-13.47-8.71l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
               Continue with Google
@@ -4098,7 +4098,7 @@ function AuthModal({ onClose }: { onClose: () => void }) {
             <button
               onClick={() => setMode('email')}
               className="w-full rounded-lg py-3.5 font-bold text-sm text-white"
-              style={{ fontFamily: 'Inter, sans-serif', background: 'var(--brand)' }}
+              style={{ fontFamily: 'Public Sans, sans-serif', background: 'var(--brand)' }}
             >
               Continue with Email
             </button>
@@ -4111,7 +4111,7 @@ function AuthModal({ onClose }: { onClose: () => void }) {
                 <button key={t} type="button"
                   onClick={() => setIsSignUp(i === 1)}
                   className="flex-1 rounded-lg py-2 text-sm font-bold transition-all"
-                  style={{ background: isSignUp === (i === 1) ? 'var(--brand)' : '#f5f5f5', color: isSignUp === (i === 1) ? 'white' : '#666', fontFamily: 'Inter, sans-serif' }}
+                  style={{ background: isSignUp === (i === 1) ? 'var(--brand)' : '#f5f5f5', color: isSignUp === (i === 1) ? 'white' : '#666', fontFamily: 'Public Sans, sans-serif' }}
                 >{t}</button>
               ))}
             </div>
@@ -4120,20 +4120,20 @@ function AuthModal({ onClose }: { onClose: () => void }) {
                 type="text" placeholder="Display name (e.g. xplorer_abq)" value={displayName}
                 onChange={e => setDisplayName(e.target.value)}
                 className="w-full rounded-lg px-4 py-3 text-sm border border-gray-200 outline-none"
-                style={{ fontFamily: 'Inter, sans-serif' }}
+                style={{ fontFamily: 'Public Sans, sans-serif' }}
               />
             )}
             <input
               type="email" placeholder="Email" required value={email}
               onChange={e => setEmail(e.target.value)}
               className="w-full rounded-lg px-4 py-3 text-sm border border-gray-200 outline-none"
-              style={{ fontFamily: 'Inter, sans-serif' }}
+              style={{ fontFamily: 'Public Sans, sans-serif' }}
             />
             <input
               type="password" placeholder="Password (min 6 chars)" required value={password}
               onChange={e => setPassword(e.target.value)} minLength={6}
               className="w-full rounded-lg px-4 py-3 text-sm border border-gray-200 outline-none"
-              style={{ fontFamily: 'Inter, sans-serif' }}
+              style={{ fontFamily: 'Public Sans, sans-serif' }}
             />
             {error && <p className="text-red-500 text-xs">{error}</p>}
             <HCaptcha
@@ -4145,13 +4145,13 @@ function AuthModal({ onClose }: { onClose: () => void }) {
             <button
               type="submit" disabled={loading}
               className="w-full rounded-lg py-3.5 font-bold text-sm text-white"
-              style={{ background: 'var(--brand)', fontFamily: 'Inter, sans-serif', opacity: loading ? 0.7 : 1 }}
+              style={{ background: 'var(--brand)', fontFamily: 'Public Sans, sans-serif', opacity: loading ? 0.7 : 1 }}
             >
               {loading ? 'Please wait…' : (isSignUp ? 'Create Account' : 'Sign In')}
             </button>
             <button type="button" onClick={() => setMode('choose')}
               className="text-xs text-gray-400 text-center mt-1"
-              style={{ fontFamily: 'Inter, sans-serif' }}
+              style={{ fontFamily: 'Public Sans, sans-serif' }}
             >← Back</button>
           </form>
         )}
@@ -4199,7 +4199,7 @@ function UsernameSetupModal({ user, onDone }: { user: User | null; onDone: (name
       position: 'fixed', inset: 0, zIndex: 9999,
       background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: '24px', fontFamily: 'Inter, sans-serif',
+      padding: '24px', fontFamily: 'Public Sans, sans-serif',
     }}>
       <div style={{
         background: 'white', borderRadius: '24px', padding: '32px 28px',
@@ -4207,7 +4207,7 @@ function UsernameSetupModal({ user, onDone }: { user: User | null; onDone: (name
         textAlign: 'center',
       }}>
         <div style={{ fontSize: '40px', marginBottom: '12px' }}>👋</div>
-        <h2 style={{ fontFamily: 'Epilogue, sans-serif', fontWeight: 900, fontSize: '22px', margin: '0 0 6px' }}>
+        <h2 style={{ fontFamily: 'Public Sans, sans-serif', fontWeight: 900, fontSize: '22px', margin: '0 0 6px' }}>
           Pick your username
         </h2>
         <p style={{ color: '#777', fontSize: '14px', margin: '0 0 24px', lineHeight: 1.5 }}>
@@ -4225,7 +4225,7 @@ function UsernameSetupModal({ user, onDone }: { user: User | null; onDone: (name
             width: '100%', boxSizing: 'border-box',
             border: `1.5px solid ${error ? '#e53935' : '#e0e0e0'}`,
             borderRadius: '12px', padding: '12px 14px', fontSize: '16px',
-            fontFamily: 'Inter, sans-serif', outline: 'none', marginBottom: '8px',
+            fontFamily: 'Public Sans, sans-serif', outline: 'none', marginBottom: '8px',
           }}
         />
         {error && <p style={{ color: '#e53935', fontSize: '13px', margin: '0 0 8px' }}>{error}</p>}
@@ -4236,7 +4236,7 @@ function UsernameSetupModal({ user, onDone }: { user: User | null; onDone: (name
             width: '100%', padding: '13px', borderRadius: '12px', border: 'none',
             background: saved ? '#2e7d32' : 'var(--brand)', color: 'white',
             fontSize: '15px', fontWeight: 700, cursor: saving || saved ? 'default' : 'pointer',
-            fontFamily: 'Inter, sans-serif', marginBottom: '10px',
+            fontFamily: 'Public Sans, sans-serif', marginBottom: '10px',
             transition: 'background 0.2s',
           }}
         >
@@ -4246,7 +4246,7 @@ function UsernameSetupModal({ user, onDone }: { user: User | null; onDone: (name
           onClick={() => onDone()}
           style={{
             background: 'none', border: 'none', color: '#aaa', fontSize: '13px',
-            cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+            cursor: 'pointer', fontFamily: 'Public Sans, sans-serif',
           }}
         >
           Skip for now
@@ -4312,7 +4312,7 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
       <button
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-center justify-between bg-white rounded-lg px-4 py-3"
-        style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', fontFamily: 'Inter, sans-serif' }}
+        style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', fontFamily: 'Public Sans, sans-serif' }}
       >
         <div className="flex items-center gap-2">
           <span style={{ fontSize: '16px' }}>⚙️</span>
@@ -4327,7 +4327,7 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
           {/* Username */}
           {user ? (
             <div className="bg-white rounded-lg p-4" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>Username</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2" style={{ fontFamily: 'Public Sans, sans-serif' }}>Username</p>
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -4336,24 +4336,24 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
                   placeholder="e.g. xplorer_abq"
                   maxLength={20}
                   className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm"
-                  style={{ fontFamily: 'Inter, sans-serif', outline: 'none' }}
+                  style={{ fontFamily: 'Public Sans, sans-serif', outline: 'none' }}
                 />
                 <button
                   onClick={handleUsernameSave}
                   className="px-4 py-2 rounded-lg text-white text-sm font-bold flex-shrink-0"
-                  style={{ background: usernameSaved ? '#2e7d32' : 'var(--brand)', fontFamily: 'Inter, sans-serif', minWidth: 64 }}
+                  style={{ background: usernameSaved ? '#2e7d32' : 'var(--brand)', fontFamily: 'Public Sans, sans-serif', minWidth: 64 }}
                 >
                   {usernameSaved ? '✓ Saved' : 'Save'}
                 </button>
               </div>
-              {usernameError && <p className="text-xs mt-1.5" style={{ color: '#c62828', fontFamily: 'Inter, sans-serif' }}>{usernameError}</p>}
-              <p className="text-xs text-gray-400 mt-1.5" style={{ fontFamily: 'Inter, sans-serif' }}>Shown on the leaderboard. Letters, numbers & underscores only.</p>
+              {usernameError && <p className="text-xs mt-1.5" style={{ color: '#c62828', fontFamily: 'Public Sans, sans-serif' }}>{usernameError}</p>}
+              <p className="text-xs text-gray-400 mt-1.5" style={{ fontFamily: 'Public Sans, sans-serif' }}>Shown on the leaderboard. Letters, numbers & underscores only.</p>
             </div>
           ) : (
             <button
               onClick={onSignIn}
               className="w-full bg-white rounded-lg p-4 flex items-center gap-3 text-left"
-              style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', fontFamily: 'Inter, sans-serif' }}
+              style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', fontFamily: 'Public Sans, sans-serif' }}
             >
               <span style={{ fontSize: '20px' }}>🏷️</span>
               <div>
@@ -4366,7 +4366,7 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
 
           {/* Homescreen Sections */}
           <div className="bg-white rounded-lg p-4" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>Homescreen Sections</p>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3" style={{ fontFamily: 'Public Sans, sans-serif' }}>Homescreen Sections</p>
             <div className="flex flex-col gap-3">
               {DISCOVER_SECTIONS.map(sec => {
                 const visible = !prefs.hiddenSections.includes(sec.id);
@@ -4374,7 +4374,7 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
                   <button key={sec.id} onClick={() => toggleSection(sec.id)} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-base">{sec.emoji}</span>
-                      <span className="text-sm font-medium text-gray-700" style={{ fontFamily: 'Inter, sans-serif' }}>{sec.label}</span>
+                      <span className="text-sm font-medium text-gray-700" style={{ fontFamily: 'Public Sans, sans-serif' }}>{sec.label}</span>
                     </div>
                     <div className="w-11 h-6 rounded-full flex items-center px-0.5 transition-colors" style={{ background: visible ? 'var(--brand)' : '#d1d5db' }}>
                       <div className="w-5 h-5 bg-white rounded-full shadow transition-transform" style={{ transform: visible ? 'translateX(20px)' : 'translateX(0)' }} />
@@ -4387,8 +4387,8 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
 
           {/* Interests */}
           <div className="bg-white rounded-lg p-4" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1" style={{ fontFamily: 'Inter, sans-serif' }}>Your Interests</p>
-            <p className="text-xs text-gray-400 mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>Selected interests appear first in your feed</p>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1" style={{ fontFamily: 'Public Sans, sans-serif' }}>Your Interests</p>
+            <p className="text-xs text-gray-400 mb-3" style={{ fontFamily: 'Public Sans, sans-serif' }}>Selected interests appear first in your feed</p>
             <div className="flex flex-wrap gap-2">
               {INTEREST_OPTIONS.map(opt => {
                 const active = prefs.preferredInterests.includes(opt.id);
@@ -4397,7 +4397,7 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
                     key={opt.id}
                     onClick={() => toggleInterest(opt.id)}
                     className="px-3 py-1.5 rounded text-sm font-semibold transition-all"
-                    style={{ fontFamily: 'Inter, sans-serif', background: active ? 'var(--brand)' : '#f3f4f6', color: active ? 'white' : '#374151', boxShadow: active ? '2px 2px 0 var(--brand)' : 'none' }}
+                    style={{ fontFamily: 'Public Sans, sans-serif', background: active ? 'var(--brand)' : '#f3f4f6', color: active ? 'white' : '#374151', boxShadow: active ? '2px 2px 0 var(--brand)' : 'none' }}
                   >
                     {opt.label}
                   </button>
@@ -4490,16 +4490,16 @@ function ProfileScreen({
 
   return (
     <div className="w-full px-5 pb-28" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-      <div className="pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #1ebaeb', borderBottom: '2px solid #1A1A1A', marginLeft: '-20px', marginRight: '-20px', paddingLeft: '20px', paddingRight: '20px' }}>
+      <div className="pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #b95c43', borderBottom: '2px solid #1A1A1A', marginLeft: '-20px', marginRight: '-20px', paddingLeft: '20px', paddingRight: '20px' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
-          style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}
+          style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}
         >
           Your Profile
         </p>
         <h1
           className="font-black uppercase leading-none mt-1"
-          style={{ fontFamily: 'Epilogue, sans-serif', fontSize: '48px', letterSpacing: '-0.04em', color: '#1A1A1A' }}
+          style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '48px', letterSpacing: '-0.04em', color: '#1A1A1A' }}
         >
           Hey,<br />{(user?.user_metadata?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Explorer').split(' ')[0]}
         </h1>
@@ -4510,7 +4510,7 @@ function ProfileScreen({
         <button
           onClick={onSignIn}
           className="w-full flex items-center justify-between rounded-lg px-4 py-3 mb-4 text-white font-bold text-sm"
-          style={{ background: 'var(--brand-gradient)', fontFamily: 'Inter, sans-serif', boxShadow: '3px 3px 0 var(--brand)' }}
+          style={{ background: 'var(--brand-gradient)', fontFamily: 'Public Sans, sans-serif', boxShadow: '3px 3px 0 var(--brand)' }}
         >
           <span>Sign in to sync check-ins & join the leaderboard</span>
           <span style={{ fontSize: '16px' }}>→</span>
@@ -4518,16 +4518,16 @@ function ProfileScreen({
       ) : (
         <div
           className="w-full flex items-center justify-between rounded-lg px-4 py-3 mb-4"
-          style={{ background: 'linear-gradient(135deg, #1b5e20, #2e7d32)', fontFamily: 'Inter, sans-serif', boxShadow: '3px 3px 0 rgba(0,0,0,0.15)' }}
+          style={{ background: 'linear-gradient(135deg, #1b5e20, #2e7d32)', fontFamily: 'Public Sans, sans-serif', boxShadow: '3px 3px 0 rgba(0,0,0,0.15)' }}
         >
           <div>
             <p className="font-bold text-sm" style={{ color: '#1A1A1A' }}>✅ Signed in & syncing your check-ins</p>
-            <p className="text-xs mt-0.5" style={{ color: '#566500' }}>Check out the leaderboard below</p>
+            <p className="text-xs mt-0.5" style={{ color: '#b95c43' }}>Check out the leaderboard below</p>
           </div>
           <button
             onClick={onSignOut}
             className="text-xs font-bold flex-shrink-0 ml-3"
-            style={{ fontFamily: 'Inter, sans-serif', background: 'none', border: 'none', cursor: 'pointer', color: '#1A1A1A' }}
+            style={{ fontFamily: 'Public Sans, sans-serif', background: 'none', border: 'none', cursor: 'pointer', color: '#1A1A1A' }}
           >
             Sign out
           </button>
@@ -4545,7 +4545,7 @@ function ProfileScreen({
             color: '#fff',
             border: '2px solid #000',
             borderRadius: 0,
-            fontFamily: 'Epilogue, sans-serif',
+            fontFamily: 'Public Sans, sans-serif',
             fontWeight: 900,
             fontSize: 14,
             letterSpacing: '0.08em',
@@ -4578,17 +4578,17 @@ function ProfileScreen({
           {user?.photoURL ? (
             <img src={user.photoURL} alt="avatar" className="w-full h-full object-cover" />
           ) : (
-            <span className="text-white text-2xl font-black" style={{ fontFamily: 'Epilogue, sans-serif' }}>
+            <span className="text-white text-2xl font-black" style={{ fontFamily: 'Public Sans, sans-serif' }}>
               {level.emoji}
             </span>
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-black text-lg truncate" style={{ fontFamily: 'Epilogue, sans-serif' }}>
+          <p className="font-black text-lg truncate" style={{ fontFamily: 'Public Sans, sans-serif' }}>
             {user?.user_metadata?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'ABQ Explorer'}
           </p>
           <p className="text-sm text-gray-500">Greater ABQ Metro</p>
-          <p className="text-xs font-semibold mt-0.5" style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}>
+          <p className="text-xs font-semibold mt-0.5" style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}>
             {level.emoji} {level.label}
           </p>
         </div>
@@ -4609,7 +4609,7 @@ function ProfileScreen({
           >
             <p
               className="text-2xl font-black"
-              style={{ fontFamily: 'Epilogue, sans-serif', color: 'var(--brand)' }}
+              style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--brand)' }}
             >
               {s.val}
             </p>
@@ -4622,13 +4622,13 @@ function ProfileScreen({
       {myCount >= 50 ? (
         <div className="bg-white rounded-lg p-4 mb-4 text-center" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
           <span style={{ fontSize: '28px' }}>★</span>
-          <p className="font-black text-sm mt-1" style={{ fontFamily: 'Epilogue, sans-serif', color: 'var(--brand)' }}>Max Level Reached!</p>
-          <p className="text-xs text-gray-400 mt-0.5" style={{ fontFamily: 'Inter, sans-serif' }}>You're a Legend — {myCount} places explored!</p>
+          <p className="font-black text-sm mt-1" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--brand)' }}>Max Level Reached!</p>
+          <p className="text-xs text-gray-400 mt-0.5" style={{ fontFamily: 'Public Sans, sans-serif' }}>You're a Legend — {myCount} places explored!</p>
         </div>
       ) : (
         <div className="bg-white rounded-lg p-4 mb-4" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
           <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-bold text-gray-700" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <span className="text-xs font-bold text-gray-700" style={{ fontFamily: 'Public Sans, sans-serif' }}>
               Progress to {nextLevel.label}
             </span>
             <span className="text-xs font-bold" style={{ color: 'var(--brand)' }}>
@@ -4641,7 +4641,7 @@ function ProfileScreen({
               style={{ width: `${progressPct}%`, background: 'var(--brand-gradient)' }}
             />
           </div>
-          <p className="text-xs text-gray-400 mt-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <p className="text-xs text-gray-400 mt-2" style={{ fontFamily: 'Public Sans, sans-serif' }}>
             Check in to {level.next - myCount} more place{level.next - myCount !== 1 ? 's' : ''} to level up!
           </p>
         </div>
@@ -4649,7 +4649,7 @@ function ProfileScreen({
 
       {/* Achievements */}
       <div className="flex items-center px-0 py-3 mb-0" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
-        <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Epilogue, sans-serif' }}>Achievements</h2>
+        <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif' }}>Achievements</h2>
       </div>
       {/* Abutting border grid — no gap, container has left+top, cells have right+bottom */}
       <div className="grid grid-cols-3 mb-5" style={{ gap: 0, borderLeft: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', borderRight: '2px solid #1A1A1A' }}>
@@ -4677,7 +4677,7 @@ function ProfileScreen({
               {a.icon}
             </span>
             <p className="text-center leading-tight font-black uppercase" style={{
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: 'Public Sans, sans-serif',
               fontSize: '8px',
               letterSpacing: '0.08em',
               color: a.unlocked ? '#1A1A1A' : '#CCCCCC',
@@ -4685,9 +4685,9 @@ function ProfileScreen({
               {a.label}
             </p>
             <p className="text-center" style={{
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: 'Public Sans, sans-serif',
               fontSize: '8px',
-              color: a.unlocked ? '#566500' : '#DDDDDD',
+              color: a.unlocked ? '#b95c43' : '#DDDDDD',
               letterSpacing: '0.04em',
             }}>
               {a.sub}
@@ -4753,7 +4753,7 @@ function ProfileScreen({
         return (
           <>
             <div className="flex items-center px-0 py-3 mb-0 mt-1" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
-              <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Epilogue, sans-serif' }}>ABQ Explorer Challenges</h2>
+              <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif' }}>ABQ Explorer Challenges</h2>
             </div>
             <div className="flex flex-col gap-2 mb-5 mt-3">
               {CHALLENGES.map(c => {
@@ -4771,20 +4771,20 @@ function ProfileScreen({
                   >
                     <div className="flex items-center gap-2 mb-1">
                       <span style={{ fontSize: '20px', lineHeight: 1 }}>{c.emoji}</span>
-                      <span className="font-black text-sm flex-1" style={{ fontFamily: 'Epilogue, sans-serif', color: '#1A1A1A' }}>{c.title}</span>
-                      {done && <span className="text-xs font-black" style={{ color: '#566500' }}>✓ DONE</span>}
-                      {!done && <span className="text-xs font-semibold" style={{ fontFamily: 'Inter, sans-serif', color: '#999' }}>{c.progress}/{c.target}</span>}
+                      <span className="font-black text-sm flex-1" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>{c.title}</span>
+                      {done && <span className="text-xs font-black" style={{ color: '#b95c43' }}>✓ DONE</span>}
+                      {!done && <span className="text-xs font-semibold" style={{ fontFamily: 'Public Sans, sans-serif', color: '#999' }}>{c.progress}/{c.target}</span>}
                     </div>
-                    <p className="text-xs mb-2" style={{ fontFamily: 'Inter, sans-serif', color: '#555' }}>{c.desc}</p>
+                    <p className="text-xs mb-2" style={{ fontFamily: 'Public Sans, sans-serif', color: '#555' }}>{c.desc}</p>
                     <div className="rounded-full overflow-hidden" style={{ height: '5px', background: done ? 'rgba(0,0,0,0.1)' : '#f0f0f0' }}>
-                      <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: done ? '#566500' : 'var(--brand-gradient)' }} />
+                      <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: done ? '#b95c43' : 'var(--brand-gradient)' }} />
                     </div>
                   </div>
                 );
               })}
               {allDone && (
                 <div className="text-center py-3 rounded-lg" style={{ background: '#1A1A1A', color: '#D4EF4D' }}>
-                  <p className="font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif' }}>🏆 All challenges complete — you're a true ABQ local!</p>
+                  <p className="font-black text-sm" style={{ fontFamily: 'Public Sans, sans-serif' }}>🏆 All challenges complete — you're a true ABQ local!</p>
                 </div>
               )}
             </div>
@@ -4796,11 +4796,11 @@ function ProfileScreen({
       <div className="flex items-center justify-between mb-3">
         <h2
           className="font-black text-base uppercase tracking-tight"
-          style={{ fontFamily: 'Epilogue, sans-serif' }}
+          style={{ fontFamily: 'Public Sans, sans-serif' }}
         >
           Leaderboard
         </h2>
-        <span className="text-xs text-gray-400" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <span className="text-xs text-gray-400" style={{ fontFamily: 'Public Sans, sans-serif' }}>
           Self-reported check-ins
         </span>
       </div>
@@ -4809,8 +4809,8 @@ function ProfileScreen({
         {leaderboard.length === 0 && (
           <div className="text-center py-8" style={{ background: 'white', borderRadius: 8, boxShadow: '3px 3px 0 rgba(0,0,0,0.08)' }}>
             <div style={{ fontSize: 32, marginBottom: 8 }}>🏁</div>
-            <p className="font-black text-sm" style={{ fontFamily: 'Epilogue, sans-serif', color: '#1a1a1a' }}>No explorers yet — be first!</p>
-            <p className="text-xs text-gray-400 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>Check in at places around ABQ to climb the board.</p>
+            <p className="font-black text-sm" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1a1a1a' }}>No explorers yet — be first!</p>
+            <p className="text-xs text-gray-400 mt-1" style={{ fontFamily: 'Public Sans, sans-serif' }}>Check in at places around ABQ to climb the board.</p>
           </div>
         )}
         {leaderboard.map((row) => (
@@ -4824,7 +4824,7 @@ function ProfileScreen({
           >
             <span
               className="font-black text-sm w-6 text-center flex-shrink-0"
-              style={{ fontFamily: 'Epilogue, sans-serif', color: row.rank <= 3 ? 'var(--brand)' : '#999' }}
+              style={{ fontFamily: 'Public Sans, sans-serif', color: row.rank <= 3 ? 'var(--brand)' : '#999' }}
             >
               {row.rank === 1 ? '' : row.rank === 2 ? '' : row.rank === 3 ? '' : `#${row.rank}`}
             </span>
@@ -4838,7 +4838,7 @@ function ProfileScreen({
             </div>
             <span
               className="flex-1 text-sm font-bold truncate"
-              style={{ fontFamily: 'Inter, sans-serif', color: row.isMe ? 'var(--brand)' : '#333' }}
+              style={{ fontFamily: 'Public Sans, sans-serif', color: row.isMe ? 'var(--brand)' : '#333' }}
             >
               {row.isMe ? 'You' : row.name}
             </span>
@@ -4849,7 +4849,7 @@ function ProfileScreen({
             ) : null}
             <span
               className="flex-shrink-0 text-sm font-black"
-              style={{ fontFamily: 'Epilogue, sans-serif', color: 'var(--brand)' }}
+              style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--brand)' }}
             >
               {row.count}
             </span>
@@ -4862,7 +4862,7 @@ function ProfileScreen({
         className="rounded-lg p-4 mb-5"
         style={{ background: 'rgba(160,59,0,0.06)' }}
       >
-        <p className="text-xs text-gray-500 text-center" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <p className="text-xs text-gray-500 text-center" style={{ fontFamily: 'Public Sans, sans-serif' }}>
           ️ Rankings are based on self-reported check-ins. We can't verify visits, but we trust you to explore honestly. The real prize is the memories you make!
         </p>
       </div>
@@ -4872,7 +4872,7 @@ function ProfileScreen({
         <>
           <h2
             className="font-black text-base uppercase tracking-tight mb-3"
-            style={{ fontFamily: 'Epilogue, sans-serif' }}
+            style={{ fontFamily: 'Public Sans, sans-serif' }}
           >
             Your Check-ins
           </h2>
@@ -4894,8 +4894,8 @@ function ProfileScreen({
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold truncate" style={{ fontFamily: 'Epilogue, sans-serif' }}>{p.name}</p>
-                    <p className="text-xs" style={{ fontFamily: 'Inter, sans-serif', color: '#666' }}>{p.category}</p>
+                    <p className="text-sm font-bold truncate" style={{ fontFamily: 'Public Sans, sans-serif' }}>{p.name}</p>
+                    <p className="text-xs" style={{ fontFamily: 'Public Sans, sans-serif', color: '#666' }}>{p.category}</p>
                   </div>
                   <span className="text-xs font-bold flex-shrink-0" style={{ color: 'var(--brand)' }}>✓</span>
                 </div>
@@ -5292,7 +5292,7 @@ function AndroidInstallPrompt() {
         border: '3px solid #000',
         borderBottom: 'none',
         padding: '0 0 calc(env(safe-area-inset-bottom) + 4px)',
-        fontFamily: 'Epilogue, sans-serif',
+        fontFamily: 'Public Sans, sans-serif',
         ...slideAnim,
       }}>
         {/* Header bar */}
@@ -5316,7 +5316,7 @@ function AndroidInstallPrompt() {
           <div style={{ fontWeight: 900, fontSize: 22, lineHeight: 1.1, textTransform: 'uppercase', letterSpacing: '-0.5px', marginBottom: 6 }}>
             INSTALL ABQ UNPLUGGED
           </div>
-          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#444', marginBottom: 20, lineHeight: 1.4 }}>
+          <div style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 14, color: '#444', marginBottom: 20, lineHeight: 1.4 }}>
             Add to your home screen. No app store. No BS.
           </div>
 
@@ -5334,13 +5334,13 @@ function AndroidInstallPrompt() {
                 ].map(({ step, text, icon }) => (
                   <div key={step} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{ minWidth: 32, height: 32, background: '#000', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 16 }}>{icon}</div>
-                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#1a1a1a' }}>{text}</span>
+                    <span style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 14, color: '#1a1a1a' }}>{text}</span>
                   </div>
                 ))}
               </div>
               <button
                 onClick={dismiss}
-                style={{ marginTop: 16, width: '100%', padding: '14px', background: '#000', color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'Epilogue, sans-serif', fontWeight: 900, fontSize: 15, letterSpacing: '0.05em', textTransform: 'uppercase' }}
+                style={{ marginTop: 16, width: '100%', padding: '14px', background: '#000', color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'Public Sans, sans-serif', fontWeight: 900, fontSize: 15, letterSpacing: '0.05em', textTransform: 'uppercase' }}
               >GOT IT</button>
             </div>
           ) : (
@@ -5348,11 +5348,11 @@ function AndroidInstallPrompt() {
             <div style={{ display: 'flex', gap: 10 }}>
               <button
                 onClick={dismiss}
-                style={{ flex: 1, padding: '14px', background: '#fff', border: '2px solid #000', cursor: 'pointer', fontFamily: 'Epilogue, sans-serif', fontWeight: 900, fontSize: 14, textTransform: 'uppercase' }}
+                style={{ flex: 1, padding: '14px', background: '#fff', border: '2px solid #000', cursor: 'pointer', fontFamily: 'Public Sans, sans-serif', fontWeight: 900, fontSize: 14, textTransform: 'uppercase' }}
               >NOT NOW</button>
               <button
                 onClick={install}
-                style={{ flex: 2, padding: '14px', background: '#000', color: '#fff', border: '2px solid #000', cursor: 'pointer', fontFamily: 'Epilogue, sans-serif', fontWeight: 900, fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                style={{ flex: 2, padding: '14px', background: '#000', color: '#fff', border: '2px solid #000', cursor: 'pointer', fontFamily: 'Public Sans, sans-serif', fontWeight: 900, fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.05em' }}
               >INSTALL NOW</button>
             </div>
           )}
@@ -5397,7 +5397,7 @@ function OfflineBanner() {
         color: '#fff',
         textAlign: 'center',
         fontSize: 13,
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'Public Sans, sans-serif',
         fontWeight: 600,
         padding: 'calc(env(safe-area-inset-top) + 8px) 16px 10px',
         boxShadow: '0 2px 12px rgba(0,0,0,0.25)',
@@ -5490,7 +5490,7 @@ function LoadingScreen() {
           key={msgIdx}
           className="text-sm text-gray-400 mt-4"
           style={{
-            fontFamily: 'Inter, sans-serif',
+            fontFamily: 'Public Sans, sans-serif',
             minHeight: '22px',
             textAlign: 'center',
             maxWidth: '260px',
@@ -5529,7 +5529,7 @@ function SiteBanner({ banner }: { banner: BannerConfig | null }) {
     info:    { bg: 'rgba(59,130,246,0.1)',  border: 'rgba(59,130,246,0.25)',  text: '#1d4ed8' },
     success: { bg: 'rgba(34,197,94,0.1)',   border: 'rgba(34,197,94,0.25)',   text: '#15803d' },
     warning: { bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.25)',  text: '#92400e' },
-    promo:   { bg: '#1ebaeb',               border: '#1A1A1A',                text: '#1A1A1A' },
+    promo:   { bg: '#b95c43',               border: '#1A1A1A',                text: '#1A1A1A' },
   };
   const typeColor = colorMap[banner.type] ?? colorMap.info;
   const bg   = banner.bgColor   || typeColor.bg;
@@ -5537,7 +5537,7 @@ function SiteBanner({ banner }: { banner: BannerConfig | null }) {
   const border = banner.bgColor || typeColor.border;
   return (
     <div style={{ background: bg, borderBottom: `2px solid ${border}`, padding: '10px 16px', textAlign: 'center' }}>
-      <p style={{ fontSize: '13px', fontWeight: 700, color: text, fontFamily: 'Inter, sans-serif', lineHeight: 1.4 }}>
+      <p style={{ fontSize: '13px', fontWeight: 700, color: text, fontFamily: 'Public Sans, sans-serif', lineHeight: 1.4 }}>
         {banner.message}
         {banner.linkUrl && banner.linkText && (
           <a href={banner.linkUrl} target="_blank" rel="noopener noreferrer"
@@ -6334,8 +6334,8 @@ function PlanScreen({
     return (
       <div className="flex flex-col items-center justify-center px-8 text-center" style={{ paddingTop: '100px', paddingBottom: '60px' }}>
         <span className="material-symbols-outlined" style={{ fontSize: '64px', color: '#d0d8d0', marginBottom: '16px' }}>bookmark</span>
-        <h2 className="font-black text-xl mb-2" style={{ fontFamily: 'Epilogue, sans-serif', color: '#1a1a1a' }}>Nothing saved yet</h2>
-        <p className="text-sm" style={{ color: '#888', fontFamily: 'Inter, sans-serif', lineHeight: 1.6 }}>
+        <h2 className="font-black text-xl mb-2" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1a1a1a' }}>Nothing saved yet</h2>
+        <p className="text-sm" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.6 }}>
           Bookmark events and places as you browse — they'll show up here so you can plan your next outing.
         </p>
       </div>
@@ -6347,19 +6347,19 @@ function PlanScreen({
       {/* Header */}
       <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-white border-b-2 border-black">
         <div>
-          <h1 className="font-black text-xl leading-tight" style={{ fontFamily: 'Epilogue, sans-serif' }}>My ABQ</h1>
-          <p className="text-xs mt-0.5" style={{ color: '#888', fontFamily: 'Inter, sans-serif' }}>{savedPlan.length} {savedPlan.length === 1 ? 'stop' : 'stops'} saved</p>
+          <h1 className="font-black text-xl leading-tight" style={{ fontFamily: 'Public Sans, sans-serif' }}>My ABQ</h1>
+          <p className="text-xs mt-0.5" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif' }}>{savedPlan.length} {savedPlan.length === 1 ? 'stop' : 'stops'} saved</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={handleSharePlan}
             className="flex items-center gap-1 text-xs font-black px-3 py-1.5"
-            style={{ border: '1.5px solid #1a1a1a', fontFamily: 'Inter, sans-serif', background: '#1a1a1a', color: 'white' }}
+            style={{ border: '1.5px solid #1a1a1a', fontFamily: 'Public Sans, sans-serif', background: '#1a1a1a', color: 'white' }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>share</span>
             Share
           </button>
-          <button onClick={onClearAll} className="text-xs font-bold px-3 py-1.5" style={{ border: '1.5px solid #1a1a1a', fontFamily: 'Inter, sans-serif', color: '#dc2626' }}>
+          <button onClick={onClearAll} className="text-xs font-bold px-3 py-1.5" style={{ border: '1.5px solid #1a1a1a', fontFamily: 'Public Sans, sans-serif', color: '#dc2626' }}>
             Clear
           </button>
         </div>
@@ -6368,7 +6368,7 @@ function PlanScreen({
       {/* Places section */}
       {places.length > 0 && (
         <div className="px-5 pt-5">
-          <h2 className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: '#888', fontFamily: 'Inter, sans-serif' }}>
+          <h2 className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif' }}>
             📍 Places ({places.length})
           </h2>
           <div className="flex flex-col gap-3">
@@ -6379,9 +6379,9 @@ function PlanScreen({
                     {(p.thumbnail || p.image) && <img src={p.thumbnail || p.image} alt="" className="w-full h-full object-cover" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-black text-sm truncate" style={{ fontFamily: 'Epilogue, sans-serif' }}>{p.name}</p>
-                    <p className="text-xs mt-0.5 truncate" style={{ color: '#888', fontFamily: 'Inter, sans-serif' }}>{p.category}</p>
-                    {p.address && <p className="text-xs mt-0.5 truncate" style={{ color: '#aaa', fontFamily: 'Inter, sans-serif' }}>{p.address.split(',')[0]}</p>}
+                    <p className="font-black text-sm truncate" style={{ fontFamily: 'Public Sans, sans-serif' }}>{p.name}</p>
+                    <p className="text-xs mt-0.5 truncate" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif' }}>{p.category}</p>
+                    {p.address && <p className="text-xs mt-0.5 truncate" style={{ color: '#aaa', fontFamily: 'Public Sans, sans-serif' }}>{p.address.split(',')[0]}</p>}
                   </div>
                 </button>
                 <div className="flex flex-col border-l-2 border-black">
@@ -6389,7 +6389,7 @@ function PlanScreen({
                     <a href={`https://maps.google.com/?q=${encodeURIComponent(p.address + ' Albuquerque NM')}`} target="_blank" rel="noopener noreferrer"
                       className="flex-1 flex flex-col items-center justify-center px-3 gap-0.5" style={{ background: 'var(--brand)', color: 'white', textDecoration: 'none', minWidth: '60px' }}>
                       <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>directions</span>
-                      <span className="text-[9px] font-black uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>Go</span>
+                      <span className="text-[9px] font-black uppercase tracking-wider" style={{ fontFamily: 'Public Sans, sans-serif' }}>Go</span>
                     </a>
                   )}
                   <button onClick={() => onRemovePlace(p.id)} className="flex items-center justify-center px-3 py-2" style={{ borderTop: '1.5px solid #1a1a1a', background: 'white' }}>
@@ -6405,7 +6405,7 @@ function PlanScreen({
       {/* Events section */}
       {events.length > 0 && (
         <div className="px-5 pt-5">
-          <h2 className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: '#888', fontFamily: 'Inter, sans-serif' }}>
+          <h2 className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif' }}>
             🎟 Events ({events.length})
           </h2>
           <div className="flex flex-col gap-3">
@@ -6421,16 +6421,16 @@ function PlanScreen({
                       {img ? <img src={img} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><span className="material-symbols-outlined text-white" style={{ fontSize: '22px' }}>confirmation_number</span></div>}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-black text-sm truncate" style={{ fontFamily: 'Epilogue, sans-serif' }}>{ev.name}</p>
-                      <p className="text-xs mt-0.5" style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>{month} {day}</p>
-                      {venue && <p className="text-xs mt-0.5 truncate" style={{ color: '#aaa', fontFamily: 'Inter, sans-serif' }}>{venue.name}</p>}
+                      <p className="font-black text-sm truncate" style={{ fontFamily: 'Public Sans, sans-serif' }}>{ev.name}</p>
+                      <p className="text-xs mt-0.5" style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif', fontWeight: 700 }}>{month} {day}</p>
+                      {venue && <p className="text-xs mt-0.5 truncate" style={{ color: '#aaa', fontFamily: 'Public Sans, sans-serif' }}>{venue.name}</p>}
                     </div>
                   </button>
                   <div className="flex flex-col border-l-2 border-black">
                     <a href={`https://maps.google.com/?q=${mapsQ}`} target="_blank" rel="noopener noreferrer"
                       className="flex-1 flex flex-col items-center justify-center px-3 gap-0.5" style={{ background: '#0057c2', color: 'white', textDecoration: 'none', minWidth: '60px' }}>
                       <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>directions</span>
-                      <span className="text-[9px] font-black uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>Go</span>
+                      <span className="text-[9px] font-black uppercase tracking-wider" style={{ fontFamily: 'Public Sans, sans-serif' }}>Go</span>
                     </a>
                     <button onClick={() => onRemoveEvent(ev.id)} className="flex items-center justify-center px-3 py-2" style={{ borderTop: '1.5px solid #1a1a1a', background: 'white' }}>
                       <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#dc2626' }}>close</span>
@@ -6445,7 +6445,7 @@ function PlanScreen({
 
       {/* Share plan hint */}
       <div className="mx-5 mt-6 p-4 text-center" style={{ background: '#f8faf8', border: '1.5px dashed #ccc' }}>
-        <p className="text-xs" style={{ color: '#888', fontFamily: 'Inter, sans-serif', lineHeight: 1.6 }}>
+        <p className="text-xs" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.6 }}>
           💡 Tap <strong>Go</strong> on any item to get directions, or tap the card to see full details and check in when you arrive.
         </p>
       </div>
@@ -6484,7 +6484,7 @@ interface DesktopAppProps {
 
 type DesktopTab = 'discover' | 'events' | 'places';
 
-const DESKTOP_DATE_COLORS = ['#566500', '#0057c2', '#1a1a1a'];
+const DESKTOP_DATE_COLORS = ['#b95c43', '#0057c2', '#1a1a1a'];
 const fmtLocalDate = (d: string) => {
   if (!d) return { month: '???', day: '??', dow: '???' };
   const dt = new Date(d + 'T12:00:00');
@@ -6517,7 +6517,7 @@ const GENRE_COLORS: Record<string, string> = {
 const genreColor = (ev: TMEvent) => GENRE_COLORS[getEventGenre(ev)] || '#374151';
 
 const dBLUE  = { background: '#0057c2' } as const;
-const dGREEN = { background: '#566500' } as const;
+const dGREEN = { background: '#b95c43' } as const;
 const dDARK  = { background: '#1a1a1a' } as const;
 
 function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSelect, onEventSelect, savedPlan: _savedPlan, onToggleSavePlace, onToggleSaveEvent, isPlaceSaved, isEventSaved }: DesktopAppProps) {
@@ -6580,7 +6580,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
     root:   { display:'flex', flexDirection:'column' as const, height:'100vh', overflow:'hidden', background:'#f8faf8', fontFamily:'Inter,system-ui,sans-serif', color:'#1a1a1a' },
     header: { height:'56px', background:'#fff', borderBottom:'2px solid #1a1a1a', display:'flex', alignItems:'center', flexShrink:0 as const, zIndex:100 },
     logo:   { width:'232px', borderRight:'2px solid #1a1a1a', height:'100%', display:'flex', alignItems:'center', padding:'0 18px', gap:'10px', flexShrink:0 as const },
-    logoBadge: { background:'linear-gradient(135deg,#566500,#8a9e00)', padding:'5px 9px', border:'2px solid #1a1a1a', fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'13px', letterSpacing:'-0.01em', color:'#d4ef4d' },
+    logoBadge: { background:'linear-gradient(135deg,#b95c43,#c97a62)', padding:'5px 9px', border:'2px solid #1a1a1a', fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'13px', letterSpacing:'-0.01em', color:'#d4ef4d' },
     headerSearch: { flex:1, height:'100%', display:'flex', alignItems:'center', padding:'0 18px', gap:'10px', borderRight:'2px solid #1a1a1a' },
     searchBox: { flex:1, maxWidth:'480px', height:'36px', border:'2px solid #1a1a1a', background:'#f8faf8', display:'flex', alignItems:'center', padding:'0 12px', gap:'8px' },
     headerRight: { width:'356px', height:'100%', display:'flex', alignItems:'center', padding:'0 16px', gap:'8px', flexShrink:0 as const },
@@ -6598,11 +6598,11 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
   const NavItem = ({ icon, label, id, count }: { icon:string; label:string; id:DesktopTab|string; count?:number }) => (
     <div onClick={() => typeof id === 'string' && ['discover','events','places'].includes(id) && setTab(id as DesktopTab)}
       style={{ display:'flex', alignItems:'center', gap:'9px', padding:'9px 14px', fontSize:'13px', fontWeight:600, cursor:'pointer',
-        color: tab === id ? '#566500' : '#5c6660', borderLeft: tab === id ? '3px solid #566500' : '3px solid transparent',
-        background: tab === id ? '#5665001a' : 'transparent' }}>
+        color: tab === id ? '#b95c43' : '#5c6660', borderLeft: tab === id ? '3px solid #b95c43' : '3px solid transparent',
+        background: tab === id ? '#b95c431a' : 'transparent' }}>
       <span className="material-symbols-outlined" style={{ fontSize:'18px' }}>{icon}</span>
       {label}
-      {count !== undefined && <span style={{ marginLeft:'auto', fontSize:'10px', fontWeight:800, background: tab===id ? '#566500' : '#1a1a1a', color:'#d4ef4d', padding:'1px 6px', minWidth:'20px', textAlign:'center' }}>{count.toLocaleString()}</span>}
+      {count !== undefined && <span style={{ marginLeft:'auto', fontSize:'10px', fontWeight:800, background: tab===id ? '#b95c43' : '#1a1a1a', color:'#d4ef4d', padding:'1px 6px', minWidth:'20px', textAlign:'center' }}>{count.toLocaleString()}</span>}
     </div>
   );
 
@@ -6640,7 +6640,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
             <span className="material-symbols-outlined" style={{ fontSize:'11px' }}>location_on</span>
             <span style={{ overflow:'hidden', whiteSpace:'nowrap', textOverflow:'ellipsis' }}>{getEventVenue(ev) || getEventCity(ev) || 'Albuquerque'}</span>
           </div>
-          {price && <span style={{ fontSize:'9px', fontWeight:800, letterSpacing:'0.04em', color: price==='FREE' ? '#566500' : '#0057c2', background: price==='FREE' ? '#5665000d' : '#dbeafe', border: price==='FREE' ? '1px solid #8a9e00' : '1px solid #93c5fd', padding:'1px 6px' }}>{price}</span>}
+          {price && <span style={{ fontSize:'9px', fontWeight:800, letterSpacing:'0.04em', color: price==='FREE' ? '#b95c43' : '#0057c2', background: price==='FREE' ? '#b95c430d' : '#dbeafe', border: price==='FREE' ? '1px solid #c97a62' : '1px solid #93c5fd', padding:'1px 6px' }}>{price}</span>}
         </div>
       </div>
     );
@@ -6652,14 +6652,14 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
       style={{ border:'2px solid #1a1a1a', background:'#fff', boxShadow:'3px 3px 0 #1a1a1a', cursor:'pointer', display:'flex', overflow:'hidden', transition:'transform 0.1s' }}
       onMouseEnter={e => (e.currentTarget.style.transform='translate(-2px,-2px)')}
       onMouseLeave={e => (e.currentTarget.style.transform='')}>
-      <div style={{ width:'72px', flexShrink:0, background: p.image ? 'transparent' : 'linear-gradient(135deg,#566500,#8a9e00)', overflow:'hidden' }}>
+      <div style={{ width:'72px', flexShrink:0, background: p.image ? 'transparent' : 'linear-gradient(135deg,#b95c43,#c97a62)', overflow:'hidden' }}>
         {(p.thumbnail || p.image) && <img src={p.thumbnail || p.image} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
       </div>
       <div style={{ flex:1, padding:'9px 11px', minWidth:0 }}>
         <div style={{ fontWeight:700, fontSize:'12px', marginBottom:'2px', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{p.name}</div>
         <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', color:'#5c6660', marginBottom:'5px' }}>{p.category}</div>
         <div style={{ display:'flex', alignItems:'center', gap:'7px' }}>
-          {p.rating && <span style={{ fontSize:'10px', fontWeight:800, color:'#566500' }}>★ {p.rating.toFixed(1)}</span>}
+          {p.rating && <span style={{ fontSize:'10px', fontWeight:800, color:'#b95c43' }}>★ {p.rating.toFixed(1)}</span>}
           {dist !== undefined && <span style={{ fontSize:'9px', color:'#5c6660', display:'flex', alignItems:'center', gap:'2px' }}>
             <span className="material-symbols-outlined" style={{ fontSize:'10px' }}>near_me</span>{formatDist(dist)}
           </span>}
@@ -6674,7 +6674,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
       style={{ border:'2px solid #1a1a1a', background:'#fff', boxShadow:'3px 3px 0 #1a1a1a', cursor:'pointer', overflow:'hidden', transition:'transform 0.1s' }}
       onMouseEnter={e => (e.currentTarget.style.transform='translate(-2px,-2px)')}
       onMouseLeave={e => (e.currentTarget.style.transform='')}>
-      <div style={{ height:'96px', background: p.image ? 'transparent' : 'linear-gradient(135deg,#566500,#8a9e00)', position:'relative', overflow:'hidden' }}>
+      <div style={{ height:'96px', background: p.image ? 'transparent' : 'linear-gradient(135deg,#b95c43,#c97a62)', position:'relative', overflow:'hidden' }}>
         {(p.thumbnail || p.image) && <img src={p.thumbnail || p.image} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
         <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(0,0,0,0.45) 0%,transparent 55%)' }} />
         {p.rating && <div style={{ position:'absolute', bottom:6, left:6, background:'rgba(0,0,0,0.55)', color:'#fff', fontSize:'10px', fontWeight:700, padding:'2px 7px' }}>★ {p.rating.toFixed(1)}</div>}
@@ -6715,13 +6715,13 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
           </div>
           <div style={{ display:'flex', gap:'5px', flexWrap:'wrap' }}>
             {getEventGenre(ev) && <span style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', border:'1px solid #d0d8d0', padding:'1px 6px', color:'#5c6660' }}>{getEventGenre(ev)}</span>}
-            {isFree && <span style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', border:'1px solid #8a9e00', padding:'1px 6px', color:'#566500', background:'#5665000d' }}>Free</span>}
+            {isFree && <span style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', border:'1px solid #c97a62', padding:'1px 6px', color:'#b95c43', background:'#b95c430d' }}>Free</span>}
           </div>
         </div>
         <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', justifyContent:'space-between', padding:'11px 13px', flexShrink:0 }}>
-          <span style={{ fontSize:'11px', fontWeight:800, color: isFree ? '#566500' : '#0057c2' }}>{price || ''}</span>
+          <span style={{ fontSize:'11px', fontWeight:800, color: isFree ? '#b95c43' : '#0057c2' }}>{price || ''}</span>
           <button onClick={e => { e.stopPropagation(); if(ev.url) window.open(ev.url,'_blank'); }}
-            style={{ height:'27px', padding:'0 9px', background: isFree ? '#566500' : '#0057c2', color:'#fff', border:'none', fontFamily:'Inter,sans-serif', fontSize:'9px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'4px' }}>
+            style={{ height:'27px', padding:'0 9px', background: isFree ? '#b95c43' : '#0057c2', color:'#fff', border:'none', fontFamily:'Inter,sans-serif', fontSize:'9px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'4px' }}>
             <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>{isFree ? 'open_in_new' : 'confirmation_number'}</span>
             {isFree ? 'Info' : 'Tickets'}
           </button>
@@ -6780,7 +6780,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
       const price = getEventPrice(ev);
       const isFree = price === 'FREE';
       const img = getEventImage(ev);
-      const color = isFree ? '#566500' : '#0057c2';
+      const color = isFree ? '#b95c43' : '#0057c2';
       return (
         <div style={{ flex:1, overflowY:'auto' }}>
           <div style={{ height:'160px', background: img ? 'transparent' : `linear-gradient(135deg,${color},#1a1a1a)`, position:'relative', overflow:'hidden' }}>
@@ -6811,7 +6811,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
             )}
             <div style={{ display:'flex', gap:'6px' }}>
               {ev.url && <button onClick={() => window.open(ev.url,'_blank')}
-                style={{ flex:1, height:'32px', background: isFree ? '#566500' : '#0057c2', color:'#fff', border:'2px solid #1a1a1a', fontFamily:'Inter,sans-serif', fontSize:'10px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'4px', boxShadow:'2px 2px 0 #1a1a1a' }}>
+                style={{ flex:1, height:'32px', background: isFree ? '#b95c43' : '#0057c2', color:'#fff', border:'2px solid #1a1a1a', fontFamily:'Inter,sans-serif', fontSize:'10px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'4px', boxShadow:'2px 2px 0 #1a1a1a' }}>
                 <span className="material-symbols-outlined" style={{ fontSize:'13px' }}>{isFree ? 'open_in_new' : 'confirmation_number'}</span>
                 {isFree ? 'More Info' : 'Get Tickets'}
               </button>}
@@ -6830,7 +6830,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
     const p = detail.data;
     return (
       <div style={{ flex:1, overflowY:'auto' }}>
-        <div style={{ height:'160px', background: p.image ? 'transparent' : 'linear-gradient(135deg,#566500,#8a9e00)', position:'relative', overflow:'hidden' }}>
+        <div style={{ height:'160px', background: p.image ? 'transparent' : 'linear-gradient(135deg,#b95c43,#c97a62)', position:'relative', overflow:'hidden' }}>
           {(p.thumbnail || p.image) && <img src={p.image || p.thumbnail} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
           <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(0,0,0,0.65),transparent 55%)' }} />
           <button onClick={() => setDetail(null)} style={{ position:'absolute', top:8, right:8, width:'28px', height:'28px', border:'1.5px solid rgba(255,255,255,0.5)', background:'rgba(0,0,0,0.4)', color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
@@ -6838,12 +6838,12 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
           </button>
         </div>
         <div style={{ padding:'14px 16px' }}>
-          <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.1em', textTransform:'uppercase', color:'#566500', marginBottom:'4px', display:'flex', alignItems:'center', gap:'4px' }}>
+          <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.1em', textTransform:'uppercase', color:'#b95c43', marginBottom:'4px', display:'flex', alignItems:'center', gap:'4px' }}>
             <span className="material-symbols-outlined" style={{ fontSize:'11px' }}>storefront</span>
             {p.category}{p.hours ? ` · ${p.hours}` : ''}
           </div>
           <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'16px', lineHeight:1.2, marginBottom:'8px' }}>{p.name}</div>
-          {p.rating && <div style={{ fontSize:'12px', fontWeight:700, color:'#566500', marginBottom:'8px' }}>★ {p.rating.toFixed(1)}{p.reviewCount ? <span style={{ fontWeight:400, color:'#5c6660', fontSize:'11px' }}> ({p.reviewCount.toLocaleString()} reviews)</span> : ''}</div>}
+          {p.rating && <div style={{ fontSize:'12px', fontWeight:700, color:'#b95c43', marginBottom:'8px' }}>★ {p.rating.toFixed(1)}{p.reviewCount ? <span style={{ fontWeight:400, color:'#5c6660', fontSize:'11px' }}> ({p.reviewCount.toLocaleString()} reviews)</span> : ''}</div>}
           {p.address && <div style={{ fontSize:'11px', color:'#5c6660', display:'flex', alignItems:'center', gap:'5px', marginBottom:'14px' }}>
             <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>location_on</span>{p.address}
           </div>}
@@ -6892,7 +6892,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
       </div>
       {/* Map filter strip */}
       <div style={{ position:'absolute', bottom:8, left:8, display:'flex', gap:'4px' }}>
-        {[{icon:'confirmation_number',label:'Events',bg:'#1a1a1a'},{icon:'storefront',label:'Places',bg:'#566500'}].map(c => (
+        {[{icon:'confirmation_number',label:'Events',bg:'#1a1a1a'},{icon:'storefront',label:'Places',bg:'#b95c43'}].map(c => (
           <div key={c.label} style={{ height:'22px', padding:'0 7px', background:c.bg, border:'1.5px solid #1a1a1a', fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'3px', color:'#d4ef4d', boxShadow:'2px 2px 0 rgba(0,0,0,0.1)' }}>
             <span className="material-symbols-outlined" style={{ fontSize:'11px' }}>{c.icon}</span>{c.label}
           </div>
@@ -6932,8 +6932,8 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
           </div>
         </div>
         <div style={s.headerRight}>
-          <div style={{ display:'flex', alignItems:'center', gap:'5px', border:'1.5px solid #8a9e00', padding:'4px 9px', background:'#5665001a', fontSize:'10px', fontWeight:700, color:'#566500', letterSpacing:'0.04em', marginRight:'4px' }}>
-            <span className="material-symbols-outlined" style={{ fontSize:'12px', color:'#566500' }}>my_location</span>
+          <div style={{ display:'flex', alignItems:'center', gap:'5px', border:'1.5px solid #c97a62', padding:'4px 9px', background:'#b95c431a', fontSize:'10px', fontWeight:700, color:'#b95c43', letterSpacing:'0.04em', marginRight:'4px' }}>
+            <span className="material-symbols-outlined" style={{ fontSize:'12px', color:'#b95c43' }}>my_location</span>
             Downtown ABQ
           </div>
           {[{icon:'search',label:'Search'},{icon:'notifications',label:'Alerts'},{icon:'person',label:'Profile'}].map((btn, i) => (
@@ -6982,7 +6982,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
             ].map(row => (
               <div key={row.label} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'8px' }}>
                 <span style={{ fontSize:'10px', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.06em', color:'#5c6660' }}>{row.label}</span>
-                <span style={{ fontSize:'13px', fontWeight:800, color:'#566500' }}>{row.val.toLocaleString()}</span>
+                <span style={{ fontSize:'13px', fontWeight:800, color:'#b95c43' }}>{row.val.toLocaleString()}</span>
               </div>
             ))}
           </div>
@@ -6992,7 +6992,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
             <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', color:'#5c6660', marginBottom:'10px' }}>Sort Places</div>
             <div style={{ display:'flex', flexDirection:'column', gap:'4px' }}>
               {([['top','Top Rated','star'],['near','Near Me','near_me'],['az','A–Z','sort_by_alpha']] as const).map(([val, label, icon]) => (
-                <div key={val} onClick={() => setSort(val)} style={{ display:'flex', alignItems:'center', gap:'8px', padding:'6px 8px', cursor:'pointer', fontSize:'12px', fontWeight:600, border:'1.5px solid', borderColor: sort===val ? (val==='near' ? '#0057c2' : '#566500') : 'transparent', background: sort===val ? (val==='near' ? '#dbeafe' : '#5665000d') : 'transparent', color: sort===val ? (val==='near' ? '#0057c2' : '#566500') : '#5c6660' }}>
+                <div key={val} onClick={() => setSort(val)} style={{ display:'flex', alignItems:'center', gap:'8px', padding:'6px 8px', cursor:'pointer', fontSize:'12px', fontWeight:600, border:'1.5px solid', borderColor: sort===val ? (val==='near' ? '#0057c2' : '#b95c43') : 'transparent', background: sort===val ? (val==='near' ? '#dbeafe' : '#b95c430d') : 'transparent', color: sort===val ? (val==='near' ? '#0057c2' : '#b95c43') : '#5c6660' }}>
                   <span className="material-symbols-outlined" style={{ fontSize:'15px' }}>{icon}</span>{label}
                 </div>
               ))}
@@ -7026,7 +7026,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
                 {/* Hero + Events This Week — side by side on wide desktop, stacked on narrow */}
                 <div style={{ display:'grid', gridTemplateColumns: isNarrowDesktop ? '1fr' : 'minmax(0,3fr) minmax(0,2fr)', gap:'0', marginBottom:'24px', border:'2px solid #1a1a1a', boxShadow:'4px 4px 0 #1a1a1a' }}>
                   {/* Hero */}
-                  <div style={{ background:'linear-gradient(135deg,#566500,#8a9e00)', padding:'clamp(14px,2vw,24px) clamp(14px,2vw,28px) clamp(12px,1.5vw,20px)', position:'relative', overflow:'hidden', minWidth:0 }}>
+                  <div style={{ background:'linear-gradient(135deg,#b95c43,#c97a62)', padding:'clamp(14px,2vw,24px) clamp(14px,2vw,28px) clamp(12px,1.5vw,20px)', position:'relative', overflow:'hidden', minWidth:0 }}>
                     <div style={{ position:'absolute', top:'-30px', right:'-30px', width:'180px', height:'180px', background:'rgba(212,239,77,0.1)', borderRadius:'50%' }} />
                     <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.16em', textTransform:'uppercase', color:'#d4ef4d', marginBottom:'5px' }}>✦ Your City, Unplugged</div>
                     <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'clamp(16px,2.2vw,26px)', lineHeight:1.05, letterSpacing:'-0.02em', color:'#fff', marginBottom:'8px' }}>Find Something<br/>Worth Leaving<br/>the House For</div>
@@ -7065,10 +7065,10 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
                 {nearbyPlaces.length > 0 && <>
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'12px', paddingBottom:'10px', borderBottom:'2px solid #1a1a1a' }}>
                     <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'12px', letterSpacing:'0.08em', textTransform:'uppercase' }}>Near You</div>
-                    <span style={{ fontSize:'10px', fontWeight:700, color:'#566500', display:'flex', alignItems:'center', gap:'4px' }}>
+                    <span style={{ fontSize:'10px', fontWeight:700, color:'#b95c43', display:'flex', alignItems:'center', gap:'4px' }}>
                       <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>my_location</span>Live location
                     </span>
-                    <span onClick={() => setTab('places')} style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', color:'#566500', cursor:'pointer', display:'flex', alignItems:'center', gap:'2px' }}>
+                    <span onClick={() => setTab('places')} style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', color:'#b95c43', cursor:'pointer', display:'flex', alignItems:'center', gap:'2px' }}>
                       All places <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>arrow_forward</span>
                     </span>
                   </div>
@@ -7849,8 +7849,8 @@ export default function App() {
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #d0d8d0; }
         :root {
-          --brand: #566500;
-          --brand-gradient: linear-gradient(135deg, #566500 0%, #8a9e00 100%);
+          --brand: #b95c43;
+          --brand-gradient: linear-gradient(135deg, #b95c43 0%, #c97a62 100%);
           --brand-bg-screen: #f8faf8;
         }
       `}</style>
@@ -7892,12 +7892,12 @@ export default function App() {
   if (loadError) return (
     <div className="fixed inset-0 flex flex-col items-center justify-center gap-3 px-8" style={{ background: 'var(--brand-bg-screen)' }}>
       <ABQUnpluggedLogo size={88} />
-      <h2 className="text-xl font-black uppercase tracking-tighter text-center" style={{ fontFamily: 'Epilogue, sans-serif', color: 'var(--brand)' }}>Couldn't Load Content</h2>
-      <p className="text-sm text-gray-500 text-center" style={{ fontFamily: 'Inter, sans-serif' }}>Check your connection and try again.</p>
+      <h2 className="text-xl font-black uppercase tracking-tighter text-center" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--brand)' }}>Couldn't Load Content</h2>
+      <p className="text-sm text-gray-500 text-center" style={{ fontFamily: 'Public Sans, sans-serif' }}>Check your connection and try again.</p>
       <button
         onClick={() => { setLoadError(false); setLoading(true); }}
         className="mt-2 px-6 py-3 rounded-lg font-bold text-sm text-white"
-        style={{ background: 'var(--brand)', fontFamily: 'Inter, sans-serif' }}
+        style={{ background: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}
       >
         Retry
       </button>
@@ -8067,7 +8067,7 @@ export default function App() {
                 className="material-symbols-outlined"
                 style={{
                   fontSize: '18px',
-                  color: coords ? '#566500' : '#888',
+                  color: coords ? '#b95c43' : '#888',
                   fontVariationSettings: coords ? "'FILL' 1" : "'FILL' 0",
                 }}
               >
@@ -8196,7 +8196,7 @@ export default function App() {
                 className="font-black uppercase"
                 style={{
                   color: activeTab === item.id ? 'white' : '#555',
-                  fontFamily: 'Inter, sans-serif',
+                  fontFamily: 'Public Sans, sans-serif',
                   fontSize: '8px',
                   letterSpacing: '0.1em',
                 }}
@@ -8211,13 +8211,13 @@ export default function App() {
           <div style={{ background: 'white', borderRadius: '4px', width: '90%', maxWidth: '480px', padding: '16px', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
               <span className="material-symbols-outlined" style={{ color: 'var(--brand)', fontSize: '22px' }}>search</span>
-              <input autoFocus type="text" placeholder="Search places, events..." value={globalSearch} onChange={e => setGlobalSearch(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && globalSearch.trim()) { trackEvent('search', { query: globalSearch.trim(), context: 'events' }); setEventsNavSearch(globalSearch.trim()); setActiveTab('events'); setShowSearch(false); } }} style={{ flex: 1, border: 'none', outline: 'none', fontSize: '16px', fontFamily: 'Inter, sans-serif' }} />
+              <input autoFocus type="text" placeholder="Search places, events..." value={globalSearch} onChange={e => setGlobalSearch(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && globalSearch.trim()) { trackEvent('search', { query: globalSearch.trim(), context: 'events' }); setEventsNavSearch(globalSearch.trim()); setActiveTab('events'); setShowSearch(false); } }} style={{ flex: 1, border: 'none', outline: 'none', fontSize: '16px', fontFamily: 'Public Sans, sans-serif' }} />
               <button onClick={() => setShowSearch(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px' }}><span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#666' }}>close</span></button>
             </div>
             {globalSearch.trim() && (
               <div style={{display:'flex',gap:'8px',width:'100%'}}>
-                <button onClick={() => { trackEvent('search', { query: globalSearch.trim(), context: 'events' }); setEventsNavSearch(globalSearch.trim()); setActiveTab('events'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'var(--brand)',color:'white',border:'none',borderRadius:'10px',fontSize:'15px',fontFamily:'Manrope, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Events</button>
-                <button onClick={() => { trackEvent('search', { query: globalSearch.trim(), context: 'places' }); setPlacesNavCat('All'); setPlacesNavSearch(globalSearch.trim()); setPlacesNavKey(k => k + 1); setActiveTab('places'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'#026cdf',color:'white',border:'none',borderRadius:'10px',fontSize:'15px',fontFamily:'Manrope, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Places</button>
+                <button onClick={() => { trackEvent('search', { query: globalSearch.trim(), context: 'events' }); setEventsNavSearch(globalSearch.trim()); setActiveTab('events'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'var(--brand)',color:'white',border:'none',borderRadius:'10px',fontSize:'15px',fontFamily:'Public Sans, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Events</button>
+                <button onClick={() => { trackEvent('search', { query: globalSearch.trim(), context: 'places' }); setPlacesNavCat('All'); setPlacesNavSearch(globalSearch.trim()); setPlacesNavKey(k => k + 1); setActiveTab('places'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'#026cdf',color:'white',border:'none',borderRadius:'10px',fontSize:'15px',fontFamily:'Public Sans, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Places</button>
               </div>
             )}
           </div>
