@@ -6684,17 +6684,24 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
 
       // Find which place-categories this query aliases to
       const aliasedCats = new Set<string>();
-      for (const [term, cats] of Object.entries(SEARCH_ALIASES)) {
+      const aliasKeys = Object.keys(SEARCH_ALIASES);
+      for (let ai = 0; ai < aliasKeys.length; ai++) {
+        const term = aliasKeys[ai];
+        const termCats = SEARCH_ALIASES[term];
         if (q === term || q.includes(term) || term.includes(q)) {
-          cats.forEach(c => aliasedCats.add(c));
+          for (let ci = 0; ci < termCats.length; ci++) {
+            aliasedCats.add(termCats[ci]);
+          }
         }
       }
       // Also match against the human-readable category labels (e.g. "restaurant" → "Restaurants")
-      PLACE_CATEGORIES.forEach(pc => {
+      for (let pi = 0; pi < PLACE_CATEGORIES.length; pi++) {
+        const pc = PLACE_CATEGORIES[pi];
         if (pc.value !== 'All' && (pc.label.toLowerCase().includes(q) || q.includes(pc.value))) {
           aliasedCats.add(pc.value);
         }
-      });
+      }
+      console.log('[SEARCH DEBUG]', q, 'aliasedCats:', [...aliasedCats], 'r.length before filter:', r.length);
 
       r = r.filter(p => {
         const pName    = p.name.toLowerCase();
