@@ -169,7 +169,8 @@ def sync_to_supabase(sb, con, force_all=False):
         if website: e['website'] = website
         if menu:    e['menu']    = menu
         upserts.append({'id': place_id, 'enriched': e})
-    sb.from_('places').upsert(upserts, on_conflict='id').execute()
+    for u in upserts:
+        sb.from_('places').update({'enriched': u['enriched']}).eq('id', u['id']).execute()
     ids = [r[0] for r in rows]
     con.execute(f'UPDATE enriched SET synced=1 WHERE place_id IN ({",".join("?"*len(ids))})', ids)
     con.commit()
