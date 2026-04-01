@@ -5433,7 +5433,7 @@ function LoadingScreen() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const showTimer = setTimeout(() => setVisible(true), 800);
+    const showTimer = setTimeout(() => setVisible(true), 1500);
     return () => clearTimeout(showTimer);
   }, []);
 
@@ -7598,14 +7598,30 @@ export default function App() {
         }
       } catch {}
 
+      // ── Phase 0: Pre-seed from static JSON so the loading screen
+      // almost never appears. /places-data.json is a same-origin static
+      // file that the service worker caches on first load — it responds
+      // in < 200 ms, well under the 1500 ms LoadingScreen delay.
+      // Supabase then refreshes the data silently in the background.
+      try {
+        const staticR = await withTimeout(fetch('/places-data.json'), 1500);
+        if (staticR.ok) {
+          const staticPlaces = await staticR.json();
+          if (Array.isArray(staticPlaces) && staticPlaces.length > 0) {
+            setPlaces(staticPlaces);
+            placesLoaded = true;
+            setLoading(false); // ← app visible immediately with static data
+          }
+        }
+      } catch { /* SW cache miss on very first ever load — fall through */ }
+
       // Kick off events fetch NOW — in parallel with places — so Supabase only
       // needs to wake up once. Both promises race concurrently.
       setEventsLoading(true);
       const eventsPromise = withTimeout(fetchEventsFromDB(), 12000);
 
       try {
-        // Timeout raised to 20 s: parallel page fetches in db.ts complete in
-        // ~2 s on a warm connection, but give a generous window for cold starts.
+        // Refresh places from Supabase in background (app already visible above)
         const sbPlaces = await withTimeout(fetchPlacesFromDB(), 20000);
         if (Array.isArray(sbPlaces) && sbPlaces.length > 0) {
           setPlaces(sbPlaces);
@@ -7613,13 +7629,10 @@ export default function App() {
           try { localStorage.setItem(CACHE_KEY, JSON.stringify({ data: sbPlaces, ts: Date.now() })); } catch {}
         }
       } catch (err) {
-        console.warn('[Places] Supabase failed or timed out, trying JSON fallback:', err);
-        try {
-          const r = await fetch('/places-data.json');
-          if (r.ok) { setPlaces(await r.json()); placesLoaded = true; }
-        } catch {}
+        console.warn('[Places] Supabase failed or timed out:', err);
+        // placesLoaded may already be true from static JSON pre-seed above
       } finally {
-        setLoading(false); // ← Show the app NOW; events will stream in shortly
+        setLoading(false); // ensure cleared regardless
       }
 
       if (!placesLoaded) {
