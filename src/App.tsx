@@ -533,7 +533,7 @@ function ABQUnpluggedLogo({ size = 43 }: { size?: number }) {
     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', userSelect: 'none' }}>
       {/* Lime accent block */}
       <div style={{
-        background: '#D4EF4D',
+        background: '#b95c43',
         padding: `2px ${Math.round(blockH * 0.28)}px`,
         display: 'inline-flex',
         alignItems: 'center',
@@ -2630,7 +2630,7 @@ function AnimatedFact() {
         <p className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>Did You Know?</p>
       </div>
       <div className="px-5">
-        <button onClick={next} className="w-full p-5 text-left" style={{ background: '#D4EF4D', border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A', minHeight: 96, borderRadius: 0 }}>
+        <button onClick={next} className="w-full p-5 text-left" style={{ background: '#b95c43', border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A', minHeight: 96, borderRadius: 0 }}>
           <div style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.35s ease' }}>
             <FlatIcon name={facts[idx].icon} size={28} color="#1A1A1A" />
             <p className="text-sm mt-2 leading-relaxed font-semibold" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>{facts[idx].fact}</p>
@@ -2912,7 +2912,7 @@ function DiscoverScreen({
                   {/* Date block */}
                   <div className="flex flex-col items-center justify-center flex-shrink-0"
                     style={{ width: 62, backgroundColor: '#1A1A1A', minHeight: 64 }}>
-                    <span className="font-black uppercase" style={{ fontSize: 10, color: '#D4EF4D', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em', lineHeight: 1 }}>
+                    <span className="font-black uppercase" style={{ fontSize: 10, color: '#F9F5F2', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em', lineHeight: 1 }}>
                       {month}
                     </span>
                     <span className="font-black" style={{ fontSize: 30, color: '#fff', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.05 }}>
@@ -2930,7 +2930,7 @@ function DiscoverScreen({
                   </div>
                   {/* Arrow */}
                   <div className="flex items-center justify-center flex-shrink-0"
-                    style={{ width: 48, backgroundColor: '#D4EF4D', borderLeft: '1px solid #1A1A1A' }}>
+                    style={{ width: 48, backgroundColor: '#b95c43', borderLeft: '1px solid #1A1A1A' }}>
                     <span className="font-black" style={{ fontSize: 18, color: '#1A1A1A' }}>→</span>
                   </div>
                 </button>
@@ -3179,14 +3179,14 @@ function DiscoverScreen({
             { name: 'Downtown', desc: 'Nightlife & events', icon: 'nightlife', bg: '#1A1A1A' },
             { name: 'Rio Grande', desc: 'Nature & trails', icon: 'nature', bg: '#1C6FEA' },
             { name: 'NE Heights', desc: 'Views & dining', icon: 'landscape', bg: '#c97a62' },
-            { name: 'South Valley', desc: 'Local flavor', icon: 'storefront', bg: '#D4EF4D' },
+            { name: 'South Valley', desc: 'Local flavor', icon: 'storefront', bg: '#baad3b' },
           ].map(({ name, desc, icon, bg }) => (
             <button key={name} className="p-4 text-left transition-all"
               style={{ backgroundColor: bg, borderRight: '2px solid #1A1A1A', borderBottom: '2px solid #1A1A1A', borderRadius: 0 }}
               onClick={() => onNavigatePlaces?.('All', name)}>
-              <span className="material-symbols-outlined" style={{ fontSize: '24px', color: bg === '#D4EF4D' ? '#1A1A1A' : 'white', fontVariationSettings: "'FILL' 0, 'wght' 300" }}>{icon}</span>
-              <p className="font-black text-sm mt-1" style={{ fontFamily: 'Public Sans, sans-serif', color: bg === '#D4EF4D' ? '#1A1A1A' : 'white' }}>{name}</p>
-              <p className="text-xs" style={{ fontFamily: 'Public Sans, sans-serif', color: bg === '#D4EF4D' ? 'rgba(0,0,0,0.65)' : 'rgba(255,255,255,0.75)' }}>{desc}</p>
+              <span className="material-symbols-outlined" style={{ fontSize: '24px', color: bg === '#baad3b' ? '#1A1A1A' : 'white', fontVariationSettings: "'FILL' 0, 'wght' 300" }}>{icon}</span>
+              <p className="font-black text-sm mt-1" style={{ fontFamily: 'Public Sans, sans-serif', color: bg === '#baad3b' ? '#1A1A1A' : 'white' }}>{name}</p>
+              <p className="text-xs" style={{ fontFamily: 'Public Sans, sans-serif', color: bg === '#baad3b' ? 'rgba(0,0,0,0.65)' : 'rgba(255,255,255,0.75)' }}>{desc}</p>
             </button>
           ))}
         </div>
@@ -3202,9 +3202,9 @@ function DiscoverScreen({
         </div>
         <div className="flex flex-col gap-2">
           {[
-            { title: 'Morning Hike + Brunch', steps: ['Sandia Mountain foothills trail', 'Coffee at Flying Star Café', 'Brunch in Nob Hill'], bar: '#D4EF4D' },
+            { title: 'Morning Hike + Brunch', steps: ['Sandia Mountain foothills trail', 'Coffee at Flying Star Café', 'Brunch in Nob Hill'], bar: '#b95c43' },
             { title: 'Culture Day', steps: ['Explora Science Center', 'Lunch in Old Town', 'Albuquerque Museum'], bar: '#b95c43' },
-            { title: 'Local Food Crawl', steps: ['Green chile breakfast at Frontier', 'Lunch at El Modelo', 'Drinks on Central Ave'], bar: '#D4EF4D' },
+            { title: 'Local Food Crawl', steps: ['Green chile breakfast at Frontier', 'Lunch at El Modelo', 'Drinks on Central Ave'], bar: '#b95c43' },
             { title: 'Nature Escape', steps: ['Rio Grande Bosque trail', 'Tingley Beach', 'Sunset at Petroglyph Monument'], bar: '#b95c43' },
           ].map(({ title, steps, bar }) => (
             <div key={title} className="flex" style={{ border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A', backgroundColor: '#fff' }}>
@@ -3216,7 +3216,7 @@ function DiscoverScreen({
                   <button
                     onClick={() => addToDayPlan(steps)}
                     className="text-xs font-black px-2 py-0.5"
-                    style={{ backgroundColor: '#D4EF4D', color: '#1A1A1A', border: '1.5px solid #1A1A1A', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.04em' }}
+                    style={{ backgroundColor: '#b95c43', color: '#1A1A1A', border: '1.5px solid #1A1A1A', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.04em' }}
                   >
                     + plan
                   </button>
@@ -3224,7 +3224,7 @@ function DiscoverScreen({
                 <div className="flex flex-col gap-0.5">
                   {steps.map((step, i) => (
                     <div key={i} className="flex items-center gap-1.5">
-                      <span className="text-xs font-black w-5 h-5 flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#1A1A1A', color: '#D4EF4D' }}>{i + 1}</span>
+                      <span className="text-xs font-black w-5 h-5 flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#1A1A1A', color: '#F9F5F2' }}>{i + 1}</span>
                       <button onClick={() => window.dispatchEvent(new CustomEvent('plan-step-click',{detail:step}))} className="text-xs text-left leading-tight flex-1" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>{step}</button>
                     </div>
                   ))}
@@ -3601,13 +3601,13 @@ function EventsScreen({
               {/* Showtime count badge — only shown when > 1 showtime was collapsed */}
               {count > 1 && (
                 <div
-                  style={{ position:'absolute', bottom:8, left:8, background:'#1A1A1A', color:'#d4ef4d', fontSize:'9px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', padding:'2px 7px', border:'1.5px solid #1A1A1A', pointerEvents:'none' }}
+                  style={{ position:'absolute', bottom:8, left:8, background:'#1A1A1A', color:'#F9F5F2', fontSize:'9px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', padding:'2px 7px', border:'1.5px solid #1A1A1A', pointerEvents:'none' }}
                 >
                   {count} showtimes
                 </div>
               )}
               {(() => { const liked = isWishlisted(event.id); return (
-              <button style={{position:'absolute',top:8,right:8,zIndex:10,background: liked ? '#1A1A1A' : 'white',border:'2px solid #1A1A1A',borderRadius:0,width:34,height:34,minHeight:0,color: liked ? '#d4ef4d' : '#1A1A1A',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'2px 2px 0 #1A1A1A'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:event.id,type:'event',name:event.name,category:'event'});}}><span className="material-symbols-outlined" style={{fontSize:'18px',fontVariationSettings: liked ? "'FILL' 1, 'wght' 700" : "'FILL' 0, 'wght' 400"}}>favorite</span></button>
+              <button style={{position:'absolute',top:8,right:8,zIndex:10,background: liked ? '#1A1A1A' : 'white',border:'2px solid #1A1A1A',borderRadius:0,width:34,height:34,minHeight:0,color: liked ? '#b95c43' : '#1A1A1A',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'2px 2px 0 #1A1A1A'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:event.id,type:'event',name:event.name,category:'event'});}}><span className="material-symbols-outlined" style={{fontSize:'18px',fontVariationSettings: liked ? "'FILL' 1, 'wght' 700" : "'FILL' 0, 'wght' 400"}}>favorite</span></button>
               ); })()}
             </div>
           );
@@ -3917,7 +3917,7 @@ function PlacesScreen({
             zIndex: openNow ? 1 : 0,
           }}
         >
-          <span style={{ width: 8, height: 8, borderRadius: '50%', background: openNow ? '#d4ef4d' : '#4caf50', display: 'inline-block', marginRight: 2, flexShrink: 0 }} />
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: openNow ? '#b95c43' : '#4caf50', display: 'inline-block', marginRight: 2, flexShrink: 0 }} />
           Open Now
         </button>
         {PLACE_CATEGORIES.map(cat => (
@@ -3991,7 +3991,7 @@ function PlacesScreen({
                 onCheckIn={e => { e.stopPropagation(); onCheckIn(place.id); }}
                 />
               {(() => { const liked = isWishlisted(place.id); return (
-              <button style={{position:'absolute',top:8,right:8,zIndex:10,background: liked ? '#1A1A1A' : 'white',border:'2px solid #1A1A1A',borderRadius:0,width:32,height:32,minHeight:0,color: liked ? '#d4ef4d' : '#1A1A1A',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'2px 2px 0 #1A1A1A'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:place.id,type:'place',name:place.name,category:place.category});}}><span className="material-symbols-outlined" style={{fontSize:'16px',fontVariationSettings: liked ? "'FILL' 1, 'wght' 700" : "'FILL' 0, 'wght' 400"}}>favorite</span></button>
+              <button style={{position:'absolute',top:8,right:8,zIndex:10,background: liked ? '#1A1A1A' : 'white',border:'2px solid #1A1A1A',borderRadius:0,width:32,height:32,minHeight:0,color: liked ? '#b95c43' : '#1A1A1A',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'2px 2px 0 #1A1A1A'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:place.id,type:'place',name:place.name,category:place.category});}}><span className="material-symbols-outlined" style={{fontSize:'16px',fontVariationSettings: liked ? "'FILL' 1, 'wght' 700" : "'FILL' 0, 'wght' 400"}}>favorite</span></button>
               ); })()}
             </div>
           ))}
@@ -4660,7 +4660,7 @@ function ProfileScreen({
             style={{
               borderRight: '2px solid #1A1A1A',
               borderBottom: '2px solid #1A1A1A',
-              background: a.unlocked ? '#D4EF4D' : 'white',
+              background: a.unlocked ? '#b95c43' : 'white',
               marginRight: '-2px',
             }}
           >
@@ -4764,7 +4764,7 @@ function ProfileScreen({
                     key={c.id}
                     className="rounded-lg px-4 py-3"
                     style={{
-                      background: done ? '#D4EF4D' : 'white',
+                      background: done ? '#b95c43' : 'white',
                       boxShadow: done ? '3px 3px 0 var(--brand)' : '3px 3px 0 rgba(0,0,0,0.10)',
                       border: done ? '2px solid #1A1A1A' : '1px solid #eee',
                     }}
@@ -4783,7 +4783,7 @@ function ProfileScreen({
                 );
               })}
               {allDone && (
-                <div className="text-center py-3 rounded-lg" style={{ background: '#1A1A1A', color: '#D4EF4D' }}>
+                <div className="text-center py-3 rounded-lg" style={{ background: '#1A1A1A', color: '#F9F5F2' }}>
                   <p className="font-black text-sm" style={{ fontFamily: 'Public Sans, sans-serif' }}>🏆 All challenges complete — you're a true ABQ local!</p>
                 </div>
               )}
@@ -6444,7 +6444,7 @@ function PlanScreen({
       )}
 
       {/* Share plan hint */}
-      <div className="mx-5 mt-6 p-4 text-center" style={{ background: '#f8faf8', border: '1.5px dashed #ccc' }}>
+      <div className="mx-5 mt-6 p-4 text-center" style={{ background: '#F9F5F2', border: '1.5px dashed #ccc' }}>
         <p className="text-xs" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.6 }}>
           💡 Tap <strong>Go</strong> on any item to get directions, or tap the card to see full details and check in when you arrive.
         </p>
@@ -6577,12 +6577,12 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
     [places]);
 
   const s = {
-    root:   { display:'flex', flexDirection:'column' as const, height:'100vh', overflow:'hidden', background:'#f8faf8', fontFamily:'Inter,system-ui,sans-serif', color:'#1a1a1a' },
+    root:   { display:'flex', flexDirection:'column' as const, height:'100vh', overflow:'hidden', background:'#F9F5F2', fontFamily:'Public Sans,system-ui,sans-serif', color:'#1a1a1a' },
     header: { height:'56px', background:'#fff', borderBottom:'2px solid #1a1a1a', display:'flex', alignItems:'center', flexShrink:0 as const, zIndex:100 },
     logo:   { width:'232px', borderRight:'2px solid #1a1a1a', height:'100%', display:'flex', alignItems:'center', padding:'0 18px', gap:'10px', flexShrink:0 as const },
-    logoBadge: { background:'linear-gradient(135deg,#b95c43,#c97a62)', padding:'5px 9px', border:'2px solid #1a1a1a', fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'13px', letterSpacing:'-0.01em', color:'#d4ef4d' },
+    logoBadge: { background:'linear-gradient(135deg,#b95c43,#c97a62)', padding:'5px 9px', border:'2px solid #1a1a1a', fontFamily:'Public Sans,sans-serif', fontWeight:900, fontSize:'13px', letterSpacing:'-0.01em', color:'#F9F5F2' },
     headerSearch: { flex:1, height:'100%', display:'flex', alignItems:'center', padding:'0 18px', gap:'10px', borderRight:'2px solid #1a1a1a' },
-    searchBox: { flex:1, maxWidth:'480px', height:'36px', border:'2px solid #1a1a1a', background:'#f8faf8', display:'flex', alignItems:'center', padding:'0 12px', gap:'8px' },
+    searchBox: { flex:1, maxWidth:'480px', height:'36px', border:'2px solid #1a1a1a', background:'#F9F5F2', display:'flex', alignItems:'center', padding:'0 12px', gap:'8px' },
     headerRight: { width:'356px', height:'100%', display:'flex', alignItems:'center', padding:'0 16px', gap:'8px', flexShrink:0 as const },
     layout: { display:'flex', flex:1, overflow:'hidden' },
     sidebar: { width:'232px', borderRight:'2px solid #1a1a1a', background:'#fff', display:'flex', flexDirection:'column' as const, overflowY:'auto' as const, flexShrink:0 as const },
@@ -6593,7 +6593,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
   };
 
   const pillBase = { height:'27px', padding:'0 9px', border:'1.5px solid #1a1a1a', fontSize:'10px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase' as const, display:'flex', alignItems:'center', gap:'4px', cursor:'pointer', background:'#fff', color:'#1a1a1a' };
-  const catBtnBase = { height:'30px', border:'1.5px solid #d0d8d0', background:'#f8faf8', display:'flex', alignItems:'center', justifyContent:'center', gap:'3px', fontSize:'10px', fontWeight:700, letterSpacing:'0.04em', textTransform:'uppercase' as const, cursor:'pointer', color:'#5c6660' };
+  const catBtnBase = { height:'30px', border:'1.5px solid #d0d8d0', background:'#F9F5F2', display:'flex', alignItems:'center', justifyContent:'center', gap:'3px', fontSize:'10px', fontWeight:700, letterSpacing:'0.04em', textTransform:'uppercase' as const, cursor:'pointer', color:'#5c6660' };
 
   const NavItem = ({ icon, label, id, count }: { icon:string; label:string; id:DesktopTab|string; count?:number }) => (
     <div onClick={() => typeof id === 'string' && ['discover','events','places'].includes(id) && setTab(id as DesktopTab)}
@@ -6602,13 +6602,13 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
         background: tab === id ? '#b95c431a' : 'transparent' }}>
       <span className="material-symbols-outlined" style={{ fontSize:'18px' }}>{icon}</span>
       {label}
-      {count !== undefined && <span style={{ marginLeft:'auto', fontSize:'10px', fontWeight:800, background: tab===id ? '#b95c43' : '#1a1a1a', color:'#d4ef4d', padding:'1px 6px', minWidth:'20px', textAlign:'center' }}>{count.toLocaleString()}</span>}
+      {count !== undefined && <span style={{ marginLeft:'auto', fontSize:'10px', fontWeight:800, background: tab===id ? '#b95c43' : '#1a1a1a', color:'#F9F5F2', padding:'1px 6px', minWidth:'20px', textAlign:'center' }}>{count.toLocaleString()}</span>}
     </div>
   );
 
   const CatBtn = ({ icon, label, val }: { icon:string; label:string; val:string }) => (
     <div onClick={() => { setCat(val); if (tab !== 'places') setTab('places'); }}
-      style={{ ...catBtnBase, ...(cat===val ? { border:'1.5px solid #1a1a1a', background:'#1a1a1a', color:'#d4ef4d', boxShadow:'2px 2px 0 #1a1a1a' } : {}) }}>
+      style={{ ...catBtnBase, ...(cat===val ? { border:'1.5px solid #1a1a1a', background:'#1a1a1a', color:'#F9F5F2', boxShadow:'2px 2px 0 #1a1a1a' } : {}) }}>
       <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>{icon}</span>
       {label}
     </div>
@@ -6629,13 +6629,13 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
         <div style={{ height:'90px', background: img ? 'transparent' : `linear-gradient(135deg,${DESKTOP_DATE_COLORS[idx%3]},${DESKTOP_DATE_COLORS[(idx+1)%3]})`, position:'relative', overflow:'hidden' }}>
           {img && <img src={img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
           <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(0,0,0,0.55) 0%,transparent 55%)' }} />
-          <div style={{ position:'absolute', top:7, left:7, background:'#d4ef4d', border:'1.5px solid #1a1a1a', padding:'2px 7px', fontSize:'9px', fontWeight:800, letterSpacing:'0.06em', textTransform:'uppercase' }}>
+          <div style={{ position:'absolute', top:7, left:7, background:'#b95c43', border:'1.5px solid #1a1a1a', padding:'2px 7px', fontSize:'9px', fontWeight:800, letterSpacing:'0.06em', textTransform:'uppercase' }}>
             {month} {day}
           </div>
           {genre && <div style={{ position:'absolute', bottom:7, right:7, background:gc, color:'#fff', padding:'2px 7px', fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase' }}>{genre}</div>}
         </div>
         <div style={{ padding:'9px 11px 11px' }}>
-          <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:800, fontSize:'12px', lineHeight:1.25, marginBottom:'4px', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' as const, overflow:'hidden' }}>{ev.name}</div>
+          <div style={{ fontFamily:'Public Sans,sans-serif', fontWeight:800, fontSize:'12px', lineHeight:1.25, marginBottom:'4px', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' as const, overflow:'hidden' }}>{ev.name}</div>
           <div style={{ fontSize:'10px', color:'#5c6660', display:'flex', alignItems:'center', gap:'5px', marginBottom:'6px' }}>
             <span className="material-symbols-outlined" style={{ fontSize:'11px' }}>location_on</span>
             <span style={{ overflow:'hidden', whiteSpace:'nowrap', textOverflow:'ellipsis' }}>{getEventVenue(ev) || getEventCity(ev) || 'Albuquerque'}</span>
@@ -6698,16 +6698,16 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
         style={{ border:'2px solid #1a1a1a', background:'#fff', display:'flex', alignItems:'stretch', cursor:'pointer', boxShadow:'3px 3px 0 #1a1a1a', transition:'transform 0.1s' }}
         onMouseEnter={e => (e.currentTarget.style.transform='translate(-2px,-2px)')}
         onMouseLeave={e => (e.currentTarget.style.transform='')}>
-        <div style={{ width:'54px', flexShrink:0, background:color, color:'#d4ef4d', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'10px 2px' }}>
+        <div style={{ width:'54px', flexShrink:0, background:color, color:'#F9F5F2', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'10px 2px' }}>
           <div style={{ fontSize:'9px', fontWeight:800, letterSpacing:'0.1em' }}>{month}</div>
-          <div style={{ fontFamily:'Epilogue,sans-serif', fontSize:'22px', fontWeight:900, lineHeight:1 }}>{day}</div>
+          <div style={{ fontFamily:'Public Sans,sans-serif', fontSize:'22px', fontWeight:900, lineHeight:1 }}>{day}</div>
           <div style={{ fontSize:'8px', fontWeight:600, letterSpacing:'0.06em', opacity:0.75 }}>{dow}</div>
         </div>
         <div style={{ width:'60px', flexShrink:0, background: img ? 'transparent' : `linear-gradient(135deg,${color},${DESKTOP_DATE_COLORS[(idx+1)%3]})`, overflow:'hidden' }}>
           {img && <img src={img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
         </div>
         <div style={{ flex:1, padding:'11px 13px', minWidth:0 }}>
-          <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:800, fontSize:'13px', marginBottom:'3px', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{ev.name}</div>
+          <div style={{ fontFamily:'Public Sans,sans-serif', fontWeight:800, fontSize:'13px', marginBottom:'3px', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{ev.name}</div>
           <div style={{ fontSize:'11px', color:'#5c6660', display:'flex', alignItems:'center', gap:'7px', marginBottom:'7px' }}>
             <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>location_on</span>
             {getEventVenue(ev) || getEventCity(ev) || 'Albuquerque'}
@@ -6721,7 +6721,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
         <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', justifyContent:'space-between', padding:'11px 13px', flexShrink:0 }}>
           <span style={{ fontSize:'11px', fontWeight:800, color: isFree ? '#b95c43' : '#0057c2' }}>{price || ''}</span>
           <button onClick={e => { e.stopPropagation(); if(ev.url) window.open(ev.url,'_blank'); }}
-            style={{ height:'27px', padding:'0 9px', background: isFree ? '#b95c43' : '#0057c2', color:'#fff', border:'none', fontFamily:'Inter,sans-serif', fontSize:'9px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'4px' }}>
+            style={{ height:'27px', padding:'0 9px', background: isFree ? '#b95c43' : '#0057c2', color:'#fff', border:'none', fontFamily:'Public Sans,sans-serif', fontSize:'9px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'4px' }}>
             <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>{isFree ? 'open_in_new' : 'confirmation_number'}</span>
             {isFree ? 'Info' : 'Tickets'}
           </button>
@@ -6745,20 +6745,20 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
         onMouseLeave={e => (e.currentTarget.style.background='')}>
         {/* Date block */}
         <div style={{ width:'72px', flexShrink:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'18px 8px' }}>
-          <div style={{ fontSize:'10px', fontWeight:800, letterSpacing:'0.12em', textTransform:'uppercase', color:'#d4ef4d' }}>{month}</div>
-          <div style={{ fontFamily:'Epilogue,sans-serif', fontSize:'34px', fontWeight:900, lineHeight:1, color:'#ffffff' }}>{day}</div>
+          <div style={{ fontSize:'10px', fontWeight:800, letterSpacing:'0.12em', textTransform:'uppercase', color:'#F9F5F2' }}>{month}</div>
+          <div style={{ fontFamily:'Public Sans,sans-serif', fontSize:'34px', fontWeight:900, lineHeight:1, color:'#ffffff' }}>{day}</div>
         </div>
         {/* Content */}
         <div style={{ flex:1, padding:'16px 12px 16px 4px', minWidth:0, display:'flex', flexDirection:'column', justifyContent:'center' }}>
-          <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'15px', lineHeight:1.2, color:'#ffffff', marginBottom:'5px', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{ev.name}</div>
+          <div style={{ fontFamily:'Public Sans,sans-serif', fontWeight:900, fontSize:'15px', lineHeight:1.2, color:'#ffffff', marginBottom:'5px', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{ev.name}</div>
           <div style={{ fontSize:'11px', color:'rgba(255,255,255,0.5)', fontWeight:600, letterSpacing:'0.04em', textTransform:'uppercase', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
             {venue}{time ? ` · ${time}` : ''}
           </div>
-          {isFree && <div style={{ marginTop:'5px', display:'inline-block', fontSize:'9px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', color:'#d4ef4d', border:'1px solid #d4ef4d', padding:'1px 6px', width:'fit-content' }}>FREE</div>}
+          {isFree && <div style={{ marginTop:'5px', display:'inline-block', fontSize:'9px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', color:'#F9F5F2', border:'1px solid #d4ef4d', padding:'1px 6px', width:'fit-content' }}>FREE</div>}
         </div>
         {/* Arrow */}
         <div style={{ width:'52px', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
-          <div style={{ width:'34px', height:'34px', background:'#d4ef4d', display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <div style={{ width:'34px', height:'34px', background:'#b95c43', display:'flex', alignItems:'center', justifyContent:'center' }}>
             <span className="material-symbols-outlined" style={{ fontSize:'18px', color:'#1a1a1a', fontWeight:700 }}>arrow_forward</span>
           </div>
         </div>
@@ -6787,7 +6787,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
             {img && <img src={img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
             <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(0,0,0,0.7),transparent 60%)' }} />
             <div style={{ position:'absolute', bottom:10, left:12 }}>
-              <div style={{ background:'#d4ef4d', border:'1.5px solid #1a1a1a', display:'inline-block', padding:'3px 9px', fontSize:'10px', fontWeight:800, letterSpacing:'0.06em' }}>{month} {day} · {dow}</div>
+              <div style={{ background:'#b95c43', border:'1.5px solid #1a1a1a', display:'inline-block', padding:'3px 9px', fontSize:'10px', fontWeight:800, letterSpacing:'0.06em' }}>{month} {day} · {dow}</div>
             </div>
             <button onClick={() => setDetail(null)} style={{ position:'absolute', top:8, right:8, width:'28px', height:'28px', border:'1.5px solid rgba(255,255,255,0.5)', background:'rgba(0,0,0,0.4)', color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
               <span className="material-symbols-outlined" style={{ fontSize:'16px' }}>close</span>
@@ -6798,7 +6798,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
               <span className="material-symbols-outlined" style={{ fontSize:'11px' }}>confirmation_number</span>
               {getEventGenre(ev) || 'Event'}{isFree ? ' · Free' : ''}
             </div>
-            <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'16px', lineHeight:1.2, marginBottom:'10px' }}>{ev.name}</div>
+            <div style={{ fontFamily:'Public Sans,sans-serif', fontWeight:900, fontSize:'16px', lineHeight:1.2, marginBottom:'10px' }}>{ev.name}</div>
             <div style={{ fontSize:'11px', color:'#5c6660', display:'flex', alignItems:'center', gap:'5px', marginBottom:'6px' }}>
               <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>location_on</span>
               {getEventVenue(ev)}{getEventCity(ev) ? ` · ${getEventCity(ev)}` : ''}
@@ -6811,14 +6811,14 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
             )}
             <div style={{ display:'flex', gap:'6px' }}>
               {ev.url && <button onClick={() => window.open(ev.url,'_blank')}
-                style={{ flex:1, height:'32px', background: isFree ? '#b95c43' : '#0057c2', color:'#fff', border:'2px solid #1a1a1a', fontFamily:'Inter,sans-serif', fontSize:'10px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'4px', boxShadow:'2px 2px 0 #1a1a1a' }}>
+                style={{ flex:1, height:'32px', background: isFree ? '#b95c43' : '#0057c2', color:'#fff', border:'2px solid #1a1a1a', fontFamily:'Public Sans,sans-serif', fontSize:'10px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'4px', boxShadow:'2px 2px 0 #1a1a1a' }}>
                 <span className="material-symbols-outlined" style={{ fontSize:'13px' }}>{isFree ? 'open_in_new' : 'confirmation_number'}</span>
                 {isFree ? 'More Info' : 'Get Tickets'}
               </button>}
               <button onClick={() => onToggleSaveEvent(ev)} title={isEventSaved(ev.id) ? 'Remove from plan' : 'Save to plan'} style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background: isEventSaved(ev.id) ? 'var(--brand)' : '#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'2px 2px 0 #1a1a1a' }}>
                 <span className="material-symbols-outlined" style={{ fontSize:'16px', color: isEventSaved(ev.id) ? '#fff' : '#1a1a1a', fontVariationSettings: isEventSaved(ev.id) ? "'FILL' 1" : "'FILL' 0" }}>bookmark</span>
               </button>
-              <button onClick={async () => { await shareEvent(ev); setShareToast(true); setTimeout(() => setShareToast(false), 2000); }} title="Copy shareable link" style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background: shareToast ? '#d4ef4d' : '#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'2px 2px 0 #1a1a1a', transition:'background 0.2s' }}>
+              <button onClick={async () => { await shareEvent(ev); setShareToast(true); setTimeout(() => setShareToast(false), 2000); }} title="Copy shareable link" style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background: shareToast ? '#b95c43' : '#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'2px 2px 0 #1a1a1a', transition:'background 0.2s' }}>
                 <span className="material-symbols-outlined" style={{ fontSize:'16px' }}>{shareToast ? 'check' : 'share'}</span>
               </button>
             </div>
@@ -6842,13 +6842,13 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
             <span className="material-symbols-outlined" style={{ fontSize:'11px' }}>storefront</span>
             {p.category}{p.hours ? ` · ${p.hours}` : ''}
           </div>
-          <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'16px', lineHeight:1.2, marginBottom:'8px' }}>{p.name}</div>
+          <div style={{ fontFamily:'Public Sans,sans-serif', fontWeight:900, fontSize:'16px', lineHeight:1.2, marginBottom:'8px' }}>{p.name}</div>
           {p.rating && <div style={{ fontSize:'12px', fontWeight:700, color:'#b95c43', marginBottom:'8px' }}>★ {p.rating.toFixed(1)}{p.reviewCount ? <span style={{ fontWeight:400, color:'#5c6660', fontSize:'11px' }}> ({p.reviewCount.toLocaleString()} reviews)</span> : ''}</div>}
           {p.address && <div style={{ fontSize:'11px', color:'#5c6660', display:'flex', alignItems:'center', gap:'5px', marginBottom:'14px' }}>
             <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>location_on</span>{p.address}
           </div>}
           <div style={{ display:'flex', gap:'6px' }}>
-            <button onClick={() => onPlaceSelect(p)} style={{ flex:1, height:'32px', background:'#1a1a1a', color:'#d4ef4d', border:'2px solid #1a1a1a', fontFamily:'Inter,sans-serif', fontSize:'10px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'4px', boxShadow:'2px 2px 0 #1a1a1a' }}>
+            <button onClick={() => onPlaceSelect(p)} style={{ flex:1, height:'32px', background:'#1a1a1a', color:'#F9F5F2', border:'2px solid #1a1a1a', fontFamily:'Public Sans,sans-serif', fontSize:'10px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'4px', boxShadow:'2px 2px 0 #1a1a1a' }}>
               <span className="material-symbols-outlined" style={{ fontSize:'13px' }}>info</span>
               Full Details
             </button>
@@ -6876,7 +6876,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
       <div style={{ position:'absolute', height:'3px', left:0, right:0, top:'65%', background:'rgba(255,255,255,0.7)' }} />
       <div style={{ position:'absolute', width:'3px', top:0, bottom:0, left:'65%', background:'rgba(255,255,255,0.7)' }} />
       {/* You are here dot */}
-      <div style={{ position:'absolute', top:'50%', left:'43%', width:'12px', height:'12px', background:'#d4ef4d', border:'2.5px solid #1a1a1a', borderRadius:'50%', transform:'translate(-50%,-50%)', boxShadow:'0 0 0 5px rgba(212,239,77,0.3)' }} />
+      <div style={{ position:'absolute', top:'50%', left:'43%', width:'12px', height:'12px', background:'#b95c43', border:'2.5px solid #1a1a1a', borderRadius:'50%', transform:'translate(-50%,-50%)', boxShadow:'0 0 0 5px rgba(185,92,67,0.3)' }} />
       {/* Map watermark */}
       <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', pointerEvents:'none' }}>
         <div style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.1em', textTransform:'uppercase', color:'rgba(86,101,0,0.35)' }}>Albuquerque · NM</div>
@@ -6893,7 +6893,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
       {/* Map filter strip */}
       <div style={{ position:'absolute', bottom:8, left:8, display:'flex', gap:'4px' }}>
         {[{icon:'confirmation_number',label:'Events',bg:'#1a1a1a'},{icon:'storefront',label:'Places',bg:'#b95c43'}].map(c => (
-          <div key={c.label} style={{ height:'22px', padding:'0 7px', background:c.bg, border:'1.5px solid #1a1a1a', fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'3px', color:'#d4ef4d', boxShadow:'2px 2px 0 rgba(0,0,0,0.1)' }}>
+          <div key={c.label} style={{ height:'22px', padding:'0 7px', background:c.bg, border:'1.5px solid #1a1a1a', fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'3px', color:'#F9F5F2', boxShadow:'2px 2px 0 rgba(0,0,0,0.1)' }}>
             <span className="material-symbols-outlined" style={{ fontSize:'11px' }}>{c.icon}</span>{c.label}
           </div>
         ))}
@@ -6911,7 +6911,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
         <div style={s.logo}>
           <div style={s.logoBadge}>ABQ</div>
           <div>
-            <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'14px', letterSpacing:'-0.01em', lineHeight:1 }}>Unplugged</div>
+            <div style={{ fontFamily:'Public Sans,sans-serif', fontWeight:900, fontSize:'14px', letterSpacing:'-0.01em', lineHeight:1 }}>Unplugged</div>
             <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.12em', textTransform:'uppercase', color:'#5c6660', marginTop:'1px' }}>Greater ABQ</div>
           </div>
         </div>
@@ -6919,13 +6919,13 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
           <div style={s.searchBox}>
             <span className="material-symbols-outlined" style={{ fontSize:'16px', color:'#5c6660' }}>search</span>
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search events, places, neighborhoods…"
-              style={{ border:'none', background:'transparent', fontFamily:'Inter,sans-serif', fontSize:'13px', color:'#1a1a1a', outline:'none', flex:1 }} />
+              style={{ border:'none', background:'transparent', fontFamily:'Public Sans,sans-serif', fontSize:'13px', color:'#1a1a1a', outline:'none', flex:1 }} />
             {search && <span className="material-symbols-outlined" onClick={() => setSearch('')} style={{ fontSize:'16px', color:'#5c6660', cursor:'pointer' }}>close</span>}
           </div>
           <div style={{ display:'flex', gap:'6px' }}>
             {(['discover','events','places'] as DesktopTab[]).map(t => (
               <div key={t} onClick={() => { setTab(t); setCat('All'); }}
-                style={{ ...pillBase, ...(tab===t ? { background:'#1a1a1a', color:'#d4ef4d' } : {}) }}>
+                style={{ ...pillBase, ...(tab===t ? { background:'#1a1a1a', color:'#F9F5F2' } : {}) }}>
                 {t === 'discover' ? 'Discover' : t === 'events' ? 'Events' : 'Places'}
               </div>
             ))}
@@ -6937,7 +6937,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
             Downtown ABQ
           </div>
           {[{icon:'search',label:'Search'},{icon:'notifications',label:'Alerts'},{icon:'person',label:'Profile'}].map((btn, i) => (
-            <div key={btn.icon} style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background: i===2 ? '#1a1a1a' : '#fff', color: i===2 ? '#d4ef4d' : '#1a1a1a', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', flexShrink:0 }}>
+            <div key={btn.icon} style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background: i===2 ? '#1a1a1a' : '#fff', color: i===2 ? '#b95c43' : '#1a1a1a', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', flexShrink:0 }}>
               <span className="material-symbols-outlined" style={{ fontSize:'17px' }}>{btn.icon}</span>
             </div>
           ))}
@@ -7011,7 +7011,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
             <div style={{ flex:1 }} />
             {tab === 'places' && (
               <select value={sort} onChange={e => setSort(e.target.value as typeof sort)}
-                style={{ height:'27px', border:'1.5px solid #1a1a1a', background:'#fff', fontFamily:'Inter,sans-serif', fontSize:'10px', fontWeight:700, letterSpacing:'0.04em', textTransform:'uppercase', padding:'0 8px', cursor:'pointer', outline:'none', color:'#1a1a1a' }}>
+                style={{ height:'27px', border:'1.5px solid #1a1a1a', background:'#fff', fontFamily:'Public Sans,sans-serif', fontSize:'10px', fontWeight:700, letterSpacing:'0.04em', textTransform:'uppercase', padding:'0 8px', cursor:'pointer', outline:'none', color:'#1a1a1a' }}>
                 <option value="top">Sort: Top Rated</option>
                 <option value="near">Sort: Near Me</option>
                 <option value="az">Sort: A–Z</option>
@@ -7028,11 +7028,11 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
                   {/* Hero */}
                   <div style={{ background:'linear-gradient(135deg,#b95c43,#c97a62)', padding:'clamp(14px,2vw,24px) clamp(14px,2vw,28px) clamp(12px,1.5vw,20px)', position:'relative', overflow:'hidden', minWidth:0 }}>
                     <div style={{ position:'absolute', top:'-30px', right:'-30px', width:'180px', height:'180px', background:'rgba(212,239,77,0.1)', borderRadius:'50%' }} />
-                    <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.16em', textTransform:'uppercase', color:'#d4ef4d', marginBottom:'5px' }}>✦ Your City, Unplugged</div>
-                    <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'clamp(16px,2.2vw,26px)', lineHeight:1.05, letterSpacing:'-0.02em', color:'#fff', marginBottom:'8px' }}>Find Something<br/>Worth Leaving<br/>the House For</div>
+                    <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.16em', textTransform:'uppercase', color:'#F9F5F2', marginBottom:'5px' }}>✦ Your City, Unplugged</div>
+                    <div style={{ fontFamily:'Public Sans,sans-serif', fontWeight:900, fontSize:'clamp(16px,2.2vw,26px)', lineHeight:1.05, letterSpacing:'-0.02em', color:'#fff', marginBottom:'8px' }}>Find Something<br/>Worth Leaving<br/>the House For</div>
                     <div style={{ fontSize:'clamp(9px,1vw,11px)', color:'rgba(255,255,255,0.75)', marginBottom:'clamp(10px,1.5vw,16px)' }}>{today} · {places.length.toLocaleString()} spots across Greater ABQ</div>
                     <div style={{ display:'flex', gap:'8px', flexWrap:'wrap' }}>
-                      <button onClick={() => setTab('events')} style={{ height:'32px', padding:'0 12px', background:'#d4ef4d', border:'2px solid #1a1a1a', boxShadow:'2px 2px 0 #1a1a1a', fontSize:'9px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'5px', color:'#1a1a1a' }}>
+                      <button onClick={() => setTab('events')} style={{ height:'32px', padding:'0 12px', background:'#b95c43', border:'2px solid #1a1a1a', boxShadow:'2px 2px 0 #1a1a1a', fontSize:'9px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'5px', color:'#1a1a1a' }}>
                         <span className="material-symbols-outlined" style={{ fontSize:'13px' }}>confirmation_number</span>Browse Events
                       </button>
                       <button onClick={() => setTab('places')} style={{ height:'32px', padding:'0 12px', background:'rgba(255,255,255,0.15)', border:'2px solid rgba(255,255,255,0.4)', fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'5px', color:'#fff' }}>
@@ -7044,8 +7044,8 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
                   {/* Events This Week */}
                   <div style={{ background:'#1a1a1a', borderLeft: isNarrowDesktop ? 'none' : '2px solid #1a1a1a', borderTop: isNarrowDesktop ? '2px solid #1a1a1a' : 'none', display:'flex', flexDirection:'column', minWidth:0 }}>
                     <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 16px', borderBottom:'1px solid rgba(255,255,255,0.1)', flexShrink:0 }}>
-                      <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'12px', letterSpacing:'0.1em', textTransform:'uppercase', color:'#fff' }}>Events This Week</div>
-                      <span onClick={() => setTab('events')} style={{ fontSize:'10px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', color:'#d4ef4d', cursor:'pointer' }}>
+                      <div style={{ fontFamily:'Public Sans,sans-serif', fontWeight:900, fontSize:'12px', letterSpacing:'0.1em', textTransform:'uppercase', color:'#fff' }}>Events This Week</div>
+                      <span onClick={() => setTab('events')} style={{ fontSize:'10px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', color:'#F9F5F2', cursor:'pointer' }}>
                         → SEE ALL
                       </span>
                     </div>
@@ -7064,7 +7064,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
                 {/* Near You */}
                 {nearbyPlaces.length > 0 && <>
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'12px', paddingBottom:'10px', borderBottom:'2px solid #1a1a1a' }}>
-                    <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'12px', letterSpacing:'0.08em', textTransform:'uppercase' }}>Near You</div>
+                    <div style={{ fontFamily:'Public Sans,sans-serif', fontWeight:900, fontSize:'12px', letterSpacing:'0.08em', textTransform:'uppercase' }}>Near You</div>
                     <span style={{ fontSize:'10px', fontWeight:700, color:'#b95c43', display:'flex', alignItems:'center', gap:'4px' }}>
                       <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>my_location</span>Live location
                     </span>
@@ -7079,7 +7079,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
 
                 {/* Hidden Gems */}
                 <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'12px', paddingBottom:'10px', borderBottom:'2px solid #1a1a1a' }}>
-                  <div style={{ fontFamily:'Epilogue,sans-serif', fontWeight:900, fontSize:'12px', letterSpacing:'0.08em', textTransform:'uppercase' }}>Hidden Gems</div>
+                  <div style={{ fontFamily:'Public Sans,sans-serif', fontWeight:900, fontSize:'12px', letterSpacing:'0.08em', textTransform:'uppercase' }}>Hidden Gems</div>
                   <span style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', color:'#5c6660' }}>★ 4.5+ Rated</span>
                 </div>
                 <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(220px, 1fr))', gap:'8px', marginBottom:'24px' }}>
@@ -7858,13 +7858,13 @@ export default function App() {
         @import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@700;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #f8faf8; -webkit-font-smoothing: antialiased; }
+        body { background: #F9F5F2; -webkit-font-smoothing: antialiased; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #d0d8d0; }
         :root {
           --brand: #b95c43;
           --brand-gradient: linear-gradient(135deg, #b95c43 0%, #c97a62 100%);
-          --brand-bg-screen: #f8faf8;
+          --brand-bg-screen: #F9F5F2;
         }
       `}</style>
       <DesktopApp
@@ -7941,7 +7941,7 @@ export default function App() {
           text-size-adjust: 100%;
         }
         body {
-          background: #F8FAF8;
+          background: #F9F5F2;
           font-family: 'Inter', -apple-system, system-ui, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
