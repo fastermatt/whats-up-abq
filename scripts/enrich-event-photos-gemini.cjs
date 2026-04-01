@@ -143,11 +143,18 @@ Reply with ONLY the raw image URL on a single line. No markdown, no explanation.
 If you cannot find a verified real URL, reply exactly: NONE`;
 
   try {
-    const escaped = prompt.replace(/'/g, "'\\''");
-    const result = execSync(
-      `${GEMINI_BIN} -m ${GEMINI_MODEL} '${escaped}'`,
-      { timeout: 30000, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }
-    ).trim();
+    // Write prompt to temp file to avoid shell escaping issues
+    const tmpFile = `/tmp/gemini_event_${Date.now()}.txt`;
+    fs.writeFileSync(tmpFile, prompt, 'utf8');
+    let result;
+    try {
+      result = execSync(
+        `${GEMINI_BIN} -m ${GEMINI_MODEL} -p "$(cat ${tmpFile})"`,
+        { timeout: 45000, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }
+      ).trim();
+    } finally {
+      try { fs.unlinkSync(tmpFile); } catch {}
+    }
 
     const lines = result.split('\n').map(l => l.trim()).filter(Boolean);
     const urlLine = lines.find(l =>
@@ -165,7 +172,8 @@ If you cannot find a verified real URL, reply exactly: NONE`;
     if (!urlLine || urlLine === 'NONE') return null;
     return urlLine;
   } catch (err) {
-    console.error(`  ⚠ Gemini error: ${err.message?.slice(0, 80)}`);
+    const detail = (err.stderr || err.stdout || err.message || '').toString().slice(0, 120);
+    console.error(`  ⚠ Gemini error: ${detail}`);
     return null;
   }
 }
