@@ -537,7 +537,7 @@ function ABQUnpluggedLogo({ size = 43 }: { size?: number }) {
         padding: `2px ${Math.round(blockH * 0.28)}px`,
         display: 'inline-flex',
         alignItems: 'center',
-        border: '2px solid #1A1A1A',
+        border: '1px solid rgba(0,0,0,0.12)',
       }}>
         <span style={{
           fontFamily: 'Public Sans, sans-serif',
@@ -753,7 +753,7 @@ function GeoBanner({
   if (silentPending && !error) return null;
 
   if (error) return (
-    <div className="px-4 py-3 flex items-center gap-3" style={{ background: '#b95c43', borderBottom: '2px solid #1A1A1A' }}>
+    <div className="px-4 py-3 flex items-center gap-3" style={{ background: '#b95c43', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
       <span className="material-symbols-outlined flex-shrink-0" style={{ color: '#1A1A1A', fontSize: '20px' }}>location_off</span>
       <p className="text-xs font-bold flex-1" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>
         Enable location to see distances &amp; sort by nearby
@@ -761,7 +761,7 @@ function GeoBanner({
       <button
         onClick={onRequest}
         className="text-xs font-black px-3 py-1.5 flex-shrink-0"
-        style={{ background: '#1A1A1A', color: 'white', border: '2px solid #1A1A1A', fontFamily: 'Public Sans, sans-serif' }}
+        style={{ background: '#1A1A1A', color: 'white', border: '1px solid rgba(0,0,0,0.12)', fontFamily: 'Public Sans, sans-serif' }}
       >
         Retry
       </button>
@@ -769,7 +769,7 @@ function GeoBanner({
   );
 
   if (requested) return (
-    <div className="px-4 py-3 flex items-center gap-3" style={{ background: '#b95c43', borderBottom: '2px solid #1A1A1A' }}>
+    <div className="px-4 py-3 flex items-center gap-3" style={{ background: '#b95c43', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
       <span className="material-symbols-outlined flex-shrink-0" style={{ color: '#1A1A1A', fontSize: '20px' }}>my_location</span>
       <p className="text-xs font-bold flex-1" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>Getting your location…</p>
     </div>
@@ -778,7 +778,7 @@ function GeoBanner({
   return (
     <div
       className="px-4 py-3 flex items-center gap-3"
-      style={{ background: '#b95c43', borderBottom: '2px solid #1A1A1A' }}
+      style={{ background: '#b95c43', borderBottom: '1px solid rgba(0,0,0,0.08)' }}
     >
       <span className="material-symbols-outlined flex-shrink-0" style={{ color: '#1A1A1A', fontSize: '20px' }}>near_me</span>
       <div className="flex-1 min-w-0">
@@ -788,7 +788,7 @@ function GeoBanner({
       <button
         onClick={onRequest}
         className="text-xs font-black px-3 py-1.5 flex-shrink-0"
-        style={{ background: '#1A1A1A', color: 'white', border: '2px solid #1A1A1A', fontFamily: 'Public Sans, sans-serif' }}
+        style={{ background: '#1A1A1A', color: 'white', border: '1px solid rgba(0,0,0,0.12)', fontFamily: 'Public Sans, sans-serif' }}
       >
         Enable
       </button>
@@ -904,7 +904,7 @@ const PlaceCard = React.memo(function PlaceCard({
     <div
       onClick={onClick}
       className="bg-white overflow-hidden text-left w-full"
-      style={{ border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A', animation: 'cardFadeIn 0.3s ease both', contain: 'layout paint' }}
+      style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)', animation: 'cardFadeIn 0.3s ease both', contain: 'layout paint' }}
     >
       <div className="relative" style={{ height: '140px' }}>
         <PlaceCardImageSlider place={place} />
@@ -966,8 +966,8 @@ const PlaceCard = React.memo(function PlaceCard({
                 letterSpacing: '0.06em',
                 background: tooFar ? '#888' : isCheckedIn ? '#1A1A1A' : '#b95c43',
                 color: tooFar ? 'white' : isCheckedIn ? 'white' : '#1A1A1A',
-                border: '1.5px solid #1A1A1A',
-                borderRadius: 0,
+                border: '1px solid rgba(0,0,0,0.12)',
+                borderRadius: 6,
               }}
             >
               {tooFar ? 'Get Closer' : isCheckedIn ? '✓ Visited' : 'Check In'}
@@ -1077,7 +1077,7 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
       ref={fadeRef}
       onClick={onClick}
       className="bg-white overflow-hidden text-left w-full"
-      style={{ border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A', borderRadius: 0, animation: 'cardFadeIn 0.3s ease both' }}
+      style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)', borderRadius: 6, animation: 'cardFadeIn 0.3s ease both' }}
     >
       <div className="relative" style={{ height: '160px' }}>
         <EventCardImageSlider event={event} />
@@ -1314,7 +1314,7 @@ function PlaceDetailModal({
         {/* Rating + Check In row */}
         <div className="flex items-center gap-2 mb-4 flex-wrap">
           {place.rating && (
-            <div className="flex items-center gap-1 bg-white rounded-lg px-3 py-2" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.12)' }}>
+            <div className="flex items-center gap-1 bg-white rounded-lg px-3 py-2" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
               <span className="text-yellow-400">★</span>
               <span className="font-black text-sm" style={{ fontFamily: 'Public Sans, sans-serif' }}>
                 {place.rating.toFixed(1)}
@@ -1325,7 +1325,7 @@ function PlaceDetailModal({
             </div>
           )}
           {place.priceLevel != null && place.priceLevel > 0 && (
-            <div className="bg-white rounded-lg px-3 py-2" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.12)' }}>
+            <div className="bg-white rounded-lg px-3 py-2" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
               <span className="font-black text-sm text-green-600">
                 {'$'.repeat(Math.min(place.priceLevel, 4))}
               </span>
@@ -1362,7 +1362,7 @@ function PlaceDetailModal({
 
         {/* Insider Tip — shown when enriched data is available */}
         {insiderTip && (
-          <div className="mb-4 p-3 flex items-start gap-2.5" style={{ background: '#fffbeb', border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A' }}>
+          <div className="mb-4 p-3 flex items-start gap-2.5" style={{ background: '#fffbeb', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
             <span className="material-symbols-outlined flex-shrink-0 mt-0.5" style={{ fontSize: '18px', color: '#b45309' }}>tips_and_updates</span>
             <div>
               <p className="text-xs font-black uppercase mb-1" style={{ color: '#b45309', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.07em' }}>Local Tip</p>
@@ -1377,7 +1377,7 @@ function PlaceDetailModal({
             href={directionsUrl}
             target="_blank" rel="noopener noreferrer"
             className="flex items-start gap-3 mb-3 bg-white p-3 w-full text-left"
-            style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', textDecoration: 'none' }}
+            style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', textDecoration: 'none' }}
           >
             <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)', marginTop: '1px' }}>location_on</span>
             <div className="min-w-0">
@@ -1389,7 +1389,7 @@ function PlaceDetailModal({
 
         {/* Hours — full schedule from enriched data, falls back to open_now text */}
         {displayHours && (
-          <div className="flex items-start gap-3 mb-3 bg-white p-3" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
+          <div className="flex items-start gap-3 mb-3 bg-white p-3" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
             <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)', marginTop: '1px' }}>schedule</span>
             <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'Public Sans, sans-serif' }}>
               {displayHours.includes(' | ')
@@ -1404,7 +1404,7 @@ function PlaceDetailModal({
           <a
             href={`tel:${displayPhone.replace(/\D/g, '')}`}
             className="flex items-center gap-3 mb-3 bg-white p-3 w-full"
-            style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', textDecoration: 'none' }}
+            style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', textDecoration: 'none' }}
           >
             <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)' }}>phone</span>
             <div className="min-w-0">
@@ -1420,7 +1420,7 @@ function PlaceDetailModal({
             href={displayWebsite.startsWith('http') ? displayWebsite : `https://${displayWebsite}`}
             target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-3 mb-3 bg-white p-3 w-full"
-            style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', textDecoration: 'none' }}
+            style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', textDecoration: 'none' }}
           >
             <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)' }}>language</span>
             <div className="min-w-0">
@@ -1438,7 +1438,7 @@ function PlaceDetailModal({
             href={displayMenu.startsWith('http') ? displayMenu : `https://${displayMenu}`}
             target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-3 mb-3 bg-white p-3 w-full"
-            style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', textDecoration: 'none', border: '2px solid var(--brand)' }}
+            style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', textDecoration: 'none', border: '2px solid var(--brand)' }}
           >
             <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)' }}>menu_book</span>
             <div className="min-w-0">
@@ -1450,7 +1450,7 @@ function PlaceDetailModal({
 
         {/* Parking */}
         {displayParking && (
-          <div className="flex items-start gap-3 mb-3 bg-white p-3" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
+          <div className="flex items-start gap-3 mb-3 bg-white p-3" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
             <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)', marginTop: '1px' }}>local_parking</span>
             <div className="min-w-0">
               <p className="text-xs font-black uppercase mb-0.5" style={{ color: '#6b7280', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em' }}>Parking</p>
@@ -1562,7 +1562,7 @@ function ReviewCard({ review }: { review: Review }) {
     .toUpperCase() || '?';
 
   return (
-    <div className="bg-white rounded-lg p-4" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
+    <div className="bg-white rounded-lg p-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
       <div className="flex items-start gap-3 mb-2">
         <div
           className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-black text-white flex-shrink-0"
@@ -1733,7 +1733,7 @@ function ReviewSection({
 
       {/* Review form */}
       {showForm && isCheckedIn && user && !alreadyReviewed && (
-        <div className="mb-4 rounded-lg p-4" style={{ background: 'white', boxShadow: '4px 4px 0 rgba(0,0,0,0.12)' }}>
+        <div className="mb-4 rounded-lg p-4" style={{ background: 'white', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
           <div className="mb-3">
             <p className="text-xs font-bold text-gray-600 mb-2" style={{ fontFamily: 'Public Sans, sans-serif' }}>
               How many outlets does this place get?
@@ -1963,7 +1963,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
         {/* ── WHEN + WHERE ─────────────────────────────────── */}
         <div className="flex gap-3 mb-3">
           {/* When: date + time combined */}
-          <div className="flex-1 bg-white p-3" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', border: '1.5px solid #f0f0f0' }}>
+          <div className="flex-1 bg-white p-3" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1.5px solid #f0f0f0' }}>
             <div className="flex items-center gap-1.5 mb-1">
               <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'var(--brand)' }}>calendar_today</span>
               <p className="text-xs font-bold uppercase tracking-wide" style={{ color: '#999', letterSpacing: '0.07em' }}>When</p>
@@ -1977,7 +1977,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
           </div>
           {/* Price */}
           {price ? (
-            <div className="flex-1 bg-white p-3" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', border: '1.5px solid #f0f0f0' }}>
+            <div className="flex-1 bg-white p-3" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1.5px solid #f0f0f0' }}>
               <div className="flex items-center gap-1.5 mb-1">
                 <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'var(--brand)' }}>sell</span>
                 <p className="text-xs font-bold uppercase tracking-wide" style={{ color: '#999', letterSpacing: '0.07em' }}>Price</p>
@@ -1990,7 +1990,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
           ) : (
             /* Age restriction badge if no price */
             event.ageRestrictions?.legalAgeEnforced ? (
-              <div className="flex-1 bg-white p-3" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', border: '1.5px solid #f0f0f0' }}>
+              <div className="flex-1 bg-white p-3" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1.5px solid #f0f0f0' }}>
                 <div className="flex items-center gap-1.5 mb-1">
                   <span className="material-symbols-outlined" style={{ fontSize: '13px', color: '#dc2626' }}>18_up_rating</span>
                   <p className="text-xs font-bold uppercase tracking-wide" style={{ color: '#999', letterSpacing: '0.07em' }}>Age</p>
@@ -2007,7 +2007,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
             href={directionsUrl}
             target="_blank" rel="noopener noreferrer"
             className="flex items-start gap-3 mb-3 bg-white p-3 w-full"
-            style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', border: '1.5px solid #f0f0f0', textDecoration: 'none' }}
+            style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1.5px solid #f0f0f0', textDecoration: 'none' }}
           >
             <span className="material-symbols-outlined flex-shrink-0 mt-0.5" style={{ fontSize: '18px', color: 'var(--brand)' }}>location_on</span>
             <div className="min-w-0 flex-1">
@@ -2031,7 +2031,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
 
         {/* ── ABOUT THIS EVENT ─────────────────────────────── */}
         {event.info && (
-          <div className="mb-3 bg-white p-3" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', border: '1.5px solid #f0f0f0' }}>
+          <div className="mb-3 bg-white p-3" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1.5px solid #f0f0f0' }}>
             <p className="text-xs font-black uppercase tracking-wide mb-2" style={{ color: 'var(--brand)', letterSpacing: '0.07em' }}>About This Event</p>
             <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'Public Sans, sans-serif' }}>{event.info}</p>
           </div>
@@ -2152,7 +2152,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
           <button
             onClick={() => addToCalendar(event)}
             className="flex items-center justify-center gap-2 w-full py-3 mb-2 font-black text-sm"
-            style={{ border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A', borderRadius: 0, background: 'white', color: '#1A1A1A', fontFamily: 'Public Sans, sans-serif' }}
+            style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderRadius: 6, background: 'white', color: '#1A1A1A', fontFamily: 'Public Sans, sans-serif' }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>calendar_add_on</span>
             ADD TO CALENDAR
@@ -2165,7 +2165,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
             {event.ticketLinks.filter(l => l.source === 'Ticketmaster').map((link) => (
               <a key={link.source} href={link.url} target="_blank" rel="noopener noreferrer"
                 className="flex items-center justify-between w-full px-5 py-3 text-white font-black text-sm"
-                style={{ borderRadius: 0, border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A',
+                style={{ borderRadius: 6, border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                   background: link.source === 'Ticketmaster' ? 'linear-gradient(135deg, #026cdf, #02a7f0)' : link.source === 'Eventbrite' ? 'linear-gradient(135deg, #f05537, #ff7a5c)' : 'linear-gradient(135deg, #d4184a, #ff5c5c)',
                   fontFamily: 'Public Sans, sans-serif' }}
               >
@@ -2177,7 +2177,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
         ) : event.url ? (
           <a href={event.url} target="_blank" rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full py-4 text-center text-white font-black text-sm"
-            style={{ borderRadius: 0, border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A',
+            style={{ borderRadius: 6, border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
               background: event._source === 'seatgeek' ? 'linear-gradient(135deg, #d4184a, #ff5c5c)' : event._source === 'local' ? 'linear-gradient(135deg, #0369a1, #38bdf8)' : 'var(--brand-gradient)',
               fontFamily: 'Public Sans, sans-serif' }}
           >
@@ -2187,7 +2187,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
         ) : (
           <a href={directionsUrl} target="_blank" rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full py-4 text-center text-white font-black text-sm"
-            style={{ borderRadius: 0, background: 'var(--brand-gradient)', fontFamily: 'Public Sans, sans-serif' }}
+            style={{ borderRadius: 6, background: 'var(--brand-gradient)', fontFamily: 'Public Sans, sans-serif' }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>directions</span>
             GET DIRECTIONS →
@@ -2512,7 +2512,7 @@ function StreakBanner() {
     : `Welcome back! Day ${info.count} in a row.`;
   return (
     <div className="flex items-center justify-between gap-3 px-4 py-3"
-      style={{ background: '#b95c43', borderBottom: '2px solid #1A1A1A', animation: 'cardFadeIn 0.4s ease both' }}>
+      style={{ background: '#b95c43', borderBottom: '1px solid rgba(0,0,0,0.08)', animation: 'cardFadeIn 0.4s ease both' }}>
       <div className="flex items-center gap-2 min-w-0">
         <span style={{ fontSize: '20px', lineHeight: 1 }}>{emoji}</span>
         <span className="text-sm font-black truncate" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>{label}</span>
@@ -2544,12 +2544,12 @@ function DailyGem({ places, onSelect }: { places: Place[]; onSelect: (p: Place) 
         <span className="text-xs font-black uppercase" style={{ color: '#666', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em' }}>🗓 Changes daily</span>
       </div>
       <button onClick={() => onSelect(gem)} className="w-full relative overflow-hidden text-left"
-        style={{ height: '180px', boxShadow: '4px 4px 0 #1A1A1A', border: '2px solid #1A1A1A', animation: 'cardFadeIn 0.45s ease both', borderRadius: 0 }}>
+        style={{ height: '180px', boxShadow: '0 2px 8px rgba(0,0,0,0.10)', border: '1px solid rgba(0,0,0,0.12)', animation: 'cardFadeIn 0.45s ease both', borderRadius: 6 }}>
         {gem.image && <img src={gem.image} alt={gem.name} className="w-full h-full object-cover" style={{ filter: 'brightness(0.82)' }} />}
         <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, rgba(28,111,234,0.12) 0%, rgba(0,0,0,0.72) 100%)' }} />
         <div className="absolute top-3 left-3">
           <span className="text-xs font-black px-3 py-1"
-            style={{ background: '#b95c43', color: '#1A1A1A', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase', border: '1.5px solid #1A1A1A', borderRadius: 0 }}>
+            style={{ background: '#b95c43', color: '#1A1A1A', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 6 }}>
             ★ TODAY'S PICK
           </span>
         </div>
@@ -2626,11 +2626,11 @@ function AnimatedFact() {
   };
   return (
     <div className="mb-6">
-      <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', marginBottom: '12px' }}>
+      <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)', marginBottom: '12px' }}>
         <p className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>Did You Know?</p>
       </div>
       <div className="px-5">
-        <button onClick={next} className="w-full p-5 text-left" style={{ background: '#b95c43', border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A', minHeight: 96, borderRadius: 0 }}>
+        <button onClick={next} className="w-full p-5 text-left" style={{ background: '#b95c43', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)', minHeight: 96, borderRadius: 6 }}>
           <div style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.35s ease' }}>
             <FlatIcon name={facts[idx].icon} size={28} color="#1A1A1A" />
             <p className="text-sm mt-2 leading-relaxed font-semibold" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>{facts[idx].fact}</p>
@@ -2818,7 +2818,7 @@ function DiscoverScreen({
       <StreakBanner />
 
       {/* Hero — value prop + primary CTA */}
-      <div style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #b95c43', borderBottom: '2px solid #1A1A1A' }}>
+      <div style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #b95c43', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <div className="px-5 pt-5 pb-4">
           <p className="text-xs font-black uppercase mb-2" style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.12em' }}>
             Greater ABQ Metro
@@ -2831,7 +2831,7 @@ function DiscoverScreen({
           </p>
           <button
             onClick={() => onNavigateEvents?.()}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '42px', padding: '0 16px', background: '#1A1A1A', color: 'white', border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #b95c43', fontFamily: 'Public Sans, sans-serif', fontSize: '13px', fontWeight: 800, letterSpacing: '0.03em', cursor: 'pointer', borderRadius: 0, marginBottom: '12px' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '42px', padding: '0 16px', background: '#1A1A1A', color: 'white', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(185,92,67,0.25)', fontFamily: 'Public Sans, sans-serif', fontSize: '13px', fontWeight: 800, letterSpacing: '0.03em', cursor: 'pointer', borderRadius: 6, marginBottom: '12px' }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>confirmation_number</span>
             What's on tonight →
@@ -2845,7 +2845,7 @@ function DiscoverScreen({
             { label: 'Explore Places', action: () => onNavigatePlaces?.('All', '') },
           ].map(chip => (
             <button key={chip.label} onClick={chip.action}
-              style={{ flexShrink: 0, height: '28px', padding: '0 12px', background: 'white', border: '1.5px solid #1A1A1A', fontFamily: 'Public Sans, sans-serif', fontSize: '11px', fontWeight: 700, letterSpacing: '0.04em', cursor: 'pointer', borderRadius: 0, whiteSpace: 'nowrap' }}>
+              style={{ flexShrink: 0, height: '28px', padding: '0 12px', background: 'white', border: '1px solid rgba(0,0,0,0.12)', fontFamily: 'Public Sans, sans-serif', fontSize: '11px', fontWeight: 700, letterSpacing: '0.04em', cursor: 'pointer', borderRadius: 6, whiteSpace: 'nowrap' }}>
               {chip.label}
             </button>
           ))}
@@ -2863,8 +2863,8 @@ function DiscoverScreen({
 
       {/* This Week Events — brutalist table layout */}
       {!hidden.includes('thisWeek') && eventsLoading && upcomingEvents.length === 0 && (
-        <div className="mb-5 mx-5" style={{ border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A' }}>
-          <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '2px solid #1A1A1A', backgroundColor: '#fff' }}>
+        <div className="mb-5 mx-5" style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>
+          <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', backgroundColor: '#fff' }}>
             <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em' }}>Events This Week</h2>
             <span className="text-xs font-black" style={{ color: '#aaa' }}>Loading…</span>
           </div>
@@ -2878,9 +2878,9 @@ function DiscoverScreen({
         </div>
       )}
       {!hidden.includes('thisWeek') && upcomingEvents.length > 0 && (
-        <div className="mb-5 mx-5" style={{ border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A' }}>
+        <div className="mb-5 mx-5" style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '2px solid #1A1A1A', backgroundColor: '#fff' }}>
+          <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', backgroundColor: '#fff' }}>
             <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>
               Events This Week
             </h2>
@@ -2930,7 +2930,7 @@ function DiscoverScreen({
                   </div>
                   {/* Arrow */}
                   <div className="flex items-center justify-center flex-shrink-0"
-                    style={{ width: 48, backgroundColor: '#b95c43', borderLeft: '1px solid #1A1A1A' }}>
+                    style={{ width: 48, backgroundColor: '#b95c43', borderLeft: '1px solid rgba(0,0,0,0.08)' }}>
                     <span className="font-black" style={{ fontSize: 18, color: '#1A1A1A' }}>→</span>
                   </div>
                 </button>
@@ -3023,7 +3023,7 @@ function DiscoverScreen({
       {/* Near You */}
       {!hidden.includes('nearYou') && coords && nearbyPlaces.length > 0 && (
         <div className="py-4">
-          <div className="flex items-center justify-between px-5 py-3 mb-0" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
+          <div className="flex items-center justify-between px-5 py-3 mb-0" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
             <h2
               className="text-sm font-black uppercase"
               style={{ fontFamily: 'Public Sans, sans-serif' }}
@@ -3041,7 +3041,7 @@ function DiscoverScreen({
                 key={place.id}
                 onClick={() => onPlaceSelect(place)}
                 className="flex-shrink-0 bg-white overflow-hidden text-left"
-                style={{ width: '144px', border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A' }}
+                style={{ width: '144px', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}
               >
                 <div className="relative" style={{ height: '100px' }}>
                   <ImageWithFallback
@@ -3084,7 +3084,7 @@ function DiscoverScreen({
       {/* Hidden Gems */}
       {!hidden.includes('hiddenGems') && hiddenGems.length > 0 && (
         <div className="py-4">
-          <div className="flex items-center justify-between px-5 py-3 mb-0" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
+          <div className="flex items-center justify-between px-5 py-3 mb-0" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
             <h2
               className="text-sm font-black uppercase"
               style={{ fontFamily: 'Public Sans, sans-serif' }}
@@ -3101,7 +3101,7 @@ function DiscoverScreen({
                 key={place.id}
                 onClick={() => onPlaceSelect(place)}
                 className="flex-shrink-0 bg-white overflow-hidden text-left"
-                style={{ width: '144px', border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A' }}
+                style={{ width: '144px', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}
               >
                 <div className="relative" style={{ height: '100px' }}>
                   <ImageWithFallback
@@ -3144,10 +3144,10 @@ function DiscoverScreen({
 
       {/* Explore by Vibe */}
       {!hidden.includes('vibes') && <div className="mb-6">
-        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
+        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
           <p className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>Explore by Vibe</p>
         </div>
-        <div className="grid grid-cols-3" style={{ gap: '0', borderLeft: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', borderRight: '2px solid #1A1A1A' }}>
+        <div className="grid grid-cols-3" style={{ gap: '0', borderLeft: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)', borderRight: '1px solid rgba(0,0,0,0.08)' }}>
           {[
             { icon: 'park', label: 'Outdoor', cat: 'park' },
             { icon: 'restaurant', label: 'Food & Drink', cat: 'restaurant' },
@@ -3158,7 +3158,7 @@ function DiscoverScreen({
           ].map(({ icon, label, cat }) => (
             <button key={label}
               className="flex flex-col items-center gap-1 p-3 transition-all active:bg-gray-100"
-              style={{ background: 'white', border: 'none', borderRight: '2px solid #1A1A1A', borderBottom: '2px solid #1A1A1A', borderRadius: 0 }}
+              style={{ background: 'white', border: 'none', borderRight: '1px solid rgba(0,0,0,0.08)', borderBottom: '1px solid rgba(0,0,0,0.08)', borderRadius: 6 }}
               onClick={() => onNavigatePlaces?.(cat, '')}>
               <span className="material-symbols-outlined" style={{ fontSize: '26px', color: '#1A1A1A', fontVariationSettings: "'FILL' 0, 'wght' 300" }}>{icon}</span>
               <span className="text-center leading-tight font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '9px', letterSpacing: '0.08em', color: '#1A1A1A' }}>{label}</span>
@@ -3169,10 +3169,10 @@ function DiscoverScreen({
 
       {/* ABQ Neighborhoods */}
       {!hidden.includes('neighborhoods') && <div className="mb-6">
-        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
+        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
           <p className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>ABQ Neighborhoods</p>
         </div>
-        <div className="grid grid-cols-2" style={{ gap: '0', borderLeft: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', borderRight: '2px solid #1A1A1A' }}>
+        <div className="grid grid-cols-2" style={{ gap: '0', borderLeft: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)', borderRight: '1px solid rgba(0,0,0,0.08)' }}>
           {[
             { name: 'Old Town', desc: 'History, art & adobe', icon: 'account_balance', bg: '#b95c43' },
             { name: 'Nob Hill', desc: 'Eclectic & walkable', icon: 'local_cafe', bg: '#0057c2' },
@@ -3182,7 +3182,7 @@ function DiscoverScreen({
             { name: 'South Valley', desc: 'Local flavor', icon: 'storefront', bg: '#baad3b' },
           ].map(({ name, desc, icon, bg }) => (
             <button key={name} className="p-4 text-left transition-all"
-              style={{ backgroundColor: bg, borderRight: '2px solid #1A1A1A', borderBottom: '2px solid #1A1A1A', borderRadius: 0 }}
+              style={{ backgroundColor: bg, borderRight: '1px solid rgba(0,0,0,0.08)', borderBottom: '1px solid rgba(0,0,0,0.08)', borderRadius: 6 }}
               onClick={() => onNavigatePlaces?.('All', name)}>
               <span className="material-symbols-outlined" style={{ fontSize: '24px', color: bg === '#baad3b' ? '#1A1A1A' : 'white', fontVariationSettings: "'FILL' 0, 'wght' 300" }}>{icon}</span>
               <p className="font-black text-sm mt-1" style={{ fontFamily: 'Public Sans, sans-serif', color: bg === '#baad3b' ? '#1A1A1A' : 'white' }}>{name}</p>
@@ -3197,7 +3197,7 @@ function DiscoverScreen({
 
       {/* Weekend Planner */}
       {!hidden.includes('planWeekend') && <div className="mb-6">
-        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', marginBottom: '12px' }}>
+        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)', marginBottom: '12px' }}>
           <p className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>Plan Your Weekend</p>
         </div>
         <div className="flex flex-col gap-2">
@@ -3207,7 +3207,7 @@ function DiscoverScreen({
             { title: 'Local Food Crawl', steps: ['Green chile breakfast at Frontier', 'Lunch at El Modelo', 'Drinks on Central Ave'], bar: '#b95c43' },
             { title: 'Nature Escape', steps: ['Rio Grande Bosque trail', 'Tingley Beach', 'Sunset at Petroglyph Monument'], bar: '#b95c43' },
           ].map(({ title, steps, bar }) => (
-            <div key={title} className="flex" style={{ border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A', backgroundColor: '#fff' }}>
+            <div key={title} className="flex" style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', backgroundColor: '#fff' }}>
               {/* left accent bar */}
               <div style={{ width: 4, flexShrink: 0, backgroundColor: bar }} />
               <div className="flex-1 px-3 py-2">
@@ -3216,7 +3216,7 @@ function DiscoverScreen({
                   <button
                     onClick={() => addToDayPlan(steps)}
                     className="text-xs font-black px-2 py-0.5"
-                    style={{ backgroundColor: '#b95c43', color: '#1A1A1A', border: '1.5px solid #1A1A1A', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.04em' }}
+                    style={{ backgroundColor: '#b95c43', color: '#1A1A1A', border: '1px solid rgba(0,0,0,0.12)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.04em' }}
                   >
                     + plan
                   </button>
@@ -3441,7 +3441,7 @@ function EventsScreen({
 
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #b95c43', borderBottom: '2px solid #1A1A1A' }}>
+      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #b95c43', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}
@@ -3459,10 +3459,10 @@ function EventsScreen({
         </p>
       </div>
 
-      <div className="px-5 py-3" style={{ borderBottom: '2px solid #1A1A1A' }}>
+      <div className="px-5 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <div
           className="flex items-center gap-2 bg-white px-4 py-3"
-          style={{ border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A' }}
+          style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
         >
           <span className="material-symbols-outlined text-gray-400" style={{ fontSize: '20px' }}>search</span>
           <input
@@ -3480,7 +3480,7 @@ function EventsScreen({
         </div>
       </div>
 
-      <div className="flex px-5 overflow-x-auto" style={{ scrollbarWidth: 'none', position: 'sticky', top: 'calc(var(--sat) + 58px)', zIndex: 30, background: 'white', paddingTop: '12px', paddingBottom: '0px', borderBottom: '2px solid #1A1A1A' }}>
+      <div className="flex px-5 overflow-x-auto" style={{ scrollbarWidth: 'none', position: 'sticky', top: 'calc(var(--sat) + 58px)', zIndex: 30, background: 'white', paddingTop: '12px', paddingBottom: '0px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         {EVENT_GENRES.map(genre => {
           const isForYou = genre === '❤️ For You';
           const isSelected = selectedGenre === genre;
@@ -3495,9 +3495,9 @@ function EventsScreen({
                   letterSpacing: '0.1em',
                   background: isSelected ? '#1A1A1A' : isForYou && followedGenres.length > 0 ? 'var(--brand-bg-subtle)' : 'white',
                   color: isSelected ? 'white' : '#1A1A1A',
-                  border: '1.5px solid #1A1A1A',
+                  border: '1px solid rgba(0,0,0,0.12)',
                   borderRight: !isForYou && !isSelected ? 'none' : '1.5px solid #1A1A1A',
-                  borderRadius: 0,
+                  borderRadius: 6,
                 }}
               >
                 {genre}
@@ -3510,9 +3510,9 @@ function EventsScreen({
                   style={{
                     background: isSelected ? '#333' : isFollowed ? 'var(--brand)' : '#f5f5f5',
                     color: isFollowed || isSelected ? 'white' : '#999',
-                    border: '1.5px solid #1A1A1A',
+                    border: '1px solid rgba(0,0,0,0.12)',
                     borderLeft: 'none',
-                    borderRadius: 0,
+                    borderRadius: 6,
                     padding: '0 6px',
                     fontSize: '10px',
                     cursor: 'pointer',
@@ -3545,7 +3545,7 @@ function EventsScreen({
             <button
               onClick={() => setSelectedGenre('All')}
               className="px-5 py-2.5 font-black text-sm uppercase"
-              style={{ background: '#1A1A1A', color: 'white', border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #b95c43', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em', cursor: 'pointer' }}
+              style={{ background: '#1A1A1A', color: 'white', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(185,92,67,0.25)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em', cursor: 'pointer' }}
             >
               Browse all events
             </button>
@@ -3555,7 +3555,7 @@ function EventsScreen({
 
       {/* For You setup prompt — shown when For You is selected but nothing followed */}
       {selectedGenre === '❤️ For You' && followedGenres.length === 0 && (
-        <div className="px-5 py-4 flex items-start gap-3" style={{ background: 'var(--brand-bg-subtle)', borderBottom: '2px solid #1A1A1A' }}>
+        <div className="px-5 py-4 flex items-start gap-3" style={{ background: 'var(--brand-bg-subtle)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
           <span style={{ fontSize: '24px', lineHeight: 1 }}>❤️</span>
           <div>
             <p className="text-sm font-black" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>Personalize your feed</p>
@@ -3832,7 +3832,7 @@ function PlacesScreen({
 
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', willChange: 'transform' } as React.CSSProperties}>
-      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #b95c43', borderBottom: '2px solid #1A1A1A' }}>
+      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #b95c43', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}
@@ -3865,7 +3865,7 @@ function PlacesScreen({
       <div className="px-5 pb-3">
         <div
           className="flex items-center gap-2 bg-white px-4 py-3"
-          style={{ border: '2px solid #1A1A1A', boxShadow: '4px 4px 0 #1A1A1A' }}
+          style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}
         >
           <span className="material-symbols-outlined text-gray-400" style={{ fontSize: '20px' }}>search</span>
           <input
@@ -3892,7 +3892,7 @@ function PlacesScreen({
           <button
             onClick={() => { setSearchInput(''); setSearch(''); }}
             className="flex items-center gap-1 px-2 py-0.5 text-xs font-black uppercase"
-            style={{ background: 'var(--brand)', color: '#fff', border: '1.5px solid #1A1A1A', boxShadow: '2px 2px 0 #1A1A1A', letterSpacing: '0.08em' }}
+            style={{ background: 'var(--brand)', color: '#fff', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', letterSpacing: '0.08em' }}
           >
             {selectedCat} <span style={{ fontSize: '14px', lineHeight: 1 }}>×</span>
           </button>
@@ -3900,7 +3900,7 @@ function PlacesScreen({
       )}
 
       {/* Open Now chip + Category pills */}
-      <div className="flex px-5 pb-0 overflow-x-auto" style={{ scrollbarWidth: 'none', borderBottom: '2px solid #1A1A1A', paddingBottom: '12px', paddingTop: '12px' }}>
+      <div className="flex px-5 pb-0 overflow-x-auto" style={{ scrollbarWidth: 'none', borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '12px', paddingTop: '12px' }}>
         {/* Open Now toggle — always first */}
         <button
           onClick={() => setOpenNow(v => !v)}
@@ -3910,9 +3910,9 @@ function PlacesScreen({
             letterSpacing: '0.1em',
             background: openNow ? '#b95c43' : 'white',
             color: openNow ? 'white' : '#1A1A1A',
-            border: '1.5px solid #1A1A1A',
+            border: '1px solid rgba(0,0,0,0.12)',
             marginRight: '-1.5px',
-            borderRadius: 0,
+            borderRadius: 6,
             position: 'relative',
             zIndex: openNow ? 1 : 0,
           }}
@@ -3930,9 +3930,9 @@ function PlacesScreen({
               letterSpacing: '0.1em',
               background: selectedCat === cat.value ? '#1A1A1A' : 'white',
               color: selectedCat === cat.value ? 'white' : '#1A1A1A',
-              border: '1.5px solid #1A1A1A',
+              border: '1px solid rgba(0,0,0,0.12)',
               marginRight: '-1.5px',
-              borderRadius: 0,
+              borderRadius: 6,
               position: 'relative',
               zIndex: selectedCat === cat.value ? 1 : 0,
             }}
@@ -3960,9 +3960,9 @@ function PlacesScreen({
               letterSpacing: '0.08em',
               background: sortMode === s.id ? '#1A1A1A' : 'white',
               color: sortMode === s.id ? 'white' : s.disabled ? '#bbb' : '#1A1A1A',
-              border: '2px solid #1A1A1A',
+              border: '1px solid rgba(0,0,0,0.12)',
               boxShadow: sortMode === s.id ? '4px 4px 0 #1A1A1A' : '3px 3px 0 rgba(0,0,0,0.15)',
-              borderRadius: 0,
+              borderRadius: 6,
               opacity: s.disabled ? 0.5 : 1,
             }}
           >
@@ -4312,7 +4312,7 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
       <button
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-center justify-between bg-white rounded-lg px-4 py-3"
-        style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', fontFamily: 'Public Sans, sans-serif' }}
+        style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', fontFamily: 'Public Sans, sans-serif' }}
       >
         <div className="flex items-center gap-2">
           <span style={{ fontSize: '16px' }}>⚙️</span>
@@ -4326,7 +4326,7 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
 
           {/* Username */}
           {user ? (
-            <div className="bg-white rounded-lg p-4" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
+            <div className="bg-white rounded-lg p-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2" style={{ fontFamily: 'Public Sans, sans-serif' }}>Username</p>
               <div className="flex gap-2">
                 <input
@@ -4353,7 +4353,7 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
             <button
               onClick={onSignIn}
               className="w-full bg-white rounded-lg p-4 flex items-center gap-3 text-left"
-              style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', fontFamily: 'Public Sans, sans-serif' }}
+              style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', fontFamily: 'Public Sans, sans-serif' }}
             >
               <span style={{ fontSize: '20px' }}>🏷️</span>
               <div>
@@ -4365,7 +4365,7 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
           )}
 
           {/* Homescreen Sections */}
-          <div className="bg-white rounded-lg p-4" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
+          <div className="bg-white rounded-lg p-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3" style={{ fontFamily: 'Public Sans, sans-serif' }}>Homescreen Sections</p>
             <div className="flex flex-col gap-3">
               {DISCOVER_SECTIONS.map(sec => {
@@ -4386,7 +4386,7 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
           </div>
 
           {/* Interests */}
-          <div className="bg-white rounded-lg p-4" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
+          <div className="bg-white rounded-lg p-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1" style={{ fontFamily: 'Public Sans, sans-serif' }}>Your Interests</p>
             <p className="text-xs text-gray-400 mb-3" style={{ fontFamily: 'Public Sans, sans-serif' }}>Selected interests appear first in your feed</p>
             <div className="flex flex-wrap gap-2">
@@ -4490,7 +4490,7 @@ function ProfileScreen({
 
   return (
     <div className="w-full px-5 pb-28" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-      <div className="pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #b95c43', borderBottom: '2px solid #1A1A1A', marginLeft: '-20px', marginRight: '-20px', paddingLeft: '20px', paddingRight: '20px' }}>
+      <div className="pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #b95c43', borderBottom: '1px solid rgba(0,0,0,0.08)', marginLeft: '-20px', marginRight: '-20px', paddingLeft: '20px', paddingRight: '20px' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}
@@ -4510,7 +4510,7 @@ function ProfileScreen({
         <button
           onClick={onSignIn}
           className="w-full flex items-center justify-between rounded-lg px-4 py-3 mb-4 text-white font-bold text-sm"
-          style={{ background: 'var(--brand-gradient)', fontFamily: 'Public Sans, sans-serif', boxShadow: '3px 3px 0 var(--brand)' }}
+          style={{ background: 'var(--brand-gradient)', fontFamily: 'Public Sans, sans-serif', boxShadow: '0 2px 8px rgba(185,92,67,0.20)' }}
         >
           <span>Sign in to sync check-ins & join the leaderboard</span>
           <span style={{ fontSize: '16px' }}>→</span>
@@ -4518,7 +4518,7 @@ function ProfileScreen({
       ) : (
         <div
           className="w-full flex items-center justify-between rounded-lg px-4 py-3 mb-4"
-          style={{ background: 'linear-gradient(135deg, #1b5e20, #2e7d32)', fontFamily: 'Public Sans, sans-serif', boxShadow: '3px 3px 0 rgba(0,0,0,0.15)' }}
+          style={{ background: 'linear-gradient(135deg, #1b5e20, #2e7d32)', fontFamily: 'Public Sans, sans-serif', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}
         >
           <div>
             <p className="font-bold text-sm" style={{ color: '#1A1A1A' }}>✅ Signed in & syncing your check-ins</p>
@@ -4544,7 +4544,7 @@ function ProfileScreen({
             background: '#000',
             color: '#fff',
             border: '2px solid #000',
-            borderRadius: 0,
+            borderRadius: 6,
             fontFamily: 'Public Sans, sans-serif',
             fontWeight: 900,
             fontSize: 14,
@@ -4569,7 +4569,7 @@ function ProfileScreen({
       {/* Profile card */}
       <div
         className="flex items-center gap-4 bg-white rounded-lg p-4 mb-4"
-        style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.12)' }}
+        style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
       >
         <div
           className="w-16 h-16 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden"
@@ -4605,7 +4605,7 @@ function ProfileScreen({
           <div
             key={s.label}
             className="bg-white rounded-lg p-3 text-center"
-            style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}
+            style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
           >
             <p
               className="text-2xl font-black"
@@ -4620,13 +4620,13 @@ function ProfileScreen({
 
       {/* Progress bar */}
       {myCount >= 50 ? (
-        <div className="bg-white rounded-lg p-4 mb-4 text-center" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
+        <div className="bg-white rounded-lg p-4 mb-4 text-center" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
           <span style={{ fontSize: '28px' }}>★</span>
           <p className="font-black text-sm mt-1" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--brand)' }}>Max Level Reached!</p>
           <p className="text-xs text-gray-400 mt-0.5" style={{ fontFamily: 'Public Sans, sans-serif' }}>You're a Legend — {myCount} places explored!</p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg p-4 mb-4" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
+        <div className="bg-white rounded-lg p-4 mb-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs font-bold text-gray-700" style={{ fontFamily: 'Public Sans, sans-serif' }}>
               Progress to {nextLevel.label}
@@ -4648,18 +4648,18 @@ function ProfileScreen({
       )}
 
       {/* Achievements */}
-      <div className="flex items-center px-0 py-3 mb-0" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
+      <div className="flex items-center px-0 py-3 mb-0" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
         <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif' }}>Achievements</h2>
       </div>
       {/* Abutting border grid — no gap, container has left+top, cells have right+bottom */}
-      <div className="grid grid-cols-3 mb-5" style={{ gap: 0, borderLeft: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A', borderRight: '2px solid #1A1A1A' }}>
+      <div className="grid grid-cols-3 mb-5" style={{ gap: 0, borderLeft: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)', borderRight: '1px solid rgba(0,0,0,0.08)' }}>
         {ACHIEVEMENTS.map(a => (
           <div
             key={a.id}
             className="flex flex-col items-center justify-center gap-1 py-5 px-2"
             style={{
-              borderRight: '2px solid #1A1A1A',
-              borderBottom: '2px solid #1A1A1A',
+              borderRight: '1px solid rgba(0,0,0,0.08)',
+              borderBottom: '1px solid rgba(0,0,0,0.08)',
               background: a.unlocked ? '#b95c43' : 'white',
               marginRight: '-2px',
             }}
@@ -4752,7 +4752,7 @@ function ProfileScreen({
         const allDone = CHALLENGES.every(c => c.progress >= c.target);
         return (
           <>
-            <div className="flex items-center px-0 py-3 mb-0 mt-1" style={{ borderBottom: '2px solid #1A1A1A', borderTop: '2px solid #1A1A1A' }}>
+            <div className="flex items-center px-0 py-3 mb-0 mt-1" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
               <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif' }}>ABQ Explorer Challenges</h2>
             </div>
             <div className="flex flex-col gap-2 mb-5 mt-3">
@@ -4807,7 +4807,7 @@ function ProfileScreen({
 
       <div className="flex flex-col gap-2 mb-5">
         {leaderboard.length === 0 && (
-          <div className="text-center py-8" style={{ background: 'white', borderRadius: 8, boxShadow: '3px 3px 0 rgba(0,0,0,0.08)' }}>
+          <div className="text-center py-8" style={{ background: 'white', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
             <div style={{ fontSize: 32, marginBottom: 8 }}>🏁</div>
             <p className="font-black text-sm" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1a1a1a' }}>No explorers yet — be first!</p>
             <p className="text-xs text-gray-400 mt-1" style={{ fontFamily: 'Public Sans, sans-serif' }}>Check in at places around ABQ to climb the board.</p>
@@ -4883,7 +4883,7 @@ function ProfileScreen({
                 <div
                   key={p.id}
                   className="flex items-center gap-3 bg-white rounded-lg px-4 py-3"
-                  style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}
+                  style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
                 >
                   <div
                     className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden"
@@ -5143,7 +5143,7 @@ function InstallPrompt() {
           <img
             src="/apple-touch-icon-180.png"
             alt="ABQ Unplugged"
-            style={{ width: 56, height: 56, borderRadius: 4, boxShadow: '3px 3px 0 rgba(0,0,0,0.15)' }}
+            style={{ width: 56, height: 56, borderRadius: 4, boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}
           />
           <div>
             <div style={{ fontWeight: 800, fontSize: 17, color: '#1c1c1e', lineHeight: 1.2 }}>
@@ -5529,7 +5529,7 @@ function SiteBanner({ banner }: { banner: BannerConfig | null }) {
     info:    { bg: 'rgba(59,130,246,0.1)',  border: 'rgba(59,130,246,0.25)',  text: '#1d4ed8' },
     success: { bg: 'rgba(34,197,94,0.1)',   border: 'rgba(34,197,94,0.25)',   text: '#15803d' },
     warning: { bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.25)',  text: '#92400e' },
-    promo:   { bg: '#b95c43',               border: '#1A1A1A',                text: '#1A1A1A' },
+    promo:   { bg: '#b95c43',               border: 'rgba(0,0,0,0.12)',                text: '#1A1A1A' },
   };
   const typeColor = colorMap[banner.type] ?? colorMap.info;
   const bg   = banner.bgColor   || typeColor.bg;
@@ -5654,7 +5654,7 @@ const inputSty = {
 };
 const cardSty = {
   backgroundColor: 'white', borderRadius: 12, padding: 16,
-  boxShadow: '2px 2px 0 rgba(0,0,0,0.10)',
+  boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
 };
 const btnPrim = {
   padding: '8px 18px', borderRadius: 8, border: 'none' as const,
@@ -6354,12 +6354,12 @@ function PlanScreen({
           <button
             onClick={handleSharePlan}
             className="flex items-center gap-1 text-xs font-black px-3 py-1.5"
-            style={{ border: '1.5px solid #1a1a1a', fontFamily: 'Public Sans, sans-serif', background: '#1a1a1a', color: 'white' }}
+            style={{ border: '1px solid rgba(0,0,0,0.12)', fontFamily: 'Public Sans, sans-serif', background: '#1a1a1a', color: 'white' }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>share</span>
             Share
           </button>
-          <button onClick={onClearAll} className="text-xs font-bold px-3 py-1.5" style={{ border: '1.5px solid #1a1a1a', fontFamily: 'Public Sans, sans-serif', color: '#dc2626' }}>
+          <button onClick={onClearAll} className="text-xs font-bold px-3 py-1.5" style={{ border: '1px solid rgba(0,0,0,0.12)', fontFamily: 'Public Sans, sans-serif', color: '#dc2626' }}>
             Clear
           </button>
         </div>
@@ -6373,7 +6373,7 @@ function PlanScreen({
           </h2>
           <div className="flex flex-col gap-3">
             {places.map(({ data: p }) => (
-              <div key={p.id} className="flex items-stretch gap-3 bg-white" style={{ border: '2px solid #1a1a1a', boxShadow: '3px 3px 0 #1a1a1a' }}>
+              <div key={p.id} className="flex items-stretch gap-3 bg-white" style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
                 <button onClick={() => onPlaceSelect(p)} className="flex items-center gap-3 flex-1 p-3 text-left">
                   <div className="flex-shrink-0 rounded overflow-hidden" style={{ width: 56, height: 56, background: '#f0f0f0' }}>
                     {(p.thumbnail || p.image) && <img src={p.thumbnail || p.image} alt="" className="w-full h-full object-cover" />}
@@ -6392,7 +6392,7 @@ function PlanScreen({
                       <span className="text-[9px] font-black uppercase tracking-wider" style={{ fontFamily: 'Public Sans, sans-serif' }}>Go</span>
                     </a>
                   )}
-                  <button onClick={() => onRemovePlace(p.id)} className="flex items-center justify-center px-3 py-2" style={{ borderTop: '1.5px solid #1a1a1a', background: 'white' }}>
+                  <button onClick={() => onRemovePlace(p.id)} className="flex items-center justify-center px-3 py-2" style={{ borderTop: '1px solid rgba(0,0,0,0.08)', background: 'white' }}>
                     <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#dc2626' }}>close</span>
                   </button>
                 </div>
@@ -6415,7 +6415,7 @@ function PlanScreen({
               const venue = ev._embedded?.venues?.[0];
               const mapsQ = encodeURIComponent((venue?.address?.line1 || venue?.name || ev.name) + ' Albuquerque NM');
               return (
-                <div key={ev.id} className="flex items-stretch gap-3 bg-white" style={{ border: '2px solid #1a1a1a', boxShadow: '3px 3px 0 #1a1a1a' }}>
+                <div key={ev.id} className="flex items-stretch gap-3 bg-white" style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
                   <button onClick={() => onEventSelect(ev)} className="flex items-center gap-3 flex-1 p-3 text-left">
                     <div className="flex-shrink-0 rounded overflow-hidden" style={{ width: 56, height: 56, background: '#1a1a1a' }}>
                       {img ? <img src={img} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><span className="material-symbols-outlined text-white" style={{ fontSize: '22px' }}>confirmation_number</span></div>}
@@ -6432,7 +6432,7 @@ function PlanScreen({
                       <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>directions</span>
                       <span className="text-[9px] font-black uppercase tracking-wider" style={{ fontFamily: 'Public Sans, sans-serif' }}>Go</span>
                     </a>
-                    <button onClick={() => onRemoveEvent(ev.id)} className="flex items-center justify-center px-3 py-2" style={{ borderTop: '1.5px solid #1a1a1a', background: 'white' }}>
+                    <button onClick={() => onRemoveEvent(ev.id)} className="flex items-center justify-center px-3 py-2" style={{ borderTop: '1px solid rgba(0,0,0,0.08)', background: 'white' }}>
                       <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#dc2626' }}>close</span>
                     </button>
                   </div>
@@ -8058,7 +8058,7 @@ export default function App() {
             paddingTop: 'calc(var(--sat) + 12px)',
             paddingBottom: '12px',
             background: 'white',
-            borderBottom: '2px solid #1A1A1A',
+            borderBottom: '1px solid rgba(0,0,0,0.08)',
             zIndex: 40,
           }}
         >
@@ -8066,13 +8066,13 @@ export default function App() {
             <img src="/logo-static.png" alt="ABQ Unplugged" style={{ height: '32px', width: 'auto' }} />
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => setShowSearch(true)} className="w-9 h-9 flex items-center justify-center" style={{ background: 'white', border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A' }}>
+            <button onClick={() => setShowSearch(true)} className="w-9 h-9 flex items-center justify-center" style={{ background: 'white', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
               <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#1A1A1A' }}>search</span>
             </button>
             <button
               onClick={requestGeo}
               className="w-9 h-9 flex items-center justify-center"
-              style={{ background: 'white', border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A' }}
+              style={{ background: 'white', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
               title={coords ? 'Location active' : 'Enable location'}
               aria-label={coords ? 'Location active' : 'Enable location'}
             >
@@ -8174,7 +8174,7 @@ export default function App() {
             width: '100%',
             maxWidth: '480px',
             paddingBottom: 'var(--sab)',
-            borderTop: '2px solid #1A1A1A',
+            borderTop: '1px solid rgba(0,0,0,0.08)',
             background: 'white',
             zIndex: 40,
           }}
@@ -8189,7 +8189,7 @@ export default function App() {
                 minHeight: '64px',
                 background: activeTab === item.id ? '#1A1A1A' : 'white',
                 borderRight: idx < NAV_ITEMS.length - 1 ? '1.5px solid #1A1A1A' : 'none',
-                borderRadius: 0,
+                borderRadius: 6,
               }}
             >
               <span
