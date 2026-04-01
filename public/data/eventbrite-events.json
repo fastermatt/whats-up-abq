@@ -1,81 +1,5 @@
 [
   {
-    "name": "The Silver Sessions Vol. 1",
-    "type": "event",
-    "id": "eb-1985921890835",
-    "test": false,
-    "url": "https://www.eventbrite.com/e/the-silver-sessions-vol-1-tickets-1985921890835",
-    "locale": "en-us",
-    "images": [
-      {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1180664569%2F70995081997%2F1%2Foriginal.20260325-150404?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=23e556e0a241735b79ce5830b619e625",
-        "ratio": "16_9",
-        "width": 512,
-        "height": 256,
-        "fallback": false
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-03-31",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBD": true,
-        "noSpecificTime": false
-      },
-      "end": {
-        "localDate": "2026-03-31"
-      },
-      "status": {
-        "code": "onsale"
-      },
-      "timezone": "America/Denver"
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nE",
-          "name": "Miscellaneous"
-        },
-        "genre": {
-          "id": "KnvZfZ7v7ll",
-          "name": "Undefined"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vAv6",
-          "name": "Undefined"
-        }
-      }
-    ],
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Rio Bravo Brewing Company",
-          "type": "venue",
-          "id": "eb-1985921890835-venue",
-          "locale": "en-us",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "1912 2nd Street Northwest"
-          }
-        }
-      ]
-    },
-    "_source": "eventbrite",
-    "description": "Join us for a conversation with three industry powerhouses about creativity, storytelling, and surviving the ad business."
-  },
-  {
     "name": "FIRST WEDNESDAY: Protecting Your Asset",
     "type": "event",
     "id": "eb-1984928326056",
@@ -228,6 +152,156 @@
     "description": "Learn more about what CNM has to offer after high school"
   },
   {
+    "name": "Creative People, Creative Places - Creative Technologies on the Mother Road",
+    "type": "event",
+    "id": "eb-1980198754781",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/creative-people-creative-places-creative-technologies-on-the-mother-road-tickets-1980198754781",
+    "locale": "en-us",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1174425028%2F47585924973%2F1%2Foriginal.20260109-165512?crop=focalpoint&fit=crop&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.52&fp-y=0.685&s=5232819ee58288ac4b839ee85f101b9e",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-02",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": true,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-04-02"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Lobo Rainforest, Seminar Room",
+          "type": "venue",
+          "id": "eb-1980198754781-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {
+            "line1": "101 Broadway Boulevard Northeast"
+          }
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "A seminar series in honor of the Route 66 Centennial showcasing areas where technology and creativity meet."
+  },
+  {
+    "name": "Pickup basketball (ALL are invited!)",
+    "type": "event",
+    "id": "eb-1977011810545",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/pickup-basketball-all-are-invited-tickets-1977011810545",
+    "locale": "en-us",
+    "dates": {
+      "start": {
+        "localDate": "2026-04-02",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": false,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-04-02"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "The Church of Jesus Christ of Latter-day Saints",
+          "type": "venue",
+          "id": "eb-1977011810545-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {}
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1172368781%2F2346067996753%2F1%2Foriginal.20251205-050526",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ]
+  },
+  {
     "name": "Bodybar's Spring Sip + Shop",
     "type": "event",
     "id": "eb-1985551522052",
@@ -302,6 +376,82 @@
     },
     "_source": "eventbrite",
     "description": "Join us April 3rd from 5\u20137 PM at our studio in Winrock Town Center for a free community open house with drinks, snacks, shopping, and more!"
+  },
+  {
+    "name": "Ralfy The Plug Wreck It Ralfy Tour - Albuquerque",
+    "type": "event",
+    "id": "eb-1982084903302",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/ralfy-the-plug-wreck-it-ralfy-tour-albuquerque-tickets-1982084903302",
+    "locale": "en-us",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1176336112%2F222765603588%2F1%2Foriginal.20260131-181423?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=187e40fbd76e49f2cc484fad43d56f6a",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-03",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": true,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-04-03"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "The Jam Spot",
+          "type": "venue",
+          "id": "eb-1982084903302-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {
+            "line1": "415 Central Avenue Northwest"
+          }
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "Ralfy The Plug Wreck It Ralfy Tour - Albuquerque"
   },
   {
     "name": "Eggstravaganza FREE Family Easter Fun",
@@ -456,234 +606,6 @@
     "description": "Welcome to an Icon Social Saturday with the Icons of NM Drag and a Very Special Iconic Guest Detox"
   },
   {
-    "name": "Vive Man\u00e1 & Rock en Espa\u00f1ol Legends Tribute Rastas Retro \u2013 Experience the m",
-    "type": "event",
-    "id": "eb-1985174475295",
-    "test": false,
-    "url": "https://www.eventbrite.com/e/vive-mana-rock-en-espanol-legends-tribute-rastas-retro-experience-the-m-tickets-1985174475295",
-    "locale": "en-us",
-    "images": [
-      {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1179819608%2F2339940129863%2F1%2Foriginal.20260313-224404?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=274446ac6cc4f8d7ef420165ac3a29a5",
-        "ratio": "16_9",
-        "width": 512,
-        "height": 256,
-        "fallback": false
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-10",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBD": true,
-        "noSpecificTime": false
-      },
-      "end": {
-        "localDate": "2026-04-10"
-      },
-      "status": {
-        "code": "onsale"
-      },
-      "timezone": "America/Denver"
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nE",
-          "name": "Miscellaneous"
-        },
-        "genre": {
-          "id": "KnvZfZ7v7ll",
-          "name": "Undefined"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vAv6",
-          "name": "Undefined"
-        }
-      }
-    ],
-    "_embedded": {
-      "venues": [
-        {
-          "name": "The Historic Lobo Theater",
-          "type": "venue",
-          "id": "eb-1985174475295-venue",
-          "locale": "en-us",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "3013 Central Avenue Northeast"
-          }
-        }
-      ]
-    },
-    "_source": "eventbrite",
-    "description": "Vive una noche \u00e9pica con Man\u00e1 y leyendas del Rock en Espa\u00f1ol en Rastas Retro, \u00a1viv\u00ed la experiencia m!"
-  },
-  {
-    "name": "The Whistle Film Screening in Albuquerque",
-    "type": "event",
-    "id": "eb-1985772755768",
-    "test": false,
-    "url": "https://www.eventbrite.com/e/the-whistle-film-screening-in-albuquerque-tickets-1985772755768",
-    "locale": "en-us",
-    "images": [
-      {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1180523358%2F5293518047%2F1%2Foriginal.20260324-000730?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=82b8566e2e2a8a92aaf54325e4828021",
-        "ratio": "16_9",
-        "width": 512,
-        "height": 256,
-        "fallback": false
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-12",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBD": true,
-        "noSpecificTime": false
-      },
-      "end": {
-        "localDate": "2026-04-12"
-      },
-      "status": {
-        "code": "onsale"
-      },
-      "timezone": "America/Denver"
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nE",
-          "name": "Miscellaneous"
-        },
-        "genre": {
-          "id": "KnvZfZ7v7ll",
-          "name": "Undefined"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vAv6",
-          "name": "Undefined"
-        }
-      }
-    ],
-    "_embedded": {
-      "venues": [
-        {
-          "name": "The Hiland Theater",
-          "type": "venue",
-          "id": "eb-1985772755768-venue",
-          "locale": "en-us",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "4800 Central Avenue Southeast"
-          }
-        }
-      ]
-    },
-    "_source": "eventbrite",
-    "description": "A story of 1970s & 80s Lesbian Youth in Albuquerque"
-  },
-  {
-    "name": "Ralfy The Plug Wreck It Ralfy Tour - Albuquerque",
-    "type": "event",
-    "id": "eb-1982084903302",
-    "test": false,
-    "url": "https://www.eventbrite.com/e/ralfy-the-plug-wreck-it-ralfy-tour-albuquerque-tickets-1982084903302",
-    "locale": "en-us",
-    "images": [
-      {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1176336112%2F222765603588%2F1%2Foriginal.20260131-181423?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=187e40fbd76e49f2cc484fad43d56f6a",
-        "ratio": "16_9",
-        "width": 512,
-        "height": 256,
-        "fallback": false
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-03",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBD": true,
-        "noSpecificTime": false
-      },
-      "end": {
-        "localDate": "2026-04-03"
-      },
-      "status": {
-        "code": "onsale"
-      },
-      "timezone": "America/Denver"
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nE",
-          "name": "Miscellaneous"
-        },
-        "genre": {
-          "id": "KnvZfZ7v7ll",
-          "name": "Undefined"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vAv6",
-          "name": "Undefined"
-        }
-      }
-    ],
-    "_embedded": {
-      "venues": [
-        {
-          "name": "The Jam Spot",
-          "type": "venue",
-          "id": "eb-1982084903302-venue",
-          "locale": "en-us",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "415 Central Avenue Northwest"
-          }
-        }
-      ]
-    },
-    "_source": "eventbrite",
-    "description": "Ralfy The Plug Wreck It Ralfy Tour - Albuquerque"
-  },
-  {
     "name": "Heights Easter Eggstravaganza",
     "type": "event",
     "id": "eb-1984401550456",
@@ -758,614 +680,6 @@
     },
     "_source": "eventbrite",
     "description": "Hop over for fun, eggs, and treats at the Heights Easter Eggstravaganza \u2013 a festive in-person bash! Live music, food trucks, games and more!"
-  },
-  {
-    "name": "APRIL 12th: Black Smurf Live in Albuquerque, NM with TokinPotent",
-    "type": "event",
-    "id": "eb-1981818156455",
-    "test": false,
-    "url": "https://www.eventbrite.com/e/april-12th-black-smurf-live-in-albuquerque-nm-with-tokinpotent-tickets-1981818156455",
-    "locale": "en-us",
-    "images": [
-      {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1176014236%2F245586790431%2F1%2Foriginal.20260128-003818?crop=focalpoint&fit=crop&w=355&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.492&fp-y=0.609&s=1b522969d5975db3f2f2cba0c73b7d2e",
-        "ratio": "16_9",
-        "width": 512,
-        "height": 256,
-        "fallback": false
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-12",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBD": true,
-        "noSpecificTime": false
-      },
-      "end": {
-        "localDate": "2026-04-12"
-      },
-      "status": {
-        "code": "onsale"
-      },
-      "timezone": "America/Denver"
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nE",
-          "name": "Miscellaneous"
-        },
-        "genre": {
-          "id": "KnvZfZ7v7ll",
-          "name": "Undefined"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vAv6",
-          "name": "Undefined"
-        }
-      }
-    ],
-    "_embedded": {
-      "venues": [
-        {
-          "name": "The Jam Spot",
-          "type": "venue",
-          "id": "eb-1981818156455-venue",
-          "locale": "en-us",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "415 Central Avenue Northwest"
-          }
-        }
-      ]
-    },
-    "_source": "eventbrite",
-    "description": "APRIL 12th: Black Smurf Live in Albuquerque, NM with TokinPotent"
-  },
-  {
-    "name": "Digit4L & Spliff Live in Albuquerque, NM April 12th",
-    "type": "event",
-    "id": "eb-1983650328531",
-    "test": false,
-    "url": "https://www.eventbrite.com/e/digit4l-spliff-live-in-albuquerque-nm-april-12th-tickets-1983650328531",
-    "locale": "en-us",
-    "images": [
-      {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1178070397%2F245586790431%2F1%2Foriginal.20260220-224824?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.521&fp-y=0.688&s=2dfdaf3db0bdd2018e96685db35a5a0e",
-        "ratio": "16_9",
-        "width": 512,
-        "height": 256,
-        "fallback": false
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-12",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBD": true,
-        "noSpecificTime": false
-      },
-      "end": {
-        "localDate": "2026-04-12"
-      },
-      "status": {
-        "code": "onsale"
-      },
-      "timezone": "America/Denver"
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nE",
-          "name": "Miscellaneous"
-        },
-        "genre": {
-          "id": "KnvZfZ7v7ll",
-          "name": "Undefined"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vAv6",
-          "name": "Undefined"
-        }
-      }
-    ],
-    "_embedded": {
-      "venues": [
-        {
-          "name": "The Jam Spot",
-          "type": "venue",
-          "id": "eb-1983650328531-venue",
-          "locale": "en-us",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "415 Central Avenue Northwest"
-          }
-        }
-      ]
-    },
-    "_source": "eventbrite",
-    "description": "Digit4L & Spliff Live in Albuquerque, NM April 12th"
-  },
-  {
-    "name": "Faetooth w/ Latter, Soap Box Derby",
-    "type": "event",
-    "id": "eb-1978916545659",
-    "test": false,
-    "url": "https://www.eventbrite.com/e/faetooth-w-latter-soap-box-derby-tickets-1978916545659",
-    "locale": "en-us",
-    "images": [
-      {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1173466960%2F294152531439%2F1%2Foriginal.20251223-185406?h=200&w=302&auto=format%2Ccompress&q=75&sharp=10&s=a807d043f3c0a9b3b60f33be57e984ba",
-        "ratio": "16_9",
-        "width": 512,
-        "height": 256,
-        "fallback": false
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-15",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBD": true,
-        "noSpecificTime": false
-      },
-      "end": {
-        "localDate": "2026-04-15"
-      },
-      "status": {
-        "code": "onsale"
-      },
-      "timezone": "America/Denver"
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nE",
-          "name": "Miscellaneous"
-        },
-        "genre": {
-          "id": "KnvZfZ7v7ll",
-          "name": "Undefined"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vAv6",
-          "name": "Undefined"
-        }
-      }
-    ],
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Sister",
-          "type": "venue",
-          "id": "eb-1978916545659-venue",
-          "locale": "en-us",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "407 Central Ave. NW"
-          }
-        }
-      ]
-    },
-    "_source": "eventbrite",
-    "description": "fairy-dOoM trio from los angeles, ca"
-  },
-  {
-    "name": "MC Cast Album Release w/ Spcl Guests",
-    "type": "event",
-    "id": "eb-1982548393614",
-    "test": false,
-    "url": "https://www.eventbrite.com/e/mc-cast-album-release-w-spcl-guests-tickets-1982548393614",
-    "locale": "en-us",
-    "images": [
-      {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1176912516%2F754809134393%2F1%2Foriginal.20260206-211202?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.446&fp-y=0.209&s=c274d2b5f7b8fc2dc26a63528619f849",
-        "ratio": "16_9",
-        "width": 512,
-        "height": 256,
-        "fallback": false
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-18",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBD": true,
-        "noSpecificTime": false
-      },
-      "end": {
-        "localDate": "2026-04-18"
-      },
-      "status": {
-        "code": "onsale"
-      },
-      "timezone": "America/Denver"
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nE",
-          "name": "Miscellaneous"
-        },
-        "genre": {
-          "id": "KnvZfZ7v7ll",
-          "name": "Undefined"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vAv6",
-          "name": "Undefined"
-        }
-      }
-    ],
-    "_embedded": {
-      "venues": [
-        {
-          "name": "JUNO brewery + cafe + art",
-          "type": "venue",
-          "id": "eb-1982548393614-venue",
-          "locale": "en-us",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "1501 1st Street Northwest"
-          }
-        }
-      ]
-    },
-    "_source": "eventbrite",
-    "description": "The Best of ABQ's Independent Local Hip-Hop"
-  },
-  {
-    "name": "Jenna Davis Meet & Greet UPGRADE - Albuquerque, NM (Maddox Batson Tour)",
-    "type": "event",
-    "id": "eb-1970096465562",
-    "test": false,
-    "url": "https://www.eventbrite.com/e/jenna-davis-meet-greet-upgrade-albuquerque-nm-maddox-batson-tour-tickets-1970096465562",
-    "locale": "en-us",
-    "images": [
-      {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1172543472%2F307569227463%2F1%2Foriginal.20251208-182529?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.502&fp-y=0.706&s=d3cad272a8f8243b16ce30b19e735d10",
-        "ratio": "16_9",
-        "width": 512,
-        "height": 256,
-        "fallback": false
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-19",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBD": true,
-        "noSpecificTime": false
-      },
-      "end": {
-        "localDate": "2026-04-19"
-      },
-      "status": {
-        "code": "onsale"
-      },
-      "timezone": "America/Denver"
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nE",
-          "name": "Miscellaneous"
-        },
-        "genre": {
-          "id": "KnvZfZ7v7ll",
-          "name": "Undefined"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vAv6",
-          "name": "Undefined"
-        }
-      }
-    ],
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Revel",
-          "type": "venue",
-          "id": "eb-1970096465562-venue",
-          "locale": "en-us",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "4720 Alexander Boulevard Northeast"
-          }
-        }
-      ]
-    },
-    "_source": "eventbrite",
-    "description": "Don\u2019t miss your chance to meet Jenna Davis IRL before her set opening on Maddox Batson\u2019s 2026 Tour! Limited VIP UPGRADES available!"
-  },
-  {
-    "name": "BASED NEGATIVE SQUAD @ THE JAM SPOT",
-    "type": "event",
-    "id": "eb-1983830587691",
-    "test": false,
-    "url": "https://www.eventbrite.com/e/based-negative-squad-the-jam-spot-tickets-1983830587691",
-    "locale": "en-us",
-    "images": [
-      {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1178564274%2F281461317488%2F1%2Foriginal.20260226-223653?crop=focalpoint&fit=crop&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=a5b3794051575141b0d4ea0fe5d06944",
-        "ratio": "16_9",
-        "width": 512,
-        "height": 256,
-        "fallback": false
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-23",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBD": true,
-        "noSpecificTime": false
-      },
-      "end": {
-        "localDate": "2026-04-23"
-      },
-      "status": {
-        "code": "onsale"
-      },
-      "timezone": "America/Denver"
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nE",
-          "name": "Miscellaneous"
-        },
-        "genre": {
-          "id": "KnvZfZ7v7ll",
-          "name": "Undefined"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vAv6",
-          "name": "Undefined"
-        }
-      }
-    ],
-    "_embedded": {
-      "venues": [
-        {
-          "name": "The Jam Spot",
-          "type": "venue",
-          "id": "eb-1983830587691-venue",
-          "locale": "en-us",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "415 Central Avenue Northwest"
-          }
-        }
-      ]
-    },
-    "_source": "eventbrite",
-    "description": "BASED NEGATIVE SQUAD at The Jam Spot, Albuquerque with Christ Dillinger and Acid Souljah."
-  },
-  {
-    "name": "Louie TheSinger",
-    "type": "event",
-    "id": "eb-1984136260968",
-    "test": false,
-    "url": "https://www.eventbrite.com/e/louie-thesinger-tickets-1984136260968",
-    "locale": "en-us",
-    "images": [
-      {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1178612732%2F1227070665153%2F1%2Foriginal.20260227-151245?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=952c142675bb3d0ca0cff26194e3fa88",
-        "ratio": "16_9",
-        "width": 512,
-        "height": 256,
-        "fallback": false
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-06-07",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBD": true,
-        "noSpecificTime": false
-      },
-      "end": {
-        "localDate": "2026-06-07"
-      },
-      "status": {
-        "code": "onsale"
-      },
-      "timezone": "America/Denver"
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nE",
-          "name": "Miscellaneous"
-        },
-        "genre": {
-          "id": "KnvZfZ7v7ll",
-          "name": "Undefined"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vAv6",
-          "name": "Undefined"
-        }
-      }
-    ],
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Overtime Sports Bar & Grill",
-          "type": "venue",
-          "id": "eb-1984136260968-venue",
-          "locale": "en-us",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "4100 San Mateo Boulevard Northeast"
-          }
-        }
-      ]
-    },
-    "_source": "eventbrite",
-    "description": "Louie will be performing live in Albuquerque, New Mexico. Come ready for a good country time. This is an all age event."
-  },
-  {
-    "name": "TACO TUESDAY - LATIN NIGHT!",
-    "type": "event",
-    "id": "eb-1482357494169",
-    "test": false,
-    "url": "https://www.eventbrite.com/e/taco-tuesday-latin-night-tickets-1482357494169",
-    "locale": "en-us",
-    "images": [
-      {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1173860011%2F1328329771693%2F1%2Foriginal.20260102-201253?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.462&fp-y=0.142&s=67c49c7c0218b27d9452dc4943a13f8c",
-        "ratio": "16_9",
-        "width": 512,
-        "height": 256,
-        "fallback": false
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-03-31",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBD": true,
-        "noSpecificTime": false
-      },
-      "end": {
-        "localDate": "2026-03-31"
-      },
-      "status": {
-        "code": "onsale"
-      },
-      "timezone": "America/Denver"
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nE",
-          "name": "Miscellaneous"
-        },
-        "genre": {
-          "id": "KnvZfZ7v7ll",
-          "name": "Undefined"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vAv6",
-          "name": "Undefined"
-        }
-      }
-    ],
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Overtime Sports Bar & Grill",
-          "type": "venue",
-          "id": "eb-1482357494169-venue",
-          "locale": "en-us",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "4100 San Mateo Boulevard Northeast"
-          }
-        }
-      ]
-    },
-    "_source": "eventbrite",
-    "description": "Music by DJ Gabriel Goza & Friends Spinning the saucy Salsa, Bachata, Timba, Mambo, Cumbia, Cha Cha Cha, Merengue y mas!"
   },
   {
     "name": "Croissants: Advanced Techniques",
@@ -1444,15 +758,15 @@
     "description": "You've learned to make croissant dough. Now learn to make fillings, topping, flavorings, and more, to step up your French pastry game!"
   },
   {
-    "name": "Make Your Own Wine at Home with Easy Kits",
+    "name": "Business Analytics Certification (CBAP) Training in Albuquerque, NM",
     "type": "event",
-    "id": "eb-1982927179573",
+    "id": "eb-1982062897482",
     "test": false,
-    "url": "https://www.eventbrite.com/e/make-your-own-wine-at-home-with-easy-kits-tickets-1982927179573",
+    "url": "https://www.eventbrite.com/e/business-analytics-certification-cbap-training-in-albuquerque-nm-tickets-1982062897482",
     "locale": "en-us",
     "images": [
       {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1177331362%2F2981032485191%2F1%2Foriginal.png?h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&rect=0%2C0%2C940%2C470&s=47ca737113f563db1b1d9a22363bb351",
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1170806829%2F2958041386231%2F1%2Foriginal.20251112-182039?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=1.0&fp-y=0.509&s=d71108382dff1bff3617119cef01f82f",
         "ratio": "16_9",
         "width": 512,
         "height": 256,
@@ -1461,14 +775,14 @@
     ],
     "dates": {
       "start": {
-        "localDate": "2026-04-16",
+        "localDate": "2026-04-07",
         "dateTBD": false,
         "dateTBA": false,
         "timeTBD": true,
         "noSpecificTime": false
       },
       "end": {
-        "localDate": "2026-04-16"
+        "localDate": "2026-04-07"
       },
       "status": {
         "code": "onsale"
@@ -1495,9 +809,9 @@
     "_embedded": {
       "venues": [
         {
-          "name": "2448 Menaul Blvd NE",
+          "name": "4801 Lang Ave NE",
           "type": "venue",
-          "id": "eb-1982927179573-venue",
+          "id": "eb-1982062897482-venue",
           "locale": "en-us",
           "city": {
             "name": "Albuquerque"
@@ -1511,40 +825,31 @@
             "countryCode": "US"
           },
           "address": {
-            "line1": "2448 Menaul Boulevard Northeast"
+            "line1": "4801 Lang Avenue Northeast"
           }
         }
       ]
     },
     "_source": "eventbrite",
-    "description": "Get hands-on and craft your own wine right at home with our easy and fun DIY kits!"
+    "description": "Advance your career as a business analyst! Attend our CBAP Classroom Bootcamp and gain real-world business analytics skills."
   },
   {
-    "name": "MEAN GIRLS BRUNCH",
+    "name": "Brain Gang Trivia",
     "type": "event",
-    "id": "eb-1984990296411",
+    "id": "eb-1972882889617",
     "test": false,
-    "url": "https://www.eventbrite.com/e/mean-girls-brunch-tickets-1984990296411",
+    "url": "https://www.eventbrite.com/e/brain-gang-trivia-tickets-1972882889617",
     "locale": "en-us",
-    "images": [
-      {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1179790155%2F61131269275%2F1%2Foriginal.20260313-163410?crop=focalpoint&fit=crop&w=355&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.486&fp-y=0.976&s=b5421a900bafe22738080bd3cc247a3a",
-        "ratio": "16_9",
-        "width": 512,
-        "height": 256,
-        "fallback": false
-      }
-    ],
     "dates": {
       "start": {
-        "localDate": "2026-04-18",
+        "localDate": "2026-04-07",
         "dateTBD": false,
         "dateTBA": false,
-        "timeTBD": true,
+        "timeTBD": false,
         "noSpecificTime": false
       },
       "end": {
-        "localDate": "2026-04-18"
+        "localDate": "2026-04-07"
       },
       "status": {
         "code": "onsale"
@@ -1571,9 +876,9 @@
     "_embedded": {
       "venues": [
         {
-          "name": "400 Central Ave SW",
+          "name": "O'Niell's Pub",
           "type": "venue",
-          "id": "eb-1984990296411-venue",
+          "id": "eb-1972882889617-venue",
           "locale": "en-us",
           "city": {
             "name": "Albuquerque"
@@ -1586,41 +891,39 @@
             "name": "United States Of America",
             "countryCode": "US"
           },
-          "address": {
-            "line1": "400 Central Avenue Southwest"
-          }
+          "address": {}
         }
       ]
     },
     "_source": "eventbrite",
-    "description": "Get in, loser\u2014we\u2019re going to brunch!"
+    "description": "",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1170083175%2F2315408862203%2F1%2Foriginal.20251129-175206",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ]
   },
   {
-    "name": "505 Flower Fest for 4/20",
+    "name": "TACO TUESDAY - LATIN NIGHT!",
     "type": "event",
-    "id": "eb-1986171277758",
+    "id": "eb-1987232764467",
     "test": false,
-    "url": "https://www.eventbrite.com/e/505-flower-fest-for-420-tickets-1986171277758",
+    "url": "https://www.eventbrite.com/e/taco-tuesday-latin-night-tickets-1987232764467",
     "locale": "en-us",
-    "images": [
-      {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1180953103%2F2339940129863%2F1%2Foriginal.20260329-220203?crop=focalpoint&fit=crop&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.439&fp-y=0.325&s=a34467277087ddf444c9fd44b0da7755",
-        "ratio": "16_9",
-        "width": 512,
-        "height": 256,
-        "fallback": false
-      }
-    ],
     "dates": {
       "start": {
-        "localDate": "2026-04-20",
+        "localDate": "2026-04-07",
         "dateTBD": false,
         "dateTBA": false,
-        "timeTBD": true,
+        "timeTBD": false,
         "noSpecificTime": false
       },
       "end": {
-        "localDate": "2026-04-20"
+        "localDate": "2026-04-07"
       },
       "status": {
         "code": "onsale"
@@ -1647,9 +950,9 @@
     "_embedded": {
       "venues": [
         {
-          "name": "The Historic Lobo Theater",
+          "name": "Casa Sandia",
           "type": "venue",
-          "id": "eb-1986171277758-venue",
+          "id": "eb-1987232764467-venue",
           "locale": "en-us",
           "city": {
             "name": "Albuquerque"
@@ -1662,41 +965,39 @@
             "name": "United States Of America",
             "countryCode": "US"
           },
-          "address": {
-            "line1": "3013 Central Avenue Northeast"
-          }
+          "address": {}
         }
       ]
     },
     "_source": "eventbrite",
-    "description": "Join us at 505 Flower Fest on 4/20 for a chill day of blooms, beats, and good vibes!"
+    "description": "",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1180927499%2F2440174093113%2F1%2Foriginal.png",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ]
   },
   {
-    "name": "The Official 90s vs Y2K Bar Crawl - Albuquerque",
+    "name": "The Silver Sessions Vol. 1",
     "type": "event",
-    "id": "eb-1657225870189",
+    "id": "eb-1985921890835",
     "test": false,
-    "url": "https://www.eventbrite.com/e/the-official-90s-vs-y2k-bar-crawl-albuquerque-tickets-1657225870189",
+    "url": "https://www.eventbrite.com/e/the-silver-sessions-vol-1-tickets-1985921890835",
     "locale": "en-us",
-    "images": [
-      {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1173303022%2F299464149304%2F1%2Foriginal.20251219-225631?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=57b0bd5c51c4a340f7d9c974d98dd6ae",
-        "ratio": "16_9",
-        "width": 512,
-        "height": 256,
-        "fallback": false
-      }
-    ],
     "dates": {
       "start": {
-        "localDate": "2026-07-18",
+        "localDate": "2026-04-07",
         "dateTBD": false,
         "dateTBA": false,
-        "timeTBD": true,
+        "timeTBD": false,
         "noSpecificTime": false
       },
       "end": {
-        "localDate": "2026-07-18"
+        "localDate": "2026-04-07"
       },
       "status": {
         "code": "onsale"
@@ -1723,9 +1024,9 @@
     "_embedded": {
       "venues": [
         {
-          "name": "The Library Bar & Grill",
+          "name": "Rio Bravo Brewing Company",
           "type": "venue",
-          "id": "eb-1657225870189-venue",
+          "id": "eb-1985921890835-venue",
           "locale": "en-us",
           "city": {
             "name": "Albuquerque"
@@ -1738,90 +1039,21 @@
             "name": "United States Of America",
             "countryCode": "US"
           },
-          "address": {
-            "line1": "312 Central Avenue Southwest"
-          }
+          "address": {}
         }
       ]
     },
     "_source": "eventbrite",
-    "description": "90s or Y2K\u2014who takes the crown? Join the ultimate decade showdown in Albuquerque on July 18th!"
-  },
-  {
-    "name": "2026  Red and Green VegFest Albuquerque",
-    "type": "event",
-    "id": "eb-1980488160401",
-    "test": false,
-    "url": "https://www.eventbrite.com/e/2026-red-and-green-vegfest-albuquerque-tickets-1980488160401",
-    "locale": "en-us",
+    "description": "",
     "images": [
       {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1174763738%2F760289983643%2F1%2Foriginal.20260113-190550?crop=focalpoint&fit=crop&h=132&w=345&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.491&fp-y=0.395&s=fdbae8952dfdd15528da43daf488f31f",
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1180664569%2F70995081997%2F1%2Foriginal.20260325-150404",
         "ratio": "16_9",
         "width": 512,
         "height": 256,
         "fallback": false
       }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-08-15",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBD": true,
-        "noSpecificTime": false
-      },
-      "end": {
-        "localDate": "2026-08-15"
-      },
-      "status": {
-        "code": "onsale"
-      },
-      "timezone": "America/Denver"
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nE",
-          "name": "Miscellaneous"
-        },
-        "genre": {
-          "id": "KnvZfZ7v7ll",
-          "name": "Undefined"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vAv6",
-          "name": "Undefined"
-        }
-      }
-    ],
-    "_embedded": {
-      "venues": [
-        {
-          "name": "First Unitarian Church",
-          "type": "venue",
-          "id": "eb-1980488160401-venue",
-          "locale": "en-us",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "3701 Carlisle Boulevard Northeast"
-          }
-        }
-      ]
-    },
-    "_source": "eventbrite",
-    "description": "Join us at the Red & Green VegFest Albuquerque on August 15, 2026 for an inspiring day dedicated to vegan living and sustainable practices."
+    ]
   },
   {
     "name": "2026 Lobo Hackathon",
@@ -1976,6 +1208,82 @@
     "description": "Headshot Swap for ABQ photographers: shoot, connect, update your headshot, and spark new creative energy together."
   },
   {
+    "name": "Vive Man\u00e1 & Rock en Espa\u00f1ol Legends Tribute Rastas Retro \u2013 Experience the m",
+    "type": "event",
+    "id": "eb-1985174475295",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/vive-mana-rock-en-espanol-legends-tribute-rastas-retro-experience-the-m-tickets-1985174475295",
+    "locale": "en-us",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1179819608%2F2339940129863%2F1%2Foriginal.20260313-224404?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=274446ac6cc4f8d7ef420165ac3a29a5",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-10",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": true,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-04-10"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "The Historic Lobo Theater",
+          "type": "venue",
+          "id": "eb-1985174475295-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {
+            "line1": "3013 Central Avenue Northeast"
+          }
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "Vive una noche \u00e9pica con Man\u00e1 y leyendas del Rock en Espa\u00f1ol en Rastas Retro, \u00a1viv\u00ed la experiencia m!"
+  },
+  {
     "name": "NMSA 2026 Annual Conference",
     "type": "event",
     "id": "eb-1984306926433",
@@ -2052,15 +1360,15 @@
     "description": "Elevate your anesthesia practice at the NMSA Annual Conference, where expertise and collaboration meet."
   },
   {
-    "name": "Albuquerque Career Fair",
+    "name": "Yuri's Night ABQ",
     "type": "event",
-    "id": "eb-1979089186031",
+    "id": "eb-1985544854108",
     "test": false,
-    "url": "https://www.eventbrite.com/e/albuquerque-career-fair-tickets-1979089186031",
+    "url": "https://www.eventbrite.com/e/yuris-night-abq-tickets-1985544854108",
     "locale": "en-us",
     "images": [
       {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1173549852%2F316131771624%2F1%2Foriginal.20251226-215441?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=5df2aaaf133e377b9be566e200537697",
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1180704017%2F46182038077%2F1%2Foriginal.20260325-213254?crop=focalpoint&fit=crop&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=9d1952b11df35f8f3bbd4223967c7b11",
         "ratio": "16_9",
         "width": 512,
         "height": 256,
@@ -2069,14 +1377,14 @@
     ],
     "dates": {
       "start": {
-        "localDate": "2026-04-16",
+        "localDate": "2026-04-11",
         "dateTBD": false,
         "dateTBA": false,
         "timeTBD": true,
         "noSpecificTime": false
       },
       "end": {
-        "localDate": "2026-04-16"
+        "localDate": "2026-04-11"
       },
       "status": {
         "code": "onsale"
@@ -2103,9 +1411,9 @@
     "_embedded": {
       "venues": [
         {
-          "name": "Hilton Hotel",
+          "name": "FatPipe ABQ",
           "type": "venue",
-          "id": "eb-1979089186031-venue",
+          "id": "eb-1985544854108-venue",
           "locale": "en-us",
           "city": {
             "name": "Albuquerque"
@@ -2119,24 +1427,24 @@
             "countryCode": "US"
           },
           "address": {
-            "line1": "Boulevard"
+            "line1": "200 Broadway Blvd NE"
           }
         }
       ]
     },
     "_source": "eventbrite",
-    "description": "Meet live with employers"
+    "description": "Celebrate space and innovation at Yuri\u2019s Night Albuquerque. A night of tech, creativity, and community connection."
   },
   {
-    "name": "SPJ Region 9 Conference",
+    "name": "The Whistle Film Screening in Albuquerque",
     "type": "event",
-    "id": "eb-1983415711786",
+    "id": "eb-1985772755768",
     "test": false,
-    "url": "https://www.eventbrite.com/e/spj-region-9-conference-tickets-1983415711786",
+    "url": "https://www.eventbrite.com/e/the-whistle-film-screening-in-albuquerque-tickets-1985772755768",
     "locale": "en-us",
     "images": [
       {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1178576119%2F287805241263%2F1%2Foriginal.20260227-013114?crop=focalpoint&fit=crop&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=0ef631438d6554cb044b176f0b4b6629",
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1180523358%2F5293518047%2F1%2Foriginal.20260324-000730?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=82b8566e2e2a8a92aaf54325e4828021",
         "ratio": "16_9",
         "width": 512,
         "height": 256,
@@ -2145,14 +1453,14 @@
     ],
     "dates": {
       "start": {
-        "localDate": "2026-04-18",
+        "localDate": "2026-04-12",
         "dateTBD": false,
         "dateTBA": false,
         "timeTBD": true,
         "noSpecificTime": false
       },
       "end": {
-        "localDate": "2026-04-18"
+        "localDate": "2026-04-12"
       },
       "status": {
         "code": "onsale"
@@ -2179,9 +1487,9 @@
     "_embedded": {
       "venues": [
         {
-          "name": "UNM Continuing Education",
+          "name": "The Hiland Theater",
           "type": "venue",
-          "id": "eb-1983415711786-venue",
+          "id": "eb-1985772755768-venue",
           "locale": "en-us",
           "city": {
             "name": "Albuquerque"
@@ -2195,24 +1503,24 @@
             "countryCode": "US"
           },
           "address": {
-            "line1": "1634 University Boulevard Northeast"
+            "line1": "4800 Central Avenue Southeast"
           }
         }
       ]
     },
     "_source": "eventbrite",
-    "description": "Join the SPJ Rio Grande Chapter and the folks from Trusting News for a day of learning and conversation."
+    "description": "A story of 1970s & 80s Lesbian Youth in Albuquerque"
   },
   {
-    "name": "General Business Networking | Elevating Your Potential - Albuquerque",
+    "name": "APRIL 12th: Black Smurf Live in Albuquerque, NM with TokinPotent",
     "type": "event",
-    "id": "eb-1777979968949",
+    "id": "eb-1981818156455",
     "test": false,
-    "url": "https://www.eventbrite.com/e/general-business-networking-elevating-your-potential-albuquerque-tickets-1777979968949",
+    "url": "https://www.eventbrite.com/e/april-12th-black-smurf-live-in-albuquerque-nm-with-tokinpotent-tickets-1981818156455",
     "locale": "en-us",
     "images": [
       {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F918942953%2F2244249934723%2F1%2Foriginal.20241217-154202?crop=focalpoint&fit=crop&h=200&w=302&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=902209309b073316e606e72248fa5464",
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1176014236%2F245586790431%2F1%2Foriginal.20260128-003818?crop=focalpoint&fit=crop&w=355&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.492&fp-y=0.609&s=1b522969d5975db3f2f2cba0c73b7d2e",
         "ratio": "16_9",
         "width": 512,
         "height": 256,
@@ -2221,14 +1529,14 @@
     ],
     "dates": {
       "start": {
-        "localDate": "2026-05-13",
+        "localDate": "2026-04-12",
         "dateTBD": false,
         "dateTBA": false,
         "timeTBD": true,
         "noSpecificTime": false
       },
       "end": {
-        "localDate": "2026-05-13"
+        "localDate": "2026-04-12"
       },
       "status": {
         "code": "onsale"
@@ -2255,9 +1563,9 @@
     "_embedded": {
       "venues": [
         {
-          "name": "Two Cranes",
+          "name": "The Jam Spot",
           "type": "venue",
-          "id": "eb-1777979968949-venue",
+          "id": "eb-1981818156455-venue",
           "locale": "en-us",
           "city": {
             "name": "Albuquerque"
@@ -2271,24 +1579,24 @@
             "countryCode": "US"
           },
           "address": {
-            "line1": "901 Rio Grande Boulevard Northwest"
+            "line1": "415 Central Avenue Northwest"
           }
         }
       ]
     },
     "_source": "eventbrite",
-    "description": "Strive welcomes you to 'General Business Networking', an event for tenured and newcomers at Two Cranes! Event is 21+. Limited Tickets."
+    "description": "APRIL 12th: Black Smurf Live in Albuquerque, NM with TokinPotent"
   },
   {
-    "name": "Rise & Network",
+    "name": "Digit4L & Spliff Live in Albuquerque, NM April 12th",
     "type": "event",
-    "id": "eb-1975166503181",
+    "id": "eb-1983650328531",
     "test": false,
-    "url": "https://www.eventbrite.com/e/rise-network-tickets-1975166503181",
+    "url": "https://www.eventbrite.com/e/digit4l-spliff-live-in-albuquerque-nm-april-12th-tickets-1983650328531",
     "locale": "en-us",
     "images": [
       {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1176388856%2F488943086939%2F1%2Foriginal.20260201-192338?crop=focalpoint&fit=crop&w=355&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=23cbee634aa8a8dbfb2d76988591feaf",
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1178070397%2F245586790431%2F1%2Foriginal.20260220-224824?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.521&fp-y=0.688&s=2dfdaf3db0bdd2018e96685db35a5a0e",
         "ratio": "16_9",
         "width": 512,
         "height": 256,
@@ -2297,14 +1605,14 @@
     ],
     "dates": {
       "start": {
-        "localDate": "2026-08-04",
+        "localDate": "2026-04-12",
         "dateTBD": false,
         "dateTBA": false,
         "timeTBD": true,
         "noSpecificTime": false
       },
       "end": {
-        "localDate": "2026-08-04"
+        "localDate": "2026-04-12"
       },
       "status": {
         "code": "onsale"
@@ -2331,9 +1639,9 @@
     "_embedded": {
       "venues": [
         {
-          "name": "Castle Coffee",
+          "name": "The Jam Spot",
           "type": "venue",
-          "id": "eb-1975166503181-venue",
+          "id": "eb-1983650328531-venue",
           "locale": "en-us",
           "city": {
             "name": "Albuquerque"
@@ -2347,89 +1655,13 @@
             "countryCode": "US"
           },
           "address": {
-            "line1": "1111 Carlisle Boulevard Southeast"
+            "line1": "415 Central Avenue Northwest"
           }
         }
       ]
     },
     "_source": "eventbrite",
-    "description": "Networking event for business owners and entrepreneurs"
-  },
-  {
-    "name": "Brain Gang Trivia",
-    "type": "event",
-    "id": "eb-1067278090499",
-    "test": false,
-    "url": "https://www.eventbrite.com/e/brain-gang-trivia-tickets-1067278090499",
-    "locale": "en-us",
-    "images": [
-      {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F887462563%2F1327814489793%2F1%2Foriginal.20241030-115309?h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&s=c703bf242d2a4145acc1a5196f72fbdd",
-        "ratio": "16_9",
-        "width": 512,
-        "height": 256,
-        "fallback": false
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-03-31",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBD": true,
-        "noSpecificTime": false
-      },
-      "end": {
-        "localDate": "2026-03-31"
-      },
-      "status": {
-        "code": "onsale"
-      },
-      "timezone": "America/Denver"
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nE",
-          "name": "Miscellaneous"
-        },
-        "genre": {
-          "id": "KnvZfZ7v7ll",
-          "name": "Undefined"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vAv6",
-          "name": "Undefined"
-        }
-      }
-    ],
-    "_embedded": {
-      "venues": [
-        {
-          "name": "The Tatted Bee Brewhouse",
-          "type": "venue",
-          "id": "eb-1067278090499-venue",
-          "locale": "en-us",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "11500 Menaul Boulevard Northeast"
-          }
-        }
-      ]
-    },
-    "_source": "eventbrite",
-    "description": "FREE FUN with $10-$25 in HOUSE CASH PRIZES to be won! Just bring the Gang and show us your wits!"
+    "description": "Digit4L & Spliff Live in Albuquerque, NM April 12th"
   },
   {
     "name": "Women\u2019s Life and Love",
@@ -2508,6 +1740,156 @@
     "description": "Mezzo-soprano Jacqueline Zander-Wall and pianist Louise Bass in recital"
   },
   {
+    "name": "The One and Only Ivan - Auditions",
+    "type": "event",
+    "id": "eb-1985835207563",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/the-one-and-only-ivan-auditions-tickets-1985835207563",
+    "locale": "en-us",
+    "dates": {
+      "start": {
+        "localDate": "2026-04-13",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": false,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-04-13"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Rio Rancho",
+          "type": "venue",
+          "id": "eb-1985835207563-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {}
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1180741705%2F2449029395403%2F1%2Foriginal.20260325-152349",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ]
+  },
+  {
+    "name": "Faetooth w/ Latter, Soap Box Derby",
+    "type": "event",
+    "id": "eb-1978916545659",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/faetooth-w-latter-soap-box-derby-tickets-1978916545659",
+    "locale": "en-us",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1173466960%2F294152531439%2F1%2Foriginal.20251223-185406?h=200&w=302&auto=format%2Ccompress&q=75&sharp=10&s=a807d043f3c0a9b3b60f33be57e984ba",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-15",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": true,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-04-15"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Sister",
+          "type": "venue",
+          "id": "eb-1978916545659-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {
+            "line1": "407 Central Ave. NW"
+          }
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "fairy-dOoM trio from los angeles, ca"
+  },
+  {
     "name": "Spring Gardenscape Shadowbox",
     "type": "event",
     "id": "eb-1983964394912",
@@ -2582,6 +1964,386 @@
     },
     "_source": "eventbrite",
     "description": "Paint a delightful garden scene in a 5\"x5\" shadowbox to house a little\u00a0bug of your choosing!"
+  },
+  {
+    "name": "Make Your Own Wine at Home with Easy Kits",
+    "type": "event",
+    "id": "eb-1982927179573",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/make-your-own-wine-at-home-with-easy-kits-tickets-1982927179573",
+    "locale": "en-us",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1177331362%2F2981032485191%2F1%2Foriginal.png?h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&rect=0%2C0%2C940%2C470&s=47ca737113f563db1b1d9a22363bb351",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-16",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": true,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-04-16"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "2448 Menaul Blvd NE",
+          "type": "venue",
+          "id": "eb-1982927179573-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {
+            "line1": "2448 Menaul Boulevard Northeast"
+          }
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "Get hands-on and craft your own wine right at home with our easy and fun DIY kits!"
+  },
+  {
+    "name": "Albuquerque Career Fair",
+    "type": "event",
+    "id": "eb-1979089186031",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/albuquerque-career-fair-tickets-1979089186031",
+    "locale": "en-us",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1173549852%2F316131771624%2F1%2Foriginal.20251226-215441?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=5df2aaaf133e377b9be566e200537697",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-16",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": true,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-04-16"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Hilton Hotel",
+          "type": "venue",
+          "id": "eb-1979089186031-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {
+            "line1": "Boulevard"
+          }
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "Meet live with employers"
+  },
+  {
+    "name": "MC Cast Album Release w/ Spcl Guests",
+    "type": "event",
+    "id": "eb-1982548393614",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/mc-cast-album-release-w-spcl-guests-tickets-1982548393614",
+    "locale": "en-us",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1176912516%2F754809134393%2F1%2Foriginal.20260206-211202?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.446&fp-y=0.209&s=c274d2b5f7b8fc2dc26a63528619f849",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-18",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": true,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-04-18"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "JUNO brewery + cafe + art",
+          "type": "venue",
+          "id": "eb-1982548393614-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {
+            "line1": "1501 1st Street Northwest"
+          }
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "The Best of ABQ's Independent Local Hip-Hop"
+  },
+  {
+    "name": "MEAN GIRLS BRUNCH",
+    "type": "event",
+    "id": "eb-1984990296411",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/mean-girls-brunch-tickets-1984990296411",
+    "locale": "en-us",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1179790155%2F61131269275%2F1%2Foriginal.20260313-163410?crop=focalpoint&fit=crop&w=355&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.486&fp-y=0.976&s=b5421a900bafe22738080bd3cc247a3a",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-18",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": true,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-04-18"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "400 Central Ave SW",
+          "type": "venue",
+          "id": "eb-1984990296411-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {
+            "line1": "400 Central Avenue Southwest"
+          }
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "Get in, loser\u2014we\u2019re going to brunch!"
+  },
+  {
+    "name": "SPJ Region 9 Conference",
+    "type": "event",
+    "id": "eb-1983415711786",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/spj-region-9-conference-tickets-1983415711786",
+    "locale": "en-us",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1178576119%2F287805241263%2F1%2Foriginal.20260227-013114?crop=focalpoint&fit=crop&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=0ef631438d6554cb044b176f0b4b6629",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-18",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": true,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-04-18"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "UNM Continuing Education",
+          "type": "venue",
+          "id": "eb-1983415711786-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {
+            "line1": "1634 University Boulevard Northeast"
+          }
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "Join the SPJ Rio Grande Chapter and the folks from Trusting News for a day of learning and conversation."
   },
   {
     "name": "Retablo Painting with Elana Gonzales",
@@ -2736,462 +2498,6 @@
     "description": "Get ready to laugh out loud with Honest John at The Duke City Comedy Jam Series\u2014live and in person!"
   },
   {
-    "name": "An Evening with Don Miquel Ruiz Jr. & The Poisoned Arrow",
-    "type": "event",
-    "id": "eb-1983477726273",
-    "test": false,
-    "url": "https://www.eventbrite.com/e/an-evening-with-don-miquel-ruiz-jr-the-poisoned-arrow-tickets-1983477726273",
-    "locale": "en-us",
-    "images": [
-      {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1177954419%2F1000909713343%2F1%2Foriginal.20260219-175050?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=ccb14083575a9a75c2c28e3095ee7f44",
-        "ratio": "16_9",
-        "width": 512,
-        "height": 256,
-        "fallback": false
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-06-12",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBD": true,
-        "noSpecificTime": false
-      },
-      "end": {
-        "localDate": "2026-06-12"
-      },
-      "status": {
-        "code": "onsale"
-      },
-      "timezone": "America/Denver"
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nE",
-          "name": "Miscellaneous"
-        },
-        "genre": {
-          "id": "KnvZfZ7v7ll",
-          "name": "Undefined"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vAv6",
-          "name": "Undefined"
-        }
-      }
-    ],
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Unity Spiritual Center Albuquerque",
-          "type": "venue",
-          "id": "eb-1983477726273-venue",
-          "locale": "en-us",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "9800 Candelaria Road Northeast"
-          }
-        }
-      ]
-    },
-    "_source": "eventbrite",
-    "description": "Hidden fear shapes our \u201csafe\u201d choices. Learn to see it, name it, and live freer\u2014even with fear still present."
-  },
-  {
-    "name": "GIRLS NIGHT OUT THE SHOW AUSTRALIA TAKEOVER ABQ,NM USA!!!",
-    "type": "event",
-    "id": "eb-1983582607977",
-    "test": false,
-    "url": "https://www.eventbrite.com/e/girls-night-out-the-show-australia-takeover-abqnm-usa-tickets-1983582607977",
-    "locale": "en-us",
-    "images": [
-      {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1177986320%2F300673942992%2F1%2Foriginal.20260219-231923?crop=focalpoint&fit=crop&w=355&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=9e3fa68181b2a95246db2bb8d0cbaba0",
-        "ratio": "16_9",
-        "width": 512,
-        "height": 256,
-        "fallback": false
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-07-24",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBD": true,
-        "noSpecificTime": false
-      },
-      "end": {
-        "localDate": "2026-07-24"
-      },
-      "status": {
-        "code": "onsale"
-      },
-      "timezone": "America/Denver"
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nE",
-          "name": "Miscellaneous"
-        },
-        "genre": {
-          "id": "KnvZfZ7v7ll",
-          "name": "Undefined"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vAv6",
-          "name": "Undefined"
-        }
-      }
-    ],
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Overtime Sports Bar",
-          "type": "venue",
-          "id": "eb-1983582607977-venue",
-          "locale": "en-us",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "4100 San Mateo Boulevard Northeast"
-          }
-        }
-      ]
-    },
-    "_source": "eventbrite",
-    "description": "Experience the THUNDER of Australia's Ultimate Girls Night Out! TICKETS On Sale NOW!  21+ Doors  6pm  Don\u2019t miss the Best Girls Night Ever!!"
-  },
-  {
-    "name": "Albuquerque Creative Portrait Workshop",
-    "type": "event",
-    "id": "eb-1984505885525",
-    "test": false,
-    "url": "https://www.eventbrite.com/e/albuquerque-creative-portrait-workshop-tickets-1984505885525",
-    "locale": "en-us",
-    "images": [
-      {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1179055129%2F635363829393%2F1%2Foriginal.20260304-214154?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.617&s=93a091fbd17447d2f4322d07418fe8ed",
-        "ratio": "16_9",
-        "width": 512,
-        "height": 256,
-        "fallback": false
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-09-14",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBD": true,
-        "noSpecificTime": false
-      },
-      "end": {
-        "localDate": "2026-09-14"
-      },
-      "status": {
-        "code": "onsale"
-      },
-      "timezone": "America/Denver"
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nE",
-          "name": "Miscellaneous"
-        },
-        "genre": {
-          "id": "KnvZfZ7v7ll",
-          "name": "Undefined"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vAv6",
-          "name": "Undefined"
-        }
-      }
-    ],
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Civic Plaza",
-          "type": "venue",
-          "id": "eb-1984505885525-venue",
-          "locale": "en-us",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "Civic Plaza"
-          }
-        }
-      ]
-    },
-    "_source": "eventbrite",
-    "description": "Join our ABQ Creative Portrait Workshop\u2014experiment with light, creativity, and storytelling while building stunning portraits."
-  },
-  {
-    "name": "Creative People, Creative Places - Creative Technologies on the Mother Road",
-    "type": "event",
-    "id": "eb-1980198754781",
-    "test": false,
-    "url": "https://www.eventbrite.com/e/creative-people-creative-places-creative-technologies-on-the-mother-road-tickets-1980198754781",
-    "locale": "en-us",
-    "images": [
-      {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1174425028%2F47585924973%2F1%2Foriginal.20260109-165512?crop=focalpoint&fit=crop&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.52&fp-y=0.685&s=5232819ee58288ac4b839ee85f101b9e",
-        "ratio": "16_9",
-        "width": 512,
-        "height": 256,
-        "fallback": false
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-02",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBD": true,
-        "noSpecificTime": false
-      },
-      "end": {
-        "localDate": "2026-04-02"
-      },
-      "status": {
-        "code": "onsale"
-      },
-      "timezone": "America/Denver"
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nE",
-          "name": "Miscellaneous"
-        },
-        "genre": {
-          "id": "KnvZfZ7v7ll",
-          "name": "Undefined"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vAv6",
-          "name": "Undefined"
-        }
-      }
-    ],
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Lobo Rainforest, Seminar Room",
-          "type": "venue",
-          "id": "eb-1980198754781-venue",
-          "locale": "en-us",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "101 Broadway Boulevard Northeast"
-          }
-        }
-      ]
-    },
-    "_source": "eventbrite",
-    "description": "A seminar series in honor of the Route 66 Centennial showcasing areas where technology and creativity meet."
-  },
-  {
-    "name": "Business Analytics Certification (CBAP) Training in Albuquerque, NM",
-    "type": "event",
-    "id": "eb-1982062897482",
-    "test": false,
-    "url": "https://www.eventbrite.com/e/business-analytics-certification-cbap-training-in-albuquerque-nm-tickets-1982062897482",
-    "locale": "en-us",
-    "images": [
-      {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1170806829%2F2958041386231%2F1%2Foriginal.20251112-182039?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=1.0&fp-y=0.509&s=d71108382dff1bff3617119cef01f82f",
-        "ratio": "16_9",
-        "width": 512,
-        "height": 256,
-        "fallback": false
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBD": true,
-        "noSpecificTime": false
-      },
-      "end": {
-        "localDate": "2026-04-07"
-      },
-      "status": {
-        "code": "onsale"
-      },
-      "timezone": "America/Denver"
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nE",
-          "name": "Miscellaneous"
-        },
-        "genre": {
-          "id": "KnvZfZ7v7ll",
-          "name": "Undefined"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vAv6",
-          "name": "Undefined"
-        }
-      }
-    ],
-    "_embedded": {
-      "venues": [
-        {
-          "name": "4801 Lang Ave NE",
-          "type": "venue",
-          "id": "eb-1982062897482-venue",
-          "locale": "en-us",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "4801 Lang Avenue Northeast"
-          }
-        }
-      ]
-    },
-    "_source": "eventbrite",
-    "description": "Advance your career as a business analyst! Attend our CBAP Classroom Bootcamp and gain real-world business analytics skills."
-  },
-  {
-    "name": "Yuri's Night ABQ",
-    "type": "event",
-    "id": "eb-1985544854108",
-    "test": false,
-    "url": "https://www.eventbrite.com/e/yuris-night-abq-tickets-1985544854108",
-    "locale": "en-us",
-    "images": [
-      {
-        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1180704017%2F46182038077%2F1%2Foriginal.20260325-213254?crop=focalpoint&fit=crop&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=9d1952b11df35f8f3bbd4223967c7b11",
-        "ratio": "16_9",
-        "width": 512,
-        "height": 256,
-        "fallback": false
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-11",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBD": true,
-        "noSpecificTime": false
-      },
-      "end": {
-        "localDate": "2026-04-11"
-      },
-      "status": {
-        "code": "onsale"
-      },
-      "timezone": "America/Denver"
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nE",
-          "name": "Miscellaneous"
-        },
-        "genre": {
-          "id": "KnvZfZ7v7ll",
-          "name": "Undefined"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vAv6",
-          "name": "Undefined"
-        }
-      }
-    ],
-    "_embedded": {
-      "venues": [
-        {
-          "name": "FatPipe ABQ",
-          "type": "venue",
-          "id": "eb-1985544854108-venue",
-          "locale": "en-us",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "200 Broadway Blvd NE"
-          }
-        }
-      ]
-    },
-    "_source": "eventbrite",
-    "description": "Celebrate space and innovation at Yuri\u2019s Night Albuquerque. A night of tech, creativity, and community connection."
-  },
-  {
     "name": "Lecture + Food. \"Lessons from the Fertile Crescent & Beyond.\" Dr. Kindstedt",
     "type": "event",
     "id": "eb-1982202724709",
@@ -3266,6 +2572,308 @@
     },
     "_source": "eventbrite",
     "description": "Registration and payment of $45 on the New Mexico Cheese Guild website required to attend. Registration link coming soon."
+  },
+  {
+    "name": "Jenna Davis Meet & Greet UPGRADE - Albuquerque, NM (Maddox Batson Tour)",
+    "type": "event",
+    "id": "eb-1970096465562",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/jenna-davis-meet-greet-upgrade-albuquerque-nm-maddox-batson-tour-tickets-1970096465562",
+    "locale": "en-us",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1172543472%2F307569227463%2F1%2Foriginal.20251208-182529?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.502&fp-y=0.706&s=d3cad272a8f8243b16ce30b19e735d10",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-19",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": true,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-04-19"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Revel",
+          "type": "venue",
+          "id": "eb-1970096465562-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {
+            "line1": "4720 Alexander Boulevard Northeast"
+          }
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "Don\u2019t miss your chance to meet Jenna Davis IRL before her set opening on Maddox Batson\u2019s 2026 Tour! Limited VIP UPGRADES available!"
+  },
+  {
+    "name": "505 Flower Fest for 4/20",
+    "type": "event",
+    "id": "eb-1986171277758",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/505-flower-fest-for-420-tickets-1986171277758",
+    "locale": "en-us",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1180953103%2F2339940129863%2F1%2Foriginal.20260329-220203?crop=focalpoint&fit=crop&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.439&fp-y=0.325&s=a34467277087ddf444c9fd44b0da7755",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-20",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": true,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-04-20"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "The Historic Lobo Theater",
+          "type": "venue",
+          "id": "eb-1986171277758-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {
+            "line1": "3013 Central Avenue Northeast"
+          }
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "Join us at 505 Flower Fest on 4/20 for a chill day of blooms, beats, and good vibes!"
+  },
+  {
+    "name": "BASED NEGATIVE SQUAD @ THE JAM SPOT",
+    "type": "event",
+    "id": "eb-1983830587691",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/based-negative-squad-the-jam-spot-tickets-1983830587691",
+    "locale": "en-us",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1178564274%2F281461317488%2F1%2Foriginal.20260226-223653?crop=focalpoint&fit=crop&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=a5b3794051575141b0d4ea0fe5d06944",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-23",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": true,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-04-23"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "The Jam Spot",
+          "type": "venue",
+          "id": "eb-1983830587691-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {
+            "line1": "415 Central Avenue Northwest"
+          }
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "BASED NEGATIVE SQUAD at The Jam Spot, Albuquerque with Christ Dillinger and Acid Souljah."
+  },
+  {
+    "name": "Albuquerque Spring Artisan Craft Beer Festival",
+    "type": "event",
+    "id": "eb-1987197218567",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/albuquerque-spring-artisan-craft-beer-festival-tickets-1987197218567",
+    "locale": "en-us",
+    "dates": {
+      "start": {
+        "localDate": "2026-04-25",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": false,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-04-25"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Tiguex Park",
+          "type": "venue",
+          "id": "eb-1987197218567-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {}
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1181027621%2F2399476655023%2F1%2Foriginal.png",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ]
   },
   {
     "name": "Albuquerque Lowtechs Anonymous",
@@ -3420,6 +3028,832 @@
     "description": "Explore intermediate coding and computer science principles. Recommended for grades 7 through 12."
   },
   {
+    "name": "Albuquerque Mini Maker Faire",
+    "type": "event",
+    "id": "eb-1987228688827",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/albuquerque-mini-maker-faire-tickets-1987228688827",
+    "locale": "en-us",
+    "dates": {
+      "start": {
+        "localDate": "2026-05-02",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": false,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-05-02"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Explora Science Center and Children's Museum",
+          "type": "venue",
+          "id": "eb-1987228688827-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {}
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1181085471%2F2399476655023%2F1%2Foriginal.png",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ]
+  },
+  {
+    "name": "Cinco de Mayo Festival Albuquerque",
+    "type": "event",
+    "id": "eb-1987206397347",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/cinco-de-mayo-festival-albuquerque-tickets-1987206397347",
+    "locale": "en-us",
+    "dates": {
+      "start": {
+        "localDate": "2026-05-02",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": false,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-05-02"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Civic Plaza",
+          "type": "venue",
+          "id": "eb-1987206397347-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {}
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1181031001%2F2399476655023%2F1%2Foriginal.png",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ]
+  },
+  {
+    "name": "General Business Networking | Elevating Your Potential - Albuquerque",
+    "type": "event",
+    "id": "eb-1777979968949",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/general-business-networking-elevating-your-potential-albuquerque-tickets-1777979968949",
+    "locale": "en-us",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F918942953%2F2244249934723%2F1%2Foriginal.20241217-154202?crop=focalpoint&fit=crop&h=200&w=302&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=902209309b073316e606e72248fa5464",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-05-13",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": true,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-05-13"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Two Cranes",
+          "type": "venue",
+          "id": "eb-1777979968949-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {
+            "line1": "901 Rio Grande Boulevard Northwest"
+          }
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "Strive welcomes you to 'General Business Networking', an event for tenured and newcomers at Two Cranes! Event is 21+. Limited Tickets."
+  },
+  {
+    "name": "New Mexico Anime & Gaming Expo",
+    "type": "event",
+    "id": "eb-1984759641727",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/new-mexico-anime-and-gaming-expo-tickets-1984759641727",
+    "locale": "en-us",
+    "dates": {
+      "start": {
+        "localDate": "2026-05-23",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": false,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-05-23"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Albuquerque Convention Center",
+          "type": "venue",
+          "id": "eb-1984759641727-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {}
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1180390049%2F2449025295403%2F1%2Foriginal.20260322-072706",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ]
+  },
+  {
+    "name": "Louie TheSinger",
+    "type": "event",
+    "id": "eb-1984136260968",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/louie-thesinger-tickets-1984136260968",
+    "locale": "en-us",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1178612732%2F1227070665153%2F1%2Foriginal.20260227-151245?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=952c142675bb3d0ca0cff26194e3fa88",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-06-07",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": true,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-06-07"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Overtime Sports Bar & Grill",
+          "type": "venue",
+          "id": "eb-1984136260968-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {
+            "line1": "4100 San Mateo Boulevard Northeast"
+          }
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "Louie will be performing live in Albuquerque, New Mexico. Come ready for a good country time. This is an all age event."
+  },
+  {
+    "name": "Beatles Concert in the Dark w Award Winning Violinist WAITLIST SHOW",
+    "type": "event",
+    "id": "eb-1474150025409",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/beatles-concert-in-the-dark-w-award-winning-violinist-waitlist-show-tickets-1474150025409",
+    "locale": "en-us",
+    "dates": {
+      "start": {
+        "localDate": "2026-06-07",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": false,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-06-07"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Secret Location in Albuquerque",
+          "type": "venue",
+          "id": "eb-1474150025409-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {}
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F857700847%2F1090042527%2F1%2Foriginal.20240930-011802",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ]
+  },
+  {
+    "name": "ABQ Pride Parade & Festival 2026",
+    "type": "event",
+    "id": "eb-1984892175767",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/abq-pride-parade-festival-2026-tickets-1984892175767",
+    "locale": "en-us",
+    "dates": {
+      "start": {
+        "localDate": "2026-06-07",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": false,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-06-07"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Albuquerque",
+          "type": "venue",
+          "id": "eb-1984892175767-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {}
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1180529809%2F2449027295403%2F1%2Foriginal.20260322-141527",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ]
+  },
+  {
+    "name": "An Evening with Don Miquel Ruiz Jr. & The Poisoned Arrow",
+    "type": "event",
+    "id": "eb-1983477726273",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/an-evening-with-don-miquel-ruiz-jr-the-poisoned-arrow-tickets-1983477726273",
+    "locale": "en-us",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1177954419%2F1000909713343%2F1%2Foriginal.20260219-175050?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=ccb14083575a9a75c2c28e3095ee7f44",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-06-12",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": true,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-06-12"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Unity Spiritual Center Albuquerque",
+          "type": "venue",
+          "id": "eb-1983477726273-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {
+            "line1": "9800 Candelaria Road Northeast"
+          }
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "Hidden fear shapes our \u201csafe\u201d choices. Learn to see it, name it, and live freer\u2014even with fear still present."
+  },
+  {
+    "name": "The Official 90s vs Y2K Bar Crawl - Albuquerque",
+    "type": "event",
+    "id": "eb-1657225870189",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/the-official-90s-vs-y2k-bar-crawl-albuquerque-tickets-1657225870189",
+    "locale": "en-us",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1173303022%2F299464149304%2F1%2Foriginal.20251219-225631?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=57b0bd5c51c4a340f7d9c974d98dd6ae",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-07-18",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": true,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-07-18"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "The Library Bar & Grill",
+          "type": "venue",
+          "id": "eb-1657225870189-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {
+            "line1": "312 Central Avenue Southwest"
+          }
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "90s or Y2K\u2014who takes the crown? Join the ultimate decade showdown in Albuquerque on July 18th!"
+  },
+  {
+    "name": "GIRLS NIGHT OUT THE SHOW AUSTRALIA TAKEOVER ABQ,NM USA!!!",
+    "type": "event",
+    "id": "eb-1983582607977",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/girls-night-out-the-show-australia-takeover-abqnm-usa-tickets-1983582607977",
+    "locale": "en-us",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1177986320%2F300673942992%2F1%2Foriginal.20260219-231923?crop=focalpoint&fit=crop&w=355&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=9e3fa68181b2a95246db2bb8d0cbaba0",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-07-24",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": true,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-07-24"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Overtime Sports Bar",
+          "type": "venue",
+          "id": "eb-1983582607977-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {
+            "line1": "4100 San Mateo Boulevard Northeast"
+          }
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "Experience the THUNDER of Australia's Ultimate Girls Night Out! TICKETS On Sale NOW!  21+ Doors  6pm  Don\u2019t miss the Best Girls Night Ever!!"
+  },
+  {
+    "name": "Rise & Network",
+    "type": "event",
+    "id": "eb-1975166503181",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/rise-network-tickets-1975166503181",
+    "locale": "en-us",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1176388856%2F488943086939%2F1%2Foriginal.20260201-192338?crop=focalpoint&fit=crop&w=355&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=23cbee634aa8a8dbfb2d76988591feaf",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-08-04",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": true,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-08-04"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Castle Coffee",
+          "type": "venue",
+          "id": "eb-1975166503181-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {
+            "line1": "1111 Carlisle Boulevard Southeast"
+          }
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "Networking event for business owners and entrepreneurs"
+  },
+  {
     "name": "5th Annual University of New Mexico Economics Research Day 2026",
     "type": "event",
     "id": "eb-1981808151530",
@@ -3494,5 +3928,231 @@
     },
     "_source": "eventbrite",
     "description": "Please join us for coffee, posters, and presentations highlighting this year\u2019s New Mexico-Centric Economics Research projects."
+  },
+  {
+    "name": "2026  Red and Green VegFest Albuquerque",
+    "type": "event",
+    "id": "eb-1980488160401",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/2026-red-and-green-vegfest-albuquerque-tickets-1980488160401",
+    "locale": "en-us",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1174763738%2F760289983643%2F1%2Foriginal.20260113-190550?crop=focalpoint&fit=crop&h=132&w=345&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.491&fp-y=0.395&s=fdbae8952dfdd15528da43daf488f31f",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-08-15",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": true,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-08-15"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "First Unitarian Church",
+          "type": "venue",
+          "id": "eb-1980488160401-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {
+            "line1": "3701 Carlisle Boulevard Northeast"
+          }
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "Join us at the Red & Green VegFest Albuquerque on August 15, 2026 for an inspiring day dedicated to vegan living and sustainable practices."
+  },
+  {
+    "name": "Albuquerque Creative Portrait Workshop",
+    "type": "event",
+    "id": "eb-1984505885525",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/albuquerque-creative-portrait-workshop-tickets-1984505885525",
+    "locale": "en-us",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1179055129%2F635363829393%2F1%2Foriginal.20260304-214154?crop=focalpoint&fit=crop&h=200&w=512&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.617&s=93a091fbd17447d2f4322d07418fe8ed",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-09-14",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": true,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-09-14"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Civic Plaza",
+          "type": "venue",
+          "id": "eb-1984505885525-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {
+            "line1": "Civic Plaza"
+          }
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "Join our ABQ Creative Portrait Workshop\u2014experiment with light, creativity, and storytelling while building stunning portraits."
+  },
+  {
+    "name": "Balloon Fiesta 2026 Early Bird",
+    "type": "event",
+    "id": "eb-1987157107287",
+    "test": false,
+    "url": "https://www.eventbrite.com/e/balloon-fiesta-2026-early-bird-tickets-1987157107287",
+    "locale": "en-us",
+    "dates": {
+      "start": {
+        "localDate": "2026-10-03",
+        "dateTBD": false,
+        "dateTBA": false,
+        "timeTBD": false,
+        "noSpecificTime": false
+      },
+      "end": {
+        "localDate": "2026-10-03"
+      },
+      "status": {
+        "code": "onsale"
+      },
+      "timezone": "America/Denver"
+    },
+    "classifications": [
+      {
+        "primary": true,
+        "segment": {
+          "id": "KZFzniwnSyZfZ7v7nE",
+          "name": "Miscellaneous"
+        },
+        "genre": {
+          "id": "KnvZfZ7v7ll",
+          "name": "Undefined"
+        },
+        "subGenre": {
+          "id": "KZazBEonSMnZfZ7vAv6",
+          "name": "Undefined"
+        }
+      }
+    ],
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Balloon Fiesta Park",
+          "type": "venue",
+          "id": "eb-1987157107287-venue",
+          "locale": "en-us",
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico",
+            "stateCode": "NM"
+          },
+          "country": {
+            "name": "United States Of America",
+            "countryCode": "US"
+          },
+          "address": {}
+        }
+      ]
+    },
+    "_source": "eventbrite",
+    "description": "",
+    "images": [
+      {
+        "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1180961311%2F2399476655023%2F1%2Foriginal.png",
+        "ratio": "16_9",
+        "width": 512,
+        "height": 256,
+        "fallback": false
+      }
+    ]
   }
 ]
