@@ -761,7 +761,7 @@ function GeoBanner({
       <button
         onClick={onRequest}
         className="text-xs font-black px-3 py-1.5 flex-shrink-0"
-        style={{ background: '#1A1A1A', color: 'white', border: '1px solid rgba(0,0,0,0.12)', fontFamily: 'Public Sans, sans-serif' }}
+        style={{ background: 'var(--brand)', color: 'white', border: 'none', fontFamily: 'Public Sans, sans-serif' }}
       >
         Retry
       </button>
@@ -788,7 +788,7 @@ function GeoBanner({
       <button
         onClick={onRequest}
         className="text-xs font-black px-3 py-1.5 flex-shrink-0"
-        style={{ background: '#1A1A1A', color: 'white', border: '1px solid rgba(0,0,0,0.12)', fontFamily: 'Public Sans, sans-serif' }}
+        style={{ background: 'var(--brand)', color: 'white', border: 'none', fontFamily: 'Public Sans, sans-serif' }}
       >
         Enable
       </button>
@@ -2407,26 +2407,26 @@ const PROFANITY_BLOCKED = ['fuck','shit','bitch','cunt','cock','pussy','nigger',
 const hasProfanity = (s: string) => { const c = s.toLowerCase().replace(/[^a-z]/g, ''); return PROFANITY_BLOCKED.some(w => c.includes(w)); };
 
 const DISCOVER_SECTIONS = [
-  { id: 'thisWeek',      label: 'This Week Events',  emoji: '🗓️' },
-  { id: 'nearYou',       label: 'Near You',          emoji: '📍' },
-  { id: 'hiddenGems',    label: 'Hidden Gems',       emoji: '💎' },
-  { id: 'vibes',         label: 'Explore by Vibe',   emoji: '✨' },
-  { id: 'neighborhoods', label: 'Neighborhoods',     emoji: '🏘️' },
-  { id: 'planWeekend',   label: 'Plan Your Weekend', emoji: '🗺️' },
-  { id: 'todayPlan',     label: "Today's Plan",      emoji: '📋' },
-  { id: 'wishlist',      label: 'My Wishlist',       emoji: '🤍' },
+  { id: 'thisWeek',      label: 'This Week Events',  emoji: 'calendar_month' },
+  { id: 'nearYou',       label: 'Near You',          emoji: 'near_me' },
+  { id: 'hiddenGems',    label: 'Hidden Gems',       emoji: 'auto_awesome' },
+  { id: 'vibes',         label: 'Explore by Vibe',   emoji: 'tune' },
+  { id: 'neighborhoods', label: 'Neighborhoods',     emoji: 'location_city' },
+  { id: 'planWeekend',   label: 'Plan Your Weekend', emoji: 'map' },
+  { id: 'todayPlan',     label: "Today's Plan",      emoji: 'assignment' },
+  { id: 'wishlist',      label: 'My Wishlist',       emoji: 'favorite' },
 ];
 
 const INTEREST_OPTIONS = [
-  { id: 'music',    label: '🎵 Music',        categories: ['entertainment'] },
-  { id: 'sports',   label: '🏆 Sports',       categories: ['fitness', 'park'] },
-  { id: 'arts',     label: '🎨 Arts',         categories: ['arts', 'museum'] },
+  { id: 'music',    label: 'Music',            categories: ['entertainment'] },
+  { id: 'sports',   label: 'Sports',           categories: ['fitness', 'park'] },
+  { id: 'arts',     label: 'Arts',             categories: ['arts', 'museum'] },
   { id: 'outdoor',  label: '🌿 Outdoor',      categories: ['park'] },
   { id: 'family',   label: '👨‍👩‍👧 Family',     categories: ['entertainment', 'park'] },
-  { id: 'active',   label: '🏃 Active',       categories: ['fitness'] },
+  { id: 'active',   label: 'Active',           categories: ['fitness'] },
   { id: 'coffee',   label: '☕ Coffee',       categories: ['restaurant'] },
   { id: 'food',     label: '🍽️ Food & Drink', categories: ['restaurant'] },
-  { id: 'bars',     label: '🍺 Bars',         categories: ['bar'] },
+  { id: 'bars',     label: 'Bars',             categories: ['bar'] },
   { id: 'parks',    label: '🌳 Parks',        categories: ['park'] },
   { id: 'shopping', label: '🛍️ Shopping',    categories: ['shopping'] },
   { id: 'museums',  label: '🏛️ Museums',     categories: ['arts', 'museum'] },
@@ -2504,20 +2504,20 @@ function StreakBanner() {
   const [info] = useState(() => tickStreak());
   const [visible, setVisible] = useState(true);
   if (!visible || info.count < 2) return null;
-  const emoji = info.count >= 7 ? '🔥' : info.count >= 3 ? '⚡' : '👋';
+  const emoji = info.count >= 7 ? 'local_fire_department' : info.count >= 3 ? 'bolt' : 'waving_hand';
   const label = info.count >= 7
     ? `${info.count}-day streak! You're officially a local.`
     : info.count >= 3
-    ? `${info.count} days running — ABQ local in the making 🌶️`
+    ? `${info.count} days running — ABQ local in the making`
     : `Welcome back! Day ${info.count} in a row.`;
   return (
     <div className="flex items-center justify-between gap-3 px-4 py-3"
       style={{ background: '#b95c43', borderBottom: '1px solid rgba(0,0,0,0.08)', animation: 'cardFadeIn 0.4s ease both' }}>
       <div className="flex items-center gap-2 min-w-0">
-        <span style={{ fontSize: '20px', lineHeight: 1 }}>{emoji}</span>
-        <span className="text-sm font-black truncate" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>{label}</span>
+        <span className="material-symbols-outlined" style={{ fontSize: '20px', lineHeight: 1, fontVariationSettings: "'FILL' 1" }}>{emoji}</span>
+        <span className="text-sm font-black truncate" style={{ fontFamily: 'Public Sans, sans-serif', color: 'white' }}>{label}</span>
       </div>
-      <button onClick={() => setVisible(false)} className="flex-shrink-0 font-black" style={{ fontSize: '16px', lineHeight: 1, color: '#1A1A1A' }}>✕</button>
+      <button onClick={() => setVisible(false)} className="flex-shrink-0 font-black" style={{ fontSize: '16px', lineHeight: 1, color: 'white' }}>✕</button>
     </div>
   );
 }
@@ -2540,8 +2540,8 @@ function DailyGem({ places, onSelect }: { places: Place[]; onSelect: (p: Place) 
   return (
     <div className="px-5 pb-5">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif' }}>Today's Pick 🌶️</h2>
-        <span className="text-xs font-black uppercase" style={{ color: '#666', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em' }}>🗓 Changes daily</span>
+        <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif' }}>Today's Pick</h2>
+        <span className="text-xs font-black uppercase" style={{ color: '#666', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em' }}><span className="material-symbols-outlined" style={{fontSize:'12px',verticalAlign:'middle',marginRight:'3px'}}>calendar_today</span>Changes daily</span>
       </div>
       <button onClick={() => onSelect(gem)} className="w-full relative overflow-hidden text-left"
         style={{ height: '180px', boxShadow: '0 2px 8px rgba(0,0,0,0.10)', border: '1px solid rgba(0,0,0,0.12)', animation: 'cardFadeIn 0.45s ease both', borderRadius: 6 }}>
@@ -2549,7 +2549,7 @@ function DailyGem({ places, onSelect }: { places: Place[]; onSelect: (p: Place) 
         <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, rgba(28,111,234,0.12) 0%, rgba(0,0,0,0.72) 100%)' }} />
         <div className="absolute top-3 left-3">
           <span className="text-xs font-black px-3 py-1"
-            style={{ background: '#b95c43', color: '#1A1A1A', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 6 }}>
+            style={{ background: '#b95c43', color: 'white', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 6 }}>
             ★ TODAY'S PICK
           </span>
         </div>
@@ -2733,7 +2733,7 @@ function MyWishlist() {
         <div className="flex flex-col gap-2">
           {items.map(item => (
             <div key={item.id} className="bg-white rounded-lg p-4 flex items-center gap-3" style={{ border: '1px solid #f3f4f6' }}>
-              <span className="text-xl flex-shrink-0">{item.type === 'event' ? '📅' : '📍'}</span>
+              <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '20px', color: 'var(--brand)', fontVariationSettings: "'FILL' 1" }}>{item.type === 'event' ? 'calendar_month' : 'location_on'}</span>
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm text-gray-900 truncate" style={{ fontFamily: 'Public Sans, sans-serif' }}>{item.name}</p>
                 <p className="text-xs text-gray-400" style={{ fontFamily: 'Public Sans, sans-serif' }}>{item.category}</p>
@@ -2869,7 +2869,7 @@ function DiscoverScreen({
             <span className="text-xs font-black" style={{ color: '#aaa' }}>Loading…</span>
           </div>
           {[0,1,2].map(i => (
-            <div key={i} className="flex" style={{ borderBottom: i < 2 ? '1px solid #1A1A1A' : 'none', height: 64 }}>
+            <div key={i} className="flex" style={{ borderBottom: i < 2 ? '1px solid rgba(0,0,0,0.08)' : 'none', height: 64 }}>
               <div style={{ width: 62, backgroundColor: '#e8e8e8' }} />
               <div className="flex-1 px-3 py-2" style={{ backgroundColor: '#f5f5f5', opacity: 0.7 }} />
               <div style={{ width: 48, backgroundColor: '#e8e8e8', borderLeft: '1px solid #ccc' }} />
@@ -3216,7 +3216,7 @@ function DiscoverScreen({
                   <button
                     onClick={() => addToDayPlan(steps)}
                     className="text-xs font-black px-2 py-0.5"
-                    style={{ backgroundColor: '#b95c43', color: '#1A1A1A', border: '1px solid rgba(0,0,0,0.12)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.04em' }}
+                    style={{ backgroundColor: '#b95c43', color: 'white', border: 'none', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.04em' }}
                   >
                     + plan
                   </button>
@@ -3300,10 +3300,10 @@ function EventsScreen({
     const horizonStr = horizonDate.toISOString().split('T')[0];
     let result = events.filter(e => {
       if (e._isAdult) return false;
-      if (!isSearchActive) {
-        const d = e.dates?.start?.localDate;
-        if (d && d > horizonStr) return false;
-      }
+      // Always hide events that have already passed
+      const d = e.dates?.start?.localDate;
+      if (d && d < todayStr) return false;
+      if (!isSearchActive && d && d > horizonStr) return false;
       return true;
     });
 
@@ -3496,7 +3496,7 @@ function EventsScreen({
                   background: isSelected ? '#1A1A1A' : isForYou && followedGenres.length > 0 ? 'var(--brand-bg-subtle)' : 'white',
                   color: isSelected ? 'white' : '#1A1A1A',
                   border: '1px solid rgba(0,0,0,0.12)',
-                  borderRight: !isForYou && !isSelected ? 'none' : '1.5px solid #1A1A1A',
+                  borderRight: 'none',
                   borderRadius: 6,
                 }}
               >
@@ -3601,13 +3601,13 @@ function EventsScreen({
               {/* Showtime count badge — only shown when > 1 showtime was collapsed */}
               {count > 1 && (
                 <div
-                  style={{ position:'absolute', bottom:8, left:8, background:'#1A1A1A', color:'#F9F5F2', fontSize:'9px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', padding:'2px 7px', border:'1.5px solid #1A1A1A', pointerEvents:'none' }}
+                  style={{ position:'absolute', bottom:8, left:8, background:'rgba(0,0,0,0.55)', color:'white', fontSize:'9px', fontWeight:600, letterSpacing:'0.06em', textTransform:'uppercase', padding:'2px 7px', borderRadius:4, pointerEvents:'none' }}
                 >
                   {count} showtimes
                 </div>
               )}
               {(() => { const liked = isWishlisted(event.id); return (
-              <button style={{position:'absolute',top:8,right:8,zIndex:10,background: liked ? '#1A1A1A' : 'white',border:'2px solid #1A1A1A',borderRadius:0,width:34,height:34,minHeight:0,color: liked ? '#b95c43' : '#1A1A1A',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'2px 2px 0 #1A1A1A'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:event.id,type:'event',name:event.name,category:'event'});}}><span className="material-symbols-outlined" style={{fontSize:'18px',fontVariationSettings: liked ? "'FILL' 1, 'wght' 700" : "'FILL' 0, 'wght' 400"}}>favorite</span></button>
+              <button style={{position:'absolute',top:8,right:8,zIndex:10,background: liked ? '#b95c43' : 'rgba(255,255,255,0.90)',border:'none',borderRadius:'50%',width:34,height:34,minHeight:0,color: liked ? 'white' : '#b95c43',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(0,0,0,0.15)'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:event.id,type:'event',name:event.name,category:'event'});}}><span className="material-symbols-outlined" style={{fontSize:'18px',fontVariationSettings: liked ? "'FILL' 1, 'wght' 700" : "'FILL' 0, 'wght' 400"}}>favorite</span></button>
               ); })()}
             </div>
           );
@@ -3991,7 +3991,7 @@ function PlacesScreen({
                 onCheckIn={e => { e.stopPropagation(); onCheckIn(place.id); }}
                 />
               {(() => { const liked = isWishlisted(place.id); return (
-              <button style={{position:'absolute',top:8,right:8,zIndex:10,background: liked ? '#1A1A1A' : 'white',border:'2px solid #1A1A1A',borderRadius:0,width:32,height:32,minHeight:0,color: liked ? '#b95c43' : '#1A1A1A',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'2px 2px 0 #1A1A1A'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:place.id,type:'place',name:place.name,category:place.category});}}><span className="material-symbols-outlined" style={{fontSize:'16px',fontVariationSettings: liked ? "'FILL' 1, 'wght' 700" : "'FILL' 0, 'wght' 400"}}>favorite</span></button>
+              <button style={{position:'absolute',top:8,right:8,zIndex:10,background: liked ? '#b95c43' : 'rgba(255,255,255,0.90)',border:'none',borderRadius:'50%',width:32,height:32,minHeight:0,color: liked ? 'white' : '#b95c43',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(0,0,0,0.15)'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:place.id,type:'place',name:place.name,category:place.category});}}><span className="material-symbols-outlined" style={{fontSize:'16px',fontVariationSettings: liked ? "'FILL' 1, 'wght' 700" : "'FILL' 0, 'wght' 400"}}>favorite</span></button>
               ); })()}
             </div>
           ))}
@@ -4373,7 +4373,7 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
                 return (
                   <button key={sec.id} onClick={() => toggleSection(sec.id)} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="text-base">{sec.emoji}</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--brand)', fontVariationSettings: "'FILL' 1" }}>{sec.emoji}</span>
                       <span className="text-sm font-medium text-gray-700" style={{ fontFamily: 'Public Sans, sans-serif' }}>{sec.label}</span>
                     </div>
                     <div className="w-11 h-6 rounded-full flex items-center px-0.5 transition-colors" style={{ background: visible ? 'var(--brand)' : '#d1d5db' }}>
@@ -4702,7 +4702,7 @@ function ProfileScreen({
         const CHALLENGES = [
           {
             id: 'old-town-5',
-            emoji: '🏛️',
+            emoji: 'account_balance',
             title: 'Old Town Explorer',
             desc: 'Check in to 5 places in Old Town ABQ',
             target: 5,
@@ -4710,7 +4710,7 @@ function ProfileScreen({
           },
           {
             id: 'nob-hill-3',
-            emoji: '☕',
+            emoji: 'coffee',
             title: 'Nob Hill Regular',
             desc: 'Check in to 3 spots on Central Ave / Nob Hill',
             target: 3,
@@ -4718,7 +4718,7 @@ function ProfileScreen({
           },
           {
             id: 'checkin-10',
-            emoji: '📍',
+            emoji: 'location_on',
             title: 'Stamped In',
             desc: 'Reach 10 total check-ins',
             target: 10,
@@ -4726,7 +4726,7 @@ function ProfileScreen({
           },
           {
             id: 'diverse-5',
-            emoji: '🗺️',
+            emoji: 'map',
             title: 'City Sampler',
             desc: 'Check in to 5 different place categories',
             target: 5,
@@ -4734,7 +4734,7 @@ function ProfileScreen({
           },
           {
             id: 'streak-7',
-            emoji: '🔥',
+            emoji: 'local_fire_department',
             title: 'Week Warrior',
             desc: 'Keep a 7-day check-in streak',
             target: 7,
@@ -4742,7 +4742,7 @@ function ProfileScreen({
           },
           {
             id: 'downtown-3',
-            emoji: '🏙️',
+            emoji: 'location_city',
             title: 'Downtown Devotee',
             desc: 'Check in to 3 places Downtown',
             target: 3,
@@ -4766,11 +4766,11 @@ function ProfileScreen({
                     style={{
                       background: done ? '#b95c43' : 'white',
                       boxShadow: done ? '3px 3px 0 var(--brand)' : '3px 3px 0 rgba(0,0,0,0.10)',
-                      border: done ? '2px solid #1A1A1A' : '1px solid #eee',
+                      border: done ? '1.5px solid var(--brand)' : '1px solid rgba(0,0,0,0.08)',
                     }}
                   >
                     <div className="flex items-center gap-2 mb-1">
-                      <span style={{ fontSize: '20px', lineHeight: 1 }}>{c.emoji}</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: '20px', lineHeight: 1, color: 'var(--brand)', fontVariationSettings: "'FILL' 1" }}>{c.emoji}</span>
                       <span className="font-black text-sm flex-1" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>{c.title}</span>
                       {done && <span className="text-xs font-black" style={{ color: '#b95c43' }}>✓ DONE</span>}
                       {!done && <span className="text-xs font-semibold" style={{ fontFamily: 'Public Sans, sans-serif', color: '#999' }}>{c.progress}/{c.target}</span>}
@@ -4844,7 +4844,7 @@ function ProfileScreen({
             </span>
             {row.streak && row.streak >= 3 ? (
               <span className="flex-shrink-0 text-xs" title={`${row.streak}-day streak`}>
-                {row.streak >= 30 ? '🔥🔥' : row.streak >= 7 ? '🔥' : '⚡'}
+                {row.streak >= 30 ? '★★' : row.streak >= 7 ? '★' : '·'}
               </span>
             ) : null}
             <span
@@ -8193,7 +8193,7 @@ export default function App() {
               style={{
                 minHeight: '64px',
                 background: activeTab === item.id ? '#1A1A1A' : 'white',
-                borderRight: idx < NAV_ITEMS.length - 1 ? '1.5px solid #1A1A1A' : 'none',
+                borderRight: 'none',
                 borderRadius: 6,
               }}
             >
