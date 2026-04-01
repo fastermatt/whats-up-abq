@@ -2817,23 +2817,39 @@ function DiscoverScreen({
       {/* Streak Banner */}
       <StreakBanner />
 
-      {/* Hero */}
-      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #1ebaeb', borderBottom: '2px solid #1A1A1A' }}>
-        <p
-          className="text-xs font-black uppercase mb-1"
-          style={{ color: '#888', fontFamily: 'Inter, sans-serif', letterSpacing: '0.12em' }}
-        >
-          Greater ABQ Metro
-        </p>
-        <h1
-          className="font-black uppercase leading-none"
-          style={{ fontFamily: 'Epilogue, sans-serif', fontSize: '48px', letterSpacing: '-0.04em', color: '#1A1A1A', lineHeight: 1 }}
-        >
-          {heroDisplay || ' '}
-        </h1>
-        <p className="mt-2" style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', color: '#666', fontWeight: 600, letterSpacing: '0.04em' }}>
-          {places.length} places · {events.length} events
-        </p>
+      {/* Hero — value prop + primary CTA */}
+      <div style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #1ebaeb', borderBottom: '2px solid #1A1A1A' }}>
+        <div className="px-5 pt-5 pb-4">
+          <p className="text-xs font-black uppercase mb-2" style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif', letterSpacing: '0.12em' }}>
+            Greater ABQ Metro
+          </p>
+          <h1 className="font-black leading-tight mb-1" style={{ fontFamily: 'Epilogue, sans-serif', fontSize: '26px', letterSpacing: '-0.02em', color: '#1A1A1A' }}>
+            Find something worth<br />going to tonight
+          </h1>
+          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', color: '#555', fontWeight: 500, marginBottom: '14px' }}>
+            {events.length.toLocaleString()} events · {places.length.toLocaleString()} places across Greater ABQ
+          </p>
+          <button
+            onClick={() => onNavigateEvents?.()}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '42px', padding: '0 16px', background: '#1A1A1A', color: 'white', border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #566500', fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 800, letterSpacing: '0.03em', cursor: 'pointer', borderRadius: 0, marginBottom: '12px' }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>confirmation_number</span>
+            What's on tonight →
+          </button>
+        </div>
+        <div className="flex px-5 pb-4 gap-2" style={{ overflowX: 'auto', scrollbarWidth: 'none' }}>
+          {[
+            { label: 'Tonight',        action: () => onNavigateEvents?.() },
+            { label: 'This Weekend',   action: () => onNavigateEvents?.() },
+            { label: 'Free Events',    action: () => onNavigateEvents?.() },
+            { label: 'Explore Places', action: () => onNavigatePlaces?.('All', '') },
+          ].map(chip => (
+            <button key={chip.label} onClick={chip.action}
+              style={{ flexShrink: 0, height: '28px', padding: '0 12px', background: 'white', border: '1.5px solid #1A1A1A', fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 700, letterSpacing: '0.04em', cursor: 'pointer', borderRadius: 0, whiteSpace: 'nowrap' }}>
+              {chip.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Geo Banner */}
@@ -3247,7 +3263,7 @@ function EventsScreen({
 }) {
   const [search, setSearch] = useState('');
   useEffect(() => { if (initialSearch) setSearch(initialSearch); }, [initialSearch]);
-  const [selectedGenre, setSelectedGenre] = useState('All');
+  const [selectedGenre, setSelectedGenre] = useState('Tonight');
   const [followedGenres, setFollowedGenres] = useState<string[]>(() => getFollowedGenres());
   const [wishlistVersion, setWishlistVersion] = useState(0);
   useEffect(() => {
@@ -3433,13 +3449,13 @@ function EventsScreen({
           What's Happening
         </p>
         <h1
-          className="font-black uppercase leading-none mt-1"
-          style={{ fontFamily: 'Epilogue, sans-serif', fontSize: '48px', letterSpacing: '-0.04em', color: '#1A1A1A' }}
+          className="font-black leading-none mt-1"
+          style={{ fontFamily: 'Epilogue, sans-serif', fontSize: '40px', letterSpacing: '-0.04em', color: '#1A1A1A' }}
         >
-          Live Events<br />Near You
+          What's Happening
         </h1>
         <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
-          {events.length} upcoming events in Greater ABQ
+          {events.length.toLocaleString()} things to do in Greater ABQ
         </p>
       </div>
 
@@ -3451,7 +3467,7 @@ function EventsScreen({
           <span className="material-symbols-outlined text-gray-400" style={{ fontSize: '20px' }}>search</span>
           <input
             className="flex-1 bg-transparent outline-none text-sm text-gray-800"
-            placeholder="Search events or venues..."
+            placeholder="Search events, artists, venues..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             style={{ fontFamily: 'Inter, sans-serif' }}
@@ -3511,6 +3527,32 @@ function EventsScreen({
           );
         })}
       </div>
+      {/* Empty state — shown when filters return zero results */}
+      {deduped.length === 0 && !eventsLoading && (
+        <div className="flex flex-col items-center justify-center px-8 text-center" style={{ paddingTop: '80px', paddingBottom: '60px' }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '56px', color: '#d0d8d0', marginBottom: '16px' }}>event_busy</span>
+          <h2 className="font-black text-lg mb-2" style={{ fontFamily: 'Epilogue, sans-serif', color: '#1a1a1a' }}>
+            {selectedGenre === 'Tonight' ? 'Nothing scheduled for tonight' :
+             selectedGenre === 'This Weekend' ? 'Nothing found this weekend' :
+             `No ${selectedGenre.toLowerCase()} events found`}
+          </h2>
+          <p className="text-sm mb-5" style={{ color: '#888', fontFamily: 'Inter, sans-serif', lineHeight: 1.6 }}>
+            {selectedGenre !== 'All'
+              ? `Try "This Weekend" or browse all events.`
+              : 'Try a different search term or check back soon.'}
+          </p>
+          {selectedGenre !== 'All' && (
+            <button
+              onClick={() => setSelectedGenre('All')}
+              className="px-5 py-2.5 font-black text-sm uppercase"
+              style={{ background: '#1A1A1A', color: 'white', border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #566500', fontFamily: 'Inter, sans-serif', letterSpacing: '0.06em', cursor: 'pointer' }}
+            >
+              Browse all events
+            </button>
+          )}
+        </div>
+      )}
+
       {/* For You setup prompt — shown when For You is selected but nothing followed */}
       {selectedGenre === '❤️ For You' && followedGenres.length === 0 && (
         <div className="px-5 py-4 flex items-start gap-3" style={{ background: 'var(--brand-bg-subtle)', borderBottom: '2px solid #1A1A1A' }}>
@@ -3604,6 +3646,7 @@ function PlacesScreen({
 }) {
   const PAGE_SIZE = 48;
   const [selectedCat, setSelectedCat] = useState('All');
+  const [openNow, setOpenNow] = useState(false);
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [sortMode, setSortMode] = useState<'top' | 'near' | 'az'>('top');
@@ -3625,7 +3668,7 @@ function PlacesScreen({
     return () => clearTimeout(t);
   }, [searchInput]);
 
-  useEffect(() => { if (navKey > 0) { setSelectedCat(navCat || 'All'); setSearchInput(navSearch || ''); setSearch(navSearch || ''); } }, [navKey]);
+  useEffect(() => { if (navKey > 0) { setSelectedCat(navCat || 'All'); setOpenNow(false); setSearchInput(navSearch || ''); setSearch(navSearch || ''); } }, [navKey]);
 
   // Auto-activate Near Me sort as soon as coords become available
   // (fires when pendingNearSort was set because the user tapped before geo was ready)
@@ -3669,8 +3712,43 @@ function PlacesScreen({
     'South Valley': { minLat: 34.960, maxLat: 35.068, minLng: -106.740, maxLng: -106.620 },
   };
 
+  // Basic "Open Now" check using hours string from place data
+  const isOpenNow = (hours?: string): boolean => {
+    if (!hours) return false;
+    const h = hours.toLowerCase();
+    if (h.includes('24 hour') || h.includes('open 24') || h.includes('always open')) return true;
+    const now = new Date();
+    const day = now.getDay(); // 0=Sun, 1=Mon,...,6=Sat
+    const currentMins = now.getHours() * 60 + now.getMinutes();
+    const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+    const dayFull = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const todayShort = dayNames[day];
+    const todayFull = dayFull[day];
+    // Find segments that mention today
+    const segments = h.split(/[;,]/);
+    for (const seg of segments) {
+      if (!seg.includes(todayShort) && !seg.includes(todayFull)) continue;
+      // Try to extract time range like "8am-9pm", "8:00am-9:00pm", "8:00-21:00"
+      const timeRange = seg.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*[-–]\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i);
+      if (!timeRange) continue;
+      const toMins = (h: string, m: string, ampm: string): number => {
+        let hours = parseInt(h, 10);
+        const mins = m ? parseInt(m, 10) : 0;
+        if (ampm === 'pm' && hours < 12) hours += 12;
+        if (ampm === 'am' && hours === 12) hours = 0;
+        return hours * 60 + mins;
+      };
+      const openMins = toMins(timeRange[1], timeRange[2], (timeRange[3] || '').toLowerCase());
+      const closeMins = toMins(timeRange[4], timeRange[5], (timeRange[6] || '').toLowerCase());
+      if (currentMins >= openMins && currentMins <= closeMins) return true;
+    }
+    return false;
+  };
+
   const filtered = useMemo(() => {
     let result = places.filter(isPlaceInMetro);
+    // Open Now filter
+    if (openNow) result = result.filter(p => isOpenNow(p.hours));
     // When a search query is active it overrides the category filter so users
     // always search across ALL places — preventing the confusing "0 results"
     // you get when a category is locked and the search term doesn't match it.
@@ -3701,7 +3779,7 @@ function PlacesScreen({
     }
     return result;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [places, selectedCat, search]);
+  }, [places, selectedCat, search, openNow]);
 
   const sorted = useMemo(() => {
     if (sortMode === 'near' && coords) {
@@ -3762,15 +3840,15 @@ function PlacesScreen({
           Explore Greater ABQ
         </p>
         <h1
-          className="font-black uppercase leading-none mt-1"
-          style={{ fontFamily: 'Epilogue, sans-serif', fontSize: '48px', letterSpacing: '-0.04em', color: '#1A1A1A' }}
+          className="font-black leading-none mt-1"
+          style={{ fontFamily: 'Epilogue, sans-serif', fontSize: '40px', letterSpacing: '-0.04em', color: '#1A1A1A' }}
         >
-          Places<br />to Go
+          Places to Go
         </h1>
         <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
           {search.trim() && NEIGHBORHOOD_BOUNDS[search.trim()]
             ? `${filtered.length} spot${filtered.length !== 1 ? 's' : ''} in ${search.trim()}`
-            : `${places.length} spots across Greater ABQ`}
+            : `${places.length.toLocaleString()} spots across Greater ABQ`}
         </p>
       </div>
 
@@ -3792,7 +3870,7 @@ function PlacesScreen({
           <span className="material-symbols-outlined text-gray-400" style={{ fontSize: '20px' }}>search</span>
           <input
             className="flex-1 bg-transparent outline-none text-sm text-gray-800"
-            placeholder="Search places..."
+            placeholder="Search places, neighborhoods..."
             value={searchInput}
             onChange={e => setSearchInput(e.target.value)}
             style={{ fontFamily: 'Inter, sans-serif' }}
@@ -3821,8 +3899,27 @@ function PlacesScreen({
         </div>
       )}
 
-      {/* Category pills */}
+      {/* Open Now chip + Category pills */}
       <div className="flex px-5 pb-0 overflow-x-auto" style={{ scrollbarWidth: 'none', borderBottom: '2px solid #1A1A1A', paddingBottom: '12px', paddingTop: '12px' }}>
+        {/* Open Now toggle — always first */}
+        <button
+          onClick={() => setOpenNow(v => !v)}
+          className="flex-shrink-0 flex items-center gap-1 px-3 py-2 text-xs font-black uppercase transition-all"
+          style={{
+            fontFamily: 'Inter, sans-serif',
+            letterSpacing: '0.1em',
+            background: openNow ? '#566500' : 'white',
+            color: openNow ? 'white' : '#1A1A1A',
+            border: '1.5px solid #1A1A1A',
+            marginRight: '-1.5px',
+            borderRadius: 0,
+            position: 'relative',
+            zIndex: openNow ? 1 : 0,
+          }}
+        >
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: openNow ? '#d4ef4d' : '#4caf50', display: 'inline-block', marginRight: 2, flexShrink: 0 }} />
+          Open Now
+        </button>
         {PLACE_CATEGORIES.map(cat => (
           <button
             key={cat.label}
@@ -6209,13 +6306,37 @@ function PlanScreen({
   const places = savedPlan.filter(i => i.type === 'place') as { type: 'place'; data: Place }[];
   const events = savedPlan.filter(i => i.type === 'event') as { type: 'event'; data: TMEvent }[];
 
+  const handleSharePlan = async () => {
+    const lines: string[] = ['My ABQ Weekend — abqunplugged.com', ''];
+    if (events.length) {
+      lines.push('Events:');
+      events.forEach(({ data: e }) => {
+        const d = e.dates?.start?.localDate ? new Date(e.dates.start.localDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
+        const t = e.dates?.start?.localTime ? ` · ${e.dates.start.localTime.slice(0,5)}` : '';
+        lines.push(`• ${e.name}${d ? ' (' + d + t + ')' : ''}`);
+      });
+      lines.push('');
+    }
+    if (places.length) {
+      lines.push('Places to check out:');
+      places.forEach(({ data: p }) => lines.push(`• ${p.name}${p.address ? ' — ' + p.address.split(',')[0] : ''}`));
+      lines.push('');
+    }
+    lines.push('Find yours at abqunplugged.com');
+    const text = lines.join('\n');
+    if (navigator.share) {
+      try { await navigator.share({ title: 'My ABQ Weekend', text }); return; } catch { /* fall through */ }
+    }
+    try { await navigator.clipboard.writeText(text); } catch { /* ignore */ }
+  };
+
   if (savedPlan.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center px-8 text-center" style={{ paddingTop: '100px', paddingBottom: '60px' }}>
         <span className="material-symbols-outlined" style={{ fontSize: '64px', color: '#d0d8d0', marginBottom: '16px' }}>bookmark</span>
-        <h2 className="font-black text-xl mb-2" style={{ fontFamily: 'Epilogue, sans-serif', color: '#1a1a1a' }}>Your plan is empty</h2>
+        <h2 className="font-black text-xl mb-2" style={{ fontFamily: 'Epilogue, sans-serif', color: '#1a1a1a' }}>Nothing saved yet</h2>
         <p className="text-sm" style={{ color: '#888', fontFamily: 'Inter, sans-serif', lineHeight: 1.6 }}>
-          Browse places and events, then tap the <strong>bookmark icon</strong> in any detail view to save them here.
+          Bookmark events and places as you browse — they'll show up here so you can plan your next outing.
         </p>
       </div>
     );
@@ -6229,9 +6350,19 @@ function PlanScreen({
           <h1 className="font-black text-xl leading-tight" style={{ fontFamily: 'Epilogue, sans-serif' }}>My ABQ</h1>
           <p className="text-xs mt-0.5" style={{ color: '#888', fontFamily: 'Inter, sans-serif' }}>{savedPlan.length} {savedPlan.length === 1 ? 'stop' : 'stops'} saved</p>
         </div>
-        <button onClick={onClearAll} className="text-xs font-bold px-3 py-1.5" style={{ border: '1.5px solid #1a1a1a', fontFamily: 'Inter, sans-serif', color: '#dc2626' }}>
-          Clear All
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleSharePlan}
+            className="flex items-center gap-1 text-xs font-black px-3 py-1.5"
+            style={{ border: '1.5px solid #1a1a1a', fontFamily: 'Inter, sans-serif', background: '#1a1a1a', color: 'white' }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>share</span>
+            Share
+          </button>
+          <button onClick={onClearAll} className="text-xs font-bold px-3 py-1.5" style={{ border: '1.5px solid #1a1a1a', fontFamily: 'Inter, sans-serif', color: '#dc2626' }}>
+            Clear
+          </button>
+        </div>
       </div>
 
       {/* Places section */}
