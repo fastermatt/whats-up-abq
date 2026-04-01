@@ -3,20 +3,86 @@ import { supabase } from './supabase';
 const GOOGLE_KEY = import.meta.env.VITE_GOOGLE_PLACES_KEY as string;
 if (!GOOGLE_KEY) throw new Error('VITE_GOOGLE_PLACES_KEY is not set');
 
-function placeTypeToCategory(types: string[]): string {
+function placeTypeToCategory(types: string[], name = ''): string {
   if (!types) return 'other';
-  if (types.includes('cafe')) return 'coffee';
-  if (types.includes('restaurant') || types.includes('food')) return 'restaurant';
-  if (types.includes('bar') || types.includes('night_club')) return 'bar';
-  if (types.includes('park') || types.includes('campground') || types.includes('hiking_area')) return 'park';
-  if (types.includes('museum')) return 'museum';
-  if (types.includes('art_gallery')) return 'arts';
-  if (types.includes('gym') || types.includes('spa')) return 'fitness';
-  if (types.includes('lodging')) return 'hotel';
-  if (types.includes('shopping_mall') || types.includes('store')) return 'shop';
-  if (types.includes('stadium') || types.includes('amusement_park') || types.includes('bowling_alley') ||
-      types.includes('movie_theater') || types.includes('zoo') || types.includes('aquarium') ||
+  const n = name.toLowerCase();
+
+  // ── Drinks / Food ────────────────────────────────────────────────────────
+  // Convenience / gas wins over everything — Google also gives them 'cafe'
+  if (types.includes('convenience_store') || types.includes('gas_station')) return 'shop';
+  if (types.includes('fast_food') && !types.includes('cafe')) return 'restaurant';
+
+  // Coffee: exact type OR (cafe type AND name reads like a coffee brand)
+  const COFFEE_NAMES = ['coffee', 'cafe', 'café', 'espresso', 'roast', 'brew', 'java',
+    'starbucks', "dunkin'", 'dunkin ', 'bean', 'grind', 'roasters', 'barista',
+    'latte', 'cappuccino', 'grounds', 'drip', 'percolat'];
+  const isCoffeeName = COFFEE_NAMES.some(w => n.includes(w));
+  if (types.includes('coffee_shop') || (types.includes('cafe') && isCoffeeName)) return 'coffee';
+
+  if (types.includes('restaurant') || types.includes('food') ||
+      types.includes('cafe') || types.includes('fast_food') || types.includes('bakery') ||
+      types.includes('meal_takeaway') || types.includes('meal_delivery')) return 'restaurant';
+  if (types.includes('bar') || types.includes('night_club') ||
+      types.includes('brewery') || types.includes('liquor_store')) return 'bar';
+
+  // ── Outdoors ─────────────────────────────────────────────────────────────
+  if (types.includes('park') || types.includes('campground') ||
+      types.includes('hiking_area') || types.includes('natural_feature') ||
+      types.includes('rv_park')) return 'park';
+
+  // ── Culture ──────────────────────────────────────────────────────────────
+  if (types.includes('museum') || types.includes('library')) return 'museum';
+  if (types.includes('art_gallery') || types.includes('performing_arts_theater')) return 'arts';
+
+  // ── Fitness ──────────────────────────────────────────────────────────────
+  if (types.includes('gym') || types.includes('spa') ||
+      types.includes('sports_complex') || types.includes('fitness_center') ||
+      types.includes('golf_course') || types.includes('swimming_pool') ||
+      types.includes('stadium')) return 'fitness';
+
+  // ── Stays ────────────────────────────────────────────────────────────────
+  if (types.includes('lodging') || types.includes('hotel') ||
+      types.includes('motel') || types.includes('resort')) return 'hotel';
+
+  // ── Shopping ─────────────────────────────────────────────────────────────
+  if (types.includes('shopping_mall') || types.includes('store') ||
+      types.includes('clothing_store') || types.includes('shoe_store') ||
+      types.includes('electronics_store') || types.includes('book_store') ||
+      types.includes('jewelry_store') || types.includes('furniture_store') ||
+      types.includes('home_goods_store') || types.includes('hardware_store') ||
+      types.includes('car_dealer') || types.includes('bicycle_store') ||
+      types.includes('pet_store') || types.includes('florist') ||
+      types.includes('supermarket') || types.includes('convenience_store') ||
+      types.includes('department_store') || types.includes('pharmacy') ||
+      types.includes('gift_shop')) return 'shop';
+
+  // ── Entertainment ─────────────────────────────────────────────────────────
+  if (types.includes('amusement_park') || types.includes('bowling_alley') ||
+      types.includes('movie_theater') || types.includes('zoo') ||
+      types.includes('aquarium') || types.includes('casino') ||
       types.includes('tourist_attraction')) return 'entertainment';
+
+  // ── Name-based fallbacks (catches things Google under-types) ─────────────
+  if (n.includes('theater') || n.includes('theatre') || n.includes('auditorium') ||
+      n.includes('cinema') || n.includes('comedy') || n.includes('fun center') ||
+      n.includes('escape room') || n.includes('bowling') || n.includes('arcade'))
+    return 'entertainment';
+  if (n.includes('gallery') || n.includes('studio') || n.includes('art ') ||
+      n.includes('dance') || n.includes(' arts') || n.includes('music school') ||
+      n.includes('pottery') || n.includes('ceramic'))
+    return 'arts';
+  if (n.includes('golf') || n.includes('crossfit') || n.includes('yoga') ||
+      n.includes('pilates') || n.includes('martial art') || n.includes('boxing') ||
+      n.includes('swim') || n.includes('aquatic') || n.includes('athletic'))
+    return 'fitness';
+  if (n.includes('library') || n.includes('historical') || n.includes('heritage') ||
+      n.includes('history') || n.includes('science center') || n.includes('planetarium'))
+    return 'museum';
+  if (n.includes('dispensary') || n.includes('cannabis') || n.includes('tattoo') ||
+      n.includes(' spa') || n.includes('salon') || n.includes('barbershop') ||
+      n.includes('nail '))
+    return 'shop';
+
   return 'other';
 }
 
@@ -83,7 +149,7 @@ function transformGoogleRaw(raw: Record<string, unknown>): Record<string, unknow
   return {
     id: raw.place_id,
     name: raw.name,
-    category: placeTypeToCategory(types),
+    category: placeTypeToCategory(types, raw.name as string),
     isFeatured: false,
     description: '',
     address: raw.vicinity || '',
