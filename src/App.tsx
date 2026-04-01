@@ -1212,7 +1212,7 @@ function PlaceDetailModal({
   enrichedDataEnabled?: boolean;
 }) {
   const [shared, setShared] = useState(false);
-  const [enriched, setEnriched] = useState<{ tip?: string; hours?: string; phone?: string; website?: string; editorial?: string; parking?: string } | null>(null);
+  const [enriched, setEnriched] = useState<{ tip?: string; hours?: string; phone?: string; website?: string; editorial?: string; parking?: string; menu?: string } | null>(null);
   const [placeHideEnriched, setPlaceHideEnriched] = useState(false);
   const detailCatMeta = PLACE_CATEGORIES.find(c => c.value === place.category) || PLACE_CATEGORIES.find(c => c.label === place.category);
   const detailCatIcon = detailCatMeta?.icon || 'pin';
@@ -1243,6 +1243,7 @@ function PlaceDetailModal({
   const displayPhone   = (showEnriched ? enriched?.phone   : null) || place.phone   || null;
   const displayWebsite = (showEnriched ? enriched?.website : null) || place.website || null;
   const displayParking = showEnriched ? (enriched?.parking || null) : null;
+  const displayMenu    = showEnriched ? (enriched?.menu    || null) : null;
   const displayDesc    = place.description || (showEnriched ? enriched?.editorial : null) || null;
   const insiderTip     = showEnriched ? (enriched?.tip || null) : null;
 
@@ -1427,6 +1428,22 @@ function PlaceDetailModal({
                 {displayWebsite.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}
               </p>
               <p className="text-xs font-bold mt-0.5" style={{ color: 'var(--brand)' }}>Visit website →</p>
+            </div>
+          </a>
+        )}
+
+        {/* Menu — restaurants & coffee shops */}
+        {displayMenu && (
+          <a
+            href={displayMenu.startsWith('http') ? displayMenu : `https://${displayMenu}`}
+            target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-3 mb-3 bg-white p-3 w-full"
+            style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', textDecoration: 'none', border: '2px solid var(--brand)' }}
+          >
+            <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)' }}>menu_book</span>
+            <div className="min-w-0">
+              <p className="text-sm font-black text-gray-800" style={{ fontFamily: 'Inter, sans-serif' }}>View Menu</p>
+              <p className="text-xs font-bold mt-0.5" style={{ color: 'var(--brand)' }}>See full menu →</p>
             </div>
           </a>
         )}

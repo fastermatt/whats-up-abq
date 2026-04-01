@@ -105,11 +105,18 @@ def open_cache() -> sqlite3.Connection:
         hours       TEXT,
         phone       TEXT,
         website     TEXT,
+        menu        TEXT,
         source      TEXT,
         tip_model   TEXT,
         synced      INTEGER DEFAULT 0,
-        created_at  TEXT DEFAULT (datetime("now"))
+        created_at  TEXT
     )''')
+    # Add menu column if upgrading from older cache
+    try:
+        con.execute('ALTER TABLE enriched ADD COLUMN menu TEXT')
+        con.commit()
+    except Exception:
+        pass
     con.commit()
     return con
 
@@ -148,18 +155,19 @@ def fetch_all_places(sb):
 def sync_to_supabase(sb, con, force_all=False):
     where = '' if force_all else 'WHERE synced=0'
     rows  = con.execute(
-        f'SELECT place_id, tip, hours, phone, website, created_at FROM enriched {where}'
+        f'SELECT place_id, tip, hours, phone, website, menu, created_at FROM enriched {where}'
     ).fetchall()
     if not rows:
         print('  Nothing to sync.')
         return
     upserts = []
-    for place_id, tip, hours, phone, website, created_at in rows:
+    for place_id, tip, hours, phone, website, menu, created_at in rows:
         e = {'enriched_at': created_at}
         if tip:     e['tip']     = tip
         if hours:   e['hours']   = hours
         if phone:   e['phone']   = phone
         if website: e['website'] = website
+        if menu:    e['menu']    = menu
         upserts.append({'id': place_id, 'enriched': e})
     sb.from_('places').upsert(upserts, on_conflict='id').execute()
     ids = [r[0] for r in rows]
@@ -249,6 +257,11 @@ _PHONE_RE = re.compile(
 
 _HOUR_KEYWORDS = re.compile(
     r'(hours|hours of operation|open|monday|tuesday|we(dnesday)?|thursday|friday|saturday|sunday)',
+    re.IGNORECASE,
+)
+
+_MENU_RE = re.compile(
+    r'href=["\']([^"\']*(?:menu|menus)[^"\']*)["\']',
     re.IGNORECASE,
 )
 
@@ -365,6 +378,27 @@ def scrape_website(url):
 
     result = _extract_schema(soup)
     result = _extract_page_patterns(soup, result)
+
+    # Menu URL — look for links containing "menu" in href
+    if not result.get('menu'):
+        html_str = r.text
+        menu_match = _MENU_RE.search(html_str)
+        if menu_match:
+            menu_href = menu_match.group(1)
+            # Make absolute if relative
+            if menu_href.startswith('http'):
+                result['menu'] = menu_href
+            elif menu_href.startswith('/'):
+                from urllib.parse import urlparse
+                base = urlparse(url)
+                result['menu'] = f'{base.scheme}://{base.netloc}{menu_href}'
+        # Also check for known third-party menu links (Toast, Square, etc.)
+        for platform in ['toasttab.com', 'squareup.com/store', 'clover.com/store', 'menupages.com', 'allmenus.com']:
+            if platform in html_str:
+                pm = re.search(rf'https?://[^"\'\s]*{re.escape(platform)}[^"\'\s]*', html_str)
+                if pm and not result.get('menu'):
+                    result['menu'] = pm.group(0).rstrip('.,)')
+
     return result
 
 # ── ③ Google Places Details (optional, low-volume) ───────────────────────────
@@ -569,10 +603,11 @@ def main():
             time.sleep(0.1)
 
         # Merge: scrape > OSM > Google (first non-empty wins per field)
-        merged = merge(scrape_data, osm_data, g_data)
+        merged = merge(scrape_data, osm_data, g_data, keys=('hours','phone','website','description','menu'))
         hours   = merged.get('hours')
         phone   = merged.get('phone')
         website = website_url or merged.get('website')
+        menu    = merged.get('menu')
         desc    = merged.get('description')
 
         active_sources = '+'.join(filter(None, [
@@ -589,11 +624,12 @@ def main():
                 print(f'  💬  {tip[:75]}{"…" if len(tip) > 75 else ""}')
 
         # Save to cache
+        import datetime as _dt
         con.execute('''INSERT OR REPLACE INTO enriched
-            (place_id, place_name, tip, hours, phone, website, source, tip_model, synced, created_at)
-            VALUES (?,?,?,?,?,?,?,?,0,datetime("now"))
-        ''', (place_id, name, tip, hours, phone, website, active_sources,
-              args.model if use_ai else None))
+            (place_id, place_name, tip, hours, phone, website, menu, source, tip_model, synced, created_at)
+            VALUES (?,?,?,?,?,?,?,?,?,0,?)
+        ''', (place_id, name, tip, hours, phone, website, menu, active_sources,
+              args.model if use_ai else None, _dt.datetime.utcnow().isoformat()))
         con.commit()
         processed += 1
 
