@@ -18,15 +18,20 @@ SETUP (one-time):
   3. Create .env next to this script:
        SUPABASE_URL=https://bsmvfutebmbkjvlrhiyq.supabase.co
        SUPABASE_SERVICE_ROLE_KEY=<service role key>
+       LM_STUDIO_URL=http://localhost:1234/v1/chat/completions   # default, change if needed
        GOOGLE_PLACES_API_KEY=<optional — only used with --google flag>
 
+  4. Open LM Studio → Local Server tab → Start Server
+     Load a model (qwen3.5-27b recommended for best tips)
+
 RUN:
-  python enrich-places-windows.py            # full pipeline
-  python enrich-places-windows.py --limit 20 # test on 20 places first
-  python enrich-places-windows.py --skip-ollama --skip-osm  # scrape only
-  python enrich-places-windows.py --google   # also call Google Details (use sparingly)
-  python enrich-places-windows.py --resync   # re-upload cached data, no new scraping
-  python enrich-places-windows.py --stats    # cache stats only
+  python enrich-places-windows.py                        # full pipeline
+  python enrich-places-windows.py --limit 20             # test on 20 places first
+  python enrich-places-windows.py --model qwen3.5-9b     # use faster/smaller model
+  python enrich-places-windows.py --skip-ai --skip-osm   # scrape only, no AI
+  python enrich-places-windows.py --google               # also call Google Details (sparingly)
+  python enrich-places-windows.py --resync               # re-upload cached data, no new scraping
+  python enrich-places-windows.py --stats                # cache stats only
 
 Cache lives at: ~/.abq-enrichment-cache.db  (SQLite, safe to Ctrl+C and restart)
 """
@@ -72,11 +77,12 @@ def load_env():
 
 load_env()
 
-SUPABASE_URL  = os.environ.get('SUPABASE_URL', '')
-SUPABASE_KEY  = os.environ.get('SUPABASE_SERVICE_ROLE_KEY', '')
-GOOGLE_KEY    = os.environ.get('GOOGLE_PLACES_API_KEY', '')
-OLLAMA_URL    = os.environ.get('OLLAMA_URL', 'http://localhost:11434/api/generate')
-OVERPASS_URL  = 'https://overpass-api.de/api/interpreter'
+SUPABASE_URL    = os.environ.get('SUPABASE_URL', '')
+SUPABASE_KEY    = os.environ.get('SUPABASE_SERVICE_ROLE_KEY', '')
+GOOGLE_KEY      = os.environ.get('GOOGLE_PLACES_API_KEY', '')
+LM_STUDIO_URL   = os.environ.get('LM_STUDIO_URL', 'http://localhost:1234/v1/chat/completions')
+LM_STUDIO_BASE  = os.environ.get('LM_STUDIO_URL', 'http://localhost:1234').replace('/v1/chat/completions', '')
+OVERPASS_URL    = 'https://overpass-api.de/api/interpreter'
 CACHE_DB      = Path.home() / '.abq-enrichment-cache.db'
 ABQ_BBOX      = (34.9, -107.5, 35.4, -106.2)  # south,west,north,east
 BATCH_SYNC    = 25
@@ -386,23 +392,30 @@ def google_details(google_place_id):
         print(f'    Google error: {e}')
         return {}
 
-# ── ④ Ollama ──────────────────────────────────────────────────────────────────
+# ── ④ LM Studio (OpenAI-compatible local AI) ─────────────────────────────────
 
-def check_ollama(model):
+def check_lm_studio(model):
+    """Verify LM Studio server is running and the requested model is loaded."""
     try:
-        tags = requests.get('http://localhost:11434/api/tags', timeout=4).json()
-        avail = [m.get('name','').split(':')[0] for m in tags.get('models',[])]
-        if model not in avail and model.split(':')[0] not in avail:
-            print(f'\n⚠  Ollama: model "{model}" not found. Run: ollama pull {model}')
-            print(f'   Available: {avail}\n')
+        resp  = requests.get(f'{LM_STUDIO_BASE}/v1/models', timeout=5)
+        avail = [m.get('id', '') for m in resp.json().get('data', [])]
+        # Accept exact match or prefix match (e.g. "qwen3.5-27b" matches "qwen/qwen3.5-27b")
+        match = any(model in m or m.endswith(model) for m in avail)
+        if not match:
+            print(f'\n⚠  LM Studio: model "{model}" not loaded.')
+            print(f'   Available models: {avail}')
+            print(f'   Either load the model in LM Studio or pass --model with one of the above.\n')
             return False
+        print(f'  ✓ LM Studio connected at {LM_STUDIO_BASE}  |  model: {model}')
         return True
-    except Exception:
-        print('\n⚠  Ollama not running. Run: ollama serve  (or install from https://ollama.ai)\n')
+    except Exception as e:
+        print(f'\n⚠  Cannot reach LM Studio at {LM_STUDIO_BASE}')
+        print(f'   Make sure LM Studio is open, the server is started, and a model is loaded.\n')
         return False
 
 
 def generate_tip(name, types, address, rating, model, description=None):
+    """Call LM Studio's OpenAI-compatible chat endpoint to generate an insider tip."""
     cat  = (types[0] if types else 'place').replace('_', ' ')
     desc = f'\n  Description: {description[:200]}' if description else ''
     prompt = (
@@ -420,19 +433,22 @@ def generate_tip(name, types, address, rating, model, description=None):
         "- Only the tip — no label or intro\n"
     )
     try:
-        r   = requests.post(OLLAMA_URL, json={
-            'model':   model,
-            'prompt':  prompt,
-            'stream':  False,
-            'options': {'temperature': 0.75, 'num_predict': 130, 'top_p': 0.9},
-        }, timeout=60)
-        tip = r.json().get('response', '').strip()
+        r = requests.post(LM_STUDIO_URL, json={
+            'model':       model,
+            'messages':    [{'role': 'user', 'content': prompt}],
+            'temperature': 0.75,
+            'max_tokens':  130,
+            'top_p':       0.9,
+            'stream':      False,
+        }, timeout=120)
+        tip = r.json()['choices'][0]['message']['content'].strip()
+        # Strip any label prefix the model might add
         for pfx in ('Tip:', 'Local tip:', 'Insider tip:', 'ABQ tip:'):
             if tip.lower().startswith(pfx.lower()):
                 tip = tip[len(pfx):].strip()
         return tip if len(tip) > 20 else None
     except Exception as e:
-        print(f'    Ollama error: {e}')
+        print(f'    LM Studio error: {e}')
         return None
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -451,13 +467,14 @@ def merge(*dicts, keys=('hours','phone','website','description')):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--skip-ollama', action='store_true', help='Skip tip generation')
+    ap.add_argument('--skip-ai',     action='store_true', help='Skip LM Studio tip generation')
+    ap.add_argument('--skip-ollama', action='store_true', help='Alias for --skip-ai (backward compat)')
     ap.add_argument('--skip-osm',    action='store_true', help='Skip OSM lookup')
     ap.add_argument('--skip-scrape', action='store_true', help='Skip website scraping')
     ap.add_argument('--google',      action='store_true', help='Also call Google Places Details API')
     ap.add_argument('--limit',       type=int, default=0)
     ap.add_argument('--resync',      action='store_true')
-    ap.add_argument('--model',       default='llama3.2')
+    ap.add_argument('--model',       default='qwen3.5-27b', help='LM Studio model ID (default: qwen3.5-27b)')
     ap.add_argument('--stats',       action='store_true')
     args = ap.parse_args()
 
@@ -477,10 +494,11 @@ def main():
         sync_to_supabase(sb, con, force_all=True)
         return
 
-    use_ollama = not args.skip_ollama
-    if use_ollama and not check_ollama(args.model):
-        print('Continuing without Ollama.\n')
-        use_ollama = False
+    skip_ai  = args.skip_ai or args.skip_ollama
+    use_ai   = not skip_ai
+    if use_ai and not check_lm_studio(args.model):
+        print('Continuing without AI tips.\n')
+        use_ai = False
 
     use_osm    = not args.skip_osm
     use_scrape = not args.skip_scrape
@@ -493,7 +511,7 @@ def main():
     if use_osm:    sources.append('OpenStreetMap')
     if use_scrape: sources.append('Website scrape')
     if use_google: sources.append('Google Places Details')
-    if use_ollama: sources.append(f'Ollama ({args.model})')
+    if use_ai:     sources.append(f'LM Studio ({args.model})')
     print(f'Active sources: {", ".join(sources)}\n')
 
     all_places = fetch_all_places(sb)
@@ -563,9 +581,9 @@ def main():
             'google' if any(g_data.values())      else '',
         ]))
 
-        # ④ Ollama tip
+        # ④ LM Studio tip
         tip = None
-        if use_ollama:
+        if use_ai:
             tip = generate_tip(name, types, address, rating, args.model, description=desc)
             if tip:
                 print(f'  💬  {tip[:75]}{"…" if len(tip) > 75 else ""}')
@@ -575,7 +593,7 @@ def main():
             (place_id, place_name, tip, hours, phone, website, source, tip_model, synced, created_at)
             VALUES (?,?,?,?,?,?,?,?,0,datetime("now"))
         ''', (place_id, name, tip, hours, phone, website, active_sources,
-              args.model if use_ollama else None))
+              args.model if use_ai else None))
         con.commit()
         processed += 1
 
