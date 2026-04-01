@@ -1,5 +1,6 @@
-@import './themes/urban-curator.css';
-/* To revert: @import './themes/original.css'; */
+@import './themes/terracotta.css';
+/* To revert to neon moss: @import './themes/urban-curator.css'; */
+/* To revert to original:  @import './themes/original.css'; */
 
 @tailwind base;
 @tailwind components;
