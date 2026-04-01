@@ -632,6 +632,130 @@ const PLACE_CATEGORIES = [
   { label: 'Hotels',         icon: 'hotel',         value: 'hotel' },
 ];
 
+// ── Semantic search aliases ──────────────────────────────────────────────────
+// Maps common search terms → category values they should expand to.
+// When a query matches an alias key the search also returns ALL places in
+// the mapped categories, not just those whose name contains the query.
+const SEARCH_ALIASES: Record<string, string[]> = {
+  // Drinks / Bars
+  drinks:       ['bar', 'coffee'],
+  cocktail:     ['bar'], cocktails:    ['bar'],
+  beer:         ['bar'], beers:        ['bar'],
+  wine:         ['bar', 'restaurant'],
+  pub:          ['bar'], brewery:      ['bar'], brewpub:     ['bar'],
+  nightlife:    ['bar', 'entertainment'],
+  'happy hour': ['bar'],
+  spirits:      ['bar'], whiskey:      ['bar'], tequila:     ['bar'],
+  // Coffee / Café
+  cafe:         ['coffee'], café:        ['coffee'],
+  coffee:       ['coffee'], espresso:    ['coffee'],
+  latte:        ['coffee'], cappuccino:  ['coffee'],
+  tea:          ['coffee', 'restaurant'],
+  boba:         ['coffee'], 'bubble tea': ['coffee'],
+  // Food / Restaurants
+  food:         ['restaurant', 'coffee'],
+  eat:          ['restaurant', 'coffee'],
+  dining:       ['restaurant'],
+  brunch:       ['restaurant', 'coffee'],
+  breakfast:    ['restaurant', 'coffee'],
+  lunch:        ['restaurant'],
+  dinner:       ['restaurant'],
+  pizza:        ['restaurant'], burger:      ['restaurant'], burgers:     ['restaurant'],
+  taco:         ['restaurant'], tacos:       ['restaurant'],
+  sushi:        ['restaurant'], ramen:       ['restaurant'],
+  mexican:      ['restaurant'], italian:     ['restaurant'], thai:        ['restaurant'],
+  chinese:      ['restaurant'], indian:      ['restaurant'], mediterranean:['restaurant'],
+  bagel:        ['restaurant', 'coffee'], bagels:     ['restaurant', 'coffee'],
+  sandwich:     ['restaurant', 'coffee'],
+  bakery:       ['restaurant', 'coffee'],
+  dessert:      ['restaurant', 'coffee'],
+  'green chile':['restaurant'],
+  'new mexican':['restaurant'],
+  // Tech / Electronics
+  electronics:  ['shop'],
+  computer:     ['shop', 'museum'], computers: ['shop', 'museum'],
+  laptop:       ['shop'], laptops:     ['shop'],
+  phone:        ['shop'], phones:      ['shop'], smartphone:  ['shop'],
+  tech:         ['shop', 'entertainment'],
+  appliance:    ['shop'], appliances:  ['shop'],
+  // Shopping
+  store:        ['shop'], stores:      ['shop'],
+  shopping:     ['shop'],
+  boutique:     ['shop'],
+  retail:       ['shop'],
+  mall:         ['shop'],
+  clothes:      ['shop'], clothing:    ['shop'], fashion:     ['shop'],
+  shoes:        ['shop'], boots:       ['shop'],
+  books:        ['shop', 'museum'], bookstore: ['shop'],
+  thrift:       ['shop'], vintage:     ['shop'],
+  jewelry:      ['shop'], gifts:       ['shop'],
+  'used goods': ['shop'],
+  // Fitness / Health
+  gym:          ['fitness'],
+  workout:      ['fitness'],
+  yoga:         ['fitness'],
+  crossfit:     ['fitness'],
+  climbing:     ['fitness', 'park'],
+  swim:         ['fitness'], swimming:    ['fitness'], pool:        ['fitness'],
+  pilates:      ['fitness'],
+  dance:        ['fitness', 'arts'],
+  'martial arts':['fitness'],
+  boxing:       ['fitness'],
+  cycling:      ['fitness', 'park'],
+  sports:       ['fitness', 'entertainment'],
+  // Arts / Culture
+  art:          ['arts', 'museum'],
+  gallery:      ['arts', 'museum'],
+  theater:      ['arts', 'entertainment'], theatre:     ['arts', 'entertainment'],
+  'live music': ['bar', 'arts', 'entertainment'],
+  concert:      ['arts', 'entertainment'],
+  comedy:       ['entertainment', 'arts'],
+  improv:       ['entertainment', 'arts'],
+  // Museums
+  museum:       ['museum'],
+  history:      ['museum', 'arts'],
+  science:      ['museum'],
+  exhibit:      ['museum'], exhibition:  ['museum'],
+  planetarium:  ['museum'],
+  // Hotels / Lodging
+  hotel:        ['hotel'],
+  motel:        ['hotel'],
+  lodging:      ['hotel'],
+  inn:          ['hotel'],
+  stay:         ['hotel'],
+  sleep:        ['hotel'],
+  resort:       ['hotel'],
+  airbnb:       ['hotel'],
+  // Parks / Outdoors
+  park:         ['park'],
+  trail:        ['park'], trails:      ['park'],
+  hike:         ['park'], hiking:      ['park'],
+  nature:       ['park'],
+  outdoor:      ['park', 'fitness'],
+  garden:       ['park'],
+  biking:       ['park', 'fitness'], bike:        ['park', 'fitness'],
+  'dog park':   ['park'],
+  // Entertainment
+  movie:        ['entertainment'], movies:      ['entertainment'],
+  cinema:       ['entertainment'], film:        ['entertainment'],
+  bowling:      ['entertainment'],
+  arcade:       ['entertainment'],
+  'escape room':['entertainment'],
+  'laser tag':  ['entertainment'],
+  show:         ['entertainment', 'arts'],
+  fun:          ['entertainment'],
+  games:        ['entertainment'],
+  // "other" helpers — let hidden venues surface
+  library:      ['other', 'museum'],
+  school:       ['other'],
+  university:   ['other'],
+  medical:      ['other'], clinic:      ['other'], hospital:    ['other'],
+  cannabis:     ['other', 'entertainment'],
+  tattoo:       ['arts', 'other'],
+  spa:          ['fitness', 'other'],
+  salon:        ['other'],
+};
+
 const EVENT_GENRES = [
   'All', 'Tonight', 'This Weekend', '❤️ For You', 'Music', 'Sports', 'Comedy', 'Arts', 'Family', 'Outdoor', 'Community', 'Free',
 ];
@@ -6552,11 +6676,54 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
 
   // Filtered places
   const filteredPlaces = useMemo(() => {
+    // Category-tab filter (unchanged)
     let r = places.filter(p => cat === 'All' || p.category === cat);
+
     if (search.trim()) {
-      const q = search.toLowerCase();
-      r = r.filter(p => p.name.toLowerCase().includes(q) || (p.address || '').toLowerCase().includes(q) || (p.category || '').includes(q));
+      const q = search.toLowerCase().trim();
+
+      // Find which place-categories this query aliases to
+      const aliasedCats = new Set<string>();
+      for (const [term, cats] of Object.entries(SEARCH_ALIASES)) {
+        if (q === term || q.includes(term) || term.includes(q)) {
+          cats.forEach(c => aliasedCats.add(c));
+        }
+      }
+      // Also match against the human-readable category labels (e.g. "restaurant" → "Restaurants")
+      PLACE_CATEGORIES.forEach(pc => {
+        if (pc.value !== 'All' && (pc.label.toLowerCase().includes(q) || q.includes(pc.value))) {
+          aliasedCats.add(pc.value);
+        }
+      });
+
+      r = r.filter(p => {
+        const pName    = p.name.toLowerCase();
+        const pAddr    = (p.address    || '').toLowerCase();
+        const pCat     = (p.category   || '').toLowerCase();
+        const pDesc    = (p.description || '').toLowerCase();
+        const pAbout   = ((p as any).about        || '').toLowerCase();
+        const pTip     = ((p as any).insiderTip   || '').toLowerCase();
+        const pBestFor = (((p as any).bestFor || []) as string[]).join(' ').toLowerCase();
+        const pTags    = ((p.tags || []) as string[]).join(' ').toLowerCase();
+        const allText  = `${pName} ${pAddr} ${pCat} ${pDesc} ${pAbout} ${pTip} ${pBestFor} ${pTags}`;
+
+        // 1. Direct text match across all fields
+        if (allText.includes(q)) return true;
+        // 2. Alias category expansion — query maps to this place's category
+        if (aliasedCats.size > 0 && aliasedCats.has(p.category)) return true;
+        return false;
+      });
+
+      // Sort: name-starts-with first, then name-contains, then rating
+      r = [...r].sort((a, b) => {
+        const an = a.name.toLowerCase(), bn = b.name.toLowerCase();
+        const aScore = an.startsWith(q) ? 2 : an.includes(q) ? 1 : 0;
+        const bScore = bn.startsWith(q) ? 2 : bn.includes(q) ? 1 : 0;
+        if (aScore !== bScore) return bScore - aScore;
+        return (b.rating || 0) - (a.rating || 0);
+      });
     }
+
     if (sort === 'near' && coords)
       return [...r].filter(p => p.lat && p.lng)
         .sort((a, b) => distanceMiles(coords.lat, coords.lng, a.lat!, a.lng!) - distanceMiles(coords.lat, coords.lng, b.lat!, b.lng!));
