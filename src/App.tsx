@@ -909,17 +909,6 @@ const PlaceCard = React.memo(function PlaceCard({
       <div className="relative" style={{ height: '140px' }}>
         <PlaceCardImageSlider place={place} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
-        {distance != null && (
-          <div className="absolute top-2 right-2">
-            <span
-              className="text-xs font-bold text-white px-1.5 py-0.5 flex items-center gap-0.5"
-              style={{ background: 'rgba(0,0,0,0.6)' }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '11px' }}>near_me</span>
-              {formatDist(distance)}
-            </span>
-          </div>
-        )}
         {isCheckedIn && (
           <div className="absolute bottom-2 left-2">
             <span
@@ -951,8 +940,8 @@ const PlaceCard = React.memo(function PlaceCard({
           </p>
         )}
         <div className="flex items-center justify-between mt-1.5 gap-1">
-          {place.rating ? (
-            <div className="flex items-center gap-1 flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            {place.rating ? (<>
               <span className="text-yellow-400 text-xs">★</span>
               <span className="text-xs font-bold text-gray-700">{place.rating.toFixed(1)}</span>
               {place.reviewCount ? (
@@ -960,8 +949,14 @@ const PlaceCard = React.memo(function PlaceCard({
                   ({place.reviewCount >= 1000 ? (place.reviewCount / 1000).toFixed(1) + 'k' : place.reviewCount})
                 </span>
               ) : null}
-            </div>
-          ) : <div className="flex-1" />}
+            </>) : null}
+            {distance != null && (
+              <span className="flex items-center gap-0.5 text-xs font-bold" style={{ color: '#888', fontFamily: 'Inter, sans-serif', marginLeft: place.rating ? 4 : 0 }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '10px', color: '#888' }}>near_me</span>
+                {formatDist(distance)}
+              </span>
+            )}
+          </div>
           {onCheckIn && (
             <button
               onClick={onCheckIn}
