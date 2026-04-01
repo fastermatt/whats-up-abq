@@ -7162,7 +7162,11 @@ export default function App() {
       return Array.isArray(data) && data.length > 0 ? data : [];
     } catch { return []; }
   });
-  const [events, setEvents] = useState<TMEvent[]>([]);
+  // Pre-seed with bundled static events so the list is never empty while
+  // Supabase loads. Live data replaces this as soon as the fetch resolves.
+  const [events, setEvents] = useState<TMEvent[]>(() =>
+    STATIC_TM_EVENTS.filter(e => !isJunkEvent(e)).map(tagAdultEvent)
+  );
   const [eventsNavSearch, setEventsNavSearch] = useState('');
   // Deep-link: capture #event/{id} from URL on mount so we can open it once events load
   const pendingDeepLinkId = useRef<string | null>(
@@ -7177,7 +7181,8 @@ export default function App() {
       return !(Array.isArray(data) && data.length > 0);
     } catch { return true; }
   });
-  const [eventsLoading, setEventsLoading] = useState(true);
+  // Start as false — static events are pre-seeded above; Supabase refreshes silently.
+  const [eventsLoading, setEventsLoading] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<TMEvent | null>(null);
