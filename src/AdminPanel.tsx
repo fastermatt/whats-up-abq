@@ -502,6 +502,16 @@ function PlacesSection() {
   const [editPlace, setEditPlace] = useState<any|null>(null);
   const [editPhotoUrl, setEditPhotoUrl] = useState('');
   const [editSaving, setEditSaving] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editCategory, setEditCategory] = useState('');
+  const [editAddress, setEditAddress] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editInsiderTip, setEditInsiderTip] = useState('');
+  const [editBestFor, setEditBestFor] = useState('');
+  const [editTags, setEditTags] = useState('');
+  const [editRating, setEditRating] = useState('');
+  const [editWebsite, setEditWebsite] = useState('');
+  const [editPhone, setEditPhone] = useState('');
   const [enrichedEnabled, setEnrichedEnabled] = useState(true);
   const [enrichedLoading, setEnrichedLoading] = useState(false);
   const [filterEnriched, setFilterEnriched] = useState<'all'|'enriched'|'missing'>('all');
@@ -560,20 +570,65 @@ function PlacesSection() {
     toast(`${selected.size} places → ${bulkCat}`); setSelected(new Set()); setBulkCat(''); load();
   };
 
-  const openEdit = (r: any) => { setEditPlace(r); setEditPhotoUrl(r.raw?.overridePhoto || ''); };
+  const openEdit = (r: any) => {
+    setEditPlace(r);
+    setEditPhotoUrl(r.raw?.overridePhoto || '');
+    setEditName(r.raw?.name || '');
+    setEditCategory(r.raw?.category || (r.raw?.types?.[0] || 'other'));
+    setEditAddress(r.raw?.vicinity || r.raw?.address || r.raw?.formattedAddress || '');
+    setEditDescription(r.raw?.description || r.raw?.about || '');
+    setEditInsiderTip(r.raw?.insiderTip || r.enriched?.tip || '');
+    setEditBestFor(r.raw?.bestFor || '');
+    setEditTags((r.raw?.tags || []).join(', '));
+    setEditRating(r.raw?.rating?.toString() || '');
+    setEditWebsite(r.enriched?.website || r.raw?.website || '');
+    setEditPhone(r.enriched?.phone || r.raw?.phone || '');
+  };
   const saveEdit = async () => {
     if (!editPlace) return;
     setEditSaving(true);
     const updatedRaw = { ...editPlace.raw };
+    // Photo override
     if (editPhotoUrl.trim()) {
       updatedRaw.overridePhoto = editPhotoUrl.trim();
     } else {
       delete updatedRaw.overridePhoto;
     }
-    const { error } = await sb('places').update({ raw: updatedRaw }).eq('id', editPlace.id);
+    // Core fields
+    if (editName.trim()) updatedRaw.name = editName.trim();
+    updatedRaw.category = editCategory || updatedRaw.category;
+    if (editAddress.trim()) {
+      updatedRaw.vicinity = editAddress.trim();
+      updatedRaw.address = editAddress.trim();
+      updatedRaw.formattedAddress = editAddress.trim();
+    }
+    // Description & tips
+    if (editDescription.trim()) updatedRaw.description = editDescription.trim();
+    else delete updatedRaw.description;
+    if (editInsiderTip.trim()) updatedRaw.insiderTip = editInsiderTip.trim();
+    else delete updatedRaw.insiderTip;
+    if (editBestFor.trim()) updatedRaw.bestFor = editBestFor.trim();
+    else delete updatedRaw.bestFor;
+    // Tags
+    const tagList = editTags.split(',').map((t: string) => t.trim()).filter(Boolean);
+    if (tagList.length > 0) updatedRaw.tags = tagList;
+    else delete updatedRaw.tags;
+    // Rating override
+    const rVal = parseFloat(editRating);
+    if (!isNaN(rVal) && rVal >= 0 && rVal <= 5) updatedRaw.rating = rVal;
+    // Enriched data updates
+    const updatedEnriched = { ...(editPlace.enriched || {}) };
+    if (editWebsite.trim()) updatedEnriched.website = editWebsite.trim();
+    if (editPhone.trim()) updatedEnriched.phone = editPhone.trim();
+    if (editInsiderTip.trim()) updatedEnriched.tip = editInsiderTip.trim();
+
+    const updatePayload: any = { raw: updatedRaw };
+    if (Object.keys(updatedEnriched).length > 0) updatePayload.enriched = updatedEnriched;
+
+    const { error } = await sb('places').update(updatePayload).eq('id', editPlace.id);
     setEditSaving(false);
     if (error) { toast('Error: '+error.message, 'err'); return; }
-    toast(editPhotoUrl.trim() ? 'Photo override saved ✓' : 'Override cleared ✓');
+    toast('Place updated ✓');
     setEditPlace(null);
     load();
   };
@@ -589,6 +644,19 @@ function PlacesSection() {
   return (
     <div>
       <SectionHeader title="Places" sub={`${total.toLocaleString()} total`} />
+
+      {/* Quick Feature / Place of the Day search */}
+      <div style={{...card, marginBottom: 16, borderLeft: '3px solid #b95c43'}}>
+        <h4 style={{fontSize: 14, fontWeight: 700, marginBottom: 8, color: '#b95c43'}}>Quick Feature a Place</h4>
+        <p style={{fontSize: 12, color: '#9ca3af', marginBottom: 8}}>Search and toggle featured status without scrolling the full list.</p>
+        <PlaceSearchPicker value="" onChange={async (id: string) => {
+          if (!id) return;
+          const { error } = await sb('places').update({ featured: true }).eq('id', id);
+          if (error) { toast('Error: ' + error.message, 'err'); return; }
+          toast('Place featured! ✓');
+          load();
+        }} />
+      </div>
 
       {/* Global enriched data toggle */}
       <div style={{...card,marginBottom:16,padding:'14px 16px',display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap'}}>
@@ -683,7 +751,62 @@ function PlacesSection() {
               <h3 style={{fontSize:16,fontWeight:800,color:'#18181b',margin:0}}>Edit Place</h3>
               <button onClick={()=>setEditPlace(null)} style={{...btnS,padding:'4px 10px',fontSize:13}}>✕</button>
             </div>
-            <p style={{fontSize:14,fontWeight:700,color:'#374151',marginBottom:16}}>{editPlace.raw?.name}</p>
+            <p style={{fontSize:14,fontWeight:700,color:'#374151',marginBottom:4}}>{editPlace.raw?.name}</p>
+            <p style={{fontSize:11,color:'#9ca3af',marginBottom:16,fontFamily:'monospace'}}>{editPlace.id}</p>
+
+            {/* Core fields */}
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:16}}>
+              <div>
+                <label style={lbl}>Name</label>
+                <input value={editName} onChange={e=>setEditName(e.target.value)} style={inp} placeholder="Place name" />
+              </div>
+              <div>
+                <label style={lbl}>Category</label>
+                <select value={editCategory} onChange={e=>setEditCategory(e.target.value)} style={inp}>
+                  {PLACE_CATS.map(c=><option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div style={{gridColumn:'1/-1'}}>
+                <label style={lbl}>Address</label>
+                <input value={editAddress} onChange={e=>setEditAddress(e.target.value)} style={inp} placeholder="Full address" />
+              </div>
+              <div>
+                <label style={lbl}>Rating (0–5)</label>
+                <input value={editRating} onChange={e=>setEditRating(e.target.value)} style={inp} placeholder="4.5" type="number" min="0" max="5" step="0.1" />
+              </div>
+              <div>
+                <label style={lbl}>Tags <span style={{fontWeight:400,color:'#9ca3af'}}>(comma-separated)</span></label>
+                <input value={editTags} onChange={e=>setEditTags(e.target.value)} style={inp} placeholder="outdoor patio, dog friendly, live music" />
+              </div>
+            </div>
+
+            {/* Description & tips */}
+            <div style={{marginBottom:16}}>
+              <label style={lbl}>Description / About</label>
+              <textarea value={editDescription} onChange={e=>setEditDescription(e.target.value)} style={{...inp,minHeight:60,resize:'vertical'}} placeholder="A short description of this place…" />
+            </div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:16}}>
+              <div>
+                <label style={lbl}>Insider Tip 💡</label>
+                <textarea value={editInsiderTip} onChange={e=>setEditInsiderTip(e.target.value)} style={{...inp,minHeight:50,resize:'vertical'}} placeholder="Try the green chile burger…" />
+              </div>
+              <div>
+                <label style={lbl}>Best For</label>
+                <input value={editBestFor} onChange={e=>setEditBestFor(e.target.value)} style={inp} placeholder="Date night, brunch, families" />
+              </div>
+            </div>
+
+            {/* Contact info */}
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:16}}>
+              <div>
+                <label style={lbl}>Website</label>
+                <input value={editWebsite} onChange={e=>setEditWebsite(e.target.value)} style={inp} placeholder="https://…" />
+              </div>
+              <div>
+                <label style={lbl}>Phone</label>
+                <input value={editPhone} onChange={e=>setEditPhone(e.target.value)} style={inp} placeholder="(505) 555-1234" />
+              </div>
+            </div>
 
             {/* Enriched data section */}
             {editPlace.enriched ? (
@@ -742,7 +865,7 @@ function PlacesSection() {
             <div style={{display:'flex',gap:8,justifyContent:'flex-end',flexWrap:'wrap'}}>
               <button style={btnS} onClick={()=>setEditPlace(null)}>Cancel</button>
               {editPlace.raw?.overridePhoto&&<button style={{...btnS,color:'#dc2626',borderColor:'#fca5a5'}} onClick={()=>setEditPhotoUrl('')}>Clear Override</button>}
-              <button style={{...btnP,opacity:editSaving?0.7:1}} onClick={saveEdit} disabled={editSaving}>{editSaving?'Saving…':'Save Photo'}</button>
+              <button style={{...btnP,opacity:editSaving?0.7:1}} onClick={saveEdit} disabled={editSaving}>{editSaving?'Saving…':'Save Changes'}</button>
             </div>
           </div>
         </div>
@@ -843,6 +966,81 @@ const DEF_CONTENT: ContentCfg = {
   vibes:[{id:'v1',name:'Outdoor',color:'#166534',icon:'🌲',category:'park'},{id:'v2',name:'Date Night',color:'#9d174d',icon:'🌹',category:'restaurant'},{id:'v3',name:'Family Fun',color:'#1d4ed8',icon:'👨‍👩‍👧',category:'entertainment'},{id:'v4',name:'Nightlife',color:'#3b0764',icon:'🎶',category:'bar'},{id:'v5',name:'Art Scene',color:'#7c2d12',icon:'🎨',category:'arts'},{id:'v6',name:'Coffee',color:'#78350f',icon:'☕',category:'coffee'}],
   sections:{thisWeek:true,nearYou:true,vibes:true,featured:true},
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PLACE SEARCH PICKER — search by name instead of knowing the Place ID
+// ─────────────────────────────────────────────────────────────────────────────
+function PlaceSearchPicker({ value, onChange }: { value: string; onChange: (id: string) => void }) {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<any[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [selectedName, setSelectedName] = useState('');
+  const debounceRef = useRef<ReturnType<typeof setTimeout>|null>(null);
+
+  // Load the name for the current value on mount
+  useEffect(() => {
+    if (!value) { setSelectedName(''); return; }
+    sb('places').select('raw').eq('id', value).single().then(({ data }) => {
+      if (data?.raw?.name) setSelectedName(data.raw.name as string);
+      else if (data?.raw?.displayName?.text) setSelectedName(data.raw.displayName.text as string);
+    });
+  }, [value]);
+
+  const doSearch = (q: string) => {
+    if (q.length < 2) { setResults([]); return; }
+    setSearching(true);
+    sb('places').select('id, raw').ilike('raw->>name', `%${q}%`).limit(15).then(({ data }) => {
+      const items = (data || []).map((r: any) => ({
+        id: r.id,
+        name: (r.raw?.name || r.raw?.displayName?.text || 'Unknown') as string,
+        address: (r.raw?.formattedAddress || r.raw?.vicinity || '') as string,
+      }));
+      setResults(items);
+      setSearching(false);
+    });
+  };
+
+  const handleInput = (val: string) => {
+    setQuery(val);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => doSearch(val), 300);
+  };
+
+  return (
+    <div style={{ position: 'relative' }}>
+      {value && selectedName ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+          <span style={{ fontSize: 13, color: '#059669', fontWeight: 600 }}>Selected:</span>
+          <span style={{ fontSize: 13, fontWeight: 700 }}>{selectedName}</span>
+          <span style={{ fontSize: 11, color: '#9ca3af' }}>({value.slice(0, 20)}…)</span>
+          <button onClick={() => { onChange(''); setSelectedName(''); }} style={{ fontSize: 11, color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>Clear</button>
+        </div>
+      ) : null}
+      <input
+        value={query}
+        onChange={e => handleInput(e.target.value)}
+        style={{ ...inp, marginBottom: 0 }}
+        placeholder="Type to search places by name…"
+      />
+      {searching && <p style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>Searching…</p>}
+      {results.length > 0 && (
+        <div style={{ position: 'absolute', zIndex: 50, top: '100%', left: 0, right: 0, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', maxHeight: 280, overflowY: 'auto', marginTop: 4 }}>
+          {results.map(r => (
+            <button
+              key={r.id}
+              onClick={() => { onChange(r.id); setSelectedName(r.name); setQuery(''); setResults([]); }}
+              style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 14px', border: 'none', borderBottom: '1px solid #f3f4f6', background: r.id === value ? '#f0fdf4' : '#fff', cursor: 'pointer', fontSize: 13 }}
+            >
+              <div style={{ fontWeight: 600, color: '#1f2937' }}>{r.name}</div>
+              {r.address && <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 2 }}>{r.address}</div>}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ContentSection() {
   const [cfg, setCfg]   = useState<ContentCfg>(DEF_CONTENT);
   const [loading, setLoading] = useState(true);
@@ -864,7 +1062,13 @@ function ContentSection() {
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
           <div><label style={lbl}>Title</label><input value={cfg.dailyGem.title} onChange={e=>setCfg(c=>({...c,dailyGem:{...c.dailyGem,title:e.target.value}}))} style={inp} /></div>
           <div><label style={lbl}>Subtitle</label><input value={cfg.dailyGem.subtitle} onChange={e=>setCfg(c=>({...c,dailyGem:{...c.dailyGem,subtitle:e.target.value}}))} style={inp} /></div>
-          <div style={{gridColumn:'1/-1'}}><label style={lbl}>Place ID (blank = auto)</label><input value={cfg.dailyGem.placeId} onChange={e=>setCfg(c=>({...c,dailyGem:{...c.dailyGem,placeId:e.target.value}}))} style={inp} placeholder="ChIJ…" /></div>
+          <div style={{gridColumn:'1/-1'}}>
+            <label style={lbl}>Place of the Day (search by name)</label>
+            <PlaceSearchPicker
+              value={cfg.dailyGem.placeId}
+              onChange={(id: string) => setCfg(c=>({...c,dailyGem:{...c.dailyGem,placeId:id}}))}
+            />
+          </div>
         </div>
       </div>
       <div style={{...card,marginBottom:18}}>

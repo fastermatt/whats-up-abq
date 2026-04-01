@@ -632,6 +632,29 @@ const PLACE_CATEGORIES = [
   { label: 'Hotels',         icon: 'hotel',         value: 'hotel' },
 ];
 
+// Category display name mapping (shows friendlier labels to users)
+function displayCategory(cat: string): string {
+  if (cat === 'other') return 'Services';
+  return cat.charAt(0).toUpperCase() + cat.slice(1);
+}
+
+
+// Category badge color mapping
+const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
+  restaurant: { bg: '#fef3c7', text: '#92400e' },
+  coffee:     { bg: '#f5e6d3', text: '#78350f' },
+  bar:        { bg: '#dbeafe', text: '#1e40af' },
+  park:       { bg: '#d1fae5', text: '#065f46' },
+  fitness:    { bg: '#ede9fe', text: '#5b21b6' },
+  arts:       { bg: '#fce7f3', text: '#9d174d' },
+  shop:       { bg: '#e0e7ff', text: '#3730a3' },
+  entertainment: { bg: '#fef9c3', text: '#854d0e' },
+  museum:     { bg: '#f3e8ff', text: '#6b21a8' },
+  hotel:      { bg: '#cffafe', text: '#155e75' },
+  other:      { bg: '#f3f4f6', text: '#374151' },
+};
+
+
 // ── Semantic search aliases ──────────────────────────────────────────────────
 // Maps common search terms → category values they should expand to.
 // When a query matches an alias key the search also returns ALL places in
@@ -808,9 +831,11 @@ function GeoBanner({
   silentPending: boolean;
   onRequest: () => void;
 }) {
+  const [dismissed, setDismissed] = useState(() => { try { return localStorage.getItem('abq_geo_dismissed') === '1'; } catch { return false; } });
   if (coords) return null;
   // Silently re-fetching for a returning user — don't flash the Enable prompt
   if (silentPending && !error) return null;
+  if (dismissed && !error) return null;
 
   if (error) return (
     <div className="px-4 py-3 flex items-center gap-3" style={{ background: '#b95c43', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
@@ -851,6 +876,14 @@ function GeoBanner({
         style={{ background: 'var(--brand)', color: 'white', border: 'none', fontFamily: 'Public Sans, sans-serif' }}
       >
         Enable
+      </button>
+      <button
+        onClick={() => { setDismissed(true); try { localStorage.setItem('abq_geo_dismissed', '1'); } catch {} }}
+        className="flex-shrink-0"
+        style={{ background: 'none', border: 'none', color: '#1A1A1A', fontSize: 18, cursor: 'pointer', padding: '0 4px', opacity: 0.6 }}
+        aria-label="Dismiss"
+      >
+        ×
       </button>
     </div>
   );
@@ -1025,7 +1058,7 @@ const PlaceCard = React.memo(function PlaceCard({
                 fontFamily: 'Public Sans, sans-serif',
                 letterSpacing: '0.06em',
                 background: tooFar ? '#888' : isCheckedIn ? '#1A1A1A' : '#b95c43',
-                color: tooFar ? 'white' : isCheckedIn ? 'white' : '#1A1A1A',
+                color: 'white',
                 border: '1px solid rgba(0,0,0,0.12)',
                 borderRadius: 6,
               }}
@@ -3667,7 +3700,7 @@ function EventsScreen({
                 </div>
               )}
               {(() => { const liked = isWishlisted(event.id); return (
-              <button style={{position:'absolute',top:8,right:8,zIndex:10,background: liked ? '#b95c43' : 'rgba(255,255,255,0.90)',border:'none',borderRadius:'50%',width:34,height:34,minHeight:0,color: liked ? 'white' : '#b95c43',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(0,0,0,0.15)'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:event.id,type:'event',name:event.name,category:'event'});}}><span className="material-symbols-outlined" style={{fontSize:'18px',fontVariationSettings: liked ? "'FILL' 1, 'wght' 700" : "'FILL' 0, 'wght' 400"}}>favorite</span></button>
+              <button style={{position:'absolute',top:8,right:8,zIndex:10,background: liked ? '#b95c43' : 'rgba(255,255,255,0.90)',border:'none',borderRadius:'50%',width:44,height:44,minHeight:0,color: liked ? 'white' : '#b95c43',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(0,0,0,0.15)'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:event.id,type:'event',name:event.name,category:'event'});}}><span className="material-symbols-outlined" style={{fontSize:'18px',fontVariationSettings: liked ? "'FILL' 1, 'wght' 700" : "'FILL' 0, 'wght' 400"}}>favorite</span></button>
               ); })()}
             </div>
           );
@@ -4104,7 +4137,7 @@ function PlacesScreen({
                 onCheckIn={e => { e.stopPropagation(); onCheckIn(place.id); }}
                 />
               {(() => { const liked = isWishlisted(place.id); return (
-              <button style={{position:'absolute',top:8,right:8,zIndex:10,background: liked ? '#b95c43' : 'rgba(255,255,255,0.90)',border:'none',borderRadius:'50%',width:32,height:32,minHeight:0,color: liked ? 'white' : '#b95c43',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(0,0,0,0.15)'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:place.id,type:'place',name:place.name,category:place.category});}}><span className="material-symbols-outlined" style={{fontSize:'16px',fontVariationSettings: liked ? "'FILL' 1, 'wght' 700" : "'FILL' 0, 'wght' 400"}}>favorite</span></button>
+              <button style={{position:'absolute',top:8,right:8,zIndex:10,background: liked ? '#b95c43' : 'rgba(255,255,255,0.90)',border:'none',borderRadius:'50%',width:44,height:44,minHeight:0,color: liked ? 'white' : '#b95c43',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(0,0,0,0.15)'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:place.id,type:'place',name:place.name,category:place.category});}}><span className="material-symbols-outlined" style={{fontSize:'18px',fontVariationSettings: liked ? "'FILL' 1, 'wght' 700" : "'FILL' 0, 'wght' 400"}}>favorite</span></button>
               ); })()}
             </div>
           ))}
