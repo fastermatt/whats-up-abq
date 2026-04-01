@@ -1196,7 +1196,7 @@ function PlacePhotoGallery({ place }: { place: Place }) {
 }
 
 function PlaceDetailModal({
-  place, onClose, isCheckedIn, onCheckIn, checkInError, tooFar, user, onShowAuth, isSaved, onToggleSave, mapProvider,
+  place, onClose, isCheckedIn, onCheckIn, checkInError, tooFar, user, onShowAuth, isSaved, onToggleSave, mapProvider, enrichedDataEnabled,
 }: {
   place: Place;
   onClose: () => void;
@@ -1209,9 +1209,11 @@ function PlaceDetailModal({
   isSaved?: boolean;
   onToggleSave?: () => void;
   mapProvider?: 'google' | 'apple';
+  enrichedDataEnabled?: boolean;
 }) {
   const [shared, setShared] = useState(false);
-  const [enriched, setEnriched] = useState<{ tip?: string; hours?: string; phone?: string; website?: string; editorial?: string } | null>(null);
+  const [enriched, setEnriched] = useState<{ tip?: string; hours?: string; phone?: string; website?: string; editorial?: string; parking?: string } | null>(null);
+  const [placeHideEnriched, setPlaceHideEnriched] = useState(false);
   const detailCatMeta = PLACE_CATEGORIES.find(c => c.value === place.category) || PLACE_CATEGORIES.find(c => c.label === place.category);
   const detailCatIcon = detailCatMeta?.icon || 'pin';
   const detailCatLabel = detailCatMeta?.label || place.category || '';
@@ -1221,23 +1223,28 @@ function PlaceDetailModal({
     ? `https://maps.apple.com/?q=${mapsQuery}`
     : `https://maps.google.com/?q=${mapsQuery}`;
 
-  // Lazy-load enriched data (tips, full hours, phone, website) on modal open
+  // Lazy-load enriched data (tips, full hours, phone, website, parking) on modal open
   useEffect(() => {
     (supabase.from as any)('places')
-      .select('enriched')
+      .select('enriched,hide_enriched')
       .eq('id', place.id)
       .maybeSingle()
-      .then(({ data }: { data: { enriched: Record<string, string> } | null }) => {
+      .then(({ data }: { data: { enriched: Record<string, string>; hide_enriched: boolean } | null }) => {
         if (data?.enriched) setEnriched(data.enriched);
+        if (data?.hide_enriched) setPlaceHideEnriched(true);
       });
   }, [place.id]);
 
+  // Global flag + per-place override both gate enriched data display
+  const showEnriched = enrichedDataEnabled !== false && !placeHideEnriched;
+
   // Merge: enriched data supplements (but doesn't erase) what's already on the place object
-  const displayHours   = enriched?.hours   || place.hours   || null;
-  const displayPhone   = enriched?.phone   || place.phone   || null;
-  const displayWebsite = enriched?.website || place.website || null;
-  const displayDesc    = place.description || enriched?.editorial || null;
-  const insiderTip     = enriched?.tip     || null;
+  const displayHours   = (showEnriched ? enriched?.hours   : null) || place.hours   || null;
+  const displayPhone   = (showEnriched ? enriched?.phone   : null) || place.phone   || null;
+  const displayWebsite = (showEnriched ? enriched?.website : null) || place.website || null;
+  const displayParking = showEnriched ? (enriched?.parking || null) : null;
+  const displayDesc    = place.description || (showEnriched ? enriched?.editorial : null) || null;
+  const insiderTip     = showEnriched ? (enriched?.tip || null) : null;
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -1422,6 +1429,17 @@ function PlaceDetailModal({
               <p className="text-xs font-bold mt-0.5" style={{ color: 'var(--brand)' }}>Visit website →</p>
             </div>
           </a>
+        )}
+
+        {/* Parking */}
+        {displayParking && (
+          <div className="flex items-start gap-3 mb-3 bg-white p-3" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
+            <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)', marginTop: '1px' }}>local_parking</span>
+            <div className="min-w-0">
+              <p className="text-xs font-black uppercase mb-0.5" style={{ color: '#6b7280', fontFamily: 'Inter, sans-serif', letterSpacing: '0.06em' }}>Parking</p>
+              <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>{displayParking}</p>
+            </div>
+          </div>
         )}
 
         {/* Map */}
@@ -7223,6 +7241,7 @@ export default function App() {
 
   const [siteBanner, setSiteBanner] = useState<BannerConfig | null>(null);
   const [mapProvider, setMapProvider] = useState<'google' | 'apple' | 'auto'>('apple');
+  const [enrichedDataEnabled, setEnrichedDataEnabled] = useState(true);
 
   // Resolve 'auto' → Apple Maps on iOS/iPadOS, Google Maps elsewhere
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -7236,13 +7255,16 @@ export default function App() {
     Promise.all([
       (supabase.from as any)('config').select('value').eq('key', 'siteConfig').maybeSingle(),
       (supabase.from as any)('config').select('value').eq('key', 'banners').maybeSingle(),
-    ]).then(([siteRes, bannersRes]: [{ data: { value: Record<string, unknown> } | null }, { data: { value: unknown[] } | null }]) => {
+      (supabase.from as any)('config').select('value').eq('key', 'enriched_data_enabled').maybeSingle(),
+    ]).then(([siteRes, bannersRes, enrichedRes]: [{ data: { value: Record<string, unknown> } | null }, { data: { value: unknown[] } | null }, { data: { value: boolean } | null }]) => {
       // Apply siteConfig
       const d = siteRes.data?.value;
       if (d) {
         if ((d.banner as any)?.active) setSiteBanner(d.banner as BannerConfig);
         if (d.mapProvider) setMapProvider(d.mapProvider as 'google' | 'apple' | 'auto');
       }
+      // Apply enriched data global toggle (default true if not set)
+      if (enrichedRes.data !== null) setEnrichedDataEnabled(enrichedRes.data.value !== false);
       // Apply banners array — find first active banner within its date window
       const bannerArr = bannersRes.data?.value;
       if (Array.isArray(bannerArr)) {
@@ -7677,6 +7699,7 @@ export default function App() {
           isSaved={isPlaceSaved(selectedPlace.id)}
           onToggleSave={() => toggleSavedPlace(selectedPlace)}
           mapProvider={resolvedMapProvider}
+          enrichedDataEnabled={enrichedDataEnabled}
         />
       )}
       {selectedEvent && <EventDetailModal event={selectedEvent} onClose={() => { closeEventModal(); window.history.back(); }} isSaved={isEventSaved(selectedEvent.id)} onToggleSave={() => toggleSavedEvent(selectedEvent)} mapProvider={resolvedMapProvider} />}
@@ -8034,6 +8057,7 @@ export default function App() {
           isSaved={isPlaceSaved(selectedPlace.id)}
           onToggleSave={() => toggleSavedPlace(selectedPlace)}
           mapProvider={resolvedMapProvider}
+          enrichedDataEnabled={enrichedDataEnabled}
         />
       )}
       {selectedEvent && (
