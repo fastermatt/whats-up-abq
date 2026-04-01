@@ -7115,8 +7115,13 @@ export default function App() {
         const pendingTab = sessionStorage.getItem('abq_post_auth_redirect') as TabId | null;
         if (pendingTab) {
           sessionStorage.removeItem('abq_post_auth_redirect');
-          setActiveTab(pendingTab);
-          if (!session.user.user_metadata?.display_name) setShowUsernameSetup(true);
+          if ((pendingTab as string) === 'admin') {
+            window.history.pushState({}, '', '#admin');
+            setCurrentHash('#admin');
+          } else {
+            setActiveTab(pendingTab);
+            if (!session.user.user_metadata?.display_name) setShowUsernameSetup(true);
+          }
         }
       } else {
         setAuthReady(true);
@@ -7140,9 +7145,15 @@ export default function App() {
         const pendingTab = sessionStorage.getItem('abq_post_auth_redirect') as TabId | null;
         if (pendingTab) {
           sessionStorage.removeItem('abq_post_auth_redirect');
-          setActiveTab(pendingTab);
-          const hasUsername = !!(u.user_metadata?.display_name);
-          if (!hasUsername) setShowUsernameSetup(true);
+          if ((pendingTab as string) === 'admin') {
+            // Admin Google sign-in — navigate to #admin (only works if email matches ADMIN_EMAIL)
+            window.history.pushState({}, '', '#admin');
+            setCurrentHash('#admin');
+          } else {
+            setActiveTab(pendingTab);
+            const hasUsername = !!(u.user_metadata?.display_name);
+            if (!hasUsername) setShowUsernameSetup(true);
+          }
         }
       }
       if (u) {
