@@ -1211,6 +1211,7 @@ function PlaceDetailModal({
   mapProvider?: 'google' | 'apple';
 }) {
   const [shared, setShared] = useState(false);
+  const [enriched, setEnriched] = useState<{ tip?: string; hours?: string; phone?: string; website?: string; editorial?: string } | null>(null);
   const detailCatMeta = PLACE_CATEGORIES.find(c => c.value === place.category) || PLACE_CATEGORIES.find(c => c.label === place.category);
   const detailCatIcon = detailCatMeta?.icon || 'pin';
   const detailCatLabel = detailCatMeta?.label || place.category || '';
@@ -1219,6 +1220,24 @@ function PlaceDetailModal({
   const directionsUrl = (mapProvider === 'apple')
     ? `https://maps.apple.com/?q=${mapsQuery}`
     : `https://maps.google.com/?q=${mapsQuery}`;
+
+  // Lazy-load enriched data (tips, full hours, phone, website) on modal open
+  useEffect(() => {
+    (supabase.from as any)('places')
+      .select('enriched')
+      .eq('id', place.id)
+      .maybeSingle()
+      .then(({ data }: { data: { enriched: Record<string, string> } | null }) => {
+        if (data?.enriched) setEnriched(data.enriched);
+      });
+  }, [place.id]);
+
+  // Merge: enriched data supplements (but doesn't erase) what's already on the place object
+  const displayHours   = enriched?.hours   || place.hours   || null;
+  const displayPhone   = enriched?.phone   || place.phone   || null;
+  const displayWebsite = enriched?.website || place.website || null;
+  const displayDesc    = place.description || enriched?.editorial || null;
+  const insiderTip     = enriched?.tip     || null;
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -1327,10 +1346,21 @@ function PlaceDetailModal({
           </div>
         )}
 
-        {place.description && (
+        {displayDesc && (
           <p className="text-gray-700 text-sm leading-relaxed mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
-            {place.description}
+            {displayDesc}
           </p>
+        )}
+
+        {/* Insider Tip — shown when enriched data is available */}
+        {insiderTip && (
+          <div className="mb-4 p-3 flex items-start gap-2.5" style={{ background: '#fffbeb', border: '2px solid #1A1A1A', boxShadow: '3px 3px 0 #1A1A1A' }}>
+            <span className="material-symbols-outlined flex-shrink-0 mt-0.5" style={{ fontSize: '18px', color: '#b45309' }}>tips_and_updates</span>
+            <div>
+              <p className="text-xs font-black uppercase mb-1" style={{ color: '#b45309', fontFamily: 'Inter, sans-serif', letterSpacing: '0.07em' }}>Local Tip</p>
+              <p className="text-sm leading-relaxed text-gray-800" style={{ fontFamily: 'Inter, sans-serif' }}>{insiderTip}</p>
+            </div>
+          </div>
         )}
 
         {/* Address — taps to Maps */}
@@ -1349,33 +1379,37 @@ function PlaceDetailModal({
           </a>
         )}
 
-        {/* Hours */}
-        {place.hours && (
+        {/* Hours — full schedule from enriched data, falls back to open_now text */}
+        {displayHours && (
           <div className="flex items-start gap-3 mb-3 bg-white p-3" style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)' }}>
             <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)', marginTop: '1px' }}>schedule</span>
-            <p className="text-sm text-gray-700" style={{ fontFamily: 'Inter, sans-serif' }}>{place.hours}</p>
+            <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>
+              {displayHours.includes(' | ')
+                ? displayHours.split(' | ').map((line, i) => <span key={i} style={{ display: 'block' }}>{line}</span>)
+                : displayHours}
+            </p>
           </div>
         )}
 
         {/* Phone — taps to call */}
-        {place.phone && (
+        {displayPhone && (
           <a
-            href={`tel:${place.phone.replace(/\D/g, '')}`}
+            href={`tel:${displayPhone.replace(/\D/g, '')}`}
             className="flex items-center gap-3 mb-3 bg-white p-3 w-full"
             style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', textDecoration: 'none' }}
           >
             <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)' }}>phone</span>
             <div className="min-w-0">
-              <p className="text-sm text-gray-700" style={{ fontFamily: 'Inter, sans-serif' }}>{place.phone}</p>
+              <p className="text-sm text-gray-700" style={{ fontFamily: 'Inter, sans-serif' }}>{displayPhone}</p>
               <p className="text-xs font-bold mt-0.5" style={{ color: 'var(--brand)' }}>Tap to call →</p>
             </div>
           </a>
         )}
 
         {/* Website */}
-        {place.website && (
+        {displayWebsite && (
           <a
-            href={place.website.startsWith('http') ? place.website : `https://${place.website}`}
+            href={displayWebsite.startsWith('http') ? displayWebsite : `https://${displayWebsite}`}
             target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-3 mb-3 bg-white p-3 w-full"
             style={{ boxShadow: '3px 3px 0 rgba(0,0,0,0.10)', textDecoration: 'none' }}
@@ -1383,7 +1417,7 @@ function PlaceDetailModal({
             <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)' }}>language</span>
             <div className="min-w-0">
               <p className="text-sm text-gray-700 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
-                {place.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}
+                {displayWebsite.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}
               </p>
               <p className="text-xs font-bold mt-0.5" style={{ color: 'var(--brand)' }}>Visit website →</p>
             </div>
