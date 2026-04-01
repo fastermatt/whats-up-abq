@@ -633,7 +633,7 @@ const PLACE_CATEGORIES = [
 ];
 
 const EVENT_GENRES = [
-  'All', '❤️ For You', 'Music', 'Sports', 'Comedy', 'Arts', 'Family', 'Outdoor', 'Community', 'Free',
+  'All', 'Tonight', 'This Weekend', '❤️ For You', 'Music', 'Sports', 'Comedy', 'Arts', 'Family', 'Outdoor', 'Community', 'Free',
 ];
 
 const FOLLOWING_KEY = 'abq_following_genres';
@@ -2540,7 +2540,7 @@ function DailyGem({ places, onSelect }: { places: Place[]; onSelect: (p: Place) 
   return (
     <div className="px-5 pb-5">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Epilogue, sans-serif' }}>{dayOfWeek}'s Spot</h2>
+        <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Epilogue, sans-serif' }}>Today's Pick 🌶️</h2>
         <span className="text-xs font-black uppercase" style={{ color: '#666', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em' }}>🗓 Changes daily</span>
       </div>
       <button onClick={() => onSelect(gem)} className="w-full relative overflow-hidden text-left"
@@ -2550,7 +2550,7 @@ function DailyGem({ places, onSelect }: { places: Place[]; onSelect: (p: Place) 
         <div className="absolute top-3 left-3">
           <span className="text-xs font-black px-3 py-1"
             style={{ background: '#1ebaeb', color: '#1A1A1A', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase', border: '1.5px solid #1A1A1A', borderRadius: 0 }}>
-            ★ SPOT OF THE DAY
+            ★ TODAY'S PICK
           </span>
         </div>
         <div className="absolute top-3 right-3">
@@ -2670,7 +2670,7 @@ function DayPlanner() {
   return (
     <div className="mx-5 mb-6">
       <div className="flex items-baseline justify-between mb-3">
-        <p className="text-xs font-black tracking-widest text-gray-400 uppercase" style={{ fontFamily: 'Inter, sans-serif' }}>TODAY'S PLAN</p>
+        <p className="text-xs font-black tracking-widest text-gray-400 uppercase" style={{ fontFamily: 'Inter, sans-serif' }}>MY ABQ</p>
         <span className="text-xs text-gray-400" style={{ fontFamily: 'Inter, sans-serif' }}>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</span>
       </div>
       <div className="bg-white rounded-lg overflow-hidden" style={{ border: '1px solid #f3f4f6' }}>
@@ -2933,7 +2933,7 @@ function DiscoverScreen({
             className="text-lg font-black uppercase tracking-tight mb-3 px-5"
             style={{ fontFamily: 'Epilogue, sans-serif' }}
           >
-            Trending Now
+            Staff Picks
           </h2>
           <div className="grid gap-2 px-5" style={{ gridTemplateColumns: '1fr 1fr' }}>
             {/* Hero card */}
@@ -3265,6 +3265,17 @@ function EventsScreen({
   }
 
   const filtered = useMemo(() => {
+    // ── Date helpers ──
+    const todayStr = new Date().toISOString().split('T')[0];
+    // This Weekend = Saturday + Sunday of the current week
+    const nowDay = new Date().getDay(); // 0=Sun, 6=Sat
+    const satOffset = (6 - nowDay + 7) % 7 || 7;
+    const sunOffset = (7 - nowDay) % 7;
+    const sat = new Date(); sat.setDate(sat.getDate() + satOffset);
+    const sun = new Date(); sun.setDate(sun.getDate() + sunOffset);
+    const satStr = sat.toISOString().split('T')[0];
+    const sunStr = sun.toISOString().split('T')[0];
+
     // 90-day horizon cap: only apply when no search/filter is active so that
     // searching for a future event (e.g. a comedian in October) still works.
     const isSearchActive = search.trim() !== '' || selectedGenre !== 'All';
@@ -3279,6 +3290,18 @@ function EventsScreen({
       }
       return true;
     });
+
+    // ── Date quick-filters ──
+    if (selectedGenre === 'Tonight') {
+      return result.filter(e => (e.dates?.start?.localDate || '') === todayStr);
+    }
+    if (selectedGenre === 'This Weekend') {
+      return result.filter(e => {
+        const d = e.dates?.start?.localDate || '';
+        return d === satStr || d === sunStr;
+      });
+    }
+
     // "For You" = union of all followed genres
     if (selectedGenre === '❤️ For You') {
       if (followedGenres.length === 0) return result; // show all if nothing followed yet
@@ -3463,8 +3486,8 @@ function EventsScreen({
               >
                 {genre}
               </button>
-              {/* Star toggle — shown on every genre except All and For You */}
-              {!isForYou && genre !== 'All' && (
+              {/* Star toggle — shown on genre chips only (not date chips or All/For You) */}
+              {!isForYou && genre !== 'All' && genre !== 'Tonight' && genre !== 'This Weekend' && (
                 <button
                   onClick={() => toggleFollowGenre(genre)}
                   title={isFollowed ? `Remove ${genre} from For You` : `Add ${genre} to For You`}
@@ -6203,8 +6226,8 @@ function PlanScreen({
       {/* Header */}
       <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-white border-b-2 border-black">
         <div>
-          <h1 className="font-black text-xl leading-tight" style={{ fontFamily: 'Epilogue, sans-serif' }}>My Plan</h1>
-          <p className="text-xs mt-0.5" style={{ color: '#888', fontFamily: 'Inter, sans-serif' }}>{savedPlan.length} {savedPlan.length === 1 ? 'stop' : 'stops'}</p>
+          <h1 className="font-black text-xl leading-tight" style={{ fontFamily: 'Epilogue, sans-serif' }}>My ABQ</h1>
+          <p className="text-xs mt-0.5" style={{ color: '#888', fontFamily: 'Inter, sans-serif' }}>{savedPlan.length} {savedPlan.length === 1 ? 'stop' : 'stops'} saved</p>
         </div>
         <button onClick={onClearAll} className="text-xs font-bold px-3 py-1.5" style={{ border: '1.5px solid #1a1a1a', fontFamily: 'Inter, sans-serif', color: '#dc2626' }}>
           Clear All
@@ -6302,11 +6325,11 @@ function PlanScreen({
 // ─── Navigation ───────────────────────────────────────────────────────────────
 
 const NAV_ITEMS = [
-  { id: 'discover', label: 'Discover', icon: 'explore' },
-  { id: 'events',   label: 'Events',   icon: 'confirmation_number' },
-  { id: 'places',   label: 'Places',   icon: 'storefront' },
-  { id: 'plan',     label: 'Plan',     icon: 'bookmark' },
-  { id: 'profile',  label: 'Profile',  icon: 'person' },
+  { id: 'discover', label: 'Home',    icon: 'explore' },
+  { id: 'events',   label: 'Events',  icon: 'confirmation_number' },
+  { id: 'places',   label: 'Places',  icon: 'storefront' },
+  { id: 'plan',     label: 'Saved',   icon: 'bookmark' },
+  { id: 'profile',  label: 'Profile', icon: 'person' },
 ] as const;
 
 type TabId = (typeof NAV_ITEMS)[number]['id'];
