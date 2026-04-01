@@ -509,7 +509,7 @@ def main():
     ap.add_argument('--google',      action='store_true', help='Also call Google Places Details API')
     ap.add_argument('--limit',       type=int, default=0)
     ap.add_argument('--resync',      action='store_true')
-    ap.add_argument('--model',       default='qwen3.5-27b', help='LM Studio model ID (default: qwen3.5-27b)')
+    ap.add_argument('--model',       default='qwen/qwen2.5-coder-14b', help='LM Studio model ID (default: qwen/qwen2.5-coder-14b)')
     ap.add_argument('--stats',       action='store_true')
     args = ap.parse_args()
 
