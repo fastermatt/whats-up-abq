@@ -5,7 +5,7 @@
 //   - Supabase API calls: Network-only (live data required)
 //   - places-data.json: Cache-first (large file, rarely changes)
 
-const CACHE_VERSION = 'abq-202604011500';
+const CACHE_VERSION = 'abq-202604011600';
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const ASSET_CACHE = `${CACHE_VERSION}-assets`;
 const DATA_CACHE  = `${CACHE_VERSION}-data`;
