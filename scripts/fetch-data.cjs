@@ -522,8 +522,14 @@ function transformSeatGeekEvent(ev) {
     name:    ev.title || perf.name || 'Untitled Event',
     url:     ev.url,
     _source: 'seatgeek',
+    ticketLinks: ev.url ? [{ source: 'SeatGeek', url: ev.url }] : [],
 
-    images: perf.image ? [{ url: perf.image }] : [],
+    // Use all performer images (primary + extras) for richer gallery
+    images: [
+      ...(perf.image ? [{ url: perf.image }] : []),
+      ...(perf.images?.huge?.url ? [{ url: perf.images.huge.url }] : []),
+      ...(perf.images?.banner?.url ? [{ url: perf.images.banner.url }] : []),
+    ].filter((img, i, arr) => arr.findIndex(x => x.url === img.url) === i),
 
     dates: {
       start: {
@@ -548,6 +554,9 @@ function transformSeatGeekEvent(ev) {
       segment: { name: mapSeatGeekType(ev.type) },
       genre:   { name: perf.type },
     }],
+
+    // Pull description from SeatGeek's description or performer info
+    info: ev.description || perf.description || perf.short_bio || undefined,
 
     priceRanges: (ev.stats?.lowest_price || ev.stats?.average_price) ? [{
       min:      ev.stats.lowest_price  || 0,

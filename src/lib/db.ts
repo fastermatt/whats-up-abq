@@ -210,7 +210,7 @@ export async function fetchPlacesFromDB(): Promise<unknown[]> {
     Array.from({ length: pageCount }, (_, i) =>
       supabase
         .from('places')
-        .select('raw')
+        .select('raw,enriched,hide_enriched')
         .range(i * PAGE, (i + 1) * PAGE - 1)
     )
   );
@@ -219,7 +219,12 @@ export async function fetchPlacesFromDB(): Promise<unknown[]> {
   for (const { data, error } of pageResults) {
     if (error) throw error;
     for (const row of (data ?? [])) {
-      allRows.push(transformGoogleRaw((row as { raw: Record<string, unknown> }).raw));
+      const typed = row as { raw: Record<string, unknown>; enriched?: Record<string, unknown>; hide_enriched?: boolean };
+      const place = transformGoogleRaw(typed.raw);
+      // Attach enriched data directly so PlaceDetailModal can use it without a second fetch
+      if (typed.enriched) (place as Record<string, unknown>)._enriched = typed.enriched;
+      if (typed.hide_enriched) (place as Record<string, unknown>)._hideEnriched = true;
+      allRows.push(place);
     }
   }
 

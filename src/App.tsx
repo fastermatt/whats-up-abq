@@ -1337,8 +1337,11 @@ function PlaceDetailModal({
   enrichedDataEnabled?: boolean;
 }) {
   const [shared, setShared] = useState(false);
-  const [enriched, setEnriched] = useState<{ tip?: string; hours?: string; phone?: string; website?: string; editorial?: string; parking?: string; menu?: string } | null>(null);
-  const [placeHideEnriched, setPlaceHideEnriched] = useState(false);
+  const [enriched, setEnriched] = useState<{ tip?: string; hours?: string; phone?: string; website?: string; editorial?: string; parking?: string; menu?: string; historicNote?: string; bestFor?: string[]; priceNote?: string } | null>(
+    // Use pre-loaded enriched data from Supabase if available (attached by fetchPlacesFromDB)
+    (place as any)._enriched || null
+  );
+  const [placeHideEnriched, setPlaceHideEnriched] = useState((place as any)._hideEnriched || false);
   const detailCatMeta = PLACE_CATEGORIES.find(c => c.value === place.category) || PLACE_CATEGORIES.find(c => c.label === place.category);
   const detailCatIcon = detailCatMeta?.icon || 'pin';
   const detailCatLabel = detailCatMeta?.label || place.category || '';
@@ -1376,13 +1379,17 @@ function PlaceDetailModal({
   const showEnriched = enrichedDataEnabled !== false && !placeHideEnriched;
 
   // Merge: enriched data supplements (but doesn't erase) what's already on the place object
+  // Falls back to place-level fields from static JSON (insiderTip, parkingInfo, about, etc.)
   const displayHours   = (showEnriched ? enriched?.hours   : null) || place.hours   || null;
   const displayPhone   = (showEnriched ? enriched?.phone   : null) || place.phone   || null;
   const displayWebsite = (showEnriched ? enriched?.website : null) || place.website || null;
-  const displayParking = showEnriched ? (enriched?.parking || null) : null;
+  const displayParking = showEnriched ? (enriched?.parking || (place as any).parkingInfo || null) : null;
   const displayMenu    = showEnriched ? (enriched?.menu    || null) : null;
-  const displayDesc    = place.description || (showEnriched ? enriched?.editorial : null) || null;
-  const insiderTip     = showEnriched ? (enriched?.tip || null) : null;
+  const displayDesc    = place.description || (showEnriched ? (enriched?.editorial || (place as any).about) : null) || null;
+  const insiderTip     = showEnriched ? (enriched?.tip || (place as any).insiderTip || null) : null;
+  const historicNote   = showEnriched ? (enriched?.historicNote || (place as any).historicNote || null) : null;
+  const bestFor        = showEnriched ? (enriched?.bestFor || (place as any).bestFor as string[] || null) : null;
+  const priceNote      = showEnriched ? (enriched?.priceNote || (place as any).priceNote || null) : null;
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -1504,6 +1511,39 @@ function PlaceDetailModal({
             <div>
               <p className="text-xs font-black uppercase mb-1" style={{ color: '#b45309', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.07em' }}>Local Tip</p>
               <p className="text-sm leading-relaxed text-gray-800" style={{ fontFamily: 'Public Sans, sans-serif' }}>{insiderTip}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Best For tags */}
+        {bestFor && bestFor.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {bestFor.map((tag, i) => (
+              <span key={i} className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: 'var(--brand-bg-subtle, #f0f0ff)', color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}>
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Historic Note */}
+        {historicNote && (
+          <div className="mb-4 p-3 flex items-start gap-2.5" style={{ background: '#fef3c7', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '8px' }}>
+            <span className="material-symbols-outlined flex-shrink-0 mt-0.5" style={{ fontSize: '18px', color: '#92400e' }}>history_edu</span>
+            <div>
+              <p className="text-xs font-black uppercase mb-1" style={{ color: '#92400e', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.07em' }}>Historic Note</p>
+              <p className="text-sm leading-relaxed text-gray-800" style={{ fontFamily: 'Public Sans, sans-serif' }}>{historicNote}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Price Note */}
+        {priceNote && (
+          <div className="flex items-start gap-3 mb-3 bg-white p-3" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+            <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)', marginTop: '1px' }}>payments</span>
+            <div className="min-w-0">
+              <p className="text-xs font-black uppercase mb-0.5" style={{ color: '#6b7280', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em' }}>Price</p>
+              <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'Public Sans, sans-serif' }}>{priceNote}</p>
             </div>
           </div>
         )}
@@ -2299,11 +2339,11 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
         {/* ── GET TICKETS / MORE INFO ───────────────────────── */}
         {event.ticketLinks && event.ticketLinks.length > 0 ? (
           <div className="flex flex-col gap-2">
-            {event.ticketLinks.filter(l => l.source === 'Ticketmaster').map((link) => (
-              <a key={link.source} href={link.url} target="_blank" rel="noopener noreferrer"
+            {event.ticketLinks.map((link) => (
+              <a key={link.source + link.url} href={link.url} target="_blank" rel="noopener noreferrer"
                 className="flex items-center justify-between w-full px-5 py-3 text-white font-black text-sm"
                 style={{ borderRadius: 6, border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                  background: link.source === 'Ticketmaster' ? 'linear-gradient(135deg, #026cdf, #02a7f0)' : link.source === 'Eventbrite' ? 'linear-gradient(135deg, #f05537, #ff7a5c)' : 'linear-gradient(135deg, #d4184a, #ff5c5c)',
+                  background: link.source === 'Ticketmaster' ? 'linear-gradient(135deg, #026cdf, #02a7f0)' : link.source === 'Eventbrite' ? 'linear-gradient(135deg, #f05537, #ff7a5c)' : link.source === 'SeatGeek' ? 'linear-gradient(135deg, #d4184a, #ff5c5c)' : 'var(--brand-gradient)',
                   fontFamily: 'Public Sans, sans-serif' }}
               >
                 <span>{link.source}</span>
@@ -7987,18 +8027,11 @@ export default function App() {
             _ebOnlyEvents.push(eb);
           }
         }
-        // Auto-generate SeatGeek & Eventbrite search links for all TM events
+        // Ensure every TM event has its own Ticketmaster link; only add SeatGeek/Eventbrite
+        // when there's a REAL specific URL (not a generic search page)
         for (const tmEv of _tmEvents) {
           if (!tmEv.ticketLinks) {
             tmEv.ticketLinks = tmEv.url ? [{source: 'Ticketmaster', url: tmEv.url}] : [];
-          }
-          const _hasSG = tmEv.ticketLinks.some(l => l.source === 'SeatGeek');
-          const _hasEB = tmEv.ticketLinks.some(l => l.source === 'Eventbrite');
-          const _q = encodeURIComponent(tmEv.name || '');
-          if (!_hasSG) tmEv.ticketLinks.push({source: 'SeatGeek', url: `https://seatgeek.com/search?q=${_q}&current_location=albuquerque`});
-          if (!_hasEB) {
-            const _slug = (tmEv.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-            tmEv.ticketLinks.push({source: 'Eventbrite', url: `https://www.eventbrite.com/d/nm--albuquerque/${_slug}/`});
           }
         }
         const seen = new Set<string>();

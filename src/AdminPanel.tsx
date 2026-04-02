@@ -616,11 +616,17 @@ function PlacesSection() {
     // Rating override
     const rVal = parseFloat(editRating);
     if (!isNaN(rVal) && rVal >= 0 && rVal <= 5) updatedRaw.rating = rVal;
-    // Enriched data updates
+    // Enriched data updates — sync all enriched fields to the enriched JSONB column
     const updatedEnriched = { ...(editPlace.enriched || {}) };
     if (editWebsite.trim()) updatedEnriched.website = editWebsite.trim();
     if (editPhone.trim()) updatedEnriched.phone = editPhone.trim();
     if (editInsiderTip.trim()) updatedEnriched.tip = editInsiderTip.trim();
+    // Also sync fields from raw into enriched for display consistency
+    if (updatedRaw.parkingInfo) updatedEnriched.parking = updatedRaw.parkingInfo;
+    if (updatedRaw.about) updatedEnriched.editorial = updatedRaw.about;
+    if (updatedRaw.historicNote) updatedEnriched.historicNote = updatedRaw.historicNote;
+    if (updatedRaw.bestFor) updatedEnriched.bestFor = updatedRaw.bestFor;
+    if (updatedRaw.priceNote) updatedEnriched.priceNote = updatedRaw.priceNote;
 
     const updatePayload: any = { raw: updatedRaw };
     if (Object.keys(updatedEnriched).length > 0) updatePayload.enriched = updatedEnriched;
