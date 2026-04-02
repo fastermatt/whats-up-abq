@@ -1353,10 +1353,12 @@ function PlaceDetailModal({
     let cancelled = false;
     const fetchEnriched = async () => {
       try {
+        // Supabase stores IDs as "google_<place_id>" but the app uses bare place_id
+        const dbId = place.id.startsWith('google_') ? place.id : `google_${place.id}`;
         const { data, error } = await supabase
           .from('places')
           .select('enriched,hide_enriched')
-          .eq('id', place.id)
+          .eq('id', dbId)
           .maybeSingle();
         if (cancelled) return;
         if (error) { console.warn('[enriched] fetch error:', error.message); return; }
