@@ -34,11 +34,20 @@ function placeTypeToCategory(types: string[], name = ''): string {
   if (types.includes('museum') || types.includes('library')) return 'museum';
   if (types.includes('art_gallery') || types.includes('performing_arts_theater')) return 'arts';
 
-  // ── Fitness ──────────────────────────────────────────────────────────────
-  if (types.includes('gym') || types.includes('spa') ||
-      types.includes('sports_complex') || types.includes('fitness_center') ||
-      types.includes('golf_course') || types.includes('swimming_pool') ||
-      types.includes('stadium')) return 'fitness';
+  // ── Health/Medical — catch before fitness so clinics don't leak ───────────
+  if (types.includes('dentist') || types.includes('doctor') ||
+      types.includes('hospital') || types.includes('health') ||
+      types.includes('veterinary_care') || types.includes('physiotherapist') ||
+      types.includes('pharmacy')) return 'other';
+
+  // ── Wellness (spas, salons — NOT active/fitness) ─────────────────────────
+  if (types.includes('spa') || types.includes('beauty_salon') ||
+      types.includes('hair_care')) return 'wellness';
+
+  // ── Fitness (gyms, sports — genuinely active) ───────────────────────────
+  if (types.includes('gym') || types.includes('fitness_center') ||
+      types.includes('sports_complex') || types.includes('swimming_pool') ||
+      types.includes('golf_course') || types.includes('stadium')) return 'fitness';
 
   // ── Stays ────────────────────────────────────────────────────────────────
   if (types.includes('lodging') || types.includes('hotel') ||
@@ -78,9 +87,10 @@ function placeTypeToCategory(types: string[], name = ''): string {
   if (n.includes('library') || n.includes('historical') || n.includes('heritage') ||
       n.includes('history') || n.includes('science center') || n.includes('planetarium'))
     return 'museum';
-  if (n.includes('dispensary') || n.includes('cannabis') || n.includes('tattoo') ||
-      n.includes(' spa') || n.includes('salon') || n.includes('barbershop') ||
-      n.includes('nail '))
+  if (n.includes(' spa') || n.includes('salon') || n.includes('barbershop') ||
+      n.includes('nail ') || n.includes('massage') || n.includes('wellness'))
+    return 'wellness';
+  if (n.includes('dispensary') || n.includes('cannabis') || n.includes('tattoo'))
     return 'shop';
 
   return 'other';

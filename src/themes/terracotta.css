@@ -17,8 +17,8 @@
        Neutral:             #827471
        Background:          #F9F5F2  warm off-white                    */
 
-    --background:            20 20% 97%;    /* #F9F5F2 warm off-white */
-    --foreground:            0 0% 10%;      /* #1A1A1A near-black */
+    --background:            40 33% 97%;    /* #FAFAF7 warm white */
+    --foreground:            15 12% 16%;    /* #2D2926 warm charcoal */
 
     --card:                  0 0% 100%;
     --card-foreground:       0 0% 10%;
@@ -26,37 +26,39 @@
     --popover:               0 0% 100%;
     --popover-foreground:    0 0% 10%;
 
-    --primary:               13 48% 49%;    /* #b95c43 terracotta */
+    --primary:               11 48% 53%;    /* #C2634A warmer terracotta */
     --primary-foreground:    0 0% 100%;     /* white */
 
-    --secondary:             10 27% 49%;    /* #9d6b5e warm clay */
+    --secondary:             140 15% 55%;   /* #7A9E7E desert sage */
     --secondary-foreground:  0 0% 100%;     /* white */
 
-    --muted:                 20 15% 94%;    /* #EFE9E5 warm muted */
-    --muted-foreground:      0 5% 43%;      /* #6F6A68 */
+    --muted:                 30 15% 94%;    /* warm muted */
+    --muted-foreground:      15 6% 42%;     /* #6B6560 */
 
-    --accent:                56 51% 47%;    /* #baad3b mesa gold */
-    --accent-foreground:     0 0% 10%;      /* dark text on gold */
+    --accent:                37 78% 56%;    /* #E8A838 sunset gold */
+    --accent-foreground:     15 12% 16%;    /* dark text on gold */
 
     --destructive:           0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border:                20 15% 88%;    /* #E3DAD4 warm border */
-    --input:                 20 15% 88%;
-    --ring:                  13 48% 49%;    /* terracotta */
+    --border:                30 12% 90%;    /* #EDE9E5 warm border */
+    --input:                 30 12% 90%;
+    --ring:                  11 48% 53%;    /* warmer terracotta */
 
-    --radius:                0.375rem;      /* 6px — soft but grounded */
+    --radius:                0.75rem;       /* 12px — modern rounded */
     --ios-blur:              blur(20px) saturate(180%);
 
     /* ── Inline-style bridge vars (App.tsx style={} props) ── */
-    --brand:                 #b95c43;
-    --brand-light:           #c97a62;
-    --brand-gradient:        linear-gradient(135deg, #b95c43 0%, #c97a62 100%);
-    --brand-bg-screen:       #F9F5F2;
-    --brand-bg-subtle:       rgba(185, 92, 67, 0.10);
-    --brand-tint-bg:         rgba(185, 92, 67, 0.08);
-    --brand-tint-border:     rgba(185, 92, 67, 0.25);
-    --brand-ring-color:      #b95c43;
+    --brand:                 #C2634A;
+    --brand-light:           #d4836e;
+    --brand-gradient:        linear-gradient(135deg, #C2634A 0%, #d4836e 100%);
+    --brand-bg-screen:       #FAFAF7;
+    --brand-bg-subtle:       rgba(194, 99, 74, 0.10);
+    --brand-tint-bg:         rgba(194, 99, 74, 0.08);
+    --brand-tint-border:     rgba(194, 99, 74, 0.25);
+    --brand-ring-color:      #C2634A;
+    --sage:                  #7A9E7E;
+    --gold:                  #E8A838;
   }
 
   /* Dark mode — deep adobe + warm terracotta glow */
@@ -142,22 +144,22 @@ body::after {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: radial-gradient(circle, #d4c2ba 1px, transparent 1px);
-  background-size: 22px 22px;
-  opacity: 0.25;
+  background-image: radial-gradient(circle, #d4c2ba 0.5px, transparent 0.5px);
+  background-size: 24px 24px;
+  opacity: 0.15;
   pointer-events: none;
   z-index: 0;
 }
 #root { position: relative; z-index: 1; }
 
 /* ── Soft shadow utilities ────────────────────────────────────────── */
-.uc-shadow { box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.55); }
-.uc-shadow-sm { box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.55); }
-.uc-shadow-accent { box-shadow: 4px 4px 0 #b95c43; }
+.uc-shadow { box-shadow: 0 4px 16px rgba(45, 41, 38, 0.10); }
+.uc-shadow-sm { box-shadow: 0 2px 8px rgba(45, 41, 38, 0.08); }
+.uc-shadow-accent { box-shadow: 0 4px 16px rgba(194, 99, 74, 0.20); }
 
 /* ── Animated ABQ logo — terracotta shimmer ──────────────────────── */
 .logo-abq-shimmer {
-  background: linear-gradient(90deg, #b95c43 0%, #e8a882 35%, #c97a62 55%, #b95c43 100%);
+  background: linear-gradient(90deg, #C2634A 0%, #E8A838 35%, #d4836e 55%, #C2634A 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -176,22 +178,27 @@ body::after {
   pointer-events: none;
 }
 
-/* ── Card hover — soft lift (no hard offset in this theme) ──────── */
+/* ── Card hover — soft lift ──────────────────────────────────────── */
 .event-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(185, 92, 67, 0.18);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(45, 41, 38, 0.12);
 }
 
 /* ── Primary button feel ──────────────────────────────────────────── */
 button[class*="bg-primary"],
 .btn-primary {
-  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.50);
-  transition: box-shadow 0.1s ease, transform 0.1s ease;
+  box-shadow: 0 2px 8px rgba(194, 99, 74, 0.30);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+button[class*="bg-primary"]:hover,
+.btn-primary:hover {
+  box-shadow: 0 4px 16px rgba(194, 99, 74, 0.40);
+  transform: translateY(-1px);
 }
 button[class*="bg-primary"]:active,
 .btn-primary:active {
-  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.50);
-  transform: translate(1px, 1px);
+  box-shadow: 0 1px 4px rgba(194, 99, 74, 0.25);
+  transform: translateY(0);
 }
 
 /* ── Frosted glass — warm tint ────────────────────────────────────── */
