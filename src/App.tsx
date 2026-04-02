@@ -1350,14 +1350,24 @@ function PlaceDetailModal({
 
   // Lazy-load enriched data (tips, full hours, phone, website, parking) on modal open
   useEffect(() => {
-    (supabase.from as any)('places')
-      .select('enriched,hide_enriched')
-      .eq('id', place.id)
-      .maybeSingle()
-      .then(({ data }: { data: { enriched: Record<string, string>; hide_enriched: boolean } | null }) => {
-        if (data?.enriched) setEnriched(data.enriched);
+    let cancelled = false;
+    const fetchEnriched = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('places')
+          .select('enriched,hide_enriched')
+          .eq('id', place.id)
+          .maybeSingle();
+        if (cancelled) return;
+        if (error) { console.warn('[enriched] fetch error:', error.message); return; }
+        if (data?.enriched) setEnriched(data.enriched as any);
         if (data?.hide_enriched) setPlaceHideEnriched(true);
-      });
+      } catch (err) {
+        console.warn('[enriched] unexpected error:', err);
+      }
+    };
+    fetchEnriched();
+    return () => { cancelled = true; };
   }, [place.id]);
 
   // Global flag + per-place override both gate enriched data display
