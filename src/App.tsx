@@ -2682,21 +2682,33 @@ function tickStreak(): { count: number; isNew: boolean } {
 function StreakBanner() {
   const [info] = useState(() => tickStreak());
   const [visible, setVisible] = useState(true);
+  // Auto-dismiss after 4 seconds
+  useEffect(() => {
+    if (!visible || info.count < 2) return;
+    const t = setTimeout(() => setVisible(false), 4000);
+    return () => clearTimeout(t);
+  }, [visible, info.count]);
   if (!visible || info.count < 2) return null;
   const emoji = info.count >= 7 ? 'local_fire_department' : info.count >= 3 ? 'bolt' : 'waving_hand';
   const label = info.count >= 7
-    ? `${info.count}-day streak! You're officially a local.`
+    ? `${info.count}-day streak!`
     : info.count >= 3
-    ? `${info.count} days running — ABQ local in the making`
-    : `Welcome back! Day ${info.count} in a row.`;
+    ? `${info.count} days in a row`
+    : `Welcome back! Day ${info.count}`;
   return (
-    <div className="flex items-center justify-between gap-3 px-4 py-3"
-      style={{ background: '#b95c43', borderBottom: '1px solid rgba(0,0,0,0.08)', animation: 'cardFadeIn 0.4s ease both' }}>
-      <div className="flex items-center gap-2 min-w-0">
-        <span className="material-symbols-outlined" style={{ fontSize: '20px', lineHeight: 1, fontVariationSettings: "'FILL' 1" }}>{emoji}</span>
-        <span className="text-sm font-black truncate" style={{ fontFamily: 'Public Sans, sans-serif', color: 'white' }}>{label}</span>
-      </div>
-      <button onClick={() => setVisible(false)} className="flex-shrink-0 font-black" style={{ fontSize: '16px', lineHeight: 1, color: 'white' }}>✕</button>
+    <div style={{
+      position: 'fixed', top: 'calc(env(safe-area-inset-top, 0px) + 56px)', left: '50%', transform: 'translateX(-50%)',
+      zIndex: 9999, background: '#1a1a1a', color: 'white', borderRadius: '20px',
+      padding: '6px 14px', display: 'flex', alignItems: 'center', gap: '6px',
+      boxShadow: '0 4px 16px rgba(0,0,0,0.25)', animation: 'streakToastIn 0.3s ease, streakToastOut 0.4s ease 3.6s forwards',
+      fontFamily: 'Public Sans, sans-serif', fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap',
+    }}>
+      <style>{`
+        @keyframes streakToastIn { from { opacity:0; transform:translateX(-50%) translateY(-16px) scale(0.92); } to { opacity:1; transform:translateX(-50%) translateY(0) scale(1); } }
+        @keyframes streakToastOut { from { opacity:1; transform:translateX(-50%) translateY(0); } to { opacity:0; transform:translateX(-50%) translateY(-12px); } }
+      `}</style>
+      <span className="material-symbols-outlined" style={{ fontSize: '16px', fontVariationSettings: "'FILL' 1", color: info.count >= 7 ? '#ff6b35' : info.count >= 3 ? '#fbbf24' : '#b95c43' }}>{emoji}</span>
+      {label}
     </div>
   );
 }
