@@ -3471,9 +3471,11 @@ function EventsScreen({
     const satStr = sat.toISOString().split('T')[0];
     const sunStr = sun.toISOString().split('T')[0];
 
+    const hasTextSearch = search.trim() !== '';
+
     // 90-day horizon cap: only apply when no search/filter is active so that
     // searching for a future event (e.g. a comedian in October) still works.
-    const isSearchActive = search.trim() !== '' || selectedGenre !== 'All';
+    const isSearchActive = hasTextSearch || selectedGenre !== 'All';
     const horizonDate = new Date();
     horizonDate.setDate(horizonDate.getDate() + 90);
     const horizonStr = horizonDate.toISOString().split('T')[0];
@@ -3486,7 +3488,27 @@ function EventsScreen({
       return true;
     });
 
-    // ── Date quick-filters ──
+    // ── Text search: when the user is typing a query, search ALL upcoming
+    // events by name, venue, description, info, and genre — regardless of
+    // which date/genre pill is selected. This ensures "easter" finds
+    // Easter events even when the "Tonight" pill is active. ──
+    if (hasTextSearch) {
+      const q = search.toLowerCase().trim();
+      result = result.filter(e => {
+        const eName    = e.name.toLowerCase();
+        const eVenue   = (e._embedded?.venues?.[0]?.name || '').toLowerCase();
+        const eInfo    = (e.info || '').toLowerCase();
+        const eDesc    = (e.description || '').toLowerCase();
+        const eSeg     = (e.classifications?.[0]?.segment?.name || '').toLowerCase();
+        const eGenre   = (e.classifications?.[0]?.genre?.name || '').toLowerCase();
+        const eSubGenre = (e.classifications?.[0]?.subGenre?.name || '').toLowerCase();
+        return eName.includes(q) || eVenue.includes(q) || eInfo.includes(q) ||
+          eDesc.includes(q) || eSeg.includes(q) || eGenre.includes(q) || eSubGenre.includes(q);
+      });
+      return result;
+    }
+
+    // ── Date quick-filters (only applied when NO text search) ──
     if (selectedGenre === 'Tonight') {
       return result.filter(e => (e.dates?.start?.localDate || '') === todayStr);
     }
@@ -3570,14 +3592,6 @@ function EventsScreen({
             return seg === selectedGenre || gen === selectedGenre;
         }
       });
-    }
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(
-        e =>
-          e.name.toLowerCase().includes(q) ||
-          (e._embedded?.venues?.[0]?.name || '').toLowerCase().includes(q)
-      );
     }
     return result;
   }, [events, selectedGenre, search]);
