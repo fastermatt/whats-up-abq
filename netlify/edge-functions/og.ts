@@ -1,6 +1,14 @@
 // Netlify Edge Function: Dynamic Open Graph meta tags for shared place/event links
-// Intercepts /place/:id and /event/:id — serves rich OG tags to social crawlers,
-// serves the normal SPA to real browsers.
+// Intercepts /place/:id and /event/:id — injects the correct OG tags (title,
+// description, image) into the SPA HTML so that ALL link-preview systems
+// (iMessage, Slack, Twitter, Facebook, etc.) see the right card.
+//
+// Strategy: fetch place/event data from Supabase, then pass the request
+// through to the origin (SPA index.html) and rewrite its <head> to swap in
+// dynamic OG tags. No bot-detection needed — every user agent gets correct tags,
+// and the SPA still boots normally for real browsers.
+
+import type { Context } from 'https://edge.netlify.com';
 
 const SUPABASE_URL = 'https://bsmvfutebmbkjvlrhiyq.supabase.co';
 const SUPABASE_ANON_KEY =
@@ -10,18 +18,17 @@ const SITE = 'https://abqunplugged.com';
 const FALLBACK_IMAGE = `${SITE}/og-image.jpg`;
 const SITE_NAME = 'ABQ Unplugged';
 
-// Bot user-agents that read OG tags (social link previews)
-const BOT_RE =
-  /facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|WhatsApp|TelegramBot|Discordbot|Googlebot|bingbot|iMessageBot|Applebot|Pinterest|Tumblr|Viber|Line|Skype|Embedly|Quora|Outbrain|W3C_Validator|vkShare|redditbot|Mastodon/i;
-
-function isBot(ua: string | null): boolean {
-  return !!ua && BOT_RE.test(ua);
-}
-
 // ── Supabase helpers ──────────────────────────────────────────────────────────
 
-async function fetchPlace(placeId: string) {
-  // Try by Google place_id first (most IDs are ChIJ...), then by UUID
+interface OGData {
+  title: string;
+  description: string;
+  image: string;
+  url: string;
+  type: string;
+}
+
+async function fetchPlaceOG(placeId: string): Promise<OGData | null> {
   const isGoogleId = placeId.startsWith('ChIJ') || placeId.startsWith('Eh');
   const query = isGoogleId
     ? `${SUPABASE_URL}/rest/v1/places?raw->>place_id=eq.${encodeURIComponent(placeId)}&select=raw,enriched&limit=1`
@@ -44,7 +51,6 @@ async function fetchPlace(placeId: string) {
     `Discover ${name} in Albuquerque on ABQ Unplugged`;
   const category = raw?.primaryTypeDisplayName?.text || raw?.category || '';
 
-  // Best available photo — use Google Maps photo API
   let image = FALLBACK_IMAGE;
   if (raw?.photos?.length) {
     const ref = raw.photos[0].photo_reference;
@@ -53,10 +59,16 @@ async function fetchPlace(placeId: string) {
     }
   }
 
-  return { name, description: truncate(description, 200), category, image, id: placeId };
+  return {
+    title: name + (category ? ` — ${category}` : ''),
+    description: truncate(description, 200),
+    image,
+    url: `${SITE}/place/${encodeURIComponent(placeId)}`,
+    type: 'article',
+  };
 }
 
-async function fetchEvent(eventId: string) {
+async function fetchEventOG(eventId: string): Promise<OGData | null> {
   const query = `${SUPABASE_URL}/rest/v1/events?raw->>id=eq.${encodeURIComponent(eventId)}&select=raw&limit=1`;
   const res = await fetch(query, {
     headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
@@ -71,24 +83,30 @@ async function fetchEvent(eventId: string) {
   const dateStr = raw?.dates?.start?.localDate || '';
   const timeStr = raw?.dates?.start?.localTime || '';
 
-  // Build description from available fields
   const parts = [name];
   if (dateStr) parts.push(formatDateCompact(dateStr));
   if (timeStr) parts.push(formatTimeCompact(timeStr));
   if (venue) parts.push(`at ${venue}`);
   const description = raw?.info || raw?.description || parts.join(' · ');
 
-  // Best image
   let image = FALLBACK_IMAGE;
   if (raw?.images?.length) {
-    // Prefer 16:9 ratio images for OG
     const wide = raw.images.find(
       (img: { ratio?: string; width?: number }) => img.ratio === '16_9' && (img.width || 0) >= 640
     );
     image = wide?.url || raw.images[0]?.url || FALLBACK_IMAGE;
   }
 
-  return { name, description: truncate(description, 200), venue, dateStr, image, id: eventId };
+  const titleParts = [name];
+  if (venue) titleParts.push(`at ${venue}`);
+
+  return {
+    title: titleParts.join(' '),
+    description: truncate(description, 200),
+    image,
+    url: `${SITE}/event/${encodeURIComponent(eventId)}`,
+    type: 'event',
+  };
 }
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
@@ -96,7 +114,7 @@ async function fetchEvent(eventId: string) {
 function truncate(s: string, max: number): string {
   if (!s) return '';
   if (s.length <= max) return s;
-  return s.slice(0, max - 1) + '…';
+  return s.slice(0, max - 1) + '\u2026';
 }
 
 function esc(s: string): string {
@@ -126,57 +144,30 @@ function formatTimeCompact(t: string): string {
   }
 }
 
-function ogHtml({
-  title,
-  description,
-  image,
-  url,
-  type = 'article',
-}: {
-  title: string;
-  description: string;
-  image: string;
-  url: string;
-  type?: string;
-}): string {
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>${esc(title)} — ${SITE_NAME}</title>
-  <meta name="description" content="${esc(description)}" />
-
-  <!-- Open Graph -->
-  <meta property="og:type"        content="${type}" />
-  <meta property="og:url"         content="${esc(url)}" />
-  <meta property="og:title"       content="${esc(title)}" />
-  <meta property="og:description" content="${esc(description)}" />
-  <meta property="og:image"       content="${esc(image)}" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt"   content="${esc(title)}" />
-  <meta property="og:site_name"   content="${SITE_NAME}" />
-  <meta property="og:locale"      content="en_US" />
-
-  <!-- Twitter / X -->
-  <meta name="twitter:card"        content="summary_large_image" />
-  <meta name="twitter:title"       content="${esc(title)}" />
-  <meta name="twitter:description" content="${esc(description)}" />
-  <meta name="twitter:image"       content="${esc(image)}" />
-
-  <!-- Redirect real users to the SPA (bots stop here) -->
-  <meta http-equiv="refresh" content="0;url=${esc(url)}" />
-  <link rel="canonical" href="${esc(url)}" />
-</head>
-<body>
-  <p>Redirecting to <a href="${esc(url)}">${esc(title)} on ABQ Unplugged</a>…</p>
-</body>
-</html>`;
+/** Build the OG meta tag block to inject into <head> */
+function ogMetaTags(og: OGData): string {
+  return `
+    <!-- Dynamic OG tags (injected by edge function) -->
+    <meta property="og:type"        content="${esc(og.type)}" />
+    <meta property="og:url"         content="${esc(og.url)}" />
+    <meta property="og:title"       content="${esc(og.title)}" />
+    <meta property="og:description" content="${esc(og.description)}" />
+    <meta property="og:image"       content="${esc(og.image)}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt"   content="${esc(og.title)}" />
+    <meta property="og:site_name"   content="${SITE_NAME}" />
+    <meta property="og:locale"      content="en_US" />
+    <meta name="twitter:card"        content="summary_large_image" />
+    <meta name="twitter:title"       content="${esc(og.title)}" />
+    <meta name="twitter:description" content="${esc(og.description)}" />
+    <meta name="twitter:image"       content="${esc(og.image)}" />
+    <title>${esc(og.title)} — ${SITE_NAME}</title>`;
 }
 
 // ── Edge Function handler ─────────────────────────────────────────────────────
 
-export default async function handler(req: Request) {
+export default async function handler(req: Request, context: Context) {
   const url = new URL(req.url);
   const path = url.pathname;
 
@@ -184,63 +175,40 @@ export default async function handler(req: Request) {
   const placeMatch = path.match(/^\/place\/(.+)$/);
   const eventMatch = path.match(/^\/event\/(.+)$/);
 
-  if (!placeMatch && !eventMatch) {
-    // Not a share URL — pass through to SPA
-    return;
-  }
+  if (!placeMatch && !eventMatch) return;
 
-  const ua = req.headers.get('user-agent');
+  // Fetch OG data from Supabase (run in parallel with origin request)
+  const ogPromise = placeMatch
+    ? fetchPlaceOG(decodeURIComponent(placeMatch[1]))
+    : fetchEventOG(decodeURIComponent(eventMatch![1]));
 
-  if (placeMatch) {
-    const placeId = decodeURIComponent(placeMatch[1]);
-    const canonical = `${SITE}/place/${encodeURIComponent(placeId)}`;
+  // Get the SPA HTML from the origin (index.html)
+  const originResponse = await context.next();
 
-    if (isBot(ua)) {
-      const place = await fetchPlace(placeId);
-      if (place) {
-        return new Response(
-          ogHtml({
-            title: place.name + (place.category ? ` — ${place.category}` : ''),
-            description: place.description,
-            image: place.image,
-            url: canonical,
-          }),
-          { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=3600' } }
-        );
-      }
-    }
+  // If we can't get OG data, just return the unmodified SPA
+  const og = await ogPromise;
+  if (!og) return originResponse;
 
-    // Real browser — let the SPA handle it (pass through to index.html via Netlify redirect)
-    return;
-  }
+  // Read the SPA HTML and inject dynamic OG tags by replacing the static ones
+  let html = await originResponse.text();
 
-  if (eventMatch) {
-    const eventId = decodeURIComponent(eventMatch[1]);
-    const canonical = `${SITE}/event/${encodeURIComponent(eventId)}`;
+  // Remove existing static OG / Twitter meta tags and title
+  html = html.replace(/<meta\s+property="og:[^"]*"\s+content="[^"]*"\s*\/?>/gi, '');
+  html = html.replace(/<meta\s+name="twitter:[^"]*"\s+content="[^"]*"\s*\/?>/gi, '');
+  html = html.replace(/<title>[^<]*<\/title>/i, '');
 
-    if (isBot(ua)) {
-      const event = await fetchEvent(eventId);
-      if (event) {
-        const titleParts = [event.name];
-        if (event.venue) titleParts.push(`at ${event.venue}`);
-        return new Response(
-          ogHtml({
-            title: titleParts.join(' '),
-            description: event.description,
-            image: event.image,
-            url: canonical,
-            type: 'event',
-          }),
-          { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=3600' } }
-        );
-      }
-    }
+  // Inject dynamic tags right after <head>
+  html = html.replace(/<head>/i, `<head>${ogMetaTags(og)}`);
 
-    return;
-  }
+  // Return modified HTML with same status/headers
+  const headers = new Headers(originResponse.headers);
+  headers.set('cache-control', 'public, max-age=300, s-maxage=3600');
+  return new Response(html, {
+    status: originResponse.status,
+    headers,
+  });
 }
 
-// Tell Netlify which paths to intercept
 export const config = {
   path: ['/place/*', '/event/*'],
 };
