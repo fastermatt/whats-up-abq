@@ -617,19 +617,33 @@ function ImageWithFallback({
 }: {
   src?: string; alt?: string; className?: string; gradient?: string; showLabel?: boolean;
 }) {
+  const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const resolvedSrc = src ? hiResUrl(src) : '';
   const bg = gradient || hashGradient(alt);
+
+  // Category-specific fallback icons
+  const fallbackIcon = (() => {
+    const n = (alt || '').toLowerCase();
+    if (n.includes('park') || n.includes('trail') || n.includes('bosque')) return '🌳';
+    if (n.includes('coffee') || n.includes('cafe')) return '☕';
+    if (n.includes('restaurant') || n.includes('food') || n.includes('grill')) return '🍽️';
+    if (n.includes('bar') || n.includes('brewery') || n.includes('taproom')) return '🍸';
+    if (n.includes('museum') || n.includes('gallery')) return '🏛️';
+    if (n.includes('gym') || n.includes('fitness')) return '💪';
+    return '📍';
+  })();
 
   if (!resolvedSrc || error) {
     return (
       <div
         className={className}
-        style={{ background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}
+        style={{ background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}
         aria-label={alt}
       >
+        <span style={{ fontSize: '32px', opacity: 0.3 }}>{fallbackIcon}</span>
         {showLabel && alt && (
-          <span style={{ color: 'rgba(255,255,255,0.5)', fontFamily: 'Public Sans, sans-serif', fontWeight: 900, fontSize: '13px', textAlign: 'center', padding: '8px', lineHeight: 1.2 }}>
+          <span style={{ position: 'absolute', bottom: 8, left: 8, right: 8, color: 'rgba(255,255,255,0.7)', fontFamily: 'Public Sans, sans-serif', fontWeight: 700, fontSize: '12px', textAlign: 'center', lineHeight: 1.2 }}>
             {alt}
           </span>
         )}
@@ -637,14 +651,27 @@ function ImageWithFallback({
     );
   }
   return (
-    <img
-      src={resolvedSrc}
-      alt={alt || ''}
-      className={className}
-      loading="lazy"
-      decoding="async"
-      onError={() => setError(true)}
-    />
+    <div className={className} style={{ position: 'relative', overflow: 'hidden', background: bg }}>
+      {/* Skeleton shimmer while loading */}
+      {!loaded && (
+        <div className="skeleton" style={{ position: 'absolute', inset: 0, borderRadius: 0 }} />
+      )}
+      <img
+        src={resolvedSrc}
+        alt={alt || ''}
+        style={{
+          width: '100%', height: '100%', objectFit: 'cover', display: 'block',
+          opacity: loaded ? 1 : 0,
+          transform: loaded ? 'scale(1)' : 'scale(1.05)',
+          filter: loaded ? 'blur(0)' : 'blur(8px)',
+          transition: 'opacity 0.5s ease, transform 0.5s ease, filter 0.5s ease',
+        }}
+        loading="lazy"
+        decoding="async"
+        onLoad={() => setLoaded(true)}
+        onError={() => setError(true)}
+      />
+    </div>
   );
 }
 
@@ -656,7 +683,8 @@ const PLACE_CATEGORIES = [
   { label: 'Coffee',         icon: 'coffee',        value: 'coffee' },
   { label: 'Bars',           icon: 'beer',          value: 'bar' },
   { label: 'Parks',          icon: 'park',          value: 'park' },
-  { label: 'Fitness',        icon: 'fitness',       value: 'fitness' },
+  { label: 'Active',         icon: 'fitness',       value: 'fitness' },
+  { label: 'Wellness',       icon: 'spa',           value: 'wellness' },
   { label: 'Arts',           icon: 'art',           value: 'arts' },
   { label: 'Shopping',       icon: 'shop',          value: 'shop' },
   { label: 'Entertainment',  icon: 'entertainment', value: 'entertainment' },
@@ -682,6 +710,7 @@ const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
   shop:       { bg: '#e0e7ff', text: '#3730a3' },
   entertainment: { bg: '#fef9c3', text: '#854d0e' },
   museum:     { bg: '#f3e8ff', text: '#6b21a8' },
+  wellness:   { bg: '#fce4ec', text: '#880e4f' },
   hotel:      { bg: '#cffafe', text: '#155e75' },
   other:      { bg: '#f3f4f6', text: '#374151' },
 };
@@ -707,9 +736,12 @@ const CATEGORY_SYNONYMS: Record<string, string[]> = {
   // Shopping (full category only for generic shopping terms)
   shopping:     ['shop'], store: ['shop'], stores: ['shop'],
   retail:       ['shop'], mall:  ['shop'],
-  // Fitness
+  // Fitness / Active
   gym:          ['fitness'], workout: ['fitness'],
   'work out':   ['fitness'], exercise: ['fitness'],
+  // Wellness
+  wellness:     ['wellness'], relax: ['wellness', 'coffee'],
+  salon:        ['wellness'], massage: ['wellness'],
   // Arts
   art:          ['arts', 'museum'], gallery: ['arts', 'museum'],
   // Museums
@@ -744,7 +776,7 @@ const SEARCH_BOOSTS: Record<string, string[]> = {
   trail:        ['park'], trails: ['park'], hike: ['park'], hiking: ['park'],
   // Cross-category
   history:      ['museum', 'arts'],
-  spa:          ['fitness'],
+  spa:          ['wellness'],
 };
 
 const EVENT_GENRES = [
@@ -3338,21 +3370,25 @@ function DiscoverScreen({
         <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
           <p className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>Explore by Vibe</p>
         </div>
-        <div className="grid grid-cols-3" style={{ gap: '0', borderLeft: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)', borderRight: '1px solid rgba(0,0,0,0.08)' }}>
-          {[
-            { icon: 'park', label: 'Outdoor', cat: 'park' },
-            { icon: 'restaurant', label: 'Food & Drink', cat: 'restaurant' },
-            { icon: 'palette', label: 'Arts & Culture', cat: 'arts' },
-            { icon: 'music_note', label: 'Live Music', cat: 'entertainment' },
-            { icon: 'child_care', label: 'Family Fun', cat: 'park' },
-            { icon: 'directions_run', label: 'Active', cat: 'fitness' },
-          ].map(({ icon, label, cat }) => (
+        <div className="grid grid-cols-5 gap-0" style={{ borderLeft: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)', borderRight: '1px solid rgba(0,0,0,0.08)' }}>
+          {([
+            { icon: 'favorite', label: 'Date Night', gradient: 'linear-gradient(135deg, #e91e63, #ff5252)', vibeSearch: 'date night', vibeCats: ['restaurant', 'bar', 'entertainment', 'arts'] },
+            { icon: 'directions_run', label: 'Active', gradient: 'linear-gradient(135deg, #ff6d00, #ffab00)', vibeSearch: '', vibeCats: ['fitness', 'park'] },
+            { icon: 'spa', label: 'Chill', gradient: 'linear-gradient(135deg, #00897b, #4db6ac)', vibeSearch: '', vibeCats: ['coffee', 'wellness', 'park'] },
+            { icon: 'family_restroom', label: 'Family', gradient: 'linear-gradient(135deg, #1565c0, #42a5f5)', vibeSearch: '', vibeCats: ['entertainment', 'park', 'museum'] },
+            { icon: 'palette', label: 'Culture', gradient: 'linear-gradient(135deg, #6a1b9a, #ab47bc)', vibeSearch: '', vibeCats: ['arts', 'museum', 'entertainment'] },
+          ] as const).map(({ icon, label, gradient, vibeSearch, vibeCats }) => (
             <button key={label}
-              className="flex flex-col items-center gap-1 p-3 transition-all active:bg-gray-100"
+              className="flex flex-col items-center gap-1.5 py-4 px-1 transition-all active:scale-95"
               style={{ background: 'white', border: 'none', borderRight: '1px solid rgba(0,0,0,0.08)', borderBottom: '1px solid rgba(0,0,0,0.08)', borderRadius: 6 }}
-              onClick={() => onNavigatePlaces?.(cat, '')}>
-              <span className="material-symbols-outlined" style={{ fontSize: '26px', color: '#1A1A1A', fontVariationSettings: "'FILL' 0, 'wght' 300" }}>{icon}</span>
-              <span className="text-center leading-tight font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '9px', letterSpacing: '0.08em', color: '#1A1A1A' }}>{label}</span>
+              onClick={() => {
+                // Navigate to places with multi-category vibe filter
+                onNavigatePlaces?.(vibeCats.join('|'), vibeSearch);
+              }}>
+              <div style={{ width: 40, height: 40, borderRadius: 12, background: gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '20px', color: 'white', fontVariationSettings: "'FILL' 1, 'wght' 500" }}>{icon}</span>
+              </div>
+              <span className="text-center leading-tight font-bold" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '10px', letterSpacing: '0.02em', color: '#2D2926' }}>{label}</span>
             </button>
           ))}
         </div>
@@ -3958,7 +3994,10 @@ function PlacesScreen({
     // always search across ALL places — preventing the confusing "0 results"
     // you get when a category is locked and the search term doesn't match it.
     const searchActive = search.trim().length > 0;
-    if (selectedCat !== 'All' && !searchActive) result = result.filter(p => p.category === selectedCat);
+    if (selectedCat !== 'All' && !searchActive) {
+      const cats = selectedCat.includes('|') ? selectedCat.split('|') : [selectedCat];
+      result = result.filter(p => cats.includes(p.category));
+    }
     if (searchActive) {
       const neighborhoodBounds = NEIGHBORHOOD_BOUNDS[search.trim()];
       if (neighborhoodBounds) {
@@ -4152,7 +4191,7 @@ function PlacesScreen({
             className="flex items-center gap-1 px-2 py-0.5 text-xs font-black uppercase"
             style={{ background: 'var(--brand)', color: '#fff', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', letterSpacing: '0.08em' }}
           >
-            {selectedCat} <span style={{ fontSize: '14px', lineHeight: 1 }}>×</span>
+            {selectedCat.includes('|') ? `${selectedCat.split('|').length} categories` : selectedCat} <span style={{ fontSize: '14px', lineHeight: 1 }}>×</span>
           </button>
         </div>
       )}
@@ -4178,7 +4217,9 @@ function PlacesScreen({
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: openNow ? '#b95c43' : '#4caf50', display: 'inline-block', marginRight: 2, flexShrink: 0 }} />
           Open Now
         </button>
-        {PLACE_CATEGORIES.map(cat => (
+        {PLACE_CATEGORIES.map(cat => {
+          const isActive = selectedCat === cat.value || (selectedCat.includes('|') && selectedCat.split('|').includes(cat.value));
+          return (
           <button
             key={cat.label}
             onClick={() => setSelectedCat(cat.value)}
@@ -4186,19 +4227,20 @@ function PlacesScreen({
             style={{
               fontFamily: 'Public Sans, sans-serif',
               letterSpacing: '0.1em',
-              background: selectedCat === cat.value ? '#1A1A1A' : 'white',
-              color: selectedCat === cat.value ? 'white' : '#1A1A1A',
+              background: isActive ? '#1A1A1A' : 'white',
+              color: isActive ? 'white' : '#1A1A1A',
               border: '1px solid rgba(0,0,0,0.12)',
               marginRight: '-1.5px',
               borderRadius: 6,
               position: 'relative',
-              zIndex: selectedCat === cat.value ? 1 : 0,
+              zIndex: isActive ? 1 : 0,
             }}
           >
-            <FlatIcon name={cat.icon} size={13} color={selectedCat === cat.value ? 'white' : '#1A1A1A'} />
+            <FlatIcon name={cat.icon} size={13} color={isActive ? 'white' : '#1A1A1A'} />
             <span>{cat.label}</span>
           </button>
-        ))}
+          );
+        })}
       </div>
 
       {/* Sort tabs */}
@@ -7458,7 +7500,8 @@ function useWindowWidth() {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>('discover');
-  const isDesktop = useIsDesktop();
+  // Mobile-first: always use mobile layout (desktop layout disabled for now)
+  const isDesktop = false;
 
   const [showSearch, setShowSearch] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
@@ -8389,7 +8432,7 @@ export default function App() {
       <OfflineBanner />
       <div
         className="flex flex-col mx-auto relative"
-        style={{ width: '100%', maxWidth: '480px', minHeight: '100dvh', background: 'white', overflowX: 'hidden' }}
+        style={{ width: '100%', maxWidth: '480px', minHeight: '100dvh', background: 'white', overflowX: 'hidden', boxShadow: '0 0 40px rgba(0,0,0,0.08)' }}
       >
         {/* Header — Urban Curator: white + hard 2px border-bottom */}
         <header
