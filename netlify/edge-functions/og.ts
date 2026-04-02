@@ -44,14 +44,12 @@ async function fetchPlace(placeId: string) {
     `Discover ${name} in Albuquerque on ABQ Unplugged`;
   const category = raw?.primaryTypeDisplayName?.text || raw?.category || '';
 
-  // Best available photo
+  // Best available photo — use Google Maps photo API
   let image = FALLBACK_IMAGE;
   if (raw?.photos?.length) {
-    const ref = raw.photos[0].name || raw.photos[0].photo_reference;
+    const ref = raw.photos[0].photo_reference;
     if (ref) {
-      image = ref.startsWith('http')
-        ? ref
-        : `https://places.googleapis.com/v1/${ref}/media?maxWidthPx=1200&key=AIzaSyAJ7V0rlGJsb2KebTObW14ylEXbSirzLFM`;
+      image = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1200&photoreference=${ref}&key=AIzaSyAJ7V0rlGJsb2KebTObW14ylEXbSirzLFM`;
     }
   }
 
