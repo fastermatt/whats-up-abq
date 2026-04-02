@@ -38,6 +38,17 @@ export interface Place {
   isOutdoor?: boolean;
   isAccessible?: boolean;
   isFeatured?: boolean;
+  // Enriched data fields (from enrichment script or Supabase)
+  insiderTip?: string;
+  parkingInfo?: string;
+  historicNote?: string;
+  bestFor?: string[];
+  priceNote?: string;
+  about?: string;
+  reviewCount?: number;
+  // Pre-loaded enriched data from Supabase (attached by fetchPlacesFromDB)
+  _enriched?: { tip?: string; hours?: string; phone?: string; website?: string; editorial?: string; parking?: string; menu?: string };
+  _hideEnriched?: boolean;
 }
 
 export const PLACE_CATEGORIES: { label: PlaceCategory; emoji: string; color: string }[] = [

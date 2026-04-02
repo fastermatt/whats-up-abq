@@ -20,9 +20,44 @@
 const fs           = require('fs');
 const path         = require('path');
 const http         = require('http');
+const https        = require('https');
 const { execSync } = require('child_process');
 
 const PLACES_FILE = path.join(__dirname, '../public/places-data.json');
+
+// ── Supabase config for syncing enriched data to DB ──────────────────────────
+const SUPABASE_URL  = process.env.VITE_SUPABASE_URL  || 'https://bsmvfutebmbkjvlrhiyq.supabase.co';
+const SUPABASE_KEY  = process.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbXZmdXRlYm1ia2p2bHJoaXlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMzgwMzIsImV4cCI6MjA4OTgxNDAzMn0.3rvMRErlF-HnKfbJ6rCNSeCJc39n4K48xjAeSGqf_rc';
+
+/** Sync enriched data to the Supabase `places.enriched` column (JSONB) */
+function syncToSupabase(placeId, enrichedObj) {
+  if (!placeId) return Promise.resolve(false);
+  const dbId = String(placeId).startsWith('google_') ? placeId : `google_${placeId}`;
+  const body = JSON.stringify({ enriched: enrichedObj });
+  const url = new URL(`${SUPABASE_URL}/rest/v1/places?id=eq.${dbId}`);
+  return new Promise((resolve) => {
+    const req = https.request(url, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Prefer': 'return=minimal',
+      },
+    }, (res) => {
+      let data = '';
+      res.on('data', c => data += c);
+      res.on('end', () => {
+        if (res.statusCode >= 300) console.warn(`  ⚠ Supabase sync ${dbId}: ${res.statusCode} ${data.slice(0,100)}`);
+        resolve(res.statusCode < 300);
+      });
+    });
+    req.on('error', (err) => { console.warn(`  ⚠ Supabase sync error: ${err.message}`); resolve(false); });
+    req.setTimeout(10000, () => { req.destroy(); resolve(false); });
+    req.write(body);
+    req.end();
+  });
+}
 const GEMINI_BIN  = '/opt/homebrew/bin/gemini';
 const MODEL_PRO   = 'gemini-2.5-pro';
 const MODEL_FLASH = 'gemini-2.0-flash';
@@ -31,7 +66,7 @@ const LM_PORT     = 1234;
 const LM_MODEL    = 'qwen/qwen2.5-coder-14b';
 const DELAY_MS    = 50;   // local LM Studio needs almost no delay
 const BATCH_SAVE  = 10;
-const CONCURRENCY = 5;   // parallel workers — tune up/down based on GPU headroom
+const CONCURRENCY = 5;   // parallel workers — Windows PC with 14B coder model
 const MAX_RETRIES = 2;
 
 const args           = process.argv.slice(2);
@@ -85,7 +120,7 @@ function checkLMStudio() {
       res.on('end', () => {
         try {
           const ids = JSON.parse(data).data.map(m => m.id);
-          resolve(ids.includes(LM_MODEL) || ids.some(m => m.includes('coder-14b')));
+          resolve(ids.includes(LM_MODEL) || ids.some(m => m.includes('qwen3.5') || m.includes('qwen/qwen')));
         } catch { resolve(false); }
       });
     });
@@ -116,7 +151,7 @@ function callLMStudio(prompt) {
       });
     });
     req.on('error', reject);
-    req.setTimeout(60000, () => { req.destroy(); reject(new Error('LM Studio timeout')); });
+    req.setTimeout(180000, () => { req.destroy(); reject(new Error('LM Studio timeout')); });
     req.write(body); req.end();
   });
 }
@@ -232,6 +267,20 @@ async function main() {
         enrichedWith: result._b,
       };
       done++;
+      // Sync to Supabase enriched column with UI-expected field names
+      const enrichedPayload = {
+        tip:       result.insiderTip   || '',
+        hours:     '',  // hours come from Google, not enrichment
+        phone:     result.phone        || '',
+        website:   result.website      || '',
+        editorial: result.about        || '',
+        parking:   result.parkingInfo  || '',
+        menu:      '',
+        historicNote: result.historicNote || '',
+        bestFor:      Array.isArray(result.bestFor) ? result.bestFor : [],
+        priceNote:    result.priceNote    || '',
+      };
+      syncToSupabase(place.id, enrichedPayload).catch(() => {});
       console.log(`✓ [${done}/${targets.length}] ${label} — ${(result.description||'').slice(0,60)}…`);
 
       if (done % BATCH_SAVE === 0 && !saving) {
