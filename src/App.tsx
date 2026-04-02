@@ -1425,10 +1425,12 @@ function PlaceDetailModal({
             )}
             <button
               onClick={async () => {
+                const shareUrl = `https://abqunplugged.com/place/${encodeURIComponent(place.id)}`;
+                const shareText = `${place.name} — ${place.description || place.category || ''}`;
                 if (navigator.share) {
-                  try { await navigator.share({ title: place.name, text: `${place.name} — ${place.description || place.category || ''}`, url: place.website || 'https://abqunplugged.com' }); setShared(true); setTimeout(() => setShared(false), 2000); return; } catch { /* fall through */ }
+                  try { await navigator.share({ title: place.name, text: shareText, url: shareUrl }); setShared(true); setTimeout(() => setShared(false), 2000); return; } catch { /* fall through */ }
                 }
-                try { await navigator.clipboard.writeText(`${place.name}\n${place.address || ''}\n${place.website || 'https://abqunplugged.com'}`); setShared(true); setTimeout(() => setShared(false), 2000); } catch { /* ignore */ }
+                try { await navigator.clipboard.writeText(shareUrl); setShared(true); setTimeout(() => setShared(false), 2000); } catch { /* ignore */ }
               }}
               className="w-10 h-10 flex items-center justify-center"
               style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%' }}
@@ -2048,7 +2050,7 @@ function addToCalendar(event: TMEvent) {
 
 async function shareEvent(event: TMEvent) {
   const venue = event._embedded?.venues?.[0];
-  const deepLink = `https://abqunplugged.com/#event/${encodeURIComponent(event.id)}`;
+  const deepLink = `https://abqunplugged.com/event/${encodeURIComponent(event.id)}`;
   const dateStr = event.dates?.start?.localDate
     ? formatDate(event.dates.start.localDate) + (event.dates.start.localTime ? ' · ' + formatTime(event.dates.start.localTime) : '')
     : '';
@@ -7453,9 +7455,25 @@ export default function App() {
     STATIC_TM_EVENTS.filter(e => !isJunkEvent(e)).map(tagAdultEvent)
   );
   const [eventsNavSearch, setEventsNavSearch] = useState('');
-  // Deep-link: capture #event/{id} from URL on mount so we can open it once events load
+  // Deep-link: capture event or place ID from URL on mount (supports both hash and path-based URLs)
   const pendingDeepLinkId = useRef<string | null>(
-    (() => { const m = window.location.hash.match(/^#event\/(.+)$/); return m ? decodeURIComponent(m[1]) : null; })()
+    (() => {
+      // Path-based: /event/{id} (from shared links with OG tags)
+      const pm = window.location.pathname.match(/^\/event\/(.+)$/);
+      if (pm) return decodeURIComponent(pm[1]);
+      // Hash-based: #event/{id} (legacy)
+      const hm = window.location.hash.match(/^#event\/(.+)$/);
+      return hm ? decodeURIComponent(hm[1]) : null;
+    })()
+  );
+  // Deep-link: capture place ID from URL on mount (path-based or hash-based)
+  const pendingPlaceDeepLinkId = useRef<string | null>(
+    (() => {
+      const pm = window.location.pathname.match(/^\/place\/(.+)$/);
+      if (pm) return decodeURIComponent(pm[1]);
+      const hm = window.location.hash.match(/^#place\/(.+)$/);
+      return hm ? decodeURIComponent(hm[1]) : null;
+    })()
   );
   // Only block on the loading screen if there's no cached data to show.
   const [loading, setLoading] = useState(() => {
@@ -7687,8 +7705,9 @@ export default function App() {
     // Once Supabase reads the tokens (async), onAuthStateChange will fire and set the correct tab.
     if (window.location.hash.includes('access_token')) return;
 
-    // Don't overwrite a deep-link event URL until it has been consumed
-    if (pendingDeepLinkId.current && window.location.hash.startsWith('#event/')) return;
+    // Don't overwrite a deep-link URL until it has been consumed
+    if (pendingDeepLinkId.current && (window.location.hash.startsWith('#event/') || window.location.pathname.startsWith('/event/'))) return;
+    if (pendingPlaceDeepLinkId.current && (window.location.hash.startsWith('#place/') || window.location.pathname.startsWith('/place/'))) return;
 
     // Sync URL to current active tab (do NOT hardcode 'discover' — that overrides post-login navigation)
     window.history.replaceState({ tab: activeTab, modal: null }, '', `#${activeTab}`);
@@ -8115,7 +8134,7 @@ export default function App() {
     loadData();
   }, []);
 
-  // ── Deep-link handler: open #event/{id} once events are available ──────────
+  // ── Deep-link handler: open /event/{id} or #event/{id} once events load ────
   useEffect(() => {
     const id = pendingDeepLinkId.current;
     if (!id || events.length === 0) return;
@@ -8124,10 +8143,22 @@ export default function App() {
     if (found) {
       setActiveTab('events');
       setSelectedEvent(found);
-      // Clean up the URL so it looks like a normal #events page after opening
       window.history.replaceState({ tab: 'events', modal: id }, '', `#event/${encodeURIComponent(id)}`);
     }
   }, [events]);
+
+  // ── Deep-link handler: open /place/{id} or #place/{id} once places load ───
+  useEffect(() => {
+    const id = pendingPlaceDeepLinkId.current;
+    if (!id || places.length === 0) return;
+    pendingPlaceDeepLinkId.current = null;
+    const found = places.find(p => p.id === id);
+    if (found) {
+      setActiveTab('discover');
+      setSelectedPlace(found);
+      window.history.replaceState({ tab: 'discover', modal: 'place', id: found.id }, '', `#place/${found.id}`);
+    }
+  }, [places]);
 
   // ── Admin route ──
   if (showAdmin) {

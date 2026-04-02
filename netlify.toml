@@ -86,6 +86,17 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
+# ─── Edge Functions ───────────────────────────────────────────────────────────
+# Dynamic OG meta tags for shared place/event links (social previews)
+
+[[edge_functions]]
+  function = "og"
+  path = "/place/*"
+
+[[edge_functions]]
+  function = "og"
+  path = "/event/*"
+
 # ─── Redirects ────────────────────────────────────────────────────────────────
 
 # SPA fallback — all routes serve index.html (sw.js served as real file before this)
