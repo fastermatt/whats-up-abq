@@ -10,5 +10,10 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,        // keep session in localStorage across app closes
     autoRefreshToken: true,      // proactively refresh access token before it expires
     storageKey: 'abq-unplugged-auth', // explicit key prevents conflicts
+    // Bypass Navigator Locks API — the default lock can stall for 5+ seconds
+    // on page load (orphaned lock from unmount / Strict Mode), which blocks
+    // ALL Supabase queries and causes timeouts for data fetches.
+    // Safe here: only one tab typically does admin auth at a time.
+    lock: async (_name: string, _acquireTimeout: number, fn: () => Promise<any>) => fn(),
   },
 });
