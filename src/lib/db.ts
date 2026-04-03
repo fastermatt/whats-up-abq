@@ -143,15 +143,24 @@ function transformGoogleRaw(
   const photoRef = photos?.[0]?.photo_reference;
   // Admin-set photo override takes precedence over everything
   const overridePhoto = raw.overridePhoto as string | undefined;
-  // Priority: overridePhoto > cached Supabase Storage URL > Google API URL
-  const imageUrl = overridePhoto || cachedPhotoUrl || (photoRef
-    ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photoRef}&key=${GOOGLE_KEY}`
-    : undefined);
-  const thumbnailUrl = overridePhoto || cachedThumbnailUrl || cachedPhotoUrl || (photoRef
-    ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoRef}&key=${GOOGLE_KEY}`
-    : undefined);
-  // Additional photos — only fall back to Google API if no cached main photo
-  const additionalImages = (!cachedPhotoUrl && !overridePhoto)
+  // 'none' means the photo was checked and is unavailable — don't hit Google API
+  const hasCachedReal = cachedPhotoUrl && cachedPhotoUrl !== 'none';
+  const hasCachedThumbReal = cachedThumbnailUrl && cachedThumbnailUrl !== 'none';
+  const photoExpired = cachedPhotoUrl === 'none';
+  // Priority: overridePhoto > cached Supabase Storage URL > Google API URL (only if not expired)
+  const imageUrl = overridePhoto
+    || (hasCachedReal ? cachedPhotoUrl : undefined)
+    || (!photoExpired && photoRef
+      ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photoRef}&key=${GOOGLE_KEY}`
+      : undefined);
+  const thumbnailUrl = overridePhoto
+    || (hasCachedThumbReal ? cachedThumbnailUrl : undefined)
+    || (hasCachedReal ? cachedPhotoUrl : undefined)
+    || (!photoExpired && photoRef
+      ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoRef}&key=${GOOGLE_KEY}`
+      : undefined);
+  // Additional photos — only fall back to Google API if no cached main photo and not expired
+  const additionalImages = (!cachedPhotoUrl && !overridePhoto && !photoExpired)
     ? photos?.slice(1, 6).map(
         p => `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${p.photo_reference}&key=${GOOGLE_KEY}`
       )
