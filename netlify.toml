@@ -32,6 +32,12 @@
   [headers.values]
     Cache-Control = "public, max-age=86400"
 
+# events-og.json — 1 day (static event data for OG previews)
+[[headers]]
+  for = "/events-og.json"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
 # Manifest — short cache (may change with app updates)
 [[headers]]
   for = "/manifest.json"
