@@ -732,7 +732,17 @@ function ImageWithFallback({
         }}
         loading="lazy"
         decoding="async"
-        onLoad={() => setLoaded(true)}
+        onLoad={(e) => {
+          const img = e.currentTarget;
+          // Google returns a tiny map-tile placeholder (~100×100) when the
+          // photo_reference is expired or invalid. Treat anything under 150px
+          // wide as a broken image so the gradient fallback shows instead.
+          if (img.naturalWidth > 0 && img.naturalWidth < 150) {
+            setError(true);
+          } else {
+            setLoaded(true);
+          }
+        }}
         onError={() => setError(true)}
       />
     </div>
@@ -1048,6 +1058,14 @@ function PlaceCardImageSlider({ place }: { place: Place }) {
   const handleImgError = useCallback((url: string) => {
     setBrokenUrls(prev => { const n = new Set(prev); n.add(url); return n; });
   }, []);
+  // Google returns a tiny map-tile placeholder (~100×100) when photo_reference
+  // is expired or invalid. Detect it on load and treat as broken.
+  const handleImgLoad = useCallback((url: string, e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (img.naturalWidth > 0 && img.naturalWidth < 150) {
+      handleImgError(url);
+    }
+  }, [handleImgError]);
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
   const touchStartX = useRef<number | null>(null);
@@ -1103,6 +1121,7 @@ function PlaceCardImageSlider({ place }: { place: Place }) {
             alt=""
             loading={i === 0 ? 'eager' : 'lazy'}
             decoding="async"
+            onLoad={(e) => handleImgLoad(src, e)}
             onError={() => handleImgError(src)}
             style={{
               width: '100%', height: '100%', objectFit: 'cover',
@@ -1249,6 +1268,10 @@ function EventCardImageSlider({ event }: { event: TMEvent }) {
   const handleImgError = useCallback((url: string) => {
     setBrokenUrls(prev => { const n = new Set(prev); n.add(url); return n; });
   }, []);
+  const handleImgLoad = useCallback((url: string, e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (img.naturalWidth > 0 && img.naturalWidth < 150) handleImgError(url);
+  }, [handleImgError]);
 
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -1301,6 +1324,7 @@ function EventCardImageSlider({ event }: { event: TMEvent }) {
         <div key={src} className="absolute inset-0" style={{ opacity: i === idx ? 1 : 0, transition: 'opacity 0.65s ease', overflow: 'hidden' }}>
           <img
             src={src} alt="" loading={i === 0 ? 'eager' : 'lazy'} decoding="async"
+            onLoad={(e) => handleImgLoad(src, e)}
             onError={() => handleImgError(src)}
             style={{ width: '100%', height: '100%', objectFit: 'cover', animation: i === idx ? `kenBurns${i % 4} 8s ease-in-out forwards` : 'none', transformOrigin: 'center center', willChange: 'transform' }}
           />
@@ -1382,6 +1406,10 @@ function PlacePhotoGallery({ place }: { place: Place }) {
   const handleImgError = useCallback((url: string) => {
     setBrokenUrls(prev => { const n = new Set(prev); n.add(url); return n; });
   }, []);
+  const handleImgLoad = useCallback((url: string, e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (img.naturalWidth > 0 && img.naturalWidth < 150) handleImgError(url);
+  }, [handleImgError]);
   const [idx, setIdx] = useState(0);
   const touchStartX = useRef<number | null>(null);
 
@@ -1412,6 +1440,7 @@ function PlacePhotoGallery({ place }: { place: Place }) {
           className="absolute inset-0 w-full h-full object-cover"
           loading={i === 0 ? 'eager' : 'lazy'}
           decoding="async"
+          onLoad={(e) => handleImgLoad(src, e)}
           onError={() => handleImgError(src)}
           style={{
             opacity: i === idx ? 1 : 0,
