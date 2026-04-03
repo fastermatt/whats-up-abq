@@ -565,7 +565,7 @@ function ABQUnpluggedLogo({ size = 43 }: { size?: number }) {
     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', userSelect: 'none' }}>
       {/* Lime accent block */}
       <div style={{
-        background: '#b95c43',
+        background: 'var(--brand)',
         padding: `2px ${Math.round(blockH * 0.28)}px`,
         display: 'inline-flex',
         alignItems: 'center',
@@ -575,7 +575,7 @@ function ABQUnpluggedLogo({ size = 43 }: { size?: number }) {
           fontFamily: 'Public Sans, sans-serif',
           fontWeight: 900,
           fontSize: `${abqSize}px`,
-          color: '#1A1A1A',
+          color: 'var(--ink)',
           letterSpacing: '-0.03em',
           lineHeight: 1,
         }}>ABQ</span>
@@ -585,7 +585,7 @@ function ABQUnpluggedLogo({ size = 43 }: { size?: number }) {
         fontFamily: 'Public Sans, sans-serif',
         fontWeight: 900,
         fontSize: `${unplSize}px`,
-        color: '#1A1A1A',
+        color: 'var(--ink)',
         letterSpacing: '0.06em',
         textTransform: 'uppercase',
         lineHeight: 1,
@@ -804,7 +804,7 @@ const EVENT_TYPE_META: Record<string, { icon: string; bg: string }> = {
   'Festival':       { icon: 'festival',      bg: 'linear-gradient(135deg,#7c3aed,#a78bfa)' },
   'Film':           { icon: 'film',          bg: 'linear-gradient(135deg,#1f2937,#4b5563)' },
   'Free':           { icon: 'free',          bg: 'linear-gradient(135deg,#047857,#10b981)' },
-  'Event':          { icon: 'event',         bg: 'linear-gradient(135deg,#1A1A1A,#374151)' },
+  'Event':          { icon: 'event',         bg: 'linear-gradient(135deg,var(--ink),#374151)' },
 };
 
 function getEventTypeMeta(event: TMEvent): { icon: string; bg: string } {
@@ -822,7 +822,7 @@ function getEventTypeMeta(event: TMEvent): { icon: string; bg: string } {
 
 // ─── Flat SVG Icon System ─────────────────────────────────────────────────────
 const FlatIcon = React.memo(function FlatIcon({
-  name, size = 14, color = '#1A1A1A',
+  name, size = 14, color = 'var(--ink)',
 }: { name: string; size?: number; color?: string }) {
   const S = { stroke: color, strokeWidth: 1.5, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: 'none' as const };
   const F = { fill: color, stroke: 'none' as const };
@@ -902,9 +902,9 @@ function GeoBanner({
   if (dismissed && !error) return null;
 
   if (error) return (
-    <div className="px-4 py-3 flex items-center gap-3" style={{ background: '#b95c43', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-      <span className="material-symbols-outlined flex-shrink-0" style={{ color: '#1A1A1A', fontSize: '20px' }}>location_off</span>
-      <p className="text-xs font-bold flex-1" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>
+    <div className="px-4 py-3 flex items-center gap-3" style={{ background: 'var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+      <span className="material-symbols-outlined flex-shrink-0" style={{ color: 'var(--ink)', fontSize: '20px' }}>location_off</span>
+      <p className="text-xs font-bold flex-1" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)' }}>
         Enable location to see distances &amp; sort by nearby
       </p>
       <button
@@ -918,20 +918,20 @@ function GeoBanner({
   );
 
   if (requested) return (
-    <div className="px-4 py-3 flex items-center gap-3" style={{ background: '#b95c43', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-      <span className="material-symbols-outlined flex-shrink-0" style={{ color: '#1A1A1A', fontSize: '20px' }}>my_location</span>
-      <p className="text-xs font-bold flex-1" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>Getting your location…</p>
+    <div className="px-4 py-3 flex items-center gap-3" style={{ background: 'var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+      <span className="material-symbols-outlined flex-shrink-0" style={{ color: 'var(--ink)', fontSize: '20px' }}>my_location</span>
+      <p className="text-xs font-bold flex-1" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)' }}>Getting your location…</p>
     </div>
   );
 
   return (
     <div
       className="px-4 py-3 flex items-center gap-3"
-      style={{ background: '#b95c43', borderBottom: '1px solid rgba(0,0,0,0.08)' }}
+      style={{ background: 'var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}
     >
-      <span className="material-symbols-outlined flex-shrink-0" style={{ color: '#1A1A1A', fontSize: '20px' }}>near_me</span>
+      <span className="material-symbols-outlined flex-shrink-0" style={{ color: 'var(--ink)', fontSize: '20px' }}>near_me</span>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-black" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>Find things near you</p>
+        <p className="text-sm font-black" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)' }}>Find things near you</p>
         <p className="text-xs" style={{ color: 'rgba(0,0,0,0.6)', fontFamily: 'Public Sans, sans-serif' }}>Share location for distances &amp; "Near Me"</p>
       </div>
       <button
@@ -944,7 +944,7 @@ function GeoBanner({
       <button
         onClick={() => { setDismissed(true); try { localStorage.setItem('abq_geo_dismissed', '1'); } catch {} }}
         className="flex-shrink-0"
-        style={{ background: 'none', border: 'none', color: '#1A1A1A', fontSize: 18, cursor: 'pointer', padding: '0 4px', opacity: 0.6 }}
+        style={{ background: 'none', border: 'none', color: 'var(--ink)', fontSize: 18, cursor: 'pointer', padding: '0 4px', opacity: 0.6 }}
         aria-label="Dismiss"
       >
         ×
@@ -1070,7 +1070,7 @@ const PlaceCard = React.memo(function PlaceCard({
           <div className="absolute bottom-2 left-2">
             <span
               className="text-xs font-bold text-white px-1.5 py-0.5"
-              style={{ background: '#1A1A1A' }}
+              style={{ background: 'var(--ink)' }}
             >
               ✓ Visited
             </span>
@@ -1080,7 +1080,7 @@ const PlaceCard = React.memo(function PlaceCard({
       <div className="p-3">
         {/* Category inline label with flat icon */}
         <div className="flex items-center gap-1 mb-1" style={{ opacity: 0.6 }}>
-          <FlatIcon name={catIconName} size={11} color="#1A1A1A" />
+          <FlatIcon name={catIconName} size={11} color="var(--ink)" />
           <span className="text-xs font-bold uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em', fontSize: 9 }}>{catLabel}</span>
         </div>
         <p
@@ -1121,7 +1121,7 @@ const PlaceCard = React.memo(function PlaceCard({
               style={{
                 fontFamily: 'Public Sans, sans-serif',
                 letterSpacing: '0.06em',
-                background: tooFar ? '#888' : isCheckedIn ? '#1A1A1A' : '#b95c43',
+                background: tooFar ? '#888' : isCheckedIn ? 'var(--ink)' : 'var(--brand)',
                 color: 'white',
                 border: '1px solid rgba(0,0,0,0.12)',
                 borderRadius: 6,
@@ -1265,7 +1265,7 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
             )}
           </div>
           {price && (
-            <span className="text-xs font-bold flex-shrink-0" style={{ color: '#1A1A1A' }}>
+            <span className="text-xs font-bold flex-shrink-0" style={{ color: 'var(--ink)' }}>
               {(price.min ?? 0) === 0 ? 'Free' : `From $${Math.round(price.min || 0)}`}
             </span>
           )}
@@ -2363,7 +2363,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
           <button
             onClick={() => addToCalendar(event)}
             className="flex items-center justify-center gap-2 w-full py-3 mb-2 font-black text-sm"
-            style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderRadius: 6, background: 'white', color: '#1A1A1A', fontFamily: 'Public Sans, sans-serif' }}
+            style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderRadius: 6, background: 'white', color: 'var(--ink)', fontFamily: 'Public Sans, sans-serif' }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>calendar_add_on</span>
             ADD TO CALENDAR
@@ -2516,7 +2516,7 @@ function WhyUnplugCard() {
   return (
     <div className={`mx-5 mb-28 unplug-${phase}`} style={{ minHeight: '88px' }}>
       <div className="unplug-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-        <FlatIcon name={q.icon} size={18} color="#1A1A1A" />
+        <FlatIcon name={q.icon} size={18} color="var(--ink)" />
         <span style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '10px', fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: '#d4450a' }}>
           Why Unplug?
         </span>
@@ -2739,7 +2739,7 @@ function StreakBanner() {
         @keyframes streakToastIn { from { opacity:0; transform:translateX(-50%) translateY(-16px) scale(0.92); } to { opacity:1; transform:translateX(-50%) translateY(0) scale(1); } }
         @keyframes streakToastOut { from { opacity:1; transform:translateX(-50%) translateY(0); } to { opacity:0; transform:translateX(-50%) translateY(-12px); } }
       `}</style>
-      <span className="material-symbols-outlined" style={{ fontSize: '16px', fontVariationSettings: "'FILL' 1", color: info.count >= 7 ? '#ff6b35' : info.count >= 3 ? '#fbbf24' : '#b95c43' }}>{emoji}</span>
+      <span className="material-symbols-outlined" style={{ fontSize: '16px', fontVariationSettings: "'FILL' 1", color: info.count >= 7 ? '#ff6b35' : info.count >= 3 ? '#fbbf24' : 'var(--brand)' }}>{emoji}</span>
       {label}
     </div>
   );
@@ -2772,13 +2772,13 @@ function DailyGem({ places, onSelect }: { places: Place[]; onSelect: (p: Place) 
         <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, rgba(28,111,234,0.12) 0%, rgba(0,0,0,0.72) 100%)' }} />
         <div className="absolute top-3 left-3">
           <span className="text-xs font-black px-3 py-1"
-            style={{ background: '#b95c43', color: 'white', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 6 }}>
+            style={{ background: 'var(--brand)', color: 'white', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 6 }}>
             ★ TODAY'S PICK
           </span>
         </div>
         <div className="absolute top-3 right-3">
           <span className="text-sm font-black w-8 h-8 flex items-center justify-center"
-            style={{ background: '#1A1A1A', color: 'white', border: '2px solid white' }}>→</span>
+            style={{ background: 'var(--ink)', color: 'white', border: '2px solid white' }}>→</span>
         </div>
         <div className="absolute bottom-3 left-3 right-3">
           <p className="text-white font-black text-xl leading-tight" style={{ fontFamily: 'Public Sans, sans-serif' }}>{gem.name}</p>
@@ -2850,21 +2850,21 @@ function AnimatedFact() {
   return (
     <div className="mb-6">
       <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)', marginBottom: '12px' }}>
-        <p className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>Did You Know?</p>
+        <p className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>Did You Know?</p>
       </div>
       <div className="px-5">
-        <button onClick={next} className="w-full p-5 text-left" style={{ background: '#b95c43', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)', minHeight: 96, borderRadius: 6 }}>
+        <button onClick={next} className="w-full p-5 text-left" style={{ background: 'var(--brand)', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)', minHeight: 96, borderRadius: 6 }}>
           <div style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.35s ease' }}>
-            <FlatIcon name={facts[idx].icon} size={28} color="#1A1A1A" />
-            <p className="text-sm mt-2 leading-relaxed font-semibold" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>{facts[idx].fact}</p>
+            <FlatIcon name={facts[idx].icon} size={28} color="var(--ink)" />
+            <p className="text-sm mt-2 leading-relaxed font-semibold" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)' }}>{facts[idx].fact}</p>
           </div>
           <div className="flex items-center justify-between mt-3">
             <div className="flex gap-1">
               {[0,1,2,3,4].map(d => (
-                <div key={d} className="w-1.5 h-1.5 transition-colors" style={{ backgroundColor: d === idx % 5 ? '#1A1A1A' : 'rgba(0,0,0,0.2)' }} />
+                <div key={d} className="w-1.5 h-1.5 transition-colors" style={{ backgroundColor: d === idx % 5 ? 'var(--ink)' : 'rgba(0,0,0,0.2)' }} />
               ))}
             </div>
-            <span className="text-xs font-black" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A', letterSpacing: '0.05em' }}>TAP FOR NEXT ›</span>
+            <span className="text-xs font-black" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)', letterSpacing: '0.05em' }}>TAP FOR NEXT ›</span>
           </div>
         </button>
       </div>
@@ -2988,7 +2988,7 @@ function DiscoverScreen({
   onRequestGeo: () => void;
   checkedIn: Set<string>;
   onCheckIn: (id: string) => void;
-  onNavigatePlaces?: (cat: string, search: string) => void;
+  onNavigatePlaces?: (cat: string, search: string, vibeLabel?: string, vibeGradient?: string) => void;
   onNavigateEvents?: () => void;
   prefs?: UserPrefs;
 }) {
@@ -3041,12 +3041,12 @@ function DiscoverScreen({
       <StreakBanner />
 
       {/* Hero — value prop + primary CTA */}
-      <div style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #b95c43', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+      <div style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <div className="px-5 pt-5 pb-4">
           <p className="text-xs font-black uppercase mb-2" style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.12em' }}>
             Greater ABQ Metro
           </p>
-          <h1 className="font-black leading-tight mb-1" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '26px', letterSpacing: '-0.02em', color: '#1A1A1A' }}>
+          <h1 className="font-black leading-tight mb-1" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '26px', letterSpacing: '-0.02em', color: 'var(--ink)' }}>
             Find something worth<br />going to tonight
           </h1>
           <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '12px', color: '#555', fontWeight: 500, marginBottom: '14px' }}>
@@ -3054,7 +3054,7 @@ function DiscoverScreen({
           </p>
           <button
             onClick={() => onNavigateEvents?.()}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '42px', padding: '0 16px', background: '#1A1A1A', color: 'white', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(185,92,67,0.25)', fontFamily: 'Public Sans, sans-serif', fontSize: '13px', fontWeight: 800, letterSpacing: '0.03em', cursor: 'pointer', borderRadius: 6, marginBottom: '12px' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '42px', padding: '0 16px', background: 'var(--ink)', color: 'white', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(185,92,67,0.25)', fontFamily: 'Public Sans, sans-serif', fontSize: '13px', fontWeight: 800, letterSpacing: '0.03em', cursor: 'pointer', borderRadius: 6, marginBottom: '12px' }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>confirmation_number</span>
             What's on tonight →
@@ -3104,13 +3104,13 @@ function DiscoverScreen({
         <div className="mb-5 mx-5" style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', backgroundColor: '#fff' }}>
-            <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>
+            <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>
               Events This Week
             </h2>
             <button
               onClick={() => onNavigateEvents?.()}
               className="text-xs font-black uppercase"
-              style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A', letterSpacing: '0.06em' }}
+              style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)', letterSpacing: '0.06em' }}
             >
               → SEE ALL
             </button>
@@ -3134,8 +3134,8 @@ function DiscoverScreen({
                 >
                   {/* Date block */}
                   <div className="flex flex-col items-center justify-center flex-shrink-0"
-                    style={{ width: 62, backgroundColor: '#1A1A1A', minHeight: 64 }}>
-                    <span className="font-black uppercase" style={{ fontSize: 10, color: '#F9F5F2', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em', lineHeight: 1 }}>
+                    style={{ width: 62, backgroundColor: 'var(--ink)', minHeight: 64 }}>
+                    <span className="font-black uppercase" style={{ fontSize: 10, color: 'var(--bg)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em', lineHeight: 1 }}>
                       {month}
                     </span>
                     <span className="font-black" style={{ fontSize: 30, color: '#fff', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.05 }}>
@@ -3144,7 +3144,7 @@ function DiscoverScreen({
                   </div>
                   {/* Content */}
                   <div className="flex-1 px-3 py-2 flex flex-col justify-center overflow-hidden">
-                    <p className="font-black text-sm leading-tight" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}>
+                    <p className="font-black text-sm leading-tight" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}>
                       {event.name}
                     </p>
                     <p className="text-xs mt-0.5 truncate" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.02em' }}>
@@ -3153,8 +3153,8 @@ function DiscoverScreen({
                   </div>
                   {/* Arrow */}
                   <div className="flex items-center justify-center flex-shrink-0"
-                    style={{ width: 48, backgroundColor: '#b95c43', borderLeft: '1px solid rgba(0,0,0,0.08)' }}>
-                    <span className="font-black" style={{ fontSize: 18, color: '#1A1A1A' }}>→</span>
+                    style={{ width: 48, backgroundColor: 'var(--brand)', borderLeft: '1px solid rgba(0,0,0,0.08)' }}>
+                    <span className="font-black" style={{ fontSize: 18, color: 'var(--ink)' }}>→</span>
                   </div>
                 </button>
               );
@@ -3368,11 +3368,11 @@ function DiscoverScreen({
       {/* Explore by Vibe */}
       {!hidden.includes('vibes') && <div className="mb-6">
         <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
-          <p className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>Explore by Vibe</p>
+          <p className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>Explore by Vibe</p>
         </div>
         <div className="grid grid-cols-5 gap-0" style={{ borderLeft: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)', borderRight: '1px solid rgba(0,0,0,0.08)' }}>
           {([
-            { icon: 'favorite', label: 'Date Night', gradient: 'linear-gradient(135deg, #e91e63, #ff5252)', vibeSearch: 'date night', vibeCats: ['restaurant', 'bar', 'entertainment', 'arts'] },
+            { icon: 'favorite', label: 'Date Night', gradient: 'linear-gradient(135deg, #e91e63, #ff5252)', vibeSearch: '', vibeCats: ['restaurant', 'bar', 'entertainment', 'arts'] },
             { icon: 'directions_run', label: 'Active', gradient: 'linear-gradient(135deg, #ff6d00, #ffab00)', vibeSearch: '', vibeCats: ['fitness', 'park'] },
             { icon: 'spa', label: 'Chill', gradient: 'linear-gradient(135deg, #00897b, #4db6ac)', vibeSearch: '', vibeCats: ['coffee', 'wellness', 'park'] },
             { icon: 'family_restroom', label: 'Family', gradient: 'linear-gradient(135deg, #1565c0, #42a5f5)', vibeSearch: '', vibeCats: ['entertainment', 'park', 'museum'] },
@@ -3383,7 +3383,7 @@ function DiscoverScreen({
               style={{ background: 'white', border: 'none', borderRight: '1px solid rgba(0,0,0,0.08)', borderBottom: '1px solid rgba(0,0,0,0.08)', borderRadius: 6 }}
               onClick={() => {
                 // Navigate to places with multi-category vibe filter
-                onNavigatePlaces?.(vibeCats.join('|'), vibeSearch);
+                onNavigatePlaces?.(vibeCats.join('|'), vibeSearch, label, gradient);
               }}>
               <div style={{ width: 40, height: 40, borderRadius: 12, background: gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
                 <span className="material-symbols-outlined" style={{ fontSize: '20px', color: 'white', fontVariationSettings: "'FILL' 1, 'wght' 500" }}>{icon}</span>
@@ -3397,22 +3397,22 @@ function DiscoverScreen({
       {/* ABQ Neighborhoods */}
       {!hidden.includes('neighborhoods') && <div className="mb-6">
         <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
-          <p className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>ABQ Neighborhoods</p>
+          <p className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>ABQ Neighborhoods</p>
         </div>
         <div className="grid grid-cols-2" style={{ gap: '0', borderLeft: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)', borderRight: '1px solid rgba(0,0,0,0.08)' }}>
           {[
-            { name: 'Old Town', desc: 'History, art & adobe', icon: 'account_balance', bg: '#b95c43' },
+            { name: 'Old Town', desc: 'History, art & adobe', icon: 'account_balance', bg: 'var(--brand)' },
             { name: 'Nob Hill', desc: 'Eclectic & walkable', icon: 'local_cafe', bg: '#0057c2' },
-            { name: 'Downtown', desc: 'Nightlife & events', icon: 'nightlife', bg: '#1A1A1A' },
+            { name: 'Downtown', desc: 'Nightlife & events', icon: 'nightlife', bg: 'var(--ink)' },
             { name: 'Rio Grande', desc: 'Nature & trails', icon: 'nature', bg: '#1C6FEA' },
-            { name: 'NE Heights', desc: 'Views & dining', icon: 'landscape', bg: '#c97a62' },
+            { name: 'NE Heights', desc: 'Views & dining', icon: 'landscape', bg: 'var(--brand-light)' },
             { name: 'South Valley', desc: 'Local flavor', icon: 'storefront', bg: '#baad3b' },
           ].map(({ name, desc, icon, bg }) => (
             <button key={name} className="p-4 text-left transition-all"
               style={{ backgroundColor: bg, borderRight: '1px solid rgba(0,0,0,0.08)', borderBottom: '1px solid rgba(0,0,0,0.08)', borderRadius: 6 }}
               onClick={() => onNavigatePlaces?.('All', name)}>
-              <span className="material-symbols-outlined" style={{ fontSize: '24px', color: bg === '#baad3b' ? '#1A1A1A' : 'white', fontVariationSettings: "'FILL' 0, 'wght' 300" }}>{icon}</span>
-              <p className="font-black text-sm mt-1" style={{ fontFamily: 'Public Sans, sans-serif', color: bg === '#baad3b' ? '#1A1A1A' : 'white' }}>{name}</p>
+              <span className="material-symbols-outlined" style={{ fontSize: '24px', color: bg === '#baad3b' ? 'var(--ink)' : 'white', fontVariationSettings: "'FILL' 0, 'wght' 300" }}>{icon}</span>
+              <p className="font-black text-sm mt-1" style={{ fontFamily: 'Public Sans, sans-serif', color: bg === '#baad3b' ? 'var(--ink)' : 'white' }}>{name}</p>
               <p className="text-xs" style={{ fontFamily: 'Public Sans, sans-serif', color: bg === '#baad3b' ? 'rgba(0,0,0,0.65)' : 'rgba(255,255,255,0.75)' }}>{desc}</p>
             </button>
           ))}
@@ -3425,25 +3425,25 @@ function DiscoverScreen({
       {/* Weekend Planner */}
       {!hidden.includes('planWeekend') && <div className="mb-6">
         <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)', marginBottom: '12px' }}>
-          <p className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: '#1A1A1A' }}>Plan Your Weekend</p>
+          <p className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>Plan Your Weekend</p>
         </div>
         <div className="flex flex-col gap-2">
           {[
-            { title: 'Morning Hike + Brunch', steps: ['Sandia Mountain foothills trail', 'Coffee at Flying Star Café', 'Brunch in Nob Hill'], bar: '#b95c43' },
-            { title: 'Culture Day', steps: ['Explora Science Center', 'Lunch in Old Town', 'Albuquerque Museum'], bar: '#b95c43' },
-            { title: 'Local Food Crawl', steps: ['Green chile breakfast at Frontier', 'Lunch at El Modelo', 'Drinks on Central Ave'], bar: '#b95c43' },
-            { title: 'Nature Escape', steps: ['Rio Grande Bosque trail', 'Tingley Beach', 'Sunset at Petroglyph Monument'], bar: '#b95c43' },
+            { title: 'Morning Hike + Brunch', steps: ['Sandia Mountain foothills trail', 'Coffee at Flying Star Café', 'Brunch in Nob Hill'], bar: 'var(--brand)' },
+            { title: 'Culture Day', steps: ['Explora Science Center', 'Lunch in Old Town', 'Albuquerque Museum'], bar: 'var(--brand)' },
+            { title: 'Local Food Crawl', steps: ['Green chile breakfast at Frontier', 'Lunch at El Modelo', 'Drinks on Central Ave'], bar: 'var(--brand)' },
+            { title: 'Nature Escape', steps: ['Rio Grande Bosque trail', 'Tingley Beach', 'Sunset at Petroglyph Monument'], bar: 'var(--brand)' },
           ].map(({ title, steps, bar }) => (
             <div key={title} className="flex" style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', backgroundColor: '#fff' }}>
               {/* left accent bar */}
               <div style={{ width: 4, flexShrink: 0, backgroundColor: bar }} />
               <div className="flex-1 px-3 py-2">
                 <div className="flex items-center justify-between mb-1.5">
-                  <p className="text-xs font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A', letterSpacing: '0.09em' }}>{title}</p>
+                  <p className="text-xs font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)', letterSpacing: '0.09em' }}>{title}</p>
                   <button
                     onClick={() => addToDayPlan(steps)}
                     className="text-xs font-black px-2 py-0.5"
-                    style={{ backgroundColor: '#b95c43', color: 'white', border: 'none', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.04em' }}
+                    style={{ backgroundColor: 'var(--brand)', color: 'white', border: 'none', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.04em' }}
                   >
                     + plan
                   </button>
@@ -3451,8 +3451,8 @@ function DiscoverScreen({
                 <div className="flex flex-col gap-0.5">
                   {steps.map((step, i) => (
                     <div key={i} className="flex items-center gap-1.5">
-                      <span className="text-xs font-black w-5 h-5 flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#1A1A1A', color: '#F9F5F2' }}>{i + 1}</span>
-                      <button onClick={() => window.dispatchEvent(new CustomEvent('plan-step-click',{detail:step}))} className="text-xs text-left leading-tight flex-1" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>{step}</button>
+                      <span className="text-xs font-black w-5 h-5 flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'var(--ink)', color: 'var(--bg)' }}>{i + 1}</span>
+                      <button onClick={() => window.dispatchEvent(new CustomEvent('plan-step-click',{detail:step}))} className="text-xs text-left leading-tight flex-1" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)' }}>{step}</button>
                     </div>
                   ))}
                 </div>
@@ -3682,7 +3682,7 @@ function EventsScreen({
 
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #b95c43', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}
@@ -3691,7 +3691,7 @@ function EventsScreen({
         </p>
         <h1
           className="font-black leading-none mt-1"
-          style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '40px', letterSpacing: '-0.04em', color: '#1A1A1A' }}
+          style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '40px', letterSpacing: '-0.04em', color: 'var(--ink)' }}
         >
           What's Happening
         </h1>
@@ -3734,8 +3734,8 @@ function EventsScreen({
                 style={{
                   fontFamily: 'Public Sans, sans-serif',
                   letterSpacing: '0.1em',
-                  background: isSelected ? '#1A1A1A' : isForYou && followedGenres.length > 0 ? 'var(--brand-bg-subtle)' : 'white',
-                  color: isSelected ? 'white' : '#1A1A1A',
+                  background: isSelected ? 'var(--ink)' : isForYou && followedGenres.length > 0 ? 'var(--brand-bg-subtle)' : 'white',
+                  color: isSelected ? 'white' : 'var(--ink)',
                   border: '1px solid rgba(0,0,0,0.12)',
                   borderRight: 'none',
                   borderRadius: 6,
@@ -3786,7 +3786,7 @@ function EventsScreen({
             <button
               onClick={() => setSelectedGenre('All')}
               className="px-5 py-2.5 font-black text-sm uppercase"
-              style={{ background: '#1A1A1A', color: 'white', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(185,92,67,0.25)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em', cursor: 'pointer' }}
+              style={{ background: 'var(--ink)', color: 'white', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(185,92,67,0.25)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em', cursor: 'pointer' }}
             >
               Browse all events
             </button>
@@ -3799,7 +3799,7 @@ function EventsScreen({
         <div className="px-5 py-4 flex items-start gap-3" style={{ background: 'var(--brand-bg-subtle)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
           <span style={{ fontSize: '24px', lineHeight: 1 }}>❤️</span>
           <div>
-            <p className="text-sm font-black" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>Personalize your feed</p>
+            <p className="text-sm font-black" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)' }}>Personalize your feed</p>
             <p className="text-xs mt-0.5" style={{ fontFamily: 'Public Sans, sans-serif', color: '#555' }}>
               Tap the <strong>☆</strong> star next to any genre above to add it to your <em>For You</em> feed. Starred genres are highlighted.
             </p>
@@ -3848,7 +3848,7 @@ function EventsScreen({
                 </div>
               )}
               {(() => { const liked = isWishlisted(event.id); return (
-              <button style={{position:'absolute',top:8,right:8,zIndex:10,background: liked ? '#b95c43' : 'rgba(255,255,255,0.90)',border:'none',borderRadius:'50%',width:44,height:44,minHeight:0,color: liked ? 'white' : '#b95c43',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(0,0,0,0.15)'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:event.id,type:'event',name:event.name,category:'event'});}}><span className="material-symbols-outlined" style={{fontSize:'18px',fontVariationSettings: liked ? "'FILL' 1, 'wght' 700" : "'FILL' 0, 'wght' 400"}}>favorite</span></button>
+              <button style={{position:'absolute',top:8,right:8,zIndex:10,background: liked ? 'var(--brand)' : 'rgba(255,255,255,0.90)',border:'none',borderRadius:'50%',width:44,height:44,minHeight:0,color: liked ? 'white' : 'var(--brand)',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(0,0,0,0.15)'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:event.id,type:'event',name:event.name,category:'event'});}}><span className="material-symbols-outlined" style={{fontSize:'18px',fontVariationSettings: liked ? "'FILL' 1, 'wght' 700" : "'FILL' 0, 'wght' 400"}}>favorite</span></button>
               ); })()}
             </div>
           );
@@ -3869,7 +3869,7 @@ function EventsScreen({
 function PlacesScreen({
   places, onPlaceSelect, coords, geoRequested, geoSilentPending = false, geoError, onRequestGeo,
   checkedIn, onCheckIn, tooFarPlaceId,
-  navKey = 0, navCat = 'All', navSearch = '',
+  navKey = 0, navCat = 'All', navSearch = '', navVibe = '',
 }: {
   places: Place[];
   onPlaceSelect: (p: Place) => void;
@@ -3884,9 +3884,11 @@ function PlacesScreen({
   navKey?: number;
   navCat?: string;
   navSearch?: string;
+  navVibe?: string;
 }) {
   const PAGE_SIZE = 48;
   const [selectedCat, setSelectedCat] = useState('All');
+  const [activeVibe, setActiveVibe] = useState('');
   const [openNow, setOpenNow] = useState(false);
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
@@ -3909,7 +3911,7 @@ function PlacesScreen({
     return () => clearTimeout(t);
   }, [searchInput]);
 
-  useEffect(() => { if (navKey > 0) { setSelectedCat(navCat || 'All'); setOpenNow(false); setSearchInput(navSearch || ''); setSearch(navSearch || ''); } }, [navKey]);
+  useEffect(() => { if (navKey > 0) { setSelectedCat(navCat || 'All'); setOpenNow(false); setSearchInput(navSearch || ''); setSearch(navSearch || ''); setActiveVibe(navVibe || ''); } }, [navKey]);
 
   // Auto-activate Near Me sort as soon as coords become available
   // (fires when pendingNearSort was set because the user tapped before geo was ready)
@@ -4129,7 +4131,35 @@ function PlacesScreen({
 
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', willChange: 'transform' } as React.CSSProperties}>
-      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #b95c43', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+      {activeVibe ? (() => {
+        const [vibeLabel, vibeGrad] = activeVibe.split('|||');
+        return (
+          <div className="px-5 pt-5 pb-4" style={{ background: vibeGrad || 'var(--brand)', borderBottom: '1px solid rgba(255,255,255,0.15)' }}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.8)', fontFamily: 'Public Sans, sans-serif' }}>
+                  Vibe Mode
+                </p>
+                <h1 className="font-black leading-none mt-1" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '36px', letterSpacing: '-0.04em', color: 'white' }}>
+                  {vibeLabel}
+                </h1>
+                <p className="text-sm mt-1" style={{ fontFamily: 'Public Sans, sans-serif', color: 'rgba(255,255,255,0.85)' }}>
+                  {filtered.length} spot{filtered.length !== 1 ? 's' : ''} curated for you
+                </p>
+              </div>
+              <button
+                onClick={() => { setActiveVibe(''); setSelectedCat('All'); }}
+                className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold uppercase"
+                style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: '1px solid rgba(255,255,255,0.3)', borderRadius: 20, fontFamily: 'Public Sans, sans-serif', backdropFilter: 'blur(8px)' }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>close</span>
+                Exit
+              </button>
+            </div>
+          </div>
+        );
+      })() : (
+      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}
@@ -4138,7 +4168,7 @@ function PlacesScreen({
         </p>
         <h1
           className="font-black leading-none mt-1"
-          style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '40px', letterSpacing: '-0.04em', color: '#1A1A1A' }}
+          style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '40px', letterSpacing: '-0.04em', color: 'var(--ink)' }}
         >
           Places to Go
         </h1>
@@ -4148,6 +4178,7 @@ function PlacesScreen({
             : `${places.length.toLocaleString()} spots across Greater ABQ`}
         </p>
       </div>
+      )}
 
       {/* Geo banner if no location yet */}
       <GeoBanner
@@ -4205,8 +4236,8 @@ function PlacesScreen({
           style={{
             fontFamily: 'Public Sans, sans-serif',
             letterSpacing: '0.1em',
-            background: openNow ? '#b95c43' : 'white',
-            color: openNow ? 'white' : '#1A1A1A',
+            background: openNow ? 'var(--brand)' : 'white',
+            color: openNow ? 'white' : 'var(--ink)',
             border: '1px solid rgba(0,0,0,0.12)',
             marginRight: '-1.5px',
             borderRadius: 6,
@@ -4214,7 +4245,7 @@ function PlacesScreen({
             zIndex: openNow ? 1 : 0,
           }}
         >
-          <span style={{ width: 8, height: 8, borderRadius: '50%', background: openNow ? '#b95c43' : '#4caf50', display: 'inline-block', marginRight: 2, flexShrink: 0 }} />
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: openNow ? 'var(--brand)' : '#4caf50', display: 'inline-block', marginRight: 2, flexShrink: 0 }} />
           Open Now
         </button>
         {PLACE_CATEGORIES.map(cat => {
@@ -4227,8 +4258,8 @@ function PlacesScreen({
             style={{
               fontFamily: 'Public Sans, sans-serif',
               letterSpacing: '0.1em',
-              background: isActive ? '#1A1A1A' : 'white',
-              color: isActive ? 'white' : '#1A1A1A',
+              background: isActive ? 'var(--ink)' : 'white',
+              color: isActive ? 'white' : 'var(--ink)',
               border: '1px solid rgba(0,0,0,0.12)',
               marginRight: '-1.5px',
               borderRadius: 6,
@@ -4236,7 +4267,7 @@ function PlacesScreen({
               zIndex: isActive ? 1 : 0,
             }}
           >
-            <FlatIcon name={cat.icon} size={13} color={isActive ? 'white' : '#1A1A1A'} />
+            <FlatIcon name={cat.icon} size={13} color={isActive ? 'white' : 'var(--ink)'} />
             <span>{cat.label}</span>
           </button>
           );
@@ -4258,10 +4289,10 @@ function PlacesScreen({
             style={{
               fontFamily: 'Public Sans, sans-serif',
               letterSpacing: '0.08em',
-              background: sortMode === s.id ? '#1A1A1A' : 'white',
-              color: sortMode === s.id ? 'white' : s.disabled ? '#bbb' : '#1A1A1A',
+              background: sortMode === s.id ? 'var(--ink)' : 'white',
+              color: sortMode === s.id ? 'white' : s.disabled ? '#bbb' : 'var(--ink)',
               border: '1px solid rgba(0,0,0,0.12)',
-              boxShadow: sortMode === s.id ? '4px 4px 0 #1A1A1A' : '3px 3px 0 rgba(0,0,0,0.15)',
+              boxShadow: sortMode === s.id ? '4px 4px 0 var(--ink)' : '3px 3px 0 rgba(0,0,0,0.15)',
               borderRadius: 6,
               opacity: s.disabled ? 0.5 : 1,
             }}
@@ -4291,7 +4322,7 @@ function PlacesScreen({
                 onCheckIn={e => { e.stopPropagation(); onCheckIn(place.id); }}
                 />
               {(() => { const liked = isWishlisted(place.id); return (
-              <button style={{position:'absolute',top:8,right:8,zIndex:10,background: liked ? '#b95c43' : 'rgba(255,255,255,0.90)',border:'none',borderRadius:'50%',width:44,height:44,minHeight:0,color: liked ? 'white' : '#b95c43',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(0,0,0,0.15)'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:place.id,type:'place',name:place.name,category:place.category});}}><span className="material-symbols-outlined" style={{fontSize:'18px',fontVariationSettings: liked ? "'FILL' 1, 'wght' 700" : "'FILL' 0, 'wght' 400"}}>favorite</span></button>
+              <button style={{position:'absolute',top:8,right:8,zIndex:10,background: liked ? 'var(--brand)' : 'rgba(255,255,255,0.90)',border:'none',borderRadius:'50%',width:44,height:44,minHeight:0,color: liked ? 'white' : 'var(--brand)',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(0,0,0,0.15)'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:place.id,type:'place',name:place.name,category:place.category});}}><span className="material-symbols-outlined" style={{fontSize:'18px',fontVariationSettings: liked ? "'FILL' 1, 'wght' 700" : "'FILL' 0, 'wght' 400"}}>favorite</span></button>
               ); })()}
             </div>
           ))}
@@ -4790,7 +4821,7 @@ function ProfileScreen({
 
   return (
     <div className="w-full px-5 pb-28" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-      <div className="pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid #b95c43', borderBottom: '1px solid rgba(0,0,0,0.08)', marginLeft: '-20px', marginRight: '-20px', paddingLeft: '20px', paddingRight: '20px' }}>
+      <div className="pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)', marginLeft: '-20px', marginRight: '-20px', paddingLeft: '20px', paddingRight: '20px' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}
@@ -4799,7 +4830,7 @@ function ProfileScreen({
         </p>
         <h1
           className="font-black uppercase leading-none mt-1"
-          style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '48px', letterSpacing: '-0.04em', color: '#1A1A1A' }}
+          style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '48px', letterSpacing: '-0.04em', color: 'var(--ink)' }}
         >
           Hey,<br />{(user?.user_metadata?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Explorer').split(' ')[0]}
         </h1>
@@ -4821,13 +4852,13 @@ function ProfileScreen({
           style={{ background: 'linear-gradient(135deg, #1b5e20, #2e7d32)', fontFamily: 'Public Sans, sans-serif', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}
         >
           <div>
-            <p className="font-bold text-sm" style={{ color: '#1A1A1A' }}>✅ Signed in & syncing your check-ins</p>
-            <p className="text-xs mt-0.5" style={{ color: '#b95c43' }}>Check out the leaderboard below</p>
+            <p className="font-bold text-sm" style={{ color: 'var(--ink)' }}>✅ Signed in & syncing your check-ins</p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--brand)' }}>Check out the leaderboard below</p>
           </div>
           <button
             onClick={onSignOut}
             className="text-xs font-bold flex-shrink-0 ml-3"
-            style={{ fontFamily: 'Public Sans, sans-serif', background: 'none', border: 'none', cursor: 'pointer', color: '#1A1A1A' }}
+            style={{ fontFamily: 'Public Sans, sans-serif', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ink)' }}
           >
             Sign out
           </button>
@@ -4960,7 +4991,7 @@ function ProfileScreen({
             style={{
               borderRight: '1px solid rgba(0,0,0,0.08)',
               borderBottom: '1px solid rgba(0,0,0,0.08)',
-              background: a.unlocked ? '#b95c43' : 'white',
+              background: a.unlocked ? 'var(--brand)' : 'white',
               marginRight: '-2px',
             }}
           >
@@ -4968,7 +4999,7 @@ function ProfileScreen({
               className="material-symbols-outlined"
               style={{
                 fontSize: '36px',
-                color: a.unlocked ? '#1A1A1A' : '#D0D0D0',
+                color: a.unlocked ? 'var(--ink)' : '#D0D0D0',
                 fontVariationSettings: a.unlocked
                   ? "'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 48"
                   : "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 48",
@@ -4980,14 +5011,14 @@ function ProfileScreen({
               fontFamily: 'Public Sans, sans-serif',
               fontSize: '8px',
               letterSpacing: '0.08em',
-              color: a.unlocked ? '#1A1A1A' : '#CCCCCC',
+              color: a.unlocked ? 'var(--ink)' : '#CCCCCC',
             }}>
               {a.label}
             </p>
             <p className="text-center" style={{
               fontFamily: 'Public Sans, sans-serif',
               fontSize: '8px',
-              color: a.unlocked ? '#b95c43' : '#DDDDDD',
+              color: a.unlocked ? 'var(--brand)' : '#DDDDDD',
               letterSpacing: '0.04em',
             }}>
               {a.sub}
@@ -5064,26 +5095,26 @@ function ProfileScreen({
                     key={c.id}
                     className="rounded-lg px-4 py-3"
                     style={{
-                      background: done ? '#b95c43' : 'white',
+                      background: done ? 'var(--brand)' : 'white',
                       boxShadow: done ? '3px 3px 0 var(--brand)' : '3px 3px 0 rgba(0,0,0,0.10)',
                       border: done ? '1.5px solid var(--brand)' : '1px solid rgba(0,0,0,0.08)',
                     }}
                   >
                     <div className="flex items-center gap-2 mb-1">
                       <span className="material-symbols-outlined" style={{ fontSize: '20px', lineHeight: 1, color: 'var(--brand)', fontVariationSettings: "'FILL' 1" }}>{c.emoji}</span>
-                      <span className="font-black text-sm flex-1" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1A1A1A' }}>{c.title}</span>
-                      {done && <span className="text-xs font-black" style={{ color: '#b95c43' }}>✓ DONE</span>}
+                      <span className="font-black text-sm flex-1" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)' }}>{c.title}</span>
+                      {done && <span className="text-xs font-black" style={{ color: 'var(--brand)' }}>✓ DONE</span>}
                       {!done && <span className="text-xs font-semibold" style={{ fontFamily: 'Public Sans, sans-serif', color: '#999' }}>{c.progress}/{c.target}</span>}
                     </div>
                     <p className="text-xs mb-2" style={{ fontFamily: 'Public Sans, sans-serif', color: '#555' }}>{c.desc}</p>
                     <div className="rounded-full overflow-hidden" style={{ height: '5px', background: done ? 'rgba(0,0,0,0.1)' : '#f0f0f0' }}>
-                      <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: done ? '#b95c43' : 'var(--brand-gradient)' }} />
+                      <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: done ? 'var(--brand)' : 'var(--brand-gradient)' }} />
                     </div>
                   </div>
                 );
               })}
               {allDone && (
-                <div className="text-center py-3 rounded-lg" style={{ background: '#1A1A1A', color: '#F9F5F2' }}>
+                <div className="text-center py-3 rounded-lg" style={{ background: 'var(--ink)', color: 'var(--bg)' }}>
                   <p className="font-black text-sm" style={{ fontFamily: 'Public Sans, sans-serif' }}>🏆 All challenges complete — you're a true ABQ local!</p>
                 </div>
               )}
@@ -5289,13 +5320,13 @@ function PullToRefresh() {
       }}
     >
       {refreshing ? (
-        <span className="material-symbols-outlined" style={{ fontSize: 24, animation: 'spin 0.8s linear infinite', color: '#1A1A1A' }}>refresh</span>
+        <span className="material-symbols-outlined" style={{ fontSize: 24, animation: 'spin 0.8s linear infinite', color: 'var(--ink)' }}>refresh</span>
       ) : (
         <span
           className="material-symbols-outlined"
           style={{
             fontSize: 24,
-            color: '#1A1A1A',
+            color: 'var(--ink)',
             transform: `rotate(${ready ? 180 : progress * 160}deg)`,
             transition: 'transform 0.15s ease',
             opacity: progress,
@@ -5829,7 +5860,7 @@ function SiteBanner({ banner }: { banner: BannerConfig | null }) {
     info:    { bg: 'rgba(59,130,246,0.1)',  border: 'rgba(59,130,246,0.25)',  text: '#1d4ed8' },
     success: { bg: 'rgba(34,197,94,0.1)',   border: 'rgba(34,197,94,0.25)',   text: '#15803d' },
     warning: { bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.25)',  text: '#92400e' },
-    promo:   { bg: '#b95c43',               border: 'rgba(0,0,0,0.12)',                text: '#1A1A1A' },
+    promo:   { bg: 'var(--brand)',               border: 'rgba(0,0,0,0.12)',                text: 'var(--ink)' },
   };
   const typeColor = colorMap[banner.type] ?? colorMap.info;
   const bg   = banner.bgColor   || typeColor.bg;
@@ -6744,7 +6775,7 @@ function PlanScreen({
       )}
 
       {/* Share plan hint */}
-      <div className="mx-5 mt-6 p-4 text-center" style={{ background: '#F9F5F2', border: '1.5px dashed #ccc' }}>
+      <div className="mx-5 mt-6 p-4 text-center" style={{ background: 'var(--bg)', border: '1.5px dashed #ccc' }}>
         <p className="text-xs" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.6 }}>
           💡 Tap <strong>Go</strong> on any item to get directions, or tap the card to see full details and check in when you arrive.
         </p>
@@ -6784,7 +6815,7 @@ interface DesktopAppProps {
 
 type DesktopTab = 'discover' | 'events' | 'places';
 
-const DESKTOP_DATE_COLORS = ['#b95c43', '#0057c2', '#1a1a1a'];
+const DESKTOP_DATE_COLORS = ['var(--brand)', '#0057c2', '#1a1a1a'];
 const fmtLocalDate = (d: string) => {
   if (!d) return { month: '???', day: '??', dow: '???' };
   const dt = new Date(d + 'T12:00:00');
@@ -6817,7 +6848,7 @@ const GENRE_COLORS: Record<string, string> = {
 const genreColor = (ev: TMEvent) => GENRE_COLORS[getEventGenre(ev)] || '#374151';
 
 const dBLUE  = { background: '#0057c2' } as const;
-const dGREEN = { background: '#b95c43' } as const;
+const dGREEN = { background: 'var(--brand)' } as const;
 const dDARK  = { background: '#1a1a1a' } as const;
 
 function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSelect, onEventSelect, savedPlan: _savedPlan, onToggleSavePlace, onToggleSaveEvent, isPlaceSaved, isEventSaved }: DesktopAppProps) {
@@ -6932,12 +6963,12 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
     [places]);
 
   const s = {
-    root:   { display:'flex', flexDirection:'column' as const, height:'100vh', overflow:'hidden', background:'#F9F5F2', fontFamily:'Public Sans,system-ui,sans-serif', color:'#1a1a1a' },
+    root:   { display:'flex', flexDirection:'column' as const, height:'100vh', overflow:'hidden', background:'var(--bg)', fontFamily:'Public Sans,system-ui,sans-serif', color:'#1a1a1a' },
     header: { height:'56px', background:'#fff', borderBottom:'2px solid #1a1a1a', display:'flex', alignItems:'center', flexShrink:0 as const, zIndex:100 },
     logo:   { width:'232px', borderRight:'2px solid #1a1a1a', height:'100%', display:'flex', alignItems:'center', padding:'0 18px', gap:'10px', flexShrink:0 as const },
-    logoBadge: { background:'linear-gradient(135deg,#b95c43,#c97a62)', padding:'5px 9px', border:'2px solid #1a1a1a', fontFamily:'Public Sans,sans-serif', fontWeight:900, fontSize:'13px', letterSpacing:'-0.01em', color:'#F9F5F2' },
+    logoBadge: { background:'linear-gradient(135deg,var(--brand),var(--brand-light))', padding:'5px 9px', border:'2px solid #1a1a1a', fontFamily:'Public Sans,sans-serif', fontWeight:900, fontSize:'13px', letterSpacing:'-0.01em', color:'var(--bg)' },
     headerSearch: { flex:1, height:'100%', display:'flex', alignItems:'center', padding:'0 18px', gap:'10px', borderRight:'2px solid #1a1a1a' },
-    searchBox: { flex:1, maxWidth:'480px', height:'36px', border:'2px solid #1a1a1a', background:'#F9F5F2', display:'flex', alignItems:'center', padding:'0 12px', gap:'8px' },
+    searchBox: { flex:1, maxWidth:'480px', height:'36px', border:'2px solid #1a1a1a', background:'var(--bg)', display:'flex', alignItems:'center', padding:'0 12px', gap:'8px' },
     headerRight: { width:'356px', height:'100%', display:'flex', alignItems:'center', padding:'0 16px', gap:'8px', flexShrink:0 as const },
     layout: { display:'flex', flex:1, overflow:'hidden' },
     sidebar: { width:'232px', borderRight:'2px solid #1a1a1a', background:'#fff', display:'flex', flexDirection:'column' as const, overflowY:'auto' as const, flexShrink:0 as const },
@@ -6948,22 +6979,22 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
   };
 
   const pillBase = { height:'27px', padding:'0 9px', border:'1.5px solid #1a1a1a', fontSize:'10px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase' as const, display:'flex', alignItems:'center', gap:'4px', cursor:'pointer', background:'#fff', color:'#1a1a1a' };
-  const catBtnBase = { height:'30px', border:'1.5px solid #d0d8d0', background:'#F9F5F2', display:'flex', alignItems:'center', justifyContent:'center', gap:'3px', fontSize:'10px', fontWeight:700, letterSpacing:'0.04em', textTransform:'uppercase' as const, cursor:'pointer', color:'#5c6660' };
+  const catBtnBase = { height:'30px', border:'1.5px solid #d0d8d0', background:'var(--bg)', display:'flex', alignItems:'center', justifyContent:'center', gap:'3px', fontSize:'10px', fontWeight:700, letterSpacing:'0.04em', textTransform:'uppercase' as const, cursor:'pointer', color:'#5c6660' };
 
   const NavItem = ({ icon, label, id, count }: { icon:string; label:string; id:DesktopTab|string; count?:number }) => (
     <div onClick={() => typeof id === 'string' && ['discover','events','places'].includes(id) && setTab(id as DesktopTab)}
       style={{ display:'flex', alignItems:'center', gap:'9px', padding:'9px 14px', fontSize:'13px', fontWeight:600, cursor:'pointer',
-        color: tab === id ? '#b95c43' : '#5c6660', borderLeft: tab === id ? '3px solid #b95c43' : '3px solid transparent',
-        background: tab === id ? '#b95c431a' : 'transparent' }}>
+        color: tab === id ? 'var(--brand)' : '#5c6660', borderLeft: tab === id ? '3px solid var(--brand)' : '3px solid transparent',
+        background: tab === id ? 'var(--brand)1a' : 'transparent' }}>
       <span className="material-symbols-outlined" style={{ fontSize:'18px' }}>{icon}</span>
       {label}
-      {count !== undefined && <span style={{ marginLeft:'auto', fontSize:'10px', fontWeight:800, background: tab===id ? '#b95c43' : '#1a1a1a', color:'#F9F5F2', padding:'1px 6px', minWidth:'20px', textAlign:'center' }}>{count.toLocaleString()}</span>}
+      {count !== undefined && <span style={{ marginLeft:'auto', fontSize:'10px', fontWeight:800, background: tab===id ? 'var(--brand)' : '#1a1a1a', color:'var(--bg)', padding:'1px 6px', minWidth:'20px', textAlign:'center' }}>{count.toLocaleString()}</span>}
     </div>
   );
 
   const CatBtn = ({ icon, label, val }: { icon:string; label:string; val:string }) => (
     <div onClick={() => { setCat(val); if (tab !== 'places') setTab('places'); }}
-      style={{ ...catBtnBase, ...(cat===val ? { border:'1.5px solid #1a1a1a', background:'#1a1a1a', color:'#F9F5F2', boxShadow:'2px 2px 0 #1a1a1a' } : {}) }}>
+      style={{ ...catBtnBase, ...(cat===val ? { border:'1.5px solid #1a1a1a', background:'#1a1a1a', color:'var(--bg)', boxShadow:'2px 2px 0 #1a1a1a' } : {}) }}>
       <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>{icon}</span>
       {label}
     </div>
@@ -6984,7 +7015,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
         <div style={{ height:'90px', background: img ? 'transparent' : `linear-gradient(135deg,${DESKTOP_DATE_COLORS[idx%3]},${DESKTOP_DATE_COLORS[(idx+1)%3]})`, position:'relative', overflow:'hidden' }}>
           {img && <img src={img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
           <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(0,0,0,0.55) 0%,transparent 55%)' }} />
-          <div style={{ position:'absolute', top:7, left:7, background:'#b95c43', border:'1.5px solid #1a1a1a', padding:'2px 7px', fontSize:'9px', fontWeight:800, letterSpacing:'0.06em', textTransform:'uppercase' }}>
+          <div style={{ position:'absolute', top:7, left:7, background:'var(--brand)', border:'1.5px solid #1a1a1a', padding:'2px 7px', fontSize:'9px', fontWeight:800, letterSpacing:'0.06em', textTransform:'uppercase' }}>
             {month} {day}
           </div>
           {genre && <div style={{ position:'absolute', bottom:7, right:7, background:gc, color:'#fff', padding:'2px 7px', fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase' }}>{genre}</div>}
@@ -6995,7 +7026,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
             <span className="material-symbols-outlined" style={{ fontSize:'11px' }}>location_on</span>
             <span style={{ overflow:'hidden', whiteSpace:'nowrap', textOverflow:'ellipsis' }}>{getEventVenue(ev) || getEventCity(ev) || 'Albuquerque'}</span>
           </div>
-          {price && <span style={{ fontSize:'9px', fontWeight:800, letterSpacing:'0.04em', color: price==='FREE' ? '#b95c43' : '#0057c2', background: price==='FREE' ? '#b95c430d' : '#dbeafe', border: price==='FREE' ? '1px solid #c97a62' : '1px solid #93c5fd', padding:'1px 6px' }}>{price}</span>}
+          {price && <span style={{ fontSize:'9px', fontWeight:800, letterSpacing:'0.04em', color: price==='FREE' ? 'var(--brand)' : '#0057c2', background: price==='FREE' ? 'var(--brand)0d' : '#dbeafe', border: price==='FREE' ? '1px solid var(--brand-light)' : '1px solid #93c5fd', padding:'1px 6px' }}>{price}</span>}
         </div>
       </div>
     );
@@ -7007,14 +7038,14 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
       style={{ border:'2px solid #1a1a1a', background:'#fff', boxShadow:'3px 3px 0 #1a1a1a', cursor:'pointer', display:'flex', overflow:'hidden', transition:'transform 0.1s' }}
       onMouseEnter={e => (e.currentTarget.style.transform='translate(-2px,-2px)')}
       onMouseLeave={e => (e.currentTarget.style.transform='')}>
-      <div style={{ width:'72px', flexShrink:0, background: p.image ? 'transparent' : 'linear-gradient(135deg,#b95c43,#c97a62)', overflow:'hidden' }}>
+      <div style={{ width:'72px', flexShrink:0, background: p.image ? 'transparent' : 'linear-gradient(135deg,var(--brand),var(--brand-light))', overflow:'hidden' }}>
         {(p.thumbnail || p.image) && <img src={p.thumbnail || p.image} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
       </div>
       <div style={{ flex:1, padding:'9px 11px', minWidth:0 }}>
         <div style={{ fontWeight:700, fontSize:'12px', marginBottom:'2px', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{p.name}</div>
         <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', color:'#5c6660', marginBottom:'5px' }}>{p.category}</div>
         <div style={{ display:'flex', alignItems:'center', gap:'7px' }}>
-          {p.rating && <span style={{ fontSize:'10px', fontWeight:800, color:'#b95c43' }}>★ {p.rating.toFixed(1)}</span>}
+          {p.rating && <span style={{ fontSize:'10px', fontWeight:800, color:'var(--brand)' }}>★ {p.rating.toFixed(1)}</span>}
           {dist !== undefined && <span style={{ fontSize:'9px', color:'#5c6660', display:'flex', alignItems:'center', gap:'2px' }}>
             <span className="material-symbols-outlined" style={{ fontSize:'10px' }}>near_me</span>{formatDist(dist)}
           </span>}
@@ -7029,7 +7060,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
       style={{ border:'2px solid #1a1a1a', background:'#fff', boxShadow:'3px 3px 0 #1a1a1a', cursor:'pointer', overflow:'hidden', transition:'transform 0.1s' }}
       onMouseEnter={e => (e.currentTarget.style.transform='translate(-2px,-2px)')}
       onMouseLeave={e => (e.currentTarget.style.transform='')}>
-      <div style={{ height:'96px', background: p.image ? 'transparent' : 'linear-gradient(135deg,#b95c43,#c97a62)', position:'relative', overflow:'hidden' }}>
+      <div style={{ height:'96px', background: p.image ? 'transparent' : 'linear-gradient(135deg,var(--brand),var(--brand-light))', position:'relative', overflow:'hidden' }}>
         {(p.thumbnail || p.image) && <img src={p.thumbnail || p.image} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
         <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(0,0,0,0.45) 0%,transparent 55%)' }} />
         {p.rating && <div style={{ position:'absolute', bottom:6, left:6, background:'rgba(0,0,0,0.55)', color:'#fff', fontSize:'10px', fontWeight:700, padding:'2px 7px' }}>★ {p.rating.toFixed(1)}</div>}
@@ -7053,7 +7084,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
         style={{ border:'2px solid #1a1a1a', background:'#fff', display:'flex', alignItems:'stretch', cursor:'pointer', boxShadow:'3px 3px 0 #1a1a1a', transition:'transform 0.1s' }}
         onMouseEnter={e => (e.currentTarget.style.transform='translate(-2px,-2px)')}
         onMouseLeave={e => (e.currentTarget.style.transform='')}>
-        <div style={{ width:'54px', flexShrink:0, background:color, color:'#F9F5F2', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'10px 2px' }}>
+        <div style={{ width:'54px', flexShrink:0, background:color, color:'var(--bg)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'10px 2px' }}>
           <div style={{ fontSize:'9px', fontWeight:800, letterSpacing:'0.1em' }}>{month}</div>
           <div style={{ fontFamily:'Public Sans,sans-serif', fontSize:'22px', fontWeight:900, lineHeight:1 }}>{day}</div>
           <div style={{ fontSize:'8px', fontWeight:600, letterSpacing:'0.06em', opacity:0.75 }}>{dow}</div>
@@ -7070,13 +7101,13 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
           </div>
           <div style={{ display:'flex', gap:'5px', flexWrap:'wrap' }}>
             {getEventGenre(ev) && <span style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', border:'1px solid #d0d8d0', padding:'1px 6px', color:'#5c6660' }}>{getEventGenre(ev)}</span>}
-            {isFree && <span style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', border:'1px solid #c97a62', padding:'1px 6px', color:'#b95c43', background:'#b95c430d' }}>Free</span>}
+            {isFree && <span style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', border:'1px solid var(--brand-light)', padding:'1px 6px', color:'var(--brand)', background:'var(--brand)0d' }}>Free</span>}
           </div>
         </div>
         <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', justifyContent:'space-between', padding:'11px 13px', flexShrink:0 }}>
-          <span style={{ fontSize:'11px', fontWeight:800, color: isFree ? '#b95c43' : '#0057c2' }}>{price || ''}</span>
+          <span style={{ fontSize:'11px', fontWeight:800, color: isFree ? 'var(--brand)' : '#0057c2' }}>{price || ''}</span>
           <button onClick={e => { e.stopPropagation(); if(ev.url) window.open(ev.url,'_blank'); }}
-            style={{ height:'27px', padding:'0 9px', background: isFree ? '#b95c43' : '#0057c2', color:'#fff', border:'none', fontFamily:'Public Sans,sans-serif', fontSize:'9px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'4px' }}>
+            style={{ height:'27px', padding:'0 9px', background: isFree ? 'var(--brand)' : '#0057c2', color:'#fff', border:'none', fontFamily:'Public Sans,sans-serif', fontSize:'9px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'4px' }}>
             <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>{isFree ? 'open_in_new' : 'confirmation_number'}</span>
             {isFree ? 'Info' : 'Tickets'}
           </button>
@@ -7100,7 +7131,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
         onMouseLeave={e => (e.currentTarget.style.background='')}>
         {/* Date block */}
         <div style={{ width:'72px', flexShrink:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'18px 8px' }}>
-          <div style={{ fontSize:'10px', fontWeight:800, letterSpacing:'0.12em', textTransform:'uppercase', color:'#F9F5F2' }}>{month}</div>
+          <div style={{ fontSize:'10px', fontWeight:800, letterSpacing:'0.12em', textTransform:'uppercase', color:'var(--bg)' }}>{month}</div>
           <div style={{ fontFamily:'Public Sans,sans-serif', fontSize:'34px', fontWeight:900, lineHeight:1, color:'#ffffff' }}>{day}</div>
         </div>
         {/* Content */}
@@ -7109,11 +7140,11 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
           <div style={{ fontSize:'11px', color:'rgba(255,255,255,0.5)', fontWeight:600, letterSpacing:'0.04em', textTransform:'uppercase', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
             {venue}{time ? ` · ${time}` : ''}
           </div>
-          {isFree && <div style={{ marginTop:'5px', display:'inline-block', fontSize:'9px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', color:'#F9F5F2', border:'1px solid #d4ef4d', padding:'1px 6px', width:'fit-content' }}>FREE</div>}
+          {isFree && <div style={{ marginTop:'5px', display:'inline-block', fontSize:'9px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', color:'var(--bg)', border:'1px solid #d4ef4d', padding:'1px 6px', width:'fit-content' }}>FREE</div>}
         </div>
         {/* Arrow */}
         <div style={{ width:'52px', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
-          <div style={{ width:'34px', height:'34px', background:'#b95c43', display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <div style={{ width:'34px', height:'34px', background:'var(--brand)', display:'flex', alignItems:'center', justifyContent:'center' }}>
             <span className="material-symbols-outlined" style={{ fontSize:'18px', color:'#1a1a1a', fontWeight:700 }}>arrow_forward</span>
           </div>
         </div>
@@ -7135,14 +7166,14 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
       const price = getEventPrice(ev);
       const isFree = price === 'FREE';
       const img = getEventImage(ev);
-      const color = isFree ? '#b95c43' : '#0057c2';
+      const color = isFree ? 'var(--brand)' : '#0057c2';
       return (
         <div style={{ flex:1, overflowY:'auto' }}>
           <div style={{ height:'160px', background: img ? 'transparent' : `linear-gradient(135deg,${color},#1a1a1a)`, position:'relative', overflow:'hidden' }}>
             {img && <img src={img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
             <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(0,0,0,0.7),transparent 60%)' }} />
             <div style={{ position:'absolute', bottom:10, left:12 }}>
-              <div style={{ background:'#b95c43', border:'1.5px solid #1a1a1a', display:'inline-block', padding:'3px 9px', fontSize:'10px', fontWeight:800, letterSpacing:'0.06em' }}>{month} {day} · {dow}</div>
+              <div style={{ background:'var(--brand)', border:'1.5px solid #1a1a1a', display:'inline-block', padding:'3px 9px', fontSize:'10px', fontWeight:800, letterSpacing:'0.06em' }}>{month} {day} · {dow}</div>
             </div>
             <button onClick={() => setDetail(null)} style={{ position:'absolute', top:8, right:8, width:'28px', height:'28px', border:'1.5px solid rgba(255,255,255,0.5)', background:'rgba(0,0,0,0.4)', color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
               <span className="material-symbols-outlined" style={{ fontSize:'16px' }}>close</span>
@@ -7166,14 +7197,14 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
             )}
             <div style={{ display:'flex', gap:'6px' }}>
               {ev.url && <button onClick={() => window.open(ev.url,'_blank')}
-                style={{ flex:1, height:'32px', background: isFree ? '#b95c43' : '#0057c2', color:'#fff', border:'2px solid #1a1a1a', fontFamily:'Public Sans,sans-serif', fontSize:'10px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'4px', boxShadow:'2px 2px 0 #1a1a1a' }}>
+                style={{ flex:1, height:'32px', background: isFree ? 'var(--brand)' : '#0057c2', color:'#fff', border:'2px solid #1a1a1a', fontFamily:'Public Sans,sans-serif', fontSize:'10px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'4px', boxShadow:'2px 2px 0 #1a1a1a' }}>
                 <span className="material-symbols-outlined" style={{ fontSize:'13px' }}>{isFree ? 'open_in_new' : 'confirmation_number'}</span>
                 {isFree ? 'More Info' : 'Get Tickets'}
               </button>}
               <button onClick={() => onToggleSaveEvent(ev)} title={isEventSaved(ev.id) ? 'Remove from plan' : 'Save to plan'} style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background: isEventSaved(ev.id) ? 'var(--brand)' : '#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'2px 2px 0 #1a1a1a' }}>
                 <span className="material-symbols-outlined" style={{ fontSize:'16px', color: isEventSaved(ev.id) ? '#fff' : '#1a1a1a', fontVariationSettings: isEventSaved(ev.id) ? "'FILL' 1" : "'FILL' 0" }}>bookmark</span>
               </button>
-              <button onClick={async () => { await shareEvent(ev); setShareToast(true); setTimeout(() => setShareToast(false), 2000); }} title="Copy shareable link" style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background: shareToast ? '#b95c43' : '#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'2px 2px 0 #1a1a1a', transition:'background 0.2s' }}>
+              <button onClick={async () => { await shareEvent(ev); setShareToast(true); setTimeout(() => setShareToast(false), 2000); }} title="Copy shareable link" style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background: shareToast ? 'var(--brand)' : '#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'2px 2px 0 #1a1a1a', transition:'background 0.2s' }}>
                 <span className="material-symbols-outlined" style={{ fontSize:'16px' }}>{shareToast ? 'check' : 'share'}</span>
               </button>
             </div>
@@ -7185,7 +7216,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
     const p = detail.data;
     return (
       <div style={{ flex:1, overflowY:'auto' }}>
-        <div style={{ height:'160px', background: p.image ? 'transparent' : 'linear-gradient(135deg,#b95c43,#c97a62)', position:'relative', overflow:'hidden' }}>
+        <div style={{ height:'160px', background: p.image ? 'transparent' : 'linear-gradient(135deg,var(--brand),var(--brand-light))', position:'relative', overflow:'hidden' }}>
           {(p.thumbnail || p.image) && <img src={p.image || p.thumbnail} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
           <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(0,0,0,0.65),transparent 55%)' }} />
           <button onClick={() => setDetail(null)} style={{ position:'absolute', top:8, right:8, width:'28px', height:'28px', border:'1.5px solid rgba(255,255,255,0.5)', background:'rgba(0,0,0,0.4)', color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
@@ -7193,17 +7224,17 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
           </button>
         </div>
         <div style={{ padding:'14px 16px' }}>
-          <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.1em', textTransform:'uppercase', color:'#b95c43', marginBottom:'4px', display:'flex', alignItems:'center', gap:'4px' }}>
+          <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.1em', textTransform:'uppercase', color:'var(--brand)', marginBottom:'4px', display:'flex', alignItems:'center', gap:'4px' }}>
             <span className="material-symbols-outlined" style={{ fontSize:'11px' }}>storefront</span>
             {p.category}{p.hours ? ` · ${p.hours}` : ''}
           </div>
           <div style={{ fontFamily:'Public Sans,sans-serif', fontWeight:900, fontSize:'16px', lineHeight:1.2, marginBottom:'8px' }}>{p.name}</div>
-          {p.rating && <div style={{ fontSize:'12px', fontWeight:700, color:'#b95c43', marginBottom:'8px' }}>★ {p.rating.toFixed(1)}{p.reviewCount ? <span style={{ fontWeight:400, color:'#5c6660', fontSize:'11px' }}> ({p.reviewCount.toLocaleString()} reviews)</span> : ''}</div>}
+          {p.rating && <div style={{ fontSize:'12px', fontWeight:700, color:'var(--brand)', marginBottom:'8px' }}>★ {p.rating.toFixed(1)}{p.reviewCount ? <span style={{ fontWeight:400, color:'#5c6660', fontSize:'11px' }}> ({p.reviewCount.toLocaleString()} reviews)</span> : ''}</div>}
           {p.address && <div style={{ fontSize:'11px', color:'#5c6660', display:'flex', alignItems:'center', gap:'5px', marginBottom:'14px' }}>
             <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>location_on</span>{p.address}
           </div>}
           <div style={{ display:'flex', gap:'6px' }}>
-            <button onClick={() => onPlaceSelect(p)} style={{ flex:1, height:'32px', background:'#1a1a1a', color:'#F9F5F2', border:'2px solid #1a1a1a', fontFamily:'Public Sans,sans-serif', fontSize:'10px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'4px', boxShadow:'2px 2px 0 #1a1a1a' }}>
+            <button onClick={() => onPlaceSelect(p)} style={{ flex:1, height:'32px', background:'#1a1a1a', color:'var(--bg)', border:'2px solid #1a1a1a', fontFamily:'Public Sans,sans-serif', fontSize:'10px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'4px', boxShadow:'2px 2px 0 #1a1a1a' }}>
               <span className="material-symbols-outlined" style={{ fontSize:'13px' }}>info</span>
               Full Details
             </button>
@@ -7231,7 +7262,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
       <div style={{ position:'absolute', height:'3px', left:0, right:0, top:'65%', background:'rgba(255,255,255,0.7)' }} />
       <div style={{ position:'absolute', width:'3px', top:0, bottom:0, left:'65%', background:'rgba(255,255,255,0.7)' }} />
       {/* You are here dot */}
-      <div style={{ position:'absolute', top:'50%', left:'43%', width:'12px', height:'12px', background:'#b95c43', border:'2.5px solid #1a1a1a', borderRadius:'50%', transform:'translate(-50%,-50%)', boxShadow:'0 0 0 5px rgba(185,92,67,0.3)' }} />
+      <div style={{ position:'absolute', top:'50%', left:'43%', width:'12px', height:'12px', background:'var(--brand)', border:'2.5px solid #1a1a1a', borderRadius:'50%', transform:'translate(-50%,-50%)', boxShadow:'0 0 0 5px rgba(185,92,67,0.3)' }} />
       {/* Map watermark */}
       <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', pointerEvents:'none' }}>
         <div style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.1em', textTransform:'uppercase', color:'rgba(86,101,0,0.35)' }}>Albuquerque · NM</div>
@@ -7247,8 +7278,8 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
       </div>
       {/* Map filter strip */}
       <div style={{ position:'absolute', bottom:8, left:8, display:'flex', gap:'4px' }}>
-        {[{icon:'confirmation_number',label:'Events',bg:'#1a1a1a'},{icon:'storefront',label:'Places',bg:'#b95c43'}].map(c => (
-          <div key={c.label} style={{ height:'22px', padding:'0 7px', background:c.bg, border:'1.5px solid #1a1a1a', fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'3px', color:'#F9F5F2', boxShadow:'2px 2px 0 rgba(0,0,0,0.1)' }}>
+        {[{icon:'confirmation_number',label:'Events',bg:'#1a1a1a'},{icon:'storefront',label:'Places',bg:'var(--brand)'}].map(c => (
+          <div key={c.label} style={{ height:'22px', padding:'0 7px', background:c.bg, border:'1.5px solid #1a1a1a', fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'3px', color:'var(--bg)', boxShadow:'2px 2px 0 rgba(0,0,0,0.1)' }}>
             <span className="material-symbols-outlined" style={{ fontSize:'11px' }}>{c.icon}</span>{c.label}
           </div>
         ))}
@@ -7280,19 +7311,19 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
           <div style={{ display:'flex', gap:'6px' }}>
             {(['discover','events','places'] as DesktopTab[]).map(t => (
               <div key={t} onClick={() => { setTab(t); setCat('All'); }}
-                style={{ ...pillBase, ...(tab===t ? { background:'#1a1a1a', color:'#F9F5F2' } : {}) }}>
+                style={{ ...pillBase, ...(tab===t ? { background:'#1a1a1a', color:'var(--bg)' } : {}) }}>
                 {t === 'discover' ? 'Discover' : t === 'events' ? 'Events' : 'Places'}
               </div>
             ))}
           </div>
         </div>
         <div style={s.headerRight}>
-          <div style={{ display:'flex', alignItems:'center', gap:'5px', border:'1.5px solid #c97a62', padding:'4px 9px', background:'#b95c431a', fontSize:'10px', fontWeight:700, color:'#b95c43', letterSpacing:'0.04em', marginRight:'4px' }}>
-            <span className="material-symbols-outlined" style={{ fontSize:'12px', color:'#b95c43' }}>my_location</span>
+          <div style={{ display:'flex', alignItems:'center', gap:'5px', border:'1.5px solid var(--brand-light)', padding:'4px 9px', background:'var(--brand)1a', fontSize:'10px', fontWeight:700, color:'var(--brand)', letterSpacing:'0.04em', marginRight:'4px' }}>
+            <span className="material-symbols-outlined" style={{ fontSize:'12px', color:'var(--brand)' }}>my_location</span>
             Downtown ABQ
           </div>
           {[{icon:'search',label:'Search'},{icon:'notifications',label:'Alerts'},{icon:'person',label:'Profile'}].map((btn, i) => (
-            <div key={btn.icon} style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background: i===2 ? '#1a1a1a' : '#fff', color: i===2 ? '#b95c43' : '#1a1a1a', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', flexShrink:0 }}>
+            <div key={btn.icon} style={{ width:'32px', height:'32px', border:'2px solid #1a1a1a', background: i===2 ? '#1a1a1a' : '#fff', color: i===2 ? 'var(--brand)' : '#1a1a1a', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', flexShrink:0 }}>
               <span className="material-symbols-outlined" style={{ fontSize:'17px' }}>{btn.icon}</span>
             </div>
           ))}
@@ -7337,7 +7368,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
             ].map(row => (
               <div key={row.label} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'8px' }}>
                 <span style={{ fontSize:'10px', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.06em', color:'#5c6660' }}>{row.label}</span>
-                <span style={{ fontSize:'13px', fontWeight:800, color:'#b95c43' }}>{row.val.toLocaleString()}</span>
+                <span style={{ fontSize:'13px', fontWeight:800, color:'var(--brand)' }}>{row.val.toLocaleString()}</span>
               </div>
             ))}
           </div>
@@ -7347,7 +7378,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
             <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', color:'#5c6660', marginBottom:'10px' }}>Sort Places</div>
             <div style={{ display:'flex', flexDirection:'column', gap:'4px' }}>
               {([['top','Top Rated','star'],['near','Near Me','near_me'],['az','A–Z','sort_by_alpha']] as const).map(([val, label, icon]) => (
-                <div key={val} onClick={() => setSort(val)} style={{ display:'flex', alignItems:'center', gap:'8px', padding:'6px 8px', cursor:'pointer', fontSize:'12px', fontWeight:600, border:'1.5px solid', borderColor: sort===val ? (val==='near' ? '#0057c2' : '#b95c43') : 'transparent', background: sort===val ? (val==='near' ? '#dbeafe' : '#b95c430d') : 'transparent', color: sort===val ? (val==='near' ? '#0057c2' : '#b95c43') : '#5c6660' }}>
+                <div key={val} onClick={() => setSort(val)} style={{ display:'flex', alignItems:'center', gap:'8px', padding:'6px 8px', cursor:'pointer', fontSize:'12px', fontWeight:600, border:'1.5px solid', borderColor: sort===val ? (val==='near' ? '#0057c2' : 'var(--brand)') : 'transparent', background: sort===val ? (val==='near' ? '#dbeafe' : 'var(--brand)0d') : 'transparent', color: sort===val ? (val==='near' ? '#0057c2' : 'var(--brand)') : '#5c6660' }}>
                   <span className="material-symbols-outlined" style={{ fontSize:'15px' }}>{icon}</span>{label}
                 </div>
               ))}
@@ -7381,13 +7412,13 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
                 {/* Hero + Events This Week — side by side on wide desktop, stacked on narrow */}
                 <div style={{ display:'grid', gridTemplateColumns: isNarrowDesktop ? '1fr' : 'minmax(0,3fr) minmax(0,2fr)', gap:'0', marginBottom:'24px', border:'2px solid #1a1a1a', boxShadow:'4px 4px 0 #1a1a1a' }}>
                   {/* Hero */}
-                  <div style={{ background:'linear-gradient(135deg,#b95c43,#c97a62)', padding:'clamp(14px,2vw,24px) clamp(14px,2vw,28px) clamp(12px,1.5vw,20px)', position:'relative', overflow:'hidden', minWidth:0 }}>
+                  <div style={{ background:'linear-gradient(135deg,var(--brand),var(--brand-light))', padding:'clamp(14px,2vw,24px) clamp(14px,2vw,28px) clamp(12px,1.5vw,20px)', position:'relative', overflow:'hidden', minWidth:0 }}>
                     <div style={{ position:'absolute', top:'-30px', right:'-30px', width:'180px', height:'180px', background:'rgba(212,239,77,0.1)', borderRadius:'50%' }} />
-                    <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.16em', textTransform:'uppercase', color:'#F9F5F2', marginBottom:'5px' }}>✦ Your City, Unplugged</div>
+                    <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.16em', textTransform:'uppercase', color:'var(--bg)', marginBottom:'5px' }}>✦ Your City, Unplugged</div>
                     <div style={{ fontFamily:'Public Sans,sans-serif', fontWeight:900, fontSize:'clamp(16px,2.2vw,26px)', lineHeight:1.05, letterSpacing:'-0.02em', color:'#fff', marginBottom:'8px' }}>Find Something<br/>Worth Leaving<br/>the House For</div>
                     <div style={{ fontSize:'clamp(9px,1vw,11px)', color:'rgba(255,255,255,0.75)', marginBottom:'clamp(10px,1.5vw,16px)' }}>{today} · {places.length.toLocaleString()} spots across Greater ABQ</div>
                     <div style={{ display:'flex', gap:'8px', flexWrap:'wrap' }}>
-                      <button onClick={() => setTab('events')} style={{ height:'32px', padding:'0 12px', background:'#b95c43', border:'2px solid #1a1a1a', boxShadow:'2px 2px 0 #1a1a1a', fontSize:'9px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'5px', color:'#1a1a1a' }}>
+                      <button onClick={() => setTab('events')} style={{ height:'32px', padding:'0 12px', background:'var(--brand)', border:'2px solid #1a1a1a', boxShadow:'2px 2px 0 #1a1a1a', fontSize:'9px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'5px', color:'#1a1a1a' }}>
                         <span className="material-symbols-outlined" style={{ fontSize:'13px' }}>confirmation_number</span>Browse Events
                       </button>
                       <button onClick={() => setTab('places')} style={{ height:'32px', padding:'0 12px', background:'rgba(255,255,255,0.15)', border:'2px solid rgba(255,255,255,0.4)', fontSize:'9px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', cursor:'pointer', display:'flex', alignItems:'center', gap:'5px', color:'#fff' }}>
@@ -7400,7 +7431,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
                   <div style={{ background:'#1a1a1a', borderLeft: isNarrowDesktop ? 'none' : '2px solid #1a1a1a', borderTop: isNarrowDesktop ? '2px solid #1a1a1a' : 'none', display:'flex', flexDirection:'column', minWidth:0 }}>
                     <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 16px', borderBottom:'1px solid rgba(255,255,255,0.1)', flexShrink:0 }}>
                       <div style={{ fontFamily:'Public Sans,sans-serif', fontWeight:900, fontSize:'12px', letterSpacing:'0.1em', textTransform:'uppercase', color:'#fff' }}>Events This Week</div>
-                      <span onClick={() => setTab('events')} style={{ fontSize:'10px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', color:'#F9F5F2', cursor:'pointer' }}>
+                      <span onClick={() => setTab('events')} style={{ fontSize:'10px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', color:'var(--bg)', cursor:'pointer' }}>
                         → SEE ALL
                       </span>
                     </div>
@@ -7420,10 +7451,10 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
                 {nearbyPlaces.length > 0 && <>
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'12px', paddingBottom:'10px', borderBottom:'2px solid #1a1a1a' }}>
                     <div style={{ fontFamily:'Public Sans,sans-serif', fontWeight:900, fontSize:'12px', letterSpacing:'0.08em', textTransform:'uppercase' }}>Near You</div>
-                    <span style={{ fontSize:'10px', fontWeight:700, color:'#b95c43', display:'flex', alignItems:'center', gap:'4px' }}>
+                    <span style={{ fontSize:'10px', fontWeight:700, color:'var(--brand)', display:'flex', alignItems:'center', gap:'4px' }}>
                       <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>my_location</span>Live location
                     </span>
-                    <span onClick={() => setTab('places')} style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', color:'#b95c43', cursor:'pointer', display:'flex', alignItems:'center', gap:'2px' }}>
+                    <span onClick={() => setTab('places')} style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', color:'var(--brand)', cursor:'pointer', display:'flex', alignItems:'center', gap:'2px' }}>
                       All places <span className="material-symbols-outlined" style={{ fontSize:'12px' }}>arrow_forward</span>
                     </span>
                   </div>
@@ -7508,6 +7539,7 @@ export default function App() {
   const [placesNavKey, setPlacesNavKey] = useState(0);
   const [placesNavCat, setPlacesNavCat] = useState('All');
   const [placesNavSearch, setPlacesNavSearch] = useState('');
+  const [placesNavVibe, setPlacesNavVibe] = useState('');
   // Pre-seed places from the localStorage cache so returning users see the app
   // immediately without waiting for a network fetch.
   const [places, setPlaces] = useState<Place[]>(() => {
@@ -8243,13 +8275,13 @@ export default function App() {
         @import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@700;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #F9F5F2; -webkit-font-smoothing: antialiased; }
+        body { background: var(--bg); -webkit-font-smoothing: antialiased; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #d0d8d0; }
         :root {
-          --brand: #b95c43;
-          --brand-gradient: linear-gradient(135deg, #b95c43 0%, #c97a62 100%);
-          --brand-bg-screen: #F9F5F2;
+          --brand: var(--brand);
+          --brand-gradient: linear-gradient(135deg, var(--brand) 0%, var(--brand-light) 100%);
+          --brand-bg-screen: var(--bg);
         }
       `}</style>
       <DesktopApp
@@ -8326,7 +8358,7 @@ export default function App() {
           text-size-adjust: 100%;
         }
         body {
-          background: #F9F5F2;
+          background: var(--bg);
           font-family: 'Inter', -apple-system, system-ui, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
@@ -8452,7 +8484,7 @@ export default function App() {
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => setShowSearch(true)} className="w-9 h-9 flex items-center justify-center" style={{ background: 'white', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#1A1A1A' }}>search</span>
+              <span className="material-symbols-outlined" style={{ fontSize: '20px', color: 'var(--ink)' }}>search</span>
             </button>
             <button
               onClick={requestGeo}
@@ -8465,7 +8497,7 @@ export default function App() {
                 className="material-symbols-outlined"
                 style={{
                   fontSize: '18px',
-                  color: coords ? '#b95c43' : '#888',
+                  color: coords ? 'var(--brand)' : '#888',
                   fontVariationSettings: coords ? "'FILL' 1" : "'FILL' 0",
                 }}
               >
@@ -8495,7 +8527,7 @@ export default function App() {
               checkedIn={checkedIn}
               onCheckIn={handleCheckIn}
 
-              onNavigatePlaces={(cat, search) => { setPlacesNavCat(cat); setPlacesNavSearch(search); setPlacesNavKey(k => k + 1); setActiveTab('places'); }}
+              onNavigatePlaces={(cat, search, vibeLabel, vibeGradient) => { setPlacesNavCat(cat); setPlacesNavSearch(search); setPlacesNavVibe(vibeLabel ? `${vibeLabel}|||${vibeGradient || ''}` : ''); setPlacesNavKey(k => k + 1); setActiveTab('places'); }}
               onNavigateEvents={() => setActiveTab('events')}
               prefs={prefs}/>
           )}
@@ -8516,7 +8548,8 @@ export default function App() {
               tooFarPlaceId={tooFarPlaceId}
               navKey={placesNavKey}
               navCat={placesNavCat}
-              navSearch={placesNavSearch}/>
+              navSearch={placesNavSearch}
+              navVibe={placesNavVibe}/>
           )}
           {activeTab === 'plan' && (
             <PlanScreen
@@ -8572,7 +8605,7 @@ export default function App() {
               className="flex-1 flex flex-col items-center justify-center gap-0.5 py-3 transition-none"
               style={{
                 minHeight: '64px',
-                background: activeTab === item.id ? '#1A1A1A' : 'white',
+                background: activeTab === item.id ? 'var(--ink)' : 'white',
                 borderRight: 'none',
                 borderRadius: 6,
               }}
