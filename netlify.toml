@@ -38,6 +38,13 @@
   [headers.values]
     Cache-Control = "public, max-age=86400"
 
+# sitemap.xml — 1 day
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+    Content-Type = "application/xml"
+
 # Manifest — short cache (may change with app updates)
 [[headers]]
   for = "/manifest.json"
