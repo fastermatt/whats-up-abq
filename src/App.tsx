@@ -2936,7 +2936,7 @@ function DailyGem({ places, onSelect }: { places: Place[]; onSelect: (p: Place) 
       </div>
       <button onClick={() => onSelect(gem)} className="w-full relative overflow-hidden text-left"
         style={{ height: '180px', boxShadow: '0 2px 8px rgba(0,0,0,0.10)', border: '1px solid rgba(0,0,0,0.12)', animation: 'cardFadeIn 0.45s ease both', borderRadius: '10px' }}>
-        {gem.image && <img src={gem.image} alt={gem.name} className="w-full h-full object-cover" style={{ filter: 'brightness(0.82)' }} />}
+        <ImageWithFallback src={gem.image} alt={gem.name} className="w-full h-full object-cover" gradient={gem.gradient || hashGradient(gem.name)} />
         <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, rgba(28,111,234,0.12) 0%, rgba(0,0,0,0.72) 100%)' }} />
         <div className="absolute top-3 left-3">
           <span className="text-xs font-black px-3 py-1"
@@ -3466,71 +3466,28 @@ function DiscoverScreen({
       {/* Featured Event (time-limited) — shows above Daily Gem when active */}
       <FeaturedEventBanner events={events} onSelect={onEventSelect} />
 
-      {/* Explore by Vibe — staggered animated icons, evenly spaced */}
-      {!hidden.includes('vibes') && (() => {
-        const [activeVibeAnim, setActiveVibeAnim] = React.useState(-1);
-        // Track GIF cache-bust keys so each play is a fresh GIF loop
-        const [gifKeys, setGifKeys] = React.useState<Record<number, number>>({});
-        React.useEffect(() => {
-          // Preload all GIFs on mount so they're in browser cache
-          VIBE_CONFIGS.forEach(({ animatedIcon }) => {
-            const img = new Image();
-            img.src = animatedIcon;
-          });
-        }, []);
-        React.useEffect(() => {
-          let timeout: ReturnType<typeof setTimeout>;
-          let resetTimeout: ReturnType<typeof setTimeout>;
-          const animate = () => {
-            const idx = Math.floor(Math.random() * VIBE_CONFIGS.length);
-            // Bump the GIF key to force a fresh GIF load (restarts animation from frame 1)
-            setGifKeys(prev => ({ ...prev, [idx]: (prev[idx] || 0) + 1 }));
-            setActiveVibeAnim(idx);
-            // After 3s, hide the GIF layer (one full GIF loop)
-            resetTimeout = setTimeout(() => setActiveVibeAnim(-1), 3000);
-            timeout = setTimeout(animate, 4000 + Math.random() * 3000);
-          };
-          timeout = setTimeout(animate, 2000);
-          return () => { clearTimeout(timeout); clearTimeout(resetTimeout); };
-        }, []);
-        return (
+      {/* Explore by Vibe — static icons only (no GIF animation) */}
+      {!hidden.includes('vibes') && (
         <div className="mb-5 px-5">
           <p className="text-xs font-black uppercase flex items-center gap-2 mb-3" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}><FlatIcon name="zia" size={12} color="var(--brand)" /> Explore by Vibe</p>
           <div className="flex justify-between pb-1">
-            {VIBE_CONFIGS.map(({ label, gradient, borderColor, animatedIcon, staticIcon, vibeSearch, vibeCats }, i) => {
-              const isAnimating = activeVibeAnim === i;
-              return (
+            {VIBE_CONFIGS.map(({ label, borderColor, staticIcon, vibeSearch, vibeCats }) => (
               <button key={label}
                 className="flex flex-col items-center gap-1.5 transition-all active:scale-95"
                 style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', flex: '1 1 0', minWidth: 0 }}
-                onClick={() => { trackEvent('vibe_click', { vibe: label }); onNavigatePlaces?.(vibeCats.join('|'), vibeSearch, label, gradient); }}>
-                <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'white', border: `2.5px solid ${borderColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
-                  {/* Static PNG — always rendered as the base layer */}
+                onClick={() => { trackEvent('vibe_click', { vibe: label }); onNavigatePlaces?.(vibeCats.join('|'), vibeSearch, label); }}>
+                <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'white', border: `2.5px solid ${borderColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', overflow: 'hidden', flexShrink: 0 }}>
                   <img
                     src={staticIcon}
                     alt={label}
-                    style={{ width: 38, height: 38, objectFit: 'contain', display: 'block', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
-                  {/* Animated GIF — layered on top, shown via opacity when active */}
-                  {/* Key includes gifKeys counter to force a fresh GIF reload each play */}
-                  <img
-                    key={`gif-${i}-${gifKeys[i] || 0}`}
-                    src={isAnimating ? `${animatedIcon}?v=${gifKeys[i] || 0}` : undefined}
-                    alt=""
-                    style={{
-                      width: 38, height: 38, objectFit: 'contain', display: 'block',
-                      position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                      opacity: isAnimating ? 1 : 0,
-                      transition: 'opacity 0.15s ease',
-                      zIndex: 1,
-                    }} />
+                    style={{ width: 38, height: 38, objectFit: 'contain', display: 'block' }} />
                 </div>
                 <span className="text-center leading-tight font-bold" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '10px', letterSpacing: '0.02em', color: 'var(--ink)' }}>{label}</span>
               </button>
-              );
-            })}
+            ))}
           </div>
-        </div>);
-      })()}
+        </div>
+      )}
 
       {/* Daily Gem — spot of the day, date-seeded */}
       {places.length > 0 && <DailyGem places={places} onSelect={onPlaceSelect} />}
@@ -3737,25 +3694,33 @@ function DiscoverScreen({
       )}
 
       {/* ABQ Neighborhoods */}
-      {!hidden.includes('neighborhoods') && <div className="mb-6">
-        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
-          <p className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>ABQ Neighborhoods</p>
-        </div>
-        <div className="grid grid-cols-2" style={{ gap: '0', borderLeft: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)', borderRight: '1px solid rgba(0,0,0,0.08)' }}>
+      {!hidden.includes('neighborhoods') && <div className="mb-5 px-5">
+        <p className="text-xs font-black uppercase flex items-center gap-2 mb-3" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'var(--brand)', fontVariationSettings: "'FILL' 1" }}>location_city</span>
+          Neighborhoods
+        </p>
+        <div className="flex flex-wrap gap-2">
           {[
-            { name: 'Old Town', desc: 'History, art & adobe', icon: 'account_balance', bg: 'var(--brand)' },
-            { name: 'Nob Hill', desc: 'Eclectic & walkable', icon: 'local_cafe', bg: '#0057c2' },
-            { name: 'Downtown', desc: 'Nightlife & events', icon: 'nightlife', bg: 'var(--ink)' },
-            { name: 'Rio Grande', desc: 'Nature & trails', icon: 'nature', bg: '#1C6FEA' },
-            { name: 'NE Heights', desc: 'Views & dining', icon: 'landscape', bg: 'var(--brand-light)' },
-            { name: 'South Valley', desc: 'Local flavor', icon: 'storefront', bg: '#baad3b' },
-          ].map(({ name, desc, icon, bg }) => (
-            <button key={name} className="p-4 text-left transition-all"
-              style={{ backgroundColor: bg, borderRight: '1px solid rgba(0,0,0,0.08)', borderBottom: '1px solid rgba(0,0,0,0.08)', borderRadius: 6 }}
+            { name: 'Old Town', icon: 'account_balance', accent: 'var(--brand)' },
+            { name: 'Nob Hill', icon: 'local_cafe', accent: '#6B8F71' },
+            { name: 'Downtown', icon: 'nightlife', accent: 'var(--ink)' },
+            { name: 'Rio Grande', icon: 'nature', accent: '#5B7FA5' },
+            { name: 'NE Heights', icon: 'landscape', accent: '#C8963E' },
+            { name: 'South Valley', icon: 'storefront', accent: '#8B6B8A' },
+          ].map(({ name, icon, accent }) => (
+            <button key={name}
+              className="flex items-center gap-1.5 transition-all active:scale-95"
+              style={{
+                padding: '7px 14px 7px 10px',
+                borderRadius: 20,
+                border: '1.5px solid rgba(0,0,0,0.10)',
+                background: 'white',
+                cursor: 'pointer',
+                fontFamily: 'Public Sans, sans-serif',
+              }}
               onClick={() => onNavigatePlaces?.('All', name)}>
-              <span className="material-symbols-outlined" style={{ fontSize: '24px', color: bg === '#baad3b' ? 'var(--ink)' : 'white', fontVariationSettings: "'FILL' 0, 'wght' 300" }}>{icon}</span>
-              <p className="font-black text-sm mt-1" style={{ fontFamily: 'Public Sans, sans-serif', color: bg === '#baad3b' ? 'var(--ink)' : 'white' }}>{name}</p>
-              <p className="text-xs" style={{ fontFamily: 'Public Sans, sans-serif', color: bg === '#baad3b' ? 'rgba(0,0,0,0.65)' : 'rgba(255,255,255,0.75)' }}>{desc}</p>
+              <span className="material-symbols-outlined" style={{ fontSize: '16px', color: accent, fontVariationSettings: "'FILL' 1, 'wght' 500" }}>{icon}</span>
+              <span className="font-bold" style={{ fontSize: '12px', color: 'var(--ink)', letterSpacing: '0.01em' }}>{name}</span>
             </button>
           ))}
         </div>
@@ -8004,15 +7969,9 @@ export default function App() {
       return hm ? decodeURIComponent(hm[1]) : null;
     })()
   );
-  // Only block on the loading screen if there's no cached data to show.
-  const [loading, setLoading] = useState(() => {
-    try {
-      const raw = localStorage.getItem('abq_places_v2');
-      if (!raw) return true;
-      const { data } = JSON.parse(raw) as { data: Place[]; ts: number };
-      return !(Array.isArray(data) && data.length > 0);
-    } catch { return true; }
-  });
+  // Never block on a loading screen — show the app shell immediately.
+  // Data populates in the background; sections gracefully show when ready.
+  const [loading, setLoading] = useState(false);
   // Start as false — static events are pre-seeded above; Supabase refreshes silently.
   const [eventsLoading, setEventsLoading] = useState(false);
   const [loadError, setLoadError] = useState(false);
