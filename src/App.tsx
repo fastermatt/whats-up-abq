@@ -787,16 +787,6 @@ const SEARCH_BOOSTS: Record<string, string[]> = {
   // Cross-category
   history:      ['museum', 'arts'],
   spa:          ['wellness'],
-  // Shopping sub-categories (so "electronics" finds all shops with that Google type)
-  electronics:  ['shop'], computer: ['shop'], computers: ['shop'], tech: ['shop'],
-  laptop:       ['shop'], phone:    ['shop'], phones:   ['shop'],
-  grocery:      ['shop'], groceries:['shop'], supermarket: ['shop'],
-  pharmacy:     ['shop'], drugstore:['shop'], medicine: ['shop'],
-  clothes:      ['shop'], clothing: ['shop'], fashion:  ['shop'],
-  shoes:        ['shop'], jewelry:  ['shop'], jeweler:  ['shop'],
-  furniture:    ['shop'], 'home goods': ['shop'], hardware: ['shop'],
-  books:        ['shop'], bookstore:['shop'], pets:     ['shop'],
-  toys:         ['shop'], gifts:    ['shop'],
   // Food sub-types
   brunch:       ['restaurant', 'coffee'],
   breakfast:    ['restaurant', 'coffee'],
