@@ -8509,7 +8509,7 @@ export default function App() {
       // in < 200 ms, well under the 1500 ms LoadingScreen delay.
       // Supabase then refreshes the data silently in the background.
       try {
-        const staticR = await withTimeout(fetch('/places-data.json'), 1500);
+        const staticR = await withTimeout(fetch('/places-data.json'), 8000);
         if (staticR.ok) {
           const staticPlaces = await staticR.json();
           if (Array.isArray(staticPlaces) && staticPlaces.length > 0) {
