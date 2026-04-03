@@ -692,6 +692,15 @@ const PLACE_CATEGORIES = [
   { label: 'Hotels',         icon: 'hotel',         value: 'hotel' },
 ];
 
+// Vibe configs — shared between DiscoverScreen buttons and PlacesScreen pill filter
+const VIBE_CONFIGS = [
+  { icon: 'favorite', label: 'Date Night', gradient: 'linear-gradient(135deg, #e91e63, #ff5252)', vibeSearch: '', vibeCats: ['restaurant', 'bar', 'entertainment', 'arts'] },
+  { icon: 'directions_run', label: 'Active', gradient: 'linear-gradient(135deg, #ff6d00, #ffab00)', vibeSearch: '', vibeCats: ['fitness', 'park'] },
+  { icon: 'self_improvement', label: 'Chill', gradient: 'linear-gradient(135deg, #00897b, #4db6ac)', vibeSearch: '', vibeCats: ['coffee', 'wellness', 'park'] },
+  { icon: 'family_restroom', label: 'Family', gradient: 'linear-gradient(135deg, #1565c0, #42a5f5)', vibeSearch: '', vibeCats: ['restaurant', 'entertainment', 'park', 'museum', 'coffee'] },
+  { icon: 'palette', label: 'Culture', gradient: 'linear-gradient(135deg, #6a1b9a, #ab47bc)', vibeSearch: '', vibeCats: ['arts', 'museum', 'entertainment'] },
+];
+
 // Category display name mapping (shows friendlier labels to users)
 function displayCategory(cat: string): string {
   if (cat === 'other') return 'Services';
@@ -876,6 +885,11 @@ const FlatIcon = React.memo(function FlatIcon({
     heart:         <><path d="M8 13L3.5 8.5A3 3 0 0 1 8 4a3 3 0 0 1 4.5 4.5Z" {...F}/></>,
     bolt:          <><path d="M10 2L5 9h4l-3 5 7-8H9Z" {...F}/></>,
     pin:           <><circle cx="8" cy="7" r="3" {...S}/><path d="M8 10c0 0-4 3.5-4 5h8c0-1.5-4-5-4-5Z" {...S}/></>,
+    // Southwest-themed icons
+    chile:         <><path d="M8 3c-1 0-2 1.5-2 4s1 5.5 2 7c1-1.5 2-4.5 2-7s-1-4-2-4Z" {...S}/><path d="M8 3V1" {...S}/><path d="M6.5 2C7 1 9 1 9.5 2" {...S}/></>,
+    zia:           <><circle cx="8" cy="8" r="2.5" {...S}/><line x1="8" y1="1" x2="8" y2="4" {...S}/><line x1="8" y1="12" x2="8" y2="15" {...S}/><line x1="1" y1="8" x2="4" y2="8" {...S}/><line x1="12" y1="8" x2="15" y2="8" {...S}/><line x1="6.5" y1="1" x2="6.5" y2="4" {...S}/><line x1="9.5" y1="1" x2="9.5" y2="4" {...S}/><line x1="6.5" y1="12" x2="6.5" y2="15" {...S}/><line x1="9.5" y1="12" x2="9.5" y2="15" {...S}/><line x1="1" y1="6.5" x2="4" y2="6.5" {...S}/><line x1="1" y1="9.5" x2="4" y2="9.5" {...S}/><line x1="12" y1="6.5" x2="15" y2="6.5" {...S}/><line x1="12" y1="9.5" x2="15" y2="9.5" {...S}/></>,
+    adobe:         <><rect x="2" y="6" width="5" height="8" rx="0.5" {...S}/><rect x="9" y="4" width="5" height="10" rx="0.5" {...S}/><rect x="3.5" y="9" width="2" height="2.5" rx="0.3" {...S}/><rect x="10.5" y="7" width="2" height="2.5" rx="0.3" {...S}/><rect x="10.5" y="11" width="2" height="1.5" rx="0.3" {...S}/><line x1="2" y1="6" x2="7" y2="6" {...S}/><line x1="9" y1="4" x2="14" y2="4" {...S}/></>,
+    spa:           <><circle cx="8" cy="5" r="3" {...S}/><path d="M4.5 8Q8 12 11.5 8" {...S}/><circle cx="4" cy="10" r="2" {...S}/><circle cx="12" cy="10" r="2" {...S}/></>,
   };
   return (
     <svg viewBox="0 0 16 16" width={size} height={size} fill="none" style={{ display: 'block', flexShrink: 0 }}>
@@ -2799,6 +2813,64 @@ function DailyGem({ places, onSelect }: { places: Place[]; onSelect: (p: Place) 
   );
 }
 
+// ─── Featured Event Banner ───────────────────────────────────────────────────
+// Time-limited override: shows a specific event prominently on Discover.
+// After the expiry date, falls through to DailyGem automatically.
+const FEATURED_EVENT_ID = 'local-easter-sunrise-2026';
+const FEATURED_EVENT_EXPIRY = '2026-04-06'; // Show through Sunday April 5
+
+function FeaturedEventBanner({ events, onSelect }: { events: TMEvent[]; onSelect: (e: TMEvent) => void }) {
+  const today = new Date().toISOString().slice(0, 10);
+  if (today >= FEATURED_EVENT_EXPIRY) return null;
+  const ev = events.find(e => e.id === FEATURED_EVENT_ID);
+  if (!ev) return null;
+  const img = ev.images?.[0]?.url || '';
+  const venue = ev._embedded?.venues?.[0]?.name || '';
+  const dateStr = ev.dates?.start?.localDate || '';
+  const timeStr = ev.dates?.start?.localTime || '';
+  const fmtDate = dateStr ? new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) : '';
+  const fmtTime = timeStr ? (() => { const [h, m] = timeStr.split(':').map(Number); return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`; })() : '';
+
+  return (
+    <div className="px-5 pb-5">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em' }}>Featured Event</h2>
+        <span className="text-xs font-black uppercase" style={{ color: '#666', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em' }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '12px', verticalAlign: 'middle', marginRight: '3px' }}>star</span>
+          This Weekend
+        </span>
+      </div>
+      <button onClick={() => onSelect(ev)} className="w-full relative overflow-hidden text-left"
+        style={{ height: '220px', boxShadow: '0 4px 20px rgba(0,0,0,0.15)', border: '1px solid rgba(0,0,0,0.12)', animation: 'cardFadeIn 0.45s ease both', borderRadius: 8 }}>
+        {img && <img src={img} alt={ev.name} className="w-full h-full object-cover" style={{ filter: 'brightness(0.75)' }} />}
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, rgba(194,99,74,0.2) 0%, rgba(0,0,0,0.78) 100%)' }} />
+        <div className="absolute top-3 left-3">
+          <span className="text-xs font-black px-3 py-1.5"
+            style={{ background: 'linear-gradient(135deg, #E8A838, #C2634A)', color: 'white', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: 6, boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
+            ★ FEATURED EVENT
+          </span>
+        </div>
+        <div className="absolute top-3 right-3">
+          <span className="text-sm font-black w-8 h-8 flex items-center justify-center"
+            style={{ background: 'var(--brand)', color: 'white', borderRadius: 6 }}>→</span>
+        </div>
+        <div className="absolute bottom-3 left-3 right-3">
+          <p className="text-white font-black text-xl leading-tight" style={{ fontFamily: 'Public Sans, sans-serif', textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>{ev.name}</p>
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            {fmtDate && <span className="text-white/90 text-xs font-bold" style={{ fontFamily: 'Public Sans, sans-serif' }}>{fmtDate}</span>}
+            {fmtTime && <><span className="text-white/40 text-xs">·</span><span className="text-white/90 text-xs font-bold">{fmtTime}</span></>}
+            {venue && <><span className="text-white/40 text-xs">·</span><span className="text-white/80 text-xs font-semibold">{venue}</span></>}
+          </div>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-xs font-black px-2 py-0.5" style={{ background: 'rgba(255,255,255,0.15)', color: 'white', borderRadius: 4, backdropFilter: 'blur(4px)' }}>FREE</span>
+            <span className="text-white/60 text-xs">No tickets required</span>
+          </div>
+        </div>
+      </button>
+    </div>
+  );
+}
+
 // ─── Ko-fi Support Banner ─────────────────────────────────────────────────────
 function KoFiBanner() {
   const [dismissed, setDismissed] = useState(() => {
@@ -3162,6 +3234,9 @@ function DiscoverScreen({
         </div>
       )}
 
+      {/* Featured Event (time-limited) — shows above Daily Gem when active */}
+      <FeaturedEventBanner events={events} onSelect={onEventSelect} />
+
       {/* Daily Gem — spot of the day, date-seeded */}
       {places.length > 0 && <DailyGem places={places} onSelect={onPlaceSelect} />}
 
@@ -3169,9 +3244,10 @@ function DiscoverScreen({
       {featured.length > 0 && (
         <div className="pb-5">
           <h2
-            className="text-lg font-black uppercase tracking-tight mb-3 px-5"
+            className="text-lg font-black uppercase tracking-tight mb-3 px-5 flex items-center gap-2"
             style={{ fontFamily: 'Public Sans, sans-serif' }}
           >
+            <FlatIcon name="chile" size={18} color="var(--brand)" />
             Staff Picks
           </h2>
           <div className="grid gap-2 px-5" style={{ gridTemplateColumns: '1fr 1fr' }}>
@@ -3368,16 +3444,10 @@ function DiscoverScreen({
       {/* Explore by Vibe */}
       {!hidden.includes('vibes') && <div className="mb-6">
         <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
-          <p className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>Explore by Vibe</p>
+          <p className="text-sm font-black uppercase flex items-center gap-2" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}><FlatIcon name="zia" size={14} color="var(--brand)" /> Explore by Vibe</p>
         </div>
         <div className="grid grid-cols-5 gap-0" style={{ borderLeft: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)', borderRight: '1px solid rgba(0,0,0,0.08)' }}>
-          {([
-            { icon: 'favorite', label: 'Date Night', gradient: 'linear-gradient(135deg, #e91e63, #ff5252)', vibeSearch: '', vibeCats: ['restaurant', 'bar', 'entertainment', 'arts'] },
-            { icon: 'directions_run', label: 'Active', gradient: 'linear-gradient(135deg, #ff6d00, #ffab00)', vibeSearch: '', vibeCats: ['fitness', 'park'] },
-            { icon: 'spa', label: 'Chill', gradient: 'linear-gradient(135deg, #00897b, #4db6ac)', vibeSearch: '', vibeCats: ['coffee', 'wellness', 'park'] },
-            { icon: 'family_restroom', label: 'Family', gradient: 'linear-gradient(135deg, #1565c0, #42a5f5)', vibeSearch: '', vibeCats: ['entertainment', 'park', 'museum'] },
-            { icon: 'palette', label: 'Culture', gradient: 'linear-gradient(135deg, #6a1b9a, #ab47bc)', vibeSearch: '', vibeCats: ['arts', 'museum', 'entertainment'] },
-          ] as const).map(({ icon, label, gradient, vibeSearch, vibeCats }) => (
+          {VIBE_CONFIGS.map(({ icon, label, gradient, vibeSearch, vibeCats }) => (
             <button key={label}
               className="flex flex-col items-center gap-1.5 py-4 px-1 transition-all active:scale-95"
               style={{ background: 'white', border: 'none', borderRight: '1px solid rgba(0,0,0,0.08)', borderBottom: '1px solid rgba(0,0,0,0.08)', borderRadius: 6 }}
@@ -3425,7 +3495,7 @@ function DiscoverScreen({
       {/* Weekend Planner */}
       {!hidden.includes('planWeekend') && <div className="mb-6">
         <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)', marginBottom: '12px' }}>
-          <p className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>Plan Your Weekend</p>
+          <p className="text-sm font-black uppercase flex items-center gap-2" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}><FlatIcon name="sun" size={14} color="var(--brand)" /> Plan Your Weekend</p>
         </div>
         <div className="flex flex-col gap-2">
           {[
@@ -4164,7 +4234,7 @@ function PlacesScreen({
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}
         >
-          Explore Greater ABQ
+          <span className="flex items-center gap-1.5"><FlatIcon name="cactus" size={11} color="var(--brand)" /> Explore Greater ABQ</span>
         </p>
         <h1
           className="font-black leading-none mt-1"
@@ -4248,7 +4318,15 @@ function PlacesScreen({
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: openNow ? 'var(--brand)' : '#4caf50', display: 'inline-block', marginRight: 2, flexShrink: 0 }} />
           Open Now
         </button>
-        {PLACE_CATEGORIES.map(cat => {
+        {(() => {
+          // When a vibe is active, only show category pills relevant to that vibe
+          const vibeLabel = activeVibe ? activeVibe.split('|||')[0] : '';
+          const vibeConfig = vibeLabel ? VIBE_CONFIGS.find(v => v.label === vibeLabel) : null;
+          const visibleCats = vibeConfig
+            ? PLACE_CATEGORIES.filter(c => c.value === 'All' || vibeConfig.vibeCats.includes(c.value))
+            : PLACE_CATEGORIES;
+          return visibleCats;
+        })().map(cat => {
           const isActive = selectedCat === cat.value || (selectedCat.includes('|') && selectedCat.split('|').includes(cat.value));
           return (
           <button
@@ -7765,6 +7843,34 @@ export default function App() {
     trackEvent('pageview', { tab, referrer: document.referrer || '', path: `#${tab}` });
   }, []);
 
+  // ── Swipe between tabs (native-app feel) ─────────────────────────────────
+  const TAB_ORDER: TabId[] = NAV_ITEMS.map(n => n.id);
+  const swipeStartX = useRef<number | null>(null);
+  const swipeStartY = useRef<number | null>(null);
+  const swipeLocked = useRef(false);
+
+  const onMainTouchStart = useCallback((e: React.TouchEvent) => {
+    swipeStartX.current = e.touches[0].clientX;
+    swipeStartY.current = e.touches[0].clientY;
+    swipeLocked.current = false;
+  }, []);
+
+  const onMainTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (swipeStartX.current === null || swipeStartY.current === null) return;
+    const dx = e.changedTouches[0].clientX - swipeStartX.current;
+    const dy = e.changedTouches[0].clientY - swipeStartY.current;
+    swipeStartX.current = null;
+    swipeStartY.current = null;
+    // Only count horizontal swipes (dx > dy threshold), min 60px
+    if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.7) return;
+    const curIdx = TAB_ORDER.indexOf(activeTab);
+    if (dx < 0 && curIdx < TAB_ORDER.length - 1) {
+      navigateTab(TAB_ORDER[curIdx + 1]);
+    } else if (dx > 0 && curIdx > 0) {
+      navigateTab(TAB_ORDER[curIdx - 1]);
+    }
+  }, [activeTab, navigateTab]);
+
   const openPlaceModal = useCallback((place: Place) => {
     setSelectedPlace(place);
     window.history.pushState({ tab: null, modal: 'place', id: place.id }, '', `#place/${place.id}`);
@@ -8479,9 +8585,9 @@ export default function App() {
             zIndex: 40,
           }}
         >
-          <div className="flex items-center gap-2">
+          <button className="flex items-center gap-2" onClick={() => { setActiveTab('discover'); window.scrollTo(0, 0); }} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
             <img src="/logo-static.png" alt="ABQ Unplugged" style={{ height: '32px', width: 'auto' }} />
-          </div>
+          </button>
           <div className="flex items-center gap-2">
             <button onClick={() => setShowSearch(true)} className="w-9 h-9 flex items-center justify-center" style={{ background: 'white', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
               <span className="material-symbols-outlined" style={{ fontSize: '20px', color: 'var(--ink)' }}>search</span>
@@ -8511,7 +8617,8 @@ export default function App() {
         <SiteBanner banner={siteBanner} />
 
         {/* Screen content */}
-        <main className="flex-1" style={{ paddingBottom: 'calc(var(--sab) + 80px)' }}>
+        <main className="flex-1" style={{ paddingBottom: 'calc(var(--sab) + 80px)' }}
+          onTouchStart={onMainTouchStart} onTouchEnd={onMainTouchEnd}>
           {activeTab === 'discover' && (
             <DiscoverScreen
               places={places}

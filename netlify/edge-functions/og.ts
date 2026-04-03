@@ -69,32 +69,46 @@ async function fetchPlaceOG(placeId: string): Promise<OGData | null> {
 }
 
 async function fetchEventOG(eventId: string): Promise<OGData | null> {
-  const query = `${SUPABASE_URL}/rest/v1/events?raw->>id=eq.${encodeURIComponent(eventId)}&select=raw&limit=1`;
-  const res = await fetch(query, {
-    headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
-  });
-  if (!res.ok) return null;
-  const rows = await res.json();
-  if (!rows?.length) return null;
+  // Try both ID formats: raw->>id for Ticketmaster events, id for local events
+  const queries = [
+    `${SUPABASE_URL}/rest/v1/events?raw->>id=eq.${encodeURIComponent(eventId)}&select=raw&limit=1`,
+    `${SUPABASE_URL}/rest/v1/events?id=eq.${encodeURIComponent(eventId)}&select=raw&limit=1`,
+  ];
 
-  const raw = rows[0].raw;
-  const name = raw?.name || 'Event';
-  const venue = raw?._embedded?.venues?.[0]?.name || '';
-  const dateStr = raw?.dates?.start?.localDate || '';
-  const timeStr = raw?.dates?.start?.localTime || '';
+  let raw: Record<string, unknown> | null = null;
+  for (const query of queries) {
+    const res = await fetch(query, {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+    });
+    if (!res.ok) continue;
+    const rows = await res.json();
+    if (rows?.length) { raw = rows[0].raw; break; }
+  }
+  if (!raw) return null;
+
+  const name = (raw?.name as string) || 'Event';
+  const embedded = raw?._embedded as Record<string, unknown[]> | undefined;
+  const venues = embedded?.venues as Array<{ name?: string }> | undefined;
+  const venue = venues?.[0]?.name || (raw?.venue as string) || '';
+  const dates = raw?.dates as { start?: { localDate?: string; localTime?: string } } | undefined;
+  const dateStr = dates?.start?.localDate || (raw?.date as string) || '';
+  const timeStr = dates?.start?.localTime || (raw?.time as string) || '';
 
   const parts = [name];
   if (dateStr) parts.push(formatDateCompact(dateStr));
   if (timeStr) parts.push(formatTimeCompact(timeStr));
   if (venue) parts.push(`at ${venue}`);
-  const description = raw?.info || raw?.description || parts.join(' · ');
+  const description = (raw?.info as string) || (raw?.description as string) || parts.join(' — ');
 
+  // Image: try Ticketmaster images[] array first, then local event image field
   let image = FALLBACK_IMAGE;
-  if (raw?.images?.length) {
-    const wide = raw.images.find(
-      (img: { ratio?: string; width?: number }) => img.ratio === '16_9' && (img.width || 0) >= 640
-    );
-    image = wide?.url || raw.images[0]?.url || FALLBACK_IMAGE;
+  const images = raw?.images as Array<{ url?: string; ratio?: string; width?: number }> | undefined;
+  if (images?.length) {
+    const wide = images.find(img => img.ratio === '16_9' && (img.width || 0) >= 640);
+    image = wide?.url || images[0]?.url || FALLBACK_IMAGE;
+  } else if (raw?.image) {
+    // Local event: single image string
+    image = raw.image as string;
   }
 
   const titleParts = [name];
