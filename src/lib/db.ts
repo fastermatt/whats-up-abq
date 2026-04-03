@@ -172,9 +172,10 @@ function transformGoogleRaw(raw: Record<string, unknown>): Record<string, unknow
     rating: raw.rating,
     reviewCount: raw.user_ratings_total,
     priceLevel: raw.price_level,
-    hours: openingHours?.open_now != null
-      ? (openingHours.open_now ? 'Open now' : 'Closed now')
-      : undefined,
+    // Note: Google Nearby Search only returns a snapshot `open_now` boolean,
+    // not actual hours. Showing stale "Open now"/"Closed now" is misleading.
+    // Real hours come from enriched data (loaded on detail modal open).
+    hours: undefined,
     tags: placeTypesToTags(types, raw.name as string),
     googleTypes: types,
     source: 'google_places',
