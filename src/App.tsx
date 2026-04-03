@@ -33,7 +33,7 @@ function useFadeIn(delay = 0) {
 if (typeof document !== 'undefined' && !document.getElementById('card-fade-style')) {
   const s = document.createElement('style');
   s.id = 'card-fade-style';
-  s.textContent = '@keyframes cardFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes kenBurns0 { from { transform: scale(1.05) translate(0%,0%); } to { transform: scale(1.18) translate(-2%,-1%); } } @keyframes kenBurns1 { from { transform: scale(1.1) translate(-1%,1%); } to { transform: scale(1.2) translate(2%,-2%); } } @keyframes kenBurns2 { from { transform: scale(1.08) translate(1%,-1%); } to { transform: scale(1.18) translate(-1%,2%); } } @keyframes kenBurns3 { from { transform: scale(1.12) translate(-2%,0%); } to { transform: scale(1.05) translate(1%,-1%); } }';
+  s.textContent = '@keyframes cardFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes kenBurns0 { from { transform: scale(1.05) translate(0%,0%); } to { transform: scale(1.18) translate(-2%,-1%); } } @keyframes kenBurns1 { from { transform: scale(1.1) translate(-1%,1%); } to { transform: scale(1.2) translate(2%,-2%); } } @keyframes kenBurns2 { from { transform: scale(1.08) translate(1%,-1%); } to { transform: scale(1.18) translate(-1%,2%); } } @keyframes kenBurns3 { from { transform: scale(1.12) translate(-2%,0%); } to { transform: scale(1.05) translate(1%,-1%); } } @keyframes cursorBlink { 0%,100% { opacity:1; } 50% { opacity:0; } }';
   document.head.appendChild(s);
 }
 
@@ -3085,13 +3085,80 @@ function DiscoverScreen({
 }) {
   const hidden = prefs?.hiddenSections ?? [];
   const interests = prefs?.preferredInterests ?? [];
+  // ── TheaterJS-style typing animation for hero ────────────────────────────
   const HERO_PHRASES = ['Go Do Something', 'Time to Get Outside', 'Stop Doomscrolling', 'Put the Phone Down', 'Touch Some Grass', 'Go See People', 'Time to Unplug', 'Get Out of the House'];
   const [heroDisplay, setHeroDisplay] = useState('');
+  const [heroPhase, setHeroPhase] = useState<'typing' | 'pausing' | 'erasing'>('typing');
   useEffect(() => {
-    const p = HERO_PHRASES[Math.floor(Math.random() * HERO_PHRASES.length)];
-    let i = 0;
-    const iv = setInterval(() => { i++; setHeroDisplay(p.slice(0, i)); if (i >= p.length) clearInterval(iv); }, 55);
-    return () => clearInterval(iv);
+    let cancelled = false;
+    let phraseIdx = Math.floor(Math.random() * HERO_PHRASES.length);
+    let charIdx = 0;
+    let current = '';
+    let phase: 'typing' | 'pausing' | 'erasing' = 'typing';
+    // Human-like speed variation
+    const typeSpeed = () => 45 + Math.random() * 55;
+    const eraseSpeed = () => 25 + Math.random() * 20;
+    // Occasional typo simulation (10% chance per character)
+    const shouldTypo = () => Math.random() < 0.08;
+    const TYPO_NEARBY: Record<string, string> = {
+      a:'s',s:'d',d:'f',f:'g',g:'h',h:'j',t:'r',i:'o',o:'p',e:'r',n:'m',l:'k',
+    };
+
+    const tick = () => {
+      if (cancelled) return;
+      const target = HERO_PHRASES[phraseIdx];
+
+      if (phase === 'typing') {
+        if (charIdx < target.length) {
+          const ch = target[charIdx];
+          // Typo: type wrong char, wait, erase, type correct
+          if (shouldTypo() && charIdx > 2 && charIdx < target.length - 2 && TYPO_NEARBY[ch.toLowerCase()]) {
+            const wrongChar = ch === ch.toUpperCase() ? TYPO_NEARBY[ch.toLowerCase()].toUpperCase() : TYPO_NEARBY[ch.toLowerCase()];
+            current += wrongChar;
+            setHeroDisplay(current);
+            setTimeout(() => {
+              if (cancelled) return;
+              current = current.slice(0, -1);
+              setHeroDisplay(current);
+              setTimeout(() => {
+                if (cancelled) return;
+                current += ch;
+                charIdx++;
+                setHeroDisplay(current);
+                setTimeout(tick, typeSpeed());
+              }, 80 + Math.random() * 40);
+            }, 150 + Math.random() * 100);
+            return;
+          }
+          current += ch;
+          charIdx++;
+          setHeroDisplay(current);
+          // Pause slightly longer after spaces and punctuation
+          const delay = (ch === ' ' || ch === ',') ? typeSpeed() * 1.8 : typeSpeed();
+          setTimeout(tick, delay);
+        } else {
+          phase = 'pausing';
+          setTimeout(tick, 2800 + Math.random() * 1200);
+        }
+      } else if (phase === 'pausing') {
+        phase = 'erasing';
+        tick();
+      } else if (phase === 'erasing') {
+        if (current.length > 0) {
+          current = current.slice(0, -1);
+          setHeroDisplay(current);
+          setTimeout(tick, eraseSpeed());
+        } else {
+          phraseIdx = (phraseIdx + 1) % HERO_PHRASES.length;
+          charIdx = 0;
+          phase = 'typing';
+          setTimeout(tick, 400 + Math.random() * 300);
+        }
+      }
+    };
+
+    setTimeout(tick, 600);
+    return () => { cancelled = true; };
   }, []);
   const featured = places.filter(p => p.isFeatured && !BLOCKED_VENUES.some(b => p.name?.toLowerCase().includes(b.toLowerCase()))).slice(0, 5);
 
@@ -3137,8 +3204,8 @@ function DiscoverScreen({
           <p className="text-xs font-black uppercase mb-2" style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.12em' }}>
             Greater ABQ Metro
           </p>
-          <h1 className="font-black leading-tight mb-1" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '26px', letterSpacing: '-0.02em', color: 'var(--ink)' }}>
-            Find something worth<br />going to tonight
+          <h1 className="font-black leading-tight mb-1" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '26px', letterSpacing: '-0.02em', color: 'var(--ink)', minHeight: '64px' }}>
+            {heroDisplay}<span style={{ display: 'inline-block', width: '2px', height: '0.85em', background: 'var(--brand)', marginLeft: '2px', verticalAlign: 'baseline', animation: 'cursorBlink 0.8s step-end infinite' }} />
           </h1>
           <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '12px', color: '#555', fontWeight: 500, marginBottom: '14px' }}>
             {events.length.toLocaleString()} events · {places.length.toLocaleString()} places across Greater ABQ
