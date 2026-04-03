@@ -60,7 +60,7 @@ function useTypewriter(text: string, startDelay = 400) {
 if (typeof document !== 'undefined' && !document.getElementById('card-fade-style')) {
   const s = document.createElement('style');
   s.id = 'card-fade-style';
-  s.textContent = '@keyframes cardFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes kenBurns0 { from { transform: scale(1.05) translate(0%,0%); } to { transform: scale(1.18) translate(-2%,-1%); } } @keyframes kenBurns1 { from { transform: scale(1.1) translate(-1%,1%); } to { transform: scale(1.2) translate(2%,-2%); } } @keyframes kenBurns2 { from { transform: scale(1.08) translate(1%,-1%); } to { transform: scale(1.18) translate(-1%,2%); } } @keyframes kenBurns3 { from { transform: scale(1.12) translate(-2%,0%); } to { transform: scale(1.05) translate(1%,-1%); } } @keyframes cursorBlink { 0%,100% { opacity:1; } 50% { opacity:0; } } @keyframes navPress { 0% { transform: scale(1); } 40% { transform: scale(0.88); } 100% { transform: scale(1); } } .nav-btn:active { animation: navPress 0.2s ease-out; } .haptic-switch { position:fixed; top:-9999px; left:-9999px; opacity:0; pointer-events:none; }';
+  s.textContent = '@keyframes cardFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes kenBurns0 { from { transform: scale(1.05) translate(0%,0%); } to { transform: scale(1.18) translate(-2%,-1%); } } @keyframes kenBurns1 { from { transform: scale(1.1) translate(-1%,1%); } to { transform: scale(1.2) translate(2%,-2%); } } @keyframes kenBurns2 { from { transform: scale(1.08) translate(1%,-1%); } to { transform: scale(1.18) translate(-1%,2%); } } @keyframes kenBurns3 { from { transform: scale(1.12) translate(-2%,0%); } to { transform: scale(1.05) translate(1%,-1%); } } @keyframes cursorBlink { 0%,100% { opacity:1; } 50% { opacity:0; } } .nav-press-btn:active { top: 4px !important; box-shadow: 0 1px 0 #0a0a0a, 0 0px 2px rgba(0,0,0,0.1) !important; } .haptic-switch { position:fixed; top:-9999px; left:-9999px; opacity:0; pointer-events:none; }';
   document.head.appendChild(s);
 }
 
@@ -7862,7 +7862,11 @@ function useWindowWidth() {
 }
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<TabId>('discover');
+  const [activeTab, setActiveTab] = useState<TabId>(() => {
+    const hash = window.location.hash.replace('#', '').split('/')[0];
+    const validTabs: TabId[] = ['discover', 'events', 'places', 'plan', 'profile'];
+    return validTabs.includes(hash as TabId) ? (hash as TabId) : 'discover';
+  });
   // Mobile-first: always use mobile layout (desktop layout disabled for now)
   const isDesktop = false;
 
@@ -8114,19 +8118,31 @@ export default function App() {
   const swipeStartY = useRef<number | null>(null);
   const swipeLocked = useRef(false);
 
+  const swipeIgnored = useRef(false);
   const onMainTouchStart = useCallback((e: React.TouchEvent) => {
     swipeStartX.current = e.touches[0].clientX;
     swipeStartY.current = e.touches[0].clientY;
     swipeLocked.current = false;
+    // Ignore swipes that start inside horizontally-scrollable containers
+    // (filter chips, image sliders, horizontal card rows, etc.)
+    let el = e.target as HTMLElement | null;
+    swipeIgnored.current = false;
+    while (el && el !== e.currentTarget) {
+      const style = window.getComputedStyle(el);
+      if (style.overflowX === 'auto' || style.overflowX === 'scroll' || el.classList.contains('overflow-x-auto')) {
+        swipeIgnored.current = true;
+        break;
+      }
+      el = el.parentElement;
+    }
   }, []);
 
   // Prevent browser back/forward swipe when horizontal drag is detected
   const onMainTouchMove = useCallback((e: React.TouchEvent) => {
+    if (swipeIgnored.current) return; // inside a scrollable container — don't hijack
     if (swipeStartX.current === null || swipeStartY.current === null) return;
     const dx = e.touches[0].clientX - swipeStartX.current;
     const dy = e.touches[0].clientY - swipeStartY.current;
-    // Once we detect a clearly horizontal movement, prevent default to stop
-    // the browser from interpreting it as a back/forward navigation gesture
     if (!swipeLocked.current && Math.abs(dx) > 15 && Math.abs(dx) > Math.abs(dy) * 1.2) {
       swipeLocked.current = true;
     }
@@ -8136,14 +8152,15 @@ export default function App() {
   }, []);
 
   const onMainTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (swipeIgnored.current) { swipeIgnored.current = false; return; }
     if (swipeStartX.current === null || swipeStartY.current === null) return;
     const dx = e.changedTouches[0].clientX - swipeStartX.current;
     const dy = e.changedTouches[0].clientY - swipeStartY.current;
     swipeStartX.current = null;
     swipeStartY.current = null;
     swipeLocked.current = false;
-    // Only count horizontal swipes (dx > dy threshold), min 60px
-    if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.7) return;
+    // Only count horizontal swipes (dx > dy threshold), min 80px
+    if (Math.abs(dx) < 80 || Math.abs(dy) > Math.abs(dx) * 0.6) return;
     const curIdx = TAB_ORDER.indexOf(activeTab);
     if (dx < 0 && curIdx < TAB_ORDER.length - 1) {
       navigateTab(TAB_ORDER[curIdx + 1]);
@@ -8988,34 +9005,44 @@ export default function App() {
             transform: 'translateX(-50%)',
             width: '100%',
             maxWidth: '480px',
-            paddingBottom: 'var(--sab)',
-            borderTop: '1px solid rgba(0,0,0,0.08)',
-            background: 'white',
+            paddingBottom: 'calc(var(--sab) + 2px)',
+            padding: '0 3px',
+            borderTop: '1px solid rgba(0,0,0,0.06)',
+            background: '#faf8f5',
             zIndex: 40,
           }}
         >
-          {NAV_ITEMS.map((item, idx) => (
+          {NAV_ITEMS.map((item, idx) => {
+            const isActive = activeTab === item.id;
+            return (
             <button
               key={item.id}
               onClick={() => { playHaptic(); navigateTab(item.id); }}
               aria-label={item.label}
-              className="nav-btn flex-1 flex flex-col items-center justify-center gap-0.5 py-3"
+              className="nav-press-btn flex-1 flex flex-col items-center justify-center gap-0.5"
               style={{
                 minHeight: '64px',
-                background: activeTab === item.id ? 'var(--ink)' : 'white',
-                borderRight: 'none',
-                borderRadius: 6,
-                transition: 'background 0.15s ease, transform 0.15s ease',
+                background: isActive ? 'var(--ink)' : '#f5f3f0',
+                border: 'none',
+                borderRadius: 8,
+                margin: '6px 3px 6px',
+                position: 'relative' as const,
+                top: 0,
+                boxShadow: isActive
+                  ? '0 4px 0 #0a0a0a, 0 2px 8px rgba(0,0,0,0.15)'
+                  : '0 4px 0 #d5d0c8, 0 2px 6px rgba(0,0,0,0.06)',
+                cursor: 'pointer',
                 WebkitTapHighlightColor: 'transparent',
+                transition: 'top 0.1s ease, box-shadow 0.1s ease, background 0.15s ease',
               }}
             >
               <span
                 className="material-symbols-outlined"
                 style={{
                   fontSize: '22px',
-                  color: activeTab === item.id ? 'white' : '#555',
+                  color: isActive ? 'white' : '#555',
                   fontVariationSettings:
-                    activeTab === item.id
+                    isActive
                       ? "'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24"
                       : "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24",
                 }}
@@ -9025,7 +9052,7 @@ export default function App() {
               <span
                 className="font-black uppercase"
                 style={{
-                  color: activeTab === item.id ? 'white' : '#555',
+                  color: isActive ? 'white' : '#555',
                   fontFamily: 'Public Sans, sans-serif',
                   fontSize: '8px',
                   letterSpacing: '0.1em',
@@ -9034,7 +9061,7 @@ export default function App() {
                 {item.label}
               </span>
             </button>
-          ))}
+          );})}
         </nav>
         {/* Hidden iOS haptic switch — clicking the label triggers a native switch toggle which produces haptic feedback on iOS 18+ */}
         <div className="haptic-switch" aria-hidden="true">
