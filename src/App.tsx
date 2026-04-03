@@ -1555,6 +1555,7 @@ function PlaceDetailModal({
               onClick={async () => {
                 const shareUrl = `https://abqunplugged.com/place/${encodeURIComponent(place.id)}`;
                 const shareText = `${place.name} — ${place.description || place.category || ''}`;
+                trackEvent('share_click', { type: 'place', place_id: place.id, name: place.name });
                 if (navigator.share) {
                   try { await navigator.share({ title: place.name, text: shareText, url: shareUrl }); setShared(true); setTimeout(() => setShared(false), 2000); return; } catch { /* fall through */ }
                 }
@@ -1683,6 +1684,7 @@ function PlaceDetailModal({
           <a
             href={directionsUrl}
             target="_blank" rel="noopener noreferrer"
+            onClick={() => trackEvent('directions_click', { place_id: place.id, name: place.name, category: place.category })}
             className="flex items-start gap-3 mb-3 bg-white p-3 w-full text-left"
             style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', textDecoration: 'none' }}
           >
@@ -1799,6 +1801,7 @@ function PlaceDetailModal({
           href={directionsUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackEvent('directions_click', { place_id: place.id, name: place.name, category: place.category })}
           className="block w-full py-4 text-center text-white font-black text-sm rounded-lg mt-2"
           style={{ background: 'var(--brand-gradient)', fontFamily: 'Public Sans, sans-serif' }}
         >
@@ -2183,6 +2186,7 @@ async function shareEvent(event: TMEvent) {
     ? formatDate(event.dates.start.localDate) + (event.dates.start.localTime ? ' · ' + formatTime(event.dates.start.localTime) : '')
     : '';
   const text = [event.name, dateStr, venue?.name ? `at ${venue.name}` : ''].filter(Boolean).join(' — ');
+  trackEvent('share_click', { type: 'event', event_id: event.id, name: event.name });
   if (navigator.share) {
     try { await navigator.share({ title: event.name, text, url: deepLink }); return; } catch { /* fall through */ }
   }
@@ -2313,6 +2317,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
           <a
             href={directionsUrl}
             target="_blank" rel="noopener noreferrer"
+            onClick={() => trackEvent('directions_click', { type: 'event', event_id: event.id, name: venue.name || event.name })}
             className="flex items-start gap-3 mb-3 bg-white p-3 w-full"
             style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1.5px solid #f0f0f0', textDecoration: 'none' }}
           >
@@ -2493,6 +2498,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
           </a>
         ) : (
           <a href={directionsUrl} target="_blank" rel="noopener noreferrer"
+            onClick={() => trackEvent('directions_click', { type: 'event', event_id: event.id, name: event.name })}
             className="flex items-center justify-center gap-2 w-full py-4 text-center text-white font-black text-sm"
             style={{ borderRadius: 6, background: 'var(--brand-gradient)', fontFamily: 'Public Sans, sans-serif' }}
           >
@@ -2769,6 +2775,7 @@ const saveWishlist = (items: { id: string; name: string; type: string; category:
 const toggleWishlist = (item: { id: string; name: string; type: string; category: string }) => {
   const current = getWishlist();
   const exists = current.some(w => w.id === item.id);
+  trackEvent(exists ? 'wishlist_remove' : 'wishlist_add', { item_id: item.id, name: item.name, type: item.type });
   saveWishlist(exists ? current.filter(w => w.id !== item.id) : [...current, item]);
 };
 const isWishlisted = (id: string) => getWishlist().some(w => w.id === id);
@@ -3421,7 +3428,7 @@ function DiscoverScreen({
               <button key={label}
                 className="flex flex-col items-center gap-1.5 transition-all active:scale-95"
                 style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', flex: '1 1 0', minWidth: 0 }}
-                onClick={() => onNavigatePlaces?.(vibeCats.join('|'), vibeSearch, label, gradient)}>
+                onClick={() => { trackEvent('vibe_click', { vibe: label }); onNavigatePlaces?.(vibeCats.join('|'), vibeSearch, label, gradient); }}>
                 <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'white', border: `2.5px solid ${borderColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', overflow: 'hidden' }}>
                   <img
                     src={activeVibeAnim === i ? animatedIcon : staticIcon}
