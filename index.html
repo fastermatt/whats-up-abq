@@ -31,29 +31,94 @@
     <meta name="theme-color" content="#F9F5F2" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#1C1814" media="(prefers-color-scheme: dark)" />
 
-    <!-- ─── Description / social ─── -->
+    <!-- ─── SEO: canonical, description, keywords ─── -->
+    <link rel="canonical" href="https://abqunplugged.com/" />
     <meta
       name="description"
-      content="Explore events, places &amp; culture in Albuquerque. Check in, earn levels, and discover ABQ like never before."
+      content="Find things to do in Albuquerque, NM. Browse 700+ events, 4,500+ places, live music, food, nightlife, free events, and more. Updated daily."
     />
+    <meta name="keywords" content="Albuquerque events, things to do in Albuquerque, ABQ events tonight, Albuquerque nightlife, Albuquerque restaurants, free events Albuquerque, ABQ live music, Albuquerque things to do this weekend, Duke City events, New Mexico events, ABQ food, Albuquerque concerts" />
+
+    <!-- ─── Geo meta tags for local SEO ─── -->
+    <meta name="geo.region" content="US-NM" />
+    <meta name="geo.placename" content="Albuquerque" />
+    <meta name="geo.position" content="35.0844;-106.6504" />
+    <meta name="ICBM" content="35.0844, -106.6504" />
 
     <!-- ─── Open Graph (iMessage, WhatsApp, Slack, Twitter, Facebook) ─── -->
     <meta property="og:type"        content="website" />
     <meta property="og:url"         content="https://abqunplugged.com/" />
-    <meta property="og:title"       content="ABQ Unplugged — Events, Places &amp; Culture in Albuquerque" />
-    <meta property="og:description" content="Discover what's happening in the Duke City. 490+ events, 4,500+ places. Free, forever." />
+    <meta property="og:title"       content="ABQ Unplugged — Things to Do in Albuquerque, NM" />
+    <meta property="og:description" content="Find events, places &amp; culture in the Duke City. 700+ events, 4,500+ places — updated daily. Free, forever." />
     <meta property="og:image"       content="https://abqunplugged.com/og-image.jpg" />
     <meta property="og:image:width"  content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt"   content="ABQ Unplugged — Events, Places &amp; Culture in Albuquerque" />
+    <meta property="og:image:alt"   content="ABQ Unplugged — Things to Do in Albuquerque, NM" />
     <meta property="og:locale"      content="en_US" />
     <meta property="og:site_name"   content="ABQ Unplugged" />
 
     <!-- ─── Twitter / X card ─── -->
     <meta name="twitter:card"        content="summary_large_image" />
-    <meta name="twitter:title"       content="ABQ Unplugged — Events &amp; Places in ABQ" />
-    <meta name="twitter:description" content="Discover what's happening in the Duke City. 490+ events, 4,500+ places. Free." />
+    <meta name="twitter:title"       content="ABQ Unplugged — Things to Do in Albuquerque" />
+    <meta name="twitter:description" content="Find events, places &amp; culture in the Duke City. 700+ events, 4,500+ places — updated daily." />
     <meta name="twitter:image"       content="https://abqunplugged.com/og-image.jpg" />
+
+    <!-- ─── Structured Data: LocalBusiness + WebSite (JSON-LD) ─── -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "ABQ Unplugged",
+      "alternateName": ["ABQ Unplugged", "Albuquerque Unplugged"],
+      "url": "https://abqunplugged.com",
+      "description": "Find things to do in Albuquerque, NM. Browse events, places, live music, food, nightlife, and more.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://abqunplugged.com/#events?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "ABQ Unplugged",
+      "url": "https://abqunplugged.com",
+      "logo": "https://abqunplugged.com/abq_unplugged_logo.png",
+      "sameAs": [],
+      "areaServed": {
+        "@type": "City",
+        "name": "Albuquerque",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Albuquerque",
+          "addressRegion": "NM",
+          "addressCountry": "US"
+        }
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Things to Do in Albuquerque",
+      "description": "Events, restaurants, nightlife, outdoor activities, and cultural attractions in Albuquerque, NM",
+      "url": "https://abqunplugged.com",
+      "numberOfItems": 5200,
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Albuquerque Events", "url": "https://abqunplugged.com/#events"},
+        {"@type": "ListItem", "position": 2, "name": "Albuquerque Restaurants & Food", "url": "https://abqunplugged.com/#places"},
+        {"@type": "ListItem", "position": 3, "name": "Albuquerque Nightlife", "url": "https://abqunplugged.com/#places"},
+        {"@type": "ListItem", "position": 4, "name": "Albuquerque Live Music", "url": "https://abqunplugged.com/#events"},
+        {"@type": "ListItem", "position": 5, "name": "Free Things to Do in Albuquerque", "url": "https://abqunplugged.com/#events"}
+      ]
+    }
+    </script>
 
     <!-- ─── Favicon ─── -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -119,10 +184,20 @@
       href="/splash/splash-2048x2732.png"
     />
 
-    <title>ABQ Unplugged — Events, Places &amp; Culture in Albuquerque</title>
+    <title>ABQ Unplugged — Things to Do in Albuquerque, NM | Events, Places &amp; Culture</title>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <h1>ABQ Unplugged — Things to Do in Albuquerque, NM</h1>
+      <p>Discover events, restaurants, live music, nightlife, and culture in Albuquerque, New Mexico. ABQ Unplugged features 700+ events and 4,500+ places to explore in the Duke City.</p>
+      <h2>Find Events in Albuquerque</h2>
+      <p>Browse concerts, comedy shows, sports events, art exhibitions, family activities, and free events happening in Albuquerque tonight, this weekend, and beyond.</p>
+      <h2>Explore Places in Albuquerque</h2>
+      <p>Find the best restaurants, coffee shops, bars, breweries, parks, museums, and hidden gems across Albuquerque neighborhoods including Downtown, Nob Hill, Old Town, UNM, and the North Valley.</p>
+      <h2>Explore by Vibe</h2>
+      <p>Whether you're looking for a date night, an active adventure, a chill hangout, family fun, or a cultural experience — ABQ Unplugged helps you find exactly what fits your mood.</p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
 
     <!-- ─── Service Worker registration ─── -->

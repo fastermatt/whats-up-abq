@@ -391,8 +391,32 @@ const STATIC_TM_EVENTS: TMEvent[] = ALL_EVENTS
 
 // ─── Utilities ──────────────────────────────────────────────────────────────
 
+const GPLACES_KEY = import.meta.env.VITE_GOOGLE_PLACES_KEY || '';
+
+/** Ensure Google Places photo URLs have a valid API key attached */
+function fixGooglePhotoUrl(url?: string): string {
+  if (!url) return '';
+  if (url.includes('maps.googleapis.com/maps/api/place/photo') && (url.endsWith('key=') || url.includes('key=&'))) {
+    return url.replace(/key=$/, `key=${GPLACES_KEY}`).replace(/key=&/, `key=${GPLACES_KEY}&`);
+  }
+  return url;
+}
+
+/** Patch all image URLs in a Place object so Google photos always carry the API key */
+function fixPlaceImages<T extends { image?: string; thumbnail?: string; additionalImages?: string[] }>(place: T): T {
+  return {
+    ...place,
+    image: fixGooglePhotoUrl(place.image),
+    thumbnail: fixGooglePhotoUrl(place.thumbnail),
+    ...(place.additionalImages ? { additionalImages: place.additionalImages.map(fixGooglePhotoUrl) } : {}),
+  };
+}
+
 function hiResUrl(url: string): string {
-  if (!url || !url.includes('places.googleapis.com')) return url;
+  if (!url) return url;
+  // Fix Google Places photo URLs missing their API key
+  url = fixGooglePhotoUrl(url);
+  if (!url.includes('places.googleapis.com')) return url;
   return url
     .replace(/maxHeightPx=\d+/, 'maxHeightPx=1600')
     .replace(/maxWidthPx=\d+/, 'maxWidthPx=2000');
@@ -3125,7 +3149,42 @@ function DiscoverScreen({
   const hidden = prefs?.hiddenSections ?? [];
   const interests = prefs?.preferredInterests ?? [];
   // ── One-shot typing animation for hero ────────────────────────────────────
-  const HERO_PHRASES = ['Go Do Something', 'Time to Get Outside', 'Stop Doomscrolling', 'Put the Phone Down', 'Touch Some Grass', 'Go See People', 'Time to Unplug', 'Get Out of the House'];
+  const HERO_PHRASES = [
+    // Motivational / get moving
+    'Go Do Something', 'Time to Get Outside', 'Stop Doomscrolling', 'Put the Phone Down',
+    'Touch Some Grass', 'Go See People', 'Time to Unplug', 'Get Out of the House',
+    'Close the Laptop', 'Your Couch Can Wait', 'The City Is Calling', 'Life Is Short',
+    'Be a Local', 'Get Off the Wifi', 'The Sun Is Out', 'No More Excuses',
+    'Adventure Awaits', 'Go Find Trouble', 'Say Yes to Fun', 'Make Some Memories',
+    // ABQ-specific
+    'Go Explore ABQ', 'The Duke City Awaits', 'Hatch Chile Season', 'Route 66 Vibes',
+    'Balloon Fiesta Mode', 'Old Town Is Calling', 'Sandia Peak Sunset', 'Bosque Trail Time',
+    'Rio Grande Vibes', 'Nob Hill Stroll', 'Find Your Spot', 'Go Be a Tourist',
+    'Sawmill District', 'Barelas Calling', 'South Valley Gems', 'East Mountains Trip',
+    'Petroglyph Hike', 'Tram Ride Day', 'Tingley Beach Walk', 'BioPark Day',
+    // Food & drink
+    'Grab a Bite', 'Coffee Run Time', 'Brunch O\'Clock', 'Happy Hour Somewhere',
+    'Taco Tuesday Vibes', 'Brewery Crawl Time', 'Try Something New', 'Eat Local',
+    'Chile Verde or Rojo?', 'Sopapilla Weather', 'Go Get Breakfast', 'Food Truck Hunt',
+    'Date Night Dinner', 'Rooftop Drinks', 'Dessert First', 'Pizza Night Out',
+    // Music & culture
+    'See Live Music', 'Gallery Night Out', 'Find Some Art', 'Go See a Show',
+    'Open Mic Night', 'Support Local Music', 'Catch a Comedy Set', 'Poetry Slam Night',
+    'Museum Day Trip', 'Street Art Walk', 'Indie Film Night', 'Go See a Band',
+    // Weekend / chill
+    'Weekend Mode On', 'Sunday Funday', 'Lazy Day Over', 'No Plans? Fix That',
+    'What Are You Doing?', 'Plans Tonight?', 'Let\'s Go Already', 'You Deserve Fun',
+    'Treat Yourself', 'Main Character Energy', 'Be Spontaneous', 'Just Go',
+    'Touch Grass Now', 'Explore Something', 'Pick a Vibe', 'Try a New Spot',
+    // Seasonal / time of day
+    'Sunset Chase Time', 'Golden Hour Walk', 'Morning Hike?', 'Late Night ABQ',
+    'Stargazing Tonight', 'Perfect Patio Weather', 'Farmers Market Day', 'Festival Season',
+    // Playful / weird
+    'Your Dog Needs This', 'Bring Your Friends', 'Text the Group Chat', 'Rally the Crew',
+    'Cancel Netflix', 'Delete the App', 'Swipe Right on ABQ', 'Log Off Already',
+    'Fresh Air Exists', 'The Wi-Fi Is Bad Here', 'Nature Is Free', 'Grass Is Real',
+    'Go Touch a Cactus', 'Find a Mural', 'Wander Around', 'Get Wonderfully Lost',
+  ];
   const [heroDisplay, setHeroDisplay] = useState('');
   const [heroDone, setHeroDone] = useState(false);
   useEffect(() => {
@@ -8299,7 +8358,7 @@ export default function App() {
         if (raw) {
           const { data, ts } = JSON.parse(raw);
           if (Array.isArray(data) && data.length > 0) {
-            setPlaces(data);
+            setPlaces(data.map(fixPlaceImages));
             setLoading(false);
             placesLoaded = true;
             // Cache still fresh — skip places network call, just load events
@@ -8349,7 +8408,7 @@ export default function App() {
         if (staticR.ok) {
           const staticPlaces = await staticR.json();
           if (Array.isArray(staticPlaces) && staticPlaces.length > 0) {
-            setPlaces(staticPlaces);
+            setPlaces(staticPlaces.map(fixPlaceImages));
             placesLoaded = true;
             setLoading(false); // ← app visible immediately with static data
           }
@@ -8365,9 +8424,10 @@ export default function App() {
         // Refresh places from Supabase in background (app already visible above)
         const sbPlaces = await withTimeout(fetchPlacesFromDB(), 20000);
         if (Array.isArray(sbPlaces) && sbPlaces.length > 0) {
-          setPlaces(sbPlaces);
+          const fixed = sbPlaces.map(fixPlaceImages);
+          setPlaces(fixed);
           placesLoaded = true;
-          try { localStorage.setItem(CACHE_KEY, JSON.stringify({ data: sbPlaces, ts: Date.now() })); } catch {}
+          try { localStorage.setItem(CACHE_KEY, JSON.stringify({ data: fixed, ts: Date.now() })); } catch {}
         }
       } catch (err) {
         console.warn('[Places] Supabase failed or timed out:', err);

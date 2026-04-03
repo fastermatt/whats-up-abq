@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://explore-abq.netlify.app/sitemap.xml
+Sitemap: https://abqunplugged.com/sitemap.xml
