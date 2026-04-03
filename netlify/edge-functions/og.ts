@@ -92,6 +92,17 @@ async function fetchEventOG(eventId: string): Promise<OGData | null> {
       if (rows?.length) { raw = rows[0].raw; break; }
     } catch { continue; }
   }
+
+  // Fallback: try static events JSON (for local/curated events not in Supabase)
+  if (!raw) {
+    try {
+      const staticRes = await fetch(`${SITE}/events-og.json`);
+      if (staticRes.ok) {
+        const lookup = await staticRes.json();
+        raw = lookup[eventId] || lookup[cleanId] || null;
+      }
+    } catch { /* ignore */ }
+  }
   if (!raw) return null;
 
   const name = (raw?.name as string) || 'Event';

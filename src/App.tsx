@@ -695,11 +695,11 @@ const PLACE_CATEGORIES = [
 
 // Vibe configs — shared between DiscoverScreen buttons and PlacesScreen pill filter
 const VIBE_CONFIGS = [
-  { icon: 'favorite', label: 'Date Night', gradient: 'linear-gradient(135deg, #C2634A, #D4896E)', borderColor: '#C2634A', animatedIcon: '/icons/vibes/date-night.gif', vibeSearch: '', vibeCats: ['restaurant', 'bar', 'entertainment', 'arts'] },
-  { icon: 'directions_run', label: 'Active', gradient: 'linear-gradient(135deg, #C8963E, #E8A838)', borderColor: '#C8963E', animatedIcon: '/icons/vibes/active.gif', vibeSearch: '', vibeCats: ['fitness', 'park'] },
-  { icon: 'self_improvement', label: 'Chill', gradient: 'linear-gradient(135deg, #6B8F71, #7A9E7E)', borderColor: '#6B8F71', animatedIcon: '/icons/vibes/chill.gif', vibeSearch: '', vibeCats: ['coffee', 'wellness', 'park'] },
-  { icon: 'family_restroom', label: 'Family', gradient: 'linear-gradient(135deg, #5B7FA5, #7A9BC0)', borderColor: '#5B7FA5', animatedIcon: '/icons/vibes/family.gif', vibeSearch: '', vibeCats: ['restaurant', 'entertainment', 'park', 'museum', 'coffee'] },
-  { icon: 'palette', label: 'Culture', gradient: 'linear-gradient(135deg, #8B6B8A, #A8899E)', borderColor: '#8B6B8A', animatedIcon: '/icons/vibes/culture.gif', vibeSearch: '', vibeCats: ['arts', 'museum', 'entertainment'] },
+  { icon: 'favorite', label: 'Date Night', gradient: 'linear-gradient(135deg, #C2634A, #D4896E)', borderColor: '#C2634A', animatedIcon: '/icons/vibes/date-night.gif', staticIcon: '/icons/vibes/date-night-static.png', vibeSearch: '', vibeCats: ['restaurant', 'bar', 'entertainment', 'arts'] },
+  { icon: 'directions_run', label: 'Active', gradient: 'linear-gradient(135deg, #C8963E, #E8A838)', borderColor: '#C8963E', animatedIcon: '/icons/vibes/active.gif', staticIcon: '/icons/vibes/active-static.png', vibeSearch: '', vibeCats: ['fitness', 'park'] },
+  { icon: 'self_improvement', label: 'Chill', gradient: 'linear-gradient(135deg, #6B8F71, #7A9E7E)', borderColor: '#6B8F71', animatedIcon: '/icons/vibes/chill.gif', staticIcon: '/icons/vibes/chill-static.png', vibeSearch: '', vibeCats: ['coffee', 'wellness', 'park'] },
+  { icon: 'family_restroom', label: 'Family', gradient: 'linear-gradient(135deg, #5B7FA5, #7A9BC0)', borderColor: '#5B7FA5', animatedIcon: '/icons/vibes/family.gif', staticIcon: '/icons/vibes/family-static.png', vibeSearch: '', vibeCats: ['restaurant', 'entertainment', 'park', 'museum', 'coffee'] },
+  { icon: 'palette', label: 'Culture', gradient: 'linear-gradient(135deg, #8B6B8A, #A8899E)', borderColor: '#8B6B8A', animatedIcon: '/icons/vibes/culture.gif', staticIcon: '/icons/vibes/culture-static.png', vibeSearch: '', vibeCats: ['arts', 'museum', 'entertainment'] },
 ];
 
 // Category display name mapping (shows friendlier labels to users)
@@ -3080,7 +3080,7 @@ function DiscoverScreen({
   checkedIn: Set<string>;
   onCheckIn: (id: string) => void;
   onNavigatePlaces?: (cat: string, search: string, vibeLabel?: string, vibeGradient?: string) => void;
-  onNavigateEvents?: () => void;
+  onNavigateEvents?: (genre?: string) => void;
   prefs?: UserPrefs;
 }) {
   const hidden = prefs?.hiddenSections ?? [];
@@ -3144,7 +3144,7 @@ function DiscoverScreen({
             {events.length.toLocaleString()} events · {places.length.toLocaleString()} places across Greater ABQ
           </p>
           <button
-            onClick={() => onNavigateEvents?.()}
+            onClick={() => onNavigateEvents?.('Tonight')}
             style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '42px', padding: '0 16px', background: 'var(--ink)', color: 'white', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(185,92,67,0.25)', fontFamily: 'Public Sans, sans-serif', fontSize: '13px', fontWeight: 800, letterSpacing: '0.03em', cursor: 'pointer', borderRadius: 6, marginBottom: '12px' }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>confirmation_number</span>
@@ -3153,9 +3153,9 @@ function DiscoverScreen({
         </div>
         <div className="flex px-5 pb-4 gap-2" style={{ overflowX: 'auto', scrollbarWidth: 'none' }}>
           {[
-            { label: 'Tonight',        action: () => onNavigateEvents?.() },
-            { label: 'This Weekend',   action: () => onNavigateEvents?.() },
-            { label: 'Free Events',    action: () => onNavigateEvents?.() },
+            { label: 'Tonight',        action: () => onNavigateEvents?.('Tonight') },
+            { label: 'This Weekend',   action: () => onNavigateEvents?.('This Weekend') },
+            { label: 'Free Events',    action: () => onNavigateEvents?.('Free') },
             { label: 'Explore Places', action: () => onNavigatePlaces?.('All', '') },
           ].map(chip => (
             <button key={chip.label} onClick={chip.action}
@@ -3256,23 +3256,45 @@ function DiscoverScreen({
       {/* Featured Event (time-limited) — shows above Daily Gem when active */}
       <FeaturedEventBanner events={events} onSelect={onEventSelect} />
 
-      {/* Explore by Vibe — animated icons, evenly spaced */}
-      {!hidden.includes('vibes') && <div className="mb-5 px-5">
-        <p className="text-xs font-black uppercase flex items-center gap-2 mb-3" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}><FlatIcon name="zia" size={12} color="var(--brand)" /> Explore by Vibe</p>
-        <div className="flex justify-between pb-1">
-          {VIBE_CONFIGS.map(({ label, gradient, borderColor, animatedIcon, vibeSearch, vibeCats }) => (
-            <button key={label}
-              className="flex flex-col items-center gap-1.5 transition-all active:scale-95"
-              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', flex: '1 1 0', minWidth: 0 }}
-              onClick={() => onNavigatePlaces?.(vibeCats.join('|'), vibeSearch, label, gradient)}>
-              <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'white', border: `2.5px solid ${borderColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', overflow: 'hidden' }}>
-                <img src={animatedIcon} alt={label} width={38} height={38} style={{ objectFit: 'contain' }} />
-              </div>
-              <span className="text-center leading-tight font-bold" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '10px', letterSpacing: '0.02em', color: 'var(--ink)' }}>{label}</span>
-            </button>
-          ))}
-        </div>
-      </div>}
+      {/* Explore by Vibe — staggered animated icons, evenly spaced */}
+      {!hidden.includes('vibes') && (() => {
+        const [activeVibeAnim, setActiveVibeAnim] = React.useState(-1);
+        React.useEffect(() => {
+          // Stagger: pick a random vibe icon every 3-5s, animate it for ~2s
+          let timeout: ReturnType<typeof setTimeout>;
+          const animate = () => {
+            const idx = Math.floor(Math.random() * VIBE_CONFIGS.length);
+            setActiveVibeAnim(idx);
+            // After 2.5s, go back to static
+            setTimeout(() => setActiveVibeAnim(-1), 2500);
+            // Schedule next animation 3-5s later
+            timeout = setTimeout(animate, 3000 + Math.random() * 2000);
+          };
+          // Start first animation after a short delay
+          timeout = setTimeout(animate, 1500);
+          return () => clearTimeout(timeout);
+        }, []);
+        return (
+        <div className="mb-5 px-5">
+          <p className="text-xs font-black uppercase flex items-center gap-2 mb-3" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}><FlatIcon name="zia" size={12} color="var(--brand)" /> Explore by Vibe</p>
+          <div className="flex justify-between pb-1">
+            {VIBE_CONFIGS.map(({ label, gradient, borderColor, animatedIcon, staticIcon, vibeSearch, vibeCats }, i) => (
+              <button key={label}
+                className="flex flex-col items-center gap-1.5 transition-all active:scale-95"
+                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', flex: '1 1 0', minWidth: 0 }}
+                onClick={() => onNavigatePlaces?.(vibeCats.join('|'), vibeSearch, label, gradient)}>
+                <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'white', border: `2.5px solid ${borderColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', overflow: 'hidden' }}>
+                  <img
+                    src={activeVibeAnim === i ? `${animatedIcon}?t=${Date.now()}` : staticIcon}
+                    alt={label} width={38} height={38}
+                    style={{ objectFit: 'contain' }} />
+                </div>
+                <span className="text-center leading-tight font-bold" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '10px', letterSpacing: '0.02em', color: 'var(--ink)' }}>{label}</span>
+              </button>
+            ))}
+          </div>
+        </div>);
+      })()}
 
       {/* Daily Gem — spot of the day, date-seeded */}
       {places.length > 0 && <DailyGem places={places} onSelect={onPlaceSelect} />}
@@ -3563,14 +3585,18 @@ function EventsScreen({
   events,
   onEventSelect,
   initialSearch = '',
+  initialGenre = '',
 }: {
   events: TMEvent[];
   onEventSelect: (e: TMEvent) => void;
   initialSearch?: string;
+  initialGenre?: string;
 }) {
   const [search, setSearch] = useState('');
   useEffect(() => { if (initialSearch) setSearch(initialSearch); }, [initialSearch]);
-  const [selectedGenre, setSelectedGenre] = useState('Tonight');
+  const [selectedGenre, setSelectedGenre] = useState(initialGenre || 'Tonight');
+  // Reset genre when initialGenre changes (e.g. from "Free Events" chip)
+  useEffect(() => { if (initialGenre) setSelectedGenre(initialGenre); }, [initialGenre]);
   const [followedGenres, setFollowedGenres] = useState<string[]>(() => getFollowedGenres());
   const [wishlistVersion, setWishlistVersion] = useState(0);
   useEffect(() => {
@@ -3662,7 +3688,7 @@ function EventsScreen({
           case 'Family':   return seg === 'Family' || name.includes('family') || name.includes(' kids') || name.includes('children');
           case 'Outdoor':  return name.includes('outdoor') || name.includes('trail') || name.includes('hike') || name.includes('5k') || name.includes('bike');
           case 'Community':return seg === 'Community' || seg === 'Festival' || name.includes('festival') || name.includes('market') || name.includes('fiesta');
-          case 'Free':     return e._source === 'local' || name.includes('free') || name.includes('no cover');
+          case 'Free':     return getEventPrice(e) === 'FREE' || name.includes('free') || name.includes('no cover') || name.includes('market') || name.includes('festival');
           default:         return seg === g || gen === g;
         }
       });
@@ -3709,11 +3735,11 @@ function EventsScreen({
               eventName.includes('community') || eventName.includes('fiesta');
           case 'Free': {
             // Show events priced at $0, with free in name, or local/curated events (no priceRanges = free)
-            const prices = e.priceRanges;
             const isFree =
-              e._source === 'local' ||
+              getEventPrice(e) === 'FREE' ||
               eventName.includes('free') || eventName.includes('no cover') || eventName.includes('no charge') ||
-              (prices != null && prices.length > 0 && prices.every(p => (p.min ?? 1) === 0));
+              eventName.includes('market') || eventName.includes('festival') ||
+              seg === 'Community' || seg === 'Festival';
             return isFree;
           }
           default:
@@ -7671,6 +7697,7 @@ export default function App() {
     STATIC_TM_EVENTS.filter(e => !isJunkEvent(e)).map(tagAdultEvent)
   );
   const [eventsNavSearch, setEventsNavSearch] = useState('');
+  const [eventsNavGenre, setEventsNavGenre] = useState('');
   // Deep-link: capture event or place ID from URL on mount (supports both hash and path-based URLs)
   const pendingDeepLinkId = useRef<string | null>(
     (() => {
@@ -7873,6 +7900,16 @@ export default function App() {
     }
   }, []);
 
+  // ── Seed browser history so "back" never leaves the site ──
+  // On first load, push a sentinel entry. If the user presses back past all
+  // app-pushed entries, they hit this sentinel and we catch it in popstate.
+  useEffect(() => {
+    if (!window.history.state?._abqSeeded) {
+      // Replace current entry as the "floor" so back beyond it stays in-app
+      window.history.replaceState({ _abqSeeded: true, tab: 'discover' }, '', window.location.hash || '#discover');
+    }
+  }, []);
+
   // ── Browser history management (prevents swipe-back leaving the site) ──
   const navigateTab = useCallback((tab: TabId) => {
     setActiveTab(tab);
@@ -7977,14 +8014,22 @@ export default function App() {
       // If going back from a modal, close it
       if (selectedPlace) { setSelectedPlace(null); return; }
       if (selectedEvent) { setSelectedEvent(null); return; }
-      // If going back between tabs, go to that tab (or default to discover)
+      // If going back between tabs, go to that tab
       if (state?.tab) {
         setActiveTab(state.tab);
       } else {
-        // Push a new state to prevent leaving the site
-        window.history.pushState({ tab: activeTab, modal: null }, '', `#${activeTab}`);
+        // No state = initial entry or external navigation.
+        // Go to discover (home) and replace so back doesn't loop.
+        setActiveTab('discover');
+        window.history.replaceState({ tab: 'discover', modal: null }, '', '#discover');
       }
     };
+    // Ensure there's always a base history entry so back doesn't leave the site.
+    // pushState on first render creates a "floor" — pressing back from this entry
+    // triggers popstate with no state, which we handle above by staying in-app.
+    if (!window.history.state?.tab) {
+      window.history.replaceState({ tab: activeTab, modal: null, base: true }, '', `#${activeTab}`);
+    }
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, [selectedPlace, selectedEvent, activeTab, showAdmin]);
@@ -8688,11 +8733,11 @@ export default function App() {
               onCheckIn={handleCheckIn}
 
               onNavigatePlaces={(cat, search, vibeLabel, vibeGradient) => { setPlacesNavCat(cat); setPlacesNavSearch(search); setPlacesNavVibe(vibeLabel ? `${vibeLabel}|||${vibeGradient || ''}` : ''); setPlacesNavKey(k => k + 1); setActiveTab('places'); window.scrollTo({ top: 0, behavior: 'instant' }); }}
-              onNavigateEvents={() => setActiveTab('events')}
+              onNavigateEvents={(genre) => { setEventsNavGenre(genre || ''); setActiveTab('events'); }}
               prefs={prefs}/>
           )}
           {activeTab === 'events' && (
-            <EventsScreen events={events} onEventSelect={openEventModal} initialSearch={eventsNavSearch} />
+            <EventsScreen events={events} onEventSelect={openEventModal} initialSearch={eventsNavSearch} initialGenre={eventsNavGenre} />
           )}
           {activeTab === 'places' && (
             <PlacesScreen
