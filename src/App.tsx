@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { supabase } from './lib/supabase';
-import { fetchPlacesFromDB, fetchEventsFromDB } from './lib/db';
+import { fetchPlacesFromDB, fetchEventsFromDB, searchPlacesFromDB } from './lib/db';
 import { ALL_EVENTS, type Event as StaticEvent } from './data/events';
 import AdminPanel from './AdminPanel';
 
@@ -186,6 +186,7 @@ interface Place {
   phone?: string;
   website?: string;
   tags?: string[];
+  googleTypes?: string[];
   isKidFriendly?: boolean;
   isAccessible?: boolean;
   source?: string;
@@ -694,11 +695,11 @@ const PLACE_CATEGORIES = [
 
 // Vibe configs — shared between DiscoverScreen buttons and PlacesScreen pill filter
 const VIBE_CONFIGS = [
-  { icon: 'favorite', label: 'Date Night', gradient: 'linear-gradient(135deg, #e91e63, #ff5252)', vibeSearch: '', vibeCats: ['restaurant', 'bar', 'entertainment', 'arts'] },
-  { icon: 'directions_run', label: 'Active', gradient: 'linear-gradient(135deg, #ff6d00, #ffab00)', vibeSearch: '', vibeCats: ['fitness', 'park'] },
-  { icon: 'self_improvement', label: 'Chill', gradient: 'linear-gradient(135deg, #00897b, #4db6ac)', vibeSearch: '', vibeCats: ['coffee', 'wellness', 'park'] },
-  { icon: 'family_restroom', label: 'Family', gradient: 'linear-gradient(135deg, #1565c0, #42a5f5)', vibeSearch: '', vibeCats: ['restaurant', 'entertainment', 'park', 'museum', 'coffee'] },
-  { icon: 'palette', label: 'Culture', gradient: 'linear-gradient(135deg, #6a1b9a, #ab47bc)', vibeSearch: '', vibeCats: ['arts', 'museum', 'entertainment'] },
+  { icon: 'favorite', label: 'Date Night', gradient: 'linear-gradient(135deg, #C2634A, #D4896E)', vibeSearch: '', vibeCats: ['restaurant', 'bar', 'entertainment', 'arts'] },
+  { icon: 'directions_run', label: 'Active', gradient: 'linear-gradient(135deg, #C8963E, #E8A838)', vibeSearch: '', vibeCats: ['fitness', 'park'] },
+  { icon: 'self_improvement', label: 'Chill', gradient: 'linear-gradient(135deg, #6B8F71, #7A9E7E)', vibeSearch: '', vibeCats: ['coffee', 'wellness', 'park'] },
+  { icon: 'family_restroom', label: 'Family', gradient: 'linear-gradient(135deg, #5B7FA5, #7A9BC0)', vibeSearch: '', vibeCats: ['restaurant', 'entertainment', 'park', 'museum', 'coffee'] },
+  { icon: 'palette', label: 'Culture', gradient: 'linear-gradient(135deg, #8B6B8A, #A8899E)', vibeSearch: '', vibeCats: ['arts', 'museum', 'entertainment'] },
 ];
 
 // Category display name mapping (shows friendlier labels to users)
@@ -786,6 +787,23 @@ const SEARCH_BOOSTS: Record<string, string[]> = {
   // Cross-category
   history:      ['museum', 'arts'],
   spa:          ['wellness'],
+  // Shopping sub-categories (so "electronics" finds all shops with that Google type)
+  electronics:  ['shop'], computer: ['shop'], computers: ['shop'], tech: ['shop'],
+  laptop:       ['shop'], phone:    ['shop'], phones:   ['shop'],
+  grocery:      ['shop'], groceries:['shop'], supermarket: ['shop'],
+  pharmacy:     ['shop'], drugstore:['shop'], medicine: ['shop'],
+  clothes:      ['shop'], clothing: ['shop'], fashion:  ['shop'],
+  shoes:        ['shop'], jewelry:  ['shop'], jeweler:  ['shop'],
+  furniture:    ['shop'], 'home goods': ['shop'], hardware: ['shop'],
+  books:        ['shop'], bookstore:['shop'], pets:     ['shop'],
+  toys:         ['shop'], gifts:    ['shop'],
+  // Food sub-types
+  brunch:       ['restaurant', 'coffee'],
+  breakfast:    ['restaurant', 'coffee'],
+  lunch:        ['restaurant'],
+  dinner:       ['restaurant'],
+  takeout:      ['restaurant'],
+  delivery:     ['restaurant'],
 };
 
 const EVENT_GENRES = [
@@ -3085,9 +3103,9 @@ function DiscoverScreen({
         return d >= today && d <= sevenDays;
       })
       .filter(e => !e._isAdult);  // Discover "This Week" is always family-friendly
-    // Shuffle, pick 4, then sort by earliest date first
+    // Shuffle, pick 3, then sort by earliest date first
     const shuffled = [...pool].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 4).sort((a, b) => {
+    return shuffled.slice(0, 3).sort((a, b) => {
       const da = a.dates?.start?.localDate || '';
       const db = b.dates?.start?.localDate || '';
       return da.localeCompare(db);
@@ -3206,11 +3224,11 @@ function DiscoverScreen({
                 >
                   {/* Date block */}
                   <div className="flex flex-col items-center justify-center flex-shrink-0"
-                    style={{ width: 62, backgroundColor: 'var(--ink)', minHeight: 64 }}>
-                    <span className="font-black uppercase" style={{ fontSize: 10, color: 'var(--bg)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em', lineHeight: 1 }}>
+                    style={{ width: 52, backgroundColor: 'var(--ink)', minHeight: 52 }}>
+                    <span className="font-black uppercase" style={{ fontSize: 9, color: 'var(--bg)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em', lineHeight: 1 }}>
                       {month}
                     </span>
-                    <span className="font-black" style={{ fontSize: 30, color: '#fff', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.05 }}>
+                    <span className="font-black" style={{ fontSize: 22, color: '#fff', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.1 }}>
                       {day}
                     </span>
                   </div>
@@ -3225,8 +3243,8 @@ function DiscoverScreen({
                   </div>
                   {/* Arrow */}
                   <div className="flex items-center justify-center flex-shrink-0"
-                    style={{ width: 48, backgroundColor: 'var(--brand)', borderLeft: '1px solid rgba(0,0,0,0.08)' }}>
-                    <span className="font-black" style={{ fontSize: 18, color: 'var(--ink)' }}>→</span>
+                    style={{ width: 38, backgroundColor: 'var(--brand)', borderLeft: '1px solid rgba(0,0,0,0.08)' }}>
+                    <span className="font-black" style={{ fontSize: 14, color: 'var(--ink)' }}>→</span>
                   </div>
                 </button>
               );
@@ -3236,6 +3254,24 @@ function DiscoverScreen({
 
       {/* Featured Event (time-limited) — shows above Daily Gem when active */}
       <FeaturedEventBanner events={events} onSelect={onEventSelect} />
+
+      {/* Explore by Vibe — moved up for visibility */}
+      {!hidden.includes('vibes') && <div className="mb-5 px-5">
+        <p className="text-xs font-black uppercase flex items-center gap-2 mb-3" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}><FlatIcon name="zia" size={12} color="var(--brand)" /> Explore by Vibe</p>
+        <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+          {VIBE_CONFIGS.map(({ icon, label, gradient, vibeSearch, vibeCats }) => (
+            <button key={label}
+              className="flex flex-col items-center gap-1.5 flex-shrink-0 transition-all active:scale-95"
+              style={{ background: 'none', border: 'none', width: '62px', padding: 0, cursor: 'pointer' }}
+              onClick={() => onNavigatePlaces?.(vibeCats.join('|'), vibeSearch, label, gradient)}>
+              <div style={{ width: 48, height: 48, borderRadius: 14, background: gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.12)', opacity: 0.85 }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '22px', color: 'white', fontVariationSettings: "'FILL' 1, 'wght' 500" }}>{icon}</span>
+              </div>
+              <span className="text-center leading-tight font-bold" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '10px', letterSpacing: '0.02em', color: 'var(--ink)' }}>{label}</span>
+            </button>
+          ))}
+        </div>
+      </div>}
 
       {/* Daily Gem — spot of the day, date-seeded */}
       {places.length > 0 && <DailyGem places={places} onSelect={onPlaceSelect} />}
@@ -3441,29 +3477,6 @@ function DiscoverScreen({
         </div>
       )}
 
-      {/* Explore by Vibe */}
-      {!hidden.includes('vibes') && <div className="mb-6">
-        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
-          <p className="text-sm font-black uppercase flex items-center gap-2" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}><FlatIcon name="zia" size={14} color="var(--brand)" /> Explore by Vibe</p>
-        </div>
-        <div className="grid grid-cols-5 gap-0" style={{ borderLeft: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)', borderRight: '1px solid rgba(0,0,0,0.08)' }}>
-          {VIBE_CONFIGS.map(({ icon, label, gradient, vibeSearch, vibeCats }) => (
-            <button key={label}
-              className="flex flex-col items-center gap-1.5 py-4 px-1 transition-all active:scale-95"
-              style={{ background: 'white', border: 'none', borderRight: '1px solid rgba(0,0,0,0.08)', borderBottom: '1px solid rgba(0,0,0,0.08)', borderRadius: 6 }}
-              onClick={() => {
-                // Navigate to places with multi-category vibe filter
-                onNavigatePlaces?.(vibeCats.join('|'), vibeSearch, label, gradient);
-              }}>
-              <div style={{ width: 40, height: 40, borderRadius: 12, background: gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
-                <span className="material-symbols-outlined" style={{ fontSize: '20px', color: 'white', fontVariationSettings: "'FILL' 1, 'wght' 500" }}>{icon}</span>
-              </div>
-              <span className="text-center leading-tight font-bold" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '10px', letterSpacing: '0.02em', color: '#2D2926' }}>{label}</span>
-            </button>
-          ))}
-        </div>
-      </div>}
-
       {/* ABQ Neighborhoods */}
       {!hidden.includes('neighborhoods') && <div className="mb-6">
         <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
@@ -3493,44 +3506,40 @@ function DiscoverScreen({
       <AnimatedFact />
 
       {/* Weekend Planner */}
-      {!hidden.includes('planWeekend') && <div className="mb-6">
-        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)', marginBottom: '12px' }}>
-          <p className="text-sm font-black uppercase flex items-center gap-2" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}><FlatIcon name="sun" size={14} color="var(--brand)" /> Plan Your Weekend</p>
-        </div>
-        <div className="flex flex-col gap-2">
-          {[
-            { title: 'Morning Hike + Brunch', steps: ['Sandia Mountain foothills trail', 'Coffee at Flying Star Café', 'Brunch in Nob Hill'], bar: 'var(--brand)' },
-            { title: 'Culture Day', steps: ['Explora Science Center', 'Lunch in Old Town', 'Albuquerque Museum'], bar: 'var(--brand)' },
-            { title: 'Local Food Crawl', steps: ['Green chile breakfast at Frontier', 'Lunch at El Modelo', 'Drinks on Central Ave'], bar: 'var(--brand)' },
-            { title: 'Nature Escape', steps: ['Rio Grande Bosque trail', 'Tingley Beach', 'Sunset at Petroglyph Monument'], bar: 'var(--brand)' },
-          ].map(({ title, steps, bar }) => (
-            <div key={title} className="flex" style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', backgroundColor: '#fff' }}>
-              {/* left accent bar */}
-              <div style={{ width: 4, flexShrink: 0, backgroundColor: bar }} />
-              <div className="flex-1 px-3 py-2">
-                <div className="flex items-center justify-between mb-1.5">
-                  <p className="text-xs font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)', letterSpacing: '0.09em' }}>{title}</p>
-                  <button
-                    onClick={() => addToDayPlan(steps)}
-                    className="text-xs font-black px-2 py-0.5"
-                    style={{ backgroundColor: 'var(--brand)', color: 'white', border: 'none', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.04em' }}
-                  >
-                    + plan
-                  </button>
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  {steps.map((step, i) => (
-                    <div key={i} className="flex items-center gap-1.5">
-                      <span className="text-xs font-black w-5 h-5 flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'var(--ink)', color: 'var(--bg)' }}>{i + 1}</span>
-                      <button onClick={() => window.dispatchEvent(new CustomEvent('plan-step-click',{detail:step}))} className="text-xs text-left leading-tight flex-1" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)' }}>{step}</button>
-                    </div>
-                  ))}
+      {!hidden.includes('planWeekend') && (() => {
+        const [open, setOpen] = React.useState(false);
+        return (
+        <div className="mx-5 mb-6" style={{ border: '1px solid rgba(0,0,0,0.10)', borderRadius: 8, background: 'white', overflow: 'hidden' }}>
+          <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between px-4 py-3" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+            <span className="text-xs font-black uppercase flex items-center gap-2" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>
+              <FlatIcon name="sun" size={13} color="var(--brand)" /> Need help planning?
+            </span>
+            <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--ink)', transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}>expand_more</span>
+          </button>
+          {open && (
+          <div className="flex flex-col gap-1.5 px-3 pb-3" style={{ animation: 'cardFadeIn 0.25s ease both' }}>
+            {[
+              { title: 'Morning Hike + Brunch', steps: ['Sandia Mountain foothills trail', 'Coffee at Flying Star Café', 'Brunch in Nob Hill'] },
+              { title: 'Culture Day', steps: ['Explora Science Center', 'Lunch in Old Town', 'Albuquerque Museum'] },
+              { title: 'Local Food Crawl', steps: ['Green chile breakfast at Frontier', 'Lunch at El Modelo', 'Drinks on Central Ave'] },
+              { title: 'Nature Escape', steps: ['Rio Grande Bosque trail', 'Tingley Beach', 'Sunset at Petroglyph Monument'] },
+            ].map(({ title, steps }) => (
+              <div key={title} className="flex" style={{ border: '1px solid rgba(0,0,0,0.08)', borderRadius: 6, backgroundColor: 'var(--bg)' }}>
+                <div style={{ width: 3, flexShrink: 0, backgroundColor: 'var(--brand)', borderRadius: '6px 0 0 6px' }} />
+                <div className="flex-1 px-3 py-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-xs font-bold" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)' }}>{title}</p>
+                    <button onClick={() => addToDayPlan(steps)} className="text-xs font-bold px-2 py-0.5" style={{ backgroundColor: 'var(--brand)', color: 'white', border: 'none', borderRadius: 4, fontFamily: 'Public Sans, sans-serif', fontSize: '9px' }}>+ ADD</button>
+                  </div>
+                  <p className="text-xs" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.3 }}>{steps.join(' → ')}</p>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+          )}
         </div>
-      </div>}
+        );
+      })()}
 
       {/* Day Planner */}
       {!hidden.includes('todayPlan') && <DayPlanner />}
@@ -3975,11 +3984,29 @@ function PlacesScreen({
     return () => window.removeEventListener('abq_wishlist_changed', handler);
   }, []);
 
+  // Server-side search results (full-text + fuzzy from Supabase)
+  const [serverResults, setServerResults] = useState<Place[]>([]);
+  const serverSearchRef = useRef('');
+
   // Debounce search input by 250ms
   useEffect(() => {
     const t = setTimeout(() => setSearch(searchInput), 250);
     return () => clearTimeout(t);
   }, [searchInput]);
+
+  // Fire server-side search when debounced query changes (2+ chars)
+  useEffect(() => {
+    if (search.trim().length < 2) { setServerResults([]); return; }
+    const q = search.trim();
+    if (q === serverSearchRef.current) return;
+    serverSearchRef.current = q;
+    let cancelled = false;
+    searchPlacesFromDB(q, 80).then(results => {
+      if (cancelled) return;
+      setServerResults(results as Place[]);
+    });
+    return () => { cancelled = true; };
+  }, [search]);
 
   useEffect(() => { if (navKey > 0) { setSelectedCat(navCat || 'All'); setOpenNow(false); setSearchInput(navSearch || ''); setSearch(navSearch || ''); setActiveVibe(navVibe || ''); } }, [navKey]);
 
@@ -4124,7 +4151,8 @@ function PlacesScreen({
           const pTip   = ((p as any).insiderTip || '').toLowerCase();
           const pBestFor = (((p as any).bestFor || []) as string[]).join(' ').toLowerCase();
           const pTags  = ((p.tags || []) as string[]).join(' ').toLowerCase();
-          const allText = `${pName} ${pAddr} ${pCat} ${pDesc} ${pAbout} ${pTip} ${pBestFor} ${pTags}`;
+          const pGTypes = ((p.googleTypes || []) as string[]).map(t => t.replace(/_/g, ' ')).join(' ').toLowerCase();
+          const allText = `${pName} ${pAddr} ${pCat} ${pDesc} ${pAbout} ${pTip} ${pBestFor} ${pTags} ${pGTypes}`;
 
           // 1. Direct text match across all fields (always wins)
           if (allText.includes(q)) return true;
@@ -4135,6 +4163,14 @@ function PlacesScreen({
           if (boostCats.size > 0 && boostCats.has(p.category)) return true;
           return false;
         });
+
+        // Merge server-side search results (full-text + fuzzy from Postgres)
+        // Server results are pre-ranked by relevance, so prepend them
+        if (serverResults.length > 0) {
+          const clientIds = new Set(result.map(p => p.id));
+          const extraFromServer = serverResults.filter(p => !clientIds.has(p.id));
+          result = [...result, ...extraFromServer];
+        }
 
         // Sort: name-starts-with first, then name-contains, then rating
         result = [...result].sort((a, b) => {
@@ -4148,7 +4184,7 @@ function PlacesScreen({
     }
     return result;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [places, selectedCat, search, openNow]);
+  }, [places, selectedCat, search, openNow, serverResults]);
 
   const sorted = useMemo(() => {
     if (sortMode === 'near' && coords) {

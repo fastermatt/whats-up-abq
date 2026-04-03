@@ -176,6 +176,7 @@ function transformGoogleRaw(raw: Record<string, unknown>): Record<string, unknow
       ? (openingHours.open_now ? 'Open now' : 'Closed now')
       : undefined,
     tags: placeTypesToTags(types, raw.name as string),
+    googleTypes: types,
     source: 'google_places',
   };
 }
@@ -239,4 +240,25 @@ export async function fetchPlacesFromDB(): Promise<unknown[]> {
   }
 
   return allRows;
+}
+
+/**
+ * Server-side search using Postgres full-text + fuzzy matching.
+ * Returns transformed Place objects ready for the UI.
+ */
+export async function searchPlacesFromDB(query: string, limit = 50): Promise<unknown[]> {
+  const { data, error } = await supabase.rpc('search_places', {
+    query,
+    result_limit: limit,
+  });
+  if (error) {
+    console.warn('Server search failed, falling back to client-side:', error.message);
+    return [];
+  }
+  return (data ?? []).map((row: { raw: Record<string, unknown>; enriched?: Record<string, unknown>; hide_enriched?: boolean }) => {
+    const place = transformGoogleRaw(row.raw);
+    if (row.enriched) (place as Record<string, unknown>)._enriched = row.enriched;
+    if (row.hide_enriched) (place as Record<string, unknown>)._hideEnriched = true;
+    return place;
+  });
 }
