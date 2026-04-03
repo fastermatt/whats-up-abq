@@ -60,7 +60,7 @@ function useTypewriter(text: string, startDelay = 400) {
 if (typeof document !== 'undefined' && !document.getElementById('card-fade-style')) {
   const s = document.createElement('style');
   s.id = 'card-fade-style';
-  s.textContent = '@keyframes cardFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes kenBurns0 { from { transform: scale(1.05) translate(0%,0%); } to { transform: scale(1.18) translate(-2%,-1%); } } @keyframes kenBurns1 { from { transform: scale(1.1) translate(-1%,1%); } to { transform: scale(1.2) translate(2%,-2%); } } @keyframes kenBurns2 { from { transform: scale(1.08) translate(1%,-1%); } to { transform: scale(1.18) translate(-1%,2%); } } @keyframes kenBurns3 { from { transform: scale(1.12) translate(-2%,0%); } to { transform: scale(1.05) translate(1%,-1%); } } @keyframes cursorBlink { 0%,100% { opacity:1; } 50% { opacity:0; } }';
+  s.textContent = '@keyframes cardFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes kenBurns0 { from { transform: scale(1.05) translate(0%,0%); } to { transform: scale(1.18) translate(-2%,-1%); } } @keyframes kenBurns1 { from { transform: scale(1.1) translate(-1%,1%); } to { transform: scale(1.2) translate(2%,-2%); } } @keyframes kenBurns2 { from { transform: scale(1.08) translate(1%,-1%); } to { transform: scale(1.18) translate(-1%,2%); } } @keyframes kenBurns3 { from { transform: scale(1.12) translate(-2%,0%); } to { transform: scale(1.05) translate(1%,-1%); } } @keyframes cursorBlink { 0%,100% { opacity:1; } 50% { opacity:0; } } @keyframes navPress { 0% { transform: scale(1); } 40% { transform: scale(0.88); } 100% { transform: scale(1); } } .nav-btn:active { animation: navPress 0.2s ease-out; } .haptic-switch { position:fixed; top:-9999px; left:-9999px; opacity:0; pointer-events:none; }';
   document.head.appendChild(s);
 }
 
@@ -145,6 +145,18 @@ function getDevice(): string {
   if (/iPad/.test(ua)) return 'tablet';
   if (/iPhone|Android.*Mobile/.test(ua)) return 'mobile';
   return 'desktop';
+}
+
+function playHaptic() {
+  // Android / standard vibration API
+  if (navigator.vibrate) {
+    navigator.vibrate(10);
+  }
+  // iOS 18 switch trick — uses a hidden checkbox toggle to trigger haptic
+  else {
+    const label = document.getElementById('haptic-label');
+    if (label) label.click();
+  }
 }
 
 function trackEvent(eventType: string, data: Record<string, unknown> = {}) {
@@ -824,7 +836,7 @@ const SEARCH_BOOSTS: Record<string, string[]> = {
 };
 
 const EVENT_GENRES = [
-  'All', 'Tonight', 'This Weekend', '❤️ For You', 'Music', 'Sports', 'Comedy', 'Arts', 'Family', 'Outdoor', 'Community', 'Free',
+  'All', 'Tonight', 'This Weekend', '❤️ For You', 'Free', 'Music', 'Sports', 'Comedy', 'Arts', 'Family', 'Outdoor', 'Community',
 ];
 
 const FOLLOWING_KEY = 'abq_following_genres';
@@ -3667,6 +3679,9 @@ function EventsScreen({
   // Reset genre when initialGenre changes (e.g. from "Free Events" chip)
   useEffect(() => { if (initialGenre) setSelectedGenre(initialGenre); }, [initialGenre]);
   const [followedGenres, setFollowedGenres] = useState<string[]>(() => getFollowedGenres());
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [wishlistVersion, setWishlistVersion] = useState(0);
   useEffect(() => {
     const handler = () => setWishlistVersion(v => v + 1);
@@ -3744,7 +3759,7 @@ function EventsScreen({
 
     // "For You" = union of all followed genres
     if (selectedGenre === '❤️ For You') {
-      if (followedGenres.length === 0) return result; // show all if nothing followed yet
+      if (followedGenres.length === 0) return []; // nothing followed — show setup prompt instead
       const matchesAny = (e: TMEvent) => followedGenres.some(g => {
         const seg = e.classifications?.[0]?.segment?.name || '';
         const gen = e.classifications?.[0]?.genre?.name || '';
@@ -3816,8 +3831,20 @@ function EventsScreen({
         }
       });
     }
+
+    // ── Date range filter (applies on top of genre/search) ──
+    if (dateFrom || dateTo) {
+      result = result.filter(e => {
+        const d = e.dates?.start?.localDate || '';
+        if (!d) return false;
+        if (dateFrom && d < dateFrom) return false;
+        if (dateTo && d > dateTo) return false;
+        return true;
+      });
+    }
+
     return result;
-  }, [events, selectedGenre, search]);
+  }, [events, selectedGenre, search, dateFrom, dateTo]);
 
   const sorted = useMemo(
     () =>
@@ -3893,7 +3920,34 @@ function EventsScreen({
               <span className="material-symbols-outlined text-gray-400" style={{ fontSize: '18px' }}>close</span>
             </button>
           )}
+          <button onClick={() => setShowDatePicker(v => !v)} style={{ position: 'relative' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '20px', color: (dateFrom || dateTo) ? 'var(--brand)' : '#9ca3af' }}>calendar_month</span>
+            {(dateFrom || dateTo) && <span style={{ position: 'absolute', top: -2, right: -2, width: 7, height: 7, borderRadius: '50%', background: 'var(--brand)' }} />}
+          </button>
         </div>
+        {showDatePicker && (
+          <div className="flex items-center gap-2 mt-2" style={{ animation: 'cardFadeIn 0.2s ease both' }}>
+            <div className="flex-1 flex items-center gap-1.5 bg-white px-3 py-2" style={{ border: '1px solid rgba(0,0,0,0.12)', borderRadius: 6 }}>
+              <span className="text-xs font-semibold" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif', whiteSpace: 'nowrap' }}>From</span>
+              <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
+                className="flex-1 bg-transparent outline-none text-xs text-gray-800"
+                style={{ fontFamily: 'Public Sans, sans-serif', colorScheme: 'light' }} />
+            </div>
+            <div className="flex-1 flex items-center gap-1.5 bg-white px-3 py-2" style={{ border: '1px solid rgba(0,0,0,0.12)', borderRadius: 6 }}>
+              <span className="text-xs font-semibold" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif', whiteSpace: 'nowrap' }}>To</span>
+              <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
+                min={dateFrom || new Date().toISOString().split('T')[0]}
+                className="flex-1 bg-transparent outline-none text-xs text-gray-800"
+                style={{ fontFamily: 'Public Sans, sans-serif', colorScheme: 'light' }} />
+            </div>
+            {(dateFrom || dateTo) && (
+              <button onClick={() => { setDateFrom(''); setDateTo(''); }} style={{ padding: '6px' }}>
+                <span className="material-symbols-outlined text-gray-400" style={{ fontSize: '16px' }}>close</span>
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="flex px-5 overflow-x-auto" style={{ scrollbarWidth: 'none', position: 'sticky', top: 'calc(var(--sat) + 58px)', zIndex: 30, background: 'white', paddingTop: '12px', paddingBottom: '0px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
@@ -8876,14 +8930,16 @@ export default function App() {
           {NAV_ITEMS.map((item, idx) => (
             <button
               key={item.id}
-              onClick={() => navigateTab(item.id)}
+              onClick={() => { playHaptic(); navigateTab(item.id); }}
               aria-label={item.label}
-              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-3 transition-none"
+              className="nav-btn flex-1 flex flex-col items-center justify-center gap-0.5 py-3"
               style={{
                 minHeight: '64px',
                 background: activeTab === item.id ? 'var(--ink)' : 'white',
                 borderRight: 'none',
                 borderRadius: 6,
+                transition: 'background 0.15s ease, transform 0.15s ease',
+                WebkitTapHighlightColor: 'transparent',
               }}
             >
               <span
@@ -8913,6 +8969,11 @@ export default function App() {
             </button>
           ))}
         </nav>
+        {/* Hidden iOS haptic switch — clicking the label triggers a native switch toggle which produces haptic feedback on iOS 18+ */}
+        <div className="haptic-switch" aria-hidden="true">
+          <input type="checkbox" id="haptic-cb" />
+          <label id="haptic-label" htmlFor="haptic-cb" />
+        </div>
             {showSearch && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 200, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '60px' }} onClick={() => setShowSearch(false)}>
           <div style={{ background: 'white', borderRadius: '4px', width: '90%', maxWidth: '480px', padding: '16px', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }} onClick={e => e.stopPropagation()}>
