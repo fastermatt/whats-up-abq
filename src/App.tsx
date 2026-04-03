@@ -28,6 +28,33 @@ function useFadeIn(delay = 0) {
   return ref as React.RefObject<any>;
 }
 
+// ── Reusable one-shot typewriter hook ──────────────────────────────────────
+function useTypewriter(text: string, startDelay = 400) {
+  const [display, setDisplay] = useState('');
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    let i = 0;
+    let current = '';
+    const speed = () => 35 + Math.random() * 45;
+    const tick = () => {
+      if (cancelled) return;
+      if (i < text.length) {
+        current += text[i];
+        i++;
+        setDisplay(current);
+        const delay = (text[i - 1] === ' ') ? speed() * 1.5 : speed();
+        setTimeout(tick, delay);
+      } else {
+        setTimeout(() => { if (!cancelled) setDone(true); }, 600);
+      }
+    };
+    setTimeout(tick, startDelay);
+    return () => { cancelled = true; };
+  }, [text]);
+  return { display, done };
+}
+
 
 // Inject global keyframe for card fade-in (CSS-only, no JS observers)
 if (typeof document !== 'undefined' && !document.getElementById('card-fade-style')) {
@@ -1083,7 +1110,7 @@ const PlaceCard = React.memo(function PlaceCard({
     <div
       onClick={onClick}
       className="bg-white overflow-hidden text-left w-full"
-      style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)', animation: 'cardFadeIn 0.3s ease both', contain: 'layout paint' }}
+      style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)', borderRadius: '10px', animation: 'cardFadeIn 0.3s ease both', contain: 'layout paint' }}
     >
       <div className="relative" style={{ height: '140px' }}>
         <PlaceCardImageSlider place={place} />
@@ -1256,7 +1283,7 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
       ref={fadeRef}
       onClick={onClick}
       className="bg-white overflow-hidden text-left w-full"
-      style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)', borderRadius: 6, animation: 'cardFadeIn 0.3s ease both' }}
+      style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)', borderRadius: '10px', animation: 'cardFadeIn 0.3s ease both' }}
     >
       <div className="relative" style={{ height: '160px' }}>
         <EventCardImageSlider event={event} />
@@ -2800,7 +2827,7 @@ function DailyGem({ places, onSelect }: { places: Place[]; onSelect: (p: Place) 
         <span className="text-xs font-black uppercase" style={{ color: '#666', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em' }}><span className="material-symbols-outlined" style={{fontSize:'12px',verticalAlign:'middle',marginRight:'3px'}}>calendar_today</span>Changes daily</span>
       </div>
       <button onClick={() => onSelect(gem)} className="w-full relative overflow-hidden text-left"
-        style={{ height: '180px', boxShadow: '0 2px 8px rgba(0,0,0,0.10)', border: '1px solid rgba(0,0,0,0.12)', animation: 'cardFadeIn 0.45s ease both', borderRadius: 6 }}>
+        style={{ height: '180px', boxShadow: '0 2px 8px rgba(0,0,0,0.10)', border: '1px solid rgba(0,0,0,0.12)', animation: 'cardFadeIn 0.45s ease both', borderRadius: '10px' }}>
         {gem.image && <img src={gem.image} alt={gem.name} className="w-full h-full object-cover" style={{ filter: 'brightness(0.82)' }} />}
         <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, rgba(28,111,234,0.12) 0%, rgba(0,0,0,0.72) 100%)' }} />
         <div className="absolute top-3 left-3">
@@ -2860,7 +2887,7 @@ function FeaturedEventBanner({ events, onSelect }: { events: TMEvent[]; onSelect
         </span>
       </div>
       <button onClick={() => onSelect(ev)} className="w-full relative overflow-hidden text-left"
-        style={{ height: '220px', boxShadow: '0 4px 20px rgba(0,0,0,0.15)', border: '1px solid rgba(0,0,0,0.12)', animation: 'cardFadeIn 0.45s ease both', borderRadius: 8 }}>
+        style={{ height: '220px', boxShadow: '0 4px 20px rgba(0,0,0,0.15)', border: '1px solid rgba(0,0,0,0.12)', animation: 'cardFadeIn 0.45s ease both', borderRadius: '10px' }}>
         {img && <img src={img} alt={ev.name} className="w-full h-full object-cover" style={{ filter: 'brightness(0.75)' }} />}
         <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, rgba(194,99,74,0.2) 0%, rgba(0,0,0,0.78) 100%)' }} />
         <div className="absolute top-3 left-3">
@@ -3085,78 +3112,51 @@ function DiscoverScreen({
 }) {
   const hidden = prefs?.hiddenSections ?? [];
   const interests = prefs?.preferredInterests ?? [];
-  // ── TheaterJS-style typing animation for hero ────────────────────────────
+  // ── One-shot typing animation for hero ────────────────────────────────────
   const HERO_PHRASES = ['Go Do Something', 'Time to Get Outside', 'Stop Doomscrolling', 'Put the Phone Down', 'Touch Some Grass', 'Go See People', 'Time to Unplug', 'Get Out of the House'];
   const [heroDisplay, setHeroDisplay] = useState('');
-  const [heroPhase, setHeroPhase] = useState<'typing' | 'pausing' | 'erasing'>('typing');
+  const [heroDone, setHeroDone] = useState(false);
   useEffect(() => {
     let cancelled = false;
-    let phraseIdx = Math.floor(Math.random() * HERO_PHRASES.length);
+    const target = HERO_PHRASES[Math.floor(Math.random() * HERO_PHRASES.length)];
     let charIdx = 0;
     let current = '';
-    let phase: 'typing' | 'pausing' | 'erasing' = 'typing';
-    // Human-like speed variation
     const typeSpeed = () => 45 + Math.random() * 55;
-    const eraseSpeed = () => 25 + Math.random() * 20;
-    // Occasional typo simulation (10% chance per character)
     const shouldTypo = () => Math.random() < 0.08;
-    const TYPO_NEARBY: Record<string, string> = {
-      a:'s',s:'d',d:'f',f:'g',g:'h',h:'j',t:'r',i:'o',o:'p',e:'r',n:'m',l:'k',
-    };
+    const TYPO_NEARBY: Record<string, string> = { a:'s',s:'d',d:'f',f:'g',g:'h',h:'j',t:'r',i:'o',o:'p',e:'r',n:'m',l:'k' };
 
     const tick = () => {
       if (cancelled) return;
-      const target = HERO_PHRASES[phraseIdx];
-
-      if (phase === 'typing') {
-        if (charIdx < target.length) {
-          const ch = target[charIdx];
-          // Typo: type wrong char, wait, erase, type correct
-          if (shouldTypo() && charIdx > 2 && charIdx < target.length - 2 && TYPO_NEARBY[ch.toLowerCase()]) {
-            const wrongChar = ch === ch.toUpperCase() ? TYPO_NEARBY[ch.toLowerCase()].toUpperCase() : TYPO_NEARBY[ch.toLowerCase()];
-            current += wrongChar;
+      if (charIdx < target.length) {
+        const ch = target[charIdx];
+        if (shouldTypo() && charIdx > 2 && charIdx < target.length - 2 && TYPO_NEARBY[ch.toLowerCase()]) {
+          const wrongChar = ch === ch.toUpperCase() ? TYPO_NEARBY[ch.toLowerCase()].toUpperCase() : TYPO_NEARBY[ch.toLowerCase()];
+          current += wrongChar;
+          setHeroDisplay(current);
+          setTimeout(() => {
+            if (cancelled) return;
+            current = current.slice(0, -1);
             setHeroDisplay(current);
             setTimeout(() => {
               if (cancelled) return;
-              current = current.slice(0, -1);
+              current += ch;
+              charIdx++;
               setHeroDisplay(current);
-              setTimeout(() => {
-                if (cancelled) return;
-                current += ch;
-                charIdx++;
-                setHeroDisplay(current);
-                setTimeout(tick, typeSpeed());
-              }, 80 + Math.random() * 40);
-            }, 150 + Math.random() * 100);
-            return;
-          }
-          current += ch;
-          charIdx++;
-          setHeroDisplay(current);
-          // Pause slightly longer after spaces and punctuation
-          const delay = (ch === ' ' || ch === ',') ? typeSpeed() * 1.8 : typeSpeed();
-          setTimeout(tick, delay);
-        } else {
-          phase = 'pausing';
-          setTimeout(tick, 2800 + Math.random() * 1200);
+              setTimeout(tick, typeSpeed());
+            }, 80 + Math.random() * 40);
+          }, 150 + Math.random() * 100);
+          return;
         }
-      } else if (phase === 'pausing') {
-        phase = 'erasing';
-        tick();
-      } else if (phase === 'erasing') {
-        if (current.length > 0) {
-          current = current.slice(0, -1);
-          setHeroDisplay(current);
-          setTimeout(tick, eraseSpeed());
-        } else {
-          phraseIdx = (phraseIdx + 1) % HERO_PHRASES.length;
-          charIdx = 0;
-          phase = 'typing';
-          setTimeout(tick, 400 + Math.random() * 300);
-        }
+        current += ch;
+        charIdx++;
+        setHeroDisplay(current);
+        const delay = (ch === ' ' || ch === ',') ? typeSpeed() * 1.8 : typeSpeed();
+        setTimeout(tick, delay);
+      } else {
+        // Done — hide cursor after a beat
+        setTimeout(() => { if (!cancelled) setHeroDone(true); }, 800);
       }
     };
-
     setTimeout(tick, 600);
     return () => { cancelled = true; };
   }, []);
@@ -3204,8 +3204,8 @@ function DiscoverScreen({
           <p className="text-xs font-black uppercase mb-2" style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.12em' }}>
             Greater ABQ Metro
           </p>
-          <h1 className="font-black leading-tight mb-1" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '26px', letterSpacing: '-0.02em', color: 'var(--ink)', minHeight: '64px' }}>
-            {heroDisplay}<span style={{ display: 'inline-block', width: '2px', height: '0.85em', background: 'var(--brand)', marginLeft: '2px', verticalAlign: 'baseline', animation: 'cursorBlink 0.8s step-end infinite' }} />
+          <h1 className="font-black leading-none mt-1 mb-1" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '40px', letterSpacing: '-0.04em', color: 'var(--ink)', minHeight: '48px' }}>
+            {heroDisplay}{!heroDone && <span style={{ display: 'inline-block', width: '3px', height: '0.85em', background: 'var(--ink)', marginLeft: '2px', verticalAlign: 'baseline', animation: 'cursorBlink 0.8s step-end infinite' }} />}
           </h1>
           <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '12px', color: '#555', fontWeight: 500, marginBottom: '14px' }}>
             {events.length.toLocaleString()} events · {places.length.toLocaleString()} places across Greater ABQ
@@ -3327,19 +3327,20 @@ function DiscoverScreen({
       {!hidden.includes('vibes') && (() => {
         const [activeVibeAnim, setActiveVibeAnim] = React.useState(-1);
         React.useEffect(() => {
-          // Stagger: pick a random vibe icon every 3-5s, animate it for ~2s
+          // Stagger: pick a random vibe icon every 4-7s, let it play its full GIF loop (~3s)
           let timeout: ReturnType<typeof setTimeout>;
+          let resetTimeout: ReturnType<typeof setTimeout>;
           const animate = () => {
             const idx = Math.floor(Math.random() * VIBE_CONFIGS.length);
             setActiveVibeAnim(idx);
-            // After 2.5s, go back to static
-            setTimeout(() => setActiveVibeAnim(-1), 2500);
-            // Schedule next animation 3-5s later
-            timeout = setTimeout(animate, 3000 + Math.random() * 2000);
+            // After 3s, go back to static (enough for one full GIF loop)
+            resetTimeout = setTimeout(() => setActiveVibeAnim(-1), 3000);
+            // Schedule next animation 4-7s later
+            timeout = setTimeout(animate, 4000 + Math.random() * 3000);
           };
           // Start first animation after a short delay
-          timeout = setTimeout(animate, 1500);
-          return () => clearTimeout(timeout);
+          timeout = setTimeout(animate, 2000);
+          return () => { clearTimeout(timeout); clearTimeout(resetTimeout); };
         }, []);
         return (
         <div className="mb-5 px-5">
@@ -3352,7 +3353,7 @@ function DiscoverScreen({
                 onClick={() => onNavigatePlaces?.(vibeCats.join('|'), vibeSearch, label, gradient)}>
                 <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'white', border: `2.5px solid ${borderColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', overflow: 'hidden' }}>
                   <img
-                    src={activeVibeAnim === i ? `${animatedIcon}?t=${Date.now()}` : staticIcon}
+                    src={activeVibeAnim === i ? animatedIcon : staticIcon}
                     alt={label} width={38} height={38}
                     style={{ objectFit: 'contain' }} />
                 </div>
@@ -3466,7 +3467,7 @@ function DiscoverScreen({
                 key={place.id}
                 onClick={() => onPlaceSelect(place)}
                 className="flex-shrink-0 bg-white overflow-hidden text-left"
-                style={{ width: '144px', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}
+                style={{ width: '144px', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)', borderRadius: '10px' }}
               >
                 <div className="relative" style={{ height: '100px' }}>
                   <ImageWithFallback
@@ -3526,7 +3527,7 @@ function DiscoverScreen({
                 key={place.id}
                 onClick={() => onPlaceSelect(place)}
                 className="flex-shrink-0 bg-white overflow-hidden text-left"
-                style={{ width: '144px', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}
+                style={{ width: '144px', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)', borderRadius: '10px' }}
               >
                 <div className="relative" style={{ height: '100px' }}>
                   <ImageWithFallback
@@ -3659,6 +3660,7 @@ function EventsScreen({
   initialSearch?: string;
   initialGenre?: string;
 }) {
+  const eventsHero = useTypewriter("What's Happening", 300);
   const [search, setSearch] = useState('');
   useEffect(() => { if (initialSearch) setSearch(initialSearch); }, [initialSearch]);
   const [selectedGenre, setSelectedGenre] = useState(initialGenre || 'Tonight');
@@ -3864,9 +3866,9 @@ function EventsScreen({
         </p>
         <h1
           className="font-black leading-none mt-1"
-          style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '40px', letterSpacing: '-0.04em', color: 'var(--ink)' }}
+          style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '40px', letterSpacing: '-0.04em', color: 'var(--ink)', minHeight: '48px' }}
         >
-          What's Happening
+          {eventsHero.display}{!eventsHero.done && <span style={{ display: 'inline-block', width: '3px', height: '0.85em', background: 'var(--ink)', marginLeft: '2px', verticalAlign: 'baseline', animation: 'cursorBlink 0.8s step-end infinite' }} />}
         </h1>
         <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: 'Public Sans, sans-serif' }}>
           {events.length.toLocaleString()} things to do in Greater ABQ
@@ -4059,6 +4061,7 @@ function PlacesScreen({
   navSearch?: string;
   navVibe?: string;
 }) {
+  const placesHero = useTypewriter('Places to Go', 300);
   const PAGE_SIZE = 48;
   const [selectedCat, setSelectedCat] = useState('All');
   const [activeVibe, setActiveVibe] = useState('');
@@ -4368,9 +4371,9 @@ function PlacesScreen({
         </p>
         <h1
           className="font-black leading-none mt-1"
-          style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '40px', letterSpacing: '-0.04em', color: 'var(--ink)' }}
+          style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '40px', letterSpacing: '-0.04em', color: 'var(--ink)', minHeight: '48px' }}
         >
-          Places to Go
+          {placesHero.display}{!placesHero.done && <span style={{ display: 'inline-block', width: '3px', height: '0.85em', background: 'var(--ink)', marginLeft: '2px', verticalAlign: 'baseline', animation: 'cursorBlink 0.8s step-end infinite' }} />}
         </h1>
         <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: 'Public Sans, sans-serif' }}>
           {search.trim() && NEIGHBORHOOD_BOUNDS[search.trim()]
@@ -4457,7 +4460,8 @@ function PlacesScreen({
             : PLACE_CATEGORIES;
           return visibleCats;
         })().map(cat => {
-          const isActive = selectedCat === cat.value || (selectedCat.includes('|') && selectedCat.split('|').includes(cat.value));
+          // In vibe mode, don't highlight individual category chips — the vibe header already shows what's active
+          const isActive = activeVibe ? cat.value === 'All' : (selectedCat === cat.value || (selectedCat.includes('|') && selectedCat.split('|').includes(cat.value)));
           return (
           <button
             key={cat.label}
