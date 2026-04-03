@@ -1128,6 +1128,10 @@ function ContentSection() {
 // ─────────────────────────────────────────────────────────────────────────────
 // ANALYTICS DASHBOARD
 // ─────────────────────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ANALYTICS
+// ─────────────────────────────────────────────────────────────────────────────
 function AnalyticsSection() {
   const [range, setRange]       = useState<'7d'|'30d'|'90d'>('7d');
   const [loading, setLoading]   = useState(true);
@@ -1135,11 +1139,15 @@ function AnalyticsSection() {
   const [topEvents, setTopEvents] = useState<{name:string;count:number}[]>([]);
   const [topPlaces, setTopPlaces] = useState<{name:string;count:number}[]>([]);
   const [topSearches,setTopSearches]=useState<{query:string;count:number}[]>([]);
+  const [topDirections, setTopDirections] = useState<{name:string;count:number}[]>([]);
   const [deviceBreakdown,setDeviceBreakdown]=useState<{device:string;count:number}[]>([]);
   const [dailyActive,setDailyActive]=useState<{day:string;sessions:number}[]>([]);
   const [sectionEngagement,setSectionEngagement]=useState<{tab:string;count:number}[]>([]);
   const [recentErrors, setRecentErrors] = useState<any[]>([]);
+  const [errorGrouped, setErrorGrouped] = useState<Record<string,{count:number;lastSeen:string;ids:string[]}>({});
   const [topPages, setTopPages] = useState<{path:string;count:number}[]>([]);
+  const [shareClicks, setShareClicks] = useState(0);
+  const [getDirectionsClicks, setGetDirectionsClicks] = useState(0);
 
   const days = range==='7d'?7:range==='30d'?30:90;
 
@@ -1159,6 +1167,14 @@ function AnalyticsSection() {
       const uniqueSessions = new Set(rows.filter(r=>r.session_id).map((r:any)=>r.session_id)).size;
       typeCount['_unique_sessions'] = uniqueSessions;
 
+      // Bounce rate (sessions with only 1 event)
+      const sessionEventCount: Record<string,number> = {};
+      rows.forEach((r:any)=>{
+        if(r.session_id) sessionEventCount[r.session_id] = (sessionEventCount[r.session_id]||0)+1;
+      });
+      const bounceCount = Object.values(sessionEventCount).filter(c=>c===1).length;
+      typeCount['_bounce_rate'] = uniqueSessions > 0 ? Math.round((bounceCount/uniqueSessions)*100) : 0;
+
       // Top events
       const evCounts: Record<string,number> = {};
       rows.filter(r=>r.event_type==='event_click').forEach((r:any)=>{ const n=r.data?.name||r.data?.event_id||'Unknown'; evCounts[n]=(evCounts[n]||0)+1; });
@@ -1173,6 +1189,17 @@ function AnalyticsSection() {
       const qCounts: Record<string,number> = {};
       rows.filter(r=>r.event_type==='search').forEach((r:any)=>{ const q=(r.data?.query||'').toLowerCase().trim(); if(q) qCounts[q]=(qCounts[q]||0)+1; });
       setTopSearches(Object.entries(qCounts).sort((a,b)=>b[1]-a[1]).slice(0,15).map(([query,count])=>({query,count})));
+
+      // Get Directions clicks
+      const dirCount = rows.filter(r=>r.event_type==='directions_click').length;
+      setGetDirectionsClicks(dirCount);
+      const topDirs: Record<string,number> = {};
+      rows.filter(r=>r.event_type==='directions_click').forEach((r:any)=>{ const n=r.data?.name||'Unknown'; topDirs[n]=(topDirs[n]||0)+1; });
+      setTopDirections(Object.entries(topDirs).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([name,count])=>({name,count})));
+
+      // Share clicks
+      const shareCount = rows.filter(r=>r.event_type==='share').length;
+      setShareClicks(shareCount);
 
       // Device breakdown
       const devCounts: Record<string,number> = {};
@@ -1197,9 +1224,19 @@ function AnalyticsSection() {
       });
       setTopPages(Object.entries(pageCounts).sort((a,b)=>b[1]-a[1]).slice(0,15).map(([path,count])=>({path,count})));
 
-      // Recent errors
-      const errors = rows.filter(r=>r.event_type==='client_error').sort((a:any,b:any)=>b.created_at.localeCompare(a.created_at)).slice(0,30);
+      // Recent errors - grouped by message
+      const errors = rows.filter(r=>r.event_type==='client_error').sort((a:any,b:any)=>b.created_at.localeCompare(a.created_at)).slice(0,50);
       setRecentErrors(errors);
+      
+      const errorsByMsg: Record<string,{count:number;lastSeen:string;ids:string[]}> = {};
+      errors.forEach((err:any,i:number)=>{
+        const msg = err.data?.message?.slice(0,100) || 'Unknown error';
+        if(!errorsByMsg[msg]) errorsByMsg[msg] = {count:0, lastSeen: err.created_at, ids:[]};
+        errorsByMsg[msg].count++;
+        if(i === 0) errorsByMsg[msg].lastSeen = err.created_at;
+        if(errorsByMsg[msg].ids.length < 3) errorsByMsg[msg].ids.push(err.id);
+      });
+      setErrorGrouped(errorsByMsg);
 
       setTotals({...typeCount});
       } catch(e:any) {
@@ -1216,13 +1253,20 @@ function AnalyticsSection() {
   const maxTP = Math.max(...topPlaces.map(d=>d.count),1);
   const maxTE = Math.max(...topEvents.map(d=>d.count),1);
 
-  const statCard = (label:string,val:number,icon:string,color:string) => (
+  const statCard = (label:string,val:number,icon:string,color:string,subtitle?:string) => (
     <div style={{...card,padding:'18px 20px'}}>
       <div style={{fontSize:22,marginBottom:6}}>{icon}</div>
       <div style={{fontSize:26,fontWeight:800,color,letterSpacing:'-0.5px'}}>{val.toLocaleString()}</div>
       <div style={{fontSize:12,color:'#9ca3af',fontWeight:600,marginTop:3}}>{label}</div>
+      {subtitle && <div style={{fontSize:11,color:'#d1d5db',marginTop:2}}>{subtitle}</div>}
     </div>
   );
+
+  const clearErrors = () => {
+    if(!confirm('Delete all error logs for this period?')) return;
+    // In a real app, this would call a backend endpoint to delete
+    toast('Error logs would be cleared here (requires backend endpoint)','info');
+  };
 
   return (
     <div>
@@ -1241,10 +1285,13 @@ function AnalyticsSection() {
             {statCard('Event Clicks',      totals.event_click||0,      '🎫','#059669')}
             {statCard('Place Clicks',      totals.place_click||0,      '📍','#7c3aed')}
             {statCard('Searches',          totals.search||0,           '🔍','#b45309')}
-            {statCard('Check-ins',         totals.checkin||0,          '✅','#0891b2')}
-            {statCard('Errors',            totals.client_error||0,     '⚠️','#dc2626')}
-            {statCard('A2HS Shown',        totals.a2hs_shown||0,       '📲','#9333ea')}
-            {statCard('A2HS Accepted',     totals.a2hs_accepted||0,    '🏠','#059669')}
+            {statCard('Get Directions',    getDirectionsClicks||0,     '🗺️','#0891b2')}
+            {statCard('Share Clicks',      shareClicks||0,             '🔗','#9333ea')}
+            {statCard('Check-ins',         totals.checkin||0,          '✅','#fb923c')}
+            {statCard('Bounce Rate',       totals._bounce_rate||0,     '📊','#dc2626','% of sessions')}
+            {statCard('Errors',            totals.client_error||0,     '⚠️','#ea580c')}
+            {statCard('A2HS Shown',        totals.a2hs_shown||0,       '📲','#6366f1')}
+            {statCard('A2HS Accepted',     totals.a2hs_accepted||0,    '🏠','#10b981')}
           </div>
 
           {/* A2HS conversion */}
@@ -1350,6 +1397,30 @@ function AnalyticsSection() {
             </div>
           </div>
 
+          {/* Get Directions tracker */}
+          {getDirectionsClicks > 0 && (
+            <div style={{...card,marginBottom:20}}>
+              <h3 style={{fontSize:14,fontWeight:700,marginBottom:14,color:'#374151'}}>Get Directions Clicks</h3>
+              <div style={{display:'flex',alignItems:'baseline',gap:8,marginBottom:14}}>
+                <div style={{fontSize:28,fontWeight:800,color:'#0891b2'}}>{getDirectionsClicks}</div>
+                <div style={{fontSize:12,color:'#9ca3af'}}>people used get directions</div>
+              </div>
+              {topDirections.length > 0 && (
+                <>
+                  <h4 style={{fontSize:12,fontWeight:700,color:'#6b7280',marginBottom:10}}>Most Popular Destinations</h4>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:8}}>
+                    {topDirections.map((d,i)=>(
+                      <div key={i} style={{padding:'10px',background:'#f9fafb',borderRadius:8}}>
+                        <div style={{fontSize:12,fontWeight:600,color:'#18181b',marginBottom:4}}>{d.name.slice(0,30)}</div>
+                        <div style={{fontSize:11,fontWeight:700,color:'#0891b2'}}>{d.count} clicks</div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
           {/* Top pages */}
           <div style={{...card,marginBottom:20}}>
             <h3 style={{fontSize:14,fontWeight:700,marginBottom:14,color:'#374151'}}>Top Viewed Pages</h3>
@@ -1366,23 +1437,28 @@ function AnalyticsSection() {
             )}
           </div>
 
-          {/* Error log */}
+          {/* Error log - now grouped */}
           <div style={{...card, borderLeft: (recentErrors.length > 0) ? '3px solid #dc2626' : '3px solid #d1d5db'}}>
-            <h3 style={{fontSize:14,fontWeight:700,marginBottom:4,color: recentErrors.length > 0 ? '#dc2626' : '#374151'}}>
-              Client Error Log {recentErrors.length > 0 && <span style={{fontSize:12,fontWeight:400,color:'#9ca3af',marginLeft:8}}>({recentErrors.length} errors in last {days} days)</span>}
-            </h3>
-            <p style={{fontSize:12,color:'#9ca3af',marginBottom:14}}>JavaScript errors captured from user browsers — use to diagnose and fix bugs.</p>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
+              <div>
+                <h3 style={{fontSize:14,fontWeight:700,margin:0,color: recentErrors.length > 0 ? '#dc2626' : '#374151'}}>
+                  Client Error Log {recentErrors.length > 0 && <span style={{fontSize:12,fontWeight:400,color:'#9ca3af',marginLeft:8}}>({recentErrors.length} errors)</span>}
+                </h3>
+                <p style={{fontSize:12,color:'#9ca3af',marginTop:6,marginBottom:0}}>JavaScript errors captured from user browsers</p>
+              </div>
+              {recentErrors.length > 0 && <button onClick={clearErrors} style={{...btnD}}>Clear Errors</button>}
+            </div>
             {!recentErrors.length ? (
               <div style={{textAlign:'center',padding:28,color:'#9ca3af'}}>
-                <div style={{fontSize:28,marginBottom:8}}>&#10003;</div>
+                <div style={{fontSize:28,marginBottom:8}}>✓</div>
                 <p style={{fontSize:13,fontWeight:600}}>No errors recorded</p>
               </div>
             ) : (
-              <div style={{maxHeight:400,overflowY:'auto'}}>
+              <div style={{maxHeight:500,overflowY:'auto'}}>
                 {recentErrors.map((err:any,i:number)=>(
                   <div key={i} style={{padding:'10px 12px',marginBottom:6,background:'#fef2f2',borderRadius:8,border:'1px solid #fecaca',fontSize:12}}>
                     <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
-                      <span style={{fontWeight:700,color:'#dc2626'}}>{err.data?.message?.slice(0,120) || 'Unknown error'}</span>
+                      <span style={{fontWeight:700,color:'#dc2626'}}>{err.data?.message?.slice(0,100) || 'Unknown error'}</span>
                       <span style={{color:'#9ca3af',fontSize:11,flexShrink:0,marginLeft:8}}>{new Date(err.created_at).toLocaleString()}</span>
                     </div>
                     {err.data?.source && <div style={{color:'#6b7280',fontFamily:'monospace',fontSize:11}}>@ {err.data.source.replace(/^https?:\/\/[^/]+/,'')}:{err.data.line}</div>}
@@ -1402,10 +1478,6 @@ function AnalyticsSection() {
     </div>
   );
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// DATA REFRESH
-// ─────────────────────────────────────────────────────────────────────────────
 function RefreshSection() {
   const [running, setRunning] = useState(false);
   const [logs, setLogs]       = useState<any[]>([]);
@@ -1804,13 +1876,37 @@ export default function AdminPanel({ user, onBack }: { user: User|null; onBack: 
 
   const isAuth = pwUnlocked || user?.email === ADMIN_EMAIL;
 
-  const tryPw = (e: React.FormEvent) => {
+  const tryPw = async (e: React.FormEvent) => {
     e.preventDefault();
     if (pwInput === ADMIN_PW) {
-      localStorage.setItem(PW_EXP_KEY, String(Date.now()+PW_TTL));
-      setPwUnlocked(true); setPwError('');
+      // Sign in to Supabase with the admin credentials to get a real session
+      try {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: ADMIN_EMAIL,
+          password: ADMIN_PW,
+        });
+        if (error) {
+          // Fallback: allow local access even if Supabase user doesn't exist
+          localStorage.setItem(PW_EXP_KEY, String(Date.now() + PW_TTL));
+          setPwUnlocked(true);
+          setPwError('');
+          toast('Admin access granted (local mode)', 'info');
+        } else {
+          localStorage.setItem(PW_EXP_KEY, String(Date.now() + PW_TTL));
+          setPwUnlocked(true);
+          setPwError('');
+          toast('Admin access granted ✓', 'ok');
+        }
+      } catch (err: any) {
+        // Fallback to local unlock
+        localStorage.setItem(PW_EXP_KEY, String(Date.now() + PW_TTL));
+        setPwUnlocked(true);
+        setPwError('');
+      }
     } else { setPwError('Incorrect password.'); setTimeout(()=>setPwError(''),3000); }
   };
+
+
 
   const logout = () => { localStorage.removeItem(PW_EXP_KEY); setPwUnlocked(false); };
 
