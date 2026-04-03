@@ -131,26 +131,31 @@ const GRADIENTS = [
 ];
 let _gradIdx = 0;
 
-function transformGoogleRaw(raw: Record<string, unknown>): Record<string, unknown> {
+function transformGoogleRaw(
+  raw: Record<string, unknown>,
+  cachedPhotoUrl?: string | null,
+  cachedThumbnailUrl?: string | null,
+): Record<string, unknown> {
   // Already transformed (has our custom fields)
   if ('image' in raw || 'source' in raw) return raw;
 
   const photos = raw.photos as Array<{ photo_reference: string }> | undefined;
   const photoRef = photos?.[0]?.photo_reference;
-  // Admin-set photo override takes precedence over Google photo
+  // Admin-set photo override takes precedence over everything
   const overridePhoto = raw.overridePhoto as string | undefined;
-  // Full-res image for detail modal hero
-  const imageUrl = overridePhoto || (photoRef
+  // Priority: overridePhoto > cached Supabase Storage URL > Google API URL
+  const imageUrl = overridePhoto || cachedPhotoUrl || (photoRef
     ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photoRef}&key=${GOOGLE_KEY}`
     : undefined);
-  // Smaller thumbnail for list cards (saves ~60% bandwidth)
-  const thumbnailUrl = overridePhoto || (photoRef
+  const thumbnailUrl = overridePhoto || cachedThumbnailUrl || cachedPhotoUrl || (photoRef
     ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoRef}&key=${GOOGLE_KEY}`
     : undefined);
-  // Up to 5 additional photos for gallery (6 total)
-  const additionalImages = photos?.slice(1, 6).map(
-    p => `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${p.photo_reference}&key=${GOOGLE_KEY}`
-  );
+  // Additional photos — only fall back to Google API if no cached main photo
+  const additionalImages = (!cachedPhotoUrl && !overridePhoto)
+    ? photos?.slice(1, 6).map(
+        p => `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${p.photo_reference}&key=${GOOGLE_KEY}`
+      )
+    : undefined;
 
   const geometry = raw.geometry as { location?: { lat: number; lng: number } } | undefined;
   const openingHours = raw.opening_hours as { open_now?: boolean } | undefined;
@@ -222,7 +227,7 @@ export async function fetchPlacesFromDB(): Promise<unknown[]> {
     Array.from({ length: pageCount }, (_, i) =>
       supabase
         .from('places')
-        .select('raw,enriched,hide_enriched')
+        .select('raw,enriched,hide_enriched,cached_photo_url,cached_thumbnail_url')
         .range(i * PAGE, (i + 1) * PAGE - 1)
     )
   );
@@ -231,8 +236,8 @@ export async function fetchPlacesFromDB(): Promise<unknown[]> {
   for (const { data, error } of pageResults) {
     if (error) throw error;
     for (const row of (data ?? [])) {
-      const typed = row as { raw: Record<string, unknown>; enriched?: Record<string, unknown>; hide_enriched?: boolean };
-      const place = transformGoogleRaw(typed.raw);
+      const typed = row as { raw: Record<string, unknown>; enriched?: Record<string, unknown>; hide_enriched?: boolean; cached_photo_url?: string; cached_thumbnail_url?: string };
+      const place = transformGoogleRaw(typed.raw, typed.cached_photo_url, typed.cached_thumbnail_url);
       // Attach enriched data directly so PlaceDetailModal can use it without a second fetch
       if (typed.enriched) (place as Record<string, unknown>)._enriched = typed.enriched;
       if (typed.hide_enriched) (place as Record<string, unknown>)._hideEnriched = true;
@@ -256,8 +261,8 @@ export async function searchPlacesFromDB(query: string, limit = 50): Promise<unk
     console.warn('Server search failed, falling back to client-side:', error.message);
     return [];
   }
-  return (data ?? []).map((row: { raw: Record<string, unknown>; enriched?: Record<string, unknown>; hide_enriched?: boolean }) => {
-    const place = transformGoogleRaw(row.raw);
+  return (data ?? []).map((row: { raw: Record<string, unknown>; enriched?: Record<string, unknown>; hide_enriched?: boolean; cached_photo_url?: string; cached_thumbnail_url?: string }) => {
+    const place = transformGoogleRaw(row.raw, row.cached_photo_url, row.cached_thumbnail_url);
     if (row.enriched) (place as Record<string, unknown>)._enriched = row.enriched;
     if (row.hide_enriched) (place as Record<string, unknown>)._hideEnriched = true;
     return place;
