@@ -60,7 +60,7 @@ function useTypewriter(text: string, startDelay = 400) {
 if (typeof document !== 'undefined' && !document.getElementById('card-fade-style')) {
   const s = document.createElement('style');
   s.id = 'card-fade-style';
-  s.textContent = '@keyframes cardFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes kenBurns0 { from { transform: scale(1.05) translate(0%,0%); } to { transform: scale(1.18) translate(-2%,-1%); } } @keyframes kenBurns1 { from { transform: scale(1.1) translate(-1%,1%); } to { transform: scale(1.2) translate(2%,-2%); } } @keyframes kenBurns2 { from { transform: scale(1.08) translate(1%,-1%); } to { transform: scale(1.18) translate(-1%,2%); } } @keyframes kenBurns3 { from { transform: scale(1.12) translate(-2%,0%); } to { transform: scale(1.05) translate(1%,-1%); } } @keyframes cursorBlink { 0%,100% { opacity:1; } 50% { opacity:0; } } .nav-press-btn:active { top: 4px !important; box-shadow: 0 1px 0 #0a0a0a, 0 0px 2px rgba(0,0,0,0.1) !important; } .haptic-switch { position:fixed; top:-9999px; left:-9999px; opacity:0; pointer-events:none; }';
+  s.textContent = '@keyframes cardFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes kenBurns0 { from { transform: scale(1.05) translate(0%,0%); } to { transform: scale(1.18) translate(-2%,-1%); } } @keyframes kenBurns1 { from { transform: scale(1.1) translate(-1%,1%); } to { transform: scale(1.2) translate(2%,-2%); } } @keyframes kenBurns2 { from { transform: scale(1.08) translate(1%,-1%); } to { transform: scale(1.18) translate(-1%,2%); } } @keyframes kenBurns3 { from { transform: scale(1.12) translate(-2%,0%); } to { transform: scale(1.05) translate(1%,-1%); } } @keyframes cursorBlink { 0%,100% { opacity:1; } 50% { opacity:0; } } @keyframes heartPop { 0% { transform: scale(1); } 15% { transform: scale(1.35); } 30% { transform: scale(0.9); } 45% { transform: scale(1.15); } 60% { transform: scale(0.97); } 75% { transform: scale(1.05); } 100% { transform: scale(1); } } @keyframes heartParticles { 0% { opacity: 1; transform: scale(0.5); } 50% { opacity: 0.8; } 100% { opacity: 0; transform: scale(2.5); } } .like-btn-pop { animation: heartPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; } .like-btn-particles::after { content: ""; position: absolute; inset: -8px; border-radius: 50%; background: radial-gradient(circle, var(--brand) 0%, transparent 70%); animation: heartParticles 0.5s ease-out forwards; pointer-events: none; z-index: -1; } .nav-press-btn:active { top: 4px !important; box-shadow: 0 1px 0 #0a0a0a, 0 0px 2px rgba(0,0,0,0.1) !important; } .haptic-switch { position:fixed; top:-9999px; left:-9999px; opacity:0; pointer-events:none; }';
   document.head.appendChild(s);
 }
 
@@ -2780,6 +2780,52 @@ const toggleWishlist = (item: { id: string; name: string; type: string; category
 };
 const isWishlisted = (id: string) => getWishlist().some(w => w.id === id);
 
+// ─── Animated Like Button ────────────────────────────────────────────────────
+function LikeButton({ id, type, name, category }: { id: string; type: 'event' | 'place'; name: string; category: string }) {
+  const liked = isWishlisted(id);
+  const [animating, setAnimating] = React.useState(false);
+  const prevLiked = React.useRef(liked);
+
+  React.useEffect(() => {
+    if (liked && !prevLiked.current) {
+      setAnimating(true);
+      const t = setTimeout(() => setAnimating(false), 550);
+      return () => clearTimeout(t);
+    }
+    prevLiked.current = liked;
+  }, [liked]);
+
+  return (
+    <button
+      className={animating ? 'like-btn-pop like-btn-particles' : ''}
+      style={{
+        position: 'absolute', top: 8, right: 8, zIndex: 10,
+        background: liked ? 'var(--brand)' : 'rgba(255,255,255,0.90)',
+        border: 'none', borderRadius: '50%', width: 44, height: 44, minHeight: 0,
+        color: liked ? 'white' : 'var(--brand)', fontSize: 16, cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+        transition: 'background 0.2s ease, color 0.2s ease',
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+        toggleWishlist({ id, type, name, category });
+      }}
+    >
+      <span
+        className="material-symbols-outlined"
+        style={{
+          fontSize: '18px',
+          fontVariationSettings: liked ? "'FILL' 1, 'wght' 700" : "'FILL' 0, 'wght' 400",
+          transition: 'font-variation-settings 0.2s ease',
+        }}
+      >
+        favorite
+      </span>
+    </button>
+  );
+}
+
 // ─── Day Plan localStorage helpers ────────────────────────────────────────────
 const getDayPlan = (): { date: string; items: { id: string; text: string; done: boolean }[] } => {
   const today = new Date().toDateString();
@@ -3429,11 +3475,11 @@ function DiscoverScreen({
                 className="flex flex-col items-center gap-1.5 transition-all active:scale-95"
                 style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', flex: '1 1 0', minWidth: 0 }}
                 onClick={() => { trackEvent('vibe_click', { vibe: label }); onNavigatePlaces?.(vibeCats.join('|'), vibeSearch, label, gradient); }}>
-                <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'white', border: `2.5px solid ${borderColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', overflow: 'hidden' }}>
+                <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'white', border: `2.5px solid ${borderColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', overflow: 'hidden', flexShrink: 0 }}>
                   <img
                     src={activeVibeAnim === i ? animatedIcon : staticIcon}
-                    alt={label} width={38} height={38}
-                    style={{ objectFit: 'contain' }} />
+                    alt={label}
+                    style={{ width: 38, height: 38, objectFit: 'contain', display: 'block' }} />
                 </div>
                 <span className="text-center leading-tight font-bold" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '10px', letterSpacing: '0.02em', color: 'var(--ink)' }}>{label}</span>
               </button>
@@ -3937,6 +3983,9 @@ function EventsScreen({
       const key = norm(e.name) + '|' + (e.dates?.start?.localDate || '') + '|' + (e._embedded?.venues?.[0]?.name || '');
       if (usedKeys.has(key)) return false;
       usedKeys.add(key);
+      // Hide events with no photos — they look broken in the feed
+      const imgs = e.images ?? [];
+      if (imgs.length === 0) return false;
       return true;
     });
     return { deduped, showtimeCounts: seen };
@@ -4142,9 +4191,7 @@ function EventsScreen({
                   {count} showtimes
                 </div>
               )}
-              {(() => { const liked = isWishlisted(event.id); return (
-              <button style={{position:'absolute',top:8,right:8,zIndex:10,background: liked ? 'var(--brand)' : 'rgba(255,255,255,0.90)',border:'none',borderRadius:'50%',width:44,height:44,minHeight:0,color: liked ? 'white' : 'var(--brand)',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(0,0,0,0.15)'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:event.id,type:'event',name:event.name,category:'event'});}}><span className="material-symbols-outlined" style={{fontSize:'18px',fontVariationSettings: liked ? "'FILL' 1, 'wght' 700" : "'FILL' 0, 'wght' 400"}}>favorite</span></button>
-              ); })()}
+              <LikeButton id={event.id} type="event" name={event.name} category="event" />
             </div>
           );
         })}
@@ -4653,9 +4700,7 @@ function PlacesScreen({
                 tooFar={tooFarPlaceId === place.id}
                 onCheckIn={e => { e.stopPropagation(); onCheckIn(place.id); }}
                 />
-              {(() => { const liked = isWishlisted(place.id); return (
-              <button style={{position:'absolute',top:8,right:8,zIndex:10,background: liked ? 'var(--brand)' : 'rgba(255,255,255,0.90)',border:'none',borderRadius:'50%',width:44,height:44,minHeight:0,color: liked ? 'white' : 'var(--brand)',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(0,0,0,0.15)'}} onClick={(e)=>{e.stopPropagation();toggleWishlist({id:place.id,type:'place',name:place.name,category:place.category});}}><span className="material-symbols-outlined" style={{fontSize:'18px',fontVariationSettings: liked ? "'FILL' 1, 'wght' 700" : "'FILL' 0, 'wght' 400"}}>favorite</span></button>
-              ); })()}
+              <LikeButton id={place.id} type="place" name={place.name} category={place.category} />
             </div>
           ))}
         </div>
@@ -8124,12 +8169,14 @@ export default function App() {
     swipeStartY.current = e.touches[0].clientY;
     swipeLocked.current = false;
     // Ignore swipes that start inside horizontally-scrollable containers
-    // (filter chips, image sliders, horizontal card rows, etc.)
+    // (filter chips, image sliders, horizontal card rows, carousels, etc.)
     let el = e.target as HTMLElement | null;
     swipeIgnored.current = false;
     while (el && el !== e.currentTarget) {
       const style = window.getComputedStyle(el);
-      if (style.overflowX === 'auto' || style.overflowX === 'scroll' || el.classList.contains('overflow-x-auto')) {
+      if (style.overflowX === 'auto' || style.overflowX === 'scroll' || el.classList.contains('overflow-x-auto')
+          || el.getAttribute('data-swipe-ignore') === 'true'
+          || (el.scrollWidth > el.clientWidth + 2)) {
         swipeIgnored.current = true;
         break;
       }
@@ -8877,7 +8924,7 @@ export default function App() {
       <OfflineBanner />
       <div
         className="flex flex-col mx-auto relative"
-        style={{ width: '100%', maxWidth: '480px', minHeight: '100dvh', background: 'white', overflowX: 'hidden', boxShadow: '0 0 40px rgba(0,0,0,0.08)' }}
+        style={{ width: '100%', maxWidth: '480px', minHeight: '100dvh', background: 'white', overflowX: 'hidden', boxShadow: '0 0 40px rgba(0,0,0,0.08)', paddingTop: 'env(safe-area-inset-top, 0px)' } as React.CSSProperties}
       >
         {/* Header — Urban Curator: white + hard 2px border-bottom */}
         <header
@@ -8924,7 +8971,7 @@ export default function App() {
         <SiteBanner banner={siteBanner} />
 
         {/* Screen content */}
-        <main className="flex-1" style={{ paddingBottom: 'calc(var(--sab) + 80px)' }}
+        <main className="flex-1" style={{ paddingBottom: 'calc(var(--sab) + 90px)', touchAction: 'pan-y', overscrollBehaviorX: 'none' } as React.CSSProperties}
           onTouchStart={onMainTouchStart} onTouchMove={onMainTouchMove} onTouchEnd={onMainTouchEnd}>
           {activeTab === 'discover' && (
             <DiscoverScreen
@@ -9005,7 +9052,7 @@ export default function App() {
             transform: 'translateX(-50%)',
             width: '100%',
             maxWidth: '480px',
-            paddingBottom: 'calc(var(--sab) + 2px)',
+            paddingBottom: 'calc(var(--sab) + 8px)',
             padding: '0 3px',
             borderTop: '1px solid rgba(0,0,0,0.06)',
             background: '#faf8f5',
