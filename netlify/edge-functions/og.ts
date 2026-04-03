@@ -69,20 +69,28 @@ async function fetchPlaceOG(placeId: string): Promise<OGData | null> {
 }
 
 async function fetchEventOG(eventId: string): Promise<OGData | null> {
-  // Try both ID formats: raw->>id for Ticketmaster events, id for local events
+  // Try multiple ID formats to handle Ticketmaster, local, and static events
+  // Static events may have "local-" prefix while DB stores without it
+  const cleanId = eventId.replace(/^local-/, '');
   const queries = [
     `${SUPABASE_URL}/rest/v1/events?raw->>id=eq.${encodeURIComponent(eventId)}&select=raw&limit=1`,
     `${SUPABASE_URL}/rest/v1/events?id=eq.${encodeURIComponent(eventId)}&select=raw&limit=1`,
+    `${SUPABASE_URL}/rest/v1/events?raw->>id=eq.${encodeURIComponent(cleanId)}&select=raw&limit=1`,
+    `${SUPABASE_URL}/rest/v1/events?id=eq.${encodeURIComponent(cleanId)}&select=raw&limit=1`,
+    // Fuzzy: match events whose ID contains core keywords from the shared ID
+    `${SUPABASE_URL}/rest/v1/events?id=like.*${encodeURIComponent(cleanId.split('-').slice(0, 2).join('-'))}*&select=raw&limit=1`,
   ];
 
   let raw: Record<string, unknown> | null = null;
   for (const query of queries) {
-    const res = await fetch(query, {
-      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
-    });
-    if (!res.ok) continue;
-    const rows = await res.json();
-    if (rows?.length) { raw = rows[0].raw; break; }
+    try {
+      const res = await fetch(query, {
+        headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+      });
+      if (!res.ok) continue;
+      const rows = await res.json();
+      if (rows?.length) { raw = rows[0].raw; break; }
+    } catch { continue; }
   }
   if (!raw) return null;
 
@@ -104,11 +112,20 @@ async function fetchEventOG(eventId: string): Promise<OGData | null> {
   let image = FALLBACK_IMAGE;
   const images = raw?.images as Array<{ url?: string; ratio?: string; width?: number }> | undefined;
   if (images?.length) {
-    const wide = images.find(img => img.ratio === '16_9' && (img.width || 0) >= 640);
-    image = wide?.url || images[0]?.url || FALLBACK_IMAGE;
+    // Prefer event-specific images (dam/a/) over generic category placeholders (dam/c/)
+    const isCustom = (url: string) => !url.includes('/dam/c/');
+    const custom16x9 = images
+      .filter(img => img.ratio === '16_9' && (img.width || 0) >= 640 && img.url && isCustom(img.url))
+      .sort((a, b) => (b.width || 0) - (a.width || 0));
+    const any16x9 = images
+      .filter(img => img.ratio === '16_9' && (img.width || 0) >= 640)
+      .sort((a, b) => (b.width || 0) - (a.width || 0));
+    image = custom16x9[0]?.url || any16x9[0]?.url || images[0]?.url || FALLBACK_IMAGE;
   } else if (raw?.image) {
     // Local event: single image string
     image = raw.image as string;
+  } else if (raw?.additionalImages?.length) {
+    image = (raw.additionalImages as string[])[0];
   }
 
   const titleParts = [name];

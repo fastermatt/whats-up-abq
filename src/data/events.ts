@@ -4847,7 +4847,7 @@ export const ALL_EVENTS: Event[] = [
 
   // ─── Easter ABQ ─────────────────────────────────────────────────────────────
   {
-    id: 'local-easter-sunrise-2026',
+    id: 'easter-sunrise-abq-2026',
     title: "Easter Sunrise Service at UNM Stadium",
     date: '2026-04-05',
     time: '7:30 AM',

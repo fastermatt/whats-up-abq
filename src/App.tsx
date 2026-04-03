@@ -695,11 +695,11 @@ const PLACE_CATEGORIES = [
 
 // Vibe configs — shared between DiscoverScreen buttons and PlacesScreen pill filter
 const VIBE_CONFIGS = [
-  { icon: 'favorite', label: 'Date Night', gradient: 'linear-gradient(135deg, #C2634A, #D4896E)', vibeSearch: '', vibeCats: ['restaurant', 'bar', 'entertainment', 'arts'] },
-  { icon: 'directions_run', label: 'Active', gradient: 'linear-gradient(135deg, #C8963E, #E8A838)', vibeSearch: '', vibeCats: ['fitness', 'park'] },
-  { icon: 'self_improvement', label: 'Chill', gradient: 'linear-gradient(135deg, #6B8F71, #7A9E7E)', vibeSearch: '', vibeCats: ['coffee', 'wellness', 'park'] },
-  { icon: 'family_restroom', label: 'Family', gradient: 'linear-gradient(135deg, #5B7FA5, #7A9BC0)', vibeSearch: '', vibeCats: ['restaurant', 'entertainment', 'park', 'museum', 'coffee'] },
-  { icon: 'palette', label: 'Culture', gradient: 'linear-gradient(135deg, #8B6B8A, #A8899E)', vibeSearch: '', vibeCats: ['arts', 'museum', 'entertainment'] },
+  { icon: 'favorite', label: 'Date Night', gradient: 'linear-gradient(135deg, #C2634A, #D4896E)', borderColor: '#C2634A', animatedIcon: '/icons/vibes/date-night.gif', vibeSearch: '', vibeCats: ['restaurant', 'bar', 'entertainment', 'arts'] },
+  { icon: 'directions_run', label: 'Active', gradient: 'linear-gradient(135deg, #C8963E, #E8A838)', borderColor: '#C8963E', animatedIcon: '/icons/vibes/active.gif', vibeSearch: '', vibeCats: ['fitness', 'park'] },
+  { icon: 'self_improvement', label: 'Chill', gradient: 'linear-gradient(135deg, #6B8F71, #7A9E7E)', borderColor: '#6B8F71', animatedIcon: '/icons/vibes/chill.gif', vibeSearch: '', vibeCats: ['coffee', 'wellness', 'park'] },
+  { icon: 'family_restroom', label: 'Family', gradient: 'linear-gradient(135deg, #5B7FA5, #7A9BC0)', borderColor: '#5B7FA5', animatedIcon: '/icons/vibes/family.gif', vibeSearch: '', vibeCats: ['restaurant', 'entertainment', 'park', 'museum', 'coffee'] },
+  { icon: 'palette', label: 'Culture', gradient: 'linear-gradient(135deg, #8B6B8A, #A8899E)', borderColor: '#8B6B8A', animatedIcon: '/icons/vibes/culture.gif', vibeSearch: '', vibeCats: ['arts', 'museum', 'entertainment'] },
 ];
 
 // Category display name mapping (shows friendlier labels to users)
@@ -1434,7 +1434,18 @@ function PlaceDetailModal({
 
   // Merge: enriched data supplements (but doesn't erase) what's already on the place object
   // Falls back to place-level fields from static JSON (insiderTip, parkingInfo, about, etc.)
-  const displayHours   = (showEnriched ? enriched?.hours   : null) || place.hours   || null;
+  // Validate hours: reject scraped garbage that doesn't look like actual hours
+  const isValidHours = (h: string | undefined | null): boolean => {
+    if (!h) return false;
+    // Must contain at least one time pattern (digit followed by am/pm or colon)
+    if (!/\d{1,2}(:\d{2})?\s*(am|pm)/i.test(h) && !/\d{1,2}:\d{2}\s*[-–]\s*\d{1,2}:\d{2}/.test(h)) return false;
+    // Reject if it's obviously scraped navigation/menu text (too many pipes, too long)
+    if (h.length > 300) return false;
+    if ((h.match(/\|/g) || []).length > 10) return false;
+    return true;
+  };
+  const rawHours = (showEnriched ? enriched?.hours : null) || place.hours || null;
+  const displayHours = isValidHours(rawHours) ? rawHours : null;
   const displayPhone   = (showEnriched ? enriched?.phone   : null) || place.phone   || null;
   const displayWebsite = (showEnriched ? enriched?.website : null) || place.website || null;
   const displayParking = showEnriched ? (enriched?.parking || (place as any).parkingInfo || null) : null;
@@ -2824,7 +2835,7 @@ function DailyGem({ places, onSelect }: { places: Place[]; onSelect: (p: Place) 
 // ─── Featured Event Banner ───────────────────────────────────────────────────
 // Time-limited override: shows a specific event prominently on Discover.
 // After the expiry date, falls through to DailyGem automatically.
-const FEATURED_EVENT_ID = 'local-easter-sunrise-2026';
+const FEATURED_EVENT_ID = 'easter-sunrise-abq-2026';
 const FEATURED_EVENT_EXPIRY = '2026-04-06'; // Show through Sunday April 5
 
 function FeaturedEventBanner({ events, onSelect }: { events: TMEvent[]; onSelect: (e: TMEvent) => void }) {
@@ -3245,17 +3256,17 @@ function DiscoverScreen({
       {/* Featured Event (time-limited) — shows above Daily Gem when active */}
       <FeaturedEventBanner events={events} onSelect={onEventSelect} />
 
-      {/* Explore by Vibe — moved up for visibility */}
+      {/* Explore by Vibe — animated icons, evenly spaced */}
       {!hidden.includes('vibes') && <div className="mb-5 px-5">
         <p className="text-xs font-black uppercase flex items-center gap-2 mb-3" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}><FlatIcon name="zia" size={12} color="var(--brand)" /> Explore by Vibe</p>
-        <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-          {VIBE_CONFIGS.map(({ icon, label, gradient, vibeSearch, vibeCats }) => (
+        <div className="flex justify-between pb-1">
+          {VIBE_CONFIGS.map(({ label, gradient, borderColor, animatedIcon, vibeSearch, vibeCats }) => (
             <button key={label}
-              className="flex flex-col items-center gap-1.5 flex-shrink-0 transition-all active:scale-95"
-              style={{ background: 'none', border: 'none', width: '62px', padding: 0, cursor: 'pointer' }}
+              className="flex flex-col items-center gap-1.5 transition-all active:scale-95"
+              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', flex: '1 1 0', minWidth: 0 }}
               onClick={() => onNavigatePlaces?.(vibeCats.join('|'), vibeSearch, label, gradient)}>
-              <div style={{ width: 48, height: 48, borderRadius: 14, background: gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.12)', opacity: 0.85 }}>
-                <span className="material-symbols-outlined" style={{ fontSize: '22px', color: 'white', fontVariationSettings: "'FILL' 1, 'wght' 500" }}>{icon}</span>
+              <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'white', border: `2.5px solid ${borderColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', overflow: 'hidden' }}>
+                <img src={animatedIcon} alt={label} width={38} height={38} style={{ objectFit: 'contain' }} />
               </div>
               <span className="text-center leading-tight font-bold" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '10px', letterSpacing: '0.02em', color: 'var(--ink)' }}>{label}</span>
             </button>
@@ -7881,12 +7892,28 @@ export default function App() {
     swipeLocked.current = false;
   }, []);
 
+  // Prevent browser back/forward swipe when horizontal drag is detected
+  const onMainTouchMove = useCallback((e: React.TouchEvent) => {
+    if (swipeStartX.current === null || swipeStartY.current === null) return;
+    const dx = e.touches[0].clientX - swipeStartX.current;
+    const dy = e.touches[0].clientY - swipeStartY.current;
+    // Once we detect a clearly horizontal movement, prevent default to stop
+    // the browser from interpreting it as a back/forward navigation gesture
+    if (!swipeLocked.current && Math.abs(dx) > 15 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+      swipeLocked.current = true;
+    }
+    if (swipeLocked.current) {
+      e.preventDefault();
+    }
+  }, []);
+
   const onMainTouchEnd = useCallback((e: React.TouchEvent) => {
     if (swipeStartX.current === null || swipeStartY.current === null) return;
     const dx = e.changedTouches[0].clientX - swipeStartX.current;
     const dy = e.changedTouches[0].clientY - swipeStartY.current;
     swipeStartX.current = null;
     swipeStartY.current = null;
+    swipeLocked.current = false;
     // Only count horizontal swipes (dx > dy threshold), min 60px
     if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.7) return;
     const curIdx = TAB_ORDER.indexOf(activeTab);
@@ -8644,7 +8671,7 @@ export default function App() {
 
         {/* Screen content */}
         <main className="flex-1" style={{ paddingBottom: 'calc(var(--sab) + 80px)' }}
-          onTouchStart={onMainTouchStart} onTouchEnd={onMainTouchEnd}>
+          onTouchStart={onMainTouchStart} onTouchMove={onMainTouchMove} onTouchEnd={onMainTouchEnd}>
           {activeTab === 'discover' && (
             <DiscoverScreen
               places={places}
@@ -8660,7 +8687,7 @@ export default function App() {
               checkedIn={checkedIn}
               onCheckIn={handleCheckIn}
 
-              onNavigatePlaces={(cat, search, vibeLabel, vibeGradient) => { setPlacesNavCat(cat); setPlacesNavSearch(search); setPlacesNavVibe(vibeLabel ? `${vibeLabel}|||${vibeGradient || ''}` : ''); setPlacesNavKey(k => k + 1); setActiveTab('places'); }}
+              onNavigatePlaces={(cat, search, vibeLabel, vibeGradient) => { setPlacesNavCat(cat); setPlacesNavSearch(search); setPlacesNavVibe(vibeLabel ? `${vibeLabel}|||${vibeGradient || ''}` : ''); setPlacesNavKey(k => k + 1); setActiveTab('places'); window.scrollTo({ top: 0, behavior: 'instant' }); }}
               onNavigateEvents={() => setActiveTab('events')}
               prefs={prefs}/>
           )}
