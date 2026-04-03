@@ -1042,7 +1042,12 @@ function GeoBanner({
 
 // ─── Ken Burns Photo Slider (PlaceCard) ─────────────────────────────────────
 function PlaceCardImageSlider({ place }: { place: Place }) {
-  const allPhotos = [place.thumbnail || place.image, ...(place.additionalImages ?? [])].filter(Boolean) as string[];
+  const initialPhotos = [place.thumbnail || place.image, ...(place.additionalImages ?? [])].filter(Boolean) as string[];
+  const [brokenUrls, setBrokenUrls] = useState<Set<string>>(new Set());
+  const allPhotos = initialPhotos.filter(url => !brokenUrls.has(url));
+  const handleImgError = useCallback((url: string) => {
+    setBrokenUrls(prev => { const n = new Set(prev); n.add(url); return n; });
+  }, []);
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
   const touchStartX = useRef<number | null>(null);
@@ -1098,6 +1103,7 @@ function PlaceCardImageSlider({ place }: { place: Place }) {
             alt=""
             loading={i === 0 ? 'eager' : 'lazy'}
             decoding="async"
+            onError={() => handleImgError(src)}
             style={{
               width: '100%', height: '100%', objectFit: 'cover',
               animation: i === idx ? `kenBurns${i % 4} 8s ease-in-out forwards` : 'none',
@@ -1226,7 +1232,7 @@ function EventCardImageSlider({ event }: { event: TMEvent }) {
   const typeMeta = getEventTypeMeta(event);
   const category = getEventCategory(event);
 
-  const allPhotos = useMemo(() => {
+  const initialPhotos = useMemo(() => {
     const imgs = event.images ?? [];
     const nonFallback = imgs.filter(img => !img.fallback);
     const pool = nonFallback.length > 0 ? nonFallback : imgs;
@@ -1237,6 +1243,12 @@ function EventCardImageSlider({ event }: { event: TMEvent }) {
       .slice(0, 5)
       .map(img => hiResUrl(img.url));
   }, [event.images]);
+
+  const [brokenUrls, setBrokenUrls] = useState<Set<string>>(new Set());
+  const allPhotos = initialPhotos.filter(url => !brokenUrls.has(url));
+  const handleImgError = useCallback((url: string) => {
+    setBrokenUrls(prev => { const n = new Set(prev); n.add(url); return n; });
+  }, []);
 
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -1289,6 +1301,7 @@ function EventCardImageSlider({ event }: { event: TMEvent }) {
         <div key={src} className="absolute inset-0" style={{ opacity: i === idx ? 1 : 0, transition: 'opacity 0.65s ease', overflow: 'hidden' }}>
           <img
             src={src} alt="" loading={i === 0 ? 'eager' : 'lazy'} decoding="async"
+            onError={() => handleImgError(src)}
             style={{ width: '100%', height: '100%', objectFit: 'cover', animation: i === idx ? `kenBurns${i % 4} 8s ease-in-out forwards` : 'none', transformOrigin: 'center center', willChange: 'transform' }}
           />
         </div>
@@ -1363,7 +1376,12 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
 // ─── Place Detail Modal ──────────────────────────────────────────────────────
 
 function PlacePhotoGallery({ place }: { place: Place }) {
-  const allPhotos = [place.image, ...(place.additionalImages ?? [])].filter(Boolean) as string[];
+  const initialPhotos = [place.image, ...(place.additionalImages ?? [])].filter(Boolean) as string[];
+  const [brokenUrls, setBrokenUrls] = useState<Set<string>>(new Set());
+  const allPhotos = initialPhotos.filter(url => !brokenUrls.has(url));
+  const handleImgError = useCallback((url: string) => {
+    setBrokenUrls(prev => { const n = new Set(prev); n.add(url); return n; });
+  }, []);
   const [idx, setIdx] = useState(0);
   const touchStartX = useRef<number | null>(null);
 
@@ -1394,6 +1412,7 @@ function PlacePhotoGallery({ place }: { place: Place }) {
           className="absolute inset-0 w-full h-full object-cover"
           loading={i === 0 ? 'eager' : 'lazy'}
           decoding="async"
+          onError={() => handleImgError(src)}
           style={{
             opacity: i === idx ? 1 : 0,
             transition: 'opacity 0.35s ease',
@@ -3450,19 +3469,27 @@ function DiscoverScreen({
       {/* Explore by Vibe — staggered animated icons, evenly spaced */}
       {!hidden.includes('vibes') && (() => {
         const [activeVibeAnim, setActiveVibeAnim] = React.useState(-1);
+        // Track GIF cache-bust keys so each play is a fresh GIF loop
+        const [gifKeys, setGifKeys] = React.useState<Record<number, number>>({});
         React.useEffect(() => {
-          // Stagger: pick a random vibe icon every 4-7s, let it play its full GIF loop (~3s)
+          // Preload all GIFs on mount so they're in browser cache
+          VIBE_CONFIGS.forEach(({ animatedIcon }) => {
+            const img = new Image();
+            img.src = animatedIcon;
+          });
+        }, []);
+        React.useEffect(() => {
           let timeout: ReturnType<typeof setTimeout>;
           let resetTimeout: ReturnType<typeof setTimeout>;
           const animate = () => {
             const idx = Math.floor(Math.random() * VIBE_CONFIGS.length);
+            // Bump the GIF key to force a fresh GIF load (restarts animation from frame 1)
+            setGifKeys(prev => ({ ...prev, [idx]: (prev[idx] || 0) + 1 }));
             setActiveVibeAnim(idx);
-            // After 3s, go back to static (enough for one full GIF loop)
+            // After 3s, hide the GIF layer (one full GIF loop)
             resetTimeout = setTimeout(() => setActiveVibeAnim(-1), 3000);
-            // Schedule next animation 4-7s later
             timeout = setTimeout(animate, 4000 + Math.random() * 3000);
           };
-          // Start first animation after a short delay
           timeout = setTimeout(animate, 2000);
           return () => { clearTimeout(timeout); clearTimeout(resetTimeout); };
         }, []);
@@ -3470,20 +3497,37 @@ function DiscoverScreen({
         <div className="mb-5 px-5">
           <p className="text-xs font-black uppercase flex items-center gap-2 mb-3" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}><FlatIcon name="zia" size={12} color="var(--brand)" /> Explore by Vibe</p>
           <div className="flex justify-between pb-1">
-            {VIBE_CONFIGS.map(({ label, gradient, borderColor, animatedIcon, staticIcon, vibeSearch, vibeCats }, i) => (
+            {VIBE_CONFIGS.map(({ label, gradient, borderColor, animatedIcon, staticIcon, vibeSearch, vibeCats }, i) => {
+              const isAnimating = activeVibeAnim === i;
+              return (
               <button key={label}
                 className="flex flex-col items-center gap-1.5 transition-all active:scale-95"
                 style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', flex: '1 1 0', minWidth: 0 }}
                 onClick={() => { trackEvent('vibe_click', { vibe: label }); onNavigatePlaces?.(vibeCats.join('|'), vibeSearch, label, gradient); }}>
-                <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'white', border: `2.5px solid ${borderColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', overflow: 'hidden', flexShrink: 0 }}>
+                <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'white', border: `2.5px solid ${borderColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
+                  {/* Static PNG — always rendered as the base layer */}
                   <img
-                    src={activeVibeAnim === i ? animatedIcon : staticIcon}
+                    src={staticIcon}
                     alt={label}
-                    style={{ width: 38, height: 38, objectFit: 'contain', display: 'block' }} />
+                    style={{ width: 38, height: 38, objectFit: 'contain', display: 'block', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
+                  {/* Animated GIF — layered on top, shown via opacity when active */}
+                  {/* Key includes gifKeys counter to force a fresh GIF reload each play */}
+                  <img
+                    key={`gif-${i}-${gifKeys[i] || 0}`}
+                    src={isAnimating ? `${animatedIcon}?v=${gifKeys[i] || 0}` : undefined}
+                    alt=""
+                    style={{
+                      width: 38, height: 38, objectFit: 'contain', display: 'block',
+                      position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                      opacity: isAnimating ? 1 : 0,
+                      transition: 'opacity 0.15s ease',
+                      zIndex: 1,
+                    }} />
                 </div>
                 <span className="text-center leading-tight font-bold" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '10px', letterSpacing: '0.02em', color: 'var(--ink)' }}>{label}</span>
               </button>
-            ))}
+              );
+            })}
           </div>
         </div>);
       })()}
@@ -3983,9 +4027,11 @@ function EventsScreen({
       const key = norm(e.name) + '|' + (e.dates?.start?.localDate || '') + '|' + (e._embedded?.venues?.[0]?.name || '');
       if (usedKeys.has(key)) return false;
       usedKeys.add(key);
-      // Hide events with no photos — they look broken in the feed
+      // Hide events with no real photos — they look broken in the feed
+      // Only count non-fallback images with actual URLs
       const imgs = e.images ?? [];
-      if (imgs.length === 0) return false;
+      const realPhotos = imgs.filter(img => !img.fallback && img.url && img.url.length > 10);
+      if (realPhotos.length === 0) return false;
       return true;
     });
     return { deduped, showtimeCounts: seen };
