@@ -101,6 +101,38 @@ function TagPill({ label, active, onClick }: { label:string; active:boolean; onC
   return <button type="button" onClick={onClick} style={{ padding:'4px 10px', borderRadius:999, fontSize:12, cursor:'pointer', border:'1px solid '+(active?ACCENT:'#e5e7eb'), background:active?ACCENT:'#fff', color:active?'#fff':'#374151' }}>{label}</button>;
 }
 
+// ─── Admin Error Boundary ────────────────────────────────────────────────────
+class AdminErrorBoundary extends React.Component<
+  { children: React.ReactNode; section?: string },
+  { error: Error | null }
+> {
+  state = { error: null as Error | null };
+  static getDerivedStateFromError(e: Error) { return { error: e }; }
+  componentDidCatch(e: Error, info: React.ErrorInfo) {
+    console.error(`[Admin${this.props.section ? ` ${this.props.section}` : ''}] Error:`, e, info);
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div style={{ ...card, background: '#fef2f2', borderColor: '#fecaca', textAlign: 'center', padding: 40 }}>
+          <div style={{ fontSize: 36, marginBottom: 12 }}>⚠️</div>
+          <h3 style={{ fontSize: 16, fontWeight: 700, color: '#dc2626', marginBottom: 8 }}>Something went wrong</h3>
+          <p style={{ fontSize: 13, color: '#7f1d1d', marginBottom: 16, lineHeight: 1.5 }}>
+            {this.state.error.message}
+          </p>
+          <button
+            onClick={() => this.setState({ error: null })}
+            style={{ ...btnP, background: '#dc2626' }}
+          >
+            Try again
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // DASHBOARD
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2035,18 +2067,20 @@ export default function AdminPanel({ user, onBack }: { user: User|null; onBack: 
           </div>
         )}
         <div style={{maxWidth:1100,margin:'0 auto',padding:isMobile?'20px 16px':'32px 36px'}}>
-          {section==='dashboard'  && <DashboardSection onNav={setSection} />}
-          {section==='analytics'  && <AnalyticsSection />}
-          {section==='banners'    && <BannersSection />}
-          {section==='events'     && <EventsSection />}
-          {section==='places'     && <PlacesSection />}
-          {section==='categories' && <CategoriesSection />}
-          {section==='content'    && <ContentSection />}
-          {section==='reviews'    && <ReviewsSection />}
-          {section==='refresh'    && <RefreshSection />}
-          {section==='tagrules'   && <TagRulesSection />}
-          {section==='settings'   && <SettingsSection />}
-          {section==='theme'      && <ThemeSection />}
+          <AdminErrorBoundary section={section} key={section}>
+            {section==='dashboard'  && <DashboardSection onNav={setSection} />}
+            {section==='analytics'  && <AnalyticsSection />}
+            {section==='banners'    && <BannersSection />}
+            {section==='events'     && <EventsSection />}
+            {section==='places'     && <PlacesSection />}
+            {section==='categories' && <CategoriesSection />}
+            {section==='content'    && <ContentSection />}
+            {section==='reviews'    && <ReviewsSection />}
+            {section==='refresh'    && <RefreshSection />}
+            {section==='tagrules'   && <TagRulesSection />}
+            {section==='settings'   && <SettingsSection />}
+            {section==='theme'      && <ThemeSection />}
+          </AdminErrorBoundary>
         </div>
       </div>
     </div>
