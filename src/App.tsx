@@ -3969,7 +3969,7 @@ function DiscoverScreen({
   places, events, eventsLoading, onPlaceSelect, onEventSelect,
   coords, geoRequested, geoSilentPending, geoError, onRequestGeo,
   checkedIn, onCheckIn,
-  onNavigatePlaces, onNavigateEvents, prefs,
+  onNavigatePlaces, onNavigateEvents, prefs, adminHeroLines,
 }: {
   places: Place[];
   events: TMEvent[];
