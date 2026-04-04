@@ -2534,12 +2534,22 @@ interface ShareCardData {
   slug: string; // for download filename + analytics
 }
 
+interface CardAdjustments {
+  zoom: number;       // 0.5–2.0, default 1.0
+  darkness: number;   // 0.0–1.0, default 0.5 (maps to overlay strength)
+  offsetX: number;    // -0.5–0.5 as fraction of W, default 0
+  offsetY: number;    // -0.5–0.5 as fraction of H, default 0
+}
+
+const DEFAULT_ADJUSTMENTS: CardAdjustments = { zoom: 1, darkness: 0.5, offsetX: 0, offsetY: 0 };
+
 function drawShareCard(
   canvas: HTMLCanvasElement,
   data: ShareCardData,
   format: 'story' | 'square',
   photo: HTMLImageElement | null,
-  photoFit: 'cover' | 'contain'
+  photoFit: 'cover' | 'contain',
+  adj: CardAdjustments = DEFAULT_ADJUSTMENTS
 ): void {
   const W = 1080;
   const H = format === 'story' ? 1920 : 1080;
@@ -2548,63 +2558,63 @@ function drawShareCard(
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
+  const ox = adj.offsetX * W;
+  const oy = adj.offsetY * H;
+
   // ── Background ────────────────────────────────────────────────
   if (photo) {
     if (photoFit === 'contain') {
       // Cross-browser blur: scale down to tiny canvas then scale back up.
-      // ctx.filter is not supported on mobile Safari — this works everywhere.
-      const BLUR_SCALE = 24; // smaller = more blur
+      const BLUR_SCALE = 24;
       const tiny = document.createElement('canvas');
       tiny.width = Math.ceil(W / BLUR_SCALE);
       tiny.height = Math.ceil(H / BLUR_SCALE);
       const tinyCtx = tiny.getContext('2d')!;
-      const bgScale = Math.max(tiny.width / photo.naturalWidth, tiny.height / photo.naturalHeight);
-      tinyCtx.drawImage(
-        photo,
-        (tiny.width - photo.naturalWidth * bgScale) / 2,
-        (tiny.height - photo.naturalHeight * bgScale) / 2,
-        photo.naturalWidth * bgScale,
-        photo.naturalHeight * bgScale
-      );
-      // Scale the blurry tiny canvas back to full size — gives natural pixelated blur
+      const bgScale = Math.max(tiny.width / photo.naturalWidth, tiny.height / photo.naturalHeight) * adj.zoom;
+      tinyCtx.drawImage(photo,
+        (tiny.width - photo.naturalWidth * bgScale) / 2 + ox / BLUR_SCALE,
+        (tiny.height - photo.naturalHeight * bgScale) / 2 + oy / BLUR_SCALE,
+        photo.naturalWidth * bgScale, photo.naturalHeight * bgScale);
       ctx.drawImage(tiny, 0, 0, W, H);
-      // Extra darken over the blurred bg
       ctx.fillStyle = 'rgba(0,0,0,0.55)';
       ctx.fillRect(0, 0, W, H);
-      // Full photo contained, vertically centered in upper 2/3 so text area is clear
-      const fitScale = Math.min(W / photo.naturalWidth, H / photo.naturalHeight) * 0.88;
+      // Full photo contained, centered + user offset
+      const fitScale = Math.min(W / photo.naturalWidth, H / photo.naturalHeight) * 0.88 * adj.zoom;
       const fw = photo.naturalWidth * fitScale;
       const fh = photo.naturalHeight * fitScale;
-      ctx.drawImage(photo, (W - fw) / 2, (H - fh) / 2, fw, fh);
+      ctx.drawImage(photo, (W - fw) / 2 + ox, (H - fh) / 2 + oy, fw, fh);
     } else {
-      // Cover fill (crop)
-      const scale = Math.max(W / photo.naturalWidth, H / photo.naturalHeight);
-      ctx.drawImage(photo, (W - photo.naturalWidth * scale) / 2, (H - photo.naturalHeight * scale) / 2, photo.naturalWidth * scale, photo.naturalHeight * scale);
+      // Cover fill + user zoom/offset
+      const scale = Math.max(W / photo.naturalWidth, H / photo.naturalHeight) * adj.zoom;
+      ctx.drawImage(photo,
+        (W - photo.naturalWidth * scale) / 2 + ox,
+        (H - photo.naturalHeight * scale) / 2 + oy,
+        photo.naturalWidth * scale, photo.naturalHeight * scale);
     }
   } else {
     const bg = ctx.createLinearGradient(0, 0, W * 0.4, H);
-    bg.addColorStop(0, '#0d1b2a');
-    bg.addColorStop(0.5, '#1a3a5c');
-    bg.addColorStop(1, '#566500');
+    bg.addColorStop(0, '#0d1b2a'); bg.addColorStop(0.5, '#1a3a5c'); bg.addColorStop(1, '#566500');
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
   }
 
-  // ── Dark overlay ──────────────────────────────────────────────
+  // ── Dark overlay — driven by adj.darkness (0=light, 1=dark) ──
+  // darkness=0.5 matches the old hardcoded defaults
   const overlayStart = photo ? 0.25 : 0.4;
-  const overlayMidAlpha = photo ? 0.55 : 0.45;
-  const overlayStrength = photo ? 0.92 : 0.82;
+  const midAlpha  = photo ? (adj.darkness * 0.8)        : (0.2 + adj.darkness * 0.5);
+  const endAlpha  = photo ? (0.55 + adj.darkness * 0.45) : (0.5 + adj.darkness * 0.45);
   const bottomOverlay = ctx.createLinearGradient(0, H * overlayStart, 0, H);
   bottomOverlay.addColorStop(0, 'rgba(0,0,0,0)');
-  bottomOverlay.addColorStop(0.35, `rgba(0,0,0,${overlayMidAlpha})`);
-  bottomOverlay.addColorStop(1, `rgba(0,0,0,${overlayStrength})`);
+  bottomOverlay.addColorStop(0.35, `rgba(0,0,0,${midAlpha.toFixed(2)})`);
+  bottomOverlay.addColorStop(1,    `rgba(0,0,0,${endAlpha.toFixed(2)})`);
   ctx.fillStyle = bottomOverlay;
   ctx.fillRect(0, 0, W, H);
 
-  // Top vignette for badge legibility
+  // Top vignette
   if (photo) {
+    const topStrength = 0.3 + adj.darkness * 0.35;
     const topV = ctx.createLinearGradient(0, 0, 0, H * 0.22);
-    topV.addColorStop(0, 'rgba(0,0,0,0.6)');
+    topV.addColorStop(0, `rgba(0,0,0,${topStrength.toFixed(2)})`);
     topV.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = topV;
     ctx.fillRect(0, 0, W, H * 0.22);
@@ -2619,9 +2629,7 @@ function drawShareCard(
   const BADGE_Y = format === 'story' ? 160 : 72;
   const dotR = 16;
   ctx.fillStyle = '#d4ef4d';
-  ctx.beginPath();
-  ctx.arc(BADGE_X + dotR, BADGE_Y + dotR, dotR, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.beginPath(); ctx.arc(BADGE_X + dotR, BADGE_Y + dotR, dotR, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = '#ffffff';
   ctx.font = `900 ${format === 'story' ? 48 : 40}px "Public Sans", sans-serif`;
   ctx.textBaseline = 'top';
@@ -2631,14 +2639,11 @@ function drawShareCard(
   ctx.fillText('UNPLUGGED', BADGE_X + dotR * 2 + 12, BADGE_Y + (format === 'story' ? 50 : 43));
 
   // ── Content block (bottom-up) ─────────────────────────────────
-  const PAD = 72;
-  const CONTENT_W = W - PAD * 2;
-  const BOTTOM_PAD = 80;
+  const PAD = 72; const CONTENT_W = W - PAD * 2; const BOTTOM_PAD = 80;
   const tagFontSize = 28;
   ctx.font = `800 ${tagFontSize}px "Public Sans", sans-serif`;
   const tagText = data.category.toUpperCase();
-  const tagPadX = 28;
-  const tagH = 56;
+  const tagPadX = 28; const tagH = 56;
   const tagW = ctx.measureText(tagText).width + tagPadX * 2;
   const titleFontSize = format === 'story' ? 88 : 76;
   const titleLineH = titleFontSize * 1.15;
@@ -2649,22 +2654,16 @@ function drawShareCard(
 
   // Tag pill
   const tagY = contentTop;
-  ctx.fillStyle = '#566500';
-  ctx.beginPath();
+  ctx.fillStyle = '#566500'; ctx.beginPath();
   if ('roundRect' in ctx) {
     (ctx as CanvasRenderingContext2D & { roundRect: (x: number, y: number, w: number, h: number, r: number) => void }).roundRect(PAD, tagY, tagW, tagH, tagH / 2);
-  } else {
-    ctx.rect(PAD, tagY, tagW, tagH);
-  }
+  } else { ctx.rect(PAD, tagY, tagW, tagH); }
   ctx.fill();
-  ctx.fillStyle = '#d4ef4d';
-  ctx.font = `800 ${tagFontSize}px "Public Sans", sans-serif`;
-  ctx.textBaseline = 'middle';
-  ctx.fillText(tagText, PAD + tagPadX, tagY + tagH / 2);
+  ctx.fillStyle = '#d4ef4d'; ctx.font = `800 ${tagFontSize}px "Public Sans", sans-serif`;
+  ctx.textBaseline = 'middle'; ctx.fillText(tagText, PAD + tagPadX, tagY + tagH / 2);
 
   // Title
-  ctx.fillStyle = '#ffffff';
-  ctx.font = `900 ${titleFontSize}px "Public Sans", sans-serif`;
+  ctx.fillStyle = '#ffffff'; ctx.font = `900 ${titleFontSize}px "Public Sans", sans-serif`;
   ctx.textBaseline = 'top';
   const titleY = tagY + tagH + 24;
   const linesDrawn = wrapCanvasText(ctx, data.title, PAD, titleY, CONTENT_W, titleLineH, 2);
@@ -2673,14 +2672,9 @@ function drawShareCard(
   const metaY = titleY + linesDrawn * titleLineH + 24;
   data.metaLines.forEach((item, i) => {
     const y = metaY + i * metaLineH;
-    ctx.fillStyle = '#d4ef4d';
-    ctx.beginPath();
-    ctx.arc(PAD + 10, y + 17, 8, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,0.9)';
-    ctx.font = `400 34px "Public Sans", sans-serif`;
-    ctx.textBaseline = 'top';
-    ctx.fillText(item, PAD + 30, y);
+    ctx.fillStyle = '#d4ef4d'; ctx.beginPath(); ctx.arc(PAD + 10, y + 17, 8, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.font = `400 34px "Public Sans", sans-serif`;
+    ctx.textBaseline = 'top'; ctx.fillText(item, PAD + 30, y);
   });
 }
 
@@ -2692,29 +2686,77 @@ function ShareCardModal({ data, photoUrl, onClose, analyticsType }: {
   analyticsType: string;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const photoRef = useRef<HTMLImageElement | null>(null);
   const [format, setFormat] = useState<'story' | 'square'>('story');
   const [photoFit, setPhotoFit] = useState<'cover' | 'contain'>('cover');
+  const [adj, setAdj] = useState<CardAdjustments>(DEFAULT_ADJUSTMENTS);
   const [shareState, setShareState] = useState<'idle' | 'saved' | 'shared'>('idle');
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    if (photoUrl) {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => drawShareCard(canvas, data, format, img, photoFit);
-      img.onerror = () => drawShareCard(canvas, data, format, null, photoFit);
-      img.src = photoUrl;
-    } else {
-      drawShareCard(canvas, data, format, null, photoFit);
-    }
-  }, [data, format, photoFit, photoUrl]);
+  // Drag state (ref so it doesn't trigger re-renders mid-drag)
+  const dragRef = useRef<{ active: boolean; lastX: number; lastY: number }>({ active: false, lastX: 0, lastY: 0 });
 
   const W = 1080;
   const H = format === 'story' ? 1920 : 1080;
   const previewScale = format === 'story' ? 0.22 : 0.34;
   const previewW = Math.round(W * previewScale);
   const previewH = Math.round(H * previewScale);
+
+  // Redraw whenever any parameter changes
+  const redraw = useCallback((overrideAdj?: CardAdjustments) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    drawShareCard(canvas, data, format, photoRef.current, photoFit, overrideAdj ?? adj);
+  }, [data, format, photoFit, adj]);
+
+  // Load photo once, then redraw on every param change
+  useEffect(() => {
+    if (!photoUrl) { redraw(); return; }
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => { photoRef.current = img; redraw(); };
+    img.onerror = () => { photoRef.current = null; redraw(); };
+    img.src = photoUrl;
+  }, [photoUrl]); // only reload image when URL changes
+
+  useEffect(() => { redraw(); }, [redraw]);
+
+  // Drag handlers — reposition photo by dragging the preview
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!photoUrl) return;
+    dragRef.current = { active: true, lastX: e.clientX, lastY: e.clientY };
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragRef.current.active) return;
+    const dx = e.clientX - dragRef.current.lastX;
+    const dy = e.clientY - dragRef.current.lastY;
+    dragRef.current.lastX = e.clientX;
+    dragRef.current.lastY = e.clientY;
+    setAdj(prev => {
+      const next = {
+        ...prev,
+        offsetX: Math.max(-0.5, Math.min(0.5, prev.offsetX + dx / (W * previewScale))),
+        offsetY: Math.max(-0.5, Math.min(0.5, prev.offsetY + dy / (H * previewScale))),
+      };
+      // Redraw immediately with next value so it feels live
+      const canvas = canvasRef.current;
+      if (canvas) drawShareCard(canvas, data, format, photoRef.current, photoFit, next);
+      return next;
+    });
+  };
+  const onPointerUp = () => { dragRef.current.active = false; };
+
+  const updateAdj = (key: keyof CardAdjustments, value: number) =>
+    setAdj(prev => ({ ...prev, [key]: value }));
+
+  const sliderStyle: React.CSSProperties = {
+    width: '100%', height: 36, cursor: 'pointer', accentColor: '#d4ef4d',
+    WebkitAppearance: 'none', appearance: 'none', background: 'transparent',
+  };
+  const labelStyle: React.CSSProperties = {
+    color: 'rgba(255,255,255,0.5)', fontSize: 10, fontFamily: 'Public Sans, sans-serif',
+    fontWeight: 800, letterSpacing: '0.06em', whiteSpace: 'nowrap', minWidth: 24,
+  };
+
   const getBlob = (): Promise<Blob | null> => new Promise(res => canvasRef.current?.toBlob(res, 'image/png'));
 
   const handleDownload = async () => {
@@ -2722,13 +2764,11 @@ function ShareCardModal({ data, photoUrl, onClose, analyticsType }: {
     if (!blob) return;
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `${data.slug}-abq-unplugged.png`;
+    a.href = url; a.download = `${data.slug}-abq-unplugged.png`;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     trackEvent('instagram_card_download', { type: analyticsType, format });
-    setShareState('saved');
-    setTimeout(() => setShareState('idle'), 2000);
+    setShareState('saved'); setTimeout(() => setShareState('idle'), 2000);
   };
 
   const handleShare = async () => {
@@ -2739,36 +2779,31 @@ function ShareCardModal({ data, photoUrl, onClose, analyticsType }: {
       try {
         await navigator.share({ files: [file], title: data.title, text: `Check out ${data.title} — found on ABQ Unplugged!\nabqunplugged.com` });
         trackEvent('instagram_card_share', { type: analyticsType, format, method: 'web_share' });
-        setShareState('shared');
-        setTimeout(() => setShareState('idle'), 2000);
+        setShareState('shared'); setTimeout(() => setShareState('idle'), 2000);
       } catch { /* user cancelled */ }
-    } else {
-      handleDownload();
-    }
+    } else { handleDownload(); }
   };
 
   return (
     <div className="fixed inset-0 z-[200] flex flex-col" style={{ background: '#1a1a1a' }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4" style={{ paddingTop: 'max(16px, env(safe-area-inset-top, 16px))', paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.12)' }}>
+      <div className="flex items-center justify-between px-4" style={{ paddingTop: 'max(16px, env(safe-area-inset-top, 16px))', paddingBottom: 10, borderBottom: '1px solid rgba(255,255,255,0.12)' }}>
         <button onClick={onClose} className="flex items-center gap-1"
           style={{ color: 'rgba(255,255,255,0.7)', fontFamily: 'Public Sans, sans-serif', fontSize: 14, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0' }}>
           <span className="material-symbols-outlined" style={{ fontSize: 20 }}>arrow_back</span>
           Back
         </button>
         <span className="font-black text-white text-sm" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em' }}>CREATE CARD</span>
-        {/* Photo fit toggle — only show when there's a photo */}
         {photoUrl ? (
-          <button onClick={() => setPhotoFit(f => f === 'cover' ? 'contain' : 'cover')}
-            title={photoFit === 'cover' ? 'Switch to fit (show full image)' : 'Switch to fill (crop to frame)'}
-            style={{ background: 'rgba(255,255,255,0.1)', border: '1.5px solid rgba(255,255,255,0.2)', borderRadius: 6, color: '#d4ef4d', cursor: 'pointer', padding: '4px 8px', fontFamily: 'Public Sans, sans-serif', fontSize: 10, fontWeight: 800, letterSpacing: '0.06em' }}>
+          <button onClick={() => { setPhotoFit(f => f === 'cover' ? 'contain' : 'cover'); setAdj(DEFAULT_ADJUSTMENTS); }}
+            style={{ background: 'rgba(255,255,255,0.1)', border: '1.5px solid rgba(255,255,255,0.2)', borderRadius: 6, color: '#d4ef4d', cursor: 'pointer', padding: '4px 10px', fontFamily: 'Public Sans, sans-serif', fontSize: 10, fontWeight: 800, letterSpacing: '0.06em' }}>
             {photoFit === 'cover' ? 'FIT' : 'FILL'}
           </button>
         ) : <div style={{ width: 44 }} />}
       </div>
 
       {/* Format tabs */}
-      <div className="flex mx-4 mt-3 mb-3" style={{ border: '2px solid rgba(255,255,255,0.15)', borderRadius: 6, overflow: 'hidden' }}>
+      <div className="flex mx-4 mt-2 mb-2" style={{ border: '2px solid rgba(255,255,255,0.15)', borderRadius: 6, overflow: 'hidden' }}>
         {(['story', 'square'] as const).map(f => (
           <button key={f} onClick={() => setFormat(f)} className="flex-1 py-2 text-xs font-black"
             style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em', background: format === f ? '#d4ef4d' : 'transparent', color: format === f ? '#1a1a1a' : 'rgba(255,255,255,0.5)', border: 'none', cursor: 'pointer', transition: 'all 0.15s' }}>
@@ -2777,18 +2812,51 @@ function ShareCardModal({ data, photoUrl, onClose, analyticsType }: {
         ))}
       </div>
 
-      {/* Canvas preview */}
-      <div className="flex-1 flex items-center justify-center overflow-hidden px-4">
+      {/* Canvas preview — drag to reposition photo */}
+      <div className="flex-1 flex items-center justify-center overflow-hidden px-4"
+        style={{ touchAction: 'none', cursor: photoUrl ? 'grab' : 'default' }}
+        onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}>
         <canvas ref={canvasRef} width={W} height={H}
-          style={{ width: previewW, height: previewH, display: 'block', border: '2px solid rgba(255,255,255,0.15)', borderRadius: 4 }} />
+          style={{ width: previewW, height: previewH, display: 'block', border: '2px solid rgba(255,255,255,0.15)', borderRadius: 4, userSelect: 'none' }} />
       </div>
 
-      <p className="text-center text-xs mb-2" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'Public Sans, sans-serif' }}>
-        Save to camera roll, then share to Instagram Stories or your feed
-      </p>
+      {photoUrl && (
+        <p className="text-center" style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', fontFamily: 'Public Sans, sans-serif', margin: '2px 0' }}>
+          Drag to reposition photo
+        </p>
+      )}
+
+      {/* Adjustments */}
+      {photoUrl && (
+        <div className="px-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 6, paddingBottom: 4 }}>
+          {/* Zoom */}
+          <div className="flex items-center gap-2">
+            <span style={labelStyle}>ZOOM</span>
+            <input type="range" min={0.5} max={2} step={0.01} value={adj.zoom}
+              onChange={e => updateAdj('zoom', parseFloat(e.target.value))}
+              style={sliderStyle} />
+            <span style={{ ...labelStyle, minWidth: 32, textAlign: 'right' }}>{Math.round(adj.zoom * 100)}%</span>
+          </div>
+          {/* Darkness */}
+          <div className="flex items-center gap-2">
+            <span style={labelStyle}>DARK</span>
+            <input type="range" min={0} max={1} step={0.01} value={adj.darkness}
+              onChange={e => updateAdj('darkness', parseFloat(e.target.value))}
+              style={sliderStyle} />
+            <span style={{ ...labelStyle, minWidth: 32, textAlign: 'right' }}>{Math.round(adj.darkness * 100)}%</span>
+          </div>
+          {/* Reset */}
+          {(adj.zoom !== 1 || adj.darkness !== 0.5 || adj.offsetX !== 0 || adj.offsetY !== 0) && (
+            <button onClick={() => setAdj(DEFAULT_ADJUSTMENTS)}
+              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', fontFamily: 'Public Sans, sans-serif', fontSize: 10, cursor: 'pointer', padding: '2px 0', letterSpacing: '0.05em' }}>
+              ↺ Reset adjustments
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Actions */}
-      <div className="flex gap-3 px-4" style={{ paddingBottom: 'max(24px, env(safe-area-inset-bottom, 24px))', paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+      <div className="flex gap-3 px-4" style={{ paddingBottom: 'max(20px, env(safe-area-inset-bottom, 20px))', paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
         <button onClick={handleDownload} className="flex-1 flex items-center justify-center gap-2 py-3 font-black text-sm"
           style={{ border: '2px solid #d4ef4d', color: '#d4ef4d', background: 'transparent', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.05em', borderRadius: 6, cursor: 'pointer' }}>
           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>download</span>
