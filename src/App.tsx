@@ -109,8 +109,8 @@ const _fbGetAllDocs = async (table: string, orderCol?: string, orderAsc = true) 
   const { data } = await q;
   return { docs: (data || []).map((d: any) => ({ id: d.id, data: () => d })), empty: !data?.length, size: data?.length || 0 };
 };
-const _fbSetDoc = async (table: string, id: string, docData: any) => {
-  await (supabase.from as any)(table).upsert({ id, ...docData });
+const _fbSetDoc = async (table: string, id: string, docData: any, _opts?: any) => {
+  await (supabase.from as any)(table).upsert({ id, ...docData }, { onConflict: 'id', ignoreDuplicates: false });
 };
 const _fbSetConfigDoc = async (key: string, value: any) => {
   await (supabase.from as any)('config').upsert({ key, value });
@@ -635,17 +635,31 @@ async function syncCheckinsToFirestore(uid: string, checkIns: Set<string>, displ
   try {
     const count = checkIns.size;
     const streak = getStreak().count;
-    await _fbSetDoc('users', uid, {
-      checkIns: [...checkIns],
+
+    // First, fetch existing data so we never overwrite with fewer check-ins
+    const existing = await (supabase.from as any)('users').select('checkIns').eq('id', uid).single();
+    const existingCheckins: string[] = existing?.data?.checkIns || [];
+    const merged = new Set<string>([...existingCheckins, ...checkIns]);
+
+    // Only write if our merged set is >= existing (never shrink)
+    await (supabase.from as any)('users').upsert({
+      id: uid,
+      checkIns: [...merged],
       updatedAt: new Date().toISOString(),
-    });
-    // Update leaderboard entry (merge: true preserves other fields)
-    await _fbSetDoc('leaderboard', uid, {
+    }, { onConflict: 'id' });
+
+    // Update leaderboard — never decrease count below what's already stored
+    const existingLB = await (supabase.from as any)('leaderboard').select('count, streak').eq('id', uid).single();
+    const existingCount: number = existingLB?.data?.count || 0;
+    const existingStreak: number = existingLB?.data?.streak || 0;
+
+    await (supabase.from as any)('leaderboard').upsert({
+      id: uid,
       displayName: displayName || 'Anonymous',
-      count,
-      streak,
+      count: Math.max(merged.size, existingCount),
+      streak: Math.max(streak, existingStreak),
       updatedAt: new Date().toISOString(),
-    }, { merge: true });
+    }, { onConflict: 'id' });
   } catch (err) {
     console.error('Firestore sync error:', err);
   }
@@ -8889,7 +8903,7 @@ export default function App() {
       if (u) {
         // Load check-ins from Firestore on sign-in
         try {
-          const snap = await _fbGetDoc('profiles', u.id);
+          const snap = await _fbGetDoc('users', u.id);
           if (snap.exists()) {
             const data = snap.data();
             if (Array.isArray(data.checkIns) && data.checkIns.length > 0) {
