@@ -2551,13 +2551,27 @@ function drawShareCard(
   // ── Background ────────────────────────────────────────────────
   if (photo) {
     if (photoFit === 'contain') {
-      // Blurred cover fill as background layer
-      ctx.save();
-      ctx.filter = 'blur(28px) brightness(0.35)';
-      const bgScale = Math.max(W / photo.naturalWidth, H / photo.naturalHeight);
-      ctx.drawImage(photo, (W - photo.naturalWidth * bgScale) / 2, (H - photo.naturalHeight * bgScale) / 2, photo.naturalWidth * bgScale, photo.naturalHeight * bgScale);
-      ctx.restore();
-      // Full photo contained, centered (90% of canvas so text doesn't overlap)
+      // Cross-browser blur: scale down to tiny canvas then scale back up.
+      // ctx.filter is not supported on mobile Safari — this works everywhere.
+      const BLUR_SCALE = 24; // smaller = more blur
+      const tiny = document.createElement('canvas');
+      tiny.width = Math.ceil(W / BLUR_SCALE);
+      tiny.height = Math.ceil(H / BLUR_SCALE);
+      const tinyCtx = tiny.getContext('2d')!;
+      const bgScale = Math.max(tiny.width / photo.naturalWidth, tiny.height / photo.naturalHeight);
+      tinyCtx.drawImage(
+        photo,
+        (tiny.width - photo.naturalWidth * bgScale) / 2,
+        (tiny.height - photo.naturalHeight * bgScale) / 2,
+        photo.naturalWidth * bgScale,
+        photo.naturalHeight * bgScale
+      );
+      // Scale the blurry tiny canvas back to full size — gives natural pixelated blur
+      ctx.drawImage(tiny, 0, 0, W, H);
+      // Extra darken over the blurred bg
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      ctx.fillRect(0, 0, W, H);
+      // Full photo contained, vertically centered in upper 2/3 so text area is clear
       const fitScale = Math.min(W / photo.naturalWidth, H / photo.naturalHeight) * 0.88;
       const fw = photo.naturalWidth * fitScale;
       const fh = photo.naturalHeight * fitScale;
