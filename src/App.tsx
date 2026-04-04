@@ -60,7 +60,7 @@ function useTypewriter(text: string, startDelay = 400) {
 if (typeof document !== 'undefined' && !document.getElementById('card-fade-style')) {
   const s = document.createElement('style');
   s.id = 'card-fade-style';
-  s.textContent = '@keyframes cardFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes kenBurns0 { from { transform: scale(1.05) translate(0%,0%); } to { transform: scale(1.18) translate(-2%,-1%); } } @keyframes kenBurns1 { from { transform: scale(1.1) translate(-1%,1%); } to { transform: scale(1.2) translate(2%,-2%); } } @keyframes kenBurns2 { from { transform: scale(1.08) translate(1%,-1%); } to { transform: scale(1.18) translate(-1%,2%); } } @keyframes kenBurns3 { from { transform: scale(1.12) translate(-2%,0%); } to { transform: scale(1.05) translate(1%,-1%); } } @keyframes cursorBlink { 0%,100% { opacity:1; } 50% { opacity:0; } } @keyframes heartPop { 0% { transform: scale(1); } 15% { transform: scale(1.35); } 30% { transform: scale(0.9); } 45% { transform: scale(1.15); } 60% { transform: scale(0.97); } 75% { transform: scale(1.05); } 100% { transform: scale(1); } } @keyframes heartParticles { 0% { opacity: 1; transform: scale(0.5); } 50% { opacity: 0.8; } 100% { opacity: 0; transform: scale(2.5); } } .like-btn-pop { animation: heartPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; } .like-btn-particles::after { content: ""; position: absolute; inset: -8px; border-radius: 50%; background: radial-gradient(circle, var(--brand) 0%, transparent 70%); animation: heartParticles 0.5s ease-out forwards; pointer-events: none; z-index: -1; } .nav-press-btn:active { top: 4px !important; box-shadow: 0 1px 0 #0a0a0a, 0 0px 2px rgba(0,0,0,0.1) !important; } .haptic-switch { position:fixed; top:-9999px; left:-9999px; opacity:0; pointer-events:none; }';
+  s.textContent = '@keyframes cardFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes neighborhoodFloat { 0%,100%{transform:translateX(0px)} 30%{transform:translateX(-5px)} 70%{transform:translateX(5px)} } @keyframes ptrSweep { 0%{background-position:-200% center} 100%{background-position:200% center} } @keyframes ptrDots { 0%,80%,100%{transform:scale(0.6);opacity:0.3} 40%{transform:scale(1);opacity:1} } @keyframes kenBurns0 { from { transform: scale(1.05) translate(0%,0%); } to { transform: scale(1.18) translate(-2%,-1%); } } @keyframes kenBurns1 { from { transform: scale(1.1) translate(-1%,1%); } to { transform: scale(1.2) translate(2%,-2%); } } @keyframes kenBurns2 { from { transform: scale(1.08) translate(1%,-1%); } to { transform: scale(1.18) translate(-1%,2%); } } @keyframes kenBurns3 { from { transform: scale(1.12) translate(-2%,0%); } to { transform: scale(1.05) translate(1%,-1%); } } @keyframes cursorBlink { 0%,100% { opacity:1; } 50% { opacity:0; } } @keyframes heartPop { 0% { transform: scale(1); } 15% { transform: scale(1.35); } 30% { transform: scale(0.9); } 45% { transform: scale(1.15); } 60% { transform: scale(0.97); } 75% { transform: scale(1.05); } 100% { transform: scale(1); } } @keyframes heartParticles { 0% { opacity: 1; transform: scale(0.5); } 50% { opacity: 0.8; } 100% { opacity: 0; transform: scale(2.5); } } .like-btn-pop { animation: heartPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; } .like-btn-particles::after { content: ""; position: absolute; inset: -8px; border-radius: 50%; background: radial-gradient(circle, var(--brand) 0%, transparent 70%); animation: heartParticles 0.5s ease-out forwards; pointer-events: none; z-index: -1; } .nav-press-btn:active { top: 4px !important; box-shadow: 0 1px 0 #0a0a0a, 0 0px 2px rgba(0,0,0,0.1) !important; } .haptic-switch { position:fixed; top:-9999px; left:-9999px; opacity:0; pointer-events:none; }';
   document.head.appendChild(s);
 }
 
@@ -3728,7 +3728,7 @@ function DiscoverScreen({
           <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'var(--brand)', fontVariationSettings: "'FILL' 1" }}>location_city</span>
           Neighborhoods
         </p>
-        <div className="flex flex-wrap gap-2">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', animation: 'neighborhoodFloat 5s ease-in-out infinite' }}>
           {[
             { name: 'Old Town', icon: 'account_balance', accent: 'var(--brand)' },
             { name: 'Nob Hill', icon: 'local_cafe', accent: '#6B8F71' },
@@ -3738,18 +3738,19 @@ function DiscoverScreen({
             { name: 'South Valley', icon: 'storefront', accent: '#8B6B8A' },
           ].map(({ name, icon, accent }) => (
             <button key={name}
-              className="flex items-center gap-1.5 transition-all active:scale-95"
+              className="flex items-center justify-center gap-1.5 transition-all active:scale-95"
               style={{
-                padding: '7px 14px 7px 10px',
+                padding: '8px 10px',
                 borderRadius: 20,
                 border: '1.5px solid rgba(0,0,0,0.10)',
                 background: 'white',
                 cursor: 'pointer',
                 fontFamily: 'Public Sans, sans-serif',
+                width: '100%',
               }}
               onClick={() => onNavigatePlaces?.('All', name)}>
-              <span className="material-symbols-outlined" style={{ fontSize: '16px', color: accent, fontVariationSettings: "'FILL' 1, 'wght' 500" }}>{icon}</span>
-              <span className="font-bold" style={{ fontSize: '12px', color: 'var(--ink)', letterSpacing: '0.01em' }}>{name}</span>
+              <span className="material-symbols-outlined" style={{ fontSize: '15px', color: accent, fontVariationSettings: "'FILL' 1, 'wght' 500" }}>{icon}</span>
+              <span className="font-bold" style={{ fontSize: '11px', color: 'var(--ink)', letterSpacing: '0.01em' }}>{name}</span>
             </button>
           ))}
         </div>
@@ -5721,36 +5722,57 @@ function PullToRefresh() {
     <div
       style={{
         position: 'fixed',
-        top: 0,
+        top: 'env(safe-area-inset-top, 0px)',
         left: '50%',
         transform: 'translateX(-50%)',
         width: '100%',
         maxWidth: 480,
         display: 'flex',
-        justifyContent: 'center',
+        flexDirection: 'column',
+        justifyContent: 'flex-end',
         alignItems: 'center',
-        height: refreshing ? 56 : Math.max(pullY, 0),
+        height: refreshing ? 52 : Math.max(pullY, 0),
         background: 'var(--brand, #D4EF4D)',
         zIndex: 9999,
         transition: refreshing ? 'height 0.2s ease' : 'none',
         overflow: 'hidden',
+        paddingBottom: 10,
+        gap: 6,
       }}
     >
       {refreshing ? (
-        <span className="material-symbols-outlined" style={{ fontSize: 24, animation: 'spin 0.8s linear infinite', color: 'var(--ink)' }}>refresh</span>
+        <>
+          {/* Animated shimmer bar */}
+          <div style={{
+            width: '80px',
+            height: '3px',
+            borderRadius: 2,
+            background: 'linear-gradient(90deg, transparent 0%, var(--ink) 40%, var(--ink) 60%, transparent 100%)',
+            backgroundSize: '200% auto',
+            animation: 'ptrSweep 1s linear infinite',
+          }} />
+          {/* Animated dots */}
+          <div style={{ display: 'flex', gap: 4 }}>
+            {[0, 1, 2].map(i => (
+              <div key={i} style={{
+                width: 5,
+                height: 5,
+                borderRadius: '50%',
+                background: 'var(--ink)',
+                animation: `ptrDots 1.2s ease-in-out ${i * 0.15}s infinite`,
+              }} />
+            ))}
+          </div>
+        </>
       ) : (
-        <span
-          className="material-symbols-outlined"
-          style={{
-            fontSize: 24,
-            color: 'var(--ink)',
-            transform: `rotate(${ready ? 180 : progress * 160}deg)`,
-            transition: 'transform 0.15s ease',
-            opacity: progress,
-          }}
-        >
-          arrow_downward
-        </span>
+        <div style={{
+          width: `${progress * 60 + 12}px`,
+          height: 3,
+          borderRadius: 2,
+          background: 'var(--ink)',
+          opacity: Math.min(progress * 2, 1),
+          transition: 'width 0.1s ease',
+        }} />
       )}
     </div>
   );
@@ -9005,7 +9027,7 @@ export default function App() {
         <SiteBanner banner={siteBanner} />
 
         {/* Screen content */}
-        <main className="flex-1" style={{ paddingBottom: 'calc(var(--sab) + 90px)', touchAction: 'pan-y', overscrollBehaviorX: 'none' } as React.CSSProperties}
+        <main className="flex-1" style={{ paddingBottom: 'calc(var(--sab) + 110px)', touchAction: 'pan-y', overscrollBehaviorX: 'none' } as React.CSSProperties}
           onTouchStart={onMainTouchStart} onTouchMove={onMainTouchMove} onTouchEnd={onMainTouchEnd}>
           {activeTab === 'discover' && (
             <DiscoverScreen
@@ -9086,8 +9108,8 @@ export default function App() {
             transform: 'translateX(-50%)',
             width: '100%',
             maxWidth: '480px',
-            paddingBottom: 'calc(var(--sab) + 8px)',
             padding: '0 3px',
+            paddingBottom: 'calc(var(--sab) + 8px)',
             borderTop: '1px solid rgba(0,0,0,0.06)',
             background: '#faf8f5',
             zIndex: 40,
