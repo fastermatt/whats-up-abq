@@ -9727,7 +9727,7 @@ export default function App() {
           style={{
             position: 'sticky',
             top: 0,
-            paddingTop: 'calc(var(--sat) + 12px)',
+            paddingTop: '12px',
             paddingBottom: '12px',
             background: 'white',
             borderBottom: '1px solid rgba(0,0,0,0.08)',
