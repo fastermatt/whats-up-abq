@@ -1352,138 +1352,162 @@ function AnalyticsSection() {
   const [range, setRange]       = useState<'7d'|'30d'|'90d'>('7d');
   const [loading, setLoading]   = useState(true);
   const [totals,  setTotals]    = useState({} as Record<string,number>);
-  const [topEvents, setTopEvents] = useState<{name:string;count:number}[]>([]);
-  const [topPlaces, setTopPlaces] = useState<{name:string;count:number}[]>([]);
+  const [topEvents, setTopEvents] = useState<{id:string;name:string;count:number}[]>([]);
+  const [topPlaces, setTopPlaces] = useState<{id:string;name:string;count:number}[]>([]);
   const [topSearches,setTopSearches]=useState<{query:string;count:number}[]>([]);
   const [topDirections, setTopDirections] = useState<{name:string;count:number}[]>([]);
   const [deviceBreakdown,setDeviceBreakdown]=useState<{device:string;count:number}[]>([]);
   const [dailyActive,setDailyActive]=useState<{day:string;sessions:number}[]>([]);
   const [sectionEngagement,setSectionEngagement]=useState<{tab:string;count:number}[]>([]);
-  const [recentErrors, setRecentErrors] = useState<any[]>([]);
-  const [errorGrouped, setErrorGrouped] = useState({} as Record<string,{count:number;lastSeen:string;ids:string[]}>);
-  const [topPages, setTopPages] = useState<{path:string;count:number}[]>([]);
+  const [errorGrouped, setErrorGrouped] = useState({} as Record<string,{count:number;lastSeen:string;ids:string[];source?:string;line?:number;stack?:string;url?:string}>);
   const [shareClicks, setShareClicks] = useState(0);
   const [getDirectionsClicks, setGetDirectionsClicks] = useState(0);
-
+  const [topReferrers, setTopReferrers] = useState<{source:string;count:number}[]>([]);
+  const [dismissedErrors, setDismissedErrors] = useState<string[]>([]);
   const days = range==='7d'?7:range==='30d'?30:90;
-
   useEffect(() => {
     const since = new Date(Date.now()-days*86400000).toISOString();
     async function load() {
       setLoading(true);
+      setDismissedErrors([]);
       try {
-      const { data: allRows } = await sb('analytics').select('event_type,session_id,data,device,created_at').gte('created_at',since);
-      const rows = allRows || [];
-
-      // Totals by event_type
-      const typeCount: Record<string,number> = {};
-      for (const r of rows) typeCount[r.event_type] = (typeCount[r.event_type]||0)+1;
-
-      // Unique sessions
-      const uniqueSessions = new Set(rows.filter(r=>r.session_id).map((r:any)=>r.session_id)).size;
-      typeCount['_unique_sessions'] = uniqueSessions;
-
-      // Bounce rate (sessions with only 1 event)
-      const sessionEventCount: Record<string,number> = {};
-      rows.forEach((r:any)=>{
-        if(r.session_id) sessionEventCount[r.session_id] = (sessionEventCount[r.session_id]||0)+1;
-      });
-      const bounceCount = Object.values(sessionEventCount).filter(c=>c===1).length;
-      typeCount['_bounce_rate'] = uniqueSessions > 0 ? Math.round((bounceCount/uniqueSessions)*100) : 0;
-
-      // Top events
-      const evCounts: Record<string,number> = {};
-      rows.filter(r=>r.event_type==='event_click').forEach((r:any)=>{ const n=r.data?.name||r.data?.event_id||'Unknown'; evCounts[n]=(evCounts[n]||0)+1; });
-      setTopEvents(Object.entries(evCounts).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([name,count])=>({name,count})));
-
-      // Top places
-      const plCounts: Record<string,number> = {};
-      rows.filter(r=>r.event_type==='place_click').forEach((r:any)=>{ const n=r.data?.name||r.data?.place_id||'Unknown'; plCounts[n]=(plCounts[n]||0)+1; });
-      setTopPlaces(Object.entries(plCounts).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([name,count])=>({name,count})));
-
-      // Top searches
-      const qCounts: Record<string,number> = {};
-      rows.filter(r=>r.event_type==='search').forEach((r:any)=>{ const q=(r.data?.query||'').toLowerCase().trim(); if(q) qCounts[q]=(qCounts[q]||0)+1; });
-      setTopSearches(Object.entries(qCounts).sort((a,b)=>b[1]-a[1]).slice(0,15).map(([query,count])=>({query,count})));
-
-      // Get Directions clicks
-      const dirCount = rows.filter(r=>r.event_type==='directions_click').length;
-      setGetDirectionsClicks(dirCount);
-      const topDirs: Record<string,number> = {};
-      rows.filter(r=>r.event_type==='directions_click').forEach((r:any)=>{ const n=r.data?.name||'Unknown'; topDirs[n]=(topDirs[n]||0)+1; });
-      setTopDirections(Object.entries(topDirs).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([name,count])=>({name,count})));
-
-      // Share clicks
-      const shareCount = rows.filter(r=>r.event_type==='share').length;
-      setShareClicks(shareCount);
-
-      // Device breakdown
-      const devCounts: Record<string,number> = {};
-      rows.forEach((r:any)=>{ const d=r.device||'unknown'; devCounts[d]=(devCounts[d]||0)+1; });
-      setDeviceBreakdown(Object.entries(devCounts).map(([device,count])=>({device,count})).sort((a,b)=>b.count-a.count));
-
-      // Section engagement (pageview tab clicks)
-      const tabCounts: Record<string,number> = {};
-      rows.filter(r=>r.event_type==='pageview').forEach((r:any)=>{ const t=r.data?.tab||'unknown'; tabCounts[t]=(tabCounts[t]||0)+1; });
-      setSectionEngagement(Object.entries(tabCounts).map(([tab,count])=>({tab,count})).sort((a,b)=>b.count-a.count));
-
-      // Daily active sessions (unique sessions per day)
-      const daySessions: Record<string,Set<string>> = {};
-      rows.filter(r=>r.session_id).forEach((r:any)=>{ const day=r.created_at.split('T')[0]; if(!daySessions[day]) daySessions[day]=new Set(); daySessions[day].add(r.session_id); });
-      setDailyActive(Object.entries(daySessions).sort((a,b)=>a[0].localeCompare(b[0])).map(([day,s])=>({day,sessions:s.size})));
-
-      // Top pages (most viewed paths from pageview events)
-      const pageCounts: Record<string,number> = {};
-      rows.filter(r=>r.event_type==='pageview').forEach((r:any)=>{
-        const path = r.data?.path || r.data?.tab || 'unknown';
-        pageCounts[path]=(pageCounts[path]||0)+1;
-      });
-      setTopPages(Object.entries(pageCounts).sort((a,b)=>b[1]-a[1]).slice(0,15).map(([path,count])=>({path,count})));
-
-      // Recent errors - grouped by message
-      const errors = rows.filter(r=>r.event_type==='client_error').sort((a:any,b:any)=>b.created_at.localeCompare(a.created_at)).slice(0,50);
-      setRecentErrors(errors);
-      
-      const errorsByMsg: Record<string,{count:number;lastSeen:string;ids:string[]}> = {};
-      errors.forEach((err:any,i:number)=>{
-        const msg = err.data?.message?.slice(0,100) || 'Unknown error';
-        if(!errorsByMsg[msg]) errorsByMsg[msg] = {count:0, lastSeen: err.created_at, ids:[]};
-        errorsByMsg[msg].count++;
-        if(i === 0) errorsByMsg[msg].lastSeen = err.created_at;
-        if(errorsByMsg[msg].ids.length < 3) errorsByMsg[msg].ids.push(err.id);
-      });
-      setErrorGrouped(errorsByMsg);
-
-      setTotals({...typeCount});
-      } catch(e:any) {
-        console.error('Analytics load error:', e);
-      } finally {
-        setLoading(false);
-      }
+        const { data: allRows } = await sb('analytics').select('event_type,session_id,data,device,created_at').gte('created_at',since);
+        const rows = allRows || [];
+        const typeCount: Record<string,number> = {};
+        for (const r of rows) typeCount[r.event_type] = (typeCount[r.event_type]||0)+1;
+        const uniqueSessions = new Set(rows.filter((r:any)=>r.session_id).map((r:any)=>r.session_id)).size;
+        typeCount['_unique_sessions'] = uniqueSessions;
+        const sessionEventCount: Record<string,number> = {};
+        rows.forEach((r:any)=>{ if(r.session_id) sessionEventCount[r.session_id] = (sessionEventCount[r.session_id]||0)+1; });
+        const bounceCount = Object.values(sessionEventCount).filter(c=>c===1).length;
+        typeCount['_bounce_rate'] = uniqueSessions > 0 ? Math.round((bounceCount/uniqueSessions)*100) : 0;
+        // Top events — resolve IDs to real names via Supabase lookup
+        const evIdToCount: Record<string,number> = {};
+        const evIdToName: Record<string,string> = {};
+        rows.filter((r:any)=>r.event_type==='event_click').forEach((r:any)=>{
+          const id = r.data?.event_id || r.data?.id || '';
+          const name = r.data?.name || '';
+          const key = id || name || 'Unknown';
+          evIdToCount[key] = (evIdToCount[key]||0)+1;
+          if (id && name) evIdToName[id] = name;
+        });
+        const unresolvedEvIds = Object.keys(evIdToCount).filter(k => !evIdToName[k] && /^[0-9a-zA-Z_-]{8,}$/.test(k));
+        if (unresolvedEvIds.length > 0) {
+          const { data: evRows } = await sb('events').select('id, raw').in('id', unresolvedEvIds.slice(0,50));
+          if (evRows) evRows.forEach((e:any) => { evIdToName[e.id] = e.raw?.name || e.raw?.title || e.id; });
+        }
+        setTopEvents(Object.entries(evIdToCount).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([id,count])=>({id, name: evIdToName[id]||id, count})));
+        // Top places — resolve IDs to real names
+        const plIdToCount: Record<string,number> = {};
+        const plIdToName: Record<string,string> = {};
+        rows.filter((r:any)=>r.event_type==='place_click').forEach((r:any)=>{
+          const id = r.data?.place_id || r.data?.id || '';
+          const name = r.data?.name || '';
+          const key = id || name || 'Unknown';
+          plIdToCount[key] = (plIdToCount[key]||0)+1;
+          if (id && name) plIdToName[id] = name;
+        });
+        const unresolvedPlIds = Object.keys(plIdToCount).filter(k => !plIdToName[k] && /^[A-Za-z0-9_-]{10,}$/.test(k));
+        if (unresolvedPlIds.length > 0) {
+          const { data: plRows } = await sb('places').select('id, raw').in('id', unresolvedPlIds.slice(0,50));
+          if (plRows) plRows.forEach((p:any) => { plIdToName[p.id] = p.raw?.name || p.raw?.formatted_address || p.id; });
+        }
+        setTopPlaces(Object.entries(plIdToCount).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([id,count])=>({id, name: plIdToName[id]||id, count})));
+        // Top searches
+        const qCounts: Record<string,number> = {};
+        rows.filter((r:any)=>r.event_type==='search').forEach((r:any)=>{ const q=(r.data?.query||'').toLowerCase().trim(); if(q) qCounts[q]=(qCounts[q]||0)+1; });
+        setTopSearches(Object.entries(qCounts).sort((a,b)=>b[1]-a[1]).slice(0,15).map(([query,count])=>({query,count})));
+        // Directions
+        const dirCount = rows.filter((r:any)=>r.event_type==='directions_click').length;
+        setGetDirectionsClicks(dirCount);
+        const topDirs: Record<string,number> = {};
+        rows.filter((r:any)=>r.event_type==='directions_click').forEach((r:any)=>{ const n=r.data?.name||'Unknown'; topDirs[n]=(topDirs[n]||0)+1; });
+        setTopDirections(Object.entries(topDirs).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([name,count])=>({name,count})));
+        setShareClicks(rows.filter((r:any)=>r.event_type==='share').length);
+        // Device breakdown
+        const devCounts: Record<string,number> = {};
+        rows.forEach((r:any)=>{ const d=r.device||'unknown'; devCounts[d]=(devCounts[d]||0)+1; });
+        setDeviceBreakdown(Object.entries(devCounts).map(([device,count])=>({device,count})).sort((a,b)=>b.count-a.count));
+        // Tab engagement
+        const tabCounts: Record<string,number> = {};
+        rows.filter((r:any)=>r.event_type==='pageview').forEach((r:any)=>{ const t=r.data?.tab||'unknown'; tabCounts[t]=(tabCounts[t]||0)+1; });
+        setSectionEngagement(Object.entries(tabCounts).map(([tab,count])=>({tab,count})).sort((a,b)=>b.count-a.count));
+        // Daily active sessions
+        const daySessions: Record<string,Set<string>> = {};
+        rows.filter((r:any)=>r.session_id).forEach((r:any)=>{ const day=r.created_at.split('T')[0]; if(!daySessions[day]) daySessions[day]=new Set(); daySessions[day].add(r.session_id); });
+        setDailyActive(Object.entries(daySessions).sort((a,b)=>a[0].localeCompare(b[0])).map(([day,s])=>({day,sessions:s.size})));
+        // Traffic sources from referrer
+        const refCounts: Record<string,number> = {};
+        rows.forEach((r:any)=>{
+          let src = r.data?.referrer || r.data?.utm_source || '';
+          if (!src || src === 'null') src = 'Direct';
+          else if (src.includes('google')) src = 'Google';
+          else if (src.includes('facebook') || src.includes('fb.')) src = 'Facebook';
+          else if (src.includes('instagram')) src = 'Instagram';
+          else if (src.includes('twitter') || src.includes('x.com')) src = 'Twitter / X';
+          else { try { src = new URL(src).hostname.replace('www.',''); } catch { src = src.slice(0,40); } }
+          refCounts[src] = (refCounts[src]||0)+1;
+        });
+        setTopReferrers(Object.entries(refCounts).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([source,count])=>({source,count})));
+        // Grouped errors
+        const errors = rows.filter((r:any)=>r.event_type==='client_error').sort((a:any,b:any)=>b.created_at.localeCompare(a.created_at)).slice(0,100);
+        const errorsByMsg: Record<string,{count:number;lastSeen:string;ids:string[];source?:string;line?:number;stack?:string;url?:string}> = {};
+        errors.forEach((err:any)=>{
+          const msg = err.data?.message?.slice(0,120) || 'Unknown error';
+          if(!errorsByMsg[msg]) errorsByMsg[msg] = {count:0, lastSeen: err.created_at, ids:[], source: err.data?.source, line: err.data?.line, stack: err.data?.stack, url: err.data?.url};
+          errorsByMsg[msg].count++;
+          if(errorsByMsg[msg].ids.length < 5) errorsByMsg[msg].ids.push(err.id);
+        });
+        setErrorGrouped(errorsByMsg);
+        setTotals({...typeCount, _error_count: errors.length});
+      } catch(e:any) { console.error('Analytics load error:', e); }
+      finally { setLoading(false); }
     }
     load();
   }, [range]);
-
+  const dismissError = (msg: string) => setDismissedErrors(d=>[...d, msg]);
+  const clearErrorType = async (msg: string, ids: string[]) => {
+    try {
+      await sb('analytics').delete().in('id', ids);
+      setDismissedErrors(d=>[...d, msg]);
+      toast(`Cleared ${ids.length} error record${ids.length!==1?'s':''}`, 'info');
+    } catch(e:any) { toast('Delete failed: '+e.message, 'err'); }
+  };
+  const copyErrorDetails = (msg: string, info: {source?:string;line?:number;stack?:string;url?:string;count:number}) => {
+    const txt = `Error: ${msg}\nFile: ${info.source||'unknown'}:${info.line||'?'}\nURL: ${info.url||'?'}\nOccurrences: ${info.count}\n\nStack:\n${info.stack||'(none)'}`;
+    navigator.clipboard.writeText(txt).then(()=>toast('Copied to clipboard','info')).catch(()=>toast('Copy failed','err'));
+  };
+  const activeErrors = Object.entries(errorGrouped).filter(([msg])=>!dismissedErrors.includes(msg));
+  const totalErrors = activeErrors.reduce((sum,[,v])=>sum+v.count,0);
   const maxDA = Math.max(...dailyActive.map(d=>d.sessions),1);
   const maxSE = Math.max(...sectionEngagement.map(d=>d.count),1);
   const maxTP = Math.max(...topPlaces.map(d=>d.count),1);
   const maxTE = Math.max(...topEvents.map(d=>d.count),1);
-
-  const statCard = (label:string,val:number,icon:string,color:string,subtitle?:string) => (
+  const maxRef = Math.max(...topReferrers.map(d=>d.count),1);
+  const statCard = (label:string,val:number|string,icon:string,color:string,subtitle?:string) => (
     <div style={{...card,padding:'18px 20px'}}>
       <div style={{fontSize:22,marginBottom:6}}>{icon}</div>
-      <div style={{fontSize:26,fontWeight:800,color,letterSpacing:'-0.5px'}}>{val.toLocaleString()}</div>
+      <div style={{fontSize:26,fontWeight:800,color,letterSpacing:'-0.5px'}}>{typeof val==='number'?val.toLocaleString():val}</div>
       <div style={{fontSize:12,color:'#9ca3af',fontWeight:600,marginTop:3}}>{label}</div>
       {subtitle && <div style={{fontSize:11,color:'#d1d5db',marginTop:2}}>{subtitle}</div>}
     </div>
   );
-
-  const clearErrors = () => {
-    if(!confirm('Delete all error logs for this period?')) return;
-    // In a real app, this would call a backend endpoint to delete
-    toast('Error logs would be cleared here (requires backend endpoint)','info');
+  // SVG line chart
+  const LineChart = ({data}:{data:{day:string;sessions:number}[]}) => {
+    if(!data.length) return <p style={{color:'#9ca3af',fontSize:13}}>No data yet.</p>;
+    const W=320,H=80,PAD=4;
+    const pts = data.map((d,i)=>({ x: PAD+(i/(Math.max(data.length-1,1)))*(W-PAD*2), y: H-PAD-((d.sessions/maxDA)*(H-PAD*2)) }));
+    const pathD = pts.map((p,i)=>`${i===0?'M':'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+    const fillD = [...pts.map((p,i)=>`${i===0?'M':'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`),`L${(W-PAD).toFixed(1)},${H} L${PAD},${H} Z`].join(' ');
+    return (
+      <svg viewBox={`0 0 ${W} ${H}`} style={{width:'100%',height:80,overflow:'visible'}}>
+        <defs><linearGradient id="lgr" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={ACCENT} stopOpacity="0.3"/><stop offset="100%" stopColor={ACCENT} stopOpacity="0.03"/></linearGradient></defs>
+        <path d={fillD} fill="url(#lgr)" />
+        <path d={pathD} fill="none" stroke={ACCENT} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        {pts.map((p,i)=>(<g key={i}><circle cx={p.x} cy={p.y} r="3" fill={ACCENT}/><title>{data[i].day}: {data[i].sessions} sessions</title></g>))}
+      </svg>
+    );
   };
-
   return (
     <div>
       <SectionHeader title="Analytics" sub={`User behavior — last ${days} days`} action={
@@ -1491,199 +1515,176 @@ function AnalyticsSection() {
           {(['7d','30d','90d'] as const).map(r=><button key={r} onClick={()=>setRange(r)} style={{padding:'6px 14px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:range===r?700:400,background:range===r?ACCENT:'#f3f4f6',color:range===r?'#fff':'#374151'}}>{r}</button>)}
         </div>
       } />
-
       {loading ? <p style={{textAlign:'center',color:'#9ca3af',padding:48}}>Loading analytics…</p> : (
         <>
           {/* Stat cards */}
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(min(100%,150px),1fr))',gap:12,marginBottom:24}}>
-            {statCard('Unique Sessions',   totals._unique_sessions||0, '👤','#8B3A0F')}
-            {statCard('Page Views',        totals.pageview||0,         '📄','#1d4ed8')}
-            {statCard('Event Clicks',      totals.event_click||0,      '🎫','#059669')}
-            {statCard('Place Clicks',      totals.place_click||0,      '📍','#7c3aed')}
-            {statCard('Searches',          totals.search||0,           '🔍','#b45309')}
-            {statCard('Get Directions',    getDirectionsClicks||0,     '🗺️','#0891b2')}
-            {statCard('Share Clicks',      shareClicks||0,             '🔗','#9333ea')}
-            {statCard('Check-ins',         totals.checkin||0,          '✅','#fb923c')}
-            {statCard('Bounce Rate',       totals._bounce_rate||0,     '📊','#dc2626','% of sessions')}
-            {statCard('Errors',            totals.client_error||0,     '⚠️','#ea580c')}
-            {statCard('A2HS Shown',        totals.a2hs_shown||0,       '📲','#6366f1')}
-            {statCard('A2HS Accepted',     totals.a2hs_accepted||0,    '🏠','#10b981')}
+            {statCard('Unique Sessions',totals._unique_sessions||0,'👤','#8B3A0F')}
+            {statCard('Page Views',totals.pageview||0,'📄','#1d4ed8')}
+            {statCard('Event Clicks',totals.event_click||0,'🎫','#059669')}
+            {statCard('Place Clicks',totals.place_click||0,'📍','#7c3aed')}
+            {statCard('Searches',totals.search||0,'🔍','#b45309')}
+            {statCard('Get Directions',getDirectionsClicks||0,'🗺️','#0891b2')}
+            {statCard('Share Clicks',shareClicks||0,'🔗','#9333ea')}
+            {statCard('Check-ins',totals.checkin||0,'✅','#fb923c')}
+            {statCard('Bounce Rate',`${totals._bounce_rate||0}%`,'📊','#dc2626','% single-event sessions')}
+            {statCard('JS Errors',totalErrors,'⚠️','#ea580c',`${activeErrors.length} unique type${activeErrors.length!==1?'s':''}`)}
+            {statCard('A2HS Shown',totals.a2hs_shown||0,'📲','#6366f1')}
+            {statCard('A2HS Accepted',totals.a2hs_accepted||0,'🏠','#10b981')}
           </div>
-
-          {/* A2HS conversion */}
           {(totals.a2hs_shown||0)>0 && (
             <div style={{...card,marginBottom:20,background:'#f0fdf4',borderColor:'#bbf7d0'}}>
-              <span style={{fontSize:13,fontWeight:700,color:'#14532d'}}>📲 Add to Home Screen conversion: </span>
-              <span style={{fontSize:16,fontWeight:800,color:'#059669'}}>
-                {Math.round(((totals.a2hs_accepted||0)/(totals.a2hs_shown||1))*100)}%
-              </span>
-              <span style={{fontSize:13,color:'#6b7280',marginLeft:8}}>({totals.a2hs_accepted||0} accepted of {totals.a2hs_shown||0} shown)</span>
+              <span style={{fontSize:13,fontWeight:700,color:'#14532d'}}>📲 Add to Home Screen: </span>
+              <span style={{fontSize:16,fontWeight:800,color:'#059669'}}>{Math.round(((totals.a2hs_accepted||0)/(totals.a2hs_shown||1))*100)}%</span>
+              <span style={{fontSize:13,color:'#6b7280',marginLeft:8}}>({totals.a2hs_accepted||0} of {totals.a2hs_shown||0} prompts accepted)</span>
             </div>
           )}
-
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(min(100%,320px),1fr))',gap:20,marginBottom:20}}>
-            {/* Daily active users chart */}
+          {/* Charts row */}
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(min(100%,300px),1fr))',gap:20,marginBottom:20}}>
+            {/* Daily sessions line chart */}
             <div style={card}>
-              <h3 style={{fontSize:14,fontWeight:700,marginBottom:14,color:'#374151'}}>Daily Active Sessions</h3>
-              {!dailyActive.length ? <p style={{color:'#9ca3af',fontSize:13}}>No data yet.</p> : (
-                <div style={{display:'flex',alignItems:'flex-end',gap:3,height:80}}>
-                  {dailyActive.map(d=>(
-                    <div key={d.day} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:2}}>
-                      <div style={{width:'100%',background:ACCENT,borderRadius:3,height:Math.max(4,Math.round((d.sessions/maxDA)*68))}} title={`${d.day}: ${d.sessions} sessions`} />
-                      <div style={{fontSize:9,color:'#9ca3af',transform:'rotate(-45deg)',transformOrigin:'top left',whiteSpace:'nowrap',marginTop:6}}>{d.day.slice(5)}</div>
-                    </div>
-                  ))}
+              <h3 style={{fontSize:14,fontWeight:700,marginBottom:10,color:'#374151'}}>Daily Active Sessions</h3>
+              <LineChart data={dailyActive} />
+              {dailyActive.length > 0 && (
+                <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:'#9ca3af',marginTop:6}}>
+                  <span>{dailyActive[0]?.day?.slice(5)}</span>
+                  <span style={{fontWeight:700,color:ACCENT}}>peak: {Math.max(...dailyActive.map(d=>d.sessions))} sessions</span>
+                  <span>{dailyActive[dailyActive.length-1]?.day?.slice(5)}</span>
                 </div>
               )}
             </div>
-
-            {/* Section engagement */}
+            {/* Tab engagement */}
             <div style={card}>
-              <h3 style={{fontSize:14,fontWeight:700,marginBottom:14,color:'#374151'}}>Section Engagement</h3>
+              <h3 style={{fontSize:14,fontWeight:700,marginBottom:14,color:'#374151'}}>Tab Engagement</h3>
               {!sectionEngagement.length ? <p style={{color:'#9ca3af',fontSize:13}}>No data yet.</p> : sectionEngagement.map(d=>(
                 <div key={d.tab} style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
-                  <div style={{width:80,fontSize:12,fontWeight:600,textTransform:'capitalize'}}>{d.tab}</div>
+                  <div style={{width:72,fontSize:12,fontWeight:600,textTransform:'capitalize'}}>{d.tab}</div>
                   <div style={{flex:1,background:'#f3f4f6',borderRadius:4,height:16,overflow:'hidden'}}>
                     <div style={{width:`${Math.round((d.count/maxSE)*100)}%`,height:'100%',background:ACCENT,borderRadius:4}} />
                   </div>
-                  <div style={{fontSize:12,fontWeight:700,color:'#374151',width:40,textAlign:'right'}}>{d.count}</div>
+                  <div style={{fontSize:12,fontWeight:700,color:'#374151',width:36,textAlign:'right'}}>{d.count}</div>
                 </div>
               ))}
             </div>
-
-            {/* Device breakdown */}
+            {/* Device breakdown with stacked bar */}
             <div style={card}>
               <h3 style={{fontSize:14,fontWeight:700,marginBottom:14,color:'#374151'}}>Device Breakdown</h3>
-              {!deviceBreakdown.length ? <p style={{color:'#9ca3af',fontSize:13}}>No data yet.</p> : deviceBreakdown.map(d=>(
-                <div key={d.device} style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
-                  <div style={{fontSize:18}}>{d.device==='ios'?'🍎':d.device==='android'?'🤖':d.device==='desktop'?'🖥️':'❓'}</div>
-                  <div style={{width:70,fontSize:12,fontWeight:600,textTransform:'capitalize'}}>{d.device}</div>
-                  <div style={{flex:1,background:'#f3f4f6',borderRadius:4,height:16,overflow:'hidden'}}>
-                    <div style={{width:`${Math.round((d.count/Math.max(...deviceBreakdown.map(x=>x.count)))*100)}%`,height:'100%',background:'#1d4ed8',borderRadius:4}} />
-                  </div>
-                  <div style={{fontSize:12,fontWeight:700,color:'#374151',width:40,textAlign:'right'}}>{d.count}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* Top searches */}
-            <div style={card}>
-              <h3 style={{fontSize:14,fontWeight:700,marginBottom:14,color:'#374151'}}>Top Search Terms</h3>
-              {!topSearches.length ? <p style={{color:'#9ca3af',fontSize:13}}>No searches yet.</p> : (
-                <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
-                  {topSearches.map((s,i)=>(
-                    <span key={s.query} style={{padding:'5px 12px',borderRadius:999,fontSize:12,fontWeight:700,background:`rgba(139,58,15,${0.15+i*0.05})`,color:ACCENT}}>
-                      {s.query} <span style={{fontSize:10,opacity:0.7}}>×{s.count}</span>
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(min(100%,280px),1fr))',gap:20,marginBottom:20}}>
-            {/* Top events */}
-            <div style={card}>
-              <h3 style={{fontSize:14,fontWeight:700,marginBottom:14,color:'#374151'}}>Most Clicked Events</h3>
-              {!topEvents.length ? <p style={{color:'#9ca3af',fontSize:13}}>No clicks yet.</p> : topEvents.map((e,i)=>(
-                <div key={e.name} style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
-                  <div style={{width:20,fontSize:11,fontWeight:700,color:'#9ca3af',textAlign:'right'}}>{i+1}</div>
-                  <div style={{flex:1,fontSize:13,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{e.name}</div>
-                  <div style={{flex:0,background:'#f3f4f6',borderRadius:4,width:80,height:14,overflow:'hidden'}}>
-                    <div style={{width:`${Math.round((e.count/maxTE)*100)}%`,height:'100%',background:'#059669'}} />
-                  </div>
-                  <div style={{fontSize:12,fontWeight:700,width:28,textAlign:'right'}}>{e.count}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* Top places */}
-            <div style={card}>
-              <h3 style={{fontSize:14,fontWeight:700,marginBottom:14,color:'#374151'}}>Most Clicked Places</h3>
-              {!topPlaces.length ? <p style={{color:'#9ca3af',fontSize:13}}>No clicks yet.</p> : topPlaces.map((p,i)=>(
-                <div key={p.name} style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
-                  <div style={{width:20,fontSize:11,fontWeight:700,color:'#9ca3af',textAlign:'right'}}>{i+1}</div>
-                  <div style={{flex:1,fontSize:13,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{p.name}</div>
-                  <div style={{flex:0,background:'#f3f4f6',borderRadius:4,width:80,height:14,overflow:'hidden'}}>
-                    <div style={{width:`${Math.round((p.count/maxTP)*100)}%`,height:'100%',background:'#1d4ed8'}} />
-                  </div>
-                  <div style={{fontSize:12,fontWeight:700,width:28,textAlign:'right'}}>{p.count}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Get Directions tracker */}
-          {getDirectionsClicks > 0 && (
-            <div style={{...card,marginBottom:20}}>
-              <h3 style={{fontSize:14,fontWeight:700,marginBottom:14,color:'#374151'}}>Get Directions Clicks</h3>
-              <div style={{display:'flex',alignItems:'baseline',gap:8,marginBottom:14}}>
-                <div style={{fontSize:28,fontWeight:800,color:'#0891b2'}}>{getDirectionsClicks}</div>
-                <div style={{fontSize:12,color:'#9ca3af'}}>people used get directions</div>
-              </div>
-              {topDirections.length > 0 && (
+              {!deviceBreakdown.length ? <p style={{color:'#9ca3af',fontSize:13}}>No data yet.</p> : (
                 <>
-                  <h4 style={{fontSize:12,fontWeight:700,color:'#6b7280',marginBottom:10}}>Most Popular Destinations</h4>
-                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:8}}>
-                    {topDirections.map((d,i)=>(
-                      <div key={i} style={{padding:'10px',background:'#f9fafb',borderRadius:8}}>
-                        <div style={{fontSize:12,fontWeight:600,color:'#18181b',marginBottom:4}}>{d.name.slice(0,30)}</div>
-                        <div style={{fontSize:11,fontWeight:700,color:'#0891b2'}}>{d.count} clicks</div>
-                      </div>
-                    ))}
+                  <div style={{display:'flex',height:16,borderRadius:8,overflow:'hidden',marginBottom:14}}>
+                    {deviceBreakdown.map((d,i)=>{ const total=deviceBreakdown.reduce((s,x)=>s+x.count,0); const colors=['#1d4ed8','#059669','#f59e0b','#9ca3af']; return <div key={d.device} style={{width:`${(d.count/total)*100}%`,background:colors[i%colors.length]}} title={`${d.device}: ${d.count}`} />; })}
                   </div>
+                  {deviceBreakdown.map((d,i)=>{ const colors=['#1d4ed8','#059669','#f59e0b','#9ca3af']; const icons:Record<string,string>={ios:'🍎',android:'🤖',desktop:'🖥️',unknown:'❓'}; const total=deviceBreakdown.reduce((s,x)=>s+x.count,0); return (
+                    <div key={d.device} style={{display:'flex',alignItems:'center',gap:8,marginBottom:6}}>
+                      <div style={{width:10,height:10,borderRadius:2,background:colors[i%colors.length],flexShrink:0}} />
+                      <div style={{fontSize:14}}>{icons[d.device]||'❓'}</div>
+                      <div style={{width:65,fontSize:12,fontWeight:600,textTransform:'capitalize'}}>{d.device}</div>
+                      <div style={{flex:1,fontSize:12,color:'#6b7280'}}>{Math.round((d.count/total)*100)}%</div>
+                      <div style={{fontSize:12,fontWeight:700,color:'#374151'}}>{d.count}</div>
+                    </div>
+                  );})}
                 </>
               )}
             </div>
-          )}
-
-          {/* Top pages */}
-          <div style={{...card,marginBottom:20}}>
-            <h3 style={{fontSize:14,fontWeight:700,marginBottom:14,color:'#374151'}}>Top Viewed Pages</h3>
-            {!topPages.length ? <p style={{color:'#9ca3af',fontSize:13}}>No pageview data yet.</p> : (
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:8}}>
-                {topPages.map((p,i)=>(
-                  <div key={p.path} style={{display:'flex',alignItems:'center',gap:10,padding:'6px 10px',background:i===0?'#fdf3ee':'#f9fafb',borderRadius:6}}>
-                    <div style={{width:22,fontSize:12,fontWeight:800,color:i<3?ACCENT:'#9ca3af',textAlign:'right'}}>{i+1}</div>
-                    <div style={{flex:1,fontSize:13,fontWeight:i<3?700:400,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',fontFamily:'monospace'}}>{p.path}</div>
-                    <div style={{fontSize:13,fontWeight:700,color:'#374151'}}>{p.count}</div>
+            {/* Traffic sources */}
+            <div style={card}>
+              <h3 style={{fontSize:14,fontWeight:700,marginBottom:14,color:'#374151'}}>Traffic Sources</h3>
+              {!topReferrers.length ? (
+                <p style={{color:'#9ca3af',fontSize:13}}>No referrer data yet.<br/><span style={{fontSize:11}}>Log <code>referrer</code> in analytics events to track sources.</span></p>
+              ) : topReferrers.map(r=>(
+                <div key={r.source} style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
+                  <div style={{fontSize:16}}>{r.source==='Direct'?'🔗':r.source==='Google'?'🔍':r.source==='Facebook'?'👥':r.source==='Instagram'?'📸':'🌐'}</div>
+                  <div style={{width:90,fontSize:12,fontWeight:600,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{r.source}</div>
+                  <div style={{flex:1,background:'#f3f4f6',borderRadius:4,height:14,overflow:'hidden'}}>
+                    <div style={{width:`${Math.round((r.count/maxRef)*100)}%`,height:'100%',background:'#6366f1',borderRadius:4}} />
                   </div>
-                ))}
+                  <div style={{fontSize:12,fontWeight:700,color:'#374151',width:36,textAlign:'right'}}>{r.count}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Top searches */}
+          <div style={{...card,marginBottom:20}}>
+            <h3 style={{fontSize:14,fontWeight:700,marginBottom:14,color:'#374151'}}>Top Search Terms</h3>
+            {!topSearches.length ? <p style={{color:'#9ca3af',fontSize:13}}>No searches yet.</p> : (
+              <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
+                {topSearches.map((s,i)=>(<span key={s.query} style={{padding:'5px 12px',borderRadius:999,fontSize:12,fontWeight:700,background:`rgba(139,58,15,${0.12+i*0.04})`,color:ACCENT}}>{s.query} <span style={{fontSize:10,opacity:0.7}}>×{s.count}</span></span>))}
               </div>
             )}
           </div>
-
-          {/* Error log - now grouped */}
-          <div style={{...card, borderLeft: (recentErrors.length > 0) ? '3px solid #dc2626' : '3px solid #d1d5db'}}>
-            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
-              <div>
-                <h3 style={{fontSize:14,fontWeight:700,margin:0,color: recentErrors.length > 0 ? '#dc2626' : '#374151'}}>
-                  Client Error Log {recentErrors.length > 0 && <span style={{fontSize:12,fontWeight:400,color:'#9ca3af',marginLeft:8}}>({recentErrors.length} errors)</span>}
-                </h3>
-                <p style={{fontSize:12,color:'#9ca3af',marginTop:6,marginBottom:0}}>JavaScript errors captured from user browsers</p>
-              </div>
-              {recentErrors.length > 0 && <button onClick={clearErrors} style={{...btnD}}>Clear Errors</button>}
+          {/* Most clicked events + places — clickable */}
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(min(100%,300px),1fr))',gap:20,marginBottom:20}}>
+            <div style={card}>
+              <h3 style={{fontSize:14,fontWeight:700,marginBottom:4,color:'#374151'}}>Most Clicked Events</h3>
+              <p style={{fontSize:11,color:'#9ca3af',marginBottom:12}}>Click any row to open in the app ↗</p>
+              {!topEvents.length ? <p style={{color:'#9ca3af',fontSize:13}}>No clicks yet.</p> : topEvents.map((e,i)=>(
+                <a key={e.id||e.name} href={`https://abqunplugged.com/?tab=events&q=${encodeURIComponent(e.name)}`} target="_blank" rel="noreferrer"
+                  style={{display:'flex',alignItems:'center',gap:10,marginBottom:6,textDecoration:'none',padding:'7px 8px',borderRadius:7,background:'transparent'}}
+                  onMouseEnter={el=>(el.currentTarget.style.background='#f3f4f6')} onMouseLeave={el=>(el.currentTarget.style.background='transparent')}>
+                  <div style={{width:20,fontSize:11,fontWeight:700,color:'#9ca3af',textAlign:'right',flexShrink:0}}>{i+1}</div>
+                  <div style={{flex:1,fontSize:13,fontWeight:500,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:'#111827'}}>{e.name}</div>
+                  <div style={{width:56,background:'#f3f4f6',borderRadius:4,height:10,overflow:'hidden',flexShrink:0}}><div style={{width:`${Math.round((e.count/maxTE)*100)}%`,height:'100%',background:'#059669'}} /></div>
+                  <div style={{fontSize:12,fontWeight:700,width:24,textAlign:'right',color:'#374151',flexShrink:0}}>{e.count}</div>
+                </a>
+              ))}
             </div>
-            {!recentErrors.length ? (
-              <div style={{textAlign:'center',padding:28,color:'#9ca3af'}}>
-                <div style={{fontSize:28,marginBottom:8}}>✓</div>
-                <p style={{fontSize:13,fontWeight:600}}>No errors recorded</p>
+            <div style={card}>
+              <h3 style={{fontSize:14,fontWeight:700,marginBottom:4,color:'#374151'}}>Most Clicked Places</h3>
+              <p style={{fontSize:11,color:'#9ca3af',marginBottom:12}}>Click any row to open in the app ↗</p>
+              {!topPlaces.length ? <p style={{color:'#9ca3af',fontSize:13}}>No clicks yet.</p> : topPlaces.map((p,i)=>(
+                <a key={p.id||p.name} href={`https://abqunplugged.com/?tab=places&q=${encodeURIComponent(p.name)}`} target="_blank" rel="noreferrer"
+                  style={{display:'flex',alignItems:'center',gap:10,marginBottom:6,textDecoration:'none',padding:'7px 8px',borderRadius:7,background:'transparent'}}
+                  onMouseEnter={el=>(el.currentTarget.style.background='#f3f4f6')} onMouseLeave={el=>(el.currentTarget.style.background='transparent')}>
+                  <div style={{width:20,fontSize:11,fontWeight:700,color:'#9ca3af',textAlign:'right',flexShrink:0}}>{i+1}</div>
+                  <div style={{flex:1,fontSize:13,fontWeight:500,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:'#111827'}}>{p.name}</div>
+                  <div style={{width:56,background:'#f3f4f6',borderRadius:4,height:10,overflow:'hidden',flexShrink:0}}><div style={{width:`${Math.round((p.count/maxTP)*100)}%`,height:'100%',background:'#7c3aed'}} /></div>
+                  <div style={{fontSize:12,fontWeight:700,width:24,textAlign:'right',color:'#374151',flexShrink:0}}>{p.count}</div>
+                </a>
+              ))}
+            </div>
+          </div>
+          {/* Get Directions */}
+          {getDirectionsClicks > 0 && (
+            <div style={{...card,marginBottom:20}}>
+              <h3 style={{fontSize:14,fontWeight:700,marginBottom:14,color:'#374151'}}>Get Directions Clicks</h3>
+              <div style={{display:'flex',alignItems:'baseline',gap:8,marginBottom:14}}><div style={{fontSize:28,fontWeight:800,color:'#0891b2'}}>{getDirectionsClicks}</div><div style={{fontSize:12,color:'#9ca3af'}}>people used get directions</div></div>
+              {topDirections.length > 0 && (<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:8}}>{topDirections.map((d,i)=>(<div key={i} style={{padding:'10px',background:'#f9fafb',borderRadius:8}}><div style={{fontSize:12,fontWeight:600,color:'#18181b',marginBottom:4}}>{d.name.slice(0,30)}</div><div style={{fontSize:11,fontWeight:700,color:'#0891b2'}}>{d.count} click{d.count!==1?'s':''}</div></div>))}</div>)}
+            </div>
+          )}
+          {/* Error log — grouped with copy + delete per type */}
+          <div style={{...card, borderLeft: activeErrors.length > 0 ? '3px solid #dc2626' : '3px solid #d1d5db'}}>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14,flexWrap:'wrap',gap:8}}>
+              <div>
+                <h3 style={{fontSize:14,fontWeight:700,margin:0,color: activeErrors.length > 0 ? '#dc2626' : '#374151'}}>
+                  JavaScript Error Log {activeErrors.length > 0 && <span style={{fontSize:12,fontWeight:400,color:'#9ca3af',marginLeft:8}}>{activeErrors.length} unique · {totalErrors} total</span>}
+                </h3>
+                <p style={{fontSize:12,color:'#9ca3af',marginTop:4,marginBottom:0}}>Errors from user browsers. <strong>Copy</strong> to share with a developer · <strong>Delete</strong> removes from database · <strong>✕</strong> hides from this view.</p>
               </div>
+              {activeErrors.length > 0 && <button onClick={()=>setDismissedErrors(Object.keys(errorGrouped))} style={{padding:'6px 14px',borderRadius:8,border:'1px solid #e5e7eb',background:'#f9fafb',fontSize:12,cursor:'pointer',color:'#6b7280',fontWeight:600}}>Dismiss All</button>}
+            </div>
+            {!activeErrors.length ? (
+              <div style={{textAlign:'center',padding:28,color:'#9ca3af'}}><div style={{fontSize:28,marginBottom:8}}>✓</div><p style={{fontSize:13,fontWeight:600}}>No errors recorded</p></div>
             ) : (
-              <div style={{maxHeight:500,overflowY:'auto'}}>
-                {recentErrors.map((err:any,i:number)=>(
-                  <div key={i} style={{padding:'10px 12px',marginBottom:6,background:'#fef2f2',borderRadius:8,border:'1px solid #fecaca',fontSize:12}}>
-                    <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
-                      <span style={{fontWeight:700,color:'#dc2626'}}>{err.data?.message?.slice(0,100) || 'Unknown error'}</span>
-                      <span style={{color:'#9ca3af',fontSize:11,flexShrink:0,marginLeft:8}}>{new Date(err.created_at).toLocaleString()}</span>
+              <div style={{display:'flex',flexDirection:'column',gap:10}}>
+                {[...activeErrors].sort((a,b)=>b[1].count-a[1].count).map(([msg,info])=>(
+                  <div key={msg} style={{padding:'12px 14px',background:'#fef2f2',borderRadius:10,border:'1px solid #fecaca'}}>
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:8,marginBottom:6}}>
+                      <div style={{flex:1}}>
+                        <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4,flexWrap:'wrap'}}>
+                          <span style={{background:'#dc2626',color:'#fff',fontSize:11,fontWeight:700,padding:'1px 7px',borderRadius:4,flexShrink:0}}>×{info.count}</span>
+                          <span style={{fontSize:13,fontWeight:700,color:'#991b1b',wordBreak:'break-word'}}>{msg}</span>
+                        </div>
+                        {info.source && <div style={{fontSize:11,color:'#9ca3af',fontFamily:'monospace',marginBottom:2}}>📄 {info.source.replace(/^https?:\/\/[^/]+/,'')}:{info.line||'?'}</div>}
+                        {info.url && <div style={{fontSize:11,color:'#9ca3af',fontFamily:'monospace'}}>🌐 {info.url.replace(/^https?:\/\/[^/]+/,'')||'/'}</div>}
+                        <div style={{fontSize:11,color:'#9ca3af',marginTop:4}}>Last seen: {new Date(info.lastSeen).toLocaleString()}</div>
+                      </div>
+                      <div style={{display:'flex',gap:6,flexShrink:0}}>
+                        <button onClick={()=>copyErrorDetails(msg,info)} style={{padding:'4px 10px',borderRadius:6,border:'1px solid #e5e7eb',background:'#fff',fontSize:11,cursor:'pointer',color:'#374151',fontWeight:600}}>Copy</button>
+                        <button onClick={()=>clearErrorType(msg,info.ids)} style={{padding:'4px 10px',borderRadius:6,border:'none',background:'#dc2626',fontSize:11,cursor:'pointer',color:'#fff',fontWeight:600}}>Delete</button>
+                        <button onClick={()=>dismissError(msg)} style={{padding:'4px 8px',borderRadius:6,border:'1px solid #e5e7eb',background:'#fff',fontSize:11,cursor:'pointer',color:'#9ca3af'}}>✕</button>
+                      </div>
                     </div>
-                    {err.data?.source && <div style={{color:'#6b7280',fontFamily:'monospace',fontSize:11}}>@ {err.data.source.replace(/^https?:\/\/[^/]+/,'')}:{err.data.line}</div>}
-                    {err.data?.stack && <details style={{marginTop:4}}><summary style={{cursor:'pointer',fontSize:11,color:'#9ca3af'}}>Stack trace</summary><pre style={{fontSize:10,color:'#374151',background:'#fff',padding:8,borderRadius:4,overflow:'auto',maxHeight:120,marginTop:4,border:'1px solid #e5e7eb'}}>{err.data.stack}</pre></details>}
-                    <div style={{display:'flex',gap:12,marginTop:4,fontSize:11,color:'#9ca3af'}}>
-                      <span>{err.device || '?'}</span>
-                      {err.data?.url && <span style={{fontFamily:'monospace'}}>{err.data.url.replace(/^https?:\/\/[^/]+/,'')}</span>}
-                      {err.data?.type === 'unhandledrejection' && <span style={{background:'#fef3c7',color:'#92400e',padding:'1px 6px',borderRadius:4,fontWeight:600}}>Promise</span>}
-                    </div>
+                    {info.stack && (<details style={{marginTop:6}}><summary style={{cursor:'pointer',fontSize:11,color:'#9ca3af',userSelect:'none'}}>Stack trace</summary><pre style={{fontSize:10,color:'#374151',background:'#fff',padding:8,borderRadius:4,overflow:'auto',maxHeight:140,marginTop:6,border:'1px solid #e5e7eb',whiteSpace:'pre-wrap',wordBreak:'break-all'}}>{info.stack}</pre></details>)}
                   </div>
                 ))}
               </div>
@@ -1694,6 +1695,7 @@ function AnalyticsSection() {
     </div>
   );
 }
+
 function RefreshSection() {
   const [running, setRunning] = useState(false);
   const [logs, setLogs]       = useState<any[]>([]);
