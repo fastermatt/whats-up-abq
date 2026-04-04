@@ -5103,13 +5103,16 @@ function PlacesScreen({
     // When a search query is active it overrides the category filter so users
     // always search across ALL places — preventing the confusing "0 results"
     // you get when a category is locked and the search term doesn't match it.
+    // Exception: neighborhood searches use a geo bounding-box filter, not text
+    // matching, so the category filter should remain active alongside them.
     const searchActive = search.trim().length > 0;
-    if (selectedCat !== 'All' && !searchActive) {
+    const neighborhoodBounds = searchActive ? NEIGHBORHOOD_BOUNDS[search.trim()] : null;
+    const isNeighborhoodSearch = !!neighborhoodBounds;
+    if (selectedCat !== 'All' && (!searchActive || isNeighborhoodSearch)) {
       const cats = selectedCat.includes('|') ? selectedCat.split('|') : [selectedCat];
       result = result.filter(p => cats.includes(p.category));
     }
     if (searchActive) {
-      const neighborhoodBounds = NEIGHBORHOOD_BOUNDS[search.trim()];
       if (neighborhoodBounds) {
         // Geographic bounding box filter for neighborhood selectors
         result = result.filter(p => {
