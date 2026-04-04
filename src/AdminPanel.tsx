@@ -1351,7 +1351,7 @@ function ContentSection() {
 function AnalyticsSection() {
   const [range, setRange]       = useState<'7d'|'30d'|'90d'>('7d');
   const [loading, setLoading]   = useState(true);
-  const [totals,  setTotals]    = useState<Record<string,number>>({});
+  const [totals,  setTotals]    = useState({} as Record<string,number>);
   const [topEvents, setTopEvents] = useState<{name:string;count:number}[]>([]);
   const [topPlaces, setTopPlaces] = useState<{name:string;count:number}[]>([]);
   const [topSearches,setTopSearches]=useState<{query:string;count:number}[]>([]);
@@ -1360,7 +1360,7 @@ function AnalyticsSection() {
   const [dailyActive,setDailyActive]=useState<{day:string;sessions:number}[]>([]);
   const [sectionEngagement,setSectionEngagement]=useState<{tab:string;count:number}[]>([]);
   const [recentErrors, setRecentErrors] = useState<any[]>([]);
-  const [errorGrouped, setErrorGrouped] = useState<Record<string,{count:number;lastSeen:string;ids:string[]}>({});
+  const [errorGrouped, setErrorGrouped] = useState({} as Record<string,{count:number;lastSeen:string;ids:string[]}>);
   const [topPages, setTopPages] = useState<{path:string;count:number}[]>([]);
   const [shareClicks, setShareClicks] = useState(0);
   const [getDirectionsClicks, setGetDirectionsClicks] = useState(0);
