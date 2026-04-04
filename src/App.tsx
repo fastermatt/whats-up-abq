@@ -5126,6 +5126,19 @@ function PlacesScreen({
     'Rio Grande':   { minLat: 35.020, maxLat: 35.220, minLng: -106.745, maxLng: -106.660 },
     'South Valley': { minLat: 34.960, maxLat: 35.068, minLng: -106.740, maxLng: -106.620 },
   };
+  // Case-insensitive neighborhood lookup — "nob hill", "Nob Hill", "NOB HILL" all match
+  const findNeighborhood = (q: string): { bounds: { minLat: number; maxLat: number; minLng: number; maxLng: number }; name: string } | null => {
+    const trimmed = q.trim();
+    if (!trimmed) return null;
+    // Direct match first (fast path)
+    if (NEIGHBORHOOD_BOUNDS[trimmed]) return { bounds: NEIGHBORHOOD_BOUNDS[trimmed], name: trimmed };
+    // Case-insensitive match
+    const lower = trimmed.toLowerCase();
+    for (const key of Object.keys(NEIGHBORHOOD_BOUNDS)) {
+      if (key.toLowerCase() === lower) return { bounds: NEIGHBORHOOD_BOUNDS[key], name: key };
+    }
+    return null;
+  };
 
   const filtered = useMemo(() => {
     let result = places.filter(isPlaceInMetro);
@@ -5137,7 +5150,8 @@ function PlacesScreen({
     // Exception: neighborhood searches use a geo bounding-box filter, not text
     // matching, so the category filter should remain active alongside them.
     const searchActive = search.trim().length > 0;
-    const neighborhoodBounds = searchActive ? NEIGHBORHOOD_BOUNDS[search.trim()] : null;
+    const neighborhoodMatch = searchActive ? findNeighborhood(search) : null;
+    const neighborhoodBounds = neighborhoodMatch?.bounds ?? null;
     const isNeighborhoodSearch = !!neighborhoodBounds;
     if (selectedCat !== 'All' && (!searchActive || isNeighborhoodSearch)) {
       const cats = selectedCat.includes('|') ? selectedCat.split('|') : [selectedCat];
@@ -5276,9 +5290,8 @@ function PlacesScreen({
     return () => io.disconnect();
   }, [sorted]);
 
-  // Only show places that have a real photo — no gradient placeholders in the grid
-  const withPhotos = sorted.filter(p => !!p.image);
-  const visiblePlaces = withPhotos.slice(0, displayCount);
+  // Show ALL places — those without photos use their gradient background
+  const visiblePlaces = sorted.slice(0, displayCount);
 
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', willChange: 'transform' } as React.CSSProperties}>
@@ -5324,9 +5337,14 @@ function PlacesScreen({
           {placesHero.display}{!placesHero.done && <span style={{ display: 'inline-block', width: '3px', height: '0.85em', background: 'var(--ink)', marginLeft: '2px', verticalAlign: 'baseline', animation: 'cursorBlink 0.8s step-end infinite' }} />}
         </h1>
         <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: 'Public Sans, sans-serif' }}>
-          {search.trim() && NEIGHBORHOOD_BOUNDS[search.trim()]
-            ? `${filtered.length} spot${filtered.length !== 1 ? 's' : ''} in ${search.trim()}`
-            : `${places.length.toLocaleString()} spots across Greater ABQ`}
+          {(() => {
+            const hoodMatch = findNeighborhood(search);
+            return hoodMatch
+              ? `${filtered.length} spot${filtered.length !== 1 ? 's' : ''} in ${hoodMatch.name}`
+              : search.trim()
+                ? `${filtered.length} result${filtered.length !== 1 ? 's' : ''} for "${search.trim()}"`
+                : `${places.length.toLocaleString()} spots across Greater ABQ`;
+          })()}
         </p>
       </div>
       )}
@@ -5464,7 +5482,7 @@ function PlacesScreen({
           </button>
         ))}
         <p className="ml-auto text-xs text-gray-400 self-center" style={{ fontFamily: 'Public Sans, sans-serif' }}>
-          {withPhotos.length} results
+          {sorted.length} results
         </p>
       </div>
 
@@ -5486,14 +5504,14 @@ function PlacesScreen({
           ))}
         </div>
         {/* Infinite scroll sentinel */}
-        {displayCount < withPhotos.length && (
+        {displayCount < sorted.length && (
           <div ref={sentinelRef} style={{ height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span className="text-xs text-gray-400" style={{ fontFamily: 'Public Sans, sans-serif' }}>
               Loading more…
             </span>
           </div>
         )}
-        {withPhotos.length === 0 && (
+        {sorted.length === 0 && (
           <div className="text-center py-16 text-gray-400">
             <span className="material-symbols-outlined" style={{ fontSize: '48px', display: 'block', marginBottom: '8px' }}>search_off</span>
             <p className="font-semibold text-sm" style={{ fontFamily: 'Public Sans, sans-serif' }}>No places found</p>
