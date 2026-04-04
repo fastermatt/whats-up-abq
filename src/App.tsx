@@ -1621,6 +1621,7 @@ function PlaceDetailModal({
   enrichedDataEnabled?: boolean;
 }) {
   const [shared, setShared] = useState(false);
+  const [showShareCard, setShowShareCard] = useState(false);
   const [enriched, setEnriched] = useState<{ tip?: string; hours?: string; phone?: string; website?: string; editorial?: string; parking?: string; menu?: string; historicNote?: string; bestFor?: string[]; priceNote?: string; amenities?: string[]; priceLevel?: number } | null>(
     // Use pre-loaded enriched data from Supabase if available (attached by fetchPlacesFromDB)
     (place as any)._enriched || null
@@ -1697,7 +1698,9 @@ function PlaceDetailModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-[150] flex justify-center" style={{ background: 'rgba(0,0,0,0.5)' }} onClick={onClose}>
+    <>
+    {showShareCard && <PlaceShareCardModal place={place} onClose={() => setShowShareCard(false)} />}
+    {!showShareCard && <div className="fixed inset-0 z-[150] flex justify-center" style={{ background: 'rgba(0,0,0,0.5)' }} onClick={onClose}>
       <div className="flex flex-col overflow-y-auto w-full" style={{ maxWidth: '480px', background: 'white' }} onClick={e => e.stopPropagation()}>
       <div className="relative flex-shrink-0" style={{ height: '260px' }}>
         <PlacePhotoGallery place={place} />
@@ -1736,6 +1739,14 @@ function PlaceDetailModal({
               style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%' }}
             >
               <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>{shared ? 'check' : 'share'}</span>
+            </button>
+            <button
+              onClick={() => setShowShareCard(true)}
+              className="w-10 h-10 flex items-center justify-center"
+              style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%' }}
+              title="Create Instagram card"
+            >
+              <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>photo_camera</span>
             </button>
           </div>
         </div>
@@ -2033,7 +2044,8 @@ function PlaceDetailModal({
       </div>
       <FeedbackWidget contextType="place" contextId={place.id} contextName={place.name} />
     </div>
-  </div>
+  </div>}
+    </>
   );
 }
 
@@ -2515,7 +2527,20 @@ function wrapCanvasText(ctx: CanvasRenderingContext2D, text: string, x: number, 
   return linesDrawn;
 }
 
-function drawShareCard(canvas: HTMLCanvasElement, event: TMEvent, format: 'story' | 'square', photo: HTMLImageElement | null): void {
+interface ShareCardData {
+  title: string;
+  category: string;
+  metaLines: string[];
+  slug: string; // for download filename + analytics
+}
+
+function drawShareCard(
+  canvas: HTMLCanvasElement,
+  data: ShareCardData,
+  format: 'story' | 'square',
+  photo: HTMLImageElement | null,
+  photoFit: 'cover' | 'contain'
+): void {
   const W = 1080;
   const H = format === 'story' ? 1920 : 1080;
   canvas.width = W;
@@ -2523,12 +2548,25 @@ function drawShareCard(canvas: HTMLCanvasElement, event: TMEvent, format: 'story
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
-  // Background
+  // ── Background ────────────────────────────────────────────────
   if (photo) {
-    const scale = Math.max(W / photo.naturalWidth, H / photo.naturalHeight);
-    const sw = photo.naturalWidth * scale;
-    const sh = photo.naturalHeight * scale;
-    ctx.drawImage(photo, (W - sw) / 2, (H - sh) / 2, sw, sh);
+    if (photoFit === 'contain') {
+      // Blurred cover fill as background layer
+      ctx.save();
+      ctx.filter = 'blur(28px) brightness(0.35)';
+      const bgScale = Math.max(W / photo.naturalWidth, H / photo.naturalHeight);
+      ctx.drawImage(photo, (W - photo.naturalWidth * bgScale) / 2, (H - photo.naturalHeight * bgScale) / 2, photo.naturalWidth * bgScale, photo.naturalHeight * bgScale);
+      ctx.restore();
+      // Full photo contained, centered (90% of canvas so text doesn't overlap)
+      const fitScale = Math.min(W / photo.naturalWidth, H / photo.naturalHeight) * 0.88;
+      const fw = photo.naturalWidth * fitScale;
+      const fh = photo.naturalHeight * fitScale;
+      ctx.drawImage(photo, (W - fw) / 2, (H - fh) / 2, fw, fh);
+    } else {
+      // Cover fill (crop)
+      const scale = Math.max(W / photo.naturalWidth, H / photo.naturalHeight);
+      ctx.drawImage(photo, (W - photo.naturalWidth * scale) / 2, (H - photo.naturalHeight * scale) / 2, photo.naturalWidth * scale, photo.naturalHeight * scale);
+    }
   } else {
     const bg = ctx.createLinearGradient(0, 0, W * 0.4, H);
     bg.addColorStop(0, '#0d1b2a');
@@ -2538,7 +2576,7 @@ function drawShareCard(canvas: HTMLCanvasElement, event: TMEvent, format: 'story
     ctx.fillRect(0, 0, W, H);
   }
 
-  // Bottom-up dark overlay
+  // ── Dark overlay ──────────────────────────────────────────────
   const overlayStart = photo ? 0.25 : 0.4;
   const overlayMidAlpha = photo ? 0.55 : 0.45;
   const overlayStrength = photo ? 0.92 : 0.82;
@@ -2549,7 +2587,7 @@ function drawShareCard(canvas: HTMLCanvasElement, event: TMEvent, format: 'story
   ctx.fillStyle = bottomOverlay;
   ctx.fillRect(0, 0, W, H);
 
-  // Top vignette (for badge legibility over photos)
+  // Top vignette for badge legibility
   if (photo) {
     const topV = ctx.createLinearGradient(0, 0, 0, H * 0.22);
     topV.addColorStop(0, 'rgba(0,0,0,0.6)');
@@ -2558,11 +2596,11 @@ function drawShareCard(canvas: HTMLCanvasElement, event: TMEvent, format: 'story
     ctx.fillRect(0, 0, W, H * 0.22);
   }
 
-  // Lime accent bar at bottom
+  // ── Lime accent bar at bottom ─────────────────────────────────
   ctx.fillStyle = '#d4ef4d';
   ctx.fillRect(0, H - 16, W, 16);
 
-  // ABQ Unplugged badge (top-left)
+  // ── ABQ Unplugged badge (top-left) ────────────────────────────
   const BADGE_X = 72;
   const BADGE_Y = format === 'story' ? 160 : 72;
   const dotR = 16;
@@ -2578,35 +2616,21 @@ function drawShareCard(canvas: HTMLCanvasElement, event: TMEvent, format: 'story
   ctx.font = `900 ${format === 'story' ? 32 : 28}px "Public Sans", sans-serif`;
   ctx.fillText('UNPLUGGED', BADGE_X + dotR * 2 + 12, BADGE_Y + (format === 'story' ? 50 : 43));
 
-  // Content block — built bottom-up
+  // ── Content block (bottom-up) ─────────────────────────────────
   const PAD = 72;
   const CONTENT_W = W - PAD * 2;
   const BOTTOM_PAD = 80;
-
-  // Category
-  const rawGenre = event.classifications?.[0]?.genre?.name;
-  const rawSegment = event.classifications?.[0]?.segment?.name;
-  const category = (rawGenre && rawGenre !== 'Undefined' ? rawGenre : rawSegment) || 'Event';
   const tagFontSize = 28;
   ctx.font = `800 ${tagFontSize}px "Public Sans", sans-serif`;
-  const tagText = category.toUpperCase();
+  const tagText = data.category.toUpperCase();
   const tagPadX = 28;
   const tagH = 56;
   const tagW = ctx.measureText(tagText).width + tagPadX * 2;
-
   const titleFontSize = format === 'story' ? 88 : 76;
   const titleLineH = titleFontSize * 1.15;
   const metaLineH = 52;
-  const metaItems = [
-    event.dates?.start?.localDate
-      ? [formatDate(event.dates.start.localDate), event.dates.start.localTime ? formatTime(event.dates.start.localTime) : ''].filter(Boolean).join(' · ')
-      : '',
-    event._embedded?.venues?.[0]?.name || '',
-  ].filter(Boolean);
-
-  const metaBlockH = metaItems.length * metaLineH;
-  const titleBlockH = 2 * titleLineH;
-  const totalContentH = tagH + 24 + titleBlockH + 24 + metaBlockH;
+  const metaBlockH = data.metaLines.length * metaLineH;
+  const totalContentH = tagH + 24 + 2 * titleLineH + 24 + metaBlockH;
   const contentTop = H - BOTTOM_PAD - totalContentH;
 
   // Tag pill
@@ -2624,16 +2648,16 @@ function drawShareCard(canvas: HTMLCanvasElement, event: TMEvent, format: 'story
   ctx.textBaseline = 'middle';
   ctx.fillText(tagText, PAD + tagPadX, tagY + tagH / 2);
 
-  // Event title
+  // Title
   ctx.fillStyle = '#ffffff';
   ctx.font = `900 ${titleFontSize}px "Public Sans", sans-serif`;
   ctx.textBaseline = 'top';
   const titleY = tagY + tagH + 24;
-  const linesDrawn = wrapCanvasText(ctx, event.name, PAD, titleY, CONTENT_W, titleLineH, 2);
+  const linesDrawn = wrapCanvasText(ctx, data.title, PAD, titleY, CONTENT_W, titleLineH, 2);
 
-  // Meta: date + venue
+  // Meta lines
   const metaY = titleY + linesDrawn * titleLineH + 24;
-  metaItems.forEach((item, i) => {
+  data.metaLines.forEach((item, i) => {
     const y = metaY + i * metaLineH;
     ctx.fillStyle = '#d4ef4d';
     ctx.beginPath();
@@ -2646,32 +2670,37 @@ function drawShareCard(canvas: HTMLCanvasElement, event: TMEvent, format: 'story
   });
 }
 
-function EventShareCardModal({ event, onClose }: { event: TMEvent; onClose: () => void }) {
+// Shared modal UI — used by both EventShareCardModal and PlaceShareCardModal
+function ShareCardModal({ data, photoUrl, onClose, analyticsType }: {
+  data: ShareCardData;
+  photoUrl: string;
+  onClose: () => void;
+  analyticsType: string;
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [format, setFormat] = useState<'story' | 'square'>('story');
+  const [photoFit, setPhotoFit] = useState<'cover' | 'contain'>('cover');
   const [shareState, setShareState] = useState<'idle' | 'saved' | 'shared'>('idle');
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const photoUrl = getBestEventImage(event.images);
     if (photoUrl) {
       const img = new Image();
       img.crossOrigin = 'anonymous';
-      img.onload = () => drawShareCard(canvas, event, format, img);
-      img.onerror = () => drawShareCard(canvas, event, format, null);
+      img.onload = () => drawShareCard(canvas, data, format, img, photoFit);
+      img.onerror = () => drawShareCard(canvas, data, format, null, photoFit);
       img.src = photoUrl;
     } else {
-      drawShareCard(canvas, event, format, null);
+      drawShareCard(canvas, data, format, null, photoFit);
     }
-  }, [event, format]);
+  }, [data, format, photoFit, photoUrl]);
 
   const W = 1080;
   const H = format === 'story' ? 1920 : 1080;
   const previewScale = format === 'story' ? 0.22 : 0.34;
   const previewW = Math.round(W * previewScale);
   const previewH = Math.round(H * previewScale);
-
   const getBlob = (): Promise<Blob | null> => new Promise(res => canvasRef.current?.toBlob(res, 'image/png'));
 
   const handleDownload = async () => {
@@ -2680,12 +2709,10 @@ function EventShareCardModal({ event, onClose }: { event: TMEvent; onClose: () =
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${event.name.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-abq-unplugged.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    a.download = `${data.slug}-abq-unplugged.png`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    trackEvent('instagram_card_download', { event_id: event.id, format });
+    trackEvent('instagram_card_download', { type: analyticsType, format });
     setShareState('saved');
     setTimeout(() => setShareState('idle'), 2000);
   };
@@ -2693,16 +2720,15 @@ function EventShareCardModal({ event, onClose }: { event: TMEvent; onClose: () =
   const handleShare = async () => {
     const blob = await getBlob();
     if (!blob) return;
-    const file = new File([blob], `${event.name.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.png`, { type: 'image/png' });
+    const file = new File([blob], `${data.slug}.png`, { type: 'image/png' });
     if (navigator.canShare?.({ files: [file] })) {
       try {
-        await navigator.share({ files: [file], title: event.name, text: `Check out ${event.name} — found on ABQ Unplugged!\nabqunplugged.com` });
-        trackEvent('instagram_card_share', { event_id: event.id, format, method: 'web_share' });
+        await navigator.share({ files: [file], title: data.title, text: `Check out ${data.title} — found on ABQ Unplugged!\nabqunplugged.com` });
+        trackEvent('instagram_card_share', { type: analyticsType, format, method: 'web_share' });
         setShareState('shared');
         setTimeout(() => setShareState('idle'), 2000);
       } catch { /* user cancelled */ }
     } else {
-      // Desktop fallback: download
       handleDownload();
     }
   };
@@ -2711,27 +2737,27 @@ function EventShareCardModal({ event, onClose }: { event: TMEvent; onClose: () =
     <div className="fixed inset-0 z-[200] flex flex-col" style={{ background: '#1a1a1a' }}>
       {/* Header */}
       <div className="flex items-center justify-between px-4" style={{ paddingTop: 'max(16px, env(safe-area-inset-top, 16px))', paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.12)' }}>
-        <button
-          onClick={onClose}
-          className="flex items-center gap-1"
-          style={{ color: 'rgba(255,255,255,0.7)', fontFamily: 'Public Sans, sans-serif', fontSize: 14, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0' }}
-        >
+        <button onClick={onClose} className="flex items-center gap-1"
+          style={{ color: 'rgba(255,255,255,0.7)', fontFamily: 'Public Sans, sans-serif', fontSize: 14, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0' }}>
           <span className="material-symbols-outlined" style={{ fontSize: 20 }}>arrow_back</span>
           Back
         </button>
         <span className="font-black text-white text-sm" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em' }}>CREATE CARD</span>
-        <div style={{ width: 60 }} />
+        {/* Photo fit toggle — only show when there's a photo */}
+        {photoUrl ? (
+          <button onClick={() => setPhotoFit(f => f === 'cover' ? 'contain' : 'cover')}
+            title={photoFit === 'cover' ? 'Switch to fit (show full image)' : 'Switch to fill (crop to frame)'}
+            style={{ background: 'rgba(255,255,255,0.1)', border: '1.5px solid rgba(255,255,255,0.2)', borderRadius: 6, color: '#d4ef4d', cursor: 'pointer', padding: '4px 8px', fontFamily: 'Public Sans, sans-serif', fontSize: 10, fontWeight: 800, letterSpacing: '0.06em' }}>
+            {photoFit === 'cover' ? 'FIT' : 'FILL'}
+          </button>
+        ) : <div style={{ width: 44 }} />}
       </div>
 
       {/* Format tabs */}
       <div className="flex mx-4 mt-3 mb-3" style={{ border: '2px solid rgba(255,255,255,0.15)', borderRadius: 6, overflow: 'hidden' }}>
         {(['story', 'square'] as const).map(f => (
-          <button
-            key={f}
-            onClick={() => setFormat(f)}
-            className="flex-1 py-2 text-xs font-black"
-            style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em', background: format === f ? '#d4ef4d' : 'transparent', color: format === f ? '#1a1a1a' : 'rgba(255,255,255,0.5)', border: 'none', cursor: 'pointer', transition: 'all 0.15s' }}
-          >
+          <button key={f} onClick={() => setFormat(f)} className="flex-1 py-2 text-xs font-black"
+            style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em', background: format === f ? '#d4ef4d' : 'transparent', color: format === f ? '#1a1a1a' : 'rgba(255,255,255,0.5)', border: 'none', cursor: 'pointer', transition: 'all 0.15s' }}>
             {f === 'story' ? 'STORY 9:16' : 'POST 1:1'}
           </button>
         ))}
@@ -2739,40 +2765,52 @@ function EventShareCardModal({ event, onClose }: { event: TMEvent; onClose: () =
 
       {/* Canvas preview */}
       <div className="flex-1 flex items-center justify-center overflow-hidden px-4">
-        <canvas
-          ref={canvasRef}
-          width={W}
-          height={H}
-          style={{ width: previewW, height: previewH, display: 'block', border: '2px solid rgba(255,255,255,0.15)', borderRadius: 4 }}
-        />
+        <canvas ref={canvasRef} width={W} height={H}
+          style={{ width: previewW, height: previewH, display: 'block', border: '2px solid rgba(255,255,255,0.15)', borderRadius: 4 }} />
       </div>
 
-      {/* Tip */}
       <p className="text-center text-xs mb-2" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'Public Sans, sans-serif' }}>
         Save to camera roll, then share to Instagram Stories or your feed
       </p>
 
       {/* Actions */}
       <div className="flex gap-3 px-4" style={{ paddingBottom: 'max(24px, env(safe-area-inset-bottom, 24px))', paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-        <button
-          onClick={handleDownload}
-          className="flex-1 flex items-center justify-center gap-2 py-3 font-black text-sm"
-          style={{ border: '2px solid #d4ef4d', color: '#d4ef4d', background: 'transparent', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.05em', borderRadius: 6, cursor: 'pointer' }}
-        >
+        <button onClick={handleDownload} className="flex-1 flex items-center justify-center gap-2 py-3 font-black text-sm"
+          style={{ border: '2px solid #d4ef4d', color: '#d4ef4d', background: 'transparent', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.05em', borderRadius: 6, cursor: 'pointer' }}>
           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>download</span>
           {shareState === 'saved' ? 'SAVED!' : 'SAVE IMAGE'}
         </button>
-        <button
-          onClick={handleShare}
-          className="flex-1 flex items-center justify-center gap-2 py-3 font-black text-sm"
-          style={{ background: '#d4ef4d', color: '#1a1a1a', border: 'none', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.05em', borderRadius: 6, cursor: 'pointer' }}
-        >
+        <button onClick={handleShare} className="flex-1 flex items-center justify-center gap-2 py-3 font-black text-sm"
+          style={{ background: '#d4ef4d', color: '#1a1a1a', border: 'none', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.05em', borderRadius: 6, cursor: 'pointer' }}>
           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>ios_share</span>
           {shareState === 'shared' ? 'SHARED!' : 'SHARE'}
         </button>
       </div>
     </div>
   );
+}
+
+function EventShareCardModal({ event, onClose }: { event: TMEvent; onClose: () => void }) {
+  const rawGenre = event.classifications?.[0]?.genre?.name;
+  const rawSegment = event.classifications?.[0]?.segment?.name;
+  const category = (rawGenre && rawGenre !== 'Undefined' ? rawGenre : rawSegment) || 'Event';
+  const metaLines = [
+    event.dates?.start?.localDate
+      ? [formatDate(event.dates.start.localDate), event.dates.start.localTime ? formatTime(event.dates.start.localTime) : ''].filter(Boolean).join(' · ')
+      : '',
+    event._embedded?.venues?.[0]?.name || '',
+  ].filter(Boolean);
+  const data: ShareCardData = { title: event.name, category, metaLines, slug: event.name.replace(/[^a-z0-9]/gi, '-').toLowerCase() };
+  return <ShareCardModal data={data} photoUrl={getBestEventImage(event.images)} onClose={onClose} analyticsType="event" />;
+}
+
+function PlaceShareCardModal({ place, onClose }: { place: Place; onClose: () => void }) {
+  const metaLines = [
+    place.address || '',
+    place.hours || '',
+  ].filter(Boolean);
+  const data: ShareCardData = { title: place.name, category: place.category || 'Place', metaLines, slug: place.name.replace(/[^a-z0-9]/gi, '-').toLowerCase() };
+  return <ShareCardModal data={data} photoUrl={place.image || place.thumbnail || ''} onClose={onClose} analyticsType="place" />;
 }
 
 // ─── Event Detail Modal ──────────────────────────────────────────────────────
