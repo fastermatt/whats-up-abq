@@ -393,11 +393,20 @@ const STATIC_TM_EVENTS: TMEvent[] = ALL_EVENTS
 
 const GPLACES_KEY = import.meta.env.VITE_GOOGLE_PLACES_KEY || '';
 
-/** Ensure Google Places photo URLs have a valid API key attached */
+/**
+ * Ensure Google Places photo URLs always carry a valid API key.
+ * Extracts the photoreference and rebuilds the URL from scratch so that
+ * stale/expired signed URLs, empty keys, and wrong keys are all fixed.
+ */
 function fixGooglePhotoUrl(url?: string): string {
   if (!url) return '';
-  if (url.includes('maps.googleapis.com/maps/api/place/photo') && (url.endsWith('key=') || url.includes('key=&'))) {
-    return url.replace(/key=$/, `key=${GPLACES_KEY}`).replace(/key=&/, `key=${GPLACES_KEY}&`);
+  if (url.includes('maps.googleapis.com/maps/api/place/photo')) {
+    const refMatch = url.match(/photoreference=([^&]+)/);
+    if (refMatch && GPLACES_KEY) {
+      const mwMatch = url.match(/maxwidth=(\d+)/);
+      const maxwidth = mwMatch ? mwMatch[1] : '800';
+      return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxwidth}&photoreference=${refMatch[1]}&key=${GPLACES_KEY}`;
+    }
   }
   return url;
 }
@@ -410,6 +419,31 @@ function fixPlaceImages<T extends { image?: string; thumbnail?: string; addition
     thumbnail: fixGooglePhotoUrl(place.thumbnail),
     ...(place.additionalImages ? { additionalImages: place.additionalImages.map(fixGooglePhotoUrl) } : {}),
   };
+}
+
+/**
+ * Image component with styled fallback placeholder.
+ * Shows dark gradient + venue name initial when src is missing or fails to load.
+ */
+function PlaceImg({ src, alt, className, style, iconSize }: {
+  src?: string; alt: string; className?: string;
+  style?: React.CSSProperties; iconSize?: string;
+}) {
+  const [failed, setFailed] = React.useState(false);
+  if (!src || failed) {
+    const initial = (alt || '?').replace(/^(the|a|an)\s+/i, '')[0]?.toUpperCase() || '?';
+    return (
+      <div className={className} style={{
+        ...style, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
+        color: 'rgba(255,255,255,0.55)', fontSize: iconSize || '2rem',
+        fontWeight: 700, fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.02em',
+      }}>
+        {initial}
+      </div>
+    );
+  }
+  return <img src={src} alt={alt} className={className} style={style} onError={() => setFailed(true)} />;
 }
 
 function hiResUrl(url: string): string {
@@ -3112,7 +3146,7 @@ function FeaturedEventBanner({ events, onSelect }: { events: TMEvent[]; onSelect
       </div>
       <button onClick={() => onSelect(ev)} className="w-full relative overflow-hidden text-left"
         style={{ height: '220px', boxShadow: '0 4px 20px rgba(0,0,0,0.15)', border: '1px solid rgba(0,0,0,0.12)', animation: 'cardFadeIn 0.45s ease both', borderRadius: '10px' }}>
-        {img && <img src={img} alt={ev.name} className="w-full h-full object-cover" style={{ filter: 'brightness(0.75)' }} />}
+        <PlaceImg src={img} alt={ev.name} className="w-full h-full object-cover" style={{ filter: 'brightness(0.75)' }} />
         <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, rgba(194,99,74,0.2) 0%, rgba(0,0,0,0.78) 100%)' }} />
         <div className="absolute top-3 left-3">
           <span className="text-xs font-black px-3 py-1.5"
@@ -5725,9 +5759,7 @@ function ProfileScreen({
                     className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden"
                     style={{ background: hashGradient(p.name) }}
                   >
-                    {p.image && (
-                      <img src={hiResUrl(p.image)} alt={p.name} className="w-full h-full object-cover" onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
-                    )}
+                    <PlaceImg src={hiResUrl(p.image)} alt={p.name} className="w-full h-full object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold truncate" style={{ fontFamily: 'Public Sans, sans-serif' }}>{p.name}</p>
@@ -6723,10 +6755,7 @@ function PlacesTab({ places, setPlaces }: { places: PlaceDoc[]; setPlaces: (fn: 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {filtered.map(p => (
           <div key={p.id} style={{ ...cardSty, display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-            {p.image && (
-              <img src={p.image} alt="" style={{ width: 52, height: 52, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }}
-                onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-            )}
+            <PlaceImg src={p.image} alt={p.name || ''} style={{ width: 52, height: 52, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} iconSize="1.2rem" />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                 <span style={{ fontSize: 15, fontWeight: 700, color: '#1f2937' }}>{p.name}</span>
@@ -7233,7 +7262,7 @@ function PlanScreen({
               <div key={p.id} className="flex items-stretch gap-3 bg-white" style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
                 <button onClick={() => onPlaceSelect(p)} className="flex items-center gap-3 flex-1 p-3 text-left">
                   <div className="flex-shrink-0 rounded overflow-hidden" style={{ width: 56, height: 56, background: '#f0f0f0' }}>
-                    {(p.thumbnail || p.image) && <img src={p.thumbnail || p.image} alt="" className="w-full h-full object-cover" />}
+                    <PlaceImg src={p.thumbnail || p.image} alt={p.name || ''} className="w-full h-full object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-black text-sm truncate" style={{ fontFamily: 'Public Sans, sans-serif' }}>{p.name}</p>
@@ -7275,7 +7304,7 @@ function PlanScreen({
                 <div key={ev.id} className="flex items-stretch gap-3 bg-white" style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
                   <button onClick={() => onEventSelect(ev)} className="flex items-center gap-3 flex-1 p-3 text-left">
                     <div className="flex-shrink-0 rounded overflow-hidden" style={{ width: 56, height: 56, background: '#1a1a1a' }}>
-                      {img ? <img src={img} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><span className="material-symbols-outlined text-white" style={{ fontSize: '22px' }}>confirmation_number</span></div>}
+                      {img ? <PlaceImg src={img} alt={e?.name || ''} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><span className="material-symbols-outlined text-white" style={{ fontSize: '22px' }}>confirmation_number</span></div>}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-black text-sm truncate" style={{ fontFamily: 'Public Sans, sans-serif' }}>{ev.name}</p>
@@ -7539,7 +7568,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
         onMouseEnter={e => (e.currentTarget.style.transform='translate(-2px,-2px)')}
         onMouseLeave={e => (e.currentTarget.style.transform='')}>
         <div style={{ height:'90px', background: img ? 'transparent' : `linear-gradient(135deg,${DESKTOP_DATE_COLORS[idx%3]},${DESKTOP_DATE_COLORS[(idx+1)%3]})`, position:'relative', overflow:'hidden' }}>
-          {img && <img src={img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
+          <PlaceImg src={img} alt={ev?.name || ''} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
           <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(0,0,0,0.55) 0%,transparent 55%)' }} />
           <div style={{ position:'absolute', top:7, left:7, background:'var(--brand)', border:'1.5px solid #1a1a1a', padding:'2px 7px', fontSize:'9px', fontWeight:800, letterSpacing:'0.06em', textTransform:'uppercase' }}>
             {month} {day}
@@ -7565,7 +7594,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
       onMouseEnter={e => (e.currentTarget.style.transform='translate(-2px,-2px)')}
       onMouseLeave={e => (e.currentTarget.style.transform='')}>
       <div style={{ width:'72px', flexShrink:0, background: p.image ? 'transparent' : 'linear-gradient(135deg,var(--brand),var(--brand-light))', overflow:'hidden' }}>
-        {(p.thumbnail || p.image) && <img src={p.thumbnail || p.image} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
+        <PlaceImg src={p.thumbnail || p.image} alt={p.name || ''} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
       </div>
       <div style={{ flex:1, padding:'9px 11px', minWidth:0 }}>
         <div style={{ fontWeight:700, fontSize:'12px', marginBottom:'2px', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{p.name}</div>
@@ -7587,7 +7616,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
       onMouseEnter={e => (e.currentTarget.style.transform='translate(-2px,-2px)')}
       onMouseLeave={e => (e.currentTarget.style.transform='')}>
       <div style={{ height:'96px', background: p.image ? 'transparent' : 'linear-gradient(135deg,var(--brand),var(--brand-light))', position:'relative', overflow:'hidden' }}>
-        {(p.thumbnail || p.image) && <img src={p.thumbnail || p.image} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
+        <PlaceImg src={p.thumbnail || p.image} alt={p.name || ''} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
         <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(0,0,0,0.45) 0%,transparent 55%)' }} />
         {p.rating && <div style={{ position:'absolute', bottom:6, left:6, background:'rgba(0,0,0,0.55)', color:'#fff', fontSize:'10px', fontWeight:700, padding:'2px 7px' }}>★ {p.rating.toFixed(1)}</div>}
       </div>
@@ -7616,7 +7645,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
           <div style={{ fontSize:'8px', fontWeight:600, letterSpacing:'0.06em', opacity:0.75 }}>{dow}</div>
         </div>
         <div style={{ width:'60px', flexShrink:0, background: img ? 'transparent' : `linear-gradient(135deg,${color},${DESKTOP_DATE_COLORS[(idx+1)%3]})`, overflow:'hidden' }}>
-          {img && <img src={img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
+          <PlaceImg src={img} alt={ev.name || ''} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
         </div>
         <div style={{ flex:1, padding:'11px 13px', minWidth:0 }}>
           <div style={{ fontFamily:'Public Sans,sans-serif', fontWeight:800, fontSize:'13px', marginBottom:'3px', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{ev.name}</div>
@@ -7696,7 +7725,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
       return (
         <div style={{ flex:1, overflowY:'auto' }}>
           <div style={{ height:'160px', background: img ? 'transparent' : `linear-gradient(135deg,${color},#1a1a1a)`, position:'relative', overflow:'hidden' }}>
-            {img && <img src={img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
+            <PlaceImg src={img} alt={ev.name || ''} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
             <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(0,0,0,0.7),transparent 60%)' }} />
             <div style={{ position:'absolute', bottom:10, left:12 }}>
               <div style={{ background:'var(--brand)', border:'1.5px solid #1a1a1a', display:'inline-block', padding:'3px 9px', fontSize:'10px', fontWeight:800, letterSpacing:'0.06em' }}>{month} {day} · {dow}</div>
@@ -7743,7 +7772,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
     return (
       <div style={{ flex:1, overflowY:'auto' }}>
         <div style={{ height:'160px', background: p.image ? 'transparent' : 'linear-gradient(135deg,var(--brand),var(--brand-light))', position:'relative', overflow:'hidden' }}>
-          {(p.thumbnail || p.image) && <img src={p.image || p.thumbnail} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
+          <PlaceImg src={p.image || p.thumbnail} alt={p.name || ''} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
           <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(0,0,0,0.65),transparent 55%)' }} />
           <button onClick={() => setDetail(null)} style={{ position:'absolute', top:8, right:8, width:'28px', height:'28px', border:'1.5px solid rgba(255,255,255,0.5)', background:'rgba(0,0,0,0.4)', color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
             <span className="material-symbols-outlined" style={{ fontSize:'16px' }}>close</span>
@@ -8074,7 +8103,7 @@ export default function App() {
   // immediately without waiting for a network fetch.
   const [places, setPlaces] = useState<Place[]>(() => {
     try {
-      const raw = localStorage.getItem('abq_places_v2');
+      const raw = localStorage.getItem('abq_places_v3');
       if (!raw) return [];
       const { data } = JSON.parse(raw) as { data: Place[]; ts: number };
       return Array.isArray(data) && data.length > 0 ? data : [];
@@ -8557,7 +8586,7 @@ export default function App() {
   useEffect(() => {
     async function loadData() {
       // ── Phase 1: Load places — serve from cache instantly, refresh in bg ──
-      const CACHE_KEY = 'abq_places_v2';
+      const CACHE_KEY = 'abq_places_v3';
       const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
       // Timeout helper — defined at top so fast path can use it too
