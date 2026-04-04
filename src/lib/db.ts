@@ -34,24 +34,37 @@ function placeTypeToCategory(types: string[], name = ''): string {
   if (types.includes('museum') || types.includes('library')) return 'museum';
   if (types.includes('art_gallery') || types.includes('performing_arts_theater')) return 'arts';
 
-  // ── Health/Medical — catch before fitness so clinics don't leak ───────────
+  // ── Wellness (spas, salons) — check BEFORE generic 'health' because med spas
+  //    and beauty-focused health studios carry both 'spa' and 'health' types ───
+  if (types.includes('spa') || types.includes('beauty_salon') ||
+      types.includes('hair_care')) return 'wellness';
+
+  // ── Fitness (gyms, sports) — check BEFORE generic 'health' because gyms
+  //    commonly carry 'gym' + 'health' together ──────────────────────────────
+  if (types.includes('gym') || types.includes('fitness_center') ||
+      types.includes('sports_complex') || types.includes('swimming_pool') ||
+      types.includes('golf_course') || types.includes('stadium')) return 'fitness';
+
+  // ── Health/Medical — only reaches here if not a spa or gym ───────────────
   if (types.includes('dentist') || types.includes('doctor') ||
       types.includes('hospital') || types.includes('health') ||
       types.includes('veterinary_care') || types.includes('physiotherapist') ||
       types.includes('pharmacy')) return 'other';
 
-  // ── Wellness (spas, salons — NOT active/fitness) ─────────────────────────
-  if (types.includes('spa') || types.includes('beauty_salon') ||
-      types.includes('hair_care')) return 'wellness';
-
-  // ── Fitness (gyms, sports — genuinely active) ───────────────────────────
-  if (types.includes('gym') || types.includes('fitness_center') ||
-      types.includes('sports_complex') || types.includes('swimming_pool') ||
-      types.includes('golf_course') || types.includes('stadium')) return 'fitness';
-
   // ── Stays ────────────────────────────────────────────────────────────────
   if (types.includes('lodging') || types.includes('hotel') ||
       types.includes('motel') || types.includes('resort')) return 'hotel';
+
+  // ── Name-priority fitness / wellness (before shopping, so "Yoga Studio" tagged
+  //    as 'store' by Google still lands in the right category) ──────────────
+  if (n.includes('yoga') || n.includes('pilates') || n.includes('crossfit') ||
+      n.includes('martial art') || n.includes('boxing') || n.includes('aquatic') ||
+      n.includes('swim school') || n.includes('athletic club'))
+    return 'fitness';
+  if (n.includes('med spa') || n.includes('medspa') || n.includes('aesthetics') ||
+      n.includes('esthetics') || n.includes('laser') || n.includes('botox') ||
+      n.includes('rejuvenat'))
+    return 'wellness';
 
   // ── Shopping ─────────────────────────────────────────────────────────────
   if (types.includes('shopping_mall') || types.includes('store') ||
