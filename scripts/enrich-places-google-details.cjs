@@ -23,13 +23,27 @@
  *   → Fetching ALL fields above for 4,622 places ≈ $78–$95 one-time cost.
  *   After first run, use --only-missing to only update places still lacking data.
  *
+ * DATA IS SAVED PERMANENTLY IN SUPABASE — you only pay once per place.
+ * The app reads from Supabase's enriched column on every modal open (free).
+ * Re-run every 3–6 months to refresh stale hours using --refresh-stale.
+ *
+ * Google Maps Platform gives $200/month free credit.
+ * At $17/1,000 for atmosphere fields, 4,622 places ≈ $78 — likely free on credit.
+ * Check usage: https://console.cloud.google.com → Billing
+ *
  * Usage:
- *   node scripts/enrich-places-google-details.cjs
- *   node scripts/enrich-places-google-details.cjs --only-missing   # skip places with hours already
- *   node scripts/enrich-places-google-details.cjs --limit 50       # test with 50 places
- *   node scripts/enrich-places-google-details.cjs --dry-run        # parse only, no writes
- *   node scripts/enrich-places-google-details.cjs --place ChIJ...  # single place_id
- *   node scripts/enrich-places-google-details.cjs --category restaurant --limit 100
+ *   node scripts/enrich-places-google-details.cjs              # all places
+ *   node scripts/enrich-places-google-details.cjs --only-missing          # skip places with hours
+ *   node scripts/enrich-places-google-details.cjs --refresh-stale 90      # re-fetch if older than 90 days
+ *   node scripts/enrich-places-google-details.cjs --limit 50              # test with 50 places
+ *   node scripts/enrich-places-google-details.cjs --dry-run               # parse only, no writes
+ *   node scripts/enrich-places-google-details.cjs --place ChIJ...         # single place_id
+ *   node scripts/enrich-places-google-details.cjs --category restaurant   # one category
+ *
+ * Recommended workflow:
+ *   1. First run:  node scripts/enrich-places-google-details.cjs
+ *   2. Monthly:    node scripts/enrich-places-google-details.cjs --only-missing   (new places only)
+ *   3. Quarterly:  node scripts/enrich-places-google-details.cjs --refresh-stale 90
  */
 'use strict';
 
@@ -67,15 +81,18 @@ const BATCH_SIZE     = 200;   // Supabase fetch page size
 const MAX_ERRORS     = 20;    // Stop if too many API errors
 
 // ── CLI args ──────────────────────────────────────────────────────────────────
-const args         = process.argv.slice(2);
-const DRY_RUN      = args.includes('--dry-run');
-const ONLY_MISSING = args.includes('--only-missing');
-const limitIdx     = args.indexOf('--limit');
-const LIMIT        = limitIdx !== -1 ? parseInt(args[limitIdx + 1], 10) : Infinity;
-const placeIdx     = args.indexOf('--place');
-const SINGLE_PLACE = placeIdx !== -1 ? args[placeIdx + 1] : null;
-const catIdx       = args.indexOf('--category');
+const args          = process.argv.slice(2);
+const DRY_RUN       = args.includes('--dry-run');
+const ONLY_MISSING  = args.includes('--only-missing');
+const limitIdx      = args.indexOf('--limit');
+const LIMIT         = limitIdx !== -1 ? parseInt(args[limitIdx + 1], 10) : Infinity;
+const placeIdx      = args.indexOf('--place');
+const SINGLE_PLACE  = placeIdx !== -1 ? args[placeIdx + 1] : null;
+const catIdx        = args.indexOf('--category');
 const CATEGORY_FILTER = catIdx !== -1 ? args[catIdx + 1] : null;
+const staleIdx      = args.indexOf('--refresh-stale');
+// --refresh-stale N  → re-fetch places where hoursUpdatedAt is older than N days
+const REFRESH_STALE_DAYS = staleIdx !== -1 ? parseInt(args[staleIdx + 1], 10) : null;
 
 // ── HTTP helpers ──────────────────────────────────────────────────────────────
 function httpsGet(url) {
@@ -118,7 +135,7 @@ function supabaseRequest(path, method, body) {
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 // ── Supabase helpers ──────────────────────────────────────────────────────────
-async function fetchPlacePage(offset, onlyMissing, category) {
+async function fetchPlacePage(offset, onlyMissing, category, refreshStaleDays) {
   let url = `/rest/v1/places?select=id,raw,enriched&order=id&offset=${offset}&limit=${BATCH_SIZE}`;
   if (onlyMissing) {
     // Only fetch places where enriched hours is null
@@ -129,7 +146,19 @@ async function fetchPlacePage(offset, onlyMissing, category) {
   }
   const res = await supabaseRequest(url, 'GET', null);
   if (res.status !== 200) throw new Error(`Supabase fetch failed: ${res.status} ${res.body}`);
-  return JSON.parse(res.body);
+  let rows = JSON.parse(res.body);
+
+  // Filter client-side for stale rows (Supabase can't easily filter nested JSONB dates)
+  if (refreshStaleDays != null) {
+    const cutoff = new Date(Date.now() - refreshStaleDays * 86400000).toISOString();
+    rows = rows.filter(row => {
+      const updatedAt = row.enriched?.hoursUpdatedAt;
+      // Include if no timestamp (never enriched) OR timestamp is older than cutoff
+      return !updatedAt || updatedAt < cutoff;
+    });
+  }
+
+  return rows;
 }
 
 async function patchEnriched(dbId, enrichedPatch) {
@@ -183,6 +212,7 @@ function parseGoogleDetails(result) {
   if (result.opening_hours?.weekday_text?.length) {
     patch.hours = result.opening_hours.weekday_text.join(' | ');
     patch.hoursSource = 'google';
+    patch.hoursUpdatedAt = new Date().toISOString();  // stamp for stale-refresh logic
   }
 
   // Website
@@ -232,8 +262,11 @@ function parseGoogleDetails(result) {
 // ── Main ──────────────────────────────────────────────────────────────────────
 async function main() {
   console.log('🗺️  ABQ Unplugged — Google Places Details Enrichment');
-  console.log(`   Mode: ${DRY_RUN ? 'DRY RUN' : 'LIVE'}${ONLY_MISSING ? ' (only missing hours)' : ' (all places)'}${CATEGORY_FILTER ? ` category=${CATEGORY_FILTER}` : ''}`);
+  const modeStr = ONLY_MISSING ? ' (only missing)' : REFRESH_STALE_DAYS ? ` (refresh stale >${REFRESH_STALE_DAYS}d)` : ' (all places)';
+  console.log(`   Mode: ${DRY_RUN ? 'DRY RUN' : 'LIVE'}${modeStr}${CATEGORY_FILTER ? ` category=${CATEGORY_FILTER}` : ''}`);
   if (LIMIT !== Infinity) console.log(`   Limit: ${LIMIT} places`);
+  console.log(`   💡 Data saved to Supabase permanently — you only pay once per place.`);
+  if (!DRY_RUN) console.log(`   💳 Check Google credit: console.cloud.google.com → Billing`);
   console.log('');
 
   let processed = 0, enriched = 0, skipped = 0, errors = 0;
@@ -262,7 +295,7 @@ async function main() {
   while (processed < LIMIT) {
     let page;
     try {
-      page = await fetchPlacePage(offset, ONLY_MISSING, CATEGORY_FILTER);
+      page = await fetchPlacePage(offset, ONLY_MISSING, CATEGORY_FILTER, REFRESH_STALE_DAYS);
     } catch (err) {
       console.error('❌ Supabase fetch error:', err.message);
       break;
