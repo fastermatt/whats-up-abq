@@ -2307,44 +2307,120 @@ function ReviewSection({
 }
 
 // ─── Calendar / Share helpers ────────────────────────────────────────────────
+
+/** Escape special chars for iCal text fields (RFC 5545 §3.3.11) */
+function icsEscape(str: string): string {
+  return str.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+}
+
+/** Fold long lines per RFC 5545 §3.1 (max 75 octets per line) */
+function icsFoldLines(ics: string): string {
+  return ics.split('\r\n').map(line => {
+    if (line.length <= 75) return line;
+    const parts: string[] = [];
+    parts.push(line.substring(0, 75));
+    let rest = line.substring(75);
+    while (rest.length > 0) {
+      parts.push(' ' + rest.substring(0, 74));
+      rest = rest.substring(74);
+    }
+    return parts.join('\r\n');
+  }).join('\r\n');
+}
+
 function makeCalendarICS(event: TMEvent): string {
   const venue = event._embedded?.venues?.[0];
   const start = event.dates?.start;
   if (!start?.localDate) return '';
+
   const dateStr = start.localDate.replace(/-/g, '');
   const timeStr = start.localTime ? start.localTime.replace(/:/g, '').substring(0, 6) : '120000';
   const startMS = new Date(`${start.localDate}T${start.localTime || '12:00:00'}`).getTime();
   const endDate = new Date(startMS + 2 * 60 * 60 * 1000);
   const endDateStr = endDate.toISOString().substring(0, 10).replace(/-/g, '');
   const endTimeStr = endDate.toTimeString().substring(0, 8).replace(/:/g, '');
+
   const ticketUrl = event.ticketLinks?.[0]?.url || event.url || '';
   const locationStr = [venue?.name, venue?.address?.line1, 'Albuquerque, NM'].filter(Boolean).join(', ');
+
+  // Build description with event details
+  const descParts: string[] = [];
+  if (venue?.name) descParts.push(`Venue: ${venue.name}`);
+  if (start.localTime) descParts.push(`Time: ${formatTime(start.localTime)}`);
+  if (ticketUrl) descParts.push(`Tickets: ${ticketUrl}`);
+  descParts.push('', 'Found on ABQ Unplugged — abqunplugged.com');
+  const description = descParts.join('\\n');
+
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+
   const lines = [
-    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//ABQ Unplugged//EN', 'CALSCALE:GREGORIAN',
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//ABQ Unplugged//abqunplugged.com//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    // VTIMEZONE for America/Denver (MST/MDT) — required for TZID references
+    'BEGIN:VTIMEZONE',
+    'TZID:America/Denver',
+    'BEGIN:STANDARD',
+    'DTSTART:19701101T020000',
+    'RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11',
+    'TZOFFSETFROM:-0600',
+    'TZOFFSETTO:-0700',
+    'TZNAME:MST',
+    'END:STANDARD',
+    'BEGIN:DAYLIGHT',
+    'DTSTART:19700308T020000',
+    'RRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3',
+    'TZOFFSETFROM:-0700',
+    'TZOFFSETTO:-0600',
+    'TZNAME:MDT',
+    'END:DAYLIGHT',
+    'END:VTIMEZONE',
     'BEGIN:VEVENT',
     `UID:${event.id}@abqunplugged.com`,
-    `DTSTAMP:${new Date().toISOString().replace(/[-:.]/g, '').substring(0, 15)}Z`,
+    `DTSTAMP:${stamp}`,
     `DTSTART;TZID=America/Denver:${dateStr}T${timeStr}`,
     `DTEND;TZID=America/Denver:${endDateStr}T${endTimeStr}`,
-    `SUMMARY:${event.name}`,
-    locationStr ? `LOCATION:${locationStr}` : '',
+    `SUMMARY:${icsEscape(event.name)}`,
+    locationStr ? `LOCATION:${icsEscape(locationStr)}` : '',
     ticketUrl ? `URL:${ticketUrl}` : '',
-    ticketUrl ? `DESCRIPTION:Get tickets: ${ticketUrl}` : 'DESCRIPTION:Added from ABQ Unplugged',
-    'END:VEVENT', 'END:VCALENDAR',
+    `DESCRIPTION:${description}`,
+    `STATUS:CONFIRMED`,
+    'END:VEVENT',
+    'END:VCALENDAR',
   ].filter(Boolean).join('\r\n');
-  return lines;
+
+  return icsFoldLines(lines);
 }
 
 function addToCalendar(event: TMEvent) {
   const ics = makeCalendarICS(event);
   if (!ics) return;
-  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${event.name.replace(/[^a-z0-9]/gi, '_').substring(0, 40)}.ics`;
-  a.click();
-  URL.revokeObjectURL(url);
+
+  // iOS Safari doesn't support blob: downloads or the download attribute.
+  // Use a data: URI opened in a new window — Safari recognizes text/calendar
+  // and hands it off to the Calendar app.
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+  if (isIOS || isSafari) {
+    // data: URI approach — Safari intercepts text/calendar and opens Calendar.app
+    const dataUri = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
+    window.open(dataUri, '_blank');
+  } else {
+    // Standard blob download for Chrome, Firefox, etc.
+    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${event.name.replace(/[^a-z0-9]/gi, '_').substring(0, 40)}.ics`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
 }
 
 async function shareEvent(event: TMEvent) {
