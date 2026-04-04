@@ -2532,6 +2532,7 @@ interface ShareCardData {
   category: string;
   metaLines: string[];
   slug: string; // for download filename + analytics
+  deepLink: string; // canonical URL for this event/place
 }
 
 interface CardAdjustments {
@@ -2777,7 +2778,7 @@ function ShareCardModal({ data, photoUrl, onClose, analyticsType }: {
     const file = new File([blob], `${data.slug}.png`, { type: 'image/png' });
     if (navigator.canShare?.({ files: [file] })) {
       try {
-        await navigator.share({ files: [file], title: data.title, text: `Check out ${data.title} — found on ABQ Unplugged!\nabqunplugged.com` });
+        await navigator.share({ files: [file], title: data.title, text: `Check out ${data.title} on ABQ Unplugged!\n${data.deepLink}` });
         trackEvent('instagram_card_share', { type: analyticsType, format, method: 'web_share' });
         setShareState('shared'); setTimeout(() => setShareState('idle'), 2000);
       } catch { /* user cancelled */ }
@@ -2882,16 +2883,21 @@ function EventShareCardModal({ event, onClose }: { event: TMEvent; onClose: () =
       : '',
     event._embedded?.venues?.[0]?.name || '',
   ].filter(Boolean);
-  const data: ShareCardData = { title: event.name, category, metaLines, slug: event.name.replace(/[^a-z0-9]/gi, '-').toLowerCase() };
+  const data: ShareCardData = {
+    title: event.name, category, metaLines,
+    slug: event.name.replace(/[^a-z0-9]/gi, '-').toLowerCase(),
+    deepLink: `https://abqunplugged.com/event/${encodeURIComponent(event.id)}`,
+  };
   return <ShareCardModal data={data} photoUrl={getBestEventImage(event.images)} onClose={onClose} analyticsType="event" />;
 }
 
 function PlaceShareCardModal({ place, onClose }: { place: Place; onClose: () => void }) {
-  const metaLines = [
-    place.address || '',
-    place.hours || '',
-  ].filter(Boolean);
-  const data: ShareCardData = { title: place.name, category: place.category || 'Place', metaLines, slug: place.name.replace(/[^a-z0-9]/gi, '-').toLowerCase() };
+  const metaLines = [place.address || '', place.hours || ''].filter(Boolean);
+  const data: ShareCardData = {
+    title: place.name, category: place.category || 'Place', metaLines,
+    slug: place.name.replace(/[^a-z0-9]/gi, '-').toLowerCase(),
+    deepLink: `https://abqunplugged.com/place/${encodeURIComponent(place.id)}`,
+  };
   return <ShareCardModal data={data} photoUrl={place.image || place.thumbnail || ''} onClose={onClose} analyticsType="place" />;
 }
 
