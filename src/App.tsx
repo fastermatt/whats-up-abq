@@ -60,7 +60,7 @@ function useTypewriter(text: string, startDelay = 400) {
 if (typeof document !== 'undefined' && !document.getElementById('card-fade-style')) {
   const s = document.createElement('style');
   s.id = 'card-fade-style';
-  s.textContent = '@keyframes cardFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes neighborhoodFloat { 0%,100%{transform:translateX(0px)} 30%{transform:translateX(-5px)} 70%{transform:translateX(5px)} } @keyframes ptrSweep { 0%{background-position:-200% center} 100%{background-position:200% center} } @keyframes ptrDots { 0%,80%,100%{transform:scale(0.6);opacity:0.3} 40%{transform:scale(1);opacity:1} } @keyframes kenBurns0 { from { transform: scale(1.05) translate(0%,0%); } to { transform: scale(1.18) translate(-2%,-1%); } } @keyframes kenBurns1 { from { transform: scale(1.1) translate(-1%,1%); } to { transform: scale(1.2) translate(2%,-2%); } } @keyframes kenBurns2 { from { transform: scale(1.08) translate(1%,-1%); } to { transform: scale(1.18) translate(-1%,2%); } } @keyframes kenBurns3 { from { transform: scale(1.12) translate(-2%,0%); } to { transform: scale(1.05) translate(1%,-1%); } } @keyframes cursorBlink { 0%,100% { opacity:1; } 50% { opacity:0; } } @keyframes heartPop { 0% { transform: scale(1); } 15% { transform: scale(1.35); } 30% { transform: scale(0.9); } 45% { transform: scale(1.15); } 60% { transform: scale(0.97); } 75% { transform: scale(1.05); } 100% { transform: scale(1); } } @keyframes heartParticles { 0% { opacity: 1; transform: scale(0.5); } 50% { opacity: 0.8; } 100% { opacity: 0; transform: scale(2.5); } } .like-btn-pop { animation: heartPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; } .like-btn-particles::after { content: ""; position: absolute; inset: -8px; border-radius: 50%; background: radial-gradient(circle, var(--brand) 0%, transparent 70%); animation: heartParticles 0.5s ease-out forwards; pointer-events: none; z-index: -1; } .nav-press-btn:active { top: 4px !important; box-shadow: 0 1px 0 #0a0a0a, 0 0px 2px rgba(0,0,0,0.1) !important; } .haptic-switch { position:fixed; top:-9999px; left:-9999px; opacity:0; pointer-events:none; }';
+  s.textContent = '@keyframes cardFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes hoodBubble0 { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-4px,2px)} 50%{transform:translate(3px,-1px)} 75%{transform:translate(-2px,-2px)} } @keyframes hoodBubble1 { 0%,100%{transform:translate(0,0)} 20%{transform:translate(3px,-3px)} 55%{transform:translate(-3px,2px)} 80%{transform:translate(2px,1px)} } @keyframes hoodBubble2 { 0%,100%{transform:translate(0,0)} 30%{transform:translate(-3px,-2px)} 60%{transform:translate(4px,1px)} 85%{transform:translate(-1px,3px)} } @keyframes hoodBubble3 { 0%,100%{transform:translate(0,0)} 35%{transform:translate(2px,3px)} 65%{transform:translate(-4px,-1px)} 90%{transform:translate(3px,-2px)} } @keyframes hoodBubble4 { 0%,100%{transform:translate(0,0)} 15%{transform:translate(-2px,-3px)} 45%{transform:translate(3px,2px)} 70%{transform:translate(-3px,1px)} } @keyframes hoodBubble5 { 0%,100%{transform:translate(0,0)} 40%{transform:translate(4px,-2px)} 70%{transform:translate(-2px,3px)} 85%{transform:translate(1px,-1px)} } @keyframes ptrSweep { 0%{background-position:-200% center} 100%{background-position:200% center} } @keyframes ptrDots { 0%,80%,100%{transform:scale(0.6);opacity:0.3} 40%{transform:scale(1);opacity:1} } @keyframes kenBurns0 { from { transform: scale(1.05) translate(0%,0%); } to { transform: scale(1.18) translate(-2%,-1%); } } @keyframes kenBurns1 { from { transform: scale(1.1) translate(-1%,1%); } to { transform: scale(1.2) translate(2%,-2%); } } @keyframes kenBurns2 { from { transform: scale(1.08) translate(1%,-1%); } to { transform: scale(1.18) translate(-1%,2%); } } @keyframes kenBurns3 { from { transform: scale(1.12) translate(-2%,0%); } to { transform: scale(1.05) translate(1%,-1%); } } @keyframes cursorBlink { 0%,100% { opacity:1; } 50% { opacity:0; } } @keyframes heartPop { 0% { transform: scale(1); } 15% { transform: scale(1.35); } 30% { transform: scale(0.9); } 45% { transform: scale(1.15); } 60% { transform: scale(0.97); } 75% { transform: scale(1.05); } 100% { transform: scale(1); } } @keyframes heartParticles { 0% { opacity: 1; transform: scale(0.5); } 50% { opacity: 0.8; } 100% { opacity: 0; transform: scale(2.5); } } .like-btn-pop { animation: heartPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; } .like-btn-particles::after { content: ""; position: absolute; inset: -8px; border-radius: 50%; background: radial-gradient(circle, var(--brand) 0%, transparent 70%); animation: heartParticles 0.5s ease-out forwards; pointer-events: none; z-index: -1; } .nav-press-btn:active { top: 4px !important; box-shadow: 0 1px 0 #0a0a0a, 0 0px 2px rgba(0,0,0,0.1) !important; } .haptic-switch { position:fixed; top:-9999px; left:-9999px; opacity:0; pointer-events:none; }';
   document.head.appendChild(s);
 }
 
@@ -1698,7 +1698,7 @@ function PlaceDetailModal({
       <div className="relative flex-shrink-0" style={{ height: '260px' }}>
         <PlacePhotoGallery place={place} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
-        <div className="absolute top-4 left-4 right-4 flex items-center justify-between" style={{ zIndex: 3 }}>
+        <div className="absolute left-4 right-4 flex items-center justify-between" style={{ zIndex: 3, top: 'max(16px, env(safe-area-inset-top, 16px))' }}>
           <button
             onClick={onClose}
             aria-label="Close"
@@ -2389,8 +2389,8 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
       <div className="relative flex-shrink-0" style={{ height: '280px' }}>
         <EventCardImageSlider event={event} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent pointer-events-none" />
-        {/* Top bar: back + share */}
-        <div className="absolute top-4 left-4 right-4 flex items-center justify-between" style={{ zIndex: 3 }}>
+        {/* Top bar: back + share — padded for PWA safe area */}
+        <div className="absolute left-4 right-4 flex items-center justify-between" style={{ zIndex: 3, top: 'max(16px, env(safe-area-inset-top, 16px))' }}>
           <button
             onClick={onClose}
             aria-label="Close"
@@ -3849,7 +3849,7 @@ function DiscoverScreen({
           <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'var(--brand)', fontVariationSettings: "'FILL' 1" }}>location_city</span>
           Neighborhoods
         </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', animation: 'neighborhoodFloat 5s ease-in-out infinite' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
           {[
             { name: 'Old Town', icon: 'account_balance', accent: 'var(--brand)' },
             { name: 'Nob Hill', icon: 'local_cafe', accent: '#6B8F71' },
@@ -3857,7 +3857,7 @@ function DiscoverScreen({
             { name: 'Rio Grande', icon: 'nature', accent: '#5B7FA5' },
             { name: 'NE Heights', icon: 'landscape', accent: '#C8963E' },
             { name: 'South Valley', icon: 'storefront', accent: '#8B6B8A' },
-          ].map(({ name, icon, accent }) => (
+          ].map(({ name, icon, accent }, idx) => (
             <button key={name}
               className="flex items-center justify-center gap-1.5 transition-all active:scale-95"
               style={{
@@ -3868,6 +3868,7 @@ function DiscoverScreen({
                 cursor: 'pointer',
                 fontFamily: 'Public Sans, sans-serif',
                 width: '100%',
+                animation: `hoodBubble${idx} ${3.5 + idx * 0.4}s ease-in-out infinite`,
               }}
               onClick={() => onNavigatePlaces?.('All', name)}>
               <span className="material-symbols-outlined" style={{ fontSize: '15px', color: accent, fontVariationSettings: "'FILL' 1, 'wght' 500" }}>{icon}</span>
