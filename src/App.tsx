@@ -1485,6 +1485,91 @@ function PlacePhotoGallery({ place }: { place: Place }) {
   );
 }
 
+// ─── Feedback Widget ──────────────────────────────────────────────────────────
+function FeedbackWidget({ contextType, contextId, contextName }: { contextType: 'place' | 'event' | 'general'; contextId?: string; contextName?: string }) {
+  const [open, setOpen] = React.useState(false);
+  const [category, setCategory] = React.useState<'bug'|'suggestion'|'compliment'|'general'>('general');
+  const [message, setMessage] = React.useState('');
+  const [sent, setSent] = React.useState(false);
+  const [sending, setSending] = React.useState(false);
+
+  const submit = async () => {
+    if (!message.trim()) return;
+    setSending(true);
+    try {
+      await (supabase.from as any)('user_feedback').insert({
+        url: window.location.href,
+        context_type: contextType,
+        context_id: contextId || null,
+        context_name: contextName || null,
+        category,
+        message: message.trim(),
+      });
+      setSent(true);
+      setMessage('');
+      setTimeout(() => { setSent(false); setOpen(false); }, 2500);
+    } catch (e) { console.error(e); }
+    setSending(false);
+  };
+
+  return (
+    <div className="px-5 pb-6">
+      {!open ? (
+        <button
+          onClick={() => setOpen(true)}
+          className="flex items-center gap-1.5 text-xs"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#aaa', fontFamily: 'Public Sans, sans-serif', padding: '4px 0' }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: '14px', color: '#ccc' }}>flag</span>
+          Report an issue or give feedback
+        </button>
+      ) : (
+        <div style={{ background: '#f8f8f8', borderRadius: 12, padding: '14px 16px', border: '1px solid #eee' }}>
+          {sent ? (
+            <p className="text-sm text-center font-bold" style={{ color: '#059669', fontFamily: 'Public Sans, sans-serif' }}>✓ Thanks for your feedback!</p>
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', color: '#555', letterSpacing: '0.08em' }}>Feedback</p>
+                <button onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: 18, lineHeight: 1 }}>×</button>
+              </div>
+              <div className="flex gap-2 mb-3 flex-wrap">
+                {(['bug','suggestion','compliment','general'] as const).map(c => (
+                  <button key={c} onClick={() => setCategory(c)} style={{
+                    padding: '4px 10px', borderRadius: 999, fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                    border: `1.5px solid ${category === c ? '#1a1a1a' : '#ddd'}`,
+                    background: category === c ? '#1a1a1a' : 'white',
+                    color: category === c ? 'white' : '#555',
+                    fontFamily: 'Public Sans, sans-serif',
+                  }}>
+                    {c === 'bug' ? '🐛 Bug' : c === 'suggestion' ? '💡 Idea' : c === 'compliment' ? '🌟 Love it' : '💬 Other'}
+                  </button>
+                ))}
+              </div>
+              <textarea
+                value={message}
+                onChange={e => setMessage(e.target.value)}
+                placeholder="What's on your mind?"
+                rows={3}
+                className="w-full rounded-lg border text-sm p-3 resize-none focus:outline-none"
+                style={{ fontFamily: 'Public Sans, sans-serif', borderColor: '#e5e7eb', background: 'white' }}
+              />
+              <button
+                onClick={submit}
+                disabled={sending || !message.trim()}
+                className="mt-2 w-full py-2.5 rounded-lg text-sm font-black text-white"
+                style={{ background: sending || !message.trim() ? '#ccc' : 'var(--brand)', fontFamily: 'Public Sans, sans-serif', border: 'none', cursor: sending || !message.trim() ? 'default' : 'pointer' }}
+              >
+                {sending ? 'Sending…' : 'Send Feedback'}
+              </button>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PlaceDetailModal({
   place, onClose, isCheckedIn, onCheckIn, checkInError, tooFar, user, onShowAuth, isSaved, onToggleSave, mapProvider, enrichedDataEnabled,
 }: {
@@ -1864,6 +1949,7 @@ function PlaceDetailModal({
           onShowAuth={onShowAuth}
         />
       </div>
+      <FeedbackWidget contextType="place" contextId={place.id} contextName={place.name} />
     </div>
   </div>
   );
@@ -2555,6 +2641,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
           </a>
         )}
       </div>
+      <FeedbackWidget contextType="event" contextId={event.id} contextName={event.name} />
     </div>
   </div>
   );
