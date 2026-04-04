@@ -2781,7 +2781,6 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
   const [shared, setShared] = useState(false);
   const [showShareCard, setShowShareCard] = useState(false);
   const [venueExpanded, setVenueExpanded] = useState(false);
-  if (showShareCard) return <EventShareCardModal event={event} onClose={() => setShowShareCard(false)} />;
   const venue = event._embedded?.venues?.[0];
   const category = getEventCategory(event);
   const price = event.priceRanges?.[0];
@@ -2799,7 +2798,9 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-[150] flex justify-center" style={{ background: 'rgba(0,0,0,0.5)' }} onClick={onClose}>
+    <>
+    {showShareCard && <EventShareCardModal event={event} onClose={() => setShowShareCard(false)} />}
+    {!showShareCard && <div className="fixed inset-0 z-[150] flex justify-center" style={{ background: 'rgba(0,0,0,0.5)' }} onClick={onClose}>
       <div className="flex flex-col overflow-y-auto w-full" style={{ maxWidth: '480px', background: 'white' }} onClick={e => e.stopPropagation()}>
       <div className="relative flex-shrink-0" style={{ height: '280px' }}>
         <EventCardImageSlider event={event} />
@@ -3100,7 +3101,8 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
       </div>
       <FeedbackWidget contextType="event" contextId={event.id} contextName={event.name} />
     </div>
-  </div>
+  </div>}
+    </>
   );
 }
 
