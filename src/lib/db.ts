@@ -218,9 +218,7 @@ export async function fetchEventsFromDB(): Promise<Record<string, unknown[]>> {
 export async function fetchPlacesFromDB(): Promise<unknown[]> {
   const PAGE = 1000;
 
-  // Get the total row count so we can fire all page requests in parallel
-  // instead of sequentially (sequential was ~5 × 2s = 10s on cold Supabase,
-  // which triggered the 8 s timeout and fell back to the stale static JSON).
+  // Get the total row count — use the Content-Range header value
   const { count, error: countErr } = await supabase
     .from('places')
     .select('*', { count: 'exact', head: true });
@@ -231,25 +229,33 @@ export async function fetchPlacesFromDB(): Promise<unknown[]> {
 
   const pageCount = Math.ceil(total / PAGE);
 
-  // Fire all page fetches concurrently — ~5× faster than sequential pagination
-  const pageResults = await Promise.all(
+  // Fire all page fetches concurrently. Exclude `enriched`/`hide_enriched` from
+  // the initial load — they are large and cause statement timeouts when 5 queries
+  // hit the DB simultaneously. Enriched data is fetched on demand in the detail modal.
+  // Use Promise.allSettled so a single failing page doesn't wipe out all results.
+  const pageResults = await Promise.allSettled(
     Array.from({ length: pageCount }, (_, i) =>
       supabase
         .from('places')
-        .select('raw,enriched,hide_enriched,cached_photo_url,cached_thumbnail_url')
+        .select('raw,cached_photo_url,cached_thumbnail_url')
         .range(i * PAGE, (i + 1) * PAGE - 1)
     )
   );
 
   const allRows: unknown[] = [];
-  for (const { data, error } of pageResults) {
-    if (error) throw error;
+  for (const result of pageResults) {
+    if (result.status === 'rejected') {
+      console.warn('[fetchPlacesFromDB] A page fetch was rejected:', result.reason);
+      continue;
+    }
+    const { data, error } = result.value;
+    if (error) {
+      console.warn('[fetchPlacesFromDB] A page returned an error:', error.message);
+      continue;
+    }
     for (const row of (data ?? [])) {
-      const typed = row as { raw: Record<string, unknown>; enriched?: Record<string, unknown>; hide_enriched?: boolean; cached_photo_url?: string; cached_thumbnail_url?: string };
+      const typed = row as { raw: Record<string, unknown>; cached_photo_url?: string; cached_thumbnail_url?: string };
       const place = transformGoogleRaw(typed.raw, typed.cached_photo_url, typed.cached_thumbnail_url);
-      // Attach enriched data directly so PlaceDetailModal can use it without a second fetch
-      if (typed.enriched) (place as Record<string, unknown>)._enriched = typed.enriched;
-      if (typed.hide_enriched) (place as Record<string, unknown>)._hideEnriched = true;
       allRows.push(place);
     }
   }
