@@ -30,7 +30,7 @@ async function cfgSet(key: string, value: any) {
 export type AdminSection =
   | 'dashboard' | 'banners' | 'events' | 'places'
   | 'categories' | 'content' | 'refresh' | 'reviews'
-  | 'analytics' | 'tagrules' | 'settings' | 'theme' | 'feedback';
+  | 'analytics' | 'tagrules' | 'settings' | 'theme' | 'feedback' | 'bulkimport';
 
 interface Banner {
   id: string; message: string; type: 'info'|'warning'|'promo';
@@ -520,6 +520,118 @@ function EventsSection() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// BULK IMPORT (Events)
+// ─────────────────────────────────────────────────────────────────────────────
+function BulkImportSection() {
+  const [input, setInput] = useState('');
+  const [preview, setPreview] = useState<any[]>([]);
+  const [importing, setImporting] = useState(false);
+
+  const parseInput = () => {
+    const lines = input.trim().split('\n').filter(l => l.trim());
+    const parsed = lines.map((line, idx) => {
+      const parts = line.split('|').map(p => p.trim());
+      return {
+        idx,
+        name: parts[0] || '',
+        date: parts[1] || '',
+        time: parts[2] || '',
+        venue: parts[3] || '',
+        category: parts[4] || 'general',
+        ticketUrl: parts[5] || '',
+        error: !parts[0] || !parts[1] ? 'Missing event name or date' : null,
+      };
+    });
+    setPreview(parsed);
+  };
+
+  const doImport = async () => {
+    setImporting(true);
+    let success = 0, failed = 0;
+    for (const item of preview) {
+      if (item.error) { failed++; continue; }
+      try {
+        await sb('events').insert({
+          name: item.name,
+          event_date: item.date,
+          time: item.time || null,
+          venue: item.venue || null,
+          category: item.category,
+          ticket_url: item.ticketUrl || null,
+          source: 'manual',
+          hidden: false,
+          featured: false,
+        });
+        success++;
+      } catch (e) {
+        failed++;
+      }
+    }
+    setImporting(false);
+    toast(`Imported ${success} events${failed > 0 ? `, ${failed} failed` : ''}`, failed > 0 ? 'err' : 'ok');
+    setInput('');
+    setPreview([]);
+  };
+
+  return (
+    <div>
+      <SectionHeader title="Bulk Event Import" sub="Paste events in format: Name | YYYY-MM-DD | HH:MM | Venue | Category | Ticket URL" />
+
+      <div style={{...card, marginBottom:20}}>
+        <label style={{...lbl, marginBottom:8}}>Paste Events (one per line)</label>
+        <textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Event Name | 2025-05-15 | 19:00 | Venue Name | music | https://tickets.url"
+          style={{...inp, minHeight:140, fontFamily:'monospace', fontSize:12, resize:'vertical'}}
+        />
+        <button onClick={parseInput} style={{...btnS, marginTop:10}}>Parse Preview</button>
+      </div>
+
+      {preview.length > 0 && (
+        <div style={{...card, marginBottom:20}}>
+          <h3 style={{fontSize:14, fontWeight:700, marginBottom:12}}>Preview ({preview.length} events)</h3>
+          <div style={{overflowX:'auto'}}>
+            <table style={{width:'100%', borderCollapse:'collapse', fontSize:12}}>
+              <thead><tr>
+                <th style={{...th}}>Name</th>
+                <th style={{...th}}>Date</th>
+                <th style={{...th}}>Time</th>
+                <th style={{...th}}>Venue</th>
+                <th style={{...th}}>Category</th>
+                <th style={{...th}}>Status</th>
+              </tr></thead>
+              <tbody>{preview.map((p) => (
+                <tr key={p.idx} style={{background: p.error ? '#fef2f2' : '#f9fafb'}}>
+                  <td style={{...td, maxWidth:200, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{p.name}</td>
+                  <td style={{...td, whiteSpace:'nowrap'}}>{p.date}</td>
+                  <td style={{...td, whiteSpace:'nowrap'}}>{p.time || '—'}</td>
+                  <td style={{...td, maxWidth:180, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{p.venue || '—'}</td>
+                  <td style={{...td, fontSize:11}}>{p.category}</td>
+                  <td style={{...td, color: p.error ? '#dc2626' : '#059669', fontWeight:600, fontSize:11}}>
+                    {p.error ? '❌ ' + p.error : '✓ Ready'}
+                  </td>
+                </tr>
+              ))}</tbody>
+            </table>
+          </div>
+          <div style={{display:'flex', gap:10, marginTop:14, justifyContent:'flex-end'}}>
+            <button onClick={() => { setInput(''); setPreview([]); }} style={btnS}>Clear</button>
+            <button
+              onClick={doImport}
+              disabled={importing || preview.some(p => p.error)}
+              style={{...btnP, opacity: (importing || preview.some(p => p.error)) ? 0.6 : 1}}
+            >
+              {importing ? 'Importing…' : `Import All (${preview.filter(p => !p.error).length})`}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // PLACES  (schema: id, source, raw jsonb, hidden, featured)
 // ─────────────────────────────────────────────────────────────────────────────
 function PlacesSection() {
@@ -547,6 +659,15 @@ function PlacesSection() {
   const [enrichedEnabled, setEnrichedEnabled] = useState(true);
   const [enrichedLoading, setEnrichedLoading] = useState(false);
   const [filterEnriched, setFilterEnriched] = useState<'all'|'enriched'|'missing'>('all');
+  const [addingPlace, setAddingPlace] = useState(false);
+  const [addName, setAddName] = useState('');
+  const [addCategory, setAddCategory] = useState('restaurant');
+  const [addAddress, setAddAddress] = useState('');
+  const [addDescription, setAddDescription] = useState('');
+  const [addWebsite, setAddWebsite] = useState('');
+  const [addPhone, setAddPhone] = useState('');
+  const [addPhotoUrl, setAddPhotoUrl] = useState('');
+  const [addSaving, setAddSaving] = useState(false);
 
   // Load global enriched data toggle from config
   useEffect(() => {
@@ -679,9 +800,41 @@ function PlacesSection() {
     load();
   };
 
+  const saveAddPlace = async () => {
+    if (!addName.trim() || !addCategory) { toast('Name and category required', 'err'); return; }
+    setAddSaving(true);
+    try {
+      const raw = {
+        name: addName.trim(),
+        category: addCategory,
+        vicinity: addAddress.trim(),
+        address: addAddress.trim(),
+        description: addDescription.trim(),
+        types: [addCategory],
+      };
+      if (addPhotoUrl.trim()) raw.overridePhoto = addPhotoUrl.trim();
+
+      const enriched: any = {};
+      if (addWebsite.trim()) enriched.website = addWebsite.trim();
+      if (addPhone.trim()) enriched.phone = addPhone.trim();
+
+      const payload: any = { source: 'manual', raw, hidden: false, featured: false };
+      if (Object.keys(enriched).length > 0) payload.enriched = enriched;
+
+      const { error } = await sb('places').insert(payload);
+      if (error) { toast('Error: '+error.message, 'err'); return; }
+      toast('Place created ✓');
+      setAddingPlace(false);
+      setAddName(''); setAddCategory('restaurant'); setAddAddress(''); setAddDescription(''); setAddWebsite(''); setAddPhone(''); setAddPhotoUrl('');
+      load();
+    } finally {
+      setAddSaving(false);
+    }
+  };
+
   return (
     <div>
-      <SectionHeader title="Places" sub={`${total.toLocaleString()} total`} />
+      <SectionHeader title="Places" sub={`${total.toLocaleString()} total`} action={<button onClick={()=>setAddingPlace(true)} style={btnP}>+ Add Place</button>} />
 
       {/* Quick Feature / Place of the Day search */}
       <div style={{...card, marginBottom: 16, borderLeft: '3px solid #b95c43'}}>
@@ -904,6 +1057,32 @@ function PlacesSection() {
               <button style={btnS} onClick={()=>setEditPlace(null)}>Cancel</button>
               {editPlace.raw?.overridePhoto&&<button style={{...btnS,color:'#dc2626',borderColor:'#fca5a5'}} onClick={()=>setEditPhotoUrl('')}>Clear Override</button>}
               <button style={{...btnP,opacity:editSaving?0.7:1}} onClick={saveEdit} disabled={editSaving}>{editSaving?'Saving…':'Save Changes'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {addingPlace&&(
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.55)',zIndex:9998,display:'flex',alignItems:'center',justifyContent:'center',padding:16}} onClick={e=>{if(e.target===e.currentTarget)setAddingPlace(false);}}>
+          <div style={{background:'#fff',borderRadius:14,padding:28,maxWidth:500,width:'100%',boxShadow:'0 8px 40px rgba(0,0,0,0.25)',maxHeight:'90vh',overflowY:'auto'}}>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
+              <h3 style={{fontSize:16,fontWeight:800,color:'#18181b',margin:0}}>Add New Place</h3>
+              <button onClick={()=>setAddingPlace(false)} style={{...btnS,padding:'4px 10px',fontSize:13}}>✕</button>
+            </div>
+            <div style={{display:'flex',flexDirection:'column',gap:14}}>
+              <div><label style={lbl}>Name *</label><input value={addName} onChange={e=>setAddName(e.target.value)} style={inp} placeholder="Place name" /></div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+                <div><label style={lbl}>Category *</label><select value={addCategory} onChange={e=>setAddCategory(e.target.value)} style={inp}>{PLACE_CATS.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
+                <div><label style={lbl}>Phone</label><input value={addPhone} onChange={e=>setAddPhone(e.target.value)} style={inp} placeholder="(505) 123-4567" /></div>
+              </div>
+              <div><label style={lbl}>Address</label><input value={addAddress} onChange={e=>setAddAddress(e.target.value)} style={inp} placeholder="123 Main St, Albuquerque, NM" /></div>
+              <div><label style={lbl}>Website</label><input value={addWebsite} onChange={e=>setAddWebsite(e.target.value)} style={inp} placeholder="https://example.com" /></div>
+              <div><label style={lbl}>Description</label><textarea value={addDescription} onChange={e=>setAddDescription(e.target.value)} style={{...inp,minHeight:60,resize:'vertical'}} placeholder="A short description of this place…" /></div>
+              <div><label style={lbl}>Photo URL (optional)</label><input value={addPhotoUrl} onChange={e=>setAddPhotoUrl(e.target.value)} style={inp} placeholder="https://example.com/photo.jpg" /></div>
+              <div style={{display:'flex',gap:8,justifyContent:'flex-end'}}>
+                <button style={btnS} onClick={()=>setAddingPlace(false)}>Cancel</button>
+                <button style={{...btnP,opacity:addSaving?0.7:1}} onClick={saveAddPlace} disabled={addSaving}>{addSaving?'Creating…':'Create Place'}</button>
+              </div>
             </div>
           </div>
         </div>
@@ -1875,14 +2054,21 @@ function ThemeSection() {
 // ─────────────────────────────────────────────────────────────────────────────
 interface FeedbackItem {
   id: string;
-  url: string | null;
-  context_type: string | null;
-  context_id: string | null;
-  context_name: string | null;
+  url?: string | null;
+  context_type?: string | null;
+  context_id?: string | null;
+  context_name?: string | null;
   category: string;
   message: string;
-  user_email: string | null;
+  user_email?: string | null;
+  name?: string | null;
+  email?: string | null;
   created_at: string;
+  status?: 'new' | 'in-review' | 'resolved' | 'dismissed';
+  admin_notes?: string | null;
+  session_id?: string | null;
+  device?: string | null;
+  page?: string | null;
 }
 
 function FeedbackSection() {
@@ -1890,15 +2076,27 @@ function FeedbackSection() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
   const [confirm, setConfirm] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editStatus, setEditStatus] = useState<string>('');
+  const [editNotes, setEditNotes] = useState('');
 
   const load = async () => {
     setLoading(true);
     try {
-      const { data, error } = await sb('user_feedback')
+      let data: any[] = [];
+      const { data: fbData } = await sb('feedback')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(200);
-      if (!error && data) setItems(data as FeedbackItem[]);
+      if (fbData) data = fbData;
+      if (!data.length) {
+        const { data: ufData } = await sb('user_feedback')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(200);
+        if (ufData) data = ufData;
+      }
+      setItems(data as FeedbackItem[]);
     } catch (e) { console.error(e); }
     setLoading(false);
   };
@@ -1906,10 +2104,25 @@ function FeedbackSection() {
   useEffect(() => { load(); }, []);
 
   const del = async (id: string) => {
-    await sb('user_feedback').delete().eq('id', id);
+    try {
+      await sb('feedback').delete().eq('id', id);
+    } catch {
+      await sb('user_feedback').delete().eq('id', id);
+    }
     setItems(p => p.filter(i => i.id !== id));
     toast('Deleted');
     setConfirm(null);
+  };
+
+  const updateFeedback = async (id: string, status: string, notes: string) => {
+    try {
+      await sb('feedback').update({ status, admin_notes: notes }).eq('id', id);
+    } catch {
+      await sb('user_feedback').update({ status, admin_notes: notes }).eq('id', id);
+    }
+    setItems(p => p.map(i => i.id === id ? { ...i, status: status as any, admin_notes: notes } : i));
+    toast('Updated ✓');
+    setEditingId(null);
   };
 
   const catColor = (c: string) => c === 'bug' ? '#dc2626' : c === 'suggestion' ? '#2563eb' : c === 'compliment' ? '#059669' : '#6b7280';
@@ -1968,6 +2181,11 @@ function FeedbackSection() {
                   <span style={{fontSize:11,fontWeight:700,padding:'3px 8px',borderRadius:999,background:catBg(item.category),color:catColor(item.category)}}>
                     {catLabel(item.category)}
                   </span>
+                  {item.status && (
+                    <span style={{fontSize:11,fontWeight:700,padding:'3px 8px',borderRadius:999,background:item.status==='resolved'?'#d1fae5':item.status==='in-review'?'#fef3c7':item.status==='dismissed'?'#f3f4f6':'#dbeafe',color:item.status==='resolved'?'#065f46':item.status==='in-review'?'#92400e':item.status==='dismissed'?'#6b7280':'#1e40af'}}>
+                      {item.status===('new' as any)?'🆕 New':item.status==='in-review'?'👀 In Review':item.status==='resolved'?'✓ Resolved':'✕ Dismissed'}
+                    </span>
+                  )}
                   {item.context_type && (
                     <span style={{fontSize:11,fontWeight:600,padding:'3px 8px',borderRadius:999,background:'#f3f4f6',color:'#374151'}}>
                       {item.context_type === 'place' ? '📍' : item.context_type === 'event' ? '🎫' : '🌐'} {item.context_name || item.context_id || item.context_type}
@@ -1976,20 +2194,45 @@ function FeedbackSection() {
                 </div>
                 <div style={{display:'flex',alignItems:'center',gap:8,flexShrink:0}}>
                   <span style={{fontSize:11,color:'#9ca3af',whiteSpace:'nowrap'}}>{new Date(item.created_at).toLocaleDateString()}</span>
+                  <button onClick={() => { setEditingId(item.id); setEditStatus(item.status || 'new'); setEditNotes(item.admin_notes || ''); }} style={{...btnS,fontSize:11,padding:'3px 7px'}}>Edit</button>
                   <button onClick={() => setConfirm(item.id)} style={btnD}>×</button>
                 </div>
               </div>
               <p style={{fontSize:14,color:'#1a1a1a',lineHeight:1.6,margin:'0 0 10px',wordBreak:'break-word'}}>{item.message}</p>
+              {item.admin_notes && (
+                <div style={{background:'#f9fafb',border:'1px solid #e5e7eb',borderRadius:6,padding:'8px 10px',marginBottom:10,fontSize:12,color:'#374151'}}>
+                  <span style={{fontWeight:600,color:'#6b7280'}}>📝 Admin notes: </span>{item.admin_notes}
+                </div>
+              )}
               <div style={{display:'flex',flexWrap:'wrap',gap:12,fontSize:11,color:'#9ca3af',borderTop:'1px solid #f3f4f6',paddingTop:8}}>
-                {item.url && (
+                {(item.url || item.page) && (
                   <span style={{fontFamily:'monospace',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:260}}>
-                    🔗 {item.url.replace(/^https?:\/\/[^/]+/,'')}
+                    🔗 {(item.page || item.url || '').replace(/^https?:\/\/[^/]+/,'')}
                   </span>
                 )}
-                {item.user_email && <span>✉️ {item.user_email}</span>}
+                {(item.user_email || item.email || item.name) && <span>✉️ {item.email || item.user_email || item.name}</span>}
+                {item.device && <span>📱 {item.device}</span>}
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {editingId && (
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.55)',zIndex:9998,display:'flex',alignItems:'center',justifyContent:'center',padding:16}} onClick={e=>{if(e.target===e.currentTarget)setEditingId(null);}}>
+          <div style={{background:'#fff',borderRadius:14,padding:28,maxWidth:420,width:'100%',boxShadow:'0 8px 40px rgba(0,0,0,0.25)'}}>
+            <h3 style={{fontSize:16,fontWeight:800,color:'#18181b',margin:'0 0 16px'}}>Update Feedback Status</h3>
+            <div style={{display:'flex',flexDirection:'column',gap:12}}>
+              <div><label style={lbl}>Status</label><select value={editStatus} onChange={e=>setEditStatus(e.target.value)} style={inp}>
+                <option value="new">New</option><option value="in-review">In Review</option><option value="resolved">Resolved</option><option value="dismissed">Dismissed</option>
+              </select></div>
+              <div><label style={lbl}>Admin Notes</label><textarea value={editNotes} onChange={e=>setEditNotes(e.target.value)} style={{...inp,minHeight:80,resize:'vertical'}} placeholder="Internal notes about this feedback…" /></div>
+              <div style={{display:'flex',gap:8,justifyContent:'flex-end'}}>
+                <button style={btnS} onClick={()=>setEditingId(null)}>Cancel</button>
+                <button style={btnP} onClick={()=>updateFeedback(editingId,editStatus,editNotes)}>Save</button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -2011,6 +2254,7 @@ const NAV: {id:AdminSection;label:string;icon:string;group:string}[] = [
   {id:'reviews',   label:'Reviews',          icon:'⭐', group:'Content'},
   {id:'refresh',   label:'Data Refresh',     icon:'🔄', group:'Tools'},
   {id:'tagrules',  label:'Tag Rules',        icon:'🔖', group:'Tools'},
+  {id:'bulkimport',label:'Bulk Import',      icon:'📋', group:'Tools'},
   {id:'settings',  label:'Settings',         icon:'⚙️', group:'Tools'},
   {id:'theme',     label:'Theme & Colors',   icon:'🎨', group:'Tools'},
 ];
@@ -2185,7 +2429,7 @@ export default function AdminPanel({ user, onBack }: { user: User|null; onBack: 
       </div>
 
       {/* Main content */}
-      <div style={{flex:1,overflowY:'auto',maxHeight:isMobile?'100vh':'100vh'}}>
+      <div style={{flex:1,overflowY:'auto',maxHeight:isMobile?'100vh':'100vh',paddingBottom:isMobile?64:0}}>
         {/* Mobile header */}
         {isMobile&&(
           <div style={{position:'sticky',top:0,background:SIDEBAR_BG,color:'#fff',padding:'12px 16px',display:'flex',alignItems:'center',gap:12,zIndex:100}}>
@@ -2206,10 +2450,47 @@ export default function AdminPanel({ user, onBack }: { user: User|null; onBack: 
             {section==='reviews'    && <ReviewsSection />}
             {section==='refresh'    && <RefreshSection />}
             {section==='tagrules'   && <TagRulesSection />}
+            {section==='bulkimport' && <BulkImportSection />}
             {section==='settings'   && <SettingsSection />}
             {section==='theme'      && <ThemeSection />}
           </AdminErrorBoundary>
         </div>
+
+        {/* Mobile bottom navigation */}
+        {isMobile && (
+          <div style={{position:'fixed',bottom:0,left:0,right:0,background:SIDEBAR_BG,borderTop:'1px solid rgba(255,255,255,0.1)',display:'flex',justifyContent:'space-around',zIndex:150,paddingBottom:'max(env(safe-area-inset-bottom), 0px)'}}>
+            {[
+              {id:'dashboard' as AdminSection, label:'Home', icon:'◼'},
+              {id:'events' as AdminSection, label:'Events', icon:'🎫'},
+              {id:'places' as AdminSection, label:'Places', icon:'📍'},
+              {id:'analytics' as AdminSection, label:'Data', icon:'📊'},
+              {id:'feedback' as AdminSection, label:'Feedback', icon:'💬'},
+            ].map(item => (
+              <button
+                key={item.id}
+                onClick={() => navTo(item.id)}
+                style={{
+                  flex:1,
+                  padding:'8px 0',
+                  border:'none',
+                  background:'transparent',
+                  color:section===item.id?ACCENT:'rgba(255,255,255,0.5)',
+                  cursor:'pointer',
+                  display:'flex',
+                  flexDirection:'column',
+                  alignItems:'center',
+                  gap:'2px',
+                  fontSize:9,
+                  fontWeight:section===item.id?700:500,
+                  transition:'color 0.15s',
+                }}
+              >
+                <span style={{fontSize:16}}>{item.icon}</span>
+                <span style={{lineHeight:1}}>{item.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
