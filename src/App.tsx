@@ -4602,8 +4602,8 @@ function EventsScreen({
     const todayStr = new Date().toISOString().split('T')[0];
     // This Weekend = Saturday + Sunday of the current week
     const nowDay = new Date().getDay(); // 0=Sun, 6=Sat
-    const satOffset = (6 - nowDay + 7) % 7 || 7;
-    const sunOffset = (7 - nowDay) % 7;
+    const satOffset = nowDay === 6 ? 0 : (6 - nowDay + 7) % 7; // if today IS Saturday, offset=0
+    const sunOffset = nowDay === 0 ? 0 : (7 - nowDay) % 7;    // if today IS Sunday, offset=0
     const sat = new Date(); sat.setDate(sat.getDate() + satOffset);
     const sun = new Date(); sun.setDate(sun.getDate() + sunOffset);
     const satStr = sat.toISOString().split('T')[0];
