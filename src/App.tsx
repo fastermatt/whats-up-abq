@@ -2774,7 +2774,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
                   fontFamily: 'Public Sans, sans-serif' }}
               >
                 <span>{link.source}</span>
-                <span>GET TICKETS →</span>
+                <span>{link.source === 'SeatGeek' ? 'GET SEATS →' : 'GET TICKETS →'}</span>
               </a>
             ))}
           </div>
@@ -2786,7 +2786,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
               fontFamily: 'Public Sans, sans-serif' }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>{event._source === 'local' ? 'info' : 'confirmation_number'}</span>
-            {event._source === 'local' ? 'MORE INFO →' : 'GET TICKETS →'}
+            {event._source === 'local' ? 'MORE INFO →' : event._source === 'seatgeek' ? 'GET SEATS →' : 'GET TICKETS →'}
           </a>
         ) : (
           <a href={directionsUrl} target="_blank" rel="noopener noreferrer"
@@ -8748,6 +8748,7 @@ export default function App() {
                   ...(sbEvents['seatgeek'] || []),
                   ...(sbEvents['bandsintown'] || []),
                   ...(sbEvents['musicbrainz'] || []),
+                  ...(sbEvents['local'] || []),
                 ];
                 // Merge in static events so "This Week" always has content
                 const seenFast = new Set(allEvts.map((e: TMEvent) => e.id));
@@ -8824,6 +8825,7 @@ export default function App() {
         let sgEvents: TMEvent[] = [];
         let bitEvents: TMEvent[] = [];
         let muEvents: TMEvent[] = [];
+        let localDbEvents: TMEvent[] = [];
 
         try {
           // Await the promise that was started in parallel with places above
@@ -8832,6 +8834,7 @@ export default function App() {
           sgEvents = sbEvents['seatgeek'] || [];
           bitEvents = sbEvents['bandsintown'] || [];
           muEvents = sbEvents['musicbrainz'] || [];
+          localDbEvents = sbEvents['local'] || [];
         } catch (err) {
           console.warn('[Events] Supabase failed or timed out, using static fallback:', err);
           const [tmR, ebR, sgR, bitR, muR] = await Promise.allSettled([
@@ -8936,6 +8939,7 @@ export default function App() {
           ..._sgOnlyEvents,
           ...toArr(bitResult),
           ...toArr(muResult),
+          ...localDbEvents,
         ].filter((e: TMEvent) => {
           if (!e?.id || seen.has(e.id)) return false;
           seen.add(e.id);
