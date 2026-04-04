@@ -121,7 +121,14 @@ function placeTypesToTags(types: string[], name: string): string[] {
       n.includes('cinema') || n.includes('gallery'))
     tags.push('indoor');
   if (types.includes('amusement_park') || types.includes('zoo') || types.includes('aquarium') ||
-      n.includes('family') || n.includes('children') || n.includes('kid'))
+      types.includes('museum') || types.includes('park') || types.includes('campground') ||
+      types.includes('bowling_alley') || types.includes('movie_theater') ||
+      n.includes('family') || n.includes('children') || n.includes('kid') ||
+      n.includes('playground') || n.includes('trampoline') || n.includes('bounce') ||
+      n.includes('mini golf') || n.includes('laser tag') || n.includes('arcade') ||
+      n.includes('skating') || n.includes('swim') || n.includes('aquatic') ||
+      n.includes('youth') || n.includes('junior') || n.includes('pizza') ||
+      n.includes('chuck e') || n.includes('dave & buster') || n.includes('discovery'))
     tags.push('family-friendly');
   if (n.includes('dog') || n.includes('paw') || n.includes('leash')) tags.push('dog-friendly');
   if (n.includes('music') || n.includes('jazz') || n.includes('blues') ||
@@ -242,15 +249,15 @@ export async function fetchPlacesFromDB(): Promise<unknown[]> {
 
   const pageCount = Math.ceil(total / PAGE);
 
-  // Fire all page fetches concurrently. Exclude `enriched`/`hide_enriched` from
-  // the initial load — they are large and cause statement timeouts when 5 queries
-  // hit the DB simultaneously. Enriched data is fetched on demand in the detail modal.
+  // Fire all page fetches concurrently. We include the enriched column so that
+  // hours, website, and phone are available on cards and in the Open Now filter
+  // without requiring a detail modal open first.
   // Use Promise.allSettled so a single failing page doesn't wipe out all results.
   const pageResults = await Promise.allSettled(
     Array.from({ length: pageCount }, (_, i) =>
       supabase
         .from('places')
-        .select('raw,cached_photo_url,cached_thumbnail_url')
+        .select('raw,cached_photo_url,cached_thumbnail_url,enriched')
         .range(i * PAGE, (i + 1) * PAGE - 1)
     )
   );
@@ -267,8 +274,16 @@ export async function fetchPlacesFromDB(): Promise<unknown[]> {
       continue;
     }
     for (const row of (data ?? [])) {
-      const typed = row as { raw: Record<string, unknown>; cached_photo_url?: string; cached_thumbnail_url?: string };
+      const typed = row as { raw: Record<string, unknown>; cached_photo_url?: string; cached_thumbnail_url?: string; enriched?: Record<string, unknown> };
       const place = transformGoogleRaw(typed.raw, typed.cached_photo_url, typed.cached_thumbnail_url);
+      // Hoist enriched hours/phone/website into the place object so Open Now
+      // filtering and card badges work without opening the detail modal.
+      if (typed.enriched) {
+        const e = typed.enriched;
+        if (e.hours) (place as Record<string, unknown>).hours = e.hours;
+        if (e.phone) (place as Record<string, unknown>).phone = e.phone;
+        if (e.website) (place as Record<string, unknown>).website = e.website;
+      }
       allRows.push(place);
     }
   }

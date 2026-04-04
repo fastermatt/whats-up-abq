@@ -1084,6 +1084,41 @@ function GeoBanner({
 
 // ─── Place Card ─────────────────────────────────────────────────────────────
 
+// Module-level Open Now check — used by PlaceCard badge AND the Open Now filter.
+// Handles Google's pipe-separated weekday_text format ("Monday: 9:00 AM – 9:00 PM | ...")
+// as well as comma/semicolon-separated formats.
+function isOpenNow(hours?: string): boolean {
+  if (!hours) return false;
+  const h = hours.toLowerCase();
+  if (h.includes('24 hour') || h.includes('open 24') || h.includes('always open')) return true;
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun, 1=Mon,...,6=Sat
+  const currentMins = now.getHours() * 60 + now.getMinutes();
+  const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+  const dayFull  = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const todayShort = dayNames[day];
+  const todayFull  = dayFull[day];
+  // Split on pipe (Google weekday_text), semicolon, or comma
+  const segments = h.split(/[;,|]/);
+  for (const seg of segments) {
+    if (!seg.includes(todayShort) && !seg.includes(todayFull)) continue;
+    // Extract time range: "9:00 am – 9:00 pm", "8am-9pm", "8:00-21:00"
+    const timeRange = seg.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*[-–]\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i);
+    if (!timeRange) continue;
+    const toMins = (hStr: string, mStr: string, ampm: string): number => {
+      let hr = parseInt(hStr, 10);
+      const mn = mStr ? parseInt(mStr, 10) : 0;
+      if (ampm === 'pm' && hr < 12) hr += 12;
+      if (ampm === 'am' && hr === 12) hr = 0;
+      return hr * 60 + mn;
+    };
+    const openMins  = toMins(timeRange[1], timeRange[2], (timeRange[3] || '').toLowerCase());
+    const closeMins = toMins(timeRange[4], timeRange[5], (timeRange[6] || '').toLowerCase());
+    if (currentMins >= openMins && currentMins <= closeMins) return true;
+  }
+  return false;
+}
+
 // ─── Ken Burns Photo Slider (PlaceCard) ─────────────────────────────────────
 function PlaceCardImageSlider({ place }: { place: Place }) {
   const initialPhotos = [place.thumbnail || place.image, ...(place.additionalImages ?? [])].filter(Boolean) as string[];
@@ -1210,6 +1245,15 @@ const PlaceCard = React.memo(function PlaceCard({
       <div className="relative" style={{ height: '140px' }}>
         <PlaceCardImageSlider place={place} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
+        {isOpenNow(place.hours) && (
+          <div className="absolute top-2 left-2">
+            <span className="flex items-center gap-1 text-white font-bold px-1.5 py-0.5"
+              style={{ fontSize: 9, letterSpacing: '0.06em', background: 'rgba(34,197,94,0.88)', borderRadius: 4, fontFamily: 'Public Sans, sans-serif' }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff', flexShrink: 0, display: 'inline-block' }} />
+              OPEN NOW
+            </span>
+          </div>
+        )}
         {isCheckedIn && (
           <div className="absolute bottom-2 left-2">
             <span
@@ -4204,11 +4248,11 @@ function DiscoverScreen({
         <div className="mb-5 px-5">
           <p className="text-xs font-black uppercase flex items-center gap-2 mb-3" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}><FlatIcon name="zia" size={12} color="var(--brand)" /> Explore by Vibe</p>
           <div className="flex justify-between pb-1">
-            {VIBE_CONFIGS.map(({ label, borderColor, staticIcon, vibeSearch, vibeCats }) => (
+            {VIBE_CONFIGS.map(({ label, borderColor, staticIcon, vibeSearch, vibeCats, gradient }) => (
               <button key={label}
                 className="flex flex-col items-center gap-1.5 transition-all active:scale-95"
                 style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', flex: '1 1 0', minWidth: 0 }}
-                onClick={() => { trackEvent('vibe_click', { vibe: label }); onNavigatePlaces?.(vibeCats.join('|'), vibeSearch, label); }}>
+                onClick={() => { trackEvent('vibe_click', { vibe: label }); onNavigatePlaces?.(vibeCats.join('|'), vibeSearch, label, gradient); }}>
                 <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'white', border: `2.5px solid ${borderColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', overflow: 'hidden', flexShrink: 0 }}>
                   <img
                     src={staticIcon}
@@ -5061,39 +5105,6 @@ function PlacesScreen({
     'Downtown':     { minLat: 35.070, maxLat: 35.098, minLng: -106.665, maxLng: -106.635 },
     'Rio Grande':   { minLat: 35.020, maxLat: 35.220, minLng: -106.745, maxLng: -106.660 },
     'South Valley': { minLat: 34.960, maxLat: 35.068, minLng: -106.740, maxLng: -106.620 },
-  };
-
-  // Basic "Open Now" check using hours string from place data
-  const isOpenNow = (hours?: string): boolean => {
-    if (!hours) return false;
-    const h = hours.toLowerCase();
-    if (h.includes('24 hour') || h.includes('open 24') || h.includes('always open')) return true;
-    const now = new Date();
-    const day = now.getDay(); // 0=Sun, 1=Mon,...,6=Sat
-    const currentMins = now.getHours() * 60 + now.getMinutes();
-    const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-    const dayFull = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    const todayShort = dayNames[day];
-    const todayFull = dayFull[day];
-    // Find segments that mention today
-    const segments = h.split(/[;,]/);
-    for (const seg of segments) {
-      if (!seg.includes(todayShort) && !seg.includes(todayFull)) continue;
-      // Try to extract time range like "8am-9pm", "8:00am-9:00pm", "8:00-21:00"
-      const timeRange = seg.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*[-–]\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i);
-      if (!timeRange) continue;
-      const toMins = (h: string, m: string, ampm: string): number => {
-        let hours = parseInt(h, 10);
-        const mins = m ? parseInt(m, 10) : 0;
-        if (ampm === 'pm' && hours < 12) hours += 12;
-        if (ampm === 'am' && hours === 12) hours = 0;
-        return hours * 60 + mins;
-      };
-      const openMins = toMins(timeRange[1], timeRange[2], (timeRange[3] || '').toLowerCase());
-      const closeMins = toMins(timeRange[4], timeRange[5], (timeRange[6] || '').toLowerCase());
-      if (currentMins >= openMins && currentMins <= closeMins) return true;
-    }
-    return false;
   };
 
   const filtered = useMemo(() => {
