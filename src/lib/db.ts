@@ -12,12 +12,14 @@ function placeTypeToCategory(types: string[], name = ''): string {
   if (types.includes('convenience_store') || types.includes('gas_station')) return 'shop';
   if (types.includes('fast_food') && !types.includes('cafe')) return 'restaurant';
 
-  // Coffee: exact type OR (cafe type AND name reads like a coffee brand)
+  // Coffee: exact type OR (cafe/food type AND name reads like a coffee brand)
   const COFFEE_NAMES = ['coffee', 'cafe', 'café', 'espresso', 'roast', 'brew', 'java',
     'starbucks', "dunkin'", 'dunkin ', 'bean', 'grind', 'roasters', 'barista',
     'latte', 'cappuccino', 'grounds', 'drip', 'percolat'];
   const isCoffeeName = COFFEE_NAMES.some(w => n.includes(w));
-  if (types.includes('coffee_shop') || (types.includes('cafe') && isCoffeeName)) return 'coffee';
+  const isFoodAdjacent = types.includes('cafe') || types.includes('bakery') ||
+    types.includes('food') || types.includes('restaurant');
+  if (types.includes('coffee_shop') || (isFoodAdjacent && isCoffeeName)) return 'coffee';
 
   if (types.includes('restaurant') || types.includes('food') ||
       types.includes('cafe') || types.includes('fast_food') || types.includes('bakery') ||
