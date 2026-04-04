@@ -30,7 +30,7 @@ async function cfgSet(key: string, value: any) {
 export type AdminSection =
   | 'dashboard' | 'banners' | 'events' | 'places'
   | 'categories' | 'content' | 'refresh' | 'reviews'
-  | 'analytics' | 'tagrules' | 'settings' | 'theme';
+  | 'analytics' | 'tagrules' | 'settings' | 'theme' | 'feedback';
 
 interface Banner {
   id: string; message: string; type: 'info'|'warning'|'promo';
@@ -188,7 +188,7 @@ function DashboardSection({ onNav }: { onNav:(s:AdminSection)=>void }) {
         <div style={card}>
           <h3 style={{fontSize:15,fontWeight:700,marginBottom:14}}>Quick Actions</h3>
           <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-            {([['+ Add Event','events',ACCENT],['+ Add Place','places','#1d4ed8'],['📢 New Banner','banners','#059669'],['📊 Analytics','analytics','#7c3aed'],['🔄 Data Refresh','refresh','#6b7280']] as [string,AdminSection,string][]).map(([label,sec,color])=>(
+            {([['+ Add Event','events',ACCENT],['+ Add Place','places','#1d4ed8'],['📢 New Banner','banners','#059669'],['💬 Feedback','feedback','#0891b2'],['📊 Analytics','analytics','#7c3aed'],['🔄 Data Refresh','refresh','#6b7280']] as [string,AdminSection,string][]).map(([label,sec,color])=>(
               <button key={sec} onClick={()=>onNav(sec)} style={{padding:'10px 18px',borderRadius:8,border:'none',background:color,color:'#fff',cursor:'pointer',fontSize:13,fontWeight:700}}>{label}</button>
             ))}
           </div>
@@ -1311,7 +1311,7 @@ function AnalyticsSection() {
       {loading ? <p style={{textAlign:'center',color:'#9ca3af',padding:48}}>Loading analytics…</p> : (
         <>
           {/* Stat cards */}
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:14,marginBottom:28}}>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(min(100%,150px),1fr))',gap:12,marginBottom:24}}>
             {statCard('Unique Sessions',   totals._unique_sessions||0, '👤','#8B3A0F')}
             {statCard('Page Views',        totals.pageview||0,         '📄','#1d4ed8')}
             {statCard('Event Clicks',      totals.event_click||0,      '🎫','#059669')}
@@ -1337,7 +1337,7 @@ function AnalyticsSection() {
             </div>
           )}
 
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(380px,1fr))',gap:20,marginBottom:20}}>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(min(100%,320px),1fr))',gap:20,marginBottom:20}}>
             {/* Daily active users chart */}
             <div style={card}>
               <h3 style={{fontSize:14,fontWeight:700,marginBottom:14,color:'#374151'}}>Daily Active Sessions</h3>
@@ -1397,7 +1397,7 @@ function AnalyticsSection() {
             </div>
           </div>
 
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginBottom:20}}>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(min(100%,280px),1fr))',gap:20,marginBottom:20}}>
             {/* Top events */}
             <div style={card}>
               <h3 style={{fontSize:14,fontWeight:700,marginBottom:14,color:'#374151'}}>Most Clicked Events</h3>
@@ -1871,11 +1871,138 @@ function ThemeSection() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// FEEDBACK
+// ─────────────────────────────────────────────────────────────────────────────
+interface FeedbackItem {
+  id: string;
+  url: string | null;
+  context_type: string | null;
+  context_id: string | null;
+  context_name: string | null;
+  category: string;
+  message: string;
+  user_email: string | null;
+  created_at: string;
+}
+
+function FeedbackSection() {
+  const [items, setItems] = useState<FeedbackItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<string>('all');
+  const [confirm, setConfirm] = useState<string | null>(null);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await sb('user_feedback')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(200);
+      if (!error && data) setItems(data as FeedbackItem[]);
+    } catch (e) { console.error(e); }
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const del = async (id: string) => {
+    await sb('user_feedback').delete().eq('id', id);
+    setItems(p => p.filter(i => i.id !== id));
+    toast('Deleted');
+    setConfirm(null);
+  };
+
+  const catColor = (c: string) => c === 'bug' ? '#dc2626' : c === 'suggestion' ? '#2563eb' : c === 'compliment' ? '#059669' : '#6b7280';
+  const catBg = (c: string) => c === 'bug' ? '#fee2e2' : c === 'suggestion' ? '#dbeafe' : c === 'compliment' ? '#d1fae5' : '#f3f4f6';
+  const catLabel = (c: string) => c === 'bug' ? '🐛 Bug' : c === 'suggestion' ? '💡 Suggestion' : c === 'compliment' ? '🌟 Compliment' : '💬 General';
+
+  const CATS = ['all', 'bug', 'suggestion', 'compliment', 'general'];
+  const filtered = filter === 'all' ? items : items.filter(i => i.category === filter);
+
+  const counts: Record<string, number> = {};
+  for (const item of items) counts[item.category] = (counts[item.category] || 0) + 1;
+
+  return (
+    <div>
+      {confirm && <Confirm msg="Delete this feedback entry?" onOk={() => del(confirm)} onCancel={() => setConfirm(null)} />}
+      <SectionHeader
+        title="User Feedback"
+        sub={`${items.length} submissions`}
+        action={<button style={btnS} onClick={load}>↻ Refresh</button>}
+      />
+
+      {/* Summary chips */}
+      <div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:20}}>
+        {CATS.map(c => {
+          const cnt = c === 'all' ? items.length : (counts[c] || 0);
+          return (
+            <button
+              key={c}
+              onClick={() => setFilter(c)}
+              style={{
+                padding: '6px 14px', borderRadius: 999, fontSize: 12, fontWeight: 700,
+                border: `2px solid ${filter === c ? catColor(c) : '#e5e7eb'}`,
+                background: filter === c ? catBg(c) : '#fff',
+                color: filter === c ? catColor(c) : '#6b7280',
+                cursor: 'pointer',
+              }}
+            >
+              {c === 'all' ? `All (${cnt})` : `${catLabel(c)} (${cnt})`}
+            </button>
+          );
+        })}
+      </div>
+
+      {loading ? <p style={{textAlign:'center',color:'#9ca3af',padding:48}}>Loading…</p> : !filtered.length ? (
+        <div style={{...card,textAlign:'center',padding:48,color:'#9ca3af'}}>
+          <div style={{fontSize:36,marginBottom:12}}>💬</div>
+          <p style={{fontWeight:600}}>No feedback yet</p>
+          <p style={{fontSize:13,marginTop:6}}>Feedback from the app will appear here</p>
+        </div>
+      ) : (
+        <div style={{display:'flex',flexDirection:'column',gap:12}}>
+          {filtered.map(item => (
+            <div key={item.id} style={{...card,padding:'16px 18px'}}>
+              <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:12,marginBottom:10}}>
+                <div style={{display:'flex',flexWrap:'wrap',gap:6,alignItems:'center'}}>
+                  <span style={{fontSize:11,fontWeight:700,padding:'3px 8px',borderRadius:999,background:catBg(item.category),color:catColor(item.category)}}>
+                    {catLabel(item.category)}
+                  </span>
+                  {item.context_type && (
+                    <span style={{fontSize:11,fontWeight:600,padding:'3px 8px',borderRadius:999,background:'#f3f4f6',color:'#374151'}}>
+                      {item.context_type === 'place' ? '📍' : item.context_type === 'event' ? '🎫' : '🌐'} {item.context_name || item.context_id || item.context_type}
+                    </span>
+                  )}
+                </div>
+                <div style={{display:'flex',alignItems:'center',gap:8,flexShrink:0}}>
+                  <span style={{fontSize:11,color:'#9ca3af',whiteSpace:'nowrap'}}>{new Date(item.created_at).toLocaleDateString()}</span>
+                  <button onClick={() => setConfirm(item.id)} style={btnD}>×</button>
+                </div>
+              </div>
+              <p style={{fontSize:14,color:'#1a1a1a',lineHeight:1.6,margin:'0 0 10px',wordBreak:'break-word'}}>{item.message}</p>
+              <div style={{display:'flex',flexWrap:'wrap',gap:12,fontSize:11,color:'#9ca3af',borderTop:'1px solid #f3f4f6',paddingTop:8}}>
+                {item.url && (
+                  <span style={{fontFamily:'monospace',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:260}}>
+                    🔗 {item.url.replace(/^https?:\/\/[^/]+/,'')}
+                  </span>
+                )}
+                {item.user_email && <span>✉️ {item.user_email}</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // SIDEBAR NAV
 // ─────────────────────────────────────────────────────────────────────────────
 const NAV: {id:AdminSection;label:string;icon:string;group:string}[] = [
   {id:'dashboard', label:'Dashboard',        icon:'◼',  group:'Overview'},
   {id:'analytics', label:'Analytics',        icon:'📊', group:'Overview'},
+  {id:'feedback',  label:'Feedback',         icon:'💬', group:'Overview'},
   {id:'banners',   label:'Banners',          icon:'📢', group:'Content'},
   {id:'events',    label:'Events',           icon:'🎫', group:'Content'},
   {id:'places',    label:'Places',           icon:'📍', group:'Content'},
@@ -2070,6 +2197,7 @@ export default function AdminPanel({ user, onBack }: { user: User|null; onBack: 
           <AdminErrorBoundary section={section} key={section}>
             {section==='dashboard'  && <DashboardSection onNav={setSection} />}
             {section==='analytics'  && <AnalyticsSection />}
+            {section==='feedback'   && <FeedbackSection />}
             {section==='banners'    && <BannersSection />}
             {section==='events'     && <EventsSection />}
             {section==='places'     && <PlacesSection />}
