@@ -66,7 +66,6 @@ const DETAILS_FIELDS = [
   'serves_breakfast',
   'serves_lunch',
   'serves_dinner',
-  'outdoor_seating',
   'delivery',
   'dine_in',
   'takeout',
@@ -138,8 +137,9 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 async function fetchPlacePage(offset, onlyMissing, category, refreshStaleDays) {
   let url = `/rest/v1/places?select=id,raw,enriched&order=id&offset=${offset}&limit=${BATCH_SIZE}`;
   if (onlyMissing) {
-    // Only fetch places where enriched hours is null
-    url += '&enriched->>hours=is.null';
+    // Fetch places where enriched is NULL entirely OR where enriched exists but has no hours key.
+    // Using Supabase's OR filter: enriched.is.null or enriched->>'hours' is null.
+    url += '&or=(enriched.is.null,enriched->>hours.is.null)';
   }
   if (category) {
     url += `&raw->>category=eq.${encodeURIComponent(category)}`;
@@ -244,7 +244,6 @@ function parseGoogleDetails(result) {
   if (truthy('dine_in'))          attrs.push('Dine In');
   if (truthy('takeout'))          attrs.push('Takeout');
   if (truthy('delivery'))         attrs.push('Delivery');
-  if (truthy('outdoor_seating'))  attrs.push('Outdoor Seating');
   if (truthy('reservable'))       attrs.push('Reservations');
   if (truthy('serves_brunch'))    attrs.push('Brunch');
   if (truthy('serves_breakfast')) attrs.push('Breakfast');

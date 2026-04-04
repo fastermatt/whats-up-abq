@@ -4575,9 +4575,9 @@ function EventsScreen({
   const eventsHero = useTypewriter("What's Happening", 300);
   const [search, setSearch] = useState('');
   useEffect(() => { if (initialSearch) setSearch(initialSearch); }, [initialSearch]);
-  const [selectedGenre, setSelectedGenre] = useState(initialGenre || 'Tonight');
-  // Reset genre when initialGenre changes (e.g. from "Free Events" chip)
-  useEffect(() => { if (initialGenre) setSelectedGenre(initialGenre); }, [initialGenre]);
+  const [selectedGenre, setSelectedGenre] = useState(initialGenre || 'All');
+  // Reset genre when initialGenre changes (e.g. from "Free Events" chip on Discover)
+  useEffect(() => { setSelectedGenre(initialGenre || 'All'); }, [initialGenre]);
   const [followedGenres, setFollowedGenres] = useState<string[]>(() => getFollowedGenres());
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -8932,6 +8932,8 @@ export default function App() {
   // ── Browser history management (prevents swipe-back leaving the site) ──
   const navigateTab = useCallback((tab: TabId) => {
     setActiveTab(tab);
+    // Reset Events genre filter when tapping Events tab directly (so stale filters don't persist)
+    if (tab === 'events') setEventsNavGenre('');
     window.history.pushState({ tab, modal: null }, '', `#${tab}`);
     trackEvent('pageview', { tab, referrer: document.referrer || '', path: `#${tab}` });
   }, []);
