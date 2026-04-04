@@ -1,0 +1,465 @@
+#!/usr/bin/env node
+/**
+ * ABQ Unplugged — Local Event Source Scrapers
+ *
+ * Fetches events from ABQ-specific sources that don't have mainstream APIs:
+ *   • Eventbrite (JSON-LD from their public event pages — no API key needed)
+ *   • Do505     (WordPress Events Calendar REST API — no API key needed)
+ *   • iCal feeds: UNM Events, ABQ BioPark (City of ABQ)
+ *
+ * Usage:
+ *   node scripts/fetch-local-events.cjs
+ *
+ * Env vars (all optional with hardcoded fallbacks for local dev):
+ *   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+ */
+
+'use strict';
+
+const https  = require('https');
+const http   = require('http');
+const fs     = require('fs');
+const path   = require('path');
+const { URL } = require('url');
+
+// ── Supabase ─────────────────────────────────────────────────────────────────
+let _sb = null;
+try {
+  const { createClient } = require('@supabase/supabase-js');
+  const _sbUrl = process.env.SUPABASE_URL
+              || process.env.VITE_SUPABASE_URL
+              || 'https://bsmvfutebmbkjvlrhiyq.supabase.co';
+  const _sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+              || process.env.VITE_SUPABASE_ANON_KEY
+              || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbXZmdXRlYm1ia2p2bHJoaXlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMzgwMzIsImV4cCI6MjA4OTgxNDAzMn0.3rvMRErlF-HnKfbJ6rCNSeCJc39n4K48xjAeSGqf_rc';
+  _sb = createClient(_sbUrl, _sbKey);
+} catch (e) { console.warn('[Supabase] init error:', e.message); }
+
+// ── Load .env ─────────────────────────────────────────────────────────────────
+const envPath = path.join(__dirname, '..', '.env');
+if (fs.existsSync(envPath)) {
+  fs.readFileSync(envPath, 'utf8').split('\n').forEach(line => {
+    const [key, ...rest] = line.split('=');
+    if (key && rest.length) process.env[key.trim()] = rest.join('=').trim().replace(/^["']|["']$/g, '');
+  });
+}
+
+// ── HTTP helper ───────────────────────────────────────────────────────────────
+function fetchUrl(urlStr, opts = {}, redirectCount = 0) {
+  return new Promise((resolve, reject) => {
+    if (redirectCount > 4) return reject(new Error('Too many redirects'));
+    const parsed  = new URL(urlStr);
+    const lib     = parsed.protocol === 'https:' ? https : http;
+    const options = {
+      hostname: parsed.hostname,
+      path:     parsed.pathname + parsed.search,
+      port:     parsed.port || (parsed.protocol === 'https:' ? 443 : 80),
+      method:   'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; ABQUnplugged-Bot/1.0; +https://abqunplugged.com)',
+        'Accept':     opts.accept || 'text/html,application/json,*/*',
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
+      timeout: 20000,
+    };
+    const req = lib.request(options, res => {
+      if ([301, 302, 303, 307, 308].includes(res.statusCode) && res.headers.location) {
+        const loc = res.headers.location.startsWith('http')
+          ? res.headers.location
+          : `${parsed.protocol}//${parsed.host}${res.headers.location}`;
+        return fetchUrl(loc, opts, redirectCount + 1).then(resolve).catch(reject);
+      }
+      const chunks = [];
+      res.on('data', d => chunks.push(d));
+      res.on('end', () => {
+        const body = Buffer.concat(chunks).toString('utf8');
+        resolve({ status: res.statusCode, body });
+      });
+    });
+    req.on('timeout', () => { req.destroy(); reject(new Error('Request timeout')); });
+    req.on('error', reject);
+    req.end();
+  });
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── Geo helpers ───────────────────────────────────────────────────────────────
+const ABQ_LAT  = 35.1053;
+const ABQ_LNG  = -106.6464;
+const MAX_MILES = 45;
+
+function haversine(lat1, lng1, lat2, lng2) {
+  const R = 3958.8;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function isInMetro(lat, lng) {
+  if (!lat || !lng) return true;
+  const dlat = parseFloat(lat), dlng = parseFloat(lng);
+  if (isNaN(dlat) || isNaN(dlng)) return true;
+  return haversine(ABQ_LAT, ABQ_LNG, dlat, dlng) <= MAX_MILES;
+}
+
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+function isFuture(d) { return typeof d === 'string' && d >= todayStr(); }
+
+// ── 1. EVENTBRITE HTML scraper ─────────────────────────────────────────────────
+// Eventbrite embeds full schema.org JSON-LD in window.__SERVER_DATA__ on every
+// public event listing page. No API key required — this is intentionally public
+// structured data for search engine indexing.
+async function fetchEventbriteEvents() {
+  console.log('\n🎟️  Fetching Eventbrite events (Albuquerque, NM)...');
+  const events = [];
+  const seenIds = new Set();
+
+  const urls = [
+    'https://www.eventbrite.com/d/nm--albuquerque/events/',
+    'https://www.eventbrite.com/d/nm--albuquerque/events/?page=2',
+    'https://www.eventbrite.com/d/nm--albuquerque/events/?page=3',
+    'https://www.eventbrite.com/d/nm--albuquerque/music/',
+    'https://www.eventbrite.com/d/nm--albuquerque/food-and-drink/',
+    'https://www.eventbrite.com/d/nm--albuquerque/arts/',
+    'https://www.eventbrite.com/d/nm--albuquerque/family-and-education/',
+    'https://www.eventbrite.com/d/nm--rio-rancho/events/',
+  ];
+
+  for (const url of urls) {
+    try {
+      const { status, body } = await fetchUrl(url);
+      if (status !== 200) { console.warn(`  ⚠️  ${url} → HTTP ${status}`); continue; }
+
+      // Extract __SERVER_DATA__ JSON from the script tag
+      const match = body.match(/window\.__SERVER_DATA__\s*=\s*(\{[\s\S]*?\});\s*<\/script>/);
+      if (!match) {
+        // Fallback: try JSON-LD script tags
+        const ldMatches = [...body.matchAll(/<script[^>]+type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)];
+        for (const ldM of ldMatches) {
+          try {
+            const ld = JSON.parse(ldM[1]);
+            const items = ld['@type'] === 'ItemList' ? ld.itemListElement?.map(e => e.item) : [ld];
+            for (const item of (items || [])) {
+              if (item?.['@type'] !== 'Event') continue;
+              const ev = transformEventbriteJsonLd(item);
+              if (ev && !seenIds.has(ev.id)) { seenIds.add(ev.id); events.push(ev); }
+            }
+          } catch {}
+        }
+        continue;
+      }
+
+      // Parse the server data — look for jsonld array
+      try {
+        const serverData = JSON.parse(match[1]);
+        const jsonld = serverData?.jsonld || serverData?.search_data?.jsonld || [];
+        const items  = Array.isArray(jsonld)
+          ? jsonld
+          : (jsonld?.itemListElement?.map((e) => e.item) || []);
+
+        for (const item of items) {
+          if (!item || item['@type'] !== 'Event') continue;
+          const ev = transformEventbriteJsonLd(item);
+          if (ev && !seenIds.has(ev.id)) { seenIds.add(ev.id); events.push(ev); }
+        }
+      } catch (parseErr) {
+        console.warn(`  ⚠️  JSON parse error for ${url}:`, parseErr.message.slice(0, 80));
+      }
+
+      await sleep(800); // polite delay
+    } catch (err) {
+      console.warn(`  ⚠️  ${url} error:`, err.message);
+    }
+  }
+
+  console.log(`  ✓ ${events.length} Eventbrite events`);
+  return events;
+}
+
+function transformEventbriteJsonLd(item) {
+  const startDate = item.startDate || '';
+  const localDate = startDate ? startDate.slice(0, 10) : '';
+  if (!localDate || !isFuture(localDate)) return null;
+
+  const localTime = startDate.length > 10 ? startDate.slice(11, 16) : undefined;
+  const loc     = item.location || {};
+  const addr    = loc.address || {};
+  const geo     = loc.geo    || {};
+  const lat     = geo.latitude;
+  const lng     = geo.longitude;
+
+  // Filter to ABQ metro only (online events pass through)
+  if (loc['@type'] !== 'VirtualLocation' && lat && lng && !isInMetro(lat, lng)) return null;
+
+  // Generate stable ID from URL
+  const urlMatch = (item.url || '').match(/\/e\/[a-z0-9-]+-(\d+)/i);
+  const ebId     = urlMatch ? urlMatch[1] : (item.url || '').replace(/[^a-z0-9]/gi, '').slice(-16);
+  if (!ebId) return null;
+
+  const name = item.name || 'Untitled Event';
+
+  return {
+    id:      `eb-${ebId}`,
+    name,
+    url:     item.url,
+    _source: 'eventbrite',
+    info:    (item.description || '').slice(0, 400),
+    images:  item.image ? [{ url: typeof item.image === 'string' ? item.image : item.image?.url || item.image?.[0] }] : [],
+    dates:   { start: { localDate, localTime } },
+    _embedded: {
+      venues: [{
+        name:    loc.name || addr.streetAddress || '',
+        address: { line1: addr.streetAddress || '' },
+        city:    { name: addr.addressLocality || 'Albuquerque' },
+        state:   { name: addr.addressRegion || 'NM' },
+        location: (lat && lng) ? { latitude: String(lat), longitude: String(lng) } : undefined,
+      }],
+    },
+    classifications: [{ segment: { name: guessCategory(name, item.description || '') } }],
+    ticketLinks: item.url ? [{ url: item.url }] : [],
+    isFree: /free/i.test(item.name || '') || /free/i.test(item.description || ''),
+  };
+}
+
+function guessCategory(name, desc) {
+  const t = (name + ' ' + desc).toLowerCase();
+  if (/music|concert|band|dj|live|jazz|blues|folk|rock|country|hip.?hop/.test(t)) return 'Music';
+  if (/comedy|stand.?up|improv|laugh/.test(t)) return 'Comedy';
+  if (/art|galler|exhibit|paint|sculpt|photo|craft/.test(t)) return 'Arts & Theatre';
+  if (/film|movie|cinema|screen/.test(t)) return 'Arts & Theatre';
+  if (/theater|theatre|play|musical|opera|dance|ballet/.test(t)) return 'Arts & Theatre';
+  if (/sport|run|race|5k|marathon|bike|yoga|fitness|gym/.test(t)) return 'Sports';
+  if (/kid|child|famil|baby|toddler|youth/.test(t)) return 'Family';
+  if (/food|drink|beer|wine|tast|brew|cocktail|dinner/.test(t)) return 'Food & Drink';
+  if (/festival|market|fair|fiesta/.test(t)) return 'Community';
+  if (/outdoor|hike|trail|nature|garden/.test(t)) return 'Community';
+  return 'Community';
+}
+
+// ── 2. Do505 WordPress API ─────────────────────────────────────────────────────
+async function fetchDo505Events() {
+  console.log('\n🎉 Fetching Do505 events (ABQ arts/culture calendar)...');
+  const events = [];
+  let page = 1;
+
+  while (page <= 5) {
+    try {
+      const url = `https://do505.com/wp-json/tribe/events/v1/events?per_page=50&page=${page}&start_date=${todayStr()}&status=publish`;
+      const { status, body } = await fetchUrl(url, { accept: 'application/json' });
+      if (status !== 200) break;
+
+      const data  = JSON.parse(body);
+      const items = Array.isArray(data?.events) ? data.events : [];
+      if (items.length === 0) break;
+
+      for (const ev of items) {
+        const norm = transformDo505Event(ev);
+        if (norm) events.push(norm);
+      }
+      if (!data.next_rest_url) break;
+      page++;
+      await sleep(400);
+    } catch (err) {
+      if (page === 1) console.warn(`  ⚠️  Do505 unavailable:`, err.message.slice(0, 60));
+      break;
+    }
+  }
+
+  console.log(`  ✓ ${events.length} Do505 events`);
+  return events;
+}
+
+function transformDo505Event(ev) {
+  const start = ev.start_date || '';
+  if (!start) return null;
+  const localDate = start.slice(0, 10);
+  if (!isFuture(localDate)) return null;
+  const localTime = start.length >= 16 ? start.slice(11, 16) : undefined;
+  const venue = ev.venue || {};
+  const lat   = venue.geo_lat || venue.latitude;
+  const lng   = venue.geo_lng || venue.longitude;
+  if (lat && lng && !isInMetro(lat, lng)) return null;
+
+  const costStr = (ev.cost || '').trim();
+  const costNum = parseFloat(costStr.replace(/[^0-9.]/g, '')) || 0;
+
+  return {
+    id:      `do505-${ev.id}`,
+    name:    ev.title || 'Untitled Event',
+    url:     ev.url,
+    _source: 'do505',
+    info:    stripHtml(ev.excerpt || ''),
+    description: stripHtml(ev.description || ''),
+    images:  ev.image ? [{ url: ev.image.url }] : [],
+    dates:   { start: { localDate, localTime } },
+    _embedded: {
+      venues: [{
+        name:    venue.venue || venue.name || '',
+        address: { line1: [venue.address, venue.address_2].filter(Boolean).join(', ') },
+        city:    { name: venue.city || 'Albuquerque' },
+        state:   { name: venue.stateprovince || 'NM' },
+        location: (lat && lng) ? { latitude: String(lat), longitude: String(lng) } : undefined,
+      }],
+    },
+    classifications: [{ segment: { name: mapDo505Category(ev.categories || []) } }],
+    priceRanges: costNum > 0 ? [{ min: costNum, max: costNum, currency: 'USD' }] : undefined,
+    isFree: costStr === '' || costStr === '0' || /free/i.test(costStr),
+    ticketLinks: ev.url ? [{ url: ev.url }] : [],
+  };
+}
+
+function mapDo505Category(cats) {
+  const names = cats.map(c => (c.name || '').toLowerCase());
+  if (names.some(n => /music|concert|band/.test(n))) return 'Music';
+  if (names.some(n => /art|galler|exhibit/.test(n))) return 'Arts & Theatre';
+  if (names.some(n => /film|movie|cinema/.test(n))) return 'Arts & Theatre';
+  if (names.some(n => /comedy|improv/.test(n))) return 'Comedy';
+  if (names.some(n => /famil|kid|child/.test(n))) return 'Family';
+  if (names.some(n => /food|drink|beer|wine/.test(n))) return 'Food & Drink';
+  if (names.some(n => /festival|market|fair/.test(n))) return 'Community';
+  if (names.some(n => /outdoor|hike|trail/.test(n))) return 'Community';
+  return 'Community';
+}
+
+function stripHtml(html) {
+  return html.replace(/<[^>]+>/g, ' ').replace(/\s{2,}/g, ' ').trim().slice(0, 500);
+}
+
+// ── 3. iCal parser ─────────────────────────────────────────────────────────────
+function parseIcal(text, defaultSource = 'local') {
+  const unfolded = text.replace(/\r?\n[ \t]/g, '');
+  const events   = [];
+  const blocks   = unfolded.split(/BEGIN:VEVENT/i).slice(1);
+
+  for (const block of blocks) {
+    const get = (key) => {
+      const re = new RegExp(`^${key}[;:][^\r\n]*`, 'im');
+      const m  = block.match(re);
+      if (!m) return '';
+      return m[0].replace(/^[^:]+:/, '').replace(/\\n/g, '\n').replace(/\\,/g, ',').trim();
+    };
+
+    const dtstart   = get('DTSTART');
+    const localDate = dtstart ? dtstart.slice(0, 4) + '-' + dtstart.slice(4, 6) + '-' + dtstart.slice(6, 8) : '';
+    const localTime = dtstart && dtstart.length >= 13
+      ? dtstart.slice(9, 11) + ':' + dtstart.slice(11, 13)
+      : undefined;
+
+    if (!localDate || !isFuture(localDate)) continue;
+
+    const uid  = get('UID') || `ical-${Math.random()}`;
+    const name = get('SUMMARY') || 'Event';
+    const url  = get('URL');
+    const loc  = get('LOCATION');
+    const desc = get('DESCRIPTION').slice(0, 500);
+    const geo  = get('GEO');
+    const [geoLat, geoLng] = geo ? geo.split(';') : [];
+    if (geoLat && geoLng && !isInMetro(geoLat, geoLng)) continue;
+
+    events.push({
+      id:      `ical-${uid.replace(/[^a-z0-9]/gi, '').slice(0, 40)}`,
+      name,
+      url:     url || undefined,
+      _source: defaultSource,
+      info:    desc,
+      images:  [],
+      dates:   { start: { localDate, localTime } },
+      _embedded: {
+        venues: [{
+          name:    loc || '',
+          address: { line1: loc || '' },
+          city:    { name: 'Albuquerque' },
+        }],
+      },
+      classifications: [{ segment: { name: guessCategory(name, desc) } }],
+      ticketLinks: url ? [{ url }] : [],
+    });
+  }
+  return events;
+}
+
+// ── 4. iCal sources ───────────────────────────────────────────────────────────
+const ICAL_SOURCES = [
+  {
+    name:   'UNM Events',
+    url:    'https://calendar.unm.edu/live/calendar/view/events/category/all/ical',
+    source: 'local',
+  },
+  {
+    name:   'City of ABQ – BioPark',
+    url:    'https://www.cabq.gov/artsculture/biopark/events/ical_view',
+    source: 'local',
+  },
+];
+
+async function fetchIcalEvents() {
+  const all = [];
+  for (const src of ICAL_SOURCES) {
+    try {
+      console.log(`\n📅 Fetching iCal: ${src.name}...`);
+      const { status, body } = await fetchUrl(src.url, { accept: 'text/calendar' });
+      if (status !== 200) { console.warn(`  ⚠️  HTTP ${status} — skipping`); continue; }
+      if (!body.includes('BEGIN:VCALENDAR') && !body.includes('BEGIN:VEVENT')) {
+        console.warn(`  ⚠️  Not valid iCal format — skipping`);
+        continue;
+      }
+      const evs = parseIcal(body, src.source);
+      console.log(`  ✓ ${evs.length} events from ${src.name}`);
+      all.push(...evs);
+    } catch (err) {
+      console.warn(`  ⚠️  ${src.name} error:`, err.message.slice(0, 80));
+    }
+    await sleep(500);
+  }
+  return all;
+}
+
+// ── 5. Upsert to Supabase ─────────────────────────────────────────────────────
+async function upsertEvents(source, rawArr) {
+  if (!_sb || !rawArr.length) return;
+  const rows = rawArr.map(raw => ({
+    id:         raw.id,
+    source,
+    raw,
+    event_date: raw.dates?.start?.localDate || null,
+  }));
+  const { error } = await _sb.from('events').upsert(rows, { onConflict: 'id' });
+  if (error) console.error(`[Supabase] ${source} upsert error:`, error.message);
+  else console.log(`[Supabase] ✓ upserted ${rows.length} ${source} events`);
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
+(async () => {
+  console.log('🗓️  ABQ Unplugged — Local Event Sources');
+  console.log('   Sources: Eventbrite (HTML/JSON-LD), Do505 (WP API), UNM, ABQ BioPark\n');
+
+  const [ebEvents, do505Events, icalEvents] = await Promise.all([
+    fetchEventbriteEvents(),
+    fetchDo505Events(),
+    fetchIcalEvents(),
+  ]);
+
+  const allLocal = [...ebEvents, ...do505Events, ...icalEvents];
+  console.log(`\n📊 Total local/EB events: ${allLocal.length}`);
+  console.log(`   Eventbrite: ${ebEvents.length}  |  Do505: ${do505Events.length}  |  iCal: ${icalEvents.length}`);
+
+  // Write output file
+  const outDir = path.join(__dirname, '..', 'public', 'data');
+  if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+  const outPath = path.join(outDir, 'local-events.json');
+  fs.writeFileSync(outPath, JSON.stringify(allLocal, null, 2));
+  console.log(`✅ Saved → ${outPath}`);
+
+  // Upsert to Supabase by source bucket
+  const ebRows    = allLocal.filter(e => e._source === 'eventbrite');
+  const do505Rows = allLocal.filter(e => e._source === 'do505');
+  const localRows = allLocal.filter(e => e._source === 'local');
+
+  await upsertEvents('eventbrite', ebRows);
+  await upsertEvents('do505',      do505Rows);
+  await upsertEvents('local',      localRows);
+
+  console.log('\n✅ Done.');
+})();
