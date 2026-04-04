@@ -17,7 +17,7 @@ jobs:
   refresh-data:
     name: Fetch fresh events & places
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repo
@@ -47,6 +47,12 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: node scripts/fetch-data.cjs
 
+      - name: Fetch local ABQ events (Do505, City calendar, UNM, BioPark)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/fetch-local-events.cjs
+
       - name: Purge past events from Supabase
         run: |
           node -e "const {createClient}=require('@supabase/supabase-js');const sb=createClient(process.env.SUPABASE_URL,process.env.SUPABASE_SERVICE_ROLE_KEY);sb.rpc('purge_past_events').then(({data,error})=>{if(error){console.error('Purge error:',error.message);process.exit(1);}console.log('Purged',data,'past events from Supabase');});"
@@ -71,6 +77,7 @@ jobs:
                   public/data/seatgeek-events.json \
                   public/data/bandsintown-events.json \
                   public/data/meetup-events.json \
+                  public/data/local-events.json \
                   public/data/google-places.json \
                   public/places-data.json
           COUNT=$(node -e "
@@ -80,6 +87,7 @@ jobs:
               './public/data/seatgeek-events.json',
               './public/data/bandsintown-events.json',
               './public/data/meetup-events.json',
+              './public/data/local-events.json',
             ];
             try {
               const total = files.reduce((s,f) => {
@@ -107,8 +115,9 @@ jobs:
           SG=$(cnt ./public/data/seatgeek-events.json)
           BIT=$(cnt ./public/data/bandsintown-events.json)
           MU=$(cnt ./public/data/meetup-events.json)
+          LC=$(cnt ./public/data/local-events.json)
           PL=$(cnt ./public/places-data.json)
-          TOTAL=$((TM + EB + SG + BIT + MU))
+          TOTAL=$((TM + EB + SG + BIT + MU + LC))
           echo "| Source | Count |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Ticketmaster | $TM |" >> $GITHUB_STEP_SUMMARY
@@ -116,6 +125,7 @@ jobs:
           echo "| SeatGeek | $SG |" >> $GITHUB_STEP_SUMMARY
           echo "| Bandsintown | $BIT |" >> $GITHUB_STEP_SUMMARY
           echo "| Meetup | $MU |" >> $GITHUB_STEP_SUMMARY
+          echo "| Do505 + local iCal | $LC |" >> $GITHUB_STEP_SUMMARY
           echo "| **Total events** | **$TOTAL** |" >> $GITHUB_STEP_SUMMARY
           echo "| Places | $PL |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

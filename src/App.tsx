@@ -4632,16 +4632,20 @@ function EventsScreen({
     // Easter events even when the "Tonight" pill is active. ──
     if (hasTextSearch) {
       const q = search.toLowerCase().trim();
+      // Split into words for multi-word matching ("isotopes game", "red rocks concert", etc.)
+      // Each word must appear somewhere — handles out-of-order and partial phrase searches.
+      const words = q.split(/\s+/).filter(w => w.length >= 2);
       result = result.filter(e => {
-        const eName    = e.name.toLowerCase();
-        const eVenue   = (e._embedded?.venues?.[0]?.name || '').toLowerCase();
-        const eInfo    = (e.info || '').toLowerCase();
-        const eDesc    = (e.description || '').toLowerCase();
-        const eSeg     = (e.classifications?.[0]?.segment?.name || '').toLowerCase();
-        const eGenre   = (e.classifications?.[0]?.genre?.name || '').toLowerCase();
-        const eSubGenre = (e.classifications?.[0]?.subGenre?.name || '').toLowerCase();
-        return eName.includes(q) || eVenue.includes(q) || eInfo.includes(q) ||
-          eDesc.includes(q) || eSeg.includes(q) || eGenre.includes(q) || eSubGenre.includes(q);
+        const haystack = [
+          e.name,
+          e._embedded?.venues?.[0]?.name || '',
+          e.info || '',
+          e.description || '',
+          e.classifications?.[0]?.segment?.name || '',
+          e.classifications?.[0]?.genre?.name || '',
+          e.classifications?.[0]?.subGenre?.name || '',
+        ].join(' ').toLowerCase();
+        return words.length > 0 ? words.every(w => haystack.includes(w)) : haystack.includes(q);
       });
       return result;
     }
@@ -4803,7 +4807,9 @@ function EventsScreen({
           {eventsHero.display}{!eventsHero.done && <span style={{ display: 'inline-block', width: '3px', height: '0.85em', background: 'var(--ink)', marginLeft: '2px', verticalAlign: 'baseline', animation: 'cursorBlink 0.8s step-end infinite' }} />}
         </h1>
         <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: 'Public Sans, sans-serif' }}>
-          {events.length.toLocaleString()} things to do in Greater ABQ
+          {(search || selectedGenre !== 'All' || dateFrom || dateTo)
+            ? <>{deduped.length.toLocaleString()} <span style={{ color: '#bbb' }}>of {events.length.toLocaleString()}</span> events</>
+            : <>{events.length.toLocaleString()} upcoming events in ABQ</>}
         </p>
       </div>
 
@@ -9224,6 +9230,7 @@ export default function App() {
                   ...(sbEvents['seatgeek'] || []),
                   ...(sbEvents['bandsintown'] || []),
                   ...(sbEvents['musicbrainz'] || []),
+                  ...(sbEvents['do505'] || []),
                   ...(sbEvents['local'] || []),
                 ];
                 // Merge in static events so "This Week" always has content
@@ -9310,7 +9317,10 @@ export default function App() {
           sgEvents = sbEvents['seatgeek'] || [];
           bitEvents = sbEvents['bandsintown'] || [];
           muEvents = sbEvents['musicbrainz'] || [];
-          localDbEvents = sbEvents['local'] || [];
+          localDbEvents = [
+            ...(sbEvents['do505'] || []),
+            ...(sbEvents['local'] || []),
+          ];
         } catch (err) {
           console.warn('[Events] Supabase failed or timed out, using static fallback:', err);
           const [tmR, ebR, sgR, bitR, muR] = await Promise.allSettled([
