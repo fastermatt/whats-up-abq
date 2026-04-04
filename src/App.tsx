@@ -8234,9 +8234,13 @@ export default function App() {
         if (pendingTab) {
           sessionStorage.removeItem('abq_post_auth_redirect');
           if ((pendingTab as string) === 'admin') {
-            window.history.pushState({}, '', '#admin');
+            window.history.replaceState({}, '', window.location.pathname + '#admin');
             setCurrentHash('#admin');
           } else {
+            // Clean up ?code= from URL after OAuth exchange
+            if (window.location.search.includes('code=')) {
+              window.history.replaceState({}, '', window.location.pathname);
+            }
             setActiveTab(pendingTab);
             if (!session.user.user_metadata?.display_name) setShowUsernameSetup(true);
           }
@@ -8264,10 +8268,14 @@ export default function App() {
         if (pendingTab) {
           sessionStorage.removeItem('abq_post_auth_redirect');
           if ((pendingTab as string) === 'admin') {
-            // Admin Google sign-in — navigate to #admin (only works if email matches ADMIN_EMAIL)
-            window.history.pushState({}, '', '#admin');
+            // Admin Google sign-in — navigate to #admin, clean up ?code= from OAuth
+            window.history.replaceState({}, '', window.location.pathname + '#admin');
             setCurrentHash('#admin');
           } else {
+            // Clean up ?code= from URL after OAuth exchange
+            if (window.location.search.includes('code=')) {
+              window.history.replaceState({}, '', window.location.pathname);
+            }
             setActiveTab(pendingTab);
             const hasUsername = !!(u.user_metadata?.display_name);
             if (!hasUsername) setShowUsernameSetup(true);
