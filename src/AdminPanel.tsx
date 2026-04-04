@@ -1271,8 +1271,13 @@ function ContentSection() {
       <SectionHeader title="Content Sections" sub="Edit hero copy, vibes, section visibility" />
       <div style={{...card,marginBottom:18}}>
         <h3 style={{fontSize:15,fontWeight:700,marginBottom:8}}>Hero Taglines</h3>
-        <p style={{fontSize:12,color:'#9ca3af',marginBottom:10}}>One phrase per line. App randomly picks from these.</p>
-        <textarea value={cfg.heroLines.join('\n')} onChange={e=>setCfg(c=>({...c,heroLines:e.target.value.split('\n').filter(Boolean)}))} rows={6} style={{...inp,resize:'vertical',fontFamily:'monospace',fontSize:14}} />
+        <p style={{fontSize:12,color:'#9ca3af',marginBottom:6}}>One phrase per line. The app randomly picks from these for the Discover page hero. Paste in bulk — one per line.</p>
+        <p style={{fontSize:12,fontWeight:600,color:'#6366f1',marginBottom:10}}>{cfg.heroLines.length} phrase{cfg.heroLines.length !== 1 ? 's' : ''} loaded</p>
+        <textarea value={cfg.heroLines.join('\n')} onChange={e=>setCfg(c=>({...c,heroLines:e.target.value.split('\n').filter(Boolean)}))} rows={20} style={{...inp,resize:'vertical',fontFamily:'monospace',fontSize:13,lineHeight:'1.6'}} placeholder="Go Do Something&#10;Touch Some Grass&#10;Stop Doomscrolling&#10;..." />
+        <div style={{display:'flex',gap:8,marginTop:8}}>
+          <button onClick={()=>{if(confirm('Sort all phrases alphabetically?')){setCfg(c=>({...c,heroLines:[...c.heroLines].sort((a,b)=>a.localeCompare(b))}));}}} style={{padding:'6px 12px',fontSize:12,fontWeight:600,border:'1px solid #e5e7eb',borderRadius:6,background:'white',cursor:'pointer'}}>Sort A→Z</button>
+          <button onClick={()=>{const dupes=cfg.heroLines.filter((v,i,a)=>a.findIndex(x=>x.toLowerCase().trim()===v.toLowerCase().trim())!==i);if(dupes.length){setCfg(c=>({...c,heroLines:[...new Map(c.heroLines.map(h=>[h.toLowerCase().trim(),h])).values()]}));alert(`Removed ${dupes.length} duplicate(s)`);}else{alert('No duplicates found');}}} style={{padding:'6px 12px',fontSize:12,fontWeight:600,border:'1px solid #e5e7eb',borderRadius:6,background:'white',cursor:'pointer'}}>Remove Duplicates</button>
+        </div>
       </div>
       <div style={{...card,marginBottom:18}}>
         <h3 style={{fontSize:15,fontWeight:700,marginBottom:12}}>Daily Gem / Sunday's Spot</h3>

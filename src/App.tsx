@@ -3986,6 +3986,7 @@ function DiscoverScreen({
   onNavigatePlaces?: (cat: string, search: string, vibeLabel?: string, vibeGradient?: string) => void;
   onNavigateEvents?: (genre?: string) => void;
   prefs?: UserPrefs;
+  adminHeroLines?: string[] | null;
 }) {
   const hidden = prefs?.hiddenSections ?? [];
   const interests = prefs?.preferredInterests ?? [];
@@ -4030,7 +4031,8 @@ function DiscoverScreen({
   const [heroDone, setHeroDone] = useState(false);
   useEffect(() => {
     let cancelled = false;
-    const target = HERO_PHRASES[Math.floor(Math.random() * HERO_PHRASES.length)];
+    const phrasePool = (adminHeroLines?.length) ? adminHeroLines : HERO_PHRASES;
+    const target = phrasePool[Math.floor(Math.random() * phrasePool.length)];
     let charIdx = 0;
     let current = '';
     const typeSpeed = () => 45 + Math.random() * 55;
@@ -9114,6 +9116,7 @@ export default function App() {
   const [siteBanner, setSiteBanner] = useState<BannerConfig | null>(null);
   const [mapProvider, setMapProvider] = useState<'google' | 'apple' | 'auto'>('apple');
   const [enrichedDataEnabled, setEnrichedDataEnabled] = useState(true);
+  const [adminHeroLines, setAdminHeroLines] = useState<string[] | null>(null);
 
   // Resolve 'auto' → Apple Maps on iOS/iPadOS, Google Maps elsewhere
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -9128,7 +9131,8 @@ export default function App() {
       (supabase.from as any)('config').select('value').eq('key', 'siteConfig').maybeSingle(),
       (supabase.from as any)('config').select('value').eq('key', 'banners').maybeSingle(),
       (supabase.from as any)('config').select('value').eq('key', 'enriched_data_enabled').maybeSingle(),
-    ]).then(([siteRes, bannersRes, enrichedRes]: [{ data: { value: Record<string, unknown> } | null }, { data: { value: unknown[] } | null }, { data: { value: boolean } | null }]) => {
+      (supabase.from as any)('config').select('value').eq('key', 'content').maybeSingle(),
+    ]).then(([siteRes, bannersRes, enrichedRes, contentRes]: [{ data: { value: Record<string, unknown> } | null }, { data: { value: unknown[] } | null }, { data: { value: boolean } | null }, { data: { value: { heroLines?: string[] } } | null }]) => {
       // Apply siteConfig
       const d = siteRes.data?.value;
       if (d) {
@@ -9150,6 +9154,9 @@ export default function App() {
           setSiteBanner({ message: active.message, type: active.type ?? 'info', active: true, linkUrl: active.linkUrl, linkText: active.linkText, bgColor: active.bgColor, textColor: active.textColor });
         }
       }
+      // Apply hero lines from admin content config
+      const contentData = contentRes.data?.value;
+      if (contentData?.heroLines?.length) setAdminHeroLines(contentData.heroLines);
     });
   }, []);
 
@@ -9819,7 +9826,8 @@ export default function App() {
 
               onNavigatePlaces={(cat, search, vibeLabel, vibeGradient) => { setPlacesNavCat(cat); setPlacesNavSearch(search); setPlacesNavVibe(vibeLabel ? `${vibeLabel}|||${vibeGradient || ''}` : ''); setPlacesNavKey(k => k + 1); setActiveTab('places'); window.scrollTo({ top: 0, behavior: 'instant' }); }}
               onNavigateEvents={(genre) => { setEventsNavGenre(genre || ''); setActiveTab('events'); }}
-              prefs={prefs}/>
+              prefs={prefs}
+              adminHeroLines={adminHeroLines}/>
           )}
           {activeTab === 'events' && (
             <EventsScreen events={events} onEventSelect={openEventModal} initialSearch={eventsNavSearch} initialGenre={eventsNavGenre} />
