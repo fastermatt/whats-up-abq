@@ -9244,7 +9244,8 @@ export default function App() {
                   ...(sbEvents['seatgeek'] || []),
                   ...(sbEvents['bandsintown'] || []),
                   ...(sbEvents['musicbrainz'] || []),
-                  ...(sbEvents['do505'] || []),
+                  ...(sbEvents['eventbrite'] || []),
+            ...(sbEvents['do505'] || []),
                   ...(sbEvents['local'] || []),
                 ];
                 // Merge in static events so "This Week" always has content
@@ -9332,6 +9333,7 @@ export default function App() {
           bitEvents = sbEvents['bandsintown'] || [];
           muEvents = sbEvents['musicbrainz'] || [];
           localDbEvents = [
+            ...(sbEvents['eventbrite'] || []),
             ...(sbEvents['do505'] || []),
             ...(sbEvents['local'] || []),
           ];
