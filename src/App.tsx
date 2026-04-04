@@ -1073,7 +1073,7 @@ function GeoBanner({
       <button
         onClick={() => { setDismissed(true); try { localStorage.setItem('abq_geo_dismissed', '1'); } catch {} }}
         className="flex-shrink-0"
-        style={{ background: 'none', border: 'none', color: 'var(--ink)', fontSize: 18, cursor: 'pointer', padding: '0 4px', opacity: 0.6 }}
+        style={{ background: 'none', border: 'none', color: 'var(--ink)', fontSize: 18, cursor: 'pointer', padding: '8px 10px', opacity: 0.6 }}
         aria-label="Dismiss"
       >
         ×
@@ -3696,7 +3696,10 @@ function FeaturedEventBanner({ events, onSelect }: { events: TMEvent[]; onSelect
   return (
     <div className="px-5 pb-5">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em' }}>Featured Event</h2>
+        <h2 className="text-sm font-black uppercase flex items-center gap-1.5" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>
+          <span style={{ display: 'inline-block', width: 10, height: 10, background: 'var(--brand)', borderRadius: 2, flexShrink: 0 }} />
+          Featured Event
+        </h2>
         <span className="text-xs font-black uppercase" style={{ color: '#666', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em' }}>
           <span className="material-symbols-outlined" style={{ fontSize: '12px', verticalAlign: 'middle', marginRight: '3px' }}>star</span>
           This Weekend
@@ -4927,9 +4930,10 @@ function EventsScreen({
             <div key={event.id} style={{position:'relative'}}>
               <EventCard event={event} onClick={() => onEventSelect(event)} />
               {/* Showtime count badge — only shown when > 1 showtime was collapsed */}
+              {/* Positioned within the image area (top: 136px) so it never overlaps venue text */}
               {count > 1 && (
                 <div
-                  style={{ position:'absolute', bottom:8, left:8, background:'rgba(0,0,0,0.55)', color:'white', fontSize:'9px', fontWeight:600, letterSpacing:'0.06em', textTransform:'uppercase', padding:'2px 7px', borderRadius:4, pointerEvents:'none' }}
+                  style={{ position:'absolute', top:136, left:8, background:'rgba(0,0,0,0.62)', color:'white', fontSize:'9px', fontWeight:600, letterSpacing:'0.06em', textTransform:'uppercase', padding:'3px 7px', borderRadius:4, pointerEvents:'none', backdropFilter:'blur(4px)' }}
                 >
                   {count} showtimes
                 </div>
