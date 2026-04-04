@@ -2486,11 +2486,302 @@ async function shareEvent(event: TMEvent) {
   try { await navigator.clipboard.writeText(deepLink); } catch { /* ignore */ }
 }
 
+// ─── Instagram / Share Card ──────────────────────────────────────────────────
+
+function wrapCanvasText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number, lineHeight: number, maxLines: number): number {
+  const words = text.split(' ');
+  let line = '';
+  let linesDrawn = 0;
+  for (let i = 0; i < words.length; i++) {
+    const testLine = line + words[i] + ' ';
+    if (ctx.measureText(testLine).width > maxWidth && i > 0) {
+      if (linesDrawn >= maxLines - 1) {
+        let truncated = line.trim();
+        while (ctx.measureText(truncated + '…').width > maxWidth && truncated.length > 0) truncated = truncated.slice(0, -1);
+        ctx.fillText(truncated + '…', x, y + linesDrawn * lineHeight);
+        return linesDrawn + 1;
+      }
+      ctx.fillText(line.trim(), x, y + linesDrawn * lineHeight);
+      line = words[i] + ' ';
+      linesDrawn++;
+    } else {
+      line = testLine;
+    }
+  }
+  if (line.trim() && linesDrawn < maxLines) {
+    ctx.fillText(line.trim(), x, y + linesDrawn * lineHeight);
+    linesDrawn++;
+  }
+  return linesDrawn;
+}
+
+function drawShareCard(canvas: HTMLCanvasElement, event: TMEvent, format: 'story' | 'square', photo: HTMLImageElement | null): void {
+  const W = 1080;
+  const H = format === 'story' ? 1920 : 1080;
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  // Background
+  if (photo) {
+    const scale = Math.max(W / photo.naturalWidth, H / photo.naturalHeight);
+    const sw = photo.naturalWidth * scale;
+    const sh = photo.naturalHeight * scale;
+    ctx.drawImage(photo, (W - sw) / 2, (H - sh) / 2, sw, sh);
+  } else {
+    const bg = ctx.createLinearGradient(0, 0, W * 0.4, H);
+    bg.addColorStop(0, '#0d1b2a');
+    bg.addColorStop(0.5, '#1a3a5c');
+    bg.addColorStop(1, '#566500');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // Bottom-up dark overlay
+  const overlayStart = photo ? 0.25 : 0.4;
+  const overlayMidAlpha = photo ? 0.55 : 0.45;
+  const overlayStrength = photo ? 0.92 : 0.82;
+  const bottomOverlay = ctx.createLinearGradient(0, H * overlayStart, 0, H);
+  bottomOverlay.addColorStop(0, 'rgba(0,0,0,0)');
+  bottomOverlay.addColorStop(0.35, `rgba(0,0,0,${overlayMidAlpha})`);
+  bottomOverlay.addColorStop(1, `rgba(0,0,0,${overlayStrength})`);
+  ctx.fillStyle = bottomOverlay;
+  ctx.fillRect(0, 0, W, H);
+
+  // Top vignette (for badge legibility over photos)
+  if (photo) {
+    const topV = ctx.createLinearGradient(0, 0, 0, H * 0.22);
+    topV.addColorStop(0, 'rgba(0,0,0,0.6)');
+    topV.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = topV;
+    ctx.fillRect(0, 0, W, H * 0.22);
+  }
+
+  // Lime accent bar at bottom
+  ctx.fillStyle = '#d4ef4d';
+  ctx.fillRect(0, H - 16, W, 16);
+
+  // ABQ Unplugged badge (top-left)
+  const BADGE_X = 72;
+  const BADGE_Y = format === 'story' ? 160 : 72;
+  const dotR = 16;
+  ctx.fillStyle = '#d4ef4d';
+  ctx.beginPath();
+  ctx.arc(BADGE_X + dotR, BADGE_Y + dotR, dotR, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `900 ${format === 'story' ? 48 : 40}px "Public Sans", sans-serif`;
+  ctx.textBaseline = 'top';
+  ctx.fillText('ABQ', BADGE_X + dotR * 2 + 12, BADGE_Y);
+  ctx.fillStyle = '#d4ef4d';
+  ctx.font = `900 ${format === 'story' ? 32 : 28}px "Public Sans", sans-serif`;
+  ctx.fillText('UNPLUGGED', BADGE_X + dotR * 2 + 12, BADGE_Y + (format === 'story' ? 50 : 43));
+
+  // Content block — built bottom-up
+  const PAD = 72;
+  const CONTENT_W = W - PAD * 2;
+  const BOTTOM_PAD = 80;
+
+  // Category
+  const rawGenre = event.classifications?.[0]?.genre?.name;
+  const rawSegment = event.classifications?.[0]?.segment?.name;
+  const category = (rawGenre && rawGenre !== 'Undefined' ? rawGenre : rawSegment) || 'Event';
+  const tagFontSize = 28;
+  ctx.font = `800 ${tagFontSize}px "Public Sans", sans-serif`;
+  const tagText = category.toUpperCase();
+  const tagPadX = 28;
+  const tagH = 56;
+  const tagW = ctx.measureText(tagText).width + tagPadX * 2;
+
+  const titleFontSize = format === 'story' ? 88 : 76;
+  const titleLineH = titleFontSize * 1.15;
+  const metaLineH = 52;
+  const metaItems = [
+    event.dates?.start?.localDate
+      ? [formatDate(event.dates.start.localDate), event.dates.start.localTime ? formatTime(event.dates.start.localTime) : ''].filter(Boolean).join(' · ')
+      : '',
+    event._embedded?.venues?.[0]?.name || '',
+  ].filter(Boolean);
+
+  const metaBlockH = metaItems.length * metaLineH;
+  const titleBlockH = 2 * titleLineH;
+  const totalContentH = tagH + 24 + titleBlockH + 24 + metaBlockH;
+  const contentTop = H - BOTTOM_PAD - totalContentH;
+
+  // Tag pill
+  const tagY = contentTop;
+  ctx.fillStyle = '#566500';
+  ctx.beginPath();
+  if ('roundRect' in ctx) {
+    (ctx as CanvasRenderingContext2D & { roundRect: (x: number, y: number, w: number, h: number, r: number) => void }).roundRect(PAD, tagY, tagW, tagH, tagH / 2);
+  } else {
+    ctx.rect(PAD, tagY, tagW, tagH);
+  }
+  ctx.fill();
+  ctx.fillStyle = '#d4ef4d';
+  ctx.font = `800 ${tagFontSize}px "Public Sans", sans-serif`;
+  ctx.textBaseline = 'middle';
+  ctx.fillText(tagText, PAD + tagPadX, tagY + tagH / 2);
+
+  // Event title
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `900 ${titleFontSize}px "Public Sans", sans-serif`;
+  ctx.textBaseline = 'top';
+  const titleY = tagY + tagH + 24;
+  const linesDrawn = wrapCanvasText(ctx, event.name, PAD, titleY, CONTENT_W, titleLineH, 2);
+
+  // Meta: date + venue
+  const metaY = titleY + linesDrawn * titleLineH + 24;
+  metaItems.forEach((item, i) => {
+    const y = metaY + i * metaLineH;
+    ctx.fillStyle = '#d4ef4d';
+    ctx.beginPath();
+    ctx.arc(PAD + 10, y + 17, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.font = `400 34px "Public Sans", sans-serif`;
+    ctx.textBaseline = 'top';
+    ctx.fillText(item, PAD + 30, y);
+  });
+}
+
+function EventShareCardModal({ event, onClose }: { event: TMEvent; onClose: () => void }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [format, setFormat] = useState<'story' | 'square'>('story');
+  const [shareState, setShareState] = useState<'idle' | 'saved' | 'shared'>('idle');
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const photoUrl = getBestEventImage(event.images);
+    if (photoUrl) {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => drawShareCard(canvas, event, format, img);
+      img.onerror = () => drawShareCard(canvas, event, format, null);
+      img.src = photoUrl;
+    } else {
+      drawShareCard(canvas, event, format, null);
+    }
+  }, [event, format]);
+
+  const W = 1080;
+  const H = format === 'story' ? 1920 : 1080;
+  const previewScale = format === 'story' ? 0.22 : 0.34;
+  const previewW = Math.round(W * previewScale);
+  const previewH = Math.round(H * previewScale);
+
+  const getBlob = (): Promise<Blob | null> => new Promise(res => canvasRef.current?.toBlob(res, 'image/png'));
+
+  const handleDownload = async () => {
+    const blob = await getBlob();
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${event.name.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-abq-unplugged.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    trackEvent('instagram_card_download', { event_id: event.id, format });
+    setShareState('saved');
+    setTimeout(() => setShareState('idle'), 2000);
+  };
+
+  const handleShare = async () => {
+    const blob = await getBlob();
+    if (!blob) return;
+    const file = new File([blob], `${event.name.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.png`, { type: 'image/png' });
+    if (navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: event.name, text: `Check out ${event.name} — found on ABQ Unplugged!\nabqunplugged.com` });
+        trackEvent('instagram_card_share', { event_id: event.id, format, method: 'web_share' });
+        setShareState('shared');
+        setTimeout(() => setShareState('idle'), 2000);
+      } catch { /* user cancelled */ }
+    } else {
+      // Desktop fallback: download
+      handleDownload();
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[200] flex flex-col" style={{ background: '#1a1a1a' }}>
+      {/* Header */}
+      <div className="flex items-center justify-between px-4" style={{ paddingTop: 'max(16px, env(safe-area-inset-top, 16px))', paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.12)' }}>
+        <button
+          onClick={onClose}
+          className="flex items-center gap-1"
+          style={{ color: 'rgba(255,255,255,0.7)', fontFamily: 'Public Sans, sans-serif', fontSize: 14, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0' }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: 20 }}>arrow_back</span>
+          Back
+        </button>
+        <span className="font-black text-white text-sm" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em' }}>CREATE CARD</span>
+        <div style={{ width: 60 }} />
+      </div>
+
+      {/* Format tabs */}
+      <div className="flex mx-4 mt-3 mb-3" style={{ border: '2px solid rgba(255,255,255,0.15)', borderRadius: 6, overflow: 'hidden' }}>
+        {(['story', 'square'] as const).map(f => (
+          <button
+            key={f}
+            onClick={() => setFormat(f)}
+            className="flex-1 py-2 text-xs font-black"
+            style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em', background: format === f ? '#d4ef4d' : 'transparent', color: format === f ? '#1a1a1a' : 'rgba(255,255,255,0.5)', border: 'none', cursor: 'pointer', transition: 'all 0.15s' }}
+          >
+            {f === 'story' ? 'STORY 9:16' : 'POST 1:1'}
+          </button>
+        ))}
+      </div>
+
+      {/* Canvas preview */}
+      <div className="flex-1 flex items-center justify-center overflow-hidden px-4">
+        <canvas
+          ref={canvasRef}
+          width={W}
+          height={H}
+          style={{ width: previewW, height: previewH, display: 'block', border: '2px solid rgba(255,255,255,0.15)', borderRadius: 4 }}
+        />
+      </div>
+
+      {/* Tip */}
+      <p className="text-center text-xs mb-2" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'Public Sans, sans-serif' }}>
+        Save to camera roll, then share to Instagram Stories or your feed
+      </p>
+
+      {/* Actions */}
+      <div className="flex gap-3 px-4" style={{ paddingBottom: 'max(24px, env(safe-area-inset-bottom, 24px))', paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+        <button
+          onClick={handleDownload}
+          className="flex-1 flex items-center justify-center gap-2 py-3 font-black text-sm"
+          style={{ border: '2px solid #d4ef4d', color: '#d4ef4d', background: 'transparent', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.05em', borderRadius: 6, cursor: 'pointer' }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>download</span>
+          {shareState === 'saved' ? 'SAVED!' : 'SAVE IMAGE'}
+        </button>
+        <button
+          onClick={handleShare}
+          className="flex-1 flex items-center justify-center gap-2 py-3 font-black text-sm"
+          style={{ background: '#d4ef4d', color: '#1a1a1a', border: 'none', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.05em', borderRadius: 6, cursor: 'pointer' }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>ios_share</span>
+          {shareState === 'shared' ? 'SHARED!' : 'SHARE'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Event Detail Modal ──────────────────────────────────────────────────────
 
 function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }: { event: TMEvent; onClose: () => void; isSaved?: boolean; onToggleSave?: () => void; mapProvider?: 'google' | 'apple' }) {
   const [shared, setShared] = useState(false);
+  const [showShareCard, setShowShareCard] = useState(false);
   const [venueExpanded, setVenueExpanded] = useState(false);
+  if (showShareCard) return <EventShareCardModal event={event} onClose={() => setShowShareCard(false)} />;
   const venue = event._embedded?.venues?.[0];
   const category = getEventCategory(event);
   const price = event.priceRanges?.[0];
@@ -2542,6 +2833,14 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
               <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>
                 {shared ? 'check' : 'share'}
               </span>
+            </button>
+            <button
+              onClick={() => setShowShareCard(true)}
+              className="w-10 h-10 flex items-center justify-center"
+              style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%' }}
+              title="Create Instagram card"
+            >
+              <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>photo_camera</span>
             </button>
           </div>
         </div>
