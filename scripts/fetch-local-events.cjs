@@ -5,7 +5,7 @@
  * Fetches events from ABQ-specific sources that don't have mainstream APIs:
  *   • Eventbrite (JSON-LD from their public event pages — no API key needed)
  *   • Do505     (WordPress Events Calendar REST API — no API key needed)
- *   • iCal feeds: UNM Events, ABQ BioPark (City of ABQ)
+ *   • ABQToDo.com (WordPress Events Calendar REST API)
  *
  * Usage:
  *   node scripts/fetch-local-events.cjs
@@ -327,96 +327,97 @@ function stripHtml(html) {
   return html.replace(/<[^>]+>/g, ' ').replace(/\s{2,}/g, ' ').trim().slice(0, 500);
 }
 
-// ── 3. iCal parser ─────────────────────────────────────────────────────────────
-function parseIcal(text, defaultSource = 'local') {
-  const unfolded = text.replace(/\r?\n[ \t]/g, '');
-  const events   = [];
-  const blocks   = unfolded.split(/BEGIN:VEVENT/i).slice(1);
+// ── 3. ABQToDo.com WordPress API ──────────────────────────────────────────────
+async function fetchAbqToDoEvents() {
+  console.log('\n📍 Fetching ABQToDo.com events (local ABQ community calendar)...');
+  const events = [];
+  let page = 1;
 
-  for (const block of blocks) {
-    const get = (key) => {
-      const re = new RegExp(`^${key}[;:][^\r\n]*`, 'im');
-      const m  = block.match(re);
-      if (!m) return '';
-      return m[0].replace(/^[^:]+:/, '').replace(/\\n/g, '\n').replace(/\\,/g, ',').trim();
-    };
+  while (page <= 5) {
+    try {
+      const url = `https://abqtodo.com/wp-json/tribe/events/v1/events?per_page=50&page=${page}&start_date=${todayStr()}&status=publish`;
+      const { status, body } = await fetchUrl(url, { accept: 'application/json' });
+      if (status !== 200) break;
 
-    const dtstart   = get('DTSTART');
-    const localDate = dtstart ? dtstart.slice(0, 4) + '-' + dtstart.slice(4, 6) + '-' + dtstart.slice(6, 8) : '';
-    const localTime = dtstart && dtstart.length >= 13
-      ? dtstart.slice(9, 11) + ':' + dtstart.slice(11, 13)
-      : undefined;
+      const data  = JSON.parse(body);
+      const items = Array.isArray(data?.events) ? data.events : [];
+      if (items.length === 0) break;
 
-    if (!localDate || !isFuture(localDate)) continue;
-
-    const uid  = get('UID') || `ical-${Math.random()}`;
-    const name = get('SUMMARY') || 'Event';
-    const url  = get('URL');
-    const loc  = get('LOCATION');
-    const desc = get('DESCRIPTION').slice(0, 500);
-    const geo  = get('GEO');
-    const [geoLat, geoLng] = geo ? geo.split(';') : [];
-    if (geoLat && geoLng && !isInMetro(geoLat, geoLng)) continue;
-
-    events.push({
-      id:      `ical-${uid.replace(/[^a-z0-9]/gi, '').slice(0, 40)}`,
-      name,
-      url:     url || undefined,
-      _source: defaultSource,
-      info:    desc,
-      images:  [],
-      dates:   { start: { localDate, localTime } },
-      _embedded: {
-        venues: [{
-          name:    loc || '',
-          address: { line1: loc || '' },
-          city:    { name: 'Albuquerque' },
-        }],
-      },
-      classifications: [{ segment: { name: guessCategory(name, desc) } }],
-      ticketLinks: url ? [{ url }] : [],
-    });
+      for (const ev of items) {
+        const norm = transformAbqToDoEvent(ev);
+        if (norm) events.push(norm);
+      }
+      if (!data.next_rest_url) break;
+      page++;
+      await sleep(400);
+    } catch (err) {
+      if (page === 1) console.warn(`  ⚠️  ABQToDo unavailable:`, err.message.slice(0, 60));
+      break;
+    }
   }
+
+  console.log(`  ✓ ${events.length} ABQToDo events`);
   return events;
 }
 
-// ── 4. iCal sources ───────────────────────────────────────────────────────────
-const ICAL_SOURCES = [
-  {
-    name:   'UNM Events',
-    url:    'https://calendar.unm.edu/live/calendar/view/events/category/all/ical',
-    source: 'local',
-  },
-  {
-    name:   'City of ABQ – BioPark',
-    url:    'https://www.cabq.gov/artsculture/biopark/events/ical_view',
-    source: 'local',
-  },
-];
+function transformAbqToDoEvent(ev) {
+  const start = ev.start_date || '';
+  if (!start) return null;
+  const localDate = start.slice(0, 10);
+  if (!isFuture(localDate)) return null;
+  const localTime = start.length >= 16 ? start.slice(11, 16) : undefined;
+  const venue = ev.venue || {};
+  const lat   = venue.geo_lat || venue.latitude;
+  const lng   = venue.geo_lng || venue.longitude;
+  if (lat && lng && !isInMetro(lat, lng)) return null;
 
-async function fetchIcalEvents() {
-  const all = [];
-  for (const src of ICAL_SOURCES) {
-    try {
-      console.log(`\n📅 Fetching iCal: ${src.name}...`);
-      const { status, body } = await fetchUrl(src.url, { accept: 'text/calendar' });
-      if (status !== 200) { console.warn(`  ⚠️  HTTP ${status} — skipping`); continue; }
-      if (!body.includes('BEGIN:VCALENDAR') && !body.includes('BEGIN:VEVENT')) {
-        console.warn(`  ⚠️  Not valid iCal format — skipping`);
-        continue;
-      }
-      const evs = parseIcal(body, src.source);
-      console.log(`  ✓ ${evs.length} events from ${src.name}`);
-      all.push(...evs);
-    } catch (err) {
-      console.warn(`  ⚠️  ${src.name} error:`, err.message.slice(0, 80));
-    }
-    await sleep(500);
+  const costStr = (ev.cost || '').trim();
+  const costNum = parseFloat(costStr.replace(/[^0-9.]/g, '')) || 0;
+
+  // ABQToDo uses lazy-loaded images — try data-src first, then url
+  let imageUrl = null;
+  if (ev.image) {
+    imageUrl = ev.image.url || ev.image['data-src'] || null;
   }
-  return all;
+
+  const cats = ev.categories || [];
+  const catNames = cats.map(c => (c.name || '').toLowerCase());
+  let segment = 'Community';
+  if (catNames.some(n => /music|concert|band/.test(n))) segment = 'Music';
+  else if (catNames.some(n => /art|galler|exhibit/.test(n))) segment = 'Arts & Theatre';
+  else if (catNames.some(n => /film|movie|cinema/.test(n))) segment = 'Arts & Theatre';
+  else if (catNames.some(n => /comedy|improv/.test(n))) segment = 'Comedy';
+  else if (catNames.some(n => /famil|kid|child/.test(n))) segment = 'Family';
+  else if (catNames.some(n => /food|drink|beer|wine/.test(n))) segment = 'Food & Drink';
+  else if (catNames.some(n => /festival|market|fair/.test(n))) segment = 'Community';
+  else if (catNames.some(n => /outdoor|hike|trail|natur/.test(n))) segment = 'Community';
+
+  return {
+    id:      `abqtodo-${ev.id}`,
+    name:    ev.title || 'Untitled Event',
+    url:     ev.url,
+    _source: 'local',
+    info:    stripHtml(ev.excerpt || ''),
+    description: stripHtml(ev.description || ''),
+    images:  imageUrl ? [{ url: imageUrl }] : [],
+    dates:   { start: { localDate, localTime } },
+    _embedded: {
+      venues: [{
+        name:    venue.venue || venue.name || '',
+        address: { line1: [venue.address, venue.address_2].filter(Boolean).join(', ') },
+        city:    { name: venue.city || 'Albuquerque' },
+        state:   { name: venue.stateprovince || 'NM' },
+        location: (lat && lng) ? { latitude: String(lat), longitude: String(lng) } : undefined,
+      }],
+    },
+    classifications: [{ segment: { name: segment } }],
+    priceRanges: costNum > 0 ? [{ min: costNum, max: costNum, currency: 'USD' }] : undefined,
+    isFree: costStr === '' || costStr === '0' || /free/i.test(costStr),
+    ticketLinks: ev.url ? [{ url: ev.url }] : [],
+  };
 }
 
-// ── 5. Upsert to Supabase ─────────────────────────────────────────────────────
+// ── 4. Upsert to Supabase ─────────────────────────────────────────────────────
 async function upsertEvents(source, rawArr) {
   if (!_sb || !rawArr.length) return;
   const rows = rawArr.map(raw => ({
@@ -433,17 +434,17 @@ async function upsertEvents(source, rawArr) {
 // ── Main ──────────────────────────────────────────────────────────────────────
 (async () => {
   console.log('🗓️  ABQ Unplugged — Local Event Sources');
-  console.log('   Sources: Eventbrite (HTML/JSON-LD), Do505 (WP API), UNM, ABQ BioPark\n');
+  console.log('   Sources: Eventbrite (HTML/JSON-LD), Do505 (WP API), ABQToDo (WP API)\n');
 
-  const [ebEvents, do505Events, icalEvents] = await Promise.all([
+  const [ebEvents, do505Events, abqTodoEvents] = await Promise.all([
     fetchEventbriteEvents(),
     fetchDo505Events(),
-    fetchIcalEvents(),
+    fetchAbqToDoEvents(),
   ]);
 
-  const allLocal = [...ebEvents, ...do505Events, ...icalEvents];
+  const allLocal = [...ebEvents, ...do505Events, ...abqTodoEvents];
   console.log(`\n📊 Total local/EB events: ${allLocal.length}`);
-  console.log(`   Eventbrite: ${ebEvents.length}  |  Do505: ${do505Events.length}  |  iCal: ${icalEvents.length}`);
+  console.log(`   Eventbrite: ${ebEvents.length}  |  Do505: ${do505Events.length}  |  ABQToDo: ${abqTodoEvents.length}`);
 
   // Write output file
   const outDir = path.join(__dirname, '..', 'public', 'data');
@@ -453,9 +454,9 @@ async function upsertEvents(source, rawArr) {
   console.log(`✅ Saved → ${outPath}`);
 
   // Upsert to Supabase by source bucket
-  const ebRows    = allLocal.filter(e => e._source === 'eventbrite');
-  const do505Rows = allLocal.filter(e => e._source === 'do505');
-  const localRows = allLocal.filter(e => e._source === 'local');
+  const ebRows       = allLocal.filter(e => e._source === 'eventbrite');
+  const do505Rows    = allLocal.filter(e => e._source === 'do505');
+  const localRows    = allLocal.filter(e => e._source === 'local');
 
   await upsertEvents('eventbrite', ebRows);
   await upsertEvents('do505',      do505Rows);
