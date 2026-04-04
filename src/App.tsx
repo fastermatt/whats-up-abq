@@ -1621,7 +1621,7 @@ function PlaceDetailModal({
   enrichedDataEnabled?: boolean;
 }) {
   const [shared, setShared] = useState(false);
-  const [enriched, setEnriched] = useState<{ tip?: string; hours?: string; phone?: string; website?: string; editorial?: string; parking?: string; menu?: string; historicNote?: string; bestFor?: string[]; priceNote?: string } | null>(
+  const [enriched, setEnriched] = useState<{ tip?: string; hours?: string; phone?: string; website?: string; editorial?: string; parking?: string; menu?: string; historicNote?: string; bestFor?: string[]; priceNote?: string; amenities?: string[]; priceLevel?: number } | null>(
     // Use pre-loaded enriched data from Supabase if available (attached by fetchPlacesFromDB)
     (place as any)._enriched || null
   );
@@ -1685,6 +1685,10 @@ function PlaceDetailModal({
   const historicNote   = showEnriched ? (enriched?.historicNote || (place as any).historicNote || null) : null;
   const bestFor        = showEnriched ? (enriched?.bestFor || (place as any).bestFor as string[] || null) : null;
   const priceNote      = showEnriched ? (enriched?.priceNote || (place as any).priceNote || null) : null;
+  const amenities      = showEnriched ? (enriched?.amenities as string[] || null) : null;
+  // priceLevel: prefer enriched (fetched from Google Details), fall back to raw
+  const priceLevelVal  = showEnriched ? (enriched?.priceLevel ?? place.priceLevel) : place.priceLevel;
+  const priceSymbol    = priceLevelVal != null ? ['Free', '$', '$$', '$$$', '$$$$'][priceLevelVal as number] : null;
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -1836,13 +1840,40 @@ function PlaceDetailModal({
         )}
 
         {/* Price Note */}
-        {priceNote && (
+        {(priceNote || priceSymbol) && (
           <div className="flex items-start gap-3 mb-3 bg-white p-3" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
             <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)', marginTop: '1px' }}>payments</span>
             <div className="min-w-0">
               <p className="text-xs font-black uppercase mb-0.5" style={{ color: '#6b7280', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em' }}>Price</p>
-              <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'Public Sans, sans-serif' }}>{priceNote}</p>
+              <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'Public Sans, sans-serif' }}>
+                {priceSymbol && <span className="font-black mr-2" style={{ color: 'var(--brand)' }}>{priceSymbol}</span>}
+                {priceNote}
+              </p>
             </div>
+          </div>
+        )}
+
+        {/* Amenity chips — Dine In, Takeout, Delivery, Outdoor Seating, Beer, Wine, etc. */}
+        {amenities && amenities.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-3 px-1">
+            {amenities.map(attr => {
+              const icon: Record<string, string> = {
+                'Dine In': '🍽️', 'Takeout': '🥡', 'Delivery': '🛵',
+                'Outdoor Seating': '☀️', 'Reservations': '📅',
+                'Brunch': '🥂', 'Breakfast': '🍳', 'Lunch': '🥗', 'Dinner': '🌙',
+                'Beer': '🍺', 'Wine': '🍷', 'Accessible': '♿',
+              };
+              return (
+                <span key={attr} style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                  padding: '4px 10px', borderRadius: 999, fontSize: 12, fontWeight: 700,
+                  background: 'rgba(0,0,0,0.05)', color: '#374151',
+                  fontFamily: 'Public Sans, sans-serif',
+                }}>
+                  {icon[attr] || '✓'} {attr}
+                </span>
+              );
+            })}
           </div>
         )}
 
@@ -1863,15 +1894,32 @@ function PlaceDetailModal({
           </a>
         )}
 
-        {/* Hours — full schedule from enriched data, falls back to open_now text */}
+        {/* Hours — full schedule from enriched data, highlights today */}
         {displayHours && (
           <div className="flex items-start gap-3 mb-3 bg-white p-3" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
             <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', color: 'var(--brand)', marginTop: '1px' }}>schedule</span>
-            <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'Public Sans, sans-serif' }}>
+            <div className="min-w-0">
+              <p className="text-xs font-black uppercase mb-1" style={{ color: '#6b7280', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em' }}>Hours</p>
               {displayHours.includes(' | ')
-                ? displayHours.split(' | ').map((line, i) => <span key={i} style={{ display: 'block' }}>{line}</span>)
-                : displayHours}
-            </p>
+                ? (() => {
+                    const days = displayHours.split(' | ');
+                    const todayIdx = new Date().getDay(); // 0=Sun
+                    // Google returns Mon–Sun (0=Mon), adjust: Sun=0→6, Mon=1→0…
+                    const todayGoogleIdx = todayIdx === 0 ? 6 : todayIdx - 1;
+                    return days.map((line, i) => (
+                      <span key={i} style={{
+                        display: 'block', fontSize: 13, lineHeight: '1.6',
+                        fontWeight: i === todayGoogleIdx ? 800 : 400,
+                        color: i === todayGoogleIdx ? 'var(--brand)' : '#374151',
+                        fontFamily: 'Public Sans, sans-serif',
+                      }}>
+                        {i === todayGoogleIdx ? '▶ ' : ''}{line}
+                      </span>
+                    ));
+                  })()
+                : <p className="text-sm text-gray-700" style={{ fontFamily: 'Public Sans, sans-serif' }}>{displayHours}</p>
+              }
+            </div>
           </div>
         )}
 
