@@ -1,7 +1,6 @@
 import { supabase } from './supabase';
 
-const GOOGLE_KEY = import.meta.env.VITE_GOOGLE_PLACES_KEY as string;
-if (!GOOGLE_KEY) throw new Error('VITE_GOOGLE_PLACES_KEY is not set');
+const GOOGLE_KEY = import.meta.env.VITE_GOOGLE_PLACES_KEY as string | undefined;
 
 function placeTypeToCategory(types: string[], name = ''): string {
   if (!types) return 'other';
@@ -169,20 +168,20 @@ function transformGoogleRaw(
   const hasCachedReal = cachedPhotoUrl && cachedPhotoUrl !== 'none';
   const hasCachedThumbReal = cachedThumbnailUrl && cachedThumbnailUrl !== 'none';
   const photoExpired = cachedPhotoUrl === 'none';
-  // Priority: overridePhoto > cached Supabase Storage URL > Google API URL (only if not expired)
+  // Priority: overridePhoto > cached Supabase Storage URL > Google API URL (only if key set and not expired)
   const imageUrl = overridePhoto
     || (hasCachedReal ? cachedPhotoUrl : undefined)
-    || (!photoExpired && photoRef
+    || (GOOGLE_KEY && !photoExpired && photoRef
       ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photoRef}&key=${GOOGLE_KEY}`
       : undefined);
   const thumbnailUrl = overridePhoto
     || (hasCachedThumbReal ? cachedThumbnailUrl : undefined)
     || (hasCachedReal ? cachedPhotoUrl : undefined)
-    || (!photoExpired && photoRef
+    || (GOOGLE_KEY && !photoExpired && photoRef
       ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoRef}&key=${GOOGLE_KEY}`
       : undefined);
-  // Additional photos — only fall back to Google API if no cached main photo and not expired
-  const additionalImages = (!cachedPhotoUrl && !overridePhoto && !photoExpired)
+  // Additional photos — only fall back to Google API if key set, no cached main photo, and not expired
+  const additionalImages = (GOOGLE_KEY && !cachedPhotoUrl && !overridePhoto && !photoExpired)
     ? photos?.slice(1, 6).map(
         p => `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${p.photo_reference}&key=${GOOGLE_KEY}`
       )
