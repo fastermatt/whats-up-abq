@@ -3677,8 +3677,15 @@ const FEATURED_EVENT_EXPIRY = '2026-04-06'; // Show through Sunday April 5
 function FeaturedEventBanner({ events, onSelect }: { events: TMEvent[]; onSelect: (e: TMEvent) => void }) {
   const today = new Date().toISOString().slice(0, 10);
   if (today >= FEATURED_EVENT_EXPIRY) return null;
-  const ev = events.find(e => e.id === FEATURED_EVENT_ID);
-  if (!ev) return null;
+  // Try filtered events first. If missing (race condition: Supabase's copy lacks
+  // a URL so hasActionableLink removes it, while the static copy was already deduped
+  // against it), fall back directly to raw static data so the banner never vanishes.
+  let ev = events.find(e => e.id === FEATURED_EVENT_ID);
+  if (!ev) {
+    const staticSrc = ALL_EVENTS.find(e => e.id === FEATURED_EVENT_ID);
+    if (!staticSrc) return null;
+    ev = staticEventToTMEvent(staticSrc);
+  }
   const img = ev.images?.[0]?.url || '';
   const venue = ev._embedded?.venues?.[0]?.name || '';
   const dateStr = ev.dates?.start?.localDate || '';
@@ -4015,9 +4022,31 @@ function DiscoverScreen({
         return d >= today && d <= sevenDays;
       })
       .filter(e => !e._isAdult);  // Discover "This Week" is always family-friendly
-    // Shuffle, pick 3, then sort by earliest date first
-    const shuffled = [...pool].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 3).sort((a, b) => {
+
+    // If a featured event is active and falls within this week, pin it first
+    // so it's guaranteed to appear regardless of the random shuffle.
+    const isFeaturedActive = today < FEATURED_EVENT_EXPIRY;
+    let pinnedFeatured: TMEvent | undefined;
+    if (isFeaturedActive) {
+      pinnedFeatured = pool.find(e => e.id === FEATURED_EVENT_ID);
+      // If not in pool (filtered by hasActionableLink or deduped), try static fallback
+      if (!pinnedFeatured) {
+        const staticSrc = ALL_EVENTS.find(e => e.id === FEATURED_EVENT_ID);
+        if (staticSrc) {
+          const candidate = staticEventToTMEvent(staticSrc);
+          const d = candidate.dates?.start?.localDate || '';
+          if (d >= today && d <= sevenDays) pinnedFeatured = candidate;
+        }
+      }
+    }
+
+    const rest = pool.filter(e => e.id !== FEATURED_EVENT_ID);
+    const shuffled = [...rest].sort(() => Math.random() - 0.5);
+    const picked = pinnedFeatured
+      ? [pinnedFeatured, ...shuffled.slice(0, 2)]
+      : shuffled.slice(0, 3);
+
+    return picked.sort((a, b) => {
       const da = a.dates?.start?.localDate || '';
       const db = b.dates?.start?.localDate || '';
       return da.localeCompare(db);
