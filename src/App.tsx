@@ -407,7 +407,8 @@ async function loadYelpPhotoMap() {
   _yelpPhotoMapLoaded = true;
 }
 function getYelpPhotos(placeName: string): string[] {
-  return _yelpPhotoMap[placeName]?.photos ?? [];
+  // Use ls.jpg (526px square) instead of l.jpg (~1000px) — loads ~4x faster
+  return (_yelpPhotoMap[placeName]?.photos ?? []).map(u => u.replace(/\/l\.jpg$/, '/ls.jpg'));
 }
 
 /**
@@ -1546,23 +1547,28 @@ function PlacePhotoGallery({ place }: { place: Place }) {
 
   return (
     <div className="w-full h-full relative overflow-hidden" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-      {allPhotos.map((src, i) => (
-        <img
-          key={src}
-          src={src}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-          loading={i === 0 ? 'eager' : 'lazy'}
-          decoding="async"
-          onLoad={(e) => handleImgLoad(src, e)}
-          onError={() => handleImgError(src)}
-          style={{
-            opacity: i === idx ? 1 : 0,
-            transition: 'opacity 0.35s ease',
-            pointerEvents: 'none',
-          }}
-        />
-      ))}
+      {allPhotos.map((src, i) => {
+        // Only mount current slide + immediate neighbors to avoid loading all photos at once
+        const isNear = Math.abs(i - idx) <= 1 || (idx === 0 && i === allPhotos.length - 1) || (idx === allPhotos.length - 1 && i === 0);
+        if (!isNear) return null;
+        return (
+          <img
+            key={src}
+            src={src}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="eager"
+            decoding="async"
+            onLoad={(e) => handleImgLoad(src, e)}
+            onError={() => handleImgError(src)}
+            style={{
+              opacity: i === idx ? 1 : 0,
+              transition: 'opacity 0.35s ease',
+              pointerEvents: 'none',
+            }}
+          />
+        );
+      })}
       {allPhotos.length > 1 && (
         <>
           <button
