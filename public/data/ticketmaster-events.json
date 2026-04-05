@@ -2,963 +2,6 @@
   {
     "name": "Albuquerque Isotopes vs. Reno Aces",
     "type": "event",
-    "id": "Z7r9jZ1A7QkPA",
-    "test": false,
-    "url": "https://www.ticketmaster.com/event/Z7r9jZ1A7QkPA",
-    "locale": "en-us",
-    "images": [
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
-        "width": 1024,
-        "height": 576,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RETINA_LANDSCAPE_16_9.jpg",
-        "width": 1136,
-        "height": 639,
-        "fallback": false
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_ARTIST_PAGE_3_2.jpg",
-        "width": 305,
-        "height": 203,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_LARGE_16_9.jpg",
-        "width": 2048,
-        "height": 1152,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_SOURCE",
-        "width": 2426,
-        "height": 1365,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_EVENT_DETAIL_PAGE_16_9.jpg",
-        "width": 205,
-        "height": 115,
-        "fallback": false
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RETINA_PORTRAIT_3_2.jpg",
-        "width": 640,
-        "height": 427,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RETINA_PORTRAIT_16_9.jpg",
-        "width": 640,
-        "height": 360,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RECOMENDATION_16_9.jpg",
-        "width": 100,
-        "height": 56,
-        "fallback": false
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_3_2.jpg",
-        "width": 1024,
-        "height": 683,
-        "fallback": false
-      },
-      {
-        "ratio": "4_3",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_CUSTOM.jpg",
-        "width": 305,
-        "height": 225,
-        "fallback": false
-      }
-    ],
-    "distance": 4.03,
-    "units": "MILES",
-    "sales": {
-      "public": {
-        "startDateTime": "9999-12-31T06:00:00Z",
-        "startTBD": false,
-        "startTBA": false,
-        "endDateTime": "2026-04-05T05:59:20Z"
-      }
-    },
-    "dates": {
-      "start": {
-        "localDate": "2026-04-04",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBA": true,
-        "noSpecificTime": false
-      },
-      "status": {
-        "code": "offsale"
-      },
-      "spanMultipleDays": false
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nE",
-          "name": "Sports"
-        },
-        "genre": {
-          "id": "KnvZfZ7vAdv",
-          "name": "Baseball"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vF1t",
-          "name": "Minor League"
-        },
-        "family": false
-      }
-    ],
-    "outlets": [
-      {
-        "url": "https://www.ticketmaster.com/event/Z7r9jZ1A7QkPA",
-        "type": "tmMarketPlace"
-      }
-    ],
-    "ticketing": {
-      "allInclusivePricing": {
-        "enabled": true
-      }
-    },
-    "nameOrigin": "custom",
-    "_links": {
-      "self": {
-        "href": "/discovery/v2/events/Z7r9jZ1A7QkPA?locale=en-us"
-      },
-      "attractions": [
-        {
-          "href": "/discovery/v2/attractions/K8vZ917549V?locale=en-us"
-        },
-        {
-          "href": "/discovery/v2/attractions/K8vZ917Gfh0?locale=en-us"
-        }
-      ],
-      "venues": [
-        {
-          "href": "/discovery/v2/venues/ZFr9jZ77ee?locale=en-us"
-        }
-      ]
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Rio Grande Credit Union Field at Isotopes Park",
-          "type": "venue",
-          "id": "ZFr9jZ77ee",
-          "test": false,
-          "locale": "en-us",
-          "distance": 4.03,
-          "units": "MILES",
-          "postalCode": "87106",
-          "timezone": "America/Denver",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "1601 Avenida Cesar Chavez Se"
-          },
-          "location": {
-            "longitude": "-106.615997000",
-            "latitude": "35.052502000"
-          },
-          "dmas": [
-            {
-              "id": 215
-            }
-          ],
-          "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
-            "_filtered": 0
-          },
-          "_links": {
-            "self": {
-              "href": "/discovery/v2/venues/ZFr9jZ77ee?locale=en-us"
-            }
-          }
-        }
-      ],
-      "attractions": [
-        {
-          "name": "Albuquerque Isotopes",
-          "type": "attraction",
-          "id": "K8vZ917549V",
-          "test": false,
-          "url": "https://www.ticketmaster.com/albuquerque-isotopes-tickets/artist/859541",
-          "locale": "en-us",
-          "images": [
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
-              "width": 1024,
-              "height": 576,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RETINA_LANDSCAPE_16_9.jpg",
-              "width": 1136,
-              "height": 639,
-              "fallback": false
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_ARTIST_PAGE_3_2.jpg",
-              "width": 305,
-              "height": 203,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_LARGE_16_9.jpg",
-              "width": 2048,
-              "height": 1152,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_SOURCE",
-              "width": 2426,
-              "height": 1365,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_EVENT_DETAIL_PAGE_16_9.jpg",
-              "width": 205,
-              "height": 115,
-              "fallback": false
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RETINA_PORTRAIT_3_2.jpg",
-              "width": 640,
-              "height": 427,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RETINA_PORTRAIT_16_9.jpg",
-              "width": 640,
-              "height": 360,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RECOMENDATION_16_9.jpg",
-              "width": 100,
-              "height": 56,
-              "fallback": false
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_3_2.jpg",
-              "width": 1024,
-              "height": 683,
-              "fallback": false
-            },
-            {
-              "ratio": "4_3",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_CUSTOM.jpg",
-              "width": 305,
-              "height": 225,
-              "fallback": false
-            }
-          ],
-          "classifications": [
-            {
-              "primary": true,
-              "segment": {
-                "id": "KZFzniwnSyZfZ7v7nE",
-                "name": "Sports"
-              },
-              "genre": {
-                "id": "KnvZfZ7vAdv",
-                "name": "Baseball"
-              },
-              "subGenre": {
-                "id": "KZazBEonSMnZfZ7vF1t",
-                "name": "Minor League"
-              },
-              "type": {
-                "id": "KZAyXgnZfZ7v7l1",
-                "name": "Group"
-              },
-              "subType": {
-                "id": "KZFzBErXgnZfZ7vA7d",
-                "name": "Team"
-              },
-              "family": false
-            }
-          ],
-          "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
-            "_filtered": 0
-          },
-          "_links": {
-            "self": {
-              "href": "/discovery/v2/attractions/K8vZ917549V?locale=en-us"
-            }
-          }
-        },
-        {
-          "name": "Reno Aces",
-          "type": "attraction",
-          "id": "K8vZ917Gfh0",
-          "test": false,
-          "url": "https://www.ticketmaster.com/reno-aces-tickets/artist/1309247",
-          "locale": "en-us",
-          "images": [
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/c/3c2/23f6a973-82f1-4503-ab46-e890539e13c2_106101_RETINA_LANDSCAPE_16_9.jpg",
-              "width": 1136,
-              "height": 639,
-              "fallback": true
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/c/3c2/23f6a973-82f1-4503-ab46-e890539e13c2_106101_ARTIST_PAGE_3_2.jpg",
-              "width": 305,
-              "height": 203,
-              "fallback": true
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/c/3c2/23f6a973-82f1-4503-ab46-e890539e13c2_106101_RETINA_PORTRAIT_16_9.jpg",
-              "width": 640,
-              "height": 360,
-              "fallback": true
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/c/3c2/23f6a973-82f1-4503-ab46-e890539e13c2_106101_TABLET_LANDSCAPE_LARGE_16_9.jpg",
-              "width": 2048,
-              "height": 1152,
-              "fallback": true
-            },
-            {
-              "ratio": "4_3",
-              "url": "https://s1.ticketm.net/dam/c/3c2/23f6a973-82f1-4503-ab46-e890539e13c2_106101_CUSTOM.jpg",
-              "width": 305,
-              "height": 225,
-              "fallback": true
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/c/3c2/23f6a973-82f1-4503-ab46-e890539e13c2_106101_TABLET_LANDSCAPE_3_2.jpg",
-              "width": 1024,
-              "height": 683,
-              "fallback": true
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/c/3c2/23f6a973-82f1-4503-ab46-e890539e13c2_106101_EVENT_DETAIL_PAGE_16_9.jpg",
-              "width": 205,
-              "height": 115,
-              "fallback": true
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/c/3c2/23f6a973-82f1-4503-ab46-e890539e13c2_106101_RETINA_PORTRAIT_3_2.jpg",
-              "width": 640,
-              "height": 427,
-              "fallback": true
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/c/3c2/23f6a973-82f1-4503-ab46-e890539e13c2_106101_TABLET_LANDSCAPE_16_9.jpg",
-              "width": 1024,
-              "height": 576,
-              "fallback": true
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/c/3c2/23f6a973-82f1-4503-ab46-e890539e13c2_106101_RECOMENDATION_16_9.jpg",
-              "width": 100,
-              "height": 56,
-              "fallback": true
-            }
-          ],
-          "classifications": [
-            {
-              "primary": true,
-              "segment": {
-                "id": "KZFzniwnSyZfZ7v7nE",
-                "name": "Sports"
-              },
-              "genre": {
-                "id": "KnvZfZ7vAdv",
-                "name": "Baseball"
-              },
-              "subGenre": {
-                "id": "KZazBEonSMnZfZ7vF1t",
-                "name": "Minor League"
-              },
-              "type": {
-                "id": "KZAyXgnZfZ7v7l1",
-                "name": "Group"
-              },
-              "subType": {
-                "id": "KZFzBErXgnZfZ7vA7d",
-                "name": "Team"
-              },
-              "family": false
-            }
-          ],
-          "upcomingEvents": {
-            "tmr": 104,
-            "ticketmaster": 48,
-            "_total": 152,
-            "_filtered": 0
-          },
-          "_links": {
-            "self": {
-              "href": "/discovery/v2/attractions/K8vZ917Gfh0?locale=en-us"
-            }
-          }
-        }
-      ]
-    }
-  },
-  {
-    "name": "Albuquerque Isotopes vs. Reno Aces",
-    "type": "event",
-    "id": "G5vzZ_eJiuE1H",
-    "test": false,
-    "url": "https://www.ticketmaster.com/albuquerque-isotopes-vs-reno-aces-albuquerque-new-mexico-04-04-2026/event/1E006429AC3672BC",
-    "locale": "en-us",
-    "images": [
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
-        "width": 1024,
-        "height": 576,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RETINA_LANDSCAPE_16_9.jpg",
-        "width": 1136,
-        "height": 639,
-        "fallback": false
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_ARTIST_PAGE_3_2.jpg",
-        "width": 305,
-        "height": 203,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_LARGE_16_9.jpg",
-        "width": 2048,
-        "height": 1152,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_SOURCE",
-        "width": 2426,
-        "height": 1365,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_EVENT_DETAIL_PAGE_16_9.jpg",
-        "width": 205,
-        "height": 115,
-        "fallback": false
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RETINA_PORTRAIT_3_2.jpg",
-        "width": 640,
-        "height": 427,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RETINA_PORTRAIT_16_9.jpg",
-        "width": 640,
-        "height": 360,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RECOMENDATION_16_9.jpg",
-        "width": 100,
-        "height": 56,
-        "fallback": false
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_3_2.jpg",
-        "width": 1024,
-        "height": 683,
-        "fallback": false
-      },
-      {
-        "ratio": "4_3",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_CUSTOM.jpg",
-        "width": 305,
-        "height": 225,
-        "fallback": false
-      }
-    ],
-    "distance": 2.69,
-    "units": "MILES",
-    "sales": {
-      "public": {
-        "startDateTime": "2026-02-06T17:00:00Z",
-        "startTBD": false,
-        "startTBA": false,
-        "endDateTime": "2026-04-05T02:35:00Z"
-      }
-    },
-    "dates": {
-      "start": {
-        "localDate": "2026-04-04",
-        "localTime": "18:35:00",
-        "dateTime": "2026-04-05T00:35:00Z",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBA": false,
-        "noSpecificTime": false
-      },
-      "timezone": "America/Denver",
-      "status": {
-        "code": "onsale"
-      },
-      "spanMultipleDays": false
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nE",
-          "name": "Sports"
-        },
-        "genre": {
-          "id": "KnvZfZ7vAdv",
-          "name": "Baseball"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vF1t",
-          "name": "Minor League"
-        },
-        "type": {
-          "id": "KZAyXgnZfZ7v7l1",
-          "name": "Group"
-        },
-        "subType": {
-          "id": "KZFzBErXgnZfZ7vA7d",
-          "name": "Team"
-        },
-        "family": false
-      }
-    ],
-    "promoter": {
-      "id": "6377",
-      "name": "DIAMOND BASEBALL HOLDINGS",
-      "description": "DIAMOND BASEBALL HOLDINGS / NTL / USA"
-    },
-    "promoters": [
-      {
-        "id": "6377",
-        "name": "DIAMOND BASEBALL HOLDINGS",
-        "description": "DIAMOND BASEBALL HOLDINGS / NTL / USA"
-      }
-    ],
-    "seatmap": {
-      "staticUrl": "https://mapsapi.tmol.io/maps/geometry/3/event/1E006429AC3672BC/staticImage?type=png&systemId=HOST"
-    },
-    "accessibility": {
-      "ticketLimit": 4
-    },
-    "ageRestrictions": {
-      "legalAgeEnforced": false
-    },
-    "ticketing": {
-      "safeTix": {
-        "enabled": true
-      },
-      "allInclusivePricing": {
-        "enabled": true
-      }
-    },
-    "nameOrigin": "custom",
-    "_links": {
-      "self": {
-        "href": "/discovery/v2/events/G5vzZ_eJiuE1H?locale=en-us"
-      },
-      "attractions": [
-        {
-          "href": "/discovery/v2/attractions/K8vZ917549V?locale=en-us"
-        },
-        {
-          "href": "/discovery/v2/attractions/K8vZ917Gfh0?locale=en-us"
-        }
-      ],
-      "venues": [
-        {
-          "href": "/discovery/v2/venues/KovZpaKabe?locale=en-us"
-        }
-      ]
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Rio Grande Credit Union Field at Isotopes Park",
-          "type": "venue",
-          "id": "KovZpaKabe",
-          "test": false,
-          "url": "https://www.ticketmaster.com/rio-grande-credit-union-field-at-tickets-albuquerque/venue/246456",
-          "locale": "en-us",
-          "images": [
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dbimages/22999v.jpg",
-              "width": 640,
-              "height": 360,
-              "fallback": false
-            }
-          ],
-          "distance": 2.69,
-          "units": "MILES",
-          "postalCode": "87106",
-          "timezone": "America/Denver",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "1601 Avenida Cesar Chavez SE"
-          },
-          "location": {
-            "longitude": "-106.62906570",
-            "latitude": "35.06903040"
-          },
-          "markets": [
-            {
-              "name": "El Paso and New Mexico",
-              "id": "8"
-            }
-          ],
-          "dmas": [
-            {
-              "id": 215
-            }
-          ],
-          "boxOfficeInfo": {
-            "phoneNumberDetail": "(505) 222-4058 (Direct Line Isotopes Park Box Office) (505) 924-BALL (Isotopes Administrative Offices/General Information)",
-            "openHoursDetail": "Non-Game Days: Monday-Friday: 10am-5pm Saturday: Closed Sunday: Closed Game Days: Monday-Saturday: 10am-conclusion of the game Sunday Day Games: 10am-conclusion of the game Sunday Night Games: 12pm-conclusion of the game",
-            "acceptedPaymentDetail": "Visa, Mastercard, Discover, American Express, Baseball Bucks",
-            "willCallDetail": "Will Call tickets may be picked up from any open Isotopes Park Box Office window. For your protection, Will Call tickets are only released to the individual whose name appears on the order, Ticketmaster account, or Will Call envelope. A valid photo ID, as well as the credit card used to make the purchase, is required to pick up tickets. The Isotopes will allow you to drop off tickets for another individual by providing the full name of the recipient, as well as your name and contact information. The Isotopes are not responsible for any tickets left by anyone outside of the Isotopes organization. Will Call tickets may be picked up any time after the order has been processed. For questions regarding Will Call procedures, please contact the Isotopes Park Box Office at (505) 222-4058."
-          },
-          "parkingDetail": "The University of New Mexico owns and controls most of the parking lots surrounding Rio Grande Credit Union Field at Isotopes Park. Fans are charged $7.00 to park in the surrounding UNM lots. Vehicles with four or more people are allowed to park in the Stadium East Lot for free. Vehicles displaying a disabled permit or placard are allowed to park for free at the UNM East Lot. There is a limited number of disabled parking spaces available on a first-come, first-served basis in Lots A and C. If Lots A or C are full, overflow disabled parking is also available at the Stadium West Lot on a first-come, first-served basis.",
-          "accessibleSeatingDetail": "Accessible seating is reserved for guests with accessible requirements and their companions. Guests requiring accessible seating may purchase one (1) accessible seat and up to three (3) companion seats adjacent to the accessible seat. Depending upon availability, seats for additional guests will be located as close as possible to the accessible space. Isotopes Park is committed to working with guests on a case-by-case basis to adequately accommodate individual needs. All ticket sales are based on availability. Isotopes Park is fully accessible. Guests may enter Isotopes Park at any of the entry gates. Ramps are provided at all entries, and there are elevators that will take patrons to the Club or Suite Level if they choose those seats. For questions regarding accessible seating, please contact the Isotopes Park Box Office at (505) 222-4058.",
-          "generalInfo": {
-            "generalRule": "To help ensure everyone's safety, Isotopes Park has a no reentry policy. Guests who wish to exit and reenter the facility for personal emergencies should be directed to the Guest Services Booth. Reentry accommodations are up to the discretion of the Albuquerque Isotopes and are strictly limited to emergencies only. Isotopes Park is a non smoking facility. No outside food and beverage is allowed (with the exception of sealed bottles of water). The Isotopes do not allow laser pointers, noisemakers, fireworks, weapons or any other item that may be considered dangerous or may interfere with enjoyment of the game for another fan. Please check the Isotopes A to Z Guide at www.abqisotopes.com for additional information regarding prohibited items and bag policy. Gates will open one (1) hour prior to the start of the game unless otherwise noted. Please check www.abqisotopes.com or call (505) 924 2255 (BALL) for updated gate times. Isotopes tickets are the property of the Albuquerque Isotopes and may not be sold or distributed on property grounds. Attempted or actual resale or distribution of tickets at any price is prohibited. Isotopes management reserves the right to confiscate any tickets being sold or distributed. Please note that the protective netting has been extended to cover Sections 101 through 123 and 102 through 124. RGCU Field at Isotopes Park is a clear bag only facility. Each fan may carry one bag of any size that is clear plastic, vinyl or PVC. No purses or other bags will be permitted in the ballpark. For guests with medical or childcare needs such as diapers, wipes, formula, bottles or breast pumps, those items must be brought in a medical or diaper bag and those bags are subject to search upon entry into the stadium. Only childcare or medical items may be carried inside of these bags, all other personal items must be carried in an approved clear bag. Please check the Isotopes A to Z Guide at www.abqisotopes.com for additional information regarding prohibited items and bag policy. Seating Policy Guests should sit only in the seats for which they hold valid tickets. Guests may be asked to show their ticket stub if there is confusion over a specific seat.",
-            "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
-          },
-          "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
-            "_filtered": 0
-          },
-          "_links": {
-            "self": {
-              "href": "/discovery/v2/venues/KovZpaKabe?locale=en-us"
-            }
-          }
-        }
-      ],
-      "attractions": [
-        {
-          "name": "Albuquerque Isotopes",
-          "type": "attraction",
-          "id": "K8vZ917549V",
-          "test": false,
-          "url": "https://www.ticketmaster.com/albuquerque-isotopes-tickets/artist/859541",
-          "locale": "en-us",
-          "images": [
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
-              "width": 1024,
-              "height": 576,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RETINA_LANDSCAPE_16_9.jpg",
-              "width": 1136,
-              "height": 639,
-              "fallback": false
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_ARTIST_PAGE_3_2.jpg",
-              "width": 305,
-              "height": 203,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_LARGE_16_9.jpg",
-              "width": 2048,
-              "height": 1152,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_SOURCE",
-              "width": 2426,
-              "height": 1365,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_EVENT_DETAIL_PAGE_16_9.jpg",
-              "width": 205,
-              "height": 115,
-              "fallback": false
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RETINA_PORTRAIT_3_2.jpg",
-              "width": 640,
-              "height": 427,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RETINA_PORTRAIT_16_9.jpg",
-              "width": 640,
-              "height": 360,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RECOMENDATION_16_9.jpg",
-              "width": 100,
-              "height": 56,
-              "fallback": false
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_3_2.jpg",
-              "width": 1024,
-              "height": 683,
-              "fallback": false
-            },
-            {
-              "ratio": "4_3",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_CUSTOM.jpg",
-              "width": 305,
-              "height": 225,
-              "fallback": false
-            }
-          ],
-          "classifications": [
-            {
-              "primary": true,
-              "segment": {
-                "id": "KZFzniwnSyZfZ7v7nE",
-                "name": "Sports"
-              },
-              "genre": {
-                "id": "KnvZfZ7vAdv",
-                "name": "Baseball"
-              },
-              "subGenre": {
-                "id": "KZazBEonSMnZfZ7vF1t",
-                "name": "Minor League"
-              },
-              "type": {
-                "id": "KZAyXgnZfZ7v7l1",
-                "name": "Group"
-              },
-              "subType": {
-                "id": "KZFzBErXgnZfZ7vA7d",
-                "name": "Team"
-              },
-              "family": false
-            }
-          ],
-          "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
-            "_filtered": 0
-          },
-          "_links": {
-            "self": {
-              "href": "/discovery/v2/attractions/K8vZ917549V?locale=en-us"
-            }
-          }
-        },
-        {
-          "name": "Reno Aces",
-          "type": "attraction",
-          "id": "K8vZ917Gfh0",
-          "test": false,
-          "url": "https://www.ticketmaster.com/reno-aces-tickets/artist/1309247",
-          "locale": "en-us",
-          "images": [
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/c/3c2/23f6a973-82f1-4503-ab46-e890539e13c2_106101_RETINA_LANDSCAPE_16_9.jpg",
-              "width": 1136,
-              "height": 639,
-              "fallback": true
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/c/3c2/23f6a973-82f1-4503-ab46-e890539e13c2_106101_ARTIST_PAGE_3_2.jpg",
-              "width": 305,
-              "height": 203,
-              "fallback": true
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/c/3c2/23f6a973-82f1-4503-ab46-e890539e13c2_106101_RETINA_PORTRAIT_16_9.jpg",
-              "width": 640,
-              "height": 360,
-              "fallback": true
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/c/3c2/23f6a973-82f1-4503-ab46-e890539e13c2_106101_TABLET_LANDSCAPE_LARGE_16_9.jpg",
-              "width": 2048,
-              "height": 1152,
-              "fallback": true
-            },
-            {
-              "ratio": "4_3",
-              "url": "https://s1.ticketm.net/dam/c/3c2/23f6a973-82f1-4503-ab46-e890539e13c2_106101_CUSTOM.jpg",
-              "width": 305,
-              "height": 225,
-              "fallback": true
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/c/3c2/23f6a973-82f1-4503-ab46-e890539e13c2_106101_TABLET_LANDSCAPE_3_2.jpg",
-              "width": 1024,
-              "height": 683,
-              "fallback": true
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/c/3c2/23f6a973-82f1-4503-ab46-e890539e13c2_106101_EVENT_DETAIL_PAGE_16_9.jpg",
-              "width": 205,
-              "height": 115,
-              "fallback": true
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/c/3c2/23f6a973-82f1-4503-ab46-e890539e13c2_106101_RETINA_PORTRAIT_3_2.jpg",
-              "width": 640,
-              "height": 427,
-              "fallback": true
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/c/3c2/23f6a973-82f1-4503-ab46-e890539e13c2_106101_TABLET_LANDSCAPE_16_9.jpg",
-              "width": 1024,
-              "height": 576,
-              "fallback": true
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/c/3c2/23f6a973-82f1-4503-ab46-e890539e13c2_106101_RECOMENDATION_16_9.jpg",
-              "width": 100,
-              "height": 56,
-              "fallback": true
-            }
-          ],
-          "classifications": [
-            {
-              "primary": true,
-              "segment": {
-                "id": "KZFzniwnSyZfZ7v7nE",
-                "name": "Sports"
-              },
-              "genre": {
-                "id": "KnvZfZ7vAdv",
-                "name": "Baseball"
-              },
-              "subGenre": {
-                "id": "KZazBEonSMnZfZ7vF1t",
-                "name": "Minor League"
-              },
-              "type": {
-                "id": "KZAyXgnZfZ7v7l1",
-                "name": "Group"
-              },
-              "subType": {
-                "id": "KZFzBErXgnZfZ7vA7d",
-                "name": "Team"
-              },
-              "family": false
-            }
-          ],
-          "upcomingEvents": {
-            "tmr": 104,
-            "ticketmaster": 48,
-            "_total": 152,
-            "_filtered": 0
-          },
-          "_links": {
-            "self": {
-              "href": "/discovery/v2/attractions/K8vZ917Gfh0?locale=en-us"
-            }
-          }
-        }
-      ]
-    }
-  },
-  {
-    "name": "Albuquerque Isotopes vs. Reno Aces",
-    "type": "event",
     "id": "G5vzZ_eJi265v",
     "test": false,
     "url": "https://www.ticketmaster.com/albuquerque-isotopes-vs-reno-aces-albuquerque-new-mexico-04-05-2026/event/1E006429AC3C72C1",
@@ -1206,9 +249,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -1332,9 +375,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -1449,9 +492,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 104,
-            "ticketmaster": 48,
-            "_total": 152,
+            "tmr": 103,
+            "ticketmaster": 47,
+            "_total": 150,
             "_filtered": 0
           },
           "_links": {
@@ -1656,9 +699,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -1782,9 +825,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -1899,9 +942,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 104,
-            "ticketmaster": 48,
-            "_total": 152,
+            "tmr": 103,
+            "ticketmaster": 47,
+            "_total": 150,
             "_filtered": 0
           },
           "_links": {
@@ -2299,9 +1342,9 @@
           ],
           "upcomingEvents": {
             "tmr": 1,
-            "ticketmaster": 18,
+            "ticketmaster": 16,
             "mfx-de": 1,
-            "_total": 20,
+            "_total": 18,
             "_filtered": 0
           },
           "_links": {
@@ -2434,9 +1477,9 @@
             "mfx-dk": 1,
             "tmr": 1,
             "mfx-nl": 1,
-            "ticketmaster": 25,
+            "ticketmaster": 23,
             "mfx-no": 2,
-            "_total": 30,
+            "_total": 28,
             "_filtered": 0
           },
           "_links": {
@@ -2625,7 +1668,6 @@
         "description": "LIVE NATION 3PE EVENT / NTL / USA"
       }
     ],
-    "accessibility": {},
     "ageRestrictions": {
       "legalAgeEnforced": false
     },
@@ -2883,9 +1925,9 @@
           ],
           "upcomingEvents": {
             "tmr": 1,
-            "ticketmaster": 18,
+            "ticketmaster": 16,
             "mfx-de": 1,
-            "_total": 20,
+            "_total": 18,
             "_filtered": 0
           },
           "_links": {
@@ -3018,9 +2060,9 @@
             "mfx-dk": 1,
             "tmr": 1,
             "mfx-nl": 1,
-            "ticketmaster": 25,
+            "ticketmaster": 23,
             "mfx-no": 2,
-            "_total": 30,
+            "_total": 28,
             "_filtered": 0
           },
           "_links": {
@@ -3185,9 +2227,9 @@
             }
           ],
           "upcomingEvents": {
-            "ticketmaster": 17,
+            "ticketmaster": 15,
             "mfx-de": 1,
-            "_total": 18,
+            "_total": 16,
             "_filtered": 0
           },
           "_links": {
@@ -3318,9 +2360,9 @@
           ],
           "upcomingEvents": {
             "tmr": 1,
-            "ticketmaster": 18,
+            "ticketmaster": 16,
             "moshtix": 4,
-            "_total": 23,
+            "_total": 21,
             "_filtered": 0
           },
           "_links": {
@@ -5321,9 +4363,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -5447,9 +4489,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -5581,8 +4623,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -5844,9 +4886,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -5970,9 +5012,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -6104,8 +5146,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -6310,9 +5352,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -6436,9 +5478,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -6570,8 +5612,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -6833,9 +5875,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -6959,9 +6001,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -7093,8 +6135,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -7356,9 +6398,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -7482,9 +6524,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -7616,8 +6658,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -7822,9 +6864,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -7948,9 +6990,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -8082,8 +7124,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -9110,9 +8152,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -9236,9 +8278,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -9370,8 +8412,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -9633,9 +8675,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -9759,9 +8801,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -9893,8 +8935,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -11437,9 +10479,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -11563,9 +10605,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -11697,8 +10739,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -11960,9 +11002,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -12086,9 +11128,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -12220,8 +11262,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -12554,9 +11596,9 @@
           ],
           "upcomingEvents": {
             "tmr": 5,
-            "ticketmaster": 26,
+            "ticketmaster": 25,
             "ticketweb": 7,
-            "_total": 38,
+            "_total": 37,
             "_filtered": 0
           },
           "_links": {
@@ -13621,9 +12663,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -13747,9 +12789,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -13881,8 +12923,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -14087,9 +13129,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -14213,9 +13255,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -14347,8 +13389,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -14704,9 +13746,9 @@
           "upcomingEvents": {
             "mfx-se": 1,
             "tmr": 5,
-            "ticketmaster": 16,
+            "ticketmaster": 15,
             "mfx-no": 1,
-            "_total": 23,
+            "_total": 22,
             "_filtered": 0
           },
           "_links": {
@@ -15099,9 +14141,9 @@
           "upcomingEvents": {
             "mfx-se": 1,
             "tmr": 5,
-            "ticketmaster": 16,
+            "ticketmaster": 15,
             "mfx-no": 1,
-            "_total": 23,
+            "_total": 22,
             "_filtered": 0
           },
           "_links": {
@@ -15441,9 +14483,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 12,
-            "ticketmaster": 13,
-            "_total": 25,
+            "tmr": 11,
+            "ticketmaster": 12,
+            "_total": 23,
             "_filtered": 0
           },
           "_links": {
@@ -15777,8 +14819,8 @@
           ],
           "upcomingEvents": {
             "tmr": 34,
-            "ticketmaster": 70,
-            "_total": 104,
+            "ticketmaster": 68,
+            "_total": 102,
             "_filtered": 0
           },
           "_links": {
@@ -16197,8 +15239,8 @@
           ],
           "upcomingEvents": {
             "tmr": 10,
-            "ticketmaster": 35,
-            "_total": 45,
+            "ticketmaster": 34,
+            "_total": 44,
             "_filtered": 0
           },
           "_links": {
@@ -16320,8 +15362,8 @@
             }
           ],
           "upcomingEvents": {
-            "ticketmaster": 30,
-            "_total": 30,
+            "ticketmaster": 29,
+            "_total": 29,
             "_filtered": 0
           },
           "_links": {
@@ -16443,8 +15485,8 @@
             }
           ],
           "upcomingEvents": {
-            "ticketmaster": 25,
-            "_total": 25,
+            "ticketmaster": 24,
+            "_total": 24,
             "_filtered": 0
           },
           "_links": {
@@ -16578,8 +15620,8 @@
             }
           ],
           "upcomingEvents": {
-            "ticketmaster": 16,
-            "_total": 16,
+            "ticketmaster": 15,
+            "_total": 15,
             "_filtered": 0
           },
           "draftStatus": "ACCEPTED",
@@ -16719,8 +15761,8 @@
             }
           ],
           "upcomingEvents": {
-            "ticketmaster": 27,
-            "_total": 27,
+            "ticketmaster": 26,
+            "_total": 26,
             "_filtered": 0
           },
           "draftStatus": "ACCEPTED",
@@ -17055,8 +16097,8 @@
           ],
           "upcomingEvents": {
             "tmr": 34,
-            "ticketmaster": 70,
-            "_total": 104,
+            "ticketmaster": 68,
+            "_total": 102,
             "_filtered": 0
           },
           "_links": {
@@ -17389,9 +16431,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 11,
-            "ticketmaster": 32,
-            "_total": 43,
+            "tmr": 10,
+            "ticketmaster": 30,
+            "_total": 40,
             "_filtered": 0
           },
           "_links": {
@@ -18395,8 +17437,8 @@
           ],
           "upcomingEvents": {
             "tmr": 34,
-            "ticketmaster": 70,
-            "_total": 104,
+            "ticketmaster": 68,
+            "_total": 102,
             "_filtered": 0
           },
           "_links": {
@@ -18970,9 +18012,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -19080,9 +18122,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 30,
-            "ticketmaster": 4,
-            "_total": 34,
+            "tmr": 28,
+            "ticketmaster": 3,
+            "_total": 31,
             "_filtered": 0
           },
           "_links": {
@@ -19515,8 +18557,8 @@
           ],
           "upcomingEvents": {
             "tmr": 34,
-            "ticketmaster": 70,
-            "_total": 104,
+            "ticketmaster": 68,
+            "_total": 102,
             "_filtered": 0
           },
           "_links": {
@@ -20234,8 +19276,8 @@
           ],
           "upcomingEvents": {
             "tmr": 34,
-            "ticketmaster": 70,
-            "_total": 104,
+            "ticketmaster": 68,
+            "_total": 102,
             "_filtered": 0
           },
           "_links": {
@@ -20569,8 +19611,8 @@
           ],
           "upcomingEvents": {
             "tmr": 34,
-            "ticketmaster": 70,
-            "_total": 104,
+            "ticketmaster": 68,
+            "_total": 102,
             "_filtered": 0
           },
           "_links": {
@@ -20908,8 +19950,8 @@
           ],
           "upcomingEvents": {
             "tmr": 4,
-            "ticketmaster": 5,
-            "_total": 9,
+            "ticketmaster": 2,
+            "_total": 6,
             "_filtered": 0
           },
           "_links": {
@@ -21504,9 +20546,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -21630,9 +20672,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -21748,8 +20790,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -22184,9 +21226,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -22310,9 +21352,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -22428,8 +21470,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -22634,9 +21676,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -22760,9 +21802,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -22878,8 +21920,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -23141,9 +22183,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -23267,9 +22309,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -23385,8 +22427,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -24885,9 +23927,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -25011,9 +24053,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -25129,8 +24171,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -25335,9 +24377,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -25461,9 +24503,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -25579,8 +24621,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -25785,9 +24827,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -25911,9 +24953,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -26029,8 +25071,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -26292,9 +25334,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -26418,9 +25460,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -26536,8 +25578,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -27848,9 +26890,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -27974,9 +27016,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -28092,8 +27134,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -28355,9 +27397,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -28481,9 +27523,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -28599,8 +27641,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -30116,9 +29158,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -30242,9 +29284,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -30360,8 +29402,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -30566,9 +29608,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -30692,9 +29734,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -30810,8 +29852,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -31011,9 +30053,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -31121,9 +30163,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 30,
-            "ticketmaster": 4,
-            "_total": 34,
+            "tmr": 28,
+            "ticketmaster": 3,
+            "_total": 31,
             "_filtered": 0
           },
           "_links": {
@@ -31229,9 +30271,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 30,
-            "ticketmaster": 3,
-            "_total": 33,
+            "tmr": 28,
+            "ticketmaster": 4,
+            "_total": 32,
             "_filtered": 0
           },
           "_links": {
@@ -31431,9 +30473,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -31541,9 +30583,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 30,
-            "ticketmaster": 4,
-            "_total": 34,
+            "tmr": 28,
+            "ticketmaster": 3,
+            "_total": 31,
             "_filtered": 0
           },
           "_links": {
@@ -31665,9 +30707,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 28,
+            "tmr": 27,
             "ticketmaster": 4,
-            "_total": 32,
+            "_total": 31,
             "_filtered": 0
           },
           "_links": {
@@ -32230,9 +31272,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -32356,9 +31398,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -32490,8 +31532,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -32753,9 +31795,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -32879,9 +31921,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -33013,8 +32055,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -33219,9 +32261,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -33345,9 +32387,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -33479,8 +32521,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -33742,9 +32784,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -33868,9 +32910,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -34002,8 +33044,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -34265,9 +33307,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -34391,9 +33433,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -34525,8 +33567,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -34731,9 +33773,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -34857,9 +33899,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -34991,8 +34033,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -35197,9 +34239,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -35323,9 +34365,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -35457,8 +34499,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -36215,9 +35257,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -36341,9 +35383,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -36475,8 +35517,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -36681,9 +35723,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -36807,9 +35849,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -36941,8 +35983,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -37204,9 +36246,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -37330,9 +36372,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -37464,8 +36506,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -37727,9 +36769,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -37853,9 +36895,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -37987,8 +37029,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -38193,9 +37235,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -38319,9 +37361,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -38453,8 +37495,8 @@
           ],
           "upcomingEvents": {
             "tmr": 126,
-            "ticketmaster": 102,
-            "_total": 228,
+            "ticketmaster": 101,
+            "_total": 227,
             "_filtered": 0
           },
           "_links": {
@@ -38654,9 +37696,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -38764,9 +37806,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 30,
-            "ticketmaster": 4,
-            "_total": 34,
+            "tmr": 28,
+            "ticketmaster": 3,
+            "_total": 31,
             "_filtered": 0
           },
           "_links": {
@@ -38888,9 +37930,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 10,
+            "tmr": 9,
             "ticketmaster": 4,
-            "_total": 14,
+            "_total": 13,
             "_filtered": 0
           },
           "_links": {
@@ -40516,8 +39558,8 @@
           ],
           "upcomingEvents": {
             "tmr": 5,
-            "ticketmaster": 25,
-            "_total": 30,
+            "ticketmaster": 24,
+            "_total": 29,
             "_filtered": 0
           },
           "_links": {
@@ -40717,9 +39759,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -40827,9 +39869,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 30,
-            "ticketmaster": 4,
-            "_total": 34,
+            "tmr": 28,
+            "ticketmaster": 3,
+            "_total": 31,
             "_filtered": 0
           },
           "_links": {
@@ -40944,9 +39986,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 11,
+            "tmr": 10,
             "ticketmaster": 3,
-            "_total": 14,
+            "_total": 13,
             "_filtered": 0
           },
           "_links": {
@@ -41151,9 +40193,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -41277,9 +40319,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -41395,8 +40437,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -41658,9 +40700,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -41784,9 +40826,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -41902,8 +40944,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -42523,9 +41565,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -42649,9 +41691,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -42767,8 +41809,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -43030,9 +42072,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -43156,9 +42198,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -43274,8 +42316,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -44096,8 +43138,8 @@
           ],
           "upcomingEvents": {
             "tmr": 2,
-            "ticketmaster": 27,
-            "_total": 29,
+            "ticketmaster": 25,
+            "_total": 27,
             "_filtered": 0
           },
           "_links": {
@@ -44488,9 +43530,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -44614,9 +43656,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -44732,8 +43774,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -44938,9 +43980,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -45064,9 +44106,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -45182,8 +44224,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -45388,9 +44430,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -45514,9 +44556,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -45632,8 +44674,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -45895,9 +44937,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -46021,9 +45063,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -46139,8 +45181,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -47084,9 +46126,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -47210,9 +46252,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -47328,8 +46370,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -47591,9 +46633,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -47717,9 +46759,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -47835,8 +46877,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -48894,9 +47936,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -49020,9 +48062,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -49138,8 +48180,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -49344,9 +48386,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -49470,9 +48512,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -49588,8 +48630,8 @@
           ],
           "upcomingEvents": {
             "tmr": 123,
-            "ticketmaster": 45,
-            "_total": 168,
+            "ticketmaster": 43,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -51529,9 +50571,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -51639,9 +50681,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 30,
-            "ticketmaster": 4,
-            "_total": 34,
+            "tmr": 28,
+            "ticketmaster": 3,
+            "_total": 31,
             "_filtered": 0
           },
           "_links": {
@@ -52671,8 +51713,8 @@
           ],
           "upcomingEvents": {
             "tmr": 3,
-            "ticketmaster": 12,
-            "_total": 15,
+            "ticketmaster": 10,
+            "_total": 13,
             "_filtered": 0
           },
           "_links": {
@@ -52872,9 +51914,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -52982,9 +52024,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 30,
-            "ticketmaster": 4,
-            "_total": 34,
+            "tmr": 28,
+            "ticketmaster": 3,
+            "_total": 31,
             "_filtered": 0
           },
           "_links": {
@@ -54669,9 +53711,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -54795,9 +53837,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -54903,9 +53945,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 120,
+            "tmr": 118,
             "ticketmaster": 48,
-            "_total": 168,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -55167,9 +54209,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -55293,9 +54335,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -55617,9 +54659,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -55743,9 +54785,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -55851,9 +54893,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 120,
+            "tmr": 118,
             "ticketmaster": 48,
-            "_total": 168,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -56115,9 +55157,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -56241,9 +55283,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -57078,9 +56120,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -57204,9 +56246,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -57528,9 +56570,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -57654,9 +56696,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -57762,9 +56804,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 120,
+            "tmr": 118,
             "ticketmaster": 48,
-            "_total": 168,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -57969,9 +57011,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -58095,9 +57137,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -58203,9 +57245,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 120,
+            "tmr": 118,
             "ticketmaster": 48,
-            "_total": 168,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -58467,9 +57509,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -58593,9 +57635,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -59364,9 +58406,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -59490,9 +58532,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -59598,9 +58640,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 120,
+            "tmr": 118,
             "ticketmaster": 48,
-            "_total": 168,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -59862,9 +58904,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -59988,9 +59030,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -60750,9 +59792,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -60876,9 +59918,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -60984,9 +60026,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 120,
+            "tmr": 118,
             "ticketmaster": 48,
-            "_total": 168,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -61248,9 +60290,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -61374,9 +60416,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -61698,9 +60740,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -61824,9 +60866,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -63057,9 +62099,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -63183,9 +62225,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -63514,9 +62556,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -63640,9 +62682,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -64028,9 +63070,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -64154,9 +63196,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -64542,9 +63584,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -64668,9 +63710,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -64999,9 +64041,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -65125,9 +64167,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -65456,9 +64498,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -65582,9 +64624,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -65970,9 +65012,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -66096,9 +65138,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -66427,9 +65469,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -66553,9 +65595,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -67016,10 +66058,10 @@
           ],
           "upcomingEvents": {
             "tmr": 3,
-            "ticketmaster": 34,
+            "ticketmaster": 33,
             "ticketweb": 5,
             "mfx-pl": 1,
-            "_total": 43,
+            "_total": 42,
             "_filtered": 0
           },
           "_links": {
@@ -67281,9 +66323,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -67407,9 +66449,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -68185,9 +67227,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -68311,9 +67353,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -68642,9 +67684,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -68768,9 +67810,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -70292,9 +69334,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -70402,9 +69444,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 30,
-            "ticketmaster": 4,
-            "_total": 34,
+            "tmr": 28,
+            "ticketmaster": 3,
+            "_total": 31,
             "_filtered": 0
           },
           "_links": {
@@ -73874,9 +72916,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -74000,9 +73042,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -74395,9 +73437,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -74521,9 +73563,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -74859,9 +73901,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -74985,9 +74027,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -75380,9 +74422,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -75506,9 +74548,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -75844,9 +74886,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -75970,9 +75012,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -76365,9 +75407,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -76491,9 +75533,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -76829,9 +75871,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -76955,9 +75997,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -77072,9 +76114,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 48,
-            "_total": 162,
+            "_total": 161,
             "_filtered": 0
           },
           "_links": {
@@ -77336,9 +76378,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -77462,9 +76504,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -77579,9 +76621,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 48,
-            "_total": 162,
+            "_total": 161,
             "_filtered": 0
           },
           "_links": {
@@ -77786,9 +76828,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -77912,9 +76954,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -78029,9 +77071,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 48,
-            "_total": 162,
+            "_total": 161,
             "_filtered": 0
           },
           "_links": {
@@ -78293,9 +77335,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -78419,9 +77461,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -78536,9 +77578,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 48,
-            "_total": 162,
+            "_total": 161,
             "_filtered": 0
           },
           "_links": {
@@ -79872,9 +78914,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -79998,9 +79040,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -80115,9 +79157,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 48,
-            "_total": 162,
+            "_total": 161,
             "_filtered": 0
           },
           "_links": {
@@ -80322,9 +79364,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -80448,9 +79490,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -80565,9 +79607,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 48,
-            "_total": 162,
+            "_total": 161,
             "_filtered": 0
           },
           "_links": {
@@ -80772,9 +79814,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -80898,9 +79940,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -81015,9 +80057,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 48,
-            "_total": 162,
+            "_total": 161,
             "_filtered": 0
           },
           "_links": {
@@ -81279,9 +80321,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -81405,9 +80447,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -81522,9 +80564,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 48,
-            "_total": 162,
+            "_total": 161,
             "_filtered": 0
           },
           "_links": {
@@ -82935,9 +81977,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -83061,9 +82103,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -83178,9 +82220,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 48,
-            "_total": 162,
+            "_total": 161,
             "_filtered": 0
           },
           "_links": {
@@ -83442,9 +82484,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -83568,9 +82610,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -83685,9 +82727,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 48,
-            "_total": 162,
+            "_total": 161,
             "_filtered": 0
           },
           "_links": {
@@ -83949,9 +82991,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -84075,9 +83117,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -84192,9 +83234,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 48,
-            "_total": 162,
+            "_total": 161,
             "_filtered": 0
           },
           "_links": {
@@ -84399,9 +83441,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -84525,9 +83567,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -84642,9 +83684,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 48,
-            "_total": 162,
+            "_total": 161,
             "_filtered": 0
           },
           "_links": {
@@ -86607,9 +85649,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -86717,9 +85759,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 30,
-            "ticketmaster": 4,
-            "_total": 34,
+            "tmr": 28,
+            "ticketmaster": 3,
+            "_total": 31,
             "_filtered": 0
           },
           "_links": {
@@ -86825,8 +85867,8 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 27,
-            "ticketmaster": 3,
+            "tmr": 26,
+            "ticketmaster": 4,
             "_total": 30,
             "_filtered": 0
           },
@@ -87032,9 +86074,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -87158,9 +86200,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -87266,9 +86308,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 120,
+            "tmr": 118,
             "ticketmaster": 48,
-            "_total": 168,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -87530,9 +86572,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -87656,9 +86698,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -87980,9 +87022,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -88106,9 +87148,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -88214,9 +87256,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 120,
+            "tmr": 118,
             "ticketmaster": 48,
-            "_total": 168,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -88478,9 +87520,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -88604,9 +87646,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -90185,9 +89227,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -90311,9 +89353,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -90635,9 +89677,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -90761,9 +89803,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -90869,9 +89911,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 120,
+            "tmr": 118,
             "ticketmaster": 48,
-            "_total": 168,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -91076,9 +90118,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -91202,9 +90244,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -91310,9 +90352,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 120,
+            "tmr": 118,
             "ticketmaster": 48,
-            "_total": 168,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -91574,9 +90616,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -91700,9 +90742,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -92024,9 +91066,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -92150,9 +91192,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -92258,9 +91300,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 120,
+            "tmr": 118,
             "ticketmaster": 48,
-            "_total": 168,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -92522,9 +91564,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -92648,9 +91690,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -93029,9 +92071,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -93155,9 +92197,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -93479,9 +92521,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -93605,9 +92647,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -93713,9 +92755,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 120,
+            "tmr": 118,
             "ticketmaster": 48,
-            "_total": 168,
+            "_total": 166,
             "_filtered": 0
           },
           "_links": {
@@ -96447,9 +95489,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -96557,9 +95599,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 30,
-            "ticketmaster": 4,
-            "_total": 34,
+            "tmr": 28,
+            "ticketmaster": 3,
+            "_total": 31,
             "_filtered": 0
           },
           "_links": {
@@ -97988,9 +97030,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -98114,9 +97156,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -98239,8 +97281,8 @@
           ],
           "upcomingEvents": {
             "tmr": 45,
-            "ticketmaster": 111,
-            "_total": 156,
+            "ticketmaster": 110,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -98502,9 +97544,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -98628,9 +97670,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -98753,8 +97795,8 @@
           ],
           "upcomingEvents": {
             "tmr": 45,
-            "ticketmaster": 111,
-            "_total": 156,
+            "ticketmaster": 110,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -98959,9 +98001,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -99085,9 +98127,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -99210,8 +98252,8 @@
           ],
           "upcomingEvents": {
             "tmr": 45,
-            "ticketmaster": 111,
-            "_total": 156,
+            "ticketmaster": 110,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -99473,9 +98515,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -99599,9 +98641,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -99724,8 +98766,8 @@
           ],
           "upcomingEvents": {
             "tmr": 45,
-            "ticketmaster": 111,
-            "_total": 156,
+            "ticketmaster": 110,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -99987,9 +99029,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -100113,9 +99155,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -100238,8 +99280,8 @@
           ],
           "upcomingEvents": {
             "tmr": 45,
-            "ticketmaster": 111,
-            "_total": 156,
+            "ticketmaster": 110,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -100444,9 +99486,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -100570,9 +99612,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -100695,8 +99737,8 @@
           ],
           "upcomingEvents": {
             "tmr": 45,
-            "ticketmaster": 111,
-            "_total": 156,
+            "ticketmaster": 110,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -101879,9 +100921,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -102005,9 +101047,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -102130,8 +101172,8 @@
           ],
           "upcomingEvents": {
             "tmr": 45,
-            "ticketmaster": 111,
-            "_total": 156,
+            "ticketmaster": 110,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -102393,9 +101435,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -102519,9 +101561,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -102644,8 +101686,8 @@
           ],
           "upcomingEvents": {
             "tmr": 45,
-            "ticketmaster": 111,
-            "_total": 156,
+            "ticketmaster": 110,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -102850,9 +101892,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -102976,9 +102018,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -103101,8 +102143,8 @@
           ],
           "upcomingEvents": {
             "tmr": 45,
-            "ticketmaster": 111,
-            "_total": 156,
+            "ticketmaster": 110,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -103364,9 +102406,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -103490,9 +102532,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -103615,8 +102657,8 @@
           ],
           "upcomingEvents": {
             "tmr": 45,
-            "ticketmaster": 111,
-            "_total": 156,
+            "ticketmaster": 110,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -104279,9 +103321,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -104405,9 +103447,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -104530,8 +103572,8 @@
           ],
           "upcomingEvents": {
             "tmr": 45,
-            "ticketmaster": 111,
-            "_total": 156,
+            "ticketmaster": 110,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -104736,9 +103778,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -104862,9 +103904,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -104987,8 +104029,8 @@
           ],
           "upcomingEvents": {
             "tmr": 45,
-            "ticketmaster": 111,
-            "_total": 156,
+            "ticketmaster": 110,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -105188,9 +104230,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -105298,9 +104340,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 30,
-            "ticketmaster": 4,
-            "_total": 34,
+            "tmr": 28,
+            "ticketmaster": 3,
+            "_total": 31,
             "_filtered": 0
           },
           "_links": {
@@ -105398,8 +104440,8 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 29,
-            "_total": 29,
+            "tmr": 28,
+            "_total": 28,
             "_filtered": 0
           },
           "_links": {
@@ -105599,9 +104641,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -105709,9 +104751,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 30,
-            "ticketmaster": 4,
-            "_total": 34,
+            "tmr": 28,
+            "ticketmaster": 3,
+            "_total": 31,
             "_filtered": 0
           },
           "_links": {
@@ -105833,9 +104875,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 14,
+            "tmr": 13,
             "ticketmaster": 17,
-            "_total": 31,
+            "_total": 30,
             "_filtered": 0
           },
           "_links": {
@@ -106040,9 +105082,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -106166,9 +105208,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -106291,8 +105333,8 @@
           ],
           "upcomingEvents": {
             "tmr": 36,
-            "ticketmaster": 120,
-            "_total": 156,
+            "ticketmaster": 118,
+            "_total": 154,
             "_filtered": 0
           },
           "_links": {
@@ -106554,9 +105596,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -106680,9 +105722,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -106805,8 +105847,8 @@
           ],
           "upcomingEvents": {
             "tmr": 36,
-            "ticketmaster": 120,
-            "_total": 156,
+            "ticketmaster": 118,
+            "_total": 154,
             "_filtered": 0
           },
           "_links": {
@@ -107011,9 +106053,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -107137,9 +106179,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -107262,8 +106304,8 @@
           ],
           "upcomingEvents": {
             "tmr": 36,
-            "ticketmaster": 120,
-            "_total": 156,
+            "ticketmaster": 118,
+            "_total": 154,
             "_filtered": 0
           },
           "_links": {
@@ -107525,9 +106567,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -107651,9 +106693,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -107776,8 +106818,8 @@
           ],
           "upcomingEvents": {
             "tmr": 36,
-            "ticketmaster": 120,
-            "_total": 156,
+            "ticketmaster": 118,
+            "_total": 154,
             "_filtered": 0
           },
           "_links": {
@@ -108039,9 +107081,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -108165,9 +107207,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -108290,8 +107332,8 @@
           ],
           "upcomingEvents": {
             "tmr": 36,
-            "ticketmaster": 120,
-            "_total": 156,
+            "ticketmaster": 118,
+            "_total": 154,
             "_filtered": 0
           },
           "_links": {
@@ -108496,9 +107538,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -108622,9 +107664,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -108747,8 +107789,8 @@
           ],
           "upcomingEvents": {
             "tmr": 36,
-            "ticketmaster": 120,
-            "_total": 156,
+            "ticketmaster": 118,
+            "_total": 154,
             "_filtered": 0
           },
           "_links": {
@@ -108953,9 +107995,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -109079,9 +108121,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -109204,8 +108246,8 @@
           ],
           "upcomingEvents": {
             "tmr": 36,
-            "ticketmaster": 120,
-            "_total": 156,
+            "ticketmaster": 118,
+            "_total": 154,
             "_filtered": 0
           },
           "_links": {
@@ -109467,9 +108509,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -109593,9 +108635,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -109718,8 +108760,8 @@
           ],
           "upcomingEvents": {
             "tmr": 36,
-            "ticketmaster": 120,
-            "_total": 156,
+            "ticketmaster": 118,
+            "_total": 154,
             "_filtered": 0
           },
           "_links": {
@@ -111117,9 +110159,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -111243,9 +110285,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -111368,8 +110410,8 @@
           ],
           "upcomingEvents": {
             "tmr": 36,
-            "ticketmaster": 120,
-            "_total": 156,
+            "ticketmaster": 118,
+            "_total": 154,
             "_filtered": 0
           },
           "_links": {
@@ -111631,9 +110673,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -111757,9 +110799,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -111882,8 +110924,8 @@
           ],
           "upcomingEvents": {
             "tmr": 36,
-            "ticketmaster": 120,
-            "_total": 156,
+            "ticketmaster": 118,
+            "_total": 154,
             "_filtered": 0
           },
           "_links": {
@@ -112145,9 +111187,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -112271,9 +111313,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -112396,8 +111438,8 @@
           ],
           "upcomingEvents": {
             "tmr": 36,
-            "ticketmaster": 120,
-            "_total": 156,
+            "ticketmaster": 118,
+            "_total": 154,
             "_filtered": 0
           },
           "_links": {
@@ -112602,9 +111644,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -112728,9 +111770,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -112853,8 +111895,8 @@
           ],
           "upcomingEvents": {
             "tmr": 36,
-            "ticketmaster": 120,
-            "_total": 156,
+            "ticketmaster": 118,
+            "_total": 154,
             "_filtered": 0
           },
           "_links": {
@@ -115094,9 +114136,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -115204,9 +114246,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 30,
-            "ticketmaster": 4,
-            "_total": 34,
+            "tmr": 28,
+            "ticketmaster": 3,
+            "_total": 31,
             "_filtered": 0
           },
           "_links": {
@@ -115329,8 +114371,8 @@
           ],
           "upcomingEvents": {
             "tmr": 8,
-            "ticketmaster": 20,
-            "_total": 28,
+            "ticketmaster": 19,
+            "_total": 27,
             "_filtered": 0
           },
           "_links": {
@@ -117293,9 +116335,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -117419,9 +116461,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -117807,9 +116849,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -117933,9 +116975,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -118264,9 +117306,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -118390,9 +117432,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -118778,9 +117820,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -118904,9 +117946,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -119292,9 +118334,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -119418,9 +118460,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -119749,9 +118791,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -119875,9 +118917,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -120206,9 +119248,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -120332,9 +119374,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -120720,9 +119762,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -120846,9 +119888,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -121177,9 +120219,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -121303,9 +120345,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -121691,9 +120733,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -121817,9 +120859,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -122205,9 +121247,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -122331,9 +121373,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -122662,9 +121704,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -122788,9 +121830,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 119,
-            "ticketmaster": 102,
-            "_total": 221,
+            "tmr": 118,
+            "ticketmaster": 101,
+            "_total": 219,
             "_filtered": 0
           },
           "_links": {
@@ -123155,9 +122197,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -125245,8 +124287,8 @@
           ],
           "upcomingEvents": {
             "tmr": 1,
-            "ticketmaster": 24,
-            "_total": 25,
+            "ticketmaster": 23,
+            "_total": 24,
             "_filtered": 0
           },
           "_links": {
@@ -125446,9 +124488,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -125556,9 +124598,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 30,
-            "ticketmaster": 4,
-            "_total": 34,
+            "tmr": 28,
+            "ticketmaster": 3,
+            "_total": 31,
             "_filtered": 0
           },
           "_links": {
@@ -128775,9 +127817,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -128885,9 +127927,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 30,
-            "ticketmaster": 4,
-            "_total": 34,
+            "tmr": 28,
+            "ticketmaster": 3,
+            "_total": 31,
             "_filtered": 0
           },
           "_links": {
@@ -132261,10 +131303,10 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 6,
+            "tmr": 5,
             "ticketmaster": 10,
             "ticketweb": 2,
-            "_total": 18,
+            "_total": 17,
             "_filtered": 0
           },
           "_links": {
@@ -134088,9 +133130,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -134198,9 +133240,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 30,
-            "ticketmaster": 4,
-            "_total": 34,
+            "tmr": 28,
+            "ticketmaster": 3,
+            "_total": 31,
             "_filtered": 0
           },
           "_links": {
@@ -134306,9 +133348,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 26,
-            "ticketmaster": 3,
-            "_total": 29,
+            "tmr": 24,
+            "ticketmaster": 4,
+            "_total": 28,
             "_filtered": 0
           },
           "_links": {
@@ -136094,8 +135136,8 @@
           ],
           "upcomingEvents": {
             "tmr": 129,
-            "ticketmaster": 117,
-            "_total": 246,
+            "ticketmaster": 115,
+            "_total": 244,
             "_filtered": 0
           },
           "_links": {
@@ -136429,8 +135471,8 @@
           ],
           "upcomingEvents": {
             "tmr": 129,
-            "ticketmaster": 117,
-            "_total": 246,
+            "ticketmaster": 115,
+            "_total": 244,
             "_filtered": 0
           },
           "_links": {
@@ -137607,8 +136649,8 @@
           ],
           "upcomingEvents": {
             "tmr": 129,
-            "ticketmaster": 117,
-            "_total": 246,
+            "ticketmaster": 115,
+            "_total": 244,
             "_filtered": 0
           },
           "_links": {
@@ -137942,8 +136984,8 @@
           ],
           "upcomingEvents": {
             "tmr": 129,
-            "ticketmaster": 117,
-            "_total": 246,
+            "ticketmaster": 115,
+            "_total": 244,
             "_filtered": 0
           },
           "_links": {
@@ -138130,9 +137172,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 88,
-            "ticketmaster": 73,
-            "_total": 161,
+            "tmr": 87,
+            "ticketmaster": 72,
+            "_total": 159,
             "_filtered": 0
           },
           "_links": {
@@ -138232,8 +137274,8 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 26,
-            "_total": 26,
+            "tmr": 25,
+            "_total": 25,
             "_filtered": 0
           },
           "_links": {
@@ -138567,8 +137609,8 @@
           ],
           "upcomingEvents": {
             "tmr": 129,
-            "ticketmaster": 117,
-            "_total": 246,
+            "ticketmaster": 115,
+            "_total": 244,
             "_filtered": 0
           },
           "_links": {
@@ -139289,8 +138331,8 @@
           ],
           "upcomingEvents": {
             "tmr": 129,
-            "ticketmaster": 117,
-            "_total": 246,
+            "ticketmaster": 115,
+            "_total": 244,
             "_filtered": 0
           },
           "_links": {
@@ -139624,8 +138666,8 @@
           ],
           "upcomingEvents": {
             "tmr": 129,
-            "ticketmaster": 117,
-            "_total": 246,
+            "ticketmaster": 115,
+            "_total": 244,
             "_filtered": 0
           },
           "_links": {
@@ -140654,9 +139696,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 69,
+            "tmr": 67,
             "ticketmaster": 56,
-            "_total": 125,
+            "_total": 123,
             "_filtered": 0
           },
           "_links": {
@@ -140989,9 +140031,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 69,
+            "tmr": 67,
             "ticketmaster": 56,
-            "_total": 125,
+            "_total": 123,
             "_filtered": 0
           },
           "_links": {
@@ -141324,9 +140366,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 69,
+            "tmr": 67,
             "ticketmaster": 56,
-            "_total": 125,
+            "_total": 123,
             "_filtered": 0
           },
           "_links": {
@@ -141659,9 +140701,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 69,
+            "tmr": 67,
             "ticketmaster": 56,
-            "_total": 125,
+            "_total": 123,
             "_filtered": 0
           },
           "_links": {
@@ -141994,9 +141036,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 69,
+            "tmr": 67,
             "ticketmaster": 56,
-            "_total": 125,
+            "_total": 123,
             "_filtered": 0
           },
           "_links": {
@@ -142329,9 +141371,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 69,
+            "tmr": 67,
             "ticketmaster": 56,
-            "_total": 125,
+            "_total": 123,
             "_filtered": 0
           },
           "_links": {
@@ -142664,9 +141706,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 69,
+            "tmr": 67,
             "ticketmaster": 56,
-            "_total": 125,
+            "_total": 123,
             "_filtered": 0
           },
           "_links": {
@@ -142999,9 +142041,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 69,
+            "tmr": 67,
             "ticketmaster": 56,
-            "_total": 125,
+            "_total": 123,
             "_filtered": 0
           },
           "_links": {
@@ -151078,8 +150120,8 @@
           ],
           "upcomingEvents": {
             "tmr": 153,
-            "ticketmaster": 28,
-            "_total": 181,
+            "ticketmaster": 26,
+            "_total": 179,
             "_filtered": 0
           },
           "_links": {
@@ -151413,8 +150455,8 @@
           ],
           "upcomingEvents": {
             "tmr": 153,
-            "ticketmaster": 28,
-            "_total": 181,
+            "ticketmaster": 26,
+            "_total": 179,
             "_filtered": 0
           },
           "_links": {
@@ -151748,8 +150790,8 @@
           ],
           "upcomingEvents": {
             "tmr": 153,
-            "ticketmaster": 28,
-            "_total": 181,
+            "ticketmaster": 26,
+            "_total": 179,
             "_filtered": 0
           },
           "_links": {
@@ -152083,8 +151125,8 @@
           ],
           "upcomingEvents": {
             "tmr": 153,
-            "ticketmaster": 28,
-            "_total": 181,
+            "ticketmaster": 26,
+            "_total": 179,
             "_filtered": 0
           },
           "_links": {
@@ -152418,8 +151460,8 @@
           ],
           "upcomingEvents": {
             "tmr": 153,
-            "ticketmaster": 28,
-            "_total": 181,
+            "ticketmaster": 26,
+            "_total": 179,
             "_filtered": 0
           },
           "_links": {
@@ -152753,8 +151795,8 @@
           ],
           "upcomingEvents": {
             "tmr": 153,
-            "ticketmaster": 28,
-            "_total": 181,
+            "ticketmaster": 26,
+            "_total": 179,
             "_filtered": 0
           },
           "_links": {
@@ -153088,8 +152130,8 @@
           ],
           "upcomingEvents": {
             "tmr": 153,
-            "ticketmaster": 28,
-            "_total": 181,
+            "ticketmaster": 26,
+            "_total": 179,
             "_filtered": 0
           },
           "_links": {
