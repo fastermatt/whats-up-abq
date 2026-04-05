@@ -393,6 +393,23 @@ const STATIC_TM_EVENTS: TMEvent[] = ALL_EVENTS
 
 const GPLACES_KEY = import.meta.env.VITE_GOOGLE_PLACES_KEY || '';
 
+// ─── Yelp Photo Map (loaded once at startup) ────────────────────────────────
+// Keyed by place name → { source, bizUrl, photos[] }
+// Stored separately from Google "image" field so neither source overwrites the other.
+let _yelpPhotoMap: Record<string, { source: string; bizUrl: string | null; photos: string[] }> = {};
+let _yelpPhotoMapLoaded = false;
+async function loadYelpPhotoMap() {
+  if (_yelpPhotoMapLoaded) return;
+  try {
+    const r = await fetch('/data/place-photos.json');
+    if (r.ok) _yelpPhotoMap = await r.json();
+  } catch {}
+  _yelpPhotoMapLoaded = true;
+}
+function getYelpPhotos(placeName: string): string[] {
+  return _yelpPhotoMap[placeName]?.photos ?? [];
+}
+
 /**
  * Ensure Google Places photo URLs always carry a valid API key.
  * Extracts the photoreference and rebuilds the URL from scratch so that
@@ -1492,7 +1509,12 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
 // ─── Place Detail Modal ──────────────────────────────────────────────────────
 
 function PlacePhotoGallery({ place }: { place: Place }) {
-  const initialPhotos = [place.image, ...(place.additionalImages ?? [])].filter(Boolean) as string[];
+  const yelpPhotos = getYelpPhotos(place.name);
+  const initialPhotos = [
+    place.image,
+    ...(place.additionalImages ?? []),
+    ...yelpPhotos,
+  ].filter(Boolean) as string[];
   const [brokenUrls, setBrokenUrls] = useState<Set<string>>(new Set());
   const allPhotos = initialPhotos.filter(url => !brokenUrls.has(url));
   const handleImgError = useCallback((url: string) => {
@@ -9297,6 +9319,9 @@ export default function App() {
           }
         }
       } catch {}
+
+      // ── Kick off yelp photo map fetch in background (no await — doesn't block render)
+      loadYelpPhotoMap();
 
       // ── Phase 0: Pre-seed from static JSON so the loading screen
       // almost never appears. /places-data.json is a same-origin static
