@@ -990,7 +990,7 @@ const FlatIcon = React.memo(function FlatIcon({
     comedy:        <><circle cx="8" cy="8" r="6" {...S}/><path d="M5.5 9.5Q8 12 10.5 9.5" {...S}/><circle cx="6" cy="7" r="0.8" {...F}/><circle cx="10" cy="7" r="0.8" {...F}/></>,
     art:           <><path d="M8 2a6 6 0 1 0 5.2 9" {...S}/><path d="M13.5 9.5c1.5-1 1.5-2.5 0-2.5s-1.5 2.5 0 2.5Z" {...F}/><circle cx="5.5" cy="6.5" r="1" {...F}/><circle cx="9.5" cy="5" r="1" {...F}/><circle cx="11" cy="9" r="1" {...F}/></>,
     theatre:       <><path d="M2 5.5c0 2.5 2 4.5 4.5 4.5S11 8 11 5.5L6.5 3Z" {...S}/><path d="M5 7.5c.5.7 1.5.7 2 0" {...S}/><circle cx="12" cy="10.5" r="3" {...S}/><path d="M10.5 12c.5-.8 1.5-.8 2 0" {...S}/></>,
-    family:        <><path d="M2 14L8 3l6 11Z" {...S}/><line x1="8" y1="14" x2="8" y2="9" {...S}/><line x1="5" y1="14" x2="11" y2="14" {...S}/></>,
+    family:        <><circle cx="4.5" cy="4" r="1.5" {...S}/><path d="M2.5 8.5c0-2 4-2 4 0" {...S}/><circle cx="11.5" cy="4" r="1.5" {...S}/><path d="M9.5 8.5c0-2 4-2 4 0" {...S}/><circle cx="8" cy="6.5" r="1.2" {...S}/><path d="M6 11c0-1.8 4-1.8 4 0" {...S}/></>,
     outdoor:       <><path d="M1 14L6 6l5 8Z" {...S}/><path d="M6 14l4-6 4 6Z" {...S}/><circle cx="13.5" cy="3.5" r="1.5" {...S}/></>,
     community:     <><circle cx="8" cy="5" r="2" {...S}/><path d="M4 14c0-2.5 8-2.5 8 0" {...S}/><circle cx="3" cy="7" r="1.5" {...S}/><path d="M1 13c0-2 4-2 4 0" {...S}/><circle cx="13" cy="7" r="1.5" {...S}/><path d="M11 13c0-2 4-2 4 0" {...S}/></>,
     festival:      <><path d="M8 2l1.6 4.5H15l-4 2.9 1.5 4.6L8 11.2l-4.5 2.8L5 9.4 1 6.5h5.4Z" {...S}/></>,
@@ -4300,31 +4300,29 @@ function DiscoverScreen({
 
       {/* Browse by Category — event genre shortcuts */}
       {!hidden.includes('vibes') && (
-        <div className="mb-5 px-5">
-          <p className="text-xs font-black uppercase flex items-center gap-2 mb-3" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>
+        <div className="mb-4 px-5">
+          <p className="text-xs font-black uppercase flex items-center gap-2 mb-2.5" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>
             <FlatIcon name="zia" size={12} color="var(--brand)" /> Browse by Category
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
-            {([
-              { genre: 'Music',     icon: 'music',     bg: 'linear-gradient(135deg,#8B3A0F,#c0552a)' },
-              { genre: 'Comedy',    icon: 'comedy',    bg: 'linear-gradient(135deg,#b45309,#d97706)' },
-              { genre: 'Arts',      icon: 'art',       bg: 'linear-gradient(135deg,#6d28d9,#8b5cf6)' },
-              { genre: 'Sports',    icon: 'sports',    bg: 'linear-gradient(135deg,#1d4ed8,#3b82f6)' },
-              { genre: 'Family',    icon: 'family',    bg: 'linear-gradient(135deg,#047857,#10b981)' },
-              { genre: 'Outdoor',   icon: 'outdoor',   bg: 'linear-gradient(135deg,#065f46,#059669)' },
-              { genre: 'Free',      icon: 'free',      bg: 'linear-gradient(135deg,#0f766e,#14b8a6)' },
-              { genre: 'Volunteer', icon: 'volunteer', bg: 'linear-gradient(135deg,#be185d,#ec4899)' },
-            ] as const).map(({ genre, icon, bg }) => (
+          <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
+            {[
+              { genre: 'Music',     icon: 'music',     color: '#8B3A0F' },
+              { genre: 'Comedy',    icon: 'comedy',    color: '#B45309' },
+              { genre: 'Arts',      icon: 'art',       color: '#6D28D9' },
+              { genre: 'Sports',    icon: 'sports',    color: '#1D4ED8' },
+              { genre: 'Family',    icon: 'family',    color: '#047857' },
+              { genre: 'Outdoor',   icon: 'outdoor',   color: '#065F46' },
+              { genre: 'Free',      icon: 'free',      color: '#0F766E' },
+              { genre: 'Volunteer', icon: 'volunteer', color: '#BE185D' },
+            ].map(({ genre, icon, color }) => (
               <button
                 key={genre}
                 onClick={() => { trackEvent('category_click', { genre }); onNavigateEvents?.(genre); }}
-                className="flex flex-col items-center gap-1.5 transition-all active:scale-95"
-                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                className="transition-all active:scale-95"
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 12px 7px 9px', borderRadius: '20px', background: color + '18', border: '1.5px solid ' + color + '40', whiteSpace: 'nowrap', cursor: 'pointer', flexShrink: 0, outline: 'none' }}
               >
-                <div style={{ width: '100%', aspectRatio: '1', borderRadius: '14px', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.15)' }}>
-                  <FlatIcon name={icon} size={28} color="white" />
-                </div>
-                <span className="text-center leading-tight font-bold" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '10px', letterSpacing: '0.02em', color: 'var(--ink)' }}>{genre}</span>
+                <FlatIcon name={icon} size={15} color={color} />
+                <span style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '12px', fontWeight: 700, color: 'var(--ink)', letterSpacing: '0.01em' }}>{genre}</span>
               </button>
             ))}
           </div>
