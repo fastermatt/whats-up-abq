@@ -4174,7 +4174,7 @@ function DiscoverScreen({
             {heroDisplay}{!heroDone && <span style={{ display: 'inline-block', width: '3px', height: '0.85em', background: 'var(--ink)', marginLeft: '2px', verticalAlign: 'baseline', animation: 'cursorBlink 0.8s step-end infinite' }} />}
           </h1>
           <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '12px', color: '#555', fontWeight: 500, marginBottom: '14px' }}>
-            {events.length.toLocaleString()} events · {places.length.toLocaleString()} places across Greater ABQ
+            {events.length.toLocaleString()} upcoming events in Albuquerque
           </p>
           <button
             onClick={() => onNavigateEvents?.('Tonight')}
@@ -4189,7 +4189,7 @@ function DiscoverScreen({
             { label: 'Tonight',        action: () => onNavigateEvents?.('Tonight') },
             { label: 'This Weekend',   action: () => onNavigateEvents?.('This Weekend') },
             { label: 'Free Events',    action: () => onNavigateEvents?.('Free') },
-            { label: 'Explore Places', action: () => onNavigatePlaces?.('All', '') },
+            { label: 'Volunteer',      action: () => onNavigateEvents?.('Volunteer') },
           ].map(chip => (
             <button key={chip.label} onClick={chip.action}
               style={{ flexShrink: 0, height: '28px', padding: '0 12px', background: 'white', border: '1px solid rgba(0,0,0,0.12)', fontFamily: 'Public Sans, sans-serif', fontSize: '11px', fontWeight: 700, letterSpacing: '0.04em', cursor: 'pointer', borderRadius: 6, whiteSpace: 'nowrap' }}>
@@ -4289,23 +4289,33 @@ function DiscoverScreen({
       {/* Featured Event (time-limited) — shows above Daily Gem when active */}
       <FeaturedEventBanner events={events} onSelect={onEventSelect} />
 
-      {/* Explore by Vibe — static icons only (no GIF animation) */}
+      {/* Browse by Category — event genre shortcuts */}
       {!hidden.includes('vibes') && (
         <div className="mb-5 px-5">
-          <p className="text-xs font-black uppercase flex items-center gap-2 mb-3" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}><FlatIcon name="zia" size={12} color="var(--brand)" /> Explore by Vibe</p>
-          <div className="flex justify-between pb-1">
-            {VIBE_CONFIGS.map(({ label, borderColor, staticIcon, vibeSearch, vibeCats, gradient }) => (
-              <button key={label}
+          <p className="text-xs font-black uppercase flex items-center gap-2 mb-3" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>
+            <FlatIcon name="zia" size={12} color="var(--brand)" /> Browse by Category
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+            {([
+              { genre: 'Music',     icon: 'music',     bg: 'linear-gradient(135deg,#8B3A0F,#c0552a)' },
+              { genre: 'Comedy',    icon: 'comedy',    bg: 'linear-gradient(135deg,#b45309,#d97706)' },
+              { genre: 'Arts',      icon: 'art',       bg: 'linear-gradient(135deg,#6d28d9,#8b5cf6)' },
+              { genre: 'Sports',    icon: 'sports',    bg: 'linear-gradient(135deg,#1d4ed8,#3b82f6)' },
+              { genre: 'Family',    icon: 'family',    bg: 'linear-gradient(135deg,#047857,#10b981)' },
+              { genre: 'Outdoor',   icon: 'outdoor',   bg: 'linear-gradient(135deg,#065f46,#059669)' },
+              { genre: 'Free',      icon: 'free',      bg: 'linear-gradient(135deg,#0f766e,#14b8a6)' },
+              { genre: 'Volunteer', icon: 'volunteer', bg: 'linear-gradient(135deg,#be185d,#ec4899)' },
+            ] as const).map(({ genre, icon, bg }) => (
+              <button
+                key={genre}
+                onClick={() => { trackEvent('category_click', { genre }); onNavigateEvents?.(genre); }}
                 className="flex flex-col items-center gap-1.5 transition-all active:scale-95"
-                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', flex: '1 1 0', minWidth: 0 }}
-                onClick={() => { trackEvent('vibe_click', { vibe: label }); onNavigatePlaces?.(vibeCats.join('|'), vibeSearch, label, gradient); }}>
-                <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'white', border: `2.5px solid ${borderColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', overflow: 'hidden', flexShrink: 0 }}>
-                  <img
-                    src={staticIcon}
-                    alt={label}
-                    style={{ width: 38, height: 38, objectFit: 'contain', display: 'block' }} />
+                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+              >
+                <div style={{ width: '100%', aspectRatio: '1', borderRadius: '14px', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.15)' }}>
+                  <FlatIcon name={icon} size={28} color="white" />
                 </div>
-                <span className="text-center leading-tight font-bold" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '10px', letterSpacing: '0.02em', color: 'var(--ink)' }}>{label}</span>
+                <span className="text-center leading-tight font-bold" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '10px', letterSpacing: '0.02em', color: 'var(--ink)' }}>{genre}</span>
               </button>
             ))}
           </div>
