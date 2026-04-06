@@ -4176,6 +4176,7 @@ function DiscoverScreen({
   const [heroDisplay, setHeroDisplay] = useState('');
   const [heroDone, setHeroDone] = useState(false);
   const [calendarDate, setCalendarDate] = useState<string | null>(null);
+  const [showCalendar, setShowCalendar] = useState(false);
   useEffect(() => {
     let cancelled = false;
     const phrasePool = (adminHeroLines?.length) ? adminHeroLines : HERO_PHRASES;
@@ -4318,7 +4319,7 @@ function DiscoverScreen({
             { label: 'Volunteer',      action: () => onNavigateEvents?.('Volunteer') },
           ].map(chip => (
             <button key={chip.label} onClick={chip.action}
-              style={{ flexShrink: 0, height: '28px', padding: '0 12px', background: 'white', border: '1px solid rgba(0,0,0,0.12)', fontFamily: 'Public Sans, sans-serif', fontSize: '11px', fontWeight: 700, letterSpacing: '0.04em', cursor: 'pointer', borderRadius: 6, whiteSpace: 'nowrap' }}>
+              style={{ flexShrink: 0, height: '28px', padding: '0 12px', background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(194,99,74,0.3)', fontFamily: 'Public Sans, sans-serif', fontSize: '11px', fontWeight: 700, letterSpacing: '0.04em', cursor: 'pointer', borderRadius: 6, whiteSpace: 'nowrap', color: 'var(--ink)' }}>
               {chip.label}
             </button>
           ))}
@@ -4417,7 +4418,7 @@ function DiscoverScreen({
 
       {/* Browse by Category — event genre shortcuts */}
       {!hidden.includes('vibes') && (
-        <div className="mb-4 px-5">
+        <div className="mb-4 px-5" style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
           <p className="text-xs font-black uppercase flex items-center gap-2 mb-2.5" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>
             <FlatIcon name="zia" size={12} color="var(--brand)" /> Browse by Category
           </p>
@@ -4708,15 +4709,22 @@ function DiscoverScreen({
         );
       })()}
 
-      {/* Browse by Date — Event Calendar */}
-      <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
+      {/* Browse by Date — Collapsible Event Calendar */}
+      <button
+        onClick={() => setShowCalendar(c => !c)}
+        className="flex items-center justify-between w-full px-5 py-3"
+        style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)', background: 'none', cursor: 'pointer' }}
+      >
         <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif' }}>Browse by Date</h2>
-      </div>
-      <EventCalendar
-        events={events}
-        selectedDate={calendarDate}
-        onSelectDate={setCalendarDate}
-      />
+        <span className="material-symbols-outlined" style={{ fontSize: 20, color: 'var(--brand)', transition: 'transform 0.2s ease', transform: showCalendar ? 'rotate(180deg)' : 'rotate(0deg)' }}>expand_more</span>
+      </button>
+      {showCalendar && (
+        <EventCalendar
+          events={events}
+          selectedDate={calendarDate}
+          onSelectDate={setCalendarDate}
+        />
+      )}
 
       {/* Day Events — shown when a date is selected in the calendar */}
       {calendarDate && (() => {
@@ -10358,14 +10366,14 @@ export default function App() {
               className="nav-press-btn flex-1 flex flex-col items-center justify-center gap-0.5"
               style={{
                 minHeight: '64px',
-                background: isActive ? 'var(--ink)' : '#f5f3f0',
+                background: isActive ? 'var(--brand)' : '#f5f3f0',
                 border: 'none',
                 borderRadius: 8,
                 margin: '6px 3px 6px',
                 position: 'relative' as const,
                 top: 0,
                 boxShadow: isActive
-                  ? '0 4px 0 #0a0a0a, 0 2px 8px rgba(0,0,0,0.15)'
+                  ? '0 4px 0 #7a2e1a, 0 2px 8px rgba(194,99,74,0.3)'
                   : '0 4px 0 #d5d0c8, 0 2px 6px rgba(0,0,0,0.06)',
                 cursor: 'pointer',
                 WebkitTapHighlightColor: 'transparent',
