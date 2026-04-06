@@ -6023,12 +6023,12 @@ function ProfileScreen({
   }, [lbRows, myCount, user]);
 
   const ACHIEVEMENTS = [
-    { id: 'first',    icon: 'where_to_vote',          label: 'First Check-in',  sub: '1 place',        unlocked: myCount  >= 1  },
-    { id: 'five',     icon: 'explore',                label: 'Explorer',        sub: '5 places',       unlocked: myCount  >= 5  },
-    { id: 'ten',      icon: 'hiking',                 label: 'Adventurer',      sub: '10 places',      unlocked: myCount  >= 10 },
-    { id: 'twenty',   icon: 'forest',                 label: 'Trailblazer',     sub: '20 places',      unlocked: myCount  >= 20 },
-    { id: 'thirty5',  icon: 'footprint',              label: 'Pioneer',         sub: '35 places',      unlocked: myCount  >= 35 },
-    { id: 'fifty',    icon: 'military_tech',          label: 'Legend',          sub: '50 places',      unlocked: myCount  >= 50 },
+    { id: 'first',    icon: 'where_to_vote',          label: 'First Event',     sub: '1 event',        unlocked: myCount  >= 1  },
+    { id: 'five',     icon: 'explore',                label: 'Explorer',        sub: '5 events',       unlocked: myCount  >= 5  },
+    { id: 'ten',      icon: 'hiking',                 label: 'Adventurer',      sub: '10 events',      unlocked: myCount  >= 10 },
+    { id: 'twenty',   icon: 'forest',                 label: 'Trailblazer',     sub: '20 events',      unlocked: myCount  >= 20 },
+    { id: 'thirty5',  icon: 'footprint',              label: 'Pioneer',         sub: '35 events',      unlocked: myCount  >= 35 },
+    { id: 'fifty',    icon: 'military_tech',          label: 'Legend',          sub: '50 events',      unlocked: myCount  >= 50 },
     { id: 'streak3',  icon: 'local_fire_department',  label: '3-Day Streak',    sub: '3 days running', unlocked: myStreak >= 3  },
     { id: 'streak7',  icon: 'whatshot',               label: 'Week Warrior',    sub: '7-day streak',   unlocked: myStreak >= 7  },
     { id: 'streak30', icon: 'emoji_events',           label: 'ABQ Regular',     sub: '30-day streak',  unlocked: myStreak >= 30 },
@@ -6146,7 +6146,7 @@ function ProfileScreen({
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 mb-4">
         {[
-          { label: 'Places\nVisited', val: myCount.toString() },
+          { label: 'Events\nAttended', val: myCount.toString() },
           { label: 'Day\nStreak', val: myStreak >= 1 ? `${myStreak}${myStreak >= 30 ? ' 🔥🔥' : myStreak >= 7 ? ' 🔥' : myStreak >= 3 ? ' ⚡' : ''}` : '—' },
           { label: 'Next\nLevel', val: myCount >= 50 ? '★' : (level.next - myCount).toString() + ' away' },
           { label: 'Rank', val: leaderboard.find(r => r.isMe)?.rank ? '#' + leaderboard.find(r => r.isMe)!.rank : '—' },
