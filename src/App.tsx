@@ -936,7 +936,7 @@ const SEARCH_BOOSTS: Record<string, string[]> = {
 };
 
 const EVENT_GENRES = [
-  'All', 'Tonight', 'This Weekend', '❤️ For You', 'Free', 'Music', 'Sports', 'Comedy', 'Arts', 'Family', 'Outdoor', 'Community',
+  'All', 'Tonight', 'This Weekend', '❤️ For You', 'Free', 'Volunteer', 'Music', 'Sports', 'Comedy', 'Arts', 'Family', 'Outdoor', 'Community',
 ];
 
 const FOLLOWING_KEY = 'abq_following_genres';
@@ -960,6 +960,7 @@ const EVENT_TYPE_META: Record<string, { icon: string; bg: string }> = {
   'Festival':       { icon: 'festival',      bg: 'linear-gradient(135deg,#7c3aed,#a78bfa)' },
   'Film':           { icon: 'film',          bg: 'linear-gradient(135deg,#1f2937,#4b5563)' },
   'Free':           { icon: 'free',          bg: 'linear-gradient(135deg,#047857,#10b981)' },
+  'Volunteer':      { icon: 'volunteer',     bg: 'linear-gradient(135deg,#be185d,#ec4899)' },
   'Event':          { icon: 'event',         bg: 'linear-gradient(135deg,var(--ink),#374151)' },
 };
 
@@ -995,6 +996,7 @@ const FlatIcon = React.memo(function FlatIcon({
     festival:      <><path d="M8 2l1.6 4.5H15l-4 2.9 1.5 4.6L8 11.2l-4.5 2.8L5 9.4 1 6.5h5.4Z" {...S}/></>,
     film:          <><rect x="2" y="4" width="12" height="8" rx="1" {...S}/><line x1="2" y1="6.5" x2="14" y2="6.5" {...S}/><line x1="2" y1="9.5" x2="14" y2="9.5" {...S}/><line x1="4.5" y1="4" x2="4.5" y2="6.5" {...S}/><line x1="11.5" y1="4" x2="11.5" y2="6.5" {...S}/><line x1="4.5" y1="9.5" x2="4.5" y2="12" {...S}/><line x1="11.5" y1="9.5" x2="11.5" y2="12" {...S}/></>,
     free:          <><rect x="2" y="4" width="12" height="8" rx="1" {...S}/><path d="M5.5 7v3M5.5 7h2c.8 0 .8 2 0 2H5.5" {...S}/><line x1="10.5" y1="7" x2="10.5" y2="10" {...S}/></>,
+    volunteer:     <><path d="M6 9V5.5a1 1 0 0 1 2 0V9" {...S}/><path d="M8 8V5a1 1 0 0 1 2 0v3" {...S}/><path d="M10 8.5V6.5a1 1 0 0 1 2 0v2c0 3-2 5-4 5s-4-2-4-5V7a1 1 0 0 1 2 0v2" {...S}/></>,
     event:         <><rect x="2" y="3" width="12" height="11" rx="1" {...S}/><line x1="2" y1="7" x2="14" y2="7" {...S}/><line x1="5" y1="1.5" x2="5" y2="4.5" {...S}/><line x1="11" y1="1.5" x2="11" y2="4.5" {...S}/><circle cx="5" cy="10.5" r="0.8" {...F}/><circle cx="8" cy="10.5" r="0.8" {...F}/><circle cx="11" cy="10.5" r="0.8" {...F}/></>,
     // Place category icons
     food:          <><line x1="5.5" y1="2" x2="5.5" y2="8" {...S}/><path d="M4 3v4a1.5 1.5 0 0 0 3 0V3" {...S}/><line x1="5.5" y1="8" x2="5.5" y2="14" {...S}/><line x1="11" y1="2" x2="11" y2="14" {...S}/><path d="M9 2L13 5M9 8h4" {...S}/></>,
@@ -4720,8 +4722,9 @@ function EventsScreen({
           case 'Family':   return seg === 'Family' || name.includes('family') || name.includes(' kids') || name.includes('children');
           case 'Outdoor':  return name.includes('outdoor') || name.includes('trail') || name.includes('hike') || name.includes('5k') || name.includes('bike');
           case 'Community':return seg === 'Community' || seg === 'Festival' || name.includes('festival') || name.includes('market') || name.includes('fiesta');
-          case 'Free':     return getEventPrice(e) === 'FREE' || name.includes('free') || name.includes('no cover') || name.includes('market') || name.includes('festival');
-          default:         return seg === g || gen === g;
+          case 'Free':      return getEventPrice(e) === 'FREE' || name.includes('free') || name.includes('no cover') || name.includes('market') || name.includes('festival');
+          case 'Volunteer': return seg === 'Volunteer' || name.includes('volunteer') || name.includes('food bank') || name.includes('food distribution');
+          default:          return seg === g || gen === g;
         }
       });
       return result.filter(matchesAny);
@@ -4774,6 +4777,12 @@ function EventsScreen({
               seg === 'Community' || seg === 'Festival';
             return isFree;
           }
+          case 'Volunteer':
+            return seg === 'Volunteer' ||
+              eventName.includes('volunteer') || eventName.includes('food bank') ||
+              eventName.includes('food distribution') || eventName.includes('warehouse shift') ||
+              eventName.includes('serve') || eventName.includes('giving back') ||
+              eventName.includes('community service');
           default:
             return seg === selectedGenre || gen === selectedGenre;
         }
@@ -8009,11 +8018,10 @@ function PlanScreen({
 // ─── Navigation ───────────────────────────────────────────────────────────────
 
 const NAV_ITEMS = [
-  { id: 'discover', label: 'Home',    icon: 'explore' },
-  { id: 'events',   label: 'Events',  icon: 'confirmation_number' },
-  { id: 'places',   label: 'Places',  icon: 'storefront' },
-  { id: 'plan',     label: 'Saved',   icon: 'bookmark' },
-  { id: 'profile',  label: 'Profile', icon: 'person' },
+  { id: 'discover', label: 'Discover', icon: 'explore' },
+  { id: 'events',   label: 'Events',   icon: 'confirmation_number' },
+  { id: 'plan',     label: 'Saved',    icon: 'bookmark' },
+  { id: 'profile',  label: 'Profile',  icon: 'person' },
 ] as const;
 
 type TabId = (typeof NAV_ITEMS)[number]['id'];
@@ -8035,7 +8043,7 @@ interface DesktopAppProps {
   isEventSaved: (id: string) => boolean;
 }
 
-type DesktopTab = 'discover' | 'events' | 'places';
+type DesktopTab = 'discover' | 'events';
 
 const DESKTOP_DATE_COLORS = ['var(--brand)', '#0057c2', '#1a1a1a'];
 const fmtLocalDate = (d: string) => {
@@ -8531,7 +8539,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
             {search && <span className="material-symbols-outlined" onClick={() => setSearch('')} style={{ fontSize:'16px', color:'#5c6660', cursor:'pointer' }}>close</span>}
           </div>
           <div style={{ display:'flex', gap:'6px' }}>
-            {(['discover','events','places'] as DesktopTab[]).map(t => (
+            {(['discover','events'] as DesktopTab[]).map(t => (
               <div key={t} onClick={() => { setTab(t); setCat('All'); }}
                 style={{ ...pillBase, ...(tab===t ? { background:'#1a1a1a', color:'var(--bg)' } : {}) }}>
                 {t === 'discover' ? 'Discover' : t === 'events' ? 'Events' : 'Places'}
@@ -8562,7 +8570,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
             <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', color:'#5c6660', padding:'0 14px 8px' }}>Browse</div>
             <NavItem icon="explore"           label="Discover" id="discover" />
             <NavItem icon="confirmation_number" label="Events"   id="events"   count={weekEvents.length} />
-            <NavItem icon="storefront"         label="Places"   id="places"   count={places.length} />
+
           </div>
 
           {/* Categories */}
@@ -8612,7 +8620,7 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
         <main style={s.main}>
           <div style={s.toolbar}>
             <span style={{ fontSize:'11px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', color:'#5c6660' }}>
-              {tab === 'discover' && <><strong style={{ color:'#1a1a1a' }}>{places.length.toLocaleString()}</strong> places · <strong style={{ color:'#1a1a1a' }}>{weekEvents.length}</strong> events this week</>}
+              {tab === 'discover' && <><strong style={{ color:'#1a1a1a' }}>{weekEvents.length}</strong> events this week</>}
               {tab === 'events'   && <><strong style={{ color:'#1a1a1a' }}>{upcomingEvents.length}</strong> upcoming events · <strong style={{ color:'#0057c2' }}>{upcomingEvents.filter(e => getEventPrice(e) === 'FREE').length}</strong> free</>}
               {tab === 'places'   && <><strong style={{ color:'#1a1a1a' }}>{filteredPlaces.length.toLocaleString()}</strong> {cat !== 'All' ? cat : ''} places</>}
             </span>
@@ -8754,7 +8762,7 @@ function useWindowWidth() {
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>(() => {
     const hash = window.location.hash.replace('#', '').split('/')[0];
-    const validTabs: TabId[] = ['discover', 'events', 'places', 'plan', 'profile'];
+    const validTabs: TabId[] = ['discover', 'events', 'plan', 'profile'];
     return validTabs.includes(hash as TabId) ? (hash as TabId) : 'discover';
   });
   // Mobile-first: always use mobile layout (desktop layout disabled for now)
@@ -8855,7 +8863,7 @@ export default function App() {
   useEffect(() => {
     const _psh = (e: Event) => {
       setPlacesNavSearch((e as CustomEvent).detail as string);
-      setActiveTab('places');
+      setActiveTab('events');
     };
     window.addEventListener('plan-step-click', _psh);
     return () => window.removeEventListener('plan-step-click', _psh);
@@ -9855,7 +9863,7 @@ export default function App() {
               checkedIn={checkedIn}
               onCheckIn={handleCheckIn}
 
-              onNavigatePlaces={(cat, search, vibeLabel, vibeGradient) => { setPlacesNavCat(cat); setPlacesNavSearch(search); setPlacesNavVibe(vibeLabel ? `${vibeLabel}|||${vibeGradient || ''}` : ''); setPlacesNavKey(k => k + 1); setActiveTab('places'); window.scrollTo({ top: 0, behavior: 'instant' }); }}
+              onNavigatePlaces={(cat, search, vibeLabel, vibeGradient) => { setPlacesNavCat(cat); setPlacesNavSearch(search); setPlacesNavVibe(vibeLabel ? `${vibeLabel}|||${vibeGradient || ''}` : ''); setPlacesNavKey(k => k + 1); setActiveTab('events'); window.scrollTo({ top: 0, behavior: 'instant' }); }}
               onNavigateEvents={(genre) => { setEventsNavGenre(genre || ''); setActiveTab('events'); }}
               prefs={prefs}
               adminHeroLines={adminHeroLines}/>
@@ -9994,7 +10002,7 @@ export default function App() {
             {globalSearch.trim() && (
               <div style={{display:'flex',gap:'8px',width:'100%'}}>
                 <button onClick={() => { trackEvent('search', { query: globalSearch.trim(), context: 'events' }); setEventsNavSearch(globalSearch.trim()); setActiveTab('events'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'var(--brand)',color:'white',border:'none',borderRadius:'10px',fontSize:'15px',fontFamily:'Public Sans, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Events</button>
-                <button onClick={() => { trackEvent('search', { query: globalSearch.trim(), context: 'places' }); setPlacesNavCat('All'); setPlacesNavSearch(globalSearch.trim()); setPlacesNavKey(k => k + 1); setActiveTab('places'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'#026cdf',color:'white',border:'none',borderRadius:'10px',fontSize:'15px',fontFamily:'Public Sans, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Places</button>
+                <button onClick={() => { trackEvent('search', { query: globalSearch.trim(), context: 'places' }); setPlacesNavCat('All'); setPlacesNavSearch(globalSearch.trim()); setPlacesNavKey(k => k + 1); setActiveTab('events'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'#026cdf',color:'white',border:'none',borderRadius:'10px',fontSize:'15px',fontFamily:'Public Sans, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Places</button>
               </div>
             )}
           </div>
