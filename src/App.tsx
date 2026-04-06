@@ -5027,32 +5027,64 @@ function EventsScreen({
         </p>
       </div>
 
-      <div className="px-5 pb-28 flex flex-col gap-3">
-        {deduped.map(event => {
-          const count = getShowtimeCount(event);
+      {(() => {
+        if (deduped.length === 0) {
           return (
-            <div key={event.id} style={{position:'relative'}}>
-              <EventCard event={event} onClick={() => onEventSelect(event)} />
-              {/* Showtime count badge — only shown when > 1 showtime was collapsed */}
-              {/* Positioned within the image area (top: 136px) so it never overlaps venue text */}
-              {count > 1 && (
-                <div
-                  style={{ position:'absolute', top:136, left:8, background:'rgba(0,0,0,0.62)', color:'white', fontSize:'9px', fontWeight:600, letterSpacing:'0.06em', textTransform:'uppercase', padding:'3px 7px', borderRadius:4, pointerEvents:'none', backdropFilter:'blur(4px)' }}
-                >
-                  {count} showtimes
-                </div>
-              )}
-              <LikeButton id={event.id} type="event" name={event.name} category="event" />
+            <div className="text-center py-16 text-gray-400">
+              <span className="material-symbols-outlined" style={{ fontSize: '48px', display: 'block', marginBottom: '8px' }}>event_busy</span>
+              <p className="font-semibold text-sm" style={{ fontFamily: 'Public Sans, sans-serif' }}>No events found</p>
             </div>
           );
-        })}
-        {deduped.length === 0 && (
-          <div className="text-center py-16 text-gray-400">
-            <span className="material-symbols-outlined" style={{ fontSize: '48px', display: 'block', marginBottom: '8px' }}>event_busy</span>
-            <p className="font-semibold text-sm" style={{ fontFamily: 'Public Sans, sans-serif' }}>No events found</p>
+        }
+        const CAT_COLORS: Record<string, string> = {
+          'Music': '#8B3A0F', 'Arts & Theatre': '#7C3AED', 'Sports': '#1D4ED8',
+          'Comedy': '#D97706', 'Family': '#059669', 'Community': '#0F766E',
+          'Food & Drink': '#B45309', 'Outdoors': '#15803D', 'Film & Media': '#9333EA',
+          'Education': '#0369A1', 'Charity & Causes': '#DB2777', 'Miscellaneous': '#6B7280',
+        };
+        const catGroups: Record<string, TMEvent[]> = {};
+        for (const evt of deduped) {
+          const cat = getEventCategory(evt);
+          if (!catGroups[cat]) catGroups[cat] = [];
+          catGroups[cat].push(evt);
+        }
+        const sortedGroups = Object.entries(catGroups).sort((a, b) => b[1].length - a[1].length);
+        return (
+          <div style={{ padding: '0 16px 112px' }}>
+            {sortedGroups.map(([cat, events]) => {
+              const color = CAT_COLORS[cat] || 'var(--brand)';
+              const tMeta = getEventTypeMeta(events[0]);
+              return (
+                <div key={cat}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '20px 0 10px' }}>
+                    <div style={{ width: 22, height: 22, borderRadius: 6, background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <FlatIcon name={tMeta.icon} size={12} color="white" />
+                    </div>
+                    <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.07em', textTransform: 'uppercase' as const, color: 'var(--ink)', fontFamily: 'Public Sans, sans-serif' }}>{cat}</span>
+                    <span style={{ fontSize: 10, color: '#bbb', fontFamily: 'Public Sans, sans-serif', fontWeight: 500 }}>{events.length}</span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                    {events.map(event => {
+                      const count = getShowtimeCount(event);
+                      return (
+                        <div key={event.id} style={{ position: 'relative' }}>
+                          <EventCard event={event} onClick={() => onEventSelect(event)} />
+                          {count > 1 && (
+                            <div style={{ position: 'absolute', top: 106, left: 6, background: 'rgba(0,0,0,0.62)', color: 'white', fontSize: '8px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '2px 5px', borderRadius: 3, pointerEvents: 'none', backdropFilter: 'blur(4px)' }}>
+                              {count} shows
+                            </div>
+                          )}
+                          <LikeButton id={event.id} type="event" name={event.name} category="event" />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        )}
-      </div>
+        );
+      })()}
     </div>
   );
 }
