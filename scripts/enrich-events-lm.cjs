@@ -1,224 +1,252 @@
 #!/usr/bin/env node
 /**
- * ABQ Unplugged — Event Enrichment via LM Studio
+ * enrich-events-lm.cjs
+ * 
+ * Uses a locally-running LM Studio model to enrich ABQ Unplugged events with:
+ *   - about:       1-2 sentences about the artist / act / event
+ *   - highlights:  2-3 bullet points on what to expect
+ *   - venue_tips:  parking, transit, and arrival tips for the venue
+ *   - local_tips:  ABQ-specific tips (food nearby, things to do before/after)
  *
- * Fills in missing event descriptions (info field) using the local LM Studio.
- * Also updates Supabase so the enriched data persists across refreshes.
+ * Run: node scripts/enrich-events-lm.cjs
  *
- * Usage:
- *   node scripts/enrich-events-lm.cjs
- *   node scripts/enrich-events-lm.cjs --limit 50
- *   node scripts/enrich-events-lm.cjs --dry-run
- *   node scripts/enrich-events-lm.cjs --force   # re-enrich even if info exists
+ * Requires LM Studio running at http://localhost:1234 with a model loaded.
+ * Reads SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY from scripts/.env
+ *
+ * Safe to re-run — skips events that already have ai_enrichment.
+ * Use --force to re-enrich everything, --limit=N to cap the batch.
  */
+
 'use strict';
+const https  = require('https');
+const http   = require('http');
+const path   = require('path');
+const fs     = require('fs');
 
-const fs    = require('fs');
-const path  = require('path');
-const http  = require('http');
-const https = require('https');
-
-// ── LM Studio config ────────────────────────────────────────────────────────
-const LM_HOST  = '10.0.0.53';
-const LM_PORT  = 1234;
-const LM_MODEL = 'qwen/qwen2.5-coder-14b';
-
-// ── Supabase config ─────────────────────────────────────────────────────────
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'https://bsmvfutebmbkjvlrhiyq.supabase.co';
-const SUPABASE_KEY = process.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbXZmdXRlYm1ia2p2bHJoaXlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMzgwMzIsImV4cCI6MjA4OTgxNDAzMn0.3rvMRErlF-HnKfbJ6rCNSeCJc39n4K48xjAeSGqf_rc';
-
-const args       = process.argv.slice(2);
-const getArg     = (f) => { const i = args.indexOf(f); return i !== -1 ? args[i + 1] : null; };
-const limitCount = parseInt(getArg('--limit') || '9999', 10);
-const dryRun     = args.includes('--dry-run');
-const forceRedo  = args.includes('--force');
-
-const DELAY_MS    = 50;
-const MAX_RETRIES = 2;
-const BATCH_SAVE  = 10;
-
-// ── Helpers ─────────────────────────────────────────────────────────────────
-
-function parseJSON(text) {
-  const clean = text
-    .replace(/<think>[\s\S]*?<\/think>/gi, '')
-    .replace(/^```json?\s*/im, '').replace(/```\s*$/m, '').trim();
-  const s = clean.indexOf('{'), e = clean.lastIndexOf('}');
-  if (s === -1 || e === -1) throw new Error(`No JSON: ${text.slice(0, 120)}`);
-  return JSON.parse(clean.slice(s, e + 1));
-}
-
-function callLMStudio(prompt) {
-  return new Promise((resolve, reject) => {
-    const body = JSON.stringify({
-      model: LM_MODEL, temperature: 0.3, max_tokens: 1024, stream: false,
-      messages: [{ role: 'user', content: prompt }],
-    });
-    const req = http.request({
-      hostname: LM_HOST, port: LM_PORT, path: '/v1/chat/completions', method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
-    }, (res) => {
-      let data = '';
-      res.on('data', c => data += c);
-      res.on('end', () => {
-        try {
-          const parsed = JSON.parse(data);
-          if (parsed.error) return reject(new Error(parsed.error.message));
-          resolve(parseJSON(parsed.choices?.[0]?.message?.content || ''));
-        } catch (err) { reject(err); }
-      });
-    });
-    req.on('error', reject);
-    req.setTimeout(180000, () => { req.destroy(); reject(new Error('LM Studio timeout')); });
-    req.write(body); req.end();
+// ── Load env ──────────────────────────────────────────────────────────────────
+const envPath = path.join(__dirname, '.env');
+if (fs.existsSync(envPath)) {
+  fs.readFileSync(envPath, 'utf8').split('\n').forEach(line => {
+    const m = line.match(/^([^#=]+)=(.*)$/);
+    if (m) process.env[m[1].trim()] = m[2].trim();
   });
 }
 
-function buildPrompt(ev) {
-  const venue = ev._embedded?.venues?.[0];
-  const genre = ev.classifications?.[0];
-  return `You are a local Albuquerque event expert writing for "ABQ Unplugged" — a local discovery app.
+const SUPABASE_URL      = process.env.SUPABASE_URL;
+const SUPABASE_KEY      = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const LM_STUDIO_URL     = process.env.LM_STUDIO_URL || 'http://localhost:1234';
+const LM_MODEL          = process.env.LM_MODEL      || 'qwen/qwen3.5-9b';
+const CONCURRENCY       = parseInt(process.env.CONCURRENCY || '2', 10);
+const FORCE             = process.argv.includes('--force');
+const LIMIT_ARG         = process.argv.find(a => a.startsWith('--limit='));
+const LIMIT             = LIMIT_ARG ? parseInt(LIMIT_ARG.split('=')[1], 10) : Infinity;
 
-Event: ${ev.name}
-Venue: ${venue?.name || 'Unknown'} | ${venue?.address?.line1 || ''}, ${venue?.city?.name || 'Albuquerque'}
-Date: ${ev.dates?.start?.localDate || 'TBD'}
-Category: ${genre?.segment?.name || 'Event'} / ${genre?.genre?.name || ''}
-Price: ${ev.priceRanges?.[0] ? '$' + ev.priceRanges[0].min + '-$' + ev.priceRanges[0].max : 'Unknown'}
-
-Write an engaging 2-4 sentence description for this event. Include what attendees can expect, the vibe/atmosphere, and any ABQ/NM context if relevant.
-
-Output ONLY a raw JSON object. No markdown fences, no extra text.
-
-{"info":"2-4 sentence event description","pleaseNote":"any important notes for attendees (age restrictions, bag policy, parking tips) or empty string"}`;
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+  console.error('❌  Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in scripts/.env');
+  process.exit(1);
 }
 
-/** Update the event's raw JSONB in Supabase with enriched fields */
-function syncToSupabase(eventId, enrichedFields) {
-  if (!eventId) return Promise.resolve(false);
-  // The events table stores raw as JSONB — we need to merge our fields into it
-  // Use Supabase REST API to patch the raw column
-  const url = new URL(`${SUPABASE_URL}/rest/v1/rpc/merge_event_info`);
-  // Fallback: just update the raw column directly by fetching + patching
-  return new Promise((resolve) => {
-    // First fetch the current raw
-    const fetchUrl = new URL(`${SUPABASE_URL}/rest/v1/events?id=eq.${encodeURIComponent(eventId)}&select=raw`);
-    const fetchReq = https.request(fetchUrl, {
-      method: 'GET',
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
-    }, (res) => {
-      let data = '';
-      res.on('data', c => data += c);
-      res.on('end', () => {
-        try {
-          const rows = JSON.parse(data);
-          if (!rows || rows.length === 0) { resolve(false); return; }
-          const raw = { ...rows[0].raw, ...enrichedFields };
-          const patchBody = JSON.stringify({ raw });
-          const patchUrl = new URL(`${SUPABASE_URL}/rest/v1/events?id=eq.${encodeURIComponent(eventId)}`);
-          const patchReq = https.request(patchUrl, {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json', 'apikey': SUPABASE_KEY,
-              'Authorization': `Bearer ${SUPABASE_KEY}`, 'Prefer': 'return=minimal',
-            },
-          }, (pRes) => {
-            let pd = '';
-            pRes.on('data', c => pd += c);
-            pRes.on('end', () => resolve(pRes.statusCode < 300));
-          });
-          patchReq.on('error', () => resolve(false));
-          patchReq.setTimeout(10000, () => { patchReq.destroy(); resolve(false); });
-          patchReq.write(patchBody); patchReq.end();
-        } catch { resolve(false); }
-      });
-    });
-    fetchReq.on('error', () => resolve(false));
-    fetchReq.setTimeout(10000, () => { fetchReq.destroy(); resolve(false); });
-    fetchReq.end();
-  });
-}
-
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-// ── Fetch all events from Supabase ──────────────────────────────────────────
-
-async function fetchAllEvents() {
+// ── HTTP helpers ──────────────────────────────────────────────────────────────
+function request(url, opts = {}, body = null) {
   return new Promise((resolve, reject) => {
-    const url = new URL(`${SUPABASE_URL}/rest/v1/events?select=id,source,raw,event_date&event_date=gte.${new Date().toISOString().split('T')[0]}&order=event_date.asc&limit=5000`);
-    const req = https.request(url, {
-      method: 'GET',
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
-    }, (res) => {
-      let data = '';
-      res.on('data', c => data += c);
+    const parsed = new URL(url);
+    const lib    = parsed.protocol === 'https:' ? https : http;
+    const req    = lib.request(parsed, {
+      method:  opts.method  || 'GET',
+      headers: opts.headers || {},
+      timeout: opts.timeout || 60000,
+    }, res => {
+      const chunks = [];
+      res.on('data', d => chunks.push(d));
       res.on('end', () => {
-        try { resolve(JSON.parse(data)); } catch (e) { reject(e); }
+        const text = Buffer.concat(chunks).toString('utf8');
+        if (res.statusCode >= 400) {
+          reject(new Error(`HTTP ${res.statusCode}: ${text.slice(0, 200)}`));
+        } else {
+          try { resolve(JSON.parse(text)); }
+          catch { resolve(text); }
+        }
       });
     });
-    req.on('error', reject);
-    req.setTimeout(30000, () => { req.destroy(); reject(new Error('Fetch timeout')); });
+    req.on('error',   reject);
+    req.on('timeout', () => { req.destroy(); reject(new Error('Request timed out')); });
+    if (body) req.write(typeof body === 'string' ? body : JSON.stringify(body));
     req.end();
   });
 }
 
-async function main() {
-  console.log('\n🎪  ABQ Unplugged — Event Enrichment (LM Studio)');
-  console.log(`   Backend: ${LM_MODEL} @ ${LM_HOST}:${LM_PORT}`);
-  if (dryRun) console.log('   *** DRY RUN ***');
-
-  // Fetch events from Supabase
-  console.log('\n   Fetching events from Supabase...');
-  const allEvents = await fetchAllEvents();
-  console.log(`   ${allEvents.length} future events found`);
-
-  // Filter to events missing info/description
-  const targets = allEvents.filter(row => {
-    const raw = row.raw || {};
-    if (!forceRedo && raw.info) return false;  // already has description
-    if (!raw.name) return false;               // skip unnamed events
-    return true;
-  }).slice(0, limitCount);
-
-  console.log(`   ${targets.length} events need enrichment\n`);
-  if (dryRun || targets.length === 0) return;
-
-  let done = 0, errors = 0;
-
-  for (const row of targets) {
-    const ev = row.raw;
-    const label = `[${(ev.name || '').slice(0, 45)}]`;
-
-    for (let attempt = 1; attempt <= MAX_RETRIES + 1; attempt++) {
-      try {
-        const prompt = buildPrompt(ev);
-        const result = await callLMStudio(prompt);
-
-        if (result.info) {
-          // Sync to Supabase
-          const enrichedFields = {};
-          if (result.info) enrichedFields.info = result.info;
-          if (result.pleaseNote) enrichedFields.pleaseNote = result.pleaseNote;
-          await syncToSupabase(row.id, enrichedFields);
-
-          done++;
-          console.log(`✓ [${done}/${targets.length}] ${label} — ${(result.info || '').slice(0, 60)}…`);
-        }
-        break;
-      } catch (err) {
-        if (attempt <= MAX_RETRIES) {
-          process.stdout.write(`  (retry ${attempt}) `);
-          await sleep(DELAY_MS * attempt * 3);
-        } else {
-          console.error(`✗ ${label}: ${err.message.slice(0, 100)}`);
-          errors++;
-        }
-      }
-    }
-    await sleep(DELAY_MS);
-  }
-
-  console.log(`\n${'─'.repeat(60)}`);
-  console.log(`✅  ${done} enriched    ❌  ${errors} errors`);
+function sbGet(path) {
+  return request(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers: {
+      'apikey':        SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Accept':        'application/json',
+    },
+  });
 }
 
-main().catch(e => { console.error('\nFATAL:', e.message); process.exit(1); });
+function sbPatch(table, id, data) {
+  return request(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    headers: {
+      'apikey':        SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type':  'application/json',
+      'Prefer':        'return=minimal',
+    },
+  }, data);
+}
+
+// ── LM Studio call ─────────────────────────────────────────────────────────────
+async function callLM(prompt, retries = 2) {
+  const payload = {
+    model:       LM_MODEL,
+    messages:    [{ role: 'user', content: prompt }],
+    temperature: 0.4,
+    max_tokens:  600,
+    stream:      false,
+  };
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await request(`${LM_STUDIO_URL}/v1/chat/completions`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 90000,
+      }, payload);
+      return res.choices?.[0]?.message?.content?.trim() || '';
+    } catch (err) {
+      if (attempt < retries) {
+        console.warn(`  ⚠ LM retry ${attempt + 1}/${retries}: ${err.message}`);
+        await new Promise(r => setTimeout(r, 2000));
+      } else {
+        throw err;
+      }
+    }
+  }
+}
+
+// ── Build prompt ──────────────────────────────────────────────────────────────
+function buildPrompt(event) {
+  const raw        = event.raw || event;
+  const name       = raw.name || 'Unknown Event';
+  const venue      = raw._embedded?.venues?.[0];
+  const venueName  = venue?.name || '';
+  const venueAddr  = venue?.address?.line1 ? `${venue.address.line1}, ${venue.city?.name || 'Albuquerque'}, NM` : 'Albuquerque, NM';
+  const date       = raw.dates?.start?.localDate || '';
+  const time       = raw.dates?.start?.localTime || '';
+  const segment    = raw.classifications?.[0]?.segment?.name || '';
+  const genre      = raw.classifications?.[0]?.genre?.name   || '';
+  const info       = raw.info || raw.description || '';
+  const parking    = venue?.parkingDetail || '';
+  const category   = [segment, genre].filter(Boolean).join(' / ');
+
+  return `You are a local Albuquerque events guide. Given the following event details, produce a JSON object with exactly these keys:
+
+{
+  "about": "1-2 sentence description of the artist, performer, or event type. Be specific and interesting — not generic.",
+  "highlights": ["2-3 short bullet points about what attendees can expect — specific, enthusiastic, useful"],
+  "venue_tips": "1-2 sentences about parking, transit options, or arrival tips for this specific venue in Albuquerque.",
+  "local_tips": "1 sentence ABQ-specific tip — a nearby restaurant, bar, or thing to do before/after the event."
+}
+
+EVENT DETAILS:
+- Name: ${name}
+- Category: ${category || 'Event'}
+- Date: ${date}${time ? ' at ' + time : ''}
+- Venue: ${venueName}${venueAddr ? ' — ' + venueAddr : ''}
+${info ? `- Description: ${info.slice(0, 400)}` : ''}
+${parking ? `- Venue parking info: ${parking.slice(0, 200)}` : ''}
+
+Rules:
+- Return ONLY the raw JSON object. No markdown, no code fences, no extra text.
+- Keep each field concise. "highlights" must be an array of strings.
+- If you don't know specific facts, give practical general advice appropriate for ABQ.
+- For "about": if it's a band/artist, mention their style or a notable fact. If it's a sports game, mention the teams. If community/local event, describe the experience.`;
+}
+
+// ── Parse LM response ─────────────────────────────────────────────────────────
+function parseEnrichment(text) {
+  // Strip thinking tags if present (some models emit <think>...</think>)
+  text = text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+  // Extract JSON from the response
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('No JSON found in response');
+  const parsed = JSON.parse(jsonMatch[0]);
+  // Validate and sanitize
+  return {
+    about:       typeof parsed.about       === 'string'  ? parsed.about.trim()                         : null,
+    highlights:  Array.isArray(parsed.highlights)        ? parsed.highlights.map(h => String(h).trim()) : [],
+    venue_tips:  typeof parsed.venue_tips  === 'string'  ? parsed.venue_tips.trim()                    : null,
+    local_tips:  typeof parsed.local_tips  === 'string'  ? parsed.local_tips.trim()                    : null,
+  };
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
+async function main() {
+  console.log('🤖  ABQ Unplugged — LM Studio Event Enrichment');
+  console.log(`    Model: ${LM_MODEL}`);
+  console.log(`    Endpoint: ${LM_STUDIO_URL}`);
+  console.log(`    Mode: ${FORCE ? 'FORCE (re-enrich all)' : 'INCREMENTAL (skip enriched)'}`);
+  if (LIMIT < Infinity) console.log(`    Limit: ${LIMIT}`);
+  console.log('');
+
+  // 1. Ping LM Studio
+  try {
+    await request(`${LM_STUDIO_URL}/v1/models`, { timeout: 5000 });
+    console.log('✅  LM Studio is running\n');
+  } catch {
+    console.error('❌  Cannot reach LM Studio at', LM_STUDIO_URL);
+    console.error('    Make sure LM Studio is open and a model is loaded.');
+    process.exit(1);
+  }
+
+  // 2. Fetch events needing enrichment
+  const today     = new Date().toISOString().split('T')[0];
+  const filter    = FORCE
+    ? `event_date=gte.${today}&order=event_date.asc&limit=500`
+    : `event_date=gte.${today}&ai_enrichment=is.null&order=event_date.asc&limit=500`;
+
+  console.log('📥  Fetching events from Supabase…');
+  const rows = await sbGet(`events?${filter}&select=id,source,raw`);
+  if (!Array.isArray(rows)) {
+    console.error('❌  Unexpected response from Supabase:', rows);
+    process.exit(1);
+  }
+
+  const toProcess = rows.slice(0, LIMIT);
+  console.log(`    Found ${rows.length} events needing enrichment (processing ${toProcess.length})\n`);
+
+  if (toProcess.length === 0) {
+    console.log('✨  Nothing to do — all upcoming events are already enriched.');
+    return;
+  }
+
+  // 3. Process with concurrency limit
+  let done = 0, failed = 0;
+
+  async function processOne(row) {
+    const eventName = row.raw?.name || row.id;
+    try {
+      const prompt     = buildPrompt(row);
+      const response   = await callLM(prompt);
+      const enrichment = parseEnrichment(response);
+      await sbPatch('events', row.id, { ai_enrichment: enrichment });
+      done++;
+      console.log(`  ✅ [${done}/${toProcess.length}] ${eventName}`);
+    } catch (err) {
+      failed++;
+      console.warn(`  ❌ [${done + failed}/${toProcess.length}] ${eventName} — ${err.message}`);
+    }
+  }
+
+  // Process in batches of CONCURRENCY
+  for (let i = 0; i < toProcess.length; i += CONCURRENCY) {
+    const batch = toProcess.slice(i, i + CONCURRENCY);
+    await Promise.all(batch.map(processOne));
+  }
+
+  console.log(`\n🏁  Done — ${done} enriched, ${failed} failed`);
+  if (failed > 0) console.log('    Re-run to retry failed events.');
+}
+
+main().catch(err => { console.error('Fatal:', err); process.exit(1); });

@@ -221,17 +221,18 @@ export async function fetchEventsFromDB(): Promise<Record<string, unknown[]>> {
   const today = new Date().toISOString().split('T')[0];
   const { data, error } = await supabase
     .from('events')
-    .select('source, raw')
+    .select('id, source, raw, ai_enrichment')
     .gte('event_date', today)
     .order('event_date', { ascending: true })
     .limit(2000);
   if (error) throw error;
   const result: Record<string, unknown[]> = {};
   for (const row of (data ?? [])) {
-    const src = (row as { source: string; raw: unknown }).source;
-    const raw = (row as { source: string; raw: unknown }).raw;
-    if (!result[src]) result[src] = [];
-    result[src].push(raw);
+    const r = row as { id: string; source: string; raw: Record<string, unknown>; ai_enrichment: unknown };
+    if (!result[r.source]) result[r.source] = [];
+    // Merge ai_enrichment into the raw event object so the app can read it
+    const merged = { ...r.raw, _aiEnrichment: r.ai_enrichment ?? null };
+    result[r.source].push(merged);
   }
   return result;
 }
