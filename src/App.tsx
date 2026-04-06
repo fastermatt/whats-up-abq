@@ -3001,6 +3001,10 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
   const [shared, setShared] = useState(false);
   const [showShareCard, setShowShareCard] = useState(false);
   const [venueExpanded, setVenueExpanded] = useState(false);
+  const [showFlagForm, setShowFlagForm] = useState(false);
+  const [flagText, setFlagText] = useState('');
+  const [flagSubmitting, setFlagSubmitting] = useState(false);
+  const [flagDone, setFlagDone] = useState(false);
   const venue = event._embedded?.venues?.[0];
   const category = getEventCategory(event);
   const price = event.priceRanges?.[0];
@@ -5193,16 +5197,6 @@ function EventsScreen({
             {(dateFrom || dateTo) && <span style={{ position: 'absolute', top: -2, right: -2, width: 7, height: 7, borderRadius: '50%', background: 'var(--brand)' }} />}
           </button>
         </div>
-        {showDatePicker && (
-          <div style={{ margin: '8px -16px 0', animation: 'cardFadeIn 0.2s ease both' }}>
-            <EventCalendar
-              events={events}
-              selectedDate={calendarSelDate}
-              onSelectDate={(d) => { setCalendarSelDate(d); setDateFrom(d || ''); setDateTo(d || ''); }}
-              compact
-            />
-          </div>
-        )}
       </div>
 
       <div className="flex px-5 overflow-x-auto" style={{ scrollbarWidth: 'none', position: 'sticky', top: 'calc(var(--sat) + 58px)', zIndex: 30, background: 'white', paddingTop: '12px', paddingBottom: '0px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
@@ -5279,6 +5273,18 @@ function EventsScreen({
       )}
 
       {/* For You setup prompt — shown when For You is selected but nothing followed */}
+      {/* Calendar filter — shown below genre pills when calendar icon tapped */}
+      {showDatePicker && (
+        <div style={{ animation: 'cardFadeIn 0.2s ease both' }}>
+          <EventCalendar
+            events={events}
+            selectedDate={calendarSelDate}
+            onSelectDate={(d) => { setCalendarSelDate(d); setDateFrom(d || ''); setDateTo(d || ''); }}
+            compact
+          />
+        </div>
+      )}
+
       {selectedGenre === '❤️ For You' && followedGenres.length === 0 && (
         <div className="px-5 py-4 flex items-start gap-3" style={{ background: 'var(--brand-bg-subtle)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
           <span style={{ fontSize: '24px', lineHeight: 1 }}>❤️</span>
