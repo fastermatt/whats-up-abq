@@ -1476,7 +1476,7 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
       className="bg-white overflow-hidden text-left w-full"
       style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)', borderRadius: '10px', animation: 'cardFadeIn 0.3s ease both' }}
     >
-      <div className="relative" style={{ height: '160px' }}>
+      <div className="relative overflow-hidden" style={{ aspectRatio: '4/3' }}>
         <EventCardImageSlider event={event} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
         <div className="absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5" style={{ background: 'rgba(0,0,0,0.55)', zIndex: 1 }}>
@@ -5138,7 +5138,7 @@ function EventsScreen({
                         <div key={event.id} style={{ position: 'relative', minWidth: 0, overflow: 'hidden' }}>
                           <EventCard event={event} onClick={() => onEventSelect(event)} />
                           {count > 1 && (
-                            <div style={{ position: 'absolute', top: 106, left: 6, background: 'rgba(0,0,0,0.62)', color: 'white', fontSize: '8px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '2px 5px', borderRadius: 3, pointerEvents: 'none', backdropFilter: 'blur(4px)' }}>
+                            <div style={{ position: 'absolute', bottom: 8, left: 6, background: 'rgba(0,0,0,0.62)', color: 'white', fontSize: '8px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '2px 5px', borderRadius: 3, pointerEvents: 'none', backdropFilter: 'blur(4px)' }}>
                               {count} shows
                             </div>
                           )}
