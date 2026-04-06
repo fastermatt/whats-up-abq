@@ -3,12 +3,10 @@
 //   - Static assets (JS/CSS/icons/images): Cache-first, serve from cache, update in bg
 //   - App shell (HTML): Network-first with cache fallback
 //   - Supabase API calls: Network-only (live data required)
-//   - places-data.json: Cache-first (large file, rarely changes)
 
-const CACHE_VERSION = 'abq-202604061535';
+const CACHE_VERSION = 'abq-202604062200';
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const ASSET_CACHE = `${CACHE_VERSION}-assets`;
-const DATA_CACHE  = `${CACHE_VERSION}-data`;
 
 // Files to pre-cache on install
 const PRECACHE_SHELL = [
@@ -26,9 +24,7 @@ const PRECACHE_ASSETS = [
   '/og-image.jpg',
 ];
 
-const PRECACHE_DATA = [
-  '/places-data.json',
-];
+const PRECACHE_DATA = [];
 
 // ─── Install: pre-cache essentials ───────────────────────────────────────────
 self.addEventListener('install', (event) => {
@@ -36,7 +32,6 @@ self.addEventListener('install', (event) => {
     Promise.all([
       caches.open(SHELL_CACHE).then(c => c.addAll(PRECACHE_SHELL)),
       caches.open(ASSET_CACHE).then(c => c.addAll(PRECACHE_ASSETS)),
-      caches.open(DATA_CACHE).then(c => c.addAll(PRECACHE_DATA)),
     ]).then(() => self.skipWaiting())
   );
 });
@@ -67,12 +62,6 @@ self.addEventListener('fetch', (event) => {
 
   // Skip browser-extension or non-http requests
   if (!url.protocol.startsWith('http')) return;
-
-  // places-data.json → cache-first (large, stable)
-  if (url.pathname === '/places-data.json') {
-    event.respondWith(cacheFirst(DATA_CACHE, request));
-    return;
-  }
 
   // Hashed JS/CSS assets (/assets/*.js, /assets/*.css) → cache-first immutable
   if (url.pathname.startsWith('/assets/')) {

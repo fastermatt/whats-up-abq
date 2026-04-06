@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { supabase } from './lib/supabase';
-import { fetchPlacesFromDB, fetchEventsFromDB, searchPlacesFromDB } from './lib/db';
+import { fetchEventsFromDB } from './lib/db';
 import { ALL_EVENTS, type Event as StaticEvent } from './data/events';
 import AdminPanel from './AdminPanel';
 
@@ -8807,16 +8807,8 @@ export default function App() {
   const [placesNavCat, setPlacesNavCat] = useState('All');
   const [placesNavSearch, setPlacesNavSearch] = useState('');
   const [placesNavVibe, setPlacesNavVibe] = useState('');
-  // Pre-seed places from the localStorage cache so returning users see the app
-  // immediately without waiting for a network fetch.
-  const [places, setPlaces] = useState<Place[]>(() => {
-    try {
-      const raw = localStorage.getItem('abq_places_v3');
-      if (!raw) return [];
-      const { data } = JSON.parse(raw) as { data: Place[]; ts: number };
-      return Array.isArray(data) && data.length > 0 ? data : [];
-    } catch { return []; }
-  });
+  // Places are not loaded in the app — kept on the server only.
+  const [places, setPlaces] = useState<Place[]>([]);
   // Pre-seed with bundled static events so the list is never empty while
   // Supabase loads. Live data replaces this as soon as the fetch resolves.
   const [events, setEvents] = useState<TMEvent[]>(() =>
@@ -9314,112 +9306,14 @@ export default function App() {
 
   useEffect(() => {
     async function loadData() {
-      // ── Phase 1: Load places — serve from cache instantly, refresh in bg ──
-      const CACHE_KEY = 'abq_places_v3';
-      const CACHE_TTL = 60 * 60 * 1000; // 1 hour
+      // Clear any stale places cache left over from a prior version of the app
+      try { localStorage.removeItem('abq_places_v3'); } catch {}
 
-      // Timeout helper — defined at top so fast path can use it too
       const withTimeout = <T,>(p: Promise<T>, ms: number): Promise<T> =>
         Promise.race([p, new Promise<T>((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
 
-      let placesLoaded = false;
-
-      // Serve from cache immediately (skips splash on repeat visits)
-      try {
-        const raw = localStorage.getItem(CACHE_KEY);
-        if (raw) {
-          const { data, ts } = JSON.parse(raw);
-          if (Array.isArray(data) && data.length > 0) {
-            setPlaces(data.map(fixPlaceImages));
-            setLoading(false);
-            placesLoaded = true;
-            // Cache still fresh — skip places network call, just load events
-            if (Date.now() - ts < CACHE_TTL) {
-              setEventsLoading(true);
-              try {
-                // Timeout added: if Supabase hangs, fall back to static events
-                const sbEvents = await withTimeout(fetchEventsFromDB(), 8000);
-                const allEvts = [
-                  ...(sbEvents['ticketmaster'] || []),
-                  ...(sbEvents['seatgeek'] || []),
-                  ...(sbEvents['bandsintown'] || []),
-                  ...(sbEvents['musicbrainz'] || []),
-                  ...(sbEvents['eventbrite'] || []),
-            ...(sbEvents['do505'] || []),
-                  ...(sbEvents['local'] || []),
-                ];
-                // Merge in static events so "This Week" always has content
-                const seenFast = new Set(allEvts.map((e: TMEvent) => e.id));
-                const normFast = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
-                const liveTitlesFast = new Set(allEvts.map((e: TMEvent) => normFast(e.name || '')));
-                const staticFast = STATIC_TM_EVENTS.filter(e => {
-                  if (seenFast.has(e.id)) return false;
-                  if (liveTitlesFast.has(normFast(e.name || ''))) return false;
-                  seenFast.add(e.id);
-                  return true;
-                });
-                const fastMerged = [...allEvts, ...staticFast]
-                  .filter(e => !isJunkEvent(e))
-                  .map(tagAdultEvent);
-                setEvents(fastMerged);
-              } catch (err) {
-                console.warn('[Events] fast path failed, using static fallback:', err);
-                setEvents(STATIC_TM_EVENTS.filter(e => !isJunkEvent(e)).map(tagAdultEvent));
-              }
-              setEventsLoading(false);
-              return;
-            }
-          }
-        }
-      } catch {}
-
-      // ── Kick off yelp photo map fetch in background (no await — doesn't block render)
-      loadYelpPhotoMap();
-
-      // ── Phase 0: Pre-seed from static JSON so the loading screen
-      // almost never appears. /places-data.json is a same-origin static
-      // file that the service worker caches on first load — it responds
-      // in < 200 ms, well under the 1500 ms LoadingScreen delay.
-      // Supabase then refreshes the data silently in the background.
-      try {
-        const staticR = await withTimeout(fetch('/places-data.json'), 8000);
-        if (staticR.ok) {
-          const staticPlaces = await staticR.json();
-          if (Array.isArray(staticPlaces) && staticPlaces.length > 0) {
-            setPlaces(staticPlaces.map(fixPlaceImages));
-            placesLoaded = true;
-            setLoading(false); // ← app visible immediately with static data
-          }
-        }
-      } catch { /* SW cache miss on very first ever load — fall through */ }
-
-      // Kick off events fetch NOW — in parallel with places — so Supabase only
-      // needs to wake up once. Both promises race concurrently.
+      // ── Load events from Supabase (static bundled events are already pre-seeded) ──
       setEventsLoading(true);
-      const eventsPromise = withTimeout(fetchEventsFromDB(), 12000);
-
-      try {
-        // Refresh places from Supabase in background (app already visible above)
-        const sbPlaces = await withTimeout(fetchPlacesFromDB(), 20000);
-        if (Array.isArray(sbPlaces) && sbPlaces.length > 0) {
-          const fixed = sbPlaces.map(fixPlaceImages);
-          setPlaces(fixed);
-          placesLoaded = true;
-          try { localStorage.setItem(CACHE_KEY, JSON.stringify({ data: fixed, ts: Date.now() })); } catch {}
-        }
-      } catch (err) {
-        console.warn('[Places] Supabase failed or timed out:', err);
-        // placesLoaded may already be true from static JSON pre-seed above
-      } finally {
-        setLoading(false); // ensure cleared regardless
-      }
-
-      if (!placesLoaded) {
-        setLoadError(true);
-        return;
-      }
-
-      // ── Phase 2: Await the events fetch that was already running ──────────
       try {
         let tmEvents: TMEvent[] = [];
         let ebEvents: TMEvent[] = [];
@@ -9429,8 +9323,7 @@ export default function App() {
         let localDbEvents: TMEvent[] = [];
 
         try {
-          // Await the promise that was started in parallel with places above
-          const sbEvents = await eventsPromise;
+          const sbEvents = await withTimeout(fetchEventsFromDB(), 12000);
           tmEvents = sbEvents['ticketmaster'] || [];
           sgEvents = sbEvents['seatgeek'] || [];
           bitEvents = sbEvents['bandsintown'] || [];
@@ -9456,7 +9349,6 @@ export default function App() {
           sgEvents = safeArr(sgR); bitEvents = safeArr(bitR); muEvents = safeArr(muR);
         }
 
-        // Synthetic result objects so the merge logic below stays unchanged
         const placesResult = { status: 'fulfilled' as const, value: [] };
         const tmResult   = { status: 'fulfilled' as const, value: { events: tmEvents } };
         const ebResult   = { status: 'fulfilled' as const, value: { events: ebEvents } };
@@ -9464,7 +9356,6 @@ export default function App() {
         const bitResult  = { status: 'fulfilled' as const, value: { events: bitEvents } };
         const muResult   = { status: 'fulfilled' as const, value: { events: muEvents } };
 
-        // Merge all event sources with cross-source fuzzy deduplication
         const toArr = (r: PromiseSettledResult<unknown>) => {
           if (r.status !== 'fulfilled') return [];
           const v = r.value as unknown;
@@ -9473,11 +9364,9 @@ export default function App() {
           return [];
         };
 
-        // Normalize title for fuzzy matching: lowercase, strip non-alphanumeric, cap length
         const normTitle = (s: string) =>
           s.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
 
-        // Index TM events by normalizedTitle|date so we can detect SeatGeek duplicates
         const _tmEvents: TMEvent[] = toArr(tmResult);
         const _tmIndex = new Map<string, TMEvent>();
         for (const e of _tmEvents) {
@@ -9485,14 +9374,12 @@ export default function App() {
           if (k !== '|') _tmIndex.set(k, e);
         }
 
-        // For each SeatGeek event: merge ticket link into matched TM event, or keep as unique
         const _sgEvents: TMEvent[] = toArr(sgResult);
         const _sgOnlyEvents: TMEvent[] = [];
         for (const sg of _sgEvents) {
           const k = normTitle(sg.name || '') + '|' + (sg.dates?.start?.localDate || '');
           const tmMatch = _tmIndex.get(k);
           if (tmMatch) {
-            // Duplicate: merge ticket links from both platforms into one card
             if (!tmMatch.ticketLinks) {
               tmMatch.ticketLinks = tmMatch.url
                 ? [{ source: 'Ticketmaster', url: tmMatch.url }]
@@ -9520,8 +9407,6 @@ export default function App() {
             _ebOnlyEvents.push(eb);
           }
         }
-        // Ensure every TM event has its own Ticketmaster link; only add SeatGeek/Eventbrite
-        // when there's a REAL specific URL (not a generic search page)
         for (const tmEv of _tmEvents) {
           if (!tmEv.ticketLinks) {
             tmEv.ticketLinks = tmEv.url ? [{source: 'Ticketmaster', url: tmEv.url}] : [];
@@ -9530,14 +9415,8 @@ export default function App() {
         const seen = new Set<string>();
         const normT = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
 
-        // ── Deduplicate TM events by name+date before building the live list.
-        // TM sometimes returns the same show under slightly different venue-name
-        // spellings (e.g. "El Rey Theatre" vs "El Rey - NM"), producing duplicates
-        // that the per-ID seen-set can't catch.  The _tmIndex map already groups by
-        // normTitle|date, so iterating its values gives one entry per show.
         const dedupedTM = [..._tmIndex.values()];
 
-        // Build merged list: live API events first, then static events that aren't duplicates
         const liveEvents = [
           ...dedupedTM,
           ..._ebOnlyEvents,
@@ -9551,7 +9430,6 @@ export default function App() {
           return true;
         });
 
-        // Add static events, skipping IDs/titles already seen from live sources
         const liveTitles = new Set(liveEvents.map(e => normT(e.name || '')));
         const staticOnly = STATIC_TM_EVENTS.filter(e => {
           if (seen.has(e.id)) return false;
@@ -9560,9 +9438,6 @@ export default function App() {
           return true;
         });
 
-        // ── ABQ metro geo filter ─────────────────────────────────────────────
-        // Only show events whose venue city is in the greater ABQ metro area.
-        // If no city is provided (e.g. static events hardcoded to ABQ), keep them.
         const ABQ_METRO_CITIES = new Set([
           'albuquerque', 'rio rancho', 'corrales', 'bernalillo', 'placitas',
           'edgewood', 'tijeras', 'cedar crest', 'sandia park', 'los lunas',
@@ -9572,13 +9447,10 @@ export default function App() {
         ]);
         const isInMetro = (ev: TMEvent): boolean => {
           const city = (ev._embedded?.venues?.[0]?.city?.name || '').toLowerCase().trim();
-          if (!city) return true; // no city info → assume local (static events)
+          if (!city) return true;
           return ABQ_METRO_CITIES.has(city);
         };
 
-        // ── CTA filter ───────────────────────────────────────────────────────
-        // Hide events that have no actionable link (no ticket URL, no info URL).
-        // These would otherwise dead-end at a "GET DIRECTIONS" button.
         const hasActionableLink = (ev: TMEvent): boolean => {
           if (ev.url) return true;
           if (ev.ticketLinks && ev.ticketLinks.some(l => l.url)) return true;
@@ -9593,14 +9465,13 @@ export default function App() {
         setEvents(merged);
       } catch (err) {
         console.error('[Events] Failed to load events:', err);
-        // Events failing is non-fatal — static events are still available
-        const normT = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
-        const seen = new Set<string>();
-        const staticOnly = STATIC_TM_EVENTS
-          .filter(e => { if (seen.has(e.id)) return false; seen.add(e.id); return true; })
+        const normT2 = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
+        const seen2 = new Set<string>();
+        const staticOnly2 = STATIC_TM_EVENTS
+          .filter(e => { if (seen2.has(e.id)) return false; seen2.add(e.id); return true; })
           .filter(e => !isJunkEvent(e))
           .map(tagAdultEvent);
-        setEvents(staticOnly);
+        setEvents(staticOnly2);
       } finally {
         setEventsLoading(false);
       }

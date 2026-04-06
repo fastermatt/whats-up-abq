@@ -41,8 +41,7 @@ jobs:
           SEATGEEK_CLIENT_ID: ${{ secrets.SEATGEEK_CLIENT_ID }}
           BANDSINTOWN_APP_ID: ${{ secrets.BANDSINTOWN_APP_ID }}
           MEETUP_API_KEY: ${{ secrets.MEETUP_API_KEY }}
-          GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
-          SKIP_PLACES: ${{ github.event.inputs.skip_places || 'false' }}
+          SKIP_PLACES: 'true'
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: node scripts/fetch-data.cjs
@@ -53,11 +52,6 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: node scripts/fetch-local-events.cjs
 
-      - name: Rebuild places-data.json from Supabase (fast-boot static cache)
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: node scripts/rebuild-places-static.cjs
 
       - name: Purge past events from Supabase
         run: |
@@ -69,8 +63,8 @@ jobs:
       - name: Check for data changes
         id: diff
         run: |
-          git diff --stat public/data/ public/places-data.json || true
-          CHANGED=$(git diff --name-only public/data/ public/places-data.json | wc -l)
+          git diff --stat public/data/ || true
+          CHANGED=$(git diff --name-only public/data/ | wc -l)
           echo "changed=$CHANGED" >> "$GITHUB_OUTPUT"
 
       - name: Commit & push updated data
@@ -84,8 +78,7 @@ jobs:
                   public/data/bandsintown-events.json \
                   public/data/meetup-events.json \
                   public/data/local-events.json \
-                  public/data/google-places.json \
-                  public/places-data.json
+                  public/data/google-places.json
           COUNT=$(node -e "
             const files = [
               './public/data/ticketmaster-events.json',
@@ -122,7 +115,6 @@ jobs:
           BIT=$(cnt ./public/data/bandsintown-events.json)
           MU=$(cnt ./public/data/meetup-events.json)
           LC=$(cnt ./public/data/local-events.json)
-          PL=$(cnt ./public/places-data.json)
           TOTAL=$((TM + EB + SG + BIT + MU + LC))
           echo "| Source | Count |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
@@ -133,6 +125,5 @@ jobs:
           echo "| Meetup | $MU |" >> $GITHUB_STEP_SUMMARY
           echo "| Do505 + local iCal | $LC |" >> $GITHUB_STEP_SUMMARY
           echo "| **Total events** | **$TOTAL** |" >> $GITHUB_STEP_SUMMARY
-          echo "| Places | $PL |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Run at: $(date -u '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
