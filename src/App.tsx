@@ -3366,6 +3366,65 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
           </a>
         )}
       </div>
+
+        {/* ── SUGGEST AN UPDATE ────────────────────────────── */}
+        <div className="mt-5 pt-4" style={{ borderTop: '1px solid rgba(0,0,0,0.07)' }}>
+          {!flagDone ? (
+            <>
+              <button
+                onClick={() => setShowFlagForm(f => !f)}
+                className="flex items-center gap-1.5 text-xs"
+                style={{ color: '#bbb', fontFamily: 'Public Sans, sans-serif', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>flag</span>
+                {showFlagForm ? 'Cancel' : 'Suggest an update'}
+              </button>
+              {showFlagForm && (
+                <div className="mt-2 flex flex-col gap-2">
+                  <textarea
+                    value={flagText}
+                    onChange={e => setFlagText(e.target.value)}
+                    placeholder="e.g. wrong date, venue has changed, missing details…"
+                    rows={3}
+                    maxLength={500}
+                    autoFocus
+                    className="w-full text-sm p-2.5 resize-none"
+                    style={{ fontFamily: 'Public Sans, sans-serif', border: '1.5px solid #e5e7eb', borderRadius: 8, outline: 'none', color: '#374151', background: '#fafafa' }}
+                  />
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs" style={{ color: '#ccc' }}>{flagText.length}/500</span>
+                    <button
+                      disabled={!flagText.trim() || flagSubmitting}
+                      onClick={async () => {
+                        if (!flagText.trim()) return;
+                        setFlagSubmitting(true);
+                        try {
+                          await (supabase.from as any)('event_flags').insert({
+                            event_id: event.id,
+                            event_name: event.name,
+                            message: flagText.trim(),
+                            submitted_by: null,
+                          });
+                          setFlagDone(true);
+                          setShowFlagForm(false);
+                        } catch { /* silent fail — flag it anyway from user POV */ }
+                        setFlagSubmitting(false);
+                      }}
+                      className="text-xs px-3 py-1.5 text-white font-bold"
+                      style={{ background: 'var(--brand)', borderRadius: 6, border: 'none', cursor: 'pointer', opacity: (!flagText.trim() || flagSubmitting) ? 0.5 : 1, fontFamily: 'Public Sans, sans-serif' }}
+                    >{flagSubmitting ? 'Sending…' : 'Submit'}</button>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <p className="text-xs flex items-center gap-1.5" style={{ color: '#059669', fontFamily: 'Public Sans, sans-serif' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>check_circle</span>
+              Thanks! We'll review it.
+            </p>
+          )}
+        </div>
+
       <FeedbackWidget contextType="event" contextId={event.id} contextName={event.name} />
     </div>
   </div>}
@@ -7248,7 +7307,7 @@ function SiteBanner({ banner }: { banner: BannerConfig | null }) {
 // The types below are kept here only for the existing DashboardTab/PlacesTab helpers
 // that are still referenced; they will be removed once full migration is complete.
 
-type AdminTab = 'dashboard' | 'places' | 'events' | 'tagrules' | 'settings';
+type AdminTab = 'dashboard' | 'places' | 'events' | 'flags' | 'tagrules' | 'settings';
 
 interface PlaceDoc {
   id: string;
@@ -7700,6 +7759,171 @@ function EventsTab() {
   );
 }
 
+// ── Flags ─────────────────────────────────────────────────────────────────────
+interface EventFlag {
+  id: string;
+  event_id: string;
+  event_name: string | null;
+  message: string;
+  submitted_by: string | null;
+  status: 'pending' | 'valid' | 'invalid';
+  admin_note: string | null;
+  created_at: string;
+}
+
+function FlagsTab() {
+  const [flags, setFlags]           = useState<EventFlag[]>([]);
+  const [loading, setLoading]       = useState(true);
+  const [filter, setFilter]         = useState<'all'|'pending'|'valid'|'invalid'>('pending');
+  const [notes, setNotes]           = useState<Record<string, string>>({});
+  const [saving, setSaving]         = useState<Record<string, boolean>>({});
+  const [msg, setMsg]               = useState('');
+  const flash = (m: string) => { setMsg(m); setTimeout(() => setMsg(''), 3000); };
+
+  useEffect(() => {
+    setLoading(true);
+    (supabase.from as any)('event_flags')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(200)
+      .then(({ data, error }: { data: EventFlag[] | null; error: unknown }) => {
+        if (!error && data) setFlags(data);
+        setLoading(false);
+      });
+  }, []);
+
+  const updateFlag = async (id: string, updates: Partial<EventFlag>) => {
+    setSaving(s => ({ ...s, [id]: true }));
+    const { error } = await (supabase.from as any)('event_flags')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', id);
+    if (!error) {
+      setFlags(prev => prev.map(f => f.id === id ? { ...f, ...updates } : f));
+      flash('Updated ✓');
+    } else {
+      flash('Error saving');
+    }
+    setSaving(s => ({ ...s, [id]: false }));
+  };
+
+  const deleteFlag = async (id: string) => {
+    await (supabase.from as any)('event_flags').delete().eq('id', id);
+    setFlags(prev => prev.filter(f => f.id !== id));
+    flash('Deleted ✓');
+  };
+
+  const pendingCount = flags.filter(f => f.status === 'pending').length;
+  const shown = filter === 'all' ? flags : flags.filter(f => f.status === filter);
+
+  const statusBadge = (s: EventFlag['status']) => {
+    const cfg = {
+      pending:  { bg: '#fef3c7', color: '#92400e', label: 'Pending' },
+      valid:    { bg: '#d1fae5', color: '#065f46', label: '✓ Valid' },
+      invalid:  { bg: '#fee2e2', color: '#991b1b', label: '✗ Invalid' },
+    }[s];
+    return <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: cfg.bg, color: cfg.color, fontWeight: 700 }}>{cfg.label}</span>;
+  };
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 700, color: '#1f2937', flex: 1 }}>
+          User Flags
+          {pendingCount > 0 && <span style={{ marginLeft: 8, fontSize: 13, background: '#b45309', color: 'white', borderRadius: 999, padding: '2px 8px', fontWeight: 700 }}>{pendingCount} pending</span>}
+        </h2>
+      </div>
+      <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 16 }}>
+        Reports submitted by users when event details look wrong or outdated. Mark as Valid to acknowledge, Invalid to dismiss.
+      </p>
+
+      {/* Filter bar */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+        {(['pending','valid','invalid','all'] as const).map(f => (
+          <button key={f} onClick={() => setFilter(f)} style={{
+            padding: '5px 14px', borderRadius: 20, border: '1px solid',
+            fontSize: 12, fontWeight: filter === f ? 700 : 400, cursor: 'pointer',
+            borderColor: filter === f ? ADMIN_ACCENT : '#e5e7eb',
+            background: filter === f ? ADMIN_ACCENT : 'white',
+            color: filter === f ? 'white' : '#374151',
+          }}>
+            {f.charAt(0).toUpperCase() + f.slice(1)}
+            {f !== 'all' && <span style={{ marginLeft: 4, opacity: 0.7 }}>({flags.filter(x => x.status === f).length})</span>}
+          </button>
+        ))}
+      </div>
+
+      <FlashMsg msg={msg} />
+
+      {loading ? (
+        <p style={{ textAlign: 'center', color: '#9ca3af', padding: 40 }}>Loading…</p>
+      ) : shown.length === 0 ? (
+        <p style={{ textAlign: 'center', color: '#9ca3af', padding: 40 }}>No {filter === 'all' ? '' : filter} flags yet.</p>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {shown.map(flag => (
+            <div key={flag.id} style={{ ...cardSty, borderLeft: `3px solid ${flag.status === 'valid' ? '#10b981' : flag.status === 'invalid' ? '#ef4444' : '#f59e0b'}` }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
+                    <span style={{ fontWeight: 700, fontSize: 14, color: '#1f2937' }}>{flag.event_name || 'Unknown Event'}</span>
+                    {statusBadge(flag.status)}
+                  </div>
+                  <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 6 }}>
+                    {new Date(flag.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                    {flag.submitted_by && <> · {flag.submitted_by}</>}
+                  </div>
+                  {/* User's message */}
+                  <div style={{ fontSize: 13, color: '#374151', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 6, padding: '8px 10px', lineHeight: 1.5 }}>
+                    "{flag.message}"
+                  </div>
+                </div>
+                <button onClick={() => deleteFlag(flag.id)} title="Delete"
+                  style={{ padding: '4px 8px', fontSize: 11, borderRadius: 6, border: '1px solid #fca5a5', background: '#fff5f5', color: '#dc2626', cursor: 'pointer', flexShrink: 0 }}>
+                  Delete
+                </button>
+              </div>
+
+              {/* Admin note */}
+              <div style={{ marginBottom: 10 }}>
+                <input
+                  value={notes[flag.id] ?? (flag.admin_note || '')}
+                  onChange={e => setNotes(n => ({ ...n, [flag.id]: e.target.value }))}
+                  placeholder="Admin note (optional)…"
+                  style={{ ...inputSty, fontSize: 12 }}
+                />
+              </div>
+
+              {/* Action buttons */}
+              <div style={{ display: 'flex', gap: 6 }}>
+                <button
+                  onClick={() => updateFlag(flag.id, { status: 'valid', admin_note: notes[flag.id] ?? flag.admin_note ?? null })}
+                  disabled={saving[flag.id]}
+                  style={{ padding: '5px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: '1.5px solid #10b981', background: flag.status === 'valid' ? '#10b981' : 'white', color: flag.status === 'valid' ? 'white' : '#10b981', cursor: 'pointer' }}>
+                  {saving[flag.id] ? '…' : '✓ Valid'}
+                </button>
+                <button
+                  onClick={() => updateFlag(flag.id, { status: 'invalid', admin_note: notes[flag.id] ?? flag.admin_note ?? null })}
+                  disabled={saving[flag.id]}
+                  style={{ padding: '5px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: '1.5px solid #ef4444', background: flag.status === 'invalid' ? '#ef4444' : 'white', color: flag.status === 'invalid' ? 'white' : '#ef4444', cursor: 'pointer' }}>
+                  {saving[flag.id] ? '…' : '✗ Invalid'}
+                </button>
+                {(notes[flag.id] !== undefined && notes[flag.id] !== (flag.admin_note || '')) && (
+                  <button
+                    onClick={() => updateFlag(flag.id, { admin_note: notes[flag.id] })}
+                    disabled={saving[flag.id]}
+                    style={{ padding: '5px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: '1px solid #d1d5db', background: 'white', color: '#374151', cursor: 'pointer' }}>
+                    Save Note
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Tag Rules ─────────────────────────────────────────────────────────────────
 function TagRulesTab() {
   const [rules, setRules] = useState<TagRulesConfig>(DEFAULT_RULES);
@@ -7930,6 +8154,7 @@ function AdminScreen({ user, onBack }: { user: User | null; onBack: () => void }
     { key: 'dashboard', label: 'Dashboard', icon: '#' },
     { key: 'places',    label: 'Places',    icon: '@' },
     { key: 'events',    label: 'Events',    icon: '~' },
+    { key: 'flags',     label: 'Flags',     icon: '🚩' },
     { key: 'tagrules',  label: 'Tag Rules', icon: 'T' },
     { key: 'settings',  label: 'Settings',  icon: '*' },
   ];
@@ -7971,6 +8196,7 @@ function AdminScreen({ user, onBack }: { user: User | null; onBack: () => void }
             {tab === 'dashboard' && <DashboardTab places={places} lbEntries={lbEntries} />}
             {tab === 'places'    && <PlacesTab places={places} setPlaces={setPlacesFn} />}
             {tab === 'events'    && <EventsTab />}
+            {tab === 'flags'     && <FlagsTab />}
             {tab === 'tagrules'  && <TagRulesTab />}
             {tab === 'settings'  && <SettingsTab />}
           </>
