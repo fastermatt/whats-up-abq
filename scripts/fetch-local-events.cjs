@@ -84,6 +84,46 @@ function fetchUrl(urlStr, opts = {}, redirectCount = 0) {
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+// ── OG Image fetcher ─────────────────────────────────────────────────────────
+// For events with no image from the source API, fetch og:image from the event
+// page URL. Every Do505, ABQToDo, and Eventbrite page has one for social sharing.
+async function fetchOgImage(url) {
+  try {
+    const { status, body } = await fetchUrl(url);
+    if (status !== 200) return null;
+    // Try both property-first and content-first attribute orderings
+    const m = body.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+           || body.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i)
+           || body.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i)
+           || body.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["']/i);
+    const imgUrl = m?.[1] || null;
+    // Ignore generic placeholder / tracking pixel URLs
+    if (!imgUrl || imgUrl.includes('placeholder') || imgUrl.includes('1x1')) return null;
+    return imgUrl;
+  } catch {
+    return null;
+  }
+}
+
+// After building an events array, fetch og:image for events still missing photos.
+// Runs concurrently in small batches to stay polite but not too slow.
+async function enrichImagesFromOg(events, label) {
+  const noImg = events.filter(e => (!e.images || e.images.length === 0) && e.url);
+  if (!noImg.length) return;
+  console.log(`  🖼️  Fetching OG images for ${noImg.length} ${label} events without photos...`);
+  let found = 0;
+  // Process in batches of 5 to avoid hammering servers
+  for (let i = 0; i < noImg.length; i += 5) {
+    const batch = noImg.slice(i, i + 5);
+    await Promise.all(batch.map(async ev => {
+      const imgUrl = await fetchOgImage(ev.url);
+      if (imgUrl) { ev.images = [{ url: imgUrl, _source: 'og' }]; found++; }
+    }));
+    if (i + 5 < noImg.length) await sleep(500); // polite pause between batches
+  }
+  console.log(`  ✓ Got OG images for ${found}/${noImg.length} events`);
+}
+
 // ── Geo helpers ───────────────────────────────────────────────────────────────
 const ABQ_LAT  = 35.1053;
 const ABQ_LNG  = -106.6464;
@@ -441,6 +481,11 @@ async function upsertEvents(source, rawArr) {
     fetchDo505Events(),
     fetchAbqToDoEvents(),
   ]);
+
+  // Enrich events still missing photos — fetch og:image from each event's page
+  await enrichImagesFromOg(ebEvents,      'Eventbrite');
+  await enrichImagesFromOg(do505Events,   'Do505');
+  await enrichImagesFromOg(abqTodoEvents, 'ABQToDo');
 
   const allLocal = [...ebEvents, ...do505Events, ...abqTodoEvents];
   console.log(`\n📊 Total local/EB events: ${allLocal.length}`);

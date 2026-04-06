@@ -132,6 +132,53 @@ function get(url) {
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+// ── OG Image fetcher (shared helper) ────────────────────────────────────────
+async function fetchOgImage(url) {
+  try {
+    const parsed = new URL(url);
+    const lib    = parsed.protocol === 'https:' ? require('https') : require('http');
+    return await new Promise((resolve) => {
+      const req = lib.request({
+        hostname: parsed.hostname, path: parsed.pathname + parsed.search,
+        port: parsed.port || (parsed.protocol === 'https:' ? 443 : 80),
+        method: 'GET',
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; ABQUnplugged-Bot/1.0)', 'Accept': 'text/html' },
+        timeout: 12000,
+      }, res => {
+        const chunks = []; let done = false;
+        res.on('data', d => { chunks.push(d); if (Buffer.concat(chunks).length > 200000) { done = true; req.destroy(); } });
+        res.on('end', () => {
+          if (done && chunks.length === 0) return resolve(null);
+          const body = Buffer.concat(chunks).toString('utf8');
+          const m = body.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+                 || body.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+          const imgUrl = m?.[1] || null;
+          resolve(imgUrl && !imgUrl.includes('placeholder') ? imgUrl : null);
+        });
+      });
+      req.on('error', () => resolve(null));
+      req.on('timeout', () => { req.destroy(); resolve(null); });
+      req.end();
+    });
+  } catch { return null; }
+}
+
+async function enrichImagesFromOg(events, label) {
+  const noImg = events.filter(e => (!e.images || e.images.length === 0) && e.url);
+  if (!noImg.length) return;
+  console.log(`  🖼️  Fetching OG images for ${noImg.length} ${label} events without photos...`);
+  let found = 0;
+  for (let i = 0; i < noImg.length; i += 5) {
+    const batch = noImg.slice(i, i + 5);
+    await Promise.all(batch.map(async ev => {
+      const imgUrl = await fetchOgImage(ev.url);
+      if (imgUrl) { ev.images = [{ url: imgUrl, _source: 'og' }]; found++; }
+    }));
+    if (i + 5 < noImg.length) await sleep(500);
+  }
+  console.log(`  ✓ Got OG images for ${found}/${noImg.length} events`);
+}
+
 function ensureDir(p) {
   if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
 }
@@ -838,6 +885,7 @@ async function main() {
   try {
     const rawMu = await fetchMeetupEvents();
     meetupEvents = rawMu.map(transformMeetupEvent);
+    await enrichImagesFromOg(meetupEvents, 'Meetup');
     const muPath = path.join(__dirname, '..', 'public', 'data', 'meetup-events.json');
     fs.writeFileSync(muPath, JSON.stringify(meetupEvents, null, 2));
   await _upsertEvents('meetup', Array.isArray(meetupEvents) ? meetupEvents : (meetupEvents.events||[]));
