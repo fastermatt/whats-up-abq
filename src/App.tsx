@@ -4304,7 +4304,7 @@ function DiscoverScreen({
           <p className="text-xs font-black uppercase flex items-center gap-2 mb-2.5" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>
             <FlatIcon name="zia" size={12} color="var(--brand)" /> Browse by Category
           </p>
-          <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
             {[
               { genre: 'Music',     icon: 'music',     color: '#8B3A0F' },
               { genre: 'Comedy',    icon: 'comedy',    color: '#B45309' },
@@ -4319,7 +4319,7 @@ function DiscoverScreen({
                 key={genre}
                 onClick={() => { trackEvent('category_click', { genre }); onNavigateEvents?.(genre); }}
                 className="transition-all active:scale-95"
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 12px 7px 9px', borderRadius: '20px', background: color + '18', border: '1.5px solid ' + color + '40', whiteSpace: 'nowrap', cursor: 'pointer', flexShrink: 0, outline: 'none' }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '8px 6px', borderRadius: '12px', background: color + '18', border: '1.5px solid ' + color + '40', cursor: 'pointer', outline: 'none', width: '100%' }}
               >
                 <FlatIcon name={icon} size={15} color={color} />
                 <span style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '12px', fontWeight: 700, color: 'var(--ink)', letterSpacing: '0.01em' }}>{genre}</span>
@@ -4610,17 +4610,20 @@ function DiscoverScreen({
 
 function EventsScreen({
   events,
+  eventsLoading = false,
   onEventSelect,
   initialSearch = '',
   initialGenre = '',
 }: {
   events: TMEvent[];
+  eventsLoading?: boolean;
   onEventSelect: (e: TMEvent) => void;
   initialSearch?: string;
   initialGenre?: string;
 }) {
   const eventsHero = useTypewriter("What's Happening", 300);
   const [search, setSearch] = useState('');
+  const [gridCols, setGridCols] = useState(2);
   useEffect(() => { if (initialSearch) setSearch(initialSearch); }, [initialSearch]);
   const [selectedGenre, setSelectedGenre] = useState(initialGenre || 'All');
   // Reset genre when initialGenre changes (e.g. from "Free Events" chip on Discover)
@@ -5051,6 +5054,18 @@ function EventsScreen({
         const sortedGroups = Object.entries(catGroups).sort((a, b) => b[1].length - a[1].length);
         return (
           <div style={{ padding: '0 16px 112px' }}>
+            {/* Column picker */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6, padding: '12px 0 4px' }}>
+              <span style={{ fontSize: 10, fontWeight: 700, color: '#aaa', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase' }}>View</span>
+              {[1, 2, 3].map(n => (
+                <button key={n} onClick={() => setGridCols(n)}
+                  style={{ width: 28, height: 28, borderRadius: 6, border: `1.5px solid ${gridCols === n ? 'var(--ink)' : 'rgba(0,0,0,0.15)'}`, background: gridCols === n ? 'var(--ink)' : 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, padding: 4 }}>
+                  {Array.from({ length: n }).map((_, i) => (
+                    <div key={i} style={{ flex: 1, height: '14px', borderRadius: 2, background: gridCols === n ? 'white' : 'rgba(0,0,0,0.25)' }} />
+                  ))}
+                </button>
+              ))}
+            </div>
             {sortedGroups.map(([cat, events]) => {
               const color = CAT_COLORS[cat] || 'var(--brand)';
               const tMeta = getEventTypeMeta(events[0]);
@@ -5063,18 +5078,18 @@ function EventsScreen({
                     <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.07em', textTransform: 'uppercase' as const, color: 'var(--ink)', fontFamily: 'Public Sans, sans-serif' }}>{cat}</span>
                     <span style={{ fontSize: 10, color: '#bbb', fontFamily: 'Public Sans, sans-serif', fontWeight: 500 }}>{events.length}</span>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: `repeat(${gridCols}, 1fr)`, gap: gridCols === 1 ? 12 : 10 }}>
                     {events.map(event => {
                       const count = getShowtimeCount(event);
                       return (
-                        <div key={event.id} style={{ position: 'relative' }}>
+                        <div key={event.id} style={{ position: 'relative', minWidth: 0, overflow: 'hidden' }}>
                           <EventCard event={event} onClick={() => onEventSelect(event)} />
                           {count > 1 && (
                             <div style={{ position: 'absolute', top: 106, left: 6, background: 'rgba(0,0,0,0.62)', color: 'white', fontSize: '8px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '2px 5px', borderRadius: 3, pointerEvents: 'none', backdropFilter: 'blur(4px)' }}>
                               {count} shows
                             </div>
                           )}
-                          <LikeButton id={event.id} type="event" name={event.name} category="event" />
+                          <LikeButton id={event.id} type="event" name={event.name} category={getEventCategory(event)} />
                         </div>
                       );
                     })}
@@ -6275,95 +6290,123 @@ function ProfileScreen({
         ))}
       </div>
 
-      {/* ABQ Explorer Challenges */}
+      {/* ABQ Explorer Challenges — event-type badges */}
       {(() => {
-        const checkedInArr = [...checkedIn];
-        const CHALLENGES = [
+        const savedEvents = getWishlist().filter(w => w.type === 'event');
+        const countCat = (cat: string) => savedEvents.filter(w =>
+          w.category.toLowerCase().includes(cat.toLowerCase())
+        ).length;
+        const CHALLENGES: { id: string; emoji: string; title: string; badge: string; desc: string; target: number; progress: number; color: string }[] = [
           {
-            id: 'old-town-5',
-            emoji: 'account_balance',
-            title: 'Old Town Explorer',
-            desc: 'Check in to 5 places in Old Town ABQ',
-            target: 5,
-            progress: places.filter(p => checkedIn.has(p.id) && (p.address?.toLowerCase().includes('old town') || p.name?.toLowerCase().includes('old town') || (p.lat && p.lat >= 35.094 && p.lat <= 35.102 && p.lng && p.lng >= -106.673 && p.lng <= -106.659))).length,
-          },
-          {
-            id: 'nob-hill-3',
-            emoji: 'coffee',
-            title: 'Nob Hill Regular',
-            desc: 'Check in to 3 spots on Central Ave / Nob Hill',
+            id: 'music-3',
+            emoji: '🎵',
+            badge: 'Melody Hunter',
+            title: 'Melody Hunter',
+            desc: 'Save 3 music events you want to attend',
             target: 3,
-            progress: places.filter(p => checkedIn.has(p.id) && (p.address?.toLowerCase().includes('central ave') || p.address?.toLowerCase().includes('nob hill') || (p.lat && p.lat >= 35.076 && p.lat <= 35.082 && p.lng && p.lng >= -106.618 && p.lng <= -106.593))).length,
+            progress: countCat('Music'),
+            color: '#8B3A0F',
           },
           {
-            id: 'checkin-10',
-            emoji: 'location_on',
-            title: 'Stamped In',
-            desc: 'Reach 10 total check-ins',
+            id: 'sports-3',
+            emoji: '🏟️',
+            badge: 'Sports Fan',
+            title: 'Sports Fan',
+            desc: 'Save 3 sports events',
+            target: 3,
+            progress: countCat('Sports'),
+            color: '#1D4ED8',
+          },
+          {
+            id: 'arts-3',
+            emoji: '🎨',
+            badge: 'Culture Seeker',
+            title: 'Culture Seeker',
+            desc: 'Save 3 arts or theatre events',
+            target: 3,
+            progress: countCat('Arts'),
+            color: '#7C3AED',
+          },
+          {
+            id: 'comedy-3',
+            emoji: '😂',
+            badge: 'Laugh Tracker',
+            title: 'Laugh Tracker',
+            desc: 'Save 3 comedy events',
+            target: 3,
+            progress: countCat('Comedy'),
+            color: '#D97706',
+          },
+          {
+            id: 'family-3',
+            emoji: '👨‍👩‍👧',
+            badge: 'Family Champion',
+            title: 'Family Champion',
+            desc: 'Save 3 family-friendly events',
+            target: 3,
+            progress: countCat('Family'),
+            color: '#059669',
+          },
+          {
+            id: 'events-10',
+            emoji: '🎟️',
+            badge: 'Event Collector',
+            title: 'Event Collector',
+            desc: 'Save 10 events of any kind',
             target: 10,
-            progress: Math.min(myCount, 10),
-          },
-          {
-            id: 'diverse-5',
-            emoji: 'map',
-            title: 'City Sampler',
-            desc: 'Check in to 5 different place categories',
-            target: 5,
-            progress: new Set(places.filter(p => checkedIn.has(p.id)).map(p => p.type || p.category)).size,
-          },
-          {
-            id: 'streak-7',
-            emoji: 'local_fire_department',
-            title: 'Week Warrior',
-            desc: 'Keep a 7-day check-in streak',
-            target: 7,
-            progress: Math.min(myStreak, 7),
-          },
-          {
-            id: 'downtown-3',
-            emoji: 'location_city',
-            title: 'Downtown Devotee',
-            desc: 'Check in to 3 places Downtown',
-            target: 3,
-            progress: places.filter(p => checkedIn.has(p.id) && (p.address?.toLowerCase().includes('downtown') || (p.lat && p.lat >= 35.083 && p.lat <= 35.095 && p.lng && p.lng >= -106.658 && p.lng <= -106.644))).length,
+            progress: Math.min(savedEvents.length, 10),
+            color: '#6B7280',
           },
         ];
-        const allDone = CHALLENGES.every(c => c.progress >= c.target);
+        const doneCount = CHALLENGES.filter(c => c.progress >= c.target).length;
+        const allDone = doneCount === CHALLENGES.length;
         return (
           <>
-            <div className="flex items-center px-0 py-3 mb-0 mt-1" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
-              <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif' }}>ABQ Explorer Challenges</h2>
+            <div className="flex items-center justify-between px-0 py-3 mb-0 mt-1" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
+              <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif' }}>Event Badges</h2>
+              <span className="text-xs font-bold" style={{ fontFamily: 'Public Sans, sans-serif', color: '#aaa' }}>{doneCount}/{CHALLENGES.length} earned</span>
             </div>
-            <div className="flex flex-col gap-2 mb-5 mt-3">
+            <p className="text-xs mt-2 mb-3" style={{ fontFamily: 'Public Sans, sans-serif', color: '#888' }}>
+              Save events with ♡ to earn badges. Each genre unlocks a different one.
+            </p>
+            <div className="flex flex-col gap-2 mb-5">
               {CHALLENGES.map(c => {
                 const done = c.progress >= c.target;
                 const pct = Math.min(100, Math.round((c.progress / c.target) * 100));
                 return (
                   <div
                     key={c.id}
-                    className="rounded-lg px-4 py-3"
+                    className="rounded-xl px-4 py-3 flex items-center gap-3"
                     style={{
-                      background: done ? 'var(--brand)' : 'white',
-                      boxShadow: done ? '3px 3px 0 var(--brand)' : '3px 3px 0 rgba(0,0,0,0.10)',
-                      border: done ? '1.5px solid var(--brand)' : '1px solid rgba(0,0,0,0.08)',
+                      background: done ? c.color : 'white',
+                      boxShadow: done ? `3px 3px 0 ${c.color}99` : '3px 3px 0 rgba(0,0,0,0.08)',
+                      border: done ? `1.5px solid ${c.color}` : '1px solid rgba(0,0,0,0.08)',
+                      transition: 'all 0.3s ease',
                     }}
                   >
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="material-symbols-outlined" style={{ fontSize: '20px', lineHeight: 1, color: 'var(--brand)', fontVariationSettings: "'FILL' 1" }}>{c.emoji}</span>
-                      <span className="font-black text-sm flex-1" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)' }}>{c.title}</span>
-                      {done && <span className="text-xs font-black" style={{ color: 'var(--brand)' }}>✓ DONE</span>}
-                      {!done && <span className="text-xs font-semibold" style={{ fontFamily: 'Public Sans, sans-serif', color: '#999' }}>{c.progress}/{c.target}</span>}
+                    {/* Badge icon */}
+                    <div style={{ width: 44, height: 44, borderRadius: '50%', background: done ? 'rgba(255,255,255,0.2)' : c.color + '15', border: done ? '2px solid rgba(255,255,255,0.4)' : `2px solid ${c.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 22 }}>
+                      {done ? c.emoji : <span style={{ fontSize: 22, filter: 'grayscale(1) opacity(0.35)' }}>{c.emoji}</span>}
                     </div>
-                    <p className="text-xs mb-2" style={{ fontFamily: 'Public Sans, sans-serif', color: '#555' }}>{c.desc}</p>
-                    <div className="rounded-full overflow-hidden" style={{ height: '5px', background: done ? 'rgba(0,0,0,0.1)' : '#f0f0f0' }}>
-                      <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: done ? 'var(--brand)' : 'var(--brand-gradient)' }} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-black text-sm" style={{ fontFamily: 'Public Sans, sans-serif', color: done ? 'white' : 'var(--ink)' }}>{c.title}</span>
+                        {done
+                          ? <span style={{ fontSize: 10, fontWeight: 800, color: 'rgba(255,255,255,0.9)', background: 'rgba(255,255,255,0.2)', borderRadius: 20, padding: '2px 8px', whiteSpace: 'nowrap', fontFamily: 'Public Sans, sans-serif' }}>EARNED ✓</span>
+                          : <span style={{ fontSize: 11, fontWeight: 600, color: '#aaa', fontFamily: 'Public Sans, sans-serif', whiteSpace: 'nowrap' }}>{c.progress}/{c.target}</span>
+                        }
+                      </div>
+                      <p style={{ fontSize: 11, color: done ? 'rgba(255,255,255,0.75)' : '#777', fontFamily: 'Public Sans, sans-serif', marginTop: 2 }}>{c.desc}</p>
+                      <div style={{ height: 4, borderRadius: 4, background: done ? 'rgba(255,255,255,0.2)' : '#f0f0f0', marginTop: 6, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', borderRadius: 4, width: `${pct}%`, background: done ? 'rgba(255,255,255,0.7)' : c.color, transition: 'width 0.5s ease' }} />
+                      </div>
                     </div>
                   </div>
                 );
               })}
               {allDone && (
-                <div className="text-center py-3 rounded-lg" style={{ background: 'var(--ink)', color: 'var(--bg)' }}>
-                  <p className="font-black text-sm" style={{ fontFamily: 'Public Sans, sans-serif' }}>🏆 All challenges complete — you're a true ABQ local!</p>
+                <div className="text-center py-3 rounded-xl" style={{ background: 'var(--ink)', color: 'white' }}>
+                  <p className="font-black text-sm" style={{ fontFamily: 'Public Sans, sans-serif' }}>🏆 All badges earned — you're an ABQ event legend!</p>
                 </div>
               )}
             </div>
@@ -9779,7 +9822,7 @@ export default function App() {
               adminHeroLines={adminHeroLines}/>
           )}
           {activeTab === 'events' && (
-            <EventsScreen events={events} onEventSelect={openEventModal} initialSearch={eventsNavSearch} initialGenre={eventsNavGenre} />
+            <EventsScreen events={events} eventsLoading={eventsLoading} onEventSelect={openEventModal} initialSearch={eventsNavSearch} initialGenre={eventsNavGenre} />
           )}
           {activeTab === 'places' && (
             <PlacesScreen
