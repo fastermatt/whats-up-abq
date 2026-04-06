@@ -8884,6 +8884,8 @@ export default function App() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUsernameSetup, setShowUsernameSetup] = useState(false);
   const syncTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Guard: only load checkins from Supabase once per unique user session
+  const loadedUserIdRef = useRef<string | null>(null);
   const [prefs, setPrefs] = useState<UserPrefs>(getPrefs);
   // Re-sync prefs state when ProfileSettingsPane saves changes
   useEffect(() => {
@@ -8990,7 +8992,9 @@ export default function App() {
         }
       }
       if (u) {
-        // Load check-ins from Firestore on sign-in
+        // Load check-ins from Firestore on sign-in — guard against multiple auth events
+        if (loadedUserIdRef.current !== u.id) {
+        loadedUserIdRef.current = u.id;
         try {
           const snap = await _fbGetDoc('users', u.id);
           if (snap.exists()) {
@@ -9002,6 +9006,7 @@ export default function App() {
             }
           }
         } catch (err) { console.error('Load checkins error:', err); }
+        } // end loadedUserIdRef guard
       }
     });
     return () => unsub.unsubscribe();
@@ -9015,7 +9020,8 @@ export default function App() {
       syncCheckinsToFirestore(user.id, checkedIn, (user.user_metadata?.display_name || user.email) || user.email || 'Explorer');
     }, 1500);
     return () => { if (syncTimeout.current) clearTimeout(syncTimeout.current); };
-  }, [checkedIn, user, authReady]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkedIn, user?.id, authReady]);
 
   const { coords, error: geoError, requested: geoRequested, silentPending: geoSilentPending, request: requestGeo } = useGeolocation();
 
