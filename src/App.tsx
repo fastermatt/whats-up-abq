@@ -4171,6 +4171,7 @@ function DiscoverScreen({
   ];
   const [heroDisplay, setHeroDisplay] = useState('');
   const [heroDone, setHeroDone] = useState(false);
+  const [calendarDate, setCalendarDate] = useState<string | null>(null);
   useEffect(() => {
     let cancelled = false;
     const phrasePool = (adminHeroLines?.length) ? adminHeroLines : HERO_PHRASES;
@@ -4703,6 +4704,63 @@ function DiscoverScreen({
         );
       })()}
 
+      {/* Browse by Date — Event Calendar */}
+      <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
+        <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif' }}>Browse by Date</h2>
+      </div>
+      <EventCalendar
+        events={events}
+        selectedDate={calendarDate}
+        onSelectDate={setCalendarDate}
+      />
+
+      {/* Day Events — shown when a date is selected in the calendar */}
+      {calendarDate && (() => {
+        const _calFmt = new Date(calendarDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+        const _calEvts = events
+          .filter(e => e.dates?.start?.localDate === calendarDate && !e._isAdult)
+          .sort((a, b) => (a.dates?.start?.localTime || '').localeCompare(b.dates?.start?.localTime || ''));
+        return (
+          <div style={{ borderBottom: '1px solid rgba(0,0,0,0.06)', marginBottom: 4 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', padding: '14px 20px 10px' }}>
+              <h2 style={{ fontSize: 13, fontWeight: 800, fontFamily: 'Public Sans, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--ink)', margin: 0 }}>{_calFmt}</h2>
+              <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.4)', fontFamily: 'Public Sans, sans-serif' }}>{_calEvts.length} event{_calEvts.length !== 1 ? 's' : ''}</span>
+            </div>
+            {_calEvts.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '24px 20px', color: 'rgba(0,0,0,0.3)', fontSize: 13, fontFamily: 'Public Sans, sans-serif' }}>Nothing scheduled this day</div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {_calEvts.slice(0, 8).map(event => {
+                  const _t = event.dates?.start?.localTime ? new Date(`2000-01-01T${event.dates.start.localTime}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : '';
+                  const _v = (event as any)._embedded?.venues?.[0]?.name || '';
+                  const _img = event.images?.find((im: any) => im.ratio === '16_9' && im.width > 300)?.url || event.images?.[0]?.url || '';
+                  return (
+                    <div key={event.id} onClick={() => onEventSelect(event)}
+                      style={{ display: 'flex', gap: 12, padding: '10px 20px', cursor: 'pointer', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.04)' }}
+                    >
+                      {_img
+                        ? <img src={_img} alt="" style={{ width: 50, height: 50, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />
+                        : <div style={{ width: 50, height: 50, borderRadius: 8, background: 'rgba(0,0,0,0.06)', flexShrink: 0 }} />
+                      }
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)', fontFamily: 'Public Sans, sans-serif', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{event.name}</div>
+                        <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', fontFamily: 'Public Sans, sans-serif', marginTop: 2 }}>{_t}{_t && _v ? ' · ' : ''}{_v}</div>
+                      </div>
+                      <span className="material-symbols-outlined" style={{ fontSize: 16, color: 'rgba(0,0,0,0.2)', flexShrink: 0 }}>chevron_right</span>
+                    </div>
+                  );
+                })}
+                {_calEvts.length > 8 && (
+                  <button onClick={() => onNavigateEvents?.()} style={{ textAlign: 'center', fontSize: 12, color: '#C2634A', padding: '12px 20px', fontFamily: 'Public Sans, sans-serif', fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+                    +{_calEvts.length - 8} more events →
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
       {/* Day Planner */}
       {!hidden.includes('todayPlan') && <DayPlanner />}
 
@@ -4714,6 +4772,135 @@ function DiscoverScreen({
 
       {/* Why Unplug */}
       <WhyUnplugCard />
+    </div>
+  );
+}
+
+// ─── Event Calendar ────────────────────────────────────────────────────────────────────────────
+function EventCalendar({
+  events,
+  selectedDate,
+  onSelectDate,
+  compact = false,
+}: {
+  events: TMEvent[];
+  selectedDate: string | null;
+  onSelectDate: (date: string | null) => void;
+  compact?: boolean;
+}) {
+  const _ecToday = new Date();
+  const [viewYear, setViewYear] = useState(_ecToday.getFullYear());
+  const [viewMonth, setViewMonth] = useState(_ecToday.getMonth());
+
+  const densityMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    events.forEach(e => {
+      const d = e.dates?.start?.localDate;
+      if (d) map[d] = (map[d] || 0) + 1;
+    });
+    return map;
+  }, [events]);
+
+  const maxCount = useMemo(() => Math.max(1, ...Object.values(densityMap)), [densityMap]);
+
+  const firstDow = new Date(viewYear, viewMonth, 1).getDay();
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const todayStr = _ecToday.toISOString().slice(0, 10);
+  const monthLabel = new Date(viewYear, viewMonth, 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+
+  const ecPrevMonth = () => {
+    if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); }
+    else setViewMonth(m => m - 1);
+  };
+  const ecNextMonth = () => {
+    if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); }
+    else setViewMonth(m => m + 1);
+  };
+
+  const EC_BRAND = '#C2634A';
+
+  const getDotSize = (count: number): number => {
+    if (count === 0) return 0;
+    return Math.round(3 + (count / maxCount) * 5);
+  };
+  const getDotOpacity = (count: number): number => {
+    if (count === 0) return 0;
+    return 0.3 + (count / maxCount) * 0.7;
+  };
+
+  const cells: Array<{ day: number; dateStr: string } | null> = [];
+  for (let i = 0; i < firstDow; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    cells.push({ day: d, dateStr });
+  }
+
+  const hpad = compact ? '12px' : '20px';
+
+  return (
+    <div style={{ background: '#fff', borderTop: '1px solid rgba(0,0,0,0.06)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+      <div style={{ padding: `14px ${hpad} 10px` }}>
+        {/* Month nav */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <button onClick={ecPrevMonth} style={{ width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, background: 'rgba(0,0,0,0.05)', border: 'none', color: 'var(--ink)', fontSize: 20, cursor: 'pointer', lineHeight: 1, fontFamily: 'Public Sans, sans-serif' }}>&#8249;</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--ink)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '-0.02em' }}>{monthLabel}</span>
+            {selectedDate && (
+              <button onClick={() => onSelectDate(null)} style={{ fontSize: 10, color: EC_BRAND, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Public Sans, sans-serif', fontWeight: 700 }}>&#10005; Clear</button>
+            )}
+          </div>
+          <button onClick={ecNextMonth} style={{ width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, background: 'rgba(0,0,0,0.05)', border: 'none', color: 'var(--ink)', fontSize: 20, cursor: 'pointer', lineHeight: 1, fontFamily: 'Public Sans, sans-serif' }}>&#8250;</button>
+        </div>
+
+        {/* Day-of-week headers */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3, marginBottom: 4 }}>
+          {['SUN','MON','TUE','WED','THU','FRI','SAT'].map((d, i) => (
+            <div key={i} style={{ textAlign: 'center', fontSize: 8, fontWeight: 800, color: 'rgba(0,0,0,0.22)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.04em', paddingBottom: 2 }}>{d}</div>
+          ))}
+        </div>
+
+        {/* Day cells */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3 }}>
+          {cells.map((cell, i) => {
+            if (!cell) return <div key={`ec${i}`} />;
+            const { day, dateStr } = cell;
+            const count = densityMap[dateStr] || 0;
+            const isSel = selectedDate === dateStr;
+            const isToday = dateStr === todayStr;
+            const isPast = dateStr < todayStr;
+            const ds = getDotSize(count);
+            const dop = getDotOpacity(count);
+            return (
+              <button
+                key={dateStr}
+                onClick={() => onSelectDate(isSel ? null : dateStr)}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2,
+                  aspectRatio: '1', borderRadius: 8, padding: 0,
+                  border: isSel ? `2px solid ${EC_BRAND}` : isToday ? '2px solid rgba(0,0,0,0.18)' : '2px solid transparent',
+                  background: isSel ? `${EC_BRAND}18` : 'transparent',
+                  cursor: 'pointer',
+                  opacity: isPast && count === 0 && !isSel ? 0.28 : 1,
+                }}
+              >
+                <span style={{ fontSize: 11, fontWeight: isSel || isToday ? 800 : 400, color: isSel ? EC_BRAND : 'var(--ink)', lineHeight: 1.1, fontFamily: 'Public Sans, sans-serif' }}>
+                  {day}
+                </span>
+                <div style={{ width: ds || 3, height: ds || 0, borderRadius: '50%', background: EC_BRAND, opacity: ds ? dop : 0, flexShrink: 0 }} />
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Density legend */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 10, justifyContent: 'flex-end' }}>
+          <span style={{ fontSize: 9, color: 'rgba(0,0,0,0.28)', fontFamily: 'Public Sans, sans-serif' }}>Fewer</span>
+          {([0.25, 0.45, 0.65, 0.85, 1.0] as number[]).map((op, i) => (
+            <div key={i} style={{ width: 3.5 + i * 1.5, height: 3.5 + i * 1.5, borderRadius: '50%', background: EC_BRAND, opacity: op, flexShrink: 0 }} />
+          ))}
+          <span style={{ fontSize: 9, color: 'rgba(0,0,0,0.28)', fontFamily: 'Public Sans, sans-serif' }}>More events</span>
+        </div>
+      </div>
     </div>
   );
 }
@@ -4744,6 +4931,7 @@ function EventsScreen({
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [calendarSelDate, setCalendarSelDate] = useState<string | null>(null);
   const [wishlistVersion, setWishlistVersion] = useState(0);
   useEffect(() => {
     const handler = () => setWishlistVersion(v => v + 1);
@@ -5006,26 +5194,13 @@ function EventsScreen({
           </button>
         </div>
         {showDatePicker && (
-          <div className="flex items-center gap-2 mt-2" style={{ animation: 'cardFadeIn 0.2s ease both' }}>
-            <div className="flex-1 flex items-center gap-1.5 bg-white px-3 py-2" style={{ border: '1px solid rgba(0,0,0,0.12)', borderRadius: 6 }}>
-              <span className="text-xs font-semibold" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif', whiteSpace: 'nowrap' }}>From</span>
-              <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
-                className="flex-1 bg-transparent outline-none text-xs text-gray-800"
-                style={{ fontFamily: 'Public Sans, sans-serif', colorScheme: 'light' }} />
-            </div>
-            <div className="flex-1 flex items-center gap-1.5 bg-white px-3 py-2" style={{ border: '1px solid rgba(0,0,0,0.12)', borderRadius: 6 }}>
-              <span className="text-xs font-semibold" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif', whiteSpace: 'nowrap' }}>To</span>
-              <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
-                min={dateFrom || new Date().toISOString().split('T')[0]}
-                className="flex-1 bg-transparent outline-none text-xs text-gray-800"
-                style={{ fontFamily: 'Public Sans, sans-serif', colorScheme: 'light' }} />
-            </div>
-            {(dateFrom || dateTo) && (
-              <button onClick={() => { setDateFrom(''); setDateTo(''); }} style={{ padding: '6px' }}>
-                <span className="material-symbols-outlined text-gray-400" style={{ fontSize: '16px' }}>close</span>
-              </button>
-            )}
+          <div style={{ margin: '8px -16px 0', animation: 'cardFadeIn 0.2s ease both' }}>
+            <EventCalendar
+              events={events}
+              selectedDate={calendarSelDate}
+              onSelectDate={(d) => { setCalendarSelDate(d); setDateFrom(d || ''); setDateTo(d || ''); }}
+              compact
+            />
           </div>
         )}
       </div>
