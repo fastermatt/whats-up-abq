@@ -283,6 +283,12 @@ interface TMEvent {
     max?: number;
     currency?: string;
   }>;
+  _aiEnrichment?: {
+    about?: string;          // 1-2 sentence blurb about the artist/event
+    highlights?: string[];   // 2-3 interesting facts / what to expect
+    venue_tips?: string;     // parking, transit, arrival tips
+    local_tips?: string;     // ABQ-specific before/after tips
+  } | null;
 }
 
 interface GeoCoords { lat: number; lng: number; }
@@ -3251,6 +3257,53 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
               src={`https://maps.google.com/maps?q=${mapsQuery}&output=embed&z=15`}
               allowFullScreen
             />
+          </div>
+        )}
+
+        {/* ── AI ENRICHMENT ────────────────────────────────── */}
+        {event._aiEnrichment && (
+          <div className="mb-3">
+            {/* About the artist/event */}
+            {event._aiEnrichment.about && (
+              <div className="mb-2 p-3 bg-white" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1.5px solid #f0f0f0', borderLeft: '3px solid var(--brand)' }}>
+                <p className="text-xs font-black uppercase tracking-wide mb-1.5" style={{ color: 'var(--brand)', letterSpacing: '0.07em' }}>About</p>
+                <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'Public Sans, sans-serif' }}>{event._aiEnrichment.about}</p>
+              </div>
+            )}
+            {/* Highlights / what to expect */}
+            {event._aiEnrichment.highlights && event._aiEnrichment.highlights.length > 0 && (
+              <div className="mb-2 p-3 bg-white" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1.5px solid #f0f0f0' }}>
+                <p className="text-xs font-black uppercase tracking-wide mb-2" style={{ color: 'var(--brand)', letterSpacing: '0.07em' }}>What to Expect</p>
+                <ul className="flex flex-col gap-1.5">
+                  {event._aiEnrichment.highlights.map((h, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-gray-700 leading-snug" style={{ fontFamily: 'Public Sans, sans-serif' }}>
+                      <span style={{ color: 'var(--brand)', fontWeight: 800, flexShrink: 0, marginTop: 1 }}>·</span>
+                      {h}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {/* Venue / parking tips */}
+            {event._aiEnrichment.venue_tips && (
+              <div className="mb-2 p-3 bg-white" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1.5px solid #f0f0f0' }}>
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <span className="material-symbols-outlined" style={{ fontSize: '14px', color: 'var(--brand)' }}>local_parking</span>
+                  <p className="text-xs font-black uppercase tracking-wide" style={{ color: 'var(--brand)', letterSpacing: '0.07em' }}>Getting There</p>
+                </div>
+                <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'Public Sans, sans-serif' }}>{event._aiEnrichment.venue_tips}</p>
+              </div>
+            )}
+            {/* Local ABQ tips */}
+            {event._aiEnrichment.local_tips && (
+              <div className="mb-2 p-3" style={{ background: 'var(--brand-bg-subtle)', border: '1.5px solid var(--brand-tint-border)' }}>
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <span style={{ fontSize: '14px', lineHeight: 1 }}>🌶️</span>
+                  <p className="text-xs font-black uppercase tracking-wide" style={{ color: 'var(--brand)', letterSpacing: '0.07em' }}>Local Tip</p>
+                </div>
+                <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'Public Sans, sans-serif' }}>{event._aiEnrichment.local_tips}</p>
+              </div>
+            )}
           </div>
         )}
 
