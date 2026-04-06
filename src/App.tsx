@@ -57,11 +57,6 @@ function useTypewriter(text: string, startDelay = 400) {
 
 
 // Inject global keyframe for card fade-in (CSS-only, no JS observers)
-// Activate Liquid Glass theme
-if (typeof document !== 'undefined') {
-  document.documentElement.classList.add('lg');
-}
-
 if (typeof document !== 'undefined' && !document.getElementById('card-fade-style')) {
   const s = document.createElement('style');
   s.id = 'card-fade-style';
@@ -10217,7 +10212,7 @@ export default function App() {
       <OfflineBanner />
       <div
         className="flex flex-col mx-auto relative"
-        style={{ width: '100%', maxWidth: '480px', minHeight: '100dvh', background: 'transparent', overflowX: 'hidden', paddingTop: 'env(safe-area-inset-top, 0px)' } as React.CSSProperties}
+        style={{ width: '100%', maxWidth: '480px', minHeight: '100dvh', background: 'white', overflowX: 'hidden', boxShadow: '0 0 40px rgba(0,0,0,0.08)', paddingTop: 'env(safe-area-inset-top, 0px)' } as React.CSSProperties}
       >
         {/* Header — Urban Curator: white + hard 2px border-bottom */}
         <header
@@ -10227,10 +10222,8 @@ export default function App() {
             top: 0,
             paddingTop: '12px',
             paddingBottom: '12px',
-            background: 'rgba(255,255,255,0.07)',
-            backdropFilter: 'blur(32px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(32px) saturate(180%)',
-            borderBottom: '1px solid rgba(255,255,255,0.12)',
+            background: 'white',
+            borderBottom: '1px solid rgba(0,0,0,0.08)',
             zIndex: 40,
           }}
         >
@@ -10238,13 +10231,13 @@ export default function App() {
             <img src="/logo-static.png" alt="ABQ Unplugged" style={{ height: '32px', width: 'auto' }} />
           </button>
           <div className="flex items-center gap-2">
-            <button onClick={() => setShowSearch(true)} className="w-9 h-9 flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.18)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.22)' }}>
+            <button onClick={() => setShowSearch(true)} className="w-9 h-9 flex items-center justify-center" style={{ background: 'white', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
               <span className="material-symbols-outlined" style={{ fontSize: '20px', color: 'var(--ink)' }}>search</span>
             </button>
             <button
               onClick={requestGeo}
               className="w-9 h-9 flex items-center justify-center"
-              style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.18)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.22)' }}
+              style={{ background: 'white', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
               title={coords ? 'Location active' : 'Enable location'}
               aria-label={coords ? 'Location active' : 'Enable location'}
             >
@@ -10338,8 +10331,9 @@ export default function App() {
           )}
         </main>
 
-        {/* Bottom navigation — Liquid Glass pill */}
+        {/* Bottom navigation — Liquid Glass with home indicator safe area */}
         <nav
+          className="flex items-stretch"
           style={{
             position: 'fixed',
             bottom: 0,
@@ -10347,51 +10341,46 @@ export default function App() {
             transform: 'translateX(-50%)',
             width: '100%',
             maxWidth: '480px',
-            padding: '0 12px',
-            paddingBottom: 'calc(var(--sab) + 6px)',
+            padding: '0 3px',
+            paddingBottom: 'calc(var(--sab) + 8px)',
+            borderTop: '1px solid rgba(0,0,0,0.06)',
+            background: '#faf8f5',
             zIndex: 40,
           }}
         >
-          <div style={{
-            display: 'flex',
-            alignItems: 'stretch',
-            background: 'rgba(18,10,4,0.52)',
-            backdropFilter: 'blur(40px) saturate(200%) brightness(1.18)',
-            WebkitBackdropFilter: 'blur(40px) saturate(200%) brightness(1.18)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            borderRadius: 26,
-            padding: '7px 4px 10px',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.22), 0 -2px 30px rgba(0,0,0,0.3), 0 16px 40px rgba(0,0,0,0.35)',
-          }}>
-          {NAV_ITEMS.map((item) => {
+          {NAV_ITEMS.map((item, idx) => {
             const isActive = activeTab === item.id;
             return (
             <button
               key={item.id}
               onClick={() => { playHaptic(); navigateTab(item.id); }}
               aria-label={item.label}
-              className="flex-1 flex flex-col items-center justify-center gap-1"
+              className="nav-press-btn flex-1 flex flex-col items-center justify-center gap-0.5"
               style={{
-                minHeight: '52px',
-                background: isActive ? 'rgba(196,80,0,0.7)' : 'transparent',
-                border: isActive ? '1px solid rgba(255,140,60,0.45)' : '1px solid transparent',
-                borderRadius: 18,
-                backdropFilter: isActive ? 'blur(20px)' : 'none',
-                WebkitBackdropFilter: isActive ? 'blur(20px)' : 'none',
+                minHeight: '64px',
+                background: isActive ? 'var(--ink)' : '#f5f3f0',
+                border: 'none',
+                borderRadius: 8,
+                margin: '6px 3px 6px',
+                position: 'relative' as const,
+                top: 0,
+                boxShadow: isActive
+                  ? '0 4px 0 #0a0a0a, 0 2px 8px rgba(0,0,0,0.15)'
+                  : '0 4px 0 #d5d0c8, 0 2px 6px rgba(0,0,0,0.06)',
                 cursor: 'pointer',
                 WebkitTapHighlightColor: 'transparent',
-                transition: 'all 0.2s ease',
-                boxShadow: isActive ? 'inset 0 1px 0 rgba(255,180,100,0.32), 0 4px 12px rgba(196,80,0,0.38)' : 'none',
+                transition: 'top 0.1s ease, box-shadow 0.1s ease, background 0.15s ease',
               }}
             >
               <span
                 className="material-symbols-outlined"
                 style={{
                   fontSize: '22px',
-                  color: isActive ? 'white' : 'rgba(255,255,255,0.5)',
-                  fontVariationSettings: isActive
-                    ? "'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24"
-                    : "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24",
+                  color: isActive ? 'white' : '#555',
+                  fontVariationSettings:
+                    isActive
+                      ? "'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24"
+                      : "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24",
                 }}
               >
                 {item.icon}
@@ -10399,7 +10388,7 @@ export default function App() {
               <span
                 className="font-black uppercase"
                 style={{
-                  color: isActive ? 'rgba(255,160,80,0.95)' : 'rgba(255,255,255,0.38)',
+                  color: isActive ? 'white' : '#555',
                   fontFamily: 'Public Sans, sans-serif',
                   fontSize: '8px',
                   letterSpacing: '0.1em',
@@ -10409,7 +10398,6 @@ export default function App() {
               </span>
             </button>
           );})}
-          </div>
         </nav>
         {/* Hidden iOS haptic switch — clicking the label triggers a native switch toggle which produces haptic feedback on iOS 18+ */}
         <div className="haptic-switch" aria-hidden="true">
