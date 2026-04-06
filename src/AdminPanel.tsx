@@ -28,7 +28,7 @@ async function cfgSet(key: string, value: any) {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 export type AdminSection =
-  | 'dashboard' | 'banners' | 'events' | 'places'
+  | 'dashboard' | 'banners' | 'events'
   | 'categories' | 'content' | 'refresh' | 'reviews'
   | 'analytics' | 'tagrules' | 'settings' | 'theme' | 'feedback' | 'bulkimport';
 
@@ -137,22 +137,23 @@ class AdminErrorBoundary extends React.Component<
 // DASHBOARD
 // ─────────────────────────────────────────────────────────────────────────────
 function DashboardSection({ onNav }: { onNav:(s:AdminSection)=>void }) {
-  const [stats, setStats] = useState({ events:0, places:0, banners:0, reviews:0, analytics:0 });
+  const [stats, setStats] = useState({ events:0, thisWeek:0, banners:0, analytics:0 });
   const [lastRefresh, setLastRefresh] = useState<string|null>(null);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     async function load() {
       try {
-        const [evR, plR, rvR, anR, cfg, rlog] = await Promise.all([
+        const today = new Date().toISOString().slice(0,10);
+        const sevenDays = new Date(Date.now() + 7*864e5).toISOString().slice(0,10);
+        const [evR, weekR, anR, cfg, rlog] = await Promise.all([
           sb('events').select('id',{count:'exact',head:true}).eq('hidden',false),
-          sb('places').select('id',{count:'exact',head:true}).eq('hidden',false),
-          sb('reviews').select('id',{count:'exact',head:true}),
+          sb('events').select('id',{count:'exact',head:true}).eq('hidden',false).gte('event_date',today).lte('event_date',sevenDays),
           sb('analytics').select('id',{count:'exact',head:true}),
           cfgGet('banners'),
           cfgGet('refreshLog'),
         ]);
         const bannerList = Array.isArray(cfg) ? cfg : [];
-        setStats({ events:evR.count??0, places:plR.count??0, banners:bannerList.filter((b:Banner)=>b.active).length, reviews:rvR.count??0, analytics:anR.count??0 });
+        setStats({ events:evR.count??0, thisWeek:weekR.count??0, banners:bannerList.filter((b:Banner)=>b.active).length, analytics:anR.count??0 });
         if (rlog?.lastRun) setLastRefresh(rlog.lastRun);
       } catch (e) {
         console.error('Dashboard load error:', e);
@@ -163,10 +164,10 @@ function DashboardSection({ onNav }: { onNav:(s:AdminSection)=>void }) {
     load();
   }, []);
   const cards = [
-    { label:'Live Events',   val:stats.events,    icon:'🎫', color:'#8B3A0F', sec:'events'    as AdminSection },
-    { label:'Places',        val:stats.places,    icon:'📍', color:'#1d4ed8', sec:'places'    as AdminSection },
-    { label:'Active Banners',val:stats.banners,   icon:'📢', color:'#059669', sec:'banners'   as AdminSection },
-    { label:'Analytics Events',val:stats.analytics,icon:'📊',color:'#7c3aed', sec:'analytics' as AdminSection },
+    { label:'Live Events',      val:stats.events,    icon:'🎫', color:'#8B3A0F', sec:'events'    as AdminSection },
+    { label:'Events This Week', val:stats.thisWeek,  icon:'📅', color:'#1d4ed8', sec:'events'    as AdminSection },
+    { label:'Active Banners',   val:stats.banners,   icon:'📢', color:'#059669', sec:'banners'   as AdminSection },
+    { label:'Analytics Events', val:stats.analytics, icon:'📊', color:'#7c3aed', sec:'analytics' as AdminSection },
   ];
   return (
     <div>
@@ -188,7 +189,7 @@ function DashboardSection({ onNav }: { onNav:(s:AdminSection)=>void }) {
         <div style={card}>
           <h3 style={{fontSize:15,fontWeight:700,marginBottom:14}}>Quick Actions</h3>
           <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-            {([['+ Add Event','events',ACCENT],['+ Add Place','places','#1d4ed8'],['📢 New Banner','banners','#059669'],['💬 Feedback','feedback','#0891b2'],['📊 Analytics','analytics','#7c3aed'],['🔄 Data Refresh','refresh','#6b7280']] as [string,AdminSection,string][]).map(([label,sec,color])=>(
+            {([['+ Add Event','events',ACCENT],['📢 New Banner','banners','#059669'],['💬 Feedback','feedback','#0891b2'],['📊 Analytics','analytics','#7c3aed'],['🔄 Data Refresh','refresh','#6b7280']] as [string,AdminSection,string][]).map(([label,sec,color])=>(
               <button key={sec} onClick={()=>onNav(sec)} style={{padding:'10px 18px',borderRadius:8,border:'none',background:color,color:'#fff',cursor:'pointer',fontSize:13,fontWeight:700}}>{label}</button>
             ))}
           </div>
@@ -2255,7 +2256,6 @@ const NAV: {id:AdminSection;label:string;icon:string;group:string}[] = [
   {id:'feedback',  label:'Feedback',         icon:'💬', group:'Overview'},
   {id:'banners',   label:'Banners',          icon:'📢', group:'Content'},
   {id:'events',    label:'Events',           icon:'🎫', group:'Content'},
-  {id:'places',    label:'Places',           icon:'📍', group:'Content'},
   {id:'categories',label:'Categories',       icon:'🏷️', group:'Content'},
   {id:'content',   label:'Content Sections', icon:'✏️', group:'Content'},
   {id:'reviews',   label:'Reviews',          icon:'⭐', group:'Content'},
@@ -2451,7 +2451,6 @@ export default function AdminPanel({ user, onBack }: { user: User|null; onBack: 
             {section==='feedback'   && <FeedbackSection />}
             {section==='banners'    && <BannersSection />}
             {section==='events'     && <EventsSection />}
-            {section==='places'     && <PlacesSection />}
             {section==='categories' && <CategoriesSection />}
             {section==='content'    && <ContentSection />}
             {section==='reviews'    && <ReviewsSection />}
@@ -2469,7 +2468,7 @@ export default function AdminPanel({ user, onBack }: { user: User|null; onBack: 
             {[
               {id:'dashboard' as AdminSection, label:'Home', icon:'◼'},
               {id:'events' as AdminSection, label:'Events', icon:'🎫'},
-              {id:'places' as AdminSection, label:'Places', icon:'📍'},
+              {id:'banners' as AdminSection, label:'Banners', icon:'📢'},
               {id:'analytics' as AdminSection, label:'Data', icon:'📊'},
               {id:'feedback' as AdminSection, label:'Feedback', icon:'💬'},
             ].map(item => (
