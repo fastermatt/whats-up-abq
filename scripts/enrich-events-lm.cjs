@@ -203,8 +203,8 @@ async function main() {
   // 2. Fetch events needing enrichment
   const today     = new Date().toISOString().split('T')[0];
   const filter    = FORCE
-    ? `event_date=gte.${today}&order=event_date.asc&limit=500`
-    : `event_date=gte.${today}&ai_enrichment=is.null&order=event_date.asc&limit=500`;
+    ? `event_date=gte.${today}&raw->>name=not.is.null&order=event_date.asc&limit=500`
+    : `event_date=gte.${today}&ai_enrichment=is.null&raw->>name=not.is.null&order=event_date.asc&limit=500`;
 
   console.log('📥  Fetching events from Supabase…');
   const rows = await sbGet(`events?${filter}&select=id,source,raw`);
