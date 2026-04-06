@@ -53,6 +53,12 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: node scripts/fetch-local-events.cjs
 
+      - name: Rebuild places-data.json from Supabase (fast-boot static cache)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/rebuild-places-static.cjs
+
       - name: Purge past events from Supabase
         run: |
           node -e "const {createClient}=require('@supabase/supabase-js');const sb=createClient(process.env.SUPABASE_URL,process.env.SUPABASE_SERVICE_ROLE_KEY);sb.rpc('purge_past_events').then(({data,error})=>{if(error){console.error('Purge error:',error.message);process.exit(1);}console.log('Purged',data,'past events from Supabase');});"
