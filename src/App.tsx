@@ -4155,9 +4155,18 @@ function DiscoverScreen({
       .slice(0, 8);
   }, [places, coords]);
 
-  const hiddenGems = places
-    .filter(p => !p.isFeatured && p.rating && p.rating >= 4.5 && !BLOCKED_VENUES.some(b => p.name?.toLowerCase().includes(b.toLowerCase())))
-    .slice(0, 10);
+  // "Happening This Week" — upcoming events over the next 7 days for the Discover feed
+  const happeningThisWeek = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    const sevenDays = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10);
+    return events
+      .filter(e => {
+        const d = e.dates?.start?.localDate || '';
+        return d >= today && d <= sevenDays && !e._isAdult;
+      })
+      .sort((a, b) => (a.dates?.start?.localDate || '').localeCompare(b.dates?.start?.localDate || ''))
+      .slice(0, 12);
+  }, [events]);
 
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
@@ -4177,11 +4186,11 @@ function DiscoverScreen({
             {events.length.toLocaleString()} upcoming events in Albuquerque
           </p>
           <button
-            onClick={() => onNavigateEvents?.('Tonight')}
+            onClick={() => onNavigateEvents?.()}
             style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '42px', padding: '0 16px', background: 'var(--ink)', color: 'white', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(185,92,67,0.25)', fontFamily: 'Public Sans, sans-serif', fontSize: '13px', fontWeight: 800, letterSpacing: '0.03em', cursor: 'pointer', borderRadius: 6, marginBottom: '12px' }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>confirmation_number</span>
-            What's on tonight →
+            Browse all events →
           </button>
         </div>
         <div className="flex px-5 pb-4 gap-2" style={{ overflowX: 'auto', scrollbarWidth: 'none' }}>
@@ -4465,101 +4474,85 @@ function DiscoverScreen({
         </div>
       )}
 
-      {/* Hidden Gems */}
-      {!hidden.includes('hiddenGems') && hiddenGems.length > 0 && (
+      {/* Happening This Week — upcoming events, next 7 days */}
+      {!hidden.includes('hiddenGems') && happeningThisWeek.length > 0 && (
         <div className="py-4">
           <div className="flex items-center justify-between px-5 py-3 mb-0" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
-            <h2
-              className="text-sm font-black uppercase"
-              style={{ fontFamily: 'Public Sans, sans-serif' }}
-            >
-              Hidden Gems
+            <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif' }}>
+              Happening This Week
             </h2>
-            <span className="text-xs font-black uppercase" style={{ color: '#666', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em' }}>
-              ★ 4.5+ rated
-            </span>
+            <button
+              onClick={() => onNavigateEvents?.()}
+              className="text-xs font-black uppercase"
+              style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)', letterSpacing: '0.06em', background: 'none', border: 'none', cursor: 'pointer' }}
+            >
+              → See All
+            </button>
           </div>
           <div className="flex gap-3 px-5 py-3 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-            {sortByInterests(hiddenGems, interests).map(place => (
-              <button
-                key={place.id}
-                onClick={() => onPlaceSelect(place)}
-                className="flex-shrink-0 bg-white overflow-hidden text-left"
-                style={{ width: '144px', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)', borderRadius: '10px' }}
-              >
-                <div className="relative" style={{ height: '100px' }}>
-                  <ImageWithFallback
-                    src={place.image}
-                    alt={place.name}
-                    className="w-full h-full object-cover"
-                    gradient={'var(--brand-gradient)'}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                  {place.rating && (
+            {happeningThisWeek.map(event => {
+              const meta = getEventTypeMeta(event);
+              const dateStr = event.dates?.start?.localDate;
+              const timeStr = event.dates?.start?.localTime;
+              const venue = event._embedded?.venues?.[0];
+              const d = dateStr ? new Date(dateStr + 'T12:00:00') : null;
+              const monthDay = d ? d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+              const time = timeStr ? formatTime(timeStr) : '';
+              const venueName = venue?.name || '';
+              const price = getEventPrice(event);
+              const imgs = (event.images ?? []).filter(img => !img.fallback);
+              const heroImg = imgs.sort((a, b) => (b.width || 0) - (a.width || 0))[0]?.url;
+              return (
+                <button
+                  key={event.id}
+                  onClick={() => onEventSelect(event)}
+                  className="flex-shrink-0 text-left overflow-hidden"
+                  style={{ width: '150px', borderRadius: '10px', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)', background: 'white' }}
+                >
+                  {/* Image / gradient header */}
+                  <div className="relative" style={{ height: '90px', background: meta.bg }}>
+                    {heroImg && (
+                      <img src={heroImg} alt={event.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                    )}
+                    {!heroImg && (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <FlatIcon name={meta.icon} size={28} color="white" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                    {price && (
+                      <div className="absolute top-2 right-2">
+                        <span className="text-xs font-black px-1.5 py-0.5" style={{ background: price === 'FREE' ? '#047857' : 'rgba(0,0,0,0.55)', color: 'white', borderRadius: 4, fontFamily: 'Public Sans, sans-serif', fontSize: '9px', letterSpacing: '0.04em' }}>
+                          {price === 'FREE' ? 'FREE' : price}
+                        </span>
+                      </div>
+                    )}
                     <div className="absolute bottom-2 left-2">
-                      <span
-                        className="text-xs font-bold text-white px-1.5 py-0.5"
-                        style={{ background: 'rgba(0,0,0,0.4)' }}
-                      >
-                        ★ {place.rating.toFixed(1)}
+                      <span className="text-xs font-black text-white" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '10px', textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
+                        {monthDay}{time ? ` · ${time}` : ''}
                       </span>
                     </div>
-                  )}
-                  {checkedIn.has(place.id) && (
-                    <div className="absolute top-2 right-2">
-                      <span className="text-white text-xs px-1.5 py-0.5" style={{ background: 'rgba(160,59,0,0.85)' }}>✓</span>
-                    </div>
-                  )}
-                </div>
-                <div className="p-2">
-                  <p
-                    className="text-xs font-bold text-gray-900 leading-tight truncate"
-                    style={{ fontFamily: 'Public Sans, sans-serif' }}
-                  >
-                    {place.name}
-                  </p>
-                  <p className="text-xs" style={{ color: '#666' }}>{place.category}</p>
-                </div>
-              </button>
-            ))}
+                  </div>
+                  {/* Info */}
+                  <div className="p-2">
+                    <p className="text-xs font-black leading-tight" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}>
+                      {event.name}
+                    </p>
+                    {venueName && (
+                      <p className="text-xs mt-0.5 truncate" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif', fontSize: '10px' }}>
+                        {venueName}
+                      </p>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* ABQ Neighborhoods */}
-      {!hidden.includes('neighborhoods') && <div className="mb-5 px-5">
-        <p className="text-xs font-black uppercase flex items-center gap-2 mb-3" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>
-          <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'var(--brand)', fontVariationSettings: "'FILL' 1" }}>location_city</span>
-          Neighborhoods
-        </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-          {[
-            { name: 'Old Town', icon: 'account_balance', accent: 'var(--brand)' },
-            { name: 'Nob Hill', icon: 'local_cafe', accent: '#6B8F71' },
-            { name: 'Downtown', icon: 'nightlife', accent: 'var(--ink)' },
-            { name: 'Rio Grande', icon: 'nature', accent: '#5B7FA5' },
-            { name: 'NE Heights', icon: 'landscape', accent: '#C8963E' },
-            { name: 'South Valley', icon: 'storefront', accent: '#8B6B8A' },
-          ].map(({ name, icon, accent }, idx) => (
-            <button key={name}
-              className="flex items-center justify-center gap-1.5 transition-all active:scale-95"
-              style={{
-                padding: '8px 10px',
-                borderRadius: 20,
-                border: '1.5px solid rgba(0,0,0,0.10)',
-                background: 'white',
-                cursor: 'pointer',
-                fontFamily: 'Public Sans, sans-serif',
-                width: '100%',
-                animation: `hoodBubble${idx} ${3.5 + idx * 0.4}s ease-in-out infinite`,
-              }}
-              onClick={() => onNavigatePlaces?.('All', name)}>
-              <span className="material-symbols-outlined" style={{ fontSize: '15px', color: accent, fontVariationSettings: "'FILL' 1, 'wght' 500" }}>{icon}</span>
-              <span className="font-bold" style={{ fontSize: '11px', color: 'var(--ink)', letterSpacing: '0.01em' }}>{name}</span>
-            </button>
-          ))}
-        </div>
-      </div>}
+      {/* Neighborhoods removed — events-only pivot */}
 
       {/* Did You Know - animated rotating card */}
       <AnimatedFact />
