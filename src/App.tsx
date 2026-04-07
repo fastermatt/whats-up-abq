@@ -5231,7 +5231,7 @@ function EventsScreen({
                   gap: 4,
                 }}
               >
-                {isCatSelected ? selectedGenre : 'Category'} \u25be
+                {isCatSelected ? selectedGenre : 'Category'} ▾
               </button>
             );
           })()}
