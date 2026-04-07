@@ -4845,13 +4845,12 @@ function EventCalendar({
 
   const EC_BRAND = '#C2634A';
 
-  const getDotSize = (count: number): number => {
-    if (count === 0) return 0;
-    return Math.round(3 + (count / maxCount) * 5);
-  };
-  const getDotOpacity = (count: number): number => {
-    if (count === 0) return 0;
-    return 0.3 + (count / maxCount) * 0.7;
+  // Density fill: terracotta background intensity scales with event count
+  const getCellBg = (count: number, isSel: boolean): string => {
+    if (isSel) return EC_BRAND;
+    if (count === 0) return 'transparent';
+    const intensity = 0.08 + (count / maxCount) * 0.62;
+    return `rgba(194,99,74,${intensity.toFixed(2)})`;
   };
 
   const cells: Array<{ day: number; dateStr: string } | null> = [];
@@ -9324,6 +9323,15 @@ export default function App() {
   // Mobile-first: always use mobile layout (desktop layout disabled for now)
   const isDesktop = false;
 
+  // ── Dark mode ──
+  const [isDark, setIsDark] = useState(() => {
+    try { return localStorage.getItem('abq-dark') === '1'; } catch { return false; }
+  });
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', isDark);
+    try { localStorage.setItem('abq-dark', isDark ? '1' : '0'); } catch {}
+  }, [isDark]);
+
   const [showSearch, setShowSearch] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
   const [placesNavKey, setPlacesNavKey] = useState(0);
@@ -10232,7 +10240,7 @@ export default function App() {
       <OfflineBanner />
       <div
         className="flex flex-col mx-auto relative"
-        style={{ width: '100%', maxWidth: '480px', minHeight: '100dvh', background: 'white', overflowX: 'hidden', boxShadow: '0 0 40px rgba(0,0,0,0.08)', paddingTop: 'env(safe-area-inset-top, 0px)' } as React.CSSProperties}
+        style={{ width: '100%', maxWidth: '480px', minHeight: '100dvh', background: 'var(--bg)', overflowX: 'hidden', boxShadow: '0 0 40px rgba(0,0,0,0.08)', paddingTop: 'env(safe-area-inset-top, 0px)' } as React.CSSProperties}
       >
         {/* Header — Urban Curator: white + hard 2px border-bottom */}
         <header
@@ -10242,7 +10250,7 @@ export default function App() {
             top: 0,
             paddingTop: '12px',
             paddingBottom: '12px',
-            background: 'white',
+            background: 'var(--bg)',
             borderBottom: '1px solid rgba(0,0,0,0.08)',
             zIndex: 40,
           }}
@@ -10251,13 +10259,13 @@ export default function App() {
             <img src="/logo-static.png" alt="ABQ Unplugged" style={{ height: '32px', width: 'auto' }} />
           </button>
           <div className="flex items-center gap-2">
-            <button onClick={() => setShowSearch(true)} className="w-9 h-9 flex items-center justify-center" style={{ background: 'white', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+            <button onClick={() => setShowSearch(true)} className="w-9 h-9 flex items-center justify-center" style={{ background: 'var(--bg)', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
               <span className="material-symbols-outlined" style={{ fontSize: '20px', color: 'var(--ink)' }}>search</span>
             </button>
             <button
               onClick={requestGeo}
               className="w-9 h-9 flex items-center justify-center"
-              style={{ background: 'white', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+              style={{ background: 'var(--bg)', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
               title={coords ? 'Location active' : 'Enable location'}
               aria-label={coords ? 'Location active' : 'Enable location'}
             >
@@ -10270,6 +10278,17 @@ export default function App() {
                 }}
               >
                 my_location
+              </span>
+            </button>
+            <button
+              onClick={() => setIsDark(d => !d)}
+              className="w-9 h-9 flex items-center justify-center"
+              style={{ background: 'var(--bg)', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+              title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--ink)' }}>
+                {isDark ? 'light_mode' : 'dark_mode'}
               </span>
             </button>
           </div>
