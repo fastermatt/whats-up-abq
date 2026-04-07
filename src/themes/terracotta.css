@@ -101,6 +101,12 @@
     --brand-tint-bg:         rgba(185, 92, 67, 0.15);
     --brand-tint-border:     rgba(185, 92, 67, 0.35);
     --brand-ring-color:      #c97a62;
+
+    /* Bridge vars — must also be overridden for dark mode */
+    --bg:                    #1C1814;
+    --ink:                   #EEE9E5;
+    --sage:                  #9dc4a8;
+    --gold:                  #c2bb56;
   }
 }
 
@@ -223,7 +229,24 @@ button[class*="bg-primary"]:active,
 
 
 /* ── Dark mode overrides (html.dark) ────────────────────────────────
-   Toggled via sun/moon button, persisted to localStorage.           */
+   Toggled via sun/moon button, persisted to localStorage.
+   NOTE: Bridge vars declared here (unlayered) to beat any unlayered
+   :root declarations — html.dark has specificity (0,1,1) > :root (0,1,0) */
+
+html.dark {
+  --bg:                    #1C1814;
+  --ink:                   #EEE9E5;
+  --brand:                 #c97a62;
+  --brand-light:           #d9937e;
+  --brand-gradient:        linear-gradient(135deg, #b95c43 0%, #c97a62 100%);
+  --brand-bg-screen:       #1C1814;
+  --brand-bg-subtle:       rgba(201, 122, 98, 0.15);
+  --brand-tint-bg:         rgba(185, 92, 67, 0.15);
+  --brand-tint-border:     rgba(185, 92, 67, 0.35);
+  --brand-ring-color:      #c97a62;
+  --sage:                  #9dc4a8;
+  --gold:                  #c2bb56;
+}
 
 html.dark body::after { opacity: 0.05; }
 
