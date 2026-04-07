@@ -81,12 +81,6 @@ const ABQ_THEATERS = [
   "Cinemark Century Rio 24 XD",
   "Regal Winrock Stadium 16 IMAX",
 ];
-const ALL_THEATERS = [
-  "AMC Albuquerque 12 & IMAX",
-  "Cinemark Century Rio 24 XD",
-  "Regal Winrock Stadium 16 IMAX",
-  "ICON Cinemas",
-
 export const ALL_EVENTS: Event[] = [
   {
     id: "mv-7",
@@ -6477,8 +6471,5 @@ export async function fetchLiveEvents(): Promise<Event[]> {
     return Array.isArray(data) ? data : [];
   } catch {
     return [];
-  }
-}
-];
   }
 }
