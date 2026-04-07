@@ -89,151 +89,6 @@ const ALL_THEATERS = [
 ];
 
 export const ALL_EVENTS: Event[] = [
-
-  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-  // MOVIES — Now Playing (March 17 â April 3, 2026)
-  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-  {
-    id: "mv-1",
-    title: "Project Hail Mary",
-    category: "Movie",
-    date: "2026-03-17",
-    endDate: "2026-04-09",
-    time: "Various showtimes",
-    location: "Multiple ABQ Theaters",
-    address: "Check Fandango for nearest theater",
-    description:
-      "Ryan Gosling stars in this stunning sci-fi adaptation of Andy Weir's bestselling novel. An astronaut wakes alone on a deep-space mission with no memory of how he got there — and discovers the fate of Earth rests entirely on his shoulders. Director Phil Lord delivers a film already being called one of the decade's great science fiction experiences.",
-    price: "$13â$22",
-    priceNum: 13,
-    image: "https://upload.wikimedia.org/wikipedia/en/3/3b/Project_Hail_Mary_poster.jpg",
-    gradient: "linear-gradient(135deg, #1e3a5f 0%, #0f2027 100%)",
-    featured: true,
-    movieRating: "PG-13",
-    movieRuntime: "2h 15m",
-    movieGenre: "Sci-Fi / Adventure",
-    theaters: ALL_THEATERS,
-    tags: ["sci-fi", "Ryan Gosling", "based on book", "IMAX"],
-    isKidFriendly: false,
-    isOutdoor: false,
-    isAccessible: true,
-    source: "Fandango",
-    website: "https://www.fandango.com/albuquerque_nm_movietimes",
-    ticketUrl: "https://www.fandango.com/albuquerque_nm_movietimes",
-    accessibility: "All theaters offer closed captioning devices & audio description",
-  },
-  {
-    id: "mv-2",
-    title: "Hoppers",
-    category: "Movie",
-    date: "2026-03-17",
-    endDate: "2026-04-09",
-    time: "Various showtimes",
-    location: "Multiple ABQ Theaters",
-    address: "Check Fandango for nearest theater",
-    description:
-      "Pixar's newest animated adventure follows Mabel, an animal-obsessed kid who discovers technology that lets her 'hop' into robotic creatures and experience a hidden world beneath our feet. A visually breathtaking, heartfelt film with Pixar's signature emotional depth — expect tears and standing ovations.",
-    price: "$13â$20",
-    priceNum: 13,
-    image: CINEMA_IMG,
-    gradient: "linear-gradient(135deg, #16a34a 0%, #15803d 100%)",
-    featured: false,
-    movieRating: "PG",
-    movieRuntime: "1h 48m",
-    movieGenre: "Animated / Family",
-    theaters: ALL_THEATERS,
-    tags: ["Pixar", "animated", "family", "kids"],
-    isKidFriendly: true,
-    isOutdoor: false,
-    isAccessible: true,
-    source: "Fandango",
-    website: "https://www.fandango.com/albuquerque_nm_movietimes",
-    ticketUrl: "https://www.fandango.com/albuquerque_nm_movietimes",
-  },
-  {
-    id: "mv-4",
-    title: "Snow White",
-    category: "Movie",
-    date: "2026-03-21",
-    endDate: "2026-04-12",
-    time: "Various showtimes",
-    location: "Multiple ABQ Theaters",
-    address: "Check Fandango for nearest theater",
-    description:
-      "Disney's stunning live-action reimagining of the classic fairy tale stars Rachel Zegler as Snow White and Gal Gadot as the Evil Queen. A lavish, musical fantasy with breathtaking production design and new original songs from the composers of La La Land.",
-    price: "$13â$22",
-    priceNum: 13,
-    image: "https://upload.wikimedia.org/wikipedia/en/1/1f/Snow_White_%282025_film%29_final_poster.jpg",
-    gradient: "linear-gradient(135deg, #dc2626 0%, #9f1239 100%)",
-    featured: false,
-    movieRating: "PG",
-    movieRuntime: "1h 55m",
-    movieGenre: "Musical / Fantasy",
-    theaters: ALL_THEATERS,
-    tags: ["Disney", "musical", "live-action", "family"],
-    isKidFriendly: true,
-    isOutdoor: false,
-    isAccessible: true,
-    source: "Fandango",
-    website: "https://www.fandango.com/albuquerque_nm_movietimes",
-    ticketUrl: "https://www.fandango.com/albuquerque_nm_movietimes",
-  },
-  {
-    id: "mv-5",
-    title: "A Minecraft Movie",
-    category: "Movie",
-    date: "2026-04-04",
-    endDate: "2026-05-03",
-    time: "Various showtimes",
-    location: "Multiple ABQ Theaters",
-    address: "Check Fandango for nearest theater",
-    description:
-      "The biggest video game movie ever made hits theaters. Jack Black stars as Steve alongside Jason Momoa in a live-action/animated adventure that takes a group of misfits from our world into the Overworld — where they must battle the Ender Dragon to save both realms. Directed by Jared Hess.",
-    price: "$13â$22",
-    priceNum: 13,
-    image: "https://upload.wikimedia.org/wikipedia/en/6/66/A_Minecraft_Movie_poster.jpg",
-    gradient: "linear-gradient(135deg, #16a34a 0%, #0891b2 100%)",
-    featured: true,
-    movieRating: "PG",
-    movieRuntime: "1h 55m",
-    movieGenre: "Action / Comedy / Family",
-    theaters: ALL_THEATERS,
-    tags: ["Minecraft", "Jack Black", "family", "video game"],
-    isKidFriendly: true,
-    isOutdoor: false,
-    isAccessible: true,
-    source: "Fandango",
-    website: "https://www.fandango.com/albuquerque_nm_movietimes",
-    ticketUrl: "https://www.fandango.com/albuquerque_nm_movietimes",
-  },
-  {
-    id: "mv-6",
-    title: "Super Mario Galaxy Movie",
-    category: "Movie",
-    date: "2026-04-04",
-    endDate: "2026-05-10",
-    time: "Various showtimes",
-    location: "Multiple ABQ Theaters",
-    address: "Check Fandango for nearest theater",
-    description:
-      "The massive sequel to The Super Mario Bros. Movie takes Mario and friends to space — across galaxies, through black holes, and toward a final showdown with Bowser on a moon-sized airship. Chris Pratt, Anya Taylor-Joy, and Charlie Day return, joined by new cast. The most anticipated animated movie of 2026.",
-    price: "$13â$22",
-    priceNum: 13,
-    image: U("1446776811953-b23d57bd21aa"),
-    gradient: "linear-gradient(135deg, #dc2626 0%, #7c3aed 100%)",
-    featured: true,
-    movieRating: "PG",
-    movieRuntime: "2h 2m",
-    movieGenre: "Animated / Adventure",
-    theaters: ALL_THEATERS,
-    tags: ["Mario", "animated", "Nintendo", "family", "sequel"],
-    isKidFriendly: true,
-    isOutdoor: false,
-    isAccessible: true,
-    source: "Fandango",
-    website: "https://www.fandango.com/albuquerque_nm_movietimes",
-    ticketUrl: "https://www.fandango.com/albuquerque_nm_movietimes",
-  },
   {
     id: "mv-7",
     title: "Ready or Not 2",
@@ -288,148 +143,6 @@ export const ALL_EVENTS: Event[] = [
     source: "Fandango",
     website: "https://www.fandango.com/albuquerque_nm_movietimes",
     ticketUrl: "https://www.fandango.com/albuquerque_nm_movietimes",
-  },
-
-  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-  // LIVE MUSIC — MARCH 21-22
-  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-
-  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-  // FARMERS MARKET — MARCH 21-22
-  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-
-  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-  // OUTDOORS — MARCH 21-22
-  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-
-  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-  // COMMUNITY — MARCH 21-22
-  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-
-  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-  // MARCH 28-29
-  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-    {
-    id: "m28-2",
-    title: "ABQ Spring Farmers Market",
-    category: "Farmers Market",
-    date: "2026-04-04",
-    time: "7:30 AM",
-    endTime: "12:00 PM",
-    location: "Rail Yards, Barelas",
-    address: "777 1st St SW, Albuquerque, NM 87102",
-    description:
-      "Spring's arrival brings 80+ New Mexico vendors to the iconic 1914 Rail Yards locomotive repair shops. Pick up heritage tomato starts, organic microgreens, fresh-ground coffee, Navajo fry bread, handmade soaps, and cut flower arrangements in a stunning industrial setting.",
-    price: "Free",
-    priceNum: 0,
-    image: U("1488459716781-31db52582fe9"),
-    gradient: "linear-gradient(135deg, #16a34a 0%, #15803d 100%)",
-    featured: true,
-    tags: ["local produce", "fresh food", "crafts", "historic venue"],
-    isKidFriendly: true,
-    isOutdoor: false,
-    isAccessible: true,
-    source: "The Paper ABQ",
-    website: "https://railyardsmarket.org",
-    accessibility: "Accessible historic industrial building",
-  },
-            
-  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-  // APRIL 4-5
-  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-  {
-    id: "a04-1",
-    title: "Downtown Growers' Market — Opening Day",
-    category: "Farmers Market",
-    date: "2026-04-04",
-    time: "8:00 AM",
-    endTime: "12:00 PM",
-    location: "Robinson Park",
-    address: "810 Copper Ave NW, Albuquerque, NM 87102",
-    description:
-      "It's back! The Downtown Growers' Market kicks off its 30th anniversary season at Robinson Park — ABQ's longest-running, producer-only market. 80+ vendors with spring produce, fresh-cut flowers, organic seedlings, honey, artisan bread, and handcrafted goods every Saturday through November.",
-    price: "Free",
-    priceNum: 0,
-    image: U("1464226184884-fa280b87c399"),
-    gradient: "linear-gradient(135deg, #16a34a 0%, #65a30d 100%)",
-    featured: true,
-    tags: ["30th anniversary", "local", "producer-only", "opening day"],
-    isKidFriendly: true,
-    isOutdoor: true,
-    isAccessible: true,
-    source: "The Paper ABQ",
-    website: "https://www.downtowngrowers.org",
-    accessibility: "Accessible park, paved paths",
-  },
-  {
-    id: "a05-1",
-    title: "Rail Yards Market · Spring Opening",
-    category: "Farmers Market",
-    date: "2026-04-05",
-    time: "9:00 AM",
-    endTime: "2:00 PM",
-    location: "Historic Rail Yards",
-    address: "777 1st St SW, Albuquerque, NM 87102",
-    description:
-      "The Rail Yards Market celebrates its spring opening in Albuquerque's 1914 locomotive repair shops — a stunning market venue open only on Sundays. Local growers, artisans, restaurateurs, and live musicians fill the soaring machine shops with community energy.",
-    price: "Free",
-    priceNum: 0,
-    image: U("1507003211169-0a1dd7228f2d"),
-    gradient: "linear-gradient(135deg, #d97706 0%, #b45309 100%)",
-    featured: true,
-    tags: ["historic venue", "community", "local", "opening"],
-    isKidFriendly: true,
-    isOutdoor: false,
-    isAccessible: true,
-    source: "The Paper ABQ",
-    website: "https://railyardsmarket.org",
-    accessibility: "Accessible historic building",
-  },
-  {
-    id: "a05-2",
-    title: "Green Chile Cheeseburger Smackdown",
-    category: "Food & Drink",
-    date: "2026-04-05",
-    time: "11:00 AM",
-    endTime: "6:00 PM",
-    location: "Expo New Mexico",
-    address: "300 San Pedro Dr NE, Albuquerque, NM 87108",
-    description:
-      "30 competing restaurants battle for ABQ's Best Green Chile Cheeseburger. Buy a tasting pass and vote for the People's Choice. Side competitions: best green chile stew, breakfast burrito, and 'most creative chile application.' Live mariachi. Marble Brewery cold on tap.",
-    image: U("1567620905732-2d1ec7ab7445"),
-    price: "$35 tasting pass",
-    priceNum: 35,
-    gradient: "linear-gradient(135deg, #16a34a 0%, #dc2626 100%)",
-    featured: true,
-    tags: ["green chile", "competition", "New Mexico cuisine"],
-    isKidFriendly: true,
-    isOutdoor: false,
-    isAccessible: true,
-    source: "ABQ365",
-    accessibility: "Accessible fairgrounds",
-  },
-  {
-    id: "a05-3",
-    title: "ABQ BioPark: Spring Baby Animal Day",
-    category: "Family",
-    date: "2026-04-05",
-    time: "9:00 AM",
-    endTime: "5:00 PM",
-    location: "ABQ BioPark Zoo",
-    address: "903 10th St SW, Albuquerque, NM 87102",
-    description:
-      "Spring babies have arrived! Meet newborn Nubian ibex, Humboldt penguin chicks, and African wild dog pups. Keeper talks every hour. Craft stations, face painting, and the new African Savanna exhibit make this ABQ's best family day.",
-    price: "$15 adults / $9 kids",
-    priceNum: 15,
-    image: "https://upload.wikimedia.org/wikipedia/commons/7/75/Albuquerque_Aquarium.jpg",
-    gradient: "linear-gradient(135deg, #0891b2 0%, #0d9488 100%)",
-    tags: ["zoo", "family", "baby animals", "spring"],
-    isKidFriendly: true,
-    isOutdoor: true,
-    isAccessible: true,
-    source: "City of ABQ",
-    website: "https://www.cabq.gov/culturalservices/biopark/zoo",
-    accessibility: "Fully accessible zoo grounds",
   },
 
   // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
@@ -771,7 +484,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/68e/ef1e492c-6782-44ef-96a2-fbde433e268e_SOURCE",
     gradient: "from-yellow-900 to-amber-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/yolanda-del-rio-albuquerque-new-mexico-04-11-2026/event/1E006383DCE1E87E",
   },
   {
     id: "tm-260411-12",
@@ -802,7 +514,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/e/d32/495103f8-a5aa-4b15-8cb3-6e1a41018d32_SOURCE",
     gradient: "from-blue-900 to-cyan-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/swan-lake-by-international-ballet-stars-albuquerque-new-mexico-04-12-2026/event/1E0062E7D5C8246C",
   },
   {
     id: "tm-260412-14",
@@ -833,7 +544,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/c/fbc/b293c0ad-c904-4215-bc59-8d7f2414dfbc_106141_TABLET_LANDSCAPE_LARGE_16_9.jpg",
     gradient: "from-orange-900 to-red-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketweb.com/event/escape-the-fate-vip-sunshine-theater-tickets/14008264?REFERRAL_ID=tmfeed",
   },
   {
     id: "tm-260414-16",
@@ -849,7 +559,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_SOURCE",
     gradient: "from-pink-900 to-rose-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-oklahoma-city-comets-albuquerque-new-mexico-04-14-2026/event/1E006429AB3A7156",
     isOutdoor: true,
   },
   {
@@ -866,7 +575,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/e90/38e0c356-6bcb-4cd2-ab5d-97809a77ce90_SOURCE",
     gradient: "from-yellow-900 to-amber-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/chelsea-handler-the-high-and-mighty-albuquerque-new-mexico-04-16-2026/event/1E00632C897A1608",
   },
   {
     id: "tm-260416-18",
@@ -882,7 +590,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/7ca/8cc6a333-c853-4c19-be70-dfddc4aeb7ca_SOURCE",
     gradient: "from-purple-900 to-indigo-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OxvV",
   },
   {
     id: "tm-260417-19",
@@ -914,7 +621,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/6df/cf97c4a4-1447-4de9-9d73-bf2b15c236df_SOURCE",
     gradient: "from-green-900 to-teal-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/i-love-the-90s-featuring-vanilla-albuquerque-new-mexico-04-18-2026/event/1E00638490DD670E",
   },
   {
     id: "tm-260418-21",
@@ -930,7 +636,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/cd2/82cffc51-59cf-4807-81d1-4c0a34181cd2_SOURCE",
     gradient: "from-orange-900 to-red-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OKvz",
   },
   {
     id: "tm-260419-22",
@@ -962,7 +667,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/a21/308b24f3-7a3a-4516-bbba-10a5239c4a21_SOURCE",
     gradient: "from-yellow-900 to-amber-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OZq8",
   },
   {
     id: "tm-260423-24",
@@ -978,7 +682,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/d05/6e2c8f9c-2ec2-4fc2-a2b2-9ec8c2971d05_SOURCE",
     gradient: "from-purple-900 to-indigo-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A74U7e",
   },
   {
     id: "tm-260424-25",
@@ -994,7 +697,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/3cf/65745505-7029-4d14-9a24-9c55dd6103cf_SOURCE",
     gradient: "from-blue-900 to-cyan-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/killers-of-kill-tony-albuquerque-new-mexico-04-24-2026/event/1E00635691751A8A",
   },
   {
     id: "tm-260424-26",
@@ -1010,7 +712,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/f40/eaa8048c-575c-4719-8681-7bf4a9fdef40_SOURCE",
     gradient: "from-green-900 to-teal-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7jbQp",
   },
   {
     id: "tm-260425-27",
@@ -1026,7 +727,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/2aa/77b63a9c-4386-433e-b187-824e19a122aa_SOURCE",
     gradient: "from-orange-900 to-red-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/2026-npc-mid-usa-prejudging-albuquerque-new-mexico-04-25-2026/event/1E00647384EF5555",
     isOutdoor: true,
   },
   {
@@ -1043,7 +743,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/2aa/77b63a9c-4386-433e-b187-824e19a122aa_SOURCE",
     gradient: "from-pink-900 to-rose-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/2026-npc-midusa-finals-albuquerque-new-mexico-04-25-2026/event/1E00647386E057C9",
     isOutdoor: true,
   },
   {
@@ -1060,7 +759,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/c/093/c74cfd95-af21-4e64-9f85-47677b951093_105651_TABLET_LANDSCAPE_LARGE_16_9.jpg",
     gradient: "from-yellow-900 to-amber-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OF0w",
     isOutdoor: true,
   },
   {
@@ -1077,7 +775,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/2ef/723a9743-ffcc-4cc0-ab85-68067d1422ef_SOURCE",
     gradient: "from-purple-900 to-indigo-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OxCA",
   },
   {
     id: "tm-260426-31",
@@ -1093,7 +790,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/c9c/77109041-77b6-4226-bb34-addc5f164c9c_SOURCE",
     gradient: "from-blue-900 to-cyan-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7qk3e",
   },
   {
     id: "tm-260427-32",
@@ -1109,7 +805,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/f6d/43b37e67-d6aa-45b4-ad2d-399f8ca1af6d_SOURCE",
     gradient: "from-green-900 to-teal-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7O3kb",
   },
   {
     id: "tm-260428-33",
@@ -1125,7 +820,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_SOURCE",
     gradient: "from-orange-900 to-red-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-el-paso-chihuahuas-albuquerque-new-mexico-04-28-2026/event/1E006429AB497166",
     isOutdoor: true,
   },
   {
@@ -1142,42 +836,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/b38/6bdf69cb-1b2e-4f1a-949f-78ff42766b38_SOURCE",
     gradient: "from-pink-900 to-rose-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/kid-cudi-presents-the-rebel-ragers-albuquerque-new-mexico-04-29-2026/event/1E00642FA7E181C9",
-  },
-
-
-
-  {
-    id: "tm-260404-iso-reno",
-    title: "Albuquerque Isotopes vs. Reno Aces",
-    category: "Sports",
-    date: "2026-04-04",
-    time: "18:35",
-    location: "Rio Grande Credit Union Field at Isotopes Park",
-    address: "1601 Avenida Cesar Chavez SE, Albuquerque, NM",
-    description: "Albuquerque Isotopes AAA baseball vs. Reno Aces.",
-    price: "See website",
-    priceNum: 0,
-    image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
-    gradient: "from-blue-900 to-teal-900",
-    source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-reno-aces-albuquerque-new-mexico-04-04-2026/event/1E006429AC3672BC",
-  },
-  {
-    id: "tm-260405-iso-reno",
-    title: "Albuquerque Isotopes vs. Reno Aces",
-    category: "Sports",
-    date: "2026-04-05",
-    time: "13:35",
-    location: "Rio Grande Credit Union Field at Isotopes Park",
-    address: "1601 Avenida Cesar Chavez SE, Albuquerque, NM",
-    description: "Albuquerque Isotopes AAA baseball vs. Reno Aces. Sunday afternoon game.",
-    price: "See website",
-    priceNum: 0,
-    image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
-    gradient: "from-blue-900 to-teal-900",
-    source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-reno-aces-albuquerque-new-mexico-04-05-2026/event/1E006429AC3C72C1",
   },
   {
     id: "tm-260415-iso-okc",
@@ -1193,7 +851,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
     gradient: "from-blue-900 to-teal-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-oklahoma-city-comets-albuquerque-new-mexico-04-15-2026/event/1E006429AB3F715B",
   },
   {
     id: "tm-260416-iso-okc",
@@ -1209,7 +866,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
     gradient: "from-blue-900 to-teal-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-oklahoma-city-comets-albuquerque-new-mexico-04-16-2026/event/1E006429AB44715E",
   },
   {
     id: "tm-260429-iso-elpaso",
@@ -1225,7 +881,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
     gradient: "from-blue-900 to-teal-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-el-paso-chihuahuas-albuquerque-new-mexico-04-29-2026/event/1E006429AB4E716C",
   },
   {
     id: "tm-260430-iso-elpaso",
@@ -1241,7 +896,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
     gradient: "from-blue-900 to-teal-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-el-paso-chihuahuas-albuquerque-new-mexico-04-30-2026/event/1E006429AB537173",
   },
   {
     id: "tm-260501-tommy",
@@ -1257,7 +911,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/818/7e2af2fb-b190-4f5c-bbc4-fcc710435818_TABLET_LANDSCAPE_16_9.jpg",
     gradient: "from-amber-900 to-yellow-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7poC3",
   },
   {
     id: "tm-260501-iso-elpaso",
@@ -1273,7 +926,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
     gradient: "from-blue-900 to-teal-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-el-paso-chihuahuas-albuquerque-new-mexico-05-01-2026/event/1E006429AC5172F3",
   },
   {
     id: "tm-260502-kool",
@@ -1289,7 +941,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/e7b/82a11a20-04a5-4c32-874a-978f352cfe7b_TABLET_LANDSCAPE_16_9.jpg",
     gradient: "from-orange-900 to-red-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/kool-the-gang-albuquerque-new-mexico-05-02-2026/event/1E006430B335965C",
   },
   {
     id: "tm-260502-architects",
@@ -1305,7 +956,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/ed1/26c6cce6-2e31-42d6-aa00-4f6e83fb5ed1_TABLET_LANDSCAPE_16_9.jpg",
     gradient: "from-slate-900 to-zinc-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OYjv",
   },
   {
     id: "tm-260502-iso-elpaso",
@@ -1321,7 +971,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
     gradient: "from-blue-900 to-teal-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-el-paso-chihuahuas-albuquerque-new-mexico-05-02-2026/event/1E006429AC5672FA",
   },
   {
     id: "tm-260503-iso-elpaso",
@@ -1337,7 +986,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
     gradient: "from-blue-900 to-teal-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-el-paso-chihuahuas-albuquerque-new-mexico-05-03-2026/event/1E006429AD1273DF",
   },
   {
     id: "tm-260506-nmu-elpaso",
@@ -1353,7 +1001,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/c/093/c74cfd95-af21-4e64-9f85-47677b951093_105651_TABLET_LANDSCAPE_16_9.jpg",
     gradient: "from-red-900 to-rose-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OF0S",
   },
   {
     id: "tm-260509-nmu-lvlights",
@@ -1369,7 +1016,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/c/093/c74cfd95-af21-4e64-9f85-47677b951093_105651_TABLET_LANDSCAPE_16_9.jpg",
     gradient: "from-red-900 to-rose-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OF0V",
   },
   {
     id: "tm-260509-seth",
@@ -1385,7 +1031,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/639/c860f8e9-1fb4-48a9-981f-607b28429639_RETINA_LANDSCAPE_16_9.jpg",
     gradient: "from-purple-900 to-violet-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/seth-meyers-albuquerque-new-mexico-05-09-2026/event/1E006428F3AEA6C2",
   },
   {
     id: "tm-260512-iso-okc",
@@ -1401,7 +1046,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
     gradient: "from-blue-900 to-teal-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-oklahoma-city-comets-albuquerque-new-mexico-05-12-2026/event/1E006429AB587179",
   },
   {
     id: "tm-260513-iso-okc",
@@ -1417,7 +1061,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
     gradient: "from-blue-900 to-teal-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-oklahoma-city-comets-albuquerque-new-mexico-05-13-2026/event/1E006429AB5D717F",
   },
   {
     id: "tm-260514-iso-okc",
@@ -1433,7 +1076,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
     gradient: "from-blue-900 to-teal-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-oklahoma-city-comets-albuquerque-new-mexico-05-14-2026/event/1E006429AB627188",
   },
   {
     id: "tm-260515-iso-okc",
@@ -1449,7 +1091,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
     gradient: "from-blue-900 to-teal-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-oklahoma-city-comets-albuquerque-new-mexico-05-15-2026/event/1E006429AC5B7300",
   },
   {
     id: "tm-260516-iso-okc",
@@ -1465,7 +1106,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
     gradient: "from-blue-900 to-teal-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-oklahoma-city-comets-albuquerque-new-mexico-05-16-2026/event/1E006429AC607304",
   },
   {
     id: "tm-260517-iso-okc",
@@ -1481,7 +1121,6 @@ export const ALL_EVENTS: Event[] = [
     image: "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
     gradient: "from-blue-900 to-teal-900",
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/albuquerque-isotopes-vs-oklahoma-city-comets-albuquerque-new-mexico-05-17-2026/event/1E006429AC65730F",
   },
 
   // ── Eventbrite events ────────────────────────────────────────────────────────
@@ -1506,50 +1145,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: true,
     source: "Eventbrite",
     ticketUrl: "https://www.eventbrite.com/e/11th-annual-great-new-mexico-food-truck-craft-beverage-festival-tickets-1976790460481",
-  },
-
-  {
-    id: "eb-eggstravaganza-2026",
-    title: "Eggstravaganza FREE Family Easter Fun",
-    category: "Family",
-    date: "2026-04-04",
-    time: "11:00 AM",
-    endTime: "1:00 PM",
-    location: "Faith Lutheran Church",
-    address: "10000 Spain Rd NE, Albuquerque, NM 87111",
-    description: "Free Easter event for the whole family featuring candy, games, bounce houses, mini burros, and a free grilled lunch. Special appearance by Steve Stucker, New Mexico's favorite weatherman. All ages welcome.",
-    price: "Free",
-    priceNum: 0,
-    image: "https://images.unsplash.com/photo-1521967906867-14ec9d64bee8?w=800&h=500&fit=crop&q=80",
-    gradient: "linear-gradient(135deg, #14532d 0%, #16a34a 100%)",
-    featured: false,
-    tags: ["Easter", "family", "free", "kids", "bounce house", "holiday"],
-    isKidFriendly: true,
-    isOutdoor: true,
-    source: "Eventbrite",
-    ticketUrl: "https://www.eventbrite.com/e/eggstravaganza-free-family-easter-fun-tickets-1984406895443",
-  },
-  {
-    id: "eb-social-saturday-icons",
-    title: "Social Saturday: Icons",
-    category: "Nightlife",
-    date: "2026-04-04",
-    time: "8:00 PM",
-    endTime: "2:00 AM",
-    location: "Albuquerque Social Club",
-    address: "4021 Central Ave NE, Albuquerque, NM 87108",
-    description: "A night celebrating New Mexico's drag icons with performances by local artists and a special guest from RuPaul's Drag Race. Featuring Avery, Anastasia, LaRhya Daniels, Madison Eriks, Savannah Knight, Gia Del Rio, and more. Hosted by Vanessa Patricks. 21+.",
-    price: "$34–$173",
-    priceNum: 34,
-    image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=500&fit=crop&q=80",
-    gradient: "linear-gradient(135deg, #4a044e 0%, #ea580c 100%)",
-    featured: false,
-    tags: ["drag", "nightlife", "RuPaul", "LGBTQ", "21+", "performance"],
-    isKidFriendly: false,
-    is21Plus: true,
-    isOutdoor: false,
-    source: "Eventbrite",
-    ticketUrl: "https://www.eventbrite.com/e/social-saturday-icons-tickets-1983112718525",
   },
   {
     id: "eb-based-negative-squad",
@@ -2102,32 +1697,6 @@ export const ALL_EVENTS: Event[] = [
     tags: ["photography", "portrait", "workshop", "outdoor", "Civic Plaza", "downtown"],
     isKidFriendly: false,
     isOutdoor: true,
-    source: "Eventbrite",
-    ticketUrl: "https://www.eventbrite.com/d/nm--albuquerque/events/",
-  },
-
-
-
-
-  {
-    id: "eb-good-hurt-couples",
-    title: "The Good Hurt: Couples Comedy Show",
-    category: "Nightlife",
-    date: "2026-04-04",
-    time: "7:30 PM",
-    endTime: "10:00 PM",
-    location: "Tractor Brewing — Wells Park",
-    address: "1800 4th St NW, Albuquerque, NM 87102",
-    description: "A hilarious stand-up comedy show dedicated to the beautiful mess of relationships. Local and touring comedians roast love, dating, and everything in between. Bring your partner or come solo — either way you'll relate.",
-    price: "$20",
-    priceNum: 20,
-    image: "https://images.unsplash.com/photo-1527224538127-2104bb71c51b?w=800&h=500&fit=crop&q=80",
-    gradient: "linear-gradient(135deg, #dc2626 0%, #fbbf24 100%)",
-    featured: false,
-    tags: ["comedy", "stand-up", "couples", "date night", "beer", "Tractor Brewing"],
-    isKidFriendly: false,
-    is21Plus: true,
-    isOutdoor: false,
     source: "Eventbrite",
     ticketUrl: "https://www.eventbrite.com/d/nm--albuquerque/events/",
   },
@@ -2861,29 +2430,6 @@ export const ALL_EVENTS: Event[] = [
     source: "Eventbrite",
     ticketUrl: "https://www.eventbrite.com/d/nm--albuquerque/events/",
   },
-
-  // ── ABQ365 / Visit Albuquerque ──────────────────────────────────────────────
-  {
-    id: "abq365-chupacabras-football",
-    title: "NM Chupacabras Football — Home Opener",
-    category: "Sports",
-    date: "2026-04-04",
-    time: "7:00 PM",
-    endTime: "10:00 PM",
-    location: "Tingley Coliseum",
-    address: "401 2nd St SW, Albuquerque, NM 87102",
-    description: "The NM Chupacabras kick off the 2026 indoor football season at home! High-energy arena football action featuring local Albuquerque talent. Plenty of family seating, tailgate atmosphere, and affordable tickets make this the hottest new sports event in town.",
-    price: "$15",
-    priceNum: 15,
-    image: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=800&h=500&fit=crop&q=80",
-    gradient: "linear-gradient(135deg, #15803d 0%, #dc2626 100%)",
-    featured: false,
-    tags: ["football", "sports", "Tingley Coliseum", "indoor", "family", "Chupacabras"],
-    isKidFriendly: true,
-    isOutdoor: false,
-    source: "ABQ365",
-    ticketUrl: "https://www.visitalbuquerque.org/event/2026-nm-chupacabras-football-season/62613/",
-  },
   {
     id: "abq365-nm-wine-festival",
     title: "2026 New Mexico Wine Festival",
@@ -2928,158 +2474,6 @@ export const ALL_EVENTS: Event[] = [
     source: "ABQ365",
     ticketUrl: "https://www.visitalbuquerque.org/event/heights-summerfest/62342/",
   },
-  {
-    id: "abq365-pueblo-pathways",
-    title: "Pueblo Pathways: Art & Culture Exhibition",
-    category: "Arts & Culture",
-    date: "2026-03-28",
-    endDate: "2026-09-30",
-    time: "9:00 AM",
-    endTime: "5:00 PM",
-    location: "Indian Pueblo Cultural Center",
-    address: "2401 12th St NW, Albuquerque, NM 87104",
-    description: "Explore the living cultures, histories, and art of the 19 Pueblos of New Mexico through this landmark exhibition at the Indian Pueblo Cultural Center. Pueblo Pathways showcases traditional and contemporary works by Pueblo artists alongside historical artifacts.",
-    price: "$8",
-    priceNum: 8,
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=500&fit=crop&q=80",
-    gradient: "linear-gradient(135deg, #b45309 0%, #92400e 100%)",
-    featured: false,
-    tags: ["Pueblo", "Native American", "art", "culture", "exhibition", "Indian Pueblo Cultural Center"],
-    isKidFriendly: true,
-    isOutdoor: false,
-    source: "ABQ365",
-    ticketUrl: "https://www.visitalbuquerque.org/event/pueblo-pathways/62488/",
-  },
-
-  // ── City of Albuquerque ────────────────────────────────────────────────────
-  {
-    id: "cabq-bosque-hike-apr",
-    title: "Bosque Wild Guided Hike",
-    category: "Health & Wellness",
-    date: "2026-04-04",
-    time: "8:30 AM",
-    endTime: "11:00 AM",
-    location: "Open Space Visitor Center",
-    address: "6500 Coors Blvd NW, Albuquerque, NM 87120",
-    description: "Join city naturalists for a stroll through the Bosque! This guided hike through Albuquerque's beloved cottonwood forest explores wildlife, native plants, and river ecology. Free and open to all fitness levels. Dogs welcome on leash.",
-    price: "Free",
-    priceNum: 0,
-    image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=500&fit=crop&q=80",
-    gradient: "linear-gradient(135deg, #166534 0%, #65a30d 100%)",
-    featured: false,
-    tags: ["hiking", "Bosque", "nature", "outdoor", "free", "wildlife", "guided"],
-    isKidFriendly: true,
-    isOutdoor: true,
-    source: "City of ABQ",
-  },
-  {
-    id: "cabq-free-sunday-museum",
-    title: "Free Sunday Mornings at Albuquerque Museum",
-    category: "Arts & Culture",
-    date: "2026-04-05",
-    time: "9:00 AM",
-    endTime: "1:00 PM",
-    location: "Albuquerque Museum",
-    address: "2000 Mountain Rd NW, Albuquerque, NM 87104",
-    description: "Every Sunday morning, general admission to the Albuquerque Museum is free! Explore world-class collections covering 400 years of New Mexico history, Southwestern art, and rotating special exhibitions — all at no cost. A perfect way to spend a Sunday morning in Old Town.",
-    price: "Free",
-    priceNum: 0,
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=500&fit=crop&q=80",
-    gradient: "linear-gradient(135deg, #1e3a5f 0%, #d97706 100%)",
-    featured: false,
-    tags: ["museum", "free", "art", "history", "family", "Old Town", "Sunday"],
-    isKidFriendly: true,
-    isOutdoor: false,
-    source: "City of ABQ",
-  },
-
-  {
-    id: "cabq-stories-music-sky",
-    title: "Stories and Music in the Sky — Balloon Museum",
-    category: "Family",
-    date: "2026-04-04",
-    endDate: "2026-04-18",
-    time: "11:00 AM",
-    endTime: "12:00 PM",
-    location: "Anderson Abruzzo Albuquerque International Balloon Museum",
-    address: "9201 Balloon Museum Dr NE, Albuquerque, NM 87113",
-    description: "Award-winning early childhood programming featuring stories, music, movement, and art — held every Saturday inside the beautiful Balloon Museum. Different themes each week for children up to 6 years old. A magical, interactive experience the whole family will love.",
-    price: "Free with admission",
-    priceNum: 7,
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=500&fit=crop&q=80",
-    gradient: "linear-gradient(135deg, #0369a1 0%, #fbbf24 100%)",
-    featured: false,
-    tags: ["kids", "music", "stories", "balloon museum", "family", "weekly", "toddler"],
-    isKidFriendly: true,
-    isOutdoor: false,
-    source: "City of ABQ",
-  },
-  {
-    id: "cabq-sculpture-garden-tour",
-    title: "Sculpture Garden Tours — Albuquerque Museum",
-    category: "Arts & Culture",
-    date: "2026-04-04",
-    time: "11:00 AM",
-    endTime: "12:00 PM",
-    location: "Albuquerque Museum",
-    address: "2000 Mountain Rd NW, Albuquerque, NM 87104",
-    description: "Enjoy a relaxing stroll through the Albuquerque Museum's outdoor sculpture garden with a friendly guide sharing the stories of artists and their works. A free Saturday morning tradition showcasing some of ABQ's most significant public art. Weather permitting.",
-    price: "Free",
-    priceNum: 0,
-    image: "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&h=500&fit=crop&q=80",
-    gradient: "linear-gradient(135deg, #b45309 0%, #d1d5db 100%)",
-    featured: false,
-    tags: ["sculpture", "art", "outdoor", "free", "museum", "guided tour", "Old Town"],
-    isKidFriendly: true,
-    isOutdoor: true,
-    source: "City of ABQ",
-  },
-
-  // ── ABQToDo ────────────────────────────────────────────────────────────────
-  {
-    id: "abqtodo-indigenous-freeways",
-    title: "Indigenous Freeways: Southwest Wildstyle — Exhibition",
-    category: "Arts & Culture",
-    date: "2026-03-28",
-    endDate: "2026-06-28",
-    time: "9:00 AM",
-    endTime: "5:00 PM",
-    location: "Indian Pueblo Cultural Center",
-    address: "2401 12th St NW, Albuquerque, NM 87104",
-    description: "Arrowsoul Art Collective's stunning mural installation fuses concepts of the beginning, present, and future of Indigenous pictographic arts. Based in the Southwest, Arrowsoul creates graffiti walls and murals that bridge ancient and contemporary expression. On display through late June.",
-    price: "Free with membership / $8 admission",
-    priceNum: 8,
-    image: "https://images.unsplash.com/photo-1549490349-8643362247b5?w=800&h=500&fit=crop&q=80",
-    gradient: "linear-gradient(135deg, #7c2d12 0%, #92400e 100%)",
-    featured: false,
-    tags: ["Indigenous", "mural", "art", "graffiti", "exhibition", "Indian Pueblo Cultural Center"],
-    isKidFriendly: true,
-    isOutdoor: false,
-    source: "ABQToDo",
-    ticketUrl: "https://abqtodo.com/event/indigenous-freeways-southwest-wildstyle-from-north-to-south/",
-  },
-    {
-    id: "abqtodo-old-town-walking-tour",
-    title: "Old Town Walking Tour",
-    category: "Community",
-    date: "2026-03-31",
-    endDate: "2026-06-30",
-    time: "11:00 AM",
-    endTime: "12:00 PM",
-    location: "Old Town Plaza",
-    address: "303 Romero St NW, Albuquerque, NM 87104",
-    description: "Explore Albuquerque's historic Old Town with a knowledgeable guide. This free 1-hour walking tour covers 300+ years of history, adobe architecture, and Pueblo culture. Offered daily and a perfect introduction to ABQ's most iconic neighborhood.",
-    price: "Free",
-    priceNum: 0,
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=500&fit=crop&q=80",
-    gradient: "linear-gradient(135deg, #b45309 0%, #fbbf24 100%)",
-    featured: false,
-    tags: ["walking tour", "Old Town", "history", "free", "guided", "adobe", "daily"],
-    isKidFriendly: true,
-    isOutdoor: true,
-    source: "ABQToDo",
-    ticketUrl: "https://abqtodo.com/event/old-town-walking-tours-53/",
-  },
 
   // ─────────────────────────────────────────────────────────
   // NEW TICKETMASTER EVENTS — refreshed 2026-03-28
@@ -3103,7 +2497,6 @@ export const ALL_EVENTS: Event[] = [
     isKidFriendly: true,
     source: "Ticketmaster",
     website: "https://www.ticketmaster.com/event/G5vzZbVKjkPPO",
-    ticketUrl: "https://www.ticketmaster.com/event/G5vzZbVKjkPPO",
   },
 
 
@@ -3122,7 +2515,6 @@ export const ALL_EVENTS: Event[] = [
     gradient: "linear-gradient(135deg, #1c1917 0%, #0c0a09 100%)",
     source: "Ticketmaster",
     website: "https://www.ticketmaster.com/event/16e0ZbyZ6G7wv6G",
-    ticketUrl: "https://www.ticketmaster.com/event/16e0ZbyZ6G7wv6G",
   },
 
 
@@ -3142,7 +2534,6 @@ export const ALL_EVENTS: Event[] = [
     gradient: "linear-gradient(135deg, #78350f 0%, #a16207 100%)",
     source: "Ticketmaster",
     website: "https://www.ticketmaster.com/event/G5vzZbUh_Zblm",
-    ticketUrl: "https://www.ticketmaster.com/event/G5vzZbUh_Zblm",
   },
   {
     id: "tm-260418-bingoloco",
@@ -3160,7 +2551,6 @@ export const ALL_EVENTS: Event[] = [
     is21Plus: true,
     source: "Ticketmaster",
     website: "https://www.ticketmaster.com/event/Z7r9jZ1A7-778",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7-778",
   },
   {
     id: "tm-260418-ilovethe90s",
@@ -3179,7 +2569,6 @@ export const ALL_EVENTS: Event[] = [
     tags: ["90s", "nostalgia", "Vanilla Ice", "Color Me Badd"],
     source: "Ticketmaster",
     website: "https://www.ticketmaster.com/event/G5vzZbz38MpjC",
-    ticketUrl: "https://www.ticketmaster.com/event/G5vzZbz38MpjC",
   },
 
 
@@ -3204,7 +2593,6 @@ export const ALL_EVENTS: Event[] = [
     gradient: "linear-gradient(135deg, #1c1917 0%, #292524 100%)",
     source: "Ticketmaster",
     website: "https://www.ticketmaster.com/event/Z7r9jZ1A7qk3e",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7qk3e",
   },
   {
     id: "tm-260427-afi",
@@ -3221,7 +2609,6 @@ export const ALL_EVENTS: Event[] = [
     gradient: "linear-gradient(135deg, #1c1917 0%, #0c0a09 100%)",
     source: "Ticketmaster",
     website: "https://www.ticketmaster.com/event/Z7r9jZ1A7O3kb",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7O3kb",
   },
   {
     id: "tm-260429-kidcudi",
@@ -3239,31 +2626,6 @@ export const ALL_EVENTS: Event[] = [
     featured: true,
     source: "Ticketmaster",
     website: "https://www.ticketmaster.com/event/G5vzZ_eXEzb6a",
-    ticketUrl: "https://www.ticketmaster.com/event/G5vzZ_eXEzb6a",
-  },
-
-  // ─── New Eventbrite events — refreshed 2026-03-28 ──────────────────────────
-  {
-    id: "eb-nm-renaissance-celtic",
-    title: "NM Renaissance Celtic Festival",
-    category: "Festival",
-    date: "2026-03-28",
-    endDate: "2026-04-05",
-    time: "10:00 AM",
-    endTime: "5:00 PM",
-    location: "Wildlife West Nature Park",
-    address: "87 N Frontage Rd, Edgewood, NM 87015",
-    description: "Two weekends of Renaissance and Celtic fun at Wildlife West Nature Park near Edgewood! Jousting, live music, artisan vendors, food, and costumes encouraged. Great family outing in the East Mountains.",
-    price: "See website",
-    priceNum: 0,
-    image: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&h=500&fit=crop&q=80",
-    gradient: "linear-gradient(135deg, #14532d 0%, #166534 100%)",
-    featured: true,
-    isKidFriendly: true,
-    isOutdoor: true,
-    tags: ["renaissance", "celtic", "festival", "East Mountains", "Edgewood", "family", "outdoor"],
-    source: "Eventbrite",
-    ticketUrl: "https://www.eventbrite.com/e/nm-renaissance-celtic-festival-2-weekends-mar-28-29-apr-4-5-tickets-1680397126039",
   },
             {
     id: "eb-perreoland-abq",
@@ -3303,7 +2665,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7QpOU",
   },
   {
     id: "tm-20260424-ayybo-ages-18",
@@ -3325,7 +2686,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7rajz",
   },
   {
     id: "tm-20260515-boots-in-the-park-2-day-pass",
@@ -3347,7 +2707,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OkPN",
   },
   {
     id: "tm-20260520-mgk-lost-americana-tour",
@@ -3369,7 +2728,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/mgk-lost-americana-tour-albuquerque-new-mexico-05-20-2026/event/1E006323A209262C",
   },
   {
     id: "tm-20260521-the-rock-orchestra-by-candleli",
@@ -3391,7 +2749,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/the-rock-orchestra-by-candlelight-albuquerque-new-mexico-05-21-2026/event/1E006351D6055301",
   },
   {
     id: "tm-20260526-2026-ampers-one-live-tour-born",
@@ -3413,7 +2770,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketweb.com/event/2026-ampersone-live-tour-born-the-historic-lobo-theater-lounge-tickets/14795213",
   },
   {
     id: "tm-20260527-kali-uchis-for-the-girls-tour",
@@ -3435,7 +2791,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/kali-uchis-for-the-girls-tour-albuquerque-new-mexico-05-27-2026/event/1E00647AB3CDA9F3",
   },
   {
     id: "tm-20260530-totally-rad-vintage-fest",
@@ -3479,7 +2834,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/ali-siddiq-the-custom-fit-tour-albuquerque-new-mexico-05-30-2026/event/1E00643078C63C1B",
   },
   {
     id: "tm-20260601-the-kid-laroi-a-perfect-world",
@@ -3501,7 +2855,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7-F_g",
   },
   {
     id: "tm-20260605-john-mulaney-mister-whatever",
@@ -3523,7 +2876,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/john-mulaney-mister-whatever-albuquerque-new-mexico-06-05-2026/event/1E00644D898D740E",
   },
   {
     id: "tm-20260608-ringo-starr-and-his-all-starr",
@@ -3545,7 +2897,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/ringo-starr-and-his-all-starr-albuquerque-new-mexico-06-08-2026/event/1E00636CBF7085F1",
   },
   {
     id: "tm-20260612-patti-labelle",
@@ -3567,7 +2918,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/patti-labelle-albuquerque-new-mexico-06-12-2026/event/1E00646DACCBA1F1",
   },
   {
     id: "tm-20260613-luke-bryan-word-on-the-street",
@@ -3589,7 +2939,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/luke-bryan-word-on-the-street-albuquerque-new-mexico-06-13-2026/event/1E006435D1D1C5A9",
   },
   {
     id: "tm-20260617-kenny-wayne-shepherd-the-30th",
@@ -3611,7 +2960,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/kenny-wayne-shepherd-the-30th-anniversary-albuquerque-new-mexico-06-17-2026/event/1E00636CD4739289",
   },
   {
     id: "tm-20260619-herb-alpert-the-tijuana-brass",
@@ -3633,7 +2981,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/herb-alpert-the-tijuana-brass-other-albuquerque-new-mexico-06-19-2026/event/1E00636D75625FC2",
   },
   {
     id: "tm-20260620-loverboy",
@@ -3655,7 +3002,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/loverboy-albuquerque-new-mexico-06-20-2026/event/1E006342D3DC582D",
   },
   {
     id: "tm-20260623-killswitch-engage",
@@ -3677,7 +3023,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7-Oko",
   },
   {
     id: "tm-20260627-gabriel-iglesias",
@@ -3699,7 +3044,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7-kPx",
   },
   {
     id: "tm-20260627-ralph-barbosa",
@@ -3721,7 +3065,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/ralph-barbosa-albuquerque-new-mexico-06-27-2026/event/1E00645281B55407",
   },
   {
     id: "tm-20260702-hilary-duff-the-lucky-me-tour",
@@ -3743,7 +3086,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/hilary-duff-the-lucky-me-tour-albuquerque-new-mexico-07-02-2026/event/1E00645A80CB5D67",
   },
   {
     id: "tm-20260714-evanescence-2026-world-tour-wi",
@@ -3765,7 +3107,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/evanescence-2026-world-tour-with-spiritbox-albuquerque-new-mexico-07-14-2026/event/1E006378D1AA7D09",
   },
   {
     id: "tm-20260715-happy-together-tour",
@@ -3787,7 +3128,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/happy-together-tour-albuquerque-new-mexico-07-15-2026/event/1E00644CB6C9D31A",
   },
   {
     id: "tm-20260716-josh-turner-this-country-music",
@@ -3809,7 +3149,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/josh-turner-this-country-music-thing-albuquerque-new-mexico-07-16-2026/event/1E006457A73298C4",
   },
   {
     id: "tm-20260722-jinjer-duel-north-america-2026",
@@ -3831,7 +3170,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7-t3F",
   },
   {
     id: "tm-20260724-darius-rucker-songs-of-summer",
@@ -3853,7 +3191,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/darius-rucker-songs-of-summer-tour-albuquerque-new-mexico-07-24-2026/event/1E006453E2DC8D3C",
   },
   {
     id: "tm-20260728-motionless-in-white-the-sweat",
@@ -3875,7 +3212,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/motionless-in-white-the-sweat-and-albuquerque-new-mexico-07-28-2026/event/1E00643BC14581BF",
   },
   {
     id: "tm-20260730-grupo-frontera-tour",
@@ -3897,7 +3233,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/grupo-frontera-tour-rio-rancho-new-mexico-07-30-2026/event/1E006479C2F2B101",
   },
   {
     id: "tm-20260805-simple-plan-bigger-than-you-th",
@@ -3919,7 +3254,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/simple-plan-bigger-than-you-think-albuquerque-new-mexico-08-05-2026/event/1E006442E30D871E",
   },
   {
     id: "tm-20260809-poppy-constantly-nowhere-tour",
@@ -3941,7 +3275,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7-6uk",
   },
   {
     id: "tm-20260810-toto-christopher-cross-the-rom",
@@ -3963,7 +3296,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/toto-christopher-cross-the-romantics-albuquerque-new-mexico-08-10-2026/event/1E006383A94A8F88",
   },
   {
     id: "tm-20260816-ne-yo-akon-nights-like-this-to",
@@ -3985,7 +3317,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/neyo-akon-nights-like-this-tour-albuquerque-new-mexico-08-16-2026/event/1E006435D5F4C92A",
   },
   {
     id: "tm-20260820-r-f-s-du-sol-north-america-202",
@@ -4007,7 +3338,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/rufus-du-sol-north-america-2026-albuquerque-new-mexico-08-20-2026/event/1E00644CC5B0E5F1",
   },
   {
     id: "tm-20260822-tori-amos",
@@ -4029,7 +3359,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OPGg",
   },
   {
     id: "tm-20260904-brantley-gilbert-the-tattoos-t",
@@ -4051,7 +3380,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/brantley-gilbert-the-tattoos-tour-2025-rio-rancho-new-mexico-09-04-2026/event/1E0062C3D41034B8",
   },
   {
     id: "tm-20260905-new-mexico-lobos-football-vs-c",
@@ -4073,7 +3401,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7O8FV",
   },
   {
     id: "tm-20260911-turnpike-troubadours",
@@ -4095,7 +3422,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7-0ak",
   },
   {
     id: "tm-20260913-the-return-of-the-carnival-of",
@@ -4117,7 +3443,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/the-return-of-the-carnival-of-albuquerque-new-mexico-09-13-2026/event/1E00636EA0A7745D",
   },
   {
     id: "tm-20260925-five-finger-death-punch",
@@ -4139,7 +3464,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/five-finger-death-punch-albuquerque-new-mexico-09-25-2026/event/1E006427997B50AB",
   },
   {
     id: "tm-20260925-bilmuri-kinda-hard-tour",
@@ -4161,7 +3485,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7-Z3F",
   },
   {
     id: "tm-20260928-wu-tang-forever-the-final-cham",
@@ -4183,7 +3506,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/wutang-forever-the-final-chamber-albuquerque-new-mexico-09-28-2026/event/1E0064729E007553",
   },
   {
     id: "tm-20261003-mumford-sons-prizefighter-tour",
@@ -4205,160 +3527,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/mumford-sons-prizefighter-tour-albuquerque-new-mexico-10-03-2026/event/1E006451E0B3E62C",
-  },
-
-  {
-    id: 'abq365-centennial-roots-exhibit',
-    title: 'Centennial Roots - Exhibit Opening',
-    date: '2026-04-04',
-    category: 'Arts & Culture',
-    ticketUrl: 'https://www.visitalbuquerque.org/event/centennial-roots-exhibit-opening/63236/',
-    price: 'Free',
-    source: 'ABQ365',
-    location: 'Route 66 Visitor Center, Albuquerque',
-  },
-  {
-    id: 'abq365-full-circle-valentine-viannay',
-    title: '"Full Circle" // Valentine Viannay Opening Reception',
-    date: '2026-03-31',
-    endDate: '2026-04-26',
-    category: 'Arts & Culture',
-    ticketUrl: 'https://www.visitalbuquerque.org/event/full-circle-valentine-viannay-opening-reception/63204/',
-    price: 'Free',
-    source: 'ABQ365',
-    location: 'Albuquerque, NM',
-  },
-  {
-    id: 'abq365-bc-nowlin-shared-passages',
-    title: 'BC Nowlin Solo Exhibition: Shared Passages, Distant Journeys',
-    date: '2026-03-31',
-    endDate: '2026-04-11',
-    category: 'Arts & Culture',
-    price: 'Free',
-    source: 'ABQ365',
-    location: 'Albuquerque, NM',
-  },
-  {
-    id: 'abq365-bunny-leland-bowen-trees',
-    title: 'Bunny & Leland Bowen: We Are in the Trees',
-    date: '2026-03-31',
-    endDate: '2026-04-26',
-    category: 'Arts & Culture',
-    ticketUrl: 'https://www.visitalbuquerque.org/event/bunny-leland-bowen-we-are-in-the-trees/63094/',
-    price: 'Free',
-    source: 'ABQ365',
-    location: 'Albuquerque, NM',
-  },
-  {
-    id: 'abq365-masterworks-nm-28th-fine-art',
-    title: 'Masterworks of New Mexico 28th Annual Fine Art Show',
-    date: '2026-03-31',
-    endDate: '2026-04-19',
-    category: 'Arts & Culture',
-    price: 'Free',
-    source: 'ABQ365',
-    location: 'Albuquerque, NM',
-  },
-  {
-    id: 'abq365-order-through-chaos-exhibition',
-    title: 'Order through Chaos Exhibition',
-    date: '2026-03-31',
-    endDate: '2026-04-04',
-    category: 'Arts & Culture',
-    price: 'Free',
-    source: 'ABQ365',
-    location: 'Albuquerque, NM',
-  },
-
-
-  {
-    id: 'abq365-italia-postwar-ceramics',
-    title: 'Italia: a Material Study of Post-War Italian Ceramics',
-    date: '2026-03-31',
-    endDate: '2026-04-11',
-    category: 'Arts & Culture',
-    ticketUrl: 'https://www.visitalbuquerque.org/event/italia-a-material-study-of-post-war-italian-ceramics/62936/',
-    price: 'Free',
-    source: 'ABQ365',
-    location: 'Albuquerque, NM',
-  },
-  {
-    id: 'abq365-live-music-town-ranch',
-    title: 'Live Music at Town & Ranch',
-    date: '2026-03-31',
-    endDate: '2026-05-27',
-    category: 'Live Music',
-    price: 'Free',
-    source: 'ABQ365',
-    location: 'Albuquerque, NM',
-  },
-  {
-    id: 'abq365-marvelous-magnetic-tiles',
-    title: 'Marvelous Magnetic Tiles',
-    date: '2026-04-02',
-    endDate: '2026-04-11',
-    category: 'Family',
-    price: 'Free',
-    source: 'ABQ365',
-    location: 'Albuquerque, NM',
-  },
-
-  // ─── Easter ABQ ─────────────────────────────────────────────────────────────
-  {
-    id: 'easter-sunrise-abq-2026',
-    title: "Easter Sunrise Service at UNM Stadium",
-    date: '2026-04-05',
-    time: '7:30 AM',
-    category: 'Community',
-    image: 'https://easterabq.com/wp-content/uploads/Easter-Sunrise-2026-Logo.webp',
-    additionalImages: [
-      'https://easterabq.com/wp-content/uploads/2019-wide-03.jpg',
-      'https://easterabq.com/wp-content/uploads/2019-wide-01.jpg',
-      'https://easterabq.com/wp-content/uploads/2019-wide-02.jpg',
-      'https://easterabq.com/wp-content/uploads/2019-tall-01.webp',
-      'https://easterabq.com/wp-content/uploads/2019-tall-02.webp',
-    ],
-    description: "New Mexico's biggest Easter sunrise service at UNM Stadium. Featuring worship by Calvary MSC and Grammy-nominated Tim Timmons, with a message by Pastor Skip Heitzig. Free admission — no tickets required. Spanish translation and deaf interpretation available. Doors open 6:30 AM. Also broadcasting live on KRQE at 7am, and noon on FOX, CW, and NM 50.",
-    pleaseNote: "No backpacks — all bags subject to inspection. Doors open 6:30 AM, service starts 7:30 AM. No tickets required, free admission. Spanish translation and deaf interpretation available.",
-    ticketUrl: 'https://easterabq.com/',
-    price: 'Free',
-    priceNum: 0,
-    location: 'UNM Stadium',
-    address: '1111 Stadium Blvd SE, Albuquerque, NM 87106',
-    source: 'ABQ365',
-    isKidFriendly: true,
-    isOutdoor: true,
-    isAccessible: true,
-  },
-
-  // ─── Museum Foundation NM ───────────────────────────────────────────────────
-  // NM state museums are free for NM residents. Events at museums across NM.
-
-
-
-  {
-    id: 'mnmf-early-nm-furniture-workshop',
-    title: 'Making Early New Mexican Furniture',
-    date: '2026-04-04',
-    category: 'Arts & Culture',
-    description: 'Historic Sites workshop on traditional New Mexican furniture-making techniques.',
-    ticketUrl: 'https://www.museumfoundation.org/events/?eventmode=upcoming',
-    price: 'Free (NM residents)',
-    location: 'NM Historic Sites',
-    source: 'Museum Foundation NM',
-  },
-  {
-    id: 'mnmf-yarn-basketweaving',
-    title: 'Sunday Fun Day: Yarn Basketweaving',
-    date: '2026-04-05',
-    category: 'Family',
-    description: 'Hands-on yarn basketweaving workshop for all ages at the Museum of Indian Arts & Culture.',
-    ticketUrl: 'https://www.museumfoundation.org/events/?eventmode=upcoming',
-    price: 'Free (NM residents)',
-    location: 'Museum of Indian Arts & Culture, Santa Fe',
-    source: 'Museum Foundation NM',
-    isKidFriendly: true,
   },
   {
     id: 'mnmf-cultures-creators-apr',
@@ -4982,27 +4150,6 @@ export const ALL_EVENTS: Event[] = [
     isAccessible: true,
     tags: ['art', 'galleries', 'first friday', 'downtown'],
   },
-
-  // ABQ Historical Society — Free Downtown Walking Tour (Saturdays Feb–Nov)
-  {
-    id: 'visitabq-walking-tour-apr-2026',
-    title: 'Free Downtown Walking Tour — ABQ Historical Society',
-    date: '2026-04-04',
-    time: '10:00 AM',
-    endTime: '11:30 AM',
-    category: 'Arts & Culture',
-    description: 'The Albuquerque Historical Society offers a free guided Downtown Walking Tour every Saturday at 10 a.m. from February through November. Learn the history and lore of downtown ABQ from knowledgeable local guides. No reservation required.',
-    ticketUrl: 'https://www.visitalbuquerque.org/plan-my-trip/specials-coupons/affordable/free/',
-    price: 'Free',
-    priceNum: 0,
-    location: 'Downtown Albuquerque',
-    address: 'Central Ave & 5th St NW, Albuquerque, NM 87102',
-    source: 'Visit ABQ',
-    isKidFriendly: true,
-    isOutdoor: true,
-    isAccessible: true,
-    tags: ['history', 'walking tour', 'downtown', 'free'],
-  },
   {
     id: 'visitabq-walking-tour-may-2026',
     title: 'Free Downtown Walking Tour — ABQ Historical Society',
@@ -5333,7 +4480,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7r4_7",
   },
   {
     id: "tm-G5vzZ_6T7mGvK",
@@ -5355,7 +4501,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: true,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/johnny-blue-skies-the-dark-clouds-rio-rancho-new-mexico-09-06-2026/event/1E00647FC4B8C053",
   },
   {
     id: "tm-G5vzZ_d9_PHRl",
@@ -5377,7 +4522,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: true,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/godsmack-the-rise-of-rock-world-albuquerque-new-mexico-09-07-2026/event/1E006435D997CBEB",
   },
   {
     id: "tm-G5vzZ_6lIdXw3",
@@ -5399,7 +4543,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: true,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/babymetal-world-tour-2026-albuquerque-new-mexico-09-29-2026/event/1E00647AE80FEC92",
   },
   {
     id: "tm-G5vzZ_7w2bat0",
@@ -5421,7 +4564,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: true,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/breaking-benjamin-albuquerque-new-mexico-10-07-2026/event/1E00644C8F609A64",
   },
   {
     id: "tm-G5vzZ_kpRx1Vp",
@@ -5443,7 +4585,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: true,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/thomas-rhett-the-soundtrack-to-life-albuquerque-new-mexico-10-09-2026/event/1E006465AF88AD16",
   },
   {
     id: "tm-G5vzZ_6ROeTL_",
@@ -5465,7 +4606,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: true,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/uicideboy-present-grey-day-tour-2026-albuquerque-new-mexico-10-10-2026/event/1E00647BE00BF7D9",
   },
   {
     id: "tm-G5vzZ_dSirnEj",
@@ -5487,7 +4627,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: true,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/staind-break-the-cycle-25th-anniversary-albuquerque-new-mexico-10-14-2026/event/1E00643CEC7AA9DC",
   },
   {
     id: "tm-Z7r9jZ1A7-P8P",
@@ -5509,7 +4648,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7-P8P",
   },
   {
     id: "tm-Z7r9jZ1A7-IOo",
@@ -5531,7 +4669,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7-IOo",
   },
   {
     id: "tm-Z7r9jZ1A7-IOb",
@@ -5553,7 +4690,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7-IOb",
   },
   {
     id: "tm-Z7r9jZ1A7-IOw",
@@ -5575,7 +4711,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7-IOw",
   },
   {
     id: "tm-Z7r9jZ1A7-IOy",
@@ -5597,7 +4732,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7-IOy",
   },
   {
     id: "tm-Z7r9jZ1A7-I-6",
@@ -5619,7 +4753,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7-I-6",
   },
   {
     id: "nm-united-Z7r9jZ1A7OF0g",
@@ -5641,7 +4774,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: true,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OF0g",
   },
   {
     id: "nm-united-Z7r9jZ1A7OF0U",
@@ -5663,7 +4795,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: true,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OF0U",
   },
   {
     id: "nm-united-Z7r9jZ1A7OF0M",
@@ -5685,7 +4816,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: true,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OF0M",
   },
   {
     id: "nm-united-Z7r9jZ1A7OF0z",
@@ -5707,7 +4837,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: true,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OF0z",
   },
   {
     id: "nm-united-Z7r9jZ1A7OF0y",
@@ -5729,7 +4858,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: true,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OF0y",
   },
   {
     id: "nm-united-Z7r9jZ1A7OFPZ",
@@ -5751,7 +4879,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: true,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OFPZ",
   },
   {
     id: "nm-united-Z7r9jZ1A7OFPv",
@@ -5773,7 +4900,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: true,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OFPv",
   },
   {
     id: "nm-united-Z7r9jZ1A7OFPe",
@@ -5795,7 +4921,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: true,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OFPe",
   },
   {
     id: "nm-united-Z7r9jZ1A7OFPd",
@@ -5817,7 +4942,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: true,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OFPd",
   },
   {
     id: "nm-united-Z7r9jZ1A7OFP7",
@@ -5839,7 +4963,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: true,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OFP7",
   },
   {
     id: "nm-united-Z7r9jZ1A7OFPA",
@@ -5861,7 +4984,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: true,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OFPA",
   },
   {
     id: "nm-united-Z7r9jZ1A7OFP6",
@@ -5883,7 +5005,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: true,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/event/Z7r9jZ1A7OFP6",
   },
   {
     id: "tm-G5vzZ_7983yqh",
@@ -5905,7 +5026,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/brad-williams-the-tall-tales-tour-albuquerque-new-mexico-11-20-2026/event/1E006445D04B975B",
   },
   {
     id: "tm-G5vzZ_6rE3EhO",
@@ -5927,7 +5047,6 @@ export const ALL_EVENTS: Event[] = [
     isOutdoor: false,
     isAccessible: true,
     source: "Ticketmaster",
-    ticketUrl: "https://www.ticketmaster.com/nutcracker-magical-christmas-ballet-albuquerque-new-mexico-11-27-2026/event/1E006477A74A76E0",
   },
 ];
 
@@ -6056,87 +5175,6 @@ export async function fetchLiveEvents(): Promise<Event[]> {
     return [];
   }
 }
-
-// Load places from pre-baked Google Places JSON (public/data/google-places.json)
-export async function fetchLivePlaces(): Promise<unknown[]> {
-  try {
-    const res = await fetch("/data/google-places.json");
-    if (!res.ok) return [];
-    const data = await res.json();
-    return Array.isArray(data) ? data : [];
-  } catch {
-    return [  {
-    id: 'abq365-free-art-for-the-soul',
-    title: 'Art for the Soul',
-    date: '2026-04-03',
-    venue: 'The Gallery Abq',
-    location: 'Albuquerque, NM',
-    category: 'Arts & Culture',
-    description: 'Art for the Soul at The Gallery Abq. Free admission.',
-    url: 'https://www.visitalbuquerque.org/event/art-for-the-soul/63230/',
-    imageUrl: 'https://assets.simpleviewinc.com/simpleview/image/upload/c_fill,h_200,q_70,w_266/v1/crm/albuquerque/Fault-Line_Kane_500jpg_B960C47D-DA72-2FE3-9EE9054F3984BA0C_b98ad649-bed6-5ad0-838cf7d18715ddf8.jpg',
-    price: 'Free',
-    source: 'ABQ365',
-    _source: 'local',
-  },
-  {
-    id: 'abq365-free-exploring-texture-an-artist-talk-with-emerging-nm-artists',
-    title: 'Exploring Texture: An Artist Talk with Emerging NM Artists',
-    date: '2026-04-03',
-    venue: 'Blue Sky Coworking NM',
-    location: 'Albuquerque, NM',
-    category: 'Arts & Culture',
-    description: 'Exploring Texture: An Artist Talk with Emerging NM Artists at Blue Sky Coworking NM. Free admission.',
-    url: 'https://www.visitalbuquerque.org/event/exploring-texture%3a-an-artist-talk-with-emerging-nm-artists/63070/',
-    imageUrl: 'https://assets.simpleviewinc.com/simpleview/image/upload/c_fill,h_200,q_70,w_266/v1/crm/albuquerque/Amy-Julia_DFF9E8AA-ADDA-1237-DCC194A12EB10237_e00db073-cf0a-dfb6-ffb942a4af2b3ceb.jpg',
-    price: 'Free',
-    source: 'ABQ365',
-    _source: 'local',
-  },
-  {
-    id: 'abq365-free-historic-house-tour-gutierrez-hubbell-house',
-    title: 'Historic House Tour - Gutierrez-Hubbell House',
-    date: '2026-04-03',
-    endDate: '2026-05-30',
-    venue: 'Gutierrez-Hubbell House Museum',
-    location: 'Albuquerque, NM',
-    category: 'History & Culture',
-    description: 'Historic House Tour - Gutierrez-Hubbell House at Gutierrez-Hubbell House Museum. Free admission.',
-    url: 'https://www.visitalbuquerque.org/event/historic-house-tour-gutierrez-hubbell-house/62379/',
-    imageUrl: 'https://assets.simpleviewinc.com/simpleview/image/upload/c_fill,h_200,q_70,w_266/v1/crm/albuquerque/Historic-House-Tour-Square_370974B0-B47D-B4A2-5C1C57C6B9839333_37382ab8-d038-a0ae-33496695fd9b47ee.jpg',
-    price: 'Free',
-    source: 'ABQ365',
-    _source: 'local',
-  },
-  {
-    id: 'abq365-free-lavendar-weekend-jos-farms',
-    title: 'Lavendar Weekend @ Jo\'s Farms',
-    date: '2026-04-03',
-    endDate: '2026-04-05',
-    venue: 'Jo\'s Farms',
-    location: 'Albuquerque, NM',
-    category: 'Family',
-    description: 'Lavendar Weekend @ Jo\'s Farms at Jo\'s Farms. Free admission.',
-    url: 'https://www.visitalbuquerque.org/event/lavendar-weekend-%40-jos-farms/63234/',
-    imageUrl: 'https://assets.simpleviewinc.com/simpleview/image/upload/c_fill,h_200,q_70,w_266/v1/crm/albuquerque/cf4a58b9-659e-4082-aa7e-dd243a827ed5_DE2007A5-ECF5-1924-41E7013829EF0739_de4cd1bd-ba9a-930e-f6f55d5eb77e6711.jpg',
-    price: 'Free',
-    source: 'ABQ365',
-    _source: 'local',
-  },
-  {
-    id: 'abq365-free-opening-reception-route-66-alburquerque',
-    title: 'Opening Reception: Route 66 & AlbuRquerque',
-    date: '2026-04-03',
-    venue: 'The Groove Artspace',
-    location: 'Albuquerque, NM',
-    category: 'History & Culture',
-    description: 'Opening Reception: Route 66 & AlbuRquerque at The Groove Artspace. Free admission.',
-    url: 'https://www.visitalbuquerque.org/event/opening-reception%3a-route-66-%26-alburquerque/62792/',
-    imageUrl: 'https://assets.simpleviewinc.com/simpleview/image/upload/c_fill,h_200,q_70,w_266/v1/crm/albuquerque/Screenshot-2026-02-12-092822_3AB02466-CDF6-A169-4888D2EC61BB654F_3ab9fd3c-d455-3ee5-d1cf719755377752.png',
-    price: 'Free',
-    source: 'ABQ365',
-    _source: 'local',
-  },
 ];
   }
 }
