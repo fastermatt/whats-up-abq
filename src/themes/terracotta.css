@@ -273,6 +273,11 @@ html.dark input::placeholder { color: rgba(255,255,255,0.30) !important; }
 html.dark .uc-shadow { box-shadow: 0 4px 16px rgba(0,0,0,0.36); }
 html.dark .uc-shadow-sm { box-shadow: 0 2px 8px rgba(0,0,0,0.26); }
 
+/* Dim hero texture image in dark mode so fallback --bg shows through more */
+html.dark [style*="hero-texture.jpg"] {
+  filter: brightness(0.35) saturate(0.5);
+}
+
 
 html.lg {
   --bg: transparent;
