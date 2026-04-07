@@ -4337,7 +4337,7 @@ function DiscoverScreen({
 
       {/* This Week Events — brutalist table layout */}
       {!hidden.includes('thisWeek') && eventsLoading && upcomingEvents.length === 0 && (
-        <div className="mb-5 mx-5" style={{ border: isDark ? '1px solid rgba(201,122,98,0.18)' : '1px solid rgba(0,0,0,0.12)', boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.35)' : '0 2px 8px rgba(0,0,0,0.10)' }}>
+        <div className="mb-5 mx-5" style={{ border: '1px solid var(--brand-tint-border)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>
           <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', backgroundColor: 'var(--bg)' }}>
             <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em' }}>Events This Week</h2>
             <span className="text-xs font-black" style={{ color: '#aaa' }}>Loading…</span>
@@ -4352,7 +4352,7 @@ function DiscoverScreen({
         </div>
       )}
       {!hidden.includes('thisWeek') && upcomingEvents.length > 0 && (
-        <div className="mb-5 mx-5" style={{ border: isDark ? '1px solid rgba(201,122,98,0.18)' : '1px solid rgba(0,0,0,0.12)', boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.35)' : '0 2px 8px rgba(0,0,0,0.10)' }}>
+        <div className="mb-5 mx-5" style={{ border: '1px solid var(--brand-tint-border)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', backgroundColor: 'var(--bg)' }}>
             <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>
@@ -5761,7 +5761,7 @@ function PlacesScreen({
       <div className="px-5 pb-3">
         <div
           className="flex items-center gap-2 bg-white px-4 py-3"
-          style={{ border: isDark ? '1px solid rgba(201,122,98,0.18)' : '1px solid rgba(0,0,0,0.12)', boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.35)' : '0 2px 8px rgba(0,0,0,0.10)' }}
+          style={{ border: '1px solid var(--brand-tint-border)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}
         >
           <span className="material-symbols-outlined text-gray-400" style={{ fontSize: '20px' }}>search</span>
           <input
