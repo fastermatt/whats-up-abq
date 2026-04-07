@@ -5309,7 +5309,7 @@ function EventsScreen({
           })}
           {/* Category dropdown trigger */}
           {(() => {
-            const CAT_GENRES = ['Music','Comedy','Arts','Sports','Family','Outdoor','Free','Volunteer'];
+            const CAT_GENRES = ['Music','Comedy','Arts','Sports','Family','Outdoor','Free','Volunteer','Movie'];
             const isCatSelected = CAT_GENRES.includes(selectedGenre);
             return (
               <button
@@ -5347,6 +5347,7 @@ function EventsScreen({
                 { genre: 'Outdoor',   icon: 'outdoor',   color: '#065F46' },
                 { genre: 'Free',      icon: 'free',      color: '#0F766E' },
                 { genre: 'Volunteer', icon: 'volunteer', color: '#BE185D' },
+                { genre: 'Movie',     icon: 'film',      color: '#1F2937' },
               ].map(({ genre, icon, color }) => (
                 <button
                   key={genre}
