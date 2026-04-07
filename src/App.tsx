@@ -4918,6 +4918,7 @@ function EventsScreen({
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showCatDropdown, setShowCatDropdown] = useState(false);
   const [calendarSelDate, setCalendarSelDate] = useState<string | null>(null);
   const [wishlistVersion, setWishlistVersion] = useState(0);
   useEffect(() => {
@@ -5182,52 +5183,98 @@ function EventsScreen({
         </div>
       </div>
 
-      <div className="flex px-5 overflow-x-auto" style={{ scrollbarWidth: 'none', position: 'sticky', top: 'calc(var(--sat) + 58px)', zIndex: 30, background: 'var(--bg)', paddingTop: '12px', paddingBottom: '0px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-        {EVENT_GENRES.map(genre => {
-          const isForYou = genre === '❤️ For You';
-          const isSelected = selectedGenre === genre;
-          const isFollowed = !isForYou && followedGenres.includes(genre);
-          return (
-            <div key={genre} className="flex-shrink-0 flex items-stretch" style={{ marginRight: '-1.5px', position: 'relative', zIndex: isSelected ? 1 : 0, marginBottom: '12px' }}>
+      {/* Quick filter pills + Category dropdown */}
+      <div style={{ position: 'sticky', top: 'calc(var(--sat) + 58px)', zIndex: 30, background: 'var(--bg)', borderBottom: showCatDropdown ? 'none' : '1px solid rgba(0,0,0,0.08)' }}>
+        <div className="flex px-5 gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none', paddingTop: '10px', paddingBottom: '10px' }}>
+          {(['All', 'Tonight', 'This Weekend', '\u2764\ufe0f For You'] as const).map(genre => {
+            const isForYou = genre === '\u2764\ufe0f For You';
+            const isSelected = selectedGenre === genre;
+            return (
               <button
-                onClick={() => setSelectedGenre(genre)}
-                className="px-3 py-2 text-xs font-black uppercase transition-all"
+                key={genre}
+                onClick={() => { setSelectedGenre(genre); setShowCatDropdown(false); }}
+                className="flex-shrink-0 px-3 py-2 text-xs font-black uppercase transition-all"
                 style={{
                   fontFamily: 'Public Sans, sans-serif',
                   letterSpacing: '0.1em',
                   background: isSelected ? 'var(--brand)' : isForYou && followedGenres.length > 0 ? 'var(--brand-bg-subtle)' : 'var(--bg)',
                   color: isSelected ? 'white' : 'var(--ink)',
                   border: '1px solid rgba(0,0,0,0.12)',
-                  borderRight: 'none',
                   borderRadius: 6,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
                 }}
               >
                 {genre}
               </button>
-              {/* Star toggle — shown on genre chips only (not date chips or All/For You) */}
-              {!isForYou && genre !== 'All' && genre !== 'Tonight' && genre !== 'This Weekend' && (
+            );
+          })}
+          {/* Category dropdown trigger */}
+          {(() => {
+            const CAT_GENRES = ['Music','Comedy','Arts','Sports','Family','Outdoor','Free','Volunteer'];
+            const isCatSelected = CAT_GENRES.includes(selectedGenre);
+            return (
+              <button
+                className="flex-shrink-0 px-3 py-2 text-xs font-black uppercase transition-all"
+                onClick={() => setShowCatDropdown(v => !v)}
+                style={{
+                  fontFamily: 'Public Sans, sans-serif',
+                  letterSpacing: '0.1em',
+                  background: isCatSelected ? 'var(--brand)' : showCatDropdown ? 'rgba(201,122,98,0.12)' : 'var(--bg)',
+                  color: isCatSelected ? 'white' : 'var(--ink)',
+                  border: '1px solid rgba(0,0,0,0.12)',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+              >
+                {isCatSelected ? selectedGenre : 'Category'} \u25be
+              </button>
+            );
+          })()}
+        </div>
+        {/* Category dropdown panel — same grid as Discover page */}
+        {showCatDropdown && (
+          <div className="px-5 pb-4" style={{ background: 'var(--bg)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+              {[
+                { genre: 'Music',     icon: 'music',     color: '#8B3A0F' },
+                { genre: 'Comedy',    icon: 'comedy',    color: '#B45309' },
+                { genre: 'Arts',      icon: 'art',       color: '#6D28D9' },
+                { genre: 'Sports',    icon: 'sports',    color: '#1D4ED8' },
+                { genre: 'Family',    icon: 'family',    color: '#047857' },
+                { genre: 'Outdoor',   icon: 'outdoor',   color: '#065F46' },
+                { genre: 'Free',      icon: 'free',      color: '#0F766E' },
+                { genre: 'Volunteer', icon: 'volunteer', color: '#BE185D' },
+              ].map(({ genre, icon, color }) => (
                 <button
-                  onClick={() => toggleFollowGenre(genre)}
-                  title={isFollowed ? `Remove ${genre} from For You` : `Add ${genre} to For You`}
+                  key={genre}
+                  onClick={() => { setSelectedGenre(genre); setShowCatDropdown(false); }}
+                  className="transition-all active:scale-95"
                   style={{
-                    background: isSelected ? '#333' : isFollowed ? 'var(--brand)' : '#f5f5f5',
-                    color: isFollowed || isSelected ? 'white' : '#999',
-                    border: '1px solid rgba(0,0,0,0.12)',
-                    borderLeft: 'none',
-                    borderRadius: 6,
-                    padding: '0 6px',
-                    fontSize: '10px',
-                    cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    padding: '8px 6px',
+                    borderRadius: '12px',
+                    background: selectedGenre === genre ? color + '35' : color + '18',
+                    border: selectedGenre === genre ? '2px solid ' + color + '80' : '1.5px solid ' + color + '40',
+                    cursor: 'pointer',
+                    outline: 'none',
+                    width: '100%',
                   }}
                 >
-                  {isFollowed ? '★' : '☆'}
+                  <FlatIcon name={icon} size={15} color={color} />
+                  <span style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '12px', fontWeight: 700, color: 'var(--ink)', letterSpacing: '0.01em' }}>{genre}</span>
                 </button>
-              )}
+              ))}
             </div>
-          );
-        })}
+          </div>
+        )}
       </div>
       {/* Empty state — shown when filters return zero results */}
       {deduped.length === 0 && !eventsLoading && (
