@@ -273,6 +273,16 @@ html.dark input::placeholder { color: rgba(255,255,255,0.30) !important; }
 html.dark .uc-shadow { box-shadow: 0 4px 16px rgba(0,0,0,0.36); }
 html.dark .uc-shadow-sm { box-shadow: 0 2px 8px rgba(0,0,0,0.26); }
 
+/* Tailwind bg-white cards (Profile achievements, badge cards, stat tiles) */
+html.dark .bg-white {
+  background-color: rgba(40, 32, 28, 0.95) !important;
+  border-color: rgba(201, 122, 98, 0.15) !important;
+}
+/* Profile avatar placeholder */
+html.dark .rounded-full[style*="240, 240, 240"] {
+  background-color: rgba(60, 48, 40, 0.9) !important;
+}
+
 /* Dark mode hero: overlay the texture with a dark tint so --ink text stays readable */
 html.dark [style*="hero-texture.jpg"] {
   background: linear-gradient(rgba(28,24,20,0.76), rgba(28,24,20,0.76)), url('/hero-texture.jpg') center/cover no-repeat !important;
