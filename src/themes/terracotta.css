@@ -275,7 +275,11 @@ html.dark .uc-shadow-sm { box-shadow: 0 2px 8px rgba(0,0,0,0.26); }
 
 /* Dark mode hero: overlay the texture with a dark tint so --ink text stays readable */
 html.dark [style*="hero-texture.jpg"] {
-  background: linear-gradient(rgba(28,24,20,0.82), rgba(28,24,20,0.82)), url('/hero-texture.jpg') center/cover no-repeat !important;
+  background: linear-gradient(rgba(28,24,20,0.76), rgba(28,24,20,0.76)), url('/hero-texture.jpg') center/cover no-repeat !important;
+}
+/* Quick-filter pill buttons inside hero — soften border in dark mode */
+html.dark [style*="hero-texture.jpg"] button {
+  border-color: rgba(238,233,229,0.25) !important;
 }
 
 

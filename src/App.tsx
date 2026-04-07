@@ -4300,7 +4300,7 @@ function DiscoverScreen({
           <h1 className="font-black leading-none mt-1 mb-1" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '40px', letterSpacing: '-0.04em', color: 'var(--ink)', minHeight: '48px' }}>
             {heroDisplay}{!heroDone && <span style={{ display: 'inline-block', width: '3px', height: '0.85em', background: 'var(--ink)', marginLeft: '2px', verticalAlign: 'baseline', animation: 'cursorBlink 0.8s step-end infinite' }} />}
           </h1>
-          <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '12px', color: '#555', fontWeight: 500, marginBottom: '14px' }}>
+          <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '12px', color: 'var(--ink)', opacity: 0.65, fontWeight: 500, marginBottom: '14px' }}>
             {events.length.toLocaleString()} upcoming events in Albuquerque
           </p>
           <button
