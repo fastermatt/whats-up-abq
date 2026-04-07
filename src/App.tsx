@@ -4673,42 +4673,6 @@ function DiscoverScreen({
       {/* Did You Know - animated rotating card */}
       <AnimatedFact />
 
-      {/* Weekend Planner */}
-      {!hidden.includes('planWeekend') && (() => {
-        const [open, setOpen] = React.useState(false);
-        return (
-        <div className="mx-5 mb-6" style={{ border: '1px solid rgba(0,0,0,0.10)', borderRadius: 8, background: 'white', overflow: 'hidden' }}>
-          <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between px-4 py-3" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-            <span className="text-xs font-black uppercase flex items-center gap-2" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>
-              <FlatIcon name="sun" size={13} color="var(--brand)" /> Need help planning?
-            </span>
-            <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--ink)', transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}>expand_more</span>
-          </button>
-          {open && (
-          <div className="flex flex-col gap-1.5 px-3 pb-3" style={{ animation: 'cardFadeIn 0.25s ease both' }}>
-            {[
-              { title: 'Morning Hike + Brunch', steps: ['Sandia Mountain foothills trail', 'Coffee at Flying Star Café', 'Brunch in Nob Hill'] },
-              { title: 'Culture Day', steps: ['Explora Science Center', 'Lunch in Old Town', 'Albuquerque Museum'] },
-              { title: 'Local Food Crawl', steps: ['Green chile breakfast at Frontier', 'Lunch at El Modelo', 'Drinks on Central Ave'] },
-              { title: 'Nature Escape', steps: ['Rio Grande Bosque trail', 'Tingley Beach', 'Sunset at Petroglyph Monument'] },
-            ].map(({ title, steps }) => (
-              <div key={title} className="flex" style={{ border: '1px solid rgba(0,0,0,0.08)', borderRadius: 6, backgroundColor: 'var(--bg)' }}>
-                <div style={{ width: 3, flexShrink: 0, backgroundColor: 'var(--brand)', borderRadius: '6px 0 0 6px' }} />
-                <div className="flex-1 px-3 py-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="text-xs font-bold" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)' }}>{title}</p>
-                    <button onClick={() => addToDayPlan(steps)} className="text-xs font-bold px-2 py-0.5" style={{ backgroundColor: 'var(--brand)', color: 'white', border: 'none', borderRadius: 4, fontFamily: 'Public Sans, sans-serif', fontSize: '9px' }}>+ ADD</button>
-                  </div>
-                  <p className="text-xs" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.3 }}>{steps.join(' → ')}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          )}
-        </div>
-        );
-      })()}
-
       {/* Browse by Date — Collapsible Event Calendar */}
       <button
         onClick={() => setShowCalendar(c => !c)}
