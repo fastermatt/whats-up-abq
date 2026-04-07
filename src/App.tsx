@@ -4,6 +4,7 @@ import { supabase } from './lib/supabase';
 import { fetchEventsFromDB } from './lib/db';
 import { ALL_EVENTS, type Event as StaticEvent } from './data/events';
 import AdminPanel from './AdminPanel';
+import { loadPrefs as loadNotifPrefs, savePrefs as saveNotifPrefs, requestPermission, notificationsSupported, checkAndTriggerNotifications, NOTIF_LABELS, type NotificationPrefs } from './lib/notifications';
 
 // ─── Scroll fade-in hook ─────────────────────────────────────────────
 function useFadeIn(delay = 0) {
@@ -6174,6 +6175,106 @@ function UsernameSetupModal({ user, onDone }: { user: User | null; onDone: (name
 }
 
 // ─── Profile Settings Pane ────────────────────────────────────────────────────
+function NotificationSettingsPane() {
+  const [prefs, setPrefs] = React.useState<NotificationPrefs>(loadNotifPrefs);
+  const [perm, setPerm] = React.useState<string>(() => notificationsSupported() ? Notification.permission : 'unsupported');
+  const [open, setOpen] = React.useState(false);
+  const [requesting, setRequesting] = React.useState(false);
+
+  const update = (next: NotificationPrefs) => { setPrefs(next); saveNotifPrefs(next); };
+
+  const handleEnable = async () => {
+    setRequesting(true);
+    const result = await requestPermission();
+    setPerm(result);
+    if (result === 'granted') {
+      const next = { ...prefs, enabled: true };
+      update(next);
+      checkAndTriggerNotifications(next, { forceAll: true });
+    }
+    setRequesting(false);
+  };
+
+  const notifKeys = Object.keys(NOTIF_LABELS) as (keyof typeof NOTIF_LABELS)[];
+
+  return (
+    <div className="mb-4">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between bg-white rounded-lg px-4 py-3"
+        style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', fontFamily: 'Public Sans, sans-serif' }}
+      >
+        <div className="flex items-center gap-2">
+          <span style={{ fontSize: '16px' }}>&#128276;</span>
+          <span className="font-bold text-sm text-gray-800">Notifications</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {perm === 'granted' && prefs.enabled && (
+            <span style={{ fontSize: '10px', background: '#e8f5e9', color: '#2e7d32', borderRadius: 4, padding: '2px 6px', fontWeight: 700 }}>ON</span>
+          )}
+          <span style={{ fontSize: '12px', color: '#999' }}>{open ? '▲' : '▼'}</span>
+        </div>
+      </button>
+
+      {open && (
+        <div className="mt-2 bg-white rounded-lg p-4 flex flex-col gap-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+          {perm === 'unsupported' ? (
+            <p className="text-xs text-gray-400" style={{ fontFamily: 'Public Sans, sans-serif' }}>Push notifications are not supported in this browser.</p>
+          ) : perm !== 'granted' ? (
+            <div className="flex flex-col gap-3">
+              <p className="text-sm text-gray-600" style={{ fontFamily: 'Public Sans, sans-serif' }}>
+                Get notified about tonight&apos;s events, weekend previews, and more. Customize exactly what you want to hear about.
+              </p>
+              <button
+                onClick={handleEnable}
+                disabled={requesting || perm === 'denied'}
+                className="w-full py-3 rounded-lg text-white font-black text-sm"
+                style={{ background: perm === 'denied' ? '#9e9e9e' : 'var(--brand)', fontFamily: 'Public Sans, sans-serif', cursor: perm === 'denied' ? 'default' : 'pointer' }}
+              >
+                {requesting ? 'Requesting…' : perm === 'denied' ? 'Blocked — enable in browser settings' : 'Enable Notifications'}
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Master toggle */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-gray-800" style={{ fontFamily: 'Public Sans, sans-serif' }}>All Notifications</p>
+                  <p className="text-xs text-gray-400" style={{ fontFamily: 'Public Sans, sans-serif' }}>Master switch for all ABQ Unplugged alerts</p>
+                </div>
+                <button onClick={() => update({ ...prefs, enabled: !prefs.enabled })}>
+                  <div className="w-11 h-6 rounded-full flex items-center px-0.5 transition-colors" style={{ background: prefs.enabled ? 'var(--brand)' : '#d1d5db' }}>
+                    <div className="w-5 h-5 bg-white rounded-full shadow transition-transform" style={{ transform: prefs.enabled ? 'translateX(20px)' : 'translateX(0)' }} />
+                  </div>
+                </button>
+              </div>
+
+              <div style={{ borderTop: '1px solid #f0f0f0' }} />
+
+              {/* Per-type toggles */}
+              {notifKeys.map(key => (
+                <div key={key} className="flex items-center justify-between">
+                  <div className="flex-1 mr-4">
+                    <p className="text-sm font-semibold text-gray-700" style={{ fontFamily: 'Public Sans, sans-serif', opacity: prefs.enabled ? 1 : 0.45 }}>{NOTIF_LABELS[key]}</p>
+                  </div>
+                  <button
+                    onClick={() => update({ ...prefs, [key]: !prefs[key] })}
+                    disabled={!prefs.enabled}
+                  >
+                    <div className="w-11 h-6 rounded-full flex items-center px-0.5 transition-colors" style={{ background: prefs.enabled && prefs[key] ? 'var(--brand)' : '#d1d5db', opacity: prefs.enabled ? 1 : 0.45 }}>
+                      <div className="w-5 h-5 bg-white rounded-full shadow transition-transform" style={{ transform: prefs.enabled && prefs[key] ? 'translateX(20px)' : 'translateX(0)' }} />
+                    </div>
+                  </button>
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User | null; onUsernameChange?: (name: string) => void; onSignIn?: () => void }) {
   const [prefs, setPrefs] = useState<UserPrefs>(getPrefs);
   const [open, setOpen] = useState(false);
@@ -6479,6 +6580,9 @@ function ProfileScreen({
           Admin Panel
         </button>
       )}
+
+      {/* Notifications */}
+      <NotificationSettingsPane />
 
       {/* Customize Settings */}
       <ProfileSettingsPane user={user} onUsernameChange={onUsernameChange} onSignIn={onSignIn} />
@@ -10005,6 +10109,8 @@ export default function App() {
           .filter(e => !isJunkEvent(e))
           .map(tagAdultEvent);
         setEvents(merged);
+        // Trigger scheduled local notifications now that we have fresh data
+        checkAndTriggerNotifications(loadNotifPrefs(), { events: merged });
       } catch (err) {
         console.error('[Events] Failed to load events:', err);
         const normT2 = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
@@ -10020,6 +10126,21 @@ export default function App() {
     }
 
     loadData();
+  }, []);
+
+  // ── SW notification-tap navigation handler ─────────────────────────────────
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type === 'NOTIF_NAV') {
+        const filter = e.data.filter || '';
+        if (filter) setEventsNavGenre(filter);
+        setActiveTab('events');
+      }
+    };
+    if (navigator.serviceWorker) {
+      navigator.serviceWorker.addEventListener('message', handler);
+      return () => navigator.serviceWorker.removeEventListener('message', handler);
+    }
   }, []);
 
   // ── Deep-link handler: open /event/{id} or #event/{id} once events load ────

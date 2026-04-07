@@ -181,3 +181,84 @@ async function networkFirst(cacheName, request, fallbackPath) {
     );
   }
 }
+
+// ─── Push Notifications ────────────────────────────────────────────────────────
+// Receives server-sent push payloads and displays them as native notifications.
+// Payload format: { title, body, tag, icon, badge, data: { url, filter } }
+
+self.addEventListener('push', (event) => {
+  let payload = { title: 'ABQ Unplugged', body: 'Something new in Albuquerque!', tag: 'abq-push', data: {} };
+
+  if (event.data) {
+    try { payload = { ...payload, ...event.data.json() }; }
+    catch { payload.body = event.data.text(); }
+  }
+
+  const notifOptions = {
+    body:    payload.body,
+    icon:    payload.icon  || '/icons/icon-192.png',
+    badge:   payload.badge || '/icons/icon-192.png',
+    tag:     payload.tag   || 'abq-push',
+    data:    payload.data  || {},
+    actions: [
+      { action: 'open',    title: 'View Events' },
+      { action: 'dismiss', title: 'Dismiss'     },
+    ],
+    requireInteraction: false,
+    vibrate: [100, 50, 100],
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(payload.title, notifOptions)
+  );
+});
+
+// ─── Notification Click ────────────────────────────────────────────────────────
+// Opens / focuses the app when user taps a notification.
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  if (event.action === 'dismiss') return;
+
+  const data = event.notification.data || {};
+  let targetUrl = self.location.origin + '/';
+
+  if (data.url) {
+    // data.url is like '/#events' or '/#profile'
+    targetUrl = self.location.origin + data.url;
+  }
+
+  // Append filter as query param so the app can pick it up
+  if (data.filter) {
+    targetUrl += (targetUrl.includes('?') ? '&' : '?') + 'notifFilter=' + encodeURIComponent(data.filter);
+  }
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      // If app tab already open, focus it and navigate
+      for (const client of clients) {
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          client.focus();
+          client.postMessage({ type: 'NOTIF_NAV', url: data.url || '#events', filter: data.filter || '' });
+          return;
+        }
+      }
+      // Otherwise open a new tab
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(targetUrl);
+      }
+    })
+  );
+});
+
+// ─── Background Sync (for when connection restored) ────────────────────────────
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'abq-check-events') {
+    event.waitUntil(
+      fetch('/public/data/events.json')
+        .then(r => r.json())
+        .catch(() => null)
+    );
+  }
+});
