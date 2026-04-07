@@ -4715,7 +4715,7 @@ function DiscoverScreen({
         className="flex items-center justify-between w-full px-5 py-3"
         style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)', background: 'none', cursor: 'pointer' }}
       >
-        <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif' }}>Browse by Date</h2>
+        <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif' }}>Events Calendar</h2>
         <span className="material-symbols-outlined" style={{ fontSize: 20, color: 'var(--brand)', transition: 'transform 0.2s ease', transform: showCalendar ? 'rotate(180deg)' : 'rotate(0deg)' }}>expand_more</span>
       </button>
       {showCalendar && (
@@ -4736,29 +4736,43 @@ function DiscoverScreen({
           <div style={{ borderBottom: '1px solid rgba(0,0,0,0.06)', marginBottom: 4 }}>
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', padding: '14px 20px 10px' }}>
               <h2 style={{ fontSize: 13, fontWeight: 800, fontFamily: 'Public Sans, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--ink)', margin: 0 }}>{_calFmt}</h2>
-              <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.4)', fontFamily: 'Public Sans, sans-serif' }}>{_calEvts.length} event{_calEvts.length !== 1 ? 's' : ''}</span>
+              <span style={{ fontSize: 12, color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif', fontWeight: 700 }}>{_calEvts.length} event{_calEvts.length !== 1 ? 's' : ''}</span>
             </div>
             {_calEvts.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '24px 20px', color: 'rgba(0,0,0,0.3)', fontSize: 13, fontFamily: 'Public Sans, sans-serif' }}>Nothing scheduled this day</div>
+              <div style={{ textAlign: 'center', padding: '24px 20px', color: 'rgba(0,0,0,0.3)', fontSize: 13, fontFamily: 'Public Sans, sans-serif' }}>No events — try a nearby date</div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {_calEvts.slice(0, 8).map(event => {
                   const _t = event.dates?.start?.localTime ? new Date(`2000-01-01T${event.dates.start.localTime}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : '';
                   const _v = (event as any)._embedded?.venues?.[0]?.name || '';
                   const _img = event.images?.find((im: any) => im.ratio === '16_9' && im.width > 300)?.url || event.images?.[0]?.url || '';
+                  const _about = event._aiEnrichment?.about;
                   return (
-                    <div key={event.id} onClick={() => onEventSelect(event)}
-                      style={{ display: 'flex', gap: 12, padding: '10px 20px', cursor: 'pointer', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.04)' }}
+                    <div key={event.id}
+                      style={{ display: 'flex', gap: 12, padding: '10px 20px', alignItems: 'flex-start', borderTop: '1px solid rgba(0,0,0,0.04)' }}
                     >
-                      {_img
-                        ? <img src={_img} alt="" style={{ width: 50, height: 50, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />
-                        : <div style={{ width: 50, height: 50, borderRadius: 8, background: 'rgba(0,0,0,0.06)', flexShrink: 0 }} />
-                      }
-                      <div style={{ flex: 1, minWidth: 0 }}>
+                      <div onClick={() => onEventSelect(event)} style={{ cursor: 'pointer', flexShrink: 0 }}>
+                        {_img
+                          ? <img src={_img} alt="" style={{ width: 50, height: 50, borderRadius: 8, objectFit: 'cover' }} />
+                          : <div style={{ width: 50, height: 50, borderRadius: 8, background: 'rgba(0,0,0,0.06)' }} />
+                        }
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }} onClick={() => onEventSelect(event)} className="cursor-pointer">
                         <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)', fontFamily: 'Public Sans, sans-serif', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{event.name}</div>
                         <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', fontFamily: 'Public Sans, sans-serif', marginTop: 2 }}>{_t}{_t && _v ? ' · ' : ''}{_v}</div>
+                        {_about && <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.5)', fontFamily: 'Public Sans, sans-serif', marginTop: 3, lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{_about}</div>}
                       </div>
-                      <span className="material-symbols-outlined" style={{ fontSize: 16, color: 'rgba(0,0,0,0.2)', flexShrink: 0 }}>chevron_right</span>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); addToCalendar(event); }}
+                          style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--brand-bg-subtle)', border: '1px solid var(--brand-tint-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                          title="Add to iCal"
+                          aria-label="Add to calendar"
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: 16, color: 'var(--brand)' }}>calendar_add_on</span>
+                        </button>
+                        <span className="material-symbols-outlined" style={{ fontSize: 16, color: 'rgba(0,0,0,0.2)', cursor: 'pointer' }} onClick={() => onEventSelect(event)}>chevron_right</span>
+                      </div>
                     </div>
                   );
                 })}
@@ -4850,7 +4864,7 @@ function EventCalendar({
   const hpad = compact ? '12px' : '20px';
 
   return (
-    <div style={{ background: '#fff', borderTop: '1px solid rgba(0,0,0,0.06)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+    <div style={{ background: 'var(--bg)', borderTop: '1px solid rgba(0,0,0,0.08)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
       <div style={{ padding: `14px ${hpad} 10px` }}>
         {/* Month nav */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
@@ -4858,7 +4872,7 @@ function EventCalendar({
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--ink)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '-0.02em' }}>{monthLabel}</span>
             {selectedDate && (
-              <button onClick={() => onSelectDate(null)} style={{ fontSize: 10, color: EC_BRAND, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Public Sans, sans-serif', fontWeight: 700 }}>&#10005; Clear</button>
+              <button onClick={() => onSelectDate(null)} style={{ fontSize: 10, color: EC_BRAND, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Public Sans, sans-serif', fontWeight: 700 }}>✕ Clear date</button>
             )}
           </div>
           <button onClick={ecNextMonth} style={{ width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, background: 'rgba(0,0,0,0.05)', border: 'none', color: 'var(--ink)', fontSize: 20, cursor: 'pointer', lineHeight: 1, fontFamily: 'Public Sans, sans-serif' }}>&#8250;</button>
@@ -4880,25 +4894,23 @@ function EventCalendar({
             const isSel = selectedDate === dateStr;
             const isToday = dateStr === todayStr;
             const isPast = dateStr < todayStr;
-            const ds = getDotSize(count);
-            const dop = getDotOpacity(count);
             return (
               <button
                 key={dateStr}
                 onClick={() => onSelectDate(isSel ? null : dateStr)}
                 style={{
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                   aspectRatio: '1', borderRadius: 8, padding: 0,
-                  border: isSel ? `2px solid ${EC_BRAND}` : isToday ? '2px solid rgba(0,0,0,0.18)' : '2px solid transparent',
-                  background: isSel ? `${EC_BRAND}18` : 'transparent',
+                  border: isSel ? `2px solid ${EC_BRAND}` : isToday ? `2px solid ${EC_BRAND}` : '2px solid transparent',
+                  background: getCellBg(count, isSel),
                   cursor: 'pointer',
-                  opacity: isPast && count === 0 && !isSel ? 0.28 : 1,
+                  opacity: isPast && count === 0 && !isSel ? 0.22 : 1,
+                  transition: 'background 0.15s ease',
                 }}
               >
-                <span style={{ fontSize: 11, fontWeight: isSel || isToday ? 800 : 400, color: isSel ? EC_BRAND : 'var(--ink)', lineHeight: 1.1, fontFamily: 'Public Sans, sans-serif' }}>
+                <span style={{ fontSize: 11, fontWeight: isSel || isToday || count > 0 ? 700 : 400, color: isSel ? '#fff' : 'var(--ink)', lineHeight: 1.1, fontFamily: 'Public Sans, sans-serif' }}>
                   {day}
                 </span>
-                <div style={{ width: ds || 3, height: ds || 0, borderRadius: '50%', background: EC_BRAND, opacity: ds ? dop : 0, flexShrink: 0 }} />
               </button>
             );
           })}
@@ -4906,11 +4918,11 @@ function EventCalendar({
 
         {/* Density legend */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 10, justifyContent: 'flex-end' }}>
-          <span style={{ fontSize: 9, color: 'rgba(0,0,0,0.28)', fontFamily: 'Public Sans, sans-serif' }}>Fewer</span>
-          {([0.25, 0.45, 0.65, 0.85, 1.0] as number[]).map((op, i) => (
-            <div key={i} style={{ width: 3.5 + i * 1.5, height: 3.5 + i * 1.5, borderRadius: '50%', background: EC_BRAND, opacity: op, flexShrink: 0 }} />
+          <span style={{ fontSize: 9, color: 'rgba(0,0,0,0.28)', fontFamily: 'Public Sans, sans-serif' }}>Quiet</span>
+          {([0.10, 0.24, 0.40, 0.58, 0.70] as number[]).map((intensity, i) => (
+            <div key={i} style={{ width: 14, height: 14, borderRadius: 4, background: `rgba(194,99,74,${intensity})`, border: '1px solid rgba(194,99,74,0.25)', flexShrink: 0 }} />
           ))}
-          <span style={{ fontSize: 9, color: 'rgba(0,0,0,0.28)', fontFamily: 'Public Sans, sans-serif' }}>More events</span>
+          <span style={{ fontSize: 9, color: 'rgba(0,0,0,0.28)', fontFamily: 'Public Sans, sans-serif' }}>Packed</span>
         </div>
       </div>
     </div>

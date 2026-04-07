@@ -106,6 +106,7 @@
 
 /* ── html background (outside React root) ─────────────────────────── */
 html { background-color: #F9F5F2; }
+html.dark { background-color: #1C1814; }
 
 /* ── Typography: Public Sans everywhere ─────────────────────────────
    Using !important to reliably override Tailwind's preflight
@@ -219,6 +220,36 @@ button[class*="bg-primary"]:active,
    LIQUID GLASS THEME — activated by adding 'lg' class to <html>
    iOS 26 inspired: vivid desert gradient + frosted glass components
    ═══════════════════════════════════════════════════════════════════ */
+
+
+/* ── Dark mode overrides (html.dark) ────────────────────────────────
+   Toggled via sun/moon button, persisted to localStorage.           */
+
+html.dark body::after { opacity: 0.05; }
+
+html.dark .glass-light {
+  background: rgba(40, 32, 28, 0.88);
+  border-color: rgba(201, 122, 98, 0.20);
+}
+
+html.dark .event-card {
+  background: rgba(40,32,28,0.95) !important;
+  border-color: rgba(201,122,98,0.18) !important;
+}
+html.dark .event-card:hover {
+  box-shadow: 0 8px 28px rgba(0,0,0,0.42) !important;
+}
+
+html.dark nav {
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+}
+
+html.dark input::placeholder { color: rgba(255,255,255,0.30) !important; }
+
+html.dark .uc-shadow { box-shadow: 0 4px 16px rgba(0,0,0,0.36); }
+html.dark .uc-shadow-sm { box-shadow: 0 2px 8px rgba(0,0,0,0.26); }
+
 
 html.lg {
   --bg: transparent;
