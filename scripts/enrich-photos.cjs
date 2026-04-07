@@ -12,7 +12,7 @@ const fs = require('fs');
 const dbSrc = fs.readFileSync(__dirname + '/../src/lib/supabase.ts', 'utf8');
 const SB_URL = dbSrc.match(/https:\/\/[a-z0-9]+\.supabase\.co/)[0];
 const SB_KEY = dbSrc.match(/eyJ[A-Za-z0-9._-]{20,}/)[0];
-const GOOGLE_KEY = 'AIzaSyDn-W5LqhBBAK2VaZhORgRW8oQagpCVq6k';
+const GOOGLE_KEY = process.env.VITE_GOOGLE_PLACES_KEY || '';
 const FIELDS = 'photos';
 
 const sb = createClient(SB_URL, SB_KEY);
