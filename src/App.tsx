@@ -290,6 +290,13 @@ interface TMEvent {
     venue_tips?: string;     // parking, transit, arrival tips
     local_tips?: string;     // ABQ-specific before/after tips
   } | null;
+  _movieMeta?: {
+    rating?: string;     // MPAA rating: G, PG, PG-13, R, NC-17
+    runtime?: string;    // "2h 15m"
+    genre?: string;      // "Horror / Comedy"
+    theaters?: string[]; // ABQ theater names where it's showing
+    endDate?: string;    // last day showing
+  };
 }
 
 interface GeoCoords { lat: number; lng: number; }
@@ -385,6 +392,9 @@ function staticEventToTMEvent(ev: StaticEvent): TMEvent {
     classifications: ev.category ? [{ segment: { name: ev.category }, genre: { name: ev.category } }] : undefined,
     priceRanges: (ev.priceNum !== undefined && ev.priceNum > 0)
       ? [{ min: ev.priceNum, max: ev.priceNum, currency: 'USD' }]
+      : undefined,
+    _movieMeta: (ev.movieRating || ev.movieRuntime || ev.movieGenre || ev.theaters)
+      ? { rating: ev.movieRating, runtime: ev.movieRuntime, genre: ev.movieGenre, theaters: ev.theaters, endDate: ev.endDate }
       : undefined,
   };
   return tm;
@@ -943,7 +953,7 @@ const SEARCH_BOOSTS: Record<string, string[]> = {
 };
 
 const EVENT_GENRES = [
-  'All', 'Tonight', 'This Weekend', '❤️ For You', 'Free', 'Volunteer', 'Music', 'Sports', 'Comedy', 'Arts', 'Family', 'Outdoor', 'Community',
+  'All', 'Tonight', 'This Weekend', '❤️ For You', 'Free', 'Volunteer', 'Music', 'Sports', 'Comedy', 'Arts', 'Family', 'Outdoor', 'Community', 'Movie',
 ];
 
 const FOLLOWING_KEY = 'abq_following_genres';
@@ -966,6 +976,7 @@ const EVENT_TYPE_META: Record<string, { icon: string; bg: string }> = {
   'Community':      { icon: 'community',     bg: 'linear-gradient(135deg,#0e7490,#06b6d4)' },
   'Festival':       { icon: 'festival',      bg: 'linear-gradient(135deg,#7c3aed,#a78bfa)' },
   'Film':           { icon: 'film',          bg: 'linear-gradient(135deg,#1f2937,#4b5563)' },
+  'Movie':          { icon: 'film',          bg: 'linear-gradient(135deg,#1f2937,#4b5563)' },
   'Free':           { icon: 'free',          bg: 'linear-gradient(135deg,#047857,#10b981)' },
   'Volunteer':      { icon: 'volunteer',     bg: 'linear-gradient(135deg,#be185d,#ec4899)' },
   'Event':          { icon: 'event',         bg: 'linear-gradient(135deg,var(--ink),#374151)' },
@@ -1469,6 +1480,8 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
   const price = event.priceRanges?.[0];
   const typeMeta = getEventTypeMeta(event);
   const fadeRef = useFadeIn();
+  const isMovie = category === 'Movie';
+  const movieMeta = event._movieMeta;
 
   return (
     <button
@@ -1484,6 +1497,11 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
           <FlatIcon name={typeMeta.icon} size={10} color="white" />
           <span style={{ fontSize: 9, fontWeight: 800, color: 'white', letterSpacing: '0.08em', textTransform: 'uppercase' as const, fontFamily: 'Public Sans, sans-serif' }}>{category}</span>
         </div>
+        {isMovie && movieMeta?.rating && (
+          <div className="absolute top-2 right-2 px-1.5 py-0.5" style={{ background: 'rgba(0,0,0,0.75)', border: '1px solid rgba(255,255,255,0.35)', borderRadius: 3, zIndex: 1 }}>
+            <span style={{ fontSize: 9, fontWeight: 800, color: 'white', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em' }}>{movieMeta.rating}</span>
+          </div>
+        )}
       </div>
       <div className="p-3">
         <p
@@ -1492,25 +1510,49 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
         >
           {event.name}
         </p>
-        <div className="mt-1.5 flex items-center justify-between gap-2">
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-bold" style={{ color: 'var(--brand)' }}>
-              {event.dates?.start?.localDate ? formatDate(event.dates.start.localDate) : 'Date TBD'}
-              {event.dates?.start?.localTime ? ' · ' + formatTime(event.dates.start.localTime) : ''}
-            </p>
-            {venue && (
-              <p className="text-xs text-gray-500 flex items-center gap-0.5 truncate mt-0.5">
-                <span className="material-symbols-outlined" style={{ fontSize: '12px' }}>location_on</span>
-                {venue.name}
+        {isMovie ? (
+          <div className="mt-1.5 flex flex-col gap-1">
+            {movieMeta?.genre && (
+              <p className="text-xs font-bold truncate" style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}>{movieMeta.genre}</p>
+            )}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5">
+                {movieMeta?.rating && (
+                  <span className="font-black" style={{ fontSize: 9, padding: '1px 4px', border: '1.5px solid #9ca3af', borderRadius: 2, color: '#6b7280', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.6 }}>{movieMeta.rating}</span>
+                )}
+                {movieMeta?.runtime && (
+                  <span className="text-xs text-gray-500" style={{ fontFamily: 'Public Sans, sans-serif' }}>{movieMeta.runtime}</span>
+                )}
+              </div>
+              {movieMeta?.theaters && (
+                <span className="text-xs text-gray-400 flex items-center gap-0.5" style={{ fontFamily: 'Public Sans, sans-serif' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '11px' }}>theaters</span>
+                  {movieMeta.theaters.length} {movieMeta.theaters.length === 1 ? 'theater' : 'theaters'}
+                </span>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="mt-1.5 flex items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-bold" style={{ color: 'var(--brand)' }}>
+                {event.dates?.start?.localDate ? formatDate(event.dates.start.localDate) : 'Date TBD'}
+                {event.dates?.start?.localTime ? ' · ' + formatTime(event.dates.start.localTime) : ''}
               </p>
+              {venue && (
+                <p className="text-xs text-gray-500 flex items-center gap-0.5 truncate mt-0.5">
+                  <span className="material-symbols-outlined" style={{ fontSize: '12px' }}>location_on</span>
+                  {venue.name}
+                </p>
+              )}
+            </div>
+            {price && (
+              <span className="text-xs font-bold flex-shrink-0" style={{ color: 'var(--ink)' }}>
+                {(price.min ?? 0) === 0 ? 'Free' : `From $${Math.round(price.min || 0)}`}
+              </span>
             )}
           </div>
-          {price && (
-            <span className="text-xs font-bold flex-shrink-0" style={{ color: 'var(--ink)' }}>
-              {(price.min ?? 0) === 0 ? 'Free' : `From $${Math.round(price.min || 0)}`}
-            </span>
-          )}
-        </div>
+        )}
       </div>
     </button>
   );
@@ -3129,6 +3171,20 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
           )}
         </div>
 
+        {/* ── MOVIE INFO BAR (rating / runtime / genre) ──── */}
+        {category === 'Movie' && event._movieMeta && (
+          <div className="flex items-center gap-3 mb-3 px-3 py-2.5 bg-white" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1.5px solid #f0f0f0', borderRadius: 0 }}>
+            {event._movieMeta.rating && (
+              <span className="font-black flex-shrink-0" style={{ fontSize: 12, padding: '2px 7px', border: '2px solid #374151', borderRadius: 3, color: '#374151', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.05em' }}>{event._movieMeta.rating}</span>
+            )}
+            {event._movieMeta.runtime && (
+              <span className="text-sm font-bold flex-shrink-0" style={{ color: 'var(--ink)', fontFamily: 'Public Sans, sans-serif' }}>{event._movieMeta.runtime}</span>
+            )}
+            {event._movieMeta.genre && (
+              <span className="text-sm truncate" style={{ color: '#6b7280', fontFamily: 'Public Sans, sans-serif' }}>{event._movieMeta.genre}</span>
+            )}
+          </div>
+        )}
         {/* Venue card — tappable to open in maps */}
         {venue && (
           <a
@@ -3166,6 +3222,45 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
           </div>
         )}
 
+        {/* ── NOW PLAYING AT (movie theaters) ──────────────── */}
+        {category === 'Movie' && event._movieMeta?.theaters && event._movieMeta.theaters.length > 0 && (
+          <div className="mb-3 bg-white" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1.5px solid #f0f0f0' }}>
+            <div className="px-3 pt-3 pb-1.5 flex items-center gap-2">
+              <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--brand)' }}>theaters</span>
+              <p className="text-xs font-black uppercase tracking-wide" style={{ color: 'var(--brand)', letterSpacing: '0.07em' }}>Now Playing At</p>
+            </div>
+            <div className="flex flex-col">
+              {event._movieMeta.theaters.map((theater, i) => (
+                <a
+                  key={theater}
+                  href={`https://www.fandango.com/search?q=${encodeURIComponent(theater)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between px-3 py-3"
+                  style={{ borderTop: i > 0 ? '1px solid #f3f4f6' : undefined, textDecoration: 'none' }}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '16px', color: '#9ca3af' }}>movie</span>
+                    <span className="text-sm font-bold truncate" style={{ color: 'var(--ink)', fontFamily: 'Public Sans, sans-serif' }}>{theater}</span>
+                  </div>
+                  <span className="text-xs font-black flex-shrink-0 ml-3" style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}>SHOWTIMES →</span>
+                </a>
+              ))}
+            </div>
+            <div className="px-3 pb-3 pt-1">
+              <a
+                href={`https://www.fandango.com/search?q=${encodeURIComponent(event.name + ' Albuquerque')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full py-2.5 font-black text-sm text-white"
+                style={{ borderRadius: 6, background: 'linear-gradient(135deg, #ff6000, #ff8c00)', fontFamily: 'Public Sans, sans-serif' }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>confirmation_number</span>
+                ALL SHOWTIMES ON FANDANGO →
+              </a>
+            </div>
+          </div>
+        )}
         {/* ── KNOW BEFORE YOU GO (expandable) ─────────────── */}
         {(venue?.boxOfficeInfo?.phoneNumberDetail || venue?.parkingDetail || venue?.generalInfo?.childRule || venue?.accessibleSeatingDetail || venue?.boxOfficeInfo?.openHoursDetail || venue?.boxOfficeInfo?.acceptedPaymentDetail) && (
           <div className="mb-3" style={{ border: '1.5px solid #e5e7eb' }}>
@@ -3354,11 +3449,11 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
           <a href={event.url} target="_blank" rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full py-4 text-center text-white font-black text-sm"
             style={{ borderRadius: 6, border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-              background: event._source === 'seatgeek' ? 'linear-gradient(135deg, #d4184a, #ff5c5c)' : event._source === 'local' ? 'linear-gradient(135deg, #0369a1, #38bdf8)' : 'var(--brand-gradient)',
+              background: event._source === 'seatgeek' ? 'linear-gradient(135deg, #d4184a, #ff5c5c)' : event._source === 'local' ? 'linear-gradient(135deg, #0369a1, #38bdf8)' : event._source === 'fandango' ? 'linear-gradient(135deg, #ff6000, #ff8c00)' : 'var(--brand-gradient)',
               fontFamily: 'Public Sans, sans-serif' }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>{event._source === 'local' ? 'info' : 'confirmation_number'}</span>
-            {event._source === 'local' ? 'MORE INFO →' : event._source === 'seatgeek' ? 'GET SEATS →' : 'GET TICKETS →'}
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>{event._source === 'local' ? 'info' : event._source === 'fandango' ? 'theaters' : 'confirmation_number'}</span>
+            {event._source === 'local' ? 'MORE INFO →' : event._source === 'seatgeek' ? 'GET SEATS →' : event._source === 'fandango' ? 'ALL FANDANGO SHOWTIMES →' : 'GET TICKETS →'}
           </a>
         ) : (
           <a href={directionsUrl} target="_blank" rel="noopener noreferrer"
@@ -5076,6 +5171,8 @@ function EventsScreen({
               eventName.includes('food distribution') || eventName.includes('warehouse shift') ||
               eventName.includes('serve') || eventName.includes('giving back') ||
               eventName.includes('community service');
+          case 'Movie':
+            return seg === 'Movie' || gen === 'Movie';
           default:
             return seg === selectedGenre || gen === selectedGenre;
         }
