@@ -4292,7 +4292,7 @@ function DiscoverScreen({
       <StreakBanner />
 
       {/* Hero — value prop + primary CTA */}
-      <div style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+      <div style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, var(--bg)", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <div className="px-5 pt-5 pb-4">
           <p className="text-xs font-black uppercase mb-2" style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.12em' }}>
             Greater ABQ Metro
@@ -5173,7 +5173,7 @@ function EventsScreen({
 
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, var(--bg)", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}
@@ -5722,7 +5722,7 @@ function PlacesScreen({
           </div>
         );
       })() : (
-      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, var(--bg)", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}
@@ -6396,7 +6396,7 @@ function ProfileScreen({
 
   return (
     <div className="w-full px-5 pb-28" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-      <div className="pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, #E2E1DC", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)', marginLeft: '-20px', marginRight: '-20px', paddingLeft: '20px', paddingRight: '20px' }}>
+      <div className="pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, var(--bg)", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)', marginLeft: '-20px', marginRight: '-20px', paddingLeft: '20px', paddingRight: '20px' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}
