@@ -4305,7 +4305,7 @@ function DiscoverScreen({
           </p>
           <button
             onClick={() => onNavigateEvents?.()}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '42px', padding: '0 16px', background: 'var(--ink)', color: 'white', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(185,92,67,0.25)', fontFamily: 'Public Sans, sans-serif', fontSize: '13px', fontWeight: 800, letterSpacing: '0.03em', cursor: 'pointer', borderRadius: 6, marginBottom: '12px' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '42px', padding: '0 16px', background: 'var(--brand)', color: 'white', border: 'none', boxShadow: '0 2px 8px rgba(185,92,67,0.30)', fontFamily: 'Public Sans, sans-serif', fontSize: '13px', fontWeight: 800, letterSpacing: '0.03em', cursor: 'pointer', borderRadius: 6, marginBottom: '12px' }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>confirmation_number</span>
             Browse all events →
@@ -4385,8 +4385,8 @@ function DiscoverScreen({
                 >
                   {/* Date block */}
                   <div className="flex flex-col items-center justify-center flex-shrink-0"
-                    style={{ width: 52, backgroundColor: 'var(--ink)', minHeight: 52 }}>
-                    <span className="font-black uppercase" style={{ fontSize: 9, color: 'var(--bg)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em', lineHeight: 1 }}>
+                    style={{ width: 52, backgroundColor: 'var(--brand)', minHeight: 52 }}>
+                    <span className="font-black uppercase" style={{ fontSize: 9, color: 'rgba(255,255,255,0.85)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em', lineHeight: 1 }}>
                       {month}
                     </span>
                     <span className="font-black" style={{ fontSize: 22, color: '#fff', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.1 }}>
@@ -5195,7 +5195,7 @@ function EventsScreen({
                 style={{
                   fontFamily: 'Public Sans, sans-serif',
                   letterSpacing: '0.1em',
-                  background: isSelected ? 'var(--ink)' : isForYou && followedGenres.length > 0 ? 'var(--brand-bg-subtle)' : 'white',
+                  background: isSelected ? 'var(--brand)' : isForYou && followedGenres.length > 0 ? 'var(--brand-bg-subtle)' : 'var(--bg)',
                   color: isSelected ? 'white' : 'var(--ink)',
                   border: '1px solid rgba(0,0,0,0.12)',
                   borderRight: 'none',
