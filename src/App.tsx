@@ -4337,8 +4337,8 @@ function DiscoverScreen({
 
       {/* This Week Events — brutalist table layout */}
       {!hidden.includes('thisWeek') && eventsLoading && upcomingEvents.length === 0 && (
-        <div className="mb-5 mx-5" style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>
-          <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', backgroundColor: '#fff' }}>
+        <div className="mb-5 mx-5" style={{ border: isDark ? '1px solid rgba(201,122,98,0.18)' : '1px solid rgba(0,0,0,0.12)', boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.35)' : '0 2px 8px rgba(0,0,0,0.10)' }}>
+          <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', backgroundColor: 'var(--bg)' }}>
             <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em' }}>Events This Week</h2>
             <span className="text-xs font-black" style={{ color: '#aaa' }}>Loading…</span>
           </div>
@@ -4352,9 +4352,9 @@ function DiscoverScreen({
         </div>
       )}
       {!hidden.includes('thisWeek') && upcomingEvents.length > 0 && (
-        <div className="mb-5 mx-5" style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>
+        <div className="mb-5 mx-5" style={{ border: isDark ? '1px solid rgba(201,122,98,0.18)' : '1px solid rgba(0,0,0,0.12)', boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.35)' : '0 2px 8px rgba(0,0,0,0.10)' }}>
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', backgroundColor: '#fff' }}>
+          <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', backgroundColor: 'var(--bg)' }}>
             <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>
               Events This Week
             </h2>
@@ -4381,7 +4381,7 @@ function DiscoverScreen({
                   key={event.id}
                   onClick={() => onEventSelect(event)}
                   className="flex w-full text-left"
-                  style={{ borderBottom: idx < arr.length - 1 ? '1px solid #D0D0D0' : 'none', backgroundColor: '#fff' }}
+                  style={{ borderBottom: idx < arr.length - 1 ? '1px solid rgba(0,0,0,0.10)' : 'none', backgroundColor: 'var(--bg)' }}
                 >
                   {/* Date block */}
                   <div className="flex flex-col items-center justify-center flex-shrink-0"
@@ -5218,7 +5218,7 @@ function EventsScreen({
         </div>
       </div>
 
-      <div className="flex px-5 overflow-x-auto" style={{ scrollbarWidth: 'none', position: 'sticky', top: 'calc(var(--sat) + 58px)', zIndex: 30, background: 'white', paddingTop: '12px', paddingBottom: '0px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+      <div className="flex px-5 overflow-x-auto" style={{ scrollbarWidth: 'none', position: 'sticky', top: 'calc(var(--sat) + 58px)', zIndex: 30, background: 'var(--bg)', paddingTop: '12px', paddingBottom: '0px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         {EVENT_GENRES.map(genre => {
           const isForYou = genre === '❤️ For You';
           const isSelected = selectedGenre === genre;
@@ -5761,7 +5761,7 @@ function PlacesScreen({
       <div className="px-5 pb-3">
         <div
           className="flex items-center gap-2 bg-white px-4 py-3"
-          style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}
+          style={{ border: isDark ? '1px solid rgba(201,122,98,0.18)' : '1px solid rgba(0,0,0,0.12)', boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.35)' : '0 2px 8px rgba(0,0,0,0.10)' }}
         >
           <span className="material-symbols-outlined text-gray-400" style={{ fontSize: '20px' }}>search</span>
           <input
@@ -10382,8 +10382,8 @@ export default function App() {
             maxWidth: '480px',
             padding: '0 3px',
             paddingBottom: 'calc(var(--sab) + 8px)',
-            borderTop: '1px solid rgba(0,0,0,0.06)',
-            background: '#faf8f5',
+            borderTop: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)',
+            background: 'var(--bg)',
             zIndex: 40,
           }}
         >
@@ -10397,7 +10397,7 @@ export default function App() {
               className="nav-press-btn flex-1 flex flex-col items-center justify-center gap-0.5"
               style={{
                 minHeight: '64px',
-                background: isActive ? 'var(--brand)' : '#f5f3f0',
+                background: isActive ? 'var(--brand)' : 'var(--bg)',
                 border: 'none',
                 borderRadius: 8,
                 margin: '6px 3px 6px',
@@ -10405,7 +10405,7 @@ export default function App() {
                 top: 0,
                 boxShadow: isActive
                   ? '0 4px 0 #7a2e1a, 0 2px 8px rgba(194,99,74,0.3)'
-                  : '0 4px 0 #d5d0c8, 0 2px 6px rgba(0,0,0,0.06)',
+                  : isDark ? '0 4px 0 rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.2)' : '0 4px 0 #d5d0c8, 0 2px 6px rgba(0,0,0,0.06)',
                 cursor: 'pointer',
                 WebkitTapHighlightColor: 'transparent',
                 transition: 'top 0.1s ease, box-shadow 0.1s ease, background 0.15s ease',
@@ -10415,7 +10415,7 @@ export default function App() {
                 className="material-symbols-outlined"
                 style={{
                   fontSize: '22px',
-                  color: isActive ? 'white' : '#555',
+                  color: isActive ? 'white' : isDark ? 'rgba(238,233,229,0.65)' : '#555',
                   fontVariationSettings:
                     isActive
                       ? "'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24"
@@ -10427,7 +10427,7 @@ export default function App() {
               <span
                 className="font-black uppercase"
                 style={{
-                  color: isActive ? 'white' : '#555',
+                  color: isActive ? 'white' : isDark ? 'rgba(238,233,229,0.65)' : '#555',
                   fontFamily: 'Public Sans, sans-serif',
                   fontSize: '8px',
                   letterSpacing: '0.1em',
