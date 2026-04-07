@@ -128,7 +128,7 @@ export const ALL_EVENTS: Event[] = [
     movieRating: "PG-13",
     movieRuntime: "2h 28m",
     movieGenre: "Biopic / Drama / Music",
-    theaters: ALL_THEATERS,
+    theaters: ABQ_THEATERS,
     tags: ["Michael Jackson", "biopic", "music", "Antoine Fuqua"],
     isKidFriendly: false,
     isOutdoor: false,
