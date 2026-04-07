@@ -11,8 +11,7 @@
 import type { Context } from 'https://edge.netlify.com';
 
 const SUPABASE_URL = 'https://bsmvfutebmbkjvlrhiyq.supabase.co';
-const SUPABASE_ANON_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbXZmdXRlYm1ia2p2bHJoaXlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMzgwMzIsImV4cCI6MjA4OTgxNDAzMn0.3rvMRErlF-HnKfbJ6rCNSeCJc39n4K48xjAeSGqf_rc';
+const SUPABASE_ANON_KEY = Deno.env.get('VITE_SUPABASE_ANON_KEY') || '';
 
 const SITE = 'https://abqunplugged.com';
 const FALLBACK_IMAGE = `${SITE}/og-image.jpg`;
@@ -55,7 +54,7 @@ async function fetchPlaceOG(placeId: string): Promise<OGData | null> {
   if (raw?.photos?.length) {
     const ref = raw.photos[0].photo_reference;
     if (ref) {
-      image = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1200&photoreference=${ref}&key=AIzaSyAJ7V0rlGJsb2KebTObW14ylEXbSirzLFM`;
+      image = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1200&photoreference=${ref}&key=${Deno.env.get("VITE_GOOGLE_PLACES_KEY") || ""}`;
     }
   }
 

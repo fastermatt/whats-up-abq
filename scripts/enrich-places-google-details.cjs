@@ -50,7 +50,7 @@
 const https = require('https');
 
 // ── Config ────────────────────────────────────────────────────────────────────
-const GOOGLE_KEY    = process.env.VITE_GOOGLE_PLACES_KEY  || 'AIzaSyDn-W5LqhBBAK2VaZhORgRW8oQagpCVq6k';
+const GOOGLE_KEY    = process.env.VITE_GOOGLE_PLACES_KEY  || '';
 const SUPABASE_URL  = process.env.VITE_SUPABASE_URL       || 'https://bsmvfutebmbkjvlrhiyq.supabase.co';
 const SUPABASE_KEY  = process.env.VITE_SUPABASE_ANON_KEY  || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbXZmdXRlYm1ia2p2bHJoaXlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMzgwMzIsImV4cCI6MjA4OTgxNDAzMn0.3rvMRErlF-HnKfbJ6rCNSeCJc39n4K48xjAeSGqf_rc';
 
