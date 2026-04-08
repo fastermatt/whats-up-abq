@@ -4946,6 +4946,22 @@ function EventsScreen({
   const eventsHero = useTypewriter("What's Happening", 300);
   const [search, setSearch] = useState('');
   const [gridCols, setGridCols] = useState(2);
+  // Each session gets a fresh random seed so category sections appear in a different order
+  const [catShuffleSeed] = useState(() => Math.random());
+  const pillRow1Ref = useRef<HTMLDivElement>(null);
+  const pillRow2Ref = useRef<HTMLDivElement>(null);
+  // Scroll-peek: slide pill rows right then snap back so users see they can swipe for more
+  useEffect(() => {
+    const peek = (el: HTMLDivElement | null, delay: number) => {
+      if (!el) return;
+      setTimeout(() => {
+        el.scrollTo({ left: 80, behavior: 'smooth' });
+        setTimeout(() => el.scrollTo({ left: 0, behavior: 'smooth' }), 520);
+      }, delay);
+    };
+    peek(pillRow1Ref.current, 500);
+    peek(pillRow2Ref.current, 750);
+  }, []);
   useEffect(() => { if (initialSearch) setSearch(initialSearch); }, [initialSearch]);
   const [selectedGenre, setSelectedGenre] = useState(initialGenre || 'All');
   // Reset genre when initialGenre changes (e.g. from "Free Events" chip on Discover)
@@ -5346,7 +5362,7 @@ function EventsScreen({
       <div style={{ position: 'sticky', top: 'calc(var(--sat) + 58px)', zIndex: 30, background: 'var(--bg)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         {/* Row 1: All / Tonight / This Weekend / ❤️ For You */}
         <div style={{ position: 'relative' }}>
-        <div className="flex px-4 gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none', paddingTop: '8px', paddingBottom: '6px' }}>
+        <div ref={pillRow1Ref} className="flex px-4 gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none', paddingTop: '8px', paddingBottom: '6px' }}>
           {(['All', 'Tonight', 'This Weekend', '\u2764\ufe0f For You'] as const).map(genre => {
             const isForYou = genre === '\u2764\ufe0f For You';
             const isSelected = selectedGenre === genre;
@@ -5375,7 +5391,7 @@ function EventsScreen({
         </div>
         {/* Row 2: Category chips — single unified pill, heart inside */}
         <div style={{ position: 'relative' }}>
-        <div className="flex px-4 gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none', paddingTop: '4px', paddingBottom: '8px' }}>
+        <div ref={pillRow2Ref} className="flex px-4 gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none', paddingTop: '4px', paddingBottom: '8px' }}>
           {([
             { genre: 'Music',     icon: 'music',     color: '#8B3A0F' },
             { genre: 'Concerts',  icon: 'concert',   color: '#7C3AED' },
@@ -5541,7 +5557,10 @@ function EventsScreen({
           if (!catGroups[cat]) catGroups[cat] = [];
           catGroups[cat].push(evt);
         }
-        const sortedGroups = Object.entries(catGroups).sort((a, b) => b[1].length - a[1].length);
+        // Seeded shuffle — different order every session so users discover new categories
+        let _rng = catShuffleSeed;
+        const _lcg = () => { _rng = (_rng * 9301 + 49297) % 233280; return _rng / 233280; };
+        const shuffledGroups = [...Object.entries(catGroups)].sort(() => _lcg() - 0.5);
         return (
           <div style={{ padding: '0 16px 112px' }}>
             {/* Column picker */}
@@ -5556,7 +5575,7 @@ function EventsScreen({
                 </button>
               ))}
             </div>
-            {sortedGroups.map(([cat, events]) => {
+            {shuffledGroups.map(([cat, events]) => {
               const color = CAT_COLORS[cat] || 'var(--brand)';
               const tMeta = getEventTypeMeta(events[0]);
               return (
