@@ -953,7 +953,7 @@ const SEARCH_BOOSTS: Record<string, string[]> = {
 };
 
 const EVENT_GENRES = [
-  'All', 'Tonight', 'This Weekend', '❤️ For You', 'Free', 'Volunteer', 'Music', 'Sports', 'Comedy', 'Arts', 'Family', 'Outdoor', 'Community', 'Movie',
+  'All', 'Tonight', 'This Weekend', '❤️ For You', 'Free', 'Volunteer', 'Music', 'Concerts', 'Sports', 'Comedy', 'Arts', 'Family', 'Outdoor', 'Community', 'Movie',
 ];
 
 const FOLLOWING_KEY = 'abq_following_genres';
@@ -967,6 +967,7 @@ function saveFollowedGenres(genres: string[]) {
 // Per-category icon and gradient for event cards
 const EVENT_TYPE_META: Record<string, { icon: string; bg: string }> = {
   'Music':          { icon: 'music',         bg: 'linear-gradient(135deg,#8B3A0F,#c0552a)' },
+  'Concerts':       { icon: 'concert',       bg: 'linear-gradient(135deg,#5B21B6,#7C3AED)' },
   'Sports':         { icon: 'sports',        bg: 'linear-gradient(135deg,#1d4ed8,#3b82f6)' },
   'Arts':           { icon: 'art',           bg: 'linear-gradient(135deg,#6d28d9,#8b5cf6)' },
   'Arts & Theatre': { icon: 'theatre',       bg: 'linear-gradient(135deg,#6d28d9,#8b5cf6)' },
@@ -1004,6 +1005,7 @@ const FlatIcon = React.memo(function FlatIcon({
   const map: Record<string, React.ReactNode> = {
     // Event type icons
     music:         <><polyline points="7.5,12 7.5,4 13,4 13,10" {...S}/><circle cx="5.5" cy="12" r="2" {...F}/><circle cx="11" cy="10" r="2" {...F}/></>,
+    concert:       <><rect x="5.5" y="1.5" width="5" height="7" rx="2.5" {...S}/><path d="M3 8c0 2.8 2.2 5 5 5s5-2.2 5-5" {...S}/><line x1="8" y1="13" x2="8" y2="14.5" {...S}/><line x1="5.5" y1="14.5" x2="10.5" y2="14.5" {...S}/></>,
     sports:        <><path d="M5 3h6v4c0 2.8-1.3 4-3 4s-3-1.2-3-4Z" {...S}/><path d="M5 5H3.5a1.5 1.5 0 0 0 0 3H5" {...S}/><path d="M11 5h1.5a1.5 1.5 0 0 1 0 3H11" {...S}/><line x1="8" y1="11" x2="8" y2="13.5" {...S}/><line x1="5.5" y1="13.5" x2="10.5" y2="13.5" {...S}/></>,
     comedy:        <><circle cx="8" cy="8" r="6" {...S}/><path d="M5.5 9.5Q8 12 10.5 9.5" {...S}/><circle cx="6" cy="7" r="0.8" {...F}/><circle cx="10" cy="7" r="0.8" {...F}/></>,
     art:           <><path d="M8 2a6 6 0 1 0 5.2 9" {...S}/><path d="M13.5 9.5c1.5-1 1.5-2.5 0-2.5s-1.5 2.5 0 2.5Z" {...F}/><circle cx="5.5" cy="6.5" r="1" {...F}/><circle cx="9.5" cy="5" r="1" {...F}/><circle cx="11" cy="9" r="1" {...F}/></>,
@@ -4532,9 +4534,10 @@ function DiscoverScreen({
           <p className="text-xs font-black uppercase flex items-center gap-2 mb-2.5" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>
             <FlatIcon name="zia" size={12} color="var(--brand)" /> Browse by Category
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
             {[
               { genre: 'Music',     icon: 'music',     color: '#8B3A0F' },
+              { genre: 'Concerts',  icon: 'concert',   color: '#7C3AED' },
               { genre: 'Comedy',    icon: 'comedy',    color: '#B45309' },
               { genre: 'Arts',      icon: 'art',       color: '#6D28D9' },
               { genre: 'Sports',    icon: 'sports',    color: '#1D4ED8' },
@@ -4542,6 +4545,7 @@ function DiscoverScreen({
               { genre: 'Outdoor',   icon: 'outdoor',   color: '#065F46' },
               { genre: 'Free',      icon: 'free',      color: '#0F766E' },
               { genre: 'Volunteer', icon: 'volunteer', color: '#BE185D' },
+              { genre: 'Movie',     icon: 'film',      color: '#1F2937' },
             ].map(({ genre, icon, color }) => (
               <button
                 key={genre}
@@ -5036,6 +5040,7 @@ function EventsScreen({
         const name = e.name.toLowerCase();
         switch (g) {
           case 'Music':    return seg === 'Music' || seg === 'Live Music';
+          case 'Concerts': return seg === 'Music' || name.includes('concert') || name.includes(' tour') || name.includes('live at ');
           case 'Sports':   return seg === 'Sports';
           case 'Comedy':   return seg === 'Comedy' || seg === 'Theater & Comedy' || name.includes('comedy') || name.includes('stand-up');
           case 'Arts':     return seg === 'Arts & Theatre' || seg === 'Arts & Culture' || name.includes('art') || name.includes('gallery') || name.includes('museum');
@@ -5058,6 +5063,11 @@ function EventsScreen({
         switch (selectedGenre) {
           case 'Music':
             return seg === 'Music' || seg === 'Live Music' || gen === 'Live Music' || gen === 'Music';
+          case 'Concerts':
+            return seg === 'Music' || gen === 'Rock' || gen === 'Pop' || gen === 'Metal' || gen === 'Hip-Hop/Rap' ||
+              gen === 'Electronic' || gen === 'Country' || gen === 'Jazz' || gen === 'Blues' || gen === "R&B" ||
+              gen === 'Alternative' || gen === 'Classical' || gen === 'Indie' || gen === 'Latin' ||
+              eventName.includes('concert') || eventName.includes(' tour') || eventName.includes('live at ');
           case 'Sports':
             return seg === 'Sports' || gen === 'Sports';
           case 'Comedy':
@@ -5245,6 +5255,7 @@ function EventsScreen({
         <div className="flex px-4 gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none', paddingTop: '4px', paddingBottom: '8px' }}>
           {([
             { genre: 'Music',     icon: 'music',     color: '#8B3A0F' },
+            { genre: 'Concerts',  icon: 'concert',   color: '#7C3AED' },
             { genre: 'Comedy',    icon: 'comedy',    color: '#B45309' },
             { genre: 'Arts',      icon: 'art',       color: '#6D28D9' },
             { genre: 'Sports',    icon: 'sports',    color: '#1D4ED8' },
