@@ -59,6 +59,10 @@ export function loadPrefs(): NotificationPrefs {
 
 export function savePrefs(prefs: NotificationPrefs): void {
   try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch {}
+  // Keep server-side prefs in sync whenever the user changes settings
+  if (prefs.enabled && hasPermission()) {
+    subscribeToPush(prefs).catch(() => {});
+  }
 }
 
 // ── Permission helpers ─────────────────────────────────────────────────────────
@@ -257,21 +261,36 @@ export async function checkAndTriggerNotifications(
 
 export const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
 
-export async function subscribeToPush(): Promise<PushSubscription | null> {
-  if (!VAPID_PUBLIC_KEY) return null;
+export async function subscribeToPush(prefs?: NotificationPrefs): Promise<PushSubscription | null> {
+  if (!VAPID_PUBLIC_KEY) {
+    console.warn('[push] VAPID_PUBLIC_KEY not set — push disabled');
+    return null;
+  }
   try {
     const reg = await navigator.serviceWorker.ready;
     const existing = await reg.pushManager.getSubscription();
-    if (existing) return existing;
-
-    const sub = await reg.pushManager.subscribe({
+    const sub = existing ?? await reg.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
     });
-    // TODO: POST sub to your backend endpoint for storage
-    // await fetch('/api/push-subscribe', { method: 'POST', body: JSON.stringify(sub) });
+
+    // Register/update subscription + prefs with our backend
+    await fetch('/api/push-subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        endpoint: sub.endpoint,
+        keys: {
+          p256dh: sub.toJSON().keys?.p256dh,
+          auth:   sub.toJSON().keys?.auth,
+        },
+        prefs: prefs ?? loadPrefs(),
+      }),
+    }).catch(err => console.warn('[push] subscribe POST failed:', err));
+
     return sub;
-  } catch {
+  } catch (err) {
+    console.warn('[push] subscribeToPush failed:', err);
     return null;
   }
 }
