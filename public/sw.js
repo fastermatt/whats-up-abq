@@ -4,7 +4,7 @@
 //   - App shell (HTML): Network-first with cache fallback
 //   - Supabase API calls: Network-only (live data required)
 
-const CACHE_VERSION = 'abq-202604062200';
+const CACHE_VERSION = 'abq-202604081847';
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const ASSET_CACHE = `${CACHE_VERSION}-assets`;
 
@@ -89,6 +89,12 @@ self.addEventListener('fetch', (event) => {
   // App shell / navigation → network-first with offline fallback
   if (request.mode === 'navigate' || url.pathname === '/') {
     event.respondWith(networkFirst(SHELL_CACHE, request, '/'));
+    return;
+  }
+
+  // Data JSON files: stale-while-revalidate — serve from cache instantly, refresh in background
+  if (url.pathname.startsWith('/data/') && url.pathname.endsWith('.json')) {
+    event.respondWith(staleWhileRevalidate(ASSET_CACHE, request));
     return;
   }
 
@@ -180,6 +186,34 @@ async function networkFirst(cacheName, request, fallbackPath) {
       { status: 200, headers: { 'Content-Type': 'text/html' } }
     );
   }
+}
+
+// ─── Stale-While-Revalidate ───────────────────────────────────────────────────
+// Serve cached data immediately, fetch fresh version in background.
+// Perfect for event JSON files: instant load + always up-to-date.
+
+async function staleWhileRevalidate(cacheName, request) {
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(request);
+
+  // Always kick off a background fetch to keep the cache fresh
+  const fetchPromise = fetch(request)
+    .then(response => {
+      if (response.ok) cache.put(request, response.clone());
+      return response;
+    })
+    .catch(() => null);
+
+  // Return cached version immediately if we have one
+  if (cached) return cached;
+
+  // No cached version yet — wait for the network response
+  const networkResponse = await fetchPromise;
+  if (networkResponse) return networkResponse;
+  return new Response('[]', {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
 }
 
 // ─── Push Notifications ────────────────────────────────────────────────────────

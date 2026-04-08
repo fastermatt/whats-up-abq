@@ -4,7 +4,7 @@ import { supabase } from './lib/supabase';
 import { fetchEventsFromDB } from './lib/db';
 import { ALL_EVENTS, type Event as StaticEvent } from './data/events';
 import AdminPanel from './AdminPanel';
-import { loadPrefs as loadNotifPrefs, savePrefs as saveNotifPrefs, requestPermission, notificationsSupported, checkAndTriggerNotifications, NOTIF_LABELS, type NotificationPrefs } from './lib/notifications';
+import { loadPrefs as loadNotifPrefs, savePrefs as saveNotifPrefs, requestPermission, notificationsSupported, checkAndTriggerNotifications, subscribeToPush, NOTIF_LABELS, type NotificationPrefs } from './lib/notifications';
 
 // ─── Scroll fade-in hook ─────────────────────────────────────────────
 function useFadeIn(delay = 0) {
@@ -5204,15 +5204,33 @@ function EventsScreen({
     return result;
   }, [events, selectedGenre, search, dateFrom, dateTo]);
 
-  const sorted = useMemo(
-    () =>
-      [...filtered].sort((a, b) => {
-        const da = a.dates?.start?.localDate || '9999';
-        const db = b.dates?.start?.localDate || '9999';
-        return da.localeCompare(db);
-      }),
-    [filtered]
-  );
+  const sorted = useMemo(() => {
+    // Base: sort everything by date ascending
+    const arr = [...filtered].sort((a, b) =>
+      (a.dates?.start?.localDate || '9999').localeCompare(b.dates?.start?.localDate || '9999')
+    );
+    // "All" view: cap same-venue/category repeats in the first 50 slots so that
+    // a single sports team's games don't flood the entire default feed.
+    // After slot 50 everything shows in natural date order.
+    if (selectedGenre !== 'All') return arr;
+    const venueSegCount = new Map<string, number>();
+    const front: typeof arr = [];
+    const overflow: typeof arr = [];
+    for (const e of arr) {
+      const venue = (e._embedded?.venues?.[0]?.name || 'unknown').toLowerCase().slice(0, 40);
+      const seg   = (e.classifications?.[0]?.segment?.name || '').toLowerCase();
+      const key   = `${seg}::${venue}`;
+      const count = venueSegCount.get(key) ?? 0;
+      const cap   = seg === 'sports' ? 3 : 8; // sports capped hard; others more lenient
+      if (front.length < 50 && count < cap) {
+        front.push(e);
+        venueSegCount.set(key, count + 1);
+      } else {
+        overflow.push(e);
+      }
+    }
+    return [...front, ...overflow];
+  }, [filtered, selectedGenre]);
 
   // Deduplicate same-title + same-date events (e.g. multiple TM showtimes for the
   // same movie listed as separate events). Keep only the first (earliest showtime).
@@ -6295,11 +6313,13 @@ function NotificationSettingsPane() {
 
   const handleEnable = async () => {
     setRequesting(true);
-    const result = await requestPermission();
-    setPerm(result);
-    if (result === 'granted') {
+    const granted = await requestPermission();
+    setPerm(Notification.permission);
+    if (granted) {
       const next = { ...prefs, enabled: true };
       update(next);
+      // Register for server-sent background push notifications
+      subscribeToPush(next).catch(() => {});
       checkAndTriggerNotifications(next, { forceAll: true });
     }
     setRequesting(false);
@@ -8912,10 +8932,28 @@ function DesktopApp({ events, places, coords, loading, eventsLoading, onPlaceSel
   // All upcoming events (events tab)
   const upcomingEvents = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
-    return events
+    const arr = events
       .filter(e => !e._isAdult && (e.dates?.start?.localDate || '') >= today)
-      .sort((a, b) => (a.dates?.start?.localDate || '').localeCompare(b.dates?.start?.localDate || ''))
-      .slice(0, 60);
+      .sort((a, b) => (a.dates?.start?.localDate || '').localeCompare(b.dates?.start?.localDate || ''));
+    // Diversity cap: keep home-screen carousel varied — max 3 sports events from
+    // the same venue in the first 40 slots before showing overflow in date order.
+    const venueSegCount = new Map<string, number>();
+    const front: typeof arr = [];
+    const overflow: typeof arr = [];
+    for (const e of arr) {
+      const venue = (e._embedded?.venues?.[0]?.name || 'unknown').toLowerCase().slice(0, 40);
+      const seg   = (e.classifications?.[0]?.segment?.name || '').toLowerCase();
+      const key   = `${seg}::${venue}`;
+      const count = venueSegCount.get(key) ?? 0;
+      const cap   = seg === 'sports' ? 3 : 8;
+      if (front.length < 40 && count < cap) {
+        front.push(e);
+        venueSegCount.set(key, count + 1);
+      } else {
+        overflow.push(e);
+      }
+    }
+    return [...front, ...overflow].slice(0, 100);
   }, [events]);
 
   // Filtered places
