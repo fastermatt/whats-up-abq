@@ -4401,21 +4401,35 @@ function DiscoverScreen({
           </p>
           <button
             onClick={() => onNavigateEvents?.()}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '42px', padding: '0 16px', background: 'var(--brand)', color: 'white', border: 'none', boxShadow: '0 2px 8px rgba(185,92,67,0.30)', fontFamily: 'Public Sans, sans-serif', fontSize: '13px', fontWeight: 800, letterSpacing: '0.03em', cursor: 'pointer', borderRadius: 6, marginBottom: '12px' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', padding: '0 0 12px 0', cursor: 'pointer', fontFamily: 'Public Sans, sans-serif', fontSize: '11px', fontWeight: 700, color: 'var(--ink)', opacity: 0.5, letterSpacing: '0.04em', textDecoration: 'underline' }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>confirmation_number</span>
             Browse all events →
           </button>
         </div>
         <div className="flex px-5 pb-4 gap-2" style={{ overflowX: 'auto', scrollbarWidth: 'none' }}>
-          {[
-            { label: 'Tonight',        action: () => onNavigateEvents?.('Tonight') },
-            { label: 'This Weekend',   action: () => onNavigateEvents?.('This Weekend') },
-            { label: 'Free Events',    action: () => onNavigateEvents?.('Free') },
-            { label: 'Volunteer',      action: () => onNavigateEvents?.('Volunteer') },
-          ].map(chip => (
+          {([
+            { label: '🌙 Tonight',   action: () => onNavigateEvents?.('Tonight'),     primary: true  },
+            { label: 'This Weekend', action: () => onNavigateEvents?.('This Weekend'), primary: false },
+            { label: 'Free Events',  action: () => onNavigateEvents?.('Free'),         primary: false },
+            { label: 'Volunteer',    action: () => onNavigateEvents?.('Volunteer'),    primary: false },
+          ] as { label: string; action: () => void; primary: boolean }[]).map(chip => (
             <button key={chip.label} onClick={chip.action}
-              style={{ flexShrink: 0, height: '28px', padding: '0 12px', background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(194,99,74,0.3)', fontFamily: 'Public Sans, sans-serif', fontSize: '11px', fontWeight: 700, letterSpacing: '0.04em', cursor: 'pointer', borderRadius: 6, whiteSpace: 'nowrap', color: 'var(--ink)' }}>
+              style={{
+                flexShrink: 0,
+                height: chip.primary ? '36px' : '28px',
+                padding: chip.primary ? '0 18px' : '0 12px',
+                background: chip.primary ? 'var(--brand)' : 'rgba(255,255,255,0.85)',
+                border: chip.primary ? 'none' : '1px solid rgba(194,99,74,0.3)',
+                fontFamily: 'Public Sans, sans-serif',
+                fontSize: chip.primary ? '13px' : '11px',
+                fontWeight: chip.primary ? 800 : 700,
+                letterSpacing: '0.04em',
+                cursor: 'pointer',
+                borderRadius: 6,
+                whiteSpace: 'nowrap' as const,
+                color: chip.primary ? 'white' : 'var(--ink)',
+                boxShadow: chip.primary ? '0 2px 8px rgba(185,92,67,0.25)' : 'none',
+              }}>
               {chip.label}
             </button>
           ))}
@@ -4686,84 +4700,6 @@ function DiscoverScreen({
         </div>
       )}
 
-      {/* Happening This Week — upcoming events, next 7 days */}
-      {!hidden.includes('hiddenGems') && happeningThisWeek.length > 0 && (
-        <div className="py-4">
-          <div className="flex items-center justify-between px-5 py-3 mb-0" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
-            <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif' }}>
-              Happening This Week
-            </h2>
-            <button
-              onClick={() => onNavigateEvents?.()}
-              className="text-xs font-black uppercase"
-              style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)', letterSpacing: '0.06em', background: 'none', border: 'none', cursor: 'pointer' }}
-            >
-              → See All
-            </button>
-          </div>
-          <div className="flex gap-3 px-5 py-3 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-            {happeningThisWeek.map(event => {
-              const meta = getEventTypeMeta(event);
-              const dateStr = event.dates?.start?.localDate;
-              const timeStr = event.dates?.start?.localTime;
-              const venue = event._embedded?.venues?.[0];
-              const d = dateStr ? new Date(dateStr + 'T12:00:00') : null;
-              const monthDay = d ? d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
-              const time = timeStr ? formatTime(timeStr) : '';
-              const venueName = venue?.name || '';
-              const price = getEventPrice(event);
-              const imgs = (event.images ?? []).filter(img => !img.fallback);
-              const heroImg = imgs.sort((a, b) => (b.width || 0) - (a.width || 0))[0]?.url;
-              return (
-                <button
-                  key={event.id}
-                  onClick={() => onEventSelect(event)}
-                  className="flex-shrink-0 text-left overflow-hidden"
-                  style={{ width: '150px', borderRadius: '10px', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)', background: 'white' }}
-                >
-                  {/* Image / gradient header */}
-                  <div className="relative" style={{ height: '90px', background: meta.bg }}>
-                    {heroImg && (
-                      <img src={heroImg} alt={event.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                        onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
-                    )}
-                    {!heroImg && (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <FlatIcon name={meta.icon} size={28} color="white" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                    {price && (
-                      <div className="absolute top-2 right-2">
-                        <span className="text-xs font-black px-1.5 py-0.5" style={{ background: price === 'FREE' ? '#047857' : 'rgba(0,0,0,0.55)', color: 'white', borderRadius: 4, fontFamily: 'Public Sans, sans-serif', fontSize: '9px', letterSpacing: '0.04em' }}>
-                          {price === 'FREE' ? 'FREE' : price}
-                        </span>
-                      </div>
-                    )}
-                    <div className="absolute bottom-2 left-2">
-                      <span className="text-xs font-black text-white" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '10px', textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
-                        {monthDay}{time ? ` · ${time}` : ''}
-                      </span>
-                    </div>
-                  </div>
-                  {/* Info */}
-                  <div className="p-2">
-                    <p className="text-xs font-black leading-tight" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}>
-                      {event.name}
-                    </p>
-                    {venueName && (
-                      <p className="text-xs mt-0.5 truncate" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif', fontSize: '10px' }}>
-                        {venueName}
-                      </p>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
       {/* Neighborhoods removed — events-only pivot */}
 
       {/* Did You Know - animated rotating card */}
@@ -4852,9 +4788,6 @@ function DiscoverScreen({
 
       {/* Wishlist */}
       {!hidden.includes('wishlist') && <MyWishlist />}
-
-      {/* Ko-fi support banner */}
-      <KoFiBanner />
 
       {/* Why Unplug */}
       <WhyUnplugCard />
@@ -6373,7 +6306,7 @@ function NotificationSettingsPane() {
   );
 }
 
-function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User | null; onUsernameChange?: (name: string) => void; onSignIn?: () => void }) {
+function ProfileSettingsPane({ user, onUsernameChange, onSignIn, isDark, onToggleDark }: { user: User | null; onUsernameChange?: (name: string) => void; onSignIn?: () => void; isDark?: boolean; onToggleDark?: () => void }) {
   const [prefs, setPrefs] = useState<UserPrefs>(getPrefs);
   const [open, setOpen] = useState(false);
   const [usernameInput, setUsernameInput] = useState(
@@ -6439,6 +6372,20 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn }: { user: User 
 
       {open && (
         <div className="mt-2 flex flex-col gap-3">
+
+          {/* Appearance — Dark Mode toggle */}
+          <div className="bg-white rounded-lg p-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3" style={{ fontFamily: 'Public Sans, sans-serif' }}>Appearance</p>
+            <button onClick={onToggleDark} className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--brand)', fontVariationSettings: isDark ? "'FILL' 1" : "'FILL' 0" }}>dark_mode</span>
+                <span className="text-sm font-medium text-gray-700" style={{ fontFamily: 'Public Sans, sans-serif' }}>Dark Mode</span>
+              </div>
+              <div className="w-11 h-6 rounded-full flex items-center px-0.5 transition-colors" style={{ background: isDark ? 'var(--brand)' : '#d1d5db' }}>
+                <div className="w-5 h-5 bg-white rounded-full shadow transition-transform" style={{ transform: isDark ? 'translateX(20px)' : 'translateX(0)' }} />
+              </div>
+            </button>
+          </div>
 
           {/* Username */}
           {user ? (
@@ -6536,7 +6483,7 @@ const LEADERBOARD_SEEDS: { name: string; count: number }[] = [];
 interface LeaderboardRow { rank: number; name: string; count: number; streak?: number; isMe: boolean; uid?: string; }
 
 function ProfileScreen({
-  checkedIn, user, onSignIn, onSignOut, places, onUsernameChange, onAdmin,
+  checkedIn, user, onSignIn, onSignOut, places, onUsernameChange, onAdmin, isDark, onToggleDark,
 }: {
   checkedIn: Set<string>;
   user: User | null;
@@ -6545,6 +6492,8 @@ function ProfileScreen({
   places: Place[];
   onUsernameChange?: (name: string) => void;
   onAdmin?: () => void;
+  isDark?: boolean;
+  onToggleDark?: () => void;
 }) {
   const myCount = checkedIn.size;
   const myStreak = getStreak().count;
@@ -6683,7 +6632,7 @@ function ProfileScreen({
       <NotificationSettingsPane />
 
       {/* Customize Settings */}
-      <ProfileSettingsPane user={user} onUsernameChange={onUsernameChange} onSignIn={onSignIn} />
+      <ProfileSettingsPane user={user} onUsernameChange={onUsernameChange} onSignIn={onSignIn} isDark={isDark} onToggleDark={onToggleDark} />
 
       {/* Profile card */}
       <div
@@ -7050,6 +6999,17 @@ function ProfileScreen({
         </>
       )}
 
+      {/* Support — subtle single line */}
+      <div style={{ textAlign: 'center', padding: '8px 0 16px', marginTop: '4px', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+        <a
+          href="https://ko-fi.com/stopscrolling"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '11px', color: 'var(--muted)', opacity: 0.55 }}
+        >
+          ☕ Built for ABQ, by ABQ &mdash; <span style={{ textDecoration: 'underline' }}>Support ♥</span>
+        </a>
+      </div>
     </div>
   );
 }
@@ -9782,14 +9742,22 @@ export default function App() {
 
   // ── Browser history management (prevents swipe-back leaving the site) ──
   const navigateTab = useCallback((tab: TabId) => {
+    // Save current scroll before leaving this tab
+    tabScrollPos.current[activeTab] = window.scrollY;
     setActiveTab(tab);
     // Reset Events genre filter when tapping Events tab directly (so stale filters don't persist)
     if (tab === 'events') setEventsNavGenre('');
     window.history.pushState({ tab, modal: null }, '', `#${tab}`);
     trackEvent('pageview', { tab, referrer: document.referrer || '', path: `#${tab}` });
-  }, []);
+    // Restore scroll position for the target tab
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: tabScrollPos.current[tab] ?? 0, behavior: 'instant' });
+    });
+  }, [activeTab]);
 
   // ── Swipe between tabs (native-app feel) ─────────────────────────────────
+  const mainRef = useRef<HTMLDivElement>(null);
+  const tabScrollPos = useRef({} as Partial<Record<TabId, number>>);
   const TAB_ORDER: TabId[] = NAV_ITEMS.map(n => n.id);
   const swipeStartX = useRef<number | null>(null);
   const swipeStartY = useRef<number | null>(null);
@@ -9806,9 +9774,10 @@ export default function App() {
     swipeIgnored.current = false;
     while (el && el !== e.currentTarget) {
       const style = window.getComputedStyle(el);
-      if (style.overflowX === 'auto' || style.overflowX === 'scroll' || el.classList.contains('overflow-x-auto')
-          || el.getAttribute('data-swipe-ignore') === 'true'
-          || (el.scrollWidth > el.clientWidth + 2)) {
+      const oxv = style.overflowX;
+      const isHScrollable = (oxv === 'auto' || oxv === 'scroll') && el.scrollWidth > el.clientWidth + 2;
+      if (isHScrollable || el.classList.contains('overflow-x-auto')
+          || el.getAttribute('data-swipe-ignore') === 'true') {
         swipeIgnored.current = true;
         break;
       }
@@ -9847,6 +9816,26 @@ export default function App() {
       navigateTab(TAB_ORDER[curIdx - 1]);
     }
   }, [activeTab, navigateTab]);
+
+  // Non-passive native touchmove: allows e.preventDefault() to actually block
+  // the browser back/forward swipe gesture (React handlers are passive, so
+  // e.preventDefault() has no effect there since React 17).
+  useEffect(() => {
+    const el = mainRef.current;
+    if (!el) return;
+    const handleTouchMove = (e: TouchEvent) => {
+      if (swipeIgnored.current) return;
+      if (swipeStartX.current === null || swipeStartY.current === null) return;
+      const dx = e.touches[0].clientX - swipeStartX.current;
+      const dy = e.touches[0].clientY - swipeStartY.current;
+      if (!swipeLocked.current && Math.abs(dx) > 15 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+        swipeLocked.current = true;
+      }
+      if (swipeLocked.current) e.preventDefault();
+    };
+    el.addEventListener('touchmove', handleTouchMove, { passive: false });
+    return () => el.removeEventListener('touchmove', handleTouchMove);
+  }, []);
 
   const openPlaceModal = useCallback((place: Place) => {
     setSelectedPlace(place);
@@ -10510,17 +10499,7 @@ export default function App() {
                 my_location
               </span>
             </button>
-            <button
-              onClick={() => setIsDark(d => !d)}
-              className="w-9 h-9 flex items-center justify-center"
-              style={{ background: 'var(--bg)', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-              title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-              aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--ink)' }}>
-                {isDark ? 'light_mode' : 'dark_mode'}
-              </span>
-            </button>
+
           </div>
         </header>
 
@@ -10528,8 +10507,8 @@ export default function App() {
         <SiteBanner banner={siteBanner} />
 
         {/* Screen content */}
-        <main className="flex-1" style={{ paddingBottom: 'calc(var(--sab) + 110px)', touchAction: 'pan-y', overscrollBehaviorX: 'none' } as React.CSSProperties}
-          onTouchStart={onMainTouchStart} onTouchMove={onMainTouchMove} onTouchEnd={onMainTouchEnd}>
+        <main ref={mainRef} className="flex-1" style={{ paddingBottom: 'calc(var(--sab) + 110px)', touchAction: 'pan-y', overscrollBehaviorX: 'none' } as React.CSSProperties}
+          onTouchStart={onMainTouchStart} onTouchEnd={onMainTouchEnd}>
           {activeTab === 'discover' && (
             <DiscoverScreen
               places={places}
@@ -10585,6 +10564,8 @@ export default function App() {
               checkedIn={checkedIn}
               user={user}
               places={places}
+              isDark={isDark}
+              onToggleDark={() => setIsDark(d => !d)}
               onSignIn={() => setShowAuthModal(true)}
               onSignOut={() => {
                 // Clear session immediately (sync) so UI updates right away on mobile
