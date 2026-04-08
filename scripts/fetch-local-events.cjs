@@ -22,6 +22,19 @@ const fs     = require('fs');
 const path   = require('path');
 const { URL } = require('url');
 
+// Load .env files before Supabase init (scripts/.env has SERVICE_ROLE_KEY)
+for (const _envFile of [
+  path.join(__dirname, '.env'),
+  path.join(__dirname, '..', '.env'),
+]) {
+  if (fs.existsSync(_envFile)) {
+    fs.readFileSync(_envFile, 'utf8').split('\n').forEach(line => {
+      const [key, ...rest] = line.split('=');
+      if (key && rest.length) process.env[key.trim()] = rest.join('=').trim().replace(/^["']|["']$/g, '');
+    });
+  }
+}
+
 // ── Supabase ─────────────────────────────────────────────────────────────────
 let _sb = null;
 try {
@@ -34,15 +47,6 @@ try {
               || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbXZmdXRlYm1ia2p2bHJoaXlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMzgwMzIsImV4cCI6MjA4OTgxNDAzMn0.3rvMRErlF-HnKfbJ6rCNSeCJc39n4K48xjAeSGqf_rc';
   _sb = createClient(_sbUrl, _sbKey);
 } catch (e) { console.warn('[Supabase] init error:', e.message); }
-
-// ── Load .env ─────────────────────────────────────────────────────────────────
-const envPath = path.join(__dirname, '..', '.env');
-if (fs.existsSync(envPath)) {
-  fs.readFileSync(envPath, 'utf8').split('\n').forEach(line => {
-    const [key, ...rest] = line.split('=');
-    if (key && rest.length) process.env[key.trim()] = rest.join('=').trim().replace(/^["']|["']$/g, '');
-  });
-}
 
 // ── HTTP helper ───────────────────────────────────────────────────────────────
 function fetchUrl(urlStr, opts = {}, redirectCount = 0) {
