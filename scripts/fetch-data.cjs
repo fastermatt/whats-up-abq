@@ -10,7 +10,7 @@
  * Search radius:      40 miles (covers full metro)
  *
  * Usage:
- *   GOOGLE_PLACES_API_KEY=xxx TICKETMASTER_API_KEY=xxx node scripts/fetch-data.cjs
+ *   TICKETMASTER_API_KEY=xxx node scripts/fetch-data.cjs
  *
  * Or create a .env file (gitignored) with those two keys and run:
  *   node scripts/fetch-data.cjs
@@ -18,7 +18,6 @@
  * Outputs:
  *   public/data/ticketmaster-events.json
  *   public/data/google-places.json
- *   public/places-data.json  (merged/cleaned version used by the app)
  */
 
 'use strict';
@@ -66,15 +65,12 @@ if (fs.existsSync(envPath)) {
 }
 
 const TM_KEY         = process.env.TICKETMASTER_API_KEY;
-const GOOGLE_KEY     = process.env.GOOGLE_PLACES_API_KEY;
 const EB_TOKEN       = process.env.EVENTBRITE_TOKEN;      // optional
 const SG_CLIENT_ID   = process.env.SEATGEEK_CLIENT_ID;    // optional Ã¢ÂÂ register at seatgeek.com/account/develop
 const BIT_APP_ID     = process.env.BANDSINTOWN_APP_ID;    // optional Ã¢ÂÂ register at bandsintown.com/v3/api
 const MEETUP_KEY     = process.env.MEETUP_API_KEY;        // optional Ã¢ÂÂ register at secure.meetup.com/meetup_api
-const SKIP_PLACES    = process.env.SKIP_PLACES === 'true';
 
 if (!TM_KEY)     { console.error('Missing TICKETMASTER_API_KEY'); process.exit(1); }
-if (!GOOGLE_KEY && !SKIP_PLACES) { console.error('Missing GOOGLE_PLACES_API_KEY (set SKIP_PLACES=true to skip places)'); process.exit(1); }
 
 // Warn for optional sources but don't fail
 for (const [name, val] of [
@@ -96,27 +92,6 @@ for (const [name, val] of [
 const METRO_CENTER = { lat: 35.1053, lng: -106.6464 };
 const METRO_RADIUS_MILES = 40;
 
-// Sub-area search circles for Google Places (max radius 50 000 m each)
-const PLACES_SEARCH_AREAS = [
-  { name: 'Albuquerque Core',        lat: 35.0844, lng: -106.6504, radius: 22000 },
-  { name: 'Rio Rancho',              lat: 35.2828, lng: -106.6630, radius: 14000 },
-  { name: 'East Mountains (Cedar Crest/Tijeras)', lat: 35.1200, lng: -106.3800, radius: 12000 },
-  { name: 'South Valley / Bosque Farms',          lat: 34.8900, lng: -106.6700, radius: 12000 },
-  { name: 'Bernalillo / Corrales',   lat: 35.3100, lng: -106.5600, radius: 10000 },
-  { name: 'North ABQ / Balloon Fiesta Park area', lat: 35.1900, lng: -106.5900, radius: 10000 },
-  { name: 'West ABQ / Petroglyph area',           lat: 35.1200, lng: -106.7700, radius: 10000 },
-];
-
-// Google Places types to search for each area
-const PLACES_TYPES = [
-  'restaurant', 'bar', 'cafe', 'night_club',
-  'museum', 'art_gallery', 'park', 'tourist_attraction',
-  'shopping_mall', 'gym', 'spa', 'movie_theater',
-  'bowling_alley', 'amusement_park', 'zoo', 'aquarium',
-  'stadium', 'campground', 'hiking_area',
-];
-
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Helpers Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function get(url) {
   return new Promise((resolve, reject) => {
     https.get(url, res => {
@@ -237,202 +212,6 @@ async function fetchTicketmasterEvents() {
   return unique;
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Google Places Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
-async function fetchGooglePlacesForArea(area, type) {
-  const url = [
-    'https://maps.googleapis.com/maps/api/place/nearbysearch/json',
-    `?location=${area.lat},${area.lng}`,
-    `&radius=${area.radius}`,
-    `&type=${type}`,
-    `&key=${GOOGLE_KEY}`,
-  ].join('');
-
-  const data = await get(url);
-
-  if (data.status === 'REQUEST_DENIED') {
-    throw new Error(`Google Places API denied: ${data.error_message}`);
-  }
-  if (data.status === 'OVER_QUERY_LIMIT') {
-    console.warn('    Ã¢ÂÂ  Rate limited Ã¢ÂÂ sleeping 2s...');
-    await sleep(2000);
-    return fetchGooglePlacesForArea(area, type);
-  }
-
-  const results = data.results || [];
-  // Follow next_page_token up to 2 extra pages
-  let nextToken = data.next_page_token;
-  let extraPages = 0;
-  while (nextToken && extraPages < 2) {
-    await sleep(2000); // Google requires ~2s before using next_page_token
-    const next = await get(
-      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?pagetoken=${nextToken}&key=${GOOGLE_KEY}`
-    );
-    results.push(...(next.results || []));
-    nextToken = next.next_page_token;
-    extraPages++;
-  }
-
-  return results;
-}
-
-async function fetchAllGooglePlaces() {
-  console.log('\nÃ°ÂÂÂ  Fetching Google Places for Greater ABQ Metro...');
-
-  const allPlaces = [];
-  const seenIds = new Set();
-
-  for (const area of PLACES_SEARCH_AREAS) {
-    console.log(`\n  Area: ${area.name}`);
-    for (const type of PLACES_TYPES) {
-      try {
-        const results = await fetchGooglePlacesForArea(area, type);
-        let added = 0;
-        for (const p of results) {
-          if (!seenIds.has(p.place_id)) {
-            seenIds.add(p.place_id);
-            allPlaces.push(p);
-            added++;
-          }
-        }
-        if (added > 0) process.stdout.write(`    ${type}: +${added}  `);
-        await sleep(100);
-      } catch (e) {
-        console.error(`    Ã¢ÂÂ ${type}: ${e.message}`);
-      }
-    }
-    console.log('');
-  }
-
-  console.log(`\n    Ã¢ÂÂ ${allPlaces.length} unique places fetched`);
-  return allPlaces;
-}
-
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Transform Google Place Ã¢ÂÂ app Place Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
-function placeTypeToCategory(types) {
-  if (!types) return 'other';
-  if (types.includes('restaurant') || types.includes('food')) return 'restaurant';
-  if (types.includes('bar') || types.includes('night_club'))  return 'bar';
-  if (types.includes('cafe'))                                  return 'coffee';
-  if (types.includes('park') || types.includes('campground') || types.includes('hiking_area')) return 'park';
-  if (types.includes('museum'))                                return 'museum';
-  if (types.includes('art_gallery'))                           return 'arts';
-  if (types.includes('gym') || types.includes('spa'))         return 'fitness';
-  if (types.includes('lodging'))                               return 'hotel';
-  if (types.includes('shopping_mall') || types.includes('store')) return 'shop';
-  if (types.includes('stadium') || types.includes('amusement_park') ||
-      types.includes('bowling_alley') || types.includes('movie_theater') ||
-      types.includes('zoo') || types.includes('aquarium'))    return 'entertainment';
-  if (types.includes('tourist_attraction'))                    return 'entertainment';
-  return 'other';
-}
-
-function placeTypesToTags(types, name) {
-  const tags = [];
-  const nameLower = (name || '').toLowerCase();
-
-  if (types.includes('park') || types.includes('campground') || types.includes('hiking_area') ||
-      nameLower.includes('trail') || nameLower.includes('park') || nameLower.includes('canyon') ||
-      nameLower.includes('mountain') || nameLower.includes('bosque') || nameLower.includes('petroglyph'))
-    tags.push('outdoor');
-
-  if (types.includes('museum') || types.includes('art_gallery') || types.includes('movie_theater') ||
-      types.includes('bowling_alley') || nameLower.includes('theater') || nameLower.includes('theatre') ||
-      nameLower.includes('cinema') || nameLower.includes('gallery'))
-    tags.push('indoor');
-
-  if (types.includes('amusement_park') || types.includes('zoo') || types.includes('aquarium') ||
-      nameLower.includes('family') || nameLower.includes('children') || nameLower.includes('kid'))
-    tags.push('family-friendly');
-
-  if (nameLower.includes('dog') || nameLower.includes('paw') || nameLower.includes('leash'))
-    tags.push('dog-friendly');
-
-  if (nameLower.includes('music') || nameLower.includes('jazz') || nameLower.includes('blues') ||
-      nameLower.includes('concert') || nameLower.includes('lounge'))
-    tags.push('live-music');
-
-  if (nameLower.includes('patio') || nameLower.includes('rooftop') || nameLower.includes('terrace'))
-    tags.push('patio');
-
-  return [...new Set(tags)];
-}
-
-// Gradient pool for places without images
-const GRADIENTS = [
-  'linear-gradient(135deg,#f97316,#ef4444)',
-  'linear-gradient(135deg,#8b5cf6,#3b82f6)',
-  'linear-gradient(135deg,#10b981,#059669)',
-  'linear-gradient(135deg,#f59e0b,#d97706)',
-  'linear-gradient(135deg,#ec4899,#8b5cf6)',
-  'linear-gradient(135deg,#14b8a6,#0284c7)',
-  'linear-gradient(135deg,#f97316,#84cc16)',
-  'linear-gradient(135deg,#6366f1,#8b5cf6)',
-];
-let gradIdx = 0;
-
-function transformGooglePlace(raw) {
-  const photo = raw.photos?.[0];
-  const photoRef = photo?.photo_reference;
-  const imageUrl = photoRef
-    ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photoRef}&key=${GOOGLE_KEY}`
-    : null;
-
-  return {
-    id:          raw.place_id,
-    name:        raw.name,
-    category:    placeTypeToCategory(raw.types),
-    isFeatured:  (raw.rating >= 4.5 && raw.user_ratings_total >= 200),
-    description: '',
-    address:     raw.vicinity || '',
-    lat:         raw.geometry?.location?.lat,
-    lng:         raw.geometry?.location?.lng,
-    image:       imageUrl,
-    gradient:    GRADIENTS[gradIdx++ % GRADIENTS.length],
-    rating:      raw.rating,
-    reviewCount: raw.user_ratings_total,
-    priceLevel:  raw.price_level,
-    hours:       raw.opening_hours?.open_now != null
-                   ? (raw.opening_hours.open_now ? 'Open now' : 'Closed now')
-                   : undefined,
-    phone:       undefined,
-    website:     undefined,
-    tags:        placeTypesToTags(raw.types, raw.name),
-    isKidFriendly:  raw.types?.includes('amusement_park') || raw.types?.includes('zoo'),
-    isAccessible: undefined,
-    source:      'google_places',
-  };
-}
-
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Eventbrite Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
-
-/**
- * DEPRECATED: Eventbrite public location-based event search was shut down
- * on December 12, 2019. The /v3/events/search/ endpoint no longer exists.
- * There is no public replacement for location-based search.
- *
- * Docs (deprecated): https://www.eventbrite.com/platform/docs/by-location
- *
- * The EVENTBRITE_TOKEN env var is kept for potential future use if Eventbrite
- * ever restores a public search API.
- */
-async function fetchEventbriteEvents() {
-  // NOTE: Eventbrite's public location-based event search (/v3/events/search/)
-  // was deprecated and shut down on December 12, 2019. No public replacement
-  // exists for searching events by city/radius. The current public API only
-  // supports fetching by event ID, venue ID, or organization ID.
-  // See: https://www.eventbrite.com/platform/docs/by-location
-  if (EB_TOKEN) {
-    console.log('\nð Eventbrite: public location search deprecated Dec 2019 â skipping.');
-    console.log('   No public endpoint for location-based search. See: https://www.eventbrite.com/platform/docs/by-location');
-  }
-  return [];
-}
-
-/**
- * Transform a raw Eventbrite event into a normalized shape the app can merge
- * with Ticketmaster events. We keep it as a separate format with a `_source`
- * marker so the app can render it correctly.
- */
 function transformEventbriteEvent(ev) {
   const venue   = ev.venue || {};
   const address = venue.address || {};
@@ -897,49 +676,15 @@ async function main() {
     if (!fs.existsSync(p)) fs.writeFileSync(p, '[]');
   }
 
-  // Ã¢ÂÂÃ¢ÂÂ Google Places Ã¢ÂÂÃ¢ÂÂ
-  let places = [];
-  if (SKIP_PLACES) {
-    console.log('\nÃ¢ÂÂ¡ Skipping Google Places refresh (SKIP_PLACES=true)');
-    // Load existing places if available
-    const appPath = path.join(__dirname, '..', 'public', 'places-data.json');
-    if (fs.existsSync(appPath)) {
-      try { places = JSON.parse(fs.readFileSync(appPath, 'utf8')); } catch {}
-    }
-  } else {
-    try {
-      const rawPlaces = await fetchAllGooglePlaces();
-
-      // Save raw data
-      const rawPath = path.join(__dirname, '..', 'public', 'data', 'google-places.json');
-      fs.writeFileSync(rawPath, JSON.stringify(rawPlaces, null, 2));
-  await _upsertPlaces(Array.isArray(rawPlaces) ? rawPlaces : (rawPlaces.results||rawPlaces.places||[]));
-      console.log(`\nÃ¢ÂÂ Saved ${rawPlaces.length} raw places Ã¢ÂÂ public/data/google-places.json`);
-
-      // Transform and save app-ready version
-      places = rawPlaces
-        .filter(p => p.business_status !== 'CLOSED_PERMANENTLY')
-        .map(transformGooglePlace);
-
-      const appPath = path.join(__dirname, '..', 'public', 'places-data.json');
-      fs.writeFileSync(appPath, JSON.stringify(places, null, 2));
-      console.log(`Ã¢ÂÂ Saved ${places.length} places Ã¢ÂÂ public/places-data.json`);
-    } catch (e) {
-      console.error('Google Places fetch failed:', e.message);
-    }
-  }
-
-  const totalEvents = tmEvents.length + ebEvents.length + sgEvents.length + bitEvents.length + meetupEvents.length;
-  console.log('\n=== Done! ===');
   console.log(`Ticketmaster: ${tmEvents.length} events`);
   console.log(`Eventbrite:   ${ebEvents.length} events`);
   console.log(`SeatGeek:     ${sgEvents.length} events`);
   console.log(`Bandsintown:  ${bitEvents.length} events`);
   console.log(`Meetup:       ${meetupEvents.length} events`);
-  console.log(`Total events: ${totalEvents}  |  Places: ${places.length}`);
+  console.log(`Total events: ${totalEvents}`);
   if (!process.env.CI) {
     console.log('\nNext steps:');
-    console.log('  git add public/data public/places-data.json');
+    console.log('  git add public/data/');
     console.log('  git commit -m "data: refresh for Greater ABQ Metro"');
     console.log('  git push origin main');
   }
