@@ -5241,7 +5241,7 @@ function EventsScreen({
             );
           })}
         </div>
-        {/* Row 2: Category chips — each has a ♡ to follow for "For You" */}
+        {/* Row 2: Category chips — single unified pill, heart inside */}
         <div className="flex px-4 gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none', paddingTop: '4px', paddingBottom: '8px' }}>
           {([
             { genre: 'Music',     icon: 'music',     color: '#8B3A0F' },
@@ -5257,55 +5257,52 @@ function EventsScreen({
             const isSelected = selectedGenre === genre;
             const isFollowed = followedGenres.includes(genre);
             return (
-              <div key={genre} className="flex-shrink-0 flex items-center" style={{ gap: 0 }}>
-                <button
-                  onClick={() => setSelectedGenre(isSelected ? 'All' : genre)}
-                  className="flex items-center gap-1.5 transition-all active:scale-95"
-                  style={{
-                    padding: '5px 8px 5px 8px',
-                    borderRadius: isFollowed ? '6px 0 0 6px' : '6px',
-                    background: isSelected ? color + '30' : color + '14',
-                    border: isSelected ? `1.5px solid ${color}70` : `1.5px solid ${color}35`,
-                    borderRight: isFollowed ? 'none' : undefined,
-                    cursor: 'pointer',
-                    outline: 'none',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  <FlatIcon name={icon} size={13} color={color} />
-                  <span style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '11px', fontWeight: 700, color: isSelected ? color : 'var(--ink)', letterSpacing: '0.01em' }}>{genre}</span>
-                </button>
-                {/* Heart follow toggle — joins to the right of the genre pill */}
-                <button
+              <button
+                key={genre}
+                onClick={() => setSelectedGenre(isSelected ? 'All' : genre)}
+                className="flex-shrink-0 flex items-center transition-all active:scale-95"
+                style={{
+                  padding: 0,
+                  borderRadius: '20px',
+                  background: isSelected ? color + '22' : isFollowed ? color + '12' : 'var(--bg)',
+                  border: isSelected ? `1.5px solid ${color}70` : isFollowed ? `1.5px solid ${color}45` : '1.5px solid rgba(0,0,0,0.12)',
+                  cursor: 'pointer',
+                  outline: 'none',
+                  overflow: 'hidden',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
+              >
+                {/* Label area */}
+                <span className="flex items-center gap-1.5" style={{ padding: '5px 8px 5px 10px', whiteSpace: 'nowrap' }}>
+                  <FlatIcon name={icon} size={13} color={isSelected || isFollowed ? color : '#999'} />
+                  <span style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '11px', fontWeight: 700, color: isSelected ? color : 'var(--ink)', letterSpacing: '0.01em' }}>
+                    {genre}
+                  </span>
+                </span>
+                {/* Heart — thin internal divider + icon, stopPropagation so it doesn't trigger genre select */}
+                <span
                   onClick={(e) => { e.stopPropagation(); toggleFollowGenre(genre); playHaptic(); }}
-                  title={isFollowed ? `Remove ${genre} from For You` : `Add ${genre} to For You`}
-                  className="flex items-center justify-center transition-all active:scale-90"
+                  className="flex items-center justify-center"
                   style={{
-                    width: '26px',
-                    height: '100%',
-                    minHeight: '28px',
-                    padding: '5px 5px 5px 4px',
-                    borderRadius: '0 6px 6px 0',
-                    background: isFollowed ? color + '22' : 'rgba(0,0,0,0.04)',
-                    border: isFollowed ? `1.5px solid ${color}50` : '1.5px solid rgba(0,0,0,0.10)',
-                    borderLeft: 'none',
-                    cursor: 'pointer',
-                    outline: 'none',
+                    padding: '5px 9px 5px 7px',
+                    borderLeft: `1px solid ${isSelected || isFollowed ? color + '30' : 'rgba(0,0,0,0.08)'}`,
                   }}
                 >
                   <span
                     className="material-symbols-outlined"
                     style={{
-                      fontSize: '13px',
-                      color: isFollowed ? color : '#bbb',
+                      fontSize: '12px',
+                      lineHeight: 1,
+                      display: 'block',
+                      color: isFollowed ? color : 'rgba(0,0,0,0.22)',
                       fontVariationSettings: isFollowed ? "'FILL' 1" : "'FILL' 0",
                       transition: 'font-variation-settings 0.15s ease, color 0.15s ease',
                     }}
                   >
                     favorite
                   </span>
-                </button>
-              </div>
+                </span>
+              </button>
             );
           })}
         </div>
