@@ -1,2101 +1,5 @@
 [
   {
-    "id": "abqtodo-10156008",
-    "name": "Local News in a Digital World: Navigating the New Information Era",
-    "url": "https://abqtodo.com/event/local-news-in-a-digital-world-navigating-the-new-information-era/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "The New Mexico Local News Fund invites you to join us for the 2026 NMLNF Summit , a two-day national gathering focused on the future of local news and information. While rooted in New Mexico’s unique communities, this summit is designed to welcome participants from across the United States who care about how local news works—and how it can work better. In today’s rapidly shifting information landscape, the stakes have never been higher. Local news is under pressure from shrinking resources, misi",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2026/01/Summit-2026-Promo-Image-copy.jpg"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "00:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "UNM Continuing Education",
-          "address": {
-            "line1": "1634 University Blvd. NE"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Community"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/local-news-in-a-digital-world-navigating-the-new-information-era/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10161749",
-    "name": "Jigsaw Puzzle Table",
-    "url": "https://abqtodo.com/event/jigsaw-puzzle-table/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Come enjoy quiet puzzling in the library. A new puzzle is put out every time one is finished, so you never know what you’ll find! For ages 9+.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2024/07/Puzzle.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "00:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Juan Tabo Library",
-          "address": {
-            "line1": "3407 Juan Tabo Blvd NE"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Community"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/jigsaw-puzzle-table/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10102640",
-    "name": "Mat Pilates",
-    "url": "https://abqtodo.com/event/mat-pilates-3/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Mat Pilates is a form of exercise dedicated to strengthening muscles and increasing flexibility. This class will focus on body awareness, core strength, and balance. Mat Pilates can be modified for any fitness level &#8211; all you need is some floor space to get started.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2024/09/a657ced0-d8f9-4f17-98a1-336aa23cb8d6-1.jpeg"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "09:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Holiday Park Community Center",
-          "address": {
-            "line1": "11710 Comanche NE"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Community"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/mat-pilates-3/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10170783",
-    "name": "Grounded in Clay: The Spirit of Pueblo Pottery",
-    "url": "https://abqtodo.com/event/grounded-in-clay-the-spirit-of-pueblo-pottery/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "EARLY CLOSURE AT 3PM ON MARCH 20TH DUE TO PRIVATE EVENT. Organized by the School for Advanced Research (SAR) and the Vilcek Foundation, Grounded in Clay: The Spirit of Pueblo Pottery , a unique traveling exhibition featuring over 100 historic and contemporary works in clay, offers a visionary understanding of Pueblo pots as vessels that carry community-based knowledge and personal experience. The Indian Pueblo Cultural Center (IPCC), established by the 19 Pueblos of New Mexico in 1976, welcomes ",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2026/02/Grounded-in-Clay-Web-Banner.jpg"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "09:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Indian Pueblo Cultural Center",
-          "address": {
-            "line1": "2401 12th Street NW"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Arts & Theatre"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/grounded-in-clay-the-spirit-of-pueblo-pottery/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10171122",
-    "name": "50 for 50: Indian Pueblo Cultural Center 1976-2026",
-    "url": "https://abqtodo.com/event/50-for-50-indian-pueblo-cultural-center-1976-2026-2/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "EARLY CLOSURE AT 3PM ON MARCH 20TH DUE TO PRIVATE EVENT In honor of the 50th anniversary of the Indian Pueblo Cultural Center (IPCC), this exhibition highlights the Center’s history through Pueblo imagery and perspectives of the past, present, and future. A combination of fifty objects from the IPCC’s Collections and Archives, with an emphasis on Pueblo pottery, illustrates the significance of the Center as a gathering place where Pueblo arts and culture are celebrated by visitors from around th",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2026/02/Screenshot-2026-02-26-at-2.11.20-PM.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "09:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Indian Pueblo Cultural Center",
-          "address": {
-            "line1": "2401 12th Street NW"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Arts & Theatre"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/50-for-50-indian-pueblo-cultural-center-1976-2026-2/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10102981",
-    "name": "Gentle Flow Yoga",
-    "url": "https://abqtodo.com/event/__trashed-81/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Join us for a gentle flow yoga class created to help you feel better in your body, more grounded emotionally, and clearer mentally. Each class will start with a short meditation followed by movement designed to build strength and increase mobility and flexibility. Classes are offered in a non-competitive, safe, and supportive environment for all participants. Mats and blocks will be available for use, or you may bring your own.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2024/07/Yoga-Pose.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "09:30"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Barelas Community Center",
-          "address": {
-            "line1": "801 Barelas Rd. SW"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Community"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/__trashed-81/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10059263",
-    "name": "Baby/Toddler Storytime at Erna Fergusson",
-    "url": "https://abqtodo.com/event/baby-toddler-storytime-at-erna-fergusson/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Enjoy an interactive storytime with your child that includes early literacy fun with books, songs, fingerplays, and body movement. Ages 0–3.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2024/07/Baby-Storytime.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "10:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Erna Fergusson Library",
-          "address": {
-            "line1": "3700 San Mateo Blvd. NE"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Family"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/baby-toddler-storytime-at-erna-fergusson/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10156450",
-    "name": "Virtual Sing Along",
-    "url": "https://abqtodo.com/event/virtual-sing-along/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Virtual sing along hosted by Arts Connections! Come sing your favorite songs with friends! All abilities welcome",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2025/11/unnamed-3.jpg"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "10:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Zoom Webinar (Online/Virtual)",
-          "address": {
-            "line1": ""
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Music"
-        }
-      }
-    ],
-    "priceRanges": [
-      {
-        "min": 10,
-        "max": 10,
-        "currency": "USD"
-      }
-    ],
-    "isFree": false,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/virtual-sing-along/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10150222",
-    "name": "An Itch to Stitch at Cherry Hills Library",
-    "url": "https://abqtodo.com/event/an-itch-to-stitch-at-cherry-hills-library/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Do you have an itch to knit, crochet, embroider, or any other needle craft? Would you like to work on your stitching projects together with like-minded folks, asking questions and sharing experiences? Join our drop-in stitching group! All ages and skill levels welcome!",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2023/09/stitch.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "10:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Cherry Hills Library",
-          "address": {
-            "line1": "6901 Barstow St. NE"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Arts & Theatre"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/an-itch-to-stitch-at-cherry-hills-library/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10167099",
-    "name": "Puzzles and Games!",
-    "url": "https://abqtodo.com/event/puzzles-and-games/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Come by the library and unwind with a jigsaw puzzle. Or, bring a friend and play one of our many boardgames. The puzzles can even be checked out, so you can enjoy them at home! Available for all ages.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2024/07/Puzzle.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "10:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "South Valley Library",
-          "address": {
-            "line1": "3904 Isleta BLVD SW"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Community"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/puzzles-and-games/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10171485",
-    "name": "InSight Photographic Art Show",
-    "url": "https://abqtodo.com/event/insight-photographic-art-show/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "InSight is a fine art photography show featuring 181 works by 94 New Mexican photographers. Open every day except Wednesdays and Easter, 10am to 5 pm. Free to attend, but NM Expo charges for parking on weekends.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2026/02/InSight-Ad-black-scaled.jpg"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "10:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Expo NM Fine Arts Building",
-          "address": {
-            "line1": "Copper &amp; San Pedro NE"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Arts & Theatre"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/insight-photographic-art-show/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10069270",
-    "name": "Family Storytime at Alamosa Public Library",
-    "url": "https://abqtodo.com/event/family-storytime-at-alamosa-public-library/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Enjoy stories and songs while developing early literacy. Storytime is geared toward preschool/kindergarten aged children and their adults.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2024/08/family-storytime-768x432-1.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "10:30"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Alamosa Public Library",
-          "address": {
-            "line1": "6900 Gonzales Rd SW"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Family"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/family-storytime-at-alamosa-public-library/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10103242",
-    "name": "Ukulele Classes",
-    "url": "https://abqtodo.com/event/ukulele-classes-4/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Join us for FREE Ukulele Classes! Bring your own instrument or borrow one provided during the class. Classes are offered in a non-competitive, safe, and supportive environment for all participants.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2024/07/Ukulele-1.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "10:30"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Cesar Chavez Community Center",
-          "address": {
-            "line1": "7505 Kathryn Ave SE"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Music"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/ukulele-classes-4/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10134988",
-    "name": "Toddler Tuesdays at I Scream Ice Cream",
-    "url": "https://abqtodo.com/event/toddler-tuesdays-at-i-scream-ice-cream/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "We know how much you adore your little ones—but we also know life at home can get a bit chaotic. That’s why we started Toddler Tuesday! Bring your kiddo to explore our toy area while you relax with a well-deserved coffee at a special parent discount. Connect with other parents, share the ups and downs of parenting, and head out stress-free—because we’ll take care of the cleanup. Play Group and discount offered on Tuesdays from 10:30a &#8211; 12:30p",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2025/09/Toddler-Tuesday.jpg"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "10:30"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "I Scream Ice Cream",
-          "address": {
-            "line1": "2000 Carlisle Blvd NE Suite F"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Community"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/toddler-tuesdays-at-i-scream-ice-cream/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10165959",
-    "name": "Military Research Group",
-    "url": "https://abqtodo.com/event/military-research-group/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "An informative genealogy program and then an opportunity to ask questions regarding your family military history. Sponsored by the Albuquerque Genealogical Society, and hosted by the Genealogy Center on the Main Library&#8217;s 2nd floor.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2024/09/military.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "10:30"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Main Library (Downtown)",
-          "address": {
-            "line1": "501 Copper Ave NW"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Community"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/military-research-group/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-514362",
-    "name": "Animal Tales with the ABQ BioPark",
-    "url": "https://abqtodo.com/event/animal-tales-with-the-abq-biopark-2/",
-    "_source": "local",
-    "info": "",
-    "description": "Come join the BioPark for “Animal Tales” and enjoy a reading of an animal related book. The BioPark will bring animals and biofacts that represent the animals in the story for the kids to meet.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2023/11/BioPark-38.jpg"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "10:30"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Alamosa Public Library",
-          "address": {
-            "line1": "6900 Gonzales Rd SW"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Family"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/animal-tales-with-the-abq-biopark-2/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10050157",
-    "name": "Old Town Walking Tours",
-    "url": "https://abqtodo.com/event/old-town-walking-tours-53/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Old Town Walking Tours: Sundays, Tuesdays, Thursdays &amp; Fridays, 11 a.m. &#8211; 12 p.m. Explore historic Old Town on foot with our informative docents who will provide insight into the people and places that shaped our early community.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2023/11/Oldtown-13.jpg"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "11:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Albuquerque Museum",
-          "address": {
-            "line1": "2000 Mountain Rd NW"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Arts & Theatre"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/old-town-walking-tours-53/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10052006",
-    "name": "Computer and Tech Basics/Conceptos Básicos de Computadora y Technologia",
-    "url": "https://abqtodo.com/event/computer-and-tech-basics-conceptos-basicos-de-computadora-y-technologia/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "By appointment only. A one-on-one help session for support with Microsoft Word, how to create and use an email account, how to use library resources eBooks, eAudiobooks, and learning beginning computer skills. For computer basics, patron must have a library card in good standing with computer access. For tablet basics, patron must bring their device and its passwords as well as library card and PIN. Solo por cita. Una sesión de ayuda personalizada para soporte con Microsoft Word, cómo crear y us",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2023/09/digital-basics.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "11:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Central &amp; Unser Public Library",
-          "address": {
-            "line1": "8081 Central Ave NW"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Community"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/computer-and-tech-basics-conceptos-basicos-de-computadora-y-technologia/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10076164",
-    "name": "Music &#038; Movement at Juan Tabo",
-    "url": "https://abqtodo.com/event/music-movement-at-juan-tabo/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Join us for stories, songs, and fun, as we dance and sing together with the library&#8217;s collection of percussion instruments, scarves, music, and, of course, books! With many different collections of music&#8211;from folk to metal!&#8211;we&#8217;ll explore a wide world of sounds and styles, while we enjoy all your favorite old songs and learn lots of new ones to sing.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2024/09/Body.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "11:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Juan Tabo Library",
-          "address": {
-            "line1": "3407 Juan Tabo Blvd NE"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Music"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/music-movement-at-juan-tabo/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10088706",
-    "name": "Stitch Club at Tony Hillerman",
-    "url": "https://abqtodo.com/event/stitch-club-at-tony-hillerman/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "(All Ages) If you enjoy knitting, crocheting, or any other stitching-type craft, you are invited to join our drop-in stitiching club. This is not a class, but all ages and skill levels are welcome to participate. Bring your own supplies. For more information call 505-291-6264.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2024/09/crochet.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "11:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Tony Hillerman Library",
-          "address": {
-            "line1": "8205 Apache Ave. NE"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Arts & Theatre"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/stitch-club-at-tony-hillerman/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10114363",
-    "name": "Adult Sense-Sational Storytime at Central &#038; Unser Public Library",
-    "url": "https://abqtodo.com/event/adult-sense-sational-storytime/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Adults with intellectual disabilities and their families and caretakers are invited to participate in storytime, including music, crafts, and read-a-loud books.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2025/01/sensory-activities-adult-learners.jpg"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "11:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Central &amp; Unser Public Library",
-          "address": {
-            "line1": "8081 Central Ave NW"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Community"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/adult-sense-sational-storytime/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10157260",
-    "name": "Tech Turn Up",
-    "url": "https://abqtodo.com/event/tech-turn-up/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Have a tech issue you need help with? Stop by the Tech Turn Up for job application, phone, computer, or device support with no appointment needed. For assistance with personal devices, bring device and passwords. For general computer help, a library card in good standing and a PIN are required.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2023/09/digital-basics.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "11:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Central &amp; Unser Public Library",
-          "address": {
-            "line1": "8081 Central Ave NW"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Community"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/tech-turn-up/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10166803",
-    "name": "Sensory Storytime for Adults with Specials Needs",
-    "url": "https://abqtodo.com/event/sensory-storytime-for-adults-with-specials-needs/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "This is a storytime for adults with special needs. Similar to children’s storytimes, sensory storytime incorporates adaptive storytelling, interactive reading, crafts, and more.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2025/01/sensory-activities-adult-learners.jpg"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "11:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "South Valley Library",
-          "address": {
-            "line1": "3904 Isleta BLVD SW"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Community"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/sensory-storytime-for-adults-with-specials-needs/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10132622",
-    "name": "Pilates Classes; Mat and Reformer Tuesdays &#038; Thursdays",
-    "url": "https://abqtodo.com/event/pilates-classes-mat-and-reformer-tuesthurs/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Commercial Street is proud to offer pay-what-you-can group mat classes and reformer Pilates classes. No payment is expected to participate in any of our classes, but donations are accepted. Pilates is a low-intensity strength and flexibility workout. Both our mat and reformer classes are beginner-friendly and can be modified to fit your needs. However, mat classes take place on mats on the floor, meaning participants must be comfortable raising and lowering themselves from the floor. Book a clas",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2025/08/pilates.jpg"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "11:30"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Commercial Street Massage",
-          "address": {
-            "line1": "305 B Washington St SE"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Community"
-        }
-      }
-    ],
-    "isFree": false,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/pilates-classes-mat-and-reformer-tuesthurs/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10156471",
-    "name": "Adaptive Yoga",
-    "url": "https://abqtodo.com/event/adaptive-yoga-2/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Virtual adaptive yoga offered by Arts Connections. Gentle movement for all abilities. Seated or on a mat! All abilities welcome!",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2025/11/unnamed-4.jpg"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "11:30"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Zoom Webinar (Online/Virtual)",
-          "address": {
-            "line1": ""
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Community"
-        }
-      }
-    ],
-    "priceRanges": [
-      {
-        "min": 10,
-        "max": 10,
-        "currency": "USD"
-      }
-    ],
-    "isFree": false,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/adaptive-yoga-2/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10135847",
-    "name": "Crafting &amp; Collage Workshop",
-    "url": "https://abqtodo.com/event/collage-workshop/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "These classes are provided in partnership with Arts Connections Inc., and are for adults. All Abilities Welcome! Free for community center members. Register for your free membership at play.cabq.gov.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2025/10/AC-in-person-class.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "12:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Loma Linda Community Center",
-          "address": {
-            "line1": "1700 Yale Blvd SE"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Arts & Theatre"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/collage-workshop/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10083046",
-    "name": "Digital Basics: One on One at Cherry Hills Library",
-    "url": "https://abqtodo.com/event/digital-basics-one-on-one-at-cherry-hills-library/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Learn the basics of Microsoft Word, how to create and use an email account, how to use library ebooks and eaudiobooks, or how to navigate our new catalog. Classes are taught either on a library computer or the patron’s tablet (i.e. Kindle or iPad). Patron must have a library card in good standing with computer access. For library ebooks and eaudiobooks, patron must bring their device, its passwords, and library card and PIN. Registration is required and limited to 1. Limit 3 sessions.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2023/09/digital-basics.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "13:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Cherry Hills Library",
-          "address": {
-            "line1": "6901 Barstow St. NE"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Community"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/digital-basics-one-on-one-at-cherry-hills-library/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10166151",
-    "name": "Writing Family Stories",
-    "url": "https://abqtodo.com/event/writing-family-stories/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "The Genealogy Center on the Main Library&#8217;s 2nd floor hosts the Creative Writing of Family Stories Special Interest Group who will inspire you to share and write engaging stories about your family that other people will be eager to read.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2024/07/Typewriter.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "13:30"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Main Library (Downtown)",
-          "address": {
-            "line1": "501 Copper Ave NW"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Community"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/writing-family-stories/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10089163",
-    "name": "This is a Stitch Up!",
-    "url": "https://abqtodo.com/event/this-is-a-stitch-up/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Do you enjoy Knitting, Crocheting or other fiber arts? Would you like to work on your stitching projects with like minded folks? Come join our friendly group. All skill levels welcome!",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2024/09/crochet.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "14:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Lomas Tramway Library",
-          "address": {
-            "line1": "908 Eastridge Dr. NE"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Arts & Theatre"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/this-is-a-stitch-up/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10095091",
-    "name": "Gallery Tours at the ABQ Museum",
-    "url": "https://abqtodo.com/event/gallery-tours-at-the-abq-museum/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Docent guided tours of select gallery exhibitions are offered year around. No reservations necessary for individuals and families.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2024/05/f075004a-ca1a-4b49-97a3-14345a026ed6.jpeg"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "14:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Albuquerque Museum",
-          "address": {
-            "line1": "2000 Mountain Rd NW"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Arts & Theatre"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/gallery-tours-at-the-abq-museum/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10118225",
-    "name": "Stab &#038; Gab Club",
-    "url": "https://abqtodo.com/event/stab-gab-club/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Do you have a project you&#8217;re working on? Do you want to meet up with fellow needle crafters to get it done? Are you new to cross stitch? Come by on the first Tuesday of the month to crochet, knit, cross stitch&#8230; whatever floats your boat! For ages 13+. No registration required.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2023/09/stitch.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "15:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "San Pedro Public Library",
-          "address": {
-            "line1": "5600 Trumbull Ave. SE"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Arts & Theatre"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/stab-gab-club/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10138445",
-    "name": "Let&#8217;s Lego at Cherry Hills Public Library",
-    "url": "https://abqtodo.com/event/lets-lego-7-2/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Join us for open build time with legos! All legos will be provided, child must be accompanied by an adult.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2023/09/7-1.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "15:30"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Cherry Hills Library",
-          "address": {
-            "line1": "6901 Barstow St. NE"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Arts & Theatre"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/lets-lego-7-2/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10164455",
-    "name": "Pokémon TCG Battle Academy",
-    "url": "https://abqtodo.com/event/pokemon-tcg-battle-academy/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Do you collect Pokémon cards and want to learn how to battle with them? Join us to learn how to play the Pokémon TCG (Starter decks provided). Already know how to battle? Pair up with a fellow Trainer and see whose deck is stronger! For ages 6+.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2025/02/pokemon_go_community_day_totodile.webp"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "16:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Westgate Library",
-          "address": {
-            "line1": "1300 Delgado Dr. SW"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Family"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/pokemon-tcg-battle-academy/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10172822",
-    "name": "Free Youth Boxing",
-    "url": "https://abqtodo.com/event/free-youth-boxing/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Enjoy a fun boxing fitness experience to challenge youth both mentally and physically combining boxing skills/drills with functional exercises. Ages 7-11 yo and parents are welcome to join to help.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2026/03/1000020268.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "16:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Presbyterian Health Plan Place",
-          "address": {
-            "line1": "2100 Louisiana Blvd NE, Suite 408"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Community"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/free-youth-boxing/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10104023",
-    "name": "Restorative Yoga",
-    "url": "https://abqtodo.com/event/restorative-yoga/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "In Restorative Yoga we move slowly, taking time to set up each pose with the support of props. The focus on gentle stretching with longer holds encourages relaxation of the body and mind. This class is accessible to anyone who can get up and down from the floor independently. Wear comfortable clothes and bring a water bottle. In Restorative Yoga we move slowly, taking time to set up each pose with the support of props. The focus on gentle stretching with longer holds encourages relaxation of the",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2024/07/Yoga-Pose.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "16:30"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Heights Community Center",
-          "address": {
-            "line1": "823 Buena Vista Dr. SE"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Community"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/restorative-yoga/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10117925",
-    "name": "IDL Art Studio",
-    "url": "https://abqtodo.com/event/idl-art-studio/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Join us every month to create your own work of art at our drop in art studio. Start from scratch or bring something from home to work on. Basic supplies will be provided based on availability.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2025/01/1732647682.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "17:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "International District Library",
-          "address": {
-            "line1": "7601 Central Ave. NE"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Arts & Theatre"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/idl-art-studio/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10134188",
-    "name": "Pilates Classes; Mat and Reformer Tuesdays &#038; Thursdays",
-    "url": "https://abqtodo.com/event/pilates-classes-mat-and-reformer-tuesthurs-copy/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Commercial Street is proud to offer pay-what-you-can group mat classes and reformer Pilates classes. No payment is expected to participate in any of our classes, but donations are accepted. Pilates is a low-intensity strength and flexibility workout. Both our mat and reformer classes are beginner-friendly and can be modified to fit your needs. However, mat classes take place on mats on the floor, meaning participants must be comfortable raising and lowering themselves from the floor. Book a clas",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2025/08/pilates.jpg"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "17:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Commercial Street Massage",
-          "address": {
-            "line1": "305 B Washington St SE"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Community"
-        }
-      }
-    ],
-    "isFree": false,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/pilates-classes-mat-and-reformer-tuesthurs-copy/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10168615",
-    "name": "Taylor Ranch Genealogy Guide",
-    "url": "https://abqtodo.com/event/taylor-ranch-genealogy-guide-3-2/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Sign up for a free, introductory level, one-on-one genealogy session at Taylor Ranch Library. Explore your ancestry, discover family connections, and learn how to use databases and websites to conduct your own research. Registration required. Bring note-taking materials and/or a USB drive.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2023/09/genealogy.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "17:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Taylor Ranch Library",
-          "address": {
-            "line1": "5700 Bogart St. NW"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Community"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/taylor-ranch-genealogy-guide-3-2/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10153620",
-    "name": "Open Mic Night",
-    "url": "https://abqtodo.com/event/open-mic-night/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Calling all singers, comedians, and performers!!! Join us at The Taproom in Old Town Albuquerque for ALL NIGHT HAPPY HOUR, discounted appetizers, and some great performances on our patio stage! Hosted by Billy Crooze Enjoy great food by our very own chefs in The Craft Kitchen!",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2026/01/480904397_122217091298080385_8404000088128457220_n.jpg"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "17:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "The Taproom at Old Town",
-          "address": {
-            "line1": "524 Romero St NW"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          },
-          "location": {
-            "latitude": "35.098267",
-            "longitude": "-106.670325"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Music"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/open-mic-night/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10150150",
-    "name": "Mystery Book Group at Cherry Hills Library",
-    "url": "https://abqtodo.com/event/mystery-book-group-at-cherry-hills-library/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "All are welcome to attend.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2023/09/book-club-adults.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "18:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Cherry Hills Library",
-          "address": {
-            "line1": "6901 Barstow St. NE"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Community"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/mystery-book-group-at-cherry-hills-library/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10171744",
-    "name": "Salsa dancing- Taco Tuesdays",
-    "url": "https://abqtodo.com/event/salsa-dancing-taco-tuesdays/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "PACHANGA PRODUCTIONS Presents TACO TUESDAY &#8211; LATIN NIGHT! Salsa, Bachata, Cumbia, Merengue lesson by JULIA will run for the month of March 6:30pm &#8211; 7:15pm MAR 3: Merengue MAR 10: Bachata MAR 17: Salsa MAR 24: Cumbia Music by DJ Gabriel Goza &amp; Friends Spinning the saucy Salsa, Bachata, Timba, Mambo, Cumbia, Cha Cha Cha, Merengue y mas! Join one of Albuquerque’s hot spots for Latin social dancing, food, drinks, and fun. We kick off the night with a Salsa or Bachata lesson at 6:30pm",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2026/03/646209382_4643483895878800_373414594548163356_n.jpg"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "18:00"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Overtime",
-          "address": {
-            "line1": "4100 San Mateo Boulevard Northeast"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "N"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Music"
-        }
-      }
-    ],
-    "priceRanges": [
-      {
-        "min": 7,
-        "max": 7,
-        "currency": "USD"
-      }
-    ],
-    "isFree": false,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/salsa-dancing-taco-tuesdays/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10129439",
-    "name": "Ukulele Classes at Singing Arrow",
-    "url": "https://abqtodo.com/event/ukulele-classes-at-singing-arrow/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "Join us for FREE Ukulele Classes! Bring your own instrument or borrow one provided during the class. Classes are offered in a non-competitive, safe, and supportive environment for all participants.",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2024/08/Ukulele.jpeg"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "18:30"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Singing Arrow Community Center",
-          "address": {
-            "line1": "13200 Wenonah Ave. SE"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Music"
-        }
-      }
-    ],
-    "isFree": true,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/ukulele-classes-at-singing-arrow/2026-04-07/"
-      }
-    ]
-  },
-  {
-    "id": "abqtodo-10159459",
-    "name": "TACO TUESDAY &#8211; LATIN NIGHT!",
-    "url": "https://abqtodo.com/event/taco-tuesday-latin-night/2026-04-07/",
-    "_source": "local",
-    "info": "",
-    "description": "PACHANGA PRODUCTIONS Presents TACO TUESDAY &#8211; LATIN NIGHT! Cumbia Lesson by JULIA will run for the month of February 6:30pm &#8211; 7:15pm ** FEB 3rd We will be raffling a full pass for a STEP INTO CUMBIA WORKSHOP happening Wednesdays in February Feb 4, 11, 18, 25 Music by DJ Gabriel Goza &amp; Friends Spinning the saucy Salsa, Bachata, Timba, Mambo, Cumbia, Cha Cha Cha, Merengue y mas! Join one of Albuquerque’s hot spots for Latin social dancing, food, drinks, and fun. We kick off the nigh",
-    "images": [
-      {
-        "url": "https://abqtodo.com/wp-content/uploads/2026/02/TACO-TUESDAY-2026_JULIA-FEB-2026.png"
-      }
-    ],
-    "dates": {
-      "start": {
-        "localDate": "2026-04-07",
-        "localTime": "18:30"
-      }
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Overtime Sports Bar &amp; Grill",
-          "address": {
-            "line1": "4100 San Mateo Blvd NE"
-          },
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "NM"
-          }
-        }
-      ]
-    },
-    "classifications": [
-      {
-        "segment": {
-          "name": "Music"
-        }
-      }
-    ],
-    "priceRanges": [
-      {
-        "min": 7,
-        "max": 7,
-        "currency": "USD"
-      }
-    ],
-    "isFree": false,
-    "ticketLinks": [
-      {
-        "url": "https://abqtodo.com/event/taco-tuesday-latin-night/2026-04-07/"
-      }
-    ]
-  },
-  {
     "id": "abqtodo-10156009",
     "name": "Local News in a Digital World: Navigating the New Information Era",
     "url": "https://abqtodo.com/event/local-news-in-a-digital-world-navigating-the-new-information-era/2026-04-08/",
@@ -12263,6 +10167,2203 @@
     "ticketLinks": [
       {
         "url": "https://abqtodo.com/event/origami-adventures-at-ernie-pyle-library-2/2026-04-11/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10171510",
+    "name": "ABQueer West Coast Swing Social Dance",
+    "url": "https://abqtodo.com/event/abqueer-west-coast-swing-social-dance/2026-04-11/",
+    "_source": "local",
+    "info": "",
+    "description": "We at ABQueer WCS are making a queer-affirming space with a goal to bring West Coast Swing to the queer community and the queer community to West Coast Swing! Come enjoy an evening of dancing, plenty of snacks, and great vibes! Our events are intended for people who identify as queer, identify with the challenges queer people face in society, their loved ones, and supporters of the queer community. Beginner Lesson: 6:30 PM &#8211; 7:30 PM Social Dancing: 7:30 PM &#8211; 10 PM Sliding Scale Entry",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/02/abqueer-wcs-scaled.png"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-11",
+        "localTime": "18:30"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Peace Love Space",
+          "address": {
+            "line1": "10410 Comanche NE"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Community"
+        }
+      }
+    ],
+    "priceRanges": [
+      {
+        "min": 515,
+        "max": 515,
+        "currency": "USD"
+      }
+    ],
+    "isFree": false,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/abqueer-west-coast-swing-social-dance/2026-04-11/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10169498",
+    "name": "Learn International Folk Dances",
+    "url": "https://abqtodo.com/event/learn-international-folk-dances-2/2026-04-11/",
+    "_source": "local",
+    "info": "",
+    "description": "Learn dances from around the world. Line, circle, and partner dances from Eastern and Northern Europe and the Middle East. Teaching from 7-8:15pm. Open dancing after that. Beginners Welcome. No Partner Necessary. Wear non-marking shoes. $3 donation requested.",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/02/76-A7309042_from_Gene-scaled.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-11",
+        "localTime": "19:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Lloyd Shaw Dance Center",
+          "address": {
+            "line1": "5506 Coal Ave SE"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "priceRanges": [
+      {
+        "min": 3,
+        "max": 3,
+        "currency": "USD"
+      }
+    ],
+    "isFree": false,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/learn-international-folk-dances-2/2026-04-11/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10169684",
+    "name": "FUSION Theatre Company Presents AIRSWIMMING",
+    "url": "https://abqtodo.com/event/fusion-theatre-company-presents-airswimming/2026-04-11/",
+    "_source": "local",
+    "info": "",
+    "description": "FUSION Theatre Company is thrilled to present a play with themes that are absolutely pertinent to today, AIRSWIMMING by Charlotte Jones! We are excited to bring the writing of Charlotte Jones back to its stage after producing her award-winning play Humble Boy in 2013. Directed by Robb Anthony Sisneros, FUSION&#8217;s production stars Wendy Barker and Nichole Hamilton. Season subscriptions and individual tickets are available now! “Airswimming” …is poignant, intelligent and at times wickedly funn",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/02/Digital-Poster-no-logos-AIRSWIMMING-copy-1-scaled.png"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-11",
+        "localTime": "19:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "FUSION",
+          "address": {
+            "line1": "700-708 1st St NW"
+          },
+          "city": {
+            "name": "ALBUQUERQUE"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "priceRanges": [
+      {
+        "min": 2065,
+        "max": 2065,
+        "currency": "USD"
+      }
+    ],
+    "isFree": false,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/fusion-theatre-company-presents-airswimming/2026-04-11/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10171655",
+    "name": "Terrion",
+    "url": "https://abqtodo.com/event/terrion/2026-04-11/",
+    "_source": "local",
+    "info": "",
+    "description": "Keshet Dance Company New Works presents: Tarrion, a collaboration between choreographer and Keshet Company Dancer Ana Lopes Aréchiga and Albuquerque-based multimedia composer Zachariah Julian. Tarrion was born from an intense two-week collaborative process during the 2025 Hear Here Festival at Keshet. Left feeling like there was more to explore, the creators expanded into a full-length standalone work. Set on the dancers of Keshet Dance Company, Tarrion is a visceral experience, a visually and a",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/03/KDC-Tarrion-Flyer-FINAL.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-11",
+        "localTime": "19:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Keshet Dance and Center for the Arts",
+          "address": {
+            "line1": "4121 Cutler Ave NE"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "priceRanges": [
+      {
+        "min": 40,
+        "max": 40,
+        "currency": "USD"
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/terrion/2026-04-11/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-489916",
+    "name": "Pilobolus &#8211; Other Worlds",
+    "url": "https://abqtodo.com/event/pilobolus-other-worlds/",
+    "_source": "local",
+    "info": "",
+    "description": "Journey into the astonishing universe of Pilobolus’s Other Worlds Collection, traversing the landscape of the human experience with heart-stopping grace, acrobatic power, and breathtaking artistry. Explore the multitudes of the human condition as Pilobolus fuses sensuality, humor, and extraordinary physical prowess in a spellbinding performance. Tickets for Pilobolus will be on sale for $89.50, $73.50, $67.50, and $29.50. Tickets may be purchased online at popejoypresents.com. Tickets are also a",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2025/10/25-26_Pilobolus_860-x-5402-1.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-11",
+        "localTime": "19:30"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Popejoy Hall",
+          "address": {
+            "line1": "203 Cornell Drive"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "priceRanges": [
+      {
+        "min": 29.5089,
+        "max": 29.5089,
+        "currency": "USD"
+      }
+    ],
+    "isFree": false,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/pilobolus-other-worlds/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10170098",
+    "name": "Out of Many, One: Spring Flamenco Concert",
+    "url": "https://abqtodo.com/event/out-of-many-one-spring-flamenco-concert/2026-04-11/",
+    "_source": "local",
+    "info": "",
+    "description": "Join us for an unforgettable evening of live flamenco as Yjastros presents Out of Many, One — a powerful program of five original works that explore connection, identity, and the ways individual voices come together to create something greater. This year’s performance features internationally acclaimed flamenco artists from Spain, bringing global artistry and tradition to our stage alongside the dancers of Yjastros. These artists have performed at some of the world’s most prestigious festivals a",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/02/Out-Of-Many-One.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-11",
+        "localTime": "19:30"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "National Hispanic Cultural Center",
+          "address": {
+            "line1": "1701 4th Street Southwest"
+          },
+          "city": {
+            "name": "Albuquerque, NM"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "priceRanges": [
+      {
+        "min": 29109,
+        "max": 29109,
+        "currency": "USD"
+      }
+    ],
+    "isFree": false,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/out-of-many-one-spring-flamenco-concert/2026-04-11/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10172278",
+    "name": "OF MICE AND MEN",
+    "url": "https://abqtodo.com/event/of-mice-and-men/2026-04-11/",
+    "_source": "local",
+    "info": "",
+    "description": "John Steinbeck adapted his novel of the same name. It premiered on Broadway in 1937 and earned the 1938 New York Drama Critics&#8217; Circle Best Play. A poignant tragedy centers around two migrant field hands , the average-looking but smart ‘George’ and the strong but mentally-challenged ‘Lennie’ who work on a farm in California during the Great Depression. Their dream of owning their own farm is shattered when Lennie has an incident with the wife of the boss&#8217;s son. It is one of director ",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/03/Of-Mice-and-Men-Marcelles-Mini.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-11",
+        "localTime": "19:30"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Adobe Theater",
+          "address": {
+            "line1": "9813 Fourth Street NW (2 blocks n. of Alameda)"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "priceRanges": [
+      {
+        "min": 1030,
+        "max": 1030,
+        "currency": "USD"
+      }
+    ],
+    "isFree": false,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/of-mice-and-men/2026-04-11/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10173353",
+    "name": "The Vortex Theatre presents Who&#8217;s Afraid of Virginia Woolf",
+    "url": "https://abqtodo.com/event/the-vortex-theatre-presents-whos-afraid-of-virginia-woolf/2026-04-11/",
+    "_source": "local",
+    "info": "",
+    "description": "An unblinking portrait of two American marriages, Virginia Woolf is Edward Albee&#8217;s explosively comedic and harrowingly profound masterpiece.",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/03/VAWoolfBizCard-3.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-11",
+        "localTime": "19:30"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Vortex Theatre",
+          "address": {
+            "line1": "2900 Carlisle Blvd NE"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "priceRanges": [
+      {
+        "min": 2126,
+        "max": 2126,
+        "currency": "USD"
+      }
+    ],
+    "isFree": false,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/the-vortex-theatre-presents-whos-afraid-of-virginia-woolf/2026-04-11/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10075243",
+    "name": "The Show &#8211; Live Comedy Improv",
+    "url": "https://abqtodo.com/event/the-show-live-comedy-improv/2026-04-11/",
+    "_source": "local",
+    "info": "",
+    "description": "Albuquerque&#8217;s longest-running comedy show! For over a decade, we&#8217;ve been making audience laugh with spontaneous scenes, songs, and games that come to life right before your eyes. No scripts, just pure comedy created on the spot based on your suggestions. Our award-winning troupe has been crowned Best Comedy Troupe by Albuquerque the Magazine and the Weekly Alibi. Every performance is unique, ensuring each visit is a one-of-a-kind experience. Get ready for a night of non-stop laughter",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2024/09/Eggcelsior.png"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-11",
+        "localTime": "20:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "The Box Performance Space",
+          "address": {
+            "line1": "114 Gold Avenue Southwest"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Comedy"
+        }
+      }
+    ],
+    "priceRanges": [
+      {
+        "min": 12,
+        "max": 12,
+        "currency": "USD"
+      }
+    ],
+    "isFree": false,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/the-show-live-comedy-improv/2026-04-11/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10131927",
+    "name": "Live ROCK Saturdays",
+    "url": "https://abqtodo.com/event/live-rock-saturdays/2026-04-11/",
+    "_source": "local",
+    "info": "",
+    "description": "Join Overtime sports bar for a variety of local and touring rocks bands every Saturday night!",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2025/09/Orange-and-Black-Creative-Rock-Music-Festival-Facebook-Post.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-11",
+        "localTime": "20:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Overtime",
+          "address": {
+            "line1": "4100 San Mateo Boulevard Northeast"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "N"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Music"
+        }
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/live-rock-saturdays/2026-04-11/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10156013",
+    "name": "Local News in a Digital World: Navigating the New Information Era",
+    "url": "https://abqtodo.com/event/local-news-in-a-digital-world-navigating-the-new-information-era/2026-04-12/",
+    "_source": "local",
+    "info": "",
+    "description": "The New Mexico Local News Fund invites you to join us for the 2026 NMLNF Summit , a two-day national gathering focused on the future of local news and information. While rooted in New Mexico’s unique communities, this summit is designed to welcome participants from across the United States who care about how local news works—and how it can work better. In today’s rapidly shifting information landscape, the stakes have never been higher. Local news is under pressure from shrinking resources, misi",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/01/Summit-2026-Promo-Image-copy.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "00:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "UNM Continuing Education",
+          "address": {
+            "line1": "1634 University Blvd. NE"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Community"
+        }
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/local-news-in-a-digital-world-navigating-the-new-information-era/2026-04-12/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10125666",
+    "name": "Expo NM Flea Market",
+    "url": "https://abqtodo.com/event/expo-nm-flea-market/2026-04-12/",
+    "_source": "local",
+    "info": "",
+    "description": "The largest outdoor flea market on Route 66! Located at Expo New Mexico, our market draws hundreds of vendors and shoppers every Saturday &amp; Sunday, weather permitting. Offering new and used toys, books, tools and more, to custom products, baked goods, candy and produce, the Expo NM Flea Market has something for everyone! Food vendors and live music too. Check out our monthly events!",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2025/06/exponmfleamarket-1.png"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "07:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Expo NM Flea Market",
+          "address": {
+            "line1": "300 San Pedro Dr NE"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Community"
+        }
+      }
+    ],
+    "priceRanges": [
+      {
+        "min": 210,
+        "max": 210,
+        "currency": "USD"
+      }
+    ],
+    "isFree": false,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/expo-nm-flea-market/2026-04-12/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10049605",
+    "name": "Free Sunday Mornings at Albuquerque Museum",
+    "url": "https://abqtodo.com/event/free-sunday-mornings-at-albuquerque-museum-19/2026-04-12/",
+    "_source": "local",
+    "info": "",
+    "description": "Free admission to Albuquerque Museum on Sunday mornings, 9 a.m.–1 p.m.",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2024/05/f075004a-ca1a-4b49-97a3-14345a026ed6.jpeg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "09:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Albuquerque Museum",
+          "address": {
+            "line1": "2000 Mountain Rd NW"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/free-sunday-mornings-at-albuquerque-museum-19/2026-04-12/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10128771",
+    "name": "Free Sunday Morning Admission to the Albuquerque Balloon Museum",
+    "url": "https://abqtodo.com/event/free-sunday-morning-admission-to-the-albuquerque-balloon-museum/2026-04-12/",
+    "_source": "local",
+    "info": "",
+    "description": "Free Admission to the Balloon Museum every Sunday morning between 9:00 a.m. – 1:00 p.m. (Excludes the first 2 Sundays in October.)",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2025/08/Graphics-for-Museum.png"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "09:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Albuquerque Balloon Museum",
+          "address": {
+            "line1": "9201 Balloon Museum Dr NE"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Community"
+        }
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/free-sunday-morning-admission-to-the-albuquerque-balloon-museum/2026-04-12/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10129964",
+    "name": "Pilates Classes; Mat and Reformer Sundays",
+    "url": "https://abqtodo.com/event/pilates-classes-mat-and-reformer/2026-04-12/",
+    "_source": "local",
+    "info": "",
+    "description": "Commercial Street is proud to offer pay-what-you-can group mat classes and reformer Pilates classes. No payment is expected to participate in any of our classes, but donations are accepted. Pilates is a low-intensity strength and flexibility workout. Both our mat and reformer classes are beginner-friendly and can be modified to fit your needs. However, mat classes take place on mats on the floor, meaning participants must be comfortable raising and lowering themselves from the floor. Book a clas",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2025/08/pilates.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "09:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Commercial Street Massage",
+          "address": {
+            "line1": "305 B Washington St SE"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "New Mexico"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Community"
+        }
+      }
+    ],
+    "isFree": false,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/pilates-classes-mat-and-reformer/2026-04-12/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-514998",
+    "name": "Next Steps in Sprang Workshop",
+    "url": "https://abqtodo.com/event/next-steps-in-sprang-workshop/",
+    "_source": "local",
+    "info": "",
+    "description": "What are your next steps with this ancient braiding technique? Are you drawn to sprang lace, twining, or color patterns? Do you want to plan a larger project, such as a hat, fingerless mittens, scarf, or cowl? Or do you need more time to train your hands and eyes in the basic stitch? This workshop is for folks that already know how to warp a frame and work the interlinking stitch. Join us for a day of individualized instruction, exploring some of the many possibilities for creating and using spr",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/02/Next-Steps-in-Sprang-Fiber-Arts-on-4th.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "09:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Fiber Arts on 4th",
+          "address": {
+            "line1": "6463 4th St NW"
+          },
+          "city": {
+            "name": "Los Ranchos"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/next-steps-in-sprang-workshop/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10170788",
+    "name": "Grounded in Clay: The Spirit of Pueblo Pottery",
+    "url": "https://abqtodo.com/event/grounded-in-clay-the-spirit-of-pueblo-pottery/2026-04-12/",
+    "_source": "local",
+    "info": "",
+    "description": "EARLY CLOSURE AT 3PM ON MARCH 20TH DUE TO PRIVATE EVENT. Organized by the School for Advanced Research (SAR) and the Vilcek Foundation, Grounded in Clay: The Spirit of Pueblo Pottery , a unique traveling exhibition featuring over 100 historic and contemporary works in clay, offers a visionary understanding of Pueblo pots as vessels that carry community-based knowledge and personal experience. The Indian Pueblo Cultural Center (IPCC), established by the 19 Pueblos of New Mexico in 1976, welcomes ",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/02/Grounded-in-Clay-Web-Banner.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "09:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Indian Pueblo Cultural Center",
+          "address": {
+            "line1": "2401 12th Street NW"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/grounded-in-clay-the-spirit-of-pueblo-pottery/2026-04-12/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10171127",
+    "name": "50 for 50: Indian Pueblo Cultural Center 1976-2026",
+    "url": "https://abqtodo.com/event/50-for-50-indian-pueblo-cultural-center-1976-2026-2/2026-04-12/",
+    "_source": "local",
+    "info": "",
+    "description": "EARLY CLOSURE AT 3PM ON MARCH 20TH DUE TO PRIVATE EVENT In honor of the 50th anniversary of the Indian Pueblo Cultural Center (IPCC), this exhibition highlights the Center’s history through Pueblo imagery and perspectives of the past, present, and future. A combination of fifty objects from the IPCC’s Collections and Archives, with an emphasis on Pueblo pottery, illustrates the significance of the Center as a gathering place where Pueblo arts and culture are celebrated by visitors from around th",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/02/Screenshot-2026-02-26-at-2.11.20-PM.png"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "09:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Indian Pueblo Cultural Center",
+          "address": {
+            "line1": "2401 12th Street NW"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/50-for-50-indian-pueblo-cultural-center-1976-2026-2/2026-04-12/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10171489",
+    "name": "InSight Photographic Art Show",
+    "url": "https://abqtodo.com/event/insight-photographic-art-show/2026-04-12/",
+    "_source": "local",
+    "info": "",
+    "description": "InSight is a fine art photography show featuring 181 works by 94 New Mexican photographers. Open every day except Wednesdays and Easter, 10am to 5 pm. Free to attend, but NM Expo charges for parking on weekends.",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/02/InSight-Ad-black-scaled.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "10:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Expo NM Fine Arts Building",
+          "address": {
+            "line1": "Copper &amp; San Pedro NE"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/insight-photographic-art-show/2026-04-12/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10172791",
+    "name": "Alice in Wonderland Tea Party",
+    "url": "https://abqtodo.com/event/alice-in-wonderland-tea-party-3/2026-04-12/",
+    "_source": "local",
+    "info": "",
+    "description": "Don&#8217;t be late, Don&#8217;t be late, for a very important date! It&#8217;s back! Our Alice in Wonderland Tea Party. Fun for the whole family, all ages welcome. We have kids tea, as well as vegan, vegetarian, and non-gluten options. View the menu and make your reservation today.",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/02/Alice-in-Wonderland.png"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "10:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Snapdragon Tea",
+          "address": {
+            "line1": "115 Harvard Dr SE, #7"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Family"
+        }
+      }
+    ],
+    "priceRanges": [
+      {
+        "min": 18.5034,
+        "max": 18.5034,
+        "currency": "USD"
+      }
+    ],
+    "isFree": false,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/alice-in-wonderland-tea-party-3/2026-04-12/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10050160",
+    "name": "Old Town Walking Tours",
+    "url": "https://abqtodo.com/event/old-town-walking-tours-53/2026-04-12/",
+    "_source": "local",
+    "info": "",
+    "description": "Old Town Walking Tours: Sundays, Tuesdays, Thursdays &amp; Fridays, 11 a.m. &#8211; 12 p.m. Explore historic Old Town on foot with our informative docents who will provide insight into the people and places that shaped our early community.",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2023/11/Oldtown-13.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "11:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Albuquerque Museum",
+          "address": {
+            "line1": "2000 Mountain Rd NW"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/old-town-walking-tours-53/2026-04-12/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10126485",
+    "name": "Laughing doesn&#8217;t need your help: An ensemble performance in the bosque",
+    "url": "https://abqtodo.com/event/laughing-doesnt-need-your-help-an-ensemble-performance-in-the-bosque/2026-04-12/",
+    "_source": "local",
+    "info": "",
+    "description": "Laughing doesn&#8217;t need your help is a contemporary dance project envisions a cosmic pull toward connection, even when relief from everyday struggle feels inconceivable. Amid the present moment of climate catastrophe, rapidly escalating administrative violence, and widespread anxiety, this new ensemble performance manifests our inevitable movement toward each other, tenderness, and meaning staged in and around the Rio Grande River. Inspired by literary references including Kaveh Akbar’s accl",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2025/07/LDNYH-press-release-image-scaled.png"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "11:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Tingley Beach",
+          "address": {
+            "line1": "1800 Tingley SW"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "priceRanges": [
+      {
+        "min": 10,
+        "max": 10,
+        "currency": "USD"
+      }
+    ],
+    "isFree": false,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/laughing-doesnt-need-your-help-an-ensemble-performance-in-the-bosque/2026-04-12/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-516312",
+    "name": "Slippin&#8217; Into Spring — The Freudian Slips Experience",
+    "url": "https://abqtodo.com/event/slippin-into-spring-the-freudian-slips-experience/",
+    "_source": "local",
+    "info": "",
+    "description": "Celebrate the annual return of the libido with your favorite Slips. We&#8217;re marking the season where repression thaws, desire buds insistently, and even the most disciplined ego loosens its collar. Sunday, April 12, The Freudian Slips Experience presents Slippin&#8217; Into Spring — an afternoon of drag, magic, and burlesque at The Painted Lady. This is a neuro-friendly event, designed with sensory consideration and predictable structure from the first act to the final curtain.",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/03/full.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "11:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Painted Lady Bed &amp; Brew",
+          "address": {
+            "line1": "1100 Bellamah Ave NW"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Community"
+        }
+      }
+    ],
+    "priceRanges": [
+      {
+        "min": 2030,
+        "max": 2030,
+        "currency": "USD"
+      }
+    ],
+    "isFree": false,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/slippin-into-spring-the-freudian-slips-experience/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-520617",
+    "name": "Slow Fashion &amp; Coffee Pop Up",
+    "url": "https://abqtodo.com/event/slow-fashion-coffee-pop-up/",
+    "_source": "local",
+    "info": "",
+    "description": "Slow down with us on Sunday by grabbing a coffee from local coffee cart AisleTwelve, shop locally made women&#8217;s clothing made by Sonrisa Designs, and browse other sustainable goods at HOSTcraft.",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/04/Slow-Fashion-Pop-Up-4.png"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "11:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "The HOSTcraft",
+          "address": {
+            "line1": "413 Romero St NW"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Community"
+        }
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/slow-fashion-coffee-pop-up/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10173367",
+    "name": "Water Strider Dance Group (Pueblo of Zuni)",
+    "url": "https://abqtodo.com/event/water-strider-dance-group-pueblo-of-zuni/2026-04-12/",
+    "_source": "local",
+    "info": "",
+    "description": "The Water Strider Dance Group (Pueblo of Zuni) will be dancing . Celebrate the seasonal cycles through prayer, song, and dance with our Cultural Dance Program. Dances connect us to our ancestors, community, and traditions while honoring gifts from our Creator. They ensure that life continues and connections to the past and future are reinforced. The Indian Pueblo Cultural Center is the only place in North America to offer cultural Native American dances every week, year-round. Free for museum me",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/03/amer-ind-week-4-24-23_water-striders_web-op-17-scaled-1.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "12:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Indian Pueblo Cultural Center",
+          "address": {
+            "line1": "2401 12th Street NW"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/water-strider-dance-group-pueblo-of-zuni/2026-04-12/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10137390",
+    "name": "Sunday Movie at Central &#038; Unser",
+    "url": "https://abqtodo.com/event/sunday-matinee-movie-at-central-unser-2/2026-04-12/",
+    "_source": "local",
+    "info": "",
+    "description": "Join us every Sunday for a movie showing. Films range in rating from G to PG-13. Note: Movies are subject to change without notice, please see our website for the movie listings.",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2024/07/Movie-2.png"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "13:30"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Central &amp; Unser Public Library",
+          "address": {
+            "line1": "8081 Central Ave NW"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/sunday-matinee-movie-at-central-unser-2/2026-04-12/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10095096",
+    "name": "Gallery Tours at the ABQ Museum",
+    "url": "https://abqtodo.com/event/gallery-tours-at-the-abq-museum/2026-04-12/",
+    "_source": "local",
+    "info": "",
+    "description": "Docent guided tours of select gallery exhibitions are offered year around. No reservations necessary for individuals and families.",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2024/05/f075004a-ca1a-4b49-97a3-14345a026ed6.jpeg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "14:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Albuquerque Museum",
+          "address": {
+            "line1": "2000 Mountain Rd NW"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/gallery-tours-at-the-abq-museum/2026-04-12/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10109684",
+    "name": "Family Movie at the International District Library",
+    "url": "https://abqtodo.com/event/family-movies/2026-04-12/",
+    "_source": "local",
+    "info": "",
+    "description": "Join us for a different movie each Sunday!",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2024/07/Movie-2.png"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "14:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "International District Library",
+          "address": {
+            "line1": "7601 Central Ave. NE"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/family-movies/2026-04-12/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-514434",
+    "name": "Completing an Advance Healthcare Directive Workshop",
+    "url": "https://abqtodo.com/event/completing-an-advance-healthcare-directive-workshop-3/",
+    "_source": "local",
+    "info": "",
+    "description": "This is a hands-on workshop with discussion of topics relevant to completing an Advance Healthcare Directive and designed to motivate participants to finish their own documents and express their individual wishes. Registration is required.",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/02/healthcare.png"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "14:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Cherry Hills Library",
+          "address": {
+            "line1": "6901 Barstow St. NE"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Community"
+        }
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/completing-an-advance-healthcare-directive-workshop-3/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10172279",
+    "name": "OF MICE AND MEN",
+    "url": "https://abqtodo.com/event/of-mice-and-men/2026-04-12/1/",
+    "_source": "local",
+    "info": "",
+    "description": "John Steinbeck adapted his novel of the same name. It premiered on Broadway in 1937 and earned the 1938 New York Drama Critics&#8217; Circle Best Play. A poignant tragedy centers around two migrant field hands , the average-looking but smart ‘George’ and the strong but mentally-challenged ‘Lennie’ who work on a farm in California during the Great Depression. Their dream of owning their own farm is shattered when Lennie has an incident with the wife of the boss&#8217;s son. It is one of director ",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/03/Of-Mice-and-Men-Marcelles-Mini.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "14:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Adobe Theater",
+          "address": {
+            "line1": "9813 Fourth Street NW (2 blocks n. of Alameda)"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "priceRanges": [
+      {
+        "min": 1030,
+        "max": 1030,
+        "currency": "USD"
+      }
+    ],
+    "isFree": false,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/of-mice-and-men/2026-04-12/1/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10173354",
+    "name": "The Vortex Theatre presents Who&#8217;s Afraid of Virginia Woolf",
+    "url": "https://abqtodo.com/event/the-vortex-theatre-presents-whos-afraid-of-virginia-woolf/2026-04-12/",
+    "_source": "local",
+    "info": "",
+    "description": "An unblinking portrait of two American marriages, Virginia Woolf is Edward Albee&#8217;s explosively comedic and harrowingly profound masterpiece.",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/03/VAWoolfBizCard-3.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "14:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Vortex Theatre",
+          "address": {
+            "line1": "2900 Carlisle Blvd NE"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "priceRanges": [
+      {
+        "min": 2126,
+        "max": 2126,
+        "currency": "USD"
+      }
+    ],
+    "isFree": false,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/the-vortex-theatre-presents-whos-afraid-of-virginia-woolf/2026-04-12/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10170099",
+    "name": "Out of Many, One: Spring Flamenco Concert",
+    "url": "https://abqtodo.com/event/out-of-many-one-spring-flamenco-concert/2026-04-12/",
+    "_source": "local",
+    "info": "",
+    "description": "Join us for an unforgettable evening of live flamenco as Yjastros presents Out of Many, One — a powerful program of five original works that explore connection, identity, and the ways individual voices come together to create something greater. This year’s performance features internationally acclaimed flamenco artists from Spain, bringing global artistry and tradition to our stage alongside the dancers of Yjastros. These artists have performed at some of the world’s most prestigious festivals a",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/02/Out-Of-Many-One.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "14:30"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "National Hispanic Cultural Center",
+          "address": {
+            "line1": "1701 4th Street Southwest"
+          },
+          "city": {
+            "name": "Albuquerque, NM"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "priceRanges": [
+      {
+        "min": 29109,
+        "max": 29109,
+        "currency": "USD"
+      }
+    ],
+    "isFree": false,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/out-of-many-one-spring-flamenco-concert/2026-04-12/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10159779",
+    "name": "Cuentos cortos en español",
+    "url": "https://abqtodo.com/event/cuentos-cortos-en-espanol/2026-04-12/",
+    "_source": "local",
+    "info": "",
+    "description": "In this bookclub, we will read and discuss a short story in Spanish! No need to prepare anything, just come prepared to read. We will talk about the story and other topics. ¡En este club de lectura vamos a leer y discutir un cuento corto en español! No necesita preparar nada, solamente venga listo para leer. Conversaremos acerca del cuento, ¡y de otros temas!",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2024/09/book-club.png"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "15:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Erna Fergusson Library",
+          "address": {
+            "line1": "3700 San Mateo Blvd. NE"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Community"
+        }
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/cuentos-cortos-en-espanol/2026-04-12/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10169893",
+    "name": "FUSION Theatre Company Presents AIRSWIMMING",
+    "url": "https://abqtodo.com/event/fusion-theatre-company-presents-airswimming-3/2026-04-12/",
+    "_source": "local",
+    "info": "",
+    "description": "FUSION Theatre Company is thrilled to present a play with themes that are absolutely pertinent to today, AIRSWIMMING by Charlotte Jones! We are excited to bring the writing of Charlotte Jones back to its stage after producing her award-winning play Humble Boy in 2013. Directed by Robb Anthony Sisneros, FUSION&#8217;s production stars Wendy Barker and Nichole Hamilton. Season subscriptions and individual tickets are available now! “Airswimming” …is poignant, intelligent and at times wickedly funn",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/02/Digital-Poster-no-logos-AIRSWIMMING-copy-1-2-scaled.png"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "15:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "FUSION",
+          "address": {
+            "line1": "700-708 1st St NW"
+          },
+          "city": {
+            "name": "ALBUQUERQUE"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "priceRanges": [
+      {
+        "min": 2065,
+        "max": 2065,
+        "currency": "USD"
+      }
+    ],
+    "isFree": false,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/fusion-theatre-company-presents-airswimming-3/2026-04-12/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-517217",
+    "name": "Albuquerque Concert Band Presents The Bruce Kroken Scholarship Award Concert!",
+    "url": "https://abqtodo.com/event/albuquerque-concert-band-presents-the-bruce-kroken-scholarship-award-concert/",
+    "_source": "local",
+    "info": "",
+    "description": "The Albuquerque Concert Band presents our annual Bruce Kroken Scholarship Award Concert! Each year we award the scholarship to a NM high school senior who is involved with their school&#8217;s music program. The winner performs at the concert. The award was created to honor the memory of past conductor of the ACB and Manzano HS, Bruce Kroken. The band is celebrating this special event with music masterpieces! Please join the band and conductors Jim Keene and Andrew Vaughn as we bring you a fun c",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/03/ACB-April-Flyer-26.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "15:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Eldorado High School Performing Arts Center",
+          "address": {
+            "line1": "11300 Montgomery Blvd NE"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Music"
+        }
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/albuquerque-concert-band-presents-the-bruce-kroken-scholarship-award-concert/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-464671",
+    "name": "Sound Bath Sunday at Studio SWAY – April 12 @ 4:00pm",
+    "url": "https://abqtodo.com/event/lotus-sound-bath-at-studio-sway-sunday-nov-10-300pm/",
+    "_source": "local",
+    "info": "",
+    "description": "Lotus Sound Bath at STUDIO SWAY Sunday, April 12 • 4:00 PM Studio SWAY &#8211; 1100 San Mateo Blvd. NE (NE corner of S. Mateo and Lomas, lower level across from Quarter Celtic) Plan your relaxation now -or discover for the first time- the benefits of the sound healing experience. Immersed in sound waves from quartz crystal singing bowls, large planet gong, handmade chimes, and other specialty instruments, this sonic meditation is intended to relieve body tension, manage stress, quiet the mind, r",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2024/10/nov-2024-scaled.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "16:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Studio Sway",
+          "address": {
+            "line1": "1100 San Matei Blvd. NE - Suite 32"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Music"
+        }
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/lotus-sound-bath-at-studio-sway-sunday-nov-10-300pm/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10172478",
+    "name": "Voice Over: Essentials",
+    "url": "https://abqtodo.com/event/voice-over-essentials/2026-04-12/",
+    "_source": "local",
+    "info": "",
+    "description": "SUNDAYS April 9 – June 4th, skips Easter 6:30 – 8:30pm MST Start Dates are loose, please be prepared to start later for industry conflicts, thank you for understanding! A 8-week class that includes one week of private consultation with Liz. “You’ll have assignments to record every week, so you will prove to yourself you can do this!” Learn the basics of voice-over acting in this 8-week virtual class with Liz Reeder Neubauer. The class covers techniques for voice-over acting in various areas such",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/03/banner.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "18:30"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Digital Event",
+          "address": {
+            "line1": "Digital Event"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Community"
+        }
+      }
+    ],
+    "priceRanges": [
+      {
+        "min": 345,
+        "max": 345,
+        "currency": "USD"
+      }
+    ],
+    "isFree": false,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/voice-over-essentials/2026-04-12/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10172280",
+    "name": "OF MICE AND MEN",
+    "url": "https://abqtodo.com/event/of-mice-and-men/2026-04-12/2/",
+    "_source": "local",
+    "info": "",
+    "description": "John Steinbeck adapted his novel of the same name. It premiered on Broadway in 1937 and earned the 1938 New York Drama Critics&#8217; Circle Best Play. A poignant tragedy centers around two migrant field hands , the average-looking but smart ‘George’ and the strong but mentally-challenged ‘Lennie’ who work on a farm in California during the Great Depression. Their dream of owning their own farm is shattered when Lennie has an incident with the wife of the boss&#8217;s son. It is one of director ",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/03/Of-Mice-and-Men-Marcelles-Mini.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-12",
+        "localTime": "19:30"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Adobe Theater",
+          "address": {
+            "line1": "9813 Fourth Street NW (2 blocks n. of Alameda)"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "priceRanges": [
+      {
+        "min": 1030,
+        "max": 1030,
+        "currency": "USD"
+      }
+    ],
+    "isFree": false,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/of-mice-and-men/2026-04-12/2/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10156014",
+    "name": "Local News in a Digital World: Navigating the New Information Era",
+    "url": "https://abqtodo.com/event/local-news-in-a-digital-world-navigating-the-new-information-era/2026-04-13/",
+    "_source": "local",
+    "info": "",
+    "description": "The New Mexico Local News Fund invites you to join us for the 2026 NMLNF Summit , a two-day national gathering focused on the future of local news and information. While rooted in New Mexico’s unique communities, this summit is designed to welcome participants from across the United States who care about how local news works—and how it can work better. In today’s rapidly shifting information landscape, the stakes have never been higher. Local news is under pressure from shrinking resources, misi",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/01/Summit-2026-Promo-Image-copy.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-13",
+        "localTime": "00:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "UNM Continuing Education",
+          "address": {
+            "line1": "1634 University Blvd. NE"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Community"
+        }
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/local-news-in-a-digital-world-navigating-the-new-information-era/2026-04-13/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10101762",
+    "name": "Palo Duro Singers",
+    "url": "https://abqtodo.com/event/palo-duro-singers-2/2026-04-13/",
+    "_source": "local",
+    "info": "",
+    "description": "Sing the day way with some phenomenal people! The Palo Duro Singers meet every Monday from 9 a.m. to 11 a.m. at Palo Duro Senior Center. Come join us!",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2024/09/a02f0159-3b82-49ec-a3ce-2ca7d4356c87.png"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-13",
+        "localTime": "09:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Palo Duro Senior Center",
+          "address": {
+            "line1": "5221 Palo Duro NE"
+          },
+          "city": {
+            "name": "Albuquerque, NM"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Music"
+        }
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/palo-duro-singers-2/2026-04-13/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10170789",
+    "name": "Grounded in Clay: The Spirit of Pueblo Pottery",
+    "url": "https://abqtodo.com/event/grounded-in-clay-the-spirit-of-pueblo-pottery/2026-04-13/",
+    "_source": "local",
+    "info": "",
+    "description": "EARLY CLOSURE AT 3PM ON MARCH 20TH DUE TO PRIVATE EVENT. Organized by the School for Advanced Research (SAR) and the Vilcek Foundation, Grounded in Clay: The Spirit of Pueblo Pottery , a unique traveling exhibition featuring over 100 historic and contemporary works in clay, offers a visionary understanding of Pueblo pots as vessels that carry community-based knowledge and personal experience. The Indian Pueblo Cultural Center (IPCC), established by the 19 Pueblos of New Mexico in 1976, welcomes ",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/02/Grounded-in-Clay-Web-Banner.jpg"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-13",
+        "localTime": "09:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Indian Pueblo Cultural Center",
+          "address": {
+            "line1": "2401 12th Street NW"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/grounded-in-clay-the-spirit-of-pueblo-pottery/2026-04-13/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10171128",
+    "name": "50 for 50: Indian Pueblo Cultural Center 1976-2026",
+    "url": "https://abqtodo.com/event/50-for-50-indian-pueblo-cultural-center-1976-2026-2/2026-04-13/",
+    "_source": "local",
+    "info": "",
+    "description": "EARLY CLOSURE AT 3PM ON MARCH 20TH DUE TO PRIVATE EVENT In honor of the 50th anniversary of the Indian Pueblo Cultural Center (IPCC), this exhibition highlights the Center’s history through Pueblo imagery and perspectives of the past, present, and future. A combination of fifty objects from the IPCC’s Collections and Archives, with an emphasis on Pueblo pottery, illustrates the significance of the Center as a gathering place where Pueblo arts and culture are celebrated by visitors from around th",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2026/02/Screenshot-2026-02-26-at-2.11.20-PM.png"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-13",
+        "localTime": "09:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Indian Pueblo Cultural Center",
+          "address": {
+            "line1": "2401 12th Street NW"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Arts & Theatre"
+        }
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/50-for-50-indian-pueblo-cultural-center-1976-2026-2/2026-04-13/"
+      }
+    ]
+  },
+  {
+    "id": "abqtodo-10164195",
+    "name": "Pickleball at Westgate Library",
+    "url": "https://abqtodo.com/event/pickleball-at-westgate-library/2026-04-13/",
+    "_source": "local",
+    "info": "",
+    "description": "Grab a paddle and join the fun! Whether you’re just starting out or already know the game, everyone’s welcome to play, learn, and enjoy pickleball together. Want to play on a different day? Check out the equipment and get pickling.",
+    "images": [
+      {
+        "url": "https://abqtodo.com/wp-content/uploads/2023/09/pickleball.png"
+      }
+    ],
+    "dates": {
+      "start": {
+        "localDate": "2026-04-13",
+        "localTime": "10:00"
+      }
+    },
+    "_embedded": {
+      "venues": [
+        {
+          "name": "Westgate Library",
+          "address": {
+            "line1": "1300 Delgado Dr. SW"
+          },
+          "city": {
+            "name": "Albuquerque"
+          },
+          "state": {
+            "name": "NM"
+          }
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "segment": {
+          "name": "Community"
+        }
+      }
+    ],
+    "isFree": true,
+    "ticketLinks": [
+      {
+        "url": "https://abqtodo.com/event/pickleball-at-westgate-library/2026-04-13/"
       }
     ]
   }
