@@ -419,7 +419,7 @@ function EventsSection() {
               <div key={k}>
                 <label style={lbl}>{l}</label>
                 {type==='select' ? <select value={(form as any)[k]} onChange={e=>setForm(f=>({...f,[k]:e.target.value}))} style={inp}>
-                  {['Music','Sports','Arts','Family','Comedy','Festival','Food','Film','Other'].map(c=><option key={c}>{c}</option>)}</select>
+                  {['Music','Concerts','Comedy','Arts','Sports','Family','Outdoor','Free','Volunteer','Movie','Other'].map(c=><option key={c}>{c}</option>)}</select>
                 : <input type={type||'text'} value={(form as any)[k]} onChange={e=>setForm(f=>({...f,[k]:e.target.value}))} style={inp} />}
               </div>
             ))}
@@ -1098,7 +1098,7 @@ function PlacesSection() {
 interface CatEntry { id:string; name:string; icon:string; color:string; type:'event'|'place'; order:number; }
 const DEF_CATS: CatEntry[] = [
   ...PLACE_CATS.map((n,i)=>({id:'pl-'+n,name:n,icon:'📍',color:'#1d4ed8',type:'place' as const,order:i})),
-  ...['Music','Sports','Arts','Family','Comedy','Festival','Food','Film','Nightlife','Outdoor','Other'].map((n,i)=>({id:'ev-'+n,name:n,icon:'🎫',color:ACCENT,type:'event' as const,order:i})),
+  ...['Music','Concerts','Comedy','Arts','Sports','Family','Outdoor','Free','Volunteer','Movie','Other'].map((n,i)=>({id:'ev-'+n,name:n,icon:'🎫',color:ACCENT,type:'event' as const,order:i})),
 ];
 function CategoriesSection() {
   const [cats, setCats] = useState<CatEntry[]>(DEF_CATS);
