@@ -315,6 +315,25 @@ async function fetchDo505Events() {
   return events;
 }
 
+// Parse a cost string that may be a range like "$45-$105" or a single value
+function parseCost(costStr) {
+  const s = (costStr || '').trim();
+  if (!s || s === '0' || /free/i.test(s)) return { min: 0, max: 0, isFree: true };
+  // Range: "$45-$105" / "$45 – $105" / "$45/$105"
+  const rangeMatch = s.match(/\$?\s*([\d,]+(?:\.\d+)?)\s*[-–—\/]\s*\$?\s*([\d,]+(?:\.\d+)?)/);
+  if (rangeMatch) {
+    const min = parseFloat(rangeMatch[1].replace(/,/g, ''));
+    const max = parseFloat(rangeMatch[2].replace(/,/g, ''));
+    if (!isNaN(min) && !isNaN(max) && min <= max && max <= 2000) {
+      return { min, max, isFree: false };
+    }
+  }
+  const single = parseFloat(s.replace(/[^0-9.]/g, ''));
+  if (isNaN(single) || single === 0) return { min: 0, max: 0, isFree: true };
+  if (single > 2000) return { min: 0, max: 0, isFree: false };  // sanity cap
+  return { min: single, max: single, isFree: false };
+}
+
 function transformDo505Event(ev) {
   const start = ev.start_date || '';
   if (!start) return null;
@@ -327,7 +346,7 @@ function transformDo505Event(ev) {
   if (lat && lng && !isInMetro(lat, lng)) return null;
 
   const costStr = (ev.cost || '').trim();
-  const costNum = parseFloat(costStr.replace(/[^0-9.]/g, '')) || 0;
+  const { min: _cMin, max: _cMax, isFree: _cFree } = parseCost(costStr);
 
   return {
     id:      `do505-${ev.id}`,
@@ -348,8 +367,8 @@ function transformDo505Event(ev) {
       }],
     },
     classifications: [{ segment: { name: mapDo505Category(ev.categories || []) } }],
-    priceRanges: costNum > 0 ? [{ min: costNum, max: costNum, currency: 'USD' }] : undefined,
-    isFree: costStr === '' || costStr === '0' || /free/i.test(costStr),
+    priceRanges: _cMin > 0 ? [{ min: _cMin, max: _cMax, currency: 'USD' }] : undefined,
+    isFree: _cFree,
     ticketLinks: ev.url ? [{ url: ev.url }] : [],
   };
 }
@@ -416,7 +435,7 @@ function transformAbqToDoEvent(ev) {
   if (lat && lng && !isInMetro(lat, lng)) return null;
 
   const costStr = (ev.cost || '').trim();
-  const costNum = parseFloat(costStr.replace(/[^0-9.]/g, '')) || 0;
+  const { min: _cMin, max: _cMax, isFree: _cFree } = parseCost(costStr);
 
   // ABQToDo uses lazy-loaded images — try data-src first, then url
   let imageUrl = null;
@@ -455,8 +474,8 @@ function transformAbqToDoEvent(ev) {
       }],
     },
     classifications: [{ segment: { name: segment } }],
-    priceRanges: costNum > 0 ? [{ min: costNum, max: costNum, currency: 'USD' }] : undefined,
-    isFree: costStr === '' || costStr === '0' || /free/i.test(costStr),
+    priceRanges: _cMin > 0 ? [{ min: _cMin, max: _cMax, currency: 'USD' }] : undefined,
+    isFree: _cFree,
     ticketLinks: ev.url ? [{ url: ev.url }] : [],
   };
 }

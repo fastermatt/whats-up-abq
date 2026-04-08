@@ -4539,16 +4539,16 @@ function DiscoverScreen({
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
             {[
-              { genre: 'Concerts',  icon: 'concert',   color: '#7C3AED' },
               { genre: 'Music',     icon: 'music',     color: '#8B3A0F' },
-              { genre: 'Dance',     icon: 'dance',     color: '#BE185D' },
-              { genre: 'Theatre',   icon: 'theatre',   color: '#6D28D9' },
+              { genre: 'Concerts',  icon: 'concert',   color: '#7C3AED' },
               { genre: 'Comedy',    icon: 'comedy',    color: '#B45309' },
-              { genre: 'Sports',    icon: 'sports',    color: '#1D4ED8' },
               { genre: 'Arts',      icon: 'art',       color: '#7C2D12' },
+              { genre: 'Sports',    icon: 'sports',    color: '#1D4ED8' },
               { genre: 'Family',    icon: 'family',    color: '#047857' },
+              { genre: 'Outdoor',   icon: 'outdoor',   color: '#065F46' },
               { genre: 'Free',      icon: 'free',      color: '#0F766E' },
-              { genre: 'Community', icon: 'community', color: '#0E7490' },
+              { genre: 'Volunteer', icon: 'volunteer', color: '#BE185D' },
+              { genre: 'Movie',     icon: 'film',      color: '#1F2937' },
             ].map(({ genre, icon, color }) => (
               <button
                 key={genre}
@@ -5074,6 +5074,9 @@ function EventsScreen({
           case 'Family':   return seg === 'Family' || name.includes('family') || name.includes('storytime') || name.includes(' kids') || name.includes('children') || name.includes('toddler') || name.includes('preschool');
           case 'Free':     return getEventPrice(e) === 'FREE' || name.includes('free') || name.includes('no cover') || name.includes('market') || name.includes('festival');
           case 'Community':return seg === 'Community' || seg === 'Festival' || name.includes('festival') || name.includes('market') || name.includes('fair') || name.includes('community') || name.includes('yoga') || name.includes('volunteer');
+          case 'Outdoor':  return name.includes('hike') || name.includes('hiking') || name.includes('trail') || name.includes('nature walk') || name.includes('outdoor') || name.includes('kayak') || name.includes('bird') || name.includes('stargaz') || name.includes('5k') || name.includes('run') || name.includes('marathon') || name.includes('botanic');
+          case 'Volunteer':return name.includes('volunteer') || name.includes('food bank') || name.includes('cleanup') || name.includes('fundrais') || name.includes('benefit') || name.includes('charity') || name.includes('blood drive') || name.includes('outreach');
+          case 'Movie':    return seg === 'Film' || gen === 'Film' || name.includes('movie') || name.includes('film') || name.includes('cinema') || name.includes('screening') || name.includes('documentary') || name.includes('drive-in');
           default:         return seg === g || gen === g;
         }
       });
@@ -5172,7 +5175,7 @@ function EventsScreen({
               eventName.includes('festival') || seg === 'Community' || seg === 'Festival';
             return isFree;
           }
-          // ── Community: social events, classes, civic, wellness, volunteer ──
+          // ── Community: social events, classes, civic, wellness ────────────
           case 'Community':
             return seg === 'Community' || gen === 'Community' || seg === 'Festival' ||
               eventName.includes('festival') || eventName.includes('market') ||
@@ -5181,9 +5184,38 @@ function EventsScreen({
               eventName.includes('pilates') || eventName.includes('qigong') ||
               eventName.includes('walkers') || eventName.includes('book club') ||
               eventName.includes('computer help') || eventName.includes('one-on-one') ||
-              eventName.includes('genealogy') || eventName.includes('volunteer') ||
-              eventName.includes('food bank') || eventName.includes('juggling') ||
+              eventName.includes('genealogy') || eventName.includes('juggling') ||
               venueName.includes('park') || venueName.includes('plaza');
+          // ── Outdoor: hikes, trails, nature walks, outdoor activities ───────
+          case 'Outdoor':
+            return eventName.includes('hike') || eventName.includes('hiking') ||
+              eventName.includes('trail') || eventName.includes('nature walk') ||
+              eventName.includes('outdoor') || eventName.includes('kayak') ||
+              eventName.includes('paddle') || eventName.includes('camping') ||
+              eventName.includes('bird') || eventName.includes('wildlife') ||
+              eventName.includes('botanic') || eventName.includes('garden walk') ||
+              eventName.includes('stargaz') || eventName.includes('astronomy') ||
+              eventName.includes('park cleanup') || eventName.includes('run') ||
+              eventName.includes('5k') || eventName.includes('marathon') ||
+              eventName.includes('walk') && (venueName.includes('park') || venueName.includes('trail')) ||
+              (seg === 'Sports' && (eventName.includes('run') || eventName.includes('race') || eventName.includes('5k')));
+          // ── Volunteer: service events, food banks, cleanups ────────────────
+          case 'Volunteer':
+            return eventName.includes('volunteer') || eventName.includes('food bank') ||
+              eventName.includes('cleanup') || eventName.includes('clean up') ||
+              eventName.includes('serve') || eventName.includes('habitat') ||
+              eventName.includes('community service') || eventName.includes('donation') ||
+              eventName.includes('fundrais') || eventName.includes('benefit') ||
+              eventName.includes('charity') || eventName.includes('give back') ||
+              eventName.includes('blood drive') || eventName.includes('outreach');
+          // ── Movie: screenings, film festivals, cinema events ────────────────
+          case 'Movie':
+            return seg === 'Film' || gen === 'Film' ||
+              eventName.includes('movie') || eventName.includes('film') ||
+              eventName.includes('cinema') || eventName.includes('screening') ||
+              eventName.includes('drive-in') || eventName.includes('documentary') ||
+              eventName.includes('short film') || eventName.includes('film fest') ||
+              venueName.includes('cinema') || venueName.includes('theater') && eventName.includes('film');
           default:
             return seg === selectedGenre || gen === selectedGenre;
         }
@@ -5313,6 +5345,7 @@ function EventsScreen({
       {/* Quick filter pills — Row 1: time-based + For You */}
       <div style={{ position: 'sticky', top: 'calc(var(--sat) + 58px)', zIndex: 30, background: 'var(--bg)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         {/* Row 1: All / Tonight / This Weekend / ❤️ For You */}
+        <div style={{ position: 'relative' }}>
         <div className="flex px-4 gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none', paddingTop: '8px', paddingBottom: '6px' }}>
           {(['All', 'Tonight', 'This Weekend', '\u2764\ufe0f For You'] as const).map(genre => {
             const isForYou = genre === '\u2764\ufe0f For You';
@@ -5338,19 +5371,22 @@ function EventsScreen({
             );
           })}
         </div>
+        <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '50px', background: 'linear-gradient(to right, transparent, var(--bg))', pointerEvents: 'none', zIndex: 1 }} />
+        </div>
         {/* Row 2: Category chips — single unified pill, heart inside */}
+        <div style={{ position: 'relative' }}>
         <div className="flex px-4 gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none', paddingTop: '4px', paddingBottom: '8px' }}>
           {([
-            { genre: 'Concerts',  icon: 'concert',   color: '#7C3AED' },
             { genre: 'Music',     icon: 'music',     color: '#8B3A0F' },
-            { genre: 'Dance',     icon: 'dance',     color: '#BE185D' },
-            { genre: 'Theatre',   icon: 'theatre',   color: '#6D28D9' },
+            { genre: 'Concerts',  icon: 'concert',   color: '#7C3AED' },
             { genre: 'Comedy',    icon: 'comedy',    color: '#B45309' },
-            { genre: 'Sports',    icon: 'sports',    color: '#1D4ED8' },
             { genre: 'Arts',      icon: 'art',       color: '#7C2D12' },
+            { genre: 'Sports',    icon: 'sports',    color: '#1D4ED8' },
             { genre: 'Family',    icon: 'family',    color: '#047857' },
+            { genre: 'Outdoor',   icon: 'outdoor',   color: '#065F46' },
             { genre: 'Free',      icon: 'free',      color: '#0F766E' },
-            { genre: 'Community', icon: 'community', color: '#0E7490' },
+            { genre: 'Volunteer', icon: 'volunteer', color: '#BE185D' },
+            { genre: 'Movie',     icon: 'film',      color: '#1F2937' },
           ] as { genre: string; icon: string; color: string }[]).map(({ genre, icon, color }) => {
             const isSelected = selectedGenre === genre;
             const isFollowed = followedGenres.includes(genre);
@@ -5403,6 +5439,8 @@ function EventsScreen({
               </button>
             );
           })}
+        </div>
+        <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '50px', background: 'linear-gradient(to right, transparent, var(--bg))', pointerEvents: 'none', zIndex: 1 }} />
         </div>
       </div>
       {/* Empty state — shown when filters return zero results */}
