@@ -2,7 +2,7 @@
   "id": "/",
   "name": "ABQ Unplugged",
   "short_name": "ABQ Unplugged",
-  "description": "Explore events, places & culture in Albuquerque. Check in, earn levels, discover ABQ.",
+  "description": "Find events and things to do in Albuquerque, NM. Live music, comedy, festivals, arts, food, and more. Updated daily.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FAFAF7",
@@ -37,16 +37,16 @@
   ],
   "screenshots": [
     {
-      "src": "/screenshots/discover.png",
+      "src": "/screenshots/discover.webp",
       "sizes": "390x844",
-      "type": "image/png",
+      "type": "image/webp",
       "form_factor": "narrow",
       "label": "Discover events and places in Albuquerque"
     },
     {
-      "src": "/screenshots/wide.png",
+      "src": "/screenshots/wide.webp",
       "sizes": "1280x800",
-      "type": "image/png",
+      "type": "image/webp",
       "form_factor": "wide",
       "label": "ABQ Unplugged on tablet and desktop"
     }

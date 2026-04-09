@@ -4309,7 +4309,7 @@ function DiscoverScreen({
   const [heroDisplay, setHeroDisplay] = useState('');
   const [heroDone, setHeroDone] = useState(false);
   const [calendarDate, setCalendarDate] = useState<string | null>(null);
-  const [showCalendar, setShowCalendar] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(true);
   useEffect(() => {
     let cancelled = false;
     const phrasePool = (adminHeroLines?.length) ? adminHeroLines : HERO_PHRASES;
@@ -4834,12 +4834,6 @@ function DiscoverScreen({
           </div>
         );
       })()}
-
-      {/* Day Planner */}
-      {!hidden.includes('todayPlan') && <DayPlanner />}
-
-      {/* Wishlist */}
-      {!hidden.includes('wishlist') && <MyWishlist />}
 
       {/* Why Unplug */}
       <WhyUnplugCard />

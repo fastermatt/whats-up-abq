@@ -1,0 +1,199 @@
+functionsDirectory = "/Users/matt/Documents/ClaudeObsidian/Projects/ABQ Unplugged PWA/whats-up-abq/netlify/functions"
+functionsDirectoryOrigin = "config"
+headersOrigin = "config"
+redirectsOrigin = "config"
+
+[build]
+edge_functions = "/Users/matt/Documents/ClaudeObsidian/Projects/ABQ Unplugged PWA/whats-up-abq/netlify/edge-functions"
+publish = "/Users/matt/Documents/ClaudeObsidian/Projects/ABQ Unplugged PWA/whats-up-abq/dist"
+publishOrigin = "config"
+commandOrigin = "config"
+command = "npm run build"
+functions = "/Users/matt/Documents/ClaudeObsidian/Projects/ABQ Unplugged PWA/whats-up-abq/netlify/functions"
+
+[build.environment]
+NODE_VERSION = "22"
+VAPID_PUBLIC_KEY = "BFPO4TytpML2fS1V72TRemWOIIjfu62V0tDdNuXVN3VY3hrapqf2Pesu8dkYqS5xou7YUm5Y4-xeGL_ZoIGU0pc"
+VAPID_SUBJECT = "mailto:4mattcarlson@gmail.com"
+
+[build.processing]
+
+[build.processing.css]
+
+[build.processing.html]
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]
+
+[[edge_functions]]
+function = "og"
+path = "/place/*"
+
+[[edge_functions]]
+function = "og"
+path = "/event/*"
+
+[functions]
+
+[functions."*"]
+node_bundler = "esbuild"
+
+[[plugins]]
+origin = "ui"
+package = "@netlify/plugin-lighthouse"
+pinned_version = "6"
+
+[plugins.inputs]
+
+[[headers]]
+for = "/*"
+
+[headers.values]
+X-Content-Type-Options = "nosniff"
+X-Frame-Options = "DENY"
+Referrer-Policy = "strict-origin-when-cross-origin"
+Permissions-Policy = "camera=(), microphone=(), geolocation=(self), payment=()"
+X-XSS-Protection = "1; mode=block"
+Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.ticketmaster.com https://api.seatgeek.com https://rest.bandsintown.com; frame-src https://www.google.com https://maps.google.com; worker-src 'self'; frame-ancestors 'none';"
+
+[[headers]]
+for = "/*"
+
+[headers.values]
+Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+for = "/places-data.json"
+
+[headers.values]
+Cache-Control = "public, max-age=86400"
+
+[[headers]]
+for = "/events-og.json"
+
+[headers.values]
+Cache-Control = "public, max-age=86400"
+
+[[headers]]
+for = "/sitemap.xml"
+
+[headers.values]
+Cache-Control = "public, max-age=86400"
+Content-Type = "application/xml"
+
+[[headers]]
+for = "/manifest.json"
+
+[headers.values]
+Cache-Control = "public, max-age=86400"
+
+[[headers]]
+for = "/*.png"
+
+[headers.values]
+Cache-Control = "public, max-age=604800"
+
+[[headers]]
+for = "/*.webp"
+
+[headers.values]
+Cache-Control = "public, max-age=604800"
+
+[[headers]]
+for = "/icons/*.webp"
+
+[headers.values]
+Cache-Control = "public, max-age=604800"
+
+[[headers]]
+for = "/icons/vibes/*.webp"
+
+[headers.values]
+Cache-Control = "public, max-age=604800"
+
+[[headers]]
+for = "/*.svg"
+
+[headers.values]
+Cache-Control = "public, max-age=604800"
+
+[[headers]]
+for = "/icons/*"
+
+[headers.values]
+Cache-Control = "public, max-age=604800"
+
+[[headers]]
+for = "/splash/*"
+
+[headers.values]
+Cache-Control = "public, max-age=604800"
+
+[[headers]]
+for = "/screenshots/*"
+
+[headers.values]
+Cache-Control = "public, max-age=604800"
+
+[[headers]]
+for = "/og-image.jpg"
+
+[headers.values]
+Cache-Control = "public, max-age=604800"
+
+[[headers]]
+for = "/sw.js"
+
+[headers.values]
+Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+for = "/assets/*"
+
+[headers.values]
+Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/data/*.json"
+
+[headers.values]
+Cache-Control = "public, max-age=3600, stale-while-revalidate=86400"
+
+[[redirects]]
+from = "https://explore-abq.netlify.app/*"
+to = "https://abqunplugged.com/:splat"
+status = 301.0
+force = true
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "http://abqunplugged.com/*"
+to = "https://abqunplugged.com/:splat"
+status = 301.0
+force = true
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
