@@ -35,7 +35,7 @@ if (fs.existsSync(envPath)) {
 const SUPABASE_URL      = process.env.SUPABASE_URL;
 const SUPABASE_KEY      = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const LM_STUDIO_URL     = process.env.LM_STUDIO_URL || 'http://localhost:1234';
-const LM_MODEL          = process.env.LM_MODEL      || 'qwen/qwen3.5-9b';
+const LM_MODEL          = process.env.LM_MODEL      || 'gemma-4-e4b-uncensored-hauhaucs-aggressive';
 const CONCURRENCY       = parseInt(process.env.CONCURRENCY || '2', 10);
 const FORCE             = process.argv.includes('--force');
 const LIMIT_ARG         = process.argv.find(a => a.startsWith('--limit='));

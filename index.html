@@ -5,13 +5,59 @@
 
     <!-- ─── Fonts: loaded as <link> (not @import) to avoid Safari ITP cross-site warnings ─── -->
     <!-- Public Sans — Terracotta theme -->
+    <!-- ─── Preload: LCP critical assets ─── -->
+    <!-- Hero texture is used as background-image in the first visible section header -->
+    <link rel="preload" href="/hero-texture.webp" as="image" type="image/webp" />
+    <!-- Nav logo is above the fold on every page -->
+    <link rel="preload" href="/logo-static.webp" as="image" type="image/webp" />
+
+    <!-- ─── Critical CSS: hide Material Symbols until font loads (prevents FOUT) ─── -->
+    <!-- Icons are invisible (not absent) during load — no layout shift, no text flash.    -->
+    <!-- JS below uses Font Loading API to reveal them once ready, with 2.5s fallback.     -->
+    <style>
+      .material-symbols-outlined {
+        font-family: 'Material Symbols Outlined', sans-serif;
+        /* Hidden until .icons-ready is added to <html> by the script below */
+        visibility: hidden;
+        /* Keep the element in layout flow so nothing jumps when icons appear */
+        display: inline-block;
+        line-height: 1;
+        vertical-align: middle;
+      }
+      .icons-ready .material-symbols-outlined {
+        visibility: visible;
+      }
+    </style>
+    <!-- Reveal icons as soon as the font is confirmed loaded (or after 2.5s fallback) -->
+    <script>
+      (function () {
+        function revealIcons() {
+          document.documentElement.classList.add('icons-ready');
+        }
+        if (typeof document.fonts !== 'undefined') {
+          // Already cached? Reveal immediately.
+          if (document.fonts.check('1em "Material Symbols Outlined"')) {
+            revealIcons();
+          } else {
+            document.fonts.load('1em "Material Symbols Outlined"').then(revealIcons, revealIcons);
+          }
+        } else {
+          // No Font Loading API (old browsers) — reveal straight away
+          revealIcons();
+        }
+        // Safety net: always reveal after 2.5s so icons never stay invisible
+        setTimeout(revealIcons, 2500);
+      })();
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&display=swap" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <!-- display=swap: browser always loads the font; our visibility:hidden prevents text flash -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" as="style" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
 
     <!-- ─── Viewport: viewport-fit=cover for iOS Dynamic Island / notch (Apple HIG) ─── -->
-    <!-- NOTE: user-scalable removed — WCAG 1.4.4 requires pinch-zoom be available for low-vision users -->
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
@@ -19,7 +65,6 @@
 
     <!-- ─── iOS PWA: Add to Home Screen support ─── -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <!-- black-translucent: status bar overlays our content so we can extend behind it with safe-area-inset-top -->
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="ABQ Unplugged" />
 
@@ -27,7 +72,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="application-name" content="ABQ Unplugged" />
 
-    <!-- ─── Theme colour: matches app background / header (Terracotta theme) ─── -->
+    <!-- ─── Theme colour ─── -->
     <meta name="theme-color" content="#F9F5F2" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#1C1814" media="(prefers-color-scheme: dark)" />
 
@@ -35,9 +80,9 @@
     <link rel="canonical" href="https://abqunplugged.com/" />
     <meta
       name="description"
-      content="Find things to do in Albuquerque, NM. Browse 700+ events, 4,500+ places, live music, food, nightlife, free events, and more. Updated daily."
+      content="Find things to do in Albuquerque, NM. Browse 700+ local events — live music, comedy, festivals, art, food, sports, and more. Updated daily."
     />
-    <meta name="keywords" content="Albuquerque events, things to do in Albuquerque, ABQ events tonight, Albuquerque nightlife, Albuquerque restaurants, free events Albuquerque, ABQ live music, Albuquerque things to do this weekend, Duke City events, New Mexico events, ABQ food, Albuquerque concerts" />
+    <meta name="keywords" content="Albuquerque events, things to do in Albuquerque, ABQ events tonight, Albuquerque nightlife, free events Albuquerque, ABQ live music, Albuquerque things to do this weekend, Duke City events, New Mexico events, Albuquerque concerts, ABQ festivals" />
 
     <!-- ─── Geo meta tags for local SEO ─── -->
     <meta name="geo.region" content="US-NM" />
@@ -45,25 +90,25 @@
     <meta name="geo.position" content="35.0844;-106.6504" />
     <meta name="ICBM" content="35.0844, -106.6504" />
 
-    <!-- ─── Open Graph (iMessage, WhatsApp, Slack, Twitter, Facebook) ─── -->
+    <!-- ─── Open Graph ─── -->
     <meta property="og:type"        content="website" />
     <meta property="og:url"         content="https://abqunplugged.com/" />
-    <meta property="og:title"       content="ABQ Unplugged — Things to Do in Albuquerque, NM" />
-    <meta property="og:description" content="Find events, places &amp; culture in the Duke City. 700+ events, 4,500+ places — updated daily. Free, forever." />
+    <meta property="og:title"       content="ABQ Unplugged — Events in Albuquerque, NM" />
+    <meta property="og:description" content="700+ local events in the Duke City — live music, comedy, festivals, food &amp; more. Updated daily. Free, forever." />
     <meta property="og:image"       content="https://abqunplugged.com/og-image.jpg" />
     <meta property="og:image:width"  content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt"   content="ABQ Unplugged — Things to Do in Albuquerque, NM" />
+    <meta property="og:image:alt"   content="ABQ Unplugged — Events in Albuquerque, NM" />
     <meta property="og:locale"      content="en_US" />
     <meta property="og:site_name"   content="ABQ Unplugged" />
 
     <!-- ─── Twitter / X card ─── -->
     <meta name="twitter:card"        content="summary_large_image" />
-    <meta name="twitter:title"       content="ABQ Unplugged — Things to Do in Albuquerque" />
-    <meta name="twitter:description" content="Find events, places &amp; culture in the Duke City. 700+ events, 4,500+ places — updated daily." />
+    <meta name="twitter:title"       content="ABQ Unplugged — Events in Albuquerque" />
+    <meta name="twitter:description" content="700+ local events in the Duke City — live music, comedy, festivals &amp; more. Updated daily." />
     <meta name="twitter:image"       content="https://abqunplugged.com/og-image.jpg" />
 
-    <!-- ─── Structured Data: LocalBusiness + WebSite (JSON-LD) ─── -->
+    <!-- ─── Structured Data: WebSite + Organization (JSON-LD) ─── -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -71,7 +116,7 @@
       "name": "ABQ Unplugged",
       "alternateName": ["ABQ Unplugged", "Albuquerque Unplugged"],
       "url": "https://abqunplugged.com",
-      "description": "Find things to do in Albuquerque, NM. Browse events, places, live music, food, nightlife, and more.",
+      "description": "Find things to do in Albuquerque, NM. Browse local events — live music, comedy, festivals, art, food, sports, and more.",
       "potentialAction": {
         "@type": "SearchAction",
         "target": {
@@ -102,30 +147,13 @@
       }
     }
     </script>
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "ItemList",
-      "name": "Things to Do in Albuquerque",
-      "description": "Events, restaurants, nightlife, outdoor activities, and cultural attractions in Albuquerque, NM",
-      "url": "https://abqunplugged.com",
-      "numberOfItems": 5200,
-      "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "Albuquerque Events", "url": "https://abqunplugged.com/#events"},
-        {"@type": "ListItem", "position": 2, "name": "Albuquerque Restaurants & Food", "url": "https://abqunplugged.com/#places"},
-        {"@type": "ListItem", "position": 3, "name": "Albuquerque Nightlife", "url": "https://abqunplugged.com/#places"},
-        {"@type": "ListItem", "position": 4, "name": "Albuquerque Live Music", "url": "https://abqunplugged.com/#events"},
-        {"@type": "ListItem", "position": 5, "name": "Free Things to Do in Albuquerque", "url": "https://abqunplugged.com/#events"}
-      ]
-    }
-    </script>
 
     <!-- ─── Favicon ─── -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
 
-    <!-- ─── Apple touch icons (iOS HIG: 180×180 for iPhone, 167×167 for iPad) ─── -->
+    <!-- ─── Apple touch icons ─── -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180.png" />
     <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167.png" />
     <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152.png" />
@@ -133,68 +161,43 @@
     <!-- ─── PWA Web App Manifest ─── -->
     <link rel="manifest" href="/manifest.json" />
 
-    <!-- ─── iOS Launch / Splash screens (iPhone 14 Pro and up) ─── -->
-    <!-- Primary splash: 1179×2556 @3x (iPhone 15/16 Pro) -->
-    <link
-      rel="apple-touch-startup-image"
+    <!-- ─── iOS Launch / Splash screens ─── -->
+    <link rel="apple-touch-startup-image"
       media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)"
-      href="/splash/splash-1179x2556.png"
-    />
-    <!-- iPhone 14/15 -->
-    <link
-      rel="apple-touch-startup-image"
+      href="/splash/splash-1179x2556.png" />
+    <link rel="apple-touch-startup-image"
       media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)"
-      href="/splash/splash-1170x2532.png"
-    />
-    <!-- iPhone SE 3rd gen -->
-    <link
-      rel="apple-touch-startup-image"
+      href="/splash/splash-1170x2532.png" />
+    <link rel="apple-touch-startup-image"
       media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)"
-      href="/splash/splash-750x1334.png"
-    />
-
-    <!-- iPhone 14 Pro Max / 15 Pro Max -->
-    <link
-      rel="apple-touch-startup-image"
+      href="/splash/splash-750x1334.png" />
+    <link rel="apple-touch-startup-image"
       media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)"
-      href="/splash/splash-1290x2796.png"
-    />
-    <!-- iPhone 14 Plus / 15 Plus -->
-    <link
-      rel="apple-touch-startup-image"
+      href="/splash/splash-1290x2796.png" />
+    <link rel="apple-touch-startup-image"
       media="screen and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)"
-      href="/splash/splash-1284x2778.png"
-    />
-    <!-- iPad Mini 6th gen -->
-    <link
-      rel="apple-touch-startup-image"
+      href="/splash/splash-1284x2778.png" />
+    <link rel="apple-touch-startup-image"
       media="screen and (device-width: 744px) and (device-height: 1133px) and (-webkit-device-pixel-ratio: 2)"
-      href="/splash/splash-1488x2266.png"
-    />
-    <!-- iPad 10th gen -->
-    <link
-      rel="apple-touch-startup-image"
+      href="/splash/splash-1488x2266.png" />
+    <link rel="apple-touch-startup-image"
       media="screen and (device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2)"
-      href="/splash/splash-1620x2160.png"
-    />
-    <!-- iPad Pro 12.9" -->
-    <link
-      rel="apple-touch-startup-image"
+      href="/splash/splash-1620x2160.png" />
+    <link rel="apple-touch-startup-image"
       media="screen and (device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)"
-      href="/splash/splash-2048x2732.png"
-    />
+      href="/splash/splash-2048x2732.png" />
 
-    <title>ABQ Unplugged — Things to Do in Albuquerque, NM | Events, Places &amp; Culture</title>
+    <title>ABQ Unplugged — Events in Albuquerque, NM | Live Music, Festivals &amp; More</title>
   </head>
   <body>
     <div id="root"></div>
     <noscript>
-      <h1>ABQ Unplugged — Things to Do in Albuquerque, NM</h1>
-      <p>Discover events, restaurants, live music, nightlife, and culture in Albuquerque, New Mexico. ABQ Unplugged features 700+ events and 4,500+ places to explore in the Duke City.</p>
-      <h2>Find Events in Albuquerque</h2>
-      <p>Browse concerts, comedy shows, sports events, art exhibitions, family activities, and free events happening in Albuquerque tonight, this weekend, and beyond.</p>
-      <h2>Explore Places in Albuquerque</h2>
-      <p>Find the best restaurants, coffee shops, bars, breweries, parks, museums, and hidden gems across Albuquerque neighborhoods including Downtown, Nob Hill, Old Town, UNM, and the North Valley.</p>
+      <h1>ABQ Unplugged — Events in Albuquerque, NM</h1>
+      <p>Discover 700+ local events in Albuquerque, New Mexico — live music, comedy, festivals, art exhibitions, food events, sports, and more. Updated daily. Free forever.</p>
+      <h2>Find Events in Albuquerque Tonight &amp; This Weekend</h2>
+      <p>Browse concerts, comedy shows, festivals, art openings, family activities, and free events happening in Albuquerque tonight, this weekend, and beyond.</p>
+      <h2>Albuquerque Event Venues</h2>
+      <p>See what's happening at El Rey Theater, Sunshine Theater, Sandia Casino Amphitheater, Isleta Amphitheater, Kiva Auditorium, and more of ABQ's top event spaces.</p>
       <h2>Explore by Vibe</h2>
       <p>Whether you're looking for a date night, an active adventure, a chill hangout, family fun, or a cultural experience — ABQ Unplugged helps you find exactly what fits your mood.</p>
     </noscript>
@@ -207,7 +210,6 @@
           navigator.serviceWorker.register('/sw.js', { scope: '/' })
             .then(reg => {
               console.log('[SW] Registered, scope:', reg.scope);
-              // Check for updates on each page load
               reg.addEventListener('updatefound', () => {
                 const newWorker = reg.installing;
                 newWorker.addEventListener('statechange', () => {
