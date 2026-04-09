@@ -352,6 +352,24 @@ function isJunkEvent(ev: TMEvent): boolean {
 }
 
 // ─── Static event → TMEvent adapter ────────────────────────────────────────
+// Generic/search-page URLs that don't link to a specific event.
+// When detected, we replace with a Google search so users land on the real event page.
+const GENERIC_URL_PATTERNS = [
+  /^https?:\/\/[^/]+\/?$/,                        // root domain only (bandsintown.com, casadebenavidez.com)
+  /eventbrite\.com\/d\//,                          // Eventbrite search/directory pages
+  /fandango\.com\/.*_movietimes/,                  // Fandango generic showtimes
+  /\/events\/?$/,                                  // generic /events/ listing pages
+];
+function resolveEventUrl(raw: string | undefined, title: string, location?: string): string | undefined {
+  if (!raw) return undefined;
+  if (GENERIC_URL_PATTERNS.some(p => p.test(raw))) {
+    // Replace with a targeted Google search that will find the specific event
+    const q = [title, location, 'Albuquerque', 'tickets'].filter(Boolean).join(' ');
+    return `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+  }
+  return raw;
+}
+
 function staticEventToTMEvent(ev: StaticEvent): TMEvent {
   const toLocal24h = (t?: string): string | undefined => {
     if (!t) return undefined;
@@ -366,10 +384,11 @@ function staticEventToTMEvent(ev: StaticEvent): TMEvent {
   };
   // Determine ticket link label based on source
   const isFreeInfo = ['ABQToDo', 'City of ABQ', 'ABQ365', 'Visit ABQ', 'Old Town ABQ', 'Downtown ABQ'].includes(ev.source || '');
+  const resolvedUrl = resolveEventUrl(ev.ticketUrl || ev.website, ev.title, ev.location);
   const tm: TMEvent = {
     id: ev.id,
     name: ev.title,
-    url: ev.ticketUrl || ev.website || undefined,
+    url: resolvedUrl,
     _source: isFreeInfo ? 'local' : (ev.source || '').toLowerCase().replace(/\s+/g, ''),
     _isAdult: ev.is21Plus === true || undefined,
     info: ev.description || undefined,
