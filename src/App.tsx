@@ -3,6 +3,7 @@ import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { supabase } from './lib/supabase';
 import { fetchEventsFromDB } from './lib/db';
 import { ALL_EVENTS, type Event as StaticEvent } from './data/events';
+import { ABQ_VENUES, getVenueBySlug, getVenueByLocation, slugifyVenue, type Venue } from './data/venues';
 import AdminPanel from './AdminPanel';
 import { loadPrefs as loadNotifPrefs, savePrefs as saveNotifPrefs, requestPermission, notificationsSupported, checkAndTriggerNotifications, subscribeToPush, NOTIF_LABELS, type NotificationPrefs } from './lib/notifications';
 
@@ -481,6 +482,14 @@ function PlaceImg({ src, alt, className, style, iconSize }: {
   return <img src={src} alt={alt} className={className} style={style} onError={() => setFailed(true)} />;
 }
 
+function decodeEntities(str: string): string {
+  if (!str || !str.includes('&')) return str;
+  // textarea safely decodes HTML entities without executing any markup
+  const el = document.createElement('textarea');
+  el.innerHTML = str;
+  return el.value;
+}
+
 function hiResUrl(url: string): string {
   if (!url) return url;
   // Fix Google Places photo URLs missing their API key
@@ -851,11 +860,11 @@ const PLACE_CATEGORIES = [
 
 // Vibe configs — shared between DiscoverScreen buttons and PlacesScreen pill filter
 const VIBE_CONFIGS = [
-  { icon: 'favorite', label: 'Date Night', gradient: 'linear-gradient(135deg, #C2634A, #D4896E)', borderColor: '#C2634A', animatedIcon: '/icons/vibes/date-night.gif', staticIcon: '/icons/vibes/date-night-static.png', vibeSearch: '', vibeCats: ['restaurant', 'bar', 'entertainment', 'arts'] },
-  { icon: 'directions_run', label: 'Active', gradient: 'linear-gradient(135deg, #C8963E, #E8A838)', borderColor: '#C8963E', animatedIcon: '/icons/vibes/active.gif', staticIcon: '/icons/vibes/active-static.png', vibeSearch: '', vibeCats: ['fitness', 'park'] },
-  { icon: 'self_improvement', label: 'Chill', gradient: 'linear-gradient(135deg, #6B8F71, #7A9E7E)', borderColor: '#6B8F71', animatedIcon: '/icons/vibes/chill.gif', staticIcon: '/icons/vibes/chill-static.png', vibeSearch: '', vibeCats: ['coffee', 'wellness', 'park'] },
-  { icon: 'family_restroom', label: 'Family', gradient: 'linear-gradient(135deg, #5B7FA5, #7A9BC0)', borderColor: '#5B7FA5', animatedIcon: '/icons/vibes/family.gif', staticIcon: '/icons/vibes/family-static.png', vibeSearch: '', vibeCats: ['restaurant', 'entertainment', 'park', 'museum', 'coffee'] },
-  { icon: 'palette', label: 'Culture', gradient: 'linear-gradient(135deg, #8B6B8A, #A8899E)', borderColor: '#8B6B8A', animatedIcon: '/icons/vibes/culture.gif', staticIcon: '/icons/vibes/culture-static.png', vibeSearch: '', vibeCats: ['arts', 'museum', 'entertainment'] },
+  { icon: 'favorite', label: 'Date Night', gradient: 'linear-gradient(135deg, #C2634A, #D4896E)', borderColor: '#C2634A', animatedIcon: '/icons/vibes/date-night.gif', staticIcon: '/icons/vibes/date-night-static.webp', vibeSearch: '', vibeCats: ['restaurant', 'bar', 'entertainment', 'arts'] },
+  { icon: 'directions_run', label: 'Active', gradient: 'linear-gradient(135deg, #C8963E, #E8A838)', borderColor: '#C8963E', animatedIcon: '/icons/vibes/active.gif', staticIcon: '/icons/vibes/active-static.webp', vibeSearch: '', vibeCats: ['fitness', 'park'] },
+  { icon: 'self_improvement', label: 'Chill', gradient: 'linear-gradient(135deg, #6B8F71, #7A9E7E)', borderColor: '#6B8F71', animatedIcon: '/icons/vibes/chill.gif', staticIcon: '/icons/vibes/chill-static.webp', vibeSearch: '', vibeCats: ['coffee', 'wellness', 'park'] },
+  { icon: 'family_restroom', label: 'Family', gradient: 'linear-gradient(135deg, #5B7FA5, #7A9BC0)', borderColor: '#5B7FA5', animatedIcon: '/icons/vibes/family.gif', staticIcon: '/icons/vibes/family-static.webp', vibeSearch: '', vibeCats: ['restaurant', 'entertainment', 'park', 'museum', 'coffee'] },
+  { icon: 'palette', label: 'Culture', gradient: 'linear-gradient(135deg, #8B6B8A, #A8899E)', borderColor: '#8B6B8A', animatedIcon: '/icons/vibes/culture.gif', staticIcon: '/icons/vibes/culture-static.webp', vibeSearch: '', vibeCats: ['arts', 'museum', 'entertainment'] },
 ];
 
 // Category display name mapping (shows friendlier labels to users)
@@ -2144,7 +2153,9 @@ function PlaceDetailModal({
               width="100%"
               height="180"
               style={{ border: 0 }}
-              src={`https://maps.google.com/maps?q=${mapsQuery}&output=embed&z=15`}
+              src={`https://www.google.com/maps?q=${mapsQuery}&output=embed&z=15`}
+              referrerPolicy="no-referrer"
+              loading="lazy"
               allowFullScreen
             />
           </div>
@@ -3359,7 +3370,9 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
             <iframe
               title={`Map for ${venue.name}`}
               width="100%" height="150" style={{ border: 0 }}
-              src={`https://maps.google.com/maps?q=${mapsQuery}&output=embed&z=15`}
+              src={`https://www.google.com/maps?q=${mapsQuery}&output=embed&z=15`}
+              referrerPolicy="no-referrer"
+              loading="lazy"
               allowFullScreen
             />
           </div>
@@ -4393,7 +4406,7 @@ function DiscoverScreen({
       <StreakBanner />
 
       {/* Hero — value prop + primary CTA */}
-      <div style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, var(--bg)", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+      <div style={{ background: "url('/hero-texture.webp') center/cover no-repeat, var(--bg)", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <div className="px-5 pt-5 pb-4">
           <p className="text-xs font-black uppercase mb-2" style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.12em' }}>
             Greater ABQ Metro
@@ -4537,7 +4550,8 @@ function DiscoverScreen({
           <p className="text-xs font-black uppercase flex items-center gap-2 mb-2.5" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>
             <FlatIcon name="zia" size={12} color="var(--brand)" /> Browse by Category
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
+          <div style={{ position: 'relative' }}>
+          <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none', paddingBottom: '4px' }}>
             {[
               { genre: 'Music',     icon: 'music',     color: '#8B3A0F' },
               { genre: 'Concerts',  icon: 'concert',   color: '#7C3AED' },
@@ -4553,13 +4567,25 @@ function DiscoverScreen({
               <button
                 key={genre}
                 onClick={() => { trackEvent('category_click', { genre }); onNavigateEvents?.(genre); }}
-                className="transition-all active:scale-95"
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '8px 6px', borderRadius: '12px', background: color + '18', border: '1.5px solid ' + color + '40', cursor: 'pointer', outline: 'none', width: '100%' }}
+                className="flex-shrink-0 flex items-center transition-all active:scale-95"
+                style={{
+                  padding: '6px 12px 6px 10px',
+                  borderRadius: '20px',
+                  background: color + '12',
+                  border: '1.5px solid ' + color + '40',
+                  cursor: 'pointer',
+                  outline: 'none',
+                  gap: '6px',
+                  whiteSpace: 'nowrap',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
               >
-                <FlatIcon name={icon} size={15} color={color} />
-                <span style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '12px', fontWeight: 700, color: 'var(--ink)', letterSpacing: '0.01em' }}>{genre}</span>
+                <FlatIcon name={icon} size={13} color={color} />
+                <span style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '11px', fontWeight: 700, color: 'var(--ink)', letterSpacing: '0.01em' }}>{genre}</span>
               </button>
             ))}
+          </div>
+          <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '50px', background: 'linear-gradient(to right, transparent, var(--bg))', pointerEvents: 'none', zIndex: 1 }} />
           </div>
         </div>
       )}
@@ -5313,7 +5339,7 @@ function EventsScreen({
 
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, var(--bg)", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.webp') center/cover no-repeat, var(--bg)", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}
@@ -5587,7 +5613,7 @@ function EventsScreen({
                     <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.07em', textTransform: 'uppercase' as const, color: 'var(--ink)', fontFamily: 'Public Sans, sans-serif' }}>{cat}</span>
                     <span style={{ fontSize: 10, color: '#bbb', fontFamily: 'Public Sans, sans-serif', fontWeight: 500 }}>{events.length}</span>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: `repeat(${gridCols}, 1fr)`, gap: gridCols === 1 ? 12 : 10 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(gridCols, events.length)}, 1fr)`, gap: Math.min(gridCols, events.length) === 1 ? 12 : 10 }}>
                     {events.map(event => {
                       const count = getShowtimeCount(event);
                       return (
@@ -5919,7 +5945,7 @@ function PlacesScreen({
           </div>
         );
       })() : (
-      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, var(--bg)", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.webp') center/cover no-repeat, var(--bg)", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}
@@ -6711,7 +6737,7 @@ function ProfileScreen({
 
   return (
     <div className="w-full px-5 pb-28" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-      <div className="pt-5 pb-4" style={{ background: "url('/hero-texture.jpg') center/cover no-repeat, var(--bg)", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)', marginLeft: '-20px', marginRight: '-20px', paddingLeft: '20px', paddingRight: '20px' }}>
+      <div className="pt-5 pb-4" style={{ background: "url('/hero-texture.webp') center/cover no-repeat, var(--bg)", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)', marginLeft: '-20px', marginRight: '-20px', paddingLeft: '20px', paddingRight: '20px' }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}
@@ -9661,6 +9687,221 @@ function useWindowWidth() {
   return width;
 }
 
+
+// ─── VenuePage ────────────────────────────────────────────────────────────────
+// Full-screen venue page shown when navigating to /venue/:slug.
+// Displays rich venue info + filtered upcoming events at that space.
+function VenuePage({
+  slug,
+  events,
+  onEventClick,
+  onBack,
+}: {
+  slug: string;
+  events: TMEvent[];
+  onEventClick: (e: TMEvent) => void;
+  onBack: () => void;
+}) {
+  const venue = getVenueBySlug(slug);
+
+  const venueEvents = useMemo(() => {
+    if (!venue) return [];
+    const today = new Date().toISOString().slice(0, 10);
+    return events
+      .filter(e => {
+        const d = e.dates?.start?.localDate ?? '';
+        if (d && d < today) return false;
+        const loc = (e._embedded?.venues?.[0]?.name ?? '').toLowerCase();
+        return venue.locationAliases.some(alias => loc.includes(alias.toLowerCase()));
+      })
+      .sort((a, b) => {
+        const da = a.dates?.start?.localDate ?? '';
+        const db = b.dates?.start?.localDate ?? '';
+        return da < db ? -1 : da > db ? 1 : 0;
+      });
+  }, [venue, events]);
+
+  if (!venue) {
+    return (
+      <div style={{ padding: '40px 24px', textAlign: 'center', fontFamily: 'Public Sans, sans-serif' }}>
+        <div style={{ fontSize: 40, marginBottom: 12 }}>🎭</div>
+        <div style={{ fontSize: 20, fontWeight: 700, color: '#1C1814', marginBottom: 8 }}>Venue not found</div>
+        <button onClick={onBack} style={{ padding: '10px 24px', background: '#b95c43', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, fontSize: 15, cursor: 'pointer' }}>
+          ← Back
+        </button>
+      </div>
+    );
+  }
+
+  const formatDate = (d?: string) => {
+    if (!d) return '';
+    const dt = new Date(d + 'T12:00:00');
+    return dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  };
+
+  const formatTime = (t?: string) => {
+    if (!t) return '';
+    const [h, m] = t.split(':').map(Number);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const hour = h % 12 || 12;
+    return `${hour}:${String(m).padStart(2, '0')} ${ampm}`;
+  };
+
+  const heroImg = venue.image;
+  const heroBg = heroImg
+    ? `url(${heroImg}) center/cover no-repeat`
+    : venue.gradient;
+
+  return (
+    <div style={{ fontFamily: 'Public Sans, sans-serif', background: '#F9F5F2', minHeight: '100vh' }}>
+      {/* Hero */}
+      <div style={{ position: 'relative', height: 220, background: heroBg, overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.6) 100%)' }} />
+        <button
+          onClick={onBack}
+          aria-label="Go back"
+          style={{ position: 'absolute', top: 16, left: 16, zIndex: 2, background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: 20, color: '#fff', padding: '6px 14px', fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+        >
+          ← Back
+        </button>
+        <div style={{ position: 'absolute', bottom: 20, left: 20, right: 20, zIndex: 2 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', marginBottom: 4 }}>
+            {venue.neighborhood}
+          </div>
+          <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: '#fff', lineHeight: 1.2 }}>
+            {venue.name}
+          </h1>
+          {venue.capacity && (
+            <div style={{ marginTop: 4, fontSize: 13, color: 'rgba(255,255,255,0.8)' }}>
+              Capacity: {venue.capacity}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Body */}
+      <div style={{ padding: '20px 16px 100px' }}>
+
+        {/* Quick links */}
+        <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
+          {venue.website && (
+            <a
+              href={venue.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', background: '#b95c43', color: '#fff', borderRadius: 20, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>language</span>
+              Official Site
+            </a>
+          )}
+          <a
+            href={`https://maps.apple.com/?q=${encodeURIComponent(venue.name + ' ' + venue.address)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', background: '#fff', color: '#1C1814', border: '1.5px solid #e5e0da', borderRadius: 20, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>map</span>
+            Directions
+          </a>
+        </div>
+
+        {/* Address */}
+        <div style={{ fontSize: 13, color: '#6b6460', marginBottom: 16, display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 16, marginTop: 1, color: '#b95c43' }}>location_on</span>
+          {venue.address}
+        </div>
+
+        {/* Description */}
+        <p style={{ fontSize: 15, color: '#3d3532', lineHeight: 1.65, margin: '0 0 20px' }}>
+          {venue.description}
+        </p>
+
+        {/* Highlights */}
+        {venue.highlights.length > 0 && (
+          <div style={{ background: '#fff', borderRadius: 12, padding: '16px', marginBottom: 20, border: '1px solid #ede8e3' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#b95c43', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
+              What to know
+            </div>
+            {venue.highlights.map((h, i) => (
+              <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: i < venue.highlights.length - 1 ? 8 : 0 }}>
+                <span style={{ color: '#b95c43', fontWeight: 700, flexShrink: 0, marginTop: 1 }}>•</span>
+                <span style={{ fontSize: 14, color: '#3d3532', lineHeight: 1.5 }}>{h}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Upcoming Events */}
+        <div style={{ fontSize: 17, fontWeight: 800, color: '#1C1814', marginBottom: 14 }}>
+          Upcoming Events
+          {venueEvents.length > 0 && (
+            <span style={{ marginLeft: 8, fontSize: 13, fontWeight: 500, color: '#9a8f8a' }}>
+              {venueEvents.length} show{venueEvents.length !== 1 ? 's' : ''}
+            </span>
+          )}
+        </div>
+
+        {venueEvents.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '32px 16px', background: '#fff', borderRadius: 12, border: '1px solid #ede8e3' }}>
+            <div style={{ fontSize: 32, marginBottom: 8 }}>🎭</div>
+            <div style={{ fontSize: 15, color: '#6b6460' }}>No upcoming events found for this venue.</div>
+            <div style={{ fontSize: 13, color: '#9a8f8a', marginTop: 4 }}>Check back soon — events are updated daily.</div>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {venueEvents.map(event => {
+              const img = event.images?.find((i: any) => i.ratio === '16_9' && i.width > 200)?.url ?? event.images?.[0]?.url;
+              const date = event.dates?.start?.localDate;
+              const time = event.dates?.start?.localTime;
+              const genre = event.classifications?.[0]?.genre?.name ?? event.classifications?.[0]?.segment?.name ?? '';
+              const minPrice = event.priceRanges?.[0]?.min;
+              return (
+                <button
+                  key={event.id}
+                  onClick={() => onEventClick(event)}
+                  style={{ display: 'flex', gap: 12, padding: 12, background: '#fff', borderRadius: 12, border: '1px solid #ede8e3', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+                >
+                  {img ? (
+                    <img src={img} alt={event.name} style={{ width: 72, height: 72, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
+                  ) : (
+                    <div style={{ width: 72, height: 72, borderRadius: 8, background: venue.gradient, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span className="material-symbols-outlined" style={{ color: 'rgba(255,255,255,0.7)', fontSize: 28 }}>music_note</span>
+                    </div>
+                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: '#1C1814', marginBottom: 3, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {event.name}
+                    </div>
+                    {(date || time) && (
+                      <div style={{ fontSize: 13, color: '#b95c43', fontWeight: 600, marginBottom: 3 }}>
+                        {formatDate(date)}{time ? ` · ${formatTime(time)}` : ''}
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                      {genre && (
+                        <span style={{ fontSize: 12, color: '#6b6460', background: '#f3eeea', borderRadius: 4, padding: '2px 7px' }}>
+                          {genre}
+                        </span>
+                      )}
+                      {minPrice !== undefined && (
+                        <span style={{ fontSize: 12, color: '#6b6460' }}>
+                          {minPrice === 0 ? 'Free' : `From $${minPrice}`}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <span className="material-symbols-outlined" style={{ color: '#c9c0ba', fontSize: 20, flexShrink: 0, alignSelf: 'center' }}>chevron_right</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>(() => {
     const hash = window.location.hash.replace('#', '').split('/')[0];
@@ -9714,6 +9955,11 @@ export default function App() {
       return hm ? decodeURIComponent(hm[1]) : null;
     })()
   );
+  // Venue page: slug from /venue/:slug URL
+  const [venuePageSlug, setVenuePageSlug] = useState<string | null>(() => {
+    const pm = window.location.pathname.match(/^\/venue\/(.+)$/);
+    return pm ? decodeURIComponent(pm[1]) : null;
+  });
   // Never block on a loading screen — show the app shell immediately.
   // Data populates in the background; sections gracefully show when ready.
   const [loading, setLoading] = useState(false);
@@ -10027,6 +10273,11 @@ export default function App() {
 
   const closePlaceModal = useCallback(() => setSelectedPlace(null), []);
   const closeEventModal = useCallback(() => setSelectedEvent(null), []);
+  const openVenuePage = useCallback((slug: string) => {
+    setSelectedEvent(null);
+    setSelectedPlace(null);
+    setVenuePageSlug(slug);
+  }, []);
 
   // ── Admin ──
   const [currentHash, setCurrentHash] = useState(() => window.location.hash);
@@ -10061,9 +10312,10 @@ export default function App() {
 
     const handlePopState = (e: PopStateEvent) => {
       const state = e.state;
-      // If going back from a modal, close it
+      // If going back from a modal or venue page, close it
       if (selectedPlace) { setSelectedPlace(null); return; }
       if (selectedEvent) { setSelectedEvent(null); return; }
+      if (venuePageSlug) { setVenuePageSlug(null); return; }
       // If going back between tabs, go to that tab
       if (state?.tab) {
         setActiveTab(state.tab);
@@ -10082,7 +10334,125 @@ export default function App() {
     }
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [selectedPlace, selectedEvent, activeTab, showAdmin]);
+  }, [selectedPlace, selectedEvent, venuePageSlug, activeTab, showAdmin]);
+
+  // ── Dynamic <title> + Event JSON-LD schema ─────────────────────────────────
+  // Updates document title and injects structured data whenever the user views
+  // a specific event, venue page, or returns to a default tab.
+  useEffect(() => {
+    const DEFAULT_TITLE = 'ABQ Unplugged — Events in Albuquerque, NM';
+    const BASE_URL = 'https://abqunplugged.com';
+
+    // Remove any previously injected dynamic JSON-LD
+    const cleanup = () => {
+      document.getElementById('abq-event-jsonld')?.remove();
+      document.getElementById('abq-venue-jsonld')?.remove();
+    };
+
+    if (selectedEvent) {
+      // ── Event detail view ──
+      const venueName = selectedEvent._embedded?.venues?.[0]?.name ?? 'Albuquerque';
+      const venueAddress = selectedEvent._embedded?.venues?.[0]?.address?.line1 ?? '';
+      const startDate = selectedEvent.dates?.start?.localDate ?? '';
+      const startTime = selectedEvent.dates?.start?.localTime ?? '';
+      const img = selectedEvent.images?.find((i: any) => i.ratio === '16_9' && i.width > 500)?.url
+        ?? selectedEvent.images?.[0]?.url ?? '';
+      const minPrice = selectedEvent.priceRanges?.[0]?.min;
+      const maxPrice = selectedEvent.priceRanges?.[0]?.max;
+      const ticketUrl = selectedEvent.ticketLinks?.[0]?.url ?? selectedEvent.url ?? '';
+      const genre = selectedEvent.classifications?.[0]?.genre?.name ?? '';
+
+      document.title = `${selectedEvent.name} — ${venueName} | ABQ Unplugged`;
+
+      cleanup();
+      const schema: Record<string, any> = {
+        '@context': 'https://schema.org',
+        '@type': 'Event',
+        'name': selectedEvent.name,
+        'description': selectedEvent.info ?? selectedEvent._aiEnrichment?.about ?? `${selectedEvent.name} at ${venueName} in Albuquerque, NM.`,
+        'startDate': startTime ? `${startDate}T${startTime}` : startDate,
+        'eventStatus': 'https://schema.org/EventScheduled',
+        'eventAttendanceMode': 'https://schema.org/OfflineEventAttendanceMode',
+        'location': {
+          '@type': 'Place',
+          'name': venueName,
+          'address': {
+            '@type': 'PostalAddress',
+            'streetAddress': venueAddress,
+            'addressLocality': 'Albuquerque',
+            'addressRegion': 'NM',
+            'addressCountry': 'US',
+          },
+        },
+        'url': ticketUrl || `${BASE_URL}/event/${encodeURIComponent(selectedEvent.id)}`,
+        'image': img || `${BASE_URL}/og-image.jpg`,
+        'organizer': { '@type': 'Organization', 'name': 'ABQ Unplugged', 'url': BASE_URL },
+      };
+      if (genre) schema['genre'] = genre;
+      if (minPrice !== undefined) {
+        schema['offers'] = {
+          '@type': 'Offer',
+          'priceCurrency': 'USD',
+          'price': minPrice,
+          ...(maxPrice !== undefined && maxPrice > minPrice ? { 'highPrice': maxPrice } : {}),
+          'availability': 'https://schema.org/InStock',
+          ...(ticketUrl ? { 'url': ticketUrl } : {}),
+        };
+      }
+      const s = document.createElement('script');
+      s.id = 'abq-event-jsonld';
+      s.type = 'application/ld+json';
+      s.textContent = JSON.stringify(schema);
+      document.head.appendChild(s);
+
+    } else if (venuePageSlug) {
+      // ── Venue page view ──
+      const venue = getVenueBySlug(venuePageSlug);
+      if (venue) {
+        document.title = `${venue.name} Events — Albuquerque | ABQ Unplugged`;
+        cleanup();
+        const schema = {
+          '@context': 'https://schema.org',
+          '@type': 'EventVenue',
+          'name': venue.name,
+          'description': venue.description,
+          'address': {
+            '@type': 'PostalAddress',
+            'streetAddress': venue.address.split(',')[0],
+            'addressLocality': 'Albuquerque',
+            'addressRegion': 'NM',
+            'addressCountry': 'US',
+          },
+          'url': venue.website ?? `${BASE_URL}/venue/${venue.slug}`,
+          ...(venue.lat && venue.lng ? {
+            'geo': { '@type': 'GeoCoordinates', 'latitude': venue.lat, 'longitude': venue.lng }
+          } : {}),
+        };
+        const s = document.createElement('script');
+        s.id = 'abq-venue-jsonld';
+        s.type = 'application/ld+json';
+        s.textContent = JSON.stringify(schema);
+        document.head.appendChild(s);
+      } else {
+        document.title = DEFAULT_TITLE;
+        cleanup();
+      }
+    } else {
+      // ── Default: restore home title ──
+      document.title = DEFAULT_TITLE;
+      cleanup();
+    }
+
+    return cleanup;
+  }, [selectedEvent, venuePageSlug]);
+
+  // ── Sync /venue/:slug URL when venuePageSlug changes ──────────────────────
+  useEffect(() => {
+    if (venuePageSlug) {
+      window.history.pushState({ venueSlug: venuePageSlug }, '', `/venue/${encodeURIComponent(venuePageSlug)}`);
+    }
+    // When cleared, navigation back is handled by the popstate handler
+  }, [venuePageSlug]);
 
   const [checkInError, setCheckInError] = useState<string | null>(null);
   const [tooFarPlaceId, setTooFarPlaceId] = useState<string | null>(null);
@@ -10368,7 +10738,8 @@ export default function App() {
           .filter(isInMetro)
           .filter(hasActionableLink)
           .filter(e => !isJunkEvent(e))
-          .map(tagAdultEvent);
+          .map(tagAdultEvent)
+          .map(e => e.name?.includes('&') ? { ...e, name: decodeEntities(e.name) } : e);
         setEvents(merged);
         // Trigger scheduled local notifications now that we have fresh data
         checkAndTriggerNotifications(loadNotifPrefs(), { events: merged });
@@ -10379,7 +10750,8 @@ export default function App() {
         const staticOnly2 = STATIC_TM_EVENTS
           .filter(e => { if (seen2.has(e.id)) return false; seen2.add(e.id); return true; })
           .filter(e => !isJunkEvent(e))
-          .map(tagAdultEvent);
+          .map(tagAdultEvent)
+          .map(e => e.name?.includes('&') ? { ...e, name: decodeEntities(e.name) } : e);
         setEvents(staticOnly2);
       } finally {
         setEventsLoading(false);
@@ -10649,7 +11021,7 @@ export default function App() {
           }}
         >
           <button className="flex items-center gap-2" onClick={() => { setActiveTab('discover'); window.scrollTo(0, 0); }} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
-            <img src="/logo-static.png" alt="ABQ Unplugged" style={{ height: '32px', width: 'auto' }} />
+            <img src="/logo-static.webp" alt="ABQ Unplugged" style={{ height: '32px', width: 'auto' }} />
           </button>
           <div className="flex items-center gap-2">
             <button onClick={() => setShowSearch(true)} className="w-9 h-9 flex items-center justify-center" style={{ background: 'var(--bg)', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
@@ -10863,6 +11235,17 @@ export default function App() {
           mapProvider={resolvedMapProvider}
           enrichedDataEnabled={enrichedDataEnabled}
         />
+      )}
+      {/* Venue page — full-screen overlay shown when /venue/:slug is active */}
+      {venuePageSlug && !selectedEvent && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: '#F9F5F2', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <VenuePage
+            slug={venuePageSlug}
+            events={events}
+            onEventClick={(e) => { openEventModal(e); }}
+            onBack={() => { setVenuePageSlug(null); window.history.back(); }}
+          />
+        </div>
       )}
       {selectedEvent && (
         <EventDetailModal event={selectedEvent} onClose={() => { closeEventModal(); window.history.back(); }} isSaved={isEventSaved(selectedEvent.id)} onToggleSave={() => toggleSavedEvent(selectedEvent)} mapProvider={resolvedMapProvider} />
