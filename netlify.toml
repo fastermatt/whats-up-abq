@@ -15,6 +15,7 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=(self), payment=()"
     X-XSS-Protection = "1; mode=block"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.ticketmaster.com https://api.seatgeek.com https://rest.bandsintown.com; worker-src 'self'; frame-ancestors 'none';"
 
 # ─── Cache headers ────────────────────────────────────────────────────────────
 # NOTE: In Netlify, later rules override earlier ones when both match.
@@ -111,6 +112,13 @@
   path = "/event/*"
 
 # ─── Redirects ────────────────────────────────────────────────────────────────
+
+# HTTP → HTTPS force redirect (fixes bare http:// returning 404)
+[[redirects]]
+  from = "http://abqunplugged.com/*"
+  to = "https://abqunplugged.com/:splat"
+  status = 301
+  force = true
 
 # SPA fallback — all routes serve index.html (sw.js served as real file before this)
 [[redirects]]
