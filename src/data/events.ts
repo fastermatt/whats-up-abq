@@ -142,30 +142,6 @@ export const ALL_EVENTS: Event[] = [
   // APRIL 11-12
   // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
   {
-    id: "a11-2",
-    title: "Machine Gun Kelly · Mainstream Sellout Tour",
-    category: "Live Music",
-    date: "2026-04-11",
-    time: "7:00 PM",
-    endTime: "10:30 PM",
-    location: "Kiva Auditorium",
-    address: "401 2nd St NW, Albuquerque, NM 87102",
-    description:
-      "Pop-punk icon Machine Gun Kelly brings his explosive live show to the historic Kiva Auditorium in Downtown ABQ. Known for one of music's highest-energy live performances, MGK delivers 2+ hours of hits. Jelly Roll opens at 7PM.",
-    price: "$50â$130",
-    priceNum: 50,
-    image: U("1493225457124-a3eb161ffa5f"),
-    gradient: "linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)",
-    featured: true,
-    tags: ["pop-punk", "rock", "arena", "downtown"],
-    isKidFriendly: false,
-    isOutdoor: false,
-    isAccessible: true,
-    source: "Bandsintown",
-    ticketUrl: "https://www.bandsintown.com",
-    accessibility: "ADA accessible; contact box office",
-  },
-  {
     id: "a11-stars",
     title: "Adobe & Stars Astronomy Night",
     category: "Outdoors",
