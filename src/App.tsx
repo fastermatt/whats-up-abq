@@ -62,7 +62,7 @@ function useTypewriter(text: string, startDelay = 400) {
 if (typeof document !== 'undefined' && !document.getElementById('card-fade-style')) {
   const s = document.createElement('style');
   s.id = 'card-fade-style';
-  s.textContent = '@keyframes cardFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes hoodBubble0 { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-4px,2px)} 50%{transform:translate(3px,-1px)} 75%{transform:translate(-2px,-2px)} } @keyframes hoodBubble1 { 0%,100%{transform:translate(0,0)} 20%{transform:translate(3px,-3px)} 55%{transform:translate(-3px,2px)} 80%{transform:translate(2px,1px)} } @keyframes hoodBubble2 { 0%,100%{transform:translate(0,0)} 30%{transform:translate(-3px,-2px)} 60%{transform:translate(4px,1px)} 85%{transform:translate(-1px,3px)} } @keyframes hoodBubble3 { 0%,100%{transform:translate(0,0)} 35%{transform:translate(2px,3px)} 65%{transform:translate(-4px,-1px)} 90%{transform:translate(3px,-2px)} } @keyframes hoodBubble4 { 0%,100%{transform:translate(0,0)} 15%{transform:translate(-2px,-3px)} 45%{transform:translate(3px,2px)} 70%{transform:translate(-3px,1px)} } @keyframes hoodBubble5 { 0%,100%{transform:translate(0,0)} 40%{transform:translate(4px,-2px)} 70%{transform:translate(-2px,3px)} 85%{transform:translate(1px,-1px)} } @keyframes ptrSweep { 0%{background-position:-200% center} 100%{background-position:200% center} } @keyframes ptrDots { 0%,80%,100%{transform:scale(0.6);opacity:0.3} 40%{transform:scale(1);opacity:1} } @keyframes kenBurns0 { from { transform: scale(1.05) translate(0%,0%); } to { transform: scale(1.18) translate(-2%,-1%); } } @keyframes kenBurns1 { from { transform: scale(1.1) translate(-1%,1%); } to { transform: scale(1.2) translate(2%,-2%); } } @keyframes kenBurns2 { from { transform: scale(1.08) translate(1%,-1%); } to { transform: scale(1.18) translate(-1%,2%); } } @keyframes kenBurns3 { from { transform: scale(1.12) translate(-2%,0%); } to { transform: scale(1.05) translate(1%,-1%); } } @keyframes cursorBlink { 0%,100% { opacity:1; } 50% { opacity:0; } } @keyframes heartPop { 0% { transform: scale(1); } 15% { transform: scale(1.35); } 30% { transform: scale(0.9); } 45% { transform: scale(1.15); } 60% { transform: scale(0.97); } 75% { transform: scale(1.05); } 100% { transform: scale(1); } } @keyframes heartParticles { 0% { opacity: 1; transform: scale(0.5); } 50% { opacity: 0.8; } 100% { opacity: 0; transform: scale(2.5); } } .like-btn-pop { animation: heartPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; } .like-btn-particles::after { content: ""; position: absolute; inset: -8px; border-radius: 50%; background: radial-gradient(circle, var(--brand) 0%, transparent 70%); animation: heartParticles 0.5s ease-out forwards; pointer-events: none; z-index: -1; } .nav-press-btn:active { top: 4px !important; box-shadow: 0 1px 0 #0a0a0a, 0 0px 2px rgba(0,0,0,0.1) !important; } .haptic-switch { position:fixed; top:-9999px; left:-9999px; opacity:0; pointer-events:none; }';
+  s.textContent = '@keyframes cardFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes hoodBubble0 { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-4px,2px)} 50%{transform:translate(3px,-1px)} 75%{transform:translate(-2px,-2px)} } @keyframes hoodBubble1 { 0%,100%{transform:translate(0,0)} 20%{transform:translate(3px,-3px)} 55%{transform:translate(-3px,2px)} 80%{transform:translate(2px,1px)} } @keyframes hoodBubble2 { 0%,100%{transform:translate(0,0)} 30%{transform:translate(-3px,-2px)} 60%{transform:translate(4px,1px)} 85%{transform:translate(-1px,3px)} } @keyframes hoodBubble3 { 0%,100%{transform:translate(0,0)} 35%{transform:translate(2px,3px)} 65%{transform:translate(-4px,-1px)} 90%{transform:translate(3px,-2px)} } @keyframes hoodBubble4 { 0%,100%{transform:translate(0,0)} 15%{transform:translate(-2px,-3px)} 45%{transform:translate(3px,2px)} 70%{transform:translate(-3px,1px)} } @keyframes hoodBubble5 { 0%,100%{transform:translate(0,0)} 40%{transform:translate(4px,-2px)} 70%{transform:translate(-2px,3px)} 85%{transform:translate(1px,-1px)} } @keyframes ptrSweep { 0%{background-position:-200% center} 100%{background-position:200% center} } @keyframes ptrDots { 0%,80%,100%{transform:scale(0.6);opacity:0.3} 40%{transform:scale(1);opacity:1} } @keyframes kenBurns0 { from { transform: scale(1.05) translate(0%,0%); } to { transform: scale(1.18) translate(-2%,-1%); } } @keyframes kenBurns1 { from { transform: scale(1.1) translate(-1%,1%); } to { transform: scale(1.2) translate(2%,-2%); } } @keyframes kenBurns2 { from { transform: scale(1.08) translate(1%,-1%); } to { transform: scale(1.18) translate(-1%,2%); } } @keyframes kenBurns3 { from { transform: scale(1.12) translate(-2%,0%); } to { transform: scale(1.05) translate(1%,-1%); } } @keyframes cursorBlink { 0%,100% { opacity:1; } 50% { opacity:0; } } @keyframes reminderSlideIn { from { opacity: 0; transform: translateY(-8px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } } @keyframes heartPop { 0% { transform: scale(1); } 15% { transform: scale(1.35); } 30% { transform: scale(0.9); } 45% { transform: scale(1.15); } 60% { transform: scale(0.97); } 75% { transform: scale(1.05); } 100% { transform: scale(1); } } @keyframes heartParticles { 0% { opacity: 1; transform: scale(0.5); } 50% { opacity: 0.8; } 100% { opacity: 0; transform: scale(2.5); } } .like-btn-pop { animation: heartPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; } .like-btn-particles::after { content: ""; position: absolute; inset: -8px; border-radius: 50%; background: radial-gradient(circle, var(--brand) 0%, transparent 70%); animation: heartParticles 0.5s ease-out forwards; pointer-events: none; z-index: -1; } .nav-press-btn:active { top: 4px !important; box-shadow: 0 1px 0 #0a0a0a, 0 0px 2px rgba(0,0,0,0.1) !important; } .haptic-switch { position:fixed; top:-9999px; left:-9999px; opacity:0; pointer-events:none; }';
   document.head.appendChild(s);
 }
 
@@ -3820,66 +3820,218 @@ const eventMatchesInterests = (event: TMEvent, interests: string[]) =>
     (event.classifications?.[0]?.segment?.name || '').toLowerCase().includes(g)
   ));
 
-// ─── Wishlist localStorage helpers ────────────────────────────────────────────
-const getWishlist = (): { id: string; name: string; type: string; category: string }[] => {
+// ─── Wishlist localStorage helpers (with reminder support) ────────────────────
+interface WishlistItem {
+  id: string;
+  name: string;
+  type: string;
+  category: string;
+  eventDate?: string;       // ISO date string of the event
+  reminderDays?: number;    // days before event to remind (0 = none)
+  reminderSent?: boolean;   // whether reminder was already triggered
+}
+const getWishlist = (): WishlistItem[] => {
   try { return JSON.parse(localStorage.getItem('abq_wishlist') || '[]'); }
   catch { return []; }
 };
-const saveWishlist = (items: { id: string; name: string; type: string; category: string }[]) => {
+const saveWishlist = (items: WishlistItem[]) => {
   localStorage.setItem('abq_wishlist', JSON.stringify(items));
   window.dispatchEvent(new Event('abq_wishlist_changed'));
 };
-const toggleWishlist = (item: { id: string; name: string; type: string; category: string }) => {
+const toggleWishlist = (item: WishlistItem) => {
   const current = getWishlist();
   const exists = current.some(w => w.id === item.id);
   trackEvent(exists ? 'wishlist_remove' : 'wishlist_add', { item_id: item.id, name: item.name, type: item.type });
   saveWishlist(exists ? current.filter(w => w.id !== item.id) : [...current, item]);
 };
+const setWishlistReminder = (id: string, reminderDays: number) => {
+  const items = getWishlist();
+  const idx = items.findIndex(w => w.id === id);
+  if (idx >= 0) {
+    items[idx].reminderDays = reminderDays;
+    items[idx].reminderSent = false;
+    saveWishlist(items);
+  }
+};
 const isWishlisted = (id: string) => getWishlist().some(w => w.id === id);
+const getWishlistItem = (id: string) => getWishlist().find(w => w.id === id);
 
-// ─── Animated Like Button ────────────────────────────────────────────────────
-function LikeButton({ id, type, name, category }: { id: string; type: 'event' | 'place'; name: string; category: string }) {
+// Sync reminder to server for background push notifications
+async function syncReminderToServer(eventId: string, eventName: string, eventDate: string, reminderDays: number) {
+  try {
+    const reg = await navigator.serviceWorker?.ready;
+    const sub = await reg?.pushManager?.getSubscription();
+    if (!sub) return; // No push subscription — can't send server push
+    if (reminderDays === 0) {
+      // Remove server-side reminder
+      fetch('/api/save-reminder', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ endpoint: sub.endpoint, eventId }),
+      }).catch(() => {});
+    } else {
+      fetch('/api/save-reminder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ endpoint: sub.endpoint, eventId, eventName, eventDate, reminderDays }),
+      }).catch(() => {});
+    }
+  } catch {}
+}
+
+// ─── Animated Like Button with Reminder Picker ──────────────────────────────
+const REMINDER_OPTIONS = [
+  { days: 0, label: 'No reminder' },
+  { days: 1, label: '1 day before' },
+  { days: 3, label: '3 days before' },
+  { days: 7, label: '1 week before' },
+];
+
+function LikeButton({ id, type, name, category, eventDate }: { id: string; type: 'event' | 'place'; name: string; category: string; eventDate?: string }) {
   const liked = isWishlisted(id);
   const [animating, setAnimating] = React.useState(false);
+  const [showReminder, setShowReminder] = React.useState(false);
+  const [selectedReminder, setSelectedReminder] = React.useState(() => {
+    const item = getWishlistItem(id);
+    return item?.reminderDays ?? 3;
+  });
   const prevLiked = React.useRef(liked);
+  const pickerRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     if (liked && !prevLiked.current) {
       setAnimating(true);
+      // Show reminder picker when liking an event (not a place)
+      if (type === 'event' && eventDate) {
+        setTimeout(() => setShowReminder(true), 400);
+      }
       const t = setTimeout(() => setAnimating(false), 550);
       return () => clearTimeout(t);
     }
     prevLiked.current = liked;
-  }, [liked]);
+  }, [liked, type, eventDate]);
+
+  // Close picker on outside click
+  React.useEffect(() => {
+    if (!showReminder) return;
+    const handler = (e: MouseEvent) => {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+        setShowReminder(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    // Auto-close after 8 seconds
+    const autoClose = setTimeout(() => setShowReminder(false), 8000);
+    return () => { document.removeEventListener('mousedown', handler); clearTimeout(autoClose); };
+  }, [showReminder]);
+
+  const handleReminderSelect = (days: number) => {
+    setSelectedReminder(days);
+    setWishlistReminder(id, days);
+    setShowReminder(false);
+    if (days > 0) {
+      trackEvent('reminder_set', { item_id: id, name, days });
+    }
+    // Sync to server for background push
+    if (eventDate) syncReminderToServer(id, name, eventDate, days);
+  };
 
   return (
-    <button
-      className={animating ? 'like-btn-pop like-btn-particles' : ''}
-      style={{
-        position: 'absolute', top: 8, right: 8, zIndex: 10,
-        background: liked ? 'var(--brand)' : 'rgba(255,255,255,0.90)',
-        border: 'none', borderRadius: '50%', width: 44, height: 44, minHeight: 0,
-        color: liked ? 'white' : 'var(--brand)', fontSize: 16, cursor: 'pointer',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-        transition: 'background 0.2s ease, color 0.2s ease',
-      }}
-      onClick={(e) => {
-        e.stopPropagation();
-        toggleWishlist({ id, type, name, category });
-      }}
-    >
-      <span
-        className="material-symbols-outlined"
+    <>
+      <button
+        className={animating ? 'like-btn-pop like-btn-particles' : ''}
         style={{
-          fontSize: '18px',
-          fontVariationSettings: liked ? "'FILL' 1, 'wght' 700" : "'FILL' 0, 'wght' 400",
-          transition: 'font-variation-settings 0.2s ease',
+          position: 'absolute', top: 8, right: 8, zIndex: 10,
+          background: liked ? 'var(--brand)' : 'rgba(255,255,255,0.90)',
+          border: 'none', borderRadius: '50%', width: 44, height: 44, minHeight: 0,
+          color: liked ? 'white' : 'var(--brand)', fontSize: 16, cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+          transition: 'background 0.2s ease, color 0.2s ease',
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (liked && type === 'event' && eventDate) {
+            // If already liked, toggle reminder picker
+            setShowReminder(s => !s);
+          } else if (liked) {
+            toggleWishlist({ id, type, name, category, eventDate });
+          } else {
+            toggleWishlist({ id, type, name, category, eventDate, reminderDays: 3 });
+            // Sync default 3-day reminder to server
+            if (eventDate) syncReminderToServer(id, name, eventDate, 3);
+          }
+        }}
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          // Double-click always unlikes
+          if (liked) toggleWishlist({ id, type, name, category, eventDate });
         }}
       >
-        favorite
-      </span>
-    </button>
+        <span
+          className="material-symbols-outlined"
+          style={{
+            fontSize: '18px',
+            fontVariationSettings: liked ? "'FILL' 1, 'wght' 700" : "'FILL' 0, 'wght' 400",
+            transition: 'font-variation-settings 0.2s ease',
+          }}
+        >
+          favorite
+        </span>
+      </button>
+
+      {/* Reminder Day Picker Popup */}
+      {showReminder && (
+        <div
+          ref={pickerRef}
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            position: 'absolute', top: 56, right: 4, zIndex: 20,
+            background: 'white', borderRadius: 12, padding: '12px 4px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08)',
+            minWidth: 180, fontFamily: 'Public Sans, sans-serif',
+            animation: 'reminderSlideIn 0.2s ease-out',
+          }}
+        >
+          <p style={{ fontSize: 11, fontWeight: 700, color: '#999', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 10px 8px', margin: 0 }}>
+            Remind me
+          </p>
+          {REMINDER_OPTIONS.map(opt => (
+            <button
+              key={opt.days}
+              onClick={() => handleReminderSelect(opt.days)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+                padding: '8px 10px', border: 'none', borderRadius: 8,
+                background: selectedReminder === opt.days ? 'var(--brand)' : 'transparent',
+                color: selectedReminder === opt.days ? 'white' : '#333',
+                cursor: 'pointer', fontSize: 13, fontWeight: selectedReminder === opt.days ? 700 : 500,
+                fontFamily: 'Public Sans, sans-serif', transition: 'all 0.15s',
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 16, fontVariationSettings: "'FILL' 1" }}>
+                {opt.days === 0 ? 'notifications_off' : 'notifications_active'}
+              </span>
+              {opt.label}
+            </button>
+          ))}
+          <div style={{ padding: '8px 10px 0', borderTop: '1px solid #f0f0f0', marginTop: 4 }}>
+            <button
+              onClick={() => { toggleWishlist({ id, type, name, category, eventDate }); setShowReminder(false); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+                padding: '8px 0', border: 'none', background: 'none',
+                color: '#c62828', cursor: 'pointer', fontSize: 13, fontWeight: 600,
+                fontFamily: 'Public Sans, sans-serif',
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>heart_minus</span>
+              Remove from saved
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -5637,7 +5789,7 @@ function EventsScreen({
                               {count} shows
                             </div>
                           )}
-                          <LikeButton id={event.id} type="event" name={event.name} category={getEventCategory(event)} />
+                          <LikeButton id={event.id} type="event" name={event.name} category={getEventCategory(event)} eventDate={event.dates?.start?.localDate} />
                         </div>
                       );
                     })}
@@ -6501,6 +6653,212 @@ function NotificationSettingsPane() {
   );
 }
 
+
+
+// ─── Event Reminder Checker ──────────────────────────────────────────────────
+function checkEventReminders() {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const items = getWishlist();
+  const now = new Date();
+  const todayStr = now.toISOString().split('T')[0];
+  let changed = false;
+
+  items.forEach(item => {
+    if (item.type !== 'event' || !item.eventDate || !item.reminderDays || item.reminderDays === 0 || item.reminderSent) return;
+
+    const eventDate = new Date(item.eventDate);
+    const reminderDate = new Date(eventDate);
+    reminderDate.setDate(reminderDate.getDate() - item.reminderDays);
+    const reminderDateStr = reminderDate.toISOString().split('T')[0];
+
+    if (todayStr >= reminderDateStr && todayStr <= item.eventDate) {
+      // Time to send reminder!
+      const daysUntil = Math.ceil((eventDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      const dayText = daysUntil === 0 ? 'today' : daysUntil === 1 ? 'tomorrow' : `in ${daysUntil} days`;
+
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.ready.then(reg => {
+          reg.showNotification(`\u2764\uFE0F ${item.name} is ${dayText}!`, {
+            body: `Your saved event is coming up ${dayText}. Tap to see details.`,
+            tag: `abq-reminder-${item.id}`,
+            icon: '/icons/icon-192.png',
+            badge: '/icons/icon-192.png',
+            vibrate: [100, 50, 100],
+            data: { url: `/#event/${item.id}` },
+          });
+        });
+      } else {
+        new Notification(`\u2764\uFE0F ${item.name} is ${dayText}!`, {
+          body: `Your saved event is coming up ${dayText}. Tap to see details.`,
+          tag: `abq-reminder-${item.id}`,
+          icon: '/icons/icon-192.png',
+        });
+      }
+
+      item.reminderSent = true;
+      changed = true;
+    }
+  });
+
+  if (changed) saveWishlist(items);
+}
+// ─── User Color Picker Component ──────────────────────────────────────────────
+const USER_THEME_KEY = 'abq_user_theme';
+const USER_ACCENT_PRESETS = [
+  { name: 'Terracotta',   color: '#C2634A', light: '#D4845E' },
+  { name: 'Desert Sage',  color: '#6B8F71', light: '#8AAD87' },
+  { name: 'Turquoise',    color: '#2B9EB3', light: '#45C4D6' },
+  { name: 'Sunset',       color: '#E07C3E', light: '#F0A060' },
+  { name: 'Lavender',     color: '#7B68AE', light: '#9B87CE' },
+  { name: 'Rio Grande',   color: '#2D6A4F', light: '#52B788' },
+  { name: 'Chile Red',    color: '#C62828', light: '#EF5350' },
+  { name: 'Sandia Pink',  color: '#D4649A', light: '#E890B6' },
+  { name: 'Mesa Gold',    color: '#B8860B', light: '#DAA520' },
+  { name: 'Adobe Brown',  color: '#8D6E63', light: '#A1887F' },
+];
+
+function applyUserTheme(brand: string, brandLight: string) {
+  const root = document.documentElement;
+  root.style.setProperty('--brand', brand);
+  root.style.setProperty('--brand-light', brandLight);
+  root.style.setProperty('--brand-gradient', `linear-gradient(135deg, ${brand} 0%, ${brandLight} 100%)`);
+  root.style.setProperty('--brand-bg-subtle', brand + '1a');
+  root.style.setProperty('--brand-ring-color', brand);
+  root.style.setProperty('--brand-tint-bg', brand + '26');
+  root.style.setProperty('--brand-tint-border', brand + '80');
+}
+
+function loadUserTheme(): { brand: string; brandLight: string } | null {
+  try {
+    const raw = localStorage.getItem(USER_THEME_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+function saveUserTheme(brand: string, brandLight: string) {
+  localStorage.setItem(USER_THEME_KEY, JSON.stringify({ brand, brandLight }));
+}
+
+function clearUserTheme() {
+  localStorage.removeItem(USER_THEME_KEY);
+}
+
+function UserColorPicker() {
+  const [selectedColor, setSelectedColor] = useState(() => {
+    const saved = loadUserTheme();
+    return saved?.brand || '';
+  });
+  const [customColor, setCustomColor] = useState(() => {
+    const saved = loadUserTheme();
+    const isPreset = USER_ACCENT_PRESETS.some(p => p.color === saved?.brand);
+    return (!isPreset && saved?.brand) ? saved.brand : '#C2634A';
+  });
+  const [showCustom, setShowCustom] = useState(() => {
+    const saved = loadUserTheme();
+    return saved ? !USER_ACCENT_PRESETS.some(p => p.color === saved.brand) : false;
+  });
+
+  const handlePreset = (preset: typeof USER_ACCENT_PRESETS[0]) => {
+    setSelectedColor(preset.color);
+    setShowCustom(false);
+    saveUserTheme(preset.color, preset.light);
+    applyUserTheme(preset.color, preset.light);
+  };
+
+  const handleCustom = (hex: string) => {
+    setCustomColor(hex);
+    setSelectedColor(hex);
+    // Generate a lighter variant by blending with white
+    const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+    const lr = Math.min(255, r + Math.round((255 - r) * 0.35));
+    const lg = Math.min(255, g + Math.round((255 - g) * 0.35));
+    const lb = Math.min(255, b + Math.round((255 - b) * 0.35));
+    const light = `#${lr.toString(16).padStart(2,'0')}${lg.toString(16).padStart(2,'0')}${lb.toString(16).padStart(2,'0')}`;
+    saveUserTheme(hex, light);
+    applyUserTheme(hex, light);
+  };
+
+  const handleReset = () => {
+    setSelectedColor('');
+    setShowCustom(false);
+    clearUserTheme();
+    // Reload admin theme or defaults
+    const root = document.documentElement;
+    root.style.removeProperty('--brand');
+    root.style.removeProperty('--brand-light');
+    root.style.removeProperty('--brand-gradient');
+    root.style.removeProperty('--brand-bg-subtle');
+    root.style.removeProperty('--brand-ring-color');
+    root.style.removeProperty('--brand-tint-bg');
+    root.style.removeProperty('--brand-tint-border');
+    window.location.reload();
+  };
+
+  return (
+    <div>
+      <div className="flex flex-wrap gap-2 mb-3">
+        {USER_ACCENT_PRESETS.map(preset => (
+          <button
+            key={preset.color}
+            onClick={() => handlePreset(preset)}
+            title={preset.name}
+            style={{
+              width: 36, height: 36, borderRadius: '50%',
+              background: `linear-gradient(135deg, ${preset.color}, ${preset.light})`,
+              border: selectedColor === preset.color ? '3px solid #222' : '3px solid transparent',
+              outline: selectedColor === preset.color ? '2px solid white' : 'none',
+              cursor: 'pointer', transition: 'all 0.15s ease',
+              boxShadow: selectedColor === preset.color ? '0 2px 8px rgba(0,0,0,0.25)' : '0 1px 3px rgba(0,0,0,0.1)',
+            }}
+          />
+        ))}
+        {/* Custom color button */}
+        <button
+          onClick={() => setShowCustom(s => !s)}
+          title="Custom color"
+          style={{
+            width: 36, height: 36, borderRadius: '50%',
+            background: showCustom ? `conic-gradient(red, yellow, lime, aqua, blue, magenta, red)` : '#e5e7eb',
+            border: showCustom ? '3px solid #222' : '3px solid transparent',
+            outline: showCustom ? '2px solid white' : 'none',
+            cursor: 'pointer', transition: 'all 0.15s ease',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '14px', color: showCustom ? 'white' : '#999',
+          }}
+        >
+          {!showCustom && <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>palette</span>}
+        </button>
+      </div>
+
+      {showCustom && (
+        <div className="flex items-center gap-3 mb-3 p-3 rounded-lg" style={{ background: '#f9fafb' }}>
+          <input
+            type="color"
+            value={customColor}
+            onChange={e => handleCustom(e.target.value)}
+            style={{ width: 44, height: 36, border: 'none', borderRadius: 8, cursor: 'pointer', padding: 0, background: 'none' }}
+          />
+          <div className="flex-1">
+            <p className="text-xs font-bold text-gray-600" style={{ fontFamily: 'Public Sans, sans-serif' }}>Custom Color</p>
+            <p className="text-xs text-gray-400 font-mono">{customColor}</p>
+          </div>
+          <div className="w-20 h-8 rounded-lg" style={{ background: `linear-gradient(135deg, ${customColor}, ${customColor}88)` }} />
+        </div>
+      )}
+
+      {selectedColor && (
+        <button
+          onClick={handleReset}
+          className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+          style={{ fontFamily: 'Public Sans, sans-serif', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0' }}
+        >
+          Reset to default colors
+        </button>
+      )}
+    </div>
+  );
+}
+
 function ProfileSettingsPane({ user, onUsernameChange, onSignIn, isDark, onToggleDark }: { user: User | null; onUsernameChange?: (name: string) => void; onSignIn?: () => void; isDark?: boolean; onToggleDark?: () => void }) {
   const [prefs, setPrefs] = useState<UserPrefs>(getPrefs);
   const [open, setOpen] = useState(false);
@@ -6568,7 +6926,7 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn, isDark, onToggl
       {open && (
         <div className="mt-2 flex flex-col gap-3">
 
-          {/* Appearance — Dark Mode toggle */}
+          {/* Appearance — Dark Mode + Color Scheme */}
           <div className="bg-white rounded-lg p-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3" style={{ fontFamily: 'Public Sans, sans-serif' }}>Appearance</p>
             <button onClick={onToggleDark} className="flex items-center justify-between w-full">
@@ -6580,6 +6938,13 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn, isDark, onToggl
                 <div className="w-5 h-5 bg-white rounded-full shadow transition-transform" style={{ transform: isDark ? 'translateX(20px)' : 'translateX(0)' }} />
               </div>
             </button>
+
+            {/* Accent Color Picker */}
+            <div className="mt-4 pt-3" style={{ borderTop: '1px solid #f0f0f0' }}>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2" style={{ fontFamily: 'Public Sans, sans-serif' }}>Accent Color</p>
+              <p className="text-xs text-gray-400 mb-3" style={{ fontFamily: 'Public Sans, sans-serif' }}>Choose a color that makes ABQ Unplugged yours</p>
+              <UserColorPicker />
+            </div>
           </div>
 
           {/* Username */}
@@ -10538,6 +10903,11 @@ export default function App() {
           root.style.setProperty('--brand-tint-bg', t.accent + '26');
           root.style.setProperty('--brand-tint-border', t.accent + '80');
         }
+      })
+      .then(() => {
+        // Apply user's personal color preference (overrides admin theme)
+        const userTheme = loadUserTheme();
+        if (userTheme) applyUserTheme(userTheme.brand, userTheme.brandLight);
       });
   }, []);
 

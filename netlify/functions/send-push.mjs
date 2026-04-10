@@ -142,6 +142,81 @@ async function sendToSubscriber(sub, payload) {
   }
 }
 
+// ── Event Reminder Processing ──────────────────────────────────────────────
+async function fetchDueReminders(dateStr) {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/event_reminders?remind_on_date=lte.${dateStr}&sent=eq.false&select=*`,
+    {
+      headers: {
+        'apikey': SUPABASE_SERVICE,
+        'Authorization': `Bearer ${SUPABASE_SERVICE}`,
+      },
+    }
+  );
+  if (!res.ok) { console.error('[reminders] fetch error:', res.status); return []; }
+  return res.json();
+}
+
+async function markReminderSent(endpoint, eventId) {
+  await fetch(
+    `${SUPABASE_URL}/rest/v1/event_reminders?endpoint=eq.${encodeURIComponent(endpoint)}&event_id=eq.${encodeURIComponent(eventId)}`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_SERVICE,
+        'Authorization': `Bearer ${SUPABASE_SERVICE}`,
+      },
+      body: JSON.stringify({ sent: true }),
+    }
+  );
+}
+
+async function processEventReminders(todayStr) {
+  const reminders = await fetchDueReminders(todayStr);
+  if (!reminders.length) return 0;
+
+  console.log(`[reminders] ${reminders.length} due reminders found`);
+  let sent = 0;
+
+  for (const rem of reminders) {
+    const eventDate = new Date(rem.event_date);
+    const now = new Date();
+    const daysUntil = Math.ceil((eventDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const dayText = daysUntil === 0 ? 'today' : daysUntil === 1 ? 'tomorrow' : 'in ' + daysUntil + ' days';
+
+    const subRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/push_subscriptions?endpoint=eq.${encodeURIComponent(rem.endpoint)}&select=endpoint,p256dh,auth`,
+      {
+        headers: {
+          'apikey': SUPABASE_SERVICE,
+          'Authorization': `Bearer ${SUPABASE_SERVICE}`,
+        },
+      }
+    );
+    const subs = await subRes.json();
+    if (!subs.length) {
+      await markReminderSent(rem.endpoint, rem.event_id);
+      continue;
+    }
+
+    const sub = subs[0];
+    const payload = {
+      title: '\u2764\uFE0F ' + rem.event_name + ' is ' + dayText + '!',
+      body: 'Your saved event is coming up ' + dayText + '. Tap to see details.',
+      tag: 'abq-reminder-' + rem.event_id,
+      data: { url: '/#event/' + rem.event_id },
+    };
+
+    const ok = await sendToSubscriber(sub, payload);
+    if (ok) sent++;
+    await markReminderSent(rem.endpoint, rem.event_id);
+  }
+
+  console.log('[reminders] Sent ' + sent + '/' + reminders.length + ' reminder notifications');
+  return sent;
+}
+
 export default async function handler() {
   if (!VAPID_PUBLIC || !VAPID_PRIVATE) {
     console.error('[send-push] Missing VAPID keys');
@@ -171,9 +246,20 @@ export default async function handler() {
   if (dow === 1 && hour === 8)             notifType = 'categories'; // Mon 8am
   if ((dow === 5 || dow === 6) && hour === 9) notifType = 'free';   // Fri/Sat 9am
 
+  // ── Always check event reminders regardless of notification schedule ────
+  let remindersSent = 0;
+  try {
+    remindersSent = await processEventReminders(today);
+  } catch (err) {
+    console.error('[send-push] Event reminder error:', err);
+  }
+
   if (!notifType) {
-    console.log('[send-push] No notification scheduled this hour');
-    return new Response('No notification this hour', { status: 200 });
+    console.log(`[send-push] No scheduled notification this hour (reminders sent: ${remindersSent})`);
+    return new Response(JSON.stringify({ scheduled: null, remindersSent }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   const subs = await fetchSubscriptions();
@@ -236,7 +322,7 @@ export default async function handler() {
   }
 
   console.log(`[send-push] Done: sent=${sent} skipped=${skipped} failed=${failed}`);
-  return new Response(JSON.stringify({ sent, skipped, failed }), {
+  return new Response(JSON.stringify({ sent, skipped, failed, remindersSent }), {
     status: 200,
     headers: { 'Content-Type': 'application/json' },
   });
