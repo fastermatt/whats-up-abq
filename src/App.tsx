@@ -5552,11 +5552,7 @@ function EventsScreen({
       const key = norm(e.name) + '|' + (e.dates?.start?.localDate || '') + '|' + (e._embedded?.venues?.[0]?.name || '');
       if (usedKeys.has(key)) return false;
       usedKeys.add(key);
-      // Hide events with no real photos — they look broken in the feed
-      // Only count non-fallback images with actual URLs
-      const imgs = e.images ?? [];
-      const realPhotos = imgs.filter(img => !img.fallback && img.url && img.url.length > 10);
-      if (realPhotos.length === 0) return false;
+      // Show all events — those without photos get a category icon fallback
       return true;
     });
     return { deduped, showtimeCounts: seen };
@@ -11137,15 +11133,18 @@ export default function App() {
               urls.add(url);
             }
             // If the new event has better priority (lower number), swap the base card
-            // but keep the merged ticketLinks
+            // but keep the merged ticketLinks AND preserve the best images
             if (getPriority(ev) < getPriority(existing)) {
               const mergedLinks = existing.ticketLinks || [];
               const mergedId = existing.id; // keep original ID for consistency
+              const bestImages = (existing.images?.length ? existing.images : ev.images) || [];
               Object.assign(existing, ev);
               existing.ticketLinks = mergedLinks;
               existing.id = mergedId;
+              // Restore best images — prefer whichever had real images
+              if (bestImages.length > 0) existing.images = bestImages;
             }
-            // If the new event has images and the existing doesn't, take them
+            // If the existing still has no images and the new event does, take them
             if ((!existing.images || existing.images.length === 0) && ev.images?.length) {
               existing.images = ev.images;
             }
