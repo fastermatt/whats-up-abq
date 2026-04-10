@@ -11103,7 +11103,7 @@ export default function App() {
           sourcePriority[(ev._source || '').toLowerCase()] ?? 99;
 
         const allRaw: TMEvent[] = [
-          ...tmEvents, ...sgEvents, ...ebEvents,
+          ...tmEvents, ...sgEvents,
           ...bitEvents, ...muEvents, ...localDbEvents,
         ];
 
