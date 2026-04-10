@@ -1944,7 +1944,7 @@ function PlaceDetailModal({
             onClick={onClose}
             aria-label="Close"
             className="w-10 h-10 flex items-center justify-center shrink-0"
-            style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%', aspectRatio: '1' }}
+            style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%', aspectRatio: '1', minHeight: 'unset' }}
           >
             <span className="material-symbols-outlined text-white" style={{ fontSize: '22px' }}>close</span>
           </button>
@@ -1953,7 +1953,7 @@ function PlaceDetailModal({
               <button
                 onClick={onToggleSave}
                 className="w-10 h-10 flex items-center justify-center shrink-0"
-                style={{ background: isSaved ? 'var(--brand)' : 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%', aspectRatio: '1' }}
+                style={{ background: isSaved ? 'var(--brand)' : 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%', aspectRatio: '1', minHeight: 'unset' }}
                 title={isSaved ? 'Remove from plan' : 'Save to plan'}
               >
                 <span className="material-symbols-outlined text-white" style={{ fontSize: '20px', fontVariationSettings: isSaved ? "'FILL' 1" : "'FILL' 0" }}>bookmark</span>
@@ -1970,14 +1970,14 @@ function PlaceDetailModal({
                 try { await navigator.clipboard.writeText(shareUrl); setShared(true); setTimeout(() => setShared(false), 2000); } catch { /* ignore */ }
               }}
               className="w-10 h-10 flex items-center justify-center shrink-0"
-              style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%', aspectRatio: '1' }}
+              style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%', aspectRatio: '1', minHeight: 'unset' }}
             >
               <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>{shared ? 'check' : 'share'}</span>
             </button>
             <button
               onClick={() => setShowShareCard(true)}
               className="w-10 h-10 flex items-center justify-center shrink-0"
-              style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%', aspectRatio: '1' }}
+              style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%', aspectRatio: '1', minHeight: 'unset' }}
               title="Create Instagram card"
             >
               <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>photo_camera</span>
@@ -3177,7 +3177,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
             onClick={onClose}
             aria-label="Close"
             className="w-10 h-10 flex items-center justify-center shrink-0"
-            style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%', aspectRatio: '1' }}
+            style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%', aspectRatio: '1', minHeight: 'unset' }}
           >
             <span className="material-symbols-outlined text-white" style={{ fontSize: '22px' }}>close</span>
           </button>
@@ -3186,7 +3186,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
               <button
                 onClick={onToggleSave}
                 className="w-10 h-10 flex items-center justify-center shrink-0"
-                style={{ background: isSaved ? 'var(--brand)' : 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%', aspectRatio: '1' }}
+                style={{ background: isSaved ? 'var(--brand)' : 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%', aspectRatio: '1', minHeight: 'unset' }}
                 title={isSaved ? 'Remove from plan' : 'Save to plan'}
               >
                 <span className="material-symbols-outlined text-white" style={{ fontSize: '20px', fontVariationSettings: isSaved ? "'FILL' 1" : "'FILL' 0" }}>bookmark</span>
@@ -3195,7 +3195,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
             <button
               onClick={async () => { await shareEvent(event); setShared(true); setTimeout(() => setShared(false), 2000); }}
               className="w-10 h-10 flex items-center justify-center shrink-0"
-              style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%', aspectRatio: '1' }}
+              style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%', aspectRatio: '1', minHeight: 'unset' }}
             >
               <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>
                 {shared ? 'check' : 'share'}
@@ -3204,7 +3204,7 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
             <button
               onClick={() => setShowShareCard(true)}
               className="w-10 h-10 flex items-center justify-center shrink-0"
-              style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%', aspectRatio: '1' }}
+              style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%', aspectRatio: '1', minHeight: 'unset' }}
               title="Create Instagram card"
             >
               <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>photo_camera</span>
@@ -6867,7 +6867,7 @@ function UserColorPicker() {
             onClick={() => handlePreset(preset)}
             title={preset.name}
             style={{
-              width: 36, height: 36, borderRadius: '50%', aspectRatio: '1', flexShrink: 0,
+              width: 36, height: 36, minHeight: 36, borderRadius: '50%', aspectRatio: '1', flexShrink: 0,
               background: `linear-gradient(135deg, ${preset.color}, ${preset.light})`,
               border: selectedColor === preset.color ? '3px solid #222' : '3px solid transparent',
               outline: selectedColor === preset.color ? '2px solid white' : 'none',
@@ -6881,7 +6881,7 @@ function UserColorPicker() {
           onClick={() => setShowCustom(s => !s)}
           title="Custom color"
           style={{
-            width: 36, height: 36, borderRadius: '50%', aspectRatio: '1', flexShrink: 0,
+            width: 36, height: 36, minHeight: 36, borderRadius: '50%', aspectRatio: '1', flexShrink: 0,
             background: showCustom ? `conic-gradient(red, yellow, lime, aqua, blue, magenta, red)` : '#e5e7eb',
             border: showCustom ? '3px solid #222' : '3px solid transparent',
             outline: showCustom ? '2px solid white' : 'none',
