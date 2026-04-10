@@ -1480,29 +1480,6 @@ function EventCardImageSlider({ event }: { event: TMEvent }) {
 
   const initialPhotos = useMemo(() => {
     const imgs = event.images ?? [];
-    // DEBUG: aggregate image stats across all events
-    if (!(window as any).__imgStats) (window as any).__imgStats = { total: 0, withImg: 0, noImg: 0, noImgSources: {} as Record<string, number>, sampleNoImg: [] as string[] };
-    const _s = (window as any).__imgStats;
-    _s.total++;
-    if (imgs.length > 0) {
-      _s.withImg++;
-      // DEBUG: check if the filter chain produces valid URLs
-      const _nonFb = imgs.filter((img: any) => !img.fallback);
-      const _pool = _nonFb.length > 0 ? _nonFb : imgs;
-      const _hasUrl = _pool.filter((img: any) => img.url && img.url.length > 5);
-      if (_hasUrl.length === 0 && !_s._urlMissingSamples) _s._urlMissingSamples = [];
-      if (_hasUrl.length === 0 && _s._urlMissingSamples.length < 5) {
-        _s._urlMissingSamples.push((event as any)._source + ':' + (event.name || '').substring(0, 30) + '|imgKeys:' + Object.keys(imgs[0] || {}).join(',') + '|val:' + JSON.stringify(imgs[0]).substring(0, 100));
-      }
-      if (!_s._urlMissingCount) _s._urlMissingCount = 0;
-      if (_hasUrl.length === 0) _s._urlMissingCount++;
-    }
-    else {
-      _s.noImg++;
-      const src = (event as any)._source || 'unknown';
-      _s.noImgSources[src] = (_s.noImgSources[src] || 0) + 1;
-      if (_s.sampleNoImg.length < 10) _s.sampleNoImg.push(src + ':' + (event.name || '').substring(0, 40));
-    }
     const nonFallback = imgs.filter(img => !img.fallback);
     const pool = nonFallback.length > 0 ? nonFallback : imgs;
     const seen = new Set<string>();
@@ -1514,12 +1491,6 @@ function EventCardImageSlider({ event }: { event: TMEvent }) {
   }, [event.images]);
 
   const [brokenUrls, setBrokenUrls] = useState<Set<string>>(new Set());
-  // DEBUG: log when images get marked broken
-  if (brokenUrls.size > 0 && !(window as any).__brokenLogCount) (window as any).__brokenLogCount = 0;
-  if (brokenUrls.size > 0 && (window as any).__brokenLogCount < 3) {
-    (window as any).__brokenLogCount++;
-    console.warn('[IMG_BROKEN]', event.name, '| broken count:', brokenUrls.size, '| sample:', [...brokenUrls][0]?.substring(0, 100));
-  }
   const allPhotos = initialPhotos.filter(url => !brokenUrls.has(url));
   const handleImgError = useCallback((url: string) => {
     setBrokenUrls(prev => { const n = new Set(prev); n.add(url); return n; });
@@ -11221,16 +11192,6 @@ export default function App() {
           if (ev.ticketLinks && ev.ticketLinks.some(l => l.url)) return true;
           return false;
         };
-
-        // DEBUG: check image presence across sources before final merge
-        const _dbg: Record<string, { total: number; withImg: number }> = {};
-        for (const ev of [...liveEvents, ...staticOnly]) {
-          const src = (ev as any)._source || 'static';
-          if (!_dbg[src]) _dbg[src] = { total: 0, withImg: 0 };
-          _dbg[src].total++;
-          if (ev.images && ev.images.length > 0) _dbg[src].withImg++;
-        }
-        console.warn('[EVENTS_IMG_DEBUG] Pre-filter image stats:', JSON.stringify(_dbg));
 
         const merged = [...liveEvents, ...staticOnly]
           .filter(isInMetro)
