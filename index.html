@@ -11,51 +11,66 @@
     <!-- Nav logo is above the fold on every page -->
     <link rel="preload" href="/logo-static.webp" as="image" type="image/webp" />
 
-    <!-- ─── Critical CSS: hide Material Symbols until font loads (prevents FOUT) ─── -->
-    <!-- Icons are invisible (not absent) during load — no layout shift, no text flash.    -->
-    <!-- JS below uses Font Loading API to reveal them once ready, with 2.5s fallback.     -->
+    <!-- ─── Self-hosted Material Symbols font (fixes iOS Safari font loading failure) ─── -->
     <style>
+      @font-face {
+        font-family: 'Material Symbols Outlined';
+        font-style: normal;
+        font-weight: 100 700;
+        font-display: block; /* block: invisible text while loading, never shows ligature text */
+        src: url('/fonts/MaterialSymbolsOutlined.woff2') format('woff2');
+      }
       .material-symbols-outlined {
         font-family: 'Material Symbols Outlined', sans-serif;
-        /* Hidden until .icons-ready is added to <html> by the script below */
-        visibility: hidden;
-        /* Keep the element in layout flow so nothing jumps when icons appear */
+        font-weight: normal;
+        font-style: normal;
+        font-size: 24px;
         display: inline-block;
         line-height: 1;
-        vertical-align: middle;
+        text-transform: none;
+        letter-spacing: normal;
+        word-wrap: normal;
+        white-space: nowrap;
+        direction: ltr;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        font-feature-settings: 'liga';
+        /* Hidden until font loads — prevents showing raw ligature text */
+        visibility: hidden;
       }
       .icons-ready .material-symbols-outlined {
         visibility: visible;
       }
     </style>
-    <!-- Reveal icons as soon as the font is confirmed loaded (or after 2.5s fallback) -->
+    <!-- Reveal icons once self-hosted font is confirmed loaded (or 3s fallback) -->
     <script>
       (function () {
         function revealIcons() {
           document.documentElement.classList.add('icons-ready');
         }
         if (typeof document.fonts !== 'undefined') {
-          // Already cached? Reveal immediately.
-          if (document.fonts.check('1em "Material Symbols Outlined"')) {
-            revealIcons();
-          } else {
-            document.fonts.load('1em "Material Symbols Outlined"').then(revealIcons, revealIcons);
-          }
+          // Wait for self-hosted font to actually load
+          document.fonts.ready.then(function() {
+            if (document.fonts.check('24px "Material Symbols Outlined"')) {
+              revealIcons();
+            } else {
+              // Font set is ready but our font isn't in it yet — try loading explicitly
+              document.fonts.load('24px "Material Symbols Outlined"').then(revealIcons, revealIcons);
+            }
+          });
         } else {
-          // No Font Loading API (old browsers) — reveal straight away
           revealIcons();
         }
-        // Safety net: always reveal after 2.5s so icons never stay invisible
-        setTimeout(revealIcons, 2500);
+        // Safety net — but 3s to give self-hosted font more time
+        setTimeout(revealIcons, 3000);
       })();
     </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&display=swap" />
-    <!-- display=swap: browser always loads the font; our visibility:hidden prevents text flash -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" as="style" crossorigin="anonymous" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
+    <!-- Material Symbols: self-hosted from /fonts/ — no CDN needed (fixes iOS Safari) -->
 
     <!-- ─── Viewport: viewport-fit=cover for iOS Dynamic Island / notch (Apple HIG) ─── -->
     <meta
