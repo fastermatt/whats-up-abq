@@ -548,8 +548,72 @@ function formatTime(timeStr?: string): string {
 }
 
 function getEventCategory(event: TMEvent): string {
-  const seg = event.classifications?.[0]?.segment?.name;
-  const gen = event.classifications?.[0]?.genre?.name;
+  const seg = (event.classifications?.[0]?.segment?.name || '').trim();
+  const gen = (event.classifications?.[0]?.genre?.name || '').trim();
+  const name = (event.name || '').toLowerCase();
+  const venue = (event._embedded?.venues?.[0]?.name || '').toLowerCase();
+
+  // ── Comedy: standalone comedians, improv, comedy clubs ──
+  if (seg === 'Comedy' || gen === 'Comedy' || seg === 'Theater & Comedy' ||
+      name.includes('comedy') || name.includes('stand-up') || name.includes('standup') ||
+      name.includes('improv') || name.includes('comedian') || name.includes('kill tony') ||
+      venue.includes('comedy') || venue.includes("hyena")) return 'Comedy';
+
+  // ── Movie: film screenings, cinema events ──
+  if (seg === 'Film' || gen === 'Film' ||
+      name.includes('movie') || name.includes('film') || name.includes('cinema') ||
+      name.includes('screening') || name.includes('drive-in') || name.includes('documentary') ||
+      venue.includes('cinema')) return 'Movie';
+
+  // ── Volunteer: food banks, cleanups, service ──
+  if (name.includes('volunteer') || name.includes('food bank') || name.includes('cleanup') ||
+      name.includes('habitat') || name.includes('blood drive') || name.includes('outreach') ||
+      event._source === 'volunteer') return 'Volunteer';
+
+  // ── Sports ──
+  if (seg === 'Sports') return 'Sports';
+
+  // ── Family ──
+  if (seg === 'Family' || gen === 'Family' ||
+      name.includes('storytime') || name.includes('story time') ||
+      name.includes('for kids') || name.includes('toddler') || name.includes('preschool') ||
+      name.includes('disney') || name.includes('paw patrol') || name.includes('pokemon'))
+    return 'Family';
+
+  // ── Theatre: Broadway tours, musicals, plays — NOT comedy, NOT film ──
+  if ((seg === 'Arts & Theatre' && (gen === 'Theatre' || gen === 'Musical' || gen === 'Dance')) ||
+      name.includes('(touring)') || name.includes('theatre') || name.includes('musical') ||
+      name.includes('ballet') || name.includes('nutcracker') || name.includes('swan lake'))
+    return 'Theatre';
+
+  // ── Arts: visual arts, crafts, galleries ──
+  if ((seg === 'Arts & Theatre' && gen !== 'Theatre' && gen !== 'Comedy' && gen !== 'Dance' && gen !== 'Musical') ||
+      name.includes('craft') || name.includes('pottery') || name.includes('painting') ||
+      name.includes('gallery') || name.includes('exhibit') || name.includes('museum') ||
+      name.includes('art show') || name.includes('art workshop'))
+    return 'Arts';
+
+  // ── Music: concerts, live music ──
+  if (seg === 'Music' || seg === 'Live Music' || gen === 'Live Music' ||
+      name.includes('concert') || name.includes('live music') || name.includes('open mic') ||
+      name.includes('live at ')) return 'Music';
+
+  // ── Outdoor ──
+  if (name.includes('hike') || name.includes('trail') || name.includes('nature walk') ||
+      name.includes('outdoor') || name.includes('kayak') || name.includes('stargaz') ||
+      name.includes('botanic')) return 'Outdoor';
+
+  // ── Community: festivals, markets, wellness, classes ──
+  if (seg === 'Community' || seg === 'Festival' ||
+      name.includes('festival') || name.includes('market') || name.includes('community') ||
+      name.includes('yoga') || name.includes('book club'))
+    return 'Community';
+
+  // ── Free events (if price is free and nothing else matched) ──
+  if (event.isFree || (event.priceRanges?.[0]?.min === 0 && event.priceRanges?.[0]?.max === 0))
+    return 'Free';
+
+  // Fallback: use segment or genre if valid
   const val = (seg && seg !== 'Undefined' ? seg : null) ||
               (gen && gen !== 'Undefined' ? gen : null);
   return val || 'Event';
@@ -4727,11 +4791,13 @@ function DiscoverScreen({
               { genre: 'Music',     icon: 'music',     color: '#8B3A0F' },
               { genre: 'Concerts',  icon: 'concert',   color: '#7C3AED' },
               { genre: 'Comedy',    icon: 'comedy',    color: '#B45309' },
+              { genre: 'Theatre',   icon: 'theatre',   color: '#4C1D95' },
               { genre: 'Arts',      icon: 'art',       color: '#7C2D12' },
               { genre: 'Sports',    icon: 'sports',    color: '#1D4ED8' },
               { genre: 'Family',    icon: 'family',    color: '#047857' },
               { genre: 'Outdoor',   icon: 'outdoor',   color: '#065F46' },
               { genre: 'Free',      icon: 'free',      color: '#0F766E' },
+              { genre: 'Community', icon: 'community', color: '#0E7490' },
               { genre: 'Volunteer', icon: 'volunteer', color: '#BE185D' },
               { genre: 'Movie',     icon: 'film',      color: '#1F2937' },
             ].map(({ genre, icon, color }) => (
@@ -5587,11 +5653,13 @@ function EventsScreen({
             { genre: 'Music',     icon: 'music',     color: '#8B3A0F' },
             { genre: 'Concerts',  icon: 'concert',   color: '#7C3AED' },
             { genre: 'Comedy',    icon: 'comedy',    color: '#B45309' },
+            { genre: 'Theatre',   icon: 'theatre',   color: '#4C1D95' },
             { genre: 'Arts',      icon: 'art',       color: '#7C2D12' },
             { genre: 'Sports',    icon: 'sports',    color: '#1D4ED8' },
             { genre: 'Family',    icon: 'family',    color: '#047857' },
             { genre: 'Outdoor',   icon: 'outdoor',   color: '#065F46' },
             { genre: 'Free',      icon: 'free',      color: '#0F766E' },
+            { genre: 'Community', icon: 'community', color: '#0E7490' },
             { genre: 'Volunteer', icon: 'volunteer', color: '#BE185D' },
             { genre: 'Movie',     icon: 'film',      color: '#1F2937' },
           ] as { genre: string; icon: string; color: string }[]).map(({ genre, icon, color }) => {
@@ -10306,11 +10374,9 @@ export default function App() {
   const [placesNavVibe, setPlacesNavVibe] = useState('');
   // Places are not loaded in the app — kept on the server only.
   const [places, setPlaces] = useState<Place[]>([]);
-  // Pre-seed with bundled static events so the list is never empty while
-  // Supabase loads. Live data replaces this as soon as the fetch resolves.
-  const [events, setEvents] = useState<TMEvent[]>(() =>
-    STATIC_TM_EVENTS.filter(e => !isJunkEvent(e)).map(tagAdultEvent)
-  );
+  // Start empty — show loading spinner until Supabase returns the real count.
+  // Static bundled events are used as fallback ONLY if the DB fetch fails.
+  const [events, setEvents] = useState<TMEvent[]>([]);
   const [eventsNavSearch, setEventsNavSearch] = useState('');
   const [eventsNavGenre, setEventsNavGenre] = useState('');
   // Deep-link: capture event or place ID from URL on mount (supports both hash and path-based URLs)
@@ -10341,8 +10407,8 @@ export default function App() {
   // Never block on a loading screen — show the app shell immediately.
   // Data populates in the background; sections gracefully show when ready.
   const [loading, setLoading] = useState(false);
-  // Start as false — static events are pre-seeded above; Supabase refreshes silently.
-  const [eventsLoading, setEventsLoading] = useState(false);
+  // Start as true — we begin with an empty list and load from Supabase.
+  const [eventsLoading, setEventsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<TMEvent | null>(null);
@@ -10976,7 +11042,6 @@ export default function App() {
       setEventsLoading(true);
       try {
         let tmEvents: TMEvent[] = [];
-        let ebEvents: TMEvent[] = [];
         let sgEvents: TMEvent[] = [];
         let bitEvents: TMEvent[] = [];
         let muEvents: TMEvent[] = [];
@@ -10992,6 +11057,7 @@ export default function App() {
             ...(sbEvents['eventbrite'] || []),
             ...(sbEvents['do505'] || []),
             ...(sbEvents['local'] || []),
+            ...(sbEvents['volunteer'] || []),
           ];
         } catch (err) {
           console.warn('[Events] Supabase failed or timed out, using static fallback:', err);
@@ -11005,91 +11071,102 @@ export default function App() {
           const safeArr = (r: PromiseSettledResult<unknown>) =>
             r.status === 'fulfilled' && r.value && typeof r.value === 'object' && Array.isArray((r.value as any).events)
               ? (r.value as any).events : (r.status === 'fulfilled' && Array.isArray(r.value) ? r.value : []);
-          tmEvents = safeArr(tmR); ebEvents = safeArr(ebR);
+          tmEvents = safeArr(tmR); localDbEvents = safeArr(ebR);
           sgEvents = safeArr(sgR); bitEvents = safeArr(bitR); muEvents = safeArr(muR);
         }
 
-        const placesResult = { status: 'fulfilled' as const, value: [] };
-        const tmResult   = { status: 'fulfilled' as const, value: { events: tmEvents } };
-        const ebResult   = { status: 'fulfilled' as const, value: { events: ebEvents } };
-        const sgResult   = { status: 'fulfilled' as const, value: { events: sgEvents } };
-        const bitResult  = { status: 'fulfilled' as const, value: { events: bitEvents } };
-        const muResult   = { status: 'fulfilled' as const, value: { events: muEvents } };
-
-        const toArr = (r: PromiseSettledResult<unknown>) => {
-          if (r.status !== 'fulfilled') return [];
-          const v = r.value as unknown;
-          if (Array.isArray(v)) return v;
-          if (v && typeof v === 'object' && Array.isArray((v as Record<string,unknown>).events)) return (v as Record<string,unknown>).events as unknown[];
-          return [];
-        };
-
+        // ── Universal deduplication across ALL sources ──
+        // Combine every event into one flat array, then deduplicate by
+        // normalized title + date.  When duplicates are found across sources,
+        // merge their ticket URLs into one card with multiple "Get Tickets" buttons.
         const normTitle = (s: string) =>
           s.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
 
-        const _tmEvents: TMEvent[] = toArr(tmResult);
-        const _tmIndex = new Map<string, TMEvent>();
-        for (const e of _tmEvents) {
-          const k = normTitle(e.name || '') + '|' + (e.dates?.start?.localDate || '');
-          if (k !== '|') _tmIndex.set(k, e);
+        const sourceLabel = (ev: TMEvent): string => {
+          const s = (ev._source || '').toLowerCase();
+          if (s === 'seatgeek') return 'SeatGeek';
+          if (s === 'eventbrite') return 'Eventbrite';
+          if (s === 'ticketmaster') return 'Ticketmaster';
+          if (s === 'bandsintown') return 'Bandsintown';
+          if (s === 'local' || s === 'do505' || s === 'nhcc') return 'Info';
+          if (s === 'volunteer') return 'Volunteer';
+          return s ? s.charAt(0).toUpperCase() + s.slice(1) : 'Tickets';
+        };
+
+        // Priority order: ticketmaster > seatgeek > eventbrite > local > volunteer > rest
+        const sourcePriority: Record<string, number> = {
+          ticketmaster: 0, seatgeek: 1, eventbrite: 2,
+          bandsintown: 3, local: 4, do505: 4, nhcc: 4,
+          volunteer: 5, musicbrainz: 6,
+        };
+        const getPriority = (ev: TMEvent) =>
+          sourcePriority[(ev._source || '').toLowerCase()] ?? 99;
+
+        const allRaw: TMEvent[] = [
+          ...tmEvents, ...sgEvents, ...ebEvents,
+          ...bitEvents, ...muEvents, ...localDbEvents,
+        ];
+
+        // Index: normalized title+date → best event (lowest priority number wins)
+        const dedupIndex = new Map<string, TMEvent>();
+        const seenUrls = new Map<string, Set<string>>(); // track URLs per dedup key
+
+        for (const ev of allRaw) {
+          const k = normTitle(ev.name || '') + '|' + (ev.dates?.start?.localDate || '');
+          if (k === '|') continue;
+
+          const existing = dedupIndex.get(k);
+          const label = sourceLabel(ev);
+          const url = ev.url || '';
+
+          if (!existing) {
+            // First time seeing this event — initialize ticketLinks
+            ev.ticketLinks = url ? [{ source: label, url }] : [];
+            dedupIndex.set(k, ev);
+            seenUrls.set(k, new Set(url ? [url] : []));
+          } else {
+            // Duplicate — merge ticket link if URL is new
+            const urls = seenUrls.get(k)!;
+            if (url && !urls.has(url)) {
+              if (!existing.ticketLinks) {
+                existing.ticketLinks = existing.url
+                  ? [{ source: sourceLabel(existing), url: existing.url }]
+                  : [];
+              }
+              existing.ticketLinks.push({ source: label, url });
+              urls.add(url);
+            }
+            // If the new event has better priority (lower number), swap the base card
+            // but keep the merged ticketLinks
+            if (getPriority(ev) < getPriority(existing)) {
+              const mergedLinks = existing.ticketLinks || [];
+              const mergedId = existing.id; // keep original ID for consistency
+              Object.assign(existing, ev);
+              existing.ticketLinks = mergedLinks;
+              existing.id = mergedId;
+            }
+            // If the new event has images and the existing doesn't, take them
+            if ((!existing.images || existing.images.length === 0) && ev.images?.length) {
+              existing.images = ev.images;
+            }
+          }
         }
 
-        const _sgEvents: TMEvent[] = toArr(sgResult);
-        const _sgOnlyEvents: TMEvent[] = [];
-        for (const sg of _sgEvents) {
-          const k = normTitle(sg.name || '') + '|' + (sg.dates?.start?.localDate || '');
-          const tmMatch = _tmIndex.get(k);
-          if (tmMatch) {
-            if (!tmMatch.ticketLinks) {
-              tmMatch.ticketLinks = tmMatch.url
-                ? [{ source: 'Ticketmaster', url: tmMatch.url }]
-                : [];
-            }
-            if (sg.url) tmMatch.ticketLinks.push({ source: 'SeatGeek', url: sg.url });
-          } else {
-            _sgOnlyEvents.push(sg);
-          }
-        }
-
-        const _ebEvents = toArr(ebResult);
-        const _ebOnlyEvents: typeof _ebEvents = [];
-        for (const eb of _ebEvents) {
-          const k = normTitle(eb.name || '') + '|' + (eb.dates?.start?.localDate || '');
-          const tmMatch = _tmIndex.get(k);
-          if (tmMatch) {
-            if (!tmMatch.ticketLinks) {
-              tmMatch.ticketLinks = tmMatch.url
-                ? [{ source: 'Ticketmaster', url: tmMatch.url }]
-                : [];
-            }
-            if (eb.url) tmMatch.ticketLinks.push({ source: 'Eventbrite', url: eb.url });
-          } else {
-            _ebOnlyEvents.push(eb);
-          }
-        }
-        for (const tmEv of _tmEvents) {
-          if (!tmEv.ticketLinks) {
-            tmEv.ticketLinks = tmEv.url ? [{source: 'Ticketmaster', url: tmEv.url}] : [];
-          }
-        }
         const seen = new Set<string>();
-        const normT = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
-
-        const dedupedTM = [..._tmIndex.values()];
-
-        const liveEvents = [
-          ...dedupedTM,
-          ..._ebOnlyEvents,
-          ..._sgOnlyEvents,
-          ...toArr(bitResult),
-          ...toArr(muResult),
-          ...localDbEvents,
-        ].filter((e: TMEvent) => {
+        const liveEvents = [...dedupIndex.values()].filter((e: TMEvent) => {
           if (!e?.id || seen.has(e.id)) return false;
           seen.add(e.id);
           return true;
         });
 
+        // Ensure every event with a URL but no ticketLinks gets one
+        for (const ev of liveEvents) {
+          if (!ev.ticketLinks || ev.ticketLinks.length === 0) {
+            ev.ticketLinks = ev.url ? [{ source: sourceLabel(ev), url: ev.url }] : [];
+          }
+        }
+
+        const normT = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
         const liveTitles = new Set(liveEvents.map(e => normT(e.name || '')));
         const staticOnly = STATIC_TM_EVENTS.filter(e => {
           if (seen.has(e.id)) return false;
