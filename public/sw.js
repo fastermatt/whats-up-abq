@@ -4,7 +4,7 @@
 //   - App shell (HTML): Network-first with cache fallback
 //   - Supabase API calls: Network-only (live data required)
 
-const CACHE_VERSION = 'abq-202604100436';
+const CACHE_VERSION = 'abq-202604100502';
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const ASSET_CACHE = `${CACHE_VERSION}-assets`;
 
@@ -22,6 +22,7 @@ const PRECACHE_ASSETS = [
   '/icons/icon-maskable-512.png',
   '/apple-touch-icon-180.png',
   '/og-image.jpg',
+  '/fonts/MaterialSymbolsOutlined.woff2',
 ];
 
 const PRECACHE_DATA = [];
