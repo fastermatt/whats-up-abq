@@ -1480,15 +1480,16 @@ function EventCardImageSlider({ event }: { event: TMEvent }) {
 
   const initialPhotos = useMemo(() => {
     const imgs = event.images ?? [];
-    // DEBUG: log first few events that have no images to diagnose photo display issue
-    if (imgs.length === 0 && !window.__imgDebugCount) window.__imgDebugCount = 0;
-    if (imgs.length === 0 && (window as any).__imgDebugCount < 5) {
-      (window as any).__imgDebugCount++;
-      console.warn('[IMG_DEBUG]', event.name, '| images:', JSON.stringify(event.images), '| keys:', Object.keys(event).join(','));
-    }
-    if (imgs.length > 0 && !(window as any).__imgOkLogged) {
-      (window as any).__imgOkLogged = true;
-      console.warn('[IMG_DEBUG_OK]', event.name, '| images[0]:', JSON.stringify(imgs[0]).substring(0, 150));
+    // DEBUG: aggregate image stats across all events
+    if (!(window as any).__imgStats) (window as any).__imgStats = { total: 0, withImg: 0, noImg: 0, noImgSources: {} as Record<string, number>, sampleNoImg: [] as string[] };
+    const _s = (window as any).__imgStats;
+    _s.total++;
+    if (imgs.length > 0) { _s.withImg++; }
+    else {
+      _s.noImg++;
+      const src = (event as any)._source || 'unknown';
+      _s.noImgSources[src] = (_s.noImgSources[src] || 0) + 1;
+      if (_s.sampleNoImg.length < 10) _s.sampleNoImg.push(src + ':' + (event.name || '').substring(0, 40));
     }
     const nonFallback = imgs.filter(img => !img.fallback);
     const pool = nonFallback.length > 0 ? nonFallback : imgs;
@@ -11202,6 +11203,16 @@ export default function App() {
           if (ev.ticketLinks && ev.ticketLinks.some(l => l.url)) return true;
           return false;
         };
+
+        // DEBUG: check image presence across sources before final merge
+        const _dbg: Record<string, { total: number; withImg: number }> = {};
+        for (const ev of [...liveEvents, ...staticOnly]) {
+          const src = (ev as any)._source || 'static';
+          if (!_dbg[src]) _dbg[src] = { total: 0, withImg: 0 };
+          _dbg[src].total++;
+          if (ev.images && ev.images.length > 0) _dbg[src].withImg++;
+        }
+        console.warn('[EVENTS_IMG_DEBUG] Pre-filter image stats:', JSON.stringify(_dbg));
 
         const merged = [...liveEvents, ...staticOnly]
           .filter(isInMetro)
