@@ -195,6 +195,24 @@ async function fetchEventbriteEvents() {
         continue;
       }
 
+      // Extract times from HTML — Eventbrite shows "Day • HH:MM AM/PM" in cards
+      // but JSON-LD only has dates. Build a map from event URL slug → time string.
+      const timeBySlug = {};
+      // Match event links followed by date/time text: /e/slug-123 … "Day • 7:00 PM"
+      const cardTimeRe = /\/e\/([a-z0-9-]+-\d+)[^]*?(\d{1,2}:\d{2}\s*[AP]M)/gi;
+      let tm;
+      while ((tm = cardTimeRe.exec(body)) !== null) {
+        const slug = tm[1];
+        const idMatch = slug.match(/-(\d+)$/);
+        if (idMatch) {
+          const ebId = idMatch[1];
+          if (!timeBySlug[ebId]) {
+            // Convert "7:00 PM" → "19:00" (24h)
+            timeBySlug[ebId] = convertTo24h(tm[2].trim());
+          }
+        }
+      }
+
       // Parse the server data — look for jsonld array
       try {
         const serverData = JSON.parse(match[1]);
@@ -205,7 +223,7 @@ async function fetchEventbriteEvents() {
 
         for (const item of items) {
           if (!item || item['@type'] !== 'Event') continue;
-          const ev = transformEventbriteJsonLd(item);
+          const ev = transformEventbriteJsonLd(item, timeBySlug);
           if (ev && !seenIds.has(ev.id)) { seenIds.add(ev.id); events.push(ev); }
         }
       } catch (parseErr) {
@@ -222,12 +240,31 @@ async function fetchEventbriteEvents() {
   return events;
 }
 
-function transformEventbriteJsonLd(item) {
+/** Convert "7:00 PM" → "19:00", "11:30 AM" → "11:30" */
+function convertTo24h(timeStr) {
+  const m = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+  if (!m) return undefined;
+  let h = parseInt(m[1], 10);
+  const min = m[2];
+  const ampm = m[3].toUpperCase();
+  if (ampm === 'PM' && h < 12) h += 12;
+  if (ampm === 'AM' && h === 12) h = 0;
+  return String(h).padStart(2, '0') + ':' + min;
+}
+
+function transformEventbriteJsonLd(item, timeBySlug) {
   const startDate = item.startDate || '';
   const localDate = startDate ? startDate.slice(0, 10) : '';
   if (!localDate || !isFuture(localDate)) return null;
 
-  const localTime = startDate.length > 10 ? startDate.slice(11, 16) : undefined;
+  // Try JSON-LD time first, then fall back to HTML-scraped time
+  let localTime = startDate.length > 10 ? startDate.slice(11, 16) : undefined;
+  if (!localTime && timeBySlug) {
+    const urlMatch = (item.url || '').match(/-(\d+)(?:\?|$)/);
+    if (urlMatch && timeBySlug[urlMatch[1]]) {
+      localTime = timeBySlug[urlMatch[1]];
+    }
+  }
   const loc     = item.location || {};
   const addr    = loc.address || {};
   const geo     = loc.geo    || {};
