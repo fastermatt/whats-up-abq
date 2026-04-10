@@ -1480,6 +1480,16 @@ function EventCardImageSlider({ event }: { event: TMEvent }) {
 
   const initialPhotos = useMemo(() => {
     const imgs = event.images ?? [];
+    // DEBUG: log first few events that have no images to diagnose photo display issue
+    if (imgs.length === 0 && !window.__imgDebugCount) window.__imgDebugCount = 0;
+    if (imgs.length === 0 && (window as any).__imgDebugCount < 5) {
+      (window as any).__imgDebugCount++;
+      console.warn('[IMG_DEBUG]', event.name, '| images:', JSON.stringify(event.images), '| keys:', Object.keys(event).join(','));
+    }
+    if (imgs.length > 0 && !(window as any).__imgOkLogged) {
+      (window as any).__imgOkLogged = true;
+      console.warn('[IMG_DEBUG_OK]', event.name, '| images[0]:', JSON.stringify(imgs[0]).substring(0, 150));
+    }
     const nonFallback = imgs.filter(img => !img.fallback);
     const pool = nonFallback.length > 0 ? nonFallback : imgs;
     const seen = new Set<string>();
