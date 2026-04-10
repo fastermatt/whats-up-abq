@@ -176,6 +176,18 @@ async function fetchEventbriteEvents() {
       const { status, body } = await fetchUrl(url);
       if (status !== 200) { console.warn(`  ⚠️  ${url} → HTTP ${status}`); continue; }
 
+      // Extract times from HTML — Eventbrite shows "Day • HH:MM AM/PM" in cards
+      // but JSON-LD only has dates. Build a map from event ID → 24h time string.
+      const timeBySlug = {};
+      const cardTimeRe = /data-event-id="(\d+)"[\s\S]{0,2000}?(\d{1,2}:\d{2}\s*[AP]M)/gi;
+      let tm;
+      while ((tm = cardTimeRe.exec(body)) !== null) {
+        const ebId = tm[1];
+        if (!timeBySlug[ebId]) {
+          timeBySlug[ebId] = convertTo24h(tm[2].trim());
+        }
+      }
+
       // Extract __SERVER_DATA__ JSON from the script tag
       const match = body.match(/window\.__SERVER_DATA__\s*=\s*(\{[\s\S]*?\});\s*<\/script>/);
       if (!match) {
@@ -187,30 +199,12 @@ async function fetchEventbriteEvents() {
             const items = ld['@type'] === 'ItemList' ? ld.itemListElement?.map(e => e.item) : [ld];
             for (const item of (items || [])) {
               if (item?.['@type'] !== 'Event') continue;
-              const ev = transformEventbriteJsonLd(item);
+              const ev = transformEventbriteJsonLd(item, timeBySlug);
               if (ev && !seenIds.has(ev.id)) { seenIds.add(ev.id); events.push(ev); }
             }
           } catch {}
         }
         continue;
-      }
-
-      // Extract times from HTML — Eventbrite shows "Day • HH:MM AM/PM" in cards
-      // but JSON-LD only has dates. Build a map from event URL slug → time string.
-      const timeBySlug = {};
-      // Match event links followed by date/time text: /e/slug-123 … "Day • 7:00 PM"
-      const cardTimeRe = /\/e\/([a-z0-9-]+-\d+)[^]*?(\d{1,2}:\d{2}\s*[AP]M)/gi;
-      let tm;
-      while ((tm = cardTimeRe.exec(body)) !== null) {
-        const slug = tm[1];
-        const idMatch = slug.match(/-(\d+)$/);
-        if (idMatch) {
-          const ebId = idMatch[1];
-          if (!timeBySlug[ebId]) {
-            // Convert "7:00 PM" → "19:00" (24h)
-            timeBySlug[ebId] = convertTo24h(tm[2].trim());
-          }
-        }
       }
 
       // Parse the server data — look for jsonld array
