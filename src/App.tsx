@@ -62,7 +62,7 @@ function useTypewriter(text: string, startDelay = 400) {
 if (typeof document !== 'undefined' && !document.getElementById('card-fade-style')) {
   const s = document.createElement('style');
   s.id = 'card-fade-style';
-  s.textContent = '@keyframes cardFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes hoodBubble0 { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-4px,2px)} 50%{transform:translate(3px,-1px)} 75%{transform:translate(-2px,-2px)} } @keyframes hoodBubble1 { 0%,100%{transform:translate(0,0)} 20%{transform:translate(3px,-3px)} 55%{transform:translate(-3px,2px)} 80%{transform:translate(2px,1px)} } @keyframes hoodBubble2 { 0%,100%{transform:translate(0,0)} 30%{transform:translate(-3px,-2px)} 60%{transform:translate(4px,1px)} 85%{transform:translate(-1px,3px)} } @keyframes hoodBubble3 { 0%,100%{transform:translate(0,0)} 35%{transform:translate(2px,3px)} 65%{transform:translate(-4px,-1px)} 90%{transform:translate(3px,-2px)} } @keyframes hoodBubble4 { 0%,100%{transform:translate(0,0)} 15%{transform:translate(-2px,-3px)} 45%{transform:translate(3px,2px)} 70%{transform:translate(-3px,1px)} } @keyframes hoodBubble5 { 0%,100%{transform:translate(0,0)} 40%{transform:translate(4px,-2px)} 70%{transform:translate(-2px,3px)} 85%{transform:translate(1px,-1px)} } @keyframes ptrSweep { 0%{background-position:-200% center} 100%{background-position:200% center} } @keyframes ptrDots { 0%,80%,100%{transform:scale(0.6);opacity:0.3} 40%{transform:scale(1);opacity:1} } @keyframes kenBurns0 { from { transform: scale(1.05) translate(0%,0%); } to { transform: scale(1.18) translate(-2%,-1%); } } @keyframes kenBurns1 { from { transform: scale(1.1) translate(-1%,1%); } to { transform: scale(1.2) translate(2%,-2%); } } @keyframes kenBurns2 { from { transform: scale(1.08) translate(1%,-1%); } to { transform: scale(1.18) translate(-1%,2%); } } @keyframes kenBurns3 { from { transform: scale(1.12) translate(-2%,0%); } to { transform: scale(1.05) translate(1%,-1%); } } @keyframes cursorBlink { 0%,100% { opacity:1; } 50% { opacity:0; } } @keyframes reminderSlideIn { from { opacity: 0; transform: translateY(-8px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } } @keyframes heartPop { 0% { transform: scale(1); } 15% { transform: scale(1.35); } 30% { transform: scale(0.9); } 45% { transform: scale(1.15); } 60% { transform: scale(0.97); } 75% { transform: scale(1.05); } 100% { transform: scale(1); } } @keyframes heartParticles { 0% { opacity: 1; transform: scale(0.5); } 50% { opacity: 0.8; } 100% { opacity: 0; transform: scale(2.5); } } .like-btn-pop { animation: heartPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; } .like-btn-particles::after { content: ""; position: absolute; inset: -8px; border-radius: 50%; background: radial-gradient(circle, var(--brand) 0%, transparent 70%); animation: heartParticles 0.5s ease-out forwards; pointer-events: none; z-index: -1; } .nav-press-btn:active { top: 4px !important; box-shadow: 0 1px 0 #0a0a0a, 0 0px 2px rgba(0,0,0,0.1) !important; } .haptic-switch { position:fixed; top:-9999px; left:-9999px; opacity:0; pointer-events:none; }';
+  s.textContent = '@keyframes cardFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes hoodBubble0 { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-4px,2px)} 50%{transform:translate(3px,-1px)} 75%{transform:translate(-2px,-2px)} } @keyframes hoodBubble1 { 0%,100%{transform:translate(0,0)} 20%{transform:translate(3px,-3px)} 55%{transform:translate(-3px,2px)} 80%{transform:translate(2px,1px)} } @keyframes hoodBubble2 { 0%,100%{transform:translate(0,0)} 30%{transform:translate(-3px,-2px)} 60%{transform:translate(4px,1px)} 85%{transform:translate(-1px,3px)} } @keyframes hoodBubble3 { 0%,100%{transform:translate(0,0)} 35%{transform:translate(2px,3px)} 65%{transform:translate(-4px,-1px)} 90%{transform:translate(3px,-2px)} } @keyframes hoodBubble4 { 0%,100%{transform:translate(0,0)} 15%{transform:translate(-2px,-3px)} 45%{transform:translate(3px,2px)} 70%{transform:translate(-3px,1px)} } @keyframes hoodBubble5 { 0%,100%{transform:translate(0,0)} 40%{transform:translate(4px,-2px)} 70%{transform:translate(-2px,3px)} 85%{transform:translate(1px,-1px)} } @keyframes ptrSweep { 0%{background-position:-200% center} 100%{background-position:200% center} } @keyframes ptrDots { 0%,80%,100%{transform:scale(0.6);opacity:0.3} 40%{transform:scale(1);opacity:1} } @keyframes kenBurns0 { from { transform: scale(1.05) translate(0%,0%); } to { transform: scale(1.18) translate(-2%,-1%); } } @keyframes kenBurns1 { from { transform: scale(1.1) translate(-1%,1%); } to { transform: scale(1.2) translate(2%,-2%); } } @keyframes kenBurns2 { from { transform: scale(1.08) translate(1%,-1%); } to { transform: scale(1.18) translate(-1%,2%); } } @keyframes kenBurns3 { from { transform: scale(1.12) translate(-2%,0%); } to { transform: scale(1.05) translate(1%,-1%); } } @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } } @keyframes reminderSlideIn { from { opacity: 0; transform: translateY(-8px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } } @keyframes heartPop { 0% { transform: scale(1); } 15% { transform: scale(1.35); } 30% { transform: scale(0.9); } 45% { transform: scale(1.15); } 60% { transform: scale(0.97); } 75% { transform: scale(1.05); } 100% { transform: scale(1); } } @keyframes heartParticles { 0% { opacity: 1; transform: scale(0.5); } 50% { opacity: 0.8; } 100% { opacity: 0; transform: scale(2.5); } } .like-btn-pop { animation: heartPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; } .like-btn-particles::after { content: ""; position: absolute; inset: -8px; border-radius: 50%; background: radial-gradient(circle, var(--brand) 0%, transparent 70%); animation: heartParticles 0.5s ease-out forwards; pointer-events: none; z-index: -1; } .nav-press-btn:active { top: 4px !important; box-shadow: 0 1px 0 #0a0a0a, 0 0px 2px rgba(0,0,0,0.1) !important; } .haptic-switch { position:fixed; top:-9999px; left:-9999px; opacity:0; pointer-events:none; }';
   document.head.appendChild(s);
 }
 
@@ -5366,7 +5366,9 @@ function EventsScreen({
         <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: 'Public Sans, sans-serif' }}>
           {(search || selectedGenre !== 'All' || dateFrom || dateTo)
             ? <>{deduped.length.toLocaleString()} <span style={{ color: '#bbb' }}>of {events.length.toLocaleString()}</span> events</>
-            : <>{events.length.toLocaleString()} upcoming events in ABQ</>}
+            : eventsLoading
+              ? <span style={{ display: 'inline-block', width: 140, height: 14, background: 'linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%)', backgroundSize: '200% 100%', borderRadius: 6, animation: 'shimmer 1.2s infinite', verticalAlign: 'middle' }} />
+              : <>{events.length.toLocaleString()} upcoming events in ABQ</>}
         </p>
       </div>
 
@@ -5555,6 +5557,21 @@ function EventsScreen({
           </div>
         );
       })()}
+      {/* Skeleton cards — shown while live data loads and no events available yet */}
+      {deduped.length === 0 && eventsLoading && (
+        <div style={{ padding: '16px 16px 0' }}>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 16, padding: 12, background: 'white', borderRadius: 12, boxShadow: '0 1px 4px rgba(0,0,0,0.07)' }}>
+              <div style={{ width: 80, height: 80, borderRadius: 8, background: 'linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.2s infinite', flexShrink: 0 }} />
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, justifyContent: 'center' }}>
+                <div style={{ height: 14, borderRadius: 6, background: 'linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.2s infinite', width: '75%' }} />
+                <div style={{ height: 11, borderRadius: 6, background: 'linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%)', backgroundSize: '200% 100%', animation: `shimmer 1.2s ${i * 0.1}s infinite`, width: '55%' }} />
+                <div style={{ height: 11, borderRadius: 6, background: 'linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%)', backgroundSize: '200% 100%', animation: `shimmer 1.2s ${i * 0.15}s infinite`, width: '40%' }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
       {/* Empty state — shown when filters return zero results */}
       {deduped.length === 0 && !eventsLoading && (
         <div className="flex flex-col items-center justify-center px-8 text-center" style={{ paddingTop: '80px', paddingBottom: '60px' }}>
@@ -10220,9 +10237,12 @@ export default function App() {
   const [placesNavVibe, setPlacesNavVibe] = useState('');
   // Places are not loaded in the app — kept on the server only.
   const [places, setPlaces] = useState<Place[]>([]);
-  // Start empty — show loading spinner until Supabase returns the real count.
-  // Static bundled events are used as fallback ONLY if the DB fetch fails.
-  const [events, setEvents] = useState<TMEvent[]>([]);
+  // Initialize with static bundled events so cards render immediately on load.
+  // Supabase live data merges in and replaces these once fetched.
+  const [events, setEvents] = useState<TMEvent[]>(() =>
+    STATIC_TM_EVENTS.filter(e => !isJunkEvent(e)).map(tagAdultEvent)
+      .map(e => e.name?.includes('&') ? { ...e, name: decodeEntities(e.name) } : e)
+  );
   const [eventsNavSearch, setEventsNavSearch] = useState('');
   const [eventsNavGenre, setEventsNavGenre] = useState('');
   // Deep-link: capture event or place ID from URL on mount (supports both hash and path-based URLs)
@@ -10253,8 +10273,8 @@ export default function App() {
   // Never block on a loading screen — show the app shell immediately.
   // Data populates in the background; sections gracefully show when ready.
   const [loading, setLoading] = useState(false);
-  // Start as true — we begin with an empty list and load from Supabase.
-  const [eventsLoading, setEventsLoading] = useState(true);
+  // Start as false — static events render immediately; live fetch runs in background.
+  const [eventsLoading, setEventsLoading] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<TMEvent | null>(null);
