@@ -1003,6 +1003,14 @@ function saveFollowedGenres(genres: string[]) {
   try { localStorage.setItem(FOLLOWING_KEY, JSON.stringify(genres)); } catch {}
 }
 
+// Canonical category colors (used for sub-genre pill row and section headers)
+const CAT_COLORS_MAP: Record<string, string> = {
+  'Concerts': '#7C3AED', 'Music': '#8B3A0F', 'Dance': '#BE185D',
+  'Theatre': '#6D28D9', 'Comedy': '#B45309', 'Sports': '#1D4ED8',
+  'Arts': '#7C2D12', 'Family': '#047857', 'Free': '#0F766E',
+  'Community': '#0E7490',
+};
+
 // Per-category icon and gradient for event cards
 const EVENT_TYPE_META: Record<string, { icon: string; bg: string }> = {
   'Music':          { icon: 'music',         bg: 'linear-gradient(135deg,#8B3A0F,#c0552a)' },
@@ -4735,18 +4743,16 @@ function DiscoverScreen({
           <div style={{ position: 'relative' }}>
           <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none', paddingBottom: '4px' }}>
             {[
-              { genre: 'Music',     icon: 'music',     color: '#8B3A0F' },
               { genre: 'Concerts',  icon: 'concert',   color: '#7C3AED' },
+              { genre: 'Music',     icon: 'music',     color: '#8B3A0F' },
+              { genre: 'Dance',     icon: 'dance',     color: '#BE185D' },
+              { genre: 'Theatre',   icon: 'theatre',   color: '#6D28D9' },
               { genre: 'Comedy',    icon: 'comedy',    color: '#B45309' },
-              { genre: 'Theatre',   icon: 'theatre',   color: '#4C1D95' },
-              { genre: 'Arts',      icon: 'art',       color: '#7C2D12' },
               { genre: 'Sports',    icon: 'sports',    color: '#1D4ED8' },
+              { genre: 'Arts',      icon: 'art',       color: '#7C2D12' },
               { genre: 'Family',    icon: 'family',    color: '#047857' },
-              { genre: 'Outdoor',   icon: 'outdoor',   color: '#065F46' },
               { genre: 'Free',      icon: 'free',      color: '#0F766E' },
               { genre: 'Community', icon: 'community', color: '#0E7490' },
-              { genre: 'Volunteer', icon: 'volunteer', color: '#BE185D' },
-              { genre: 'Movie',     icon: 'film',      color: '#1F2937' },
             ].map(({ genre, icon, color }) => (
               <button
                 key={genre}
@@ -5168,8 +5174,9 @@ function EventsScreen({
   }, []);
   useEffect(() => { if (initialSearch) setSearch(initialSearch); }, [initialSearch]);
   const [selectedGenre, setSelectedGenre] = useState(initialGenre || 'All');
+  const [selectedSubGenre, setSelectedSubGenre] = useState<string>('All');
   // Reset genre when initialGenre changes (e.g. from "Free Events" chip on Discover)
-  useEffect(() => { setSelectedGenre(initialGenre || 'All'); }, [initialGenre]);
+  useEffect(() => { setSelectedGenre(initialGenre || 'All'); setSelectedSubGenre('All'); }, [initialGenre]);
   const [followedGenres, setFollowedGenres] = useState<string[]>(() => getFollowedGenres());
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -5267,6 +5274,10 @@ function EventsScreen({
         return cat === selectedGenre;
       });
     }
+    // Sub-genre filter (applies on top of category filter)
+    if (selectedSubGenre !== 'All') {
+      result = result.filter(e => getEventSubGenre(e) === selectedSubGenre);
+    }
 
     // ── Date range filter (applies on top of genre/search) ──
     if (dateFrom || dateTo) {
@@ -5280,7 +5291,7 @@ function EventsScreen({
     }
 
     return result;
-  }, [events, selectedGenre, search, dateFrom, dateTo]);
+  }, [events, selectedGenre, selectedSubGenre, search, dateFrom, dateTo]);
 
   const sorted = useMemo(() => {
     // Base: sort everything by date ascending
@@ -5419,25 +5430,23 @@ function EventsScreen({
         <div style={{ position: 'relative' }}>
         <div ref={pillRow2Ref} className="flex px-4 gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none', paddingTop: '4px', paddingBottom: '8px' }}>
           {([
-            { genre: 'Music',     icon: 'music',     color: '#8B3A0F' },
             { genre: 'Concerts',  icon: 'concert',   color: '#7C3AED' },
+            { genre: 'Music',     icon: 'music',     color: '#8B3A0F' },
+            { genre: 'Dance',     icon: 'dance',     color: '#BE185D' },
+            { genre: 'Theatre',   icon: 'theatre',   color: '#6D28D9' },
             { genre: 'Comedy',    icon: 'comedy',    color: '#B45309' },
-            { genre: 'Theatre',   icon: 'theatre',   color: '#4C1D95' },
-            { genre: 'Arts',      icon: 'art',       color: '#7C2D12' },
             { genre: 'Sports',    icon: 'sports',    color: '#1D4ED8' },
+            { genre: 'Arts',      icon: 'art',       color: '#7C2D12' },
             { genre: 'Family',    icon: 'family',    color: '#047857' },
-            { genre: 'Outdoor',   icon: 'outdoor',   color: '#065F46' },
             { genre: 'Free',      icon: 'free',      color: '#0F766E' },
             { genre: 'Community', icon: 'community', color: '#0E7490' },
-            { genre: 'Volunteer', icon: 'volunteer', color: '#BE185D' },
-            { genre: 'Movie',     icon: 'film',      color: '#1F2937' },
           ] as { genre: string; icon: string; color: string }[]).map(({ genre, icon, color }) => {
             const isSelected = selectedGenre === genre;
             const isFollowed = followedGenres.includes(genre);
             return (
               <button
                 key={genre}
-                onClick={() => setSelectedGenre(isSelected ? 'All' : genre)}
+                onClick={() => { setSelectedGenre(isSelected ? 'All' : genre); setSelectedSubGenre('All'); }}
                 className="flex-shrink-0 flex items-center transition-all active:scale-95"
                 style={{
                   padding: 0,
@@ -5487,6 +5496,65 @@ function EventsScreen({
         <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '50px', background: 'linear-gradient(to right, transparent, var(--bg))', pointerEvents: 'none', zIndex: 1 }} />
         </div>
       </div>
+      {/* Row 3: Sub-genre chips — shown when a category is selected */}
+      {selectedGenre !== 'All' && selectedGenre !== 'Tonight' && selectedGenre !== 'This Weekend' && selectedGenre !== '❤️ For You' && (() => {
+        // Compute available sub-genres from the filtered events (before sub-genre filter)
+        const catEvents = events.filter(e => getEventCategory(e) === selectedGenre);
+        const subGenreCounts: Record<string, number> = {};
+        catEvents.forEach(e => {
+          const sg = getEventSubGenre(e);
+          subGenreCounts[sg] = (subGenreCounts[sg] || 0) + 1;
+        });
+        // Sort by count descending, filter out "Other" unless it's the only one
+        const subGenres = Object.entries(subGenreCounts)
+          .filter(([sg]) => sg !== 'Other' || Object.keys(subGenreCounts).length === 1)
+          .sort((a, b) => b[1] - a[1])
+          .map(([sg]) => sg);
+        // Only show if there are 2+ sub-genres
+        if (subGenres.length < 2) return null;
+        const catColor = CAT_COLORS_MAP[selectedGenre] || 'var(--brand)';
+        return (
+          <div className="flex px-4 gap-1.5 overflow-x-auto" style={{ scrollbarWidth: 'none', paddingBottom: '6px' }}>
+            <button
+              onClick={() => setSelectedSubGenre('All')}
+              className="flex-shrink-0 transition-all active:scale-95"
+              style={{
+                padding: '4px 12px',
+                borderRadius: '14px',
+                background: selectedSubGenre === 'All' ? catColor : 'transparent',
+                border: selectedSubGenre === 'All' ? 'none' : '1px solid rgba(0,0,0,0.1)',
+                cursor: 'pointer',
+                fontFamily: 'Public Sans, sans-serif',
+                fontSize: '10px',
+                fontWeight: 700,
+                color: selectedSubGenre === 'All' ? 'white' : '#888',
+                letterSpacing: '0.03em',
+                whiteSpace: 'nowrap',
+              }}
+            >All</button>
+            {subGenres.map(sg => (
+              <button
+                key={sg}
+                onClick={() => setSelectedSubGenre(selectedSubGenre === sg ? 'All' : sg)}
+                className="flex-shrink-0 transition-all active:scale-95"
+                style={{
+                  padding: '4px 12px',
+                  borderRadius: '14px',
+                  background: selectedSubGenre === sg ? catColor : 'transparent',
+                  border: selectedSubGenre === sg ? 'none' : '1px solid rgba(0,0,0,0.1)',
+                  cursor: 'pointer',
+                  fontFamily: 'Public Sans, sans-serif',
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  color: selectedSubGenre === sg ? 'white' : '#888',
+                  letterSpacing: '0.03em',
+                  whiteSpace: 'nowrap',
+                }}
+              >{sg} <span style={{ opacity: 0.6, fontSize: '9px' }}>{subGenreCounts[sg]}</span></button>
+            ))}
+          </div>
+        );
+      })()}
       {/* Empty state — shown when filters return zero results */}
       {deduped.length === 0 && !eventsLoading && (
         <div className="flex flex-col items-center justify-center px-8 text-center" style={{ paddingTop: '80px', paddingBottom: '60px' }}>
