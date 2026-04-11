@@ -3285,7 +3285,6 @@ function DiscoverScreen({
     setTimeout(tick, 600);
     return () => { cancelled = true; };
   }, []);
-  const featured: any[] = [];
 
   const upcomingEvents = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
@@ -3326,15 +3325,6 @@ function DiscoverScreen({
       return da.localeCompare(db);
     });
   }, [events]);
-
-  const nearbyPlaces = useMemo(() => {
-    if (!coords) return [];
-    return places
-      .filter(p => p.lat != null && p.lng != null)
-      .map(p => ({ place: p, dist: distanceMiles(coords.lat, coords.lng, p.lat!, p.lng!) }))
-      .sort((a, b) => a.dist - b.dist)
-      .slice(0, 8);
-  }, [places, coords]);
 
   // "Happening This Week" — upcoming events over the next 7 days for the Discover feed
   const happeningThisWeek = useMemo(() => {
@@ -3540,71 +3530,11 @@ function DiscoverScreen({
       )}
 
       {/* Daily Gem — spot of the day, date-seeded */}
-      {places.length > 0 && <DailyGem places={places} onSelect={onPlaceSelect} />}
 
       {/* Trending Bento Grid */}
       
 
-      {/* Near You */}
-      {!hidden.includes('nearYou') && coords && nearbyPlaces.length > 0 && (
-        <div className="py-4">
-          <div className="flex items-center justify-between px-5 py-3 mb-0" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
-            <h2
-              className="text-sm font-black uppercase"
-              style={{ fontFamily: 'Public Sans, sans-serif' }}
-            >
-              Near You
-            </h2>
-            <span className="text-xs font-semibold flex items-center gap-1" style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '13px' }}>my_location</span>
-              Live location
-            </span>
-          </div>
-          <div className="flex gap-3 px-5 py-3 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-            {[...nearbyPlaces].sort((a, b) => (placeMatchesInterests(b.place.category, interests) ? 1 : 0) - (placeMatchesInterests(a.place.category, interests) ? 1 : 0)).map(({ place, dist }) => (
-              <button
-                key={place.id}
-                onClick={() => onPlaceSelect(place)}
-                className="flex-shrink-0 bg-white overflow-hidden text-left"
-                style={{ width: '144px', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)', borderRadius: '10px' }}
-              >
-                <div className="relative" style={{ height: '100px' }}>
-                  <ImageWithFallback
-                    src={place.image}
-                    alt={place.name}
-                    className="w-full h-full object-cover"
-                    gradient={'var(--brand-gradient)'}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                  <div className="absolute bottom-2 left-2">
-                    <span
-                      className="text-xs font-bold text-white px-1.5 py-0.5 flex items-center gap-0.5"
-                      style={{ background: 'rgba(0,0,0,0.45)' }}
-                    >
-                      <span className="material-symbols-outlined" style={{ fontSize: '10px' }}>near_me</span>
-                      {formatDist(dist)}
-                    </span>
-                  </div>
-                  {checkedIn.has(place.id) && (
-                    <div className="absolute top-2 right-2">
-                      <span className="text-white text-xs px-1.5 py-0.5" style={{ background: 'rgba(160,59,0,0.85)' }}>✓</span>
-                    </div>
-                  )}
-                </div>
-                <div className="p-2">
-                  <p
-                    className="text-xs font-bold text-gray-900 leading-tight truncate"
-                    style={{ fontFamily: 'Public Sans, sans-serif' }}
-                  >
-                    {place.name}
-                  </p>
-                  <p className="text-xs" style={{ color: '#666' }}>{place.category}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+
 
       {/* Neighborhoods removed — events-only pivot */}
 
@@ -6980,9 +6910,6 @@ export default function App() {
   const [authReady, setAuthReady] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUsernameSetup, setShowUsernameSetup] = useState(false);
-  const syncTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Guard: only load checkins from Supabase once per unique user session
-  const loadedUserIdRef = useRef<string | null>(null);
   const [prefs, setPrefs] = useState<UserPrefs>(getPrefs);
   // Re-sync prefs state when ProfileSettingsPane saves changes
   useEffect(() => {
@@ -6991,15 +6918,7 @@ export default function App() {
     return () => window.removeEventListener('abq_prefs_changed', handler);
   }, []);
 
-  //   // Fix: vertical wheel scroll passes through horizontal carousels
-  useEffect(() => {
-    const _psh = (e: Event) => {
-      setPlacesNavSearch((e as CustomEvent).detail as string);
-      setActiveTab('events');
-    };
-    window.addEventListener('plan-step-click', _psh);
-    return () => window.removeEventListener('plan-step-click', _psh);
-  }, []);
+
 
   useEffect(() => {
     const fn = (e: WheelEvent) => {
@@ -7227,12 +7146,7 @@ export default function App() {
     return () => el.removeEventListener('touchmove', handleTouchMove);
   }, []);
 
-  const openPlaceModal = useCallback((place: Place) => {
-    setSelectedPlace(place);
-    window.history.pushState({ tab: null, modal: 'place', id: place.id }, '', `#place/${place.id}`);
-    trackEvent('place_click', { place_id: place.id, place_name: place.name, category: place.category });
-    trackEvent('pageview', { tab: 'place_detail', place_id: place.id, place_name: place.name, path: `#place/${place.id}` });
-  }, []);
+
 
   const openEventModal = useCallback((event: TMEvent) => {
     setSelectedEvent(event);
@@ -7240,12 +7154,9 @@ export default function App() {
     trackEvent('event_click', { event_id: event.id, event_name: event.name });
     trackEvent('pageview', { tab: 'event_detail', event_id: event.id, event_name: event.name, path: `#event/${event.id}` });
   }, []);
-
-  const closePlaceModal = useCallback(() => setSelectedPlace(null), []);
   const closeEventModal = useCallback(() => setSelectedEvent(null), []);
   const openVenuePage = useCallback((slug: string) => {
     setSelectedEvent(null);
-    setSelectedPlace(null);
     setVenuePageSlug(slug);
   }, []);
 
@@ -7283,7 +7194,6 @@ export default function App() {
     const handlePopState = (e: PopStateEvent) => {
       const state = e.state;
       // If going back from a modal or venue page, close it
-      if (selectedPlace) { setSelectedPlace(null); return; }
       if (selectedEvent) { setSelectedEvent(null); return; }
       if (venuePageSlug) { setVenuePageSlug(null); return; }
       // If going back between tabs, go to that tab
@@ -7304,7 +7214,7 @@ export default function App() {
     }
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [selectedPlace, selectedEvent, venuePageSlug, activeTab, showAdmin]);
+  }, [selectedEvent, venuePageSlug, activeTab, showAdmin]);
 
   // ── Dynamic <title> + Event JSON-LD schema ─────────────────────────────────
   // Updates document title and injects structured data whenever the user views
@@ -7724,19 +7634,6 @@ export default function App() {
     }
   }, [events]);
 
-  // ── Deep-link handler: open /place/{id} or #place/{id} once places load ───
-  useEffect(() => {
-    const id = pendingPlaceDeepLinkId.current;
-    if (!id || places.length === 0) return;
-    pendingPlaceDeepLinkId.current = null;
-    const found = places.find(p => p.id === id);
-    if (found) {
-      setActiveTab('discover');
-      setSelectedPlace(found);
-      window.history.replaceState({ tab: 'discover', modal: 'place', id: found.id }, '', `#place/${found.id}`);
-    }
-  }, [places]);
-
   // ── Admin route ──
   if (showAdmin) {
     // AdminPanel handles its own auth (Supabase email OR hardcoded password)
@@ -7766,30 +7663,11 @@ export default function App() {
         coords={coords}
         loading={loading}
         eventsLoading={eventsLoading}
-        onPlaceSelect={(p) => setSelectedPlace(p)}
         onEventSelect={(e) => setSelectedEvent(e)}
         savedPlan={savedPlan}
-        onToggleSavePlace={toggleSavedPlace}
         onToggleSaveEvent={toggleSavedEvent}
-        isPlaceSaved={isPlaceSaved}
         isEventSaved={isEventSaved}
       />
-      {selectedPlace && (
-        <PlaceDetailModal
-          place={selectedPlace}
-          onClose={() => { closePlaceModal(); window.history.back(); }}
-          isCheckedIn={checkedIn.has(selectedPlace.id)}
-          onCheckIn={() => handleCheckIn(selectedPlace.id)}
-          checkInError={checkInError}
-          tooFar={tooFarPlaceId === selectedPlace.id}
-          user={user}
-          onShowAuth={() => setShowAuthModal(true)}
-          isSaved={isPlaceSaved(selectedPlace.id)}
-          onToggleSave={() => toggleSavedPlace(selectedPlace)}
-          mapProvider={resolvedMapProvider}
-          enrichedDataEnabled={enrichedDataEnabled}
-        />
-      )}
       {selectedEvent && <EventDetailModal event={selectedEvent} onClose={() => { closeEventModal(); window.history.back(); }} isSaved={isEventSaved(selectedEvent.id)} onToggleSave={() => toggleSavedEvent(selectedEvent)} mapProvider={resolvedMapProvider} />}
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
     </ErrorBoundary>
@@ -8010,7 +7888,7 @@ export default function App() {
           {activeTab === 'plan' && (
             <PlanScreen
               savedPlan={savedPlan}
-              onPlaceSelect={openPlaceModal}
+              onPlaceSelect={() => {}}
               onEventSelect={openEventModal}
               onRemovePlace={(id) => { setSavedPlan(prev => { const n = prev.filter(p => !(p.type === 'place' && (p.data as Place).id === id)); savePlanToStorage(n); return n; }); }}
               onRemoveEvent={(id) => { setSavedPlan(prev => { const n = prev.filter(p => !(p.type === 'event' && (p.data as TMEvent).id === id)); savePlanToStorage(n); return n; }); }}
@@ -8103,7 +7981,6 @@ export default function App() {
             {globalSearch.trim() && (
               <div style={{display:'flex',gap:'8px',width:'100%'}}>
                 <button onClick={() => { trackEvent('search', { query: globalSearch.trim(), context: 'events' }); setEventsNavSearch(globalSearch.trim()); setActiveTab('events'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'var(--brand)',color:'white',border:'none',borderRadius:'10px',fontSize:'15px',fontFamily:'Public Sans, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Events</button>
-                <button onClick={() => { trackEvent('search', { query: globalSearch.trim(), context: 'places' }); setPlacesNavCat('All'); setPlacesNavSearch(globalSearch.trim()); setPlacesNavKey(k => k + 1); setActiveTab('events'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'#026cdf',color:'white',border:'none',borderRadius:'10px',fontSize:'15px',fontFamily:'Public Sans, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Places</button>
               </div>
             )}
           </div>
@@ -8112,22 +7989,6 @@ export default function App() {
 </div>
 
       {/* Detail Modals */}
-      {selectedPlace && (
-        <PlaceDetailModal
-          place={selectedPlace}
-          onClose={() => { closePlaceModal(); window.history.back(); }}
-          isCheckedIn={checkedIn.has(selectedPlace.id)}
-          onCheckIn={() => handleCheckIn(selectedPlace.id)}
-          checkInError={checkInError}
-          tooFar={tooFarPlaceId === selectedPlace.id}
-          user={user}
-          onShowAuth={() => setShowAuthModal(true)}
-          isSaved={isPlaceSaved(selectedPlace.id)}
-          onToggleSave={() => toggleSavedPlace(selectedPlace)}
-          mapProvider={resolvedMapProvider}
-          enrichedDataEnabled={enrichedDataEnabled}
-        />
-      )}
       {/* Venue page — full-screen overlay shown when /venue/:slug is active */}
       {venuePageSlug && !selectedEvent && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: '#F9F5F2', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
