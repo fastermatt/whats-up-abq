@@ -1542,8 +1542,10 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
       className="bg-white overflow-hidden text-left w-full"
       style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)', borderRadius: '10px', animation: 'cardFadeIn 0.3s ease both' }}
     >
-      <div className="relative overflow-hidden" style={{ aspectRatio: '4/3' }}>
-        <EventCardImageSlider event={event} />
+      <div className="relative overflow-hidden" style={{ paddingTop: '75%' }}>
+        <div className="absolute inset-0">
+          <EventCardImageSlider event={event} />
+        </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
         <div className="absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5" style={{ background: 'rgba(0,0,0,0.55)', zIndex: 1 }}>
           <FlatIcon name={typeMeta.icon} size={10} color="white" />
