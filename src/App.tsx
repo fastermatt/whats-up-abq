@@ -752,8 +752,6 @@ function ImageWithFallback({
 // ─── Category Data ──────────────────────────────────────────────────────────
 
 
-// Vibe configs — shared between DiscoverScreen buttons and PlacesScreen pill filter
-
 // Category display name mapping (shows friendlier labels to users)
 
 
@@ -3106,25 +3104,101 @@ function MyWishlist() {
   );
 }
 
+
+// ─── JSON-LD Event Schema for SEO ────────────────────────────────────────────
+function generateEventJsonLd(event: TMEvent): string {
+  const venue = event._embedded?.venues?.[0];
+  const image = getBestEventImage(event.images);
+  const schema: Record<string, any> = {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: event.name,
+    startDate: event.dates?.start?.dateTime || event.dates?.start?.localDate || '',
+    description: event.info || event.name,
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    eventStatus: 'https://schema.org/EventScheduled',
+  };
+  if (image) schema.image = image;
+  if (event.url) schema.url = event.url;
+  if (venue) {
+    schema.location = {
+      '@type': 'Place',
+      name: venue.name || 'Venue',
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: venue.address?.line1 || '',
+        addressLocality: venue.city?.name || 'Albuquerque',
+        addressRegion: venue.state?.stateCode || 'NM',
+        postalCode: venue.postalCode || '',
+        addressCountry: 'US',
+      },
+    };
+    if (venue.location?.latitude && venue.location?.longitude) {
+      schema.location.geo = {
+        '@type': 'GeoCoordinates',
+        latitude: venue.location.latitude,
+        longitude: venue.location.longitude,
+      };
+    }
+  }
+  // Price info
+  const priceRanges = event.priceRanges;
+  if (priceRanges && priceRanges.length > 0) {
+    schema.offers = {
+      '@type': 'Offer',
+      price: priceRanges[0].min || 0,
+      priceCurrency: priceRanges[0].currency || 'USD',
+      availability: 'https://schema.org/InStock',
+      url: event.url || '',
+    };
+  }
+  return JSON.stringify(schema);
+}
+
+// ─── Skeleton Screen ─────────────────────────────────────────────────────────
+function EventCardSkeleton() {
+  return (
+    <div className="animate-pulse" style={{ width: '280px', minWidth: '280px', borderRadius: '16px', overflow: 'hidden', background: 'white', border: '1px solid rgba(0,0,0,0.06)', flexShrink: 0 }}>
+      <div style={{ height: '160px', background: 'linear-gradient(135deg, #e5e7eb, #d1d5db)' }} />
+      <div style={{ padding: '14px' }}>
+        <div style={{ height: '14px', background: '#e5e7eb', borderRadius: '4px', width: '75%', marginBottom: '10px' }} />
+        <div style={{ height: '10px', background: '#f3f4f6', borderRadius: '4px', width: '50%', marginBottom: '8px' }} />
+        <div style={{ height: '10px', background: '#f3f4f6', borderRadius: '4px', width: '30%' }} />
+      </div>
+    </div>
+  );
+}
+
+function EventListSkeleton() {
+  return (
+    <div style={{ padding: '0 20px' }}>
+      {[0,1,2,3,4].map(i => (
+        <div key={i} className="animate-pulse" style={{ display: 'flex', gap: '12px', padding: '14px 0', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+          <div style={{ width: '64px', height: '64px', borderRadius: '12px', background: 'linear-gradient(135deg, #e5e7eb, #d1d5db)', flexShrink: 0 }} />
+          <div style={{ flex: 1 }}>
+            <div style={{ height: '14px', background: '#e5e7eb', borderRadius: '4px', width: '70%', marginBottom: '8px' }} />
+            <div style={{ height: '10px', background: '#f3f4f6', borderRadius: '4px', width: '40%', marginBottom: '6px' }} />
+            <div style={{ height: '10px', background: '#f3f4f6', borderRadius: '4px', width: '25%' }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function DiscoverScreen({
-  places, events, eventsLoading, onPlaceSelect, onEventSelect,
+  events, eventsLoading, onEventSelect,
   coords, geoRequested, geoSilentPending, geoError, onRequestGeo,
-  checkedIn, onCheckIn,
-  onNavigatePlaces, onNavigateEvents, prefs, adminHeroLines,
+  onNavigateEvents, prefs, adminHeroLines,
 }: {
-  places: Place[];
   events: TMEvent[];
   eventsLoading?: boolean;
-  onPlaceSelect: (p: Place) => void;
   onEventSelect: (e: TMEvent) => void;
   coords: GeoCoords | null;
   geoRequested: boolean;
   geoSilentPending: boolean;
   geoError: string | null;
   onRequestGeo: () => void;
-  checkedIn: Set<string>;
-  onCheckIn: (id: string) => void;
-  onNavigatePlaces?: (cat: string, search: string, vibeLabel?: string, vibeGradient?: string) => void;
   onNavigateEvents?: (genre?: string) => void;
   prefs?: UserPrefs;
   adminHeroLines?: string[] | null;
@@ -6628,13 +6702,9 @@ const NAV_ITEMS = [
   { id: 'discover', label: 'Discover', icon: 'explore' },
   { id: 'events',   label: 'Events',   icon: 'confirmation_number' },
   { id: 'plan',     label: 'Saved',    icon: 'bookmark' },
-  { id: 'profile',  label: 'Profile',  icon: 'person' },
 ] as const;
 
 type TabId = (typeof NAV_ITEMS)[number]['id'];
-
-
-// ─── Desktop Layout ──────────────────────────────────────────────────────────
 
 
 const fmtLocalTime = (t?: string) => {
@@ -6904,7 +6974,7 @@ function VenuePage({
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>(() => {
     const hash = window.location.hash.replace('#', '').split('/')[0];
-    const validTabs: TabId[] = ['discover', 'events', 'plan', 'profile'];
+    const validTabs: TabId[] = ['discover', 'events', 'plan'];
     return validTabs.includes(hash as TabId) ? (hash as TabId) : 'discover';
   });
   // Mobile-first: always use mobile layout (desktop layout disabled for now)
@@ -6921,12 +6991,7 @@ export default function App() {
 
   const [showSearch, setShowSearch] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
-  const [placesNavKey, setPlacesNavKey] = useState(0);
-  const [placesNavCat, setPlacesNavCat] = useState('All');
-  const [placesNavSearch, setPlacesNavSearch] = useState('');
-  const [placesNavVibe, setPlacesNavVibe] = useState('');
   // Places are not loaded in the app — kept on the server only.
-  const [places, setPlaces] = useState<Place[]>([]);
   // Initialize with static bundled events so cards render immediately on load.
   // Supabase live data merges in and replaces these once fetched.
   const [events, setEvents] = useState<TMEvent[]>(() =>
@@ -6966,9 +7031,7 @@ export default function App() {
   // Start as false — static events render immediately; live fetch runs in background.
   const [eventsLoading, setEventsLoading] = useState(false);
   const [loadError, setLoadError] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<TMEvent | null>(null);
-  const [checkedIn, setCheckedIn] = useState<Set<string>>(loadCheckins);
 
   // ── Plan / Saved Items ──
   const [savedPlan, setSavedPlan] = useState<SavedPlanItem[]>(() => {
@@ -7453,9 +7516,6 @@ export default function App() {
     }
     // When cleared, navigation back is handled by the popstate handler
   }, [venuePageSlug]);
-
-  const [checkInError, setCheckInError] = useState<string | null>(null);
-  const [tooFarPlaceId, setTooFarPlaceId] = useState<string | null>(null);
 
   const [siteBanner, setSiteBanner] = useState<BannerConfig | null>(null);
   const [mapProvider, setMapProvider] = useState<'google' | 'apple' | 'auto'>('apple');
@@ -8076,43 +8136,20 @@ export default function App() {
           onTouchStart={onMainTouchStart} onTouchEnd={onMainTouchEnd}>
           {activeTab === 'discover' && (
             <DiscoverScreen
-              places={places}
               events={events}
               eventsLoading={eventsLoading}
-              onPlaceSelect={openPlaceModal}
               onEventSelect={openEventModal}
               coords={coords}
               geoRequested={geoRequested}
               geoSilentPending={geoSilentPending}
               geoError={geoError}
               onRequestGeo={requestGeo}
-              checkedIn={checkedIn}
-              onCheckIn={handleCheckIn}
-
-              onNavigatePlaces={(cat, search, vibeLabel, vibeGradient) => { setPlacesNavCat(cat); setPlacesNavSearch(search); setPlacesNavVibe(vibeLabel ? `${vibeLabel}|||${vibeGradient || ''}` : ''); setPlacesNavKey(k => k + 1); setActiveTab('events'); window.scrollTo({ top: 0, behavior: 'instant' }); }}
               onNavigateEvents={(genre) => { setEventsNavGenre(genre || ''); setActiveTab('events'); }}
               prefs={prefs}
               adminHeroLines={adminHeroLines}/>
           )}
           {activeTab === 'events' && (
             <EventsScreen events={events} eventsLoading={eventsLoading} onEventSelect={openEventModal} initialSearch={eventsNavSearch} initialGenre={eventsNavGenre} />
-          )}
-          {activeTab === 'places' && (
-            <PlacesScreen
-              places={places}
-              onPlaceSelect={openPlaceModal}
-              coords={coords}
-              geoRequested={geoRequested}
-              geoSilentPending={geoSilentPending}
-              geoError={geoError}
-              onRequestGeo={requestGeo}
-              checkedIn={checkedIn}
-              onCheckIn={handleCheckIn}
-              tooFarPlaceId={tooFarPlaceId}
-              navKey={placesNavKey}
-              navCat={placesNavCat}
-              navSearch={placesNavSearch}
-              navVibe={placesNavVibe}/>
           )}
           {activeTab === 'plan' && (
             <PlanScreen
@@ -8122,26 +8159,6 @@ export default function App() {
               onRemovePlace={(id) => { setSavedPlan(prev => { const n = prev.filter(p => !(p.type === 'place' && (p.data as Place).id === id)); savePlanToStorage(n); return n; }); }}
               onRemoveEvent={(id) => { setSavedPlan(prev => { const n = prev.filter(p => !(p.type === 'event' && (p.data as TMEvent).id === id)); savePlanToStorage(n); return n; }); }}
               onClearAll={() => { setSavedPlan([]); localStorage.removeItem('abq-saved-plan'); }}
-            />
-          )}
-          {activeTab === 'profile' && (
-            <ProfileScreen
-              checkedIn={checkedIn}
-              user={user}
-              places={places}
-              isDark={isDark}
-              onToggleDark={() => setIsDark(d => !d)}
-              onSignIn={() => setShowAuthModal(true)}
-              onSignOut={() => {
-                // Clear session immediately (sync) so UI updates right away on mobile
-                const sbKey = Object.keys(localStorage).find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
-                if (sbKey) localStorage.removeItem(sbKey);
-                setUser(null);
-                // Also do the async server-side invalidation in the background
-                supabase.auth.signOut({ scope: 'local' }).catch(() => {});
-              }}
-              onUsernameChange={async () => { const { data: { user: fresh } } = await supabase.auth.getUser(); if (fresh) setUser(fresh); }}
-              onAdmin={user?.email === ADMIN_EMAIL ? () => { setCurrentHash('#admin'); window.history.pushState({}, '', '#admin'); } : undefined}
             />
           )}
         </main>
