@@ -407,20 +407,7 @@ const STATIC_TM_EVENTS: TMEvent[] = ALL_EVENTS
 // ─── Yelp Photo Map (loaded once at startup) ────────────────────────────────
 // Keyed by place name → { source, bizUrl, photos[] }
 // Stored separately from Google "image" field so neither source overwrites the other.
-let _yelpPhotoMap: Record<string, { source: string; bizUrl: string | null; photos: string[] }> = {};
-let _yelpPhotoMapLoaded = false;
-async function loadYelpPhotoMap() {
-  if (_yelpPhotoMapLoaded) return;
-  try {
-    const r = await fetch('/data/place-photos.json');
-    if (r.ok) _yelpPhotoMap = await r.json();
-  } catch {}
-  _yelpPhotoMapLoaded = true;
-}
-function getYelpPhotos(placeName: string): string[] {
-  // Use ls.jpg (526px square) instead of l.jpg (~1000px) — loads ~4x faster
-  return (_yelpPhotoMap[placeName]?.photos ?? []).map(u => u.replace(/\/l\.jpg$/, '/ls.jpg'));
-}
+
 
 
 function decodeEntities(str: string): string {
@@ -441,16 +428,23 @@ function hiResUrl(url: string): string {
     .replace(/maxWidthPx=\d+/, 'maxWidthPx=2000');
 }
 
-function getBestEventImage(images?: TMImage[]): string {
+function getBestEventImage(images?: TMImage[], preferThumbnail = false): string {
   if (!images || images.length === 0) return '';
   const nonFallback = images.filter(img => !img.fallback);
   const pool = nonFallback.length > 0 ? nonFallback : images;
-  const sorted = [...pool].sort((a, b) => {
-    const ap = (a.width || 0) * (a.height || 0);
-    const bp = (b.width || 0) * (b.height || 0);
-    return bp - ap;
-  });
-  return sorted[0]?.url || '';
+  if (preferThumbnail) {
+    // For list views: pick smallest image >= 200px wide to save bandwidth
+    const small = pool.filter(i => (i.width || 0) >= 200 && (i.width || 0) <= 500);
+    if (small.length > 0) return small[0].url || '';
+  }
+  // For detail views: pick largest image
+  let best = pool[0];
+  for (let i = 1; i < pool.length; i++) {
+    if (((pool[i].width || 0) * (pool[i].height || 0)) > ((best.width || 0) * (best.height || 0))) {
+      best = pool[i];
+    }
+  }
+  return best?.url || '';
 }
 
 function formatDate(dateStr?: string): string {
@@ -3291,7 +3285,7 @@ function DiscoverScreen({
     setTimeout(tick, 600);
     return () => { cancelled = true; };
   }, []);
-  const featured = places.filter(p => p.isFeatured && !BLOCKED_VENUES.some(b => p.name?.toLowerCase().includes(b.toLowerCase()))).slice(0, 5);
+  const featured: any[] = [];
 
   const upcomingEvents = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
@@ -3549,83 +3543,7 @@ function DiscoverScreen({
       {places.length > 0 && <DailyGem places={places} onSelect={onPlaceSelect} />}
 
       {/* Trending Bento Grid */}
-      {featured.length > 0 && (
-        <div className="pb-5">
-          <h2
-            className="text-lg font-black uppercase tracking-tight mb-3 px-5 flex items-center gap-2"
-            style={{ fontFamily: 'Public Sans, sans-serif' }}
-          >
-            <FlatIcon name="chile" size={18} color="var(--brand)" />
-            Staff Picks
-          </h2>
-          <div className="grid gap-2 px-5" style={{ gridTemplateColumns: '1fr 1fr' }}>
-            {/* Hero card */}
-            <button
-              onClick={() => onPlaceSelect(featured[0])}
-              className="relative overflow-hidden rounded-lg col-span-2"
-              style={{ height: '176px' }}
-            >
-              <ImageWithFallback
-                src={featured[0].image}
-                alt={featured[0].name}
-                className="w-full h-full object-cover"
-                gradient={featured[0].gradient}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-              <div className="absolute top-3 left-3">
-                <span className="text-xs font-bold text-white bg-primary px-2 py-1 rounded">
-                  ⚡ Featured
-                </span>
-              </div>
-              {checkedIn.has(featured[0].id) && (
-                <div className="absolute top-3 right-3">
-                  <span className="text-xs font-bold text-white px-2 py-1 rounded" style={{ background: 'rgba(160,59,0,0.85)' }}>✓ Visited</span>
-                </div>
-              )}
-              <div className="absolute bottom-3 left-3 right-3 text-left">
-                <p
-                  className="text-white font-black text-base leading-tight"
-                  style={{ fontFamily: 'Public Sans, sans-serif' }}
-                >
-                  {featured[0].name}
-                </p>
-                <p className="text-white/70 text-xs mt-0.5">{featured[0].category}</p>
-              </div>
-            </button>
-            {/* Two smaller cards */}
-            {featured.slice(1, 3).map(place => (
-              <button
-                key={place.id}
-                onClick={() => onPlaceSelect(place)}
-                className="relative overflow-hidden rounded-lg"
-                style={{ height: '128px' }}
-              >
-                <ImageWithFallback
-                  src={place.image}
-                  alt={place.name}
-                  className="w-full h-full object-cover"
-                  gradient={'var(--brand-gradient)'}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                {checkedIn.has(place.id) && (
-                  <div className="absolute top-2 right-2">
-                    <span className="text-white text-xs px-1.5 py-0.5 rounded" style={{ background: 'rgba(160,59,0,0.85)' }}>✓</span>
-                  </div>
-                )}
-                <div className="absolute bottom-2.5 left-2.5 right-2.5 text-left">
-                  <p
-                    className="text-white font-black text-sm leading-tight"
-                    style={{ fontFamily: 'Public Sans, sans-serif', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}
-                  >
-                    {place.name}
-                  </p>
-                  <p className="text-white/60 text-xs">{place.category}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      
 
       {/* Near You */}
       {!hidden.includes('nearYou') && coords && nearbyPlaces.length > 0 && (
@@ -7179,9 +7097,7 @@ export default function App() {
           if (snap.exists()) {
             const data = snap.data();
             if (Array.isArray(data.checkIns) && data.checkIns.length > 0) {
-              const merged = new Set<string>([...loadCheckins(), ...data.checkIns]);
               setCheckedIn(merged);
-              saveCheckins(merged);
             }
           }
         } catch (err) { console.error('Load checkins error:', err); }
@@ -7191,16 +7107,7 @@ export default function App() {
     return () => unsub.unsubscribe();
   }, []);
 
-  // Debounced Firestore sync when checkedIn changes and user is signed in
-  useEffect(() => {
-    if (!user || !authReady) return;
-    if (syncTimeout.current) clearTimeout(syncTimeout.current);
-    syncTimeout.current = setTimeout(() => {
-      syncCheckinsToFirestore(user.id, checkedIn, (user.user_metadata?.display_name || user.email) || user.email || 'Explorer');
-    }, 1500);
-    return () => { if (syncTimeout.current) clearTimeout(syncTimeout.current); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checkedIn, user?.id, authReady]);
+
 
   const { coords, error: geoError, requested: geoRequested, silentPending: geoSilentPending, request: requestGeo } = useGeolocation();
 
@@ -7593,58 +7500,7 @@ export default function App() {
       });
   }, []);
 
-  const handleCheckIn = useCallback((placeId: string) => {
-    // Allow un-checking without proximity
-    if (checkedIn.has(placeId)) {
-      setCheckedIn(prev => {
-        const next = new Set(prev);
-        next.delete(placeId);
-        saveCheckins(next);
-        return next;
-      });
-      setCheckInError(null);
-      return;
-    }
-
-    // Require location for checking IN
-    if (!coords) {
-      setCheckInError('Enable location to check in — you need to be near the place!');
-      requestGeo();
-      setTimeout(() => setCheckInError(null), 5000);
-      return;
-    }
-
-    // Find the place and verify proximity (within 0.05 miles / ~264 ft)
-    const place = places.find(p => p.id === placeId);
-    if (place?.lat && place?.lng) {
-      const dist = distanceMiles(coords.lat, coords.lng, place.lat, place.lng);
-      if (dist > 0.05) {
-        setTooFarPlaceId(placeId);
-        setTimeout(() => setTooFarPlaceId(null), 3000);
-        return;
-      }
-    }
-
-    // If place has no coordinates, we can't verify proximity — block check-in
-    if (place && !place.lat && !place.lng) {
-      setCheckInError('Check-in unavailable — this place has no location data.');
-      setTimeout(() => setCheckInError(null), 4000);
-      return;
-    }
-
-    // Proximity OK → check in
-    // Haptic feedback: iOS/Android vibration on successful check-in
-    if ('vibrate' in navigator) { try { navigator.vibrate([12, 40, 12]); } catch {} }
-    tickStreak(); // advance daily check-in streak
-    trackEvent('checkin', { place_id: placeId });
-    setCheckedIn(prev => {
-      const next = new Set(prev);
-      next.add(placeId);
-      saveCheckins(next);
-      return next;
-    });
-    setCheckInError(null);
-  }, [checkedIn, coords, places, requestGeo]);
+  
 
   useEffect(() => {
     async function loadData() {
