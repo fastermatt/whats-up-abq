@@ -548,75 +548,22 @@ function formatTime(timeStr?: string): string {
 }
 
 function getEventCategory(event: TMEvent): string {
+  // Events are pre-classified in Supabase with one of 10 canonical categories:
+  // Concerts, Music, Dance, Theatre, Comedy, Sports, Arts, Family, Free, Community
   const seg = (event.classifications?.[0]?.segment?.name || '').trim();
-  const gen = (event.classifications?.[0]?.genre?.name || '').trim();
-  const name = (event.name || '').toLowerCase();
-  const venue = (event._embedded?.venues?.[0]?.name || '').toLowerCase();
-
-  // ── Comedy: standalone comedians, improv, comedy clubs ──
-  if (seg === 'Comedy' || gen === 'Comedy' || seg === 'Theater & Comedy' ||
-      name.includes('comedy') || name.includes('stand-up') || name.includes('standup') ||
-      name.includes('improv') || name.includes('comedian') || name.includes('kill tony') ||
-      venue.includes('comedy') || venue.includes("hyena")) return 'Comedy';
-
-  // ── Movie: film screenings, cinema events ──
-  if (seg === 'Film' || gen === 'Film' ||
-      name.includes('movie') || name.includes('film') || name.includes('cinema') ||
-      name.includes('screening') || name.includes('drive-in') || name.includes('documentary') ||
-      venue.includes('cinema')) return 'Movie';
-
-  // ── Volunteer: food banks, cleanups, service ──
-  if (name.includes('volunteer') || name.includes('food bank') || name.includes('cleanup') ||
-      name.includes('habitat') || name.includes('blood drive') || name.includes('outreach') ||
-      event._source === 'volunteer') return 'Volunteer';
-
-  // ── Sports ──
+  const VALID_CATS = ['Concerts', 'Music', 'Dance', 'Theatre', 'Comedy', 'Sports', 'Arts', 'Family', 'Free', 'Community'];
+  if (VALID_CATS.includes(seg)) return seg;
+  // Legacy fallback for any events not yet reclassified
+  if (seg === 'Arts & Theatre') return 'Arts';
+  if (seg === 'Volunteer' || seg === 'Outdoor') return 'Community';
+  if (seg === 'Film') return 'Community';
+  if (seg === 'Concert' || seg === 'Music') return 'Concerts';
   if (seg === 'Sports') return 'Sports';
+  return 'Community';
+}
 
-  // ── Family ──
-  if (seg === 'Family' || gen === 'Family' ||
-      name.includes('storytime') || name.includes('story time') ||
-      name.includes('for kids') || name.includes('toddler') || name.includes('preschool') ||
-      name.includes('disney') || name.includes('paw patrol') || name.includes('pokemon'))
-    return 'Family';
-
-  // ── Theatre: Broadway tours, musicals, plays — NOT comedy, NOT film ──
-  if ((seg === 'Arts & Theatre' && (gen === 'Theatre' || gen === 'Musical' || gen === 'Dance')) ||
-      name.includes('(touring)') || name.includes('theatre') || name.includes('musical') ||
-      name.includes('ballet') || name.includes('nutcracker') || name.includes('swan lake'))
-    return 'Theatre';
-
-  // ── Arts: visual arts, crafts, galleries ──
-  if ((seg === 'Arts & Theatre' && gen !== 'Theatre' && gen !== 'Comedy' && gen !== 'Dance' && gen !== 'Musical') ||
-      name.includes('craft') || name.includes('pottery') || name.includes('painting') ||
-      name.includes('gallery') || name.includes('exhibit') || name.includes('museum') ||
-      name.includes('art show') || name.includes('art workshop'))
-    return 'Arts';
-
-  // ── Music: concerts, live music ──
-  if (seg === 'Music' || seg === 'Live Music' || gen === 'Live Music' ||
-      name.includes('concert') || name.includes('live music') || name.includes('open mic') ||
-      name.includes('live at ')) return 'Music';
-
-  // ── Outdoor ──
-  if (name.includes('hike') || name.includes('trail') || name.includes('nature walk') ||
-      name.includes('outdoor') || name.includes('kayak') || name.includes('stargaz') ||
-      name.includes('botanic')) return 'Outdoor';
-
-  // ── Community: festivals, markets, wellness, classes ──
-  if (seg === 'Community' || seg === 'Festival' ||
-      name.includes('festival') || name.includes('market') || name.includes('community') ||
-      name.includes('yoga') || name.includes('book club'))
-    return 'Community';
-
-  // ── Free events (if price is free and nothing else matched) ──
-  if (event.isFree || (event.priceRanges?.[0]?.min === 0 && event.priceRanges?.[0]?.max === 0))
-    return 'Free';
-
-  // Fallback: use segment or genre if valid
-  const val = (seg && seg !== 'Undefined' ? seg : null) ||
-              (gen && gen !== 'Undefined' ? gen : null);
-  return val || 'Event';
+function getEventSubGenre(event: TMEvent): string {
+  return (event.classifications?.[0]?.genre?.name || '').trim() || 'Other';
 }
 
 function distanceMiles(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -5310,188 +5257,14 @@ function EventsScreen({
     // "For You" = union of all followed genres
     if (selectedGenre === '❤️ For You') {
       if (followedGenres.length === 0) return []; // nothing followed — show setup prompt instead
-      const matchesAny = (e: TMEvent) => followedGenres.some(g => {
-        const seg = e.classifications?.[0]?.segment?.name || '';
-        const gen = e.classifications?.[0]?.genre?.name || '';
-        const name = e.name.toLowerCase();
-        switch (g) {
-          case 'Concerts': return seg === 'Music' ||
-            gen === 'Rock' || gen === 'Pop' || gen === 'Metal' || gen === 'Hip-Hop/Rap' ||
-            gen === 'Country' || gen === 'Jazz' || gen === 'Blues' || gen === "R&B" ||
-            gen === 'Alternative' || gen === 'Classical' || gen === 'Latin' || gen === 'Dance/Electronic' ||
-            ((seg === 'Undefined' || !seg) && !name.includes('(touring)') && !name.includes('storytime') && !name.includes('workshop') && !name.includes(' class') && !name.includes('book club')) ||
-            name.includes('concert') || name.includes(' Tour ') || name.includes(' tour ') || name.includes('live at ');
-          case 'Music':    return seg === 'Live Music' || gen === 'Live Music' ||
-            (seg === 'Music' && (!gen || gen === '' || gen === 'Other')) ||
-            name.includes('live music') || name.includes('open mic') || name.includes('jam ') ||
-            name.includes('acoustic') || name.includes('songwriting') || name.includes('sound bath') ||
-            name.includes('salsa') || name.includes('cumbia') || name.includes('tango') ||
-            name.includes('flamenco') || name.includes('boogie') || name.includes('shimmy') ||
-            name.includes('goth night') || name.includes('live rock');
-          case 'Dance':    return gen === 'Dance' ||
-            name.includes('dance') || name.includes('salsa') || name.includes('cumbia') ||
-            name.includes('tango') || name.includes('flamenco') || name.includes('swing') ||
-            name.includes('zumba') || name.includes('boogie') || name.includes('shimmy') ||
-            name.includes('ballet') || name.includes('nutcracker') || name.includes('pilobolus');
-          case 'Theatre':  return (seg === 'Arts & Theatre' && (gen === 'Theatre' || gen === 'Musical')) ||
-            ((seg === 'Undefined' || !seg) && name.includes('(touring)')) ||
-            name.includes('theatre') || name.includes('theater') || name.includes('musical') ||
-            name.includes('vortex') || name.includes('fusion theatre') || name.includes('airswimming');
-          case 'Comedy':   return seg === 'Comedy' || gen === 'Comedy' || name.includes('comedy') || name.includes('stand-up') || name.includes('improv');
-          case 'Sports':   return seg === 'Sports';
-          case 'Arts':     return (seg === 'Arts & Theatre' && gen !== 'Theatre' && gen !== 'Comedy' && gen !== 'Dance' && gen !== 'Musical') ||
-            name.includes('craft') || name.includes('pottery') || name.includes('painting') ||
-            name.includes('gallery') || name.includes('exhibit') || name.includes('photo') ||
-            name.includes('quilt') || name.includes('knit') || name.includes('crochet') ||
-            name.includes('origami') || name.includes('lego') || name.includes('studio');
-          case 'Family':   return seg === 'Family' || name.includes('family') || name.includes('storytime') || name.includes(' kids') || name.includes('children') || name.includes('toddler') || name.includes('preschool');
-          case 'Free':     return getEventPrice(e) === 'FREE' || name.includes('free') || name.includes('no cover') || name.includes('market') || name.includes('festival');
-          case 'Community':return seg === 'Community' || seg === 'Festival' || name.includes('festival') || name.includes('market') || name.includes('fair') || name.includes('community') || name.includes('yoga') || name.includes('volunteer');
-          case 'Outdoor':  return name.includes('hike') || name.includes('hiking') || name.includes('trail') || name.includes('nature walk') || name.includes('outdoor') || name.includes('kayak') || name.includes('bird') || name.includes('stargaz') || name.includes('5k') || name.includes('run') || name.includes('marathon') || name.includes('botanic');
-          case 'Volunteer':return name.includes('volunteer') || name.includes('food bank') || name.includes('cleanup') || name.includes('fundrais') || name.includes('benefit') || name.includes('charity') || name.includes('blood drive') || name.includes('outreach');
-          case 'Movie':    return seg === 'Film' || gen === 'Film' || name.includes('movie') || name.includes('film') || name.includes('cinema') || name.includes('screening') || name.includes('documentary') || name.includes('drive-in');
-          default:         return seg === g || gen === g;
-        }
-      });
+      const matchesAny = (e: TMEvent) => followedGenres.some(g => getEventCategory(e) === g);
       return result.filter(matchesAny);
     }
     if (selectedGenre !== 'All') {
       result = result.filter(e => {
-        const seg = e.classifications?.[0]?.segment?.name || '';
-        const gen = e.classifications?.[0]?.genre?.name || '';
-        const eventName = e.name.toLowerCase();
-        const venueName = (e._embedded?.venues?.[0]?.name || '').toLowerCase();
-        switch (selectedGenre) {
-          // ── Concerts: ticketed shows from TM/SeatGeek ──────────────────────
-          case 'Concerts':
-            return seg === 'Music' ||
-              gen === 'Rock' || gen === 'Pop' || gen === 'Metal' || gen === 'Hip-Hop/Rap' ||
-              gen === 'Country' || gen === 'Jazz' || gen === 'Blues' || gen === "R&B" ||
-              gen === 'Alternative' || gen === 'Classical' || gen === 'Latin' || gen === 'Dance/Electronic' ||
-              // Undefined TM events that are concerts (Josiah Queen, AYYBO, tribute bands)
-              ((seg === 'Undefined' || !seg) && !eventName.includes('(touring)') &&
-               !eventName.includes('storytime') && !eventName.includes('workshop') &&
-               !eventName.includes(' class') && !eventName.includes('book club') &&
-               !eventName.includes('walking tour') && !eventName.includes('gift card')) ||
-              eventName.includes('concert') || eventName.includes(' Tour') || eventName.includes('live at ');
-          // ── Music: local / participatory / live music scenes ───────────────
-          case 'Music':
-            return seg === 'Live Music' || gen === 'Live Music' ||
-              (seg === 'Music' && (!gen || gen === '' || gen === 'Other')) ||
-              eventName.includes('live music') || eventName.includes('open mic') ||
-              eventName.includes('acoustic') || eventName.includes('songwriting') ||
-              eventName.includes('sound bath') || eventName.includes('live rock') ||
-              eventName.includes('goth night') || eventName.includes('salsa') ||
-              eventName.includes('cumbia') || eventName.includes('tango') ||
-              eventName.includes('flamenco') || eventName.includes('boogie') ||
-              eventName.includes('shimmy') || eventName.includes('palo duro');
-          // ── Dance: classes, social dance, dance performances ───────────────
-          case 'Dance':
-            return gen === 'Dance' ||
-              eventName.includes('dance') || eventName.includes('salsa') ||
-              eventName.includes('cumbia') || eventName.includes('tango') ||
-              eventName.includes('flamenco') || eventName.includes(' swing') ||
-              eventName.includes('zumba') || eventName.includes('boogie') ||
-              eventName.includes('shimmy') || eventName.includes('ballet') ||
-              eventName.includes('nutcracker') || eventName.includes('pilobolus') ||
-              eventName.includes('west coast swing') || eventName.includes('folk dance');
-          // ── Theatre: Broadway tours, plays, musicals, local theatre ────────
-          case 'Theatre':
-            return (seg === 'Arts & Theatre' && (gen === 'Theatre' || gen === 'Musical' || gen === 'Dance')) ||
-              ((seg === 'Undefined' || !seg) && eventName.includes('(touring)')) ||
-              eventName.includes('theatre') || eventName.includes('theater') ||
-              eventName.includes('musical') || eventName.includes('vortex') ||
-              eventName.includes('fusion theatre') || eventName.includes('airswimming') ||
-              eventName.includes('pilobolus') || eventName.includes('swan lake') ||
-              eventName.includes('nutcracker') || eventName.includes('ballet');
-          // ── Comedy ─────────────────────────────────────────────────────────
-          case 'Comedy':
-            return seg === 'Comedy' || gen === 'Comedy' || seg === 'Theater & Comedy' ||
-              eventName.includes('comedy') || eventName.includes('stand-up') ||
-              eventName.includes('standup') || eventName.includes('improv') ||
-              eventName.includes('kill tony') || eventName.includes('comedian');
-          // ── Sports ─────────────────────────────────────────────────────────
-          case 'Sports':
-            return seg === 'Sports' || gen === 'Sports';
-          // ── Arts: visual art, crafts, galleries, workshops ─────────────────
-          case 'Arts':
-            return (seg === 'Arts & Theatre' && gen !== 'Theatre' && gen !== 'Comedy' &&
-                    gen !== 'Dance' && gen !== 'Musical') ||
-              eventName.includes('craft') || eventName.includes('pottery') ||
-              eventName.includes('painting') || eventName.includes('drawing') ||
-              eventName.includes('gallery') || eventName.includes('exhibit') ||
-              eventName.includes('museum') || eventName.includes('photo') ||
-              eventName.includes('quilt') || eventName.includes('knit') ||
-              eventName.includes('crochet') || eventName.includes('origami') ||
-              eventName.includes('lego') || eventName.includes('duplo') ||
-              eventName.includes('clay') || eventName.includes('screenwriting') ||
-              eventName.includes('art studio') || eventName.includes('art workshop') ||
-              eventName.includes('film festival') || eventName.includes('art show');
-          // ── Family: kids, storytime, STEAM, youth ──────────────────────────
-          case 'Family':
-            return seg === 'Family' || gen === 'Family' ||
-              eventName.includes('family') || eventName.includes('storytime') ||
-              eventName.includes('story time') || eventName.includes(' kids') ||
-              eventName.includes('for kids') || eventName.includes('children') ||
-              eventName.includes('toddler') || eventName.includes('preschool') ||
-              eventName.includes('baby/toddler') || eventName.includes('read to') ||
-              eventName.includes('steam') || eventName.includes('youth') ||
-              eventName.includes('junior') || eventName.includes('disney') ||
-              eventName.includes('pokemon') || eventName.includes('paw patrol') ||
-              eventName.includes('duplo') || eventName.includes('lego club');
-          // ── Free events ────────────────────────────────────────────────────
-          case 'Free': {
-            const isFree =
-              getEventPrice(e) === 'FREE' ||
-              eventName.includes('free') || eventName.includes('no cover') ||
-              eventName.includes('no charge') || eventName.includes('market') ||
-              eventName.includes('festival') || seg === 'Community' || seg === 'Festival';
-            return isFree;
-          }
-          // ── Community: social events, classes, civic, wellness ────────────
-          case 'Community':
-            return seg === 'Community' || gen === 'Community' || seg === 'Festival' ||
-              eventName.includes('festival') || eventName.includes('market') ||
-              eventName.includes('fair') || eventName.includes('community') ||
-              eventName.includes('fiesta') || eventName.includes('yoga') ||
-              eventName.includes('pilates') || eventName.includes('qigong') ||
-              eventName.includes('walkers') || eventName.includes('book club') ||
-              eventName.includes('computer help') || eventName.includes('one-on-one') ||
-              eventName.includes('genealogy') || eventName.includes('juggling') ||
-              venueName.includes('park') || venueName.includes('plaza');
-          // ── Outdoor: hikes, trails, nature walks, outdoor activities ───────
-          case 'Outdoor':
-            return eventName.includes('hike') || eventName.includes('hiking') ||
-              eventName.includes('trail') || eventName.includes('nature walk') ||
-              eventName.includes('outdoor') || eventName.includes('kayak') ||
-              eventName.includes('paddle') || eventName.includes('camping') ||
-              eventName.includes('bird') || eventName.includes('wildlife') ||
-              eventName.includes('botanic') || eventName.includes('garden walk') ||
-              eventName.includes('stargaz') || eventName.includes('astronomy') ||
-              eventName.includes('park cleanup') || eventName.includes('run') ||
-              eventName.includes('5k') || eventName.includes('marathon') ||
-              eventName.includes('walk') && (venueName.includes('park') || venueName.includes('trail')) ||
-              (seg === 'Sports' && (eventName.includes('run') || eventName.includes('race') || eventName.includes('5k')));
-          // ── Volunteer: service events, food banks, cleanups ────────────────
-          case 'Volunteer':
-            return eventName.includes('volunteer') || eventName.includes('food bank') ||
-              eventName.includes('cleanup') || eventName.includes('clean up') ||
-              eventName.includes('serve') || eventName.includes('habitat') ||
-              eventName.includes('community service') || eventName.includes('donation') ||
-              eventName.includes('fundrais') || eventName.includes('benefit') ||
-              eventName.includes('charity') || eventName.includes('give back') ||
-              eventName.includes('blood drive') || eventName.includes('outreach');
-          // ── Movie: screenings, film festivals, cinema events ────────────────
-          case 'Movie':
-            return seg === 'Film' || gen === 'Film' ||
-              eventName.includes('movie') || eventName.includes('film') ||
-              eventName.includes('cinema') || eventName.includes('screening') ||
-              eventName.includes('drive-in') || eventName.includes('documentary') ||
-              eventName.includes('short film') || eventName.includes('film fest') ||
-              venueName.includes('cinema') || venueName.includes('theater') && eventName.includes('film');
-          default:
-            return seg === selectedGenre || gen === selectedGenre;
-        }
+        // Events are pre-classified with canonical categories in segment.name
+        const cat = getEventCategory(e);
+        return cat === selectedGenre;
       });
     }
 
@@ -5801,21 +5574,30 @@ function EventsScreen({
           );
         }
         const CAT_COLORS: Record<string, string> = {
-          'Music': '#8B3A0F', 'Arts & Theatre': '#7C3AED', 'Sports': '#1D4ED8',
-          'Comedy': '#D97706', 'Family': '#059669', 'Community': '#0F766E',
-          'Food & Drink': '#B45309', 'Outdoors': '#15803D', 'Film & Media': '#9333EA',
-          'Education': '#0369A1', 'Charity & Causes': '#DB2777', 'Miscellaneous': '#6B7280',
+          'Concerts': '#7C3AED', 'Music': '#8B3A0F', 'Dance': '#BE185D',
+          'Theatre': '#6D28D9', 'Comedy': '#B45309', 'Sports': '#1D4ED8',
+          'Arts': '#7C2D12', 'Family': '#047857', 'Free': '#0F766E',
+          'Community': '#0E7490',
         };
+        // When a specific genre is selected, show events in a flat date-sorted list
+        // When "All", group by category and shuffle section order per session
         const catGroups: Record<string, TMEvent[]> = {};
-        for (const evt of deduped) {
-          const cat = getEventCategory(evt);
-          if (!catGroups[cat]) catGroups[cat] = [];
-          catGroups[cat].push(evt);
+        if (selectedGenre !== 'All') {
+          // Single group — all filtered events under the selected genre
+          catGroups[selectedGenre] = deduped;
+        } else {
+          for (const evt of deduped) {
+            const cat = getEventCategory(evt);
+            if (!catGroups[cat]) catGroups[cat] = [];
+            catGroups[cat].push(evt);
+          }
         }
         // Seeded shuffle — different order every session so users discover new categories
         let _rng = catShuffleSeed;
         const _lcg = () => { _rng = (_rng * 9301 + 49297) % 233280; return _rng / 233280; };
-        const shuffledGroups = [...Object.entries(catGroups)].sort(() => _lcg() - 0.5);
+        const shuffledGroups = selectedGenre !== 'All'
+          ? Object.entries(catGroups)
+          : [...Object.entries(catGroups)].sort(() => _lcg() - 0.5);
         return (
           <div style={{ padding: '0 16px 112px' }}>
             {/* Column picker */}
