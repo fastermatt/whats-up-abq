@@ -3240,6 +3240,7 @@ function DiscoverScreen({
   const [heroDone, setHeroDone] = useState(false);
   const [calendarDate, setCalendarDate] = useState<string | null>(null);
   const [showCalendar, setShowCalendar] = useState(true);
+  const [discoverFilter, setDiscoverFilter] = useState<'Tonight' | 'This Weekend' | 'Free' | 'Volunteer'>('Tonight');
   useEffect(() => {
     let cancelled = false;
     const phrasePool = (adminHeroLines?.length) ? adminHeroLines : HERO_PHRASES;
@@ -3286,73 +3287,73 @@ function DiscoverScreen({
     return () => { cancelled = true; };
   }, []);
 
-  const upcomingEvents = useMemo(() => {
-    const today = new Date().toISOString().slice(0, 10);
-    const sevenDays = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10);
-    const pool = events
-      .filter(e => {
-        const d = e.dates?.start?.localDate || '';
-        return d >= today && d <= sevenDays;
-      })
-      .filter(e => !e._isAdult);  // Discover "This Week" is always family-friendly
+  // Use local date (Mountain Time friendly) for today comparisons
+  const todayStr = useMemo(() => new Date().toLocaleDateString('en-CA'), []);
 
-    // If a featured event is active and falls within this week, pin it first
-    // so it's guaranteed to appear regardless of the random shuffle.
-    const isFeaturedActive = today < FEATURED_EVENT_EXPIRY;
-    let pinnedFeatured: TMEvent | undefined;
-    if (isFeaturedActive) {
-      pinnedFeatured = pool.find(e => e.id === FEATURED_EVENT_ID);
-      // If not in pool (filtered by hasActionableLink or deduped), try static fallback
-      if (!pinnedFeatured) {
-        const staticSrc = ALL_EVENTS.find(e => e.id === FEATURED_EVENT_ID);
-        if (staticSrc) {
-          const candidate = staticEventToTMEvent(staticSrc);
-          const d = candidate.dates?.start?.localDate || '';
-          if (d >= today && d <= sevenDays) pinnedFeatured = candidate;
-        }
-      }
-    }
+  // Today's events — randomly sampled, 3–5 shown each load
+  const todayEvents = useMemo(() => {
+    const pool = events.filter(e => (e.dates?.start?.localDate || '') === todayStr && !e._isAdult);
+    const shuffled = [...pool].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, Math.min(pool.length, 5));
+  }, [events, todayStr]);
 
-    const rest = pool.filter(e => e.id !== FEATURED_EVENT_ID);
-    const shuffled = [...rest].sort(() => Math.random() - 0.5);
-    const picked = pinnedFeatured
-      ? [pinnedFeatured, ...shuffled.slice(0, 2)]
-      : shuffled.slice(0, 3);
-
-    return picked.sort((a, b) => {
-      const da = a.dates?.start?.localDate || '';
-      const db = b.dates?.start?.localDate || '';
-      return da.localeCompare(db);
+  // This week's events (fallback when no today events)
+  const thisWeekEvents = useMemo(() => {
+    const sevenDays = new Date(Date.now() + 7 * 864e5).toLocaleDateString('en-CA');
+    const pool = events.filter(e => {
+      const d = e.dates?.start?.localDate || '';
+      return d > todayStr && d <= sevenDays && !e._isAdult;
     });
-  }, [events]);
+    const shuffled = [...pool].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 5);
+  }, [events, todayStr]);
 
-  // "Happening This Week" — upcoming events over the next 7 days for the Discover feed
-  const happeningThisWeek = useMemo(() => {
-    const today = new Date().toISOString().slice(0, 10);
-    const sevenDays = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10);
-    return events
-      .filter(e => {
+  // Hero event — one random event matching the active discover filter
+  const heroEvent = useMemo(() => {
+    let pool: TMEvent[] = [];
+    if (discoverFilter === 'Tonight') {
+      pool = events.filter(e => (e.dates?.start?.localDate || '') === todayStr && !e._isAdult);
+    } else if (discoverFilter === 'This Weekend') {
+      const now = new Date();
+      const dayOfWeek = now.getDay(); // 0=Sun, 6=Sat
+      const daysToFriday = dayOfWeek <= 5 ? 5 - dayOfWeek : 6; // next/this Friday
+      const friday = new Date(now); friday.setDate(now.getDate() + daysToFriday);
+      const sunday = new Date(friday); sunday.setDate(friday.getDate() + 2);
+      const fridayStr = friday.toLocaleDateString('en-CA');
+      const sundayStr = sunday.toLocaleDateString('en-CA');
+      pool = events.filter(e => {
         const d = e.dates?.start?.localDate || '';
-        return d >= today && d <= sevenDays && !e._isAdult;
-      })
-      .sort((a, b) => (a.dates?.start?.localDate || '').localeCompare(b.dates?.start?.localDate || ''))
-      .slice(0, 12);
-  }, [events]);
-
-  // Count of events today for dynamic label on the Discover section
-  const todayEventCount = useMemo(() => {
-    const today = new Date().toISOString().slice(0, 10);
-    return events.filter(e => (e.dates?.start?.localDate || '') === today && !e._isAdult).length;
-  }, [events]);
+        return d >= fridayStr && d <= sundayStr && !e._isAdult;
+      });
+    } else if (discoverFilter === 'Free') {
+      pool = events.filter(e => e.isFree && !e._isAdult);
+    } else if (discoverFilter === 'Volunteer') {
+      pool = events.filter(e => {
+        const cats = e.classifications?.[0];
+        const name = (e.name || '').toLowerCase();
+        return !e._isAdult && (
+          name.includes('volunteer') ||
+          cats?.segment?.name?.toLowerCase().includes('volunteer') ||
+          cats?.genre?.name?.toLowerCase().includes('volunteer')
+        );
+      });
+    }
+    if (pool.length === 0) {
+      // Fallback: any upcoming event
+      pool = events.filter(e => (e.dates?.start?.localDate || '') >= todayStr && !e._isAdult);
+    }
+    if (pool.length === 0) return null;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }, [events, discoverFilter, todayStr]);
 
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
       {/* Streak Banner */}
       <StreakBanner />
 
-      {/* Hero — value prop + primary CTA */}
+      {/* Hero — value prop + filter pills + featured event card */}
       <div style={{ background: "url('/hero-texture.webp') center/cover no-repeat, var(--bg)", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-        <div className="px-5 pt-5 pb-4">
+        <div className="px-5 pt-5 pb-3">
           <p className="text-xs font-black uppercase mb-2" style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.12em' }}>
             Greater ABQ Metro
           </p>
@@ -3360,45 +3361,85 @@ function DiscoverScreen({
             {heroDisplay}{!heroDone && <span style={{ display: 'inline-block', width: '3px', height: '0.85em', background: 'var(--ink)', marginLeft: '2px', verticalAlign: 'baseline', animation: 'cursorBlink 0.8s step-end infinite' }} />}
           </h1>
           <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '12px', color: 'var(--ink)', opacity: 0.65, fontWeight: 500, marginBottom: '14px' }}>
-            {todayEventCount > 0
-              ? <>{todayEventCount.toLocaleString()} events happening today</>
+            {todayEvents.length > 0
+              ? <>{todayEvents.length === 5 ? '5+' : todayEvents.length} events happening today</>
               : <>{events.length.toLocaleString()} upcoming events in Albuquerque</>}
           </p>
-          <button
-            onClick={() => onNavigateEvents?.()}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', padding: '0 0 12px 0', cursor: 'pointer', fontFamily: 'Public Sans, sans-serif', fontSize: '11px', fontWeight: 700, color: 'var(--ink)', opacity: 0.5, letterSpacing: '0.04em', textDecoration: 'underline' }}
-          >
-            Browse all events →
-          </button>
         </div>
-        <div className="flex px-5 pb-4 gap-2" style={{ overflowX: 'auto', scrollbarWidth: 'none' }}>
+        {/* Filter pills — control the hero event card, don't navigate away */}
+        <div className="flex px-5 pb-3 gap-2" style={{ overflowX: 'auto', scrollbarWidth: 'none' }}>
           {([
-            { label: '🌙 Tonight',   action: () => onNavigateEvents?.('Tonight'),     primary: true  },
-            { label: 'This Weekend', action: () => onNavigateEvents?.('This Weekend'), primary: false },
-            { label: 'Free Events',  action: () => onNavigateEvents?.('Free'),         primary: false },
-            { label: 'Volunteer',    action: () => onNavigateEvents?.('Volunteer'),    primary: false },
-          ] as { label: string; action: () => void; primary: boolean }[]).map(chip => (
-            <button key={chip.label} onClick={chip.action}
-              style={{
-                flexShrink: 0,
-                height: chip.primary ? '36px' : '28px',
-                padding: chip.primary ? '0 18px' : '0 12px',
-                background: chip.primary ? 'var(--brand)' : 'rgba(255,255,255,0.85)',
-                border: chip.primary ? 'none' : '1px solid rgba(194,99,74,0.3)',
-                fontFamily: 'Public Sans, sans-serif',
-                fontSize: chip.primary ? '13px' : '11px',
-                fontWeight: chip.primary ? 800 : 700,
-                letterSpacing: '0.04em',
-                cursor: 'pointer',
-                borderRadius: 6,
-                whiteSpace: 'nowrap' as const,
-                color: chip.primary ? 'white' : 'var(--ink)',
-                boxShadow: chip.primary ? '0 2px 8px rgba(185,92,67,0.25)' : 'none',
-              }}>
-              {chip.label}
-            </button>
-          ))}
+            { label: '🌙 Tonight',    value: 'Tonight'      as const },
+            { label: 'This Weekend',  value: 'This Weekend' as const },
+            { label: 'Free Events',   value: 'Free'         as const },
+            { label: 'Volunteer',     value: 'Volunteer'    as const },
+          ]).map(chip => {
+            const active = discoverFilter === chip.value;
+            return (
+              <button key={chip.value} onClick={() => setDiscoverFilter(chip.value)}
+                style={{
+                  flexShrink: 0,
+                  height: active ? '36px' : '30px',
+                  padding: active ? '0 18px' : '0 14px',
+                  background: active ? 'var(--brand)' : 'rgba(255,255,255,0.85)',
+                  border: active ? 'none' : '1px solid rgba(194,99,74,0.3)',
+                  fontFamily: 'Public Sans, sans-serif',
+                  fontSize: active ? '13px' : '12px',
+                  fontWeight: active ? 800 : 700,
+                  letterSpacing: '0.04em',
+                  cursor: 'pointer',
+                  borderRadius: 6,
+                  whiteSpace: 'nowrap' as const,
+                  color: active ? 'white' : 'var(--ink)',
+                  boxShadow: active ? '0 2px 8px rgba(185,92,67,0.25)' : 'none',
+                  transition: 'all 0.15s ease',
+                }}>
+                {chip.label}
+              </button>
+            );
+          })}
         </div>
+        {/* Hero event card — full bleed image, event info */}
+        {heroEvent && (() => {
+          const hImg = heroEvent.images?.find((im: any) => (im.ratio === '16_9' || im.ratio === '3_2') && im.width > 500)?.url
+            || heroEvent.images?.find((im: any) => im.width > 300)?.url
+            || heroEvent.images?.[0]?.url || '';
+          const hDate = heroEvent.dates?.start?.localDate;
+          const hTime = heroEvent.dates?.start?.localTime;
+          const hVenue = heroEvent._embedded?.venues?.[0];
+          const hVenueName = hVenue?.name || '';
+          const hDateFmt = hDate ? new Date(hDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
+          const hTimeFmt = hTime ? formatTime(hTime) : '';
+          return (
+            <button
+              onClick={() => onEventSelect(heroEvent)}
+              className="w-full text-left"
+              style={{ display: 'block', marginBottom: 0, cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}
+            >
+              <div style={{ position: 'relative', paddingTop: '52%', overflow: 'hidden' }}>
+                {hImg
+                  ? <img src={hImg} alt={heroEvent.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, var(--brand) 0%, #7c3a0f 100%)' }} />
+                }
+                {/* Gradient overlay */}
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.2) 55%, transparent 100%)' }} />
+                {/* Content */}
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '12px 14px' }}>
+                  <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '17px', fontWeight: 900, color: '#fff', lineHeight: 1.2, marginBottom: 4, letterSpacing: '-0.01em', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}>
+                    {heroEvent.name}
+                  </p>
+                  <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.8)', letterSpacing: '0.03em' }}>
+                    {[hDateFmt, hTimeFmt, hVenueName].filter(Boolean).join(' · ')}
+                  </p>
+                </div>
+                {/* Arrow button */}
+                <div style={{ position: 'absolute', bottom: 12, right: 12, width: 32, height: 32, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
+                  <span style={{ color: '#fff', fontSize: 16, fontWeight: 900, lineHeight: 1 }}>→</span>
+                </div>
+              </div>
+            </button>
+          );
+        })()}
       </div>
 
       {/* Geo Banner */}
@@ -3410,83 +3451,99 @@ function DiscoverScreen({
         onRequest={onRequestGeo}
       />
 
-      {/* This Week Events — brutalist table layout */}
-      {!hidden.includes('thisWeek') && eventsLoading && upcomingEvents.length === 0 && (
-        <div className="mb-5 mx-5" style={{ border: '1px solid var(--brand-tint-border)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>
-          <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', backgroundColor: 'var(--bg)' }}>
-            <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em' }}>Today's Events</h2>
-            <span className="text-xs font-black" style={{ color: '#aaa' }}>Loading…</span>
-          </div>
-          {[0,1,2].map(i => (
-            <div key={i} className="flex" style={{ borderBottom: i < 2 ? '1px solid rgba(0,0,0,0.08)' : 'none', height: 64 }}>
-              <div style={{ width: 62, backgroundColor: '#e8e8e8' }} />
-              <div className="flex-1 px-3 py-2" style={{ backgroundColor: '#f5f5f5', opacity: 0.7 }} />
-              <div style={{ width: 48, backgroundColor: '#e8e8e8', borderLeft: '1px solid #ccc' }} />
-            </div>
-          ))}
-        </div>
-      )}
-      {!hidden.includes('thisWeek') && upcomingEvents.length > 0 && (
-        <div className="mb-5 mx-5" style={{ border: '1px solid var(--brand-tint-border)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', backgroundColor: 'var(--bg)' }}>
-            <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>
-              {todayEventCount > 0 ? "Today's Events" : 'Events This Week'}
-            </h2>
-            <button
-              onClick={() => onNavigateEvents?.()}
-              className="text-xs font-black uppercase"
-              style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)', letterSpacing: '0.06em' }}
-            >
-              → SEE ALL
-            </button>
-          </div>
-          {/* Rows — 4 randomized events from next 7 days */}
-          {upcomingEvents.map((event, idx, arr) => {
-              const dateStr = event.dates?.start?.localDate;
-              const timeStr = event.dates?.start?.localTime;
-              const venue = event._embedded?.venues?.[0];
-              const d = dateStr ? new Date(dateStr + 'T12:00:00') : null;
-              const month = d ? d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase() : '';
-              const day = d ? d.getDate() : '';
-              const time = timeStr ? formatTime(timeStr) : '';
-              const venueName = venue?.name ? venue.name.toUpperCase() : '';
-              return (
-                <button
-                  key={event.id}
-                  onClick={() => onEventSelect(event)}
-                  className="flex w-full text-left"
-                  style={{ borderBottom: idx < arr.length - 1 ? '1px solid rgba(0,0,0,0.10)' : 'none', backgroundColor: 'var(--bg)' }}
-                >
-                  {/* Date block */}
-                  <div className="flex flex-col items-center justify-center flex-shrink-0"
-                    style={{ width: 52, backgroundColor: 'var(--brand)', minHeight: 52 }}>
-                    <span className="font-black uppercase" style={{ fontSize: 9, color: 'rgba(255,255,255,0.85)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em', lineHeight: 1 }}>
-                      {month}
-                    </span>
-                    <span className="font-black" style={{ fontSize: 22, color: '#fff', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.1 }}>
-                      {day}
-                    </span>
+      {/* Today's Events — brutalist table layout */}
+      {!hidden.includes('thisWeek') && (() => {
+        const usingFallback = todayEvents.length === 0;
+        const displayEvents = usingFallback ? thisWeekEvents : todayEvents;
+        const sectionLabel = usingFallback ? 'Events This Week' : "Today's Events";
+        return (
+          <>
+            {eventsLoading && displayEvents.length === 0 && (
+              <div className="mb-5 mx-5" style={{ border: '1px solid var(--brand-tint-border)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>
+                <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', backgroundColor: 'var(--bg)' }}>
+                  <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em' }}>Today's Events</h2>
+                  <span className="text-xs font-black" style={{ color: '#aaa' }}>Loading…</span>
+                </div>
+                {[0,1,2].map(i => (
+                  <div key={i} className="flex" style={{ borderBottom: i < 2 ? '1px solid rgba(0,0,0,0.08)' : 'none', height: 64 }}>
+                    <div style={{ width: 62, backgroundColor: '#e8e8e8' }} />
+                    <div className="flex-1 px-3 py-2" style={{ backgroundColor: '#f5f5f5', opacity: 0.7 }} />
+                    <div style={{ width: 48, backgroundColor: '#e8e8e8', borderLeft: '1px solid #ccc' }} />
                   </div>
-                  {/* Content */}
-                  <div className="flex-1 px-3 py-2 flex flex-col justify-center overflow-hidden">
-                    <p className="font-black text-sm leading-tight" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}>
-                      {event.name}
-                    </p>
-                    <p className="text-xs mt-0.5 truncate" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.02em' }}>
-                      {[time, venueName].filter(Boolean).join(' · ')}
-                    </p>
+                ))}
+              </div>
+            )}
+            {displayEvents.length > 0 && (
+              <div className="mb-5 mx-5" style={{ border: '1px solid var(--brand-tint-border)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>
+                {/* Header */}
+                <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', backgroundColor: 'var(--bg)' }}>
+                  <div>
+                    <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>
+                      {sectionLabel}
+                    </h2>
+                    {usingFallback && (
+                      <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 10, color: '#aaa', fontWeight: 600, marginTop: 1 }}>
+                        Nothing today — here's this week's picks
+                      </p>
+                    )}
                   </div>
-                  {/* Arrow */}
-                  <div className="flex items-center justify-center flex-shrink-0"
-                    style={{ width: 38, backgroundColor: 'var(--brand)', borderLeft: '1px solid rgba(0,0,0,0.08)' }}>
-                    <span className="font-black" style={{ fontSize: 14, color: 'var(--ink)' }}>→</span>
-                  </div>
-                </button>
-              );
-            })}
-        </div>
-      )}
+                  <button
+                    onClick={() => onNavigateEvents?.('Tonight')}
+                    className="text-xs font-black uppercase"
+                    style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)', letterSpacing: '0.06em' }}
+                  >
+                    SEE ALL →
+                  </button>
+                </div>
+                {/* Rows — today's events (or week fallback) */}
+                {displayEvents.map((event, idx, arr) => {
+                  const dateStr = event.dates?.start?.localDate;
+                  const timeStr = event.dates?.start?.localTime;
+                  const venue = event._embedded?.venues?.[0];
+                  const d = dateStr ? new Date(dateStr + 'T12:00:00') : null;
+                  const month = d ? d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase() : '';
+                  const day = d ? d.getDate() : '';
+                  const time = timeStr ? formatTime(timeStr) : '';
+                  const venueName = venue?.name ? venue.name.toUpperCase() : '';
+                  return (
+                    <button
+                      key={event.id}
+                      onClick={() => onEventSelect(event)}
+                      className="flex w-full text-left"
+                      style={{ borderBottom: idx < arr.length - 1 ? '1px solid rgba(0,0,0,0.10)' : 'none', backgroundColor: 'var(--bg)' }}
+                    >
+                      {/* Date block */}
+                      <div className="flex flex-col items-center justify-center flex-shrink-0"
+                        style={{ width: 52, backgroundColor: 'var(--brand)', minHeight: 52 }}>
+                        <span className="font-black uppercase" style={{ fontSize: 9, color: 'rgba(255,255,255,0.85)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em', lineHeight: 1 }}>
+                          {month}
+                        </span>
+                        <span className="font-black" style={{ fontSize: 22, color: '#fff', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.1 }}>
+                          {day}
+                        </span>
+                      </div>
+                      {/* Content */}
+                      <div className="flex-1 px-3 py-2 flex flex-col justify-center overflow-hidden">
+                        <p className="font-black text-sm leading-tight" style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}>
+                          {event.name}
+                        </p>
+                        <p className="text-xs mt-0.5 truncate" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.02em' }}>
+                          {[time, venueName].filter(Boolean).join(' · ')}
+                        </p>
+                      </div>
+                      {/* Arrow */}
+                      <div className="flex items-center justify-center flex-shrink-0"
+                        style={{ width: 38, backgroundColor: 'var(--brand)', borderLeft: '1px solid rgba(0,0,0,0.08)' }}>
+                        <span className="font-black" style={{ fontSize: 14, color: 'var(--ink)' }}>→</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        );
+      })()}
 
       {/* Featured Event (time-limited) — shows above Daily Gem when active */}
       <FeaturedEventBanner events={events} onSelect={onEventSelect} />
