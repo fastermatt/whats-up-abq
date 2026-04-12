@@ -3339,6 +3339,12 @@ function DiscoverScreen({
       .slice(0, 12);
   }, [events]);
 
+  // Count of events today for dynamic label on the Discover section
+  const todayEventCount = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    return events.filter(e => (e.dates?.start?.localDate || '') === today && !e._isAdult).length;
+  }, [events]);
+
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
       {/* Streak Banner */}
@@ -3354,7 +3360,9 @@ function DiscoverScreen({
             {heroDisplay}{!heroDone && <span style={{ display: 'inline-block', width: '3px', height: '0.85em', background: 'var(--ink)', marginLeft: '2px', verticalAlign: 'baseline', animation: 'cursorBlink 0.8s step-end infinite' }} />}
           </h1>
           <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '12px', color: 'var(--ink)', opacity: 0.65, fontWeight: 500, marginBottom: '14px' }}>
-            {events.length.toLocaleString()} upcoming events in Albuquerque
+            {todayEventCount > 0
+              ? <>{todayEventCount.toLocaleString()} events happening today</>
+              : <>{events.length.toLocaleString()} upcoming events in Albuquerque</>}
           </p>
           <button
             onClick={() => onNavigateEvents?.()}
@@ -3406,7 +3414,7 @@ function DiscoverScreen({
       {!hidden.includes('thisWeek') && eventsLoading && upcomingEvents.length === 0 && (
         <div className="mb-5 mx-5" style={{ border: '1px solid var(--brand-tint-border)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>
           <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', backgroundColor: 'var(--bg)' }}>
-            <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em' }}>Events This Week</h2>
+            <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em' }}>Today's Events</h2>
             <span className="text-xs font-black" style={{ color: '#aaa' }}>Loading…</span>
           </div>
           {[0,1,2].map(i => (
@@ -3423,7 +3431,7 @@ function DiscoverScreen({
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', backgroundColor: 'var(--bg)' }}>
             <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>
-              Events This Week
+              {todayEventCount > 0 ? "Today's Events" : 'Events This Week'}
             </h2>
             <button
               onClick={() => onNavigateEvents?.()}
@@ -3786,10 +3794,18 @@ function EventsScreen({
     peek(pillRow2Ref.current, 750);
   }, []);
   useEffect(() => { if (initialSearch) setSearch(initialSearch); }, [initialSearch]);
-  const [selectedGenre, setSelectedGenre] = useState(initialGenre || 'All');
+  const [selectedGenre, setSelectedGenre] = useState(initialGenre || 'Tonight');
   const [selectedSubGenre, setSelectedSubGenre] = useState<string>('All');
   // Reset genre when initialGenre changes (e.g. from "Free Events" chip on Discover)
-  useEffect(() => { setSelectedGenre(initialGenre || 'All'); setSelectedSubGenre('All'); }, [initialGenre]);
+  useEffect(() => { setSelectedGenre(initialGenre || 'Tonight'); setSelectedSubGenre('All'); }, [initialGenre]);
+  // Auto-fallback: if events load and there are zero events today, fall back to All
+  const tonightFallbackDone = useRef(false);
+  useEffect(() => {
+    if (initialGenre || tonightFallbackDone.current || events.length === 0 || selectedGenre !== 'Tonight') return;
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayCount = events.filter(e => (e.dates?.start?.localDate || '') === todayStr && !e._isAdult).length;
+    if (todayCount === 0) { setSelectedGenre('All'); tonightFallbackDone.current = true; }
+  }, [events, initialGenre, selectedGenre]);
   const [followedGenres, setFollowedGenres] = useState<string[]>(() => getFollowedGenres());
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -3977,11 +3993,13 @@ function EventsScreen({
           {eventsHero.display}{!eventsHero.done && <span style={{ display: 'inline-block', width: '3px', height: '0.85em', background: 'var(--ink)', marginLeft: '2px', verticalAlign: 'baseline', animation: 'cursorBlink 0.8s step-end infinite' }} />}
         </h1>
         <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: 'Public Sans, sans-serif' }}>
-          {(search || selectedGenre !== 'All' || dateFrom || dateTo)
-            ? <>{deduped.length.toLocaleString()} <span style={{ color: '#bbb' }}>of {events.length.toLocaleString()}</span> events</>
-            : eventsLoading
-              ? <span style={{ display: 'inline-block', width: 140, height: 14, background: 'linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%)', backgroundSize: '200% 100%', borderRadius: 6, animation: 'shimmer 1.2s infinite', verticalAlign: 'middle' }} />
-              : <>{events.length.toLocaleString()} upcoming events in ABQ</>}
+          {selectedGenre === 'Tonight'
+            ? <>{deduped.length.toLocaleString()} event{deduped.length !== 1 ? 's' : ''} happening today</>
+            : (search || selectedGenre !== 'All' || dateFrom || dateTo)
+              ? <>{deduped.length.toLocaleString()} <span style={{ color: '#bbb' }}>of {events.length.toLocaleString()}</span> events</>
+              : eventsLoading
+                ? <span style={{ display: 'inline-block', width: 140, height: 14, background: 'linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%)', backgroundSize: '200% 100%', borderRadius: 6, animation: 'shimmer 1.2s infinite', verticalAlign: 'middle' }} />
+                : <>{events.length.toLocaleString()} upcoming events in ABQ</>}
         </p>
       </div>
 
@@ -4195,9 +4213,11 @@ function EventsScreen({
              `No ${selectedGenre.toLowerCase()} events found`}
           </h2>
           <p className="text-sm mb-5" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.6 }}>
-            {selectedGenre !== 'All'
-              ? `Try "This Weekend" or browse all events.`
-              : 'Try a different search term or check back soon.'}
+            {selectedGenre === 'Tonight'
+              ? `Check back later, or browse all upcoming events.`
+              : selectedGenre !== 'All'
+                ? `Try "This Weekend" or browse all events.`
+                : 'Try a different search term or check back soon.'}
           </p>
           {selectedGenre !== 'All' && (
             <button
@@ -4250,9 +4270,9 @@ function EventsScreen({
           {deduped.length < sorted.length && (
             <span className="ml-2 text-xs text-gray-400">({sorted.length - deduped.length} duplicate showtimes hidden)</span>
           )}
-          {(selectedGenre !== 'All' || search) && (
+          {((selectedGenre !== 'All' && selectedGenre !== 'Tonight') || search || dateFrom || dateTo) && (
             <button
-              onClick={() => { setSelectedGenre('All'); setSearch(''); }}
+              onClick={() => { setSelectedGenre('Tonight'); setSearch(''); setDateFrom(''); setDateTo(''); }}
               className="ml-2 text-xs font-bold"
               style={{ color: 'var(--brand)' }}
             >
