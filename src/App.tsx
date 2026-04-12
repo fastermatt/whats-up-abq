@@ -3290,61 +3290,81 @@ function DiscoverScreen({
   // Use local date (Mountain Time friendly) for today comparisons
   const todayStr = useMemo(() => new Date().toLocaleDateString('en-CA'), []);
 
-  // Today's events — randomly sampled, 3–5 shown each load
-  const todayEvents = useMemo(() => {
-    const pool = events.filter(e => (e.dates?.start?.localDate || '') === todayStr && !e._isAdult);
-    const shuffled = [...pool].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, Math.min(pool.length, 5));
-  }, [events, todayStr]);
+  // Weekend date range helpers
+  const weekendRange = useMemo(() => {
+    const now = new Date();
+    const dow = now.getDay(); // 0=Sun,6=Sat
+    // Days until Saturday (day 6). If today is Sun(0), that's 6 days; Sat(6) → 0; etc.
+    const daysToSat = dow === 0 ? 6 : 6 - dow;
+    const sat = new Date(now); sat.setDate(now.getDate() + daysToSat);
+    const sun = new Date(sat); sun.setDate(sat.getDate() + 1);
+    return { sat: sat.toLocaleDateString('en-CA'), sun: sun.toLocaleDateString('en-CA') };
+  }, []);
 
-  // This week's events (fallback when no today events)
+  // Full pool for the active filter (unsampled) — used for count in subtitle
+  const filterPool = useMemo(() => {
+    if (discoverFilter === 'Tonight') {
+      return events.filter(e => (e.dates?.start?.localDate || '') === todayStr && !e._isAdult);
+    } else if (discoverFilter === 'This Weekend') {
+      return events.filter(e => {
+        const d = e.dates?.start?.localDate || '';
+        return (d === weekendRange.sat || d === weekendRange.sun) && !e._isAdult;
+      });
+    } else if (discoverFilter === 'Free') {
+      const sevenDays = new Date(Date.now() + 7 * 864e5).toLocaleDateString('en-CA');
+      return events.filter(e => e.isFree && !e._isAdult && (e.dates?.start?.localDate || '') >= todayStr && (e.dates?.start?.localDate || '') <= sevenDays);
+    } else { // Volunteer
+      const sevenDays = new Date(Date.now() + 7 * 864e5).toLocaleDateString('en-CA');
+      return events.filter(e => {
+        const cats = e.classifications?.[0];
+        const name = (e.name || '').toLowerCase();
+        const d = e.dates?.start?.localDate || '';
+        return !e._isAdult && d >= todayStr && d <= sevenDays && (
+          name.includes('volunteer') || name.includes('community') ||
+          cats?.segment?.name?.toLowerCase().includes('volunteer') ||
+          cats?.genre?.name?.toLowerCase().includes('volunteer') ||
+          cats?.segment?.name?.toLowerCase().includes('community')
+        );
+      });
+    }
+  }, [events, discoverFilter, todayStr, weekendRange]);
+
+  // Sampled list for the section (3–5, shuffled), sorted by time for Tonight
+  const filteredDiscoverEvents = useMemo(() => {
+    const shuffled = [...filterPool].sort(() => Math.random() - 0.5);
+    const picked = shuffled.slice(0, Math.min(filterPool.length, 5));
+    if (discoverFilter === 'Tonight') {
+      return picked.sort((a, b) => (a.dates?.start?.localTime || '').localeCompare(b.dates?.start?.localTime || ''));
+    }
+    return picked;
+  }, [filterPool, discoverFilter]);
+
+  // Fallback week events when filterPool is empty
   const thisWeekEvents = useMemo(() => {
     const sevenDays = new Date(Date.now() + 7 * 864e5).toLocaleDateString('en-CA');
     const pool = events.filter(e => {
       const d = e.dates?.start?.localDate || '';
       return d > todayStr && d <= sevenDays && !e._isAdult;
     });
-    const shuffled = [...pool].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 5);
+    return [...pool].sort(() => Math.random() - 0.5).slice(0, 5);
   }, [events, todayStr]);
 
-  // Hero event — one random event matching the active discover filter
+  // Hero event — one random event from the same filter pool
   const heroEvent = useMemo(() => {
-    let pool: TMEvent[] = [];
-    if (discoverFilter === 'Tonight') {
-      pool = events.filter(e => (e.dates?.start?.localDate || '') === todayStr && !e._isAdult);
-    } else if (discoverFilter === 'This Weekend') {
-      const now = new Date();
-      const dayOfWeek = now.getDay(); // 0=Sun, 6=Sat
-      const daysToFriday = dayOfWeek <= 5 ? 5 - dayOfWeek : 6; // next/this Friday
-      const friday = new Date(now); friday.setDate(now.getDate() + daysToFriday);
-      const sunday = new Date(friday); sunday.setDate(friday.getDate() + 2);
-      const fridayStr = friday.toLocaleDateString('en-CA');
-      const sundayStr = sunday.toLocaleDateString('en-CA');
-      pool = events.filter(e => {
-        const d = e.dates?.start?.localDate || '';
-        return d >= fridayStr && d <= sundayStr && !e._isAdult;
-      });
-    } else if (discoverFilter === 'Free') {
-      pool = events.filter(e => e.isFree && !e._isAdult);
-    } else if (discoverFilter === 'Volunteer') {
-      pool = events.filter(e => {
-        const cats = e.classifications?.[0];
-        const name = (e.name || '').toLowerCase();
-        return !e._isAdult && (
-          name.includes('volunteer') ||
-          cats?.segment?.name?.toLowerCase().includes('volunteer') ||
-          cats?.genre?.name?.toLowerCase().includes('volunteer')
-        );
-      });
-    }
-    if (pool.length === 0) {
-      // Fallback: any upcoming event
-      pool = events.filter(e => (e.dates?.start?.localDate || '') >= todayStr && !e._isAdult);
-    }
+    const pool = filterPool.length > 0
+      ? filterPool
+      : events.filter(e => (e.dates?.start?.localDate || '') >= todayStr && !e._isAdult);
     if (pool.length === 0) return null;
     return pool[Math.floor(Math.random() * pool.length)];
-  }, [events, discoverFilter, todayStr]);
+  }, [filterPool, events, todayStr]);
+
+  // Section metadata per filter
+  const filterMeta = useMemo(() => ({
+    'Tonight':      { label: "Tonight's Events",       seeAllFilter: 'Tonight',      subtitle: (n: number) => n > 0 ? `${n} event${n !== 1 ? 's' : ''} happening tonight` : `${events.length.toLocaleString()} upcoming events in Albuquerque` },
+    'This Weekend': { label: 'This Weekend',            seeAllFilter: 'This Weekend', subtitle: (n: number) => n > 0 ? `${n} event${n !== 1 ? 's' : ''} this weekend`      : `${events.length.toLocaleString()} upcoming events in Albuquerque` },
+    'Free':         { label: 'Free Events',             seeAllFilter: 'Free',         subtitle: (n: number) => n > 0 ? `${n} free event${n !== 1 ? 's' : ''} this week`     : `${events.length.toLocaleString()} upcoming events in Albuquerque` },
+    'Volunteer':    { label: 'Volunteer Opportunities', seeAllFilter: 'Volunteer',    subtitle: (n: number) => n > 0 ? `${n} volunteer opportunit${n !== 1 ? 'ies' : 'y'} this week` : `${events.length.toLocaleString()} upcoming events in Albuquerque` },
+  } as Record<string, { label: string; seeAllFilter: string; subtitle: (n: number) => string }>), [events.length]);
 
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
@@ -3361,9 +3381,7 @@ function DiscoverScreen({
             {heroDisplay}{!heroDone && <span style={{ display: 'inline-block', width: '3px', height: '0.85em', background: 'var(--ink)', marginLeft: '2px', verticalAlign: 'baseline', animation: 'cursorBlink 0.8s step-end infinite' }} />}
           </h1>
           <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '12px', color: 'var(--ink)', opacity: 0.65, fontWeight: 500, marginBottom: '14px' }}>
-            {todayEvents.length > 0
-              ? <>{todayEvents.length === 5 ? '5+' : todayEvents.length} events happening today</>
-              : <>{events.length.toLocaleString()} upcoming events in Albuquerque</>}
+            {filterMeta[discoverFilter].subtitle(filterPool.length)}
           </p>
         </div>
         {/* Filter pills — control the hero event card, don't navigate away */}
@@ -3451,17 +3469,17 @@ function DiscoverScreen({
         onRequest={onRequestGeo}
       />
 
-      {/* Today's Events — brutalist table layout */}
+      {/* Filtered Events List — controlled by discoverFilter pills */}
       {!hidden.includes('thisWeek') && (() => {
-        const usingFallback = todayEvents.length === 0;
-        const displayEvents = usingFallback ? thisWeekEvents : todayEvents;
-        const sectionLabel = usingFallback ? 'Events This Week' : "Today's Events";
+        const meta = filterMeta[discoverFilter];
+        const usingFallback = filteredDiscoverEvents.length === 0 && thisWeekEvents.length > 0;
+        const displayEvents = filteredDiscoverEvents.length > 0 ? filteredDiscoverEvents : thisWeekEvents;
         return (
           <>
             {eventsLoading && displayEvents.length === 0 && (
               <div className="mb-5 mx-5" style={{ border: '1px solid var(--brand-tint-border)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>
                 <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', backgroundColor: 'var(--bg)' }}>
-                  <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em' }}>Today's Events</h2>
+                  <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em' }}>{meta.label}</h2>
                   <span className="text-xs font-black" style={{ color: '#aaa' }}>Loading…</span>
                 </div>
                 {[0,1,2].map(i => (
@@ -3479,23 +3497,23 @@ function DiscoverScreen({
                 <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', backgroundColor: 'var(--bg)' }}>
                   <div>
                     <h2 className="text-sm font-black uppercase" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>
-                      {sectionLabel}
+                      {usingFallback ? 'Events This Week' : meta.label}
                     </h2>
                     {usingFallback && (
                       <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 10, color: '#aaa', fontWeight: 600, marginTop: 1 }}>
-                        Nothing today — here's this week's picks
+                        Nothing found — here's this week's picks
                       </p>
                     )}
                   </div>
                   <button
-                    onClick={() => onNavigateEvents?.('Tonight')}
+                    onClick={() => onNavigateEvents?.(meta.seeAllFilter)}
                     className="text-xs font-black uppercase"
                     style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)', letterSpacing: '0.06em' }}
                   >
                     SEE ALL →
                   </button>
                 </div>
-                {/* Rows — today's events (or week fallback) */}
+                {/* Rows */}
                 {displayEvents.map((event, idx, arr) => {
                   const dateStr = event.dates?.start?.localDate;
                   const timeStr = event.dates?.start?.localTime;
