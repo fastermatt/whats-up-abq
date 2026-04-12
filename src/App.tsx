@@ -5203,9 +5203,19 @@ function PullToRefresh() {
 
   const onTouchStart = React.useCallback((e: TouchEvent) => {
     // Only activate when scrolled to top
-    if (window.scrollY === 0) {
-      startY.current = e.touches[0].clientY;
+    if (window.scrollY !== 0) return;
+    // Don't activate PTR if the touch starts inside a horizontally-scrollable
+    // container (filter pills, carousels, etc.) to avoid conflicting with
+    // horizontal scrolling of the category filter row.
+    let el = e.target as HTMLElement | null;
+    while (el) {
+      const style = window.getComputedStyle(el);
+      const oxv = style.overflowX;
+      if ((oxv === 'auto' || oxv === 'scroll') && el.scrollWidth > el.clientWidth + 2) return;
+      if (el.classList.contains('overflow-x-auto')) return;
+      el = el.parentElement;
     }
+    startY.current = e.touches[0].clientY;
   }, []);
 
   const onTouchMove = React.useCallback((e: TouchEvent) => {
