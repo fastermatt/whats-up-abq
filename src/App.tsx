@@ -4383,10 +4383,30 @@ function AuthModal({ onClose }: { onClose: () => void }) {
     e.preventDefault(); setError(''); setLoading(true);
     try {
       if (isSignUp) {
-        const cred = await supabase.auth.signUp({ email: email, password: password, options: { captchaToken } });
+        const { data: cred, error: signUpError } = await supabase.auth.signUp({ email: email, password: password, options: { captchaToken } });
+        if (signUpError) throw signUpError;
         if (displayName) await supabase.auth.updateUser({ data: { display_name: displayName } });
+        // Create email prefs row for new user (opted in by default)
+        if (cred?.user) {
+          await supabase.from('user_email_prefs').upsert({
+            user_id: cred.user.id,
+            email: email,
+            opted_in: true,
+            frequency: 'weekly',
+          }, { onConflict: 'user_id' });
+        }
       } else {
-        await supabase.auth.signInWithPassword({ email: email, password: password, options: { captchaToken } });
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email: email, password: password, options: { captchaToken } });
+        if (signInError) throw signInError;
+        // Ensure email prefs row exists for existing users signing in
+        if (signInData?.user) {
+          await supabase.from('user_email_prefs').upsert({
+            user_id: signInData.user.id,
+            email: email,
+            opted_in: true,
+            frequency: 'weekly',
+          }, { onConflict: 'user_id', ignoreDuplicates: true });
+        }
       }
       onClose();
     } catch (e: any) { setError(e.message || 'Auth failed'); }
@@ -4410,7 +4430,7 @@ function AuthModal({ onClose }: { onClose: () => void }) {
           <button onClick={onClose} className="text-gray-400 hover:text-gray-700 text-2xl leading-none">×</button>
         </div>
         <p className="text-sm text-gray-500 mb-5" style={{ fontFamily: 'Public Sans, sans-serif' }}>
-          Sign in to sync your check-ins across devices and appear on the leaderboard.
+          Sign in to save events, get personalized email newsletters, and appear on the leaderboard.
         </p>
 
         {mode === 'choose' ? (
@@ -4901,6 +4921,43 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn, isDark, onToggl
   );
   const [usernameError, setUsernameError] = useState('');
   const [usernameSaved, setUsernameSaved] = useState(false);
+  // Email newsletter prefs
+  const [emailOptIn, setEmailOptIn] = useState(false);
+  const [emailFreq, setEmailFreq] = useState<'weekly' | 'daily' | 'never'>('weekly');
+  const [emailPrefsLoaded, setEmailPrefsLoaded] = useState(false);
+  const [emailPrefsSaving, setEmailPrefsSaving] = useState(false);
+  const [emailPrefsSaved, setEmailPrefsSaved] = useState(false);
+
+  // Load email prefs from Supabase when user is logged in
+  useEffect(() => {
+    if (!user) { setEmailPrefsLoaded(false); return; }
+    supabase.from('user_email_prefs').select('opted_in, frequency').eq('user_id', user.id).maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          setEmailOptIn(data.opted_in ?? false);
+          setEmailFreq((data.frequency as any) ?? 'weekly');
+        } else {
+          setEmailOptIn(false);
+          setEmailFreq('weekly');
+        }
+        setEmailPrefsLoaded(true);
+      });
+  }, [user?.id]);
+
+  const saveEmailPrefs = async (optIn: boolean, freq: 'weekly' | 'daily' | 'never') => {
+    if (!user) return;
+    setEmailPrefsSaving(true);
+    const userEmail = user.email ?? '';
+    await supabase.from('user_email_prefs').upsert({
+      user_id: user.id,
+      email: userEmail,
+      opted_in: optIn,
+      frequency: freq,
+    }, { onConflict: 'user_id' });
+    setEmailPrefsSaving(false);
+    setEmailPrefsSaved(true);
+    setTimeout(() => setEmailPrefsSaved(false), 2000);
+  };
 
   const updatePrefs = (next: UserPrefs) => { setPrefs(next); savePrefs(next); window.dispatchEvent(new Event('abq_prefs_changed')); };
 
@@ -5020,6 +5077,64 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn, isDark, onToggl
               <span style={{ marginLeft: 'auto', color: 'var(--brand)', fontWeight: 700, fontSize: '13px' }}>Sign in →</span>
             </button>
           )}
+
+          {/* Email Newsletter */}
+          {user ? (
+            <div className="bg-white rounded-lg p-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1" style={{ fontFamily: 'Public Sans, sans-serif' }}>Email Newsletter</p>
+              <p className="text-xs text-gray-400 mb-3" style={{ fontFamily: 'Public Sans, sans-serif' }}>Get personalized event picks based on what you've saved</p>
+              {!emailPrefsLoaded ? (
+                <p className="text-xs text-gray-400" style={{ fontFamily: 'Public Sans, sans-serif' }}>Loading…</p>
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      const next = !emailOptIn;
+                      setEmailOptIn(next);
+                      saveEmailPrefs(next, emailFreq);
+                    }}
+                    className="flex items-center justify-between w-full mb-3"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--brand)', fontVariationSettings: emailOptIn ? "'FILL' 1" : "'FILL' 0" }}>mail</span>
+                      <span className="text-sm font-medium text-gray-700" style={{ fontFamily: 'Public Sans, sans-serif' }}>Receive Newsletter</span>
+                    </div>
+                    <div className="w-11 h-6 rounded-full flex items-center px-0.5 transition-colors" style={{ background: emailOptIn ? 'var(--brand)' : '#d1d5db' }}>
+                      <div className="w-5 h-5 bg-white rounded-full shadow transition-transform" style={{ transform: emailOptIn ? 'translateX(20px)' : 'translateX(0)' }} />
+                    </div>
+                  </button>
+                  {emailOptIn && (
+                    <div>
+                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2" style={{ fontFamily: 'Public Sans, sans-serif' }}>Frequency</p>
+                      <div className="flex gap-2">
+                        {(['weekly', 'daily'] as const).map(f => (
+                          <button
+                            key={f}
+                            onClick={() => { setEmailFreq(f); saveEmailPrefs(emailOptIn, f); }}
+                            className="flex-1 rounded-lg py-2 text-sm font-bold transition-all"
+                            style={{
+                              background: emailFreq === f ? 'var(--brand)' : '#f5f5f5',
+                              color: emailFreq === f ? 'white' : '#666',
+                              fontFamily: 'Public Sans, sans-serif',
+                            }}
+                          >
+                            {f.charAt(0).toUpperCase() + f.slice(1)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {emailPrefsSaved && (
+                    <p className="text-xs mt-2" style={{ color: '#2e7d32', fontFamily: 'Public Sans, sans-serif' }}>✓ Saved</p>
+                  )}
+                  {emailPrefsSaving && (
+                    <p className="text-xs mt-2 text-gray-400" style={{ fontFamily: 'Public Sans, sans-serif' }}>Saving…</p>
+                  )}
+                  <p className="text-xs text-gray-400 mt-2" style={{ fontFamily: 'Public Sans, sans-serif' }}>Sent to {user.email}</p>
+                </>
+              )}
+            </div>
+          ) : null}
 
           {/* Homescreen Sections */}
           <div className="bg-white rounded-lg p-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
@@ -6899,7 +7014,37 @@ export default function App() {
     setSavedPlan(prev => {
       const exists = prev.some(p => p.type === 'event' && (p.data as TMEvent).id === event.id);
       const next = exists ? prev.filter(p => !(p.type === 'event' && (p.data as TMEvent).id === event.id)) : [...prev, { type: 'event' as const, data: event }];
-      savePlanToStorage(next); return next;
+      savePlanToStorage(next);
+      // Sync to Supabase when logged in
+      if (user) {
+        if (!exists) {
+          // Save: upsert into user_saved_events
+          const eventDate = event.dates?.start?.localDate ?? null;
+          const category = getEventCategory(event);
+          const imageUrl = getBestEventImage(event) ?? null;
+          supabase.from('user_saved_events').upsert({
+            user_id: user.id,
+            event_id: event.id,
+            event_source: event._source ?? 'unknown',
+            event_name: event.name,
+            event_date: eventDate,
+            categories: category ? [category] : [],
+            image_url: imageUrl,
+          }, { onConflict: 'user_id,event_id' }).then(({ error }) => {
+            if (error) console.error('Save event sync error:', error);
+          });
+        } else {
+          // Unsave: delete from user_saved_events
+          supabase.from('user_saved_events')
+            .delete()
+            .eq('user_id', user.id)
+            .eq('event_id', event.id)
+            .then(({ error }) => {
+              if (error) console.error('Unsave event sync error:', error);
+            });
+        }
+      }
+      return next;
     });
   };
   const isPlaceSaved = (id: string) => savedPlan.some(p => p.type === 'place' && (p.data as Place).id === id);
@@ -7008,19 +7153,38 @@ export default function App() {
         }
       }
       if (u) {
-        // Load check-ins from Firestore on sign-in — guard against multiple auth events
+        // Sync saved events from Supabase on sign-in
         if (loadedUserIdRef.current !== u.id) {
-        loadedUserIdRef.current = u.id;
-        try {
-          const snap = await _fbGetDoc('users', u.id);
-          if (snap.exists()) {
-            const data = snap.data();
-            if (Array.isArray(data.checkIns) && data.checkIns.length > 0) {
-              setCheckedIn(merged);
+          loadedUserIdRef.current = u.id;
+          try {
+            const { data: savedRows } = await supabase
+              .from('user_saved_events')
+              .select('event_id, event_name, event_source, event_date, categories, image_url')
+              .eq('user_id', u.id)
+              .order('saved_at', { ascending: false })
+              .limit(200);
+            if (savedRows && savedRows.length > 0) {
+              // Merge remote saves into local savedPlan (remote wins, dedup by event_id)
+              setSavedPlan(prev => {
+                const localIds = new Set(prev.filter(p => p.type === 'event').map(p => (p.data as TMEvent).id));
+                const remoteEvents: SavedPlanItem[] = savedRows
+                  .filter((r: any) => !localIds.has(r.event_id))
+                  .map((r: any) => ({
+                    type: 'event' as const,
+                    data: {
+                      id: r.event_id,
+                      name: r.event_name,
+                      _source: r.event_source,
+                      dates: r.event_date ? { start: { localDate: r.event_date } } : undefined,
+                    } as TMEvent,
+                  }));
+                const merged = [...prev, ...remoteEvents];
+                savePlanToStorage(merged);
+                return merged;
+              });
             }
-          }
-        } catch (err) { console.error('Load checkins error:', err); }
-        } // end loadedUserIdRef guard
+          } catch (err) { console.error('Load saved events error:', err); }
+        }
       }
     });
     return () => unsub.unsubscribe();
