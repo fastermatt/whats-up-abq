@@ -4,7 +4,7 @@
 //   - App shell (HTML): Network-first with cache fallback
 //   - Supabase API calls: Network-only (live data required)
 
-const CACHE_VERSION = 'abq-202604102050';
+const CACHE_VERSION = 'abq-202604131700';
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const ASSET_CACHE = `${CACHE_VERSION}-assets`;
 
