@@ -6699,6 +6699,16 @@ function AdminScreen({ user, onBack }: { user: User | null; onBack: () => void }
 
 // ─── Plan Screen ──────────────────────────────────────────────────────────────
 
+/** Parse a YYYY-MM-DD string into { month: 'APR', day: '13' } */
+function fmtLocalDate(dateStr: string): { month: string; day: string } {
+  if (!dateStr) return { month: '', day: '' };
+  const d = new Date(dateStr + 'T12:00:00');
+  return {
+    month: d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
+    day: String(d.getDate()),
+  };
+}
+
 type SavedPlanItem = { type: 'place'; data: Place } | { type: 'event'; data: TMEvent };
 
 function PlanScreen({
@@ -6832,7 +6842,7 @@ function PlanScreen({
                 <div key={ev.id} className="flex items-stretch gap-3 bg-white" style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
                   <button onClick={() => onEventSelect(ev)} className="flex items-center gap-3 flex-1 p-3 text-left">
                     <div className="flex-shrink-0 rounded overflow-hidden" style={{ width: 56, height: 56, background: '#1a1a1a' }}>
-                      {img ? <img src={img} alt={e?.name || ''} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><span className="material-symbols-outlined text-white" style={{ fontSize: '22px' }}>confirmation_number</span></div>}
+                      {img ? <img src={img} alt={ev.name || ''} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><span className="material-symbols-outlined text-white" style={{ fontSize: '22px' }}>confirmation_number</span></div>}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-black text-sm truncate" style={{ fontFamily: 'Public Sans, sans-serif' }}>{ev.name}</p>
