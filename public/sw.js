@@ -4,7 +4,7 @@
 //   - App shell (HTML): Network-first with cache fallback
 //   - Supabase API calls: Network-only (live data required)
 
-const CACHE_VERSION = 'abq-202604131700';
+const CACHE_VERSION = 'abq-202604132200';
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const ASSET_CACHE = `${CACHE_VERSION}-assets`;
 
@@ -37,7 +37,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// ─── Activate: clean up old caches ───────────────────────────────────────────
+// ─── Activate: clean up old caches, then reload all clients ──────────────────
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -47,6 +47,22 @@ self.addEventListener('activate', (event) => {
           .map(k => caches.delete(k))
       )
     ).then(() => self.clients.claim())
+     .then(() =>
+       // Navigate all open tabs to reload after the new SW takes control.
+       // client.navigate(url) triggers a full page reload even on old shells
+       // that don't have a postMessage listener.
+       self.clients.matchAll({ type: 'window', includeUncontrolled: false }).then(clients => {
+         clients.forEach(client => {
+           // navigate() reloads the client; fall back to postMessage for
+           // browsers that don't support WindowClient.navigate()
+           if (typeof client.navigate === 'function') {
+             client.navigate(client.url).catch(() => client.postMessage({ type: 'SW_UPDATED' }));
+           } else {
+             client.postMessage({ type: 'SW_UPDATED' });
+           }
+         });
+       })
+     )
   );
 });
 

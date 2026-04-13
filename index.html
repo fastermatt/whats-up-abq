@@ -239,10 +239,15 @@
               });
             })
             .catch(err => console.warn('[SW] Registration failed:', err));
-          // Also reload when a new SW takes control (handles the case where
-          // skipWaiting fires after the updatefound event was already processed)
+          // Reload when a new SW takes control
           navigator.serviceWorker.addEventListener('controllerchange', () => {
             window.location.reload();
+          });
+          // Also listen for SW_UPDATED message (sent by new SW on activate via client.navigate fallback)
+          navigator.serviceWorker.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'SW_UPDATED') {
+              window.location.reload();
+            }
           });
         });
       }
