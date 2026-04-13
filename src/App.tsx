@@ -2593,6 +2593,10 @@ const saveWishlist = (items: WishlistItem[]) => {
   localStorage.setItem('abq_wishlist', JSON.stringify(items));
   window.dispatchEvent(new Event('abq_wishlist_changed'));
 };
+// Bridge: sync wishlist likes to the saved plan system so Saved tab shows liked events
+const dispatchLikeSync = (id: string, action: 'add' | 'remove') => {
+  window.dispatchEvent(new CustomEvent('abq_like_sync', { detail: { id, action } }));
+};
 const toggleWishlist = (item: WishlistItem) => {
   const current = getWishlist();
   const exists = current.some(w => w.id === item.id);
@@ -2680,12 +2684,23 @@ function LikeButton({ id, type, name, category, eventDate }: { id: string; type:
     return () => { document.removeEventListener('mousedown', handler); clearTimeout(autoClose); };
   }, [showReminder]);
 
-  const handleReminderSelect = (days: number) => {
+  const handleReminderSelect = async (days: number) => {
     setSelectedReminder(days);
     setWishlistReminder(id, days);
     setShowReminder(false);
     if (days > 0) {
       trackEvent('reminder_set', { item_id: id, name, days });
+      // Request notification permission if not already granted
+      if ('Notification' in window && Notification.permission === 'default') {
+        try {
+          const perm = await Notification.requestPermission();
+          if (perm === 'granted') {
+            // Register push subscription so server can send reminders
+            const { subscribeToPush } = await import('./lib/notifications');
+            subscribeToPush().catch(() => {});
+          }
+        } catch { /* ignore */ }
+      }
     }
     // Sync to server for background push
     if (eventDate) syncReminderToServer(id, name, eventDate, days);
@@ -2711,8 +2726,10 @@ function LikeButton({ id, type, name, category, eventDate }: { id: string; type:
             setShowReminder(s => !s);
           } else if (liked) {
             toggleWishlist({ id, type, name, category, eventDate });
+            dispatchLikeSync(id, 'remove');
           } else {
             toggleWishlist({ id, type, name, category, eventDate, reminderDays: 3 });
+            dispatchLikeSync(id, 'add');
             // Sync default 3-day reminder to server
             if (eventDate) syncReminderToServer(id, name, eventDate, 3);
           }
@@ -2720,7 +2737,7 @@ function LikeButton({ id, type, name, category, eventDate }: { id: string; type:
         onDoubleClick={(e) => {
           e.stopPropagation();
           // Double-click always unlikes
-          if (liked) toggleWishlist({ id, type, name, category, eventDate });
+          if (liked) { toggleWishlist({ id, type, name, category, eventDate }); dispatchLikeSync(id, 'remove'); }
         }}
       >
         <span
@@ -2772,7 +2789,7 @@ function LikeButton({ id, type, name, category, eventDate }: { id: string; type:
           ))}
           <div style={{ padding: '8px 10px 0', borderTop: '1px solid #f0f0f0', marginTop: 4 }}>
             <button
-              onClick={() => { toggleWishlist({ id, type, name, category, eventDate }); setShowReminder(false); }}
+              onClick={() => { toggleWishlist({ id, type, name, category, eventDate }); dispatchLikeSync(id, 'remove'); setShowReminder(false); }}
               style={{
                 display: 'flex', alignItems: 'center', gap: 8, width: '100%',
                 padding: '8px 0', border: 'none', background: 'none',
@@ -6723,12 +6740,18 @@ function PlanScreen({
 
   if (savedPlan.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center px-8 text-center" style={{ paddingTop: '100px', paddingBottom: '60px' }}>
-        <span className="material-symbols-outlined" style={{ fontSize: '64px', color: '#d0d8d0', marginBottom: '16px' }}>bookmark</span>
+      <div className="flex flex-col items-center justify-center px-8 text-center" style={{ paddingTop: '80px', paddingBottom: '60px' }}>
+        <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 28, color: 'white', fontVariationSettings: "'FILL' 1" }}>favorite</span>
+        </div>
         <h2 className="font-black text-xl mb-2" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1a1a1a' }}>Nothing saved yet</h2>
-        <p className="text-sm" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.6 }}>
-          Bookmark events as you browse — they'll show up here so you can plan your next outing.
+        <p className="text-sm" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.6, maxWidth: 280 }}>
+          Tap the <span style={{ color: 'var(--brand)', fontWeight: 700 }}>heart</span> on any event to save it here. You'll also get a reminder before it starts.
         </p>
+        <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'rgba(0,0,0,0.04)', borderRadius: 8 }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#aaa' }}>arrow_downward</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: '#aaa', fontFamily: 'Public Sans, sans-serif' }}>Browse events below to get started</span>
+        </div>
       </div>
     );
   }
@@ -7234,6 +7257,55 @@ export default function App() {
   };
   const isPlaceSaved = (id: string) => savedPlan.some(p => p.type === 'place' && (p.data as Place).id === id);
   const isEventSaved = (id: string) => savedPlan.some(p => p.type === 'event' && (p.data as TMEvent).id === id);
+
+  // One-time migration: copy any wishlist items into saved plan
+  useEffect(() => {
+    try {
+      const wishlistRaw = localStorage.getItem('abq_wishlist');
+      if (!wishlistRaw) return;
+      const wishlist: { id: string; type: string; name: string }[] = JSON.parse(wishlistRaw);
+      const eventIds = wishlist.filter(w => w.type === 'event').map(w => w.id);
+      if (eventIds.length === 0) return;
+      // Check which ones aren't already in saved plan
+      const alreadySaved = new Set(savedPlan.filter(p => p.type === 'event').map(p => (p.data as TMEvent).id));
+      const toAdd = eventIds.filter(id => !alreadySaved.has(id));
+      if (toAdd.length === 0) return;
+      const newItems = toAdd.map(id => events.find(e => e.id === id)).filter(Boolean).map(ev => ({ type: 'event' as const, data: ev! }));
+      if (newItems.length > 0) {
+        setSavedPlan(prev => {
+          const next = [...prev, ...newItems];
+          savePlanToStorage(next);
+          return next;
+        });
+      }
+    } catch { /* ignore migration errors */ }
+  }, [events.length > 0]); // Run once after events load
+
+  // Bridge: sync LikeButton hearts ↔ Saved Plan tab
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const { id, action } = (e as CustomEvent).detail;
+      const alreadySaved = savedPlan.some(p => p.type === 'event' && (p.data as TMEvent).id === id);
+      if (action === 'add' && !alreadySaved) {
+        const ev = events.find(ev => ev.id === id);
+        if (ev) {
+          setSavedPlan(prev => {
+            const next = [...prev, { type: 'event' as const, data: ev }];
+            savePlanToStorage(next);
+            return next;
+          });
+        }
+      } else if (action === 'remove' && alreadySaved) {
+        setSavedPlan(prev => {
+          const next = prev.filter(p => !(p.type === 'event' && (p.data as TMEvent).id === id));
+          savePlanToStorage(next);
+          return next;
+        });
+      }
+    };
+    window.addEventListener('abq_like_sync', handler);
+    return () => window.removeEventListener('abq_like_sync', handler);
+  }, [events, savedPlan]);
 
   // ── Firebase Auth ──
   const [user, setUser] = useState<User | null>(null);
