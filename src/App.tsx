@@ -345,6 +345,11 @@ function resolveEventUrl(raw: string | undefined, title: string, location?: stri
   return raw;
 }
 
+// Ticketmaster internal master files (_SOURCE) don't render in browsers.
+// Convert them to the standard 16:9 tablet-landscape variant.
+const sanitizeImageUrl = (url: string): string =>
+  url.replace(/_SOURCE(\.jpg)?$/, '_TABLET_LANDSCAPE_16_9.jpg');
+
 function staticEventToTMEvent(ev: StaticEvent): TMEvent {
   const toLocal24h = (t?: string): string | undefined => {
     if (!t) return undefined;
@@ -369,7 +374,7 @@ function staticEventToTMEvent(ev: StaticEvent): TMEvent {
     info: ev.description || undefined,
     pleaseNote: ev.pleaseNote || undefined,
     images: ev.image
-      ? [{ url: ev.image, width: 1600, height: 900 }, ...(ev.additionalImages ?? []).map(u => ({ url: u }))]
+      ? [{ url: sanitizeImageUrl(ev.image), width: 1600, height: 900 }, ...(ev.additionalImages ?? []).map(u => ({ url: sanitizeImageUrl(u) }))]
       : undefined,
     dates: {
       start: {
