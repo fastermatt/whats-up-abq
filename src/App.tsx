@@ -1831,7 +1831,7 @@ function EventShareCardModal({ event, onClose }: { event: TMEvent; onClose: () =
 
 // ─── Event Detail Modal ──────────────────────────────────────────────────────
 
-function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }: { event: TMEvent; onClose: () => void; isSaved?: boolean; onToggleSave?: () => void; mapProvider?: 'google' | 'apple' }) {
+function EventDetailModal({ event, onClose, mapProvider }: { event: TMEvent; onClose: () => void; mapProvider?: 'google' | 'apple' }) {
   const [shared, setShared] = useState(false);
   const [showShareCard, setShowShareCard] = useState(false);
   const [venueExpanded, setVenueExpanded] = useState(false);
@@ -1873,17 +1873,15 @@ function EventDetailModal({ event, onClose, isSaved, onToggleSave, mapProvider }
           >
             <span className="material-symbols-outlined text-white" style={{ fontSize: '22px' }}>close</span>
           </button>
-          <div className="flex items-center gap-2">
-            {onToggleSave && (
-              <button
-                onClick={onToggleSave}
-                className="w-10 h-10 flex items-center justify-center shrink-0"
-                style={{ background: isSaved ? 'var(--brand)' : 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: '50%', aspectRatio: '1', minHeight: 'unset' }}
-                title={isSaved ? 'Remove from plan' : 'Save to plan'}
-              >
-                <span className="material-symbols-outlined text-white" style={{ fontSize: '20px', fontVariationSettings: isSaved ? "'FILL' 1" : "'FILL' 0" }}>bookmark</span>
-              </button>
-            )}
+          <div className="flex items-center gap-2" style={{ position: 'relative' }}>
+            <LikeButton
+              id={event.id}
+              type="event"
+              name={event.name}
+              category={getEventCategory(event)}
+              eventDate={event.dates?.start?.localDate}
+              inline={true}
+            />
             <button
               onClick={async () => { await shareEvent(event); setShared(true); setTimeout(() => setShared(false), 2000); }}
               className="w-10 h-10 flex items-center justify-center shrink-0"
@@ -2646,7 +2644,7 @@ const REMINDER_OPTIONS = [
   { days: 7, label: '1 week before' },
 ];
 
-function LikeButton({ id, type, name, category, eventDate }: { id: string; type: 'event'; name: string; category: string; eventDate?: string }) {
+function LikeButton({ id, type, name, category, eventDate, inline }: { id: string; type: 'event'; name: string; category: string; eventDate?: string; inline?: boolean }) {
   const liked = isWishlisted(id);
   const [animating, setAnimating] = React.useState(false);
   const [showReminder, setShowReminder] = React.useState(false);
@@ -2710,7 +2708,17 @@ function LikeButton({ id, type, name, category, eventDate }: { id: string; type:
     <>
       <button
         className={animating ? 'like-btn-pop like-btn-particles' : ''}
-        style={{
+        style={inline ? {
+          // Inline variant: for use in modal header toolbar
+          position: 'relative', zIndex: 10,
+          background: liked ? 'var(--brand)' : 'rgba(0,0,0,0.4)',
+          backdropFilter: 'blur(10px)',
+          border: 'none', borderRadius: '50%', width: 40, height: 40, minHeight: 0, aspectRatio: '1', flexShrink: 0,
+          color: 'white', fontSize: 16, cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          transition: 'background 0.2s ease',
+        } : {
+          // Card variant: absolute-positioned over event thumbnail
           position: 'absolute', top: 8, right: 8, zIndex: 10,
           background: liked ? 'var(--brand)' : 'rgba(255,255,255,0.90)',
           border: 'none', borderRadius: '50%', width: 44, height: 44, minHeight: 0, aspectRatio: '1', flexShrink: 0,
@@ -2758,7 +2766,7 @@ function LikeButton({ id, type, name, category, eventDate }: { id: string; type:
           ref={pickerRef}
           onClick={(e) => e.stopPropagation()}
           style={{
-            position: 'absolute', top: 56, right: 4, zIndex: 20,
+            position: 'absolute', top: inline ? 48 : 56, right: inline ? 0 : 4, zIndex: 20,
             background: 'white', borderRadius: 12, padding: '12px 4px',
             boxShadow: '0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08)',
             minWidth: 180, fontFamily: 'Public Sans, sans-serif',
@@ -6718,6 +6726,154 @@ function AdminScreen({ user, onBack }: { user: User | null; onBack: () => void }
   );
 }
 
+// ─── Profile Screen ───────────────────────────────────────────────────────────
+
+function ProfileScreen({ user, onShowAuth, onSignOut }: { user: any; onShowAuth: () => void; onSignOut: () => void }) {
+  const [signingOut, setSigningOut] = React.useState(false);
+
+  return (
+    <div className="pb-16">
+      {/* Header */}
+      <div className="px-5 pt-6 pb-4 border-b border-black/10">
+        <h1 className="font-black text-2xl" style={{ fontFamily: 'Public Sans, sans-serif' }}>Profile</h1>
+      </div>
+
+      <div className="px-5 py-5 flex flex-col gap-4">
+
+        {/* Account section */}
+        <div className="bg-white rounded-xl p-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+          <p className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif' }}>Account</p>
+          {user ? (
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-bold text-sm" style={{ fontFamily: 'Public Sans, sans-serif' }}>{user.user_metadata?.full_name || user.email}</p>
+                <p className="text-xs mt-0.5" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif' }}>{user.email}</p>
+              </div>
+              <button
+                onClick={async () => { setSigningOut(true); await onSignOut(); setSigningOut(false); }}
+                disabled={signingOut}
+                className="text-xs font-bold px-3 py-1.5"
+                style={{ border: '1px solid rgba(0,0,0,0.12)', fontFamily: 'Public Sans, sans-serif', color: '#dc2626', borderRadius: 6, background: 'white', cursor: 'pointer' }}
+              >
+                {signingOut ? 'Signing out…' : 'Sign out'}
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <p className="text-sm" style={{ color: '#555', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.5 }}>
+                Sign in to sync your saved events across devices and get personalized notifications.
+              </p>
+              <button
+                onClick={onShowAuth}
+                className="w-full py-3 rounded-lg text-white font-black text-sm"
+                style={{ background: 'var(--brand)', fontFamily: 'Public Sans, sans-serif', border: 'none', cursor: 'pointer' }}
+              >
+                Sign in / Create account
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Notifications section */}
+        <div className="bg-white rounded-xl p-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+          <p className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif' }}>Notifications</p>
+          <NotificationSettingsFull />
+        </div>
+
+        {/* About */}
+        <div className="bg-white rounded-xl p-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+          <p className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif' }}>About</p>
+          <p className="text-sm" style={{ color: '#555', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.6 }}>
+            ABQ Unplugged surfaces the best of what's happening in Albuquerque — concerts, community events, free activities, and hidden gems.
+          </p>
+          <p className="text-xs mt-3" style={{ color: '#aaa', fontFamily: 'Public Sans, sans-serif' }}>abqunplugged.com</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Notification settings — inline expanded version (no accordion)
+function NotificationSettingsFull() {
+  const [prefs, setPrefs] = React.useState<NotificationPrefs>(loadNotifPrefs);
+  const [perm, setPerm] = React.useState<string>(() => notificationsSupported() ? Notification.permission : 'unsupported');
+  const [requesting, setRequesting] = React.useState(false);
+
+  const update = (next: NotificationPrefs) => { setPrefs(next); saveNotifPrefs(next); };
+
+  const handleEnable = async () => {
+    setRequesting(true);
+    const granted = await requestPermission();
+    setPerm(Notification.permission);
+    if (granted) {
+      const next = { ...prefs, enabled: true };
+      update(next);
+      subscribeToPush(next).catch(() => {});
+    }
+    setRequesting(false);
+  };
+
+  const notifKeys = Object.keys(NOTIF_LABELS) as (keyof typeof NOTIF_LABELS)[];
+
+  if (perm === 'unsupported') {
+    return <p className="text-sm" style={{ color: '#aaa', fontFamily: 'Public Sans, sans-serif' }}>Push notifications aren't supported in this browser.</p>;
+  }
+
+  if (perm !== 'granted') {
+    return (
+      <div className="flex flex-col gap-3">
+        <p className="text-sm" style={{ color: '#555', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.5 }}>
+          Get notified before events you've saved, or about tonight's picks and weekend previews.
+        </p>
+        <button
+          onClick={handleEnable}
+          disabled={requesting || perm === 'denied'}
+          className="w-full py-3 rounded-lg text-white font-black text-sm"
+          style={{ background: perm === 'denied' ? '#9e9e9e' : 'var(--brand)', fontFamily: 'Public Sans, sans-serif', border: 'none', cursor: perm === 'denied' ? 'default' : 'pointer' }}
+        >
+          {requesting ? 'Requesting…' : perm === 'denied' ? 'Blocked — enable in Settings' : 'Enable Notifications'}
+        </button>
+        {perm === 'denied' && (
+          <p className="text-xs text-center" style={{ color: '#aaa', fontFamily: 'Public Sans, sans-serif' }}>
+            Go to Settings → {'{'}Browser{'}'} → Notifications to allow ABQ Unplugged.
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Master toggle */}
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-bold" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1a1a1a' }}>All notifications</p>
+          <p className="text-xs mt-0.5" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif' }}>Master switch</p>
+        </div>
+        <button onClick={() => update({ ...prefs, enabled: !prefs.enabled })}>
+          <div className="w-11 h-6 rounded-full flex items-center px-0.5 transition-colors" style={{ background: prefs.enabled ? 'var(--brand)' : '#d1d5db' }}>
+            <div className="w-5 h-5 bg-white rounded-full shadow transition-transform" style={{ transform: prefs.enabled ? 'translateX(20px)' : 'translateX(0)' }} />
+          </div>
+        </button>
+      </div>
+
+      <div style={{ borderTop: '1px solid #f0f0f0' }} />
+
+      {/* Per-type toggles */}
+      {notifKeys.map(key => (
+        <div key={key} className="flex items-center justify-between">
+          <p className="text-sm flex-1 mr-4" style={{ fontFamily: 'Public Sans, sans-serif', color: '#333', opacity: prefs.enabled ? 1 : 0.4 }}>{NOTIF_LABELS[key]}</p>
+          <button onClick={() => update({ ...prefs, [key]: !prefs[key] })} disabled={!prefs.enabled}>
+            <div className="w-11 h-6 rounded-full flex items-center px-0.5 transition-colors" style={{ background: prefs.enabled && prefs[key] ? 'var(--brand)' : '#d1d5db', opacity: prefs.enabled ? 1 : 0.4 }}>
+              <div className="w-5 h-5 bg-white rounded-full shadow transition-transform" style={{ transform: prefs.enabled && prefs[key] ? 'translateX(20px)' : 'translateX(0)' }} />
+            </div>
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ─── Plan Screen ──────────────────────────────────────────────────────────────
 
 /** Parse a YYYY-MM-DD string into { month: 'APR', day: '13' } */
@@ -6730,46 +6886,41 @@ function fmtLocalDate(dateStr: string): { month: string; day: string } {
   };
 }
 
-type SavedPlanItem = { type: 'place'; data: Place } | { type: 'event'; data: TMEvent };
+// PlanScreen is self-contained — reads from abq_wishlist directly.
+// events array passed for full event lookup on tap.
+function PlanScreen({ onEventSelect, events }: { onEventSelect: (e: TMEvent) => void; events: TMEvent[] }) {
+  // Re-render whenever the wishlist changes
+  const [, forceUpdate] = React.useReducer(x => x + 1, 0);
+  React.useEffect(() => {
+    const handler = () => forceUpdate();
+    window.addEventListener('abq_wishlist_changed', handler);
+    return () => window.removeEventListener('abq_wishlist_changed', handler);
+  }, []);
 
-function PlanScreen({
-  savedPlan, onPlaceSelect, onEventSelect, onRemovePlace, onRemoveEvent, onClearAll,
-}: {
-  savedPlan: SavedPlanItem[];
-  onPlaceSelect: (p: Place) => void;
-  onEventSelect: (e: TMEvent) => void;
-  onRemovePlace: (id: string) => void;
-  onRemoveEvent: (id: string) => void;
-  onClearAll: () => void;
-}) {
-  const places = savedPlan.filter(i => i.type === 'place') as { type: 'place'; data: Place }[];
-  const events = savedPlan.filter(i => i.type === 'event') as { type: 'event'; data: TMEvent }[];
+  const wishlist = getWishlist().filter(w => w.type === 'event');
+  const count = wishlist.length;
 
   const handleSharePlan = async () => {
-    const lines: string[] = ['My ABQ Weekend — abqunplugged.com', ''];
-    if (events.length) {
-      lines.push('Events:');
-      events.forEach(({ data: e }) => {
-        const d = e.dates?.start?.localDate ? new Date(e.dates.start.localDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
-        const t = e.dates?.start?.localTime ? ` · ${e.dates.start.localTime.slice(0,5)}` : '';
-        lines.push(`• ${e.name}${d ? ' (' + d + t + ')' : ''}`);
-      });
-      lines.push('');
-    }
-    if (places.length) {
-      lines.push('Places to check out:');
-      places.forEach(({ data: p }) => lines.push(`• ${p.name}${p.address ? ' — ' + p.address.split(',')[0] : ''}`));
-      lines.push('');
-    }
+    const lines: string[] = ['My saved ABQ events — abqunplugged.com', ''];
+    wishlist.forEach(item => {
+      const d = item.eventDate ? new Date(item.eventDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
+      lines.push(`• ${item.name}${d ? ' (' + d + ')' : ''}`);
+    });
+    lines.push('');
     lines.push('Find yours at abqunplugged.com');
     const text = lines.join('\n');
     if (navigator.share) {
-      try { await navigator.share({ title: 'My ABQ Weekend', text }); return; } catch { /* fall through */ }
+      try { await navigator.share({ title: 'My ABQ Events', text }); return; } catch { /* fall through */ }
     }
     try { await navigator.clipboard.writeText(text); } catch { /* ignore */ }
   };
 
-  if (savedPlan.length === 0) {
+  const handleClearAll = () => {
+    localStorage.removeItem('abq_wishlist');
+    window.dispatchEvent(new Event('abq_wishlist_changed'));
+  };
+
+  if (count === 0) {
     return (
       <div className="flex flex-col items-center justify-center px-8 text-center" style={{ paddingTop: '80px', paddingBottom: '60px' }}>
         <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
@@ -6777,12 +6928,8 @@ function PlanScreen({
         </div>
         <h2 className="font-black text-xl mb-2" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1a1a1a' }}>Nothing saved yet</h2>
         <p className="text-sm" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.6, maxWidth: 280 }}>
-          Tap the <span style={{ color: 'var(--brand)', fontWeight: 700 }}>heart</span> on any event to save it here. You'll also get a reminder before it starts.
+          Tap the <span style={{ color: 'var(--brand)', fontWeight: 700 }}>❤</span> on any event to save it here. You can also set a reminder so you don't miss it.
         </p>
-        <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'rgba(0,0,0,0.04)', borderRadius: 8 }}>
-          <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#aaa' }}>arrow_downward</span>
-          <span style={{ fontSize: 12, fontWeight: 600, color: '#aaa', fontFamily: 'Public Sans, sans-serif' }}>Browse events below to get started</span>
-        </div>
       </div>
     );
   }
@@ -6792,106 +6939,69 @@ function PlanScreen({
       {/* Header */}
       <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-white border-b-2 border-black">
         <div>
-          <h1 className="font-black text-xl leading-tight" style={{ fontFamily: 'Public Sans, sans-serif' }}>My ABQ</h1>
-          <p className="text-xs mt-0.5" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif' }}>{savedPlan.length} {savedPlan.length === 1 ? 'stop' : 'stops'} saved</p>
+          <h1 className="font-black text-xl leading-tight" style={{ fontFamily: 'Public Sans, sans-serif' }}>Saved Events</h1>
+          <p className="text-xs mt-0.5" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif' }}>{count} {count === 1 ? 'event' : 'events'} saved</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={handleSharePlan}
             className="flex items-center gap-1 text-xs font-black px-3 py-1.5"
-            style={{ border: '1px solid rgba(0,0,0,0.12)', fontFamily: 'Public Sans, sans-serif', background: '#1a1a1a', color: 'white' }}
+            style={{ border: '1px solid rgba(0,0,0,0.12)', fontFamily: 'Public Sans, sans-serif', background: '#1a1a1a', color: 'white', borderRadius: 6 }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>share</span>
             Share
           </button>
-          <button onClick={onClearAll} className="text-xs font-bold px-3 py-1.5" style={{ border: '1px solid rgba(0,0,0,0.12)', fontFamily: 'Public Sans, sans-serif', color: '#dc2626' }}>
-            Clear
+          <button onClick={handleClearAll} className="text-xs font-bold px-3 py-1.5" style={{ border: '1px solid rgba(0,0,0,0.12)', fontFamily: 'Public Sans, sans-serif', color: '#dc2626', borderRadius: 6, background: 'white' }}>
+            Clear all
           </button>
         </div>
       </div>
 
-      {/* Places section */}
-      {places.length > 0 && (
-        <div className="px-5 pt-5">
-          <h2 className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif' }}>
-            📍 Places ({places.length})
-          </h2>
-          <div className="flex flex-col gap-3">
-            {places.map(({ data: p }) => (
-              <div key={p.id} className="flex items-stretch gap-3 bg-white" style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-                <button onClick={() => onPlaceSelect(p)} className="flex items-center gap-3 flex-1 p-3 text-left">
-                  <div className="flex-shrink-0 rounded overflow-hidden" style={{ width: 56, height: 56, background: '#f0f0f0' }}>
-                    <img src={p.thumbnail || p.image} alt={p.name || ''} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-black text-sm truncate" style={{ fontFamily: 'Public Sans, sans-serif' }}>{p.name}</p>
-                    <p className="text-xs mt-0.5 truncate" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif' }}>{p.category}</p>
-                    {p.address && <p className="text-xs mt-0.5 truncate" style={{ color: '#aaa', fontFamily: 'Public Sans, sans-serif' }}>{p.address.split(',')[0]}</p>}
-                  </div>
-                </button>
-                <div className="flex flex-col border-l-2 border-black">
-                  {p.address && (
-                    <a href={`https://maps.google.com/?q=${encodeURIComponent(p.address + ' Albuquerque NM')}`} target="_blank" rel="noopener noreferrer"
-                      className="flex-1 flex flex-col items-center justify-center px-3 gap-0.5" style={{ background: 'var(--brand)', color: 'white', textDecoration: 'none', minWidth: '60px' }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>directions</span>
-                      <span className="text-[9px] font-black uppercase tracking-wider" style={{ fontFamily: 'Public Sans, sans-serif' }}>Go</span>
-                    </a>
-                  )}
-                  <button onClick={() => onRemovePlace(p.id)} className="flex items-center justify-center px-3 py-2" style={{ borderTop: '1px solid rgba(0,0,0,0.08)', background: 'white' }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#dc2626' }}>close</span>
-                  </button>
-                </div>
+      {/* Events list */}
+      <div className="px-5 pt-5 flex flex-col gap-3">
+        {wishlist.map((item) => {
+          const { month, day } = fmtLocalDate(item.eventDate || '');
+          const reminderLabel = item.reminderDays && item.reminderDays > 0
+            ? item.reminderDays === 1 ? '1 day before' : `${item.reminderDays} days before`
+            : null;
+          return (
+            <div key={item.id} className="flex items-stretch bg-white" style={{ border: '1px solid rgba(0,0,0,0.12)', borderRadius: 10, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
+              {/* Date badge */}
+              <div style={{ width: 52, background: 'var(--brand)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.8)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{month}</span>
+                <span style={{ fontSize: 22, fontWeight: 900, color: 'white', fontFamily: 'Public Sans, sans-serif', lineHeight: 1 }}>{day}</span>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Events section */}
-      {events.length > 0 && (
-        <div className="px-5 pt-5">
-          <h2 className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif' }}>
-            🎟 Events ({events.length})
-          </h2>
-          <div className="flex flex-col gap-3">
-            {events.map(({ data: ev }) => {
-              const { month, day } = fmtLocalDate(ev.dates?.start?.localDate || '');
-              const img = getBestEventImage(ev.images);
-              const venue = ev._embedded?.venues?.[0];
-              const mapsQ = encodeURIComponent((venue?.address?.line1 || venue?.name || ev.name) + ' Albuquerque NM');
-              return (
-                <div key={ev.id} className="flex items-stretch gap-3 bg-white" style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-                  <button onClick={() => onEventSelect(ev)} className="flex items-center gap-3 flex-1 p-3 text-left">
-                    <div className="flex-shrink-0 rounded overflow-hidden" style={{ width: 56, height: 56, background: '#1a1a1a' }}>
-                      {img ? <img src={img} alt={ev.name || ''} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><span className="material-symbols-outlined text-white" style={{ fontSize: '22px' }}>confirmation_number</span></div>}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-black text-sm truncate" style={{ fontFamily: 'Public Sans, sans-serif' }}>{ev.name}</p>
-                      <p className="text-xs mt-0.5" style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif', fontWeight: 700 }}>{month} {day}</p>
-                      {venue && <p className="text-xs mt-0.5 truncate" style={{ color: '#aaa', fontFamily: 'Public Sans, sans-serif' }}>{venue.name}</p>}
-                    </div>
-                  </button>
-                  <div className="flex flex-col border-l-2 border-black">
-                    <a href={`https://maps.google.com/?q=${mapsQ}`} target="_blank" rel="noopener noreferrer"
-                      className="flex-1 flex flex-col items-center justify-center px-3 gap-0.5" style={{ background: '#0057c2', color: 'white', textDecoration: 'none', minWidth: '60px' }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>directions</span>
-                      <span className="text-[9px] font-black uppercase tracking-wider" style={{ fontFamily: 'Public Sans, sans-serif' }}>Go</span>
-                    </a>
-                    <button onClick={() => onRemoveEvent(ev.id)} className="flex items-center justify-center px-3 py-2" style={{ borderTop: '1px solid rgba(0,0,0,0.08)', background: 'white' }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#dc2626' }}>close</span>
-                    </button>
+              {/* Info — tappable */}
+              <button
+                className="flex-1 text-left px-3 py-3 min-w-0"
+                onClick={() => {
+                  const fullEvent = events.find(e => e.id === item.id);
+                  if (fullEvent) onEventSelect(fullEvent);
+                }}
+              >
+                <p className="font-black text-sm leading-tight" style={{ fontFamily: 'Public Sans, sans-serif', color: '#1a1a1a' }}>{item.name}</p>
+                {reminderLabel && (
+                  <div className="flex items-center gap-1 mt-1">
+                    <span className="material-symbols-outlined" style={{ fontSize: 12, color: 'var(--brand)', fontVariationSettings: "'FILL' 1" }}>notifications_active</span>
+                    <span style={{ fontSize: 11, color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif', fontWeight: 600 }}>{reminderLabel}</span>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+                )}
+              </button>
+              {/* Unheart button */}
+              <button
+                onClick={() => { toggleWishlist({ id: item.id, type: 'event', name: item.name, category: item.category || '', eventDate: item.eventDate }); }}
+                style={{ width: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', borderLeft: '1px solid rgba(0,0,0,0.08)', cursor: 'pointer', flexShrink: 0 }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 18, color: 'var(--brand)', fontVariationSettings: "'FILL' 1" }}>favorite</span>
+              </button>
+            </div>
+          );
+        })}
+      </div>
 
-      {/* Share plan hint */}
-      <div className="mx-5 mt-6 p-4 text-center" style={{ background: 'var(--bg)', border: '1.5px dashed #ccc' }}>
+      <div className="mx-5 mt-5 p-4 text-center" style={{ background: 'var(--bg)', border: '1.5px dashed #ccc', borderRadius: 8 }}>
         <p className="text-xs" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.6 }}>
-          💡 Tap <strong>Go</strong> on any item to get directions, or tap the card to see full details and check in when you arrive.
+          Tap an event to see full details. Tap the ❤ to unsave.
         </p>
       </div>
     </div>
@@ -6903,7 +7013,8 @@ function PlanScreen({
 const NAV_ITEMS = [
   { id: 'discover', label: 'Discover', icon: 'explore' },
   { id: 'events',   label: 'Events',   icon: 'confirmation_number' },
-  { id: 'plan',     label: 'Saved',    icon: 'bookmark' },
+  { id: 'plan',     label: 'Saved',    icon: 'favorite' },
+  { id: 'profile',  label: 'Profile',  icon: 'person' },
 ] as const;
 
 type TabId = (typeof NAV_ITEMS)[number]['id'];
@@ -7176,7 +7287,7 @@ function VenuePage({
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>(() => {
     const hash = window.location.hash.replace('#', '').split('/')[0];
-    const validTabs: TabId[] = ['discover', 'events', 'plan'];
+    const validTabs: TabId[] = ['discover', 'events', 'plan', 'profile'];
     return validTabs.includes(hash as TabId) ? (hash as TabId) : 'discover';
   });
   // Mobile-first: always use mobile layout (desktop layout disabled for now)
@@ -7312,31 +7423,7 @@ export default function App() {
     } catch { /* ignore migration errors */ }
   }, [events.length > 0]); // Run once after events load
 
-  // Bridge: sync LikeButton hearts ↔ Saved Plan tab
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const { id, action } = (e as CustomEvent).detail;
-      const alreadySaved = savedPlan.some(p => p.type === 'event' && (p.data as TMEvent).id === id);
-      if (action === 'add' && !alreadySaved) {
-        const ev = events.find(ev => ev.id === id);
-        if (ev) {
-          setSavedPlan(prev => {
-            const next = [...prev, { type: 'event' as const, data: ev }];
-            savePlanToStorage(next);
-            return next;
-          });
-        }
-      } else if (action === 'remove' && alreadySaved) {
-        setSavedPlan(prev => {
-          const next = prev.filter(p => !(p.type === 'event' && (p.data as TMEvent).id === id));
-          savePlanToStorage(next);
-          return next;
-        });
-      }
-    };
-    window.addEventListener('abq_like_sync', handler);
-    return () => window.removeEventListener('abq_like_sync', handler);
-  }, [events, savedPlan]);
+  // Note: abq_like_sync bridge removed — PlanScreen reads from abq_wishlist directly
 
   // ── Firebase Auth ──
   const [user, setUser] = useState<User | null>(null);
@@ -8141,7 +8228,7 @@ export default function App() {
         onToggleSaveEvent={toggleSavedEvent}
         isEventSaved={isEventSaved}
       />
-      {selectedEvent && <EventDetailModal event={selectedEvent} onClose={closeEventModal} isSaved={isEventSaved(selectedEvent.id)} onToggleSave={() => toggleSavedEvent(selectedEvent)} mapProvider={resolvedMapProvider} />}
+      {selectedEvent && <EventDetailModal event={selectedEvent} onClose={closeEventModal} mapProvider={resolvedMapProvider} />}
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
     </ErrorBoundary>
   );
@@ -8365,14 +8452,10 @@ export default function App() {
             <EventsScreen events={events} eventsLoading={eventsLoading} onEventSelect={openEventModal} initialSearch={eventsNavSearch} initialGenre={eventsNavGenre} />
           )}
           {activeTab === 'plan' && (
-            <PlanScreen
-              savedPlan={savedPlan}
-              onPlaceSelect={() => {}}
-              onEventSelect={openEventModal}
-              onRemovePlace={(id) => { setSavedPlan(prev => { const n = prev.filter(p => !(p.type === 'place' && (p.data as Place).id === id)); savePlanToStorage(n); return n; }); }}
-              onRemoveEvent={(id) => { setSavedPlan(prev => { const n = prev.filter(p => !(p.type === 'event' && (p.data as TMEvent).id === id)); savePlanToStorage(n); return n; }); }}
-              onClearAll={() => { setSavedPlan([]); localStorage.removeItem('abq-saved-plan'); }}
-            />
+            <PlanScreen onEventSelect={openEventModal} events={events} />
+          )}
+          {activeTab === 'profile' && (
+            <ProfileScreen user={user} onShowAuth={() => setShowAuthModal(true)} onSignOut={async () => { await supabase.auth.signOut(); }} />
           )}
         </main>
 
@@ -8480,7 +8563,7 @@ export default function App() {
         </div>
       )}
       {selectedEvent && (
-        <EventDetailModal event={selectedEvent} onClose={closeEventModal} isSaved={isEventSaved(selectedEvent.id)} onToggleSave={() => toggleSavedEvent(selectedEvent)} mapProvider={resolvedMapProvider} />
+        <EventDetailModal event={selectedEvent} onClose={closeEventModal} mapProvider={resolvedMapProvider} />
       )}
       {showAuthModal && (
         <AuthModal onClose={() => setShowAuthModal(false)} />
