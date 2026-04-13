@@ -7569,16 +7569,37 @@ export default function App() {
 
 
 
+  // Track whether we pushed a history entry for the event modal so we know
+  // whether to call history.back() on close. On iOS PWA, calling history.back()
+  // when there's no prior entry exits the app and shows a blank white screen.
+  const eventModalPushedHistory = useRef(false);
+
   const openEventModal = useCallback((event: TMEvent) => {
     setSelectedEvent(event);
     window.history.pushState({ tab: null, modal: 'event', id: event.id }, '', `#event/${event.id}`);
+    eventModalPushedHistory.current = true;
     trackEvent('event_click', { event_id: event.id, event_name: event.name });
     trackEvent('pageview', { tab: 'event_detail', event_id: event.id, event_name: event.name, path: `#event/${event.id}` });
   }, []);
-  const closeEventModal = useCallback(() => setSelectedEvent(null), []);
+  const closeEventModal = useCallback(() => {
+    setSelectedEvent(null);
+    if (eventModalPushedHistory.current) {
+      eventModalPushedHistory.current = false;
+      window.history.back();
+    }
+  }, []);
+  const venuePagePushedHistory = useRef(false);
   const openVenuePage = useCallback((slug: string) => {
     setSelectedEvent(null);
     setVenuePageSlug(slug);
+    venuePagePushedHistory.current = true;
+  }, []);
+  const closeVenuePage = useCallback(() => {
+    setVenuePageSlug(null);
+    if (venuePagePushedHistory.current) {
+      venuePagePushedHistory.current = false;
+      window.history.back();
+    }
   }, []);
 
   // ── Admin ──
@@ -8089,7 +8110,7 @@ export default function App() {
         onToggleSaveEvent={toggleSavedEvent}
         isEventSaved={isEventSaved}
       />
-      {selectedEvent && <EventDetailModal event={selectedEvent} onClose={() => { closeEventModal(); window.history.back(); }} isSaved={isEventSaved(selectedEvent.id)} onToggleSave={() => toggleSavedEvent(selectedEvent)} mapProvider={resolvedMapProvider} />}
+      {selectedEvent && <EventDetailModal event={selectedEvent} onClose={closeEventModal} isSaved={isEventSaved(selectedEvent.id)} onToggleSave={() => toggleSavedEvent(selectedEvent)} mapProvider={resolvedMapProvider} />}
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
     </ErrorBoundary>
   );
@@ -8417,12 +8438,12 @@ export default function App() {
             slug={venuePageSlug}
             events={events}
             onEventClick={(e) => { openEventModal(e); }}
-            onBack={() => { setVenuePageSlug(null); window.history.back(); }}
+            onBack={closeVenuePage}
           />
         </div>
       )}
       {selectedEvent && (
-        <EventDetailModal event={selectedEvent} onClose={() => { closeEventModal(); window.history.back(); }} isSaved={isEventSaved(selectedEvent.id)} onToggleSave={() => toggleSavedEvent(selectedEvent)} mapProvider={resolvedMapProvider} />
+        <EventDetailModal event={selectedEvent} onClose={closeEventModal} isSaved={isEventSaved(selectedEvent.id)} onToggleSave={() => toggleSavedEvent(selectedEvent)} mapProvider={resolvedMapProvider} />
       )}
       {showAuthModal && (
         <AuthModal onClose={() => setShowAuthModal(false)} />
