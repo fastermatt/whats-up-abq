@@ -62,7 +62,7 @@ function useTypewriter(text: string, startDelay = 400) {
 if (typeof document !== 'undefined' && !document.getElementById('card-fade-style')) {
   const s = document.createElement('style');
   s.id = 'card-fade-style';
-  s.textContent = '@keyframes cardFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes hoodBubble0 { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-4px,2px)} 50%{transform:translate(3px,-1px)} 75%{transform:translate(-2px,-2px)} } @keyframes hoodBubble1 { 0%,100%{transform:translate(0,0)} 20%{transform:translate(3px,-3px)} 55%{transform:translate(-3px,2px)} 80%{transform:translate(2px,1px)} } @keyframes hoodBubble2 { 0%,100%{transform:translate(0,0)} 30%{transform:translate(-3px,-2px)} 60%{transform:translate(4px,1px)} 85%{transform:translate(-1px,3px)} } @keyframes hoodBubble3 { 0%,100%{transform:translate(0,0)} 35%{transform:translate(2px,3px)} 65%{transform:translate(-4px,-1px)} 90%{transform:translate(3px,-2px)} } @keyframes hoodBubble4 { 0%,100%{transform:translate(0,0)} 15%{transform:translate(-2px,-3px)} 45%{transform:translate(3px,2px)} 70%{transform:translate(-3px,1px)} } @keyframes hoodBubble5 { 0%,100%{transform:translate(0,0)} 40%{transform:translate(4px,-2px)} 70%{transform:translate(-2px,3px)} 85%{transform:translate(1px,-1px)} } @keyframes ptrSweep { 0%{background-position:-200% center} 100%{background-position:200% center} } @keyframes ptrDots { 0%,80%,100%{transform:scale(0.6);opacity:0.3} 40%{transform:scale(1);opacity:1} } @keyframes kenBurns0 { from { transform: scale(1.05) translate(0%,0%); } to { transform: scale(1.18) translate(-2%,-1%); } } @keyframes kenBurns1 { from { transform: scale(1.1) translate(-1%,1%); } to { transform: scale(1.2) translate(2%,-2%); } } @keyframes kenBurns2 { from { transform: scale(1.08) translate(1%,-1%); } to { transform: scale(1.18) translate(-1%,2%); } } @keyframes kenBurns3 { from { transform: scale(1.12) translate(-2%,0%); } to { transform: scale(1.05) translate(1%,-1%); } } @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } } @keyframes reminderSlideIn { from { opacity: 0; transform: translateY(-8px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } } @keyframes heartPop { 0% { transform: scale(1); } 15% { transform: scale(1.35); } 30% { transform: scale(0.9); } 45% { transform: scale(1.15); } 60% { transform: scale(0.97); } 75% { transform: scale(1.05); } 100% { transform: scale(1); } } @keyframes heartParticles { 0% { opacity: 1; transform: scale(0.5); } 50% { opacity: 0.8; } 100% { opacity: 0; transform: scale(2.5); } } .like-btn-pop { animation: heartPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; } .like-btn-particles::after { content: ""; position: absolute; inset: -8px; border-radius: 50%; background: radial-gradient(circle, var(--brand) 0%, transparent 70%); animation: heartParticles 0.5s ease-out forwards; pointer-events: none; z-index: -1; } .nav-press-btn:active { top: 4px !important; box-shadow: 0 1px 0 #0a0a0a, 0 0px 2px rgba(0,0,0,0.1) !important; } .haptic-switch { position:fixed; top:-9999px; left:-9999px; opacity:0; pointer-events:none; }';
+  s.textContent = '@keyframes cardFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes hoodBubble0 { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-4px,2px)} 50%{transform:translate(3px,-1px)} 75%{transform:translate(-2px,-2px)} } @keyframes hoodBubble1 { 0%,100%{transform:translate(0,0)} 20%{transform:translate(3px,-3px)} 55%{transform:translate(-3px,2px)} 80%{transform:translate(2px,1px)} } @keyframes hoodBubble2 { 0%,100%{transform:translate(0,0)} 30%{transform:translate(-3px,-2px)} 60%{transform:translate(4px,1px)} 85%{transform:translate(-1px,3px)} } @keyframes hoodBubble3 { 0%,100%{transform:translate(0,0)} 35%{transform:translate(2px,3px)} 65%{transform:translate(-4px,-1px)} 90%{transform:translate(3px,-2px)} } @keyframes hoodBubble4 { 0%,100%{transform:translate(0,0)} 15%{transform:translate(-2px,-3px)} 45%{transform:translate(3px,2px)} 70%{transform:translate(-3px,1px)} } @keyframes hoodBubble5 { 0%,100%{transform:translate(0,0)} 40%{transform:translate(4px,-2px)} 70%{transform:translate(-2px,3px)} 85%{transform:translate(1px,-1px)} } @keyframes ptrSweep { 0%{background-position:-200% center} 100%{background-position:200% center} } @keyframes ptrDots { 0%,80%,100%{transform:scale(0.6);opacity:0.3} 40%{transform:scale(1);opacity:1} } @keyframes kenBurns0 { from { transform: scale(1.05) translate(0%,0%); } to { transform: scale(1.18) translate(-2%,-1%); } } @keyframes kenBurns1 { from { transform: scale(1.1) translate(-1%,1%); } to { transform: scale(1.2) translate(2%,-2%); } } @keyframes kenBurns2 { from { transform: scale(1.08) translate(1%,-1%); } to { transform: scale(1.18) translate(-1%,2%); } } @keyframes kenBurns3 { from { transform: scale(1.12) translate(-2%,0%); } to { transform: scale(1.05) translate(1%,-1%); } } @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } } @keyframes reminderSlideIn { from { opacity: 0; transform: translateY(-8px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } } @keyframes heartPop { 0% { transform: scale(1); } 15% { transform: scale(1.35); } 30% { transform: scale(0.9); } 45% { transform: scale(1.15); } 60% { transform: scale(0.97); } 75% { transform: scale(1.05); } 100% { transform: scale(1); } } @keyframes heartParticles { 0% { opacity: 1; transform: scale(0.5); } 50% { opacity: 0.8; } 100% { opacity: 0; transform: scale(2.5); } } .like-btn-pop { animation: heartPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; } .like-btn-particles::after { content: ""; position: absolute; inset: -8px; border-radius: 50%; background: radial-gradient(circle, var(--brand) 0%, transparent 70%); animation: heartParticles 0.5s ease-out forwards; pointer-events: none; z-index: -1; } .nav-press-btn:active { top: 4px !important; box-shadow: 0 1px 0 #0a0a0a, 0 0px 2px rgba(0,0,0,0.1) !important; } .haptic-switch { position:fixed; top:-9999px; left:-9999px; opacity:0; pointer-events:none; } @keyframes heroCardReveal { from { opacity:0; transform:translateY(10px) scale(0.98); } to { opacity:1; transform:translateY(0) scale(1); } } @keyframes heroImgZoom { from { transform:scale(1.08); } to { transform:scale(1.18); } } @keyframes heroTextSlideUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } } @keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }';
   document.head.appendChild(s);
 }
 
@@ -972,10 +972,11 @@ function EventCardImageSlider({ event }: { event: TMEvent }) {
   const handleImgError = useCallback((url: string) => {
     setBrokenUrls(prev => { const n = new Set(prev); n.add(url); return n; });
   }, []);
-  const handleImgLoad = useCallback((url: string, e: React.SyntheticEvent<HTMLImageElement>) => {
-    const img = e.currentTarget;
-    if (img.naturalWidth > 0 && img.naturalWidth < 150) handleImgError(url);
-  }, [handleImgError]);
+  // Only mark as broken on actual load error — don't reject small images
+  // (Eventbrite URLs may have small dimensions but render fine at card size)
+  const handleImgLoad = useCallback((_url: string, _e: React.SyntheticEvent<HTMLImageElement>) => {
+    // no-op: removed naturalWidth < 150 filter that was incorrectly rejecting Eventbrite images
+  }, []);
 
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -3180,6 +3181,19 @@ function EventListSkeleton() {
   );
 }
 
+// Small thumbnail for calendar day list — shows image with fallback to category icon
+function CalEventThumb({ img, typeMeta, onClick }: { img: string; typeMeta: { bg: string; icon: string }; onClick: () => void }) {
+  const [broken, setBroken] = React.useState(false);
+  return (
+    <div onClick={onClick} style={{ cursor: 'pointer', flexShrink: 0, width: 50, height: 50, borderRadius: 8, overflow: 'hidden', background: typeMeta.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {img && !broken
+        ? <img src={img} alt="" style={{ width: 50, height: 50, objectFit: 'cover', display: 'block' }} onError={() => setBroken(true)} />
+        : <FlatIcon name={typeMeta.icon} size={22} color="white" />
+      }
+    </div>
+  );
+}
+
 function DiscoverScreen({
   events, eventsLoading, onEventSelect,
   coords, geoRequested, geoSilentPending, geoError, onRequestGeo,
@@ -3417,10 +3431,11 @@ function DiscoverScreen({
             );
           })}
         </div>
-        {/* Hero event card — full bleed image, event info */}
+        {/* Hero event card — full bleed image, animated entrance */}
         {heroEvent && (() => {
-          const hImg = heroEvent.images?.find((im: any) => (im.ratio === '16_9' || im.ratio === '3_2') && im.width > 500)?.url
-            || heroEvent.images?.find((im: any) => im.width > 300)?.url
+          // Pick best image regardless of ratio/width — supports both TM and Eventbrite
+          const hImg = heroEvent.images?.find((im: any) => (im.ratio === '16_9' || im.ratio === '3_2') && (im.width || 0) > 400)?.url
+            || heroEvent.images?.find((im: any) => !im.fallback)?.url
             || heroEvent.images?.[0]?.url || '';
           const hDate = heroEvent.dates?.start?.localDate;
           const hTime = heroEvent.dates?.start?.localTime;
@@ -3432,27 +3447,35 @@ function DiscoverScreen({
             <button
               onClick={() => onEventSelect(heroEvent)}
               className="w-full text-left"
-              style={{ display: 'block', marginBottom: 0, cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}
+              style={{ display: 'block', marginBottom: 0, cursor: 'pointer', WebkitTapHighlightColor: 'transparent', animation: 'heroCardReveal 0.45s cubic-bezier(0.22,1,0.36,1) both' }}
             >
-              <div style={{ position: 'relative', paddingTop: '52%', overflow: 'hidden' }}>
+              <div style={{ position: 'relative', paddingTop: '54%', overflow: 'hidden' }}>
                 {hImg
-                  ? <img src={hImg} alt={heroEvent.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ? <img src={hImg} alt={heroEvent.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', animation: 'heroImgZoom 8s ease-out forwards' }} />
                   : <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, var(--brand) 0%, #7c3a0f 100%)' }} />
                 }
-                {/* Gradient overlay */}
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.2) 55%, transparent 100%)' }} />
-                {/* Content */}
-                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '12px 14px' }}>
-                  <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '17px', fontWeight: 900, color: '#fff', lineHeight: 1.2, marginBottom: 4, letterSpacing: '-0.01em', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}>
+                {/* Multi-layer gradient for cinematic look */}
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.05) 100%)' }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,0.25) 0%, transparent 60%)' }} />
+                {/* Filter badge top-left */}
+                <div style={{ position: 'absolute', top: 10, left: 12, background: 'var(--brand)', padding: '3px 8px', borderRadius: 4 }}>
+                  <span style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 9, fontWeight: 900, color: 'white', letterSpacing: '0.1em', textTransform: 'uppercase' as const }}>
+                    {discoverFilter === 'Tonight' ? '🌙 Tonight' : discoverFilter === 'This Weekend' ? 'This Weekend' : discoverFilter === 'Free' ? 'Free Event' : 'Volunteer'}
+                  </span>
+                </div>
+                {/* Text content — slides up on mount */}
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '14px 14px 12px', animation: 'heroTextSlideUp 0.55s cubic-bezier(0.22,1,0.36,1) 0.1s both' }}>
+                  <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '19px', fontWeight: 900, color: '#fff', lineHeight: 1.15, marginBottom: 5, letterSpacing: '-0.02em', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', textShadow: '0 1px 4px rgba(0,0,0,0.4)' } as React.CSSProperties}>
                     {heroEvent.name}
                   </p>
-                  <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.8)', letterSpacing: '0.03em' }}>
+                  <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.75)', letterSpacing: '0.03em' }}>
                     {[hDateFmt, hTimeFmt, hVenueName].filter(Boolean).join(' · ')}
                   </p>
                 </div>
-                {/* Arrow button */}
-                <div style={{ position: 'absolute', bottom: 12, right: 12, width: 32, height: 32, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
-                  <span style={{ color: '#fff', fontSize: 16, fontWeight: 900, lineHeight: 1 }}>→</span>
+                {/* Tap to view pill */}
+                <div style={{ position: 'absolute', bottom: 12, right: 12, background: 'white', borderRadius: 20, padding: '5px 12px 5px 10px', display: 'flex', alignItems: 'center', gap: 4, boxShadow: '0 2px 10px rgba(0,0,0,0.3)', animation: 'heroTextSlideUp 0.55s cubic-bezier(0.22,1,0.36,1) 0.2s both' }}>
+                  <span style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 11, fontWeight: 800, color: 'var(--ink)', letterSpacing: '0.02em' }}>View event</span>
+                  <span style={{ color: 'var(--brand)', fontSize: 13, fontWeight: 900 }}>→</span>
                 </div>
               </div>
             </button>
@@ -3566,51 +3589,109 @@ function DiscoverScreen({
       {/* Featured Event (time-limited) — shows above Daily Gem when active */}
       <FeaturedEventBanner events={events} onSelect={onEventSelect} />
 
-      {/* Browse by Category — event genre shortcuts */}
-      {!hidden.includes('vibes') && (
-        <div className="mb-4 px-5" style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
-          <p className="text-xs font-black uppercase flex items-center gap-2 mb-2.5" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>
-            <FlatIcon name="zia" size={12} color="var(--brand)" /> Browse by Category
-          </p>
-          <div style={{ position: 'relative' }}>
-          <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none', paddingBottom: '4px' }}>
-            {[
-              { genre: 'Concerts',  icon: 'concert',   color: '#7C3AED' },
-              { genre: 'Music',     icon: 'music',     color: '#8B3A0F' },
-              { genre: 'Dance',     icon: 'dance',     color: '#BE185D' },
-              { genre: 'Theatre',   icon: 'theatre',   color: '#6D28D9' },
-              { genre: 'Comedy',    icon: 'comedy',    color: '#B45309' },
-              { genre: 'Sports',    icon: 'sports',    color: '#1D4ED8' },
-              { genre: 'Arts',      icon: 'art',       color: '#7C2D12' },
-              { genre: 'Family',    icon: 'family',    color: '#047857' },
-              { genre: 'Free',      icon: 'free',      color: '#0F766E' },
-              { genre: 'Community', icon: 'community', color: '#0E7490' },
-            ].map(({ genre, icon, color }) => (
-              <button
-                key={genre}
-                onClick={() => { trackEvent('category_click', { genre }); onNavigateEvents?.(genre); }}
-                className="flex-shrink-0 flex items-center transition-all active:scale-95"
-                style={{
-                  padding: '6px 12px 6px 10px',
-                  borderRadius: '20px',
-                  background: color + '12',
-                  border: '1.5px solid ' + color + '40',
-                  cursor: 'pointer',
-                  outline: 'none',
-                  gap: '6px',
-                  whiteSpace: 'nowrap',
-                  WebkitTapHighlightColor: 'transparent',
-                }}
-              >
-                <FlatIcon name={icon} size={13} color={color} />
-                <span style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '11px', fontWeight: 700, color: 'var(--ink)', letterSpacing: '0.01em' }}>{genre}</span>
+      {/* Browse by Category — unified section with preview card */}
+      {!hidden.includes('vibes') && (() => {
+        const CATS = [
+          { genre: 'Concerts',  icon: 'concert',   color: '#7C3AED' },
+          { genre: 'Music',     icon: 'music',     color: '#8B3A0F' },
+          { genre: 'Dance',     icon: 'dance',     color: '#BE185D' },
+          { genre: 'Theatre',   icon: 'theatre',   color: '#6D28D9' },
+          { genre: 'Comedy',    icon: 'comedy',    color: '#B45309' },
+          { genre: 'Sports',    icon: 'sports',    color: '#1D4ED8' },
+          { genre: 'Arts',      icon: 'art',       color: '#7C2D12' },
+          { genre: 'Family',    icon: 'family',    color: '#047857' },
+          { genre: 'Free',      icon: 'free',      color: '#0F766E' },
+          { genre: 'Community', icon: 'community', color: '#0E7490' },
+        ];
+        const [activeGenre, setActiveGenre] = React.useState(CATS[0].genre);
+        const activeCat = CATS.find(c => c.genre === activeGenre) || CATS[0];
+        // Pick a random preview event for the active genre
+        const sevenDays = new Date(Date.now() + 7 * 864e5).toLocaleDateString('en-CA');
+        const genrePool = events.filter(e => {
+          if (e._isAdult) return false;
+          const d = e.dates?.start?.localDate || '';
+          if (d < todayStr || d > sevenDays) return false;
+          const cat = getEventCategory(e);
+          if (activeGenre === 'Free') return e.isFree;
+          if (activeGenre === 'Community') return cat === 'Community' || cat === 'Volunteer';
+          return cat === activeGenre || cat === activeGenre.replace('Concerts', 'Concert');
+        });
+        const previewEvent = genrePool.length > 0 ? genrePool[Math.floor(Date.now() / 3600000) % genrePool.length] : null;
+        const pImg = previewEvent?.images?.find((im: any) => !im.fallback)?.url || previewEvent?.images?.[0]?.url || '';
+        const pVenue = previewEvent?._embedded?.venues?.[0]?.name || '';
+        const pDate = previewEvent?.dates?.start?.localDate;
+        const pDateFmt = pDate ? new Date(pDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
+
+        return (
+          <div style={{ borderTop: '1px solid rgba(0,0,0,0.06)', marginBottom: 4 }}>
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 pt-3 pb-2">
+              <p className="text-xs font-black uppercase flex items-center gap-2" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>
+                <FlatIcon name="zia" size={12} color="var(--brand)" /> Browse by Category
+              </p>
+              <button onClick={() => { trackEvent('category_click', { genre: activeGenre }); onNavigateEvents?.(activeGenre); }}
+                style={{ fontSize: 10, fontWeight: 800, color: 'var(--ink)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.06em', background: 'none', border: 'none', cursor: 'pointer', textTransform: 'uppercase' as const }}>
+                SEE ALL →
               </button>
-            ))}
+            </div>
+            {/* Scrollable category pills */}
+            <div style={{ position: 'relative' }}>
+              <div className="flex gap-2 px-5 pb-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+                {CATS.map(({ genre, icon, color }) => {
+                  const isActive = genre === activeGenre;
+                  return (
+                    <button key={genre} onClick={() => setActiveGenre(genre)}
+                      className="flex-shrink-0 flex items-center active:scale-95 transition-all"
+                      style={{
+                        padding: isActive ? '6px 14px 6px 10px' : '5px 12px 5px 9px',
+                        borderRadius: '20px',
+                        background: isActive ? color : color + '12',
+                        border: isActive ? 'none' : '1.5px solid ' + color + '40',
+                        cursor: 'pointer', outline: 'none', gap: '5px', whiteSpace: 'nowrap' as const,
+                        WebkitTapHighlightColor: 'transparent',
+                        transition: 'all 0.15s ease',
+                        boxShadow: isActive ? `0 2px 8px ${color}40` : 'none',
+                      }}>
+                      <FlatIcon name={icon} size={12} color={isActive ? 'white' : color} />
+                      <span style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '11px', fontWeight: 700, color: isActive ? 'white' : 'var(--ink)', letterSpacing: '0.01em' }}>{genre}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '40px', background: 'linear-gradient(to right, transparent, var(--bg))', pointerEvents: 'none', zIndex: 1 }} />
+            </div>
+            {/* Preview event card for active genre */}
+            {previewEvent ? (
+              <button onClick={() => onEventSelect(previewEvent)}
+                className="w-full text-left mx-5 active:opacity-80"
+                style={{ display: 'flex', gap: 12, alignItems: 'center', background: activeCat.color + '08', border: `1.5px solid ${activeCat.color}30`, borderRadius: 10, padding: '10px 12px', marginBottom: 12, width: 'calc(100% - 40px)', cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}
+              >
+                {/* Thumbnail */}
+                <div style={{ width: 52, height: 52, borderRadius: 8, overflow: 'hidden', background: activeCat.color + '22', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {pImg
+                    ? <img src={pImg} alt="" style={{ width: 52, height: 52, objectFit: 'cover' }} onError={(e) => { (e.currentTarget as HTMLImageElement).style.display='none'; }} />
+                    : <FlatIcon name={activeCat.icon} size={24} color={activeCat.color} />
+                  }
+                </div>
+                {/* Info */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 13, fontWeight: 800, color: 'var(--ink)', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{previewEvent.name}</p>
+                  <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 11, color: '#888', marginTop: 2 }}>{[pDateFmt, pVenue].filter(Boolean).join(' · ')}</p>
+                  <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 10, fontWeight: 700, color: activeCat.color, marginTop: 3, letterSpacing: '0.04em', textTransform: 'uppercase' as const }}>{genrePool.length} {activeGenre.toLowerCase()} event{genrePool.length !== 1 ? 's' : ''} this week</p>
+                </div>
+                {/* Arrow */}
+                <div style={{ width: 28, height: 28, borderRadius: '50%', background: activeCat.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ color: 'white', fontSize: 14, fontWeight: 900 }}>→</span>
+                </div>
+              </button>
+            ) : (
+              <div style={{ padding: '8px 20px 12px', fontSize: 12, color: '#aaa', fontFamily: 'Public Sans, sans-serif' }}>
+                No {activeGenre.toLowerCase()} events this week
+              </div>
+            )}
           </div>
-          <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '50px', background: 'linear-gradient(to right, transparent, var(--bg))', pointerEvents: 'none', zIndex: 1 }} />
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Daily Gem — spot of the day, date-seeded */}
 
@@ -3660,18 +3741,17 @@ function DiscoverScreen({
                 {_calEvts.slice(0, 8).map(event => {
                   const _t = event.dates?.start?.localTime ? new Date(`2000-01-01T${event.dates.start.localTime}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : '';
                   const _v = (event as any)._embedded?.venues?.[0]?.name || '';
-                  const _img = event.images?.find((im: any) => im.ratio === '16_9' && im.width > 300)?.url || event.images?.[0]?.url || '';
+                  // Pick best available image — no width/ratio requirement for Eventbrite events
+                  const _img = event.images?.find((im: any) => (im.ratio === '16_9' || im.ratio === '3_2') && (im.width || 0) > 300)?.url
+                    || event.images?.find((im: any) => !im.fallback)?.url
+                    || event.images?.[0]?.url || '';
                   const _about = event._aiEnrichment?.about;
+                  const _typeMeta = getEventTypeMeta(event);
                   return (
                     <div key={event.id}
                       style={{ display: 'flex', gap: 12, padding: '10px 20px', alignItems: 'flex-start', borderTop: '1px solid rgba(0,0,0,0.04)' }}
                     >
-                      <div onClick={() => onEventSelect(event)} style={{ cursor: 'pointer', flexShrink: 0 }}>
-                        {_img
-                          ? <img src={_img} alt="" style={{ width: 50, height: 50, borderRadius: 8, objectFit: 'cover' }} />
-                          : <div style={{ width: 50, height: 50, borderRadius: 8, background: 'rgba(0,0,0,0.06)' }} />
-                        }
-                      </div>
+                      <CalEventThumb img={_img} typeMeta={_typeMeta} onClick={() => onEventSelect(event)} />
                       <div style={{ flex: 1, minWidth: 0 }} onClick={() => onEventSelect(event)} className="cursor-pointer">
                         <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)', fontFamily: 'Public Sans, sans-serif', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{event.name}</div>
                         <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', fontFamily: 'Public Sans, sans-serif', marginTop: 2 }}>{_t}{_t && _v ? ' · ' : ''}{_v}</div>
