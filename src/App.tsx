@@ -3633,11 +3633,11 @@ function DiscoverScreen({
           if (activeGenre === 'Community') return cat === 'Community' || cat === 'Volunteer';
           return cat === activeGenre || cat === activeGenre.replace('Concerts', 'Concert');
         });
-        const previewEvent = genrePool.length > 0 ? genrePool[Math.floor(Date.now() / 3600000) % genrePool.length] : null;
-        const pImg = previewEvent?.images?.find((im: any) => !im.fallback)?.url || previewEvent?.images?.[0]?.url || '';
-        const pVenue = previewEvent?._embedded?.venues?.[0]?.name || '';
-        const pDate = previewEvent?.dates?.start?.localDate;
-        const pDateFmt = pDate ? new Date(pDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
+        // Show up to 5 preview events, sorted by date
+        const previewEvents = genrePool
+          .slice()
+          .sort((a, b) => (a.dates?.start?.localDate || '') < (b.dates?.start?.localDate || '') ? -1 : 1)
+          .slice(0, 5);
 
         return (
           <div style={{ borderTop: '1px solid rgba(0,0,0,0.06)', marginBottom: 4 }}>
@@ -3677,30 +3677,51 @@ function DiscoverScreen({
               </div>
               <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '40px', background: 'linear-gradient(to right, transparent, var(--bg))', pointerEvents: 'none', zIndex: 1 }} />
             </div>
-            {/* Preview event card for active genre */}
-            {previewEvent ? (
-              <button onClick={() => onEventSelect(previewEvent)}
-                className="w-full text-left mx-5 active:opacity-80"
-                style={{ display: 'flex', gap: 12, alignItems: 'center', background: activeCat.color + '08', border: `1.5px solid ${activeCat.color}30`, borderRadius: 10, padding: '10px 12px', marginBottom: 12, width: 'calc(100% - 40px)', cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}
-              >
-                {/* Thumbnail */}
-                <div style={{ width: 52, height: 52, borderRadius: 8, overflow: 'hidden', background: activeCat.color + '22', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {pImg
-                    ? <img src={pImg} alt="" style={{ width: 52, height: 52, objectFit: 'cover' }} onError={(e) => { (e.currentTarget as HTMLImageElement).style.display='none'; }} />
-                    : <FlatIcon name={activeCat.icon} size={24} color={activeCat.color} />
-                  }
-                </div>
-                {/* Info */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 13, fontWeight: 800, color: 'var(--ink)', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{previewEvent.name}</p>
-                  <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 11, color: '#888', marginTop: 2 }}>{[pDateFmt, pVenue].filter(Boolean).join(' · ')}</p>
-                  <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 10, fontWeight: 700, color: activeCat.color, marginTop: 3, letterSpacing: '0.04em', textTransform: 'uppercase' as const }}>{genrePool.length} {activeGenre.toLowerCase()} event{genrePool.length !== 1 ? 's' : ''} this week</p>
-                </div>
-                {/* Arrow */}
-                <div style={{ width: 28, height: 28, borderRadius: '50%', background: activeCat.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <span style={{ color: 'white', fontSize: 14, fontWeight: 900 }}>→</span>
-                </div>
-              </button>
+            {/* Preview event list for active genre */}
+            {previewEvents.length > 0 ? (
+              <div style={{ padding: '0 20px' }}>
+                {previewEvents.map((ev) => {
+                  const evImg = ev.images?.find((im: any) => !im.fallback)?.url || ev.images?.[0]?.url || '';
+                  const evVenue = ev._embedded?.venues?.[0]?.name || '';
+                  const evDate = ev.dates?.start?.localDate;
+                  const evDateFmt = evDate ? new Date(evDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
+                  return (
+                    <button key={ev.id} onClick={() => onEventSelect(ev)}
+                      className="w-full text-left active:opacity-80"
+                      style={{ display: 'flex', gap: 12, alignItems: 'center', background: 'white', border: `1px solid rgba(0,0,0,0.08)`, borderRadius: 10, padding: '10px 12px', marginBottom: 8, cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}
+                    >
+                      {/* Thumbnail */}
+                      <div style={{ width: 48, height: 48, borderRadius: 8, overflow: 'hidden', background: activeCat.color + '22', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {evImg
+                          ? <img src={evImg} alt="" style={{ width: 48, height: 48, objectFit: 'cover' }} onError={(e) => { (e.currentTarget as HTMLImageElement).style.display='none'; }} />
+                          : <FlatIcon name={activeCat.icon} size={22} color={activeCat.color} />
+                        }
+                      </div>
+                      {/* Info */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 13, fontWeight: 800, color: 'var(--ink)', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{ev.name}</p>
+                        <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 11, color: '#888', marginTop: 2 }}>{[evDateFmt, evVenue].filter(Boolean).join(' · ')}</p>
+                      </div>
+                      {/* Arrow */}
+                      <span style={{ color: activeCat.color, fontSize: 16, fontWeight: 900, flexShrink: 0 }}>›</span>
+                    </button>
+                  );
+                })}
+                {/* SEE ALL button */}
+                <button
+                  onClick={() => { trackEvent('category_click', { genre: activeGenre }); onNavigateEvents?.(activeGenre); }}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                    width: '100%', padding: '11px', marginBottom: 12,
+                    background: activeCat.color, color: 'white', border: 'none', borderRadius: 10,
+                    fontSize: 12, fontWeight: 800, fontFamily: 'Public Sans, sans-serif',
+                    letterSpacing: '0.06em', textTransform: 'uppercase' as const, cursor: 'pointer',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
+                >
+                  See all {genrePool.length} {activeGenre.toLowerCase()} events →
+                </button>
+              </div>
             ) : (
               <div style={{ padding: '8px 20px 12px', fontSize: 12, color: '#aaa', fontFamily: 'Public Sans, sans-serif' }}>
                 No {activeGenre.toLowerCase()} events this week
@@ -8330,7 +8351,13 @@ export default function App() {
               geoSilentPending={geoSilentPending}
               geoError={geoError}
               onRequestGeo={requestGeo}
-              onNavigateEvents={(genre) => { setEventsNavGenre(genre || ''); setActiveTab('events'); }}
+              onNavigateEvents={(genre) => {
+                setEventsNavGenre(genre || '');
+                setActiveTab('events');
+                // Always scroll to top when navigating from Discover — not mid-page
+                tabScrollPos.current['events'] = 0;
+                requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+              }}
               prefs={prefs}
               adminHeroLines={adminHeroLines}/>
           )}
