@@ -4018,6 +4018,15 @@ function EventsScreen({
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [calendarSelDate, setCalendarSelDate] = useState<string | null>(null);
   const [wishlistVersion, setWishlistVersion] = useState(0);
+
+  // Scroll to top of page whenever the primary filter changes so users see
+  // the new results — without this, the grid updates above the viewport
+  // and it looks like nothing happened.
+  const isFirstFilterMount = useRef(true);
+  useEffect(() => {
+    if (isFirstFilterMount.current) { isFirstFilterMount.current = false; return; }
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [selectedGenre]);
   useEffect(() => {
     const handler = () => setWishlistVersion(v => v + 1);
     window.addEventListener('abq_wishlist_changed', handler);
@@ -4639,6 +4648,11 @@ function AuthModal({ onClose }: { onClose: () => void }) {
     setLoading(false);
   }
 
+  // Detect if running as installed PWA (standalone mode)
+  const isPWA = typeof window !== 'undefined' &&
+    (window.matchMedia('(display-mode: standalone)').matches ||
+     (window.navigator as any).standalone === true);
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-end justify-center"
@@ -4655,6 +4669,14 @@ function AuthModal({ onClose }: { onClose: () => void }) {
           </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-700 text-2xl leading-none">×</button>
         </div>
+        {isPWA && (
+          <div style={{ background: '#fffbeb', border: '1px solid #fcd34d', borderRadius: 10, padding: '10px 12px', marginBottom: 14, display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+            <span style={{ fontSize: 16, lineHeight: 1.4 }}>📱</span>
+            <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 12, color: '#78350f', lineHeight: 1.5, margin: 0 }}>
+              The app and your browser have separate sign-in sessions. Sign in here to access your saved events.
+            </p>
+          </div>
+        )}
         <p className="text-sm text-gray-500 mb-5" style={{ fontFamily: 'Public Sans, sans-serif' }}>
           Sign in to save events, get personalized email newsletters, and appear on the leaderboard.
         </p>
@@ -6765,6 +6787,16 @@ function ProfileScreen({ user, onShowAuth, onSignOut }: { user: any; onShowAuth:
             </div>
           ) : (
             <div className="flex flex-col gap-2">
+              {/* Detect standalone PWA — localStorage is isolated from the browser,
+                  so users who signed in via Safari need to sign in again here */}
+              {(window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true) && (
+                <div style={{ background: '#fffbeb', border: '1px solid #fcd34d', borderRadius: 8, padding: '8px 10px', display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 4 }}>
+                  <span style={{ fontSize: 14 }}>📱</span>
+                  <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 11, color: '#78350f', lineHeight: 1.5, margin: 0 }}>
+                    The app and Safari have separate sign-in sessions. Sign in here to access your account.
+                  </p>
+                </div>
+              )}
               <p className="text-sm" style={{ color: '#555', fontFamily: 'Public Sans, sans-serif', lineHeight: 1.5 }}>
                 Sign in to sync your saved events across devices and get personalized notifications.
               </p>
