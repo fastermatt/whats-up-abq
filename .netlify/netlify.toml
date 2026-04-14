@@ -13,7 +13,7 @@ functions = "/Users/matt/Documents/ClaudeObsidian/Projects/ABQ Unplugged PWA/wha
 
 [build.environment]
 NODE_VERSION = "22"
-VAPID_PUBLIC_KEY = "BFPO4TytpML2fS1V72TRemWOIIjfu62V0tDdNuXVN3VY3hrapqf2Pesu8dkYqS5xou7YUm5Y4-xeGL_ZoIGU0pc"
+VAPID_PUBLIC_KEY = "BBsD8ydl2s1rXqCNH34NSVg9G8w9IYODuu7vqTwjQSZb5b_nN2zK6BPRJBjorpQgXi79CLouwLQShFKS-KnQSpE"
 VAPID_SUBJECT = "mailto:4mattcarlson@gmail.com"
 
 [build.processing]
