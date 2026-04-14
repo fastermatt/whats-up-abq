@@ -622,38 +622,54 @@ function useGeolocation() {
 // Matches the brutalist mockup: boxed accent word + uppercase tracking label
 
 function ABQUnpluggedLogo({ size = 43 }: { size?: number }) {
-  const blockH   = Math.round(size * 0.72);          // height of the ABQ block
-  const abqSize  = Math.round(blockH * 0.62);        // ABQ font size
-  const unplSize = Math.round(blockH * 0.38);        // UNPLUGGED font size
+  const blockH   = Math.round(size * 0.72);
+  const abqSize  = Math.round(blockH * 0.62);
+  const unplSize = Math.round(blockH * 0.38);
+  const ziaSize  = Math.round(size * 0.78);
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', userSelect: 'none' }}>
-      {/* Lime accent block */}
-      <div style={{
-        background: 'var(--brand)',
-        padding: `2px ${Math.round(blockH * 0.28)}px`,
-        display: 'inline-flex',
-        alignItems: 'center',
-        border: '1px solid rgba(0,0,0,0.12)',
-      }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', userSelect: 'none' }}>
+      {/* Zia sun symbol — Southwest icon mark */}
+      <svg width={ziaSize} height={ziaSize} viewBox="0 0 40 40" fill="none" aria-hidden="true">
+        {/* Outer ring */}
+        <circle cx="20" cy="20" r="5.5" fill="var(--brand)" />
+        {/* 4 sets of 4 rays — Zia symbol */}
+        {[0, 90, 180, 270].map(rot => (
+          <g key={rot} transform={`rotate(${rot} 20 20)`}>
+            <rect x="19" y="2" width="2" height="7" rx="1" fill="var(--brand)" />
+            <rect x="17.5" y="4.5" width="1.5" height="5" rx="0.75" fill="var(--brand)" transform="rotate(-15 18.25 7)" />
+            <rect x="21" y="4.5" width="1.5" height="5" rx="0.75" fill="var(--brand)" transform="rotate(15 21.75 7)" />
+            <rect x="18.5" y="3" width="1.2" height="4.5" rx="0.6" fill="var(--brand)" transform="rotate(-30 19.1 5.25)" />
+          </g>
+        ))}
+      </svg>
+      {/* ABQ block + wordmark */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+        <div style={{
+          background: 'var(--brand)',
+          padding: `1px ${Math.round(blockH * 0.22)}px`,
+          display: 'inline-flex',
+          alignItems: 'center',
+          borderRadius: '4px',
+        }}>
+          <span style={{
+            fontFamily: 'Public Sans, sans-serif',
+            fontWeight: 900,
+            fontSize: `${abqSize}px`,
+            color: 'white',
+            letterSpacing: '-0.02em',
+            lineHeight: 1,
+          }}>ABQ</span>
+        </div>
         <span style={{
           fontFamily: 'Public Sans, sans-serif',
-          fontWeight: 900,
-          fontSize: `${abqSize}px`,
+          fontWeight: 800,
+          fontSize: `${unplSize}px`,
           color: 'var(--ink)',
-          letterSpacing: '-0.03em',
+          letterSpacing: '0.10em',
+          textTransform: 'uppercase' as const,
           lineHeight: 1,
-        }}>ABQ</span>
+        }}>UNPLUGGED</span>
       </div>
-      {/* Wordmark */}
-      <span style={{
-        fontFamily: 'Public Sans, sans-serif',
-        fontWeight: 900,
-        fontSize: `${unplSize}px`,
-        color: 'var(--ink)',
-        letterSpacing: '0.06em',
-        textTransform: 'uppercase',
-        lineHeight: 1,
-      }}>UNPLUGGED</span>
     </div>
   );
 }
@@ -1069,7 +1085,7 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
       ref={fadeRef}
       onClick={onClick}
       className="bg-white overflow-hidden text-left w-full"
-      style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.10)', borderRadius: '10px', animation: 'cardFadeIn 0.3s ease both' }}
+      style={{ border: '1px solid rgba(0,0,0,0.07)', boxShadow: 'rgba(0,0,0,0.02) 0px 0px 0px 1px, rgba(0,0,0,0.04) 0px 2px 6px, rgba(0,0,0,0.08) 0px 4px 12px', borderRadius: '16px', animation: 'cardFadeIn 0.3s ease both' }}
     >
       <div className="relative overflow-hidden" style={{ paddingTop: '75%' }}>
         <div className="absolute inset-0">
@@ -2929,7 +2945,7 @@ function FeaturedEventBanner({ events, onSelect }: { events: TMEvent[]; onSelect
         </span>
       </div>
       <button onClick={() => onSelect(ev)} className="w-full relative overflow-hidden text-left"
-        style={{ height: '220px', boxShadow: '0 4px 20px rgba(0,0,0,0.15)', border: '1px solid rgba(0,0,0,0.12)', animation: 'cardFadeIn 0.45s ease both', borderRadius: '10px' }}>
+        style={{ height: '220px', boxShadow: 'rgba(0,0,0,0.02) 0px 0px 0px 1px, rgba(0,0,0,0.06) 0px 4px 12px, rgba(0,0,0,0.12) 0px 8px 24px', border: '1px solid rgba(0,0,0,0.07)', animation: 'cardFadeIn 0.45s ease both', borderRadius: '20px', overflow: 'hidden' }}>
         <img src={img} alt={ev.name} className="w-full h-full object-cover" style={{ filter: 'brightness(0.75)' }} />
         <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, rgba(194,99,74,0.2) 0%, rgba(0,0,0,0.78) 100%)' }} />
         <div className="absolute top-3 left-3">
@@ -3442,20 +3458,20 @@ function DiscoverScreen({
               <button key={chip.value} onClick={() => setDiscoverFilter(chip.value)}
                 style={{
                   flexShrink: 0,
-                  height: active ? '36px' : '30px',
-                  padding: active ? '0 18px' : '0 14px',
-                  background: active ? 'var(--brand)' : 'rgba(255,255,255,0.85)',
-                  border: active ? 'none' : '1px solid rgba(194,99,74,0.3)',
+                  height: '36px',
+                  padding: '0 18px',
+                  background: active ? 'var(--brand)' : 'rgba(255,255,255,0.90)',
+                  border: active ? 'none' : '1.5px solid rgba(199,91,57,0.25)',
                   fontFamily: 'Public Sans, sans-serif',
-                  fontSize: active ? '13px' : '12px',
-                  fontWeight: active ? 800 : 700,
-                  letterSpacing: '0.04em',
+                  fontSize: '13px',
+                  fontWeight: active ? 800 : 600,
+                  letterSpacing: '0.02em',
                   cursor: 'pointer',
-                  borderRadius: 6,
+                  borderRadius: '999px',
                   whiteSpace: 'nowrap' as const,
                   color: active ? 'white' : 'var(--ink)',
-                  boxShadow: active ? '0 2px 8px rgba(185,92,67,0.25)' : 'none',
-                  transition: 'all 0.15s ease',
+                  boxShadow: active ? '0 2px 10px rgba(199,91,57,0.28)' : 'rgba(0,0,0,0.02) 0px 0px 0px 1px, rgba(0,0,0,0.04) 0px 1px 4px',
+                  transition: 'all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)',
                 }}>
                 {chip.label}
               </button>
@@ -7087,6 +7103,349 @@ const dGREEN = { background: 'var(--brand)' } as const;
 const dDARK  = { background: '#1a1a1a' } as const;
 
 
+
+// ─── DesktopApp ──────────────────────────────────────────────────────────────
+// Airbnb-warm design: sidebar nav + photography-forward event grid
+interface DesktopAppProps {
+  events: TMEvent[];
+  places: any[];
+  coords: { lat: number; lng: number } | null;
+  loading: boolean;
+  eventsLoading: boolean;
+  onEventSelect: (e: TMEvent) => void;
+  savedPlan: TMEvent[];
+  onToggleSaveEvent: (e: TMEvent) => void;
+  isEventSaved: (id: string) => boolean;
+}
+
+function DesktopApp({ events, places, coords, loading, eventsLoading, onEventSelect, savedPlan, onToggleSaveEvent, isEventSaved }: DesktopAppProps) {
+  const [activeTab, setActiveTab] = useState<TabId>('discover');
+  const [search, setSearch] = useState('');
+  const [activeFilter, setActiveFilter] = useState('Tonight');
+
+  const today = new Date().toLocaleDateString('en-CA');
+  const tomorrow = new Date(Date.now() + 86400000).toLocaleDateString('en-CA');
+
+  const filteredEvents = useMemo(() => {
+    let evs = events;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      evs = evs.filter(e => e.title.toLowerCase().includes(q) || (e.venue || '').toLowerCase().includes(q) || (e.category || '').toLowerCase().includes(q));
+    }
+    if (activeFilter === 'Tonight') evs = evs.filter(e => e.date === today);
+    else if (activeFilter === 'Tomorrow') evs = evs.filter(e => e.date === tomorrow);
+    else if (activeFilter === 'This Week') {
+      const weekOut = new Date(Date.now() + 7 * 86400000).toLocaleDateString('en-CA');
+      evs = evs.filter(e => e.date >= today && e.date <= weekOut);
+    } else if (activeFilter === 'Free') evs = evs.filter(e => !e.price || e.price === '0' || e.price?.toLowerCase().includes('free'));
+    return evs;
+  }, [events, search, activeFilter, today, tomorrow]);
+
+  const filters = ['Tonight', 'Tomorrow', 'This Week', 'Free', 'All'];
+
+  const SIDEBAR_ITEMS: { id: TabId; icon: string; label: string }[] = [
+    { id: 'discover', icon: 'explore', label: 'Discover' },
+    { id: 'events',   icon: 'event',   label: 'Events'   },
+    { id: 'plan',     icon: 'bookmark', label: 'Saved'   },
+    { id: 'profile',  icon: 'person',   label: 'Profile' },
+  ];
+
+  return (
+    <div style={{ display: 'flex', height: '100vh', background: 'var(--bg)', fontFamily: "'Public Sans', -apple-system, sans-serif", overflow: 'hidden' }}>
+
+      {/* ── Sidebar ── */}
+      <aside style={{
+        width: 240, flexShrink: 0, display: 'flex', flexDirection: 'column',
+        background: '#fff', borderRight: '1px solid rgba(0,0,0,0.08)',
+        padding: '24px 0',
+      }}>
+        {/* Logo */}
+        <div style={{ padding: '0 20px 28px' }}>
+          <ABQUnpluggedLogo size={36} />
+        </div>
+
+        {/* Nav items */}
+        <nav style={{ flex: 1 }}>
+          {SIDEBAR_ITEMS.map(item => {
+            const active = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  width: '100%', padding: '12px 20px',
+                  background: active ? 'rgba(199,91,57,0.08)' : 'transparent',
+                  border: 'none', cursor: 'pointer', textAlign: 'left',
+                  borderRadius: '0 24px 24px 0', marginBottom: 4,
+                  color: active ? 'var(--brand)' : '#444',
+                  fontWeight: active ? 700 : 500,
+                  fontSize: 15,
+                  transition: 'all 0.15s',
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 22, color: active ? 'var(--brand)' : '#888' }}>{item.icon}</span>
+                {item.label}
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Footer tagline */}
+        <div style={{ padding: '0 20px', fontSize: 11, color: '#aaa', lineHeight: 1.5 }}>
+          Your guide to<br />Albuquerque events
+        </div>
+      </aside>
+
+      {/* ── Main content ── */}
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+
+        {/* Top bar */}
+        <header style={{
+          display: 'flex', alignItems: 'center', gap: 16,
+          padding: '16px 32px', background: '#fff',
+          borderBottom: '1px solid rgba(0,0,0,0.06)',
+          flexShrink: 0,
+        }}>
+          {/* Search */}
+          <div style={{
+            flex: 1, display: 'flex', alignItems: 'center', gap: 10,
+            background: '#f5f5f5', borderRadius: 999,
+            padding: '10px 18px',
+          }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 20, color: '#999' }}>search</span>
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search events, artists, venues…"
+              style={{
+                flex: 1, border: 'none', background: 'transparent', outline: 'none',
+                fontSize: 14, color: '#333', fontFamily: 'inherit',
+              }}
+            />
+          </div>
+
+          {/* Filter pills */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            {filters.map(f => (
+              <button
+                key={f}
+                onClick={() => setActiveFilter(f)}
+                style={{
+                  padding: '8px 16px', borderRadius: 999,
+                  border: activeFilter === f ? 'none' : '1.5px solid #e5e7eb',
+                  background: activeFilter === f ? 'var(--brand)' : '#fff',
+                  color: activeFilter === f ? '#fff' : '#555',
+                  fontWeight: 600, fontSize: 13, cursor: 'pointer',
+                  fontFamily: 'inherit', whiteSpace: 'nowrap',
+                  transition: 'all 0.15s',
+                }}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+        </header>
+
+        {/* Content area */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '28px 32px' }}>
+          {activeTab === 'discover' || activeTab === 'events' ? (
+            <>
+              <div style={{ marginBottom: 20 }}>
+                <h1 style={{ fontSize: 26, fontWeight: 800, color: '#111', margin: 0, letterSpacing: '-0.5px' }}>
+                  {activeFilter === 'Tonight' ? 'Tonight in ABQ' :
+                   activeFilter === 'Tomorrow' ? 'Tomorrow in ABQ' :
+                   activeFilter === 'This Week' ? 'This Week' :
+                   activeFilter === 'Free' ? 'Free Events' : 'All Events'}
+                </h1>
+                <p style={{ margin: '4px 0 0', fontSize: 14, color: '#888' }}>
+                  {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''} in Albuquerque
+                </p>
+              </div>
+
+              {eventsLoading ? (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
+                  {[1,2,3,4,5,6].map(i => (
+                    <div key={i} style={{
+                      borderRadius: 16, overflow: 'hidden',
+                      background: '#f0f0f0', height: 280,
+                      animation: 'pulse 1.5s ease-in-out infinite',
+                    }} />
+                  ))}
+                </div>
+              ) : filteredEvents.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '80px 0', color: '#888' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 48, display: 'block', marginBottom: 12 }}>event_busy</span>
+                  <p style={{ fontWeight: 600, fontSize: 16 }}>No events found</p>
+                  <p style={{ fontSize: 14, marginTop: 4 }}>Try a different filter or check back soon</p>
+                </div>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
+                  {filteredEvents.map(event => (
+                    <DesktopEventCard
+                      key={event.id}
+                      event={event}
+                      onClick={() => onEventSelect(event)}
+                      isSaved={isEventSaved(event.id)}
+                      onToggleSave={() => onToggleSaveEvent(event)}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          ) : activeTab === 'plan' ? (
+            <div>
+              <h1 style={{ fontSize: 26, fontWeight: 800, color: '#111', margin: '0 0 20px', letterSpacing: '-0.5px' }}>Saved Events</h1>
+              {savedPlan.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '80px 0', color: '#888' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 48, display: 'block', marginBottom: 12 }}>bookmark_border</span>
+                  <p style={{ fontWeight: 600, fontSize: 16 }}>Nothing saved yet</p>
+                  <p style={{ fontSize: 14, marginTop: 4 }}>Tap the heart on any event to save it</p>
+                </div>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
+                  {savedPlan.map(event => (
+                    <DesktopEventCard
+                      key={event.id}
+                      event={event}
+                      onClick={() => onEventSelect(event)}
+                      isSaved={true}
+                      onToggleSave={() => onToggleSaveEvent(event)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div style={{ maxWidth: 480 }}>
+              <h1 style={{ fontSize: 26, fontWeight: 800, color: '#111', margin: '0 0 20px', letterSpacing: '-0.5px' }}>Profile</h1>
+              <p style={{ color: '#888', fontSize: 15 }}>Sign in to save events and set reminders.</p>
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}
+
+// ─── Desktop Event Card ────────────────────────────────────────────────────────
+function DesktopEventCard({ event, onClick, isSaved, onToggleSave }: {
+  event: TMEvent;
+  onClick: () => void;
+  isSaved: boolean;
+  onToggleSave: () => void;
+}) {
+  const img = event.cached_photo_url || event.images?.[0]?.url;
+  const [imgErr, setImgErr] = useState(false);
+
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        borderRadius: 16, overflow: 'hidden', cursor: 'pointer',
+        background: '#fff',
+        boxShadow: 'rgba(0,0,0,0.02) 0px 0px 0px 1px, rgba(0,0,0,0.04) 0px 2px 6px, rgba(0,0,0,0.08) 0px 4px 12px',
+        transition: 'transform 0.18s, box-shadow 0.18s',
+      }}
+      onMouseEnter={e => {
+        (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)';
+        (e.currentTarget as HTMLDivElement).style.boxShadow = 'rgba(0,0,0,0.03) 0px 0px 0px 1px, rgba(0,0,0,0.06) 0px 4px 12px, rgba(0,0,0,0.12) 0px 8px 24px';
+      }}
+      onMouseLeave={e => {
+        (e.currentTarget as HTMLDivElement).style.transform = '';
+        (e.currentTarget as HTMLDivElement).style.boxShadow = 'rgba(0,0,0,0.02) 0px 0px 0px 1px, rgba(0,0,0,0.04) 0px 2px 6px, rgba(0,0,0,0.08) 0px 4px 12px';
+      }}
+    >
+      {/* Image */}
+      <div style={{ position: 'relative', paddingTop: '56.25%', background: '#f0ece8', overflow: 'hidden' }}>
+        {img && !imgErr ? (
+          <img
+            src={img}
+            alt={event.title}
+            onError={() => setImgErr(true)}
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        ) : (
+          <div style={{
+            position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'linear-gradient(135deg, #C75B39 0%, #e8896a 100%)',
+          }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 40, color: 'rgba(255,255,255,0.7)' }}>event</span>
+          </div>
+        )}
+        {/* Save button */}
+        <button
+          onClick={e => { e.stopPropagation(); onToggleSave(); }}
+          style={{
+            position: 'absolute', top: 10, right: 10,
+            width: 34, height: 34, borderRadius: '50%',
+            background: 'rgba(255,255,255,0.92)',
+            border: 'none', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            backdropFilter: 'blur(4px)',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
+          }}
+        >
+          <span className="material-symbols-outlined" style={{
+            fontSize: 18,
+            color: isSaved ? '#C75B39' : '#666',
+            fontVariationSettings: isSaved ? "'FILL' 1" : "'FILL' 0",
+          }}>favorite</span>
+        </button>
+        {/* Category badge */}
+        {event.category && (
+          <div style={{
+            position: 'absolute', bottom: 10, left: 10,
+            background: 'rgba(0,0,0,0.55)', color: '#fff',
+            backdropFilter: 'blur(6px)',
+            borderRadius: 999, padding: '3px 10px',
+            fontSize: 11, fontWeight: 600, letterSpacing: '0.3px',
+            textTransform: 'uppercase',
+          }}>
+            {event.category}
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div style={{ padding: '14px 16px 16px' }}>
+        <h3 style={{
+          margin: '0 0 6px', fontSize: 15, fontWeight: 700,
+          color: '#111', lineHeight: 1.3,
+          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+        }}>
+          {event.title}
+        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#C75B39' }}>calendar_today</span>
+          <span style={{ fontSize: 13, color: '#666' }}>
+            {event.date ? new Date(event.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : ''}
+            {event.time ? ` · ${event.time}` : ''}
+          </span>
+        </div>
+        {event.venue && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#999' }}>location_on</span>
+            <span style={{ fontSize: 13, color: '#888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{event.venue}</span>
+          </div>
+        )}
+        {event.price && (
+          <div style={{ marginTop: 10 }}>
+            <span style={{
+              display: 'inline-block', padding: '3px 10px', borderRadius: 999,
+              background: event.price?.toLowerCase().includes('free') ? '#e8f5e9' : '#fff3e0',
+              color: event.price?.toLowerCase().includes('free') ? '#2e7d32' : '#e65100',
+              fontSize: 12, fontWeight: 700,
+            }}>
+              {event.price?.toLowerCase().includes('free') ? 'Free' : event.price}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── useIsDesktop hook ────────────────────────────────────────────────────────
 function useIsDesktop() {
   const [isDesktop, setIsDesktop] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1024);
@@ -7330,8 +7689,7 @@ export default function App() {
     const validTabs: TabId[] = ['discover', 'events', 'plan', 'profile'];
     return validTabs.includes(hash as TabId) ? (hash as TabId) : 'discover';
   });
-  // Mobile-first: always use mobile layout (desktop layout disabled for now)
-  const isDesktop = false;
+  const isDesktop = useIsDesktop();
 
   // ── Dark mode ──
   const [isDark, setIsDark] = useState(() => {
@@ -8422,44 +8780,43 @@ export default function App() {
       >
         {/* Header — Urban Curator: white + hard 2px border-bottom */}
         <header
-          className="flex-shrink-0 px-4 flex items-center justify-between"
+          className="flex-shrink-0"
           style={{
             position: 'sticky',
             top: 0,
-            paddingTop: '12px',
-            paddingBottom: '12px',
+            paddingTop: '10px',
+            paddingBottom: '10px',
+            paddingLeft: '16px',
+            paddingRight: '16px',
             background: 'var(--bg)',
-            borderBottom: '1px solid rgba(0,0,0,0.08)',
+            borderBottom: '1px solid rgba(0,0,0,0.07)',
             zIndex: 40,
           }}
         >
-          <button className="flex items-center gap-2" onClick={() => { setActiveTab('discover'); window.scrollTo(0, 0); }} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
-            <img src="/logo-static.webp" alt="ABQ Unplugged" style={{ height: '32px', width: 'auto' }} />
-          </button>
-          <div className="flex items-center gap-2">
-            <button onClick={() => setShowSearch(true)} className="w-9 h-9 flex items-center justify-center" style={{ background: 'var(--bg)', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '20px', color: 'var(--ink)' }}>search</span>
+          {/* Logo row */}
+          <div className="flex items-center justify-between mb-2.5">
+            <button onClick={() => { setActiveTab('discover'); window.scrollTo(0, 0); }} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+              <ABQUnpluggedLogo size={38} />
             </button>
             <button
               onClick={requestGeo}
               className="w-9 h-9 flex items-center justify-center"
-              style={{ background: 'var(--bg)', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+              style={{ background: 'var(--bg)', border: '1px solid rgba(0,0,0,0.10)', borderRadius: '50%', boxShadow: '0 1px 4px rgba(0,0,0,0.07)' }}
               title={coords ? 'Location active' : 'Enable location'}
               aria-label={coords ? 'Location active' : 'Enable location'}
             >
-              <span
-                className="material-symbols-outlined"
-                style={{
-                  fontSize: '18px',
-                  color: coords ? 'var(--brand)' : '#888',
-                  fontVariationSettings: coords ? "'FILL' 1" : "'FILL' 0",
-                }}
-              >
-                my_location
-              </span>
+              <span className="material-symbols-outlined" style={{ fontSize: '18px', color: coords ? 'var(--brand)' : '#888', fontVariationSettings: coords ? "'FILL' 1" : "'FILL' 0" }}>my_location</span>
             </button>
-
           </div>
+          {/* Persistent search pill */}
+          <button
+            onClick={() => setShowSearch(true)}
+            className="w-full flex items-center gap-2.5 search-pill"
+            style={{ padding: '9px 16px', background: isDark ? 'rgba(255,255,255,0.06)' : '#F2EDE9', border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.10)' : '#E5DDD8'}`, borderRadius: '999px', cursor: 'text', textAlign: 'left' as const }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#999', flexShrink: 0 }}>search</span>
+            <span style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '14px', fontWeight: 500, color: isDark ? 'rgba(255,255,255,0.35)' : '#999' }}>Search events, artists, venues…</span>
+          </button>
         </header>
 
         {/* Site-wide announcement banner */}
@@ -8526,15 +8883,13 @@ export default function App() {
               className="nav-press-btn flex-1 flex flex-col items-center justify-center gap-0.5"
               style={{
                 minHeight: '64px',
-                background: isActive ? 'var(--brand)' : 'var(--bg)',
+                background: isActive ? 'var(--brand-tint-bg)' : 'transparent',
                 border: 'none',
-                borderRadius: 8,
+                borderRadius: 12,
                 margin: '6px 3px 6px',
                 position: 'relative' as const,
                 top: 0,
-                boxShadow: isActive
-                  ? '0 4px 0 #7a2e1a, 0 2px 8px rgba(194,99,74,0.3)'
-                  : isDark ? '0 4px 0 rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.2)' : '0 4px 0 #d5d0c8, 0 2px 6px rgba(0,0,0,0.06)',
+                boxShadow: 'none',
                 cursor: 'pointer',
                 WebkitTapHighlightColor: 'transparent',
                 transition: 'top 0.1s ease, box-shadow 0.1s ease, background 0.15s ease',
