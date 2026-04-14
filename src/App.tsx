@@ -8603,17 +8603,13 @@ export default function App() {
   if (isDesktop) return (
     <ErrorBoundary>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@700;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800;900&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--bg); -webkit-font-smoothing: antialiased; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #d0d8d0; }
-        :root {
-          --brand: var(--brand);
-          --brand-gradient: linear-gradient(135deg, var(--brand) 0%, var(--brand-light) 100%);
-          --brand-bg-screen: var(--bg);
-        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
       `}</style>
       <DesktopApp
         events={events}
