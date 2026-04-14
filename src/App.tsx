@@ -8617,12 +8617,12 @@ export default function App() {
       `}</style>
       <DesktopApp
         events={events}
-        places={places}
+        places={[]}
         coords={coords}
         loading={loading}
         eventsLoading={eventsLoading}
         onEventSelect={(e) => setSelectedEvent(e)}
-        savedPlan={savedPlan}
+        savedPlan={savedPlan.filter(p => p.type === 'event').map(p => p.data as TMEvent)}
         onToggleSaveEvent={toggleSavedEvent}
         isEventSaved={isEventSaved}
       />
