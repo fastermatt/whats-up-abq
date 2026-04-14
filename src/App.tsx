@@ -401,7 +401,8 @@ function staticEventToTMEvent(ev: StaticEvent): TMEvent {
 }
 
 // Pre-convert all static events once (filter out today-or-past at load time)
-const TODAY = new Date().toISOString().split('T')[0];
+// Use en-CA locale for YYYY-MM-DD in LOCAL time (toISOString is UTC and can return wrong date)
+const TODAY = new Date().toLocaleDateString('en-CA');
 const STATIC_TM_EVENTS: TMEvent[] = ALL_EVENTS
   .filter(ev => (ev.endDate ?? ev.date) >= TODAY)
   .map(staticEventToTMEvent);
@@ -3388,7 +3389,7 @@ function DiscoverScreen({
     const sevenDays = new Date(Date.now() + 7 * 864e5).toLocaleDateString('en-CA');
     const pool = events.filter(e => {
       const d = e.dates?.start?.localDate || '';
-      return d > todayStr && d <= sevenDays && !e._isAdult;
+      return d >= todayStr && d <= sevenDays && !e._isAdult;  // >= includes today
     });
     return [...pool].sort(() => Math.random() - 0.5).slice(0, 5);
   }, [events, todayStr]);
@@ -4008,7 +4009,7 @@ function EventsScreen({
   const tonightFallbackDone = useRef(false);
   useEffect(() => {
     if (initialGenre || tonightFallbackDone.current || events.length === 0 || selectedGenre !== 'Tonight') return;
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = new Date().toLocaleDateString('en-CA');
     const todayCount = events.filter(e => (e.dates?.start?.localDate || '') === todayStr && !e._isAdult).length;
     if (todayCount === 0) { setSelectedGenre('All'); tonightFallbackDone.current = true; }
   }, [events, initialGenre, selectedGenre]);
@@ -4043,15 +4044,17 @@ function EventsScreen({
 
   const filtered = useMemo(() => {
     // ── Date helpers ──
-    const todayStr = new Date().toISOString().split('T')[0];
+    // Use en-CA locale for YYYY-MM-DD in LOCAL time — toISOString() is UTC and
+    // can return the wrong date during evening hours in US timezones (UTC-4 to UTC-8).
+    const todayStr = new Date().toLocaleDateString('en-CA');
     // This Weekend = Saturday + Sunday of the current week
     const nowDay = new Date().getDay(); // 0=Sun, 6=Sat
     const satOffset = nowDay === 6 ? 0 : (6 - nowDay + 7) % 7; // if today IS Saturday, offset=0
     const sunOffset = nowDay === 0 ? 0 : (7 - nowDay) % 7;    // if today IS Sunday, offset=0
     const sat = new Date(); sat.setDate(sat.getDate() + satOffset);
     const sun = new Date(); sun.setDate(sun.getDate() + sunOffset);
-    const satStr = sat.toISOString().split('T')[0];
-    const sunStr = sun.toISOString().split('T')[0];
+    const satStr = sat.toLocaleDateString('en-CA');
+    const sunStr = sun.toLocaleDateString('en-CA');
 
     const hasTextSearch = search.trim() !== '';
 
@@ -4060,7 +4063,7 @@ function EventsScreen({
     const isSearchActive = hasTextSearch || selectedGenre !== 'All';
     const horizonDate = new Date();
     horizonDate.setDate(horizonDate.getDate() + 90);
-    const horizonStr = horizonDate.toISOString().split('T')[0];
+    const horizonStr = horizonDate.toLocaleDateString('en-CA');
     let result = events.filter(e => {
       if (e._isAdult) return false;
       // Always hide events that have already passed
@@ -4962,7 +4965,7 @@ function checkEventReminders() {
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
   const items = getWishlist();
   const now = new Date();
-  const todayStr = now.toISOString().split('T')[0];
+  const todayStr = now.toLocaleDateString('en-CA');
   let changed = false;
 
   items.forEach(item => {
@@ -4971,7 +4974,7 @@ function checkEventReminders() {
     const eventDate = new Date(item.eventDate);
     const reminderDate = new Date(eventDate);
     reminderDate.setDate(reminderDate.getDate() - item.reminderDays);
-    const reminderDateStr = reminderDate.toISOString().split('T')[0];
+    const reminderDateStr = reminderDate.toLocaleDateString('en-CA');
 
     if (todayStr >= reminderDateStr && todayStr <= item.eventDate) {
       // Time to send reminder!
