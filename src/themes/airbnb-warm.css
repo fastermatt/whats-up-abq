@@ -92,14 +92,14 @@
     --input:              20 8% 22%;
     --ring:               16 52% 58%;
 
-    --brand:              #d97a5e;
+    --brand:              #C75B39;
     --brand-light:        #e8957c;
     --brand-gradient:     linear-gradient(135deg, #C75B39 0%, #d97a5e 100%);
     --brand-bg-screen:    #1C1814;
-    --brand-bg-subtle:    rgba(217, 122, 94, 0.14);
+    --brand-bg-subtle:    rgba(199, 91, 57, 0.18);
     --brand-tint-bg:      rgba(199, 91, 57, 0.14);
     --brand-tint-border:  rgba(199, 91, 57, 0.32);
-    --brand-ring-color:   #d97a5e;
+    --brand-ring-color:   #C75B39;
     --bg:                 #1C1814;
     --ink:                #EEE9E5;
     --sage:               #9dc4a8;
@@ -254,14 +254,14 @@ button[class*="bg-primary"]:active, .btn-primary:active {
 html.dark {
   --bg:                   #1C1814;
   --ink:                  #EEE9E5;
-  --brand:                #d97a5e;
+  --brand:                #C75B39;
   --brand-light:          #e8957c;
   --brand-gradient:       linear-gradient(135deg, #C75B39 0%, #d97a5e 100%);
   --brand-bg-screen:      #1C1814;
-  --brand-bg-subtle:      rgba(217,122,94,0.14);
+  --brand-bg-subtle:      rgba(199,91,57,0.18);
   --brand-tint-bg:        rgba(199,91,57,0.14);
   --brand-tint-border:    rgba(199,91,57,0.32);
-  --brand-ring-color:     #d97a5e;
+  --brand-ring-color:     #C75B39;
   --sage:                 #9dc4a8;
   --gold:                 #c2bb56;
 }
