@@ -1,295 +1,360 @@
 /**
- * Event data layer — reads from public.events (v1 Supabase schema).
- * Normalises raw JSON from TM / Eventbrite / SeatGeek / local sources
- * into a unified Event shape the UI can consume.
+ * Event data layer — reads from public.events (v1 ingestion table)
+ * which has 1428+ real events from Ticketmaster, Eventbrite, SeatGeek, etc.
+ *
+ * v2.events is intentionally empty until Phase 2 ingestion is wired up.
  */
 import { createClient } from '@/lib/supabase/server'
+import { getTimeRange, TimeFilter } from '@/lib/utils/dates'
 
-export type EventSource = 'ticketmaster' | 'eventbrite' | 'seatgeek' | 'local' | 'bandsintown'
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+export type { TimeFilter }
 
 export interface NormalizedEvent {
-  id:           string
-  title:        string
-  date:         string          // ISO date string YYYY-MM-DD
-  time?:        string          // e.g. "8:00 PM"
-  venue?:       string
-  address?:     string
-  city?:        string
-  category?:    string
-  description?: string
-  price?:       string
-  imageUrl?:    string
-  ticketUrl?:   string
-  source:       EventSource
-  isFeatured:   boolean
+  id: string
+  title: string
+  date: string
+  time: string | null
+  venue: string | null
+  address: string | null
+  city: string | null
+  category: string | null
+  description: string | null
+  price: string | null
+  imageUrl: string | null
+  ticketUrl: string | null
+  source: string
+  isFeatured: boolean
 }
 
-export type TimeFilter = 'today' | 'tomorrow' | 'this-weekend' | 'this-week' | 'upcoming'
-export type CategoryFilter = string   // matches category slug or 'all'
+export type CategoryFilter = string | null
 
-const ABQ_TZ = 'America/Denver'
-
-function nowMDT(): Date {
-  return new Date(new Date().toLocaleString('en-US', { timeZone: ABQ_TZ }))
+export interface FetchEventsOptions {
+  timeFilter?: TimeFilter
+  category?: CategoryFilter
+  limit?: number
+  offset?: number
 }
 
-function localDate(d: Date): string {
-  return d.toLocaleDateString('en-CA', { timeZone: ABQ_TZ })  // YYYY-MM-DD
+export interface FetchEventsResult {
+  events: NormalizedEvent[]
+  total: number
 }
 
-function getDateRange(filter: TimeFilter): { start: string; end?: string } {
-  const now = nowMDT()
-  const today = localDate(now)
+// ─── Raw row shape from public.events ────────────────────────────────────────
 
-  const addDays = (d: Date, n: number) => {
-    const c = new Date(d); c.setDate(c.getDate() + n); return c
-  }
-
-  switch (filter) {
-    case 'today':
-      return { start: today, end: today }
-    case 'tomorrow': {
-      const tom = localDate(addDays(now, 1))
-      return { start: tom, end: tom }
-    }
-    case 'this-weekend': {
-      const day = now.getDay()  // 0=Sun
-      const daysToFri = day <= 5 ? 5 - day : 6
-      const fri = localDate(addDays(now, day === 6 || day === 0 ? 0 : daysToFri))
-      const sun = localDate(addDays(now, day === 0 ? 0 : 7 - day))
-      return { start: fri, end: sun }
-    }
-    case 'this-week': {
-      const weekEnd = localDate(addDays(now, 7))
-      return { start: today, end: weekEnd }
-    }
-    default:
-      return { start: today }
-  }
+interface RawEventRow {
+  id: string
+  source: string
+  raw: Record<string, unknown>
+  event_date: string | null
+  cached_photo_url: string | null
+  ai_enrichment: Record<string, unknown> | null
+  featured: boolean | null
+  hidden: boolean | null
 }
 
-// Normalise Ticketmaster raw event
-function normalizeTM(row: { id: string; raw: Record<string, unknown>; event_date: string; cached_photo_url?: string; featured?: boolean }): NormalizedEvent {
-  const raw = row.raw
-  const embedded = (raw._embedded as Record<string, unknown>) ?? {}
-  const venues   = (embedded.venues as Record<string, unknown>[]) ?? []
-  const venue    = venues[0] ?? {}
-  const dates    = (raw.dates as Record<string, unknown>) ?? {}
-  const start    = (dates.start as Record<string, unknown>) ?? {}
-  const images   = (raw.images as { url: string; width: number }[]) ?? []
-  const bigImg   = images.sort((a: { width: number }, b: { width: number }) => b.width - a.width)[0]
-
-  const priceRanges = (raw.priceRanges as { min?: number; max?: number }[]) ?? []
-  const priceStr = priceRanges[0]
-    ? priceRanges[0].min === 0 ? 'Free' : `$${priceRanges[0].min}`
-    : undefined
-
-  const classifications = (raw.classifications as { segment?: { name: string }; genre?: { name: string } }[]) ?? []
-  const seg  = classifications[0]?.segment?.name
-  const genr = classifications[0]?.genre?.name
-
-  return {
-    id:          row.id,
-    title:       (raw.name as string) ?? 'Event',
-    date:        row.event_date,
-    time:        start.localTime ? formatTime(start.localTime as string) : undefined,
-    venue:       (venue.name as string) ?? undefined,
-    address:     [venue.address && (venue.address as Record<string, string>).line1, (venue.city as Record<string, string>)?.name].filter(Boolean).join(', ') || undefined,
-    city:        (venue.city as Record<string, string>)?.name ?? 'Albuquerque',
-    category:    mapCategory(seg, genr),
-    description: (raw.info as string) ?? (raw.pleaseNote as string) ?? undefined,
-    price:       priceStr,
-    imageUrl:    row.cached_photo_url ?? bigImg?.url,
-    ticketUrl:   (raw.url as string) ?? undefined,
-    source:      'ticketmaster',
-    isFeatured:  row.featured ?? false,
-  }
-}
-
-// Normalise Eventbrite raw event
-function normalizeEB(row: { id: string; raw: Record<string, unknown>; event_date: string; cached_photo_url?: string; featured?: boolean }): NormalizedEvent {
-  const raw = row.raw
-  const logo = raw.logo as Record<string, unknown> | undefined
-  const imgUrl = (logo?.url as string) ?? undefined
-
-  const cost = raw.ticket_availability as Record<string, unknown> | undefined
-  const priceStr = cost?.is_free ? 'Free' : cost?.minimum_ticket_price
-    ? `$${(cost.minimum_ticket_price as Record<string, number>).major_value}`
-    : undefined
-
-  const cats = (raw.category as Record<string, string>) ?? {}
-
-  return {
-    id:          row.id,
-    title:       (raw.name as Record<string, string>)?.text ?? (raw.title as string) ?? 'Event',
-    date:        row.event_date,
-    time:        raw.start ? formatTime(((raw.start as Record<string, string>).local ?? '').split('T')[1]) : undefined,
-    venue:       (raw.venue as Record<string, string>)?.name ?? undefined,
-    category:    mapCategory(cats.name, undefined),
-    description: (raw.description as Record<string, string>)?.text?.slice(0, 200) ?? undefined,
-    price:       priceStr,
-    imageUrl:    row.cached_photo_url ?? imgUrl,
-    ticketUrl:   (raw.url as string) ?? undefined,
-    source:      'eventbrite',
-    isFeatured:  row.featured ?? false,
-  }
-}
-
-// Normalise SeatGeek
-function normalizeSG(row: { id: string; raw: Record<string, unknown>; event_date: string; cached_photo_url?: string; featured?: boolean }): NormalizedEvent {
-  const raw = row.raw
-  const performers = (raw.performers as { name: string; image: string }[]) ?? []
-  const venue = (raw.venue as Record<string, unknown>) ?? {}
-
-  return {
-    id:         row.id,
-    title:      (raw.title as string) ?? (raw.short_title as string) ?? 'Event',
-    date:       row.event_date,
-    time:       raw.datetime_local ? formatTime(((raw.datetime_local as string).split('T')[1])) : undefined,
-    venue:      (venue.name as string) ?? undefined,
-    city:       (venue.city as string) ?? 'Albuquerque',
-    category:   (raw.type as string) ?? undefined,
-    price:      raw.stats ? `$${(raw.stats as Record<string, number>).lowest_price ?? 0}` : undefined,
-    imageUrl:   row.cached_photo_url ?? performers[0]?.image,
-    ticketUrl:  (raw.url as string) ?? undefined,
-    source:     'seatgeek',
-    isFeatured: row.featured ?? false,
-  }
-}
-
-// Normalise local/iCal events
-function normalizeLocal(row: { id: string; raw: Record<string, unknown>; event_date: string; cached_photo_url?: string; featured?: boolean }): NormalizedEvent {
-  const raw = row.raw
-  const images = (raw.images as { url: string }[]) ?? []
-  return {
-    id:          row.id,
-    title:       (raw.title as string) ?? (raw.name as string) ?? 'Event',
-    date:        row.event_date,
-    time:        raw.time as string ?? undefined,
-    venue:       (raw.location as string) ?? (raw.venue as string) ?? undefined,
-    category:    (raw.category as string) ?? undefined,
-    description: (raw.description as string)?.slice(0, 200) ?? undefined,
-    price:       (raw.price as string) ?? undefined,
-    imageUrl:    row.cached_photo_url ?? images[0]?.url,
-    ticketUrl:   (raw.url as string) ?? (raw.ticket_url as string) ?? (raw.website as string) ?? undefined,
-    source:      'local',
-    isFeatured:  row.featured ?? false,
-  }
-}
-
-function normalizeBIT(row: { id: string; raw: Record<string, unknown>; event_date: string; cached_photo_url?: string; featured?: boolean }): NormalizedEvent {
-  const raw = row.raw
-  return {
-    id:          row.id,
-    title:       (raw.title as string) ?? 'Event',
-    date:        row.event_date,
-    time:        raw.datetime ? formatTime(((raw.datetime as string).split('T')[1])) : undefined,
-    venue:       (raw.venue as Record<string, string>)?.name ?? undefined,
-    category:    'Music',
-    imageUrl:    row.cached_photo_url ?? (raw.artist as Record<string, string>)?.image_url,
-    ticketUrl:   (raw.url as string) ?? undefined,
-    source:      'bandsintown',
-    isFeatured:  row.featured ?? false,
-  }
-}
-
-function formatTime(t?: string): string | undefined {
-  if (!t) return undefined
-  const [h, m] = t.split(':').map(Number)
-  if (isNaN(h)) return undefined
-  const period = h >= 12 ? 'PM' : 'AM'
-  const hour   = h % 12 || 12
-  return m ? `${hour}:${String(m).padStart(2, '0')} ${period}` : `${hour}:00 ${period}`
-}
-
-const CAT_MAP: Record<string, string> = {
-  music: 'Music', sports: 'Sports', arts: 'Arts & Culture',
-  comedy: 'Comedy', film: 'Film', family: 'Family', food: 'Food & Drink',
-  health: 'Health', community: 'Community', theatre: 'Theater',
-  concerts: 'Music', undefined: 'Other',
-}
-
-function mapCategory(seg?: string, genre?: string): string | undefined {
-  const s = (seg ?? '').toLowerCase()
-  const g = (genre ?? '').toLowerCase()
-  for (const [k, v] of Object.entries(CAT_MAP)) {
-    if (s.includes(k) || g.includes(k)) return v
-  }
-  return seg ?? genre
-}
-
-function normalizeRow(row: { id: string; source: string; raw: Record<string, unknown>; event_date: string; cached_photo_url?: string; featured?: boolean }): NormalizedEvent | null {
-  try {
-    switch (row.source) {
-      case 'ticketmaster': return normalizeTM(row as Parameters<typeof normalizeTM>[0])
-      case 'eventbrite':   return normalizeEB(row as Parameters<typeof normalizeEB>[0])
-      case 'seatgeek':     return normalizeSG(row as Parameters<typeof normalizeSG>[0])
-      case 'bandsintown':  return normalizeBIT(row as Parameters<typeof normalizeBIT>[0])
-      default:              return normalizeLocal(row as Parameters<typeof normalizeLocal>[0])
-    }
-  } catch {
-    return null
-  }
-}
+// ─── Main fetch function ──────────────────────────────────────────────────────
 
 export async function fetchEvents({
   timeFilter = 'upcoming',
   category,
-  limit = 48,
+  limit = 24,
   offset = 0,
-}: {
-  timeFilter?: TimeFilter
-  category?: string
-  limit?: number
-  offset?: number
-} = {}): Promise<{ events: NormalizedEvent[]; total: number }> {
+}: FetchEventsOptions = {}): Promise<FetchEventsResult> {
   const supabase = await createClient()
+  const { gte, lte } = getTimeRange(timeFilter)
 
-  const { start, end } = getDateRange(timeFilter)
-
-  let query = (supabase as unknown as { schema: (s: string) => typeof supabase })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let query = (supabase as any)
     .schema('public')
     .from('events')
-    .select('id,source,raw,event_date,cached_photo_url,featured,ai_enrichment', { count: 'exact' })
-    .gte('event_date', start)
+    .select('id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden', {
+      count: 'exact',
+    })
     .eq('hidden', false)
+    .gte('event_date', gte)
     .order('event_date', { ascending: true })
-    .range(offset, offset + limit - 1)
 
-  if (end) {
-    query = query.lte('event_date', end)
+  if (lte) {
+    query = query.lte('event_date', lte)
   }
 
-  const { data, error, count } = await query
+  const { data, error, count } = await query.range(offset, offset + limit - 1)
 
   if (error) {
-    console.error('fetchEvents error:', error.message)
+    console.error('[fetchEvents] Supabase error:', error.message)
     return { events: [], total: 0 }
   }
 
-  let events = (data ?? [])
-    .map((row) => normalizeRow(row as Parameters<typeof normalizeRow>[0]))
+  const rows: RawEventRow[] = data ?? []
+  const events = rows
+    .map(normalizeRow)
     .filter((e): e is NormalizedEvent => e !== null)
-
-  // Client-side category filter (category is in raw JSON, not a DB column yet)
-  if (category && category !== 'all') {
-    events = events.filter(e =>
-      e.category?.toLowerCase().includes(category.toLowerCase())
-    )
-  }
 
   return { events, total: count ?? 0 }
 }
 
 export async function fetchEventById(id: string): Promise<NormalizedEvent | null> {
   const supabase = await createClient()
-  const { data, error } = await (supabase as unknown as { schema: (s: string) => typeof supabase })
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
     .schema('public')
     .from('events')
-    .select('id,source,raw,event_date,cached_photo_url,featured,ai_enrichment')
+    .select('id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden')
     .eq('id', id)
     .single()
 
   if (error || !data) return null
-  return normalizeRow(data as Parameters<typeof normalizeRow>[0])
+  return normalizeRow(data as RawEventRow)
+}
+
+// ─── Row → NormalizedEvent ────────────────────────────────────────────────────
+
+function normalizeRow(row: RawEventRow): NormalizedEvent | null {
+  try {
+    switch (row.source) {
+      case 'ticketmaster': return normalizeTM(row)
+      case 'eventbrite':   return normalizeEB(row)
+      case 'seatgeek':     return normalizeSG(row)
+      case 'bandsintown':  return normalizeBIT(row)
+      case 'local':        return normalizeLocal(row)
+      default:             return normalizeGeneric(row)
+    }
+  } catch {
+    return null
+  }
+}
+
+// ─── Source-specific normalizers ──────────────────────────────────────────────
+
+function normalizeTM(row: RawEventRow): NormalizedEvent {
+  const r = row.raw as Record<string, unknown>
+  const embedded = r._embedded as Record<string, unknown> | undefined
+  const venues = embedded?.venues as Array<Record<string, unknown>> | undefined
+  const v = venues?.[0] ?? null
+  const priceRanges = r.priceRanges as Array<Record<string, unknown>> | undefined
+  const classifications = r.classifications as Array<Record<string, unknown>> | undefined
+  const images = r.images as Array<Record<string, unknown>> | undefined
+
+  const minPrice = priceRanges?.[0]?.min as number | undefined
+  const maxPrice = priceRanges?.[0]?.max as number | undefined
+  let priceStr: string | null = null
+  if (minPrice != null && maxPrice != null) {
+    priceStr = minPrice === maxPrice
+      ? `$${Math.round(minPrice)}`
+      : `$${Math.round(minPrice)}–$${Math.round(maxPrice)}`
+  } else if (minPrice != null) {
+    priceStr = `From $${Math.round(minPrice)}`
+  }
+
+  const segment = (classifications?.[0]?.segment as Record<string, unknown> | undefined)?.name as string | undefined
+  const genre = (classifications?.[0]?.genre as Record<string, unknown> | undefined)?.name as string | undefined
+
+  const image = row.cached_photo_url
+    ?? images?.find(i => i.ratio === '16_9' && (i.width as number) >= 640)?.url as string | undefined
+    ?? images?.[0]?.url as string | undefined
+    ?? null
+
+  const startObj = (r.dates as Record<string, unknown> | undefined)?.start as Record<string, unknown> | undefined
+  const startTime = startObj?.dateTime as string | undefined
+
+  return {
+    id: row.id,
+    title: (r.name as string) ?? 'Untitled Event',
+    date: row.event_date ?? startTime ?? '',
+    time: startTime ? formatTime(startTime) : null,
+    venue: (v?.name as string | undefined) ?? null,
+    address: v ? buildTMAddress(v) : null,
+    city: (v?.city as Record<string, unknown> | undefined)?.name as string | null ?? null,
+    category: mapCategory(segment, genre),
+    description: null,
+    price: priceStr,
+    imageUrl: (image as string | null) ?? null,
+    ticketUrl: (r.url as string | undefined) ?? null,
+    source: 'ticketmaster',
+    isFeatured: row.featured ?? false,
+  }
+}
+
+function normalizeEB(row: RawEventRow): NormalizedEvent {
+  const r = row.raw as Record<string, unknown>
+  const venue = r.venue as Record<string, unknown> | undefined
+  const isFree = r.is_free as boolean | undefined
+  const tickets = r.ticket_availability as Record<string, unknown> | undefined
+  const minTicket = tickets?.minimum_ticket_price as Record<string, unknown> | undefined
+  const cost = isFree
+    ? 'Free'
+    : minTicket?.major_value != null
+      ? `From $${Math.round(minTicket.major_value as number)}`
+      : null
+
+  const nameField = r.name as Record<string, unknown> | string | undefined
+  const title = typeof nameField === 'object' && nameField
+    ? (nameField.text as string)
+    : (nameField as string) ?? 'Untitled Event'
+
+  return {
+    id: row.id,
+    title,
+    date: row.event_date ?? (r.start as Record<string, unknown> | undefined)?.utc as string ?? '',
+    time: row.event_date ? formatTime(row.event_date) : null,
+    venue: (venue?.name as string | undefined) ?? null,
+    address: venue ? buildEBAddress(venue) : null,
+    city: (venue?.address as Record<string, unknown> | undefined)?.city as string | null ?? null,
+    category: (r.category as Record<string, unknown> | undefined)?.name as string | null ?? null,
+    description: ((r.description as Record<string, unknown> | undefined)?.text as string | undefined)?.slice(0, 300) ?? null,
+    price: cost,
+    imageUrl: row.cached_photo_url ?? (r.logo as Record<string, unknown> | undefined)?.url as string | null ?? null,
+    ticketUrl: (r.url as string | undefined) ?? null,
+    source: 'eventbrite',
+    isFeatured: row.featured ?? false,
+  }
+}
+
+function normalizeSG(row: RawEventRow): NormalizedEvent {
+  const r = row.raw as Record<string, unknown>
+  const venue = r.venue as Record<string, unknown> | undefined
+  const performers = r.performers as Array<Record<string, unknown>> | undefined
+  const stats = r.stats as Record<string, unknown> | undefined
+
+  const minPrice = stats?.lowest_price as number | undefined
+  const avgPrice = stats?.average_price as number | undefined
+  let priceStr: string | null = null
+  if (minPrice != null) priceStr = `From $${Math.round(minPrice)}`
+  else if (avgPrice != null) priceStr = `~$${Math.round(avgPrice)}`
+
+  const dtLocal = r.datetime_local as string | undefined
+
+  return {
+    id: row.id,
+    title: (r.title as string) ?? (r.short_title as string) ?? 'Untitled Event',
+    date: row.event_date ?? dtLocal ?? '',
+    time: dtLocal ? formatTime(dtLocal) : null,
+    venue: (venue?.name as string | undefined) ?? null,
+    address: venue
+      ? [venue.address, venue.city].filter(Boolean).join(', ') || null
+      : null,
+    city: (venue?.city as string | undefined) ?? null,
+    category: (r.type as string | undefined) ?? null,
+    description: null,
+    price: priceStr,
+    imageUrl: row.cached_photo_url
+      ?? (performers?.[0]?.image as string | undefined)
+      ?? null,
+    ticketUrl: (r.url as string | undefined) ?? null,
+    source: 'seatgeek',
+    isFeatured: row.featured ?? false,
+  }
+}
+
+function normalizeBIT(row: RawEventRow): NormalizedEvent {
+  const r = row.raw as Record<string, unknown>
+  const venue = r.venue as Record<string, unknown> | undefined
+  const lineup = r.lineup as string[] | undefined
+  const dt = r.datetime as string | undefined
+
+  return {
+    id: row.id,
+    title: (r.title as string) ?? lineup?.[0] ?? 'Concert',
+    date: row.event_date ?? dt ?? '',
+    time: dt ? formatTime(dt) : null,
+    venue: (venue?.name as string | undefined) ?? null,
+    address: (venue?.location as string | undefined) ?? null,
+    city: (venue?.city as string | undefined) ?? null,
+    category: 'Music',
+    description: (r.description as string | undefined)?.slice(0, 300) ?? null,
+    price: null,
+    imageUrl: row.cached_photo_url
+      ?? (r.artist as Record<string, unknown> | undefined)?.image_url as string | undefined
+      ?? null,
+    ticketUrl: (r.url as string | undefined) ?? null,
+    source: 'bandsintown',
+    isFeatured: row.featured ?? false,
+  }
+}
+
+function normalizeLocal(row: RawEventRow): NormalizedEvent {
+  const r = row.raw as Record<string, unknown>
+  return {
+    id: row.id,
+    title: (r.title as string) ?? (r.name as string) ?? 'Local Event',
+    date: row.event_date ?? (r.date as string) ?? (r.start_date as string) ?? '',
+    time: row.event_date ? formatTime(row.event_date) : null,
+    venue: typeof r.venue === 'string' ? r.venue : (r.venue_name as string | undefined) ?? null,
+    address: (r.address as string | undefined) ?? null,
+    city: (r.city as string | undefined) ?? 'Albuquerque',
+    category: (r.category as string | undefined) ?? null,
+    description: (r.description as string | undefined)?.slice(0, 300) ?? null,
+    price: (r.price as string | undefined) ?? (r.cost as string | undefined) ?? null,
+    imageUrl: row.cached_photo_url ?? (r.image as string | undefined) ?? null,
+    ticketUrl: (r.url as string | undefined) ?? (r.ticket_url as string | undefined) ?? null,
+    source: 'local',
+    isFeatured: row.featured ?? false,
+  }
+}
+
+function normalizeGeneric(row: RawEventRow): NormalizedEvent {
+  const r = row.raw as Record<string, unknown>
+  return {
+    id: row.id,
+    title: (r.name as string) ?? (r.title as string) ?? 'Event',
+    date: row.event_date ?? '',
+    time: row.event_date ? formatTime(row.event_date) : null,
+    venue: null,
+    address: null,
+    city: null,
+    category: null,
+    description: null,
+    price: null,
+    imageUrl: row.cached_photo_url ?? null,
+    ticketUrl: (r.url as string | undefined) ?? null,
+    source: row.source,
+    isFeatured: row.featured ?? false,
+  }
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function formatTime(iso: string): string {
+  try {
+    const d = new Date(iso)
+    if (isNaN(d.getTime())) return ''
+    return d.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: 'America/Denver',
+    })
+  } catch {
+    return ''
+  }
+}
+
+function buildTMAddress(venue: Record<string, unknown>): string | null {
+  const addr = (venue.address as Record<string, unknown> | undefined)?.line1 as string | undefined
+  const city = (venue.city as Record<string, unknown> | undefined)?.name as string | undefined
+  const state = (venue.state as Record<string, unknown> | undefined)?.stateCode as string | undefined
+  return [addr, city, state].filter(Boolean).join(', ') || null
+}
+
+function buildEBAddress(venue: Record<string, unknown>): string | null {
+  const addr = venue.address as Record<string, unknown> | undefined
+  return (addr?.localized_address_display as string | undefined)
+    ?? (addr?.city as string | undefined)
+    ?? null
+}
+
+function mapCategory(segment?: string, genre?: string): string | null {
+  const s = (segment ?? '').toLowerCase()
+  const g = (genre ?? '').toLowerCase()
+  if (s.includes('music') || g.includes('rock') || g.includes('pop') || g.includes('country') || g.includes('jazz') || g.includes('hip-hop') || g.includes('r&b')) return 'Music'
+  if (s.includes('sport')) return 'Sports'
+  if (s.includes('art') || s.includes('theatre') || s.includes('theater') || g.includes('comedy') || g.includes('classical')) return 'Arts & Theater'
+  if (s.includes('family') || g.includes('family')) return 'Family'
+  if (g.includes('film') || g.includes('movie')) return 'Film'
+  if (g.includes('food') || g.includes('festival') || g.includes('fair')) return 'Food & Drink'
+  return segment ?? genre ?? null
 }
