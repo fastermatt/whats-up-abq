@@ -3417,6 +3417,16 @@ function DiscoverScreen({
     }
   }, [events, discoverFilter, todayStr, weekendRange]);
 
+  // Auto-advance: if Tonight has 0 events (and events have loaded), switch to This Weekend
+  const discoverAutoAdvanceDone = useRef(false);
+  useEffect(() => {
+    if (discoverAutoAdvanceDone.current || events.length === 0 || discoverFilter !== 'Tonight') return;
+    if (filterPool.length === 0) {
+      discoverAutoAdvanceDone.current = true;
+      setDiscoverFilter('This Weekend');
+    }
+  }, [events.length, filterPool.length, discoverFilter]);
+
   // Sampled list for the section (3–5, shuffled), sorted by time for Tonight
   const filteredDiscoverEvents = useMemo(() => {
     const shuffled = [...filterPool].sort(() => Math.random() - 0.5);
