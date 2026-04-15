@@ -1908,7 +1908,7 @@ function EventDetailModal({ event, onClose, mapProvider }: { event: TMEvent; onC
     <>
     {showShareCard && <EventShareCardModal event={event} onClose={() => setShowShareCard(false)} />}
     {!showShareCard && <div className="fixed inset-0 z-[150] flex justify-center" style={{ background: 'rgba(0,0,0,0.5)' }} onClick={onClose}>
-      <div className="flex flex-col overflow-y-auto w-full" style={{ maxWidth: '480px', background: 'white' }} onClick={e => e.stopPropagation()}>
+      <div className="flex flex-col overflow-y-auto w-full" style={{ maxWidth: '480px', background: 'white', borderRadius: '20px 20px 0 0', marginTop: 'auto', maxHeight: '96vh' }} onClick={e => e.stopPropagation()}>
       <div className="relative flex-shrink-0" style={{ height: '280px' }}>
         <EventCardImageSlider event={event} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent pointer-events-none" />
@@ -3745,7 +3745,7 @@ function DiscoverScreen({
                   return (
                     <button key={ev.id} onClick={() => onEventSelect(ev)}
                       className="w-full text-left active:opacity-80"
-                      style={{ display: 'flex', gap: 12, alignItems: 'center', background: 'white', border: `1px solid rgba(0,0,0,0.08)`, borderRadius: 10, padding: '10px 12px', marginBottom: 8, cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}
+                      style={{ display: 'flex', gap: 12, alignItems: 'center', background: 'white', border: `1px solid rgba(0,0,0,0.08)`, borderRadius: 16, padding: '10px 12px', marginBottom: 8, cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}
                     >
                       {/* Thumbnail */}
                       <div style={{ width: 48, height: 48, borderRadius: 8, overflow: 'hidden', background: activeCat.color + '22', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -3770,7 +3770,7 @@ function DiscoverScreen({
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                     width: '100%', padding: '11px', marginBottom: 12,
-                    background: activeCat.color, color: 'white', border: 'none', borderRadius: 10,
+                    background: activeCat.color, color: 'white', border: 'none', borderRadius: 999,
                     fontSize: 12, fontWeight: 800, fontFamily: 'Public Sans, sans-serif',
                     letterSpacing: '0.06em', textTransform: 'uppercase' as const, cursor: 'pointer',
                     WebkitTapHighlightColor: 'transparent',
@@ -7051,7 +7051,7 @@ function PlanScreen({ onEventSelect, events }: { onEventSelect: (e: TMEvent) => 
             ? item.reminderDays === 1 ? '1 day before' : `${item.reminderDays} days before`
             : null;
           return (
-            <div key={item.id} className="flex items-stretch bg-white" style={{ border: '1px solid rgba(0,0,0,0.12)', borderRadius: 10, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
+            <div key={item.id} className="flex items-stretch bg-white" style={{ border: '1px solid rgba(0,0,0,0.12)', borderRadius: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
               {/* Date badge */}
               <div style={{ width: 52, background: 'var(--brand)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <span style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.8)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{month}</span>
@@ -8944,7 +8944,7 @@ export default function App() {
             </div>
             {globalSearch.trim() && (
               <div style={{display:'flex',gap:'8px',width:'100%'}}>
-                <button onClick={() => { trackEvent('search', { query: globalSearch.trim(), context: 'events' }); setEventsNavSearch(globalSearch.trim()); setActiveTab('events'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'var(--brand)',color:'white',border:'none',borderRadius:'10px',fontSize:'15px',fontFamily:'Public Sans, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Events</button>
+                <button onClick={() => { trackEvent('search', { query: globalSearch.trim(), context: 'events' }); setEventsNavSearch(globalSearch.trim()); setActiveTab('events'); setShowSearch(false); }} style={{flex:1,padding:'12px',background:'var(--brand)',color:'white',border:'none',borderRadius:'999px',fontSize:'15px',fontFamily:'Public Sans, sans-serif',fontWeight:'600',cursor:'pointer'}}>Search Events</button>
               </div>
             )}
           </div>
