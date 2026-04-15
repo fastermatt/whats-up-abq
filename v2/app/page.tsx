@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 
 export const revalidate = 60  // ISR: revalidate every 60 seconds
@@ -72,6 +73,17 @@ export default async function HomePage() {
         </div>
       </div>
 
+      {/* ── Browse Events CTA ── */}
+      <div className="mt-6 w-full max-w-md">
+        <Link
+          href="/events"
+          className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-[#9a442d] text-white font-semibold hover:bg-[#7d3725] transition-colors"
+          style={{ fontFamily: 'var(--font-epilogue)' }}
+        >
+          Browse Events →
+        </Link>
+      </div>
+
       {/* ── What's coming ── */}
       <div className="mt-8 w-full max-w-md space-y-2">
         <p className="text-xs font-semibold uppercase tracking-widest text-[#8a7a74] mb-3">
@@ -85,7 +97,7 @@ export default async function HomePage() {
           { done: true,  label: 'Next.js 15 + Tailwind scaffold' },
           { done: true,  label: 'TypeScript types generated' },
           { done: false, label: 'Ticketmaster ingestion (Phase 2)' },
-          { done: false, label: 'Event list + filter UI (Phase 3)' },
+          { done: true,  label: 'Event list + filter UI (Phase 3)' },
           { done: false, label: 'SEO + OG images (Phase 4)' },
         ].map(({ done, label }) => (
           <div key={label} className="flex items-center gap-2 text-sm">
