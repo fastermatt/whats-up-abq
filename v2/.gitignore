@@ -23,3 +23,4 @@ Thumbs.db
 *.tsbuildinfo
 .vercel
 # Phase 0 secrets: Upstash/R2/Umami added 2026-04-15
+# Supabase anon key + service_role added 2026-04-15
