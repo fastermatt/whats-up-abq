@@ -446,10 +446,15 @@ function hiResUrl(url: string): string {
   }
 
   // ── Ticketmaster s1.ticketm.net ───────────────────────────────────────────
-  // Swap any image size suffix for _SOURCE (the master/highest-res image)
-  // e.g. _TABL, _RETI, _EVEN, _CUST, _ARTI, _RECO → _SOURCE
+  // TM serves images via named variants. ONLY the full .jpg suffix names work
+  // (e.g. _TABLET_LANDSCAPE_16_9.jpg). Short codes (_TABL, _RETI, _SOURCE etc)
+  // all return 403. Rewrite any short-code suffix to the best working variant.
   if (url.includes('ticketm.net')) {
-    url = url.replace(/(_[A-Z0-9]{3,20})(\?|$)/, '_SOURCE$2');
+    // Already has a proper .jpg suffix — leave it alone
+    if (!url.endsWith('.jpg')) {
+      // Strip short suffix and replace with highest-res working variant
+      url = url.replace(/(_[A-Z0-9]{3,20})(\?|$)/, '_RETINA_LANDSCAPE_16_9.jpg$2');
+    }
   }
 
   // ── Google Places photo API ───────────────────────────────────────────────
@@ -464,19 +469,24 @@ function getBestEventImage(images?: TMImage[], preferThumbnail = false): string 
   if (!images || images.length === 0) return '';
   const nonFallback = images.filter(img => !img.fallback);
   const pool = nonFallback.length > 0 ? nonFallback : images;
+  // For Ticketmaster: only .jpg suffix URLs work; short codes (_TABL, _SOURCE, etc.) return 403
+  const validPool = pool.filter(img => {
+    const u = img.url || '';
+    if (u.includes('ticketm.net')) return u.endsWith('.jpg');
+    return true;
+  });
+  const finalPool = validPool.length > 0 ? validPool : pool;
   if (preferThumbnail) {
-    // For list views: pick smallest image >= 200px wide to save bandwidth
-    const small = pool.filter(i => (i.width || 0) >= 200 && (i.width || 0) <= 500);
-    if (small.length > 0) return small[0].url || '';
+    const small = finalPool.filter(i => (i.width || 0) >= 200 && (i.width || 0) <= 500);
+    if (small.length > 0) return hiResUrl(small[0].url || '');
   }
-  // For detail views: pick largest image
-  let best = pool[0];
-  for (let i = 1; i < pool.length; i++) {
-    if (((pool[i].width || 0) * (pool[i].height || 0)) > ((best.width || 0) * (best.height || 0))) {
-      best = pool[i];
+  let best = finalPool[0];
+  for (let i = 1; i < finalPool.length; i++) {
+    if (((finalPool[i].width || 0) * (finalPool[i].height || 0)) > ((best.width || 0) * (best.height || 0))) {
+      best = finalPool[i];
     }
   }
-  return best?.url || '';
+  return hiResUrl(best?.url || '');
 }
 
 function formatDate(dateStr?: string): string {
@@ -1046,7 +1056,14 @@ function EventCardImageSlider({ event }: { event: TMEvent }) {
     const nonFallback = imgs.filter(img => !img.fallback);
     // Always use non-fallback pool if available; otherwise use all images (fallback events still have real photos)
     const pool = nonFallback.length > 0 ? nonFallback : imgs;
-    const sorted = [...pool].sort((a, b) => (b.width || 0) * (b.height || 0) - (a.width || 0) * (a.height || 0));
+    // For Ticketmaster: only use .jpg suffixed URLs — short codes (_TABL, _RETI, _SOURCE etc) return 403
+    const validPool = pool.filter(img => {
+      const u = img.url || '';
+      if (u.includes('ticketm.net')) return u.endsWith('.jpg');
+      return true; // Eventbrite, abqtodo.com etc — all valid
+    });
+    const finalPool = validPool.length > 0 ? validPool : pool; // fallback to all if none have .jpg
+    const sorted = [...finalPool].sort((a, b) => (b.width || 0) * (b.height || 0) - (a.width || 0) * (a.height || 0));
     for (const img of sorted) {
       if (urls.length >= 5) break;
       const u = addUrl(img.url);
