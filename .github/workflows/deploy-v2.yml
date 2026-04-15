@@ -17,8 +17,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: v2/package-lock.json
 
       - name: Install Netlify CLI
         run: npm install -g netlify-cli
@@ -28,7 +26,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: v2
-        run: npm ci --legacy-peer-deps
+        run: npm install --legacy-peer-deps
 
       - name: Deploy to Netlify (builds on Netlify infra via CLI)
         working-directory: v2
