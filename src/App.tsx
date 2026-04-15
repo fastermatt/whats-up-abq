@@ -426,21 +426,37 @@ function decodeEntities(str: string): string {
 
 function hiResUrl(url: string): string {
   if (!url) return url;
-  // Google Places photo API — bump resolution
+
+  // ── Eventbrite img.evbuc.com proxy ───────────────────────────────────────
+  // The proxy URL format is: https://img.evbuc.com/<url-encoded-cdn-url>?s=SIGNATURE&...
+  // The s= signature expires. The inner cdn.evbuc.com URL works permanently
+  // without any signing. Extract it and use that instead.
+  if (url.includes('img.evbuc.com')) {
+    try {
+      const parsed = new URL(url);
+      // The pathname is the URL-encoded inner CDN URL
+      const inner = decodeURIComponent(parsed.pathname.replace(/^\//, ''));
+      if (inner.startsWith('http')) {
+        // Strip any query string from the inner URL (timestamps, etc.) and
+        // add format params that Eventbrite's CDN supports
+        const innerClean = inner.split('?')[0];
+        return innerClean + '?auto=format&q=80&w=1200';
+      }
+    } catch (_) { /* fall through to original */ }
+  }
+
+  // ── Ticketmaster s1.ticketm.net ───────────────────────────────────────────
+  // Swap any image size suffix for _SOURCE (the master/highest-res image)
+  // e.g. _TABL, _RETI, _EVEN, _CUST, _ARTI, _RECO → _SOURCE
+  if (url.includes('ticketm.net')) {
+    url = url.replace(/(_[A-Z0-9]{3,20})(\?|$)/, '_SOURCE$2');
+  }
+
+  // ── Google Places photo API ───────────────────────────────────────────────
   url = url
     .replace(/maxHeightPx=\d+/, 'maxHeightPx=1600')
     .replace(/maxWidthPx=\d+/, 'maxWidthPx=2000');
-  // Ticketmaster: swap any suffix for _SOURCE (highest resolution master image)
-  // e.g. _TABLET_16_9 / _RETINA_PORTRAIT_3_2 / _TABLxxxx → _SOURCE
-  // Pattern: dam URL ending in _XXXXX (uppercase alphanum + underscores)
-  if (url.includes('ticketm.net') || url.includes('s1.ticketm.net')) {
-    // Replace the last _SUFFIX segment before any query string
-    url = url.replace(/(_[A-Z0-9]{3,20})(\?|$)/, '_SOURCE$2');
-  }
-  // Eventbrite img.evbuc.com: add w=1000 quality param for sharper renders
-  if (url.includes('img.evbuc.com') && !url.includes('w=')) {
-    url = url + (url.includes('?') ? '&' : '?') + 'w=1000&auto=format&q=75';
-  }
+
   return url;
 }
 
