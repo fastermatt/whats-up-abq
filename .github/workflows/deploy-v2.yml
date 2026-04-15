@@ -24,10 +24,6 @@ jobs:
       - name: Remove root package-lock.json (avoid Turbopack lockfile confusion)
         run: rm -f package-lock.json
 
-      - name: Install dependencies
-        working-directory: v2
-        run: npm install --legacy-peer-deps
-
       - name: Deploy to Netlify (builds on Netlify infra via CLI)
         working-directory: v2
         run: |
