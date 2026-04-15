@@ -8599,33 +8599,8 @@ export default function App() {
   }
 
   if (loading) return <LoadingScreen />;
-  // ── Desktop layout ──────────────────────────────────────────────────────────
-  if (isDesktop) return (
-    <ErrorBoundary>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800;900&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: var(--bg); -webkit-font-smoothing: antialiased; }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #d0d8d0; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-      `}</style>
-      <DesktopApp
-        events={events}
-        places={[]}
-        coords={coords}
-        loading={loading}
-        eventsLoading={eventsLoading}
-        onEventSelect={(e) => setSelectedEvent(e)}
-        savedPlan={savedPlan.filter(p => p.type === 'event').map(p => p.data as TMEvent)}
-        onToggleSaveEvent={toggleSavedEvent}
-        isEventSaved={isEventSaved}
-      />
-      {selectedEvent && <EventDetailModal event={selectedEvent} onClose={closeEventModal} mapProvider={resolvedMapProvider} />}
-      {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
-    </ErrorBoundary>
-  );
+  // Desktop shell wraps the mobile-first screens in a sidebar + top bar for ≥1024px.
+  // Rendered below via the `isDesktop` ternary around the main <ErrorBoundary>.
 
   if (loadError) return (
     <div className="fixed inset-0 flex flex-col items-center justify-center gap-3 px-8" style={{ background: 'var(--brand-bg-screen)' }}>
