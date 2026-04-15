@@ -473,14 +473,36 @@ function getEventCategory(event: TMEvent): string {
   // Events are pre-classified in Supabase with one of 10 canonical categories:
   // Concerts, Music, Dance, Theatre, Comedy, Sports, Arts, Family, Free, Community
   const seg = (event.classifications?.[0]?.segment?.name || '').trim();
+  const genre = (event.classifications?.[0]?.genre?.name || '').trim().toLowerCase();
+  const name = (event.name || '').toLowerCase();
+
   const VALID_CATS = ['Concerts', 'Music', 'Dance', 'Theatre', 'Comedy', 'Sports', 'Arts', 'Family', 'Free', 'Community'];
   if (VALID_CATS.includes(seg)) return seg;
-  // Legacy fallback for any events not yet reclassified
-  if (seg === 'Arts & Theatre') return 'Arts';
+
+  // "Arts & Theatre" is the Eventbrite/TM catch-all — split it properly using genre + name
+  if (seg === 'Arts & Theatre') {
+    // Comedy: stand-up, improv, open mic comedy shows
+    if (genre === 'comedy' || /\b(stand.?up|improv|open mic|comedy)\b/.test(name)) return 'Comedy';
+    // Theatre: stage shows, musicals, opera, ballet
+    if (genre === 'theatre' || genre === 'musical' || genre === 'opera' || genre === 'ballet' ||
+        /\b(theatre|theater|musical|opera|ballet|broadway|stage show|play)\b/.test(name)) return 'Theatre';
+    // Dance: dance performances, dance classes
+    if (genre === 'dance' || /\b(dance|dancing|salsa|tango|cumbia|swing|ballroom|ballet class)\b/.test(name)) return 'Dance';
+    // Music: concerts, live music
+    if (genre === 'music' || /\b(concert|live music|band|orchestra|symphony|choir|jazz|blues|folk)\b/.test(name)) return 'Concerts';
+    // Visual arts: painting, drawing, crafts, galleries
+    if (/\b(paint|watercolor|oil paint|acrylic|sketch|draw|portrait|landscape|gallery|exhibit|ceramics|pottery|sculpture|printmak|weav|knit|sew|embroider|mixed media|collage|art class|art workshop|art lab|retablo|linocut|darkroom|photo)\b/.test(name)) return 'Arts';
+    // Default Arts & Theatre events that don't match above → Community
+    return 'Community';
+  }
+
   if (seg === 'Volunteer' || seg === 'Outdoor') return 'Community';
-  if (seg === 'Film') return 'Community';
+  if (seg === 'Film' || seg === 'Movie') return 'Community';
   if (seg === 'Concert' || seg === 'Music') return 'Concerts';
   if (seg === 'Sports') return 'Sports';
+  if (seg === 'Comedy') return 'Comedy';
+  if (seg === 'Dance') return 'Dance';
+  if (seg === 'Family') return 'Family';
   return 'Community';
 }
 
@@ -1002,6 +1024,7 @@ function EventCardImageSlider({ event }: { event: TMEvent }) {
 
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const autoRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const count = allPhotos.length;
@@ -1047,13 +1070,17 @@ function EventCardImageSlider({ event }: { event: TMEvent }) {
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
+      {/* Skeleton shimmer shown while first image loads */}
+      {!imgLoaded && (
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, #EDE8E3 25%, #F5F0EC 50%, #EDE8E3 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.4s ease-in-out infinite', zIndex: 0 }} />
+      )}
       {allPhotos.map((src, i) => (
         <div key={src} className="absolute inset-0" style={{ opacity: i === idx ? 1 : 0, transition: 'opacity 0.65s ease', overflow: 'hidden' }}>
           <img
             src={src} alt="" loading={i === 0 ? 'eager' : 'lazy'} decoding="async"
-            onLoad={(e) => handleImgLoad(src, e)}
-            onError={() => handleImgError(src)}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', animation: i === idx ? `kenBurns${i % 4} 8s ease-in-out forwards` : 'none', transformOrigin: 'center center', willChange: 'transform' }}
+            onLoad={(e) => { handleImgLoad(src, e); if (i === 0) setImgLoaded(true); }}
+            onError={() => { handleImgError(src); if (i === 0) setImgLoaded(true); }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', animation: i === idx ? `kenBurns${i % 4} 8s ease-in-out forwards` : 'none', transformOrigin: 'center center', willChange: 'transform', opacity: imgLoaded ? 1 : 0, transition: 'opacity 0.3s ease' }}
           />
         </div>
       ))}
@@ -4240,8 +4267,8 @@ function EventsScreen({
 
       <div className="px-5 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <div
-          className="flex items-center gap-2 bg-white px-4 py-3"
-          style={{ border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+          className="flex items-center gap-2 px-4 py-3"
+          style={{ background: isDark ? 'rgba(255,255,255,0.06)' : '#F2EDE9', border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.10)' : '#E5DDD8'}`, borderRadius: 999, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}
         >
           <span className="material-symbols-outlined text-gray-400" style={{ fontSize: '20px' }}>search</span>
           <input
