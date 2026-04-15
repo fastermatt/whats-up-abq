@@ -1,11 +1,9 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  // Silence Turbopack multi-lockfile warning when repo root has another package-lock.json
-  experimental: {
-    turbo: {
-      root: __dirname,
-    },
+  // Tell Turbopack to use v2/ as root to avoid picking up the repo root package-lock.json
+  turbopack: {
+    root: __dirname,
   },
   images: {
     remotePatterns: [
