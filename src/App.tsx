@@ -4037,6 +4037,7 @@ function EventsScreen({
   const eventsHero = useTypewriter("What's Happening", 300);
   const [search, setSearch] = useState('');
   const isDesktopInner = useIsDesktop();
+  const isDark = document.documentElement.classList.contains('dark');
   const [gridCols, setGridCols] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1024 ? 3 : 2);
   // Each session gets a fresh random seed so category sections appear in a different order
   const [catShuffleSeed] = useState(() => Math.random());
