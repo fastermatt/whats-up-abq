@@ -22,3 +22,4 @@ Thumbs.db
 # Misc
 *.tsbuildinfo
 .vercel
+# Phase 0 secrets: Upstash/R2/Umami added 2026-04-15
