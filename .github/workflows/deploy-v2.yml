@@ -28,13 +28,18 @@ jobs:
         working-directory: v2
         run: npm install --legacy-peer-deps
 
-      - name: Deploy to Netlify (builds on Netlify infra via CLI)
+      - name: Build Next.js app
+        working-directory: v2
+        run: npm run build
+
+      - name: Deploy to Netlify
         working-directory: v2
         run: |
           netlify deploy \
             --site $NETLIFY_SITE_ID \
             --auth $NETLIFY_AUTH_TOKEN \
-            --build \
+            --dir .next \
+            --functions .netlify/functions-internal \
             --prod \
             --message "Deploy ${{ github.sha }}"
         env:
