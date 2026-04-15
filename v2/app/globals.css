@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+/* ─── Brand CSS variables ─────────────────────────────────────────────── */
+:root {
+  --bg:           #fbf7f1;
+  --terra-deep:   #9a442d;
+  --terra-mid:    #c4614a;
+  --terra-light:  #e8a898;
+  --sage-deep:    #4f6249;
+  --sage-mid:     #6f8469;
+  --sage-light:   #b0c4b1;
+  --turq-deep:    #006a62;
+  --turq-mid:     #2a8f87;
+  --turq-light:   #7cc4bf;
+  --sand-dark:    #c4a97d;
+  --sand-mid:     #ddc9a3;
+  --sand-light:   #f0e4cc;
+  --ink:          #1a1614;
+  --ink-mid:      #4a3f3a;
+  --ink-light:    #8a7a74;
+}
+
+/* ─── Base ────────────────────────────────────────────────────────────── */
+html {
+  background-color: var(--bg);
+  color:            var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg);
+  color:            var(--ink);
+  font-family:      var(--font-inter), system-ui, sans-serif;
+  min-height:       100dvh;
+}
+
+/* ─── Skeleton shimmer ────────────────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--sand-light) 25%,
+    var(--sand-mid)   50%,
+    var(--sand-light) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+
+/* ─── Focus styles ────────────────────────────────────────────────────── */
+:focus-visible {
+  outline:        2px solid var(--turq-deep);
+  outline-offset: 2px;
+  border-radius:  4px;
+}
+
+/* ─── Scrollbar styling (Webkit) ─────────────────────────────────────── */
+::-webkit-scrollbar         { width: 6px; height: 6px; }
+::-webkit-scrollbar-track   { background: var(--sand-light); }
+::-webkit-scrollbar-thumb   { background: var(--sand-dark); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-light); }
+
+/* ─── View Transitions API (progressive enhancement) ─────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(event-card),
+  ::view-transition-new(event-card) {
+    animation-duration: 0.25s;
+    animation-timing-function: ease-out;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration:   0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration:  0.01ms !important;
+  }
+}
