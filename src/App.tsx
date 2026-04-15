@@ -3494,7 +3494,7 @@ function DiscoverScreen({
             <button
               onClick={() => onEventSelect(heroEvent)}
               className="w-full text-left"
-              style={{ display: 'block', marginBottom: 0, cursor: 'pointer', WebkitTapHighlightColor: 'transparent', animation: 'heroCardReveal 0.45s cubic-bezier(0.22,1,0.36,1) both' }}
+              style={{ display: 'block', marginBottom: 0, cursor: 'pointer', WebkitTapHighlightColor: 'transparent', animation: 'heroCardReveal 0.45s cubic-bezier(0.22,1,0.36,1) both', borderRadius: 20, overflow: 'hidden', boxShadow: 'rgba(0,0,0,0.04) 0px 0px 0px 1px, rgba(0,0,0,0.08) 0px 4px 16px' }}
             >
               <div style={{ position: 'relative', paddingTop: '54%', overflow: 'hidden' }}>
                 {hImg
@@ -3505,8 +3505,8 @@ function DiscoverScreen({
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.05) 100%)' }} />
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,0.25) 0%, transparent 60%)' }} />
                 {/* Filter badge top-left */}
-                <div style={{ position: 'absolute', top: 10, left: 12, background: 'var(--brand)', padding: '3px 8px', borderRadius: 4 }}>
-                  <span style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 9, fontWeight: 900, color: 'white', letterSpacing: '0.1em', textTransform: 'uppercase' as const }}>
+                <div style={{ position: 'absolute', top: 10, left: 12, background: 'var(--brand)', padding: '4px 10px', borderRadius: 999, boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }}>
+                  <span style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 10, fontWeight: 800, color: 'white', letterSpacing: '0.06em', textTransform: 'uppercase' as const }}>
                     {discoverFilter === 'Tonight' ? '🌙 Tonight' : discoverFilter === 'This Weekend' ? 'This Weekend' : discoverFilter === 'Free' ? 'Free Event' : 'Volunteer'}
                   </span>
                 </div>
@@ -3578,7 +3578,7 @@ function DiscoverScreen({
                   <button
                     onClick={() => onNavigateEvents?.(meta.seeAllFilter)}
                     className="text-xs font-black uppercase"
-                    style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--ink)', letterSpacing: '0.06em' }}
+                    style={{ fontFamily: 'Public Sans, sans-serif', color: 'var(--brand)', letterSpacing: '0.06em' }}
                   >
                     SEE ALL →
                   </button>
@@ -3999,7 +3999,8 @@ function EventsScreen({
 }) {
   const eventsHero = useTypewriter("What's Happening", 300);
   const [search, setSearch] = useState('');
-  const [gridCols, setGridCols] = useState(2);
+  const isDesktopInner = useIsDesktop();
+  const [gridCols, setGridCols] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1024 ? 3 : 2);
   // Each session gets a fresh random seed so category sections appear in a different order
   const [catShuffleSeed] = useState(() => Math.random());
   const pillRow1Ref = useRef<HTMLDivElement>(null);
@@ -4212,8 +4213,8 @@ function EventsScreen({
   };
 
   return (
-    <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.webp') center/cover no-repeat, var(--bg)", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+    <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', maxWidth: isDesktopInner ? '1400px' : undefined, marginLeft: isDesktopInner ? 'auto' : undefined, marginRight: isDesktopInner ? 'auto' : undefined } as React.CSSProperties}>
+      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.webp') center/cover no-repeat, var(--bg)", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)', paddingLeft: isDesktopInner ? 32 : undefined, paddingRight: isDesktopInner ? 32 : undefined }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}
@@ -4277,13 +4278,15 @@ function EventsScreen({
                 className="flex-shrink-0 px-3 py-1.5 text-xs font-black uppercase transition-all"
                 style={{
                   fontFamily: 'Public Sans, sans-serif',
-                  letterSpacing: '0.1em',
+                  letterSpacing: '0.08em',
                   background: isSelected ? 'var(--brand)' : isForYou && followedGenres.length > 0 ? 'var(--brand-bg-subtle)' : 'var(--bg)',
                   color: isSelected ? 'white' : 'var(--ink)',
-                  border: '1px solid rgba(0,0,0,0.12)',
-                  borderRadius: 6,
+                  border: isSelected ? '1.5px solid var(--brand)' : '1.5px solid rgba(0,0,0,0.12)',
+                  borderRadius: 999,
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
+                  boxShadow: isSelected ? '0 2px 8px rgba(199,91,57,0.28)' : 'none',
+                  transition: 'all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)',
                 }}
               >
                 {genre}
@@ -4576,7 +4579,7 @@ function EventsScreen({
                     <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.07em', textTransform: 'uppercase' as const, color: 'var(--ink)', fontFamily: 'Public Sans, sans-serif' }}>{cat}</span>
                     <span style={{ fontSize: 10, color: '#bbb', fontFamily: 'Public Sans, sans-serif', fontWeight: 500 }}>{events.length}</span>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(gridCols, events.length)}, 1fr)`, gap: Math.min(gridCols, events.length) === 1 ? 12 : 10 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: isDesktopInner ? `repeat(auto-fill, minmax(260px, 1fr))` : `repeat(${Math.min(gridCols, events.length)}, 1fr)`, gap: isDesktopInner ? 16 : (Math.min(gridCols, events.length) === 1 ? 12 : 10) }}>
                     {events.map(event => {
                       const count = getShowtimeCount(event);
                       return (
@@ -8747,7 +8750,7 @@ export default function App() {
       <OfflineBanner />
       <div
         className="flex flex-col mx-auto relative"
-        style={{ width: '100%', maxWidth: '480px', minHeight: '100dvh', background: 'var(--bg)', overflowX: 'hidden', boxShadow: '0 0 40px rgba(0,0,0,0.08)', paddingTop: 'env(safe-area-inset-top, 0px)' } as React.CSSProperties}
+        style={{ width: '100%', maxWidth: isDesktop ? '100%' : '480px', minHeight: '100dvh', background: 'var(--bg)', overflowX: 'hidden', boxShadow: isDesktop ? 'none' : '0 0 40px rgba(0,0,0,0.08)', paddingTop: 'env(safe-area-inset-top, 0px)' } as React.CSSProperties}
       >
         {/* Header — Urban Curator: white + hard 2px border-bottom */}
         <header
@@ -8833,15 +8836,19 @@ export default function App() {
           style={{
             position: 'fixed',
             bottom: 0,
-            left: '50%',
-            transform: 'translateX(-50%)',
+            left: isDesktop ? 0 : '50%',
+            transform: isDesktop ? 'none' : 'translateX(-50%)',
             width: '100%',
-            maxWidth: '480px',
-            padding: '0 3px',
+            maxWidth: isDesktop ? '100%' : '480px',
+            padding: isDesktop ? '0 24px' : '0 3px',
             paddingBottom: 'calc(var(--sab) + 8px)',
             borderTop: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)',
-            background: 'var(--bg)',
+            background: isDark ? 'rgba(28,24,20,0.95)' : 'rgba(250,250,247,0.95)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
             zIndex: 40,
+            justifyContent: isDesktop ? 'center' : undefined,
+            gap: isDesktop ? '8px' : undefined,
           }}
         >
           {NAV_ITEMS.map((item, idx) => {
@@ -8853,11 +8860,11 @@ export default function App() {
               aria-label={item.label}
               className="nav-press-btn flex-1 flex flex-col items-center justify-center gap-0.5"
               style={{
-                minHeight: '64px',
-                background: isActive ? 'var(--brand-tint-bg)' : 'transparent',
+                minHeight: '56px',
+                background: 'transparent',
                 border: 'none',
                 borderRadius: 12,
-                margin: '6px 3px 6px',
+                margin: '4px 2px 4px',
                 position: 'relative' as const,
                 top: 0,
                 boxShadow: 'none',
@@ -8870,11 +8877,12 @@ export default function App() {
                 className="material-symbols-outlined"
                 style={{
                   fontSize: '22px',
-                  color: isActive ? 'white' : isDark ? 'rgba(238,233,229,0.65)' : '#555',
+                  color: isActive ? 'var(--brand)' : isDark ? 'rgba(238,233,229,0.55)' : '#888',
                   fontVariationSettings:
                     isActive
                       ? "'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24"
                       : "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24",
+                  transition: 'color 0.15s ease, font-variation-settings 0.15s ease',
                 }}
               >
                 {item.icon}
@@ -8882,10 +8890,11 @@ export default function App() {
               <span
                 className="font-black uppercase"
                 style={{
-                  color: isActive ? 'white' : isDark ? 'rgba(238,233,229,0.65)' : '#555',
+                  color: isActive ? 'var(--brand)' : isDark ? 'rgba(238,233,229,0.55)' : '#888',
                   fontFamily: 'Public Sans, sans-serif',
-                  fontSize: '8px',
-                  letterSpacing: '0.1em',
+                  fontSize: '9px',
+                  letterSpacing: '0.08em',
+                  transition: 'color 0.15s ease',
                 }}
               >
                 {item.label}
