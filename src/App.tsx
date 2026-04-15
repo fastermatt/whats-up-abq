@@ -426,12 +426,22 @@ function decodeEntities(str: string): string {
 
 function hiResUrl(url: string): string {
   if (!url) return url;
-  // Fix Google Places photo URLs missing their API key
-  
-  
-  return url
+  // Google Places photo API — bump resolution
+  url = url
     .replace(/maxHeightPx=\d+/, 'maxHeightPx=1600')
     .replace(/maxWidthPx=\d+/, 'maxWidthPx=2000');
+  // Ticketmaster: swap any suffix for _SOURCE (highest resolution master image)
+  // e.g. _TABLET_16_9 / _RETINA_PORTRAIT_3_2 / _TABLxxxx → _SOURCE
+  // Pattern: dam URL ending in _XXXXX (uppercase alphanum + underscores)
+  if (url.includes('ticketm.net') || url.includes('s1.ticketm.net')) {
+    // Replace the last _SUFFIX segment before any query string
+    url = url.replace(/(_[A-Z0-9]{3,20})(\?|$)/, '_SOURCE$2');
+  }
+  // Eventbrite img.evbuc.com: add w=1000 quality param for sharper renders
+  if (url.includes('img.evbuc.com') && !url.includes('w=')) {
+    url = url + (url.includes('?') ? '&' : '?') + 'w=1000&auto=format&q=75';
+  }
+  return url;
 }
 
 function getBestEventImage(images?: TMImage[], preferThumbnail = false): string {
@@ -1000,16 +1010,35 @@ function EventCardImageSlider({ event }: { event: TMEvent }) {
   const category = getEventCategory(event);
 
   const initialPhotos = useMemo(() => {
+    const seen = new Set<string>();
+    const addUrl = (url: string) => {
+      const hi = hiResUrl(url);
+      if (hi && !seen.has(hi)) { seen.add(hi); return hi; }
+      return null;
+    };
+
+    const urls: string[] = [];
+
+    // 1. Best bet: cached_photo_url from Supabase trigger (highest quality, pre-selected)
+    if ((event as any).cached_photo_url) {
+      const u = addUrl((event as any).cached_photo_url);
+      if (u) urls.push(u);
+    }
+
+    // 2. From images array — prefer non-fallback, sort by resolution DESC
     const imgs = event.images ?? [];
     const nonFallback = imgs.filter(img => !img.fallback);
+    // Always use non-fallback pool if available; otherwise use all images (fallback events still have real photos)
     const pool = nonFallback.length > 0 ? nonFallback : imgs;
-    const seen = new Set<string>();
-    return pool
-      .filter(img => { if (seen.has(img.url)) return false; seen.add(img.url); return true; })
-      .sort((a, b) => (b.width || 0) * (b.height || 0) - (a.width || 0) * (a.height || 0))
-      .slice(0, 5)
-      .map(img => hiResUrl(img.url));
-  }, [event.images]);
+    const sorted = [...pool].sort((a, b) => (b.width || 0) * (b.height || 0) - (a.width || 0) * (a.height || 0));
+    for (const img of sorted) {
+      if (urls.length >= 5) break;
+      const u = addUrl(img.url);
+      if (u) urls.push(u);
+    }
+
+    return urls;
+  }, [event.images, (event as any).cached_photo_url]);
 
   const [brokenUrls, setBrokenUrls] = useState<Set<string>>(new Set());
   const allPhotos = initialPhotos.filter(url => !brokenUrls.has(url));
