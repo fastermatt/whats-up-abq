@@ -1112,7 +1112,7 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
       ref={fadeRef}
       onClick={onClick}
       className="bg-white overflow-hidden text-left w-full"
-      style={{ border: '1px solid rgba(0,0,0,0.07)', boxShadow: 'rgba(0,0,0,0.02) 0px 0px 0px 1px, rgba(0,0,0,0.04) 0px 2px 6px, rgba(0,0,0,0.08) 0px 4px 12px', borderRadius: '16px', animation: 'cardFadeIn 0.3s ease both' }}
+      style={{ border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 2px 12px rgba(0,0,0,0.08)', borderRadius: '16px', animation: 'cardFadeIn 0.3s ease both' }}
     >
       <div className="relative overflow-hidden" style={{ paddingTop: '75%' }}>
         <div className="absolute inset-0">
@@ -3488,7 +3488,7 @@ function DiscoverScreen({
                   height: '36px',
                   padding: '0 18px',
                   background: active ? 'var(--brand)' : 'rgba(255,255,255,0.90)',
-                  border: active ? 'none' : '1.5px solid rgba(199,91,57,0.25)',
+                  border: active ? 'none' : '1.5px solid #ddd',
                   fontFamily: 'Public Sans, sans-serif',
                   fontSize: '13px',
                   fontWeight: active ? 800 : 600,
@@ -3521,7 +3521,7 @@ function DiscoverScreen({
             <button
               onClick={() => onEventSelect(heroEvent)}
               className="w-full text-left"
-              style={{ display: 'block', marginBottom: 0, cursor: 'pointer', WebkitTapHighlightColor: 'transparent', animation: 'heroCardReveal 0.45s cubic-bezier(0.22,1,0.36,1) both', borderRadius: 20, overflow: 'hidden', boxShadow: 'rgba(0,0,0,0.04) 0px 0px 0px 1px, rgba(0,0,0,0.08) 0px 4px 16px' }}
+              style={{ display: 'block', marginBottom: 0, cursor: 'pointer', WebkitTapHighlightColor: 'transparent', animation: 'heroCardReveal 0.45s cubic-bezier(0.22,1,0.36,1) both', borderRadius: 28, overflow: 'hidden', boxShadow: 'rgba(0,0,0,0.04) 0px 0px 0px 1px, rgba(0,0,0,0.08) 0px 4px 16px' }}
             >
               <div style={{ position: 'relative', paddingTop: '54%', overflow: 'hidden' }}>
                 {hImg
@@ -3547,7 +3547,7 @@ function DiscoverScreen({
                   </p>
                 </div>
                 {/* Tap to view pill */}
-                <div style={{ position: 'absolute', bottom: 12, right: 12, background: 'white', borderRadius: 20, padding: '5px 12px 5px 10px', display: 'flex', alignItems: 'center', gap: 4, boxShadow: '0 2px 10px rgba(0,0,0,0.3)', animation: 'heroTextSlideUp 0.55s cubic-bezier(0.22,1,0.36,1) 0.2s both' }}>
+                <div style={{ position: 'absolute', bottom: 12, right: 12, background: 'white', borderRadius: 999, padding: '5px 12px 5px 10px', display: 'flex', alignItems: 'center', gap: 4, boxShadow: '0 2px 10px rgba(0,0,0,0.3)', animation: 'heroTextSlideUp 0.55s cubic-bezier(0.22,1,0.36,1) 0.2s both' }}>
                   <span style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 11, fontWeight: 800, color: 'var(--ink)', letterSpacing: '0.02em' }}>View event</span>
                   <span style={{ color: 'var(--brand)', fontSize: 13, fontWeight: 900 }}>→</span>
                 </div>
@@ -8824,7 +8824,7 @@ export default function App() {
         <SiteBanner banner={siteBanner} />
 
         {/* Screen content */}
-        <main ref={mainRef} className="flex-1" style={{ paddingBottom: 'calc(var(--sab) + 110px)', touchAction: 'pan-y', overscrollBehaviorX: 'none' } as React.CSSProperties}
+        <main ref={mainRef} className="flex-1" style={{ paddingBottom: 'calc(var(--sab) + 90px)', touchAction: 'pan-y', overscrollBehaviorX: 'none' } as React.CSSProperties}
           onTouchStart={onMainTouchStart} onTouchEnd={onMainTouchEnd}>
           {activeTab === 'discover' && (
             <DiscoverScreen
@@ -8887,7 +8887,7 @@ export default function App() {
               aria-label={item.label}
               className="nav-press-btn flex-1 flex flex-col items-center justify-center gap-0.5"
               style={{
-                minHeight: '56px',
+                minHeight: '66px',
                 background: 'transparent',
                 border: 'none',
                 borderRadius: 12,
