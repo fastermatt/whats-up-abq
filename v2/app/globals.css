@@ -36,6 +36,72 @@ body {
   min-height:       100dvh;
 }
 
+/* ─── Entry animations ───────────────────────────────────────────────── */
+
+/* Fade in */
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Fade up — sections and content */
+.animate-fade-up {
+  animation: fadeUp 0.6s ease-out both;
+}
+
+.animate-fade-up-delay {
+  animation: fadeUp 0.6s ease-out 0.3s both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Slide down — nav elements */
+.animate-slide-down {
+  animation: slideDown 0.5s ease-out both;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Hero text — staggered reveal */
+.animate-hero-text {
+  animation: heroReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+}
+
+@keyframes heroReveal {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Card stagger — event cards on the grid */
+.animate-card-in {
+  animation: cardIn 0.4s ease-out both;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Section reveal — horizontal scroll sections */
+.animate-section-in {
+  animation: sectionIn 0.6s ease-out both;
+}
+
+@keyframes sectionIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
 /* ─── Skeleton shimmer ────────────────────────────────────────────────── */
 .skeleton {
   background: linear-gradient(
@@ -79,6 +145,7 @@ body {
   }
 }
 
+/* ─── Reduced motion — respect user preference ───────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,

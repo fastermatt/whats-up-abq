@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { fetchEvents, NormalizedEvent } from '@/lib/events'
 import { TimeFilter } from '@/lib/utils/dates'
 import { FilterBar } from './FilterBar'
-import { MapPin, Clock, ExternalLink } from 'lucide-react'
+import { MapPin, Clock } from 'lucide-react'
 
 export const revalidate = 60
 
@@ -32,22 +32,22 @@ export default async function EventsPage({ searchParams }: PageProps) {
   return (
     <main className="min-h-dvh bg-[--bg]">
       {/* ── Nav ── */}
-      <header className="sticky top-0 z-20 bg-[--bg]/90 backdrop-blur border-b border-[#ddc9a3]">
+      <header className="sticky top-0 z-20 bg-[--bg]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link
             href="/"
-            className="font-black text-xl text-[#1a1614] tracking-tight"
+            className="font-black text-xl text-[#1a1614] tracking-tight hover:text-[#9a442d] transition-colors"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             ABQ Unplugged
           </Link>
-          <span className="text-xs text-[#8a7a74]">{total.toLocaleString()} events</span>
+          <span className="text-xs text-[#8a7a74] tabular-nums">{total.toLocaleString()} events</span>
         </div>
       </header>
 
       <div className="max-w-6xl mx-auto px-4 py-5 space-y-4">
         {/* ── Title row ── */}
-        <div className="flex items-end justify-between">
+        <div className="flex items-end justify-between animate-fade-in">
           <div>
             <h1
               className="text-2xl font-black text-[#1a1614]"
@@ -72,12 +72,12 @@ export default async function EventsPage({ searchParams }: PageProps) {
           <EmptyState timeLabel={timeLabel} />
         ) : (
           <>
-            <p className="text-xs text-[#8a7a74]">
+            <p className="text-xs text-[#8a7a74] tabular-nums">
               {offset + 1}–{Math.min(offset + limit, total)} of {total.toLocaleString()}
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-              {events.map((event) => (
-                <EventCard key={event.id} event={event} />
+              {events.map((event, i) => (
+                <EventCard key={event.id} event={event} index={i} />
               ))}
             </div>
           </>
@@ -97,30 +97,27 @@ export default async function EventsPage({ searchParams }: PageProps) {
   )
 }
 
-// ─── Compact Event Card ─────────────────────────────────────────────────────
+// ─── Compact Event Card — Landscape Rectangle ────────────────────────────────
 
-function EventCard({ event }: { event: NormalizedEvent }) {
+function EventCard({ event, index }: { event: NormalizedEvent; index: number }) {
   const dateStr = formatDate(event.date)
-  const timeStr = event.time ? `${event.time}` : ''
-  const Wrapper = event.ticketUrl ? 'a' : 'div'
-  const linkProps = event.ticketUrl
-    ? { href: event.ticketUrl, target: '_blank' as const, rel: 'noopener noreferrer' }
-    : {}
+  const timeStr = event.time ?? ''
 
   return (
-    <Wrapper
-      {...linkProps}
-      className="group flex flex-col bg-white rounded-xl overflow-hidden border border-[#f0e4cc] shadow-[0_1px_4px_rgba(26,22,20,0.04)] hover:shadow-[0_4px_16px_rgba(26,22,20,0.12)] transition-all hover:-translate-y-0.5"
+    <Link
+      href={`/events/${event.id}`}
+      className="group flex flex-col bg-white rounded-xl overflow-hidden border border-[#f0e4cc]/80 shadow-[0_1px_3px_rgba(26,22,20,0.04)] hover:shadow-[0_8px_24px_rgba(26,22,20,0.12)] transition-all duration-300 hover:-translate-y-1 animate-card-in"
+      style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
     >
-      {/* Square image */}
-      <div className="relative aspect-square bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] overflow-hidden">
+      {/* Landscape image — 16:10 ratio for a nice rectangle */}
+      <div className="relative aspect-[16/10] bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] overflow-hidden">
         {event.imageUrl ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={event.imageUrl}
             alt=""
             loading="lazy"
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -128,44 +125,42 @@ function EventCard({ event }: { event: NormalizedEvent }) {
           </div>
         )}
 
-        {/* Time badge (top-left, like mockup) */}
-        {(dateStr || timeStr) && (
-          <div className="absolute top-1.5 left-1.5 bg-white/90 backdrop-blur-sm text-[#1a1614] text-[10px] font-semibold px-2 py-0.5 rounded-full">
-            {timeStr ? `${dateStr} · ${timeStr}` : dateStr}
-          </div>
-        )}
-
-        {/* Category badge */}
+        {/* Category badge — top right */}
         {event.category && (
           <div className="absolute top-1.5 right-1.5 bg-black/50 backdrop-blur-sm text-white text-[10px] px-1.5 py-0.5 rounded-full">
             {event.category}
           </div>
         )}
 
-        {/* Price badge */}
+        {/* Price badge — bottom right */}
         {event.price && (
-          <div className="absolute bottom-1.5 right-1.5 bg-[#006a62] text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
+          <div className="absolute bottom-1.5 right-1.5 bg-[#006a62]/90 backdrop-blur-sm text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
             {event.price}
           </div>
         )}
 
-        {/* Ticket link indicator */}
-        {event.ticketUrl && (
-          <div className="absolute bottom-1.5 left-1.5 bg-[#9a442d] text-white text-[10px] font-medium px-1.5 py-0.5 rounded-full flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-            <ExternalLink className="w-2.5 h-2.5" />
-            Tickets
-          </div>
-        )}
+        {/* Hover overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
 
-      {/* Info */}
-      <div className="p-2.5 space-y-1 flex-1 flex flex-col">
+      {/* Info section — compact and clean */}
+      <div className="p-2 space-y-0.5 flex-1 flex flex-col">
         <h3
-          className="font-semibold text-[#1a1614] text-xs leading-tight line-clamp-2"
+          className="font-bold text-[#1a1614] text-[11px] leading-tight line-clamp-2 group-hover:text-[#9a442d] transition-colors"
           style={{ fontFamily: 'var(--font-epilogue)' }}
         >
           {event.title}
         </h3>
+
+        {/* Date & time row */}
+        {(dateStr || timeStr) && (
+          <p className="text-[10px] text-[#9a442d] font-medium flex items-center gap-1">
+            <Clock className="w-2.5 h-2.5 flex-shrink-0" />
+            <span>{timeStr ? `${dateStr} · ${timeStr}` : dateStr}</span>
+          </p>
+        )}
+
+        {/* Venue */}
         {event.venue && (
           <p className="text-[10px] text-[#8a7a74] line-clamp-1 flex items-center gap-1">
             <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
@@ -173,7 +168,7 @@ function EventCard({ event }: { event: NormalizedEvent }) {
           </p>
         )}
       </div>
-    </Wrapper>
+    </Link>
   )
 }
 
@@ -181,7 +176,7 @@ function EventCard({ event }: { event: NormalizedEvent }) {
 
 function EmptyState({ timeLabel }: { timeLabel: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-center">
+    <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
       <div className="text-5xl mb-3">🌵</div>
       <h2
         className="text-lg font-bold text-[#1a1614] mb-1"
@@ -225,7 +220,7 @@ function Pagination({
   }
 
   return (
-    <div className="flex items-center justify-center gap-3 py-6">
+    <div className="flex items-center justify-center gap-3 py-6 animate-fade-in">
       {page > 1 && (
         <Link
           href={buildUrl(page - 1)}
@@ -234,7 +229,7 @@ function Pagination({
           ← Prev
         </Link>
       )}
-      <span className="text-xs text-[#8a7a74]">
+      <span className="text-xs text-[#8a7a74] tabular-nums">
         {page} / {totalPages}
       </span>
       {page < totalPages && (
