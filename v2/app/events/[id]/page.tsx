@@ -83,7 +83,7 @@ export default async function EventDetailPage({ params }: PageProps) {
     organizer: {
       '@type': 'Organization',
       name: 'ABQ Unplugged',
-      url: 'https://abq-unplugged-v2.netlify.app',
+      url: 'https://abqunplugged.com',
     },
   }
 
@@ -178,6 +178,47 @@ export default async function EventDetailPage({ params }: PageProps) {
         {event.description && (
           <div className="prose prose-sm max-w-none mb-6">
             <p className="text-sm text-[#4a3f3a] leading-relaxed">{event.description}</p>
+          </div>
+        )}
+
+        {/* AI Enrichment — about, highlights, venue & local tips */}
+        {(event.about || event.highlights.length > 0 || event.venueTips || event.localTips) && (
+          <div className="space-y-4 mb-6">
+            {event.about && (
+              <div className="bg-white rounded-xl px-4 py-3 border border-[#f0e4cc] shadow-sm">
+                <p className="text-xs font-bold text-[#9a442d] uppercase tracking-wider mb-1">About</p>
+                <p className="text-sm text-[#4a3f3a] leading-relaxed">{event.about}</p>
+              </div>
+            )}
+            {event.highlights.length > 0 && (
+              <div className="bg-white rounded-xl px-4 py-3 border border-[#f0e4cc] shadow-sm">
+                <p className="text-xs font-bold text-[#9a442d] uppercase tracking-wider mb-2">What to Expect</p>
+                <ul className="space-y-1">
+                  {event.highlights.map((h, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-[#4a3f3a]">
+                      <span className="text-[#9a442d] mt-0.5">•</span>
+                      <span>{h}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {(event.venueTips || event.localTips) && (
+              <div className="bg-[#f7f2ec] rounded-xl px-4 py-3 border border-[#e8d9bf] shadow-sm space-y-2">
+                {event.venueTips && (
+                  <div>
+                    <p className="text-xs font-bold text-[#4f6249] uppercase tracking-wider mb-1">Venue Tips</p>
+                    <p className="text-sm text-[#4a3f3a] leading-relaxed">{event.venueTips}</p>
+                  </div>
+                )}
+                {event.localTips && (
+                  <div>
+                    <p className="text-xs font-bold text-[#006a62] uppercase tracking-wider mb-1">Local Tips</p>
+                    <p className="text-sm text-[#4a3f3a] leading-relaxed">{event.localTips}</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
