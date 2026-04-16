@@ -69,6 +69,26 @@ export default async function EventDetailPage({ params }: PageProps) {
     .eq('event_id', id)
     .eq('state', 'going')
 
+  // Fetch public attendees for "Who's Going" section
+  const { data: goingUserIds } = await supabase
+    .from('user_events')
+    .select('user_id')
+    .eq('event_id', id)
+    .eq('state', 'going')
+    .limit(20)
+
+  const attendeeIds = (goingUserIds ?? []).map((u: { user_id: string }) => u.user_id)
+  let attendees: { handle: string | null; display_name: string | null; avatar_url: string | null }[] = []
+  if (attendeeIds.length > 0) {
+    const { data: profileRows } = await supabase
+      .from('profiles')
+      .select('handle, display_name, avatar_url')
+      .in('id', attendeeIds)
+      .eq('is_public', true)
+      .limit(12)
+    attendees = profileRows ?? []
+  }
+
   const dateStr = formatDateLong(event.date)
   const timeStr = event.time ?? ''
 
@@ -339,13 +359,42 @@ export default async function EventDetailPage({ params }: PageProps) {
             eventName={event.title}
             eventDate={event.date}
           />
-          {(goingCount ?? 0) > 0 && (
-            <p className="text-xs text-[#8a7a74] flex items-center gap-1 ml-auto">
-              <Users className="w-3.5 h-3.5" />
-              {goingCount} going
-            </p>
-          )}
         </div>
+
+        {(goingCount ?? 0) > 0 && (
+          <div className="mb-6 bg-white rounded-xl border border-[#f0e4cc] px-4 py-3 shadow-sm">
+            <p className="text-xs font-bold text-[#8a7a74] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5" />
+              {goingCount} {goingCount === 1 ? 'person' : 'people'} going
+            </p>
+            {attendees.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {attendees.map((a, i) => {
+                  const name = a.handle ?? a.display_name ?? 'Burqueño'
+                  const initials = name.slice(0, 2).toUpperCase()
+                  return (
+                    <div key={i} className="flex items-center gap-1.5 bg-[#f7f2ec] rounded-full px-2.5 py-1">
+                      {a.avatar_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={a.avatar_url} alt="" className="w-5 h-5 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-5 h-5 rounded-full bg-[#9a442d] flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0">
+                          {initials}
+                        </div>
+                      )}
+                      <span className="text-[11px] text-[#4a3f3a] font-medium">@{name}</span>
+                    </div>
+                  )
+                })}
+                {(goingCount ?? 0) > attendees.length && (
+                  <div className="flex items-center px-2.5 py-1">
+                    <span className="text-[11px] text-[#8a7a74]">+{(goingCount ?? 0) - attendees.length} more</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Source + report */}
         <div className="flex items-center justify-between mb-2">
