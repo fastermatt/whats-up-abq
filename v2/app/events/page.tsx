@@ -10,7 +10,7 @@ import { MapPin, Clock } from 'lucide-react'
 export const revalidate = 60
 
 interface PageProps {
-  searchParams: Promise<{ time?: string; category?: string; page?: string; q?: string; free?: string }>
+  searchParams: Promise<{ time?: string; category?: string; page?: string; q?: string; free?: string; price?: string }>
 }
 
 export default async function EventsPage({ searchParams }: PageProps) {
@@ -18,13 +18,16 @@ export default async function EventsPage({ searchParams }: PageProps) {
   const timeFilter = (params.time as TimeFilter) || 'upcoming'
   const category = params.category || null
   const search = params.q?.trim() || undefined
-  const freeOnly = params.free === '1'
+  // Support both legacy `free=1` and new `price=free|25|50`
+  const priceParam = params.price || (params.free === '1' ? 'free' : undefined)
+  const freeOnly = priceParam === 'free'
+  const maxPrice = priceParam && priceParam !== 'free' ? parseInt(priceParam, 10) : undefined
   const page = Math.max(1, parseInt(params.page ?? '1', 10))
   const limit = 36
   const offset = (page - 1) * limit
 
   const [{ events, total }, categoryCounts] = await Promise.all([
-    fetchEvents({ timeFilter, category, search, freeOnly, limit, offset }),
+    fetchEvents({ timeFilter, category, search, freeOnly, maxPrice, limit, offset }),
     fetchCategoryCounts(),
   ])
 
@@ -71,7 +74,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
           <FilterBar
             currentTime={params.time ?? ''}
             currentCategory={params.category ?? ''}
-            freeOnly={freeOnly}
+            priceFilter={priceParam}
             categoryCounts={categoryCounts}
           />
         </Suspense>
@@ -100,7 +103,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
             time={params.time}
             category={params.category}
             q={params.q}
-            free={params.free}
+            price={priceParam}
           />
         )}
       </div>
@@ -210,21 +213,21 @@ function Pagination({
   time,
   category,
   q,
-  free,
+  price,
 }: {
   page: number
   totalPages: number
   time?: string
   category?: string
   q?: string
-  free?: string
+  price?: string
 }) {
   const buildUrl = (p: number) => {
     const params = new URLSearchParams()
     if (time) params.set('time', time)
     if (category) params.set('category', category)
     if (q) params.set('q', q)
-    if (free) params.set('free', free)
+    if (price) params.set('price', price)
     if (p > 1) params.set('page', String(p))
     const qs = params.toString()
     return `/events${qs ? `?${qs}` : ''}`
