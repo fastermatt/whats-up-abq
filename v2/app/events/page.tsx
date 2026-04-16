@@ -273,7 +273,11 @@ const TIME_LABELS: Record<string, string> = {
 function formatDate(iso: string): string {
   if (!iso) return ''
   try {
-    const d = new Date(iso)
+    // Date-only strings (YYYY-MM-DD) parse as UTC midnight, which renders
+    // as the previous day in Mountain Time (-6/7h). Append noon so the
+    // calendar date always matches what was stored regardless of UTC offset.
+    const normalized = /^\d{4}-\d{2}-\d{2}$/.test(iso) ? `${iso}T12:00:00` : iso
+    const d = new Date(normalized)
     if (isNaN(d.getTime())) return ''
     return d.toLocaleDateString('en-US', {
       weekday: 'short',

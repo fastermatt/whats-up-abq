@@ -66,13 +66,42 @@ export async function fetchEvents({
   const supabase = await createClient()
   const { gte, lte } = getTimeRange(timeFilter)
 
+  const COLS = 'id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden'
+
+  // When filtering by category we must normalize first (category is inside raw JSON,
+  // different field per source), so fetch all rows for the time range then filter/paginate.
+  if (category) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let q = (supabase as any)
+      .schema('public')
+      .from('events')
+      .select(COLS)
+      .eq('hidden', false)
+      .gte('event_date', gte)
+      .order('event_date', { ascending: true })
+    if (lte) q = q.lte('event_date', lte)
+
+    const { data, error } = await q
+    if (error) {
+      console.error('[fetchEvents] Supabase error:', error.message)
+      return { events: [], total: 0 }
+    }
+    const allNormalized = ((data ?? []) as RawEventRow[])
+      .map(normalizeRow)
+      .filter((e): e is NormalizedEvent => e !== null)
+      .filter((e) => e.category?.toLowerCase() === category.toLowerCase())
+    return {
+      events: allNormalized.slice(offset, offset + limit),
+      total: allNormalized.length,
+    }
+  }
+
+  // No category filter — use DB-level pagination with count for efficiency
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query = (supabase as any)
     .schema('public')
     .from('events')
-    .select('id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden', {
-      count: 'exact',
-    })
+    .select(COLS, { count: 'exact' })
     .eq('hidden', false)
     .gte('event_date', gte)
     .order('event_date', { ascending: true })
@@ -319,6 +348,8 @@ function normalizeGeneric(row: RawEventRow): NormalizedEvent {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatTime(iso: string): string {
+  // Date-only strings (YYYY-MM-DD) have no meaningful time — skip them
+  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) return ''
   try {
     const d = new Date(iso)
     if (isNaN(d.getTime())) return ''
