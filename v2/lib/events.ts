@@ -167,9 +167,12 @@ export async function fetchEvents({
     }
 
     if (freeOnly) {
-      allNormalized = allNormalized.filter(
-        (e) => e.price?.toLowerCase() === 'free' || e.price === null
-      )
+      // Only include events explicitly marked free — NOT null/unknown price events,
+      // which are usually paid events with missing price data.
+      allNormalized = allNormalized.filter((e) => {
+        const p = (e.price ?? '').toLowerCase().trim()
+        return p === 'free' || p === '$0' || p === '0'
+      })
     }
 
     if (maxPrice !== undefined) {
