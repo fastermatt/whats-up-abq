@@ -20,6 +20,7 @@ export interface NormalizedEvent {
   address: string | null
   city: string | null
   category: string | null
+  subcategory: string | null
   description: string | null
   price: string | null
   imageUrl: string | null
@@ -94,15 +95,24 @@ export async function fetchEvents({
       .filter((e): e is NormalizedEvent => e !== null)
 
     if (category) {
-      allNormalized = allNormalized.filter(
-        (e) => e.category?.toLowerCase() === category.toLowerCase()
-      )
+      // Support subcategory filtering: "Sports > Baseball" matches subcategory,
+      // "Sports" matches all sports events regardless of subcategory
+      if (category.includes(' > ')) {
+        const sub = category.split(' > ')[1]
+        allNormalized = allNormalized.filter(
+          (e) => e.subcategory?.toLowerCase() === sub.toLowerCase()
+        )
+      } else {
+        allNormalized = allNormalized.filter(
+          (e) => e.category?.toLowerCase() === category.toLowerCase()
+        )
+      }
     }
 
     if (search) {
       const terms = search.toLowerCase().split(/\s+/).filter(Boolean)
       allNormalized = allNormalized.filter((e) => {
-        const haystack = `${e.title} ${e.venue ?? ''} ${e.category ?? ''} ${e.description ?? ''}`.toLowerCase()
+        const haystack = `${e.title} ${e.venue ?? ''} ${e.category ?? ''} ${e.subcategory ?? ''} ${e.description ?? ''}`.toLowerCase()
         return terms.every((t) => haystack.includes(t))
       })
     }
@@ -215,7 +225,7 @@ function normalizeTM(row: RawEventRow): NormalizedEvent {
     venue: (v?.name as string | undefined) ?? null,
     address: v ? buildTMAddress(v) : null,
     city: (v?.city as Record<string, unknown> | undefined)?.name as string | null ?? null,
-    category: mapCategory(segment, genre),
+    ...mapCategory(segment, genre),
     description: null,
     price: priceStr,
     imageUrl: (image as string | null) ?? null,
@@ -250,7 +260,7 @@ function normalizeEB(row: RawEventRow): NormalizedEvent {
     venue: (venue?.name as string | undefined) ?? null,
     address: venue ? buildEBAddress(venue) : null,
     city: (venue?.address as Record<string, unknown> | undefined)?.city as string | null ?? null,
-    category: mapCategory(
+    ...mapCategory(
       (r.category as Record<string, unknown> | undefined)?.name as string | undefined,
       title
     ),
@@ -287,7 +297,7 @@ function normalizeSG(row: RawEventRow): NormalizedEvent {
       ? [venue.address, venue.city].filter(Boolean).join(', ') || null
       : null,
     city: (venue?.city as string | undefined) ?? null,
-    category: mapCategory(
+    ...mapCategory(
       (r.type as string | undefined),
       (r.title as string) ?? (r.short_title as string)
     ),
@@ -317,6 +327,7 @@ function normalizeBIT(row: RawEventRow): NormalizedEvent {
     address: (venue?.location as string | undefined) ?? null,
     city: (venue?.city as string | undefined) ?? null,
     category: 'Music',
+    subcategory: null,
     description: (r.description as string | undefined)?.slice(0, 300) ?? null,
     price: null,
     imageUrl: row.cached_photo_url
@@ -338,7 +349,7 @@ function normalizeLocal(row: RawEventRow): NormalizedEvent {
     venue: typeof r.venue === 'string' ? r.venue : (r.venue_name as string | undefined) ?? null,
     address: (r.address as string | undefined) ?? null,
     city: (r.city as string | undefined) ?? 'Albuquerque',
-    category: mapCategory(
+    ...mapCategory(
       (r.category as string | undefined),
       (r.title as string | undefined) ?? (r.name as string | undefined)
     ),
@@ -362,7 +373,7 @@ function normalizeGeneric(row: RawEventRow): NormalizedEvent {
     venue: null,
     address: null,
     city: null,
-    category: mapCategory((r.category as string | undefined), title),
+    ...mapCategory((r.category as string | undefined), title),
     description: null,
     price: null,
     imageUrl: row.cached_photo_url ?? null,
@@ -406,98 +417,158 @@ function buildEBAddress(venue: Record<string, unknown>): string | null {
 }
 
 /**
- * Map any source's category/segment/genre/type string to our display categories.
- * Handles: Ticketmaster segment+genre, Eventbrite category.name, SeatGeek type,
- * and local event title-based matching (pass title as 2nd arg for local events).
- *
- * IMPORTANT: For Eventbrite, the category name is passed as `segment` (1st arg).
- * For local events, the event title is passed as `genre` (2nd arg) so title keywords
- * get matched via `both`. Always check BOTH `s` and `g` for every keyword.
+ * Result of category mapping — includes optional subcategory for drill-down filtering.
  */
-function mapCategory(segment?: string, genre?: string): string | null {
+interface CategoryResult {
+  category: string | null
+  subcategory: string | null
+}
+
+/**
+ * Word-boundary-aware keyword matching.
+ * Uses regex \b (word boundary) so "fair" does NOT match "fairy" or "affair",
+ * but DOES match "career fair", "state fair", etc.
+ *
+ * For multi-word phrases (e.g. "block party"), uses simple includes() since
+ * the phrase itself provides sufficient context.
+ */
+function wordMatch(text: string, word: string): boolean {
+  if (word.includes(' ')) {
+    // Multi-word phrase: includes() is fine — "block party" won't false-match
+    return text.includes(word)
+  }
+  // Single word: use word-boundary regex to avoid substring false positives
+  // e.g. \bfair\b matches "career fair" but NOT "fairy" or "fairytale"
+  return new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(text)
+}
+
+/** Check if ANY of the given words/phrases match in the text */
+function anyWord(text: string, words: string[]): boolean {
+  return words.some(w => wordMatch(text, w))
+}
+
+/**
+ * Map any source's category/segment/genre/type string to our display categories
+ * with optional subcategory (e.g., Sports > Baseball).
+ *
+ * Uses word-boundary matching to prevent false positives like:
+ *   - "fairy tale" → Festivals (was matching on "fair" inside "fairy")
+ *   - "career fair" → Festivals (now correctly → Community via "job fair"/"career fair")
+ *
+ * For Eventbrite, the category name is passed as `segment` (1st arg).
+ * For local/SG events, the event title is passed as `genre` (2nd arg).
+ */
+function mapCategory(segment?: string, genre?: string): CategoryResult {
   const s = (segment ?? '').toLowerCase()
   const g = (genre ?? '').toLowerCase()
   const both = `${s} ${g}`
 
-  // Family — check FIRST because "Kids" events shouldn't fall into Community
-  // EB sends "Family & Education", "Kids & Family", etc. as segment
-  if (both.includes('family') || both.includes('kids') || both.includes('children')
-    || both.includes('storytime') || both.includes('story time') || both.includes('story hour')
-    || both.includes('toddler') || both.includes('baby') || both.includes('puppet')
-    || both.includes('duplo') || both.includes('lego') || both.includes('read to the dog')
-    || both.includes('kids clay') || both.includes('kid concert')
-    || both.includes('holiday') || both.includes('easter') || both.includes('trunk or treat')
-    || both.includes('music & movement')) return 'Family'
+  // ── Community-specific fairs — check BEFORE Festivals so "career fair", ──
+  // ── "job fair", "health fair" go to Community, not Festivals             ──
+  if (anyWord(both, ['career fair', 'job fair', 'health fair', 'resource fair']))
+    return { category: 'Community', subcategory: null }
 
-  // Comedy — check before Arts so comedians don't land in "Arts & Theater"
-  if (both.includes('comedy') || both.includes('stand-up') || both.includes('standup')
-    || both.includes('improv') || both.includes('open mic') || both.includes('comedian')
-    || both.includes('funny') || both.includes('laugh')) return 'Comedy'
+  // ── Family ──────────────────────────────────────────────────────────────
+  if (anyWord(both, [
+    'family', 'kids', 'children', 'storytime', 'story time', 'story hour',
+    'toddler', 'baby', 'puppet', 'duplo', 'lego', 'read to the dog',
+    'kids clay', 'kid concert', 'easter', 'trunk or treat',
+    'music & movement',
+  ])) return { category: 'Family', subcategory: null }
 
-  // Music — TM segments, SG type 'concert', EB 'Music'
-  if (s.includes('music') || both.includes('concert') || both.includes(' band ')
-    || g.includes('rock') || g.includes('pop') || g.includes('country') || g.includes('jazz')
-    || g.includes('hip-hop') || g.includes('r&b') || g.includes('edm') || g.includes('electronic')
-    || g.includes('latin') || g.includes('reggae') || g.includes('soul') || g.includes('folk')
-    || g.includes('bluegrass') || g.includes('metal') || g.includes('punk')
-    || g.includes('singer') || g.includes('songwriter')
-    || both.includes('live music') || both.includes('dj ')) return 'Music'
+  // ── Comedy — before Arts so comedians don't land in "Arts & Theater" ────
+  if (anyWord(both, [
+    'comedy', 'stand-up', 'standup', 'improv', 'open mic', 'comedian',
+  ])) return { category: 'Comedy', subcategory: null }
 
-  // Sports — TM segments, SG type, EB
-  if (s.includes('sport') || both.includes('baseball') || both.includes('basketball')
-    || both.includes('football') || both.includes('soccer') || both.includes('hockey')
-    || both.includes('mma') || both.includes('boxing') || both.includes('wrestling')
-    || both.includes('racing') || both.includes('rodeo') || both.includes('isotopes')
-    || both.includes('lobos') || both.includes('nm united') || both.includes('new mexico united')
-    || both.includes('aggies') || both.includes('bodybuilding') || both.includes('marathon')
-    || both.includes('5k') || both.includes('10k') || both.includes('triathlon')) return 'Sports'
+  // ── Music ───────────────────────────────────────────────────────────────
+  if (anyWord(s, ['music'])
+    || anyWord(both, ['concert', 'live music', 'dj set'])
+    || anyWord(g, [
+      'rock', 'pop', 'country', 'jazz', 'hip-hop', 'r&b', 'edm', 'electronic',
+      'latin', 'reggae', 'soul', 'folk', 'bluegrass', 'metal', 'punk',
+      'singer', 'songwriter', 'mariachi', 'cumbia', 'salsa', 'norteño',
+      'reggaeton', 'classical', 'symphony',
+    ])
+  ) return { category: 'Music', subcategory: null }
 
-  // Film — check BOTH s and g (EB passes film category as segment, not genre)
-  if (both.includes('film') || both.includes('movie') || both.includes('screening')
-    || both.includes('cinema') || both.includes('documentary') || both.includes('short film')
-    || s.includes('tv') || both.includes('drive-in')) return 'Film'
+  // ── Sports — with subcategories per strategy doc taxonomy ───────────────
+  // Check specific teams/sports first for subcategory, then generic "sports"
+  if (anyWord(both, ['isotopes']))
+    return { category: 'Sports', subcategory: 'Baseball' }
+  if (anyWord(both, ['nm united', 'new mexico united']))
+    return { category: 'Sports', subcategory: 'Soccer' }
+  if (anyWord(both, ['lobos']))
+    return { category: 'Sports', subcategory: 'College' }
+  if (anyWord(both, ['aggies']))
+    return { category: 'Sports', subcategory: 'College' }
+  if (anyWord(both, ['baseball', 'softball']))
+    return { category: 'Sports', subcategory: 'Baseball' }
+  if (anyWord(both, ['soccer', 'futbol', 'fútbol']))
+    return { category: 'Sports', subcategory: 'Soccer' }
+  if (anyWord(both, ['football']))
+    return { category: 'Sports', subcategory: 'Football' }
+  if (anyWord(both, ['basketball']))
+    return { category: 'Sports', subcategory: 'Basketball' }
+  if (anyWord(both, ['hockey']))
+    return { category: 'Sports', subcategory: 'Hockey' }
+  if (anyWord(both, ['mma', 'boxing', 'wrestling', 'ufc']))
+    return { category: 'Sports', subcategory: 'Combat' }
+  if (anyWord(both, ['racing', 'drag racing', 'stock car', 'motorsport']))
+    return { category: 'Sports', subcategory: 'Motorsports' }
+  if (anyWord(both, ['rodeo']))
+    return { category: 'Sports', subcategory: 'Rodeo' }
+  if (anyWord(both, ['marathon', '5k', '10k', 'triathlon', 'half marathon']))
+    return { category: 'Sports', subcategory: 'Running' }
+  if (anyWord(both, ['bodybuilding']))
+    return { category: 'Sports', subcategory: null }
+  if (anyWord(s, ['sport', 'sports']))
+    return { category: 'Sports', subcategory: null }
 
-  // Food & Drink — EB sends "Food & Drink", also catch title keywords
-  if (both.includes('food') || both.includes('drink') || both.includes('tasting')
-    || both.includes('brewery') || both.includes('wine') || both.includes('culinary')
-    || both.includes('chef') || both.includes('farmers market') || both.includes('growers market')
-    || both.includes('cocktail') || both.includes('distillery') || both.includes('cooking')
-    || both.includes('beer') || both.includes('brunch') || both.includes('dinner')
-    || both.includes('food truck') || both.includes('sips') || both.includes('suds')
-    || both.includes('beverage') || both.includes('taproom') || both.includes('winery')
-    || both.includes('margarita') || both.includes('mezcal')) return 'Food & Drink'
+  // ── Film ────────────────────────────────────────────────────────────────
+  if (anyWord(both, [
+    'film', 'movie', 'screening', 'cinema', 'documentary', 'short film', 'drive-in',
+  ]) || anyWord(s, ['tv']))
+    return { category: 'Film', subcategory: null }
 
-  // Arts & Theater
-  if (s.includes('art') || s.includes('theatre') || s.includes('theater')
-    || both.includes('ballet') || both.includes('opera') || both.includes('classical')
-    || both.includes('gallery') || both.includes('museum') || both.includes('exhibit')
-    || both.includes('literary') || both.includes('performing art')
-    || both.includes('play ') || both.includes(' play') || both.includes('broadway')
-    || both.includes('symphony') || both.includes('philharmonic')
-    || both.includes('art studio') || both.includes('painting') || both.includes('pottery')
-    || both.includes('sculpture') || both.includes('printmaking')) return 'Arts & Theater'
+  // ── Food & Drink ───────────────────────────────────────────────────────
+  if (anyWord(both, [
+    'food', 'drink', 'tasting', 'brewery', 'wine', 'culinary', 'chef',
+    'farmers market', 'growers market', 'cocktail', 'distillery', 'cooking',
+    'beer', 'brunch', 'food truck', 'sips', 'suds', 'beverage', 'taproom',
+    'winery', 'margarita', 'mezcal',
+  ])) return { category: 'Food & Drink', subcategory: null }
 
-  // Festivals & Fairs
-  if (both.includes('festival') || both.includes(' fair') || both.includes('carnival')
-    || both.includes('expo') || both.includes('fiesta') || both.includes('celebration')
-    || both.includes('block party')) return 'Festivals'
+  // ── Arts & Theater ─────────────────────────────────────────────────────
+  if (anyWord(s, ['art', 'arts', 'theatre', 'theater'])
+    || anyWord(both, [
+      'ballet', 'opera', 'gallery', 'museum', 'exhibit',
+      'literary', 'performing art', 'broadway',
+      'philharmonic', 'art studio', 'painting', 'pottery',
+      'sculpture', 'printmaking', 'fairy tale', 'fairy tales',
+    ])
+  ) return { category: 'Arts & Theater', subcategory: null }
 
-  // Outdoor & Adventure
-  if (both.includes('outdoor') || both.includes('hiking') || both.includes('cycling')
-    || both.includes('balloon') || both.includes('camping') || both.includes('adventure')
-    || both.includes('trail') || both.includes('nature walk') || both.includes('birding')
-    || both.includes('stargazing') || both.includes('garden tour')) return 'Outdoor'
+  // ── Festivals & Fairs — uses word-boundary so "fairy" won't match "fair" ─
+  if (anyWord(both, [
+    'festival', 'fair', 'carnival', 'expo', 'fiesta', 'celebration',
+    'block party',
+  ])) return { category: 'Festivals', subcategory: null }
 
-  // Community — check last, broadest bucket
-  if (both.includes('community') || both.includes('charity') || both.includes('fundraiser')
-    || both.includes('civic') || both.includes('volunteer') || both.includes('workshop')
-    || both.includes('seminar') || both.includes('networking') || both.includes('meeting')
-    || both.includes('support group') || both.includes('book club')
-    || both.includes('meditation') || both.includes('yoga') || both.includes('tai chi')
-    || both.includes('health fair') || both.includes('job fair')
-    || both.includes('open house') || both.includes('town hall')
-    || both.includes('creative writing') || both.includes('makerspace')) return 'Community'
+  // ── Outdoor & Adventure ────────────────────────────────────────────────
+  if (anyWord(both, [
+    'outdoor', 'hiking', 'cycling', 'balloon', 'camping', 'adventure',
+    'trail', 'nature walk', 'birding', 'stargazing', 'garden tour',
+  ])) return { category: 'Outdoor', subcategory: null }
+
+  // ── Community — broadest bucket, check last ────────────────────────────
+  if (anyWord(both, [
+    'community', 'charity', 'fundraiser', 'civic', 'volunteer', 'workshop',
+    'seminar', 'networking', 'support group', 'book club',
+    'meditation', 'yoga', 'tai chi', 'open house', 'town hall',
+    'creative writing', 'makerspace',
+  ])) return { category: 'Community', subcategory: null }
 
   // If nothing matched, return null — event shows up in "All" but not in any filter
-  return null
+  return { category: null, subcategory: null }
 }
