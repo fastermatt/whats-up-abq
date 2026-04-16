@@ -84,18 +84,25 @@ body {
 
 /* Spring card entrance — staggered, with overshoot inertia.
    Each card gets a --card-i CSS variable (0, 1, 2…) from inline style.
-   The cubic-bezier overshoots, then settles — like cards have weight. */
+   The cubic-bezier overshoots, then settles — like cards have weight.
+   animation-fill-mode: backwards holds the card invisible until its delay fires,
+   so early cards don't briefly flash before staggered ones appear. */
 @keyframes springUp {
-  0%   { opacity: 0; transform: translateY(22px) scale(0.95); }
-  55%  { opacity: 1; transform: translateY(-5px) scale(1.015); }
-  75%  { transform: translateY(2px) scale(0.997); }
+  0%   { opacity: 0; transform: translateY(20px) scale(0.96); }
+  60%  { opacity: 1; transform: translateY(-4px) scale(1.01); }
+  80%  { transform: translateY(2px) scale(0.998); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-@media (prefers-reduced-motion: no-preference) {
+/* Always define the class; inside reduced-motion we just make it instant */
+.spring-card {
+  animation: springUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)
+             calc(var(--card-i, 0) * 35ms) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
   .spring-card {
-    animation: springUp 0.55s cubic-bezier(0.34, 1.56, 0.64, 1)
-               calc(var(--card-i, 0) * 38ms) both;
+    animation: none;
   }
 }
 
@@ -218,12 +225,16 @@ body {
 }
 
 /* ─── Reduced motion — respect user preference ───────────────────────── */
+/* Spring cards are handled above. Transition-based animations obey this. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  ::before,
-  ::after {
-    animation-duration:   0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration:  0.01ms !important;
+  .animate-fade-in,
+  .animate-fade-up,
+  .animate-fade-up-delay,
+  .animate-slide-down,
+  .animate-hero-text,
+  .animate-section-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
