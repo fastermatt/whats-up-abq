@@ -27,6 +27,9 @@ export interface NormalizedEvent {
   ticketUrl: string | null
   source: string
   isFeatured: boolean
+  // Location tags (from neighborhood + venue_slug DB columns)
+  neighborhood: string | null
+  venueSlug: string | null
   // LLM enrichment fields (from ai_enrichment column)
   about: string | null
   highlights: string[]
@@ -62,6 +65,8 @@ interface RawEventRow {
   ai_enrichment: Record<string, unknown> | null
   featured: boolean | null
   hidden: boolean | null
+  neighborhood: string | null
+  venue_slug: string | null
 }
 
 // ─── Category counts ──────────────────────────────────────────────────────────
@@ -113,7 +118,7 @@ export async function fetchEvents({
   const supabase = await createClient()
   const { gte, lte } = getTimeRange(timeFilter)
 
-  const COLS = 'id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden'
+  const COLS = 'id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, neighborhood, venue_slug'
   const needsInMemory = !!(category || search || freeOnly || maxPrice !== undefined)
 
   // When filtering by category or search we must normalize first (category is inside raw JSON,
@@ -219,7 +224,7 @@ export async function fetchFeaturedEvents(limit = 6): Promise<NormalizedEvent[]>
   const { data, error } = await (supabase as any)
     .schema('public')
     .from('events')
-    .select('id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden')
+    .select('id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, neighborhood, venue_slug')
     .eq('hidden', false)
     .eq('featured', true)
     .gte('event_date', today)
@@ -242,7 +247,7 @@ export async function fetchEventsByVenue(venueName: string, limit = 20): Promise
   const { data, error } = await (supabase as any)
     .schema('public')
     .from('events')
-    .select('id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden')
+    .select('id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, neighborhood, venue_slug')
     .eq('hidden', false)
     .gte('event_date', today)
     .order('event_date', { ascending: true })
@@ -294,7 +299,7 @@ export async function fetchEventById(id: string): Promise<NormalizedEvent | null
   const { data, error } = await (supabase as any)
     .schema('public')
     .from('events')
-    .select('id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden')
+    .select('id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, neighborhood, venue_slug')
     .eq('id', id)
     .single()
 
@@ -314,6 +319,11 @@ function normalizeRow(row: RawEventRow): NormalizedEvent | null {
       case 'bandsintown':  evt = normalizeBIT(row); break
       case 'local':        evt = normalizeLocal(row); break
       default:             evt = normalizeGeneric(row)
+    }
+    // Pass through neighborhood + venue_slug DB columns
+    if (evt) {
+      evt.neighborhood = row.neighborhood ?? null
+      evt.venueSlug    = row.venue_slug   ?? null
     }
     // Apply ai_enrichment overrides (from LLM enrichment pass)
     if (evt && row.ai_enrichment) {
@@ -382,6 +392,7 @@ function normalizeTM(row: RawEventRow): NormalizedEvent {
     ticketUrl: (r.url as string | undefined) ?? null,
     source: 'ticketmaster',
     isFeatured: row.featured ?? false,
+    neighborhood: null, venueSlug: null,
     about: null, highlights: [], venueTips: null, localTips: null,
   }
 }
@@ -421,6 +432,7 @@ function normalizeEB(row: RawEventRow): NormalizedEvent {
     ticketUrl: (r.url as string | undefined) ?? null,
     source: 'eventbrite',
     isFeatured: row.featured ?? false,
+    neighborhood: null, venueSlug: null,
     about: null, highlights: [], venueTips: null, localTips: null,
   }
 }
@@ -476,6 +488,7 @@ function normalizeSG(row: RawEventRow): NormalizedEvent {
     ticketUrl: (r.url as string | undefined) ?? null,
     source: 'seatgeek',
     isFeatured: row.featured ?? false,
+    neighborhood: null, venueSlug: null,
     about: null, highlights: [], venueTips: null, localTips: null,
   }
 }
@@ -504,6 +517,7 @@ function normalizeBIT(row: RawEventRow): NormalizedEvent {
     ticketUrl: (r.url as string | undefined) ?? null,
     source: 'bandsintown',
     isFeatured: row.featured ?? false,
+    neighborhood: null, venueSlug: null,
     about: null, highlights: [], venueTips: null, localTips: null,
   }
 }
@@ -528,6 +542,7 @@ function normalizeLocal(row: RawEventRow): NormalizedEvent {
     ticketUrl: (r.url as string | undefined) ?? (r.ticket_url as string | undefined) ?? null,
     source: 'local',
     isFeatured: row.featured ?? false,
+    neighborhood: null, venueSlug: null,
     about: null, highlights: [], venueTips: null, localTips: null,
   }
 }
@@ -550,6 +565,7 @@ function normalizeGeneric(row: RawEventRow): NormalizedEvent {
     ticketUrl: (r.url as string | undefined) ?? null,
     source: row.source,
     isFeatured: row.featured ?? false,
+    neighborhood: null, venueSlug: null,
     about: null, highlights: [], venueTips: null, localTips: null,
   }
 }
