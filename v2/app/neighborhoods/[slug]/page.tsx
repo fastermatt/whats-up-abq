@@ -129,7 +129,7 @@ export default async function NeighborhoodPage({ params }: PageProps) {
         )}
 
         {/* ── Top venues in this neighborhood ── */}
-        {topVenues.length > 1 && (
+        {topVenues.length > 0 && (
           <div className="mb-5">
             <h2
               className="text-xs font-bold text-[#8a7a74] uppercase tracking-wider mb-2"
@@ -257,13 +257,22 @@ export default async function NeighborhoodPage({ params }: PageProps) {
 
 /** Generate static params for the top neighborhoods at build time */
 export async function generateStaticParams() {
-  // The top neighborhoods — hardcoded to avoid a DB call at build time
-  // (runtime ISR handles any others)
+  // Neighborhoods that actually have events in the DB (from tag-neighborhoods-venues.cjs backfill).
+  // ISR (revalidate=3600) handles any new neighborhoods that appear after deploy.
   const top = [
-    'downtown', 'nob-hill', 'northeast-heights', 'old-town',
-    'rio-rancho', 'south-valley', 'unm-campus', 'midtown',
-    'uptown-midtown', 'far-northeast-heights', 'barelas-south-downtown',
-    'near-i-25-midtown', 'state-fairgrounds-midtown', 'north-valley',
+    'unm-south-campus',
+    'downtown',
+    'unm-campus',
+    'south-i-25-university-se',
+    'uptown-midtown',
+    'downtown-edo',
+    'far-northeast-heights',
+    'state-fairgrounds-midtown',
+    'rio-rancho',
+    'unm-nob-hill',
+    'far-northeast-sandia-foothills',
+    'nob-hill',
+    'barelas-south-downtown',
   ]
   return top.map((slug) => ({ slug }))
 }
