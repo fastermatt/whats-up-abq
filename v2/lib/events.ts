@@ -33,6 +33,7 @@ export type CategoryFilter = string | null
 export interface FetchEventsOptions {
   timeFilter?: TimeFilter
   category?: CategoryFilter
+  search?: string
   limit?: number
   offset?: number
 }
@@ -60,6 +61,7 @@ interface RawEventRow {
 export async function fetchEvents({
   timeFilter = 'upcoming',
   category,
+  search,
   limit = 24,
   offset = 0,
 }: FetchEventsOptions = {}): Promise<FetchEventsResult> {
@@ -67,10 +69,11 @@ export async function fetchEvents({
   const { gte, lte } = getTimeRange(timeFilter)
 
   const COLS = 'id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden'
+  const needsInMemory = !!(category || search)
 
-  // When filtering by category we must normalize first (category is inside raw JSON,
+  // When filtering by category or search we must normalize first (category is inside raw JSON,
   // different field per source), so fetch all rows for the time range then filter/paginate.
-  if (category) {
+  if (needsInMemory) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let q = (supabase as any)
       .schema('public')
@@ -86,17 +89,31 @@ export async function fetchEvents({
       console.error('[fetchEvents] Supabase error:', error.message)
       return { events: [], total: 0 }
     }
-    const allNormalized = ((data ?? []) as RawEventRow[])
+    let allNormalized = ((data ?? []) as RawEventRow[])
       .map(normalizeRow)
       .filter((e): e is NormalizedEvent => e !== null)
-      .filter((e) => e.category?.toLowerCase() === category.toLowerCase())
+
+    if (category) {
+      allNormalized = allNormalized.filter(
+        (e) => e.category?.toLowerCase() === category.toLowerCase()
+      )
+    }
+
+    if (search) {
+      const terms = search.toLowerCase().split(/\s+/).filter(Boolean)
+      allNormalized = allNormalized.filter((e) => {
+        const haystack = `${e.title} ${e.venue ?? ''} ${e.category ?? ''} ${e.description ?? ''}`.toLowerCase()
+        return terms.every((t) => haystack.includes(t))
+      })
+    }
+
     return {
       events: allNormalized.slice(offset, offset + limit),
       total: allNormalized.length,
     }
   }
 
-  // No category filter — use DB-level pagination with count for efficiency
+  // No category/search filter — use DB-level pagination with count for efficiency
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query = (supabase as any)
     .schema('public')
@@ -233,7 +250,7 @@ function normalizeEB(row: RawEventRow): NormalizedEvent {
     venue: (venue?.name as string | undefined) ?? null,
     address: venue ? buildEBAddress(venue) : null,
     city: (venue?.address as Record<string, unknown> | undefined)?.city as string | null ?? null,
-    category: (r.category as Record<string, unknown> | undefined)?.name as string | null ?? null,
+    category: mapCategory((r.category as Record<string, unknown> | undefined)?.name as string | undefined),
     description: ((r.description as Record<string, unknown> | undefined)?.text as string | undefined)?.slice(0, 300) ?? null,
     price: cost,
     imageUrl: row.cached_photo_url ?? (r.logo as Record<string, unknown> | undefined)?.url as string | null ?? null,
@@ -267,7 +284,7 @@ function normalizeSG(row: RawEventRow): NormalizedEvent {
       ? [venue.address, venue.city].filter(Boolean).join(', ') || null
       : null,
     city: (venue?.city as string | undefined) ?? null,
-    category: (r.type as string | undefined) ?? null,
+    category: mapCategory((r.type as string | undefined)),
     description: null,
     price: priceStr,
     imageUrl: row.cached_photo_url
@@ -378,14 +395,69 @@ function buildEBAddress(venue: Record<string, unknown>): string | null {
     ?? null
 }
 
+/**
+ * Map any source's category/segment/genre/type string to our display categories.
+ * Handles: Ticketmaster segment+genre, Eventbrite category.name, SeatGeek type.
+ */
 function mapCategory(segment?: string, genre?: string): string | null {
   const s = (segment ?? '').toLowerCase()
   const g = (genre ?? '').toLowerCase()
-  if (s.includes('music') || g.includes('rock') || g.includes('pop') || g.includes('country') || g.includes('jazz') || g.includes('hip-hop') || g.includes('r&b')) return 'Music'
-  if (s.includes('sport')) return 'Sports'
-  if (s.includes('art') || s.includes('theatre') || s.includes('theater') || g.includes('comedy') || g.includes('classical')) return 'Arts & Theater'
-  if (s.includes('family') || g.includes('family')) return 'Family'
-  if (g.includes('film') || g.includes('movie')) return 'Film'
-  if (g.includes('food') || g.includes('festival') || g.includes('fair')) return 'Food & Drink'
-  return segment ?? genre ?? null
+  const both = `${s} ${g}`
+
+  // Music — TM segments, SG type 'concert'/'band', EB 'Music'
+  if (s.includes('music') || both.includes('concert') || both.includes('band')
+    || g.includes('rock') || g.includes('pop') || g.includes('country') || g.includes('jazz')
+    || g.includes('hip-hop') || g.includes('r&b') || g.includes('edm') || g.includes('electronic')
+    || g.includes('latin') || g.includes('reggae') || g.includes('soul') || g.includes('folk')
+    || g.includes('bluegrass') || g.includes('metal') || g.includes('punk')
+    || g.includes('singer') || g.includes('songwriter')) return 'Music'
+
+  // Comedy — a distinct display category
+  if (both.includes('comedy') || both.includes('stand-up') || both.includes('standup')
+    || both.includes('improv') || both.includes('open mic')) return 'Comedy'
+
+  // Sports — TM segments, SG type, EB
+  if (s.includes('sport') || both.includes('baseball') || both.includes('basketball')
+    || both.includes('football') || both.includes('soccer') || both.includes('hockey')
+    || both.includes('mma') || both.includes('boxing') || both.includes('wrestling')
+    || both.includes('racing') || both.includes('rodeo')) return 'Sports'
+
+  // Arts & Theater
+  if (s.includes('art') || s.includes('theatre') || s.includes('theater')
+    || both.includes('ballet') || both.includes('opera') || both.includes('classical')
+    || both.includes('dance') || both.includes('gallery') || both.includes('museum')
+    || both.includes('literary') || both.includes('performing art')) return 'Arts & Theater'
+
+  // Family
+  if (s.includes('family') || g.includes('family') || both.includes('kids')
+    || both.includes('children') || both.includes('story time')
+    || both.includes('puppet') || both.includes('holiday')) return 'Family'
+
+  // Film
+  if (g.includes('film') || g.includes('movie') || both.includes('screening')
+    || both.includes('cinema') || both.includes('documentary')) return 'Film'
+
+  // Food & Drink
+  if (both.includes('food') || both.includes('drink') || both.includes('tasting')
+    || both.includes('brewery') || both.includes('wine') || both.includes('culinary')
+    || both.includes('chef') || both.includes('farmers market')
+    || both.includes('cocktail') || both.includes('distillery')) return 'Food & Drink'
+
+  // Festivals & Fairs
+  if (both.includes('festival') || both.includes('fair') || both.includes('carnival')
+    || both.includes('expo') || both.includes('fiesta')) return 'Festivals'
+
+  // Outdoor & Adventure
+  if (both.includes('outdoor') || both.includes('hiking') || both.includes('cycling')
+    || both.includes('balloon') || both.includes('camping')
+    || both.includes('adventure') || both.includes('trail')) return 'Outdoor'
+
+  // Community
+  if (both.includes('community') || both.includes('charity') || both.includes('fundraiser')
+    || both.includes('civic') || both.includes('volunteer') || both.includes('workshop')
+    || both.includes('class') || both.includes('seminar') || both.includes('networking')) return 'Community'
+
+  // If nothing matched but we have a raw string, return null rather than leaking
+  // arbitrary source-specific strings into the UI
+  return null
 }

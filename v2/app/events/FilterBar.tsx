@@ -14,11 +14,15 @@ const TIME_FILTERS = [
 
 const CATEGORIES = [
   'Music',
+  'Comedy',
   'Sports',
   'Arts & Theater',
   'Family',
   'Film',
   'Food & Drink',
+  'Festivals',
+  'Outdoor',
+  'Community',
 ]
 
 interface FilterBarProps {

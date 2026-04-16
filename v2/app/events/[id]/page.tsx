@@ -1,9 +1,10 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { fetchEventById } from '@/lib/events'
+import { fetchEventById, fetchEvents } from '@/lib/events'
 import { getCategoryFallback } from '@/lib/fallback-images'
-import { MapPin, Clock, Calendar, Ticket, ArrowLeft, ExternalLink } from 'lucide-react'
+import { MapPin, Clock, Calendar, Ticket, ArrowLeft, ExternalLink, Share2 } from 'lucide-react'
+import ShareButton from './ShareButton'
 
 export const revalidate = 60
 
@@ -130,30 +131,91 @@ export default async function EventDetailPage({ params }: PageProps) {
           </div>
         )}
 
-        {/* CTA button */}
-        {event.ticketUrl && (
-          <a
-            href={event.ticketUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#9a442d] text-white font-semibold text-sm hover:bg-[#7d3725] transition-all duration-300 hover:shadow-lg hover:shadow-[#9a442d]/20 hover:scale-[1.02]"
-            style={{ fontFamily: 'var(--font-epilogue)' }}
-          >
-            Get Tickets
-            <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-          </a>
-        )}
+        {/* CTA buttons */}
+        <div className="flex flex-wrap gap-3 mb-6">
+          {event.ticketUrl && (
+            <a
+              href={event.ticketUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#9a442d] text-white font-semibold text-sm hover:bg-[#7d3725] transition-all duration-300 hover:shadow-lg hover:shadow-[#9a442d]/20 hover:scale-[1.02]"
+              style={{ fontFamily: 'var(--font-epilogue)' }}
+            >
+              Get Tickets
+              <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            </a>
+          )}
+          <ShareButton title={event.title} />
+        </div>
 
         {/* Source attribution */}
-        <p className="text-[10px] text-[#8a7a74] mt-6">
+        <p className="text-[10px] text-[#8a7a74]">
           Source: {event.source.charAt(0).toUpperCase() + event.source.slice(1)}
         </p>
       </article>
+
+      {/* ── Similar Events ── */}
+      <SimilarEvents eventId={event.id} category={event.category} />
     </main>
   )
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
+
+async function SimilarEvents({ eventId, category }: { eventId: string; category: string | null }) {
+  if (!category) return null
+
+  const { events } = await fetchEvents({
+    timeFilter: 'upcoming',
+    category,
+    limit: 5,
+  })
+
+  // Filter out the current event
+  const similar = events.filter((e) => e.id !== eventId).slice(0, 4)
+  if (similar.length === 0) return null
+
+  return (
+    <section className="max-w-3xl mx-auto px-4 pb-8">
+      <div className="border-t border-[#f0e4cc] pt-6">
+        <h2
+          className="text-lg font-black text-[#1a1614] mb-4"
+          style={{ fontFamily: 'var(--font-epilogue)' }}
+        >
+          More {category}
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {similar.map((event) => (
+            <Link
+              key={event.id}
+              href={`/events/${event.id}`}
+              className="group"
+            >
+              <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] mb-1.5 shadow-sm group-hover:shadow-md transition-shadow">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
+                  alt=""
+                  loading="lazy"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+              <h3
+                className="font-bold text-[11px] text-[#1a1614] line-clamp-2 group-hover:text-[#9a442d] transition-colors"
+                style={{ fontFamily: 'var(--font-epilogue)' }}
+              >
+                {event.title}
+              </h3>
+              {event.venue && (
+                <p className="text-[10px] text-[#8a7a74] line-clamp-1">{event.venue}</p>
+              )}
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
 
 function formatDateLong(iso: string): string {
   if (!iso) return ''
