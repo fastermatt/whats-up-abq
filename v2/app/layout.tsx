@@ -34,13 +34,19 @@ export const metadata: Metadata = {
   description:
     'The best events in Albuquerque, NM — concerts, comedy, arts, sports, food & drink. ' +
     'Every ticket source in one place.',
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? 'https://v2.abqunplugged.com'
-  ),
+  metadataBase: new URL('https://abqunplugged.com'),
   openGraph: {
     type:        'website',
     siteName:    'ABQ Unplugged',
     locale:      'en_US',
+    images: [
+      {
+        url: 'https://cdn.midjourney.com/fb77c641/0_0.jpeg',
+        width: 1200,
+        height: 630,
+        alt: 'ABQ Unplugged — Events in Albuquerque, NM',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
