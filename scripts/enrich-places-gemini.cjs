@@ -27,7 +27,7 @@ const PLACES_FILE = path.join(__dirname, '../public/places-data.json');
 
 // ── Supabase config for syncing enriched data to DB ──────────────────────────
 const SUPABASE_URL  = process.env.VITE_SUPABASE_URL  || 'https://bsmvfutebmbkjvlrhiyq.supabase.co';
-const SUPABASE_KEY  = process.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbXZmdXRlYm1ia2p2bHJoaXlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMzgwMzIsImV4cCI6MjA4OTgxNDAzMn0.3rvMRErlF-HnKfbJ6rCNSeCJc39n4K48xjAeSGqf_rc';
+const SUPABASE_KEY  = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
 
 /** Sync enriched data to the Supabase `places.enriched` column (JSONB) */
 function syncToSupabase(placeId, enrichedObj) {

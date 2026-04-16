@@ -3,12 +3,33 @@
  * Runs Gemma 4 via LM Studio at localhost:1234.
  *
  * Usage: node scripts/enrich-seatgeek.mjs [--dry-run] [--limit=50]
+ * Requires: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in scripts/.env or environment
  */
 import { createClient } from '@supabase/supabase-js'
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-const SUPABASE_URL = 'https://bsmvfutebmbkjvlrhiyq.supabase.co'
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbXZmdXRlYm1ia2p2bHJoaXlxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDIzODAzMiwiZXhwIjoyMDg5ODE0MDMyfQ.z0ROQshAv4qOLIONKESzZZFUH6dN9coiB_aX6MAWEls'
-const LM_STUDIO_URL = 'http://localhost:1234/v1/chat/completions'
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+// Load .env from scripts/ directory (two levels up from v2/scripts/)
+for (const envFile of [
+  path.join(__dirname, '.env'),
+  path.join(__dirname, '..', '..', 'scripts', '.env'),
+]) {
+  if (fs.existsSync(envFile)) {
+    fs.readFileSync(envFile, 'utf8').split('\n').forEach(line => {
+      const m = line.match(/^([^#=]+)=(.*)$/)
+      if (m) process.env[m[1].trim()] = m[2].trim()
+    })
+    break
+  }
+}
+
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://bsmvfutebmbkjvlrhiyq.supabase.co'
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+if (!SUPABASE_KEY) { console.error('❌ SUPABASE_SERVICE_ROLE_KEY not set. Add it to scripts/.env'); process.exit(1) }
+const LM_STUDIO_URL = process.env.LM_STUDIO_URL || 'http://localhost:1234/v1/chat/completions'
 
 const MUSIC_SUBCATEGORIES = [
   'Rock', 'Pop', 'Country', 'Jazz', 'Hip-Hop', 'R&B', 'Electronic',
