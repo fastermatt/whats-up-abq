@@ -2,18 +2,11 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "V2 Next.js Dev (port 3000)",
+      "name": "ABQ Unplugged V2",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "cwd": "v2",
       "port": 3000
-    },
-    {
-      "name": "V1 Vite Dev (port 5173)",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
-      "cwd": ".",
-      "port": 5173
     }
   ]
 }

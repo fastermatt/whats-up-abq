@@ -1,121 +1,72 @@
-# ABQ Unplugged Code Edit Skill
+# ABQ Unplugged V2 — Code Edit Skill
 
-This skill guides editing, committing, and deploying changes to the ABQ Unplugged app.
+This skill guides editing, building, committing, and deploying changes to ABQ Unplugged V2.
 
-## Project Overview
-- **Stack**: React + TypeScript, Tailwind CSS, Supabase, Netlify, Vite
-- **Main file**: `/Users/matt/Documents/Claude/Projects/whats-up-abq/src/App.tsx` (~8000+ lines)
-- **Live site**: https://abqunplugged.com | **GitHub**: fastermatt/whats-up-abq
-- **Deploy**: Netlify auto-deploys on push to `main` (~60s)
+## Project overview
 
-## Critical Notes
-- The VM sandbox (Bash tool) CANNOT make outbound network requests — no curl, fetch, npm run
-- ALL file edits, git operations, and shell commands must go through **Desktop Commander**
-- The git repo folder is `whats-up-abq` (NOT "ABQ Unplugged")
-- Chrome `javascript_tool` CANNOT read raw.githubusercontent.com (blocked)
+- **Stack**: Next.js 16.2.3 (App Router, Turbopack) · TypeScript · Tailwind 4 · Supabase · Netlify
+- **V2 app root**: `v2/` within the repo
+- **Live site**: https://abqunplugged.com
+- **GitHub**: `fastermatt/whats-up-abq`, branch `v2`
+- **Deploy**: push to `v2` branch → Netlify auto-deploys (~90s). Site ID: `a0ff66c2`
 
----
+## Editing files
 
-## Step 1: Find the File
+Use the Claude `Read` + `Edit` tools directly. Read before editing; make precise replacements.
 
-```
-mcp__Desktop_Commander__start_process:
-  command: mdfind -name "App.tsx" | grep whats-up-abq
-  timeout_ms: 10000
-```
-Expected result: `/Users/matt/Documents/Claude/Projects/whats-up-abq/src/App.tsx`
-
----
-
-## Step 2: Read Source Code
-
-Use a sub-agent (Agent tool, general-purpose) with WebFetch:
-```
-Fetch https://raw.githubusercontent.com/fastermatt/whats-up-abq/main/src/App.tsx
-Return VERBATIM the lines containing [TARGET_STRING] and surrounding context (~20 lines)
-```
-Do NOT use javascript_tool for GitHub raw URLs — blocked by extension.
-
----
-
-## Step 3: Write a Python Edit Script
-
-Write to `/tmp/fix_something.py` via `mcp__Desktop_Commander__write_file`:
-
-```python
-filepath = '/Users/matt/Documents/Claude/Projects/whats-up-abq/src/App.tsx'
-with open(filepath, 'r', encoding='utf-8') as f:
-    content = f.read()
-
-# Safety check — confirm target string exists before editing
-assert 'UNIQUE_STRING_FROM_ORIGINAL' in content, "Target not found — check string"
-
-OLD = """[exact original code block]"""
-NEW = """[replacement code block]"""
-
-content = content.replace(OLD, NEW, 1)
-with open(filepath, 'w', encoding='utf-8') as f:
-    f.write(content)
-print("Done")
+```bash
+cd v2 && npm run build   # must show 0 TypeScript errors before committing
 ```
 
-Key rules:
-- Always include `assert` to verify target exists before replacing
-- Use `replace(OLD, NEW, 1)` — the `1` prevents accidental multi-replaces
-- Preserve exact indentation from original (tabs vs spaces matter in JSX)
+## Commit and push
 
----
-
-## Step 4: Run the Script
-
-```
-mcp__Desktop_Commander__start_process:
-  command: python3 /tmp/fix_something.py
-  timeout_ms: 15000
+```bash
+cd "/Users/matt/Documents/ClaudeObsidian/Projects/ABQ Unplugged v2/repo"
+git add v2/path/to/file
+git commit -m "feat/fix/chore: description"
+git push origin v2
 ```
 
----
+## Key files
 
-## Step 5: Commit and Push
+| File | Purpose |
+|------|---------|
+| `v2/lib/events.ts` | All event fetching + normalizeRow() dispatch |
+| `v2/app/page.tsx` | Homepage (hero, mood chips, editorial sections) |
+| `v2/app/events/page.tsx` | Events listing with FilterBar |
+| `v2/app/events/[id]/page.tsx` | Event detail (ICS, calendar, ticket CTAs) |
+| `v2/app/events/FilterBar.tsx` | Filter UI — time / category / subcategory rows |
+| `v2/app/tonight/page.tsx` | Editorial Tonight feed |
+| `v2/app/weekend/page.tsx` | Editorial Weekend feed |
+| `v2/app/layout.tsx` | Root layout, skip-link, bottom nav, desktop sidebar |
+| `v2/app/globals.css` | Tailwind config + all keyframe animations |
+| `v2/lib/seo.ts` | buildBreadcrumbs() JSON-LD helper |
+| `v2/lib/ics.ts` | RFC 5545 ICS calendar builder |
+| `v2/lib/moods.ts` | 8 mood presets for homepage chips |
+| `v2/lib/classify.ts` | mapCategory() keyword classifier |
+
+## Design tokens
 
 ```
-mcp__Desktop_Commander__start_process:
-  command: cd /Users/matt/Documents/Claude/Projects/whats-up-abq && git add src/App.tsx && git commit -m "feat: description of change" && git push origin main
-  timeout_ms: 30000
+Background:  #fbf7f1  (cream)
+Accent:      #9a442d  (terra)
+Secondary:   #4f6249  (sage)
+Tertiary:    #006a62  (turquoise)
 ```
 
----
+Use Tailwind arbitrary values: `bg-[#fbf7f1]`, `text-[#9a442d]`.
 
-## Step 6: Verify on Live Site
+## TypeScript gotchas
 
-After ~60s, check https://abqunplugged.com via Chrome MCP or computer-use screenshot.
+- Supabase queries need `.schema('public')` and `as any` on the chain
+- JSONB columns → cast as `Record<string, unknown>` before accessing properties
+- `featured` is `boolean | null` — always use `?? false`
+- New API routes need `export const dynamic = 'force-dynamic'` if not ISR-cacheable
+- `formatTime()` returns `''` (not null) for date-only strings — use `|| null`
 
----
+## Animations
 
-## App Architecture Quick Reference
-
-**Theme** (CSS vars in `terracotta.css`):
-- `--ink`: dark text (~#1C1814)
-- `--brand`: terracotta accent (~#C0552A)
-- `--bg`: warm cream (~#F9F5F2)
-- `--muted`: muted text
-
-**Font**: Public Sans — loaded via `<link>` in index.html (NOT @import — Safari ITP)
-
-**FlatIcon component** (custom inline SVG system):
-- `viewBox="0 0 16 16"`, wrapped in `React.memo`
-- Stroke style: `S = { stroke: color, strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round', fill: 'none' }`
-- Fill style: `F = { fill: color, stroke: 'none' }`
-- Add new icons by inserting into the `map` object inside the FlatIcon component
-
-**Browse by Category** (compact horizontal pill row, as of Apr 2026):
-- Flex row with `overflowX: 'auto'`, `scrollbarWidth: 'none'`
-- Each pill: `background: color + '18'` (10% tint), `border: 1.5px solid color + '40'`
-- FlatIcon at 15px + bold 12px label in `--ink` color
-- Categories: Music, Comedy, Arts, Sports, Family, Outdoor, Free, Volunteer
-
-**Key Constants**:
-- `EVENT_TYPE_META`: genre → `{ icon, bg }` for event type badges
-- `PLACE_CATEGORIES`: `{ label, icon, value }[]` for place filter chips
-- `CATEGORY_COLORS`: `Record<string, {bg, text}>` for place category pills
-- `EVENT_GENRES`: flat string array for event filter tabs
+- `AnimateIn` component: IntersectionObserver, variants `fade-up` / `fade-in` / `slide-left` / `scale`
+- `scroll-hint-inner` class: one-time 1.6s peek on FilterBar inner flex divs
+- All animations respect `prefers-reduced-motion`
+- Stagger pattern: `delay={Math.min(i * 30, 300)}`
