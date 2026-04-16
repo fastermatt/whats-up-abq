@@ -133,6 +133,36 @@ export default async function DiscoverPage() {
         </div>
       </section>
 
+      {/* ── Category quick links ── */}
+      <section className="py-4 border-b border-[#f0e4cc]/60">
+        <div
+          className="flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-hide"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {[
+            { label: 'Music',       emoji: '🎵', cat: 'Music' },
+            { label: 'Comedy',      emoji: '😂', cat: 'Comedy' },
+            { label: 'Arts',        emoji: '🎭', cat: 'Arts & Theater' },
+            { label: 'Sports',      emoji: '🏟️', cat: 'Sports' },
+            { label: 'Food & Drink',emoji: '🍽️', cat: 'Food & Drink' },
+            { label: 'Family',      emoji: '👨‍👩‍👧', cat: 'Family' },
+            { label: 'Festivals',   emoji: '🎪', cat: 'Festivals' },
+            { label: 'Film',        emoji: '🎬', cat: 'Film' },
+            { label: 'Outdoor',     emoji: '🌵', cat: 'Outdoor' },
+            { label: 'Free',        emoji: '✨', cat: null, price: 'free' },
+          ].map(({ label, emoji, cat, price }) => (
+            <Link
+              key={label}
+              href={cat ? `/events?category=${encodeURIComponent(cat)}` : `/events?price=${price}`}
+              className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full bg-white border border-[#ddc9a3] text-xs font-semibold text-[#4a3f3a] hover:border-[#9a442d] hover:text-[#9a442d] transition-all whitespace-nowrap"
+            >
+              <span>{emoji}</span>
+              {label}
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {/* ── Editor's Picks — Featured Events ── */}
       {featured.length > 0 && (
         <AnimateIn animation="fade-up">
