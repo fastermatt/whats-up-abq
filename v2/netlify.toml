@@ -8,3 +8,46 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# ─── Cache Headers ─────────────────────────────────────────────────────────────
+# Event detail and listing pages: cache 1h on CDN, serve stale for 24h
+[[headers]]
+  for = "/events/*"
+  [headers.values]
+    Cache-Control = "public, s-maxage=3600, stale-while-revalidate=86400"
+
+[[headers]]
+  for = "/events"
+  [headers.values]
+    Cache-Control = "public, s-maxage=60, stale-while-revalidate=3600"
+
+[[headers]]
+  for = "/categories/*"
+  [headers.values]
+    Cache-Control = "public, s-maxage=3600, stale-while-revalidate=86400"
+
+[[headers]]
+  for = "/venues/*"
+  [headers.values]
+    Cache-Control = "public, s-maxage=3600, stale-while-revalidate=86400"
+
+[[headers]]
+  for = "/neighborhoods/*"
+  [headers.values]
+    Cache-Control = "public, s-maxage=3600, stale-while-revalidate=86400"
+
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "public, s-maxage=60, stale-while-revalidate=600"
+
+# Admin pages must never be cached
+[[headers]]
+  for = "/admin/*"
+  [headers.values]
+    Cache-Control = "private, no-store"
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "private, no-store"

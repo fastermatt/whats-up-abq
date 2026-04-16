@@ -486,6 +486,7 @@ function normalizeRow(row: RawEventRow): NormalizedEvent | null {
       case 'bandsintown':  evt = normalizeBIT(row); break
       case 'local':        evt = normalizeLocal(row); break
       case 'volunteer':    evt = normalizeLocal(row); break  // volunteer events are always free
+      case 'nhcc':         evt = normalizeLocal(row); break  // NHCC community events
       default:             evt = normalizeGeneric(row)
     }
     // Pass through DB columns
@@ -708,7 +709,7 @@ function normalizeLocal(row: RawEventRow): NormalizedEvent {
     id: row.id,
     title: decodeHtml((r.title as string) ?? (r.name as string)) || 'Local Event',
     date: row.event_date ?? (r.date as string) ?? (r.start_date as string) ?? '',
-    time: row.event_date ? formatTime(row.event_date) : null,
+    time: row.event_date ? (formatTime(row.event_date) || null) : null,
     venue: typeof r.venue === 'string' ? r.venue : (r.venue_name as string | undefined) ?? null,
     address: (r.address as string | undefined) ?? null,
     city: (r.city as string | undefined) ?? 'Albuquerque',
@@ -734,7 +735,7 @@ function normalizeGeneric(row: RawEventRow): NormalizedEvent {
     id: row.id,
     title,
     date: row.event_date ?? '',
-    time: row.event_date ? formatTime(row.event_date) : null,
+    time: row.event_date ? (formatTime(row.event_date) || null) : null,
     venue: null,
     address: null,
     city: null,

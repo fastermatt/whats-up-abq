@@ -18,11 +18,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const neighborhood = events[0].neighborhood ?? slug
   return {
-    title: `Things to Do in ${neighborhood}, Albuquerque | ABQ Unplugged`,
+    title: `Things to Do in ${neighborhood}, Albuquerque`,
     description: `Upcoming events in ${neighborhood}, Albuquerque NM. Find concerts, comedy, arts, sports, and more on ABQ Unplugged.`,
     alternates: { canonical: `https://abqunplugged.com/neighborhoods/${slug}` },
     openGraph: {
-      title: `Events in ${neighborhood} | ABQ Unplugged`,
+      title: `Events in ${neighborhood}`,
       description: `Discover upcoming events in ${neighborhood}, Albuquerque NM.`,
       url: `https://abqunplugged.com/neighborhoods/${slug}`,
     },

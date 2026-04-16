@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { fetchEventsByVenue } from '@/lib/events'
+import { buildBreadcrumbs } from '@/lib/seo'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { MapPin, Calendar, ArrowLeft, ExternalLink } from 'lucide-react'
 
@@ -35,7 +36,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const venue = events[0].venue ?? venueName
   return {
-    title: `${venue} Events | ABQ Unplugged`,
+    title: `${venue} — Upcoming Events in Albuquerque`,
     description: `Upcoming events at ${venue} in Albuquerque, NM. Find tickets and details on ABQ Unplugged.`,
     alternates: { canonical: `https://abqunplugged.com/venues/${slug}` },
   }
@@ -60,8 +61,18 @@ export default async function VenuePage({ params }: PageProps) {
   }
   const topCategory = Object.entries(catCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
 
+  const breadcrumbLd = buildBreadcrumbs([
+    { name: 'Home', url: 'https://abqunplugged.com' },
+    { name: 'Events', url: 'https://abqunplugged.com/events' },
+    { name: venue, url: `https://abqunplugged.com/venues/${slug}` },
+  ])
+
   return (
     <main className="min-h-dvh bg-[--bg]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
       {/* ── Header ── */}
       <header className="sticky top-0 z-20 bg-[--bg]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
@@ -93,7 +104,11 @@ export default async function VenuePage({ params }: PageProps) {
           <div className="flex flex-wrap items-center gap-3 text-sm text-[#8a7a74]">
             <span className="flex items-center gap-1.5">
               <MapPin className="w-4 h-4 text-[#9a442d]" />
-              {address ? `${address}, ${city}` : city}
+              {address
+                ? (city && address.toLowerCase().includes(city.toLowerCase())
+                    ? address
+                    : `${address}, ${city}`)
+                : city}
             </span>
             <span className="text-[#ddc9a3]">·</span>
             <span className="font-medium text-[#1a1614]">
@@ -148,7 +163,7 @@ export default async function VenuePage({ params }: PageProps) {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
-                    alt=""
+                    alt={event.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>

@@ -63,7 +63,7 @@ const SOURCES = [
 
 export default function AboutPage() {
   return (
-    <main className="min-h-dvh bg-[#fbf7f1] text-[#1a1614]">
+    <main id="main" className="min-h-dvh bg-[#fbf7f1] text-[#1a1614]">
       <div className="max-w-2xl mx-auto px-4 py-8 md:py-12">
         {/* Back button */}
         <Link
