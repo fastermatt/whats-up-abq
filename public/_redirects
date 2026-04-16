@@ -1,5 +1,0 @@
-# Force Netlify subdomain → custom domain (permanent redirect)
-https://explore-abq.netlify.app/* https://abqunplugged.com/:splat 301!
-
-# SPA fallback — all paths serve index.html
-/*    /index.html   200
