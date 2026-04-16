@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { fetchEvents, fetchRecentlyAdded, NormalizedEvent } from '@/lib/events'
+import { fetchEvents, fetchRecentlyAdded, fetchFeaturedEvents, NormalizedEvent } from '@/lib/events'
 import { getHeroImage, getCategoryFallback } from '@/lib/fallback-images'
 import { MapPin, ArrowRight } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
@@ -50,11 +50,12 @@ const websiteJsonLd = {
 }
 
 export default async function DiscoverPage() {
-  const [tonight, tomorrow, weekend, featured, justAdded] = await Promise.all([
+  const [tonight, tomorrow, weekend, allUpcoming, featured, justAdded] = await Promise.all([
     fetchEvents({ timeFilter: 'tonight', limit: 10 }),
     fetchEvents({ timeFilter: 'tomorrow', limit: 10 }),
     fetchEvents({ timeFilter: 'this-weekend', limit: 10 }),
-    fetchEvents({ timeFilter: 'upcoming', limit: 20 }),
+    fetchEvents({ timeFilter: 'upcoming', limit: 1 }),
+    fetchFeaturedEvents(6),
     fetchRecentlyAdded(10),
   ])
 
@@ -132,6 +133,41 @@ export default async function DiscoverPage() {
         </div>
       </section>
 
+      {/* ── Editor's Picks — Featured Events ── */}
+      {featured.length > 0 && (
+        <AnimateIn animation="fade-up">
+          <section className="py-6">
+            <div className="max-w-6xl mx-auto px-4 flex items-end justify-between mb-3">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] mb-0.5 font-semibold">Editor&apos;s picks</p>
+                <h3
+                  className="text-xl font-black text-[#1a1614]"
+                  style={{ fontFamily: 'var(--font-epilogue)' }}
+                >
+                  Not to miss
+                </h3>
+              </div>
+              <Link
+                href="/events?featured=1"
+                className="text-xs font-semibold text-[#9a442d] hover:underline flex-shrink-0 flex items-center gap-1 group"
+              >
+                See all
+                <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
+
+            <div
+              className="flex gap-3 overflow-x-auto px-4 pb-2 snap-x snap-mandatory scrollbar-hide"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {featured.map((event) => (
+                <FeaturedCard key={event.id} event={event} />
+              ))}
+            </div>
+          </section>
+        </AnimateIn>
+      )}
+
       {/* ── Happening Now ── */}
       {tonight.events.length > 0 && (
         <AnimateIn animation="fade-up">
@@ -192,7 +228,7 @@ export default async function DiscoverPage() {
             className="group flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-[#9a442d] text-white font-semibold hover:bg-[#7d3725] transition-all duration-300 text-sm hover:shadow-lg hover:shadow-[#9a442d]/20"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
-            Browse All {featured.total.toLocaleString()} Events
+            Browse All {allUpcoming.total.toLocaleString()} Events
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </section>
@@ -332,6 +368,63 @@ function HorizontalCard({
       </div>
 
       {/* Info */}
+      <h4
+        className="font-bold text-[#1a1614] text-[11px] leading-tight line-clamp-2 mb-0.5 group-hover:text-[#9a442d] transition-colors"
+        style={{ fontFamily: 'var(--font-epilogue)' }}
+      >
+        {event.title}
+      </h4>
+      {event.venue && (
+        <p className="text-[10px] text-[#8a7a74] line-clamp-1 flex items-center gap-0.5">
+          <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
+          {event.venue}
+        </p>
+      )}
+    </Link>
+  )
+}
+
+// ─── Featured Card — Taller portrait card with star badge ──────────────────
+
+function FeaturedCard({ event }: { event: NormalizedEvent }) {
+  const dateStr = event.date
+    ? new Date(event.date + 'T12:00:00').toLocaleDateString('en-US', {
+        weekday: 'short', month: 'short', day: 'numeric',
+      })
+    : null
+
+  return (
+    <Link
+      href={`/events/${event.id}`}
+      className="group flex-shrink-0 w-[180px] snap-start"
+    >
+      <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] mb-1.5 shadow-sm group-hover:shadow-md transition-shadow duration-300">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
+          alt=""
+          loading="lazy"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+        />
+        {/* Star badge */}
+        <div className="absolute top-2 left-2 bg-[#9a442d] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+          ★ Featured
+        </div>
+        {/* Price */}
+        {event.price && (
+          <div className="absolute bottom-1.5 right-1.5 bg-[#006a62]/90 backdrop-blur-sm text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
+            {event.price}
+          </div>
+        )}
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+        {/* Date on image */}
+        {dateStr && (
+          <div className="absolute bottom-2 left-2 text-white text-[10px] font-semibold">
+            {dateStr}
+          </div>
+        )}
+      </div>
       <h4
         className="font-bold text-[#1a1614] text-[11px] leading-tight line-clamp-2 mb-0.5 group-hover:text-[#9a442d] transition-colors"
         style={{ fontFamily: 'var(--font-epilogue)' }}
