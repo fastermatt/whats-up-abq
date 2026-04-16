@@ -19,18 +19,35 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const event = await fetchEventById(id)
   if (!event) return { title: 'Event Not Found' }
 
-  const description = event.description
-    ?? `${event.title} at ${event.venue ?? 'Albuquerque'} — ${formatDateLong(event.date)}`
+  const dateStr = formatDateLong(event.date)
+  const venueStr = event.venue ?? 'Albuquerque, NM'
+  const description = (
+    event.description
+    ?? `${event.title} at ${venueStr} — ${dateStr}. Find tickets and event details on ABQ Unplugged.`
+  ).slice(0, 160)
 
   const ogImage = event.imageUrl || getCategoryFallback(event.category ?? undefined, id)
+  const canonicalUrl = `https://abqunplugged.com/events/${id}`
 
   return {
-    title: event.title,
-    description: description.slice(0, 160),
+    title: `${event.title} — ${dateStr} | ABQ Unplugged`,
+    description,
     openGraph: {
-      title: event.title,
-      description: description.slice(0, 160),
-      ...(ogImage ? { images: [{ url: ogImage }] } : {}),
+      title: `${event.title} — ${dateStr}`,
+      description,
+      url: canonicalUrl,
+      type: 'article',
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: `${event.title} at ${venueStr}`,
+        },
+      ],
+    },
+    alternates: {
+      canonical: canonicalUrl,
     },
   }
 }
@@ -48,38 +65,54 @@ export default async function EventDetailPage({ params }: PageProps) {
     ? `${event.date}T12:00:00-06:00`
     : event.date
 
+  const eventImage = event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)
+
+  // Parse price for structured data
+  const rawPrice = event.price
+  let offerPrice: string | undefined
+  let isFree = false
+  if (rawPrice) {
+    if (rawPrice.toLowerCase() === 'free' || rawPrice === '$0') {
+      isFree = true
+      offerPrice = '0'
+    } else {
+      // Extract first numeric value from strings like "$15–$40" or "From $12"
+      const match = rawPrice.replace(/,/g, '').match(/[\d]+(?:\.\d+)?/)
+      if (match) offerPrice = match[0]
+    }
+  }
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Event',
     name: event.title,
     startDate,
+    eventStatus: 'https://schema.org/EventScheduled',
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     ...(event.description ? { description: event.description } : {}),
-    ...(event.imageUrl ? { image: event.imageUrl } : {}),
+    image: eventImage,
+    url: `https://abqunplugged.com/events/${event.id}`,
     location: {
       '@type': 'Place',
       name: event.venue ?? 'Albuquerque, NM',
       address: {
         '@type': 'PostalAddress',
+        ...(event.address ? { streetAddress: event.address } : {}),
         addressLocality: event.city ?? 'Albuquerque',
         addressRegion: 'NM',
         addressCountry: 'US',
-        ...(event.address ? { streetAddress: event.address } : {}),
       },
     },
-    ...(event.ticketUrl
-      ? {
-          offers: {
-            '@type': 'Offer',
-            url: event.ticketUrl,
-            availability: 'https://schema.org/InStock',
-            ...(event.price && event.price !== 'Free'
-              ? { price: event.price.replace(/[^0-9.]/g, '').split('–')[0], priceCurrency: 'USD' }
-              : event.price === 'Free'
-              ? { price: '0', priceCurrency: 'USD' }
-              : {}),
-          },
-        }
-      : {}),
+    offers: {
+      '@type': 'Offer',
+      url: event.ticketUrl ?? `https://abqunplugged.com/events/${event.id}`,
+      availability: 'https://schema.org/InStock',
+      validFrom: new Date().toISOString().slice(0, 10),
+      ...(offerPrice !== undefined
+        ? { price: offerPrice, priceCurrency: 'USD' }
+        : {}),
+      ...(isFree ? { category: 'primary' } : {}),
+    },
     organizer: {
       '@type': 'Organization',
       name: 'ABQ Unplugged',

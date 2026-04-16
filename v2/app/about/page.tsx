@@ -4,7 +4,18 @@ import { ArrowLeft } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
 
 export const metadata: Metadata = {
-  title: 'About | ABQ Unplugged',
+  title: 'About ABQ Unplugged — Albuquerque Event Discovery',
+  description:
+    'ABQ Unplugged aggregates every event in the greater Albuquerque, NM area — concerts, comedy, sports, arts, and food festivals — from Ticketmaster, Eventbrite, SeatGeek, and local listings.',
+  openGraph: {
+    title: 'About ABQ Unplugged — Albuquerque Event Discovery',
+    description:
+      'ABQ Unplugged aggregates every event in the greater Albuquerque, NM area — concerts, comedy, sports, arts, and food festivals — from Ticketmaster, Eventbrite, SeatGeek, and local listings.',
+    url: 'https://abqunplugged.com/about',
+  },
+  alternates: {
+    canonical: 'https://abqunplugged.com/about',
+  },
 }
 
 export const revalidate = false

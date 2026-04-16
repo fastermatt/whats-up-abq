@@ -1,10 +1,53 @@
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { fetchEvents, NormalizedEvent } from '@/lib/events'
 import { getHeroImage, getCategoryFallback } from '@/lib/fallback-images'
 import { MapPin, ArrowRight } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
 
 export const revalidate = 60
+
+export const metadata: Metadata = {
+  title: 'ABQ Unplugged — Things to Do in Albuquerque, NM',
+  description:
+    'Discover the best events in Albuquerque, NM — concerts, comedy, arts, sports, food & drink festivals. ' +
+    'Find things to do in ABQ tonight, this weekend, and beyond. Every ticket source in one place.',
+  openGraph: {
+    title: 'ABQ Unplugged — Things to Do in Albuquerque, NM',
+    description:
+      'Discover the best events in Albuquerque, NM — concerts, comedy, arts, sports, food & drink festivals. ' +
+      'Find things to do in ABQ tonight, this weekend, and beyond.',
+    url: 'https://abqunplugged.com',
+    images: [
+      {
+        url: 'https://cdn.midjourney.com/fb77c641/0_0.jpeg',
+        width: 1200,
+        height: 630,
+        alt: 'Albuquerque events — ABQ Unplugged',
+      },
+    ],
+  },
+  alternates: {
+    canonical: 'https://abqunplugged.com',
+  },
+}
+
+const websiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'ABQ Unplugged',
+  url: 'https://abqunplugged.com',
+  description:
+    'Discover the best events in Albuquerque, NM — concerts, comedy, arts, sports, food & drink festivals.',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: 'https://abqunplugged.com/events?q={search_term_string}',
+    },
+    'query-input': 'required name=search_term_string',
+  },
+}
 
 export default async function DiscoverPage() {
   const [tonight, tomorrow, weekend, featured] = await Promise.all([
@@ -24,6 +67,13 @@ export default async function DiscoverPage() {
 
   return (
     <main className="min-h-dvh bg-[--bg]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
+      {/* SEO h1 — visually hidden, provides primary keyword signal */}
+      <h1 className="sr-only">Events in Albuquerque, NM — Things to Do in ABQ</h1>
+
       {/* ── Hero ── */}
       <section className="relative overflow-hidden text-white">
         {/* Hero background image (rotates daily) */}
@@ -42,12 +92,12 @@ export default async function DiscoverPage() {
           {/* Top bar */}
           <div className="flex items-center justify-between mb-8 animate-slide-down">
             <div>
-              <h1
+              <p
                 className="text-2xl font-black tracking-tight"
                 style={{ fontFamily: 'var(--font-epilogue)' }}
               >
                 ABQ Unplugged
-              </h1>
+              </p>
               <p className="text-[11px] text-white/50 tracking-wide uppercase">Greater Albuquerque</p>
             </div>
             <Link

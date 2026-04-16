@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { fetchEvents, fetchCategoryCounts, NormalizedEvent } from '@/lib/events'
 import { TimeFilter } from '@/lib/utils/dates'
 import { getCategoryFallback } from '@/lib/fallback-images'
@@ -11,6 +12,80 @@ export const revalidate = 60
 
 interface PageProps {
   searchParams: Promise<{ time?: string; category?: string; page?: string; q?: string; free?: string; price?: string }>
+}
+
+const CATEGORY_TITLES: Record<string, string> = {
+  Music:      'Music Events',
+  Comedy:     'Comedy Shows',
+  Sports:     'Sports Events',
+  Arts:       'Arts & Culture Events',
+  Food:       'Food & Drink Events',
+  Family:     'Family Events',
+  Nightlife:  'Nightlife Events',
+  Community:  'Community Events',
+  Film:       'Film & Cinema Events',
+}
+
+const TIME_TITLE_MAP: Record<string, string> = {
+  tonight:        'Tonight',
+  tomorrow:       'Tomorrow',
+  'this-weekend': 'This Weekend',
+  'this-week':    'This Week',
+  upcoming:       'Upcoming',
+}
+
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+  const params = await searchParams
+  const category = params.category
+  const time = params.time
+  const q = params.q?.trim()
+
+  const categoryLabel = category ? (CATEGORY_TITLES[category] ?? `${category} Events`) : null
+  const timeLabel = time ? TIME_TITLE_MAP[time] : null
+
+  let title: string
+  let description: string
+
+  if (q) {
+    title = `"${q}" Events in Albuquerque, NM`
+    description = `Search results for "${q}" — find upcoming events in Albuquerque, NM on ABQ Unplugged.`
+  } else if (categoryLabel && timeLabel) {
+    title = `${timeLabel} ${categoryLabel} in Albuquerque, NM`
+    description = `${timeLabel} ${categoryLabel.toLowerCase()} in Albuquerque, NM. Find tickets and event details on ABQ Unplugged.`
+  } else if (categoryLabel) {
+    title = `${categoryLabel} in Albuquerque, NM`
+    description = `Upcoming ${categoryLabel.toLowerCase()} in Albuquerque, NM. Concerts, shows, and more — find tickets on ABQ Unplugged.`
+  } else if (timeLabel) {
+    title = `${timeLabel}'s Events in Albuquerque, NM`
+    description = `${timeLabel}'s events in Albuquerque, NM — concerts, comedy, sports, arts, food & drink. Find tickets on ABQ Unplugged.`
+  } else {
+    title = 'Events in Albuquerque, NM — Things to Do in ABQ'
+    description =
+      'Browse all upcoming events in Albuquerque, NM — concerts, comedy shows, sports, arts, food festivals, and more. Find tickets from Ticketmaster, Eventbrite, SeatGeek and more, all in one place.'
+  }
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: 'https://abqunplugged.com/events',
+      images: [
+        {
+          url: 'https://cdn.midjourney.com/fb77c641/0_0.jpeg',
+          width: 1200,
+          height: 630,
+          alt: 'Events in Albuquerque, NM — ABQ Unplugged',
+        },
+      ],
+    },
+    alternates: {
+      canonical: `https://abqunplugged.com/events${
+        category ? `?category=${encodeURIComponent(category)}` : ''
+      }`,
+    },
+  }
 }
 
 export default async function EventsPage({ searchParams }: PageProps) {
