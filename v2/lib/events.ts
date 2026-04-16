@@ -210,6 +210,29 @@ export async function fetchEvents({
   return { events, total: count ?? 0 }
 }
 
+/** Fetch admin-featured upcoming events (featured=true in DB). */
+export async function fetchFeaturedEvents(limit = 6): Promise<NormalizedEvent[]> {
+  const supabase = await createClient()
+  const today = new Date().toISOString().slice(0, 10)
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .schema('public')
+    .from('events')
+    .select('id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden')
+    .eq('hidden', false)
+    .eq('featured', true)
+    .gte('event_date', today)
+    .order('event_date', { ascending: true })
+    .limit(limit)
+
+  if (error) return []
+
+  return ((data ?? []) as RawEventRow[])
+    .map(normalizeRow)
+    .filter((e): e is NormalizedEvent => e !== null)
+}
+
 /** Fetch upcoming events at a specific venue (case-insensitive partial match on venue name). */
 export async function fetchEventsByVenue(venueName: string, limit = 20): Promise<NormalizedEvent[]> {
   const supabase = await createClient()
