@@ -6,6 +6,7 @@ import { getCategoryFallback } from '@/lib/fallback-images'
 import { MapPin, Clock, Calendar, Ticket, ArrowLeft, ExternalLink, Share2 } from 'lucide-react'
 import ShareButton from './ShareButton'
 import { AnimateIn } from '@/app/components/AnimateIn'
+import { ReportForm } from '@/app/components/ReportForm'
 
 export const revalidate = 60
 
@@ -197,10 +198,13 @@ export default async function EventDetailPage({ params }: PageProps) {
           <ShareButton title={event.title} />
         </div>
 
-        {/* Source attribution */}
-        <p className="text-[10px] text-[#8a7a74]">
-          Source: {event.source.charAt(0).toUpperCase() + event.source.slice(1)}
-        </p>
+        {/* Source + report */}
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] text-[#8a7a74]">
+            Source: {event.source.charAt(0).toUpperCase() + event.source.slice(1)}
+          </p>
+          <ReportForm eventId={event.id} eventTitle={event.title} />
+        </div>
       </article>
 
       {/* ── Similar Events ── */}

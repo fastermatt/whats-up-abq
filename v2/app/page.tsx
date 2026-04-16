@@ -230,7 +230,7 @@ function HorizontalCard({
   return (
     <Link
       href={`/events/${event.id}`}
-      className="group flex-shrink-0 w-[220px] snap-start"
+      className="group flex-shrink-0 w-[220px] snap-start scroll-reveal-slide"
     >
       {/* Landscape image */}
       <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] mb-1.5 shadow-sm group-hover:shadow-md transition-shadow duration-300">
