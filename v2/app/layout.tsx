@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Epilogue, Inter, Space_Grotesk } from 'next/font/google'
 import Script from 'next/script'
 import BottomNav from './components/BottomNav'
+import DesktopNav from './components/DesktopNav'
 import './globals.css'
 
 const epilogue = Epilogue({
@@ -91,6 +92,7 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-[#fbf7f1] text-[#1a1614] min-h-full flex flex-col">
+        <DesktopNav />
         <div className="pb-20 md:pb-0">{children}</div>
         <BottomNav />
 

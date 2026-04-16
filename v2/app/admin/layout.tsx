@@ -1,10 +1,20 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { LogoutButton } from './LogoutButton'
 
 export const metadata = { title: 'Admin | ABQ Unplugged' }
 
-export default function AdminLayout({ children }: { children: ReactNode }) {
+export default async function AdminLayout({ children }: { children: ReactNode }) {
+  // Verify admin token in Node.js runtime (process.env is reliable here)
+  const cookieStore = await cookies()
+  const token = cookieStore.get('admin_token')?.value
+  const secret = process.env.ADMIN_SECRET
+
+  if (!secret || token !== secret) {
+    redirect('/admin/login')
+  }
   return (
     <div className="min-h-dvh bg-[#1a1614] text-white">
       <nav className="border-b border-white/10 px-6 py-3 flex items-center gap-6 sticky top-0 bg-[#1a1614]/95 backdrop-blur z-10">
