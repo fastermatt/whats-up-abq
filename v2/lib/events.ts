@@ -35,6 +35,7 @@ export interface FetchEventsOptions {
   timeFilter?: TimeFilter
   category?: CategoryFilter
   search?: string
+  freeOnly?: boolean
   limit?: number
   offset?: number
 }
@@ -98,6 +99,7 @@ export async function fetchEvents({
   timeFilter = 'upcoming',
   category,
   search,
+  freeOnly = false,
   limit = 24,
   offset = 0,
 }: FetchEventsOptions = {}): Promise<FetchEventsResult> {
@@ -105,7 +107,7 @@ export async function fetchEvents({
   const { gte, lte } = getTimeRange(timeFilter)
 
   const COLS = 'id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden'
-  const needsInMemory = !!(category || search)
+  const needsInMemory = !!(category || search || freeOnly)
 
   // When filtering by category or search we must normalize first (category is inside raw JSON,
   // different field per source), so fetch all rows for the time range then filter/paginate.
@@ -150,6 +152,12 @@ export async function fetchEvents({
         const haystack = `${e.title} ${e.venue ?? ''} ${e.category ?? ''} ${e.subcategory ?? ''} ${e.description ?? ''}`.toLowerCase()
         return terms.every((t) => haystack.includes(t))
       })
+    }
+
+    if (freeOnly) {
+      allNormalized = allNormalized.filter(
+        (e) => e.price?.toLowerCase() === 'free' || e.price === null
+      )
     }
 
     return {
@@ -206,14 +214,22 @@ export async function fetchEventById(id: string): Promise<NormalizedEvent | null
 
 function normalizeRow(row: RawEventRow): NormalizedEvent | null {
   try {
+    let evt: NormalizedEvent | null
     switch (row.source) {
-      case 'ticketmaster': return normalizeTM(row)
-      case 'eventbrite':   return normalizeEB(row)
-      case 'seatgeek':     return normalizeSG(row)
-      case 'bandsintown':  return normalizeBIT(row)
-      case 'local':        return normalizeLocal(row)
-      default:             return normalizeGeneric(row)
+      case 'ticketmaster': evt = normalizeTM(row); break
+      case 'eventbrite':   evt = normalizeEB(row); break
+      case 'seatgeek':     evt = normalizeSG(row); break
+      case 'bandsintown':  evt = normalizeBIT(row); break
+      case 'local':        evt = normalizeLocal(row); break
+      default:             evt = normalizeGeneric(row)
     }
+    // Apply ai_enrichment overrides (from LLM enrichment pass)
+    if (evt && row.ai_enrichment) {
+      const ai = row.ai_enrichment as Record<string, unknown>
+      if (typeof ai.category === 'string') evt.category = ai.category
+      if (typeof ai.subcategory === 'string') evt.subcategory = ai.subcategory
+    }
+    return evt
   } catch {
     return null
   }
@@ -310,37 +326,52 @@ function normalizeEB(row: RawEventRow): NormalizedEvent {
 
 function normalizeSG(row: RawEventRow): NormalizedEvent {
   const r = row.raw as Record<string, unknown>
-  const venue = r.venue as Record<string, unknown> | undefined
-  const performers = r.performers as Array<Record<string, unknown>> | undefined
-  const stats = r.stats as Record<string, unknown> | undefined
 
-  const minPrice = stats?.lowest_price as number | undefined
-  const avgPrice = stats?.average_price as number | undefined
+  // SeatGeek events were ingested in TM-compatible format (name, _embedded, classifications)
+  const embedded = r._embedded as Record<string, unknown> | undefined
+  const venues = embedded?.venues as Array<Record<string, unknown>> | undefined
+  const v = venues?.[0] ?? null
+  const classifications = r.classifications as Array<Record<string, unknown>> | undefined
+  const priceRanges = r.priceRanges as Array<Record<string, unknown>> | undefined
+  const images = r.images as Array<Record<string, unknown>> | undefined
+
+  const minPrice = priceRanges?.[0]?.min as number | undefined
+  const maxPrice = priceRanges?.[0]?.max as number | undefined
   let priceStr: string | null = null
-  if (minPrice != null) priceStr = `From $${Math.round(minPrice)}`
-  else if (avgPrice != null) priceStr = `~$${Math.round(avgPrice)}`
+  if (minPrice != null && maxPrice != null) {
+    priceStr = minPrice === maxPrice
+      ? `$${Math.round(minPrice)}`
+      : `$${Math.round(minPrice)}–$${Math.round(maxPrice)}`
+  } else if (minPrice != null) {
+    priceStr = `From $${Math.round(minPrice)}`
+  }
 
-  const dtLocal = r.datetime_local as string | undefined
+  const segment = (classifications?.[0]?.segment as Record<string, unknown> | undefined)?.name as string | undefined
+  const genre = (classifications?.[0]?.genre as Record<string, unknown> | undefined)?.name as string | undefined
+  const title = (r.name as string | undefined) ?? 'Untitled Event'
+
+  const startObj = (r.dates as Record<string, unknown> | undefined)?.start as Record<string, unknown> | undefined
+  const startTime = startObj?.dateTime as string | undefined
+  const startDate = startObj?.localDate as string | undefined
+  const startLocal = startObj?.localTime as string | undefined
+
+  const image = row.cached_photo_url
+    ?? images?.find(i => i.ratio === '16_9' && (i.width as number) >= 640)?.url as string | undefined
+    ?? images?.[0]?.url as string | undefined
+    ?? null
 
   return {
     id: row.id,
-    title: (r.title as string) ?? (r.short_title as string) ?? 'Untitled Event',
-    date: row.event_date ?? dtLocal ?? '',
-    time: dtLocal ? formatTime(dtLocal) : null,
-    venue: (venue?.name as string | undefined) ?? null,
-    address: venue
-      ? [venue.address, venue.city].filter(Boolean).join(', ') || null
-      : null,
-    city: (venue?.city as string | undefined) ?? null,
-    ...mapCategory(
-      (r.type as string | undefined),
-      (r.title as string) ?? (r.short_title as string)
-    ),
-    description: null,
+    title,
+    date: row.event_date ?? startDate ?? startTime ?? '',
+    time: startLocal ? formatTime(`${startDate ?? ''}T${startLocal}`) : startTime ? formatTime(startTime) : null,
+    venue: (v?.name as string | undefined) ?? null,
+    address: v ? buildTMAddress(v) : null,
+    city: (v?.city as Record<string, unknown> | undefined)?.name as string | null ?? null,
+    ...mapCategory(segment, genre ?? title),
+    description: (r.info as string | undefined)?.slice(0, 300) ?? null,
     price: priceStr,
-    imageUrl: row.cached_photo_url
-      ?? (performers?.[0]?.image as string | undefined)
-      ?? null,
+    imageUrl: (image as string | null) ?? null,
     ticketUrl: (r.url as string | undefined) ?? null,
     source: 'seatgeek',
     isFeatured: row.featured ?? false,
@@ -517,15 +548,25 @@ function mapCategory(segment?: string, genre?: string): CategoryResult {
   ])) return { category: 'Comedy', subcategory: null }
 
   // ── Music ───────────────────────────────────────────────────────────────
+  const musicSubcategoryMap: Record<string, string> = {
+    'rock': 'Rock', 'alternative': 'Alternative', 'indie': 'Indie',
+    'pop': 'Pop', 'country': 'Country', 'jazz': 'Jazz',
+    'hip-hop': 'Hip-Hop', 'rap': 'Hip-Hop', 'r&b': 'R&B', 'soul': 'Soul',
+    'edm': 'Electronic', 'electronic': 'Electronic', 'electronica': 'Electronic',
+    'latin': 'Latin', 'reggae': 'Reggae', 'folk': 'Folk', 'bluegrass': 'Folk',
+    'metal': 'Metal', 'punk': 'Rock', 'blues': 'Blues', 'classical': 'Classical',
+    'symphony': 'Classical',
+  }
+  const musicSub = Object.entries(musicSubcategoryMap).find(([k]) => g.includes(k))?.[1] ?? null
   if (anyWord(s, ['music'])
     || anyWord(both, ['concert', 'live music', 'dj set'])
     || anyWord(g, [
       'rock', 'pop', 'country', 'jazz', 'hip-hop', 'r&b', 'edm', 'electronic',
       'latin', 'reggae', 'soul', 'folk', 'bluegrass', 'metal', 'punk',
       'singer', 'songwriter', 'mariachi', 'cumbia', 'salsa', 'norteño',
-      'reggaeton', 'classical', 'symphony',
+      'reggaeton', 'classical', 'symphony', 'blues', 'alternative', 'indie',
     ])
-  ) return { category: 'Music', subcategory: null }
+  ) return { category: 'Music', subcategory: musicSub }
 
   // ── Sports — with subcategories per strategy doc taxonomy ───────────────
   // Check specific teams/sports first for subcategory, then generic "sports"

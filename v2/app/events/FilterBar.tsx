@@ -42,18 +42,29 @@ const SPORTS_SUBS = [
   'Rodeo',
 ]
 
+/** Music subcategories (from Gemma enrichment + TM genre data) */
+const MUSIC_SUBS = [
+  'Rock', 'Pop', 'Country', 'Hip-Hop', 'Electronic', 'Metal',
+  'R&B', 'Jazz', 'Folk', 'Soul', 'Blues', 'Latin', 'Classical',
+  'Alternative', 'Indie',
+]
+
 interface FilterBarProps {
   currentTime: string
   currentCategory: string
+  freeOnly?: boolean
   categoryCounts?: CategoryCount[]
 }
 
-export function FilterBar({ currentTime, currentCategory, categoryCounts = [] }: FilterBarProps) {
+export function FilterBar({ currentTime, currentCategory, freeOnly = false, categoryCounts = [] }: FilterBarProps) {
   const countMap = Object.fromEntries(categoryCounts.map((c) => [c.category, c.count]))
   const router = useRouter()
   const searchParams = useSearchParams()
   const [sportsExpanded, setSportsExpanded] = useState(
     currentCategory.startsWith('Sports')
+  )
+  const [musicExpanded, setMusicExpanded] = useState(
+    currentCategory.startsWith('Music')
   )
 
   const setFilter = useCallback(
@@ -69,6 +80,17 @@ export function FilterBar({ currentTime, currentCategory, categoryCounts = [] }:
     },
     [router, searchParams]
   )
+
+  const toggleFree = useCallback(() => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (freeOnly) {
+      params.delete('free')
+    } else {
+      params.set('free', '1')
+    }
+    params.delete('page')
+    router.push(`/events?${params.toString()}`, { scroll: false })
+  }, [router, searchParams, freeOnly])
 
   const handleSportsClick = () => {
     if (currentCategory === 'Sports' || currentCategory.startsWith('Sports > ')) {
@@ -101,6 +123,17 @@ export function FilterBar({ currentTime, currentCategory, categoryCounts = [] }:
             </button>
           )
         })}
+        {/* Free events toggle */}
+        <button
+          onClick={toggleFree}
+          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+            freeOnly
+              ? 'bg-[#4f6249] text-white'
+              : 'bg-white border border-[#ddc9a3] text-[#4a3f3a] hover:border-[#4f6249] hover:text-[#4f6249]'
+          }`}
+        >
+          Free
+        </button>
       </div>
 
       {/* Category filter */}
@@ -117,15 +150,32 @@ export function FilterBar({ currentTime, currentCategory, categoryCounts = [] }:
         </button>
         {CATEGORIES.map((cat) => {
           const isSports = cat === 'Sports'
+          const isMusic = cat === 'Music'
           const isActive = isSports
             ? currentCategory === 'Sports' || currentCategory.startsWith('Sports > ')
+            : isMusic
+            ? currentCategory === 'Music' || currentCategory.startsWith('Music > ')
             : currentCategory === cat
           const count = countMap[cat]
+
+          const handleClick = () => {
+            if (isSports) return handleSportsClick()
+            if (isMusic) {
+              if (currentCategory === 'Music' || currentCategory.startsWith('Music > ')) {
+                setMusicExpanded(!musicExpanded)
+              } else {
+                setFilter('category', 'Music')
+                setMusicExpanded(true)
+              }
+              return
+            }
+            setFilter('category', cat)
+          }
 
           return (
             <button
               key={cat}
-              onClick={() => isSports ? handleSportsClick() : setFilter('category', cat)}
+              onClick={handleClick}
               className={`px-3 py-1 rounded-full text-xs font-medium transition-colors inline-flex items-center gap-1 ${
                 isActive
                   ? 'bg-[#006a62] text-white'
@@ -138,15 +188,45 @@ export function FilterBar({ currentTime, currentCategory, categoryCounts = [] }:
                   {count}
                 </span>
               )}
-              {isSports && (
-                sportsExpanded
-                  ? <ChevronUp className="w-3 h-3" />
-                  : <ChevronDown className="w-3 h-3" />
-              )}
+              {isSports && (sportsExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)}
+              {isMusic && (musicExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)}
             </button>
           )
         })}
       </div>
+
+      {/* Music subcategory chips — expandable */}
+      {musicExpanded && (
+        <div className="flex flex-wrap gap-1.5 pl-2 animate-fade-in">
+          <button
+            onClick={() => setFilter('category', 'Music')}
+            className={`px-2.5 py-0.5 rounded-full text-[10px] font-medium transition-colors ${
+              currentCategory === 'Music'
+                ? 'bg-[#006a62]/80 text-white'
+                : 'bg-[#f0e4cc]/60 border border-[#ddc9a3]/60 text-[#4a3f3a] hover:border-[#006a62] hover:text-[#006a62]'
+            }`}
+          >
+            All Music
+          </button>
+          {MUSIC_SUBS.map((sub) => {
+            const filterValue = `Music > ${sub}`
+            const isActive = currentCategory === filterValue
+            return (
+              <button
+                key={sub}
+                onClick={() => setFilter('category', filterValue)}
+                className={`px-2.5 py-0.5 rounded-full text-[10px] font-medium transition-colors ${
+                  isActive
+                    ? 'bg-[#006a62]/80 text-white'
+                    : 'bg-[#f0e4cc]/60 border border-[#ddc9a3]/60 text-[#4a3f3a] hover:border-[#006a62] hover:text-[#006a62]'
+                }`}
+              >
+                {sub}
+              </button>
+            )
+          })}
+        </div>
+      )}
 
       {/* Sports subcategory chips — expandable */}
       {sportsExpanded && (
