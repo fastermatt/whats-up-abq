@@ -35,13 +35,31 @@ import time
 import requests
 from pathlib import Path
 
+def _load_env(env_file):
+    """Load key=value pairs from a .env file into os.environ (if file exists)."""
+    p = Path(env_file)
+    if not p.exists():
+        return
+    for line in p.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith('#') or '=' not in line:
+            continue
+        k, _, v = line.partition('=')
+        k = k.strip()
+        v = v.strip().strip('"').strip("'")
+        if k and k not in os.environ:
+            os.environ[k] = v
+
+# Load secrets from scripts/.env (ignored by git)
+_load_env(Path(__file__).parent / '.env')
+
 # ─────────────────────────────────────────────────────────────────────────────
-#  CONFIG — fill these in before running
+#  CONFIG — set these in scripts/.env or environment before running
 # ─────────────────────────────────────────────────────────────────────────────
-YELP_API_KEY    = "oEGvo6sHhqQ1S0Loc9btHrkfc4C52Fku68rd0W28WvhK8Gz1nARRj_6fsSB0BPs5uEDDNUwFSRyGtIS8UI4LlBfip0F7APcMOJ6yloWz0bUWZeUpjoHVYq42tChXaHYx"
-GEMINI_API_KEY  = "AIzaSyAcmNEKqnuBWKuP1_lXohlwORk-nR5yUaU"
-SUPABASE_URL    = "https://bsmvfutebmbkjvlrhiyq.supabase.co"
-SUPABASE_KEY    = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbXZmdXRlYm1ia2p2bHJoaXlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMzgwMzIsImV4cCI6MjA4OTgxNDAzMn0.3rvMRErlF-HnKfbJ6rCNSeCJc39n4K48xjAeSGqf_rc"
+YELP_API_KEY    = os.getenv('YELP_API_KEY', '')
+GEMINI_API_KEY  = os.getenv('GEMINI_API_KEY', '')
+SUPABASE_URL    = os.getenv('SUPABASE_URL', 'https://bsmvfutebmbkjvlrhiyq.supabase.co')
+SUPABASE_KEY    = os.getenv('NEXT_PUBLIC_SUPABASE_ANON_KEY') or os.getenv('SUPABASE_ANON_KEY', '')
 BUCKET          = "place-photos"
 # ─────────────────────────────────────────────────────────────────────────────
 

@@ -26,16 +26,34 @@ USAGE:
 """
 
 import sys
+import os
 import json
 import time
 import requests
 from pathlib import Path
 
+def _load_env(env_file):
+    """Load key=value pairs from a .env file into os.environ (if file exists)."""
+    p = Path(env_file)
+    if not p.exists():
+        return
+    for line in p.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith('#') or '=' not in line:
+            continue
+        k, _, v = line.partition('=')
+        k = k.strip()
+        v = v.strip().strip('"').strip("'")
+        if k and k not in os.environ:
+            os.environ[k] = v
+
+_load_env(Path(__file__).parent / '.env')
+
 # ─────────────────────────────────────────────────────────────────────────────
-#  CONFIG
+#  CONFIG — set these in scripts/.env or environment before running
 # ─────────────────────────────────────────────────────────────────────────────
-SUPABASE_URL  = "https://bsmvfutebmbkjvlrhiyq.supabase.co"
-SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbXZmdXRlYm1ia2p2bHJoaXlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMzgwMzIsImV4cCI6MjA4OTgxNDAzMn0.3rvMRErlF-HnKfbJ6rCNSeCJc39n4K48xjAeSGqf_rc"
+SUPABASE_URL  = os.getenv('SUPABASE_URL', 'https://bsmvfutebmbkjvlrhiyq.supabase.co')
+SUPABASE_KEY  = os.getenv('NEXT_PUBLIC_SUPABASE_ANON_KEY') or os.getenv('SUPABASE_ANON_KEY', '')
 BUCKET        = "event-photos"
 # ─────────────────────────────────────────────────────────────────────────────
 
