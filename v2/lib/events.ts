@@ -67,6 +67,9 @@ interface RawEventRow {
   hidden: boolean | null
   neighborhood: string | null
   venue_slug: string | null
+  // Denormalized columns added 2026-04-16 for egress reduction
+  category?: string | null
+  venue_name?: string | null
 }
 
 // ─── Category counts ──────────────────────────────────────────────────────────
@@ -76,7 +79,8 @@ export interface CategoryCount {
   count: number
 }
 
-/** Returns event counts per top-level category for the upcoming time range. */
+/** Returns event counts per top-level category for the upcoming time range.
+ *  Uses the denormalized `category` column — no raw JSONB fetched. */
 export async function fetchCategoryCounts(): Promise<CategoryCount[]> {
   const supabase = await createClient()
   const today = new Date().toISOString().slice(0, 10)
@@ -85,18 +89,14 @@ export async function fetchCategoryCounts(): Promise<CategoryCount[]> {
   const { data } = await (supabase as any)
     .schema('public')
     .from('events')
-    .select('source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden')
+    .select('category')
     .eq('hidden', false)
     .gte('event_date', today)
-    .order('event_date', { ascending: true })
 
   const counts: Record<string, number> = {}
-  for (const row of (data ?? []) as RawEventRow[]) {
-    try {
-      const evt = normalizeRow(row)
-      if (!evt?.category) continue
-      counts[evt.category] = (counts[evt.category] ?? 0) + 1
-    } catch { /* skip */ }
+  for (const row of (data ?? []) as { category: string | null }[]) {
+    if (!row.category) continue
+    counts[row.category] = (counts[row.category] ?? 0) + 1
   }
 
   return Object.entries(counts)
@@ -105,6 +105,9 @@ export async function fetchCategoryCounts(): Promise<CategoryCount[]> {
 }
 
 // ─── Main fetch function ──────────────────────────────────────────────────────
+
+// Columns for queries that need full normalisation (includes raw JSONB)
+const COLS = 'id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, neighborhood, venue_slug, category, venue_name'
 
 export async function fetchEvents({
   timeFilter = 'upcoming',
@@ -118,104 +121,103 @@ export async function fetchEvents({
   const supabase = await createClient()
   const { gte, lte } = getTimeRange(timeFilter)
 
-  const COLS = 'id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, neighborhood, venue_slug'
-  const needsInMemory = !!(category || search || freeOnly || maxPrice !== undefined)
+  // Parse category filter — top-level ("Music") vs subcategory ("Sports > Baseball")
+  const topLevelCat = category
+    ? (category.includes(' > ') ? category.split(' > ')[0] : category)
+    : null
+  const subCat = category?.includes(' > ') ? category.split(' > ')[1] : null
 
-  // When filtering by category or search we must normalize first (category is inside raw JSON,
-  // different field per source), so fetch all rows for the time range then filter/paginate.
-  if (needsInMemory) {
+  // In-memory filtering is needed for: subcategory, search, freeOnly, maxPrice.
+  // When only a top-level category is given, we can do pure DB pagination.
+  const needsInMemory = !!(subCat || search || freeOnly || maxPrice !== undefined)
+
+  if (!needsInMemory) {
+    // ── Pure DB path: category filter + pagination in DB (no raw scan) ─────────
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let q = (supabase as any)
+    let query = (supabase as any)
       .schema('public')
       .from('events')
-      .select(COLS)
+      .select(COLS, { count: 'exact' })
       .eq('hidden', false)
       .gte('event_date', gte)
       .order('event_date', { ascending: true })
-    if (lte) q = q.lte('event_date', lte)
 
-    const { data, error } = await q
+    if (lte) query = query.lte('event_date', lte)
+    if (topLevelCat) query = query.eq('category', topLevelCat)
+
+    const { data, error, count } = await query.range(offset, offset + limit - 1)
     if (error) {
       console.error('[fetchEvents] Supabase error:', error.message)
       return { events: [], total: 0 }
     }
-    let allNormalized = ((data ?? []) as RawEventRow[])
+
+    const events = ((data ?? []) as RawEventRow[])
       .map(normalizeRow)
       .filter((e): e is NormalizedEvent => e !== null)
-
-    if (category) {
-      // Support subcategory filtering: "Sports > Baseball" matches subcategory,
-      // "Sports" matches all sports events regardless of subcategory
-      if (category.includes(' > ')) {
-        const sub = category.split(' > ')[1]
-        allNormalized = allNormalized.filter(
-          (e) => e.subcategory?.toLowerCase() === sub.toLowerCase()
-        )
-      } else {
-        allNormalized = allNormalized.filter(
-          (e) => e.category?.toLowerCase() === category.toLowerCase()
-        )
-      }
-    }
-
-    if (search) {
-      const terms = search.toLowerCase().split(/\s+/).filter(Boolean)
-      allNormalized = allNormalized.filter((e) => {
-        const haystack = `${e.title} ${e.venue ?? ''} ${e.category ?? ''} ${e.subcategory ?? ''} ${e.description ?? ''}`.toLowerCase()
-        return terms.every((t) => haystack.includes(t))
-      })
-    }
-
-    if (freeOnly) {
-      // Only include events explicitly marked free — NOT null/unknown price events,
-      // which are usually paid events with missing price data.
-      allNormalized = allNormalized.filter((e) => {
-        const p = (e.price ?? '').toLowerCase().trim()
-        return p === 'free' || p === '$0' || p === '0'
-      })
-    }
-
-    if (maxPrice !== undefined) {
-      allNormalized = allNormalized.filter((e) => {
-        const p = parsePriceMin(e.price)
-        if (maxPrice === 0) return p === 0 || e.price === null
-        return p === null || p <= maxPrice
-      })
-    }
-
-    return {
-      events: allNormalized.slice(offset, offset + limit),
-      total: allNormalized.length,
-    }
+    return { events, total: count ?? 0 }
   }
 
-  // No category/search filter — use DB-level pagination with count for efficiency
+  // ── In-memory path: pre-filter by top-level category in DB, then filter in JS ─
+  // This still fetches raw JSONB but only for the matching category subset,
+  // dramatically reducing egress vs fetching all ~994 events.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let query = (supabase as any)
+  let q = (supabase as any)
     .schema('public')
     .from('events')
-    .select(COLS, { count: 'exact' })
+    .select(COLS)
     .eq('hidden', false)
     .gte('event_date', gte)
     .order('event_date', { ascending: true })
 
-  if (lte) {
-    query = query.lte('event_date', lte)
-  }
+  if (lte) q = q.lte('event_date', lte)
+  if (topLevelCat) q = q.eq('category', topLevelCat)  // Pre-filter cuts dataset!
 
-  const { data, error, count } = await query.range(offset, offset + limit - 1)
-
+  const { data, error } = await q
   if (error) {
     console.error('[fetchEvents] Supabase error:', error.message)
     return { events: [], total: 0 }
   }
 
-  const rows: RawEventRow[] = data ?? []
-  const events = rows
+  let allNormalized = ((data ?? []) as RawEventRow[])
     .map(normalizeRow)
     .filter((e): e is NormalizedEvent => e !== null)
 
-  return { events, total: count ?? 0 }
+  if (subCat) {
+    // Subcategory filter: "Sports > Baseball" → filter by subcategory within the category
+    allNormalized = allNormalized.filter(
+      (e) => e.subcategory?.toLowerCase() === subCat.toLowerCase()
+    )
+  }
+
+  if (search) {
+    const terms = search.toLowerCase().split(/\s+/).filter(Boolean)
+    allNormalized = allNormalized.filter((e) => {
+      const haystack = `${e.title} ${e.venue ?? ''} ${e.category ?? ''} ${e.subcategory ?? ''} ${e.description ?? ''}`.toLowerCase()
+      return terms.every((t) => haystack.includes(t))
+    })
+  }
+
+  if (freeOnly) {
+    // Only include events explicitly marked free — NOT null/unknown price events,
+    // which are usually paid events with missing price data.
+    allNormalized = allNormalized.filter((e) => {
+      const p = (e.price ?? '').toLowerCase().trim()
+      return p === 'free' || p === '$0' || p === '0'
+    })
+  }
+
+  if (maxPrice !== undefined) {
+    allNormalized = allNormalized.filter((e) => {
+      const p = parsePriceMin(e.price)
+      if (maxPrice === 0) return p === 0 || e.price === null
+      return p === null || p <= maxPrice
+    })
+  }
+
+  return {
+    events: allNormalized.slice(offset, offset + limit),
+    total: allNormalized.length,
+  }
 }
 
 /** Fetch admin-featured upcoming events (featured=true in DB). */
@@ -227,7 +229,7 @@ export async function fetchFeaturedEvents(limit = 6): Promise<NormalizedEvent[]>
   const { data, error } = await (supabase as any)
     .schema('public')
     .from('events')
-    .select('id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, neighborhood, venue_slug')
+    .select(COLS)
     .eq('hidden', false)
     .eq('featured', true)
     .gte('event_date', today)
@@ -257,7 +259,8 @@ export function neighborhoodToSlug(name: string): string {
     .replace(/^-|-$/g, '')
 }
 
-/** Fetch upcoming events in a specific neighborhood by slug */
+/** Fetch upcoming events in a specific neighborhood by slug.
+ *  Uses the generated `neighborhood_slug` DB column — no in-memory filter needed. */
 export async function fetchEventsByNeighborhood(slug: string, limit = 30): Promise<NormalizedEvent[]> {
   const supabase = await createClient()
   const today = new Date().toISOString().slice(0, 10)
@@ -266,12 +269,12 @@ export async function fetchEventsByNeighborhood(slug: string, limit = 30): Promi
   const { data, error } = await (supabase as any)
     .schema('public')
     .from('events')
-    .select('id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, neighborhood, venue_slug')
+    .select(COLS)
     .eq('hidden', false)
     .gte('event_date', today)
-    .not('neighborhood', 'is', null)
+    .eq('neighborhood_slug', slug)   // DB-level filter — no in-memory scan
     .order('event_date', { ascending: true })
-    .limit(500)
+    .limit(limit)
 
   if (error) {
     console.error('[fetchEventsByNeighborhood] Supabase error:', error.message)
@@ -281,8 +284,6 @@ export async function fetchEventsByNeighborhood(slug: string, limit = 30): Promi
   return ((data ?? []) as RawEventRow[])
     .map(normalizeRow)
     .filter((e): e is NormalizedEvent => e !== null)
-    .filter((e) => e.neighborhood !== null && neighborhoodToSlug(e.neighborhood) === slug)
-    .slice(0, limit)
 }
 
 /** Fetch neighborhood event counts — used for the homepage neighborhood section */
@@ -316,7 +317,8 @@ export async function fetchNeighborhoodCounts(): Promise<NeighborhoodCount[]> {
     .sort((a, b) => b.count - a.count)
 }
 
-/** Fetch upcoming events at a specific venue (case-insensitive partial match on venue name). */
+/** Fetch upcoming events at a specific venue (case-insensitive partial match on venue name).
+ *  Uses the denormalized `venue_name` DB column — no in-memory scan needed. */
 export async function fetchEventsByVenue(venueName: string, limit = 20): Promise<NormalizedEvent[]> {
   const supabase = await createClient()
   const today = new Date().toISOString().slice(0, 10)
@@ -325,23 +327,21 @@ export async function fetchEventsByVenue(venueName: string, limit = 20): Promise
   const { data, error } = await (supabase as any)
     .schema('public')
     .from('events')
-    .select('id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, neighborhood, venue_slug')
+    .select(COLS)
     .eq('hidden', false)
     .gte('event_date', today)
+    .ilike('venue_name', `%${venueName}%`)  // DB-level filter — no in-memory scan
     .order('event_date', { ascending: true })
-    .limit(500)
+    .limit(limit)
 
   if (error) {
     console.error('[fetchEventsByVenue] Supabase error:', error.message)
     return []
   }
 
-  const search = venueName.toLowerCase()
   return ((data ?? []) as RawEventRow[])
     .map(normalizeRow)
     .filter((e): e is NormalizedEvent => e !== null)
-    .filter((e) => e.venue?.toLowerCase().includes(search))
-    .slice(0, limit)
 }
 
 /** Fetch recently added upcoming events (newest ingestion first). */
@@ -353,7 +353,7 @@ export async function fetchRecentlyAdded(limit = 10): Promise<NormalizedEvent[]>
   const { data, error } = await (supabase as any)
     .schema('public')
     .from('events')
-    .select('id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, created_at')
+    .select(COLS + ', created_at')
     .eq('hidden', false)
     .gte('event_date', today)
     .order('created_at', { ascending: false })
@@ -377,7 +377,7 @@ export async function fetchEventById(id: string): Promise<NormalizedEvent | null
   const { data, error } = await (supabase as any)
     .schema('public')
     .from('events')
-    .select('id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, neighborhood, venue_slug')
+    .select(COLS)
     .eq('id', id)
     .single()
 
@@ -398,17 +398,21 @@ function normalizeRow(row: RawEventRow): NormalizedEvent | null {
       case 'local':        evt = normalizeLocal(row); break
       default:             evt = normalizeGeneric(row)
     }
-    // Pass through neighborhood + venue_slug DB columns
+    // Pass through DB columns
     if (evt) {
       evt.neighborhood = row.neighborhood ?? null
       evt.venueSlug    = row.venue_slug   ?? null
+      // Use denormalized DB category when available (consistent with DB filtering).
+      // The backfill in migration add_denormalized_category_venue_columns already
+      // incorporates both the code classifier and AI enrichment overrides.
+      if (row.category != null) evt.category = row.category
+      // Fall back to DB venue_name for sources whose normalizer couldn't extract it
+      if (evt.venue === null && row.venue_name != null) evt.venue = row.venue_name
     }
     // Apply ai_enrichment overrides (from LLM enrichment pass)
     if (evt && row.ai_enrichment) {
       const ai = row.ai_enrichment as Record<string, unknown>
-      // Only let AI override category when the code classifier returned null —
-      // this prevents mis-labeled AI categories (e.g. rock band → Comedy) from
-      // overriding a confident code-classifier result.
+      // Only let AI override category when DB column is also null (new events not yet backfilled)
       if (typeof ai.category === 'string' && evt.category === null) evt.category = ai.category
       if (typeof ai.subcategory === 'string' && evt.subcategory === null) evt.subcategory = ai.subcategory
       if (typeof ai.about === 'string')       evt.about      = ai.about
