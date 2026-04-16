@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { fetchEventById, fetchEvents } from '@/lib/events'
+import { fetchEventById, fetchEvents, neighborhoodToSlug } from '@/lib/events'
 import { venueToSlug } from '@/app/venues/[slug]/page'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { createClient } from '@/lib/supabase/server'
@@ -231,6 +231,20 @@ export default async function EventDetailPage({ params }: PageProps) {
               <Ticket className="w-4 h-4 text-[#4f6249]" />
               <p className="text-xs font-semibold text-[#1a1614]">{event.price}</p>
             </div>
+          )}
+
+          {/* Neighborhood pill — links to neighborhood landing page */}
+          {event.neighborhood && (
+            <Link
+              href={`/neighborhoods/${neighborhoodToSlug(event.neighborhood)}`}
+              className="flex items-center gap-2 bg-white rounded-xl px-3 py-2 border border-[#f0e4cc] shadow-sm hover:border-[#006a62]/40 hover:shadow-md transition-all group"
+            >
+              <MapPin className="w-4 h-4 text-[#006a62] group-hover:text-[#9a442d] transition-colors flex-shrink-0" />
+              <div>
+                <p className="text-[9px] uppercase tracking-wider text-[#8a7a74] font-semibold leading-none mb-0.5">Neighborhood</p>
+                <p className="text-xs font-semibold text-[#1a1614] group-hover:text-[#006a62] transition-colors">{event.neighborhood}</p>
+              </div>
+            </Link>
           )}
         </div>
 

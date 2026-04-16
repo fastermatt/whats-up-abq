@@ -238,6 +238,81 @@ export async function fetchFeaturedEvents(limit = 6): Promise<NormalizedEvent[]>
     .filter((e): e is NormalizedEvent => e !== null)
 }
 
+// ─── Neighborhood helpers ─────────────────────────────────────────────────────
+
+export interface NeighborhoodCount {
+  neighborhood: string
+  count: number
+  slug: string
+}
+
+/** Convert a neighborhood name to a URL-safe slug */
+export function neighborhoodToSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
+/** Fetch upcoming events in a specific neighborhood by slug */
+export async function fetchEventsByNeighborhood(slug: string, limit = 30): Promise<NormalizedEvent[]> {
+  const supabase = await createClient()
+  const today = new Date().toISOString().slice(0, 10)
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .schema('public')
+    .from('events')
+    .select('id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, neighborhood, venue_slug')
+    .eq('hidden', false)
+    .gte('event_date', today)
+    .not('neighborhood', 'is', null)
+    .order('event_date', { ascending: true })
+    .limit(500)
+
+  if (error) {
+    console.error('[fetchEventsByNeighborhood] Supabase error:', error.message)
+    return []
+  }
+
+  return ((data ?? []) as RawEventRow[])
+    .map(normalizeRow)
+    .filter((e): e is NormalizedEvent => e !== null)
+    .filter((e) => e.neighborhood !== null && neighborhoodToSlug(e.neighborhood) === slug)
+    .slice(0, limit)
+}
+
+/** Fetch neighborhood event counts — used for the homepage neighborhood section */
+export async function fetchNeighborhoodCounts(): Promise<NeighborhoodCount[]> {
+  const supabase = await createClient()
+  const today = new Date().toISOString().slice(0, 10)
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .schema('public')
+    .from('events')
+    .select('neighborhood')
+    .eq('hidden', false)
+    .gte('event_date', today)
+    .not('neighborhood', 'is', null)
+
+  if (error) return []
+
+  const counts: Record<string, number> = {}
+  for (const row of (data ?? []) as { neighborhood: string }[]) {
+    const n = row.neighborhood
+    if (n) counts[n] = (counts[n] ?? 0) + 1
+  }
+
+  return Object.entries(counts)
+    .map(([neighborhood, count]) => ({
+      neighborhood,
+      count,
+      slug: neighborhoodToSlug(neighborhood),
+    }))
+    .sort((a, b) => b.count - a.count)
+}
+
 /** Fetch upcoming events at a specific venue (case-insensitive partial match on venue name). */
 export async function fetchEventsByVenue(venueName: string, limit = 20): Promise<NormalizedEvent[]> {
   const supabase = await createClient()
