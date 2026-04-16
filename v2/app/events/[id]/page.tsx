@@ -3,10 +3,12 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { fetchEventById, fetchEvents } from '@/lib/events'
 import { getCategoryFallback } from '@/lib/fallback-images'
-import { MapPin, Clock, Calendar, Ticket, ArrowLeft, ExternalLink, Share2 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/server'
+import { MapPin, Clock, Calendar, Ticket, ArrowLeft, ExternalLink, Users } from 'lucide-react'
 import ShareButton from './ShareButton'
 import { AnimateIn } from '@/app/components/AnimateIn'
 import { ReportForm } from '@/app/components/ReportForm'
+import { SaveEventButton } from '@/app/components/SaveEventButton'
 
 export const revalidate = 60
 
@@ -54,8 +56,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function EventDetailPage({ params }: PageProps) {
   const { id } = await params
-  const event = await fetchEventById(id)
+  const [event, supabase] = await Promise.all([fetchEventById(id), createClient()])
   if (!event) notFound()
+
+  // Going count — how many users have state='going' for this event
+  const { count: goingCount } = await supabase
+    .from('user_events')
+    .select('id', { count: 'exact', head: true })
+    .eq('event_id', id)
+    .eq('state', 'going')
 
   const dateStr = formatDateLong(event.date)
   const timeStr = event.time ?? ''
@@ -256,7 +265,7 @@ export default async function EventDetailPage({ params }: PageProps) {
         )}
 
         {/* CTA buttons */}
-        <div className="flex flex-wrap gap-3 mb-6">
+        <div className="flex flex-wrap gap-3 mb-4">
           {event.ticketUrl && (
             <a
               href={event.ticketUrl}
@@ -270,6 +279,26 @@ export default async function EventDetailPage({ params }: PageProps) {
             </a>
           )}
           <ShareButton title={event.title} />
+        </div>
+
+        {/* Social row — save/going buttons + count */}
+        <div className="flex items-center justify-between mb-6 pb-6 border-b border-[#f0e4cc]">
+          <SaveEventButton
+            eventId={event.id}
+            eventName={event.title}
+            eventDate={event.date}
+            venueName={event.venue ?? null}
+            category={event.category ?? null}
+            imageUrl={event.imageUrl ?? null}
+            ticketUrl={event.ticketUrl ?? null}
+            goingCount={goingCount ?? 0}
+          />
+          {(goingCount ?? 0) > 0 && (
+            <p className="text-xs text-[#8a7a74] flex items-center gap-1">
+              <Users className="w-3.5 h-3.5" />
+              {goingCount} going
+            </p>
+          )}
         </div>
 
         {/* Source + report */}
