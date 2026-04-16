@@ -266,13 +266,23 @@ export async function fetchEvents({
   }
 }
 
-/** Fetch admin-featured upcoming events (featured=true in DB). */
+/** Fetch highlighted upcoming events for the homepage.
+ *
+ *  Priority 1 — admin-marked featured=true events (manually curated).
+ *  Priority 2 — algorithmic fallback: events in the next 14 days that have
+ *    a photo and AI enrichment, from mainstream sources (TM/SG), in crowd-
+ *    pleasing categories. Sorted by date ascending so soonest appears first.
+ *
+ *  This keeps the homepage interesting even when no events are manually featured.
+ */
 export async function fetchFeaturedEvents(limit = 6): Promise<NormalizedEvent[]> {
   const supabase = await createClient()
   const today = new Date().toISOString().slice(0, 10)
+  const in14 = new Date(Date.now() + 14 * 86400_000).toISOString().slice(0, 10)
 
+  // ── Priority 1: manual featured ──
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data: featData } = await (supabase as any)
     .schema('public')
     .from('events')
     .select(COLS)
@@ -282,11 +292,44 @@ export async function fetchFeaturedEvents(limit = 6): Promise<NormalizedEvent[]>
     .order('event_date', { ascending: true })
     .limit(limit)
 
-  if (error) return []
-
-  return ((data ?? []) as RawEventRow[])
+  const featured = ((featData ?? []) as RawEventRow[])
     .map(normalizeRow)
     .filter((e): e is NormalizedEvent => e !== null)
+
+  if (featured.length >= limit) return featured
+
+  // ── Priority 2: algorithmic highlights (fills remaining slots) ──
+  // Criteria: has a photo, has AI enrichment, next 14 days, crowd-pleasing category.
+  const HIGHLIGHT_CATS = ['Music', 'Comedy', 'Sports', 'Arts & Theater', 'Festivals', 'Community']
+  const manualIds = new Set(featured.map((e) => e.id))
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: autoData } = await (supabase as any)
+    .schema('public')
+    .from('events')
+    .select(COLS)
+    .eq('hidden', false)
+    .eq('featured', false)
+    .gte('event_date', today)
+    .lte('event_date', in14)
+    .not('cached_photo_url', 'is', null)
+    .not('ai_enrichment', 'is', null)
+    .in('category', HIGHLIGHT_CATS)
+    .order('event_date', { ascending: true })
+    .limit((limit - featured.length) * 6)  // fetch extra, filter in JS
+
+  const auto = ((autoData ?? []) as RawEventRow[])
+    .map(normalizeRow)
+    .filter((e): e is NormalizedEvent => e !== null && !manualIds.has(e.id))
+    // Prefer TM/SG sources (richer metadata) then others
+    .sort((a, b) => {
+      const srcScore = (s: string) =>
+        s === 'ticketmaster' ? 0 : s === 'seatgeek' ? 1 : 2
+      return srcScore(a.source) - srcScore(b.source) || a.date.localeCompare(b.date)
+    })
+    .slice(0, limit - featured.length)
+
+  return [...featured, ...auto]
 }
 
 // ─── Neighborhood helpers ─────────────────────────────────────────────────────
