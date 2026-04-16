@@ -2,8 +2,48 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 import { CheckCircle2, MapPin } from 'lucide-react'
+
+/** Award badges based on check-in milestones. Idempotent — safe to call multiple times. */
+async function awardBadges(supabase: SupabaseClient, userId: string) {
+  try {
+    const [{ data: profile }, { data: checkIns }] = await Promise.all([
+      supabase.from('profiles').select('badges, events_attended').eq('id', userId).single(),
+      supabase.from('check_ins').select('event_id, category, event_date').eq('user_id', userId),
+    ])
+
+    const earned: string[] = (profile?.badges as string[]) ?? []
+    const totalCheckins = checkIns?.length ?? 0
+    const uniqueVenues = new Set(checkIns?.map(c => c.event_id)).size
+    const musicEvents = checkIns?.filter(c => c.category === 'Music').length ?? 0
+    const comedyEvents = checkIns?.filter(c => c.category === 'Comedy').length ?? 0
+    const outdoorEvents = checkIns?.filter(c => c.category === 'Outdoor').length ?? 0
+
+    const toAdd: string[] = []
+
+    if (totalCheckins >= 1  && !earned.includes('first_checkin'))   toAdd.push('first_checkin')
+    if (totalCheckins >= 5  && !earned.includes('five_checkins'))   toAdd.push('five_checkins')
+    if (totalCheckins >= 10 && !earned.includes('ten_checkins'))    toAdd.push('ten_checkins')
+    if (uniqueVenues >= 5   && !earned.includes('burqueno'))        toAdd.push('burqueno')
+    if (musicEvents >= 5    && !earned.includes('music_lover'))     toAdd.push('music_lover')
+    if (comedyEvents >= 3   && !earned.includes('comedy_buff'))     toAdd.push('comedy_buff')
+    if (outdoorEvents >= 3  && !earned.includes('outdoor_explorer')) toAdd.push('outdoor_explorer')
+
+    if (toAdd.length > 0) {
+      await supabase
+        .from('profiles')
+        .update({
+          badges: [...earned, ...toAdd],
+          events_attended: totalCheckins,
+        })
+        .eq('id', userId)
+    }
+  } catch {
+    // Non-critical — don't fail the check-in
+  }
+}
 
 interface Props {
   eventId: string
@@ -63,12 +103,17 @@ export function CheckInButton({ eventId, eventName, eventDate }: Props) {
           onClick={async () => {
             if (!user) { router.push(`/login?next=/events/${eventId}`); return }
             setLoading(true)
+
             await supabase.from('check_ins').upsert({
               user_id: user.id,
               event_id: eventId,
               event_name: eventName,
               event_date: eventDate,
             }, { onConflict: 'user_id,event_id' })
+
+            // Award badges after check-in
+            await awardBadges(supabase, user.id)
+
             setCheckedIn(true)
             setShowConfirm(false)
             setLoading(false)
