@@ -16,7 +16,7 @@ export default async function AdminEventEditPage({ params }: PageProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: row } = await (supabase as any)
     .schema('public').from('events')
-    .select('id, source, event_date, hidden, ai_enrichment, raw')
+    .select('id, source, event_date, hidden, featured, ai_enrichment, raw')
     .eq('id', id)
     .single()
 
@@ -60,6 +60,7 @@ export default async function AdminEventEditPage({ params }: PageProps) {
           title_override: (ai.title_override as string) ?? '',
           admin_notes: (ai.admin_notes as string) ?? '',
           hidden: row.hidden ?? false,
+          featured: row.featured ?? false,
         }}
         rawTitle={rawTitle}
       />

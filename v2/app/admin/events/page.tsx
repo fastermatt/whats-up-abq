@@ -1,18 +1,23 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { QuickHideButton } from './QuickHideButton'
+import { QuickFeaturedButton } from './QuickFeaturedButton'
+import { EventsFilterForm } from './EventsFilterForm'
+import { BulkActions } from './BulkActions'
 
 export const revalidate = 0
 
 interface PageProps {
-  searchParams: Promise<{ q?: string; hidden?: string; source?: string; page?: string }>
+  searchParams: Promise<{ q?: string; hidden?: string; featured?: string; source?: string; cat?: string; page?: string }>
 }
 
 export default async function AdminEventsPage({ searchParams }: PageProps) {
   const params = await searchParams
   const search = params.q?.trim() || ''
   const showHidden = params.hidden === '1'
+  const showFeatured = params.featured === '1'
   const source = params.source || ''
+  const catFilter = params.cat || ''
   const page = Math.max(1, parseInt(params.page ?? '1', 10))
   const limit = 50
   const offset = (page - 1) * limit
@@ -23,19 +28,44 @@ export default async function AdminEventsPage({ searchParams }: PageProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let q = (supabase as any)
     .schema('public').from('events')
-    .select('id, source, event_date, hidden, ai_enrichment, raw', { count: 'exact' })
-    .eq('hidden', showHidden)
+    .select('id, source, event_date, hidden, featured, ai_enrichment, raw', { count: 'exact' })
     .gte('event_date', today)
     .order('event_date', { ascending: true })
     .range(offset, offset + limit - 1)
 
+  if (showHidden) {
+    q = q.eq('hidden', true)
+  } else if (showFeatured) {
+    q = q.eq('featured', true).eq('hidden', false)
+  } else {
+    q = q.eq('hidden', false)
+  }
+
   if (source) q = q.eq('source', source)
 
-  const { data: rows, count } = await q
-  const totalPages = Math.ceil((count ?? 0) / limit)
+  // Server-side text search using ilike on raw JSONB text representation
+  if (search) {
+    // We'll filter post-fetch since title extraction depends on source
+  }
 
-  // Extract title from raw JSON per source
-  const events = (rows ?? []).map((r: Record<string, unknown>) => {
+  if (catFilter) {
+    q = q.eq('ai_enrichment->>category', catFilter)
+  }
+
+  const { data: rows, count } = await q
+
+  interface AdminEvent {
+    id: string
+    source: string
+    event_date: string
+    hidden: boolean
+    featured: boolean
+    title: string
+    category: string | null
+  }
+
+  // Extract title + metadata
+  const allEvents: AdminEvent[] = (rows ?? []).map((r: Record<string, unknown>) => {
     const raw = r.raw as Record<string, unknown>
     const ai = r.ai_enrichment as Record<string, unknown> | null
     let title = ''
@@ -47,74 +77,114 @@ export default async function AdminEventsPage({ searchParams }: PageProps) {
     }
     if (ai?.title_override) title = ai.title_override as string
     const category = (ai?.category ?? null) as string | null
-    return { id: r.id, source: r.source, event_date: r.event_date, hidden: r.hidden, title, category }
-  }).filter((e: { title: string }) => !search || e.title.toLowerCase().includes(search.toLowerCase()))
+    return {
+      id: r.id as string,
+      source: r.source as string,
+      event_date: r.event_date as string,
+      hidden: r.hidden as boolean,
+      featured: r.featured as boolean,
+      title,
+      category,
+    }
+  })
+
+  // Client-side title search filter (since title is derived)
+  const events = search
+    ? allEvents.filter((e) => e.title.toLowerCase().includes(search.toLowerCase()))
+    : allEvents
+
+  const totalPages = Math.ceil((count ?? 0) / limit)
 
   const SOURCES = ['', 'ticketmaster', 'seatgeek', 'eventbrite', 'local', 'volunteer', 'bandsintown']
+  const CATEGORIES = [
+    '', 'Music', 'Comedy', 'Sports', 'Arts & Theater', 'Family',
+    'Film', 'Food & Drink', 'Festivals', 'Outdoor', 'Community',
+  ]
+
+  // Build base URL params for pagination links
+  const paginationBase = [
+    source ? `source=${source}` : '',
+    showHidden ? 'hidden=1' : '',
+    showFeatured ? 'featured=1' : '',
+    catFilter ? `cat=${encodeURIComponent(catFilter)}` : '',
+    search ? `q=${encodeURIComponent(search)}` : '',
+  ].filter(Boolean).join('&')
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-3xl font-black" style={{ fontFamily: 'var(--font-epilogue)' }}>Events</h1>
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2 items-center flex-wrap">
           <Link
             href={showHidden ? '/admin/events' : '/admin/events?hidden=1'}
             className={`text-xs px-3 py-1.5 rounded-lg transition-colors ${showHidden ? 'bg-yellow-500/20 text-yellow-400' : 'bg-white/10 text-white/60 hover:text-white'}`}
           >
-            {showHidden ? 'Showing hidden' : 'Show hidden'}
+            {showHidden ? '✓ Showing hidden' : 'Show hidden'}
+          </Link>
+          <Link
+            href={showFeatured ? '/admin/events' : '/admin/events?featured=1'}
+            className={`text-xs px-3 py-1.5 rounded-lg transition-colors ${showFeatured ? 'bg-blue-500/20 text-blue-400' : 'bg-white/10 text-white/60 hover:text-white'}`}
+          >
+            {showFeatured ? '★ Featured only' : 'Featured only'}
           </Link>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-3 flex-wrap">
-        <input
-          type="text"
-          placeholder="Search events…"
-          defaultValue={search}
-          className="bg-white/10 border border-white/20 text-white placeholder-white/30 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-[#9a442d] w-64"
-          onChange={() => {/* handled server-side on submit */}}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              const val = (e.target as HTMLInputElement).value
-              window.location.href = `/admin/events?q=${encodeURIComponent(val)}${showHidden ? '&hidden=1' : ''}`
-            }
-          }}
-        />
-        <select
-          defaultValue={source}
-          className="bg-white/10 border border-white/20 text-white rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-[#9a442d]"
-          onChange={(e) => {
-            window.location.href = `/admin/events?source=${e.target.value}${showHidden ? '&hidden=1' : ''}`
-          }}
-        >
-          {SOURCES.map(s => <option key={s} value={s} className="bg-[#1a1614]">{s || 'All sources'}</option>)}
-        </select>
-      </div>
+      {/* Filters — client component handles form submit navigation */}
+      <EventsFilterForm
+        search={search}
+        source={source}
+        catFilter={catFilter}
+        showHidden={showHidden}
+        showFeatured={showFeatured}
+        sources={SOURCES}
+        categories={CATEGORIES}
+      />
 
-      <p className="text-white/40 text-xs">{count?.toLocaleString()} events · showing {offset + 1}–{Math.min(offset + limit, count ?? 0)}</p>
+      <p className="text-white/40 text-xs">
+        {count?.toLocaleString()} events · showing {Math.min(offset + 1, count ?? 0)}–{Math.min(offset + limit, count ?? 0)}
+        {search && ` · filtered to ${events.length} matching "${search}"`}
+      </p>
+
+      {/* Bulk actions */}
+      <BulkActions eventIds={events.map(e => e.id)} />
 
       {/* Events table */}
-      <div className="space-y-1">
-        {events.map((event: Record<string, string | boolean | null>) => (
-          <div key={String(event.id)} className="flex items-center gap-3 bg-white/5 hover:bg-white/8 rounded-xl px-4 py-2.5 group">
+      <div className="space-y-1" id="events-list">
+        {events.map(event => (
+          <div key={event.id} className="flex items-center gap-3 bg-white/5 hover:bg-white/[0.08] rounded-xl px-4 py-2.5 group">
+            {/* Bulk checkbox */}
+            <input
+              type="checkbox"
+              data-event-id={event.id}
+              className="event-bulk-check w-4 h-4 accent-[#9a442d] flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+              aria-label={`Select ${event.title}`}
+            />
+
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{String(event.title) || '(no title)'}</p>
+              <div className="flex items-center gap-2 min-w-0">
+                <p className="text-sm font-medium truncate">{event.title || '(no title)'}</p>
+                {event.featured && (
+                  <span className="text-xs text-yellow-400 flex-shrink-0">★</span>
+                )}
+              </div>
               <p className="text-xs text-white/40">
-                {String(event.event_date)} · {String(event.source)}
-                {event.category && ` · ${String(event.category)}`}
+                {event.event_date} · {event.source}
+                {event.category && ` · ${event.category}`}
               </p>
             </div>
-            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <QuickHideButton eventId={String(event.id)} hidden={Boolean(event.hidden)} />
+
+            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+              <QuickFeaturedButton eventId={event.id} featured={event.featured} />
+              <QuickHideButton eventId={event.id} hidden={event.hidden} />
               <Link
-                href={`/admin/events/${String(event.id)}`}
+                href={`/admin/events/${event.id}`}
                 className="text-xs px-3 py-1 bg-white/10 rounded-lg hover:bg-white/15 transition-colors"
               >
                 Edit
               </Link>
               <Link
-                href={`/events/${String(event.id)}`}
+                href={`/events/${event.id}`}
                 className="text-xs text-white/40 hover:text-white transition-colors"
                 target="_blank"
               >
@@ -125,17 +195,29 @@ export default async function AdminEventsPage({ searchParams }: PageProps) {
         ))}
       </div>
 
+      {events.length === 0 && (
+        <p className="text-white/40 text-sm text-center py-12">No events found.</p>
+      )}
+
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex gap-3 items-center justify-center pt-4">
           {page > 1 && (
-            <Link href={`/admin/events?page=${page - 1}${source ? `&source=${source}` : ''}${showHidden ? '&hidden=1' : ''}`}
-              className="text-sm px-4 py-1.5 bg-white/10 rounded-lg hover:bg-white/15 transition-colors">← Prev</Link>
+            <Link
+              href={`/admin/events?page=${page - 1}${paginationBase ? `&${paginationBase}` : ''}`}
+              className="text-sm px-4 py-1.5 bg-white/10 rounded-lg hover:bg-white/15 transition-colors"
+            >
+              ← Prev
+            </Link>
           )}
           <span className="text-sm text-white/40">{page} / {totalPages}</span>
           {page < totalPages && (
-            <Link href={`/admin/events?page=${page + 1}${source ? `&source=${source}` : ''}${showHidden ? '&hidden=1' : ''}`}
-              className="text-sm px-4 py-1.5 bg-white/10 rounded-lg hover:bg-white/15 transition-colors">Next →</Link>
+            <Link
+              href={`/admin/events?page=${page + 1}${paginationBase ? `&${paginationBase}` : ''}`}
+              className="text-sm px-4 py-1.5 bg-white/10 rounded-lg hover:bg-white/15 transition-colors"
+            >
+              Next →
+            </Link>
           )}
         </div>
       )}
