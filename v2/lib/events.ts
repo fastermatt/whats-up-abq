@@ -396,6 +396,7 @@ function normalizeRow(row: RawEventRow): NormalizedEvent | null {
       case 'seatgeek':     evt = normalizeSG(row); break
       case 'bandsintown':  evt = normalizeBIT(row); break
       case 'local':        evt = normalizeLocal(row); break
+      case 'volunteer':    evt = normalizeLocal(row); break  // volunteer events are always free
       default:             evt = normalizeGeneric(row)
     }
     // Pass through DB columns
@@ -482,7 +483,8 @@ function normalizeTM(row: RawEventRow): NormalizedEvent {
 function normalizeEB(row: RawEventRow): NormalizedEvent {
   const r = row.raw as Record<string, unknown>
   const venue = r.venue as Record<string, unknown> | undefined
-  const isFree = r.is_free as boolean | undefined
+  // Data is stored in TM-compatible camelCase (isFree) not native EB snake_case (is_free)
+  const isFree = (r.isFree ?? r.is_free) as boolean | undefined
   const tickets = r.ticket_availability as Record<string, unknown> | undefined
   const minTicket = tickets?.minimum_ticket_price as Record<string, unknown> | undefined
   const cost = isFree
@@ -611,6 +613,8 @@ function normalizeBIT(row: RawEventRow): NormalizedEvent {
 
 function normalizeLocal(row: RawEventRow): NormalizedEvent {
   const r = row.raw as Record<string, unknown>
+  // All volunteer events are free; local events may carry an isFree flag
+  const isFree = row.source === 'volunteer' || r.isFree === true
   return {
     id: row.id,
     title: decodeHtml((r.title as string) ?? (r.name as string)) || 'Local Event',
@@ -624,10 +628,10 @@ function normalizeLocal(row: RawEventRow): NormalizedEvent {
       (r.title as string | undefined) ?? (r.name as string | undefined)
     ),
     description: (r.description as string | undefined)?.slice(0, 300) ?? null,
-    price: (r.price as string | undefined) ?? (r.cost as string | undefined) ?? null,
+    price: isFree ? 'Free' : (r.price as string | undefined) ?? (r.cost as string | undefined) ?? null,
     imageUrl: row.cached_photo_url ?? (r.image as string | undefined) ?? null,
     ticketUrl: (r.url as string | undefined) ?? (r.ticket_url as string | undefined) ?? null,
-    source: 'local',
+    source: row.source,
     isFeatured: row.featured ?? false,
     neighborhood: null, venueSlug: null,
     about: null, highlights: [], venueTips: null, localTips: null,
