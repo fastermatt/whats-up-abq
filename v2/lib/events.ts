@@ -1,6 +1,6 @@
 /**
  * Event data layer — reads from public.events (v1 ingestion table)
- * which has 1428+ real events from Ticketmaster, Eventbrite, SeatGeek, etc.
+ * which has 1428+ real events from Ticketmaster, Eventbrite, SeatGeek, Volunteer, etc.
  *
  * v2.events is intentionally empty until Phase 2 ingestion is wired up.
  */
