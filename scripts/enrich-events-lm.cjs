@@ -105,7 +105,7 @@ async function callLM(prompt, retries = 2) {
     model:       LM_MODEL,
     messages:    [{ role: 'user', content: prompt }],
     temperature: 0.5,
-    max_tokens:  800,
+    max_tokens:  1200,
     stream:      false,
   };
   for (let attempt = 0; attempt <= retries; attempt++) {
