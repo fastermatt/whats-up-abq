@@ -27,6 +27,11 @@ export interface NormalizedEvent {
   ticketUrl: string | null
   source: string
   isFeatured: boolean
+  // LLM enrichment fields (from ai_enrichment column)
+  about: string | null
+  highlights: string[]
+  venueTips: string | null
+  localTips: string | null
 }
 
 export type CategoryFilter = string | null
@@ -236,8 +241,12 @@ function normalizeRow(row: RawEventRow): NormalizedEvent | null {
     // Apply ai_enrichment overrides (from LLM enrichment pass)
     if (evt && row.ai_enrichment) {
       const ai = row.ai_enrichment as Record<string, unknown>
-      if (typeof ai.category === 'string') evt.category = ai.category
+      if (typeof ai.category === 'string')    evt.category   = ai.category
       if (typeof ai.subcategory === 'string') evt.subcategory = ai.subcategory
+      if (typeof ai.about === 'string')       evt.about      = ai.about
+      if (Array.isArray(ai.highlights))       evt.highlights = (ai.highlights as unknown[]).map(h => String(h))
+      if (typeof ai.venue_tips === 'string')  evt.venueTips  = ai.venue_tips
+      if (typeof ai.local_tips === 'string')  evt.localTips  = ai.local_tips
     }
     return evt
   } catch {
@@ -293,6 +302,7 @@ function normalizeTM(row: RawEventRow): NormalizedEvent {
     ticketUrl: (r.url as string | undefined) ?? null,
     source: 'ticketmaster',
     isFeatured: row.featured ?? false,
+    about: null, highlights: [], venueTips: null, localTips: null,
   }
 }
 
@@ -331,6 +341,7 @@ function normalizeEB(row: RawEventRow): NormalizedEvent {
     ticketUrl: (r.url as string | undefined) ?? null,
     source: 'eventbrite',
     isFeatured: row.featured ?? false,
+    about: null, highlights: [], venueTips: null, localTips: null,
   }
 }
 
@@ -385,6 +396,7 @@ function normalizeSG(row: RawEventRow): NormalizedEvent {
     ticketUrl: (r.url as string | undefined) ?? null,
     source: 'seatgeek',
     isFeatured: row.featured ?? false,
+    about: null, highlights: [], venueTips: null, localTips: null,
   }
 }
 
@@ -412,6 +424,7 @@ function normalizeBIT(row: RawEventRow): NormalizedEvent {
     ticketUrl: (r.url as string | undefined) ?? null,
     source: 'bandsintown',
     isFeatured: row.featured ?? false,
+    about: null, highlights: [], venueTips: null, localTips: null,
   }
 }
 
@@ -435,6 +448,7 @@ function normalizeLocal(row: RawEventRow): NormalizedEvent {
     ticketUrl: (r.url as string | undefined) ?? (r.ticket_url as string | undefined) ?? null,
     source: 'local',
     isFeatured: row.featured ?? false,
+    about: null, highlights: [], venueTips: null, localTips: null,
   }
 }
 
@@ -456,6 +470,7 @@ function normalizeGeneric(row: RawEventRow): NormalizedEvent {
     ticketUrl: (r.url as string | undefined) ?? null,
     source: row.source,
     isFeatured: row.featured ?? false,
+    about: null, highlights: [], venueTips: null, localTips: null,
   }
 }
 
