@@ -492,11 +492,16 @@ function normalizeEB(row: RawEventRow): NormalizedEvent {
     ? (nameField.text as string)
     : (nameField as string) ?? 'Untitled Event'
 
+  const ebStart = r.start as Record<string, unknown> | undefined
+  const ebLocalTime = ebStart?.local as string | undefined  // e.g. "2026-04-18T19:00:00"
+  const ebUtcTime   = ebStart?.utc   as string | undefined  // e.g. "2026-04-19T01:00:00Z"
+
   return {
     id: row.id,
     title,
-    date: row.event_date ?? (r.start as Record<string, unknown> | undefined)?.utc as string ?? '',
-    time: row.event_date ? formatTime(row.event_date) : null,
+    date: row.event_date ?? ebUtcTime ?? '',
+    // Prefer .local (already in venue timezone), fall back to .utc (will show UTC hours)
+    time: ebLocalTime ? formatTime(ebLocalTime) : ebUtcTime ? formatTime(ebUtcTime) : null,
     venue: (venue?.name as string | undefined) ?? null,
     address: venue ? buildEBAddress(venue) : null,
     city: (venue?.address as Record<string, unknown> | undefined)?.city as string | null ?? null,

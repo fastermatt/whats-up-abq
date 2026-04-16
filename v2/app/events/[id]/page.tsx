@@ -199,20 +199,29 @@ export default async function EventDetailPage({ params }: PageProps) {
             </div>
           )}
 
-          {/* Venue — links to venue page + Google Maps link */}
+          {/* Venue — links to venue page (when venue name is known) */}
           {event.venue && (
+            <Link
+              href={`/venues/${venueToSlug(event.venue)}`}
+              className="flex items-center gap-2 bg-white rounded-xl px-3 py-2 border border-[#f0e4cc] shadow-sm hover:border-[#9a442d]/40 hover:shadow-md transition-all group"
+            >
+              <MapPin className="w-4 h-4 text-[#006a62] group-hover:text-[#9a442d] transition-colors flex-shrink-0" />
+              <div>
+                <p className="text-xs font-semibold text-[#1a1614] group-hover:text-[#9a442d] transition-colors">{event.venue}</p>
+                {event.address && <p className="text-[11px] text-[#8a7a74]">{event.address}</p>}
+              </div>
+            </Link>
+          )}
+
+          {/* Google Maps link — shown whenever we have any location info (venue OR address) */}
+          {(event.venue || event.address) && (
             <div className="flex flex-col gap-1">
-              <Link
-                href={`/venues/${venueToSlug(event.venue)}`}
-                className="flex items-center gap-2 bg-white rounded-xl px-3 py-2 border border-[#f0e4cc] shadow-sm hover:border-[#9a442d]/40 hover:shadow-md transition-all group"
-              >
-                <MapPin className="w-4 h-4 text-[#006a62] group-hover:text-[#9a442d] transition-colors flex-shrink-0" />
-                <div>
-                  <p className="text-xs font-semibold text-[#1a1614] group-hover:text-[#9a442d] transition-colors">{event.venue}</p>
-                  {event.address && <p className="text-[11px] text-[#8a7a74]">{event.address}</p>}
+              {!event.venue && event.address && (
+                <div className="flex items-center gap-2 bg-white rounded-xl px-3 py-2 border border-[#f0e4cc] shadow-sm">
+                  <MapPin className="w-4 h-4 text-[#006a62] flex-shrink-0" />
+                  <p className="text-xs font-semibold text-[#1a1614]">{event.address}</p>
                 </div>
-              </Link>
-              {/* Free map link — opens Google Maps search, no API key needed */}
+              )}
               <a
                 href={`https://maps.google.com/?q=${encodeURIComponent([event.venue, event.address, event.city ?? 'Albuquerque NM'].filter(Boolean).join(', '))}`}
                 target="_blank"
