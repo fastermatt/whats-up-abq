@@ -40,6 +40,8 @@ const CONCURRENCY       = parseInt(process.env.CONCURRENCY || '2', 10);
 const FORCE             = process.argv.includes('--force');
 const LIMIT_ARG         = process.argv.find(a => a.startsWith('--limit='));
 const LIMIT             = LIMIT_ARG ? parseInt(LIMIT_ARG.split('=')[1], 10) : Infinity;
+const ID_ARG            = process.argv.find(a => a.startsWith('--id='));
+const SINGLE_ID         = ID_ARG ? ID_ARG.split('=').slice(1).join('=') : null;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.error('❌  Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in scripts/.env');
@@ -208,16 +210,23 @@ Rules:
 - The third highlight MUST be the motivation hook provided — include it verbatim or closely paraphrased.
 - Keep each field warm, direct, and human. Avoid corporate/generic language.
 - Local tips should name actual ABQ spots (Frontier Restaurant, Casa de Benavidez, Nob Hill, Old Town, etc.) when relevant.
-- If you don't know the exact venue details, give solid general tips for that part of ABQ.`;
+- If you don't know the exact venue details, give solid general tips for that part of ABQ.
+- NEVER mention specific days of the week (Monday, Tuesday, Friday, etc.) in "about" or "highlights" unless the event details above explicitly state which days. Never invent a recurring schedule or specific day.
+- For volunteer/signup events, describe what participants do — not when slots are available.`;
 }
 
 // ── Parse LM response ─────────────────────────────────────────────────────────
 function parseEnrichment(text) {
   // Strip thinking tags if present (some models emit <think>...</think>)
   text = text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+  // Strip markdown code fences
+  text = text.replace(/```(?:json)?\s*([\s\S]*?)\s*```/g, '$1').trim();
   // Extract JSON from the response
   const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error('No JSON found in response');
+  if (!jsonMatch) {
+    console.warn('  ⚠ Raw response (first 500 chars):', text.slice(0, 500));
+    throw new Error('No JSON found in response');
+  }
   const parsed = JSON.parse(jsonMatch[0]);
   // Validate and sanitize
   return {
@@ -233,7 +242,8 @@ async function main() {
   console.log('🤖  ABQ Unplugged — LM Studio Event Enrichment');
   console.log(`    Model: ${LM_MODEL}`);
   console.log(`    Endpoint: ${LM_STUDIO_URL}`);
-  console.log(`    Mode: ${FORCE ? 'FORCE (re-enrich all)' : 'INCREMENTAL (skip enriched)'}`);
+  if (SINGLE_ID) console.log(`    Single event: ${SINGLE_ID}`);
+  else console.log(`    Mode: ${FORCE ? 'FORCE (re-enrich all)' : 'INCREMENTAL (skip enriched)'}`);
   if (LIMIT < Infinity) console.log(`    Limit: ${LIMIT}`);
   console.log('');
 
@@ -249,9 +259,14 @@ async function main() {
 
   // 2. Fetch events needing enrichment
   const today     = new Date().toISOString().split('T')[0];
-  const filter    = FORCE
-    ? `event_date=gte.${today}&raw->>name=not.is.null&order=event_date.asc&limit=500`
-    : `event_date=gte.${today}&ai_enrichment=is.null&raw->>name=not.is.null&order=event_date.asc&limit=500`;
+  let filter;
+  if (SINGLE_ID) {
+    filter = `id=eq.${encodeURIComponent(SINGLE_ID)}`;
+  } else if (FORCE) {
+    filter = `event_date=gte.${today}&raw->>name=not.is.null&order=event_date.asc&limit=500`;
+  } else {
+    filter = `event_date=gte.${today}&ai_enrichment=is.null&raw->>name=not.is.null&order=event_date.asc&limit=500`;
+  }
 
   console.log('📥  Fetching events from Supabase…');
   const rows = await sbGet(`events?${filter}&select=id,source,raw`);
