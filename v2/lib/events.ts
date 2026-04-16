@@ -36,6 +36,7 @@ export interface FetchEventsOptions {
   category?: CategoryFilter
   search?: string
   freeOnly?: boolean
+  maxPrice?: number   // 0 = free only; 25 = under $25; 50 = under $50
   limit?: number
   offset?: number
 }
@@ -100,6 +101,7 @@ export async function fetchEvents({
   category,
   search,
   freeOnly = false,
+  maxPrice,
   limit = 24,
   offset = 0,
 }: FetchEventsOptions = {}): Promise<FetchEventsResult> {
@@ -107,7 +109,7 @@ export async function fetchEvents({
   const { gte, lte } = getTimeRange(timeFilter)
 
   const COLS = 'id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden'
-  const needsInMemory = !!(category || search || freeOnly)
+  const needsInMemory = !!(category || search || freeOnly || maxPrice !== undefined)
 
   // When filtering by category or search we must normalize first (category is inside raw JSON,
   // different field per source), so fetch all rows for the time range then filter/paginate.
@@ -158,6 +160,14 @@ export async function fetchEvents({
       allNormalized = allNormalized.filter(
         (e) => e.price?.toLowerCase() === 'free' || e.price === null
       )
+    }
+
+    if (maxPrice !== undefined) {
+      allNormalized = allNormalized.filter((e) => {
+        const p = parsePriceMin(e.price)
+        if (maxPrice === 0) return p === 0 || e.price === null
+        return p === null || p <= maxPrice
+      })
     }
 
     return {
@@ -451,6 +461,14 @@ function normalizeGeneric(row: RawEventRow): NormalizedEvent {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+/** Parse the minimum dollar amount from a price string. Returns 0 for Free, null if unknown. */
+function parsePriceMin(price: string | null): number | null {
+  if (!price) return null
+  if (price.toLowerCase() === 'free') return 0
+  const m = price.match(/\$(\d+(?:\.\d+)?)/)
+  return m ? parseFloat(m[1]) : null
+}
+
 /** Decode HTML entities in strings (e.g. &#8211; → —, &amp; → &) */
 function decodeHtml(str: string | undefined | null): string {
   if (!str) return ''
@@ -559,6 +577,22 @@ function mapCategory(segment?: string, genre?: string): CategoryResult {
   if (anyWord(both, [
     'comedy', 'stand-up', 'standup', 'improv', 'open mic', 'comedian',
   ])) return { category: 'Comedy', subcategory: null }
+
+  // ── Dance classes & lessons → Community (check BEFORE Music) ────────────
+  // Prevents "Salsa Dance Class" or "Line Dancing Workshop" from matching music keywords
+  if (anyWord(both, [
+    'dance class', 'dance classes', 'dance lesson', 'dance lessons',
+    'dance workshop', 'dance instruction', 'learn to dance',
+    'swing dance', 'line dance', 'line dancing', 'ballroom',
+    'tango lesson', 'tango class', 'salsa lesson', 'salsa class',
+    'salsa dance class', 'salsa dancing', 'latin dance class', 'latin dance lesson',
+    'barre class', 'barre fit', 'zumba', 'cumbia class',
+  ])) return { category: 'Community', subcategory: null }
+
+  // ── Dance performance → Arts & Theater ──────────────────────────────────
+  if (anyWord(both, [
+    'dance performance', 'dance recital', 'dance show', 'dance company', 'dance concert',
+  ])) return { category: 'Arts & Theater', subcategory: null }
 
   // ── Music ───────────────────────────────────────────────────────────────
   const musicSubcategoryMap: Record<string, string> = {

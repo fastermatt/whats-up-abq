@@ -52,11 +52,17 @@ const MUSIC_SUBS = [
 interface FilterBarProps {
   currentTime: string
   currentCategory: string
-  freeOnly?: boolean
+  priceFilter?: string   // 'free' | '25' | '50' | undefined
   categoryCounts?: CategoryCount[]
 }
 
-export function FilterBar({ currentTime, currentCategory, freeOnly = false, categoryCounts = [] }: FilterBarProps) {
+const PRICE_FILTERS = [
+  { value: 'free', label: 'Free' },
+  { value: '25',   label: 'Under $25' },
+  { value: '50',   label: 'Under $50' },
+] as const
+
+export function FilterBar({ currentTime, currentCategory, priceFilter, categoryCounts = [] }: FilterBarProps) {
   const countMap = Object.fromEntries(categoryCounts.map((c) => [c.category, c.count]))
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -81,16 +87,17 @@ export function FilterBar({ currentTime, currentCategory, freeOnly = false, cate
     [router, searchParams]
   )
 
-  const toggleFree = useCallback(() => {
+  const setPrice = useCallback((value: string) => {
     const params = new URLSearchParams(searchParams.toString())
-    if (freeOnly) {
-      params.delete('free')
+    if (priceFilter === value) {
+      params.delete('price')
     } else {
-      params.set('free', '1')
+      params.set('price', value)
     }
+    params.delete('free') // remove legacy free param
     params.delete('page')
     router.push(`/events?${params.toString()}`, { scroll: false })
-  }, [router, searchParams, freeOnly])
+  }, [router, searchParams, priceFilter])
 
   const handleSportsClick = () => {
     if (currentCategory === 'Sports' || currentCategory.startsWith('Sports > ')) {
@@ -123,17 +130,20 @@ export function FilterBar({ currentTime, currentCategory, freeOnly = false, cate
             </button>
           )
         })}
-        {/* Free events toggle */}
-        <button
-          onClick={toggleFree}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-            freeOnly
-              ? 'bg-[#4f6249] text-white'
-              : 'bg-white border border-[#ddc9a3] text-[#4a3f3a] hover:border-[#4f6249] hover:text-[#4f6249]'
-          }`}
-        >
-          Free
-        </button>
+        {/* Price filter chips */}
+        {PRICE_FILTERS.map(({ value, label }) => (
+          <button
+            key={value}
+            onClick={() => setPrice(value)}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              priceFilter === value
+                ? 'bg-[#4f6249] text-white'
+                : 'bg-white border border-[#ddc9a3] text-[#4a3f3a] hover:border-[#4f6249] hover:text-[#4f6249]'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* Category filter */}
