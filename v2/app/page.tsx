@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { fetchEvents, NormalizedEvent } from '@/lib/events'
+import { getHeroImage, getCategoryFallback } from '@/lib/fallback-images'
 import { MapPin, ArrowRight } from 'lucide-react'
 
 export const revalidate = 60
@@ -23,7 +24,16 @@ export default async function DiscoverPage() {
   return (
     <main className="min-h-dvh bg-[--bg]">
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#9a442d] via-[#7d3725] to-[#5a2416] text-white">
+      <section className="relative overflow-hidden text-white">
+        {/* Hero background image (rotates daily) */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={getHeroImage()}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        {/* Dark overlay for text legibility */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#9a442d]/85 via-[#7d3725]/80 to-[#5a2416]/85" />
         {/* Subtle texture */}
         <div className="absolute inset-0 opacity-[0.07] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMS41IiBmaWxsPSIjZmZmIi8+PC9zdmc+')] animate-fade-in" />
 
@@ -215,19 +225,13 @@ function HorizontalCard({
     >
       {/* Landscape image */}
       <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] mb-1.5 shadow-sm group-hover:shadow-md transition-shadow duration-300">
-        {event.imageUrl ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
-            src={event.imageUrl}
-            alt=""
-            loading="lazy"
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-3xl opacity-20">🎶</span>
-          </div>
-        )}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
+          alt=""
+          loading="lazy"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+        />
 
         {/* Time badge */}
         {timeStr && (
