@@ -250,7 +250,10 @@ function normalizeEB(row: RawEventRow): NormalizedEvent {
     venue: (venue?.name as string | undefined) ?? null,
     address: venue ? buildEBAddress(venue) : null,
     city: (venue?.address as Record<string, unknown> | undefined)?.city as string | null ?? null,
-    category: mapCategory((r.category as Record<string, unknown> | undefined)?.name as string | undefined),
+    category: mapCategory(
+      (r.category as Record<string, unknown> | undefined)?.name as string | undefined,
+      title
+    ),
     description: ((r.description as Record<string, unknown> | undefined)?.text as string | undefined)?.slice(0, 300) ?? null,
     price: cost,
     imageUrl: row.cached_photo_url ?? (r.logo as Record<string, unknown> | undefined)?.url as string | null ?? null,
@@ -284,7 +287,10 @@ function normalizeSG(row: RawEventRow): NormalizedEvent {
       ? [venue.address, venue.city].filter(Boolean).join(', ') || null
       : null,
     city: (venue?.city as string | undefined) ?? null,
-    category: mapCategory((r.type as string | undefined)),
+    category: mapCategory(
+      (r.type as string | undefined),
+      (r.title as string) ?? (r.short_title as string)
+    ),
     description: null,
     price: priceStr,
     imageUrl: row.cached_photo_url
@@ -332,7 +338,10 @@ function normalizeLocal(row: RawEventRow): NormalizedEvent {
     venue: typeof r.venue === 'string' ? r.venue : (r.venue_name as string | undefined) ?? null,
     address: (r.address as string | undefined) ?? null,
     city: (r.city as string | undefined) ?? 'Albuquerque',
-    category: (r.category as string | undefined) ?? null,
+    category: mapCategory(
+      (r.category as string | undefined),
+      (r.title as string | undefined) ?? (r.name as string | undefined)
+    ),
     description: (r.description as string | undefined)?.slice(0, 300) ?? null,
     price: (r.price as string | undefined) ?? (r.cost as string | undefined) ?? null,
     imageUrl: row.cached_photo_url ?? (r.image as string | undefined) ?? null,
@@ -344,15 +353,16 @@ function normalizeLocal(row: RawEventRow): NormalizedEvent {
 
 function normalizeGeneric(row: RawEventRow): NormalizedEvent {
   const r = row.raw as Record<string, unknown>
+  const title = (r.name as string) ?? (r.title as string) ?? 'Event'
   return {
     id: row.id,
-    title: (r.name as string) ?? (r.title as string) ?? 'Event',
+    title,
     date: row.event_date ?? '',
     time: row.event_date ? formatTime(row.event_date) : null,
     venue: null,
     address: null,
     city: null,
-    category: null,
+    category: mapCategory((r.category as string | undefined), title),
     description: null,
     price: null,
     imageUrl: row.cached_photo_url ?? null,
@@ -397,67 +407,97 @@ function buildEBAddress(venue: Record<string, unknown>): string | null {
 
 /**
  * Map any source's category/segment/genre/type string to our display categories.
- * Handles: Ticketmaster segment+genre, Eventbrite category.name, SeatGeek type.
+ * Handles: Ticketmaster segment+genre, Eventbrite category.name, SeatGeek type,
+ * and local event title-based matching (pass title as 2nd arg for local events).
+ *
+ * IMPORTANT: For Eventbrite, the category name is passed as `segment` (1st arg).
+ * For local events, the event title is passed as `genre` (2nd arg) so title keywords
+ * get matched via `both`. Always check BOTH `s` and `g` for every keyword.
  */
 function mapCategory(segment?: string, genre?: string): string | null {
   const s = (segment ?? '').toLowerCase()
   const g = (genre ?? '').toLowerCase()
   const both = `${s} ${g}`
 
-  // Music — TM segments, SG type 'concert'/'band', EB 'Music'
-  if (s.includes('music') || both.includes('concert') || both.includes('band')
+  // Family — check FIRST because "Kids" events shouldn't fall into Community
+  // EB sends "Family & Education", "Kids & Family", etc. as segment
+  if (both.includes('family') || both.includes('kids') || both.includes('children')
+    || both.includes('storytime') || both.includes('story time') || both.includes('story hour')
+    || both.includes('toddler') || both.includes('baby') || both.includes('puppet')
+    || both.includes('duplo') || both.includes('lego') || both.includes('read to the dog')
+    || both.includes('kids clay') || both.includes('kid concert')
+    || both.includes('holiday') || both.includes('easter') || both.includes('trunk or treat')
+    || both.includes('music & movement')) return 'Family'
+
+  // Comedy — check before Arts so comedians don't land in "Arts & Theater"
+  if (both.includes('comedy') || both.includes('stand-up') || both.includes('standup')
+    || both.includes('improv') || both.includes('open mic') || both.includes('comedian')
+    || both.includes('funny') || both.includes('laugh')) return 'Comedy'
+
+  // Music — TM segments, SG type 'concert', EB 'Music'
+  if (s.includes('music') || both.includes('concert') || both.includes(' band ')
     || g.includes('rock') || g.includes('pop') || g.includes('country') || g.includes('jazz')
     || g.includes('hip-hop') || g.includes('r&b') || g.includes('edm') || g.includes('electronic')
     || g.includes('latin') || g.includes('reggae') || g.includes('soul') || g.includes('folk')
     || g.includes('bluegrass') || g.includes('metal') || g.includes('punk')
-    || g.includes('singer') || g.includes('songwriter')) return 'Music'
-
-  // Comedy — a distinct display category
-  if (both.includes('comedy') || both.includes('stand-up') || both.includes('standup')
-    || both.includes('improv') || both.includes('open mic')) return 'Comedy'
+    || g.includes('singer') || g.includes('songwriter')
+    || both.includes('live music') || both.includes('dj ')) return 'Music'
 
   // Sports — TM segments, SG type, EB
   if (s.includes('sport') || both.includes('baseball') || both.includes('basketball')
     || both.includes('football') || both.includes('soccer') || both.includes('hockey')
     || both.includes('mma') || both.includes('boxing') || both.includes('wrestling')
-    || both.includes('racing') || both.includes('rodeo')) return 'Sports'
+    || both.includes('racing') || both.includes('rodeo') || both.includes('isotopes')
+    || both.includes('lobos') || both.includes('nm united') || both.includes('new mexico united')
+    || both.includes('aggies') || both.includes('bodybuilding') || both.includes('marathon')
+    || both.includes('5k') || both.includes('10k') || both.includes('triathlon')) return 'Sports'
+
+  // Film — check BOTH s and g (EB passes film category as segment, not genre)
+  if (both.includes('film') || both.includes('movie') || both.includes('screening')
+    || both.includes('cinema') || both.includes('documentary') || both.includes('short film')
+    || s.includes('tv') || both.includes('drive-in')) return 'Film'
+
+  // Food & Drink — EB sends "Food & Drink", also catch title keywords
+  if (both.includes('food') || both.includes('drink') || both.includes('tasting')
+    || both.includes('brewery') || both.includes('wine') || both.includes('culinary')
+    || both.includes('chef') || both.includes('farmers market') || both.includes('growers market')
+    || both.includes('cocktail') || both.includes('distillery') || both.includes('cooking')
+    || both.includes('beer') || both.includes('brunch') || both.includes('dinner')
+    || both.includes('food truck') || both.includes('sips') || both.includes('suds')
+    || both.includes('beverage') || both.includes('taproom') || both.includes('winery')
+    || both.includes('margarita') || both.includes('mezcal')) return 'Food & Drink'
 
   // Arts & Theater
   if (s.includes('art') || s.includes('theatre') || s.includes('theater')
     || both.includes('ballet') || both.includes('opera') || both.includes('classical')
-    || both.includes('dance') || both.includes('gallery') || both.includes('museum')
-    || both.includes('literary') || both.includes('performing art')) return 'Arts & Theater'
-
-  // Family
-  if (s.includes('family') || g.includes('family') || both.includes('kids')
-    || both.includes('children') || both.includes('story time')
-    || both.includes('puppet') || both.includes('holiday')) return 'Family'
-
-  // Film
-  if (g.includes('film') || g.includes('movie') || both.includes('screening')
-    || both.includes('cinema') || both.includes('documentary')) return 'Film'
-
-  // Food & Drink
-  if (both.includes('food') || both.includes('drink') || both.includes('tasting')
-    || both.includes('brewery') || both.includes('wine') || both.includes('culinary')
-    || both.includes('chef') || both.includes('farmers market')
-    || both.includes('cocktail') || both.includes('distillery')) return 'Food & Drink'
+    || both.includes('gallery') || both.includes('museum') || both.includes('exhibit')
+    || both.includes('literary') || both.includes('performing art')
+    || both.includes('play ') || both.includes(' play') || both.includes('broadway')
+    || both.includes('symphony') || both.includes('philharmonic')
+    || both.includes('art studio') || both.includes('painting') || both.includes('pottery')
+    || both.includes('sculpture') || both.includes('printmaking')) return 'Arts & Theater'
 
   // Festivals & Fairs
-  if (both.includes('festival') || both.includes('fair') || both.includes('carnival')
-    || both.includes('expo') || both.includes('fiesta')) return 'Festivals'
+  if (both.includes('festival') || both.includes(' fair') || both.includes('carnival')
+    || both.includes('expo') || both.includes('fiesta') || both.includes('celebration')
+    || both.includes('block party')) return 'Festivals'
 
   // Outdoor & Adventure
   if (both.includes('outdoor') || both.includes('hiking') || both.includes('cycling')
-    || both.includes('balloon') || both.includes('camping')
-    || both.includes('adventure') || both.includes('trail')) return 'Outdoor'
+    || both.includes('balloon') || both.includes('camping') || both.includes('adventure')
+    || both.includes('trail') || both.includes('nature walk') || both.includes('birding')
+    || both.includes('stargazing') || both.includes('garden tour')) return 'Outdoor'
 
-  // Community
+  // Community — check last, broadest bucket
   if (both.includes('community') || both.includes('charity') || both.includes('fundraiser')
     || both.includes('civic') || both.includes('volunteer') || both.includes('workshop')
-    || both.includes('class') || both.includes('seminar') || both.includes('networking')) return 'Community'
+    || both.includes('seminar') || both.includes('networking') || both.includes('meeting')
+    || both.includes('support group') || both.includes('book club')
+    || both.includes('meditation') || both.includes('yoga') || both.includes('tai chi')
+    || both.includes('health fair') || both.includes('job fair')
+    || both.includes('open house') || both.includes('town hall')
+    || both.includes('creative writing') || both.includes('makerspace')) return 'Community'
 
-  // If nothing matched but we have a raw string, return null rather than leaking
-  // arbitrary source-specific strings into the UI
+  // If nothing matched, return null — event shows up in "All" but not in any filter
   return null
 }
