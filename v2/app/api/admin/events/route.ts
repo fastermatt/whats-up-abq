@@ -6,7 +6,18 @@ const VALID_CATEGORIES = [
   'Film', 'Food & Drink', 'Festivals', 'Outdoor', 'Community',
 ]
 
+function isAuthorized(request: NextRequest): boolean {
+  const secret = process.env.ADMIN_SECRET
+  if (!secret) return false
+  const token = request.cookies.get('admin_token')?.value
+  return token === secret
+}
+
 export async function PATCH(request: NextRequest) {
+  if (!isAuthorized(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const body = await request.json()
   const { id, category, subcategory, hidden, featured, title_override, admin_notes } = body
 

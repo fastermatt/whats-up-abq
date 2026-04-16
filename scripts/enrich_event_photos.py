@@ -57,7 +57,7 @@ _load_env(Path(__file__).parent / '.env')
 SUPABASE_URL  = os.getenv('SUPABASE_URL', 'https://bsmvfutebmbkjvlrhiyq.supabase.co')
 SUPABASE_KEY  = os.getenv('NEXT_PUBLIC_SUPABASE_ANON_KEY') or os.getenv('SUPABASE_ANON_KEY', '')
 BUCKET        = "event-photos"
-SEATGEEK_AID  = "a74134c31c4ac4008d2c75ce858e2c4a1d84fc400c66eccfc706accd32ec9c2e"
+SEATGEEK_AID  = os.getenv('SEATGEEK_AID', '')
 GEMINI_BIN    = "/opt/homebrew/bin/gemini"
 
 PROGRESS_FILE = Path(__file__).parent / "enrich_event_progress.json"

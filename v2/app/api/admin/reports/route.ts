@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 
+function isAuthorized(request: NextRequest): boolean {
+  const secret = process.env.ADMIN_SECRET
+  if (!secret) return false
+  const token = request.cookies.get('admin_token')?.value
+  return token === secret
+}
+
 export async function PATCH(request: NextRequest) {
+  if (!isAuthorized(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { id, status, admin_notes } = await request.json()
 
   if (!id || !['pending', 'reviewed', 'resolved', 'dismissed'].includes(status)) {
