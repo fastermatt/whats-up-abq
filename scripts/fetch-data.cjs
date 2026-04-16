@@ -33,7 +33,17 @@ const _sb = (_sbUrl && _sbKey) ? createSupabaseClient(_sbUrl, _sbKey) : null;
 
 async function _upsertEvents(source, rawArr) {
   if (!_sb || !rawArr || rawArr.length === 0) return;
-  const rows = rawArr.map(raw => {
+  // Filter out Ticketmaster shell/test events that should never reach the DB
+  const filtered = rawArr.filter(raw => {
+    const title = (raw.name || raw.title || '').toLowerCase();
+    if (/non.manifested shell/i.test(title)) return false;
+    if (/test event/i.test(title) && source === 'ticketmaster') return false;
+    return true;
+  });
+  if (filtered.length < rawArr.length) {
+    console.log(`[filter] Skipped ${rawArr.length - filtered.length} shell/test events from ${source}`);
+  }
+  const rows = filtered.map(raw => {
     let d = raw.dates?.start?.localDate || raw.datetime_local?.split('T')[0]
            || raw.datetime_utc?.split('T')[0] || raw.start?.local?.split('T')[0]
            || raw.date?.split('T')[0] || null;
