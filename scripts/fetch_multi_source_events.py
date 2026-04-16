@@ -22,6 +22,7 @@ Output:
     { "id": str, "source": str, "raw": {...TMEvent...}, "event_date": "YYYY-MM-DD" }
 """
 
+import os
 import sys
 import re
 import json
@@ -29,10 +30,26 @@ import time
 import hashlib
 import requests
 from datetime import datetime, timedelta
+from pathlib import Path
 from bs4 import BeautifulSoup
 
+def _load_env(env_file):
+    p = Path(env_file)
+    if not p.exists():
+        return
+    for line in p.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith('#') or '=' not in line:
+            continue
+        k, _, v = line.partition('=')
+        k = k.strip(); v = v.strip().strip('"').strip("'")
+        if k and k not in os.environ:
+            os.environ[k] = v
+
+_load_env(Path(__file__).parent / '.env')
+
 # ─── CONFIG ─────────────────────────────────────────────────────────────────
-SEATGEEK_AID = "a74134c31c4ac4008d2c75ce858e2c4a1d84fc400c66eccfc706accd32ec9c2e"
+SEATGEEK_AID = os.getenv('SEATGEEK_AID', '')
 
 TODAY       = datetime.now().strftime('%Y-%m-%d')
 FUTURE_90   = (datetime.now() + timedelta(days=90)).strftime('%Y-%m-%d')

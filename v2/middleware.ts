@@ -36,10 +36,19 @@ export async function middleware(request: NextRequest) {
   // Non-blocking — we don't await this for speed, but it sets cookies if needed
   await supabase.auth.getUser()
 
-  // Admin guard: check cookie presence only (Edge can't compare env secrets reliably)
-  if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
+  // Admin guard: protect /admin/* pages and /api/admin/* routes
+  // Edge runtime can't compare env secrets reliably, so we check cookie presence only.
+  // The actual secret comparison happens in AdminLayout (Node.js) and each /api/admin route.
+  const isAdminPage = pathname.startsWith('/admin') && pathname !== '/admin/login'
+  const isAdminApi  = pathname.startsWith('/api/admin')
+
+  if (isAdminPage || isAdminApi) {
     const token = request.cookies.get('admin_token')?.value
     if (!token) {
+      // Pages → redirect to login; API routes → return 401
+      if (isAdminApi) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
       return NextResponse.redirect(new URL('/admin/login', request.url))
     }
   }

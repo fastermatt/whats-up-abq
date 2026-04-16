@@ -43,7 +43,7 @@ jobs:
             --prod \
             --message "Deploy ${{ github.sha }}"
         env:
-          NETLIFY_SITE_ID: a0ff66c2-b959-4438-b184-509597d248e2
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           # Build-time env vars (Netlify site env vars are also injected automatically)
           NEXT_PUBLIC_SUPABASE_URL: https://bsmvfutebmbkjvlrhiyq.supabase.co
@@ -54,7 +54,7 @@ jobs:
           CLOUDFLARE_R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
           CLOUDFLARE_R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
           CLOUDFLARE_R2_BUCKET_NAME: abq-unplugged-images
-          CLOUDFLARE_ACCOUNT_ID: 6cb41f07a6895b9a25ff68394eed3980
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           NEXT_PUBLIC_CDN_BASE_URL: https://cdn.abqunplugged.com
           TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
           SEATGEEK_CLIENT_ID: ${{ secrets.SEATGEEK_CLIENT_ID }}
@@ -62,4 +62,4 @@ jobs:
           NEXT_PUBLIC_UMAMI_SRC: https://cloud.umami.is/script.js
           NEXT_PUBLIC_SITE_URL: https://abqunplugged.com
           NEXT_PUBLIC_SITE_NAME: ABQ Unplugged
-          NOMINATIM_USER_AGENT: abqunplugged/2.0 (4mattcarlson@gmail.com)
+          NOMINATIM_USER_AGENT: ${{ secrets.NOMINATIM_USER_AGENT }}
