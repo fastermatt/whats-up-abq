@@ -853,7 +853,7 @@ function mapCategory(segment?: string, genre?: string): CategoryResult {
     'food', 'drink', 'tasting', 'brewery', 'wine', 'culinary', 'chef',
     'farmers market', 'growers market', 'cocktail', 'distillery', 'cooking',
     'beer', 'brunch', 'food truck', 'sips', 'suds', 'beverage', 'taproom',
-    'winery', 'margarita', 'mezcal',
+    'winery', 'margarita', 'mezcal', 'hops', 'homebrew', 'cider',
   ])) return { category: 'Food & Drink', subcategory: null }
 
   // ── Arts & Theater ─────────────────────────────────────────────────────

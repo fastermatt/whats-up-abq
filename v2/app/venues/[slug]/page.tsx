@@ -103,7 +103,7 @@ export default async function VenuePage({ params }: PageProps) {
         </div>
 
         {/* ── Category chips ── */}
-        {Object.keys(catCounts).length > 1 && (
+        {Object.keys(catCounts).length > 0 && (
           <div className="flex flex-wrap gap-2 mb-5">
             {Object.entries(catCounts)
               .sort((a, b) => b[1] - a[1])
