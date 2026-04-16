@@ -648,7 +648,7 @@ function normalizeRow(row: RawEventRow): NormalizedEvent | null {
       // incorporates both the code classifier and AI enrichment overrides.
       if (row.category != null) evt.category = row.category
       // Fall back to DB venue_name for sources whose normalizer couldn't extract it
-      if (evt.venue === null && row.venue_name != null) evt.venue = row.venue_name
+      if (evt.venue === null && row.venue_name != null) evt.venue = decodeHtml(row.venue_name) || null
     }
     // Apply ai_enrichment overrides (from LLM enrichment pass)
     if (evt && row.ai_enrichment) {
@@ -860,8 +860,8 @@ function normalizeLocal(row: RawEventRow): NormalizedEvent {
     title: decodeHtml((r.title as string) ?? (r.name as string)) || 'Local Event',
     date: row.event_date ?? (r.date as string) ?? (r.start_date as string) ?? '',
     time: row.event_date ? (formatTime(row.event_date) || null) : null,
-    venue: typeof r.venue === 'string' ? r.venue : (r.venue_name as string | undefined) ?? null,
-    address: (r.address as string | undefined) ?? null,
+    venue: decodeHtml(typeof r.venue === 'string' ? r.venue : (r.venue_name as string | undefined) ?? null) || null,
+    address: decodeHtml((r.address as string | undefined) ?? null) || null,
     city: (r.city as string | undefined) ?? 'Albuquerque',
     ...mapCategory(
       (r.category as string | undefined),
