@@ -57,6 +57,31 @@ const CATEGORY_IMAGES: Record<string, string[]> = {
     `${MJ}/c7779be8-b980-400f-9996-15fbc1761318/0_2.jpeg`,
     `${MJ}/c7779be8-b980-400f-9996-15fbc1761318/0_3.jpeg`,
   ],
+  // Aliases — reuse existing images for new categories
+  comedy: [
+    `${MJ}/cea7d54e-e473-409b-8fbc-24ca50c3d626/0_0.jpeg`, // reuse arts & theater masks
+    `${MJ}/cea7d54e-e473-409b-8fbc-24ca50c3d626/0_1.jpeg`,
+    `${MJ}/cea7d54e-e473-409b-8fbc-24ca50c3d626/0_2.jpeg`,
+    `${MJ}/cea7d54e-e473-409b-8fbc-24ca50c3d626/0_3.jpeg`,
+  ],
+  festivals: [
+    `${MJ}/a47a3206-8682-4d01-9e8d-a396962898ec/0_0.jpeg`, // reuse balloon festival
+    `${MJ}/a47a3206-8682-4d01-9e8d-a396962898ec/0_1.jpeg`,
+    `${MJ}/a47a3206-8682-4d01-9e8d-a396962898ec/0_2.jpeg`,
+    `${MJ}/a47a3206-8682-4d01-9e8d-a396962898ec/0_3.jpeg`,
+  ],
+  outdoor: [
+    `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_0.jpeg`, // desert highway into Sandias
+    `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_1.jpeg`,
+    `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_2.jpeg`,
+    `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_3.jpeg`,
+  ],
+  community: [
+    `${MJ}/e181e268-544e-4a60-899e-2a37cebcdb86/0_0.jpeg`, // reuse golden hour patio
+    `${MJ}/e181e268-544e-4a60-899e-2a37cebcdb86/0_1.jpeg`,
+    `${MJ}/e181e268-544e-4a60-899e-2a37cebcdb86/0_2.jpeg`,
+    `${MJ}/e181e268-544e-4a60-899e-2a37cebcdb86/0_3.jpeg`,
+  ],
 }
 
 // Default fallback — used when category is unknown or missing

@@ -4,18 +4,20 @@ import { fetchEvents, NormalizedEvent } from '@/lib/events'
 import { TimeFilter } from '@/lib/utils/dates'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { FilterBar } from './FilterBar'
+import { SearchBar } from './SearchBar'
 import { MapPin, Clock } from 'lucide-react'
 
 export const revalidate = 60
 
 interface PageProps {
-  searchParams: Promise<{ time?: string; category?: string; page?: string }>
+  searchParams: Promise<{ time?: string; category?: string; page?: string; q?: string }>
 }
 
 export default async function EventsPage({ searchParams }: PageProps) {
   const params = await searchParams
   const timeFilter = (params.time as TimeFilter) || 'upcoming'
   const category = params.category || null
+  const search = params.q?.trim() || undefined
   const page = Math.max(1, parseInt(params.page ?? '1', 10))
   const limit = 36
   const offset = (page - 1) * limit
@@ -23,6 +25,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
   const { events, total } = await fetchEvents({
     timeFilter,
     category,
+    search,
     limit,
     offset,
   })
@@ -60,6 +63,11 @@ export default async function EventsPage({ searchParams }: PageProps) {
           </div>
         </div>
 
+        {/* ── Search ── */}
+        <Suspense>
+          <SearchBar />
+        </Suspense>
+
         {/* ── Filters ── */}
         <Suspense>
           <FilterBar
@@ -91,6 +99,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
             totalPages={totalPages}
             time={params.time}
             category={params.category}
+            q={params.q}
           />
         )}
       </div>
@@ -199,16 +208,19 @@ function Pagination({
   totalPages,
   time,
   category,
+  q,
 }: {
   page: number
   totalPages: number
   time?: string
   category?: string
+  q?: string
 }) {
   const buildUrl = (p: number) => {
     const params = new URLSearchParams()
     if (time) params.set('time', time)
     if (category) params.set('category', category)
+    if (q) params.set('q', q)
     if (p > 1) params.set('page', String(p))
     const qs = params.toString()
     return `/events${qs ? `?${qs}` : ''}`
