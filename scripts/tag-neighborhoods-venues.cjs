@@ -178,8 +178,8 @@ function neighborhoodFromAddress(addr, city) {
     if (block < 2000)  return 'EDo (East Downtown)';
     if (block < 3500)  return 'Nob Hill';
     if (block < 5500)  return 'Near Heights';
-    if (block < 8000)  return 'Northeast Heights';
-    return 'Far Northeast Heights';
+    // Merge Far NE Heights into Northeast Heights for a bigger, more useful area
+    return 'Northeast Heights';
   }
 
   if (/central ave.*ne|ne.*central|central.*nob hill/.test(a)) return 'Nob Hill';
@@ -196,8 +196,8 @@ function neighborhoodFromAddress(addr, city) {
     const block = parseInt(lomasMatch[1]);
     if (block < 1500) return 'Downtown';
     if (block < 4000) return 'Midtown';
-    if (block < 8000) return 'Northeast Heights';
-    return 'Far Northeast Heights';
+    // Merge all NE Heights address ranges into one neighborhood
+    return 'Northeast Heights';
   }
 
   if (/lomas blvd/.test(a))    return 'Midtown';
@@ -205,8 +205,8 @@ function neighborhoodFromAddress(addr, city) {
   if (/montgomery.*ne/.test(a)) return 'Northeast Heights';
   if (/academy.*ne/.test(a))    return 'Northeast Heights';
   if (/wyoming.*ne/.test(a))    return 'Northeast Heights';
-  if (/eubank.*ne/.test(a))     return 'Far Northeast Heights';
-  if (/juan tabo/.test(a))      return 'Far Northeast Heights';
+  if (/eubank.*ne/.test(a))     return 'Northeast Heights';
+  if (/juan tabo/.test(a))      return 'Northeast Heights';
   if (/tramway/.test(a))        return 'Far Northeast / Sandia Foothills';
   if (/san mateo.*ne/.test(a))  return 'Northeast Heights';
   if (/louisiana.*ne/.test(a))  return 'Uptown / Midtown';
