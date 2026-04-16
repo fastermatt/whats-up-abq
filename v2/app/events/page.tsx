@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
-import { fetchEvents, NormalizedEvent } from '@/lib/events'
+import { fetchEvents, fetchCategoryCounts, NormalizedEvent } from '@/lib/events'
 import { TimeFilter } from '@/lib/utils/dates'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { FilterBar } from './FilterBar'
@@ -22,13 +22,10 @@ export default async function EventsPage({ searchParams }: PageProps) {
   const limit = 36
   const offset = (page - 1) * limit
 
-  const { events, total } = await fetchEvents({
-    timeFilter,
-    category,
-    search,
-    limit,
-    offset,
-  })
+  const [{ events, total }, categoryCounts] = await Promise.all([
+    fetchEvents({ timeFilter, category, search, limit, offset }),
+    fetchCategoryCounts(),
+  ])
 
   const totalPages = Math.ceil(total / limit)
   const timeLabel = TIME_LABELS[timeFilter] ?? 'Events'
@@ -73,6 +70,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
           <FilterBar
             currentTime={params.time ?? ''}
             currentCategory={params.category ?? ''}
+            categoryCounts={categoryCounts}
           />
         </Suspense>
 

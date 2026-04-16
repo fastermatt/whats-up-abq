@@ -41,8 +41,56 @@ export default async function EventDetailPage({ params }: PageProps) {
   const dateStr = formatDateLong(event.date)
   const timeStr = event.time ?? ''
 
+  // Build ISO start date for JSON-LD
+  const startDate = /^\d{4}-\d{2}-\d{2}$/.test(event.date)
+    ? `${event.date}T12:00:00-06:00`
+    : event.date
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: event.title,
+    startDate,
+    ...(event.description ? { description: event.description } : {}),
+    ...(event.imageUrl ? { image: event.imageUrl } : {}),
+    location: {
+      '@type': 'Place',
+      name: event.venue ?? 'Albuquerque, NM',
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: event.city ?? 'Albuquerque',
+        addressRegion: 'NM',
+        addressCountry: 'US',
+        ...(event.address ? { streetAddress: event.address } : {}),
+      },
+    },
+    ...(event.ticketUrl
+      ? {
+          offers: {
+            '@type': 'Offer',
+            url: event.ticketUrl,
+            availability: 'https://schema.org/InStock',
+            ...(event.price && event.price !== 'Free'
+              ? { price: event.price.replace(/[^0-9.]/g, '').split('–')[0], priceCurrency: 'USD' }
+              : event.price === 'Free'
+              ? { price: '0', priceCurrency: 'USD' }
+              : {}),
+          },
+        }
+      : {}),
+    organizer: {
+      '@type': 'Organization',
+      name: 'ABQ Unplugged',
+      url: 'https://abq-unplugged-v2.netlify.app',
+    },
+  }
+
   return (
     <main className="min-h-dvh bg-[--bg]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* ── Nav ── */}
       <header className="sticky top-0 z-20 bg-[--bg]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">

@@ -57,6 +57,41 @@ interface RawEventRow {
   hidden: boolean | null
 }
 
+// ─── Category counts ──────────────────────────────────────────────────────────
+
+export interface CategoryCount {
+  category: string
+  count: number
+}
+
+/** Returns event counts per top-level category for the upcoming time range. */
+export async function fetchCategoryCounts(): Promise<CategoryCount[]> {
+  const supabase = await createClient()
+  const today = new Date().toISOString().slice(0, 10)
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data } = await (supabase as any)
+    .schema('public')
+    .from('events')
+    .select('source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden')
+    .eq('hidden', false)
+    .gte('event_date', today)
+    .order('event_date', { ascending: true })
+
+  const counts: Record<string, number> = {}
+  for (const row of (data ?? []) as RawEventRow[]) {
+    try {
+      const evt = normalizeRow(row)
+      if (!evt?.category) continue
+      counts[evt.category] = (counts[evt.category] ?? 0) + 1
+    } catch { /* skip */ }
+  }
+
+  return Object.entries(counts)
+    .map(([category, count]) => ({ category, count }))
+    .sort((a, b) => b.count - a.count)
+}
+
 // ─── Main fetch function ──────────────────────────────────────────────────────
 
 export async function fetchEvents({

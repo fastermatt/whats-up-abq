@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useState } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
+import type { CategoryCount } from '@/lib/events'
 
 const TIME_FILTERS = [
   { value: 'today',        label: 'Today' },
@@ -44,9 +45,11 @@ const SPORTS_SUBS = [
 interface FilterBarProps {
   currentTime: string
   currentCategory: string
+  categoryCounts?: CategoryCount[]
 }
 
-export function FilterBar({ currentTime, currentCategory }: FilterBarProps) {
+export function FilterBar({ currentTime, currentCategory, categoryCounts = [] }: FilterBarProps) {
+  const countMap = Object.fromEntries(categoryCounts.map((c) => [c.category, c.count]))
   const router = useRouter()
   const searchParams = useSearchParams()
   const [sportsExpanded, setSportsExpanded] = useState(
@@ -117,6 +120,7 @@ export function FilterBar({ currentTime, currentCategory }: FilterBarProps) {
           const isActive = isSports
             ? currentCategory === 'Sports' || currentCategory.startsWith('Sports > ')
             : currentCategory === cat
+          const count = countMap[cat]
 
           return (
             <button
@@ -129,6 +133,11 @@ export function FilterBar({ currentTime, currentCategory }: FilterBarProps) {
               }`}
             >
               {cat}
+              {count != null && (
+                <span className={`text-[10px] tabular-nums ${isActive ? 'opacity-80' : 'opacity-50'}`}>
+                  {count}
+                </span>
+              )}
               {isSports && (
                 sportsExpanded
                   ? <ChevronUp className="w-3 h-3" />
