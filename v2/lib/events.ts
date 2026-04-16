@@ -45,8 +45,44 @@ export interface FetchEventsOptions {
   search?: string
   freeOnly?: boolean
   maxPrice?: number   // 0 = free only; 25 = under $25; 50 = under $50
+  date?: string       // YYYY-MM-DD — overrides timeFilter when set
   limit?: number
   offset?: number
+}
+
+// ─── Calendar counts ──────────────────────────────────────────────────────────
+
+export interface DateCount {
+  date: string  // YYYY-MM-DD
+  count: number
+}
+
+/** Returns event counts per day between startDate and endDate (inclusive).
+ *  Only reads event_date — no raw JSONB fetched, so egress is minimal. */
+export async function fetchEventCountsByDate(
+  startDate: string,
+  endDate: string,
+): Promise<DateCount[]> {
+  const supabase = await createClient()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data } = await (supabase as any)
+    .schema('public')
+    .from('events')
+    .select('event_date')
+    .eq('hidden', false)
+    .gte('event_date', startDate)
+    .lte('event_date', endDate)
+
+  const counts: Record<string, number> = {}
+  for (const row of (data ?? []) as { event_date: string | null }[]) {
+    if (!row.event_date) continue
+    counts[row.event_date] = (counts[row.event_date] ?? 0) + 1
+  }
+
+  return Object.entries(counts)
+    .map(([date, count]) => ({ date, count }))
+    .sort((a, b) => a.date.localeCompare(b.date))
 }
 
 export interface FetchEventsResult {
@@ -115,6 +151,7 @@ export async function fetchEvents({
   search,
   freeOnly = false,
   maxPrice,
+  date,
   limit = 24,
   offset = 0,
 }: FetchEventsOptions = {}): Promise<FetchEventsResult> {
@@ -139,10 +176,15 @@ export async function fetchEvents({
       .from('events')
       .select(COLS, { count: 'exact' })
       .eq('hidden', false)
-      .gte('event_date', gte)
       .order('event_date', { ascending: true })
 
-    if (lte) query = query.lte('event_date', lte)
+    // date overrides timeFilter — exact day match
+    if (date) {
+      query = query.eq('event_date', date)
+    } else {
+      query = query.gte('event_date', gte)
+      if (lte) query = query.lte('event_date', lte)
+    }
     if (topLevelCat) query = query.eq('category', topLevelCat)
 
     const { data, error, count } = await query.range(offset, offset + limit - 1)
@@ -166,10 +208,14 @@ export async function fetchEvents({
     .from('events')
     .select(COLS)
     .eq('hidden', false)
-    .gte('event_date', gte)
     .order('event_date', { ascending: true })
 
-  if (lte) q = q.lte('event_date', lte)
+  if (date) {
+    q = q.eq('event_date', date)
+  } else {
+    q = q.gte('event_date', gte)
+    if (lte) q = q.lte('event_date', lte)
+  }
   if (topLevelCat) q = q.eq('category', topLevelCat)  // Pre-filter cuts dataset!
 
   const { data, error } = await q
