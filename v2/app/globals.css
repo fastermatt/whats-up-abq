@@ -82,7 +82,24 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Card stagger — fallback for browsers that don't support scroll-driven animations */
+/* Spring card entrance — staggered, with overshoot inertia.
+   Each card gets a --card-i CSS variable (0, 1, 2…) from inline style.
+   The cubic-bezier overshoots, then settles — like cards have weight. */
+@keyframes springUp {
+  0%   { opacity: 0; transform: translateY(22px) scale(0.95); }
+  55%  { opacity: 1; transform: translateY(-5px) scale(1.015); }
+  75%  { transform: translateY(2px) scale(0.997); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .spring-card {
+    animation: springUp 0.55s cubic-bezier(0.34, 1.56, 0.64, 1)
+               calc(var(--card-i, 0) * 38ms) both;
+  }
+}
+
+/* Legacy fallback for browsers without spring-card support */
 @supports not (animation-timeline: view()) {
   .animate-card-in {
     animation: cardIn 0.4s ease-out both;

@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useState } from 'react'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown, ChevronUp, X } from 'lucide-react'
 import type { CategoryCount } from '@/lib/events'
 
 const TIME_FILTERS = [
@@ -146,8 +146,70 @@ export function FilterBar({ currentTime, currentCategory, priceFilter, categoryC
         : 'bg-[#f0e4cc]/60 border border-[#ddc9a3]/60 text-[#4a3f3a] hover:border-[#006a62] hover:text-[#006a62]'
     }`
 
+  // Derive active labels for the pinned badge row
+  const activeTimeFilter = TIME_FILTERS.find(f => f.value === currentTime && currentTime && currentTime !== 'upcoming')
+  const activePriceFilter = PRICE_FILTERS.find(f => f.value === priceFilter)
+  const hasActiveFilters = !!(activeTimeFilter || currentCategory || activePriceFilter)
+
+  const clearCategory = () => { setFilter('category', ''); setSportsExpanded(false); setMusicExpanded(false) }
+  const clearPrice = () => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete('price'); params.delete('free'); params.delete('page')
+    router.push(`/events?${params.toString()}`, { scroll: false })
+  }
+  const clearAll = () => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete('time'); params.delete('category'); params.delete('price'); params.delete('free'); params.delete('page')
+    setSportsExpanded(false); setMusicExpanded(false)
+    router.push(`/events?${params.toString()}`, { scroll: false })
+  }
+
+  const activeCount = [activeTimeFilter, currentCategory, activePriceFilter].filter(Boolean).length
+
   return (
     <div className="space-y-2">
+
+      {/* ── Active filter badges — always visible above scroll rows ── */}
+      {hasActiveFilters && (
+        <div className="flex flex-wrap items-center gap-1.5 animate-fade-in">
+          {activeTimeFilter && (
+            <button
+              onClick={() => setFilter('time', 'upcoming')}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#9a442d] text-white shadow-sm hover:bg-[#7d3725] transition-colors"
+            >
+              {activeTimeFilter.label}
+              <X className="w-3 h-3 opacity-80" />
+            </button>
+          )}
+          {currentCategory && (
+            <button
+              onClick={clearCategory}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#006a62] text-white shadow-sm hover:bg-[#004d47] transition-colors"
+            >
+              {currentCategory.replace(' > ', ' › ')}
+              <X className="w-3 h-3 opacity-80" />
+            </button>
+          )}
+          {activePriceFilter && (
+            <button
+              onClick={clearPrice}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#4f6249] text-white shadow-sm hover:bg-[#3d4d39] transition-colors"
+            >
+              {activePriceFilter.label}
+              <X className="w-3 h-3 opacity-80" />
+            </button>
+          )}
+          {activeCount > 1 && (
+            <button
+              onClick={clearAll}
+              className="px-2.5 py-1 rounded-full text-xs font-medium text-[#8a7a74] border border-[#ddc9a3] hover:text-[#9a442d] hover:border-[#9a442d] transition-colors"
+            >
+              Clear all
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Row 1: Time + Price — single scrollable strip */}
       <ScrollRow>
         {TIME_FILTERS.map(({ value, label }) => {
