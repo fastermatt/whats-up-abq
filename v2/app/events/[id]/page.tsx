@@ -78,7 +78,7 @@ export default async function EventDetailPage({ params }: PageProps) {
             {/* Category badge */}
             {event.category && (
               <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full">
-                {event.category}
+                {event.subcategory ? `${event.category} · ${event.subcategory}` : event.category}
               </div>
             )}
           </div>

@@ -132,7 +132,7 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
         {/* Category badge — top right */}
         {event.category && (
           <div className="absolute top-1.5 right-1.5 bg-black/50 backdrop-blur-sm text-white text-[10px] px-1.5 py-0.5 rounded-full">
-            {event.category}
+            {event.subcategory ? `${event.category} · ${event.subcategory}` : event.category}
           </div>
         )}
 
