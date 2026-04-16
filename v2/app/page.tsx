@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { fetchEvents, fetchRecentlyAdded, fetchFeaturedEvents, NormalizedEvent } from '@/lib/events'
+import { fetchEvents, fetchRecentlyAdded, fetchFeaturedEvents, fetchNeighborhoodCounts, NormalizedEvent } from '@/lib/events'
 import { getHeroImage, getCategoryFallback } from '@/lib/fallback-images'
 import { MapPin, ArrowRight } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
@@ -50,13 +50,14 @@ const websiteJsonLd = {
 }
 
 export default async function DiscoverPage() {
-  const [tonight, tomorrow, weekend, allUpcoming, featured, justAdded] = await Promise.all([
+  const [tonight, tomorrow, weekend, allUpcoming, featured, justAdded, neighborhoodCounts] = await Promise.all([
     fetchEvents({ timeFilter: 'tonight', limit: 10 }),
     fetchEvents({ timeFilter: 'tomorrow', limit: 10 }),
     fetchEvents({ timeFilter: 'this-weekend', limit: 10 }),
     fetchEvents({ timeFilter: 'upcoming', limit: 1 }),
     fetchFeaturedEvents(6),
     fetchRecentlyAdded(10),
+    fetchNeighborhoodCounts(),
   ])
 
   const now = new Date()
@@ -247,6 +248,42 @@ export default async function DiscoverPage() {
             seeAllHref="/events"
             sectionLabel="New"
           />
+        </AnimateIn>
+      )}
+
+      {/* ── Explore by Neighborhood ── */}
+      {neighborhoodCounts.length > 0 && (
+        <AnimateIn animation="fade-up" delay={200}>
+          <section className="py-6 border-t border-[#f0e4cc]/60">
+            <div className="max-w-6xl mx-auto px-4 mb-3">
+              <p className="text-[10px] uppercase tracking-[0.15em] text-[#8a7a74] mb-0.5">Browse by area</p>
+              <h3
+                className="text-xl font-black text-[#1a1614]"
+                style={{ fontFamily: 'var(--font-epilogue)' }}
+              >
+                Explore by Neighborhood
+              </h3>
+            </div>
+            <div
+              className="flex gap-2 overflow-x-auto px-4 pb-2"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {neighborhoodCounts.slice(0, 14).map(({ neighborhood, count, slug }) => (
+                <Link
+                  key={slug}
+                  href={`/neighborhoods/${slug}`}
+                  className="flex-shrink-0 flex flex-col items-start px-3.5 py-2.5 rounded-xl bg-white border border-[#ddc9a3] hover:border-[#006a62] hover:shadow-sm transition-all group"
+                >
+                  <span className="text-xs font-bold text-[#1a1614] group-hover:text-[#006a62] transition-colors whitespace-nowrap">
+                    {neighborhood}
+                  </span>
+                  <span className="text-[10px] text-[#8a7a74] tabular-nums">
+                    {count} event{count !== 1 ? 's' : ''}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </section>
         </AnimateIn>
       )}
 
