@@ -1,17 +1,19 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { fetchEvents, fetchCategoryCounts, NormalizedEvent } from '@/lib/events'
+import { fetchEvents, fetchCategoryCounts, fetchEventCountsByDate, NormalizedEvent } from '@/lib/events'
 import { TimeFilter } from '@/lib/utils/dates'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { FilterBar } from './FilterBar'
 import { SearchBar } from './SearchBar'
+import { CalendarPicker } from './CalendarPicker'
+import { CalendarToggle } from './CalendarToggle'
 import { MapPin, Clock } from 'lucide-react'
 
 export const revalidate = 60
 
 interface PageProps {
-  searchParams: Promise<{ time?: string; category?: string; page?: string; q?: string; free?: string; price?: string }>
+  searchParams: Promise<{ time?: string; category?: string; page?: string; q?: string; free?: string; price?: string; date?: string; cal?: string }>
 }
 
 const CATEGORY_TITLES: Record<string, string> = {
@@ -93,6 +95,8 @@ export default async function EventsPage({ searchParams }: PageProps) {
   const timeFilter = (params.time as TimeFilter) || 'upcoming'
   const category = params.category || null
   const search = params.q?.trim() || undefined
+  const selectedDate = params.date || null  // YYYY-MM-DD from calendar
+  const showCal = params.cal === '1' || !!selectedDate
   // Support both legacy `free=1` and new `price=free|25|50`
   const priceParam = params.price || (params.free === '1' ? 'free' : undefined)
   const freeOnly = priceParam === 'free'
@@ -101,13 +105,29 @@ export default async function EventsPage({ searchParams }: PageProps) {
   const limit = 36
   const offset = (page - 1) * limit
 
-  const [{ events, total }, categoryCounts] = await Promise.all([
-    fetchEvents({ timeFilter, category, search, freeOnly, maxPrice, limit, offset }),
+  // Calendar counts: fetch ~3 months around today so navigation works client-side
+  const today = new Date()
+  const calStart = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+    .toISOString().slice(0, 10)
+  const calEnd = new Date(today.getFullYear(), today.getMonth() + 3, 0)
+    .toISOString().slice(0, 10)
+
+  const [{ events, total }, categoryCounts, calendarCounts] = await Promise.all([
+    fetchEvents({ timeFilter, category, search, freeOnly, maxPrice, date: selectedDate ?? undefined, limit, offset }),
     fetchCategoryCounts(),
+    showCal ? fetchEventCountsByDate(calStart, calEnd) : Promise.resolve([]),
   ])
 
   const totalPages = Math.ceil(total / limit)
-  const timeLabel = TIME_LABELS[timeFilter] ?? 'Events'
+
+  // Title: date filter overrides time label
+  let timeLabel: string
+  if (selectedDate) {
+    const d = new Date(selectedDate + 'T12:00:00')
+    timeLabel = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+  } else {
+    timeLabel = TIME_LABELS[timeFilter] ?? 'Events'
+  }
 
   return (
     <main className="min-h-dvh bg-[--bg]">
@@ -126,8 +146,8 @@ export default async function EventsPage({ searchParams }: PageProps) {
       </header>
 
       <div className="max-w-6xl mx-auto px-4 py-5 space-y-4">
-        {/* ── Title row ── */}
-        <div className="flex items-end justify-between animate-fade-in">
+        {/* ── Title row + Calendar toggle ── */}
+        <div className="flex items-center justify-between animate-fade-in">
           <div>
             <h1
               className="text-2xl font-black text-[#1a1614]"
@@ -137,7 +157,18 @@ export default async function EventsPage({ searchParams }: PageProps) {
             </h1>
             <p className="text-[#8a7a74] text-xs mt-0.5">Albuquerque, NM</p>
           </div>
+          {/* Calendar toggle button — client component so it can read/set URL param */}
+          <Suspense>
+            <CalendarToggle isOpen={showCal} />
+          </Suspense>
         </div>
+
+        {/* ── Calendar (shown when cal=1 or date is set) ── */}
+        {showCal && (
+          <Suspense>
+            <CalendarPicker counts={calendarCounts} selectedDate={selectedDate} />
+          </Suspense>
+        )}
 
         {/* ── Search ── */}
         <Suspense>
