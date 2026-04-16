@@ -318,8 +318,11 @@ function normalizeRow(row: RawEventRow): NormalizedEvent | null {
     // Apply ai_enrichment overrides (from LLM enrichment pass)
     if (evt && row.ai_enrichment) {
       const ai = row.ai_enrichment as Record<string, unknown>
-      if (typeof ai.category === 'string')    evt.category   = ai.category
-      if (typeof ai.subcategory === 'string') evt.subcategory = ai.subcategory
+      // Only let AI override category when the code classifier returned null —
+      // this prevents mis-labeled AI categories (e.g. rock band → Comedy) from
+      // overriding a confident code-classifier result.
+      if (typeof ai.category === 'string' && evt.category === null) evt.category = ai.category
+      if (typeof ai.subcategory === 'string' && evt.subcategory === null) evt.subcategory = ai.subcategory
       if (typeof ai.about === 'string')       evt.about      = ai.about
       if (Array.isArray(ai.highlights))       evt.highlights = (ai.highlights as unknown[]).map(h => String(h))
       if (typeof ai.venue_tips === 'string')  evt.venueTips  = ai.venue_tips
