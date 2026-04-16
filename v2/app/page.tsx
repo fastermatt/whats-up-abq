@@ -4,6 +4,8 @@ import { fetchEvents, fetchRecentlyAdded, fetchFeaturedEvents, fetchNeighborhood
 import { getHeroImage, getCategoryFallback } from '@/lib/fallback-images'
 import { MapPin, ArrowRight } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
+import MoodChips from '@/app/components/MoodChips'
+import SurpriseButton from '@/app/components/SurpriseButton'
 
 export const revalidate = 60
 
@@ -122,7 +124,11 @@ export default async function DiscoverPage() {
             >
               What&apos;s<br />Happening<br />Tonight
             </h2>
-            <p className="text-sm text-white/60 mb-6">{dayStr}</p>
+            <p className="text-sm text-white/60 mb-4">{dayStr}</p>
+            {/* Surprise Me CTA — inline with hero */}
+            <div className="mb-6">
+              <SurpriseButton />
+            </div>
           </div>
 
           {/* Quick stats */}
@@ -163,6 +169,9 @@ export default async function DiscoverPage() {
           ))}
         </div>
       </section>
+
+      {/* ── Mood chips ── */}
+      <MoodChips />
 
       {/* ── Editor's Picks — Featured Events ── */}
       {featured.length > 0 && (
@@ -268,19 +277,20 @@ export default async function DiscoverPage() {
               className="flex gap-2 overflow-x-auto px-4 pb-2"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-              {neighborhoodCounts.slice(0, 14).map(({ neighborhood, count, slug }) => (
-                <Link
-                  key={slug}
-                  href={`/neighborhoods/${slug}`}
-                  className="flex-shrink-0 flex flex-col items-start px-3.5 py-2.5 rounded-xl bg-white border border-[#ddc9a3] hover:border-[#006a62] hover:shadow-sm transition-all group"
-                >
-                  <span className="text-xs font-bold text-[#1a1614] group-hover:text-[#006a62] transition-colors whitespace-nowrap">
-                    {neighborhood}
-                  </span>
-                  <span className="text-[10px] text-[#8a7a74] tabular-nums">
-                    {count} event{count !== 1 ? 's' : ''}
-                  </span>
-                </Link>
+              {neighborhoodCounts.slice(0, 14).map(({ neighborhood, count, slug }, i) => (
+                <AnimateIn key={slug} animation="fade-up" delay={Math.min(i * 50, 300)} className="flex-shrink-0">
+                  <Link
+                    href={`/neighborhoods/${slug}`}
+                    className="flex flex-col items-start px-3.5 py-2.5 rounded-xl bg-white border border-[#ddc9a3] hover:border-[#006a62] hover:shadow-sm transition-all group"
+                  >
+                    <span className="text-xs font-bold text-[#1a1614] group-hover:text-[#006a62] transition-colors whitespace-nowrap">
+                      {neighborhood}
+                    </span>
+                    <span className="text-[10px] text-[#8a7a74] tabular-nums">
+                      {count} event{count !== 1 ? 's' : ''}
+                    </span>
+                  </Link>
+                </AnimateIn>
               ))}
             </div>
           </section>

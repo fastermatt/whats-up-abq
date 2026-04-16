@@ -224,6 +224,25 @@ body {
   }
 }
 
+/* ─── Scroll-hint nudge — teaches users about horizontal scrollability ── */
+/* Runs once on mount, briefly nudges content left then snaps back.       */
+@keyframes scroll-hint {
+  0%   { transform: translateX(0); }
+  35%  { transform: translateX(-14px); }
+  65%  { transform: translateX(-14px); }
+  100% { transform: translateX(0); }
+}
+
+.scroll-hint-inner {
+  animation: scroll-hint 1.6s ease-in-out 0.4s 1 both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-hint-inner {
+    animation: none;
+  }
+}
+
 /* ─── Reduced motion — respect user preference ───────────────────────── */
 /* Spring cards are handled above. Transition-based animations obey this. */
 @media (prefers-reduced-motion: reduce) {

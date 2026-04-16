@@ -8,6 +8,7 @@ import { getCategoryFallback } from '@/lib/fallback-images'
 import { createClient } from '@/lib/supabase/server'
 import { MapPin, Clock, Calendar, Ticket, ArrowLeft, ExternalLink, Users } from 'lucide-react'
 import ShareButton from './ShareButton'
+import AddToCalendar from './AddToCalendar'
 import { AnimateIn } from '@/app/components/AnimateIn'
 import { ReportForm } from '@/app/components/ReportForm'
 import { SaveEventButton } from '@/app/components/SaveEventButton'
@@ -358,6 +359,18 @@ export default async function EventDetailPage({ params }: PageProps) {
             </a>
           )}
           <ShareButton title={event.title} />
+        </div>
+
+        {/* Add to calendar */}
+        <div className="mb-4">
+          <AddToCalendar
+            id={event.id}
+            title={event.title}
+            date={event.date}
+            venue={event.venue}
+            address={event.address}
+            description={event.description}
+          />
         </div>
 
         {/* Social row — save/going/check-in buttons */}

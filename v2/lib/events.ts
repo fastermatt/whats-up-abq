@@ -459,6 +459,156 @@ export async function fetchRecentlyAdded(limit = 10): Promise<NormalizedEvent[]>
     .slice(0, limit)
 }
 
+// ─── Source priority scoring ──────────────────────────────────────────────────
+
+/** Higher = shown first in ranked editorial feeds */
+function sourcePriority(source: string): number {
+  switch (source) {
+    case 'nhcc':         return 5
+    case 'seatgeek':     return 4
+    case 'ticketmaster': return 3
+    case 'eventbrite':   return 2
+    case 'local':        return 1
+    case 'volunteer':    return 0
+    default:             return 0
+  }
+}
+
+/** Tonight's events (today in Denver time), ranked:
+ *  featured DESC → has_photo DESC → source_priority DESC → event_date ASC.
+ *  Returns up to 60. */
+export async function fetchTonightRanked(limit = 60): Promise<NormalizedEvent[]> {
+  const supabase = await createClient()
+  // Compute today's date in Denver timezone
+  const todayDenver = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Denver' }) // YYYY-MM-DD
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .schema('public')
+    .from('events')
+    .select(COLS)
+    .eq('hidden', false)
+    .eq('event_date', todayDenver)
+    .order('featured',    { ascending: false })
+    .order('event_date',  { ascending: true })
+    .limit(limit * 4) // fetch extra to sort in JS for photo + priority
+
+  if (error) {
+    console.error('[fetchTonightRanked] Supabase error:', error.message)
+    return []
+  }
+
+  return ((data ?? []) as RawEventRow[])
+    .map(normalizeRow)
+    .filter((e): e is NormalizedEvent => e !== null)
+    .sort((a, b) => {
+      // featured DESC
+      if ((b.isFeatured ? 1 : 0) !== (a.isFeatured ? 1 : 0))
+        return (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0)
+      // has_photo DESC
+      const aPhoto = a.imageUrl ? 1 : 0
+      const bPhoto = b.imageUrl ? 1 : 0
+      if (bPhoto !== aPhoto) return bPhoto - aPhoto
+      // source_priority DESC
+      const aPri = sourcePriority(a.source)
+      const bPri = sourcePriority(b.source)
+      if (bPri !== aPri) return bPri - aPri
+      // event_date ASC
+      return a.date.localeCompare(b.date)
+    })
+    .slice(0, limit)
+}
+
+/** Weekend events (Fri/Sat/Sun), ranked same as tonight.
+ *  If today is Mon–Thu: uses the coming Fri–Sun.
+ *  If today is Fri/Sat/Sun: uses the current weekend.
+ *  Returns up to 100. */
+export async function fetchWeekendRanked(limit = 100): Promise<NormalizedEvent[]> {
+  const supabase = await createClient()
+
+  // Compute day-of-week in Denver timezone (0=Sun … 6=Sat)
+  const nowDenver = new Date().toLocaleString('en-US', { timeZone: 'America/Denver', weekday: 'short' })
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  const dayIndex = dayNames.indexOf(nowDenver)
+  const todayDenver = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Denver' })
+
+  // Compute Fri/Sat/Sun as YYYY-MM-DD strings
+  let fridayOffset: number
+  if (dayIndex === 0) fridayOffset = -2       // Sunday: Fri was 2 days ago
+  else if (dayIndex === 6) fridayOffset = -1  // Saturday: Fri was yesterday
+  else if (dayIndex === 5) fridayOffset = 0   // Friday: today is Friday
+  else fridayOffset = 5 - dayIndex            // Mon–Thu: days until Friday
+
+  const fridayDate = new Date(
+    new Date(todayDenver + 'T12:00:00').getTime() + fridayOffset * 86400_000
+  ).toLocaleDateString('en-CA', { timeZone: 'UTC' })
+  const satDate = new Date(
+    new Date(fridayDate + 'T12:00:00').getTime() + 1 * 86400_000
+  ).toLocaleDateString('en-CA', { timeZone: 'UTC' })
+  const sunDate = new Date(
+    new Date(fridayDate + 'T12:00:00').getTime() + 2 * 86400_000
+  ).toLocaleDateString('en-CA', { timeZone: 'UTC' })
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .schema('public')
+    .from('events')
+    .select(COLS)
+    .eq('hidden', false)
+    .in('event_date', [fridayDate, satDate, sunDate])
+    .order('featured',   { ascending: false })
+    .order('event_date', { ascending: true })
+    .limit(limit * 4)
+
+  if (error) {
+    console.error('[fetchWeekendRanked] Supabase error:', error.message)
+    return []
+  }
+
+  return ((data ?? []) as RawEventRow[])
+    .map(normalizeRow)
+    .filter((e): e is NormalizedEvent => e !== null)
+    .sort((a, b) => {
+      if ((b.isFeatured ? 1 : 0) !== (a.isFeatured ? 1 : 0))
+        return (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0)
+      const aPhoto = a.imageUrl ? 1 : 0
+      const bPhoto = b.imageUrl ? 1 : 0
+      if (bPhoto !== aPhoto) return bPhoto - aPhoto
+      const aPri = sourcePriority(a.source)
+      const bPri = sourcePriority(b.source)
+      if (bPri !== aPri) return bPri - aPri
+      return a.date.localeCompare(b.date)
+    })
+    .slice(0, limit)
+}
+
+/** Compute the Fri/Sat/Sun dates for the weekend display heading. */
+export function getWeekendDates(): { fri: string; sat: string; sun: string } {
+  const nowDenver = new Date().toLocaleString('en-US', { timeZone: 'America/Denver', weekday: 'short' })
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  const dayIndex = dayNames.indexOf(nowDenver)
+  const todayDenver = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Denver' })
+
+  let fridayOffset: number
+  if (dayIndex === 0) fridayOffset = -2
+  else if (dayIndex === 6) fridayOffset = -1
+  else if (dayIndex === 5) fridayOffset = 0
+  else fridayOffset = 5 - dayIndex
+
+  const toDate = (offset: number) =>
+    new Date(
+      new Date(todayDenver + 'T12:00:00').getTime() + offset * 86400_000
+    ).toLocaleDateString('en-US', {
+      weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC',
+    })
+
+  return {
+    fri: toDate(fridayOffset),
+    sat: toDate(fridayOffset + 1),
+    sun: toDate(fridayOffset + 2),
+  }
+}
+
 export async function fetchEventById(id: string): Promise<NormalizedEvent | null> {
   const supabase = await createClient()
 
