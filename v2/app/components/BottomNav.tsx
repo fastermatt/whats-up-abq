@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Compass, CalendarDays, Bookmark, User } from 'lucide-react'
+import { Compass, CalendarDays, Moon, Bookmark, User } from 'lucide-react'
 
 const NAV_ITEMS = [
   { href: '/',        label: 'Discover', Icon: Compass      },
   { href: '/events',  label: 'Events',   Icon: CalendarDays },
+  { href: '/tonight', label: 'Tonight',  Icon: Moon         },
   { href: '/saved',   label: 'Saved',    Icon: Bookmark     },
   { href: '/profile', label: 'Profile',  Icon: User         },
 ] as const
@@ -19,7 +20,7 @@ export default function BottomNav() {
       className="fixed bottom-0 inset-x-0 z-50 bg-white/92 backdrop-blur-xl border-t border-[#f0e4cc] md:hidden"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
-      <div className="grid grid-cols-4 h-16 max-w-lg mx-auto">
+      <div className="grid grid-cols-5 h-16 max-w-lg mx-auto">
         {NAV_ITEMS.map(({ href, label, Icon }) => {
           const isActive =
             href === '/'
