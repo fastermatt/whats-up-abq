@@ -199,18 +199,30 @@ export default async function EventDetailPage({ params }: PageProps) {
             </div>
           )}
 
-          {/* Venue — links to venue page */}
+          {/* Venue — links to venue page + Google Maps link */}
           {event.venue && (
-            <Link
-              href={`/venues/${venueToSlug(event.venue)}`}
-              className="flex items-center gap-2 bg-white rounded-xl px-3 py-2 border border-[#f0e4cc] shadow-sm hover:border-[#9a442d]/40 hover:shadow-md transition-all group"
-            >
-              <MapPin className="w-4 h-4 text-[#006a62] group-hover:text-[#9a442d] transition-colors" />
-              <div>
-                <p className="text-xs font-semibold text-[#1a1614] group-hover:text-[#9a442d] transition-colors">{event.venue}</p>
-                {event.address && <p className="text-[11px] text-[#8a7a74]">{event.address}</p>}
-              </div>
-            </Link>
+            <div className="flex flex-col gap-1">
+              <Link
+                href={`/venues/${venueToSlug(event.venue)}`}
+                className="flex items-center gap-2 bg-white rounded-xl px-3 py-2 border border-[#f0e4cc] shadow-sm hover:border-[#9a442d]/40 hover:shadow-md transition-all group"
+              >
+                <MapPin className="w-4 h-4 text-[#006a62] group-hover:text-[#9a442d] transition-colors flex-shrink-0" />
+                <div>
+                  <p className="text-xs font-semibold text-[#1a1614] group-hover:text-[#9a442d] transition-colors">{event.venue}</p>
+                  {event.address && <p className="text-[11px] text-[#8a7a74]">{event.address}</p>}
+                </div>
+              </Link>
+              {/* Free map link — opens Google Maps search, no API key needed */}
+              <a
+                href={`https://maps.google.com/?q=${encodeURIComponent([event.venue, event.address, event.city ?? 'Albuquerque NM'].filter(Boolean).join(', '))}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-1 text-[10px] text-[#006a62] hover:text-[#9a442d] transition-colors font-medium flex items-center gap-1"
+              >
+                <MapPin className="w-2.5 h-2.5" />
+                Open in Google Maps
+              </a>
+            </div>
           )}
 
           {/* Price */}

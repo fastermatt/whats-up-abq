@@ -35,8 +35,8 @@ if (fs.existsSync(envPath)) {
 const SUPABASE_URL      = process.env.SUPABASE_URL;
 const SUPABASE_KEY      = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const LM_STUDIO_URL     = process.env.LM_STUDIO_URL || 'http://localhost:1234';
-const LM_MODEL          = process.env.LM_MODEL      || 'gemma-4-e4b-uncensored-hauhaucs-aggressive';
-const CONCURRENCY       = parseInt(process.env.CONCURRENCY || '2', 10);
+const LM_MODEL          = process.env.LM_MODEL      || 'google/gemma-4-e4b';
+const CONCURRENCY       = parseInt(process.env.CONCURRENCY || '1', 10); // 1 = safe; model takes ~50s/event
 const FORCE             = process.argv.includes('--force');
 const LIMIT_ARG         = process.argv.find(a => a.startsWith('--limit='));
 const LIMIT             = LIMIT_ARG ? parseInt(LIMIT_ARG.split('=')[1], 10) : Infinity;
@@ -113,7 +113,7 @@ async function callLM(prompt, retries = 2) {
       const res = await request(`${LM_STUDIO_URL}/v1/chat/completions`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        timeout: 90000,
+        timeout: 180000,
       }, payload);
       return res.choices?.[0]?.message?.content?.trim() || '';
     } catch (err) {
@@ -164,55 +164,155 @@ const MOTIVATION_HOOKS = {
   general:   'Getting out and meeting people in person is one of the most powerful things you can do for your mental health.',
 };
 
+// ── ABQ neighborhood lookup ────────────────────────────────────────────────────
+// Maps venue names and street addresses to accurate Albuquerque neighborhood context.
+// This prevents the LLM from guessing and hallucinating location details.
+const KNOWN_VENUES = {
+  'nexus brewery':              { neighborhood: 'near I-25 / Pan American Freeway in northeast Albuquerque (midtown, close to Uptown)', parking: 'Large parking lot on-site.' },
+  'isleta amphitheater':        { neighborhood: 'in the South Valley near I-25 south', parking: 'Large parking lots on-site; expect traffic — arrive 45 min early for big shows.' },
+  'isleta amphitheatre':        { neighborhood: 'in the South Valley near I-25 south', parking: 'Large parking lots on-site; expect traffic — arrive 45 min early for big shows.' },
+  'tingley coliseum':           { neighborhood: 'at Expo New Mexico / State Fairgrounds, midtown (near Louisiana Blvd)', parking: 'Fairgrounds parking on-site; $10–15 typical.' },
+  'expo new mexico':            { neighborhood: 'at the State Fairgrounds, midtown Albuquerque', parking: 'Large fairgrounds parking; $10–15 typical.' },
+  'sandia resort':              { neighborhood: 'at the base of the Sandia Mountains in the far northeast (Tramway area)', parking: 'Free valet and self-parking on-site.' },
+  'sandia casino':              { neighborhood: 'at the base of the Sandia Mountains in the far northeast (Tramway area)', parking: 'Free parking on-site.' },
+  'hard rock hotel':            { neighborhood: 'in the South Valley near I-25 south (exit 220)', parking: 'Free parking on-site.' },
+  'hard rock casino':           { neighborhood: 'in the South Valley near I-25 south (exit 220)', parking: 'Free parking on-site.' },
+  'popejoy hall':               { neighborhood: 'on the UNM campus in central Albuquerque', parking: 'UNM parking structures nearby; Yale Parking Structure is closest.' },
+  'keller hall':                { neighborhood: 'on the UNM campus in central Albuquerque', parking: 'UNM parking structures nearby.' },
+  'launchpad':                  { neighborhood: 'on Central Ave in Downtown/EDo (East Downtown)', parking: 'Street parking on Central and side streets; Albuquerque has free 2-hour street parking downtown.' },
+  'sunshine theater':           { neighborhood: 'on Central Ave in Downtown Albuquerque', parking: 'Street parking on Central; free city lot nearby on 1st St.' },
+  'meow wolf':                  { neighborhood: 'in the Railyard district of Santa Fe (not Albuquerque — about 60 miles north)', parking: 'Dedicated parking lot adjacent.' },
+  'kiva auditorium':            { neighborhood: 'at the Albuquerque Convention Center, Downtown', parking: 'Convention Center parking garage on-site (paid).' },
+  'albuquerque convention':     { neighborhood: 'in Downtown Albuquerque', parking: 'Convention Center parking garage (paid); street parking available.' },
+  'isotopes park':              { neighborhood: 'just south of UNM on Avenida Cesar Chavez, central Albuquerque', parking: 'Large stadium lots on-site; $5–10.' },
+  'rio rancho events center':   { neighborhood: 'in Rio Rancho, about 15 miles northwest of downtown Albuquerque', parking: 'Free parking on-site.' },
+  'rio rancho civic center':    { neighborhood: 'in Rio Rancho, about 15 miles northwest of downtown Albuquerque', parking: 'Free parking adjacent.' },
+  'nob hill':                   { neighborhood: 'in the Nob Hill neighborhood along Central Ave, east of Downtown', parking: 'Street parking on Central and side streets.' },
+  'hotel albuquerque':          { neighborhood: 'in Old Town Albuquerque, near the original plaza', parking: 'Hotel parking garage on-site.' },
+  'duran\'s pharmacy':          { neighborhood: 'in Old Town / Barelas neighborhood near 12th and Central', parking: 'Small lot; street parking nearby.' },
+  'abq biopark':                { neighborhood: 'in Albuquerque\'s South Valley/Barelas near the Rio Grande', parking: 'Large parking lots on-site; $3 typical.' },
+  'biopark':                    { neighborhood: 'near the Rio Grande in central/south Albuquerque', parking: 'Large parking lots on-site.' },
+  'albuquerque museum':         { neighborhood: 'in Old Town Albuquerque near the plaza', parking: 'Museum lot on Mountain Rd; Old Town street parking nearby.' },
+  'national hispanic cultural': { neighborhood: 'in the Barelas neighborhood, south of Downtown along 4th St', parking: 'Free parking lot on-site.' },
+};
+
+function getVenueContext(venueName, address) {
+  const key = (venueName || '').toLowerCase();
+  const addr = (address || '').toLowerCase();
+  const combined = key + ' ' + addr;
+
+  // Check known venues first (most accurate)
+  for (const [pattern, info] of Object.entries(KNOWN_VENUES)) {
+    if (combined.includes(pattern)) return info;
+  }
+
+  // Derive neighborhood from street/address patterns
+  let neighborhood = null;
+  let parking = null;
+
+  if (/pan american|pan-american freeway/.test(addr)) {
+    neighborhood = 'near the Pan American Freeway (I-25), midtown Albuquerque';
+    parking = 'Parking is typically available in adjacent lots off the frontage road.';
+  } else if (/central ave/.test(addr)) {
+    const block = parseInt(addr.match(/(\d+)\s+central/)?.[1] || '0');
+    if (block < 1000)       neighborhood = 'on Central Ave in Downtown Albuquerque';
+    else if (block < 3000)  neighborhood = 'on Central Ave / EDo (East Downtown)';
+    else if (block < 5000)  neighborhood = 'on Central Ave in the Nob Hill neighborhood';
+    else if (block < 8000)  neighborhood = 'on Central Ave in the Heights';
+    else                    neighborhood = 'on Central Ave in the Far Heights';
+  } else if (/university blvd/.test(addr)) {
+    neighborhood = 'on University Blvd near UNM, central Albuquerque';
+  } else if (/lomas blvd/.test(addr)) {
+    neighborhood = 'on Lomas Blvd in central Albuquerque';
+  } else if (/paseo del norte/.test(addr)) {
+    neighborhood = 'near Paseo del Norte, in the north Albuquerque / Journal Center area';
+  } else if (/montgomery/.test(addr)) {
+    neighborhood = 'on Montgomery in the Northeast Heights';
+  } else if (/academy.*ne|ne.*academy/.test(addr)) {
+    neighborhood = 'in the Northeast Heights near Academy Blvd';
+  } else if (/rio rancho/.test(addr) || /rio rancho/.test(key)) {
+    neighborhood = 'in Rio Rancho, about 15 miles northwest of downtown Albuquerque';
+  } else if (/4th st.*nw|nw.*4th/.test(addr)) {
+    neighborhood = 'on North 4th St NW, in the North Valley area';
+  } else if (/old town|mountain rd nw/.test(addr)) {
+    neighborhood = 'in Old Town Albuquerque';
+  } else if (/downtown|civic plaza|marquette|gold ave|copper ave/.test(addr)) {
+    neighborhood = 'in Downtown Albuquerque';
+  }
+
+  if (neighborhood || parking) return { neighborhood, parking };
+  return null;
+}
+
 // ── Build prompt ──────────────────────────────────────────────────────────────
 function buildPrompt(event) {
   const raw        = event.raw || event;
-  const name       = raw.name || 'Unknown Event';
-  const venue      = raw._embedded?.venues?.[0];
-  const venueName  = venue?.name || '';
-  const venueAddr  = venue?.address?.line1 ? `${venue.address.line1}, ${venue.city?.name || 'Albuquerque'}, NM` : 'Albuquerque, NM';
-  const date       = raw.dates?.start?.localDate || '';
+  const name       = raw.name || raw.title || 'Unknown Event';
+
+  // Support both TM-format (_embedded.venues) and Eventbrite/local (venue field)
+  const tmVenue    = raw._embedded?.venues?.[0];
+  const ebVenue    = raw.venue;
+  const venueName  = tmVenue?.name || (typeof ebVenue === 'object' ? ebVenue?.name : ebVenue) || '';
+  const addrLine   = tmVenue?.address?.line1
+                  || (typeof ebVenue === 'object' ? ebVenue?.address?.localized_address_display || ebVenue?.address?.address_1 : null)
+                  || raw.address || '';
+  const cityName   = tmVenue?.city?.name || (typeof ebVenue === 'object' ? ebVenue?.address?.city : null) || 'Albuquerque';
+  const venueAddr  = addrLine ? `${addrLine}, ${cityName}, NM` : `${cityName}, NM`;
+
+  const date       = raw.dates?.start?.localDate || raw.event_date || '';
   const time       = raw.dates?.start?.localTime || '';
   const segment    = raw.classifications?.[0]?.segment?.name || '';
   const genre      = raw.classifications?.[0]?.genre?.name   || '';
-  const info       = raw.info || raw.description || '';
-  const parking    = venue?.parkingDetail || '';
+  const info       = raw.info || raw.description || (typeof raw.description === 'object' ? raw.description?.text : '') || '';
+  const parking    = tmVenue?.parkingDetail || '';
   const category   = [segment, genre].filter(Boolean).join(' / ');
   const cat        = detectCategory(event);
   const motivation = MOTIVATION_HOOKS[cat];
+
+  // Pre-compute neighborhood so the model doesn't have to guess
+  const venueCtx   = getVenueContext(venueName, addrLine);
+  const neighborhoodLine = venueCtx?.neighborhood
+    ? `- Venue neighborhood (use this, do NOT contradict it): ${venueCtx.neighborhood}`
+    : '';
+  const parkingLine = (venueCtx?.parking || parking)
+    ? `- Parking info: ${venueCtx?.parking || parking.slice(0, 200)}`
+    : '';
 
   return `You are a passionate local Albuquerque events guide whose mission is to get people off their couches and into the city together. You believe in-person experiences are transformative.
 
 Given the following event details, produce a JSON object with exactly these keys:
 
 {
-  "about": "1-2 sentences about the artist, performer, or event — specific and interesting, NOT generic. For bands: mention their sound and a notable fact. For sports: mention teams and stakes. For community events: paint the experience.",
+  "about": "1-2 sentences about the artist, performer, or event — specific and interesting, NOT generic. For bands: mention their sound and a notable fact. For sports: mention teams and stakes. For community events: paint the vivid experience.",
   "highlights": [
     "specific highlight about what attendees will experience",
     "another concrete, enthusiastic thing to expect",
     "${motivation}"
   ],
-  "venue_tips": "1-2 practical sentences about parking, transit, or arrival tips for this venue in Albuquerque (be specific to the neighborhood).",
-  "local_tips": "1 warm, insider sentence — a nearby restaurant, bar, coffee shop, or activity to pair with this event. Make it feel like advice from a local friend."
+  "venue_tips": "1-2 practical sentences covering: where the venue is in the city (use the neighborhood context provided — do NOT contradict it), parking or transit tips, and anything useful about arrival.",
+  "local_tips": "1 warm, insider sentence — a nearby restaurant, bar, coffee shop, or activity to pair with this event. Name a real, specific ABQ spot."
 }
 
 EVENT DETAILS:
 - Name: ${name}
 - Category: ${category || 'Event'}
 - Date: ${date}${time ? ' at ' + time : ''}
-- Venue: ${venueName}${venueAddr ? ' — ' + venueAddr : ''}
+- Venue: ${venueName}${venueAddr !== cityName + ', NM' ? ' — ' + venueAddr : ''}
+${neighborhoodLine}
+${parkingLine}
 ${info ? `- Description: ${info.slice(0, 400)}` : ''}
-${parking ? `- Venue parking info: ${parking.slice(0, 200)}` : ''}
 
 Rules:
 - Return ONLY the raw JSON object. No markdown, no code fences, no extra text.
 - "highlights" MUST be an array of exactly 3 strings.
 - The third highlight MUST be the motivation hook provided — include it verbatim or closely paraphrased.
 - Keep each field warm, direct, and human. Avoid corporate/generic language.
-- Local tips should name actual ABQ spots (Frontier Restaurant, Casa de Benavidez, Nob Hill, Old Town, etc.) when relevant.
-- If you don't know the exact venue details, give solid general tips for that part of ABQ.
-- NEVER mention specific days of the week (Monday, Tuesday, Friday, etc.) in "about" or "highlights" unless the event details above explicitly state which days. Never invent a recurring schedule or specific day.
-- For volunteer/signup events, describe what participants do — not when slots are available.`;
+- CRITICAL: If a "Venue neighborhood" line is provided above, use it verbatim for location context in venue_tips. NEVER contradict it or substitute your own geographic claim.
+- If no neighborhood context is provided, describe the venue only by its street/address — do NOT guess or claim which part of the city it is in.
+- Local tips should name specific, real ABQ restaurants or bars near the venue (Frontier Restaurant, Casa de Benavidez, Duran's Pharmacy, Nob Hill spots, etc.).
+- NEVER mention specific days of the week (Monday, Tuesday, Friday, etc.) in "about" or "highlights" unless the event details above explicitly state which days. Never invent a recurring schedule.
+- For volunteer/signup events, describe what participants do — not when slots are available.
+- If the event is in Rio Rancho or Santa Fe (not Albuquerque), acknowledge that in venue_tips.`;
 }
 
 // ── Parse LM response ─────────────────────────────────────────────────────────
