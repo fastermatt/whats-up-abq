@@ -266,7 +266,7 @@ export async function generateStaticParams() {
     'south-i-25-university-se',
     'uptown-midtown',
     'downtown-edo',
-    'far-northeast-heights',
+    'northeast-heights',          // merged from Far Northeast Heights
     'state-fairgrounds-midtown',
     'rio-rancho',
     'unm-nob-hill',
