@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { fetchEventById, fetchEvents, neighborhoodToSlug } from '@/lib/events'
+import { buildBreadcrumbs } from '@/lib/seo'
 import { venueToSlug } from '@/app/venues/[slug]/page'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { createClient } from '@/lib/supabase/server'
@@ -150,13 +151,30 @@ export default async function EventDetailPage({ params }: PageProps) {
       name: 'ABQ Unplugged',
       url: 'https://abqunplugged.com',
     },
+    ...(event.source !== 'volunteer' && event.source !== 'nhcc' ? {
+      performer: {
+        '@type': 'PerformingGroup',
+        name: event.title,
+      }
+    } : {}),
   }
 
+  const breadcrumbLd = buildBreadcrumbs([
+    { name: 'Home', url: 'https://abqunplugged.com' },
+    { name: 'Events', url: 'https://abqunplugged.com/events' },
+    ...(event.category ? [{ name: event.category, url: `https://abqunplugged.com/categories/${event.category.toLowerCase().replace(/\s+&\s+/g, '-').replace(/\s+/g, '-')}` }] : []),
+    { name: event.title, url: `https://abqunplugged.com/events/${event.id}` },
+  ])
+
   return (
-    <main className="min-h-dvh bg-[--bg]">
+    <main id="main" className="min-h-dvh bg-[--bg]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       {/* ── Nav ── */}
       <header className="sticky top-0 z-20 bg-[--bg]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
@@ -184,7 +202,7 @@ export default async function EventDetailPage({ params }: PageProps) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
-            alt=""
+            alt={event.title}
             className="w-full h-full object-cover"
           />
             {/* Gradient overlay for readability */}
@@ -335,7 +353,7 @@ export default async function EventDetailPage({ params }: PageProps) {
               className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#9a442d] text-white font-semibold text-sm hover:bg-[#7d3725] transition-all duration-300 hover:shadow-lg hover:shadow-[#9a442d]/20 hover:scale-[1.02]"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
-              Get Tickets
+              {getCtaLabel(event.source, event.price, event.ticketUrl, isFree)}
               <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </a>
           )}
@@ -450,7 +468,7 @@ async function SimilarEvents({ eventId, category }: { eventId: string; category:
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
-                  alt=""
+                  alt={event.title}
                   loading="lazy"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
@@ -471,6 +489,14 @@ async function SimilarEvents({ eventId, category }: { eventId: string; category:
     </section>
     </AnimateIn>
   )
+}
+
+function getCtaLabel(source: string, price: string | null, ticketUrl: string | null, isFree: boolean): string {
+  if (['nhcc', 'volunteer', 'local'].includes(source)) return 'More Info'
+  if (price?.toLowerCase() === 'free' || isFree) return 'RSVP Free'
+  const ticketPlatforms = ['ticketmaster.com', 'seatgeek.com', 'eventbrite.com', 'axs.com', 'stubhub.com', 'livenation.com']
+  if (ticketUrl && ticketPlatforms.some((domain) => ticketUrl.includes(domain))) return 'Get Tickets'
+  return 'Visit Event Site'
 }
 
 function formatDateLong(iso: string): string {

@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { fetchEvents } from '@/lib/events'
+import { buildBreadcrumbs } from '@/lib/seo'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { MapPin, Calendar, ArrowLeft, ExternalLink, Tag } from 'lucide-react'
 
@@ -49,11 +50,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!category) return { title: 'Category Not Found' }
   const desc = CATEGORY_DESCRIPTIONS[slug] ?? ''
   return {
-    title: `${category} Events in Albuquerque, NM | ABQ Unplugged`,
+    title: `${category} Events in Albuquerque, NM`,
     description: `${desc} Find tickets and event details on ABQ Unplugged.`,
     alternates: { canonical: `https://abqunplugged.com/categories/${slug}` },
     openGraph: {
-      title: `${category} Events in Albuquerque | ABQ Unplugged`,
+      title: `${category} Events in Albuquerque`,
       description: desc,
       url: `https://abqunplugged.com/categories/${slug}`,
     },
@@ -91,9 +92,16 @@ export default async function CategoryPage({ params }: PageProps) {
     numberOfItems: total,
   }
 
+  const breadcrumbLd = buildBreadcrumbs([
+    { name: 'Home', url: 'https://abqunplugged.com' },
+    { name: 'Events', url: 'https://abqunplugged.com/events' },
+    { name: `${category} Events`, url: `https://abqunplugged.com/categories/${slug}` },
+  ])
+
   return (
     <main className="min-h-dvh bg-[--bg]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
       <header className="sticky top-0 z-20 bg-[--bg]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
@@ -168,7 +176,7 @@ export default async function CategoryPage({ params }: PageProps) {
                 className="group flex gap-3 bg-white rounded-xl border border-[#f0e4cc] p-3 shadow-sm hover:shadow-md transition-all">
                 <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-[#f0e4cc]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)} alt=""
+                  <img src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)} alt={event.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 </div>
                 <div className="flex-1 min-w-0 flex flex-col justify-between">

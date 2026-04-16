@@ -69,7 +69,7 @@ export default async function DiscoverPage() {
   })
 
   return (
-    <main className="min-h-dvh bg-[--bg]">
+    <main id="main" className="min-h-dvh bg-[--bg]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
@@ -171,12 +171,12 @@ export default async function DiscoverPage() {
             <div className="max-w-6xl mx-auto px-4 flex items-end justify-between mb-3">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] mb-0.5 font-semibold">Editor&apos;s picks</p>
-                <h3
+                <h2
                   className="text-xl font-black text-[#1a1614]"
                   style={{ fontFamily: 'var(--font-epilogue)' }}
                 >
                   Not to miss
-                </h3>
+                </h2>
               </div>
               <Link
                 href="/events?featured=1"
@@ -257,12 +257,12 @@ export default async function DiscoverPage() {
           <section className="py-6 border-t border-[#f0e4cc]/60">
             <div className="max-w-6xl mx-auto px-4 mb-3">
               <p className="text-[10px] uppercase tracking-[0.15em] text-[#8a7a74] mb-0.5">Browse by area</p>
-              <h3
+              <h2
                 className="text-xl font-black text-[#1a1614]"
                 style={{ fontFamily: 'var(--font-epilogue)' }}
               >
                 Explore by Neighborhood
-              </h3>
+              </h2>
             </div>
             <div
               className="flex gap-2 overflow-x-auto px-4 pb-2"
@@ -355,12 +355,12 @@ function EventSection({
       <div className="max-w-6xl mx-auto px-4 flex items-end justify-between mb-3">
         <div>
           <p className="text-[10px] uppercase tracking-[0.15em] text-[#8a7a74] mb-0.5">{subtitle}</p>
-          <h3
+          <h2
             className="text-xl font-black text-[#1a1614]"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             {title}
-          </h3>
+          </h2>
         </div>
         <Link
           href={seeAllHref}
@@ -404,7 +404,7 @@ function HorizontalCard({
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
-          alt=""
+          alt={event.title}
           loading="lazy"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
         />
@@ -469,7 +469,7 @@ function FeaturedCard({ event }: { event: NormalizedEvent }) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
-          alt=""
+          alt={event.title}
           loading="lazy"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
         />

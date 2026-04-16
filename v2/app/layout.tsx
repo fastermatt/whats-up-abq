@@ -93,6 +93,13 @@ export default function RootLayout({
     >
       <head />
       <body className="bg-[#fbf7f1] text-[#1a1614] min-h-full flex flex-col">
+        {/* Skip to main content — for keyboard/screen-reader users */}
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-white focus:text-[#9a442d] focus:px-3 focus:py-2 focus:rounded-lg focus:font-semibold focus:text-sm focus:shadow-lg"
+        >
+          Skip to main content
+        </a>
         <DesktopNav />
         <div className="pb-20 md:pb-0">{children}</div>
         <BottomNav />
