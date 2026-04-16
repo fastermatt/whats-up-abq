@@ -60,9 +60,13 @@ const CATEGORY_IMAGES: Record<string, string[]> = {
 }
 
 // Default fallback — used when category is unknown or missing
-// Using Family (balloon) images as default since they're the most "Albuquerque" and text-free
+// Desert highway + Family (balloon) + OG panoramic — all text-free flat illustration style
 // NOTE: Route 66 images (c66db325) have AI text slop — do NOT use
 const DEFAULT_IMAGES = [
+  `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_0.jpeg`, // desert highway stretching into Sandias
+  `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_1.jpeg`,
+  `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_2.jpeg`,
+  `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_3.jpeg`,
   ...CATEGORY_IMAGES.family,
   `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_0.jpeg`, // OG panoramic (balloons + skyline)
   `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_1.jpeg`,
@@ -83,6 +87,10 @@ const HERO_IMAGES = [
   `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_1.jpeg`,
   `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_2.jpeg`,
   `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_3.jpeg`,
+  `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_0.jpeg`, // desert highway into Sandias
+  `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_1.jpeg`,
+  `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_2.jpeg`,
+  `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_3.jpeg`,
 ]
 
 // ── OG Share Image ──────────────────────────────────────────────────────────
