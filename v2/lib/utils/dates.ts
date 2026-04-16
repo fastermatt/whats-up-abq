@@ -22,18 +22,18 @@ export function endOfToday(): TZDate {
   return new TZDate(endOfDay(nowInABQ()), ABQ_TZ)
 }
 
-/** Start of this weekend (Friday 5 PM through Sunday midnight) */
+/** Start of this weekend (Saturday midnight through Sunday midnight).
+ *  Deliberately excludes Friday to avoid overlap with "Tomorrow". */
 export function startOfWeekend(): TZDate {
-  const now  = nowInABQ()
-  const day  = now.getDay() // 0=Sun, 5=Fri, 6=Sat
-  let   daysToFriday = 5 - day
-  if (daysToFriday < 0) daysToFriday += 7
-  if (day === 5 && now.getHours() >= 17) daysToFriday = 0
-  if (day === 6 || day === 0) daysToFriday = 0
-
-  const friday = new TZDate(addDays(startOfDay(now), daysToFriday), ABQ_TZ)
-  friday.setHours(17, 0, 0, 0)
-  return friday
+  const now = nowInABQ()
+  const day = now.getDay() // 0=Sun, 1=Mon … 6=Sat
+  if (day === 0 || day === 6) {
+    // Already the weekend — start from beginning of today
+    return new TZDate(startOfDay(now), ABQ_TZ)
+  }
+  // Weekday (Mon–Fri): next Saturday = 6 - day days away
+  const daysToSat = 6 - day
+  return new TZDate(startOfDay(addDays(now, daysToSat)), ABQ_TZ)
 }
 
 export function endOfWeekend(): TZDate {
