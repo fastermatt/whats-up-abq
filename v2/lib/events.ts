@@ -210,6 +210,60 @@ export async function fetchEvents({
   return { events, total: count ?? 0 }
 }
 
+/** Fetch upcoming events at a specific venue (case-insensitive partial match on venue name). */
+export async function fetchEventsByVenue(venueName: string, limit = 20): Promise<NormalizedEvent[]> {
+  const supabase = await createClient()
+  const today = new Date().toISOString().slice(0, 10)
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .schema('public')
+    .from('events')
+    .select('id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden')
+    .eq('hidden', false)
+    .gte('event_date', today)
+    .order('event_date', { ascending: true })
+    .limit(500)
+
+  if (error) {
+    console.error('[fetchEventsByVenue] Supabase error:', error.message)
+    return []
+  }
+
+  const search = venueName.toLowerCase()
+  return ((data ?? []) as RawEventRow[])
+    .map(normalizeRow)
+    .filter((e): e is NormalizedEvent => e !== null)
+    .filter((e) => e.venue?.toLowerCase().includes(search))
+    .slice(0, limit)
+}
+
+/** Fetch recently added upcoming events (newest ingestion first). */
+export async function fetchRecentlyAdded(limit = 10): Promise<NormalizedEvent[]> {
+  const supabase = await createClient()
+  const today = new Date().toISOString().slice(0, 10)
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .schema('public')
+    .from('events')
+    .select('id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, created_at')
+    .eq('hidden', false)
+    .gte('event_date', today)
+    .order('created_at', { ascending: false })
+    .limit(limit * 3) // fetch extra to account for normalization failures
+
+  if (error) {
+    console.error('[fetchRecentlyAdded] Supabase error:', error.message)
+    return []
+  }
+
+  return ((data ?? []) as RawEventRow[])
+    .map(normalizeRow)
+    .filter((e): e is NormalizedEvent => e !== null)
+    .slice(0, limit)
+}
+
 export async function fetchEventById(id: string): Promise<NormalizedEvent | null> {
   const supabase = await createClient()
 

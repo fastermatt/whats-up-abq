@@ -1,12 +1,14 @@
 {
   "name": "ABQ Unplugged",
   "short_name": "ABQ Unplugged",
-  "description": "Every event in Albuquerque, in one place.",
+  "description": "Every event in Albuquerque, in one place. Concerts, comedy, arts, sports, food & more.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#fbf7f1",
   "theme_color": "#9a442d",
   "orientation": "portrait-primary",
+  "lang": "en-US",
+  "scope": "/",
   "icons": [
     {
       "src": "/icon-192.png",
@@ -21,6 +23,28 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["entertainment", "lifestyle", "travel"],
-  "screenshots": []
+  "shortcuts": [
+    {
+      "name": "Tonight",
+      "short_name": "Tonight",
+      "description": "Events happening tonight",
+      "url": "/events?time=tonight",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "This Weekend",
+      "short_name": "Weekend",
+      "description": "Events this weekend",
+      "url": "/events?time=this-weekend",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "My Events",
+      "short_name": "Saved",
+      "description": "Your saved and going events",
+      "url": "/saved",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "categories": ["entertainment", "lifestyle", "travel"]
 }

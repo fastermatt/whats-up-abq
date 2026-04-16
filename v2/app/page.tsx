@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { fetchEvents, NormalizedEvent } from '@/lib/events'
+import { fetchEvents, fetchRecentlyAdded, NormalizedEvent } from '@/lib/events'
 import { getHeroImage, getCategoryFallback } from '@/lib/fallback-images'
 import { MapPin, ArrowRight } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
@@ -50,11 +50,12 @@ const websiteJsonLd = {
 }
 
 export default async function DiscoverPage() {
-  const [tonight, tomorrow, weekend, featured] = await Promise.all([
+  const [tonight, tomorrow, weekend, featured, justAdded] = await Promise.all([
     fetchEvents({ timeFilter: 'tonight', limit: 10 }),
     fetchEvents({ timeFilter: 'tomorrow', limit: 10 }),
     fetchEvents({ timeFilter: 'this-weekend', limit: 10 }),
     fetchEvents({ timeFilter: 'upcoming', limit: 20 }),
+    fetchRecentlyAdded(10),
   ])
 
   const now = new Date()
@@ -166,6 +167,19 @@ export default async function DiscoverPage() {
             events={weekend.events.slice(0, 10)}
             seeAllHref="/events?time=this-weekend"
             sectionLabel="This Weekend"
+          />
+        </AnimateIn>
+      )}
+
+      {/* ── Just Added ── */}
+      {justAdded.length > 0 && (
+        <AnimateIn animation="fade-up" delay={150}>
+          <EventSection
+            title="Just added"
+            subtitle="Fresh on the calendar"
+            events={justAdded}
+            seeAllHref="/events"
+            sectionLabel="New"
           />
         </AnimateIn>
       )}

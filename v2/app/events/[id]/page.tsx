@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { fetchEventById, fetchEvents } from '@/lib/events'
+import { venueToSlug } from '@/app/venues/[slug]/page'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { createClient } from '@/lib/supabase/server'
 import { MapPin, Clock, Calendar, Ticket, ArrowLeft, ExternalLink, Users } from 'lucide-react'
@@ -9,6 +10,7 @@ import ShareButton from './ShareButton'
 import { AnimateIn } from '@/app/components/AnimateIn'
 import { ReportForm } from '@/app/components/ReportForm'
 import { SaveEventButton } from '@/app/components/SaveEventButton'
+import { ReviewSection } from '@/app/components/ReviewSection'
 
 export const revalidate = 60
 
@@ -196,15 +198,18 @@ export default async function EventDetailPage({ params }: PageProps) {
             </div>
           )}
 
-          {/* Venue */}
+          {/* Venue — links to venue page */}
           {event.venue && (
-            <div className="flex items-center gap-2 bg-white rounded-xl px-3 py-2 border border-[#f0e4cc] shadow-sm">
-              <MapPin className="w-4 h-4 text-[#006a62]" />
+            <Link
+              href={`/venues/${venueToSlug(event.venue)}`}
+              className="flex items-center gap-2 bg-white rounded-xl px-3 py-2 border border-[#f0e4cc] shadow-sm hover:border-[#9a442d]/40 hover:shadow-md transition-all group"
+            >
+              <MapPin className="w-4 h-4 text-[#006a62] group-hover:text-[#9a442d] transition-colors" />
               <div>
-                <p className="text-xs font-semibold text-[#1a1614]">{event.venue}</p>
+                <p className="text-xs font-semibold text-[#1a1614] group-hover:text-[#9a442d] transition-colors">{event.venue}</p>
                 {event.address && <p className="text-[11px] text-[#8a7a74]">{event.address}</p>}
               </div>
-            </div>
+            </Link>
           )}
 
           {/* Price */}
@@ -302,12 +307,15 @@ export default async function EventDetailPage({ params }: PageProps) {
         </div>
 
         {/* Source + report */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-2">
           <p className="text-[10px] text-[#8a7a74]">
             Source: {event.source.charAt(0).toUpperCase() + event.source.slice(1)}
           </p>
           <ReportForm eventId={event.id} eventTitle={event.title} />
         </div>
+
+        {/* Reviews */}
+        <ReviewSection eventId={event.id} />
       </article>
 
       {/* ── Similar Events ── */}
