@@ -19,6 +19,7 @@ interface Props {
     title_override: string
     admin_notes: string
     hidden: boolean
+    featured: boolean
   }
 }
 
@@ -48,6 +49,7 @@ export function EventEditForm({ eventId, rawTitle, initialValues }: Props) {
         title_override: values.title_override || null,
         admin_notes: values.admin_notes || null,
         hidden: values.hidden,
+        featured: values.featured,
       }),
     })
     setSaving(false)
@@ -63,22 +65,40 @@ export function EventEditForm({ eventId, rawTitle, initialValues }: Props) {
 
   return (
     <div className="space-y-5 bg-white/5 rounded-2xl p-6">
-      {/* Hidden toggle */}
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium">Visibility</p>
-          <p className="text-xs text-white/40">Hidden events won&apos;t appear on the site</p>
+      {/* Visibility + Featured toggles */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          <div>
+            <p className="text-sm font-medium">Visibility</p>
+            <p className="text-xs text-white/40">Hidden events won&apos;t appear on the site</p>
+          </div>
+          <button
+            onClick={() => set('hidden', !values.hidden)}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              values.hidden
+                ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                : 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
+            }`}
+          >
+            {values.hidden ? 'Hidden' : 'Visible'}
+          </button>
         </div>
-        <button
-          onClick={() => set('hidden', !values.hidden)}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-            values.hidden
-              ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
-              : 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
-          }`}
-        >
-          {values.hidden ? 'Hidden' : 'Visible'}
-        </button>
+        <div className="flex items-center gap-3">
+          <div>
+            <p className="text-sm font-medium">Featured</p>
+            <p className="text-xs text-white/40">Shown in featured section</p>
+          </div>
+          <button
+            onClick={() => set('featured', !values.featured)}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              values.featured
+                ? 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30'
+                : 'bg-white/10 text-white/40 hover:bg-white/15'
+            }`}
+          >
+            {values.featured ? '★ Featured' : '☆ Not featured'}
+          </button>
+        </div>
       </div>
 
       <div className="border-t border-white/10" />
