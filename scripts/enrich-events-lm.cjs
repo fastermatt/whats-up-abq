@@ -102,8 +102,8 @@ async function callLM(prompt, retries = 2) {
   const payload = {
     model:       LM_MODEL,
     messages:    [{ role: 'user', content: prompt }],
-    temperature: 0.4,
-    max_tokens:  600,
+    temperature: 0.5,
+    max_tokens:  800,
     stream:      false,
   };
   for (let attempt = 0; attempt <= retries; attempt++) {
@@ -125,6 +125,43 @@ async function callLM(prompt, retries = 2) {
   }
 }
 
+// ── Category detection for prompt tone ────────────────────────────────────────
+function detectCategory(event) {
+  const raw  = event.raw || event;
+  const name = (raw.name || '').toLowerCase();
+  const desc = (raw.info || raw.description || '').toLowerCase();
+  const seg  = (raw.classifications?.[0]?.segment?.name || '').toLowerCase();
+  const gen  = (raw.classifications?.[0]?.genre?.name   || '').toLowerCase();
+  const t    = name + ' ' + desc + ' ' + seg + ' ' + gen;
+
+  if (/comedy|stand.?up|improv|laugh/.test(t))                          return 'comedy';
+  if (/hike|trail|outdoor|nature|garden|park|river|mountain|balloon/.test(t)) return 'outdoor';
+  if (/pottery|clay|craft|knit|sew|paint|draw|sculpt|ceramic/.test(t)) return 'craft';
+  if (/yoga|meditation|wellness|mindful|breathe/.test(t))               return 'wellness';
+  if (/volunteer|food bank|community|service|cleanup/.test(t))          return 'community';
+  if (/food|dinner|tasting|beer|wine|cocktail|brew|restaurant/.test(t)) return 'food';
+  if (/sport|game|match|race|5k|marathon|football|baseball|basketball|soccer/.test(t)) return 'sports';
+  if (/dance|ballet|theater|theatre|musical|opera|play/.test(t))        return 'arts';
+  if (/family|kid|child|toddler|storytime|youth/.test(t))               return 'family';
+  if (/music|concert|band|dj|festival|live/.test(t))                    return 'music';
+  return 'general';
+}
+
+// Category-specific motivation hooks for the "why go" highlight
+const MOTIVATION_HOOKS = {
+  comedy:    'Science says: laughter triggers endorphins and cuts cortisol in half — this is literally medicine for your stress.',
+  outdoor:   'Getting outdoors reduces anxiety and cortisol levels within 20 minutes — your nervous system was built for this.',
+  craft:     'Hands-on making puts you in a flow state that silences the mental chatter modern life never shuts off.',
+  wellness:  'Communal movement and breathwork create a sense of shared presence that solo home practice simply can\'t replicate.',
+  community: 'Research shows volunteering and community involvement are among the strongest predictors of long-term life satisfaction.',
+  food:      'Breaking bread together is one of the oldest human bonding rituals — meals out strengthen relationships in ways texting can\'t.',
+  sports:    'Live sports trigger the same tribal belonging circuits that kept human communities tight for 200,000 years. Feel the crowd.',
+  arts:      'Experiencing art with others activates mirror neurons and creates shared emotional memories that last years.',
+  family:    'Shared experiences outside the home build family identity — kids remember adventures, not screen time.',
+  music:     'Live music synchronizes heartbeats across strangers. Your body literally gets on the same rhythm as the people around you.',
+  general:   'Getting out and meeting people in person is one of the most powerful things you can do for your mental health.',
+};
+
 // ── Build prompt ──────────────────────────────────────────────────────────────
 function buildPrompt(event) {
   const raw        = event.raw || event;
@@ -139,14 +176,22 @@ function buildPrompt(event) {
   const info       = raw.info || raw.description || '';
   const parking    = venue?.parkingDetail || '';
   const category   = [segment, genre].filter(Boolean).join(' / ');
+  const cat        = detectCategory(event);
+  const motivation = MOTIVATION_HOOKS[cat];
 
-  return `You are a local Albuquerque events guide. Given the following event details, produce a JSON object with exactly these keys:
+  return `You are a passionate local Albuquerque events guide whose mission is to get people off their couches and into the city together. You believe in-person experiences are transformative.
+
+Given the following event details, produce a JSON object with exactly these keys:
 
 {
-  "about": "1-2 sentence description of the artist, performer, or event type. Be specific and interesting — not generic.",
-  "highlights": ["2-3 short bullet points about what attendees can expect — specific, enthusiastic, useful"],
-  "venue_tips": "1-2 sentences about parking, transit options, or arrival tips for this specific venue in Albuquerque.",
-  "local_tips": "1 sentence ABQ-specific tip — a nearby restaurant, bar, or thing to do before/after the event."
+  "about": "1-2 sentences about the artist, performer, or event — specific and interesting, NOT generic. For bands: mention their sound and a notable fact. For sports: mention teams and stakes. For community events: paint the experience.",
+  "highlights": [
+    "specific highlight about what attendees will experience",
+    "another concrete, enthusiastic thing to expect",
+    "${motivation}"
+  ],
+  "venue_tips": "1-2 practical sentences about parking, transit, or arrival tips for this venue in Albuquerque (be specific to the neighborhood).",
+  "local_tips": "1 warm, insider sentence — a nearby restaurant, bar, coffee shop, or activity to pair with this event. Make it feel like advice from a local friend."
 }
 
 EVENT DETAILS:
@@ -159,9 +204,11 @@ ${parking ? `- Venue parking info: ${parking.slice(0, 200)}` : ''}
 
 Rules:
 - Return ONLY the raw JSON object. No markdown, no code fences, no extra text.
-- Keep each field concise. "highlights" must be an array of strings.
-- If you don't know specific facts, give practical general advice appropriate for ABQ.
-- For "about": if it's a band/artist, mention their style or a notable fact. If it's a sports game, mention the teams. If community/local event, describe the experience.`;
+- "highlights" MUST be an array of exactly 3 strings.
+- The third highlight MUST be the motivation hook provided — include it verbatim or closely paraphrased.
+- Keep each field warm, direct, and human. Avoid corporate/generic language.
+- Local tips should name actual ABQ spots (Frontier Restaurant, Casa de Benavidez, Nob Hill, Old Town, etc.) when relevant.
+- If you don't know the exact venue details, give solid general tips for that part of ABQ.`;
 }
 
 // ── Parse LM response ─────────────────────────────────────────────────────────

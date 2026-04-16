@@ -2,13 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Compass, Calendar, Bookmark, Info } from 'lucide-react'
+import { Compass, Calendar, Bookmark, User, Trophy } from 'lucide-react'
 
 const NAV_ITEMS = [
-  { href: '/',       label: 'Discover', Icon: Compass },
-  { href: '/events', label: 'Events',   Icon: Calendar },
-  { href: '/saved',  label: 'Saved',    Icon: Bookmark },
-  { href: '/about',  label: 'About',    Icon: Info },
+  { href: '/',            label: 'Discover',     Icon: Compass },
+  { href: '/events',      label: 'Events',       Icon: Calendar },
+  { href: '/saved',       label: 'Saved',        Icon: Bookmark },
+  { href: '/leaderboard', label: 'Leaderboard',  Icon: Trophy },
+  { href: '/profile',     label: 'Profile',      Icon: User },
 ] as const
 
 export default function DesktopNav() {
