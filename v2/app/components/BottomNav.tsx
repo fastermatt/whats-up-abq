@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Compass, CalendarDays, Bookmark, User } from 'lucide-react'
 
 const NAV_ITEMS = [
-  { href: '/',        label: 'Discover', icon: 'explore' },
-  { href: '/events',  label: 'Events',   icon: 'calendar_today' },
-  { href: '/saved',   label: 'Saved',    icon: 'bookmark' },
-  { href: '/profile', label: 'Profile',  icon: 'person' },
+  { href: '/',        label: 'Discover', Icon: Compass      },
+  { href: '/events',  label: 'Events',   Icon: CalendarDays },
+  { href: '/saved',   label: 'Saved',    Icon: Bookmark     },
+  { href: '/profile', label: 'Profile',  Icon: User         },
 ] as const
 
 export default function BottomNav() {
@@ -19,7 +20,7 @@ export default function BottomNav() {
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
       <div className="grid grid-cols-4 h-16 max-w-lg mx-auto">
-        {NAV_ITEMS.map(({ href, label, icon }) => {
+        {NAV_ITEMS.map(({ href, label, Icon }) => {
           const isActive =
             href === '/'
               ? pathname === '/'
@@ -30,7 +31,7 @@ export default function BottomNav() {
               key={href}
               href={href}
               className={`
-                flex flex-col items-center justify-center gap-0.5 relative
+                flex flex-col items-center justify-center gap-1 relative
                 transition-colors duration-150
                 ${isActive ? 'text-[#9a442d]' : 'text-[#8a7a74]'}
               `}
@@ -40,16 +41,11 @@ export default function BottomNav() {
                 <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-b-sm bg-[#9a442d]" />
               )}
 
-              <span
-                className="material-symbols-rounded text-2xl"
-                style={
-                  isActive
-                    ? { fontVariationSettings: "'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24" }
-                    : { fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }
-                }
-              >
-                {icon}
-              </span>
+              <Icon
+                className="w-5 h-5"
+                strokeWidth={isActive ? 2.5 : 1.75}
+                fill={isActive ? 'currentColor' : 'none'}
+              />
 
               <span
                 className="text-[10px] font-bold tracking-wider uppercase"
