@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import Link from 'next/link'
 import { fetchEvents, NormalizedEvent } from '@/lib/events'
 import { TimeFilter } from '@/lib/utils/dates'
+import { getCategoryFallback } from '@/lib/fallback-images'
 import { FilterBar } from './FilterBar'
 import { MapPin, Clock } from 'lucide-react'
 
@@ -111,19 +112,13 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
     >
       {/* Landscape image — 16:10 ratio for a nice rectangle */}
       <div className="relative aspect-[16/10] bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] overflow-hidden">
-        {event.imageUrl ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
-            src={event.imageUrl}
-            alt=""
-            loading="lazy"
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-3xl opacity-20">🎶</span>
-          </div>
-        )}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
+          alt=""
+          loading="lazy"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+        />
 
         {/* Category badge — top right */}
         {event.category && (

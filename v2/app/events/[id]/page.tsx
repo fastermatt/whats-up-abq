@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { fetchEventById } from '@/lib/events'
+import { getCategoryFallback } from '@/lib/fallback-images'
 import { MapPin, Clock, Calendar, Ticket, ArrowLeft, ExternalLink } from 'lucide-react'
 
 export const revalidate = 60
@@ -18,13 +19,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const description = event.description
     ?? `${event.title} at ${event.venue ?? 'Albuquerque'} — ${formatDateLong(event.date)}`
 
+  const ogImage = event.imageUrl || getCategoryFallback(event.category ?? undefined, id)
+
   return {
     title: event.title,
     description: description.slice(0, 160),
     openGraph: {
       title: event.title,
       description: description.slice(0, 160),
-      ...(event.imageUrl ? { images: [{ url: event.imageUrl }] } : {}),
+      ...(ogImage ? { images: [{ url: ogImage }] } : {}),
     },
   }
 }
@@ -60,15 +63,14 @@ export default async function EventDetailPage({ params }: PageProps) {
       </header>
 
       <article className="max-w-3xl mx-auto px-4 py-6 animate-fade-up">
-        {/* Hero image */}
-        {event.imageUrl && (
-          <div className="relative aspect-[2/1] rounded-2xl overflow-hidden mb-6 shadow-lg">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={event.imageUrl}
-              alt=""
-              className="w-full h-full object-cover"
-            />
+        {/* Hero image — always shown (falls back to category illustration) */}
+        <div className="relative aspect-[2/1] rounded-2xl overflow-hidden mb-6 shadow-lg">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
+            alt=""
+            className="w-full h-full object-cover"
+          />
             {/* Gradient overlay for readability */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
 
@@ -79,7 +81,6 @@ export default async function EventDetailPage({ params }: PageProps) {
               </div>
             )}
           </div>
-        )}
 
         {/* Title */}
         <h1
