@@ -5,6 +5,7 @@ import { fetchEventById, fetchEvents } from '@/lib/events'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { MapPin, Clock, Calendar, Ticket, ArrowLeft, ExternalLink, Share2 } from 'lucide-react'
 import ShareButton from './ShareButton'
+import { AnimateIn } from '@/app/components/AnimateIn'
 
 export const revalidate = 60
 
@@ -224,6 +225,7 @@ async function SimilarEvents({ eventId, category }: { eventId: string; category:
   if (similar.length === 0) return null
 
   return (
+    <AnimateIn animation="fade-up">
     <section className="max-w-3xl mx-auto px-4 pb-8">
       <div className="border-t border-[#f0e4cc] pt-6">
         <h2
@@ -262,6 +264,7 @@ async function SimilarEvents({ eventId, category }: { eventId: string; category:
         </div>
       </div>
     </section>
+    </AnimateIn>
   )
 }
 

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { fetchEvents, NormalizedEvent } from '@/lib/events'
 import { getHeroImage, getCategoryFallback } from '@/lib/fallback-images'
 import { MapPin, ArrowRight } from 'lucide-react'
+import { AnimateIn } from '@/app/components/AnimateIn'
 
 export const revalidate = 60
 
@@ -82,48 +83,56 @@ export default async function DiscoverPage() {
 
       {/* ── Happening Now ── */}
       {tonight.events.length > 0 && (
-        <EventSection
-          title="Doors are open"
-          subtitle="Happening right now"
-          events={tonight.events}
-          seeAllHref="/events?time=tonight"
-          sectionLabel="Tonight"
-        />
+        <AnimateIn animation="fade-up">
+          <EventSection
+            title="Doors are open"
+            subtitle="Happening right now"
+            events={tonight.events}
+            seeAllHref="/events?time=tonight"
+            sectionLabel="Tonight"
+          />
+        </AnimateIn>
       )}
 
       {/* ── Tomorrow ── */}
       {tomorrow.events.length > 0 && (
-        <EventSection
-          title="Coming up tomorrow"
-          subtitle="Plan ahead"
-          events={tomorrow.events}
-          seeAllHref="/events?time=tomorrow"
-          sectionLabel="Tomorrow"
-        />
+        <AnimateIn animation="fade-up" delay={50}>
+          <EventSection
+            title="Coming up tomorrow"
+            subtitle="Plan ahead"
+            events={tomorrow.events}
+            seeAllHref="/events?time=tomorrow"
+            sectionLabel="Tomorrow"
+          />
+        </AnimateIn>
       )}
 
       {/* ── This Weekend ── */}
       {weekend.events.length > 0 && (
-        <EventSection
-          title="This weekend"
-          subtitle="Don't miss out"
-          events={weekend.events.slice(0, 10)}
-          seeAllHref="/events?time=this-weekend"
-          sectionLabel="This Weekend"
-        />
+        <AnimateIn animation="fade-up" delay={100}>
+          <EventSection
+            title="This weekend"
+            subtitle="Don't miss out"
+            events={weekend.events.slice(0, 10)}
+            seeAllHref="/events?time=this-weekend"
+            sectionLabel="This Weekend"
+          />
+        </AnimateIn>
       )}
 
       {/* ── Browse All CTA ── */}
-      <section className="max-w-6xl mx-auto px-4 py-8">
-        <Link
-          href="/events"
-          className="group flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-[#9a442d] text-white font-semibold hover:bg-[#7d3725] transition-all duration-300 text-sm hover:shadow-lg hover:shadow-[#9a442d]/20"
-          style={{ fontFamily: 'var(--font-epilogue)' }}
-        >
-          Browse All {featured.total.toLocaleString()} Events
-          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-        </Link>
-      </section>
+      <AnimateIn animation="scale" delay={50}>
+        <section className="max-w-6xl mx-auto px-4 py-8">
+          <Link
+            href="/events"
+            className="group flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-[#9a442d] text-white font-semibold hover:bg-[#7d3725] transition-all duration-300 text-sm hover:shadow-lg hover:shadow-[#9a442d]/20"
+            style={{ fontFamily: 'var(--font-epilogue)' }}
+          >
+            Browse All {featured.total.toLocaleString()} Events
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </section>
+      </AnimateIn>
 
       {/* ── Footer ── */}
       <footer className="border-t border-[#f0e4cc] py-8 text-center">
