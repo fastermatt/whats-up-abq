@@ -195,7 +195,8 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
   return (
     <Link
       href={`/events/${event.id}`}
-      className="group flex flex-col bg-white rounded-xl overflow-hidden border border-[#f0e4cc]/80 shadow-[0_1px_3px_rgba(26,22,20,0.04)] hover:shadow-[0_8px_24px_rgba(26,22,20,0.12)] transition-all duration-300 hover:-translate-y-1 animate-card-in scroll-reveal"
+      className="group flex flex-col bg-white rounded-xl overflow-hidden border border-[#f0e4cc]/80 shadow-[0_1px_3px_rgba(26,22,20,0.04)] hover:shadow-[0_8px_24px_rgba(26,22,20,0.12)] transition-all duration-300 hover:-translate-y-1 spring-card scroll-reveal"
+      style={{ '--card-i': Math.min(index, 14) } as React.CSSProperties}
     >
       {/* Landscape image — 16:10 ratio for a nice rectangle */}
       <div className="relative aspect-[16/10] bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] overflow-hidden">
