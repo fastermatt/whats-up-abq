@@ -11,6 +11,7 @@ import { AnimateIn } from '@/app/components/AnimateIn'
 import { ReportForm } from '@/app/components/ReportForm'
 import { SaveEventButton } from '@/app/components/SaveEventButton'
 import { ReviewSection } from '@/app/components/ReviewSection'
+import { CheckInButton } from '@/app/components/CheckInButton'
 
 export const revalidate = 60
 
@@ -286,8 +287,8 @@ export default async function EventDetailPage({ params }: PageProps) {
           <ShareButton title={event.title} />
         </div>
 
-        {/* Social row — save/going buttons + count */}
-        <div className="flex items-center justify-between mb-6 pb-6 border-b border-[#f0e4cc]">
+        {/* Social row — save/going/check-in buttons */}
+        <div className="flex flex-wrap items-center gap-3 mb-6 pb-6 border-b border-[#f0e4cc]">
           <SaveEventButton
             eventId={event.id}
             eventName={event.title}
@@ -298,8 +299,13 @@ export default async function EventDetailPage({ params }: PageProps) {
             ticketUrl={event.ticketUrl ?? null}
             goingCount={goingCount ?? 0}
           />
+          <CheckInButton
+            eventId={event.id}
+            eventName={event.title}
+            eventDate={event.date}
+          />
           {(goingCount ?? 0) > 0 && (
-            <p className="text-xs text-[#8a7a74] flex items-center gap-1">
+            <p className="text-xs text-[#8a7a74] flex items-center gap-1 ml-auto">
               <Users className="w-3.5 h-3.5" />
               {goingCount} going
             </p>
