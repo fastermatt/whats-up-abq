@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Epilogue, Inter, Space_Grotesk } from 'next/font/google'
 import Script from 'next/script'
+import BottomNav from './components/BottomNav'
 import './globals.css'
 
 const epilogue = Epilogue({
@@ -69,8 +70,16 @@ export default function RootLayout({
       lang="en"
       className={`${epilogue.variable} ${inter.variable} ${spaceGrotesk.variable} h-full`}
     >
+      <head>
+        {/* Material Symbols for bottom nav icons */}
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+        />
+      </head>
       <body className="bg-[#fbf7f1] text-[#1a1614] min-h-full flex flex-col">
-        {children}
+        <div className="pb-20 md:pb-0">{children}</div>
+        <BottomNav />
 
         {/* Umami analytics — loads after page is interactive, privacy-first */}
         {umamiId && (
