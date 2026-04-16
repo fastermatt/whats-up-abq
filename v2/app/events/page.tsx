@@ -10,7 +10,7 @@ import { MapPin, Clock } from 'lucide-react'
 export const revalidate = 60
 
 interface PageProps {
-  searchParams: Promise<{ time?: string; category?: string; page?: string; q?: string }>
+  searchParams: Promise<{ time?: string; category?: string; page?: string; q?: string; free?: string }>
 }
 
 export default async function EventsPage({ searchParams }: PageProps) {
@@ -18,12 +18,13 @@ export default async function EventsPage({ searchParams }: PageProps) {
   const timeFilter = (params.time as TimeFilter) || 'upcoming'
   const category = params.category || null
   const search = params.q?.trim() || undefined
+  const freeOnly = params.free === '1'
   const page = Math.max(1, parseInt(params.page ?? '1', 10))
   const limit = 36
   const offset = (page - 1) * limit
 
   const [{ events, total }, categoryCounts] = await Promise.all([
-    fetchEvents({ timeFilter, category, search, limit, offset }),
+    fetchEvents({ timeFilter, category, search, freeOnly, limit, offset }),
     fetchCategoryCounts(),
   ])
 
@@ -70,6 +71,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
           <FilterBar
             currentTime={params.time ?? ''}
             currentCategory={params.category ?? ''}
+            freeOnly={freeOnly}
             categoryCounts={categoryCounts}
           />
         </Suspense>
@@ -98,6 +100,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
             time={params.time}
             category={params.category}
             q={params.q}
+            free={params.free}
           />
         )}
       </div>
@@ -207,18 +210,21 @@ function Pagination({
   time,
   category,
   q,
+  free,
 }: {
   page: number
   totalPages: number
   time?: string
   category?: string
   q?: string
+  free?: string
 }) {
   const buildUrl = (p: number) => {
     const params = new URLSearchParams()
     if (time) params.set('time', time)
     if (category) params.set('category', category)
     if (q) params.set('q', q)
+    if (free) params.set('free', free)
     if (p > 1) params.set('page', String(p))
     const qs = params.toString()
     return `/events${qs ? `?${qs}` : ''}`
