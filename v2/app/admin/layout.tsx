@@ -1,12 +1,19 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { LogoutButton } from './LogoutButton'
 
 export const metadata = { title: 'Admin | ABQ Unplugged' }
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
+  // Don't auth-check the login page itself (middleware passes x-pathname)
+  const headersList = await headers()
+  const pathname = headersList.get('x-pathname') ?? ''
+  if (pathname === '/admin/login') {
+    return <>{children}</>
+  }
+
   // Verify admin token in Node.js runtime (process.env is reliable here)
   const cookieStore = await cookies()
   const token = cookieStore.get('admin_token')?.value
