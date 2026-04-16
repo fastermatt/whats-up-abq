@@ -9,16 +9,34 @@ export const metadata: Metadata = {
 
 export const revalidate = 300
 
-export default async function LeaderboardPage() {
+interface PageProps {
+  searchParams: Promise<{ period?: string }>
+}
+
+export default async function LeaderboardPage({ searchParams }: PageProps) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const { period: periodParam } = await searchParams
+  const isWeekly = periodParam === 'week'
 
+  // Fetch leaderboard — weekly uses weekly_checkins, all-time uses total_checkins
   const { data: board } = await supabase
     .from('leaderboard_view')
     .select('*')
+    .order(isWeekly ? 'weekly_checkins' : 'total_checkins', { ascending: false })
     .limit(25)
 
-  const myRank = board?.findIndex(l => l.id === user?.id) ?? -1
+  // Filter for weekly: only show users with at least 1 weekly check-in
+  const displayBoard = isWeekly
+    ? (board ?? []).filter(l => (l.weekly_checkins ?? 0) > 0)
+    : (board ?? [])
+
+  const myRank = displayBoard.findIndex(l => l.id === user?.id)
+
+  const tabs = [
+    { label: 'All Time', href: '/leaderboard' },
+    { label: 'This Week', href: '/leaderboard?period=week' },
+  ]
 
   return (
     <main className="min-h-dvh bg-[--bg]">
@@ -41,48 +59,62 @@ export default async function LeaderboardPage() {
           <h2 className="text-xl font-black" style={{ fontFamily: 'var(--font-epilogue)' }}>
             Top ABQ Event-Goers
           </h2>
-          <p className="text-white/60 text-sm mt-1">Who's actually out there living it up</p>
+          <p className="text-white/60 text-sm mt-1">Who&apos;s actually out there living it up</p>
           {user && myRank >= 0 && (
             <div className="mt-3 inline-flex items-center gap-2 bg-white/10 rounded-full px-3 py-1.5 text-sm">
               <Medal className="w-4 h-4" />
-              You're ranked #{myRank + 1}
+              You&apos;re ranked #{myRank + 1} {isWeekly ? 'this week' : 'overall'}
+            </div>
+          )}
+          {user && myRank < 0 && (
+            <div className="mt-3 inline-flex items-center gap-2 bg-white/10 rounded-full px-3 py-1.5 text-sm text-white/60">
+              Check in at events to get on the board
             </div>
           )}
         </div>
 
-        {/* Toggle: this week / all time */}
+        {/* Period tabs */}
         <div className="flex gap-2">
-          {['All Time', 'This Week'].map(tab => (
-            <button
-              key={tab}
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all ${
-                tab === 'All Time'
-                  ? 'bg-[#9a442d] text-white border-[#9a442d]'
-                  : 'bg-white text-[#4a3f3a] border-[#ddc9a3] hover:border-[#9a442d]'
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
+          {tabs.map(tab => {
+            const active = (tab.href === '/leaderboard' && !isWeekly) || (tab.href.includes('week') && isWeekly)
+            return (
+              <Link
+                key={tab.label}
+                href={tab.href}
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+                  active
+                    ? 'bg-[#9a442d] text-white border-[#9a442d]'
+                    : 'bg-white text-[#4a3f3a] border-[#ddc9a3] hover:border-[#9a442d]'
+                }`}
+              >
+                {tab.label}
+              </Link>
+            )
+          })}
         </div>
 
         {/* Leaderboard list */}
-        {!board || board.length === 0 ? (
+        {displayBoard.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-2xl border border-[#f0e4cc]">
             <Trophy className="w-10 h-10 text-[#ddc9a3] mx-auto mb-3" />
             <h3 className="font-bold text-[#1a1614] mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
-              No one here yet
+              {isWeekly ? 'No check-ins this week yet' : 'No one here yet'}
             </h3>
-            <p className="text-xs text-[#8a7a74] mb-4">Be the first to check in and claim the #1 spot!</p>
+            <p className="text-xs text-[#8a7a74] mb-4">
+              {isWeekly
+                ? 'Check into an event this week to appear on the board!'
+                : 'Be the first to check in and claim the #1 spot!'}
+            </p>
             <Link href="/events" className="text-xs font-semibold text-[#9a442d] hover:underline">
               Find an event →
             </Link>
           </div>
         ) : (
           <div className="space-y-2">
-            {board.map((person, idx) => {
+            {displayBoard.map((person, idx) => {
               const isMe = person.id === user?.id
               const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : null
+              const score = isWeekly ? (person.weekly_checkins ?? 0) : (person.total_checkins ?? 0)
 
               return (
                 <div
@@ -112,7 +144,7 @@ export default async function LeaderboardPage() {
                   {/* Name + meta */}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-[#1a1614] truncate">
-                      {person.display_name || person.handle}
+                      {person.display_name || person.handle || 'ABQ Fan'}
                       {isMe && <span className="ml-1.5 text-[10px] text-[#9a442d] font-normal">you</span>}
                     </p>
                     <div className="flex items-center gap-2 text-[10px] text-[#8a7a74]">
@@ -122,16 +154,20 @@ export default async function LeaderboardPage() {
                           {person.neighborhood}
                         </span>
                       )}
-                      <span>{person.unique_venues} venues</span>
+                      {(person.unique_venues ?? 0) > 0 && (
+                        <span>{person.unique_venues} venues</span>
+                      )}
                     </div>
                   </div>
 
                   {/* Score */}
                   <div className="text-right flex-shrink-0">
                     <p className="text-base font-black text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
-                      {person.total_checkins}
+                      {score}
                     </p>
-                    <p className="text-[10px] text-[#8a7a74]">check-ins</p>
+                    <p className="text-[10px] text-[#8a7a74]">
+                      {isWeekly ? 'this week' : 'total'}
+                    </p>
                   </div>
                 </div>
               )
@@ -139,7 +175,28 @@ export default async function LeaderboardPage() {
           </div>
         )}
 
-        {/* CTA */}
+        {/* How it works */}
+        <div className="bg-white rounded-2xl border border-[#f0e4cc] p-4">
+          <p className="text-xs font-bold text-[#1a1614] mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
+            How to climb the ranks
+          </p>
+          <ul className="space-y-1.5 text-xs text-[#8a7a74]">
+            <li className="flex items-center gap-2">
+              <span className="w-4 h-4 rounded-full bg-[#9a442d]/10 flex items-center justify-center text-[9px]">1</span>
+              Browse events and tap &quot;I&apos;m going&quot;
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="w-4 h-4 rounded-full bg-[#9a442d]/10 flex items-center justify-center text-[9px]">2</span>
+              Show up and tap &quot;Check in&quot; on the event page
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="w-4 h-4 rounded-full bg-[#9a442d]/10 flex items-center justify-center text-[9px]">3</span>
+              Earn points, badges, and weekly ranking glory
+            </li>
+          </ul>
+        </div>
+
+        {/* CTA for unauthed */}
         {!user && (
           <div className="bg-white rounded-2xl border border-[#f0e4cc] p-5 text-center">
             <p className="text-sm font-bold text-[#1a1614] mb-1">Want to compete?</p>
