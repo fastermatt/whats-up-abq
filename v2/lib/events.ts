@@ -409,7 +409,7 @@ function normalizeLocal(row: RawEventRow): NormalizedEvent {
   const r = row.raw as Record<string, unknown>
   return {
     id: row.id,
-    title: (r.title as string) ?? (r.name as string) ?? 'Local Event',
+    title: decodeHtml((r.title as string) ?? (r.name as string)) || 'Local Event',
     date: row.event_date ?? (r.date as string) ?? (r.start_date as string) ?? '',
     time: row.event_date ? formatTime(row.event_date) : null,
     venue: typeof r.venue === 'string' ? r.venue : (r.venue_name as string | undefined) ?? null,
@@ -430,7 +430,7 @@ function normalizeLocal(row: RawEventRow): NormalizedEvent {
 
 function normalizeGeneric(row: RawEventRow): NormalizedEvent {
   const r = row.raw as Record<string, unknown>
-  const title = (r.name as string) ?? (r.title as string) ?? 'Event'
+  const title = decodeHtml((r.name as string) ?? (r.title as string)) || 'Event'
   return {
     id: row.id,
     title,
@@ -450,6 +450,19 @@ function normalizeGeneric(row: RawEventRow): NormalizedEvent {
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Decode HTML entities in strings (e.g. &#8211; → —, &amp; → &) */
+function decodeHtml(str: string | undefined | null): string {
+  if (!str) return ''
+  return str
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+}
 
 function formatTime(iso: string): string {
   // Date-only strings (YYYY-MM-DD) have no meaningful time — skip them
