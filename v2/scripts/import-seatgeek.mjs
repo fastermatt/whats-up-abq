@@ -36,7 +36,8 @@ for (const envFile of [
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://bsmvfutebmbkjvlrhiyq.supabase.co'
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
-const SG_AID       = process.env.SEATGEEK_AID
+// Accept either SEATGEEK_AID (preferred) or SEATGEEK_CLIENT_ID (legacy GitHub secret name)
+const SG_AID       = process.env.SEATGEEK_AID || process.env.SEATGEEK_CLIENT_ID
 
 if (!SUPABASE_KEY) {
   console.error('❌ SUPABASE_SERVICE_ROLE_KEY not set. Add it to scripts/.env')
