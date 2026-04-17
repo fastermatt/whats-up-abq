@@ -39,8 +39,10 @@ export async function middleware(request: NextRequest) {
   // Admin guard: protect /admin/* pages and /api/admin/* routes
   // Edge runtime can't compare env secrets reliably, so we check cookie presence only.
   // The actual secret comparison happens in AdminLayout (Node.js) and each /api/admin route.
-  const isAdminPage = pathname.startsWith('/admin') && pathname !== '/admin/login' && pathname !== '/admin/verify'
-  const isAdminApi  = pathname.startsWith('/api/admin') && pathname !== '/api/admin/login' && pathname !== '/api/admin/verify'
+  const ADMIN_PUBLIC_PAGES = ['/admin/login', '/admin/verify']
+  const ADMIN_PUBLIC_APIS  = ['/api/admin/login', '/api/admin/verify', '/api/admin/verify-session']
+  const isAdminPage = pathname.startsWith('/admin') && !ADMIN_PUBLIC_PAGES.includes(pathname)
+  const isAdminApi  = pathname.startsWith('/api/admin') && !ADMIN_PUBLIC_APIS.includes(pathname)
 
   if (isAdminPage || isAdminApi) {
     const token = request.cookies.get('admin_token')?.value

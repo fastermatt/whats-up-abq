@@ -1,58 +1,87 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { Loader2, CheckCircle, XCircle } from 'lucide-react'
 
 export default function AdminVerifyPage() {
-  const searchParams = useSearchParams()
   const router = useRouter()
   const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying')
   const [errorMsg, setErrorMsg] = useState('')
 
   useEffect(() => {
-    const token_hash = searchParams.get('token_hash')
-    const type       = searchParams.get('type')
-    const error      = searchParams.get('error')
-    const errorDesc  = searchParams.get('error_description')
+    async function verify() {
+      // Read from BOTH query params (PKCE flow) AND hash fragment (implicit flow)
+      const urlParams  = new URLSearchParams(window.location.search)
+      const hashStr    = window.location.hash.replace(/^#/, '')
+      const hashParams = new URLSearchParams(hashStr)
 
-    if (error) {
-      setStatus('error')
-      setErrorMsg(errorDesc ?? error)
-      return
-    }
-
-    if (!token_hash || type !== 'email') {
-      setStatus('error')
-      setErrorMsg('Invalid verification link.')
-      return
-    }
-
-    // POST to verify API which sets the admin cookies
-    fetch('/api/admin/verify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token_hash, type }),
-    })
-      .then(async res => {
-        if (res.ok) {
-          setStatus('success')
-          // Brief pause so the user sees the success state, then navigate in
-          setTimeout(() => {
-            router.push('/admin')
-            router.refresh()
-          }, 1200)
-        } else {
-          const data = await res.json().catch(() => ({}))
-          setStatus('error')
-          setErrorMsg(data.error ?? 'Verification failed.')
-        }
-      })
-      .catch(() => {
+      // Supabase error (URL wasn't whitelisted, or token expired, etc.)
+      const error     = urlParams.get('error')     || hashParams.get('error')
+      const errorDesc = urlParams.get('error_description') || hashParams.get('error_description')
+      if (error) {
         setStatus('error')
-        setErrorMsg('Network error. Please try again.')
-      })
-  }, [searchParams, router])
+        setErrorMsg(errorDesc ?? error)
+        return
+      }
+
+      const supabase = createClient()
+
+      // ── PKCE flow: token_hash in query params ───────────────────────────────
+      const token_hash = urlParams.get('token_hash')
+      const type       = urlParams.get('type')
+      if (token_hash && type) {
+        const { error: verifyError } = await supabase.auth.verifyOtp({
+          token_hash,
+          type: type as 'email',
+        })
+        if (verifyError) {
+          setStatus('error')
+          setErrorMsg(verifyError.message)
+          return
+        }
+        await grantAdminAccess()
+        return
+      }
+
+      // ── Implicit flow: access_token in hash ────────────────────────────────
+      const access_token  = hashParams.get('access_token')
+      const refresh_token = hashParams.get('refresh_token') ?? ''
+      if (access_token) {
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token,
+          refresh_token,
+        })
+        if (sessionError) {
+          setStatus('error')
+          setErrorMsg(sessionError.message)
+          return
+        }
+        await grantAdminAccess()
+        return
+      }
+
+      // Nothing usable in URL — link was probably already used or is malformed
+      setStatus('error')
+      setErrorMsg('Verification link is invalid or has already been used. Request a new login link.')
+    }
+
+    async function grantAdminAccess() {
+      // Tell the server there is now a valid Supabase session; it will set admin cookies
+      const res = await fetch('/api/admin/verify-session', { method: 'POST' })
+      if (res.ok) {
+        setStatus('success')
+        setTimeout(() => { router.push('/admin'); router.refresh() }, 1200)
+      } else {
+        const data = await res.json().catch(() => ({}))
+        setStatus('error')
+        setErrorMsg(data.error ?? 'Failed to create admin session. Please try again.')
+      }
+    }
+
+    verify()
+  }, [router])
 
   return (
     <main className="min-h-dvh bg-[#1a1614] flex items-center justify-center px-4">
@@ -61,14 +90,17 @@ export default function AdminVerifyPage() {
           <>
             <Loader2 className="w-10 h-10 text-[#9a442d] mx-auto mb-4 animate-spin" />
             <p className="text-white font-semibold">Verifying your login link…</p>
+            <p className="text-[#8a7a74] text-sm mt-1">This only takes a moment.</p>
           </>
         )}
         {status === 'success' && (
           <>
             <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
-            <p className="text-white font-semibold text-lg">Verified!</p>
-            <p className="text-[#8a7a74] text-sm mt-1">Redirecting to admin…</p>
-            <p className="text-[#4a4040] text-xs mt-4">
+            <p className="text-white font-semibold text-lg" style={{ fontFamily: 'var(--font-epilogue)' }}>
+              Verified!
+            </p>
+            <p className="text-[#8a7a74] text-sm mt-1">Taking you to the admin panel…</p>
+            <p className="text-[#4a4040] text-[11px] mt-4">
               This device is now trusted for 90 days.
             </p>
           </>
@@ -76,11 +108,13 @@ export default function AdminVerifyPage() {
         {status === 'error' && (
           <>
             <XCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-            <p className="text-white font-semibold text-lg">Verification failed</p>
-            <p className="text-[#8a7a74] text-sm mt-1">{errorMsg}</p>
+            <p className="text-white font-semibold text-lg" style={{ fontFamily: 'var(--font-epilogue)' }}>
+              Verification failed
+            </p>
+            <p className="text-[#8a7a74] text-sm mt-1 leading-relaxed">{errorMsg}</p>
             <a
               href="/admin/login"
-              className="inline-block mt-6 text-[#9a442d] text-sm hover:text-[#c4603f] transition-colors"
+              className="inline-block mt-6 px-4 py-2 rounded-lg bg-[#9a442d]/20 text-[#9a442d] text-sm hover:bg-[#9a442d]/30 transition-colors"
             >
               ← Back to login
             </a>

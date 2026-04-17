@@ -3,6 +3,10 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Mail, Lock } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+
+const ADMIN_EMAIL = '4mattcarlson@gmail.com'
+const SITE_URL    = 'https://abqunplugged.com'
 
 export default function AdminLoginPage() {
   const [password, setPassword]     = useState('')
@@ -27,6 +31,15 @@ export default function AdminLoginPage() {
         return
       }
       if (data.action === 'verify_required') {
+        // Initiate OTP from the CLIENT (browser) so PKCE code verifier is stored locally
+        const supabase = createClient()
+        await supabase.auth.signInWithOtp({
+          email: ADMIN_EMAIL,
+          options: {
+            emailRedirectTo: `${SITE_URL}/admin/verify`,
+            shouldCreateUser: true,
+          },
+        })
         setState('check_email')
         return
       }
