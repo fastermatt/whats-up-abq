@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { fetchEvents, fetchRecentlyAdded, fetchFeaturedEvents, fetchNeighborhoodCounts, NormalizedEvent } from '@/lib/events'
-import { getHeroImage, getCategoryFallback } from '@/lib/fallback-images'
+import { getHeroImage, getCategoryFallback, OG_IMAGE } from '@/lib/fallback-images'
 import { MapPin, ArrowRight } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
 import MoodChips from '@/app/components/MoodChips'
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     url: 'https://abqunplugged.com',
     images: [
       {
-        url: 'https://cdn.midjourney.com/fb77c641/0_0.jpeg',
+        url: OG_IMAGE,
         width: 1200,
         height: 630,
         alt: 'Albuquerque events — ABQ Unplugged',

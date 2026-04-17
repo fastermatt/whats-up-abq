@@ -100,10 +100,25 @@ const DEFAULT_IMAGES = [
 ]
 
 // ── Hero Images (daily rotation) ────────────────────────────────────────────
-// Wide-format images for the homepage hero section
-// Rotates based on day-of-year so it changes daily but is consistent for all users
+// Wide-format images for the homepage hero section.
+// Local images (in /public/hero/) take priority — they rotate daily.
+// CDN images serve as fallback if local files haven't been placed yet.
+// Rotates based on day-of-year so it's consistent for all users on the same day.
 
-const HERO_IMAGES = [
+// Local hero images — place files in v2/public/hero/ to activate
+// hero-1.png: festival scene with adobe gate towers + Sandia mountains
+// hero-2.png: outdoor concert venue, teal-orange sky, string lights, crowd
+// hero-3.png: Southwest town plaza, adobe buildings, people gathering
+// hero-4.png: desert road with saguaro cacti, mountains, sunset
+const LOCAL_HERO_IMAGES = [
+  '/hero/hero-1.png',
+  '/hero/hero-2.png',
+  '/hero/hero-3.png',
+  '/hero/hero-4.png',
+]
+
+// CDN fallback images (Midjourney Southwest illustration style)
+const CDN_HERO_IMAGES = [
   `${MJ}/e181e268-544e-4a60-899e-2a37cebcdb86/0_0.jpeg`, // golden hour patio
   `${MJ}/e181e268-544e-4a60-899e-2a37cebcdb86/0_1.jpeg`,
   `${MJ}/e181e268-544e-4a60-899e-2a37cebcdb86/0_2.jpeg`,
@@ -118,7 +133,11 @@ const HERO_IMAGES = [
   `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_3.jpeg`,
 ]
 
+// Combined: local images first (more prominent in rotation), CDN as backup pool
+const HERO_IMAGES = [...LOCAL_HERO_IMAGES, ...CDN_HERO_IMAGES]
+
 // ── OG Share Image ──────────────────────────────────────────────────────────
+// Use a full-UUID CDN URL (short-form IDs return 403 on some platforms)
 export const OG_IMAGE = `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_2.jpeg`
 
 // ── Public API ──────────────────────────────────────────────────────────────

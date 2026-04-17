@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { fetchEvents, fetchCategoryCounts, fetchEventCountsByDate, NormalizedEvent } from '@/lib/events'
+import { OG_IMAGE } from '@/lib/fallback-images'
 import { TimeFilter } from '@/lib/utils/dates'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { FilterBar } from './FilterBar'
@@ -13,7 +14,7 @@ import { MapPin, Clock } from 'lucide-react'
 export const revalidate = 60
 
 interface PageProps {
-  searchParams: Promise<{ time?: string; category?: string; page?: string; q?: string; free?: string; price?: string; date?: string; cal?: string }>
+  searchParams: Promise<{ time?: string; category?: string; mood?: string; page?: string; q?: string; free?: string; price?: string; date?: string; cal?: string }>
 }
 
 const CATEGORY_TITLES: Record<string, string> = {
@@ -75,7 +76,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
       url: 'https://abqunplugged.com/events',
       images: [
         {
-          url: 'https://cdn.midjourney.com/fb77c641/0_0.jpeg',
+          url: OG_IMAGE,
           width: 1200,
           height: 630,
           alt: 'Events in Albuquerque, NM — ABQ Unplugged',
@@ -94,6 +95,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
   const params = await searchParams
   const timeFilter = (params.time as TimeFilter) || 'upcoming'
   const category = params.category || null
+  const mood = params.mood || undefined
   const search = params.q?.trim() || undefined
   const selectedDate = params.date || null  // YYYY-MM-DD from calendar
   const showCal = params.cal === '1' || !!selectedDate
@@ -113,7 +115,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
     .toISOString().slice(0, 10)
 
   const [{ events, total }, categoryCounts, calendarCounts] = await Promise.all([
-    fetchEvents({ timeFilter, category, search, freeOnly, maxPrice, date: selectedDate ?? undefined, limit, offset }),
+    fetchEvents({ timeFilter, category, mood, search, freeOnly, maxPrice, date: selectedDate ?? undefined, limit, offset }),
     fetchCategoryCounts(),
     showCal ? fetchEventCountsByDate(calStart, calEnd) : Promise.resolve([]),
   ])

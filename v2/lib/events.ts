@@ -42,6 +42,7 @@ export type CategoryFilter = string | null
 export interface FetchEventsOptions {
   timeFilter?: TimeFilter
   category?: CategoryFilter
+  mood?: string       // e.g. 'live-music' | 'date-night' | 'family-fun' etc.
   search?: string
   freeOnly?: boolean
   maxPrice?: number   // 0 = free only; 25 = under $25; 50 = under $50
@@ -148,6 +149,7 @@ const COLS = 'id, source, raw, event_date, cached_photo_url, ai_enrichment, feat
 export async function fetchEvents({
   timeFilter = 'upcoming',
   category,
+  mood,
   search,
   freeOnly = false,
   maxPrice,
@@ -165,6 +167,7 @@ export async function fetchEvents({
   const subCat = category?.includes(' > ') ? category.split(' > ')[1] : null
 
   // In-memory filtering is needed for: subcategory, search, freeOnly, maxPrice.
+  // Mood filter is handled at DB level (ai_enrichment JSONB column).
   // When only a top-level category is given, we can do pure DB pagination.
   const needsInMemory = !!(subCat || search || freeOnly || maxPrice !== undefined)
 
@@ -186,6 +189,7 @@ export async function fetchEvents({
       if (lte) query = query.lte('event_date', lte)
     }
     if (topLevelCat) query = query.eq('category', topLevelCat)
+    if (mood) query = query.eq('ai_enrichment->>mood', mood)
 
     const { data, error, count } = await query.range(offset, offset + limit - 1)
     if (error) {
@@ -217,6 +221,7 @@ export async function fetchEvents({
     if (lte) q = q.lte('event_date', lte)
   }
   if (topLevelCat) q = q.eq('category', topLevelCat)  // Pre-filter cuts dataset!
+  if (mood) q = q.eq('ai_enrichment->>mood', mood)
 
   const { data, error } = await q
   if (error) {

@@ -37,13 +37,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const canonicalUrl = `https://abqunplugged.com/events/${id}`
 
   return {
-    title: `${event.title} — ${dateStr} | ABQ Unplugged`,
+    title: `${event.title} — ${dateStr}`,
     description,
     openGraph: {
       title: `${event.title} — ${dateStr}`,
       description,
       url: canonicalUrl,
-      type: 'article',
+      type: 'website',
       images: [
         {
           url: ogImage,
