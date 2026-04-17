@@ -9,6 +9,7 @@ interface PageProps {
 }
 
 const REPORT_TYPE_LABELS: Record<string, string> = {
+  event_submission: 'Event Submission',
   wrong_info: 'Wrong info',
   cancelled: 'Cancelled',
   duplicate: 'Duplicate',
@@ -27,12 +28,24 @@ export default async function AdminReportsPage({ searchParams }: PageProps) {
     .order('created_at', { ascending: false })
     .limit(100)
 
-  if (status !== 'all') q = q.eq('status', status)
+  if (status === 'submissions') {
+    q = q.eq('report_type', 'event_submission').eq('status', 'pending')
+  } else if (status !== 'all') {
+    q = q.eq('status', status).neq('report_type', 'event_submission')
+  }
 
   const { data: reports } = await q
 
+  // Separate count for pending submissions badge
+  const { count: pendingSubmissions } = await (supabase as any)
+    .schema('public').from('event_reports')
+    .select('*', { count: 'exact', head: true })
+    .eq('report_type', 'event_submission')
+    .eq('status', 'pending')
+
   const TABS = [
     { label: 'Pending', value: 'pending' },
+    { label: `Submissions${(pendingSubmissions ?? 0) > 0 ? ` (${pendingSubmissions})` : ''}`, value: 'submissions' },
     { label: 'Resolved', value: 'resolved' },
     { label: 'Dismissed', value: 'dismissed' },
     { label: 'All', value: 'all' },
@@ -65,7 +78,7 @@ export default async function AdminReportsPage({ searchParams }: PageProps) {
       ) : (
         <div className="space-y-3">
           {reports.map((r: Record<string, string>) => (
-            <div key={r.id} className="bg-white/5 rounded-2xl p-5 space-y-3">
+            <div key={r.id} className={`rounded-2xl p-5 space-y-3 ${r.report_type === 'event_submission' ? 'bg-[#9a442d]/15 border border-[#9a442d]/30' : 'bg-white/5'}`}>
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">

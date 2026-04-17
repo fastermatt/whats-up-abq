@@ -43,9 +43,8 @@ export default async function AdminEventsPage({ searchParams }: PageProps) {
 
   if (source) q = q.eq('source', source)
 
-  // Server-side text search using ilike on raw JSONB text representation
   if (search) {
-    // We'll filter post-fetch since title extraction depends on source
+    q = q.or(`raw->>name.ilike.%${search}%,raw->>title.ilike.%${search}%,ai_enrichment->>title_override.ilike.%${search}%`)
   }
 
   if (catFilter) {
@@ -88,10 +87,7 @@ export default async function AdminEventsPage({ searchParams }: PageProps) {
     }
   })
 
-  // Client-side title search filter (since title is derived)
-  const events = search
-    ? allEvents.filter((e) => e.title.toLowerCase().includes(search.toLowerCase()))
-    : allEvents
+  const events = allEvents
 
   const totalPages = Math.ceil((count ?? 0) / limit)
 
@@ -143,7 +139,7 @@ export default async function AdminEventsPage({ searchParams }: PageProps) {
 
       <p className="text-white/40 text-xs">
         {count?.toLocaleString()} events · showing {Math.min(offset + 1, count ?? 0)}–{Math.min(offset + limit, count ?? 0)}
-        {search && ` · filtered to ${events.length} matching "${search}"`}
+        {search && ` · matching "${search}"`}
       </p>
 
       {/* Bulk actions */}

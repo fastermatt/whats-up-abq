@@ -99,23 +99,23 @@ const DEFAULT_IMAGES = [
   `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_3.jpeg`,
 ]
 
-// ── Hero Images (daily rotation) ────────────────────────────────────────────
+// ── Hero Images (rotates every 3 hours) ─────────────────────────────────────
 // Wide-format images for the homepage hero section
-// Rotates based on day-of-year so it changes daily but is consistent for all users
+// Rotates every 3 hours (8 slots/day) — consistent for all users within same slot
 
 const HERO_IMAGES = [
+  `${MJ}/6b9cf507-2761-47cf-894c-ff55b6249bd8/0_0.jpeg`, // baseball stadium + Sandias
+  `${MJ}/432d4425-1f79-4f48-a1bf-9d84e87c5d59/0_1.jpeg`, // guitar + cactus + string lights
   `${MJ}/e181e268-544e-4a60-899e-2a37cebcdb86/0_0.jpeg`, // golden hour patio
-  `${MJ}/e181e268-544e-4a60-899e-2a37cebcdb86/0_1.jpeg`,
-  `${MJ}/e181e268-544e-4a60-899e-2a37cebcdb86/0_2.jpeg`,
-  `${MJ}/e181e268-544e-4a60-899e-2a37cebcdb86/0_3.jpeg`,
-  `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_0.jpeg`, // panoramic balloons + skyline
-  `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_1.jpeg`,
-  `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_2.jpeg`,
-  `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_3.jpeg`,
+  `${MJ}/a47a3206-8682-4d01-9e8d-a396962898ec/0_2.jpeg`, // hot air balloon festival
+  `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_1.jpeg`, // panoramic balloons + skyline
+  `${MJ}/cea7d54e-e473-409b-8fbc-24ca50c3d626/0_0.jpeg`, // theater masks + adobe
   `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_0.jpeg`, // desert highway into Sandias
-  `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_1.jpeg`,
-  `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_2.jpeg`,
-  `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_3.jpeg`,
+  `${MJ}/432d4425-1f79-4f48-a1bf-9d84e87c5d59/0_3.jpeg`, // guitar + cactus (alt angle)
+  `${MJ}/6b9cf507-2761-47cf-894c-ff55b6249bd8/0_2.jpeg`, // stadium (alt angle)
+  `${MJ}/e181e268-544e-4a60-899e-2a37cebcdb86/0_3.jpeg`, // golden hour patio (alt)
+  `${MJ}/27a789d4-13b9-4e5f-a8d6-7008beee4e4a/0_0.jpeg`, // green chile + margaritas
+  `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_3.jpeg`, // panoramic (alt)
 ]
 
 // ── OG Share Image ──────────────────────────────────────────────────────────
@@ -129,10 +129,9 @@ export const OG_IMAGE = `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_2.jpeg`
  */
 export function getHeroImage(): string {
   const now = new Date()
-  const dayOfYear = Math.floor(
-    (now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000
-  )
-  return HERO_IMAGES[dayOfYear % HERO_IMAGES.length]
+  // Rotates every 3 hours — 8 slots per day, consistent across all users
+  const slot = Math.floor(now.getTime() / (3 * 60 * 60 * 1000))
+  return HERO_IMAGES[slot % HERO_IMAGES.length]
 }
 
 /**
