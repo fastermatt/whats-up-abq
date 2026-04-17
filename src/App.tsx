@@ -1158,9 +1158,197 @@ function EventCardImageSlider({ event }: { event: TMEvent }) {
   );
 }
 
-// ─── Event Card ─────────────────────────────────────────────────────────────
+// ─── Friends & Social Layer ─────────────────────────────────────────────────
 
-const EventCard = React.memo(function EventCard({ event, onClick }: { event: TMEvent; onClick: () => void }) {
+interface FriendProfile {
+  id: string;
+  display_name: string | null;
+  handle: string | null;
+  avatar_url: string | null;
+}
+
+interface FriendSaver {
+  userId: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  showcase_badge?: string | null;
+  state: string;
+}
+
+// ── useFriends: loads accepted friends + their saved event IDs ────────────────
+function useFriends(userId: string | null) {
+  const [friends, setFriends] = React.useState<FriendProfile[]>([]);
+  const [friendSavedEventIds, setFriendSavedEventIds] = React.useState<Map<string, FriendSaver[]>>(new Map());
+  const [loading, setLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!userId) { setFriends([]); setFriendSavedEventIds(new Map()); return; }
+    setLoading(true);
+    (async () => {
+      try {
+        // Get accepted friend IDs
+        const { data: fships } = await supabase
+          .from('friendships')
+          .select('requester_id, addressee_id')
+          .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`)
+          .eq('status', 'accepted');
+
+        if (!fships?.length) { setLoading(false); return; }
+
+        const friendIds = fships.map(f => f.requester_id === userId ? f.addressee_id : f.requester_id);
+
+        // Get friend profiles
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, display_name, handle, avatar_url')
+          .in('id', friendIds);
+
+        setFriends(profiles || []);
+
+        // Get friends' saved events (only for those with share_saves=true)
+        const { data: visibleFriends } = await supabase
+          .from('social_visibility')
+          .select('user_id')
+          .in('user_id', friendIds)
+          .eq('share_saves', true);
+
+        const sharingIds = (visibleFriends || []).map(v => v.user_id);
+        if (!sharingIds.length) { setLoading(false); return; }
+
+        const { data: saves } = await supabase
+          .from('user_events')
+          .select('user_id, event_id, state')
+          .in('user_id', sharingIds)
+          .in('state', ['saved', 'going']);
+
+        // Build map: event_id → array of {userId, display_name, avatar_url, state}
+        const map = new Map<string, FriendSaver[]>();
+        for (const save of (saves || [])) {
+          const profile = (profiles || []).find(p => p.id === save.user_id);
+          if (!profile) continue;
+          const existing = map.get(save.event_id) || [];
+          existing.push({ userId: save.user_id, display_name: profile.display_name, avatar_url: profile.avatar_url, state: save.state });
+          map.set(save.event_id, existing);
+        }
+        setFriendSavedEventIds(map);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error loading friends:', err);
+        setLoading(false);
+      }
+    })();
+  }, [userId]);
+
+  return { friends, friendSavedEventIds, loading };
+}
+
+// ── useProfile: load user's profile data (avatar_url, badges, showcase_badge) ──
+function useProfile(userId: string | null) {
+  const [profile, setProfile] = React.useState<{ avatar_url: string | null; badges: any[]; showcase_badge: string | null } | null>(null);
+
+  const load = React.useCallback(() => {
+    if (!userId) { setProfile(null); return; }
+    supabase.from('profiles').select('avatar_url, badges, showcase_badge').eq('id', userId).maybeSingle()
+      .then(({ data }) => { if (data) setProfile({ avatar_url: data.avatar_url, badges: data.badges || [], showcase_badge: data.showcase_badge }); });
+  }, [userId]);
+
+  React.useEffect(() => {
+    load();
+    const handler = () => load();
+    window.addEventListener('abq_profile_changed', handler);
+    return () => window.removeEventListener('abq_profile_changed', handler);
+  }, [load]);
+
+  return profile;
+}
+
+// ── FriendAvatarStack: overlapping avatar circles for friends who saved ───────
+function FriendAvatarStack({ savers, maxShow = 3 }: {
+  savers: FriendSaver[];
+  maxShow?: number;
+}) {
+  if (!savers.length) return null;
+  const shown = savers.slice(0, maxShow);
+  const extra = savers.length - shown.length;
+  const label = savers.length === 1
+    ? `${savers[0].display_name || 'A friend'} saved this`
+    : `${savers.length} friends saved this`;
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        {shown.map((s, i) => (
+          <div key={s.userId} style={{
+            width: 20, height: 20, borderRadius: '50%',
+            border: '2px solid white',
+            background: s.avatar_url ? 'transparent' : 'var(--brand)',
+            overflow: 'hidden',
+            marginLeft: i > 0 ? -6 : 0,
+            zIndex: shown.length - i,
+            position: 'relative',
+            flexShrink: 0,
+          }}>
+            {s.avatar_url
+              ? <img src={s.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              : <span style={{ fontSize: 9, color: 'white', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontFamily: 'Public Sans, sans-serif' }}>
+                  {(s.display_name || '?')[0].toUpperCase()}
+                </span>
+            }
+            {s.showcase_badge && (
+              <div style={{ position: 'absolute', bottom: -2, right: -2, fontSize: 10, width: 14, height: 14, borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>
+                {s.showcase_badge}
+              </div>
+            )}
+          </div>
+        ))}
+        {extra > 0 && (
+          <div style={{
+            width: 20, height: 20, borderRadius: '50%',
+            border: '2px solid white',
+            background: '#e5e7eb',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            marginLeft: -6, zIndex: 0, position: 'relative', flexShrink: 0,
+          }}>
+            <span style={{ fontSize: 8, color: '#6b7280', fontWeight: 800, fontFamily: 'Public Sans, sans-serif' }}>+{extra}</span>
+          </div>
+        )}
+      </div>
+      <span style={{ fontSize: 10, color: '#6b7280', fontFamily: 'Public Sans, sans-serif', fontWeight: 600 }}>{label}</span>
+    </div>
+  );
+}
+
+// ── FriendsSectionInDetail: shows friends who saved in event detail modal ─────
+function FriendsSectionInDetail({ eventId, friendSavedEventIds }: {
+  eventId: string;
+  friendSavedEventIds: Map<string, FriendSaver[]>;
+}) {
+  const savers = friendSavedEventIds.get(eventId) || [];
+  if (!savers.length) return null;
+
+  const formatNames = () => {
+    if (savers.length === 1) return savers[0].display_name || 'A friend';
+    if (savers.length === 2) return `${savers[0].display_name || 'A friend'} and ${savers[1].display_name || 'a friend'}`;
+    return `${savers[0].display_name || 'A friend'}, ${savers[1].display_name || 'a friend'}, and ${savers.length - 2} other${savers.length - 2 > 1 ? 's' : ''}`;
+  };
+
+  return (
+    <div className="mb-3 bg-white p-3" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1.5px solid #f0f0f0' }}>
+      <div className="flex items-center gap-1.5 mb-2">
+        <span style={{ fontSize: '14px' }}>👥</span>
+        <p className="text-xs font-black uppercase tracking-wide" style={{ color: 'var(--brand)', letterSpacing: '0.07em' }}>Friends</p>
+      </div>
+      <FriendAvatarStack savers={savers} maxShow={5} />
+      <p className="text-sm text-gray-700 mt-2" style={{ fontFamily: 'Public Sans, sans-serif' }}>
+        {formatNames()} saved this event
+      </p>
+    </div>
+  );
+}
+
+// ─── Event Card ─────────────────────────────────────────────────────────────────
+
+const EventCard = React.memo(function EventCard({ event, onClick, friendSavers }: { event: TMEvent; onClick: () => void; friendSavers?: FriendSaver[] }) {
   const venue = event._embedded?.venues?.[0];
   const category = getEventCategory(event);
   const price = event.priceRanges?.[0];
@@ -1198,6 +1386,9 @@ const EventCard = React.memo(function EventCard({ event, onClick }: { event: TME
         >
           {event.name}
         </p>
+        {friendSavers && friendSavers.length > 0 && (
+          <FriendAvatarStack savers={friendSavers} />
+        )}
         {isMovie ? (
           <div className="mt-1.5 flex flex-col gap-1">
             {movieMeta?.genre && (
@@ -1942,7 +2133,7 @@ function EventShareCardModal({ event, onClose }: { event: TMEvent; onClose: () =
 
 // ─── Event Detail Modal ──────────────────────────────────────────────────────
 
-function EventDetailModal({ event, onClose, mapProvider }: { event: TMEvent; onClose: () => void; mapProvider?: 'google' | 'apple' }) {
+function EventDetailModal({ event, onClose, mapProvider, friendSavedEventIds }: { event: TMEvent; onClose: () => void; mapProvider?: 'google' | 'apple'; friendSavedEventIds?: Map<string, FriendSaver[]> }) {
   const [shared, setShared] = useState(false);
   const [showShareCard, setShowShareCard] = useState(false);
   const [venueExpanded, setVenueExpanded] = useState(false);
@@ -2101,6 +2292,11 @@ function EventDetailModal({ event, onClose, mapProvider }: { event: TMEvent; onC
               <p className="text-xs font-bold mt-1" style={{ color: 'var(--brand)' }}>Open in {mapProvider === 'apple' ? 'Apple Maps' : 'Google Maps'} →</p>
             </div>
           </a>
+        )}
+
+        {/* ── Friends section ──────────────────────────────── */}
+        {friendSavedEventIds && (
+          <FriendsSectionInDetail eventId={event.id} friendSavedEventIds={friendSavedEventIds} />
         )}
 
         {/* ── PLEASE NOTE callout (amber warning) ──────────── */}
@@ -3333,7 +3529,7 @@ function CalEventThumb({ img, typeMeta, onClick }: { img: string; typeMeta: { bg
 function DiscoverScreen({
   events, eventsLoading, onEventSelect,
   coords, geoRequested, geoSilentPending, geoError, onRequestGeo,
-  onNavigateEvents, prefs, adminHeroLines,
+  onNavigateEvents, prefs, adminHeroLines, user, friendSavedEventIds,
 }: {
   events: TMEvent[];
   eventsLoading?: boolean;
@@ -3346,6 +3542,8 @@ function DiscoverScreen({
   onNavigateEvents?: (genre?: string) => void;
   prefs?: UserPrefs;
   adminHeroLines?: string[] | null;
+  user?: User | null;
+  friendSavedEventIds?: Map<string, FriendSaver[]>;
 }) {
   const hidden = prefs?.hiddenSections ?? [];
   const interests = prefs?.preferredInterests ?? [];
@@ -3735,6 +3933,46 @@ function DiscoverScreen({
       {/* Featured Event (time-limited) — shows above Daily Gem when active */}
       <FeaturedEventBanner events={events} onSelect={onEventSelect} />
 
+      {/* Friends' Picks — shows events friends have saved */}
+      {user && friendSavedEventIds && friendSavedEventIds.size > 0 && (() => {
+        const todayStr = new Date().toLocaleDateString('en-CA');
+        const sevenDays = new Date(Date.now() + 90 * 864e5).toLocaleDateString('en-CA');
+        // Collect all events that friends have saved
+        const friendPicksMap = new Map<string, FriendSaver[]>();
+        for (const [eventId, savers] of friendSavedEventIds) {
+          friendPicksMap.set(eventId, savers);
+        }
+        // Filter to upcoming events only
+        const friendPicksEvents = events.filter(e => {
+          if (!friendPicksMap.has(e.id)) return false;
+          if (e._isAdult) return false;
+          const d = e.dates?.start?.localDate || '';
+          if (d < todayStr || d > sevenDays) return false;
+          return true;
+        }).slice(0, 5);
+
+        if (friendPicksEvents.length === 0) return null;
+
+        return (
+          <div style={{ borderTop: '1px solid rgba(0,0,0,0.06)', marginBottom: 4 }}>
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 pt-3 pb-2">
+              <p className="text-xs font-black uppercase flex items-center gap-2" style={{ fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.1em', color: 'var(--ink)' }}>
+                <span style={{ fontSize: 12 }}>👥</span> Friends' Picks
+              </p>
+            </div>
+            {/* Horizontal scroll of friend pick event cards */}
+            <div className="flex gap-3 px-5 pb-4 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+              {friendPicksEvents.map(event => (
+                <div key={event.id} style={{ flexShrink: 0, width: '240px', cursor: 'pointer' }} onClick={() => onEventSelect(event)}>
+                  <EventCard event={event} onClick={() => onEventSelect(event)} friendSavers={friendPicksMap.get(event.id)} />
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Browse by Category — unified section with preview card */}
       {!hidden.includes('vibes') && (() => {
         const CATS = [
@@ -4089,12 +4327,14 @@ function EventsScreen({
   onEventSelect,
   initialSearch = '',
   initialGenre = '',
+  friendSavedEventIds,
 }: {
   events: TMEvent[];
   eventsLoading?: boolean;
   onEventSelect: (e: TMEvent) => void;
   initialSearch?: string;
   initialGenre?: string;
+  friendSavedEventIds?: Map<string, FriendSaver[]>;
 }) {
   const eventsHero = useTypewriter("What's Happening", 300);
   const [search, setSearch] = useState('');
@@ -4684,7 +4924,7 @@ function EventsScreen({
                       const count = getShowtimeCount(event);
                       return (
                         <div key={event.id} style={{ position: 'relative', minWidth: 0, overflow: 'hidden' }}>
-                          <EventCard event={event} onClick={() => onEventSelect(event)} />
+                          <EventCard event={event} onClick={() => onEventSelect(event)} friendSavers={friendSavedEventIds?.get(event.id)} />
                           {count > 1 && (
                             <div style={{ position: 'absolute', bottom: 8, left: 6, background: 'rgba(0,0,0,0.62)', color: 'white', fontSize: '8px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '2px 5px', borderRadius: 3, pointerEvents: 'none', backdropFilter: 'blur(4px)' }}>
                               {count} shows
@@ -5293,6 +5533,83 @@ function UserColorPicker() {
   );
 }
 
+// ── SocialPrivacyToggles: privacy settings for friend visibility ──────────────
+function SocialPrivacyToggles({ userId }: { userId: string }) {
+  const [shareSaves, setShareSaves] = React.useState(true);
+  const [shareCheckins, setShareCheckins] = React.useState(true);
+  const [loading, setLoading] = React.useState(true);
+  const [saving, setSaving] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!userId) { setLoading(false); return; }
+    supabase.from('social_visibility')
+      .select('share_saves, share_checkins')
+      .eq('user_id', userId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          setShareSaves(data.share_saves ?? true);
+          setShareCheckins(data.share_checkins ?? true);
+        } else {
+          setShareSaves(true);
+          setShareCheckins(true);
+        }
+        setLoading(false);
+      });
+  }, [userId]);
+
+  const handleToggle = async (field: 'share_saves' | 'share_checkins', value: boolean) => {
+    if (field === 'share_saves') setShareSaves(value);
+    else setShareCheckins(value);
+    setSaving(true);
+    try {
+      await supabase.from('social_visibility').upsert({
+        user_id: userId,
+        [field]: value,
+      }, { onConflict: 'user_id' });
+    } catch (err) {
+      console.error('Error saving privacy settings:', err);
+    }
+    setSaving(false);
+  };
+
+  if (loading) return <p className="text-xs text-gray-400" style={{ fontFamily: 'Public Sans, sans-serif' }}>Loading…</p>;
+
+  return (
+    <div className="flex flex-col gap-3">
+      <button
+        onClick={() => handleToggle('share_saves', !shareSaves)}
+        disabled={saving}
+        className="flex items-center justify-between"
+      >
+        <div className="flex items-center gap-2">
+          <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--brand)' }}>bookmark</span>
+          <span className="text-sm font-medium text-gray-700" style={{ fontFamily: 'Public Sans, sans-serif' }}>Share my saved events</span>
+        </div>
+        <div className="w-11 h-6 rounded-full flex items-center px-0.5 transition-colors" style={{ background: shareSaves ? 'var(--brand)' : '#d1d5db', opacity: saving ? 0.6 : 1 }}>
+          <div className="w-5 h-5 bg-white rounded-full shadow transition-transform" style={{ transform: shareSaves ? 'translateX(20px)' : 'translateX(0)' }} />
+        </div>
+      </button>
+
+      <button
+        onClick={() => handleToggle('share_checkins', !shareCheckins)}
+        disabled={saving}
+        className="flex items-center justify-between"
+      >
+        <div className="flex items-center gap-2">
+          <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--brand)' }}>check_circle</span>
+          <span className="text-sm font-medium text-gray-700" style={{ fontFamily: 'Public Sans, sans-serif' }}>Share my check-ins</span>
+        </div>
+        <div className="w-11 h-6 rounded-full flex items-center px-0.5 transition-colors" style={{ background: shareCheckins ? 'var(--brand)' : '#d1d5db', opacity: saving ? 0.6 : 1 }}>
+          <div className="w-5 h-5 bg-white rounded-full shadow transition-transform" style={{ transform: shareCheckins ? 'translateX(20px)' : 'translateX(0)' }} />
+        </div>
+      </button>
+
+      <p className="text-xs text-gray-400 mt-2" style={{ fontFamily: 'Public Sans, sans-serif' }}>Friends can only see your activity if they've been accepted as friends.</p>
+    </div>
+  );
+}
+
 function ProfileSettingsPane({ user, onUsernameChange, onSignIn, isDark, onToggleDark }: { user: User | null; onUsernameChange?: (name: string) => void; onSignIn?: () => void; isDark?: boolean; onToggleDark?: () => void }) {
   const [prefs, setPrefs] = useState<UserPrefs>(getPrefs);
   const [open, setOpen] = useState(false);
@@ -5515,6 +5832,14 @@ function ProfileSettingsPane({ user, onUsernameChange, onSignIn, isDark, onToggl
               )}
             </div>
           ) : null}
+
+          {/* Privacy — Social visibility settings */}
+          {user && (
+            <div className="bg-white rounded-lg p-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3" style={{ fontFamily: 'Public Sans, sans-serif' }}>Privacy</p>
+              <SocialPrivacyToggles userId={user.id} />
+            </div>
+          )}
 
           {/* Homescreen Sections */}
           <div className="bg-white rounded-lg p-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
@@ -6887,8 +7212,432 @@ function AdminScreen({ user, onBack }: { user: User | null; onBack: () => void }
 
 // ─── Profile Screen ───────────────────────────────────────────────────────────
 
+// ── FriendsSection: manage friends and add new ones ──────────────────────────
+function FriendsSection({ userId }: { userId: string }) {
+  const [friends, setFriends] = React.useState<FriendProfile[]>([]);
+  const [pendingRequests, setPendingRequests] = React.useState<any[]>([]);
+  const [searchOpen, setSearchOpen] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [searchResults, setSearchResults] = React.useState<any[]>([]);
+  const [searching, setSearching] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
+
+  // Load friends and pending requests
+  React.useEffect(() => {
+    if (!userId) return;
+    loadFriendsData();
+  }, [userId]);
+
+  const loadFriendsData = async () => {
+    setLoading(true);
+    try {
+      // Get accepted friends
+      const { data: fships } = await supabase
+        .from('friendships')
+        .select('requester_id, addressee_id')
+        .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`)
+        .eq('status', 'accepted');
+
+      const friendIds = (fships || []).map(f => f.requester_id === userId ? f.addressee_id : f.requester_id);
+
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, display_name, handle, avatar_url, showcase_badge')
+        .in('id', friendIds);
+
+      setFriends(profiles || []);
+
+      // Get pending requests
+      const { data: pending } = await supabase
+        .from('friendships')
+        .select('requester_id, addressee_id, profiles!friendships_requester_id_fkey(display_name, handle, avatar_url)')
+        .eq('addressee_id', userId)
+        .eq('status', 'pending');
+
+      setPendingRequests(pending || []);
+    } catch (err) {
+      console.error('Error loading friends:', err);
+    }
+    setLoading(false);
+  };
+
+  const handleSearch = async (query: string) => {
+    if (!query.trim()) { setSearchResults([]); return; }
+    setSearching(true);
+    try {
+      // Search by handle (case-insensitive)
+      const { data: results } = await supabase
+        .from('profiles')
+        .select('id, display_name, handle, avatar_url, showcase_badge')
+        .ilike('handle', `%${query}%`)
+        .neq('id', userId)
+        .limit(10);
+
+      // Filter out existing friends
+      const friendIds = new Set(friends.map(f => f.id));
+      const filtered = (results || []).filter(r => !friendIds.has(r.id));
+      setSearchResults(filtered);
+    } catch (err) {
+      console.error('Error searching:', err);
+    }
+    setSearching(false);
+  };
+
+  const handleAddFriend = async (userId2: string) => {
+    try {
+      await supabase.from('friendships').insert({
+        requester_id: userId,
+        addressee_id: userId2,
+        status: 'pending',
+      });
+      // Refresh search results
+      handleSearch(searchQuery);
+    } catch (err) {
+      console.error('Error sending friend request:', err);
+    }
+  };
+
+  const handleAcceptRequest = async (requesterid: string) => {
+    try {
+      await supabase.from('friendships')
+        .update({ status: 'accepted' })
+        .eq('requester_id', requesterid)
+        .eq('addressee_id', userId);
+      loadFriendsData();
+    } catch (err) {
+      console.error('Error accepting request:', err);
+    }
+  };
+
+  const handleDeclineRequest = async (requesterid: string) => {
+    try {
+      await supabase.from('friendships')
+        .delete()
+        .eq('requester_id', requesterid)
+        .eq('addressee_id', userId);
+      loadFriendsData();
+    } catch (err) {
+      console.error('Error declining request:', err);
+    }
+  };
+
+  if (loading) return <p className="text-xs text-gray-400" style={{ fontFamily: 'Public Sans, sans-serif' }}>Loading…</p>;
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Friends list */}
+      {friends.length > 0 ? (
+        <div>
+          <p className="text-xs font-bold text-gray-500 uppercase mb-2" style={{ fontFamily: 'Public Sans, sans-serif' }}>{friends.length} Friends</p>
+          <div className="flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
+            {friends.map(f => (
+              <div key={f.id} className="flex flex-col items-center flex-shrink-0">
+                <div style={{
+                  width: 52, height: 52, borderRadius: '50%',
+                  background: f.avatar_url ? 'transparent' : 'var(--brand)',
+                  overflow: 'hidden',
+                  border: '2px solid #e5e7eb',
+                  position: 'relative',
+                }}>
+                  {f.avatar_url
+                    ? <img src={f.avatar_url} alt={f.display_name || ''} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : <span style={{ fontSize: 20, color: 'white', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontFamily: 'Public Sans, sans-serif' }}>
+                        {(f.display_name || '?')[0].toUpperCase()}
+                      </span>
+                  }
+                  {f.showcase_badge && (
+                    <div style={{ position: 'absolute', bottom: -2, right: -2, fontSize: 14, width: 20, height: 20, borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>
+                      {f.showcase_badge}
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs font-bold mt-1 text-center" style={{ fontFamily: 'Public Sans, sans-serif', maxWidth: 60, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.display_name || f.handle}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <p className="text-sm text-gray-500" style={{ fontFamily: 'Public Sans, sans-serif' }}>No friends yet</p>
+      )}
+
+      {/* Pending requests */}
+      {pendingRequests.length > 0 && (
+        <div style={{ paddingTop: 8, borderTop: '1px solid #f0f0f0' }}>
+          <p className="text-xs font-bold text-gray-500 uppercase mb-2" style={{ fontFamily: 'Public Sans, sans-serif' }}>Pending Requests</p>
+          <div className="flex flex-col gap-2">
+            {pendingRequests.map(req => (
+              <div key={req.requester_id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-2 min-w-0">
+                  {req.profiles?.avatar_url ? (
+                    <img src={req.profiles.avatar_url} alt="" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, fontSize: 12 }}>
+                      {(req.profiles?.display_name || '?')[0].toUpperCase()}
+                    </div>
+                  )}
+                  <p className="text-sm font-bold truncate" style={{ fontFamily: 'Public Sans, sans-serif' }}>{req.profiles?.display_name || req.profiles?.handle}</p>
+                </div>
+                <div className="flex gap-1 flex-shrink-0">
+                  <button onClick={() => handleAcceptRequest(req.requester_id)} className="px-2 py-1 rounded text-white text-xs font-bold" style={{ background: 'var(--brand)', border: 'none', cursor: 'pointer' }}>Accept</button>
+                  <button onClick={() => handleDeclineRequest(req.requester_id)} className="px-2 py-1 rounded text-gray-600 text-xs font-bold" style={{ background: '#f5f5f5', border: 'none', cursor: 'pointer' }}>Decline</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Add friends button */}
+      <button
+        onClick={() => setSearchOpen(!searchOpen)}
+        className="w-full py-2 rounded-lg text-white font-bold text-sm"
+        style={{ background: 'var(--brand)', fontFamily: 'Public Sans, sans-serif', border: 'none', cursor: 'pointer' }}
+      >
+        + Add Friends
+      </button>
+
+      {/* Search panel */}
+      {searchOpen && (
+        <div className="border-t pt-3">
+          <input
+            type="text"
+            placeholder="Search by handle"
+            value={searchQuery}
+            onChange={(e) => { setSearchQuery(e.target.value); handleSearch(e.target.value); }}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+            style={{ fontFamily: 'Public Sans, sans-serif', outline: 'none' }}
+          />
+          {searching && <p className="text-xs text-gray-400 mt-2" style={{ fontFamily: 'Public Sans, sans-serif' }}>Searching…</p>}
+          {searchResults.length > 0 && (
+            <div className="flex flex-col gap-2 mt-2">
+              {searchResults.map(result => (
+                <div key={result.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-2 min-w-0">
+                    {result.avatar_url ? (
+                      <img src={result.avatar_url} alt="" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, fontSize: 12 }}>
+                        {(result.display_name || '?')[0].toUpperCase()}
+                      </div>
+                    )}
+                    <p className="text-sm font-bold truncate" style={{ fontFamily: 'Public Sans, sans-serif' }}>{result.display_name || result.handle}</p>
+                  </div>
+                  <button onClick={() => handleAddFriend(result.id)} className="px-3 py-1 rounded text-white text-xs font-bold flex-shrink-0" style={{ background: 'var(--brand)', border: 'none', cursor: 'pointer' }}>Add</button>
+                </div>
+              ))}
+            </div>
+          )}
+          {!searching && searchQuery && searchResults.length === 0 && (
+            <p className="text-xs text-gray-400 mt-2" style={{ fontFamily: 'Public Sans, sans-serif' }}>No results found</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── BadgePickerModal: bottom sheet to select showcase badge ──────────────────
+function BadgePickerModal({ badges, currentBadge, userId, onClose }: {
+  badges: any[];
+  currentBadge: string | null;
+  userId: string;
+  onClose: () => void;
+}) {
+  const [saving, setSaving] = React.useState(false);
+
+  const selectBadge = async (badgeId: string | null) => {
+    setSaving(true);
+    await supabase.from('profiles').update({ showcase_badge: badgeId }).eq('id', userId);
+    setSaving(false);
+    onClose();
+    // Force profile re-fetch by dispatching event
+    window.dispatchEvent(new Event('abq_profile_changed'));
+  };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }} onClick={onClose}>
+      <div style={{ background: 'white', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: 480, padding: '20px 20px 40px', maxHeight: '70vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <p style={{ fontFamily: 'Public Sans, sans-serif', fontWeight: 800, fontSize: 16, margin: 0 }}>Choose Showcase Badge</p>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#999' }}>✕</button>
+        </div>
+        <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 12, color: '#888', marginBottom: 16 }}>This badge appears on your avatar everywhere in the app</p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16 }}>
+          {badges.map((badge: any) => {
+            const id = badge.id || badge;
+            const emoji = badge.emoji || badge;
+            const label = badge.label || badge.name || id;
+            const isSelected = currentBadge === emoji;
+            return (
+              <button
+                key={id}
+                onClick={() => selectBadge(emoji)}
+                disabled={saving}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '12px 8px', borderRadius: 12, border: isSelected ? '2px solid var(--brand)' : '1.5px solid #e5e7eb', background: isSelected ? 'var(--brand)' + '15' : 'white', cursor: 'pointer' }}
+              >
+                <span style={{ fontSize: 28 }}>{emoji}</span>
+                <span style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 9, fontWeight: 700, color: isSelected ? 'var(--brand)' : '#666', textAlign: 'center', lineHeight: 1.3 }}>{label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {currentBadge && (
+          <button
+            onClick={() => selectBadge(null)}
+            disabled={saving}
+            style={{ width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: 10, background: 'white', fontFamily: 'Public Sans, sans-serif', fontSize: 13, color: '#888', cursor: 'pointer' }}
+          >
+            Remove badge from avatar
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── ProfileAvatarUpload: profile photo upload with showcase badge corner ──────
+function ProfileAvatarUpload({ user, profile }: { user: any; profile: { avatar_url: string | null; badges: any[]; showcase_badge: string | null } | null }) {
+  const [uploading, setUploading] = React.useState(false);
+  const [localUrl, setLocalUrl] = React.useState<string | null>(null);
+  const [showBadgePicker, setShowBadgePicker] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const displayUrl = localUrl || profile?.avatar_url || null;
+  const displayName = user?.user_metadata?.display_name || user?.user_metadata?.full_name || user?.email || '?';
+  const initial = displayName[0].toUpperCase();
+
+  // Generate a consistent color from the user id (same as existing avatar circles)
+  const avatarColor = React.useMemo(() => {
+    const colors = ['#B95C43', '#7C3AED', '#1D4ED8', '#047857', '#BE185D', '#B45309'];
+    const hash = (user?.id || '').split('').reduce((acc: number, c: string) => acc + c.charCodeAt(0), 0);
+    return colors[hash % colors.length];
+  }, [user?.id]);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { alert('Photo must be under 5MB'); return; }
+
+    setUploading(true);
+    try {
+      // Show local preview immediately
+      const objectUrl = URL.createObjectURL(file);
+      setLocalUrl(objectUrl);
+
+      // Upload to Supabase storage
+      const filePath = `${user.id}/avatar.jpg`;
+      const { error: uploadError } = await supabase.storage
+        .from('profile-photos')
+        .upload(filePath, file, { upsert: true, contentType: file.type });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('profile-photos')
+        .getPublicUrl(filePath);
+
+      // Add cache-bust param so the img element refreshes
+      const freshUrl = `${publicUrl}?t=${Date.now()}`;
+
+      // Update profile in DB
+      await supabase.from('profiles').upsert({ id: user.id, avatar_url: freshUrl }, { onConflict: 'id' });
+
+      setLocalUrl(freshUrl);
+    } catch (err) {
+      console.error('Avatar upload failed:', err);
+      setLocalUrl(null);
+    } finally {
+      setUploading(false);
+      // Reset input so same file can be re-selected
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const earnedBadges: any[] = profile?.badges || [];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, paddingBottom: 4 }}>
+      {/* Avatar with upload tap target */}
+      <div style={{ position: 'relative', width: 88, height: 88 }}>
+        {/* Main avatar circle */}
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          style={{ width: 88, height: 88, borderRadius: '50%', overflow: 'hidden', border: '3px solid var(--brand)', background: displayUrl ? 'transparent' : avatarColor, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', position: 'relative' }}
+        >
+          {uploading && (
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
+              <div style={{ width: 24, height: 24, border: '3px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+            </div>
+          )}
+          {displayUrl ? (
+            <img src={displayUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            <span style={{ fontSize: 36, fontWeight: 900, color: 'white', fontFamily: 'Public Sans, sans-serif', lineHeight: 1 }}>{initial}</span>
+          )}
+        </button>
+
+        {/* Camera icon overlay — bottom left */}
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          style={{ position: 'absolute', bottom: 0, left: 0, width: 26, height: 26, borderRadius: '50%', background: '#1a1a1a', border: '2px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 3 }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: 13, color: 'white', fontVariationSettings: "'FILL' 1" }}>photo_camera</span>
+        </button>
+
+        {/* Showcase badge corner — bottom right, only if earned badges exist */}
+        {earnedBadges.length > 0 && (
+          <button
+            onClick={() => setShowBadgePicker(true)}
+            style={{ position: 'absolute', bottom: 0, right: 0, width: 28, height: 28, borderRadius: '50%', background: 'white', border: '2px solid white', boxShadow: '0 1px 4px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 3, fontSize: 16 }}
+            title="Change showcase badge"
+          >
+            {profile?.showcase_badge || '🏅'}
+          </button>
+        )}
+      </div>
+
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*,image/heic,image/heif"
+        onChange={handleFileChange}
+        style={{ display: 'none' }}
+      />
+
+      {/* Name + handle */}
+      <div style={{ textAlign: 'center' }}>
+        <p style={{ fontFamily: 'Public Sans, sans-serif', fontWeight: 800, fontSize: 16, color: 'var(--ink)', margin: 0 }}>
+          {user?.user_metadata?.display_name || user?.user_metadata?.full_name || 'Your Profile'}
+        </p>
+        {user?.user_metadata?.display_name && (
+          <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 12, color: '#888', margin: '2px 0 0' }}>
+            @{user.user_metadata.display_name}
+          </p>
+        )}
+      </div>
+
+      {/* Badge picker modal */}
+      {showBadgePicker && earnedBadges.length > 0 && (
+        <BadgePickerModal
+          badges={earnedBadges}
+          currentBadge={profile?.showcase_badge || null}
+          userId={user.id}
+          onClose={() => setShowBadgePicker(false)}
+        />
+      )}
+    </div>
+  );
+}
+
 function ProfileScreen({ user, onShowAuth, onSignOut }: { user: any; onShowAuth: () => void; onSignOut: () => void }) {
   const [signingOut, setSigningOut] = React.useState(false);
+  const profile = useProfile(user?.id ?? null);
 
   return (
     <div className="pb-16">
@@ -6903,19 +7652,23 @@ function ProfileScreen({ user, onShowAuth, onSignOut }: { user: any; onShowAuth:
         <div className="bg-white rounded-xl p-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
           <p className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif' }}>Account</p>
           {user ? (
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-bold text-sm" style={{ fontFamily: 'Public Sans, sans-serif' }}>{user.user_metadata?.full_name || user.email}</p>
-                <p className="text-xs mt-0.5" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif' }}>{user.email}</p>
+            <div className="flex flex-col gap-4">
+              <ProfileAvatarUpload user={user} profile={profile} />
+              <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: 12 }} />
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-bold text-sm" style={{ fontFamily: 'Public Sans, sans-serif' }}>{user.user_metadata?.full_name || user.email}</p>
+                  <p className="text-xs mt-0.5" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif' }}>{user.email}</p>
+                </div>
+                <button
+                  onClick={async () => { setSigningOut(true); await onSignOut(); setSigningOut(false); }}
+                  disabled={signingOut}
+                  className="text-xs font-bold px-3 py-1.5"
+                  style={{ border: '1px solid rgba(0,0,0,0.12)', fontFamily: 'Public Sans, sans-serif', color: '#dc2626', borderRadius: 6, background: 'white', cursor: 'pointer' }}
+                >
+                  {signingOut ? 'Signing out…' : 'Sign out'}
+                </button>
               </div>
-              <button
-                onClick={async () => { setSigningOut(true); await onSignOut(); setSigningOut(false); }}
-                disabled={signingOut}
-                className="text-xs font-bold px-3 py-1.5"
-                style={{ border: '1px solid rgba(0,0,0,0.12)', fontFamily: 'Public Sans, sans-serif', color: '#dc2626', borderRadius: 6, background: 'white', cursor: 'pointer' }}
-              >
-                {signingOut ? 'Signing out…' : 'Sign out'}
-              </button>
             </div>
           ) : (
             <div className="flex flex-col gap-2">
@@ -6942,6 +7695,14 @@ function ProfileScreen({ user, onShowAuth, onSignOut }: { user: any; onShowAuth:
             </div>
           )}
         </div>
+
+        {/* Friends section */}
+        {user && (
+          <div className="bg-white rounded-xl p-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+            <p className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif' }}>Friends</p>
+            <FriendsSection userId={user.id} />
+          </div>
+        )}
 
         {/* Notifications section */}
         <div className="bg-white rounded-xl p-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
@@ -7949,6 +8710,9 @@ export default function App() {
     return () => window.removeEventListener('abq_prefs_changed', handler);
   }, []);
 
+  // ── Friends & Social Layer ──
+  const { friends, friendSavedEventIds } = useFriends(user?.id ?? null);
+
 
 
   useEffect(() => {
@@ -8927,10 +9691,12 @@ export default function App() {
                 requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'instant' }));
               }}
               prefs={prefs}
-              adminHeroLines={adminHeroLines}/>
+              adminHeroLines={adminHeroLines}
+              user={user}
+              friendSavedEventIds={friendSavedEventIds}/>
           )}
           {activeTab === 'events' && (
-            <EventsScreen events={events} eventsLoading={eventsLoading} onEventSelect={openEventModal} initialSearch={eventsNavSearch} initialGenre={eventsNavGenre} />
+            <EventsScreen events={events} eventsLoading={eventsLoading} onEventSelect={openEventModal} initialSearch={eventsNavSearch} initialGenre={eventsNavGenre} friendSavedEventIds={friendSavedEventIds} />
           )}
           {activeTab === 'plan' && (
             <PlanScreen onEventSelect={openEventModal} events={events} />
@@ -9048,7 +9814,7 @@ export default function App() {
         </div>
       )}
       {selectedEvent && (
-        <EventDetailModal event={selectedEvent} onClose={closeEventModal} mapProvider={resolvedMapProvider} />
+        <EventDetailModal event={selectedEvent} onClose={closeEventModal} mapProvider={resolvedMapProvider} friendSavedEventIds={friendSavedEventIds} />
       )}
       {showAuthModal && (
         <AuthModal onClose={() => setShowAuthModal(false)} />

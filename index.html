@@ -75,9 +75,10 @@
     <!-- Material Symbols: self-hosted from /fonts/ — no CDN needed (fixes iOS Safari) -->
 
     <!-- ─── Viewport: viewport-fit=cover for iOS Dynamic Island / notch (Apple HIG) ─── -->
+    <!-- user-scalable=no: prevents pinch-to-zoom so the app feels native and layouts can't break -->
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content"
     />
 
     <!-- ─── iOS PWA: Add to Home Screen support ─── -->
