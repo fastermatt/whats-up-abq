@@ -139,8 +139,9 @@ const CDN_HERO_IMAGES = [
 const HERO_IMAGES = [...LOCAL_HERO_IMAGES, ...CDN_HERO_IMAGES]
 
 // ── OG Share Image ──────────────────────────────────────────────────────────
-// Use a full-UUID CDN URL (short-form IDs return 403 on some platforms)
-export const OG_IMAGE = `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_2.jpeg`
+// Self-hosted on Netlify CDN — never depends on Midjourney hotlink availability.
+// hero-4.png is the high-contrast vintage poster landscape (1456×816, ~2.3MB).
+export const OG_IMAGE = 'https://abqunplugged.com/hero/hero-4.png'
 
 // ── Public API ──────────────────────────────────────────────────────────────
 

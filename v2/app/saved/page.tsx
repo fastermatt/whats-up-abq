@@ -49,6 +49,9 @@ export default async function SavedPage({ searchParams }: PageProps) {
         <Link href="/events" className="mt-4 text-xs text-[#9a442d] hover:underline">
           Browse events first →
         </Link>
+        <div className="mt-10 max-w-xs mx-auto">
+          <ConnectionQuote size="sm" />
+        </div>
       </main>
     )
   }
