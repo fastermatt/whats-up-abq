@@ -69,6 +69,15 @@ export default async function DiscoverPage() {
     day: 'numeric',
     timeZone: 'America/Denver',
   })
+  const hourMT = parseInt(
+    now.toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: 'America/Denver' }),
+    10
+  )
+  const heroLabel =
+    hourMT >= 6 && hourMT < 11 ? 'Good Morning, ABQ' :
+    hourMT >= 11 && hourMT < 17 ? 'Midday in the 505' :
+    hourMT >= 17 && hourMT < 21 ? 'Tonight in the 505' :
+    'Late Night in the 505'
 
   return (
     <main id="main" className="min-h-dvh bg-[--bg]">
@@ -116,7 +125,7 @@ export default async function DiscoverPage() {
           {/* Hero text */}
           <div className="animate-hero-text">
             <p className="text-[11px] uppercase tracking-[0.2em] text-[#e8a898] mb-2">
-              Tonight in the 505
+              {heroLabel}
             </p>
             <h2
               className="text-4xl sm:text-5xl font-black leading-[1.05] mb-3"

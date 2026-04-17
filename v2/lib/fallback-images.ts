@@ -99,24 +99,50 @@ const DEFAULT_IMAGES = [
   `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_3.jpeg`,
 ]
 
-// ── Hero Images (daily rotation) ────────────────────────────────────────────
-// Wide-format images for the homepage hero section
-// Rotates based on day-of-year so it changes daily but is consistent for all users
+// ── Hero Images (time-of-day rotation) ──────────────────────────────────────
+// Four pools keyed by time period (Mountain Time / America/Denver).
+// Within each pool, rotates daily — consistent across all users for a given day.
+//
+// Periods:  morning 6–11am · midday 11am–5pm · evening 5–9pm · night 9pm–6am
+//
+// TODO: Replace placeholder URLs with new Midjourney batches once generated.
+// Prompts in plan file: .claude/plans/i-m-curious-if-you-wobbly-crescent.md
 
-const HERO_IMAGES = [
-  `${MJ}/e181e268-544e-4a60-899e-2a37cebcdb86/0_0.jpeg`, // golden hour patio
-  `${MJ}/e181e268-544e-4a60-899e-2a37cebcdb86/0_1.jpeg`,
-  `${MJ}/e181e268-544e-4a60-899e-2a37cebcdb86/0_2.jpeg`,
-  `${MJ}/e181e268-544e-4a60-899e-2a37cebcdb86/0_3.jpeg`,
-  `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_0.jpeg`, // panoramic balloons + skyline
-  `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_1.jpeg`,
-  `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_2.jpeg`,
-  `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_3.jpeg`,
-  `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_0.jpeg`, // desert highway into Sandias
-  `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_1.jpeg`,
-  `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_2.jpeg`,
-  `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_3.jpeg`,
-]
+type HeroPeriod = 'morning' | 'midday' | 'evening' | 'night'
+
+const HERO_IMAGES: Record<HeroPeriod, string[]> = {
+  morning: [
+    // Sandia Mountains sunrise / alpenglow batch (paste 0_0–0_3 here when ready)
+    // Rio Grande Bosque at dawn batch (paste 0_0–0_3 here when ready)
+    `${MJ}/e181e268-544e-4a60-899e-2a37cebcdb86/0_0.jpeg`, // golden hour patio (temp)
+    `${MJ}/e181e268-544e-4a60-899e-2a37cebcdb86/0_1.jpeg`,
+  ],
+  midday: [
+    // Old Town plaza at high noon batch (paste 0_0–0_3 here when ready)
+    // Aerial ABQ cityscape batch (paste 0_0–0_3 here when ready)
+    `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_0.jpeg`, // panoramic balloons (temp)
+    `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_1.jpeg`,
+  ],
+  evening: [
+    // Balloon silhouettes at golden hour batch (paste 0_0–0_3 here when ready)
+    // Bosque at dusk batch (paste 0_0–0_3 here when ready)
+    `${MJ}/e181e268-544e-4a60-899e-2a37cebcdb86/0_2.jpeg`, // golden hour patio (temp)
+    `${MJ}/e181e268-544e-4a60-899e-2a37cebcdb86/0_3.jpeg`,
+  ],
+  night: [
+    // Old Town courtyard string lights batch (paste 0_0–0_3 here when ready)
+    // Central Ave neon night batch (paste 0_0–0_3 here when ready)
+    `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_0.jpeg`, // desert highway (temp)
+    `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_1.jpeg`,
+  ],
+}
+
+function getHeroPeriod(hourMT: number): HeroPeriod {
+  if (hourMT >= 6 && hourMT < 11) return 'morning'
+  if (hourMT >= 11 && hourMT < 17) return 'midday'
+  if (hourMT >= 17 && hourMT < 21) return 'evening'
+  return 'night'
+}
 
 // ── OG Share Image ──────────────────────────────────────────────────────────
 export const OG_IMAGE = `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_2.jpeg`
@@ -124,15 +150,22 @@ export const OG_IMAGE = `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_2.jpeg`
 // ── Public API ──────────────────────────────────────────────────────────────
 
 /**
- * Get the hero image URL for today.
- * Rotates daily based on day-of-year — consistent across all users for same day.
+ * Get the hero image URL for the current time of day (Mountain Time).
+ * Selects a time-period pool (morning/midday/evening/night), then picks
+ * a variation by day-of-year so it's consistent for all users on a given day.
  */
 export function getHeroImage(): string {
   const now = new Date()
+  const hourMT = parseInt(
+    now.toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: 'America/Denver' }),
+    10
+  )
+  const period = getHeroPeriod(hourMT)
+  const images = HERO_IMAGES[period]
   const dayOfYear = Math.floor(
     (now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000
   )
-  return HERO_IMAGES[dayOfYear % HERO_IMAGES.length]
+  return images[dayOfYear % images.length]
 }
 
 /**
