@@ -1,4 +1,5 @@
 import { createServiceClient } from '@/lib/supabase/server'
+import { decodeHtml } from '@/lib/events'
 import Link from 'next/link'
 import { QuickHideButton } from './QuickHideButton'
 import { QuickFeaturedButton } from './QuickFeaturedButton'
@@ -76,6 +77,7 @@ export default async function AdminEventsPage({ searchParams }: PageProps) {
       title = (raw.name as string) ?? (raw.title as string) ?? ''
     }
     if (ai?.title_override) title = ai.title_override as string
+    title = decodeHtml(title)
     const category = (ai?.category ?? null) as string | null
     return {
       id: r.id as string,

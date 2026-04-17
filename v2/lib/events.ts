@@ -970,17 +970,27 @@ function parsePriceMin(price: string | null): number | null {
   return m ? parseFloat(m[1]) : null
 }
 
-/** Decode HTML entities in strings (e.g. &#8211; → —, &amp; → &) */
-function decodeHtml(str: string | undefined | null): string {
+/**
+ * Decode HTML entities in strings (e.g. &#8211; → —, &amp; → &).
+ * Exported so admin views (which read `raw` directly without going through
+ * the normalizer dispatch) can decode too — otherwise things like `&#038;`
+ * and `&#8211;` leak into the admin UI.
+ */
+export function decodeHtml(str: string | undefined | null): string {
   if (!str) return ''
   return str
     .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => String.fromCharCode(parseInt(h, 16)))
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&apos;/g, "'")
+    .replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, ' ')
+    .replace(/&mdash;/g, '\u2014')
+    .replace(/&ndash;/g, '\u2013')
+    .replace(/&hellip;/g, '\u2026')
 }
 
 function formatTime(iso: string): string {

@@ -40,8 +40,8 @@ export default async function AdminDashboard() {
     supabase.from('user_events').select('event_id, event_name').limit(500),
     // Category breakdown
     supabase.from('events').select('ai_enrichment').eq('hidden', false).gte('event_date', today).not('ai_enrichment', 'is', null),
-    // Analytics events in last 7 days
-    supabase.from('analytics').select('event_type, created_at').gte('created_at', weekAgo + 'T00:00:00').order('created_at', { ascending: false }).limit(500),
+    // Analytics events in last 7 days (pulls `data` so we can filter out V1 noise)
+    supabase.from('analytics').select('event_type, data, created_at').gte('created_at', weekAgo + 'T00:00:00').order('created_at', { ascending: false }).limit(500),
   ])
 
   // Category tally
@@ -62,9 +62,23 @@ export default async function AdminDashboard() {
   }
   const topSaved = Object.values(savesByEvent).sort((a, b) => b.count - a.count).slice(0, 5)
 
-  // Analytics breakdown
+  // Analytics breakdown — filter out V1 (abandoned Vite SPA) error noise.
+  // V1 errors reference Vite bundle paths (/assets/index-*.js) or old Netlify
+  // preview URLs — they're cached bundles in returning users' browsers, not
+  // V2 bugs. See session notes 2026-04-17.
   const analyticsTypes: Record<string, number> = {}
+  let v1ErrorsFiltered = 0
   for (const ev of recentAnalytics ?? []) {
+    if (ev.event_type === 'client_error') {
+      const data = ev.data as Record<string, unknown> | null
+      const src = (data?.source as string | undefined) ?? ''
+      const url = (data?.url as string | undefined) ?? ''
+      const isV1 =
+        /\/assets\/index-[A-Za-z0-9]+\.js/.test(src) ||
+        /\/assets\/index-[A-Za-z0-9]+\.js/.test(url) ||
+        /netlify\.app/.test(url) // old preview URLs
+      if (isV1) { v1ErrorsFiltered++; continue }
+    }
     analyticsTypes[ev.event_type] = (analyticsTypes[ev.event_type] ?? 0) + 1
   }
 

@@ -1,0 +1,303 @@
+/**
+ * Cross-source event deduplication.
+ *
+ * Finds duplicate events (same event ingested from multiple sources or twice
+ * from the same source) and hides the losers while preserving all ticket links
+ * on the winner.
+ *
+ * Two distinct dup classes found in the DB:
+ *   1. SAME-SOURCE (majority): SeatGeek ingests both "seatgeek_12345" and
+ *      "seatgeek_sg-12345" for the same numeric ID — pure ingest bug.
+ *   2. CROSS-SOURCE (31 groups): same show on Ticketmaster + SeatGeek.
+ *
+ * Dedup key: normalize(title, 35 chars) + event_date
+ *   - strip non-alphanumeric, lowercase, take first 35 chars
+ *   - "Buckethead" → "buckethead", "A at B"/"B vs A" both share 35-char prefix
+ *   - Venue fuzzy matching skipped — venue_name is NULL for many SeatGeek rows,
+ *     so title+date is more reliable; 35-char truncation handles minor wording
+ *     differences between sources while being long enough to avoid false matches.
+ *
+ * Source priority (winner selection): ticketmaster > seatgeek > eventbrite >
+ *   local > volunteer > nhcc — ticketmaster rows tend to have the best photo
+ *   and venue_name data. Within the same source, prefer the non-"sg-" ID
+ *   (the plain numeric one has a venue_name populated).
+ *
+ * Safety:
+ *   - NEVER deletes. Sets hidden=true + ai_enrichment.dedup_reason on losers.
+ *   - Skips events that are already hidden.
+ *   - --dry-run prints what would happen without touching the DB.
+ *   - All ticket URLs from losers are appended to winner's raw.ticket_links.
+ *
+ * Usage:
+ *   node scripts/dedup-events.mjs --dry-run
+ *   node scripts/dedup-events.mjs
+ *   node scripts/dedup-events.mjs --limit=50   # cap groups processed
+ *
+ * Requires: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in scripts/.env
+ */
+
+import { createClient } from '@supabase/supabase-js'
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+// ─── Load .env (same pattern as enrich-moods-lm.mjs) ──────────────────────────
+for (const envFile of [
+  path.join(__dirname, '.env'),
+  path.join(__dirname, '..', 'scripts', '.env'),
+]) {
+  if (fs.existsSync(envFile)) {
+    fs.readFileSync(envFile, 'utf8').split('\n').forEach(line => {
+      const m = line.match(/^([^#=]+)=(.*)$/)
+      if (m) process.env[m[1].trim()] = m[2].trim()
+    })
+    console.log('Loaded env from:', envFile)
+    break
+  }
+}
+
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://bsmvfutebmbkjvlrhiyq.supabase.co'
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+if (!SUPABASE_KEY) {
+  console.error('SUPABASE_SERVICE_ROLE_KEY not set. Add it to scripts/.env')
+  process.exit(1)
+}
+
+const isDryRun = process.argv.includes('--dry-run')
+const limitArg = process.argv.find(a => a.startsWith('--limit='))
+const MAX_GROUPS = limitArg ? parseInt(limitArg.split('=')[1]) : Infinity
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+const today = new Date().toISOString().slice(0, 10)
+
+// Source priority — higher index = higher priority (winner)
+const SOURCE_PRIORITY = ['nhcc', 'volunteer', 'local', 'eventbrite', 'seatgeek', 'ticketmaster']
+function sourcePriority(source) {
+  const idx = SOURCE_PRIORITY.indexOf(source)
+  return idx === -1 ? 0 : idx
+}
+
+// ─── Title normalizer ──────────────────────────────────────────────────────────
+// Strip non-alphanumeric, lowercase, take first 35 chars.
+// This is intentionally simple — false positives are caught by date match;
+// false negatives (missed dups) are acceptable vs. wrongly merging different events.
+function normalizeTitle(raw) {
+  if (!raw) return ''
+  return raw
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
+    .slice(0, 35)
+}
+
+// ─── Extract the event title from a DB row ────────────────────────────────────
+function getTitle(row) {
+  const raw = row.raw || {}
+  const nameField = raw.name || raw.title || ''
+  const title = typeof nameField === 'object' ? (nameField?.text || '') : nameField
+  return String(title).trim()
+}
+
+// ─── Extract all ticket/purchase URLs from a row ─────────────────────────────
+// Ticket links are stored variously across sources. We pull every URL we can find.
+function extractTicketUrls(row) {
+  const raw = row.raw || {}
+  const urls = new Set()
+
+  // Explicit ticket_links array (if we've already merged some)
+  if (Array.isArray(raw.ticket_links)) {
+    raw.ticket_links.forEach(u => u && urls.add(u))
+  }
+
+  // SeatGeek: raw.url is the ticket page
+  if (raw.url && typeof raw.url === 'string') urls.add(raw.url)
+
+  // Ticketmaster: raw.url is the event page; raw._embedded.priceRanges not a URL
+  // TM ticket purchase is usually via raw.url too
+  if (raw.ticketUrl && typeof raw.ticketUrl === 'string') urls.add(raw.ticketUrl)
+
+  // Eventbrite: raw.url
+  // NHCC/local: raw.url
+
+  // Remove empty/null
+  return [...urls].filter(Boolean)
+}
+
+// ─── Pick winner from a group of duplicate rows ───────────────────────────────
+// Rules: highest source priority wins. Within same source, prefer non-sg- ID
+// (those tend to have venue_name populated). Tiebreak: whichever has a photo.
+function pickWinner(rows) {
+  return rows.slice().sort((a, b) => {
+    const sPriority = sourcePriority(b.source) - sourcePriority(a.source)
+    if (sPriority !== 0) return sPriority
+
+    // Prefer non-"sg-" IDs within seatgeek (those have venue_name)
+    const aIsSg = a.id.includes('_sg-') ? 1 : 0
+    const bIsSg = b.id.includes('_sg-') ? 1 : 0
+    if (aIsSg !== bIsSg) return aIsSg - bIsSg
+
+    // Prefer rows with a cached photo
+    const aPhoto = a.cached_photo_url ? 1 : 0
+    const bPhoto = b.cached_photo_url ? 1 : 0
+    return bPhoto - aPhoto
+  })[0]
+}
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
+async function main() {
+  console.log(`\nEvent Deduplication — ${isDryRun ? 'DRY RUN (no changes)' : 'LIVE'}`)
+  console.log(`Today: ${today}\n`)
+
+  // Fetch all upcoming visible events (we only dedup future events to be safe)
+  console.log('Fetching upcoming visible events...')
+  const { data: rows, error } = await supabase
+    .schema('public')
+    .from('events')
+    .select('id, source, event_date, venue_name, raw, ai_enrichment, cached_photo_url')
+    .eq('hidden', false)
+    .gte('event_date', today)
+    .order('event_date', { ascending: true })
+
+  if (error) {
+    console.error('Fetch error:', error.message)
+    process.exit(1)
+  }
+
+  console.log(`Fetched ${rows.length} upcoming visible events\n`)
+
+  // ─── Group by dedup key ──────────────────────────────────────────────────────
+  const groups = new Map() // key → [rows]
+
+  for (const row of rows) {
+    const title = getTitle(row)
+    if (!title) continue
+
+    const key = `${normalizeTitle(title)}::${row.event_date}`
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key).push(row)
+  }
+
+  // Keep only groups with more than one row
+  const dupGroups = [...groups.values()].filter(g => g.length > 1)
+
+  console.log(`Found ${dupGroups.length} duplicate groups among ${rows.length} events`)
+  if (dupGroups.length === 0) {
+    console.log('Nothing to deduplicate.')
+    return
+  }
+
+  // ─── Process each group ──────────────────────────────────────────────────────
+  let groupsProcessed = 0
+  let totalHidden = 0
+  let totalTicketsMerged = 0
+  let totalErrors = 0
+
+  const capped = dupGroups.slice(0, MAX_GROUPS)
+  if (MAX_GROUPS < dupGroups.length) {
+    console.log(`(capped to first ${MAX_GROUPS} groups via --limit)\n`)
+  }
+
+  for (const group of capped) {
+    const winner = pickWinner(group)
+    const losers = group.filter(r => r.id !== winner.id)
+    const winnerTitle = getTitle(winner)
+
+    // Collect all unique ticket URLs from losers that aren't already on the winner
+    const winnerUrls = new Set(extractTicketUrls(winner))
+    const newUrls = []
+    for (const loser of losers) {
+      for (const url of extractTicketUrls(loser)) {
+        if (!winnerUrls.has(url)) {
+          winnerUrls.add(url)
+          newUrls.push(url)
+        }
+      }
+    }
+
+    const crossSource = new Set(group.map(r => r.source)).size > 1
+
+    if (isDryRun) {
+      console.log(`[DRY] GROUP: "${winnerTitle.slice(0, 50)}" on ${winner.event_date}`)
+      console.log(`       Winner: ${winner.id} (${winner.source})`)
+      for (const l of losers) {
+        console.log(`       Hide:   ${l.id} (${l.source})`)
+      }
+      if (newUrls.length > 0) {
+        console.log(`       Merge ${newUrls.length} ticket URL(s) → winner`)
+      }
+      console.log(`       Type: ${crossSource ? 'CROSS-SOURCE' : 'SAME-SOURCE'}`)
+      console.log('')
+      groupsProcessed++
+      totalHidden += losers.length
+      totalTicketsMerged += newUrls.length
+      continue
+    }
+
+    // ── Live: update winner with merged ticket_links ───────────────────────────
+    if (newUrls.length > 0) {
+      const existingLinks = Array.isArray(winner.raw?.ticket_links)
+        ? winner.raw.ticket_links
+        : []
+      const mergedLinks = [...new Set([...existingLinks, ...newUrls])]
+      const updatedRaw = { ...(winner.raw || {}), ticket_links: mergedLinks }
+
+      const { error: winnerErr } = await supabase
+        .schema('public')
+        .from('events')
+        .update({ raw: updatedRaw })
+        .eq('id', winner.id)
+
+      if (winnerErr) {
+        console.error(`  ERROR updating winner ${winner.id}: ${winnerErr.message}`)
+        totalErrors++
+      } else {
+        totalTicketsMerged += newUrls.length
+      }
+    }
+
+    // ── Live: hide each loser ─────────────────────────────────────────────────
+    for (const loser of losers) {
+      const loserTitle = getTitle(loser)
+      const existingEnrichment = loser.ai_enrichment || {}
+      const updatedEnrichment = {
+        ...existingEnrichment,
+        dedup_reason: `Duplicate of ${winner.id} (${winner.source}). ` +
+          `Same event detected: title="${loserTitle.slice(0, 40)}", date=${loser.event_date}. ` +
+          `Hidden by dedup-events.mjs on ${new Date().toISOString().slice(0, 10)}.`,
+        dedup_primary_id: winner.id,
+        dedup_hidden_at: new Date().toISOString(),
+      }
+
+      const { error: loserErr } = await supabase
+        .schema('public')
+        .from('events')
+        .update({ hidden: true, ai_enrichment: updatedEnrichment })
+        .eq('id', loser.id)
+
+      if (loserErr) {
+        console.error(`  ERROR hiding loser ${loser.id}: ${loserErr.message}`)
+        totalErrors++
+      } else {
+        console.log(`  Hidden: ${loser.id} (${loser.source}) → winner: ${winner.id} | "${winnerTitle.slice(0, 40)}"`)
+        totalHidden++
+      }
+    }
+
+    groupsProcessed++
+  }
+
+  // ─── Summary ─────────────────────────────────────────────────────────────────
+  console.log('\n─── Summary ───────────────────────────────────────────')
+  if (isDryRun) console.log('(DRY RUN — no changes made)')
+  console.log(`Groups found:        ${dupGroups.length}`)
+  console.log(`Groups processed:    ${groupsProcessed}`)
+  console.log(`Rows hidden:         ${totalHidden}`)
+  console.log(`Ticket URLs merged:  ${totalTicketsMerged}`)
+  if (totalErrors > 0) console.log(`Errors:              ${totalErrors}`)
+  console.log('\nDone.')
+  console.log('To reverse: UPDATE public.events SET hidden=false WHERE ai_enrichment->>\'dedup_reason\' IS NOT NULL;')
+}
+
+main().catch(console.error)
