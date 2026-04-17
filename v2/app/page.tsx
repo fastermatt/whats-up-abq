@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { fetchEvents, fetchRecentlyAdded, fetchFeaturedEvents, fetchNeighborhoodCounts, NormalizedEvent } from '@/lib/events'
-import { getHeroImage, getCategoryFallback } from '@/lib/fallback-images'
+import { getHeroImage, getCategoryFallback, getHeroPeriod, dayOfYearMT, type HeroPeriod } from '@/lib/fallback-images'
 import { MapPin, ArrowRight } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
 import MoodChips from '@/app/components/MoodChips'
@@ -32,6 +32,49 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://abqunplugged.com',
   },
+}
+
+// ── Hero copy (rotates by day, keyed to time-of-day period) ────────────────
+// Boundaries live in lib/fallback-images.ts (getHeroPeriod):
+//   morning 5am–10am · midday 10am–4pm · evening 4pm–9pm · night 9pm–5am
+// Taglines are action-first — the site's job is to get people out the door.
+
+const HERO_LABELS: Record<HeroPeriod, readonly string[]> = {
+  morning: [
+    'Rise up, 505',
+    'Start something today',
+    'Early bird, ABQ',
+    'Plan your day, 505',
+    "What's on today, ABQ",
+  ],
+  midday: [
+    'Afternoon in the 505',
+    'Pick something, ABQ',
+    'Still time to plan',
+    "What's on today, 505",
+    'Grab the day, ABQ',
+  ],
+  evening: [
+    'Tonight in the 505',
+    'Get out there, ABQ',
+    'The night is calling',
+    'Evening plans, 505',
+    'Find your night, ABQ',
+  ],
+  night: [
+    "The night's young, 505",
+    'Still going, ABQ',
+    'Night out in ABQ',
+    'The 505 after dark',
+    'Out late in the 505',
+  ],
+}
+
+const HERO_HEADINGS: Record<HeroPeriod, readonly [string, string, string]> = {
+  morning: ["What's", 'On', 'Today'],
+  midday:  ["What's", 'On', 'Today'],
+  evening: ["What's", 'Happening', 'Tonight'],
+  night:   ["What's", 'Still', 'Open'],
 }
 
 const websiteJsonLd = {
@@ -69,15 +112,10 @@ export default async function DiscoverPage() {
     day: 'numeric',
     timeZone: 'America/Denver',
   })
-  const hourMT = parseInt(
-    now.toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: 'America/Denver' }),
-    10
-  )
-  const heroLabel =
-    hourMT >= 6 && hourMT < 11 ? 'Good Morning, ABQ' :
-    hourMT >= 11 && hourMT < 17 ? 'Midday in the 505' :
-    hourMT >= 17 && hourMT < 21 ? 'Tonight in the 505' :
-    'Late Night in the 505'
+  const heroPeriod = getHeroPeriod(now)
+  const dayIdx = dayOfYearMT(now)
+  const heroLabel = HERO_LABELS[heroPeriod][dayIdx % HERO_LABELS[heroPeriod].length]
+  const heroHeading = HERO_HEADINGS[heroPeriod]
 
   return (
     <main id="main" className="min-h-dvh bg-[--bg]">
@@ -131,7 +169,7 @@ export default async function DiscoverPage() {
               className="text-4xl sm:text-5xl font-black leading-[1.05] mb-3"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
-              What&apos;s<br />Happening<br />Tonight
+              {heroHeading[0]}<br />{heroHeading[1]}<br />{heroHeading[2]}
             </h2>
             <p className="text-sm text-white/60 mb-4">{dayStr}</p>
             {/* Surprise Me CTA — inline with hero */}

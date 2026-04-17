@@ -103,12 +103,13 @@ const DEFAULT_IMAGES = [
 // Four pools keyed by time period (Mountain Time / America/Denver).
 // Within each pool, rotates daily — consistent across all users for a given day.
 //
-// Periods:  morning 6–11am · midday 11am–5pm · evening 5–9pm · night 9pm–6am
+// Periods (boundaries tuned so early risers at 5am get morning vibes, not "late night"):
+//   morning 5am–10am · midday 10am–4pm · evening 4pm–9pm · night 9pm–5am
 //
 // TODO: Replace placeholder URLs with new Midjourney batches once generated.
 // Prompts in plan file: .claude/plans/i-m-curious-if-you-wobbly-crescent.md
 
-type HeroPeriod = 'morning' | 'midday' | 'evening' | 'night'
+export type HeroPeriod = 'morning' | 'midday' | 'evening' | 'night'
 
 const HERO_IMAGES: Record<HeroPeriod, string[]> = {
   morning: [
@@ -137,11 +138,26 @@ const HERO_IMAGES: Record<HeroPeriod, string[]> = {
   ],
 }
 
-function getHeroPeriod(hourMT: number): HeroPeriod {
-  if (hourMT >= 6 && hourMT < 11) return 'morning'
-  if (hourMT >= 11 && hourMT < 17) return 'midday'
-  if (hourMT >= 17 && hourMT < 21) return 'evening'
+/**
+ * Return the hero period for a given MT hour.
+ * Exported so page copy (labels, headings) can key off the same boundaries.
+ */
+export function getHeroPeriod(now: Date = new Date()): HeroPeriod {
+  const hourMT = parseInt(
+    now.toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: 'America/Denver' }),
+    10
+  )
+  if (hourMT >= 5 && hourMT < 10) return 'morning'
+  if (hourMT >= 10 && hourMT < 16) return 'midday'
+  if (hourMT >= 16 && hourMT < 21) return 'evening'
   return 'night'
+}
+
+/** Day-of-year (0-based) in America/Denver — for deterministic daily rotation. */
+export function dayOfYearMT(now: Date = new Date()): number {
+  return Math.floor(
+    (now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000
+  )
 }
 
 // ── OG Share Image ──────────────────────────────────────────────────────────
@@ -156,16 +172,8 @@ export const OG_IMAGE = `${MJ}/fb77c641-ef3a-495b-bc7c-cfb703633cf8/0_2.jpeg`
  */
 export function getHeroImage(): string {
   const now = new Date()
-  const hourMT = parseInt(
-    now.toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: 'America/Denver' }),
-    10
-  )
-  const period = getHeroPeriod(hourMT)
-  const images = HERO_IMAGES[period]
-  const dayOfYear = Math.floor(
-    (now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000
-  )
-  return images[dayOfYear % images.length]
+  const images = HERO_IMAGES[getHeroPeriod(now)]
+  return images[dayOfYearMT(now) % images.length]
 }
 
 /**
