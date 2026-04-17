@@ -178,8 +178,9 @@ export default async function DiscoverPage() {
       {/* ── Editor's Picks — Featured Events ── */}
       {featured.length > 0 && (
         <AnimateIn animation="fade-up">
-          <section className="py-6">
-            <div className="max-w-6xl mx-auto px-4 flex items-end justify-between mb-3">
+          {/* Warm section bg differentiates this from the standard horizontal rows */}
+          <section className="py-6 bg-gradient-to-b from-[#f5ece3] to-[#fbf7f1] border-y border-[#e8d5c0]/70">
+            <div className="max-w-6xl mx-auto px-4 flex items-end justify-between mb-4">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] mb-0.5 font-semibold flex items-center gap-1">
                   <span>★</span> Editor&apos;s picks
@@ -202,7 +203,7 @@ export default async function DiscoverPage() {
 
             <div className="overflow-x-auto scrollbar-hide">
               <div
-                className="flex gap-3 px-4 pb-2 snap-x snap-mandatory scroll-hint-inner"
+                className="flex gap-4 px-4 pb-2 snap-x snap-mandatory scroll-hint-inner"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
                 {featured.map((event) => (
@@ -504,7 +505,7 @@ function HorizontalCard({
   )
 }
 
-// ─── Featured Card — Taller portrait card with star badge ──────────────────
+// ─── Featured Card — Wide landscape card, larger than standard HorizontalCard ─
 
 function FeaturedCard({ event }: { event: NormalizedEvent }) {
   const dateStr = event.date
@@ -516,9 +517,10 @@ function FeaturedCard({ event }: { event: NormalizedEvent }) {
   return (
     <Link
       href={`/events/${event.id}`}
-      className="group flex-shrink-0 w-[180px] snap-start"
+      className="group flex-shrink-0 w-[270px] snap-start"
     >
-      <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] mb-1.5 shadow-sm group-hover:shadow-md transition-shadow duration-300">
+      {/* Landscape 16:10 — matches every other card on the site */}
+      <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] mb-2 shadow-md group-hover:shadow-lg transition-shadow duration-300">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
@@ -526,27 +528,26 @@ function FeaturedCard({ event }: { event: NormalizedEvent }) {
           loading="lazy"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
         />
-        {/* Star badge */}
-        <div className="absolute top-2 left-2 bg-[#9a442d] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+        {/* ★ Featured badge */}
+        <div className="absolute top-2 left-2 bg-[#9a442d] text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm">
           ★ Featured
         </div>
         {/* Price */}
         {event.price && (
-          <div className="absolute bottom-1.5 right-1.5 bg-[#006a62]/90 backdrop-blur-sm text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
+          <div className="absolute top-2 right-2 bg-[#006a62]/90 backdrop-blur-sm text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
             {event.price}
           </div>
         )}
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-        {/* Date on image */}
+        {/* Bottom gradient + date */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
         {dateStr && (
-          <div className="absolute bottom-2 left-2 text-white text-[10px] font-semibold">
+          <div className="absolute bottom-2 left-2.5 text-white text-[11px] font-semibold drop-shadow">
             {dateStr}
           </div>
         )}
       </div>
       <h4
-        className="font-bold text-[#1a1614] text-xs leading-tight line-clamp-2 mb-0.5 group-hover:text-[#9a442d] transition-colors"
+        className="font-bold text-[#1a1614] text-sm leading-tight line-clamp-2 mb-0.5 group-hover:text-[#9a442d] transition-colors"
         style={{ fontFamily: 'var(--font-epilogue)' }}
       >
         {event.title}

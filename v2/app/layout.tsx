@@ -101,9 +101,13 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        <DesktopNav />
-        <div className="pb-20 md:pb-0">{children}</div>
-        <BottomNav />
+        {/* overflow-x-clip — clips overflow without creating a scroll container,
+            so position:sticky still works inside pages */}
+        <div className="w-full overflow-x-clip">
+          <DesktopNav />
+          <div className="pb-20 md:pb-0">{children}</div>
+          <BottomNav />
+        </div>
         <InstallPrompt />
 
         {/* Umami analytics — loads after page is interactive, privacy-first */}
