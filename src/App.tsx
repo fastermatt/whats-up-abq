@@ -1783,13 +1783,31 @@ interface CardAdjustments {
 
 const DEFAULT_ADJUSTMENTS: CardAdjustments = { zoom: 1, darkness: 0.5, offsetX: 0, offsetY: 0 };
 
+// ── Sticker presets — composited as static text onto the card ─────────────
+interface StickerPreset {
+  id: string;
+  label: string;   // shown in picker
+  text: string;    // drawn on canvas
+  emoji: string;   // leading emoji on canvas
+}
+
+const STICKER_PRESETS: StickerPreset[] = [
+  { id: 'none',    label: 'None',           text: '',                      emoji: '' },
+  { id: 'going',   label: "I'm going",      text: "I'm going to this",     emoji: '→' },
+  { id: 'invite',  label: 'Anyone want in?', text: 'Anyone wanna come?',   emoji: '👀' },
+  { id: 'here',    label: 'Currently here', text: 'Currently here',        emoji: '📍' },
+  { id: 'hype',    label: 'You should go',  text: 'You should go',         emoji: '🔥' },
+  { id: 'checkin', label: 'Just checked in', text: 'Just checked in',      emoji: '✅' },
+];
+
 function drawShareCard(
   canvas: HTMLCanvasElement,
   data: ShareCardData,
   format: 'story' | 'square',
   photo: HTMLImageElement | null,
   photoFit: 'cover' | 'contain',
-  adj: CardAdjustments = DEFAULT_ADJUSTMENTS
+  adj: CardAdjustments = DEFAULT_ADJUSTMENTS,
+  stickerId = 'none'
 ): void {
   const W = 1080;
   const H = format === 'story' ? 1920 : 1080;
@@ -1916,6 +1934,46 @@ function drawShareCard(
     ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.font = `400 34px "Public Sans", sans-serif`;
     ctx.textBaseline = 'top'; ctx.fillText(item, PAD + 30, y);
   });
+
+  // ── Sticker overlay ───────────────────────────────────────────
+  // Drawn in the upper-right area so it doesn't clash with the bottom content block
+  const preset = STICKER_PRESETS.find(s => s.id === stickerId);
+  if (preset && preset.id !== 'none') {
+    const stickerFontSize = format === 'story' ? 52 : 44;
+    const stickerPadX = 36;
+    const stickerPadY = 28;
+    const stickerH = stickerFontSize + stickerPadY * 2;
+    const fullText = `${preset.emoji}  ${preset.text}`;
+
+    ctx.font = `800 ${stickerFontSize}px "Public Sans", sans-serif`;
+    const textW = ctx.measureText(fullText).width;
+    const stickerW = textW + stickerPadX * 2;
+
+    // Position: top-right, below the ABQ badge area
+    const stickerX = W - PAD - stickerW;
+    const stickerY = format === 'story' ? 240 : 140;
+
+    // Pill background — semi-transparent dark with lime border
+    ctx.fillStyle = 'rgba(0,0,0,0.72)';
+    ctx.strokeStyle = '#d4ef4d';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    const r = stickerH / 2;
+    if ('roundRect' in ctx) {
+      (ctx as CanvasRenderingContext2D & { roundRect: (x: number, y: number, w: number, h: number, r: number) => void })
+        .roundRect(stickerX, stickerY, stickerW, stickerH, r);
+    } else {
+      ctx.rect(stickerX, stickerY, stickerW, stickerH);
+    }
+    ctx.fill();
+    ctx.stroke();
+
+    // Sticker text
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `800 ${stickerFontSize}px "Public Sans", sans-serif`;
+    ctx.textBaseline = 'middle';
+    ctx.fillText(fullText, stickerX + stickerPadX, stickerY + stickerH / 2);
+  }
 }
 
 // Shared modal UI — used by both EventShareCardModal and PlaceShareCardModal
@@ -1930,6 +1988,7 @@ function ShareCardModal({ data, photoUrl, onClose, analyticsType }: {
   const [format, setFormat] = useState<'story' | 'square'>('story');
   const [photoFit, setPhotoFit] = useState<'cover' | 'contain'>('cover');
   const [adj, setAdj] = useState<CardAdjustments>(DEFAULT_ADJUSTMENTS);
+  const [stickerId, setStickerId] = useState('none');
   const [shareState, setShareState] = useState<'idle' | 'saved' | 'shared'>('idle');
   // Drag state (ref so it doesn't trigger re-renders mid-drag)
   const dragRef = useRef<{ active: boolean; lastX: number; lastY: number }>({ active: false, lastX: 0, lastY: 0 });
@@ -1944,8 +2003,8 @@ function ShareCardModal({ data, photoUrl, onClose, analyticsType }: {
   const redraw = useCallback((overrideAdj?: CardAdjustments) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    drawShareCard(canvas, data, format, photoRef.current, photoFit, overrideAdj ?? adj);
-  }, [data, format, photoFit, adj]);
+    drawShareCard(canvas, data, format, photoRef.current, photoFit, overrideAdj ?? adj, stickerId);
+  }, [data, format, photoFit, adj, stickerId]);
 
   // Load photo once, then redraw on every param change
   useEffect(() => {
@@ -1979,7 +2038,7 @@ function ShareCardModal({ data, photoUrl, onClose, analyticsType }: {
       };
       // Redraw immediately with next value so it feels live
       const canvas = canvasRef.current;
-      if (canvas) drawShareCard(canvas, data, format, photoRef.current, photoFit, next);
+      if (canvas) drawShareCard(canvas, data, format, photoRef.current, photoFit, next, stickerId);
       return next;
     });
   };
@@ -2065,6 +2124,39 @@ function ShareCardModal({ data, photoUrl, onClose, analyticsType }: {
           Drag to reposition photo
         </p>
       )}
+
+      {/* Sticker picker */}
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 8, paddingBottom: 4 }}>
+        <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 9, fontWeight: 800, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.4)', margin: '0 0 6px 16px' }}>ADD STICKER</p>
+        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingLeft: 16, paddingRight: 16, scrollbarWidth: 'none' }}>
+          {STICKER_PRESETS.map(preset => {
+            const active = stickerId === preset.id;
+            return (
+              <button
+                key={preset.id}
+                onClick={() => setStickerId(preset.id)}
+                style={{
+                  flexShrink: 0,
+                  padding: '6px 12px',
+                  borderRadius: 999,
+                  border: active ? '2px solid #d4ef4d' : '1.5px solid rgba(255,255,255,0.18)',
+                  background: active ? 'rgba(212,239,77,0.15)' : 'rgba(255,255,255,0.06)',
+                  color: active ? '#d4ef4d' : 'rgba(255,255,255,0.6)',
+                  fontFamily: 'Public Sans, sans-serif',
+                  fontSize: 11,
+                  fontWeight: active ? 800 : 600,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  letterSpacing: '0.02em',
+                  transition: 'all 0.12s ease',
+                }}
+              >
+                {preset.id === 'none' ? 'None' : `${preset.emoji} ${preset.label}`}
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Adjustments */}
       {photoUrl && (
