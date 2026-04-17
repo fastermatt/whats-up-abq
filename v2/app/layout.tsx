@@ -4,6 +4,7 @@ import Script from 'next/script'
 import BottomNav from './components/BottomNav'
 import DesktopNav from './components/DesktopNav'
 import { InstallPrompt } from './components/InstallPrompt'
+import { AuthCallbackCatcher } from './components/AuthCallbackCatcher'
 import { OG_IMAGE } from '@/lib/fallback-images'
 import './globals.css'
 
@@ -103,6 +104,7 @@ export default function RootLayout({
         </a>
         {/* overflow-x-clip — clips overflow without creating a scroll container,
             so position:sticky still works inside pages */}
+        <AuthCallbackCatcher />
         <div className="w-full overflow-x-clip">
           <DesktopNav />
           <div className="pb-20 md:pb-0">{children}</div>
