@@ -14,16 +14,16 @@ export const revalidate = 0
 
 // Badge definitions
 const BADGE_DEFS = [
-  { id: 'first_checkin',   label: 'First Check-in',  emoji: '✓',  desc: 'Checked into your first event' },
-  { id: 'five_checkins',   label: 'Regular',          emoji: '⭐', desc: '5 check-ins' },
-  { id: 'ten_checkins',    label: 'Super Fan',         emoji: '🎯', desc: '10 check-ins' },
-  { id: 'first_friday',    label: 'First Friday',      emoji: '🎨', desc: 'Attended a First Friday' },
-  { id: 'streak_3',        label: '3-Week Streak',     emoji: '🔥', desc: 'Out 3 weeks in a row' },
-  { id: 'green_chile',     label: 'Green Chile',       emoji: '🌶', desc: 'Checked in at a local spot' },
-  { id: 'burqueno',        label: 'Burqueño',          emoji: '🌵', desc: 'Visited 5+ venues' },
-  { id: 'music_lover',     label: 'Music Lover',       emoji: '🎵', desc: '5 music events' },
-  { id: 'comedy_buff',     label: 'Comedy Buff',       emoji: '😂', desc: '3 comedy shows' },
-  { id: 'outdoor_explorer',label: 'Explorer',          emoji: '🏔', desc: '3 outdoor events' },
+  { id: 'first_checkin',    label: 'First Check-in', icon: '/badges/first-checkin.svg', desc: 'Checked into your first event' },
+  { id: 'five_checkins',    label: 'Regular',         icon: '/badges/regular.svg',       desc: '5 check-ins' },
+  { id: 'ten_checkins',     label: 'Super Fan',        icon: '/badges/super-fan.svg',     desc: '10 check-ins' },
+  { id: 'first_friday',     label: 'First Friday',     icon: '/badges/first-friday.svg',  desc: 'Attended a First Friday' },
+  { id: 'streak_3',         label: '3-Week Streak',    icon: '/badges/streak.svg',        desc: 'Out 3 weeks in a row' },
+  { id: 'green_chile',      label: 'Green Chile',      icon: '/badges/green-chile.svg',   desc: 'Checked in at a local spot' },
+  { id: 'burqueno',         label: 'Burqueño',         icon: '/badges/burqueno.svg',      desc: 'Visited 5+ venues' },
+  { id: 'music_lover',      label: 'Music Lover',      icon: '/badges/music-lover.svg',   desc: '5 music events' },
+  { id: 'comedy_buff',      label: 'Comedy Buff',      icon: '/badges/comedy-buff.svg',   desc: '3 comedy shows' },
+  { id: 'outdoor_explorer', label: 'Explorer',         icon: '/badges/explorer.svg',      desc: '3 outdoor events' },
 ]
 
 export default async function ProfilePage() {
@@ -149,7 +149,7 @@ export default async function ProfilePage() {
                       : 'bg-[#f7f2ec] border-[#e8d9bf] opacity-40'
                   }`}
                 >
-                  <span className="text-2xl mb-0.5">{badge.emoji}</span>
+                  <img src={badge.icon} alt={badge.label} className="w-8 h-8 mb-1" style={earned ? {} : { filter: 'grayscale(1)' }} />
                   <span className="text-[9px] font-semibold text-[#4a3f3a] leading-tight">{badge.label}</span>
                 </div>
               )

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="28" fill="#e8f0ff"/>
+  <circle cx="32" cy="32" r="28" fill="none" stroke="#3a5a9a" stroke-width="3"/>
+  <!-- sky -->
+  <rect x="6" y="36" width="52" height="20" rx="0" fill="#e8f0ff"/>
+  <!-- far mountain -->
+  <polygon points="14,42 28,20 42,42" fill="#8aabcf" stroke="#3a5a9a" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- snow cap far -->
+  <polygon points="28,20 23,30 33,30" fill="white" stroke="#3a5a9a" stroke-width="1"/>
+  <!-- near mountain -->
+  <polygon points="24,46 40,18 56,46" fill="#5a7aaa" stroke="#3a5a9a" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- snow cap near -->
+  <polygon points="40,18 34,30 46,30" fill="white" stroke="#3a5a9a" stroke-width="1"/>
+  <!-- ground -->
+  <rect x="6" y="44" width="52" height="14" rx="0" fill="#7aaa7a" opacity="0.6"/>
+  <!-- sun -->
+  <circle cx="14" cy="18" r="5" fill="#f5c842" stroke="#c9952a" stroke-width="1.5"/>
+</svg>
