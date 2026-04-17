@@ -7,10 +7,13 @@ import { LogoutButton } from './LogoutButton'
 export const metadata = { title: 'Admin | ABQ Unplugged' }
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
-  // Don't auth-check the login page itself (middleware passes x-pathname)
+  // Don't auth-check the public admin pages (login + verify flow)
+  // The verify page completes 2FA on a fresh device BEFORE admin_token is set,
+  // so it has to render without the cookie check.
   const headersList = await headers()
   const pathname = headersList.get('x-pathname') ?? ''
-  if (pathname === '/admin/login') {
+  const ADMIN_PUBLIC_PAGES = ['/admin/login', '/admin/verify']
+  if (ADMIN_PUBLIC_PAGES.includes(pathname)) {
     return <>{children}</>
   }
 

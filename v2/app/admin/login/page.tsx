@@ -33,13 +33,21 @@ export default function AdminLoginPage() {
       if (data.action === 'verify_required') {
         // Initiate OTP from the CLIENT (browser) so PKCE code verifier is stored locally
         const supabase = createClient()
-        await supabase.auth.signInWithOtp({
+        const { error: otpError } = await supabase.auth.signInWithOtp({
           email: ADMIN_EMAIL,
           options: {
             emailRedirectTo: `${SITE_URL}/admin/verify`,
             shouldCreateUser: true,
           },
         })
+        if (otpError) {
+          // Most common case: rate limited (429 from Supabase after repeated tries)
+          const msg = /rate|429|security|For security/i.test(otpError.message)
+            ? 'Too many login attempts. Wait a minute and try again.'
+            : otpError.message
+          setError(msg)
+          return
+        }
         setState('check_email')
         return
       }
