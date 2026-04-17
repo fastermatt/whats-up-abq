@@ -427,10 +427,25 @@ export default async function EventDetailPage({ params }: PageProps) {
           </div>
         )}
 
+        {/* Community attribution */}
+        {event.source === 'community' && (
+          <div className="mb-4 flex items-center gap-2 p-3 rounded-xl bg-[#006a62]/8 border border-[#006a62]/25">
+            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#006a62]/15 text-[#006a62] font-bold text-xs">
+              👥
+            </span>
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-bold text-[#006a62] uppercase tracking-wider">Community event</p>
+              <p className="text-[11px] text-[#4a3f3a]">
+                Submitted by a member of the ABQ Unplugged community
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Source + report */}
         <div className="flex items-center justify-between mb-2">
           <p className="text-[10px] text-[#8a7a74]">
-            Source: {event.source.charAt(0).toUpperCase() + event.source.slice(1)}
+            Source: {event.source === 'community' ? 'Community submission' : event.source.charAt(0).toUpperCase() + event.source.slice(1)}
           </p>
           <ReportForm eventId={event.id} eventTitle={event.title} />
         </div>

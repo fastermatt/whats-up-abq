@@ -334,6 +334,8 @@ export default async function DiscoverPage() {
               { href: '/events?time=tonight',  label: 'Tonight' },
               { href: '/events?time=this-weekend', label: 'This Weekend' },
               { href: '/neighborhoods',        label: 'Neighborhoods' },
+              { href: '/submit',               label: 'Submit Event' },
+              { href: '/feedback',             label: 'Feedback' },
               { href: '/about',                label: 'About' },
             ].map(({ href, label }) => (
               <Link

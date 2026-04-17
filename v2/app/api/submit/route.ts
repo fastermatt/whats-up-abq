@@ -1,55 +1,112 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 
+/**
+ * POST /api/submit
+ *
+ * Writes to `public.event_submissions`. Requires a logged-in Supabase Auth user.
+ * Enforces a 3-submissions-per-day rate limit per user.
+ *
+ * Body (JSON):
+ *   title, description, venue_name, venue_address, event_date, start_time,
+ *   end_time, category, neighborhood_slug, photo_url (already uploaded),
+ *   ticket_url, price_min_cents, price_max_cents, is_free
+ */
 export async function POST(request: NextRequest) {
   try {
+    // ── Auth ──
+    const authed = await createClient()
+    const { data: { user } } = await authed.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Sign in required' }, { status: 401 })
+    }
+
+    // ── Rate limit: 3 per day ──
+    const service = await createServiceClient()
+    const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { count } = await (service as any)
+      .schema('public')
+      .from('event_submissions')
+      .select('id', { count: 'exact', head: true })
+      .eq('submitted_by', user.id)
+      .gte('created_at', dayAgo)
+    if ((count ?? 0) >= 3) {
+      return NextResponse.json(
+        { error: 'You\'ve reached the daily limit of 3 event submissions. Try again tomorrow.' },
+        { status: 429 },
+      )
+    }
+
+    // ── Body ──
     const body = await request.json()
     const {
-      title, description, venue, address, event_date, event_time,
-      ticket_url, price, category, contact_name, contact_email,
+      title, description, venue_name, venue_address,
+      event_date, start_time, end_time,
+      category, neighborhood_slug, photo_url,
+      ticket_url, price_min_cents, price_max_cents, is_free,
     } = body
 
-    if (!title?.trim() || !event_date) {
-      return NextResponse.json({ error: 'Title and date are required' }, { status: 400 })
+    if (!title?.trim() || title.trim().length > 200) {
+      return NextResponse.json({ error: 'Title is required (max 200 chars)' }, { status: 400 })
+    }
+    if (!event_date) {
+      return NextResponse.json({ error: 'Event date is required' }, { status: 400 })
+    }
+    if (!venue_name?.trim() || venue_name.trim().length > 200) {
+      return NextResponse.json({ error: 'Venue name is required (max 200 chars)' }, { status: 400 })
+    }
+    // Date sanity: must be today or future
+    if (event_date < new Date().toISOString().slice(0, 10)) {
+      return NextResponse.json({ error: 'Event date must be today or in the future' }, { status: 400 })
     }
 
-    if (contact_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact_email)) {
-      return NextResponse.json({ error: 'Invalid email address' }, { status: 400 })
-    }
-
-    const supabase = await createServiceClient()
+    // ── Metadata for fraud review ──
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null
+    const ua = request.headers.get('user-agent')?.slice(0, 500) ?? null
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
+    const { data, error } = await (service as any)
       .schema('public')
-      .from('event_reports')
+      .from('event_submissions')
       .insert({
-        event_id: 'submission_new',
-        type: 'event_submission',
-        details: JSON.stringify({
-          title: title.trim(),
-          description: description?.trim() || null,
-          venue: venue?.trim() || null,
-          address: address?.trim() || null,
-          event_date,
-          event_time: event_time?.trim() || null,
-          ticket_url: ticket_url?.trim() || null,
-          price: price?.trim() || null,
-          category: category || null,
-          contact_name: contact_name?.trim() || null,
-          contact_email: contact_email?.trim() || null,
-        }),
-        status: 'pending',
+        submitted_by:      user.id,
+        title:             title.trim(),
+        description:       description?.trim()?.slice(0, 2000) || null,
+        event_date,
+        start_time:        start_time || null,
+        end_time:          end_time   || null,
+        venue_name:        venue_name.trim(),
+        venue_address:     venue_address?.trim()?.slice(0, 300) || null,
+        category:          category || null,
+        neighborhood_slug: neighborhood_slug || null,
+        photo_url:         photo_url || null,
+        ticket_url:        ticket_url?.trim()?.slice(0, 500) || null,
+        price_min_cents:   typeof price_min_cents === 'number' ? price_min_cents : null,
+        price_max_cents:   typeof price_max_cents === 'number' ? price_max_cents : null,
+        is_free:           !!is_free,
+        status:            'pending',
+        submitter_ip:      ip,
+        user_agent:        ua,
       })
+      .select('id')
+      .single()
 
     if (error) {
-      console.error('Submit error:', error)
+      console.error('[submit] insert error', error)
       return NextResponse.json({ error: 'Failed to submit. Please try again.' }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true })
+    // Bump submitter's count on their profile
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (service as any)
+      .schema('public')
+      .rpc('increment_profile_counter', { p_user_id: user.id, p_column: 'events_submitted' })
+      .then(() => {}, () => {}) // ignore if RPC doesn't exist
+
+    return NextResponse.json({ success: true, id: data?.id })
   } catch (e) {
-    console.error('Submit error:', e)
+    console.error('[submit] server error', e)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

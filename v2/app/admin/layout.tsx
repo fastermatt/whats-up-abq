@@ -29,6 +29,8 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           Admin
         </span>
         <Link href="/admin" className="text-sm text-white/60 hover:text-white transition-colors">Dashboard</Link>
+        <Link href="/admin/submissions" className="text-sm text-white/60 hover:text-white transition-colors">Submissions</Link>
+        <Link href="/admin/feedback" className="text-sm text-white/60 hover:text-white transition-colors">Feedback</Link>
         <Link href="/admin/reports" className="text-sm text-white/60 hover:text-white transition-colors">Reports</Link>
         <Link href="/admin/events" className="text-sm text-white/60 hover:text-white transition-colors">Events</Link>
         <div className="flex-1" />
