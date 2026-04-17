@@ -4719,6 +4719,7 @@ function AuthModal({ onClose }: { onClose: () => void }) {
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function handleGoogle() {
@@ -4742,9 +4743,10 @@ function AuthModal({ onClose }: { onClose: () => void }) {
       if (isSignUp) {
         const { data: cred, error: signUpError } = await supabase.auth.signUp({ email: email, password: password, options: { captchaToken } });
         if (signUpError) throw signUpError;
-        if (displayName) await supabase.auth.updateUser({ data: { display_name: displayName } });
+        if (displayName && cred?.user) await supabase.auth.updateUser({ data: { display_name: displayName } });
         // Create email prefs row for new user (opted in by default)
-        if (cred?.user) {
+        if (cred?.user && !cred.session) {
+          // New user: session is null until email confirmed
           await supabase.from('user_email_prefs').upsert({
             user_id: cred.user.id,
             email: email,
@@ -4752,6 +4754,13 @@ function AuthModal({ onClose }: { onClose: () => void }) {
             frequency: 'weekly',
           }, { onConflict: 'user_id' });
         }
+        // Always show confirmation message — Supabase returns 200 even for
+        // "repeated signup" (existing email), so we can't distinguish.
+        // The honest UX: tell the user to check their inbox either way.
+        setError('');
+        setLoading(false);
+        setSuccessMsg('Check your email for a confirmation link! (Check spam too.)');
+        return;
       } else {
         const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email: email, password: password, options: { captchaToken } });
         if (signInError) throw signInError;
@@ -4855,6 +4864,7 @@ function AuthModal({ onClose }: { onClose: () => void }) {
               style={{ fontFamily: 'Public Sans, sans-serif' }}
             />
             {error && <p className="text-red-500 text-xs">{error}</p>}
+            {successMsg && <p className="text-green-600 text-sm font-medium text-center py-2">{successMsg}</p>}
             <HCaptcha
               ref={captchaRef}
               sitekey={import.meta.env.VITE_HCAPTCHA_SITE_KEY}
@@ -4862,9 +4872,9 @@ function AuthModal({ onClose }: { onClose: () => void }) {
               onExpire={() => setCaptchaToken('')}
             />
             <button
-              type="submit" disabled={loading}
+              type="submit" disabled={loading || !captchaToken}
               className="w-full rounded-lg py-3.5 font-bold text-sm text-white"
-              style={{ background: 'var(--brand)', fontFamily: 'Public Sans, sans-serif', opacity: loading ? 0.7 : 1 }}
+              style={{ background: 'var(--brand)', fontFamily: 'Public Sans, sans-serif', opacity: (loading || !captchaToken) ? 0.5 : 1, cursor: !captchaToken ? 'not-allowed' : 'pointer' }}
             >
               {loading ? 'Please wait…' : (isSignUp ? 'Create Account' : 'Sign In')}
             </button>
