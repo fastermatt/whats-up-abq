@@ -105,16 +105,18 @@ const DEFAULT_IMAGES = [
 // CDN images serve as fallback if local files haven't been placed yet.
 // Rotates based on day-of-year so it's consistent for all users on the same day.
 
-// Local hero images — place files in v2/public/hero/ to activate
-// hero-1.png: festival scene with adobe gate towers + Sandia mountains
-// hero-2.png: outdoor concert venue, teal-orange sky, string lights, crowd
-// hero-3.png: Southwest town plaza, adobe buildings, people gathering
-// hero-4.png: desert road with saguaro cacti, mountains, sunset
+// Local hero images — Midjourney vintage poster-style ABQ landscapes
+// All 7 images placed in v2/public/hero/
+// hero-1–4: bd1a40a6 batch — cream sky, terra terrain, teal accents
+// hero-5–7: d72bebe5 batch — moonrise mesa road, geometric cityscape variations
 const LOCAL_HERO_IMAGES = [
   '/hero/hero-1.png',
   '/hero/hero-2.png',
   '/hero/hero-3.png',
   '/hero/hero-4.png',
+  '/hero/hero-5.png',
+  '/hero/hero-6.png',
+  '/hero/hero-7.png',
 ]
 
 // CDN fallback images (Midjourney Southwest illustration style)
