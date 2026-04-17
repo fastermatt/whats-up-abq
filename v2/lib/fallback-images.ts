@@ -135,8 +135,18 @@ const CDN_HERO_IMAGES = [
   `${MJ}/52417dbf-7760-49d5-9ed5-9209121b29e5/0_3.jpeg`,
 ]
 
-// Combined: local images first (more prominent in rotation), CDN as backup pool
-const HERO_IMAGES = [...LOCAL_HERO_IMAGES, ...CDN_HERO_IMAGES]
+// Interleaved: local + CDN alternate so new local images surface every other
+// day for the first ~2 weeks of the cycle instead of clustering all 7 together.
+// With 7 local + 12 CDN = 19 images; interleaving: L C L C L C L C L C L C L C C C C C C
+const HERO_IMAGES: string[] = (() => {
+  const out: string[] = []
+  const max = Math.max(LOCAL_HERO_IMAGES.length, CDN_HERO_IMAGES.length)
+  for (let i = 0; i < max; i++) {
+    if (i < LOCAL_HERO_IMAGES.length) out.push(LOCAL_HERO_IMAGES[i])
+    if (i < CDN_HERO_IMAGES.length) out.push(CDN_HERO_IMAGES[i])
+  }
+  return out
+})()
 
 // ── OG Share Image ──────────────────────────────────────────────────────────
 // Self-hosted on Netlify CDN — never depends on Midjourney hotlink availability.
@@ -147,14 +157,20 @@ export const OG_IMAGE = 'https://abqunplugged.com/hero/hero-4.png'
 
 /**
  * Get the hero image URL for today.
- * Rotates daily based on day-of-year — consistent across all users for same day.
+ * Rotates daily — consistent across all users for the same day.
+ *
+ * Seeded to launch day (2026-04-17 = day 107) so the rotation starts at
+ * index 0 = hero-1.png on the day these assets shipped. Before that, we use
+ * the raw dayOfYear so prior snapshots show a reasonable image too.
  */
+const HERO_LAUNCH_DAY = 107 // 2026-04-17 — day new local hero images landed
 export function getHeroImage(): string {
   const now = new Date()
-  const dayOfYear = Math.floor(
-    (now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000
-  )
-  return HERO_IMAGES[dayOfYear % HERO_IMAGES.length]
+  const start = new Date(now.getFullYear(), 0, 0)
+  const dayOfYear = Math.floor((now.getTime() - start.getTime()) / 86400000)
+  const offset = dayOfYear - HERO_LAUNCH_DAY
+  const idx = ((offset % HERO_IMAGES.length) + HERO_IMAGES.length) % HERO_IMAGES.length
+  return HERO_IMAGES[idx]
 }
 
 /**
