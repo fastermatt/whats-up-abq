@@ -1,0 +1,124 @@
+name: V2 Weekly Event Refresh
+
+on:
+  # Every Tuesday at 7:00 AM Mountain Time (14:00 UTC / covers MDT & MST)
+  schedule:
+    - cron: '0 14 * * 2'
+
+  # Manual trigger from GitHub Actions tab (useful for testing or on-demand refresh)
+  workflow_dispatch:
+    inputs:
+      enrich_all:
+        description: 'Re-enrich ALL events (not just new ones)'
+        required: false
+        default: 'false'
+        type: boolean
+      skip_imports:
+        description: 'Skip imports and only run enrichment + validation'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  refresh:
+    name: Import → Enrich → Validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      SUPABASE_URL:            ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      TICKETMASTER_API_KEY:    ${{ secrets.TICKETMASTER_API_KEY }}
+      SEATGEEK_AID:            ${{ secrets.SEATGEEK_AID }}
+      EVENTBRITE_TOKEN:        ${{ secrets.EVENTBRITE_TOKEN }}
+
+    steps:
+      # ── Setup ────────────────────────────────────────────────────────────────
+
+      - name: Checkout repo (v2 branch — scripts live here)
+        uses: actions/checkout@v4
+        with:
+          ref: v2
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: v2/package-lock.json
+
+      - name: Install V2 dependencies
+        working-directory: v2
+        run: npm install --legacy-peer-deps --ignore-scripts
+
+      # ── Step 1: Import events from all sources ────────────────────────────────
+
+      - name: Import — Ticketmaster
+        if: ${{ inputs.skip_imports != 'true' }}
+        working-directory: v2
+        run: node scripts/import-ticketmaster.mjs
+        continue-on-error: true   # one source failing shouldn't kill the whole run
+
+      - name: Import — SeatGeek
+        if: ${{ inputs.skip_imports != 'true' }}
+        working-directory: v2
+        run: node scripts/import-seatgeek.mjs
+        continue-on-error: true
+
+      - name: Import — Eventbrite
+        if: ${{ inputs.skip_imports != 'true' }}
+        working-directory: v2
+        run: node scripts/import-eventbrite.mjs
+        continue-on-error: true
+
+      - name: Import — NHCC Community Events
+        if: ${{ inputs.skip_imports != 'true' }}
+        working-directory: v2
+        run: node scripts/import-nhcc.mjs
+        continue-on-error: true
+
+      # ── Step 2: Enrich new events ─────────────────────────────────────────────
+
+      - name: Enrich — Neighborhood tags
+        working-directory: v2
+        # --dry-run removed so it actually writes; tag-neighborhoods reads from DB
+        run: node scripts/tag-neighborhoods.mjs
+        continue-on-error: true
+
+      - name: Enrich — Mood / indoor-outdoor / age-appeal (rule-based)
+        working-directory: v2
+        run: |
+          EXTRA_FLAGS=""
+          if [ "${{ inputs.enrich_all }}" = "true" ]; then
+            EXTRA_FLAGS="--all"
+          fi
+          node scripts/enrich-moods-rules.mjs --limit=5000 $EXTRA_FLAGS
+
+      # ── Step 3: Validate data quality ─────────────────────────────────────────
+
+      - name: Validate event data
+        working-directory: v2
+        run: node scripts/validate-events.mjs
+
+      # ── Step 4: Summary ──────────────────────────────────────────────────────
+
+      - name: Write job summary
+        if: always()
+        run: |
+          {
+            echo "## 📅 V2 Weekly Event Refresh"
+            echo ""
+            echo "**Run at:** $(date -u '+%Y-%m-%d %H:%M UTC')"
+            echo "**Trigger:** ${{ github.event_name }}"
+            echo ""
+            echo "### Pipeline"
+            echo "| Step | Result |"
+            echo "|------|--------|"
+            echo "| Import: Ticketmaster | ${{ steps.import-ticketmaster.outcome || 'skipped' }} |"
+            echo "| Import: SeatGeek | ${{ steps.import-seatgeek.outcome || 'skipped' }} |"
+            echo "| Import: Eventbrite | ${{ steps.import-eventbrite.outcome || 'skipped' }} |"
+            echo "| Import: NHCC | ${{ steps.import-nhcc.outcome || 'skipped' }} |"
+            echo "| Enrich: Neighborhoods | ${{ steps.enrich-neighborhoods.outcome || 'skipped' }} |"
+            echo "| Enrich: Moods | ${{ steps.enrich-moods.outcome || 'skipped' }} |"
+            echo "| Validate | ${{ steps.validate.outcome || 'skipped' }} |"
+          } >> $GITHUB_STEP_SUMMARY
