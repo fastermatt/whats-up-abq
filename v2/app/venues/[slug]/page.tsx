@@ -29,6 +29,27 @@ function slugToVenue(slug: string): string {
   return decodeURIComponent(slug).replace(/-/g, ' ')
 }
 
+/**
+ * Third-place framing line (Oldenburg, 1989).
+ * A small italic nudge that reframes the venue as a room that belongs
+ * to its regulars — not just a transaction location.
+ */
+function thirdPlaceLine(topCategory: string | null, eventCount: number): string {
+  if (eventCount >= 20) return 'A room the regulars know by heart.'
+  if (topCategory === 'Music')         return 'The kind of place you remember by the show you saw there.'
+  if (topCategory === 'Comedy')        return 'Laughter is a room you share.'
+  if (topCategory === 'Sports')        return 'A place to shout with strangers and leave as friends.'
+  if (topCategory === 'Food & Drink')  return 'Shared meals, shared hours.'
+  if (topCategory === 'Arts & Theater' || topCategory === 'Arts')
+                                        return 'A room that holds the quiet and the wonder.'
+  if (topCategory === 'Family')        return 'A place where the small people get to belong too.'
+  if (topCategory === 'Community')     return 'A room that makes neighbors out of strangers.'
+  if (topCategory === 'Film')          return 'The lights go down. The room becomes a room.'
+  if (topCategory === 'Outdoor')       return 'The best rooms don\u2019t have ceilings.'
+  if (eventCount <= 3)                  return 'Small calendar. Big potential.'
+  return 'A place Albuquerque shows up for.'
+}
+
 /** Pre-render top 60 venues at build time. */
 export async function generateStaticParams() {
   const topVenues = await fetchTopVenues(60)
@@ -168,6 +189,11 @@ export default async function VenuePage({ params }: PageProps) {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 py-5 space-y-5">
+        {/* Third-place framing — venues are rooms that belong to the people in them */}
+        <p className="text-xs italic text-[#8a7a74] leading-relaxed">
+          {thirdPlaceLine(topCategory, events.length)}
+        </p>
+
         {/* ── Stats + Neighborhood ── */}
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-sm font-bold text-[#1a1614]">

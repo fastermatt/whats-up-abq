@@ -13,6 +13,7 @@ import { AnimateIn } from '@/app/components/AnimateIn'
 import { SaveEventButton } from '@/app/components/SaveEventButton'
 import { ReviewSection } from '@/app/components/ReviewSection'
 import { CheckInButton } from '@/app/components/CheckInButton'
+import { InviteCard } from '@/app/components/InviteCard'
 
 export const revalidate = 60
 
@@ -69,6 +70,13 @@ export default async function EventDetailPage({ params }: PageProps) {
     .select('id', { count: 'exact', head: true })
     .eq('event_id', id)
     .eq('state', 'going')
+
+  // Saved count — how many users have saved this event (belonging proof, not scarcity)
+  const { count: savedCount } = await supabase
+    .from('user_events')
+    .select('id', { count: 'exact', head: true })
+    .eq('event_id', id)
+    .eq('state', 'saved')
 
   // Fetch public attendees for "Who's Going" section
   const { data: goingUserIds } = await supabase
@@ -391,11 +399,23 @@ export default async function EventDetailPage({ params }: PageProps) {
           />
         </div>
 
+        {/* Belonging proof — "N saved this" as a soft inline signal (never scarcity) */}
+        {(savedCount ?? 0) > 0 && (goingCount ?? 0) === 0 && (
+          <p className="text-[11px] text-[#8a7a74] mb-4 italic">
+            {savedCount} {savedCount === 1 ? 'person has' : 'people have'} saved this
+          </p>
+        )}
+
         {(goingCount ?? 0) > 0 && (
           <div className="mb-6 bg-white rounded-xl border border-[#f0e4cc] px-4 py-3 shadow-sm">
             <p className="text-xs font-bold text-[#8a7a74] uppercase tracking-wider mb-2 flex items-center gap-1.5">
               <Users className="w-3.5 h-3.5" />
               {goingCount} {goingCount === 1 ? 'person' : 'people'} going
+              {(savedCount ?? 0) > 0 && (
+                <span className="font-normal text-[#8a7a74]/70 normal-case tracking-normal">
+                  · {savedCount} saved
+                </span>
+              )}
             </p>
             {attendees.length > 0 && (
               <div className="flex flex-wrap gap-2">
@@ -425,6 +445,14 @@ export default async function EventDetailPage({ params }: PageProps) {
             )}
           </div>
         )}
+
+        {/* "Who would love this?" — plan-making friction reduction (implementation intentions) */}
+        <InviteCard
+          eventId={event.id}
+          eventTitle={event.title}
+          eventDate={event.date}
+          venue={event.venue}
+        />
 
         {/* Community attribution */}
         {event.source === 'community' && (

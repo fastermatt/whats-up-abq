@@ -345,6 +345,7 @@ export default async function DiscoverPage() {
               { href: '/neighborhoods',        label: 'Neighborhoods' },
               { href: '/submit',               label: 'Share an event' },
               { href: '/feedback',             label: 'Feedback' },
+              { href: '/why',                  label: 'Why we built this' },
               { href: '/about',                label: 'About' },
             ].map(({ href, label }) => (
               <Link
