@@ -35,6 +35,8 @@ export interface NormalizedEvent {
   highlights: string[]
   venueTips: string | null
   localTips: string | null
+  // Community submissions
+  submitterHandle: string | null
 }
 
 export type CategoryFilter = string | null
@@ -107,6 +109,7 @@ interface RawEventRow {
   // Denormalized columns added 2026-04-16 for egress reduction
   category?: string | null
   venue_name?: string | null
+  submitted_by?: string | null
 }
 
 // ─── Category counts ──────────────────────────────────────────────────────────
@@ -144,7 +147,7 @@ export async function fetchCategoryCounts(): Promise<CategoryCount[]> {
 // ─── Main fetch function ──────────────────────────────────────────────────────
 
 // Columns for queries that need full normalisation (includes raw JSONB)
-const COLS = 'id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, neighborhood, venue_slug, category, venue_name'
+const COLS = 'id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, neighborhood, venue_slug, category, venue_name, submitted_by'
 
 export async function fetchEvents({
   timeFilter = 'upcoming',
@@ -662,7 +665,21 @@ export async function fetchEventById(id: string): Promise<NormalizedEvent | null
     .single()
 
   if (error || !data) return null
-  return normalizeRow(data as RawEventRow)
+  const row = data as RawEventRow
+  const evt = normalizeRow(row)
+  if (!evt) return null
+
+  // Fetch submitter handle for community events
+  if (row.source === 'community' && row.submitted_by) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('handle')
+      .eq('id', row.submitted_by)
+      .single()
+    if (profile?.handle) evt.submitterHandle = profile.handle
+  }
+
+  return evt
 }
 
 // ─── Row → NormalizedEvent ────────────────────────────────────────────────────
@@ -682,8 +699,9 @@ function normalizeRow(row: RawEventRow): NormalizedEvent | null {
     }
     // Pass through DB columns
     if (evt) {
-      evt.neighborhood = row.neighborhood ?? null
-      evt.venueSlug    = row.venue_slug   ?? null
+      evt.neighborhood    = row.neighborhood  ?? null
+      evt.venueSlug       = row.venue_slug    ?? null
+      evt.submitterHandle = null  // populated in fetchEventById for community events
       // Use denormalized DB category when available (consistent with DB filtering).
       // The backfill in migration add_denormalized_category_venue_columns already
       // incorporates both the code classifier and AI enrichment overrides.
@@ -756,7 +774,7 @@ function normalizeTM(row: RawEventRow): NormalizedEvent {
     ticketUrl: (r.url as string | undefined) ?? null,
     source: 'ticketmaster',
     isFeatured: row.featured ?? false,
-    neighborhood: null, venueSlug: null,
+    neighborhood: null, venueSlug: null, submitterHandle: null,
     about: null, highlights: [], venueTips: null, localTips: null,
   }
 }
@@ -802,7 +820,7 @@ function normalizeEB(row: RawEventRow): NormalizedEvent {
     ticketUrl: (r.url as string | undefined) ?? null,
     source: 'eventbrite',
     isFeatured: row.featured ?? false,
-    neighborhood: null, venueSlug: null,
+    neighborhood: null, venueSlug: null, submitterHandle: null,
     about: null, highlights: [], venueTips: null, localTips: null,
   }
 }
@@ -858,7 +876,7 @@ function normalizeSG(row: RawEventRow): NormalizedEvent {
     ticketUrl: (r.url as string | undefined) ?? null,
     source: 'seatgeek',
     isFeatured: row.featured ?? false,
-    neighborhood: null, venueSlug: null,
+    neighborhood: null, venueSlug: null, submitterHandle: null,
     about: null, highlights: [], venueTips: null, localTips: null,
   }
 }
@@ -887,7 +905,7 @@ function normalizeBIT(row: RawEventRow): NormalizedEvent {
     ticketUrl: (r.url as string | undefined) ?? null,
     source: 'bandsintown',
     isFeatured: row.featured ?? false,
-    neighborhood: null, venueSlug: null,
+    neighborhood: null, venueSlug: null, submitterHandle: null,
     about: null, highlights: [], venueTips: null, localTips: null,
   }
 }
@@ -914,7 +932,7 @@ function normalizeLocal(row: RawEventRow): NormalizedEvent {
     ticketUrl: (r.url as string | undefined) ?? (r.ticket_url as string | undefined) ?? null,
     source: row.source,
     isFeatured: row.featured ?? false,
-    neighborhood: null, venueSlug: null,
+    neighborhood: null, venueSlug: null, submitterHandle: null,
     about: null, highlights: [], venueTips: null, localTips: null,
   }
 }
@@ -937,7 +955,7 @@ function normalizeGeneric(row: RawEventRow): NormalizedEvent {
     ticketUrl: (r.url as string | undefined) ?? null,
     source: row.source,
     isFeatured: row.featured ?? false,
-    neighborhood: null, venueSlug: null,
+    neighborhood: null, venueSlug: null, submitterHandle: null,
     about: null, highlights: [], venueTips: null, localTips: null,
   }
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -18,8 +19,16 @@ const OPTIONS: { value: Category; label: string; icon: typeof Flag; blurb: strin
   { value: 'general',         label: 'Something else',    icon: MessageSquare, blurb: 'General questions or feedback' },
 ]
 
+const VALID_CATEGORIES: Category[] = ['event_report', 'event_idea', 'site_suggestion', 'bug_report', 'general']
+
 export default function FeedbackPage() {
-  const [category, setCategory] = useState<Category | null>(null)
+  const searchParams = useSearchParams()
+  const presetCategory = searchParams.get('category') as Category | null
+  const presetEventId  = searchParams.get('event_id') ?? null
+
+  const [category, setCategory] = useState<Category | null>(
+    presetCategory && VALID_CATEGORIES.includes(presetCategory) ? presetCategory : null
+  )
   const [subject,  setSubject]  = useState('')
   const [message,  setMessage]  = useState('')
   const [email,    setEmail]    = useState('')
@@ -51,6 +60,7 @@ export default function FeedbackPage() {
           subject:       subject.trim() || null,
           message:       message.trim(),
           contact_email: userEmail ?? email.trim() ?? null,
+          event_id:      presetEventId ?? undefined,
         }),
       })
       const data = await res.json()
@@ -111,6 +121,14 @@ export default function FeedbackPage() {
           <p className="text-sm text-[#8a7a74]">
             Every message lands in our inbox and gets read. Bugs, ideas, event reports — all welcome.
           </p>
+          {presetEventId && (
+            <div className="mt-3 flex items-center gap-2 bg-[#9a442d]/8 border border-[#9a442d]/20 rounded-xl px-3 py-2">
+              <Flag className="w-3.5 h-3.5 text-[#9a442d] flex-shrink-0" />
+              <p className="text-[11px] text-[#4a3f3a]">
+                Reporting about event <Link href={`/events/${presetEventId}`} className="text-[#9a442d] underline">#{presetEventId.slice(0,8)}…</Link>
+              </p>
+            </div>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

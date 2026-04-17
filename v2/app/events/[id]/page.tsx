@@ -6,11 +6,10 @@ import { buildBreadcrumbs } from '@/lib/seo'
 import { venueToSlug } from '@/app/venues/[slug]/page'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { createClient } from '@/lib/supabase/server'
-import { MapPin, Clock, Calendar, Ticket, ArrowLeft, ExternalLink, Users } from 'lucide-react'
+import { MapPin, Clock, Calendar, Ticket, ArrowLeft, ExternalLink, Users, Flag } from 'lucide-react'
 import ShareButton from './ShareButton'
 import AddToCalendar from './AddToCalendar'
 import { AnimateIn } from '@/app/components/AnimateIn'
-import { ReportForm } from '@/app/components/ReportForm'
 import { SaveEventButton } from '@/app/components/SaveEventButton'
 import { ReviewSection } from '@/app/components/ReviewSection'
 import { CheckInButton } from '@/app/components/CheckInButton'
@@ -436,7 +435,9 @@ export default async function EventDetailPage({ params }: PageProps) {
             <div className="flex-1 min-w-0">
               <p className="text-[11px] font-bold text-[#006a62] uppercase tracking-wider">Community event</p>
               <p className="text-[11px] text-[#4a3f3a]">
-                Submitted by a member of the ABQ Unplugged community
+                {event.submitterHandle
+                  ? <>Submitted by <span className="font-semibold text-[#006a62]">@{event.submitterHandle}</span></>
+                  : 'Submitted by a member of the ABQ Unplugged community'}
               </p>
             </div>
           </div>
@@ -447,7 +448,13 @@ export default async function EventDetailPage({ params }: PageProps) {
           <p className="text-[10px] text-[#8a7a74]">
             Source: {event.source === 'community' ? 'Community submission' : event.source.charAt(0).toUpperCase() + event.source.slice(1)}
           </p>
-          <ReportForm eventId={event.id} eventTitle={event.title} />
+          <Link
+            href={`/feedback?category=event_report&event_id=${event.id}`}
+            className="inline-flex items-center gap-1.5 text-xs text-[#8a7a74] hover:text-[#9a442d] transition-colors py-1"
+          >
+            <Flag className="w-3 h-3" />
+            Report an issue
+          </Link>
         </div>
 
         {/* Reviews */}
