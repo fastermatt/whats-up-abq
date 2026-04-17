@@ -3,6 +3,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { Bookmark, MapPin, Calendar, ExternalLink, ArrowLeft, User } from 'lucide-react'
+import { ConnectionQuote } from '@/app/components/ConnectionQuote'
 
 export const metadata: Metadata = {
   title: 'Saved Events | ABQ Unplugged',
@@ -37,7 +38,7 @@ export default async function SavedPage({ searchParams }: PageProps) {
         <h1 className="text-2xl font-black text-[#1a1614] mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
           Saved Events
         </h1>
-        <p className="text-sm text-[#8a7a74] mb-6">Sign in to save events and track where you're going.</p>
+        <p className="text-sm text-[#8a7a74] mb-6">Sign in to save events and track where you&apos;re going. The best ones come with a plan and a person.</p>
         <Link
           href="/login"
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#9a442d] text-white font-semibold text-sm hover:bg-[#7d3725] transition-all"
@@ -126,11 +127,14 @@ export default async function SavedPage({ searchParams }: PageProps) {
             <p className="text-xs text-[#8a7a74] mb-4">
               {activeTab === 'past'
                 ? 'Events you attend will appear here.'
-                : 'Save events from any event page to track them here.'}
+                : 'Save events from any event page to track them here. The best ones come with a plan and a person.'}
             </p>
             <Link href="/events" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#9a442d] text-white text-xs font-semibold hover:bg-[#7d3725] transition-colors">
               Browse events
             </Link>
+            <div className="mt-8 max-w-xs mx-auto">
+              <ConnectionQuote size="sm" />
+            </div>
           </div>
         ) : (
           <div className="space-y-3 animate-fade-up">

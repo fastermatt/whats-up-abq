@@ -6,6 +6,7 @@ import { MapPin, ArrowRight } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
 import MoodChips from '@/app/components/MoodChips'
 import SurpriseButton from '@/app/components/SurpriseButton'
+import { ConnectionQuote } from '@/app/components/ConnectionQuote'
 
 export const revalidate = 60
 
@@ -139,6 +140,11 @@ export default async function DiscoverPage() {
           </div>
         </div>
       </section>
+
+      {/* ── Ambient daily quote — soft, unpressured ── */}
+      <div className="max-w-6xl mx-auto px-4 py-3 text-center">
+        <ConnectionQuote size="sm" />
+      </div>
 
       {/* ── Category quick links ── */}
       <section className="py-4 border-b border-[#f0e4cc]/60 animate-fade-in">
@@ -327,14 +333,17 @@ export default async function DiscoverPage() {
           >
             ABQ Unplugged
           </p>
-          <p className="text-xs text-[#8a7a74] mb-4">Every event in Albuquerque, one place</p>
+          <p className="text-xs text-[#8a7a74] mb-1">Every event in Albuquerque, one place</p>
+          <div className="mb-4 max-w-md mx-auto">
+            <ConnectionQuote size="sm" />
+          </div>
           <nav className="flex items-center justify-center gap-4 flex-wrap">
             {[
               { href: '/events',               label: 'All Events' },
               { href: '/events?time=tonight',  label: 'Tonight' },
               { href: '/events?time=this-weekend', label: 'This Weekend' },
               { href: '/neighborhoods',        label: 'Neighborhoods' },
-              { href: '/submit',               label: 'Submit Event' },
+              { href: '/submit',               label: 'Share an event' },
               { href: '/feedback',             label: 'Feedback' },
               { href: '/about',                label: 'About' },
             ].map(({ href, label }) => (
