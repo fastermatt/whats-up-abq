@@ -5,6 +5,7 @@ import { fetchEvents, fetchCategoryCounts, fetchEventCountsByDate, NormalizedEve
 import { OG_IMAGE } from '@/lib/fallback-images'
 import { TimeFilter } from '@/lib/utils/dates'
 import { getCategoryFallback } from '@/lib/fallback-images'
+import { EventImage } from '@/app/components/EventImage'
 import { FilterBar } from './FilterBar'
 import { SearchBar } from './SearchBar'
 import { CalendarPicker } from './CalendarPicker'
@@ -233,9 +234,9 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
     >
       {/* Landscape image — 16:10 ratio for a nice rectangle */}
       <div className="relative aspect-[16/10] bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <EventImage
           src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
+          fallback={getCategoryFallback(event.category ?? undefined, event.id)}
           alt=""
           loading="lazy"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"

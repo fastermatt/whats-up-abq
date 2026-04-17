@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { fetchEvents } from '@/lib/events'
 import { buildBreadcrumbs } from '@/lib/seo'
 import { getCategoryFallback } from '@/lib/fallback-images'
+import { EventImage } from '@/app/components/EventImage'
 import { MapPin, Calendar, ArrowLeft, ExternalLink, Tag } from 'lucide-react'
 
 export const revalidate = 3600
@@ -175,9 +176,12 @@ export default async function CategoryPage({ params }: PageProps) {
               <Link key={event.id} href={`/events/${event.id}`}
                 className="group flex gap-3 bg-white rounded-xl border border-[#f0e4cc] p-3 shadow-sm hover:shadow-md transition-all">
                 <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-[#f0e4cc]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)} alt={event.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <EventImage
+                    src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
+                    fallback={getCategoryFallback(event.category ?? undefined, event.id)}
+                    alt={event.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
                 </div>
                 <div className="flex-1 min-w-0 flex flex-col justify-between">
                   <div>

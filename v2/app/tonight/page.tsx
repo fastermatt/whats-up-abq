@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Clock, MapPin } from 'lucide-react'
 import { fetchTonightRanked, NormalizedEvent } from '@/lib/events'
 import { getCategoryFallback } from '@/lib/fallback-images'
+import { EventImage } from '@/app/components/EventImage'
 
 export const revalidate = 60
 
@@ -142,9 +143,9 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
       style={{ '--card-i': Math.min(index, 14) } as React.CSSProperties}
     >
       <div className="relative aspect-[16/10] bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <EventImage
           src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
+          fallback={getCategoryFallback(event.category ?? undefined, event.id)}
           alt=""
           loading="lazy"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"

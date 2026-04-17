@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { fetchEventsByVenue, fetchTopVenues, neighborhoodToSlug } from '@/lib/events'
 import { buildBreadcrumbs } from '@/lib/seo'
 import { getCategoryFallback } from '@/lib/fallback-images'
+import { EventImage } from '@/app/components/EventImage'
 import { MapPin, Calendar, ArrowLeft, ExternalLink, Ticket } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
 
@@ -271,9 +272,9 @@ export default async function VenuePage({ params }: PageProps) {
                   >
                     {/* Thumbnail */}
                     <div className="w-[72px] h-[72px] rounded-lg overflow-hidden flex-shrink-0 bg-[#f0e4cc]">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                      <EventImage
                         src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
+                        fallback={getCategoryFallback(event.category ?? undefined, event.id)}
                         alt={event.title}
                         loading="lazy"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"

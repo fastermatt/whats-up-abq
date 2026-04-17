@@ -244,6 +244,43 @@ async function main() {
   const existingIds = new Set((existing ?? []).map(e => e.id))
   console.log(`  ${existingIds.size} existing SeatGeek events in DB`)
 
+  // ── Guard: detect and suppress legacy V1 duplicates ─────────────────────────
+  // The old fetch-data.cjs used id format `seatgeek_sg-{numeric}`, which created
+  // duplicate rows alongside the correct `seatgeek_{numeric}` rows from this importer.
+  // Find any surviving `seatgeek_sg-*` rows and mark them hidden so they don't surface.
+  if (!isDryRun) {
+    const { data: legacyRows } = await supabase
+      .schema('public')
+      .from('events')
+      .select('id, ai_enrichment')
+      .eq('source', 'seatgeek')
+      .like('id', 'seatgeek_sg-%')
+    const legacyList = legacyRows ?? []
+    if (legacyList.length > 0) {
+      console.log(`  ⚠️  Found ${legacyList.length} legacy seatgeek_sg-* rows — marking hidden`)
+      let suppressed = 0
+      for (const row of legacyList) {
+        const merged = {
+          ...(row.ai_enrichment ?? {}),
+          dedup_reason: 'superseded by seatgeek_{numeric} V2 importer',
+        }
+        const { error: dedupError } = await supabase
+          .schema('public')
+          .from('events')
+          .update({ hidden: true, ai_enrichment: merged })
+          .eq('id', row.id)
+        if (dedupError) {
+          console.warn(`    ⚠️  Could not suppress ${row.id}: ${dedupError.message}`)
+        } else {
+          suppressed++
+        }
+      }
+      console.log(`  ✅ Suppressed ${suppressed} legacy duplicate rows`)
+    } else {
+      console.log(`  ✅ No legacy seatgeek_sg-* duplicates found`)
+    }
+  }
+
   const toProcess = upcoming.slice(0, perRunLimit)
   console.log(`  Processing ${toProcess.length} events\n`)
 

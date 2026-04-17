@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { fetchEvents, fetchRecentlyAdded, fetchFeaturedEvents, fetchNeighborhoodCounts, NormalizedEvent } from '@/lib/events'
 import { getHeroImage, getCategoryFallback, OG_IMAGE } from '@/lib/fallback-images'
+import { EventImage } from '@/app/components/EventImage'
 import { MapPin, ArrowRight } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
 import MoodChips from '@/app/components/MoodChips'
@@ -467,9 +468,9 @@ function HorizontalCard({
     >
       {/* Landscape image */}
       <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] mb-1.5 shadow-sm group-hover:shadow-md transition-shadow duration-300">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <EventImage
           src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
+          fallback={getCategoryFallback(event.category ?? undefined, event.id)}
           alt={event.title}
           loading="lazy"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
@@ -533,9 +534,9 @@ function FeaturedCard({ event }: { event: NormalizedEvent }) {
     >
       {/* Landscape 16:10 — matches every other card on the site */}
       <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] mb-2 shadow-md group-hover:shadow-lg transition-shadow duration-300">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <EventImage
           src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
+          fallback={getCategoryFallback(event.category ?? undefined, event.id)}
           alt={event.title}
           loading="lazy"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"

@@ -644,7 +644,13 @@ async function main() {
     sgEvents = rawSg.map(transformSeatGeekEvent);
     const sgPath = path.join(__dirname, '..', 'public', 'data', 'seatgeek-events.json');
     fs.writeFileSync(sgPath, JSON.stringify(sgEvents, null, 2));
-  await _upsertEvents('seatgeek', Array.isArray(sgEvents) ? sgEvents : (sgEvents.events||[]));
+  // SeatGeek Supabase upsert is intentionally disabled here.
+  // v2/scripts/import-seatgeek.mjs is the authoritative importer -- it writes
+  // id format `seatgeek_{numeric}` with venue_name populated.
+  // This legacy script used id format `seatgeek_sg-{numeric}`, which caused
+  // duplicate rows in public.events. The JSON file write above is kept so
+  // refresh-events.yml can still commit the static JSON to the repo.
+  // await _upsertEvents('seatgeek', Array.isArray(sgEvents) ? sgEvents : (sgEvents.events||[]));
     if (SG_CLIENT_ID) console.log(`\nÃ¢ÂÂ Saved ${sgEvents.length} events Ã¢ÂÂ public/data/seatgeek-events.json`);
     else fs.writeFileSync(sgPath, '[]');
   } catch (e) {

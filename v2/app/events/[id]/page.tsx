@@ -5,6 +5,7 @@ import { fetchEventById, fetchEvents, neighborhoodToSlug } from '@/lib/events'
 import { buildBreadcrumbs } from '@/lib/seo'
 import { venueToSlug } from '@/app/venues/[slug]/page'
 import { getCategoryFallback } from '@/lib/fallback-images'
+import { EventImage } from '@/app/components/EventImage'
 import { createClient } from '@/lib/supabase/server'
 import { MapPin, Clock, Calendar, Ticket, ArrowLeft, ExternalLink, Users, Flag } from 'lucide-react'
 import ShareButton from './ShareButton'
@@ -207,9 +208,9 @@ export default async function EventDetailPage({ params }: PageProps) {
       <article className="max-w-3xl mx-auto px-4 py-6 animate-fade-up">
         {/* Hero image — always shown (falls back to category illustration) */}
         <div className="relative aspect-[2/1] rounded-2xl overflow-hidden mb-6 shadow-lg">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <EventImage
             src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
+            fallback={getCategoryFallback(event.category ?? undefined, event.id)}
             alt={event.title}
             className="w-full h-full object-cover"
           />
@@ -528,9 +529,9 @@ async function SimilarEvents({ eventId, category }: { eventId: string; category:
               className="group"
             >
               <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] mb-1.5 shadow-sm group-hover:shadow-md transition-shadow">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <EventImage
                   src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
+                  fallback={getCategoryFallback(event.category ?? undefined, event.id)}
                   alt={event.title}
                   loading="lazy"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

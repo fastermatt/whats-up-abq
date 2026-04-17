@@ -3,6 +3,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { fetchEventsByNeighborhood, neighborhoodToSlug } from '@/lib/events'
 import { getCategoryFallback } from '@/lib/fallback-images'
+import { EventImage } from '@/app/components/EventImage'
 import { MapPin, Calendar, ArrowLeft, ExternalLink, Map } from 'lucide-react'
 
 export const revalidate = 3600
@@ -181,9 +182,9 @@ export default async function NeighborhoodPage({ params }: PageProps) {
               >
                 {/* Thumbnail */}
                 <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-[#f0e4cc]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <EventImage
                     src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
+                    fallback={getCategoryFallback(event.category ?? undefined, event.id)}
                     alt=""
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
