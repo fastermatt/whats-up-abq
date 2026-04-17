@@ -438,6 +438,42 @@ export async function fetchEventsByVenue(venueName: string, limit = 20): Promise
     .filter((e): e is NormalizedEvent => e !== null)
 }
 
+/** Return top venues by upcoming event count — used for generateStaticParams pre-rendering.
+ *  Uses a cookie-free Supabase client so it works at build time. */
+export async function fetchTopVenues(limit = 60): Promise<{ venueName: string; count: number }[]> {
+  // Use a simple fetch-based client to avoid cookies() which is unavailable at build time
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://bsmvfutebmbkjvlrhiyq.supabase.co'
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
+  const today = new Date().toISOString().slice(0, 10)
+
+  const endpoint =
+    `${url}/rest/v1/events?select=venue_name&hidden=eq.false&event_date=gte.${today}&venue_name=not.is.null&limit=5000`
+
+  const res = await fetch(endpoint, {
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      'Content-Type': 'application/json',
+    },
+    next: { revalidate: 3600 },
+  })
+
+  if (!res.ok) return []
+
+  const data = (await res.json()) as { venue_name: string }[]
+
+  // Count by venue name in-memory
+  const counts: Record<string, number> = {}
+  for (const row of data) {
+    if (row.venue_name) counts[row.venue_name] = (counts[row.venue_name] ?? 0) + 1
+  }
+
+  return Object.entries(counts)
+    .map(([venueName, count]) => ({ venueName, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit)
+}
+
 /** Fetch recently added upcoming events (newest ingestion first). */
 export async function fetchRecentlyAdded(limit = 10): Promise<NormalizedEvent[]> {
   const supabase = await createClient()

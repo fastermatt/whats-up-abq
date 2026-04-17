@@ -4,6 +4,7 @@ import Script from 'next/script'
 import BottomNav from './components/BottomNav'
 import DesktopNav from './components/DesktopNav'
 import { InstallPrompt } from './components/InstallPrompt'
+import { OG_IMAGE } from '@/lib/fallback-images'
 import './globals.css'
 
 const epilogue = Epilogue({
@@ -42,7 +43,7 @@ export const metadata: Metadata = {
     locale:      'en_US',
     images: [
       {
-        url: 'https://cdn.midjourney.com/fb77c641/0_0.jpeg',
+        url: OG_IMAGE,
         width: 1200,
         height: 630,
         alt: 'ABQ Unplugged — Events in Albuquerque, NM',

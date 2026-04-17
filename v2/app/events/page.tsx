@@ -262,7 +262,7 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
       {/* Info section — compact and clean */}
       <div className="p-2 space-y-0.5 flex-1 flex flex-col">
         <h3
-          className="font-bold text-[#1a1614] text-[11px] leading-tight line-clamp-2 group-hover:text-[#9a442d] transition-colors"
+          className="font-bold text-[#1a1614] text-xs leading-tight line-clamp-2 group-hover:text-[#9a442d] transition-colors"
           style={{ fontFamily: 'var(--font-epilogue)' }}
         >
           {event.title}

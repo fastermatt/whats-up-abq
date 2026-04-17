@@ -28,6 +28,7 @@ export default function SurpriseButton() {
         'motion-reduce:transition-none motion-reduce:active:scale-100',
         'disabled:opacity-70 disabled:cursor-wait',
         'shadow-sm hover:shadow-md hover:shadow-[#9a442d]/25',
+        loading ? '' : 'animate-pulse-glow',
       ].join(' ')}
     >
       <Shuffle

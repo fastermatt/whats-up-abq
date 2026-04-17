@@ -247,6 +247,49 @@ body {
   }
 }
 
+/* ─── Pulse glow — used on primary CTAs (Surprise Me button) ─────────── */
+/* A subtle ring that expands and fades, drawing the eye to the button.   */
+@keyframes pulse-glow {
+  0%   { box-shadow: 0 0 0 0 rgba(154, 68, 45, 0.5); }
+  70%  { box-shadow: 0 0 0 10px rgba(154, 68, 45, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(154, 68, 45, 0); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2.4s ease-out 1.2s 3;
+}
+
+/* ─── Float — subtle up/down for hero elements ────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-4px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* ─── Shimmer highlight — sweeps across an element once on load ───────── */
+@keyframes shimmer-once {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* ─── Number count-up feel — pairs with JS counter or just fast fade ──── */
+.animate-number {
+  animation: fadeUp 0.4s ease-out both;
+}
+
+/* ─── Image reveal — expands from center, used on hero ───────────────── */
+@keyframes revealScale {
+  from { transform: scale(1.08); opacity: 0.7; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+.animate-reveal-scale {
+  animation: revealScale 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 /* ─── Reduced motion — respect user preference ───────────────────────── */
 /* Spring cards are handled above. Transition-based animations obey this. */
 @media (prefers-reduced-motion: reduce) {
@@ -255,7 +298,10 @@ body {
   .animate-fade-up-delay,
   .animate-slide-down,
   .animate-hero-text,
-  .animate-section-in {
+  .animate-section-in,
+  .animate-pulse-glow,
+  .animate-float,
+  .animate-reveal-scale {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;

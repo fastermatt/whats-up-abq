@@ -66,16 +66,16 @@ const today = new Date().toISOString().slice(0, 10)
 // Applied in order; first match wins.
 const RULES = [
   // Downtown (includes Harwood which is 7th St NW, very close to downtown)
-  [/\b(sunshine theater|launchpad|el rey|kimo|century downtown|civic plaza|albuquerque civic|convention center|hotel andaluz|strand|downtown|(main library.*downtown)|special collections library|black cat cultural|african american performing arts|casa de benavidez|the grove|harwood art center|harwood|juno brewery|juno.*cafe|cathedral.*john|st.*john.*cathedral|african american performing|albuquerque social club.*central|robinson park)\b/i, 'Downtown'],
+  [/\b(sunshine theater|launchpad|el rey|kimo|century downtown|civic plaza|albuquerque civic|convention center|hotel andaluz|strand|downtown|(main library.*downtown)|special collections library|black cat cultural|african american performing arts|casa de benavidez|the grove|harwood art center|harwood|juno brewery|juno.*cafe|cathedral.*john|st.*john.*cathedral|african american performing|albuquerque social club.*central|robinson park|marquette ave|the block|groove artspace|red door bar|500 marquette|hla conference)\b/i, 'Downtown'],
 
   // Downtown / EDo
-  [/\b(edo|east downtown)\b/i, 'Downtown / EDo'],
+  [/\b(edo|east downtown|sister.*bar|the jam spot)\b/i, 'Downtown / EDo'],
 
   // Barelas / South Downtown
-  [/\b(barelas|barela|national hispanic cultural|nhcc|south downtown|second chance|lobo rainforest|wesst.*broadway|rainforest innovation)\b/i, 'Barelas / South Downtown'],
+  [/\b(barelas|barela|national hispanic cultural|nhcc|south downtown|second chance|lobo rainforest|wesst.*broadway|rainforest innovation|roy.*disney|disney.*performing|salon ortega|sal.n ortega|disney center)\b/i, 'Barelas / South Downtown'],
 
   // UNM Campus (before nob-hill so "lobo" → UNM not nob-hill)
-  [/\b(popejoy|keller hall|university arena|johnson center|domenici auditorium|unm north campus|unm continuing ed|stanford dr|yale blvd|cornell drive|university of new mexico campus|loma linda community center|kiva lecture hall|1920 yale)\b/i, 'UNM Campus'],
+  [/\b(popejoy|keller hall|university arena|johnson center|domenici|unm north campus|unm continuing ed|stanford dr|yale blvd|cornell drive|university of new mexico campus|loma linda community center|kiva lecture hall|1920 yale|university stadium|visual art museum|unm art)\b/i, 'UNM Campus'],
 
   // UNM / Nob Hill
   [/\b(nob hill|lobo theater|historic lobo|effex|anodyne|tractor brewery|flying star|ernie pyle library|erna fergusson|girard blvd)\b/i, 'UNM / Nob Hill'],
@@ -87,22 +87,22 @@ const RULES = [
   [/\b(albuquerque school of healing arts|copper ave|outpost performance|4600 copper|albuquerque social club)\b/i, 'South I-25 / University SE'],
 
   // State Fairgrounds / Midtown
-  [/\b(state fairground|expo new mexico|the pit|midtown.*arena|isotopes|4801 lang|2448 menaul|menaul blvd|urban 360)\b/i, 'State Fairgrounds / Midtown'],
+  [/\b(state fairground|expo new mexico|the pit|midtown.*arena|isotopes|4801 lang|2448 menaul|menaul blvd|urban 360|tingley coliseum|chupacabras)\b/i, 'State Fairgrounds / Midtown'],
 
   // Uptown / Midtown (San Mateo, Louisiana, Wyoming corridors)
-  [/\b(uptown|louisiana blvd|coronado center|san mateo blvd|albuquerque marriott|wyoming.*menaul)\b/i, 'Uptown / Midtown'],
+  [/\b(uptown|louisiana blvd|coronado center|san mateo blvd|albuquerque marriott|wyoming.*menaul|san mateo pl|san mateo place)\b/i, 'Uptown / Midtown'],
 
   // Far Northeast / Sandia Foothills
-  [/\b(sandia foothills|tramway blvd|elena gallegos|balloon fiesta|fiesta pkwy|foothills|far northeast|high desert|tony hillerman library|roadrunner food bank|office blvd)\b/i, 'Far Northeast / Sandia Foothills'],
+  [/\b(sandia foothills|tramway blvd|elena gallegos|balloon fiesta|fiesta pkwy|foothills|far northeast|high desert|tony hillerman library|roadrunner food bank|office blvd|sandia casino|sandia amphitheater)\b/i, 'Far Northeast / Sandia Foothills'],
 
   // Northeast Heights (Juan Tabo, Eubank, Academy, Comanche corridor)
-  [/\b(juan tabo|lomas tramway|cherry hills.*library|taylor ranch|montgomery blvd|sandia labs|kirtland|eubank blvd|academy blvd|comanche|adobe theater|creativity warehouse|story quest|overtime sports|unity spiritual|nexus brewery|heartstrings|holiday park|san pedro.*library|csp dance|ymca.*comanche)\b/i, 'Northeast Heights'],
+  [/\b(juan tabo|lomas tramway|cherry hills.*library|taylor ranch|montgomery blvd|sandia labs|kirtland|eubank blvd|academy blvd|comanche|adobe theater|creativity warehouse|story quest|overtime sports|unity spiritual|nexus brewery|heartstrings|holiday park|san pedro.*library|csp dance|ymca.*comanche|horn ymca|hb.*ymca)\b/i, 'Northeast Heights'],
 
   // North Valley / Los Ranchos
   [/\b(north valley|los ranchos|rudolfo anaya|los griegos|alameda blvd|los duranes|corrales|rio grande.*north)\b/i, 'North Valley'],
 
   // Old Town (Mountain Rd, Rio Grande Blvd NW, museums)
-  [/\b(old town|biopark|aquarium|botanic garden|tingley beach|rio grande nature|museum of natural history|albuquerque museum|indian pueblo cultural|rio grande blvd|mountain road|mountain rd|raindrop foundation|4920 rio grande)\b/i, 'Old Town'],
+  [/\b(old town|biopark|aquarium|botanic garden|tingley beach|rio grande nature|museum of natural history|albuquerque museum|indian pueblo cultural|rio grande blvd|mountain road|mountain rd|raindrop foundation|4920 rio grande|arrive albuquerque|arrive hotel)\b/i, 'Old Town'],
 
   // Rio Rancho / Sandoval County
   [/\b(rio rancho|sandoval|santa ana star|hyatt regency.*tamaya|rust medical|hilton.*rio rancho|cafe.*rio rancho boulevard|castle coffee.*rio rancho)\b/i, 'Rio Rancho'],

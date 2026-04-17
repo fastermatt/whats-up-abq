@@ -86,10 +86,10 @@ export default async function DiscoverPage() {
         <img
           src={getHeroImage()}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover animate-reveal-scale"
         />
-        {/* Dark overlay for text legibility */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#9a442d]/85 via-[#7d3725]/80 to-[#5a2416]/85" />
+        {/* Dark overlay — directional so the image shows through at bottom */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#7d3725]/80 via-[#9a442d]/70 to-[#5a2416]/60" />
         {/* Subtle texture */}
         <div className="absolute inset-0 opacity-[0.07] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMS41IiBmaWxsPSIjZmZmIi8+PC9zdmc+')] animate-fade-in" />
 
@@ -141,9 +141,10 @@ export default async function DiscoverPage() {
       </section>
 
       {/* ── Category quick links ── */}
-      <section className="py-4 border-b border-[#f0e4cc]/60">
+      <section className="py-4 border-b border-[#f0e4cc]/60 animate-fade-in">
+        <div className="overflow-x-auto scrollbar-hide">
         <div
-          className="flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-hide"
+          className="flex gap-2 px-4 pb-1 scroll-hint-inner"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {[
@@ -168,6 +169,7 @@ export default async function DiscoverPage() {
             </Link>
           ))}
         </div>
+        </div>
       </section>
 
       {/* ── Mood chips ── */}
@@ -179,7 +181,9 @@ export default async function DiscoverPage() {
           <section className="py-6">
             <div className="max-w-6xl mx-auto px-4 flex items-end justify-between mb-3">
               <div>
-                <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] mb-0.5 font-semibold">Editor&apos;s picks</p>
+                <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] mb-0.5 font-semibold flex items-center gap-1">
+                  <span>★</span> Editor&apos;s picks
+                </p>
                 <h2
                   className="text-xl font-black text-[#1a1614]"
                   style={{ fontFamily: 'var(--font-epilogue)' }}
@@ -196,13 +200,15 @@ export default async function DiscoverPage() {
               </Link>
             </div>
 
-            <div
-              className="flex gap-3 overflow-x-auto px-4 pb-2 snap-x snap-mandatory scrollbar-hide"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-              {featured.map((event) => (
-                <FeaturedCard key={event.id} event={event} />
-              ))}
+            <div className="overflow-x-auto scrollbar-hide">
+              <div
+                className="flex gap-3 px-4 pb-2 snap-x snap-mandatory scroll-hint-inner"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {featured.map((event) => (
+                  <FeaturedCard key={event.id} event={event} />
+                ))}
+              </div>
             </div>
           </section>
         </AnimateIn>
@@ -312,14 +318,34 @@ export default async function DiscoverPage() {
       </AnimateIn>
 
       {/* ── Footer ── */}
-      <footer className="border-t border-[#f0e4cc] py-8 text-center">
-        <p
-          className="text-sm font-bold text-[#1a1614] mb-1"
-          style={{ fontFamily: 'var(--font-epilogue)' }}
-        >
-          ABQ Unplugged
-        </p>
-        <p className="text-xs text-[#8a7a74]">Every event in Albuquerque, one place</p>
+      <footer className="border-t border-[#f0e4cc] py-8">
+        <div className="max-w-6xl mx-auto px-4 text-center">
+          <p
+            className="text-sm font-bold text-[#1a1614] mb-1"
+            style={{ fontFamily: 'var(--font-epilogue)' }}
+          >
+            ABQ Unplugged
+          </p>
+          <p className="text-xs text-[#8a7a74] mb-4">Every event in Albuquerque, one place</p>
+          <nav className="flex items-center justify-center gap-4 flex-wrap">
+            {[
+              { href: '/events',               label: 'All Events' },
+              { href: '/events?time=tonight',  label: 'Tonight' },
+              { href: '/events?time=this-weekend', label: 'This Weekend' },
+              { href: '/neighborhoods',        label: 'Neighborhoods' },
+              { href: '/about',                label: 'About' },
+            ].map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className="text-xs text-[#8a7a74] hover:text-[#9a442d] transition-colors"
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
+          <p className="text-[10px] text-[#8a7a74]/60 mt-5">© {new Date().getFullYear()} ABQ Unplugged · Albuquerque, NM</p>
+        </div>
       </footer>
     </main>
   )
@@ -347,6 +373,14 @@ function QuickStat({ label, count, href }: { label: string; count: number; href:
 
 // ─── Horizontal Scrolling Event Section ─────────────────────────────────────
 
+// Section accent colors — each section gets a distinct accent to break monotony
+const SECTION_ACCENTS: Record<string, string> = {
+  Tonight:    '#006a62', // turquoise
+  Tomorrow:   '#4f6249', // sage
+  'This Weekend': '#9a442d', // terra
+  New:        '#8a7a74', // ink-light
+}
+
 function EventSection({
   title,
   subtitle,
@@ -360,11 +394,18 @@ function EventSection({
   seeAllHref: string
   sectionLabel: string
 }) {
+  const accentColor = SECTION_ACCENTS[sectionLabel] ?? '#8a7a74'
+
   return (
     <section className="py-6">
       <div className="max-w-6xl mx-auto px-4 flex items-end justify-between mb-3">
         <div>
-          <p className="text-[10px] uppercase tracking-[0.15em] text-[#8a7a74] mb-0.5">{subtitle}</p>
+          <p
+            className="text-[10px] uppercase tracking-[0.15em] mb-0.5 font-semibold"
+            style={{ color: accentColor }}
+          >
+            {subtitle}
+          </p>
           <h2
             className="text-xl font-black text-[#1a1614]"
             style={{ fontFamily: 'var(--font-epilogue)' }}
@@ -381,13 +422,15 @@ function EventSection({
         </Link>
       </div>
 
-      <div
-        className="flex gap-3 overflow-x-auto px-4 pb-2 snap-x snap-mandatory scrollbar-hide"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        {events.map((event) => (
-          <HorizontalCard key={event.id} event={event} sectionLabel={sectionLabel} />
-        ))}
+      <div className="overflow-x-auto scrollbar-hide">
+        <div
+          className="flex gap-3 px-4 pb-2 snap-x snap-mandatory scroll-hint-inner"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {events.map((event) => (
+            <HorizontalCard key={event.id} event={event} sectionLabel={sectionLabel} />
+          ))}
+        </div>
       </div>
     </section>
   )
@@ -446,7 +489,7 @@ function HorizontalCard({
 
       {/* Info */}
       <h4
-        className="font-bold text-[#1a1614] text-[11px] leading-tight line-clamp-2 mb-0.5 group-hover:text-[#9a442d] transition-colors"
+        className="font-bold text-[#1a1614] text-xs leading-tight line-clamp-2 mb-0.5 group-hover:text-[#9a442d] transition-colors"
         style={{ fontFamily: 'var(--font-epilogue)' }}
       >
         {event.title}
@@ -503,7 +546,7 @@ function FeaturedCard({ event }: { event: NormalizedEvent }) {
         )}
       </div>
       <h4
-        className="font-bold text-[#1a1614] text-[11px] leading-tight line-clamp-2 mb-0.5 group-hover:text-[#9a442d] transition-colors"
+        className="font-bold text-[#1a1614] text-xs leading-tight line-clamp-2 mb-0.5 group-hover:text-[#9a442d] transition-colors"
         style={{ fontFamily: 'var(--font-epilogue)' }}
       >
         {event.title}
