@@ -243,15 +243,29 @@ status = "verified" when the source page clearly shows the same event AND the da
 status = "uncertain" when ANY of these apply:
   • The source page text is empty, minimal, behind a login, JS-only, or didn't render.
   • The DB record has a null/missing start time but the source page has a time.
-    (Missing DB data is NOT "wrong" — it's "uncertain". Never set status="wrong" just because the DB is INCOMPLETE.)
-  • The source page shows the event but DOES NOT state the date or year explicitly.
+    *** CRITICAL: Missing DB time is NEVER "wrong". It is ALWAYS "uncertain". ***
+    Our import pipeline often omits the time even when the source has one. That is a data-import gap, not an event error.
+  • The source page shows the event but DOES NOT state the year explicitly AND you cannot confirm the year from context.
   • You can't find the event on the source page at all.
   • Ambiguous: recurring event with multiple dates listed, and you can't tell which one matches.
 
+MATCHING RULES — memorize these:
+  • "Source says 'Friday, May 1'" + DB date is 2026-05-01 AND May 1 2026 IS a Friday → status="verified", NOT date_mismatch.
+    The year not being printed on the source page is FINE — match on day-of-week + month-day.
+  • "Source says 'Saturday, May 2'" + DB date is 2026-05-02 AND May 2 2026 IS a Saturday → status="verified".
+  • "Source says '10 AM - 3 PM'" + DB has no time → status="verified" or "uncertain", NEVER date_mismatch.
+    A time on the source and no time in the DB is NOT a date problem. The date is fine.
+  • "Source says '7 PM - 10:30 PM'" + DB has no time → NOT date_mismatch. Set status="verified" if date matches.
+  • "Source says event runs May 1–2" + DB says May 1 → status="verified" (May 1 is the start date, OK).
+  • NEVER use date_mismatch just because the source has a time and the DB doesn't. That is a time import gap, not a date mismatch.
+  • "Source sold out" → status="wrong", issue="cancelled". Sold out = no longer purchasable.
+  • "Source explicitly says CANCELLED" → status="wrong", issue="cancelled".
+
 Extra notes:
-  • The DB record's event_date is the authoritative calendar day we are displaying. Only override it if the source page shows a different explicit date.
+  • The DB record's event_date is the authoritative calendar day we are displaying. Only override it if the source page shows a DIFFERENT explicit date for the SAME event.
   • Eventbrite workshops with generic titles like "PMP Certification Training in Albuquerque, NM" or venues like "info@...com" are spam (status="wrong", issue="spam").
   • A source page that only confirms the venue and title but doesn't show a date is "uncertain", not "verified" and not "wrong".
+  • Events in foreign languages (Dutch, French, etc.) or with UK/EU locations are NOT local ABQ events — status="wrong", issue="not_local".
 
 Output shape (strict JSON only, no prose, no fences):
 {
@@ -451,7 +465,9 @@ async function writeVerdict(row, verdict, stats) {
 
   // Only auto-hide on "real event-was-wrong" signals. Never auto-hide for missing-data
   // or page-render issues — those need human review.
-  const SAFE_AUTO_HIDE_ISSUES = new Set(['date_mismatch', 'time_mismatch', 'cancelled', 'spam', 'not_local'])
+  // time_mismatch is intentionally excluded: "DB has no time but source does" is a data-import
+  // gap, not a wrong event. Only hide on genuine event-level signals.
+  const SAFE_AUTO_HIDE_ISSUES = new Set(['date_mismatch', 'cancelled', 'spam', 'not_local'])
   const hasHideIssue = (verdict.issues || []).some(i => SAFE_AUTO_HIDE_ISSUES.has(i))
   const shouldHide =
     verdict.status === 'wrong'
