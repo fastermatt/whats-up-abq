@@ -3,7 +3,6 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useState } from 'react'
 import { ChevronDown, ChevronUp, X, MapPin } from 'lucide-react'
-import Link from 'next/link'
 import type { CategoryCount } from '@/lib/events'
 
 const TIME_FILTERS = [
@@ -15,7 +14,7 @@ const TIME_FILTERS = [
   { value: 'upcoming',     label: 'All' },
 ] as const
 
-/** Top-level categories. Sports has expandable subcategories. */
+/** Top-level categories. Sports/Music have expandable subcategories. */
 const CATEGORIES = [
   'Music',
   'Comedy',
@@ -29,21 +28,13 @@ const CATEGORIES = [
   'Community',
 ]
 
-/** Sports subcategories per the strategy doc taxonomy */
+/** Sports subcategories */
 const SPORTS_SUBS = [
-  'Baseball',
-  'Soccer',
-  'Football',
-  'Basketball',
-  'Hockey',
-  'Combat',
-  'Motorsports',
-  'College',
-  'Running',
-  'Rodeo',
+  'Baseball', 'Soccer', 'Football', 'Basketball', 'Hockey',
+  'Combat', 'Motorsports', 'College', 'Running', 'Rodeo',
 ]
 
-/** Music subcategories (from Gemma enrichment + TM genre data) */
+/** Music subcategories */
 const MUSIC_SUBS = [
   'Rock', 'Pop', 'Country', 'Hip-Hop', 'Electronic', 'Metal',
   'R&B', 'Jazz', 'Folk', 'Soul', 'Blues', 'Latin', 'Classical',
@@ -56,9 +47,36 @@ const PRICE_FILTERS = [
   { value: '50',   label: '< $50' },
 ] as const
 
+/** Top neighborhoods by event count (slug must match neighborhood_slug column) */
+const NEIGHBORHOODS = [
+  { label: 'State Fairgrounds', slug: 'state-fairgrounds-midtown' },
+  { label: 'Downtown',           slug: 'downtown' },
+  { label: 'Far NE / Sandias',   slug: 'far-northeast-sandia-foothills' },
+  { label: 'UNM Campus',         slug: 'unm-campus' },
+  { label: 'Uptown / Midtown',   slug: 'uptown-midtown' },
+  { label: 'South / University', slug: 'south-i-25-university-se' },
+  { label: 'North Valley',       slug: 'north-valley' },
+  { label: 'Barelas',            slug: 'barelas-south-downtown' },
+  { label: 'West Side',          slug: 'west-side' },
+  { label: 'Old Town',           slug: 'old-town' },
+]
+
+/** Vibe shortcuts — emoji + label that set category/time/price combos */
+const VIBES = [
+  { slug: 'date-night',    label: '❤️ Date Night',    params: { category: 'Arts & Theater', time: 'tonight' } },
+  { slug: 'family-fun',    label: '👶 With Kids',      params: { category: 'Family' } },
+  { slug: 'live-music',    label: '🎵 Live Music',     params: { category: 'Music', time: 'this-weekend' } },
+  { slug: 'free-tonight',  label: '✨ Free Tonight',   params: { price: 'free', time: 'tonight' } },
+  { slug: 'chill',         label: '☕ Low-key',         params: { category: 'Community' } },
+  { slug: 'nightlife',     label: '🌙 Out Late',        params: { category: 'Music', time: 'tonight' } },
+  { slug: 'foodie',        label: '🍽️ Foodie',          params: { category: 'Food & Drink' } },
+  { slug: 'outdoors',      label: '🌲 Outdoors',        params: { category: 'Outdoor' } },
+] as const
+
 interface FilterBarProps {
   currentTime: string
   currentCategory: string
+  currentNeighborhood: string
   priceFilter?: string
   categoryCounts?: CategoryCount[]
 }
@@ -76,12 +94,19 @@ function ScrollRow({ children, className = '' }: { children: React.ReactNode; cl
   )
 }
 
-export function FilterBar({ currentTime, currentCategory, priceFilter, categoryCounts = [] }: FilterBarProps) {
+export function FilterBar({
+  currentTime,
+  currentCategory,
+  currentNeighborhood,
+  priceFilter,
+  categoryCounts = [],
+}: FilterBarProps) {
   const countMap = Object.fromEntries(categoryCounts.map((c) => [c.category, c.count]))
   const router = useRouter()
   const searchParams = useSearchParams()
   const [sportsExpanded, setSportsExpanded] = useState(currentCategory.startsWith('Sports'))
   const [musicExpanded, setMusicExpanded] = useState(currentCategory.startsWith('Music'))
+  const [areaExpanded, setAreaExpanded] = useState(!!currentNeighborhood)
 
   const setFilter = useCallback(
     (key: string, value: string) => {
@@ -108,6 +133,27 @@ export function FilterBar({ currentTime, currentCategory, priceFilter, categoryC
     params.delete('page')
     router.push(`/events?${params.toString()}`, { scroll: false })
   }, [router, searchParams, priceFilter])
+
+  /** Set a vibe — replaces category/time/price with the vibe's preset */
+  const setVibe = useCallback((vibeParams: Record<string, string>) => {
+    const params = new URLSearchParams()
+    // Clear existing category/time/price filters, apply vibe's preset
+    if (vibeParams.category) params.set('category', vibeParams.category)
+    if (vibeParams.time) params.set('time', vibeParams.time)
+    if (vibeParams.price) params.set('price', vibeParams.price)
+    router.push(`/events?${params.toString()}`, { scroll: false })
+  }, [router])
+
+  const setNeighborhood = useCallback((slug: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (slug === '' || currentNeighborhood === slug) {
+      params.delete('neighborhood')
+    } else {
+      params.set('neighborhood', slug)
+    }
+    params.delete('page')
+    router.push(`/events?${params.toString()}`, { scroll: false })
+  }, [router, searchParams, currentNeighborhood])
 
   const handleSportsClick = () => {
     if (currentCategory === 'Sports' || currentCategory.startsWith('Sports > ')) {
@@ -147,10 +193,13 @@ export function FilterBar({ currentTime, currentCategory, priceFilter, categoryC
         : 'bg-[#f0e4cc]/60 border border-[#ddc9a3]/60 text-[#4a3f3a] hover:border-[#006a62] hover:text-[#006a62]'
     }`
 
-  // Derive active labels for the pinned badge row
+  const vibePill = `flex-none px-2.5 py-1 rounded-full text-[10px] font-semibold whitespace-nowrap transition-colors bg-white border border-[#ddc9a3]/80 text-[#4a3f3a] hover:border-[#9a442d]/50 hover:text-[#9a442d] hover:bg-[#9a442d]/5`
+
+  // Active filter badges
   const activeTimeFilter = TIME_FILTERS.find(f => f.value === currentTime && currentTime && currentTime !== 'upcoming')
   const activePriceFilter = PRICE_FILTERS.find(f => f.value === priceFilter)
-  const hasActiveFilters = !!(activeTimeFilter || currentCategory || activePriceFilter)
+  const activeNeighborhood = NEIGHBORHOODS.find(n => n.slug === currentNeighborhood)
+  const hasActiveFilters = !!(activeTimeFilter || currentCategory || activePriceFilter || activeNeighborhood)
 
   const clearCategory = () => { setFilter('category', ''); setSportsExpanded(false); setMusicExpanded(false) }
   const clearPrice = () => {
@@ -158,14 +207,16 @@ export function FilterBar({ currentTime, currentCategory, priceFilter, categoryC
     params.delete('price'); params.delete('free'); params.delete('page')
     router.push(`/events?${params.toString()}`, { scroll: false })
   }
+  const clearNeighborhood = () => { setNeighborhood(''); setAreaExpanded(false) }
   const clearAll = () => {
     const params = new URLSearchParams(searchParams.toString())
-    params.delete('time'); params.delete('category'); params.delete('price'); params.delete('free'); params.delete('page')
-    setSportsExpanded(false); setMusicExpanded(false)
+    params.delete('time'); params.delete('category'); params.delete('price')
+    params.delete('free'); params.delete('neighborhood'); params.delete('page')
+    setSportsExpanded(false); setMusicExpanded(false); setAreaExpanded(false)
     router.push(`/events?${params.toString()}`, { scroll: false })
   }
 
-  const activeCount = [activeTimeFilter, currentCategory, activePriceFilter].filter(Boolean).length
+  const activeCount = [activeTimeFilter, currentCategory, activePriceFilter, activeNeighborhood].filter(Boolean).length
 
   return (
     <div className="space-y-2">
@@ -200,6 +251,16 @@ export function FilterBar({ currentTime, currentCategory, priceFilter, categoryC
               <X className="w-3 h-3 opacity-80" />
             </button>
           )}
+          {activeNeighborhood && (
+            <button
+              onClick={clearNeighborhood}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#9a442d]/70 text-white shadow-sm hover:bg-[#9a442d] transition-colors"
+            >
+              <MapPin className="w-3 h-3" />
+              {activeNeighborhood.label}
+              <X className="w-3 h-3 opacity-80" />
+            </button>
+          )}
           {activeCount > 1 && (
             <button
               onClick={clearAll}
@@ -211,7 +272,7 @@ export function FilterBar({ currentTime, currentCategory, priceFilter, categoryC
         </div>
       )}
 
-      {/* Row 1: Time + Price — single scrollable strip */}
+      {/* Row 1: Time + Price */}
       <ScrollRow>
         {TIME_FILTERS.map(({ value, label }) => {
           const isActive = currentTime === value || (value === 'upcoming' && !currentTime)
@@ -231,15 +292,14 @@ export function FilterBar({ currentTime, currentCategory, priceFilter, categoryC
           </button>
         ))}
 
-        {/* Spacer so last item clears the fade */}
         <div className="flex-none w-6" />
       </ScrollRow>
 
-      {/* Row 2: Categories — single scrollable strip */}
+      {/* Row 2: Categories + Area toggle */}
       <ScrollRow>
         <button
           onClick={() => { setFilter('category', ''); setSportsExpanded(false); setMusicExpanded(false) }}
-          className={catPill(!currentCategory)}
+          className={catPill(!currentCategory && !currentNeighborhood)}
         >
           All
         </button>
@@ -282,14 +342,17 @@ export function FilterBar({ currentTime, currentCategory, priceFilter, categoryC
           )
         })}
 
-        {/* Neighborhood link — opens /neighborhoods directory */}
-        <Link
-          href="/neighborhoods"
-          className="flex-none px-3 py-1 rounded-full text-xs font-semibold transition-colors whitespace-nowrap inline-flex items-center gap-1 bg-white border border-[#ddc9a3] text-[#4a3f3a] hover:border-[#9a442d] hover:text-[#9a442d]"
+        {/* Area (neighborhood) expandable chip */}
+        <button
+          onClick={() => setAreaExpanded(!areaExpanded)}
+          className={catPill(!!currentNeighborhood)}
         >
           <MapPin className="w-3 h-3" />
-          By Neighborhood
-        </Link>
+          {currentNeighborhood
+            ? (NEIGHBORHOODS.find(n => n.slug === currentNeighborhood)?.label ?? 'Area')
+            : 'Area'}
+          {areaExpanded ? <ChevronUp className="w-2.5 h-2.5" /> : <ChevronDown className="w-2.5 h-2.5" />}
+        </button>
 
         <div className="flex-none w-6" />
       </ScrollRow>
@@ -331,6 +394,36 @@ export function FilterBar({ currentTime, currentCategory, priceFilter, categoryC
           <div className="flex-none w-6" />
         </ScrollRow>
       )}
+
+      {/* Row 4 (conditional): Neighborhood chips */}
+      {areaExpanded && (
+        <ScrollRow className="animate-fade-in">
+          {NEIGHBORHOODS.map((n) => (
+            <button
+              key={n.slug}
+              onClick={() => setNeighborhood(n.slug)}
+              className={subPill(currentNeighborhood === n.slug)}
+            >
+              {n.label}
+            </button>
+          ))}
+          <div className="flex-none w-6" />
+        </ScrollRow>
+      )}
+
+      {/* Vibe row — compact discovery shortcuts, always visible */}
+      <ScrollRow>
+        <span className="flex-none self-center text-[9px] uppercase tracking-[0.12em] text-[#8a7a74] font-semibold pr-0.5 pl-0.5 whitespace-nowrap">
+          Vibe
+        </span>
+        {VIBES.map((v) => (
+          <button key={v.slug} onClick={() => setVibe(v.params as Record<string, string>)} className={vibePill}>
+            {v.label}
+          </button>
+        ))}
+        <div className="flex-none w-6" />
+      </ScrollRow>
+
     </div>
   )
 }

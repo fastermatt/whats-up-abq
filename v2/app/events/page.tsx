@@ -16,7 +16,7 @@ import { QuickSaveButton } from '@/app/components/QuickSaveButton'
 export const revalidate = 60
 
 interface PageProps {
-  searchParams: Promise<{ time?: string; category?: string; mood?: string; page?: string; q?: string; free?: string; price?: string; date?: string; cal?: string }>
+  searchParams: Promise<{ time?: string; category?: string; mood?: string; neighborhood?: string; page?: string; q?: string; free?: string; price?: string; date?: string; cal?: string }>
 }
 
 const CATEGORY_TITLES: Record<string, string> = {
@@ -98,6 +98,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
   const timeFilter = (params.time as TimeFilter) || 'upcoming'
   const category = params.category || null
   const mood = params.mood || undefined
+  const neighborhood = params.neighborhood || undefined
   const search = params.q?.trim() || undefined
   const selectedDate = params.date || null  // YYYY-MM-DD from calendar
   const showCal = params.cal === '1' || !!selectedDate
@@ -117,7 +118,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
     .toISOString().slice(0, 10)
 
   const [{ events, total }, categoryCounts, calendarCounts] = await Promise.all([
-    fetchEvents({ timeFilter, category, mood, search, freeOnly, maxPrice, date: selectedDate ?? undefined, limit, offset }),
+    fetchEvents({ timeFilter, category, mood, neighborhood, search, freeOnly, maxPrice, date: selectedDate ?? undefined, limit, offset }),
     fetchCategoryCounts(),
     showCal ? fetchEventCountsByDate(calStart, calEnd) : Promise.resolve([]),
   ])
@@ -184,6 +185,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
           <FilterBar
             currentTime={params.time ?? ''}
             currentCategory={params.category ?? ''}
+            currentNeighborhood={neighborhood ?? ''}
             priceFilter={priceParam}
             categoryCounts={categoryCounts}
           />

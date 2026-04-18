@@ -45,6 +45,7 @@ export interface FetchEventsOptions {
   timeFilter?: TimeFilter
   category?: CategoryFilter
   mood?: string       // e.g. 'live-music' | 'date-night' | 'family-fun' etc.
+  neighborhood?: string // neighborhood_slug e.g. 'downtown', 'unm-campus'
   search?: string
   freeOnly?: boolean
   maxPrice?: number   // 0 = free only; 25 = under $25; 50 = under $50
@@ -153,6 +154,7 @@ export async function fetchEvents({
   timeFilter = 'upcoming',
   category,
   mood,
+  neighborhood,
   search,
   freeOnly = false,
   maxPrice,
@@ -193,6 +195,7 @@ export async function fetchEvents({
     }
     if (topLevelCat) query = query.eq('category', topLevelCat)
     if (mood) query = query.eq('ai_enrichment->>mood', mood)
+    if (neighborhood) query = query.eq('neighborhood_slug', neighborhood)
 
     const { data, error, count } = await query.range(offset, offset + limit - 1)
     if (error) {
@@ -225,6 +228,7 @@ export async function fetchEvents({
   }
   if (topLevelCat) q = q.eq('category', topLevelCat)  // Pre-filter cuts dataset!
   if (mood) q = q.eq('ai_enrichment->>mood', mood)
+  if (neighborhood) q = q.eq('neighborhood_slug', neighborhood)
 
   const { data, error } = await q
   if (error) {
