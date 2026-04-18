@@ -1,11 +1,14 @@
 import { supabase } from './supabase';
 
 export async function fetchEventsFromDB(): Promise<Record<string, unknown[]>> {
-  const today = new Date().toISOString().split('T')[0];
+  // Use local date (en-CA = YYYY-MM-DD) — toISOString() is UTC and can return
+  // yesterday's date after ~5 PM MDT, causing today's events to disappear.
+  const today = new Date().toLocaleDateString('en-CA');
   const { data, error } = await supabase
     .from('events')
     .select('id, source, raw, ai_enrichment, cached_photo_url, cached_thumbnail_url')
     .gte('event_date', today)
+    .eq('hidden', false)          // exclude dedup-hidden and manually suppressed events
     .order('event_date', { ascending: true })
     .limit(2000);
   if (error) throw error;

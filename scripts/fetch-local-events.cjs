@@ -574,7 +574,41 @@ function transformAbqToDoEvent(ev) {
   };
 }
 
-// ── 4. Cross-source duplicate detection ──────────────────────────────────────
+// ── 4. Suspicious-time validator ─────────────────────────────────────────────
+// Music and nightlife events almost never start before 4 PM.
+// If we see one with a time between 00:00 and 15:59, flag it — it's likely
+// a UTC time being stored as local (e.g. 22:00 local → 04:00 UTC next day).
+const EVENING_CATEGORIES = new Set(['Music', 'Comedy', 'Arts & Theatre', 'Community']);
+const DAYTIME_SAFE_KEYWORDS = /brunch|afternoon|matinee|family|kid|child|workshop|class|tour|market|farmer|craft|art walk|gallery|exhibit/i;
+
+function checkSuspiciousTime(ev) {
+  const localTime = ev.dates?.start?.localTime;
+  if (!localTime || localTime === 'TBD') return null;
+  const [hStr] = localTime.split(':');
+  const h = parseInt(hStr, 10);
+  if (isNaN(h)) return null;
+
+  // Only flag Music/Comedy/nightlife events
+  const cat = ev.classifications?.[0]?.segment?.name || '';
+  if (!EVENING_CATEGORIES.has(cat)) return null;
+
+  // Times 00:00–15:59 are suspicious for evening events
+  if (h >= 0 && h < 16) {
+    const name = ev.name || '';
+    const desc = ev.info || ev.description || '';
+    // Suppress false positive for genuinely daytime events
+    if (DAYTIME_SAFE_KEYWORDS.test(name) || DAYTIME_SAFE_KEYWORDS.test(desc)) return null;
+    return {
+      name,
+      time: localTime,
+      cat,
+      reason: `${localTime} is unusually early for a ${cat} event — possible UTC/local timezone mix-up`,
+    };
+  }
+  return null;
+}
+
+// ── 5. Cross-source duplicate detection ──────────────────────────────────────
 /**
  * Flag probable duplicates: same venue (normalised) + same date + start times
  * within 6 hours of each other. Keeps the Ticketmaster version when available;
@@ -689,6 +723,9 @@ async function upsertEvents(source, rawArr) {
   // Cross-source duplicate detection
   const { events: allLocal, duplicates } = deduplicateCrossSource(allBeforeDedup);
 
+  // Suspicious-time check — flag potential UTC/local timezone mix-ups
+  const suspiciousTimes = allLocal.map(checkSuspiciousTime).filter(Boolean);
+
   console.log(`\n📊 Total local/EB events: ${allLocal.length}`);
   console.log(`   Eventbrite: ${ebEvents.length}  |  Do505: ${do505Events.length}  |  ABQToDo: ${abqTodoEvents.length}`);
 
@@ -724,6 +761,11 @@ async function upsertEvents(source, rawArr) {
   console.log(`  🔁 Duplicates removed:  ${duplicates.length}`);
   if (duplicates.length) {
     duplicates.forEach(d => console.log(`     • Kept: ${d.kept} | Removed: ${d.removed} @ ${d.venue} ${d.date}`));
+  }
+  console.log(`  ⚠️  Suspicious times:   ${suspiciousTimes.length}`);
+  if (suspiciousTimes.length) {
+    suspiciousTimes.forEach(s => console.log(`     • "${s.name}" at ${s.time} [${s.cat}] — ${s.reason}`));
+    console.log('     ↳ Review these manually — times may be UTC stored as local');
   }
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('\n✅ Done.');

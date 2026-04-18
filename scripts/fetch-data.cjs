@@ -594,6 +594,24 @@ function transformMeetupEvent(ev) {
 }
 
 // Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Main Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+
+// ── Suspicious-time validator ────────────────────────────────────────────────
+// Music/nightlife events before 4 PM are likely UTC times stored as local.
+const EVENING_CATS_FD = new Set(['Music', 'Sports', 'Arts & Theatre', 'Comedy']);
+const DAYTIME_OK_FD = /brunch|afternoon|matinee|family|kid|child|workshop|class|tour|market|farmer|craft|gallery|exhibit/i;
+
+function checkSuspiciousTimeFD(ev) {
+  const localTime = ev.dates?.start?.localTime;
+  if (!localTime || localTime === 'TBD') return null;
+  const h = parseInt((localTime.split(':')[0] || ''), 10);
+  if (isNaN(h) || h >= 16) return null;
+  const seg = ev.classifications?.[0]?.segment?.name || '';
+  if (!EVENING_CATS_FD.has(seg)) return null;
+  const name = ev.name || '';
+  if (DAYTIME_OK_FD.test(name)) return null;
+  return { name, time: localTime, seg, reason: `${localTime} is unusually early for a ${seg} event (possible UTC/local mix-up)` };
+}
+
 async function main() {
   console.log('=== ABQ Unplugged Data Fetcher Ã¢ÂÂ Greater Metro Area ===');
   console.log(`Coverage: ${METRO_RADIUS_MILES}-mile radius from ABQ city center`);
@@ -743,6 +761,15 @@ async function main() {
   console.log(`  Duplicates removed:   ${dupRemove.size}`);
   console.log(`  ✅ Net events:        ${total}`);
   if (dupLog.length) dupLog.forEach(l => console.log(l));
+
+  // Suspicious time check across all events
+  const allForTimeCheck = [...tmEvents, ...sgEvents, ...ebEvents, ...bitEvents, ...meetupEvents];
+  const suspTimes = allForTimeCheck.map(checkSuspiciousTimeFD).filter(Boolean);
+  console.log(`  ⚠️  Suspicious times: ${suspTimes.length}`);
+  if (suspTimes.length) {
+    suspTimes.forEach(s => console.log(`     • "${s.name}" at ${s.time} [${s.seg}] — ${s.reason}`));
+    console.log('     ↳ Review these manually — may be UTC stored as local');
+  }
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 }
 
