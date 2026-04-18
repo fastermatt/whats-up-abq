@@ -367,6 +367,15 @@ export default async function EventDetailPage({ params }: PageProps) {
             </a>
           )}
           <ShareButton title={event.title} />
+          {/* Instagram card shortcut — admin/content tool */}
+          <Link
+            href={`/events/${event.id}/ig`}
+            className="inline-flex items-center gap-1.5 px-4 py-3 rounded-xl border border-[#f0e4cc] text-[#8a7a74] text-sm font-medium hover:border-[#9a442d] hover:text-[#9a442d] transition-colors"
+            title="Open Instagram card"
+          >
+            <span>📸</span>
+            <span className="hidden sm:inline">IG Card</span>
+          </Link>
         </div>
 
         {/* Add to calendar */}
