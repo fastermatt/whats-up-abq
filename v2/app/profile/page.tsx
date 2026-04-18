@@ -4,7 +4,8 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { SignOutButton } from './SignOutButton'
 import { EditProfileForm } from './EditProfileForm'
-import { MapPin, Trophy, Zap, Star, CheckSquare, Calendar, ArrowLeft } from 'lucide-react'
+import { MapPin, Trophy, Zap, Star, CheckSquare, Calendar, ArrowLeft, Heart, Users, Bell, Search, UserPlus, HelpCircle } from 'lucide-react'
+import { PushBell } from '@/app/components/PushBell'
 
 export const metadata: Metadata = {
   title: 'My Profile | ABQ Unplugged',
@@ -228,6 +229,84 @@ export default async function ProfilePage() {
             </Link>
           </div>
         )}
+
+        {/* Notifications */}
+        <section>
+          <h2 className="text-base font-black text-[#1a1614] mb-3" style={{ fontFamily: 'var(--font-epilogue)' }}>
+            Notifications
+          </h2>
+          <div className="bg-white rounded-xl border border-[#f0e4cc] p-4 flex items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <Bell className="w-4 h-4 text-[#9a442d] mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-[#1a1614]">Event reminders</p>
+                <p className="text-[10px] text-[#8a7a74] mt-0.5">Get notified about new events and upcoming things you&apos;re going to</p>
+              </div>
+            </div>
+            <PushBell />
+          </div>
+        </section>
+
+        {/* How to Use guide */}
+        <section>
+          <h2 className="text-base font-black text-[#1a1614] mb-3 flex items-center gap-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
+            <HelpCircle className="w-4 h-4 text-[#9a442d]" />
+            Tips & Tricks
+          </h2>
+          <div className="bg-white rounded-xl border border-[#f0e4cc] divide-y divide-[#f0e4cc]">
+            {[
+              {
+                icon: <Heart className="w-4 h-4 text-[#9a442d]" />,
+                title: 'Save events instantly',
+                desc: 'Tap the heart ♥ on any event card to save it without opening the full page. Hearts on card listings, hearts on detail pages — both work.',
+              },
+              {
+                icon: <Search className="w-4 h-4 text-[#006a62]" />,
+                title: 'Find friends',
+                desc: 'Go to the Leaderboard page to see active users. Check someone\'s rank, then tap their name to visit their public profile. From there you can follow them.',
+              },
+              {
+                icon: <UserPlus className="w-4 h-4 text-[#4f6249]" />,
+                title: 'Follow people',
+                desc: 'Visit a user\'s profile at abqunplugged.com/u/their-handle and tap Follow. Their going events will show up in your Saved → Friends tab.',
+              },
+              {
+                icon: <Users className="w-4 h-4 text-[#9a442d]" />,
+                title: 'See what friends are doing',
+                desc: 'In the Saved tab, switch to the Friends tab to see every event the people you follow have marked as "Going." No FOMO.',
+              },
+              {
+                icon: <CheckSquare className="w-4 h-4 text-[#4f6249]" />,
+                title: 'Check in at events',
+                desc: 'Open an event page while you\'re there and tap "Check In." Earn badges, build your streak, and climb the leaderboard.',
+              },
+              {
+                icon: <Trophy className="w-4 h-4 text-[#006a62]" />,
+                title: 'Earn badges',
+                desc: 'Badges unlock automatically — first check-in, 5 check-ins, music events, comedy shows, outdoor events. See them on your profile and others\' profiles.',
+              },
+              {
+                icon: <Zap className="w-4 h-4 text-[#9a442d]" />,
+                title: 'Surprise Me',
+                desc: 'Hit the ⚡ Surprise Me button on the homepage to get sent to a random upcoming event. Great for beating decision paralysis.',
+              },
+              {
+                icon: <Bell className="w-4 h-4 text-[#4f6249]" />,
+                title: 'Pull to refresh (on mobile)',
+                desc: 'If you\'ve added ABQ Unplugged to your home screen, pull down from the top of any page to refresh the event feed.',
+              },
+            ].map(({ icon, title, desc }) => (
+              <div key={title} className="flex items-start gap-3 px-4 py-3">
+                <div className="mt-0.5 flex-shrink-0">{icon}</div>
+                <div>
+                  <p className="text-sm font-semibold text-[#1a1614]">{title}</p>
+                  <p className="text-[11px] text-[#8a7a74] mt-0.5 leading-relaxed">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
       </div>
     </main>
   )
