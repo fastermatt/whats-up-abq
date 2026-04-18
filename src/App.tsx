@@ -2225,7 +2225,7 @@ function EventShareCardModal({ event, onClose }: { event: TMEvent; onClose: () =
 
 // ─── Event Detail Modal ──────────────────────────────────────────────────────
 
-function EventDetailModal({ event, onClose, mapProvider, friendSavedEventIds }: { event: TMEvent; onClose: () => void; mapProvider?: 'google' | 'apple'; friendSavedEventIds?: Map<string, FriendSaver[]> }) {
+function EventDetailModal({ event, onClose, mapProvider, friendSavedEventIds, user }: { event: TMEvent; onClose: () => void; mapProvider?: 'google' | 'apple'; friendSavedEventIds?: Map<string, FriendSaver[]>; user?: any }) {
   const [shared, setShared] = useState(false);
   const [showShareCard, setShowShareCard] = useState(false);
   const [venueExpanded, setVenueExpanded] = useState(false);
@@ -2233,8 +2233,14 @@ function EventDetailModal({ event, onClose, mapProvider, friendSavedEventIds }: 
   const [flagText, setFlagText] = useState('');
   const [flagSubmitting, setFlagSubmitting] = useState(false);
   const [flagDone, setFlagDone] = useState(false);
+  const [checkInLoading, setCheckInLoading] = useState(false);
+  const [checkInShowing, setCheckInShowing] = useState(false);
+  const [checkedInToday, setCheckedInToday] = useState(false);
+  const [checkInError, setCheckInError] = useState('');
   const venue = event._embedded?.venues?.[0];
   const category = getEventCategory(event);
+  const [checkedIn] = useCheckInStatus(event.id, user?.id ?? null);
+  const mayor = useVenueMayor(venue ? slugifyVenueName(venue.name) : null);
   const price = event.priceRanges?.[0];
   const mapsQuery = encodeURIComponent(
     (venue?.address?.line1 || venue?.name || event.name) + ' Albuquerque NM'
@@ -2382,6 +2388,7 @@ function EventDetailModal({ event, onClose, mapProvider, friendSavedEventIds }: 
               <p className="font-bold text-sm text-gray-900 truncate" style={{ fontFamily: 'Public Sans, sans-serif' }}>{venue.name}</p>
               {venue.address?.line1 && <p className="text-xs text-gray-500 mt-0.5">{venue.address.line1}{venue.city?.name ? `, ${venue.city.name}` : ''}</p>}
               <p className="text-xs font-bold mt-1" style={{ color: 'var(--brand)' }}>Open in {mapProvider === 'apple' ? 'Apple Maps' : 'Google Maps'} →</p>
+              {mayor && <p className="text-xs mt-1.5" style={{ color: '#ea580c' }}>👑 Mayor: {mayor.display_name}</p>}
             </div>
           </a>
         )}
@@ -2606,6 +2613,70 @@ function EventDetailModal({ event, onClose, mapProvider, friendSavedEventIds }: 
               <p className="text-xs text-gray-600 leading-relaxed" style={{ fontFamily: 'Public Sans, sans-serif' }}>Put your phone away for the first 30 minutes. Let yourself fully arrive before documenting.</p>
             </div>
           </div>
+        )}
+
+        {/* ── CHECK IN BUTTON ────────────────────────────────── */}
+        {!checkInShowing ? (
+          <button
+            onClick={() => {
+              if (!user) {
+                setCheckInShowing(true);
+              } else {
+                setCheckInLoading(true);
+                performCheckIn(event, user.id)
+                  .then(result => {
+                    if (result.alreadyCheckedIn) {
+                      setCheckedInToday(true);
+                    } else if (result.success) {
+                      toast({ title: `✅ Checked in at ${venue?.name || 'event'}!` });
+                      setCheckedInToday(true);
+                    }
+                  })
+                  .catch(err => {
+                    console.error('Check-in error:', err);
+                    setCheckInError('Failed to check in. Please try again.');
+                  })
+                  .finally(() => setCheckInLoading(false));
+              }
+            }}
+            disabled={checkInLoading || checkedInToday || checkedIn}
+            className="flex items-center justify-center gap-2 w-full py-3 mb-2 font-black text-sm"
+            style={{
+              border: 'none',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+              borderRadius: 6,
+              background: checkedInToday || checkedIn ? '#e8f5e9' : 'var(--brand)',
+              color: checkedInToday || checkedIn ? '#2e7d32' : 'white',
+              fontFamily: 'Public Sans, sans-serif',
+              cursor: checkInLoading || checkedInToday || checkedIn ? 'default' : 'pointer',
+              opacity: checkInLoading ? 0.7 : 1,
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+              {checkedInToday || checkedIn ? 'check_circle' : 'location_on'}
+            </span>
+            {checkInLoading ? 'CHECKING IN...' : checkedInToday || checkedIn ? '✅ ALREADY CHECKED IN' : 'CHECK IN HERE'}
+          </button>
+        ) : (
+          <div className="bg-blue-50 p-3 rounded-lg mb-2" style={{ border: '1.5px solid var(--brand-tint-border)' }}>
+            <p className="text-sm font-bold mb-2" style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}>Sign in to check in</p>
+            <button
+              onClick={() => {
+                setCheckInShowing(false);
+                // Trigger parent's auth modal
+                if (window.dispatchEvent) {
+                  window.dispatchEvent(new CustomEvent('show_auth_modal'));
+                }
+              }}
+              className="w-full py-2 text-white font-black text-sm rounded"
+              style={{ background: 'var(--brand)', fontFamily: 'Public Sans, sans-serif', border: 'none', cursor: 'pointer' }}
+            >
+              SIGN IN
+            </button>
+          </div>
+        )}
+        {checkInError && (
+          <p className="text-xs text-red-600 mb-2" style={{ fontFamily: 'Public Sans, sans-serif' }}>{checkInError}</p>
         )}
 
         {/* ── ADD TO CALENDAR ───────────────────────────────── */}
@@ -3248,6 +3319,165 @@ function tickStreak(): { count: number; isNew: boolean } {
   return { count: newCount, isNew: true };
 }
 
+// ─── Competitive Mechanics Helpers ──────────────────────────────────────────
+
+function toast({ title }: { title: string }): void {
+  // Simple toast notification using browser notification API or a visual popup
+  if (window.dispatchEvent) {
+    window.dispatchEvent(new CustomEvent('toast', { detail: { title } }));
+  }
+  // Fallback: log to console
+  console.log('[Toast]', title);
+}
+
+async function performCheckIn(event: TMEvent, userId: string): Promise<{ success: boolean; alreadyCheckedIn: boolean }> {
+  const today = new Date().toLocaleDateString('en-CA');
+  const venueName = event._embedded?.venues?.[0]?.name || '';
+  const venueId = slugifyVenueName(venueName);
+  const imageUrl = getBestEventImage(event.images);
+
+  // Check if already checked in today
+  const { data: existing } = await supabase
+    .from('check_ins')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('event_id', event.id)
+    .gte('checked_in_at', today + 'T00:00:00')
+    .maybeSingle();
+  if (existing) return { success: false, alreadyCheckedIn: true };
+
+  const { error } = await supabase.from('check_ins').insert({
+    user_id: userId,
+    event_id: event.id,
+    event_name: event.name,
+    event_date: event.dates?.start?.localDate || today,
+    venue_name: venueName,
+    venue_id: venueId,
+    category: getEventCategory(event),
+    image_url: imageUrl,
+  });
+  if (error) throw error;
+
+  // Update streak and mayor in parallel
+  await Promise.all([
+    updateStreakAfterCheckIn(userId),
+    venueId ? refreshVenueMayor(venueId, venueName, userId) : Promise.resolve(),
+  ]);
+
+  return { success: true, alreadyCheckedIn: false };
+}
+
+function slugifyVenueName(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+async function updateStreakAfterCheckIn(userId: string): Promise<void> {
+  const today = new Date().toLocaleDateString('en-CA');
+  const yesterday = new Date(Date.now() - 864e5).toLocaleDateString('en-CA');
+
+  const { data: prof } = await supabase
+    .from('profiles')
+    .select('streak_days, streak_last_date, total_check_ins')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (!prof) return;
+
+  let newStreak = 1;
+  const last = prof.streak_last_date;
+  if (last === today) {
+    return; // already counted today
+  } else if (last === yesterday) {
+    newStreak = (prof.streak_days || 0) + 1;
+  }
+
+  await supabase.from('profiles').update({
+    streak_days: newStreak,
+    streak_last_date: today,
+    total_check_ins: (prof.total_check_ins || 0) + 1,
+    updated_at: new Date().toISOString(),
+  }).eq('id', userId);
+}
+
+async function refreshVenueMayor(venueId: string, venueName: string, userId: string): Promise<void> {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 864e5).toLocaleDateString('en-CA');
+
+  // Count check-ins at this venue in the last 30 days for the current user
+  const { count: myCount } = await supabase
+    .from('check_ins')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('venue_id', venueId)
+    .gte('event_date', thirtyDaysAgo);
+
+  if (!myCount || myCount === 0) return;
+
+  // Get current mayor's count
+  const { data: currentMayor } = await supabase
+    .from('venue_mayors')
+    .select('user_id, checkin_count')
+    .eq('venue_id', venueId)
+    .eq('is_current', true)
+    .maybeSingle();
+
+  if (!currentMayor || currentMayor.user_id === userId) {
+    // Upsert own mayorship
+    await supabase.from('venue_mayors').upsert({
+      venue_id: venueId,
+      venue_name: venueName,
+      user_id: userId,
+      checkin_count: myCount,
+      period_start: thirtyDaysAgo,
+      is_current: true,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'venue_id,user_id' });
+  } else if (myCount > currentMayor.checkin_count) {
+    // Dethrone current mayor
+    await supabase.from('venue_mayors')
+      .update({ is_current: false, updated_at: new Date().toISOString() })
+      .eq('venue_id', venueId)
+      .eq('is_current', true);
+
+    await supabase.from('venue_mayors').insert({
+      venue_id: venueId,
+      venue_name: venueName,
+      user_id: userId,
+      checkin_count: myCount,
+      period_start: thirtyDaysAgo,
+      is_current: true,
+    });
+  }
+}
+
+async function useStreakPause(userId: string): Promise<boolean> {
+  const today = new Date().toLocaleDateString('en-CA');
+  const monthStart = today.slice(0, 7) + '-01';
+
+  // Check if already used a pause this month
+  const { count } = await supabase
+    .from('streak_pauses')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .gte('paused_date', monthStart);
+
+  if (count && count >= 1) return false; // already used
+
+  const { error } = await supabase.from('streak_pauses').insert({
+    user_id: userId,
+    paused_date: today,
+  });
+
+  if (!error) {
+    // Extend streak_last_date to today so it doesn't break tomorrow
+    await supabase.from('profiles').update({
+      streak_last_date: today,
+      streak_pauses_used: 1,
+    }).eq('id', userId);
+  }
+
+  return !error;
+}
+
 function StreakBanner() {
   const [info] = useState(() => tickStreak());
   const [visible, setVisible] = useState(true);
@@ -3280,6 +3510,103 @@ function StreakBanner() {
       {label}
     </div>
   );
+}
+
+// ─── Competitive Mechanics Hooks ────────────────────────────────────────────
+
+function useCheckInStatus(eventId: string, userId: string | null) {
+  const [checkedIn, setCheckedIn] = React.useState(false);
+  React.useEffect(() => {
+    if (!userId) return;
+    const today = new Date().toLocaleDateString('en-CA');
+    supabase.from('check_ins')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('event_id', eventId)
+      .gte('checked_in_at', today + 'T00:00:00')
+      .maybeSingle()
+      .then(({ data }) => setCheckedIn(!!data));
+  }, [eventId, userId]);
+  return [checkedIn, setCheckedIn] as const;
+}
+
+function useVenueMayor(venueId: string | null) {
+  const [mayor, setMayor] = React.useState<{ user_id: string; display_name: string; checkin_count: number } | null>(null);
+  React.useEffect(() => {
+    if (!venueId) return;
+    supabase.from('venue_mayors')
+      .select('user_id, venue_name, checkin_count, profiles(display_name)')
+      .eq('venue_id', venueId)
+      .eq('is_current', true)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          const p = data.profiles as any;
+          setMayor({ user_id: data.user_id, display_name: p?.display_name || 'Someone', checkin_count: data.checkin_count });
+        }
+      });
+  }, [venueId]);
+  return mayor;
+}
+
+function useWeeklyLeaderboard(tab: 'friends' | 'neighborhood' | 'global', userId: string | null, neighborhood: string | null) {
+  const [rows, setRows] = React.useState<Array<{ user_id: string; display_name: string; weekly_count: number; rank: number; avatar_url?: string; is_me?: boolean }>>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [myRank, setMyRank] = React.useState<{ rank: number; count: number } | null>(null);
+
+  React.useEffect(() => {
+    if (!userId) { setLoading(false); return; }
+    setLoading(true);
+
+    async function load() {
+      if (tab === 'global') {
+        const { data } = await supabase
+          .from('leaderboard_weekly')
+          .select('user_id, display_name, weekly_count, rank, avatar_url')
+          .order('rank', { ascending: true })
+          .limit(10);
+        const top10 = (data || []).map(r => ({ ...r, is_me: r.user_id === userId }));
+        setRows(top10);
+        // Find my rank if not in top 10
+        const myRow = top10.find(r => r.user_id === userId);
+        if (!myRow) {
+          const { data: myData } = await supabase
+            .from('leaderboard_weekly')
+            .select('rank, weekly_count')
+            .eq('user_id', userId)
+            .maybeSingle();
+          if (myData) setMyRank({ rank: myData.rank, count: myData.weekly_count });
+        }
+      } else if (tab === 'neighborhood' && neighborhood) {
+        const { data } = await supabase
+          .from('leaderboard_weekly')
+          .select('user_id, display_name, weekly_count, rank, avatar_url')
+          .eq('neighborhood', neighborhood)
+          .order('rank', { ascending: true })
+          .limit(10);
+        setRows((data || []).map(r => ({ ...r, is_me: r.user_id === userId })));
+      } else if (tab === 'friends') {
+        // Get friend IDs
+        const { data: friendships } = await supabase
+          .from('friendships')
+          .select('requester_id, addressee_id')
+          .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`)
+          .eq('status', 'accepted');
+        const friendIds = (friendships || []).map(f => f.requester_id === userId ? f.addressee_id : f.requester_id);
+        const ids = [...friendIds, userId];
+        const { data } = await supabase
+          .from('leaderboard_weekly')
+          .select('user_id, display_name, weekly_count, rank, avatar_url')
+          .in('user_id', ids)
+          .order('weekly_count', { ascending: false });
+        setRows((data || []).map((r, i) => ({ ...r, rank: i + 1, is_me: r.user_id === userId })));
+      }
+      setLoading(false);
+    }
+    load();
+  }, [tab, userId, neighborhood]);
+
+  return { rows, loading, myRank };
 }
 
 // ─── Daily Gem (date-seeded spot of the day) ──────────────────────────────────
@@ -7727,6 +8054,207 @@ function ProfileAvatarUpload({ user, profile }: { user: any; profile: { avatar_u
   );
 }
 
+// ── CompetitiveSection: Streak card + Leaderboard card ─────────────────────────
+
+function CompetitiveSection({ userId, profile }: { userId: string; profile: any }) {
+  const [leaderboardTab, setLeaderboardTab] = React.useState<'friends' | 'neighborhood' | 'global'>('friends');
+  const [mayorCount, setMayorCount] = React.useState(0);
+  const neighborhood = profile?.neighborhood || null;
+  const { rows: leaderboardRows, loading: leaderboardLoading, myRank } = useWeeklyLeaderboard(leaderboardTab, userId, neighborhood);
+
+  React.useEffect(() => {
+    // Count how many venues user is mayor of
+    supabase.from('venue_mayors')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('is_current', true)
+      .then(({ count }) => setMayorCount(count || 0));
+  }, [userId]);
+
+  const streakDays = profile?.streak_days || 0;
+  const streakLastDate = profile?.streak_last_date || null;
+  const today = new Date().toLocaleDateString('en-CA');
+  const yesterday = new Date(Date.now() - 864e5).toLocaleDateString('en-CA');
+  const isStreakAtRisk = streakLastDate === yesterday && streakDays > 0;
+  const streakPausesUsed = profile?.streak_pauses_used || 0;
+
+  // Milestone badges
+  const milestones = [
+    { days: 7, emoji: '🌟', label: 'Week Warrior' },
+    { days: 30, emoji: '💎', label: 'Monthly Legend' },
+    { days: 100, emoji: '👑', label: 'ABQ Legend' },
+  ];
+
+  return (
+    <>
+      {/* Streak card */}
+      <div className="bg-white rounded-xl p-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+        <p className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif' }}>Check-In Streak</p>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 12 }}>
+          <span style={{ fontSize: 32 }}>🔥</span>
+          <span style={{ fontSize: 28, fontWeight: 900, color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}>{streakDays}</span>
+          <span style={{ fontSize: 13, color: '#666', fontFamily: 'Public Sans, sans-serif' }}>consecutive days</span>
+        </div>
+
+        {streakDays === 0 ? (
+          <p className="text-sm text-gray-600 mb-4" style={{ fontFamily: 'Public Sans, sans-serif' }}>Check in at an event to start your streak!</p>
+        ) : (
+          <>
+            {isStreakAtRisk && (
+              <div style={{ background: '#fff3cd', border: '1px solid #ffc107', borderRadius: 6, padding: '8px 10px', marginBottom: 12 }}>
+                <p className="text-xs font-bold" style={{ color: '#856404', fontFamily: 'Public Sans, sans-serif' }}>⚠️ Check in today to keep your streak!</p>
+              </div>
+            )}
+            <div style={{ marginBottom: 12 }}>
+              <p className="text-xs font-bold mb-2" style={{ color: '#666', fontFamily: 'Public Sans, sans-serif' }}>Milestones</p>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {milestones.map(m => {
+                  const earned = streakDays >= m.days;
+                  return (
+                    <div key={m.days} style={{
+                      padding: '8px 10px',
+                      borderRadius: 6,
+                      background: earned ? '#f0f7ff' : '#f5f5f5',
+                      border: earned ? '1px solid var(--brand)' : '1px solid #ddd',
+                      opacity: earned ? 1 : 0.6,
+                    }}>
+                      <span style={{ fontSize: 14, marginRight: 4 }}>{m.emoji}</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: earned ? 'var(--brand)' : '#999', fontFamily: 'Public Sans, sans-serif' }}>{m.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        )}
+
+        {streakPausesUsed < 1 && streakDays > 0 && (
+          <button
+            onClick={async () => {
+              const success = await useStreakPause(userId);
+              if (success) {
+                toast({ title: 'Streak pause used! Extend your streak by a day.' });
+                window.dispatchEvent(new CustomEvent('profile_updated'));
+              }
+            }}
+            style={{
+              width: '100%',
+              padding: '8px',
+              fontSize: 12,
+              fontWeight: 700,
+              border: '1px solid var(--brand)',
+              borderRadius: 6,
+              background: 'white',
+              color: 'var(--brand)',
+              cursor: 'pointer',
+              fontFamily: 'Public Sans, sans-serif',
+            }}
+          >
+            Use streak pause
+          </button>
+        )}
+
+        {mayorCount > 0 && (
+          <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid #eee' }}>
+            <p className="text-sm font-bold" style={{ color: '#666', fontFamily: 'Public Sans, sans-serif' }}>
+              👑 Mayor of {mayorCount} venue{mayorCount !== 1 ? 's' : ''}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Leaderboard card */}
+      <div className="bg-white rounded-xl p-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+        <p className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: '#888', fontFamily: 'Public Sans, sans-serif' }}>Leaderboard</p>
+
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: 8, marginBottom: 12, borderBottom: '1px solid #eee' }}>
+          {(['friends', 'neighborhood', 'global'] as const).map(tab => (
+            <button
+              key={tab}
+              onClick={() => setLeaderboardTab(tab)}
+              style={{
+                padding: '8px 12px',
+                fontSize: 12,
+                fontWeight: leaderboardTab === tab ? 700 : 500,
+                border: 'none',
+                borderBottom: leaderboardTab === tab ? '2px solid var(--brand)' : '2px solid transparent',
+                background: 'transparent',
+                color: leaderboardTab === tab ? 'var(--brand)' : '#999',
+                cursor: 'pointer',
+                fontFamily: 'Public Sans, sans-serif',
+              }}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
+        </div>
+
+        {/* Weekly reset label */}
+        <p className="text-xs text-gray-500 mb-3" style={{ fontFamily: 'Public Sans, sans-serif' }}>Resets Monday</p>
+
+        {/* Leaderboard rows */}
+        {leaderboardLoading ? (
+          <p className="text-sm text-gray-500" style={{ fontFamily: 'Public Sans, sans-serif' }}>Loading...</p>
+        ) : leaderboardRows.length === 0 ? (
+          <p className="text-xs text-gray-500" style={{ fontFamily: 'Public Sans, sans-serif' }}>No data yet — check in at events to appear here!</p>
+        ) : (
+          <div>
+            {leaderboardRows.map(row => (
+              <div
+                key={row.user_id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '8px 0',
+                  borderBottom: '1px solid #f0f0f0',
+                  background: row.is_me ? 'var(--brand)' + '08' : 'transparent',
+                  borderRadius: 6,
+                  paddingLeft: 6,
+                  paddingRight: 6,
+                }}
+              >
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#999', minWidth: 20 }}>#{row.rank}</span>
+                <div
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: '50%',
+                    background: row.avatar_url ? 'transparent' : 'var(--brand)',
+                    backgroundImage: row.avatar_url ? `url(${row.avatar_url})` : 'none',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {!row.avatar_url && row.display_name[0].toUpperCase()}
+                </div>
+                <span style={{ fontSize: 13, fontWeight: 600, flex: 1, color: row.is_me ? 'var(--brand)' : '#333', fontFamily: 'Public Sans, sans-serif' }}>
+                  {row.display_name}
+                </span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}>{row.weekly_count}</span>
+              </div>
+            ))}
+            {myRank && !leaderboardRows.find(r => r.user_id === userId) && (
+              <div style={{ padding: '8px 6px', marginTop: 8, borderTop: '1px solid #e5e7eb', paddingTop: 8 }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: '#666', fontFamily: 'Public Sans, sans-serif' }}>
+                  You — Rank #{myRank.rank} · {myRank.count} check-ins
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
 function ProfileScreen({ user, onShowAuth, onSignOut }: { user: any; onShowAuth: () => void; onSignOut: () => void }) {
   const [signingOut, setSigningOut] = React.useState(false);
   const profile = useProfile(user?.id ?? null);
@@ -7795,6 +8323,9 @@ function ProfileScreen({ user, onShowAuth, onSignOut }: { user: any; onShowAuth:
             <FriendsSection userId={user.id} />
           </div>
         )}
+
+        {/* Competitive section: Streak & Leaderboard */}
+        {user && profile && <CompetitiveSection userId={user.id} profile={profile} />}
 
         {/* Notifications section */}
         <div className="bg-white rounded-xl p-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
@@ -9906,7 +10437,7 @@ export default function App() {
         </div>
       )}
       {selectedEvent && (
-        <EventDetailModal event={selectedEvent} onClose={closeEventModal} mapProvider={resolvedMapProvider} friendSavedEventIds={friendSavedEventIds} />
+        <EventDetailModal event={selectedEvent} onClose={closeEventModal} mapProvider={resolvedMapProvider} friendSavedEventIds={friendSavedEventIds} user={user} />
       )}
       {showAuthModal && (
         <AuthModal onClose={() => setShowAuthModal(false)} />
