@@ -367,15 +367,29 @@ export default async function EventDetailPage({ params }: PageProps) {
             </a>
           )}
           <ShareButton title={event.title} />
-          {/* Instagram card shortcut — admin/content tool */}
-          <Link
-            href={`/events/${event.id}/ig`}
-            className="inline-flex items-center gap-1.5 px-4 py-3 rounded-xl border border-[#f0e4cc] text-[#8a7a74] text-sm font-medium hover:border-[#9a442d] hover:text-[#9a442d] transition-colors"
-            title="Open Instagram card"
-          >
-            <span>📸</span>
-            <span className="hidden sm:inline">IG Card</span>
-          </Link>
+        </div>
+
+        {/* Instagram share strip */}
+        <div className="mb-4 rounded-xl border border-[#f0e4cc] bg-[#fdf9f4] px-4 py-3">
+          <p className="text-[11px] font-semibold text-[#8a7a74] uppercase tracking-wide mb-2.5">
+            📸 Share to Instagram
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { href: `/events/${event.id}/ig`,  label: '1:1 Square',    desc: 'Feed' },
+              { href: `/events/${event.id}/ig2`, label: '4:5 Portrait',  desc: 'Feed' },
+              { href: `/events/${event.id}/ig3`, label: '9:16 Story',    desc: 'Story / Reel' },
+            ].map(({ href, label, desc }) => (
+              <Link
+                key={href}
+                href={href}
+                className="inline-flex flex-col items-center px-4 py-2 rounded-lg border border-[#e8d9bf] bg-white text-center hover:border-[#9a442d] hover:shadow-sm transition-all"
+              >
+                <span className="text-xs font-semibold text-[#1a1614]">{label}</span>
+                <span className="text-[10px] text-[#8a7a74]">{desc}</span>
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* Add to calendar */}

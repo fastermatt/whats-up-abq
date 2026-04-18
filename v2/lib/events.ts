@@ -769,11 +769,11 @@ function normalizeTM(row: RawEventRow): NormalizedEvent {
     id: row.id,
     title: (r.name as string) ?? 'Untitled Event',
     date: row.event_date ?? startLocalDate ?? startTime ?? '',
-    // Prefer full ISO dateTime (has tz offset), then localDate+localTime (venue-local, no offset shift)
-    time: startTime
+    // Prefer localTime (venue-local, no UTC shift). dateTime is UTC and causes wrong display.
+    time: startLocalTime
+      ? formatTime(`${startLocalDate ?? ''}T${startLocalTime}`)
+      : startTime
       ? formatTime(startTime)
-      : (startLocalDate && startLocalTime)
-      ? formatTime(`${startLocalDate}T${startLocalTime}`)
       : null,
     venue: (v?.name as string | undefined) ?? null,
     address: v ? buildTMAddress(v) : null,
