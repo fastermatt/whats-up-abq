@@ -24,12 +24,15 @@ export default function DesktopNav() {
   return (
     <header className="hidden md:flex sticky top-0 z-40 items-center justify-between px-6 h-14 bg-[#fbf7f1]/95 backdrop-blur-md border-b border-[#f0e4cc]">
       {/* Logo */}
-      <Link
-        href="/"
-        className="font-black text-lg text-[#1a1614] hover:text-[#9a442d] transition-colors tracking-tight"
-        style={{ fontFamily: 'var(--font-epilogue)' }}
-      >
-        ABQ Unplugged
+      <Link href="/" className="flex items-center gap-2.5 hover:opacity-85 transition-opacity">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/icon-192.png" alt="" className="w-8 h-8 rounded-lg" />
+        <span
+          className="font-black text-lg text-[#1a1614] tracking-tight"
+          style={{ fontFamily: 'var(--font-epilogue)' }}
+        >
+          ABQ Unplugged
+        </span>
       </Link>
 
       {/* Nav links */}

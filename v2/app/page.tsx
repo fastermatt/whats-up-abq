@@ -102,14 +102,18 @@ export default async function DiscoverPage() {
         <div className="max-w-6xl mx-auto px-4 pt-8 pb-7 relative">
           {/* Top bar */}
           <div className="flex items-center justify-between mb-8 animate-slide-down">
-            <div>
-              <p
-                className="text-2xl font-black tracking-tight"
-                style={{ fontFamily: 'var(--font-epilogue)' }}
-              >
-                ABQ Unplugged
-              </p>
-              <p className="text-[11px] text-white/50 tracking-wide uppercase">Greater Albuquerque</p>
+            <div className="flex items-center gap-2.5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/icon-192.png" alt="" className="w-10 h-10 rounded-xl shadow-md" />
+              <div>
+                <p
+                  className="text-2xl font-black tracking-tight"
+                  style={{ fontFamily: 'var(--font-epilogue)' }}
+                >
+                  ABQ Unplugged
+                </p>
+                <p className="text-[11px] text-white/50 tracking-wide uppercase">Greater Albuquerque</p>
+              </div>
             </div>
             <Link
               href="/events"

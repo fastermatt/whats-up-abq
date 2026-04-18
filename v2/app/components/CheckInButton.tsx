@@ -21,9 +21,9 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): nu
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
-/** Max distance (km) from venue centre to allow a check-in.
- *  500 m covers GPS drift in large venues, rooftop patios, adjacent parking. */
-const MAX_KM = 0.5
+/** Max distance (miles) from venue centre to allow a check-in.
+ *  ~0.31 mi ≈ 500 m — covers GPS drift in large venues, rooftop patios, adjacent parking. */
+const MAX_MILES = 0.31
 
 /** Geocode a venue name + optional address via Nominatim (OSM, free, no key). */
 async function geocodeVenue(venueName: string, venueAddress: string | null): Promise<{ lat: number; lng: number } | null> {
@@ -124,7 +124,7 @@ export function CheckInButton({ eventId, eventName, eventDate, venueName, venueA
   const [checkedIn, setCheckedIn] = useState(false)
   const [loaded, setLoaded] = useState(false)
   const [geoState, setGeoState] = useState<GeoState>('idle')
-  const [distanceKm, setDistanceKm] = useState<number | null>(null)
+  const [distanceMiles, setDistanceMiles] = useState<number | null>(null)
 
   useEffect(() => {
     async function init() {
@@ -174,7 +174,7 @@ export function CheckInButton({ eventId, eventName, eventDate, venueName, venueA
     }
 
     setGeoState('verifying')
-    setDistanceKm(null)
+    setDistanceMiles(null)
 
     // Step 1: get user's location
     const coords = await getBrowserLocation()
@@ -197,15 +197,16 @@ export function CheckInButton({ eventId, eventName, eventDate, venueName, venueA
 
     // Step 3: check distance
     const km = haversineKm(coords.latitude, coords.longitude, venueCoords.lat, venueCoords.lng)
-    setDistanceKm(km)
+    const miles = km * 0.621371
+    setDistanceMiles(miles)
 
-    if (km <= MAX_KM) {
+    if (miles <= MAX_MILES) {
       setGeoState('confirm')
     } else {
       setGeoState('too_far')
       setTimeout(() => {
         setGeoState('idle')
-        setDistanceKm(null)
+        setDistanceMiles(null)
       }, 4000)
     }
   }
@@ -239,11 +240,10 @@ export function CheckInButton({ eventId, eventName, eventDate, venueName, venueA
   }
 
   if (geoState === 'too_far') {
-    const meters = distanceKm != null ? Math.round(distanceKm * 1000) : null
     const displayDist =
-      distanceKm == null ? '' :
-      distanceKm >= 1 ? ` (${distanceKm.toFixed(1)} km away)` :
-      ` (${meters} m away)`
+      distanceMiles == null ? '' :
+      distanceMiles >= 0.1 ? ` (${distanceMiles.toFixed(1)} mi away)` :
+      ` (about ${Math.round(distanceMiles * 5280)} ft away)`
 
     return (
       <div className="flex flex-col gap-1">
