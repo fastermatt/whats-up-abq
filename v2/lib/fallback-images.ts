@@ -109,15 +109,20 @@ const DEFAULT_IMAGES = [
 // All 7 images placed in v2/public/hero/
 // hero-1–4: bd1a40a6 batch — cream sky, terra terrain, teal accents
 // hero-5–7: d72bebe5 batch — moonrise mesa road, geometric cityscape variations
+// WebP versions — converted from PNG at quality 78, 63–212KB each (vs 2MB+ PNGs).
+// Always prefer .webp; browsers that don't support it get a blank background (acceptable).
 const LOCAL_HERO_IMAGES = [
-  '/hero/hero-1.png',
-  '/hero/hero-2.png',
-  '/hero/hero-3.png',
-  '/hero/hero-4.png',
-  '/hero/hero-5.png',
-  '/hero/hero-6.png',
-  '/hero/hero-7.png',
+  '/hero/hero-1.webp',
+  '/hero/hero-2.webp',
+  '/hero/hero-3.webp',
+  '/hero/hero-4.webp',
+  '/hero/hero-5.webp',
+  '/hero/hero-6.webp',
+  '/hero/hero-7.webp',
 ]
+
+// Exported for the HeroCarousel component — only local WebP (fast, no CDN latency)
+export const CAROUSEL_IMAGES = LOCAL_HERO_IMAGES
 
 // CDN fallback images (Midjourney Southwest illustration style)
 const CDN_HERO_IMAGES = [
@@ -150,8 +155,20 @@ const HERO_IMAGES: string[] = (() => {
 
 // ── OG Share Image ──────────────────────────────────────────────────────────
 // Self-hosted on Netlify CDN — never depends on Midjourney hotlink availability.
-// hero-4.png is the high-contrast vintage poster landscape (1456×816, ~2.3MB).
-export const OG_IMAGE = 'https://abqunplugged.com/hero/hero-4.png'
+export const OG_IMAGE = 'https://abqunplugged.com/hero/hero-4.webp'
+
+/**
+ * Returns the starting index for the hero carousel based on time of day.
+ * Spreads the 7 images across 4 time windows so the image genuinely changes
+ * as the day progresses — morning, afternoon, evening, night.
+ */
+export function getCarouselStartIndex(): number {
+  const hour = new Date().getHours() // local browser time (this is called client-side)
+  if (hour >= 6  && hour < 11) return 0  // morning      → hero-1
+  if (hour >= 11 && hour < 15) return 2  // afternoon    → hero-3
+  if (hour >= 15 && hour < 20) return 4  // evening      → hero-5
+  return 6                               // night/late   → hero-7
+}
 
 // ── Public API ──────────────────────────────────────────────────────────────
 

@@ -2,7 +2,8 @@ import Link from 'next/link'
 import { Fragment } from 'react'
 import type { Metadata } from 'next'
 import { fetchEvents, fetchRecentlyAdded, fetchFeaturedEvents, fetchNeighborhoodCounts, NormalizedEvent } from '@/lib/events'
-import { getHeroImage, getCategoryFallback, OG_IMAGE } from '@/lib/fallback-images'
+import { getCategoryFallback, OG_IMAGE, CAROUSEL_IMAGES } from '@/lib/fallback-images'
+import { HeroCarousel } from '@/app/components/HeroCarousel'
 import { getHeroCopy } from '@/lib/hero-copy'
 import { EventImage } from '@/app/components/EventImage'
 import { MapPin, ArrowRight } from 'lucide-react'
@@ -87,32 +88,27 @@ export default async function DiscoverPage() {
 
       {/* ── Hero ── */}
       <section className="relative overflow-hidden text-white">
-        {/* Hero background image (rotates daily) */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={getHeroImage()}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover animate-reveal-scale"
-        />
-        {/* Dark overlay — directional so the image shows through at bottom */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#7d3725]/80 via-[#9a442d]/70 to-[#5a2416]/60" />
-        {/* Subtle texture */}
-        <div className="absolute inset-0 opacity-[0.07] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMS41IiBmaWxsPSIjZmZmIi8+PC9zdmc+')] animate-fade-in" />
+        {/* Hero carousel — 7 WebP images, crossfade every 5.5s, time-of-day start */}
+        <HeroCarousel serverIndex={Math.floor(Date.now() / 86400000) % CAROUSEL_IMAGES.length} />
+        {/* Dark overlay — directional so the photo shows through at bottom */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#5a2416]/85 via-[#7d3725]/70 to-[#5a2416]/65" />
+        {/* Subtle dot texture */}
+        <div className="absolute inset-0 opacity-[0.06] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMS41IiBmaWxsPSIjZmZmIi8+PC9zdmc+')] animate-fade-in" />
 
-        <div className="max-w-6xl mx-auto px-4 pt-8 pb-7 relative">
+        <div className="max-w-6xl mx-auto px-4 pt-5 pb-5 relative">
           {/* Top bar */}
-          <div className="flex items-center justify-between mb-8 animate-slide-down">
-            <div className="flex items-center gap-2.5">
+          <div className="flex items-center justify-between mb-5 animate-slide-down">
+            <div className="flex items-center gap-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/icon-192.png" alt="" className="w-10 h-10 rounded-xl shadow-md" />
+              <img src="/icon-192.png" alt="" className="w-9 h-9 rounded-xl shadow-md" />
               <div>
                 <p
-                  className="text-2xl font-black tracking-tight"
+                  className="text-xl font-black tracking-tight"
                   style={{ fontFamily: 'var(--font-epilogue)' }}
                 >
                   ABQ Unplugged
                 </p>
-                <p className="text-[11px] text-white/50 tracking-wide uppercase">Greater Albuquerque</p>
+                <p className="text-[10px] text-white/50 tracking-wide uppercase">Greater Albuquerque</p>
               </div>
             </div>
             <Link
@@ -129,7 +125,7 @@ export default async function DiscoverPage() {
               {heroCopy.eyebrow}
             </p>
             <h2
-              className="text-4xl sm:text-5xl font-black leading-[1.05] mb-3"
+              className="text-[28px] sm:text-4xl font-black leading-[1.05] mb-2"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               {heroCopy.lines.map((line, i) => (
@@ -139,15 +135,15 @@ export default async function DiscoverPage() {
                 </Fragment>
               ))}
             </h2>
-            <p className="text-sm text-white/60 mb-4">{dayStr}</p>
+            <p className="text-xs text-white/60 mb-3">{dayStr}</p>
             {/* Surprise Me CTA — inline with hero */}
-            <div className="mb-6">
+            <div className="mb-4">
               <SurpriseButton />
             </div>
           </div>
 
           {/* Quick stats */}
-          <div className="grid grid-cols-3 gap-3 animate-fade-up-delay">
+          <div className="grid grid-cols-3 gap-2 animate-fade-up-delay">
             <QuickStat label="Tonight" count={tonight.total} href="/events?time=tonight" />
             <QuickStat label="Tomorrow" count={tomorrow.total} href="/events?time=tomorrow" />
             <QuickStat label="Weekend" count={weekend.total} href="/events?time=this-weekend" />
@@ -384,16 +380,16 @@ function QuickStat({ label, count, href }: { label: string; count: number; href:
   return (
     <Link
       href={href}
-      className="bg-white/10 backdrop-blur-sm rounded-xl p-3 hover:bg-white/20 transition-all duration-300 hover:scale-[1.02] group"
+      className="bg-white/10 backdrop-blur-sm rounded-xl p-2.5 hover:bg-white/20 transition-all duration-300 hover:scale-[1.02] group"
     >
-      <p className="text-[10px] uppercase tracking-widest text-white/50 mb-0.5">{label}</p>
+      <p className="text-[9px] uppercase tracking-widest text-white/50 mb-0.5">{label}</p>
       <p
-        className="text-3xl font-black tabular-nums"
+        className="text-2xl font-black tabular-nums"
         style={{ fontFamily: 'var(--font-epilogue)' }}
       >
         {count}
       </p>
-      <p className="text-xs text-white/40 group-hover:text-white/60 transition-colors">events</p>
+      <p className="text-[10px] text-white/40 group-hover:text-white/60 transition-colors">events</p>
     </Link>
   )
 }
