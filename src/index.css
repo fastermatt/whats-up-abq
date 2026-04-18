@@ -36,6 +36,11 @@
   body {
     -webkit-overflow-scrolling: touch;
   }
+  /* Prevent iOS Safari from zooming in when focusing inputs
+     (iOS Safari auto-zooms when input font-size < 16px) */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
   #root {
     width: 100%;
     min-height: 100dvh;
