@@ -996,6 +996,26 @@ export function decodeHtml(str: string | undefined | null): string {
 function formatTime(iso: string): string {
   // Date-only strings (YYYY-MM-DD) have no meaningful time — skip them
   if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) return ''
+
+  // Bare datetime without timezone offset (e.g. "2026-04-17T21:30" or "2026-04-17T21:30:00")
+  // Sources (SeatGeek localTime, Eventbrite .local) provide venue-local time. On server runtimes
+  // where TZ=UTC (Netlify), new Date() would parse these as UTC and shift them by 6–7 hours.
+  // Extract HH:MM directly to preserve the intended local time.
+  const bareMatch = iso.match(/^\d{4}-\d{2}-\d{2}T(\d{2}):(\d{2})(?::\d{2})?$/)
+  if (bareMatch) {
+    return formatHHMM(bareMatch[1], bareMatch[2])
+  }
+
+  // Bare time only: "HH:MM" or "HH:MM:SS"
+  const timeOnly = iso.match(/^(\d{2}):(\d{2})(?::\d{2})?$/)
+  if (timeOnly) {
+    return formatHHMM(timeOnly[1], timeOnly[2])
+  }
+
+  // Treat midnight (00:00) with offset as "time unknown" placeholder — many feeds default
+  // to midnight when the real time isn't published. We'd rather show no time than a wrong one.
+  if (/T00:00:00([-+]\d{2}:?\d{2}|Z)?$/.test(iso)) return ''
+
   try {
     const d = new Date(iso)
     if (isNaN(d.getTime())) return ''
@@ -1008,6 +1028,16 @@ function formatTime(iso: string): string {
   } catch {
     return ''
   }
+}
+
+function formatHHMM(hh: string, mm: string): string {
+  const hour = parseInt(hh, 10)
+  if (isNaN(hour)) return ''
+  // Midnight placeholder — most sources use 00:00 to mean "time unknown"
+  if (hour === 0 && mm === '00') return ''
+  const period = hour >= 12 ? 'PM' : 'AM'
+  const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
+  return `${displayHour}:${mm} ${period}`
 }
 
 function buildTMAddress(venue: Record<string, unknown>): string | null {

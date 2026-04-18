@@ -191,6 +191,15 @@ async function main() {
       continue
     }
 
+    // Skip cancelled events — TM keeps them in the feed with status.code='cancelled'.
+    // Rescheduled events carry the NEW date, so they're kept.
+    const statusCode = ev.dates?.status?.code
+    if (statusCode === 'cancelled') {
+      console.log(`  [${i + 1}/${toProcess.length}] ⚠️  SKIP (cancelled): ${title}`)
+      skipped++
+      continue
+    }
+
     const startTime = ev.dates?.start?.localTime
     const eventDate = (startTime && startTime !== '00:00:00')
       ? `${startDate}T${startTime.slice(0, 5)}:00-07:00`

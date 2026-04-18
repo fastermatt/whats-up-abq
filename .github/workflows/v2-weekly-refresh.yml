@@ -92,7 +92,14 @@ jobs:
           fi
           node scripts/enrich-moods-rules.mjs --limit=5000 $EXTRA_FLAGS
 
-      # ── Step 3: Validate data quality ─────────────────────────────────────────
+      # ── Step 3: Hygiene — hide past events, dupes, cancelled ──────────────────
+
+      - name: Event cleanup (past / dupes / cancelled)
+        working-directory: v2
+        run: node scripts/cleanup-events.mjs
+        continue-on-error: true
+
+      # ── Step 4: Validate data quality ─────────────────────────────────────────
 
       - name: Validate event data
         working-directory: v2
