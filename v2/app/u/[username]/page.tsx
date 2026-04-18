@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('display_name, handle')
+    .select('display_name, handle, bio')
     .or(`handle.eq.${username},handle.eq.@${username}`)
     .eq('is_public', true)
     .single()
@@ -43,9 +43,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const displayName = profile.display_name || username
   const handle = profile.handle?.startsWith('@') ? profile.handle : `@${profile.handle ?? username}`
+  const bio = (profile as { bio?: string | null }).bio
 
   return {
-    title: `${displayName} (${handle}) — ABQ Unplugged`,
+    // Use absolute to prevent the root layout's title template from appending "| ABQ Unplugged" again
+    title: { absolute: `${displayName} (${handle}) — ABQ Unplugged` },
+    openGraph: {
+      title: `${displayName} (${handle}) — ABQ Unplugged`,
+      description: bio
+        ? `${bio} — See what ${displayName} is up to on ABQ Unplugged.`
+        : `Check out ${displayName}'s events and check-ins on ABQ Unplugged — Albuquerque's event guide.`,
+    },
   }
 }
 

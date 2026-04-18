@@ -2,7 +2,8 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useState } from 'react'
-import { ChevronDown, ChevronUp, X } from 'lucide-react'
+import { ChevronDown, ChevronUp, X, MapPin } from 'lucide-react'
+import Link from 'next/link'
 import type { CategoryCount } from '@/lib/events'
 
 const TIME_FILTERS = [
@@ -280,6 +281,15 @@ export function FilterBar({ currentTime, currentCategory, priceFilter, categoryC
             </button>
           )
         })}
+
+        {/* Neighborhood link — opens /neighborhoods directory */}
+        <Link
+          href="/neighborhoods"
+          className="flex-none px-3 py-1 rounded-full text-xs font-semibold transition-colors whitespace-nowrap inline-flex items-center gap-1 bg-white border border-[#ddc9a3] text-[#4a3f3a] hover:border-[#9a442d] hover:text-[#9a442d]"
+        >
+          <MapPin className="w-3 h-3" />
+          By Neighborhood
+        </Link>
 
         <div className="flex-none w-6" />
       </ScrollRow>

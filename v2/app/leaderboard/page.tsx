@@ -115,16 +115,15 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
               const isMe = person.id === user?.id
               const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : null
               const score = isWeekly ? (person.weekly_checkins ?? 0) : (person.total_checkins ?? 0)
+              const handle = person.handle?.replace('@', '') ?? null
+              const cardClass = `flex items-center gap-3 rounded-xl px-4 py-3 border transition-all ${
+                isMe
+                  ? 'bg-[#9a442d]/5 border-[#9a442d]/30 shadow-sm'
+                  : 'bg-white border-[#f0e4cc]'
+              } ${handle && !isMe ? 'hover:border-[#9a442d]/30 hover:shadow-sm' : ''}`
 
-              return (
-                <div
-                  key={person.id}
-                  className={`flex items-center gap-3 rounded-xl px-4 py-3 border transition-all ${
-                    isMe
-                      ? 'bg-[#9a442d]/5 border-[#9a442d]/30 shadow-sm'
-                      : 'bg-white border-[#f0e4cc]'
-                  }`}
-                >
+              const inner = (
+                <>
                   {/* Rank */}
                   <div className="w-8 text-center flex-shrink-0">
                     {medal ? (
@@ -169,8 +168,18 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
                       {isWeekly ? 'this week' : 'total'}
                     </p>
                   </div>
-                </div>
+                  {/* Tap hint — only for other users with a profile */}
+                  {handle && !isMe && (
+                    <div className="text-[#ddc9a3] flex-shrink-0">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                    </div>
+                  )}
+                </>
               )
+
+              return handle && !isMe
+                ? <Link key={person.id} href={`/u/${handle}`} className={cardClass}>{inner}</Link>
+                : <div key={person.id} className={cardClass}>{inner}</div>
             })}
           </div>
         )}
