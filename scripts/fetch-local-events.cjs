@@ -309,6 +309,8 @@ function transformEventbriteJsonLd(item, timeBySlug, rejections) {
       localTime = timeBySlug[urlMatch[1]];
     }
   }
+  // Fix 4: 00:00 means "no time known" — null it out so app shows "Time TBD" not "12:00 AM"
+  if (localTime === '00:00' || localTime === '00:00:00') localTime = undefined;
   const loc     = item.location || {};
   const addr    = loc.address || {};
   const geo     = loc.geo    || {};
@@ -433,7 +435,7 @@ function transformDo505Event(ev) {
   if (!start) return null;
   const localDate = start.slice(0, 10);
   if (!isFuture(localDate)) return null;
-  const localTime = start.length >= 16 ? start.slice(11, 16) : undefined;
+  const localTime = (() => { const t = start.length >= 16 ? start.slice(11, 16) : undefined; return (t === '00:00' || t === '00:00:00') ? undefined : t; })();
   const venue = ev.venue || {};
   const lat   = venue.geo_lat || venue.latitude;
   const lng   = venue.geo_lng || venue.longitude;
@@ -522,7 +524,7 @@ function transformAbqToDoEvent(ev) {
   if (!start) return null;
   const localDate = start.slice(0, 10);
   if (!isFuture(localDate)) return null;
-  const localTime = start.length >= 16 ? start.slice(11, 16) : undefined;
+  const localTime = (() => { const t = start.length >= 16 ? start.slice(11, 16) : undefined; return (t === '00:00' || t === '00:00:00') ? undefined : t; })();
   const venue = ev.venue || {};
   const lat   = venue.geo_lat || venue.latitude;
   const lng   = venue.geo_lng || venue.longitude;

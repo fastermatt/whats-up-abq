@@ -37,13 +37,12 @@ async function _upsertEvents(source, rawArr) {
     let d = raw.dates?.start?.localDate || raw.datetime_local?.split('T')[0]
            || raw.datetime_utc?.split('T')[0] || raw.start?.local?.split('T')[0]
            || raw.date?.split('T')[0] || null;
-    // Use raw.id directly if it already has a source prefix (e.g. 'sg-123' from transformSeatGeekEvent)
-    // Otherwise prepend source to avoid bare numeric IDs
+    // Always prepend source to the raw ID. SeatGeek IDs are numeric (e.g. 18163107)
+    // → stored as seatgeek_18163107. TM IDs contain letters (e.g. G5vzZ_...) → ticketmaster_G5vzZ_...
+    // Never use sg- prefix — that was a historical bug that caused duplicate records.
     const rawId = raw.id || raw.event_id || raw.uid;
     const storedId = rawId
-      ? (String(rawId).includes('-') || String(rawId).includes('_')
-          ? source + '_' + String(rawId)   // e.g. seatgeek_sg-18163314 or ticketmaster_G5vzZ...
-          : source + '_' + String(rawId))  // e.g. seatgeek_18163314 (numeric — normalize to this form)
+      ? source + '_' + String(rawId)
       : source + '_' + Math.random();
     return { id: storedId, source, raw, event_date: d };
   });
@@ -219,12 +218,32 @@ async function fetchTicketmasterEvents() {
   console.log(`    Ã¢ÂÂ ${unique.length} unique events fetched`);
   // Enforce: if TM doesn't provide localTime, store 'TBD' instead of undefined.
   // This prevents stale or guessed times from being stored.
+  // Also null out literal 00:00 — no real ABQ event starts at midnight.
   for (const ev of unique) {
     const start = ev.dates?.start;
     if (start && !start.localTime) start.localTime = 'TBD';
+    if (start && (start.localTime === '00:00' || start.localTime === '00:00:00')) {
+      start.localTime = 'TBD';
+    }
   }
 
-  return unique;
+  // Fix 2: Deduplicate TM events by name+date+venue before upsert
+  // TM sometimes returns the same event under two different IDs (individual ticket vs season package)
+  const tmSeenKey = new Set();
+  const tmUnique = unique.filter(ev => {
+    const name = (ev.name || '').toLowerCase().trim();
+    const date = ev.dates?.start?.localDate || '';
+    const venue = (ev._embedded?.venues?.[0]?.name || '').toLowerCase().trim().slice(0, 40);
+    const k = `${name}|${date}|${venue}`;
+    if (tmSeenKey.has(k)) return false;
+    tmSeenKey.add(k);
+    return true;
+  });
+  if (tmUnique.length < unique.length) {
+    console.log(`    Deduped ${unique.length - tmUnique.length} internal TM duplicates (same name+date+venue)`);
+  }
+
+  return tmUnique;
 }
 
 function transformEventbriteEvent(ev) {
@@ -248,7 +267,10 @@ function transformEventbriteEvent(ev) {
     dates: {
       start: {
         localDate: start.local ? start.local.split('T')[0] : undefined,
-        localTime: start.local ? start.local.split('T')[1]?.slice(0, 5) : undefined,
+        localTime: (() => {
+          const t = start.local ? start.local.split('T')[1]?.slice(0, 5) : undefined;
+          return (t === '00:00' || t === '00:00:00') ? undefined : t;
+        })(),
       },
     },
 
@@ -667,7 +689,27 @@ async function main() {
   let sgEvents = [];
   try {
     const rawSg = await fetchSeatGeekEvents();
-    sgEvents = rawSg.map(transformSeatGeekEvent);
+    const sgRaw = rawSg.map(transformSeatGeekEvent);
+    // Fix 3: Cross-source dedup — skip SeatGeek events where TM already has same name+date
+    // TM preferred (better data: more images, structured venues, official ticket links)
+    const tmEventSet = new Set(
+      (Array.isArray(tmEvents) ? tmEvents : []).map(e =>
+        `${(e.name||'').toLowerCase().trim()}|${e.dates?.start?.localDate||''}`
+      )
+    );
+    const sgBeforeDedup = sgRaw.length;
+    sgEvents = sgRaw.filter(ev => {
+      const k = `${(ev.name||'').toLowerCase().trim()}|${ev.dates?.start?.localDate||''}`;
+      return !tmEventSet.has(k);
+    });
+    if (sgEvents.length < sgBeforeDedup) {
+      console.log(`    Cross-source dedup: removed ${sgBeforeDedup - sgEvents.length} SG events already in TM`);
+    }
+    // Fix 4: Null out 00:00 localTime on SG events (no event truly starts at midnight)
+    for (const ev of sgEvents) {
+      const t = ev.dates?.start?.localTime;
+      if (t === '00:00' || t === '00:00:00') ev.dates.start.localTime = undefined;
+    }
     const sgPath = path.join(__dirname, '..', 'public', 'data', 'seatgeek-events.json');
     fs.writeFileSync(sgPath, JSON.stringify(sgEvents, null, 2));
   await _upsertEvents('seatgeek', Array.isArray(sgEvents) ? sgEvents : (sgEvents.events||[]));
