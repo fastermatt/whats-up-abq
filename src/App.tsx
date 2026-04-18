@@ -4011,24 +4011,26 @@ function DiscoverScreen({
 
   // ── Hero image crossfade carousel ─────────────────────────────────────────
   const HERO_IMAGES = ['/hero/hero-1.webp','/hero/hero-2.webp','/hero/hero-3.webp','/hero/hero-4.webp','/hero/hero-5.webp','/hero/hero-6.webp','/hero/hero-7.webp'];
-  const h = new Date().getHours();
-  const startIdx = h < 7 ? 6 : h < 12 ? 0 : h < 17 ? 2 : h < 21 ? 4 : 6;
-  const [heroImgIdx, setHeroImgIdx] = useState(startIdx);
-  const [heroImgNext, setHeroImgNext] = useState((startIdx + 1) % HERO_IMAGES.length);
-  const [heroFading, setHeroFading] = useState(false);
+  const _h = new Date().getHours();
+  const _startIdx = _h < 7 ? 6 : _h < 12 ? 0 : _h < 17 ? 2 : _h < 21 ? 4 : 6;
+  const [heroBotIdx, setHeroBotIdx] = useState(_startIdx);
+  const [heroTopIdx, setHeroTopIdx] = useState((_startIdx + 1) % HERO_IMAGES.length);
+  const [heroTopOpacity, setHeroTopOpacity] = useState(0);
   useEffect(() => {
-    const interval = setInterval(() => {
-      setHeroFading(true);
+    const FADE = 1500;
+    const timer = setInterval(() => {
+      // Fade top layer in (already holds next image)
+      setHeroTopOpacity(1);
+      // After fade completes: snap bottom to next, reset top invisibly, then preload next-next
       setTimeout(() => {
-        setHeroImgIdx(prev => {
-          const next = (prev + 1) % HERO_IMAGES.length;
-          setHeroImgNext((next + 1) % HERO_IMAGES.length);
-          return next;
-        });
-        setHeroFading(false);
-      }, 1500);
+        setHeroBotIdx(prev => (prev + 1) % HERO_IMAGES.length);
+        setHeroTopOpacity(0);
+        setTimeout(() => {
+          setHeroTopIdx(prev => (prev + 1) % HERO_IMAGES.length);
+        }, 50);
+      }, FADE + 50);
     }, 60000);
-    return () => clearInterval(interval);
+    return () => clearInterval(timer);
   }, []);
   useEffect(() => {
     let cancelled = false;
@@ -4173,10 +4175,12 @@ function DiscoverScreen({
       {/* Hero — value prop + filter pills + featured event card */}
       <div style={{ position: 'relative', borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)', overflow: 'hidden' }}>
         {/* Crossfade background layers */}
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${HERO_IMAGES[heroImgIdx]})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: heroFading ? 0 : 1, transition: 'opacity 1.5s ease-in-out', zIndex: 0 }} />
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${HERO_IMAGES[heroImgNext]})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: heroFading ? 1 : 0, transition: 'opacity 1.5s ease-in-out', zIndex: 0 }} />
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.38)', zIndex: 1 }} />
-        <div style={{ position: 'relative', zIndex: 2 }}>
+        {/* Bottom layer — always fully visible, holds current image */}
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${HERO_IMAGES[heroBotIdx]})`, backgroundSize: 'cover', backgroundPosition: 'center', zIndex: 0 }} />
+        {/* Top layer — fades in over bottom, no transition on reset so snap is invisible */}
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${HERO_IMAGES[heroTopIdx]})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: heroTopOpacity, transition: heroTopOpacity === 1 ? 'opacity 1.5s ease-in-out' : 'none', zIndex: 1 }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.38)', zIndex: 2 }} />
+        <div style={{ position: 'relative', zIndex: 3 }}>
         <div className="px-5 pt-5 pb-3">
           <p className="text-xs font-black uppercase mb-2" style={{ color: 'rgba(255,255,255,0.85)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.12em', textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}>
             Greater ABQ Metro
