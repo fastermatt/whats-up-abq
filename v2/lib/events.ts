@@ -758,12 +758,19 @@ function normalizeTM(row: RawEventRow): NormalizedEvent {
 
   const startObj = (r.dates as Record<string, unknown> | undefined)?.start as Record<string, unknown> | undefined
   const startTime = startObj?.dateTime as string | undefined
+  const startLocalDate = startObj?.localDate as string | undefined
+  const startLocalTime = startObj?.localTime as string | undefined
 
   return {
     id: row.id,
     title: (r.name as string) ?? 'Untitled Event',
-    date: row.event_date ?? startTime ?? '',
-    time: startTime ? formatTime(startTime) : null,
+    date: row.event_date ?? startLocalDate ?? startTime ?? '',
+    // Prefer full ISO dateTime (has tz offset), then localDate+localTime (venue-local, no offset shift)
+    time: startTime
+      ? formatTime(startTime)
+      : (startLocalDate && startLocalTime)
+      ? formatTime(`${startLocalDate}T${startLocalTime}`)
+      : null,
     venue: (v?.name as string | undefined) ?? null,
     address: v ? buildTMAddress(v) : null,
     city: (v?.city as Record<string, unknown> | undefined)?.name as string | null ?? null,
@@ -797,16 +804,26 @@ function normalizeEB(row: RawEventRow): NormalizedEvent {
     ? (nameField.text as string)
     : (nameField as string) ?? 'Untitled Event'
 
-  const ebStart = r.start as Record<string, unknown> | undefined
-  const ebLocalTime = ebStart?.local as string | undefined  // e.g. "2026-04-18T19:00:00"
-  const ebUtcTime   = ebStart?.utc   as string | undefined  // e.g. "2026-04-19T01:00:00Z"
+  // EB events are stored in TM-compatible format (dates.start.localDate/localTime)
+  // Native EB paths (r.start.local / r.start.utc) are null in our DB
+  const ebStartObj = (r.dates as Record<string, unknown> | undefined)?.start as Record<string, unknown> | undefined
+  const ebLocalDate = ebStartObj?.localDate as string | undefined
+  const ebLocalTime = ebStartObj?.localTime as string | undefined
+  // Also check native EB paths as fallback (in case some rows use original EB format)
+  const ebNativeStart = r.start as Record<string, unknown> | undefined
+  const ebNativeLocal = ebNativeStart?.local as string | undefined
+  const ebNativeUtc   = ebNativeStart?.utc   as string | undefined
 
   return {
     id: row.id,
     title,
-    date: row.event_date ?? ebUtcTime ?? '',
-    // Prefer .local (already in venue timezone), fall back to .utc (will show UTC hours)
-    time: ebLocalTime ? formatTime(ebLocalTime) : ebUtcTime ? formatTime(ebUtcTime) : null,
+    date: row.event_date ?? ebLocalDate ?? ebNativeLocal ?? ebNativeUtc ?? '',
+    // TM-compat localDate+localTime is the primary signal; native EB paths as fallback
+    time: (ebLocalDate && ebLocalTime)
+      ? formatTime(`${ebLocalDate}T${ebLocalTime}`)
+      : ebNativeLocal ? formatTime(ebNativeLocal)
+      : ebNativeUtc   ? formatTime(ebNativeUtc)
+      : null,
     venue: (venue?.name as string | undefined) ?? null,
     address: venue ? buildEBAddress(venue) : null,
     city: (venue?.address as Record<string, unknown> | undefined)?.city as string | null ?? null,
@@ -914,11 +931,17 @@ function normalizeLocal(row: RawEventRow): NormalizedEvent {
   const r = row.raw as Record<string, unknown>
   // All volunteer events are free; local events may carry an isFree flag
   const isFree = row.source === 'volunteer' || r.isFree === true
+  // Time stored in TM-compat format (dates.start.localDate/localTime) for imported events
+  const localStartObj = (r.dates as Record<string, unknown> | undefined)?.start as Record<string, unknown> | undefined
+  const localStartDate = localStartObj?.localDate as string | undefined
+  const localStartTime = localStartObj?.localTime as string | undefined
   return {
     id: row.id,
     title: decodeHtml((r.title as string) ?? (r.name as string)) || 'Local Event',
-    date: row.event_date ?? (r.date as string) ?? (r.start_date as string) ?? '',
-    time: row.event_date ? (formatTime(row.event_date) || null) : null,
+    date: row.event_date ?? localStartDate ?? (r.date as string) ?? (r.start_date as string) ?? '',
+    time: (localStartDate && localStartTime)
+      ? formatTime(`${localStartDate}T${localStartTime}`)
+      : row.event_date ? (formatTime(row.event_date) || null) : null,
     venue: decodeHtml(typeof r.venue === 'string' ? r.venue : (r.venue_name as string | undefined) ?? null) || null,
     address: decodeHtml((r.address as string | undefined) ?? null) || null,
     city: (r.city as string | undefined) ?? 'Albuquerque',
