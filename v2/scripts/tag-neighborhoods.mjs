@@ -122,14 +122,17 @@ const RULES = [
   // South I-25 / University SE (87106 far south — amphitheater area)
   [/\b(albuquerque school of healing arts|copper ave|outpost performance|4600 copper|albuquerque social club|first financial.*amphitheater|journal pavilion|hard rock amphitheater|university blvd.*south|5601 university)\b/i, 'South I-25 / University SE'],
 
-  // Uptown / Midtown
-  [/\b(uptown|louisiana blvd|coronado center|san mateo blvd|albuquerque marriott|wyoming.*menaul|san mateo pl|san mateo place)\b/i, 'Uptown / Midtown'],
+  // Uptown / Midtown (San Mateo, Louisiana, Wyoming, Pan American Freeway NE corridors)
+  // Horn YMCA is 7840 Pan American Freeway NE (zip 87109) — NOT Northeast Heights
+  [/\b(uptown|louisiana blvd|coronado center|san mateo blvd|albuquerque marriott|wyoming.*menaul|san mateo pl|san mateo place|pan american freeway|horn ymca|hb.*ymca|hb &amp;.*ymca)\b/i, 'Uptown / Midtown'],
 
   // Far Northeast / Sandia Foothills
   [/\b(sandia foothills|tramway blvd|elena gallegos|balloon fiesta|fiesta pkwy|foothills|far northeast|high desert|tony hillerman library|roadrunner food bank|office blvd|sandia casino|sandia amphitheater)\b/i, 'Far Northeast / Sandia Foothills'],
 
-  // Northeast Heights
-  [/\b(juan tabo|lomas tramway|cherry hills.*library|taylor ranch|montgomery blvd|sandia labs|kirtland|eubank blvd|academy blvd|comanche|adobe theater|creativity warehouse|story quest|overtime sports|unity spiritual|nexus brewery|heartstrings|holiday park|san pedro.*library|csp dance|ymca.*comanche|horn ymca|hb.*ymca)\b/i, 'Northeast Heights'],
+  // Northeast Heights (Juan Tabo, Eubank, Academy, Comanche corridor — NE quadrant only)
+  // REMOVED from here: taylor ranch (West Side 87120), overtime sports (Coors Bypass = West Side),
+  // horn ymca / hb ymca (Pan American Freeway = Uptown/Midtown 87109)
+  [/\b(juan tabo|lomas tramway|cherry hills.*library|montgomery blvd|sandia labs|kirtland|eubank blvd|academy blvd|comanche|adobe theater|creativity warehouse|story quest|unity spiritual|nexus brewery|heartstrings|holiday park|san pedro.*library|csp dance|ymca.*comanche)\b/i, 'Northeast Heights'],
 
   // North Valley / Los Ranchos
   [/\b(north valley|los ranchos|rudolfo anaya|los griegos|alameda blvd|los duranes|corrales|rio grande.*north|revel entertainment)\b/i, 'North Valley'],
@@ -140,8 +143,10 @@ const RULES = [
   // Rio Rancho
   [/\b(rio rancho|sandoval|santa ana star|hyatt regency.*tamaya|rust medical|hilton.*rio rancho|cafe.*rio rancho boulevard|castle coffee.*rio rancho)\b/i, 'Rio Rancho'],
 
-  // West Side
-  [/\b(west side|westgate|ladera|coors blvd|paseo del norte.*west|universe blvd|unser.*central|central.*unser|route 66 casino|central.*unser public library|westgate library)\b/i, 'West Side'],
+  // West Side (Coors, Unser, Taylor Ranch, Ladera, Paradise Hills, Westgate)
+  // Taylor Ranch is NW ABQ (zip 87120) — NOT Northeast Heights
+  // Overtime Sports Bar is on Coors Bypass NW (zip 87114) — NOT Northeast Heights
+  [/\b(west side|westgate|ladera|coors blvd|coors bypass|paseo del norte.*west|universe blvd|unser.*central|central.*unser|route 66 casino|central.*unser public library|westgate library|taylor ranch|paradise hills|paradise ridge|overtime sports)\b/i, 'West Side'],
 
   // South Valley / Isleta
   [/\b(south valley|isleta casino|isleta resort|isleta.*showroom|rio bravo brewing|atrisco|woodmont|three sisters kitchen|gold avenue southwest|gutierrez.hubbell|cnm south valley|south valley library|isleta blvd)\b/i, 'South Valley'],
@@ -189,14 +194,44 @@ function getVenueString(row) {
   return [vn, fromRaw, addr].filter(Boolean).join(' | ')
 }
 
+// ─── High-confidence venue overrides (bypass zip lookup) ─────────────────────
+// Use these when TM/SeatGeek has a wrong postalCode for a well-known venue.
+// Key: lowercase partial venue name match. Value: correct neighborhood.
+const VENUE_OVERRIDES = {
+  'new mexico state fair':          'State Fairgrounds / Midtown',
+  'expo new mexico':                'State Fairgrounds / Midtown',
+  'tingley coliseum':               'State Fairgrounds / Midtown',
+  'isotopes park':                  'State Fairgrounds / Midtown',
+  'rgcu field':                     'State Fairgrounds / Midtown',
+  'rio grande credit union field':  'State Fairgrounds / Midtown',
+  'popejoy':                        'UNM Campus',
+  'university stadium':             'UNM Campus',
+  'johnson center':                 'UNM Campus',
+  'keller hall':                    'UNM Campus',
+  'balloon fiesta park':            'Far Northeast / Sandia Foothills',
+  'sandia resort':                  'Far Northeast / Sandia Foothills',
+  'sandia casino':                  'Far Northeast / Sandia Foothills',
+  'route 66 casino':                'West Side',
+  'isleta casino':                  'South Valley',
+  'isleta resort':                  'South Valley',
+  'rio rancho events center':       'Rio Rancho',
+}
+
 // ─── Tag Logic ────────────────────────────────────────────────────────────────
 function tagNeighborhood(venueStr, zip) {
+  const venueStrLower = venueStr.toLowerCase()
+
+  // 0. High-confidence venue overrides — trump zip (handles bad source zips)
+  for (const [key, neighborhood] of Object.entries(VENUE_OVERRIDES)) {
+    if (venueStrLower.includes(key)) return neighborhood
+  }
+
   // 1. Unambiguous zip → direct mapping
   if (zip && ZIP_MAP[zip] && !ZIP_AMBIGUOUS.has(zip)) {
     return ZIP_MAP[zip]
   }
 
-  // 2. Ambiguous zip (87106) — use keywords to pick sub-area, with zip as confirmation
+  // 2. Ambiguous zip (87106) — use keywords to pick sub-area
   if (zip && ZIP_AMBIGUOUS.has(zip)) {
     for (const [regex, neighborhood] of RULES) {
       if (regex.test(venueStr)) return neighborhood
@@ -217,10 +252,11 @@ async function main() {
   console.log(`\nNeighborhood Tagger — ${isDryRun ? 'DRY RUN' : 'LIVE'} ${isForce ? '(--force: re-tagging all)' : ''}`)
   console.log(`Today: ${today}\n`)
 
+  // Use venue_zip generated column (no raw JSON parsing needed in script anymore)
   let query = supabase
     .schema('public')
     .from('events')
-    .select('id, venue_name, raw, neighborhood')
+    .select('id, venue_name, raw, neighborhood, venue_zip')
     .gte('event_date', today)
     .eq('hidden', false)
     .order('event_date', { ascending: true })
@@ -249,7 +285,8 @@ async function main() {
   const wrongTags = []
 
   for (const row of allRows) {
-    const zip = extractZip(row.raw)
+    // Prefer DB venue_zip (generated column, already extracted) over raw JSON parsing
+    const zip = row.venue_zip || extractZip(row.raw)
     const venueStr = getVenueString(row)
     const neighborhood = tagNeighborhood(venueStr, zip)
 
