@@ -209,6 +209,13 @@ async function fetchTicketmasterEvents() {
   });
 
   console.log(`    Ã¢ÂÂ ${unique.length} unique events fetched`);
+  // Enforce: if TM doesn't provide localTime, store 'TBD' instead of undefined.
+  // This prevents stale or guessed times from being stored.
+  for (const ev of unique) {
+    const start = ev.dates?.start;
+    if (start && !start.localTime) start.localTime = 'TBD';
+  }
+
   return unique;
 }
 
@@ -676,18 +683,67 @@ async function main() {
     if (!fs.existsSync(p)) fs.writeFileSync(p, '[]');
   }
 
-  console.log(`Ticketmaster: ${tmEvents.length} events`);
-  console.log(`Eventbrite:   ${ebEvents.length} events`);
-  console.log(`SeatGeek:     ${sgEvents.length} events`);
-  console.log(`Bandsintown:  ${bitEvents.length} events`);
-  console.log(`Meetup:       ${meetupEvents.length} events`);
-  console.log(`Total events: ${totalEvents}`);
-  if (!process.env.CI) {
-    console.log('\nNext steps:');
-    console.log('  git add public/data/');
-    console.log('  git commit -m "data: refresh for Greater ABQ Metro"');
-    console.log('  git push origin main');
+  // ── Cross-source duplicate detection ──────────────────────────────────────
+  // Same venue (normalised) + same date + start times within 6h → probable dup.
+  // TM takes priority over SeatGeek; SeatGeek over EB; EB over others.
+  const SOURCE_PRIORITY_FD = { ticketmaster: 0, seatgeek: 1, eventbrite: 2, bandsintown: 3, meetup: 4 };
+  function normVenueFD(name) {
+    return (name || '').toLowerCase().replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 40);
   }
+  function timeToMinsFD(t) {
+    if (!t || t === 'TBD') return null;
+    const [h, m] = t.split(':').map(Number); return isNaN(h) ? null : h * 60 + (m || 0);
+  }
+
+  const allCrossSource = [...tmEvents, ...sgEvents, ...ebEvents, ...bitEvents, ...meetupEvents];
+  const byVenueDate = new Map();
+  for (const ev of allCrossSource) {
+    const v = normVenueFD(ev._embedded?.venues?.[0]?.name);
+    const d = ev.dates?.start?.localDate;
+    if (!v || !d) continue;
+    const k = v + '|' + d;
+    if (!byVenueDate.has(k)) byVenueDate.set(k, []);
+    byVenueDate.get(k).push(ev);
+  }
+
+  const dupLog = [];
+  const dupRemove = new Set();
+  for (const [, grp] of byVenueDate) {
+    if (grp.length < 2) continue;
+    for (let i = 0; i < grp.length; i++) {
+      for (let j = i + 1; j < grp.length; j++) {
+        const a = grp[i], b = grp[j];
+        if (dupRemove.has(a.id) || dupRemove.has(b.id)) continue;
+        const tA = timeToMinsFD(a.dates?.start?.localTime);
+        const tB = timeToMinsFD(b.dates?.start?.localTime);
+        const diff = (tA !== null && tB !== null) ? Math.abs(tA - tB) : 0;
+        if (diff <= 360) {
+          const pA = SOURCE_PRIORITY_FD[a._source] ?? 99;
+          const pB = SOURCE_PRIORITY_FD[b._source] ?? 99;
+          const rem = pA <= pB ? b : a;
+          dupRemove.add(rem.id);
+          dupLog.push(`  Removed dup: [${rem._source}] ${rem.name} (kept ${pA <= pB ? a._source : b._source} version)`);
+        }
+      }
+    }
+  }
+
+  // ── Validation Report ────────────────────────────────────────────────────
+  const total = allCrossSource.length - dupRemove.size;
+  console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('📋 VALIDATION REPORT');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log(`  Ticketmaster: ${tmEvents.length} events`);
+  console.log(`  SeatGeek:     ${sgEvents.length} events`);
+  console.log(`  Eventbrite:   ${ebEvents.length} events`);
+  console.log(`  Bandsintown:  ${bitEvents.length} events`);
+  console.log(`  Meetup:       ${meetupEvents.length} events`);
+  console.log(`  ─────────────────────────────`);
+  console.log(`  Total (before dedup): ${allCrossSource.length}`);
+  console.log(`  Duplicates removed:   ${dupRemove.size}`);
+  console.log(`  ✅ Net events:        ${total}`);
+  if (dupLog.length) dupLog.forEach(l => console.log(l));
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 }
 
 main().catch(e => { console.error(e); process.exit(1); });

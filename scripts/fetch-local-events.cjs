@@ -133,6 +133,16 @@ const ABQ_LAT  = 35.1053;
 const ABQ_LNG  = -106.6464;
 const MAX_MILES = 45;
 
+// Hard bounding box for Eventbrite geo-filter (user spec: lat 34.8–35.3, lng -107.2 to -106.4)
+const ABQ_BBOX = { latMin: 34.8, latMax: 35.3, lngMin: -107.2, lngMax: -106.4 };
+
+// City names that count as ABQ metro
+const ABQ_CITIES = new Set([
+  'albuquerque', 'rio rancho', 'bernalillo', 'corrales',
+  'edgewood', 'cedar crest', 'tijeras', 'bosque farms',
+  'los lunas', 'sandia park', 'placitas',
+]);
+
 function haversine(lat1, lng1, lat2, lng2) {
   const R = 3958.8;
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -148,7 +158,41 @@ function isInMetro(lat, lng) {
   return haversine(ABQ_LAT, ABQ_LNG, dlat, dlng) <= MAX_MILES;
 }
 
-function todayStr() { return new Date().toISOString().split('T')[0]; }
+/**
+ * Hard geo-filter for Eventbrite events.
+ * Requires EITHER a recognised ABQ metro city name OR coordinates within the bounding box.
+ * Returns { pass: bool, reason: string }
+ */
+function eventbriteGeoCheck(cityName, stateName, lat, lng) {
+  const city  = (cityName  || '').toLowerCase().trim();
+  const state = (stateName || '').toLowerCase().trim();
+
+  // City whitelist check
+  if (ABQ_CITIES.has(city)) return { pass: true, reason: 'city match' };
+
+  // State must be NM if we're going to trust coords
+  if (state && state !== 'nm' && state !== 'new mexico') {
+    return { pass: false, reason: `wrong state: "${stateName}"` };
+  }
+
+  // Bounding box check
+  if (lat && lng) {
+    const dlat = parseFloat(lat), dlng = parseFloat(lng);
+    if (!isNaN(dlat) && !isNaN(dlng)) {
+      if (dlat >= ABQ_BBOX.latMin && dlat <= ABQ_BBOX.latMax &&
+          dlng >= ABQ_BBOX.lngMin && dlng <= ABQ_BBOX.lngMax) {
+        return { pass: true, reason: 'coords in bbox' };
+      }
+      return { pass: false, reason: `coords out of bbox (${dlat.toFixed(3)}, ${dlng.toFixed(3)})` };
+    }
+  }
+
+  // No city match, no usable coords — reject
+  if (!city) return { pass: false, reason: 'no city or coords' };
+  return { pass: false, reason: `unknown city: "${cityName}"` };
+}
+
+function todayStr() { return new Date().toLocaleDateString('en-CA'); }
 function isFuture(d) { return typeof d === 'string' && d >= todayStr(); }
 
 // ── 1. EVENTBRITE HTML scraper ─────────────────────────────────────────────────
@@ -159,6 +203,7 @@ async function fetchEventbriteEvents() {
   console.log('\n🎟️  Fetching Eventbrite events (Albuquerque, NM)...');
   const events = [];
   const seenIds = new Set();
+  const rejections = []; // Track geo-rejected events for validation report
 
   const urls = [
     'https://www.eventbrite.com/d/nm--albuquerque/events/',
@@ -199,7 +244,7 @@ async function fetchEventbriteEvents() {
             const items = ld['@type'] === 'ItemList' ? ld.itemListElement?.map(e => e.item) : [ld];
             for (const item of (items || [])) {
               if (item?.['@type'] !== 'Event') continue;
-              const ev = transformEventbriteJsonLd(item, timeBySlug);
+              const ev = transformEventbriteJsonLd(item, timeBySlug, rejections);
               if (ev && !seenIds.has(ev.id)) { seenIds.add(ev.id); events.push(ev); }
             }
           } catch {}
@@ -217,7 +262,7 @@ async function fetchEventbriteEvents() {
 
         for (const item of items) {
           if (!item || item['@type'] !== 'Event') continue;
-          const ev = transformEventbriteJsonLd(item, timeBySlug);
+          const ev = transformEventbriteJsonLd(item, timeBySlug, rejections);
           if (ev && !seenIds.has(ev.id)) { seenIds.add(ev.id); events.push(ev); }
         }
       } catch (parseErr) {
@@ -230,8 +275,13 @@ async function fetchEventbriteEvents() {
     }
   }
 
+  if (rejections.length) {
+    console.log(`  ⛔ Geo-rejected ${rejections.length} Eventbrite events (wrong city/coords):`);
+    rejections.slice(0, 10).forEach(r => console.log(`      • ${r.title} — ${r.reason}`));
+    if (rejections.length > 10) console.log(`      … and ${rejections.length - 10} more`);
+  }
   console.log(`  ✓ ${events.length} Eventbrite events`);
-  return events;
+  return { events, rejections };
 }
 
 /** Convert "7:00 PM" → "19:00", "11:30 AM" → "11:30" */
@@ -246,7 +296,7 @@ function convertTo24h(timeStr) {
   return String(h).padStart(2, '0') + ':' + min;
 }
 
-function transformEventbriteJsonLd(item, timeBySlug) {
+function transformEventbriteJsonLd(item, timeBySlug, rejections) {
   const startDate = item.startDate || '';
   const localDate = startDate ? startDate.slice(0, 10) : '';
   if (!localDate || !isFuture(localDate)) return null;
@@ -264,9 +314,17 @@ function transformEventbriteJsonLd(item, timeBySlug) {
   const geo     = loc.geo    || {};
   const lat     = geo.latitude;
   const lng     = geo.longitude;
+  const cityName  = addr.addressLocality || '';
+  const stateName = addr.addressRegion   || '';
 
-  // Filter to ABQ metro only (online events pass through)
-  if (loc['@type'] !== 'VirtualLocation' && lat && lng && !isInMetro(lat, lng)) return null;
+  // Hard geo-filter: online events always pass; physical events must be in ABQ metro
+  if (loc['@type'] !== 'VirtualLocation') {
+    const geoResult = eventbriteGeoCheck(cityName, stateName, lat, lng);
+    if (!geoResult.pass) {
+      if (rejections) rejections.push({ title: item.name, reason: geoResult.reason });
+      return null;
+    }
+  }
 
   // Generate stable ID from URL
   const urlMatch = (item.url || '').match(/\/e\/[a-z0-9-]+-(\d+)/i);
@@ -300,15 +358,20 @@ function transformEventbriteJsonLd(item, timeBySlug) {
 
 function guessCategory(name, desc) {
   const t = (name + ' ' + desc).toLowerCase();
-  if (/music|concert|band|dj|live|jazz|blues|folk|rock|country|hip.?hop/.test(t)) return 'Music';
+  if (/music|concert|band|dj|live music|jazz|blues|folk|rock|country|hip.?hop/.test(t)) return 'Music';
   if (/comedy|stand.?up|improv|laugh/.test(t)) return 'Comedy';
-  if (/art|galler|exhibit|paint|sculpt|photo|craft/.test(t)) return 'Arts & Theatre';
+  // Food & Drink before Arts so "food fair", "tasting" etc. land correctly
+  if (/food|drink|beer|wine|tast|brew|cocktail|dinner|brunch|culinar|farm.to/.test(t)) return 'Food & Drink';
+  if (/art\b|galler|exhibit|paint|sculpt|craft show|art fair|art market/.test(t)) return 'Arts & Theatre';
   if (/film|movie|cinema|screen/.test(t)) return 'Arts & Theatre';
   if (/theater|theatre|play|musical|opera|dance|ballet/.test(t)) return 'Arts & Theatre';
   if (/sport|run|race|5k|marathon|bike|yoga|fitness|gym/.test(t)) return 'Sports';
   if (/kid|child|famil|baby|toddler|youth/.test(t)) return 'Family';
-  if (/food|drink|beer|wine|tast|brew|cocktail|dinner/.test(t)) return 'Food & Drink';
-  if (/festival|market|fair|fiesta/.test(t)) return 'Community';
+  // "festival" is Community only when it's an explicit multi-act outdoor event word
+  // "fair" alone is too broad — require context or full word "festival"
+  if (/\bfestival\b|fiesta|street fair|block party|cultural fair/.test(t)) return 'Community';
+  if (/\bmarket\b|vendor|artisan market/.test(t)) return 'Community';
+  if (/book (fair|club|fest)|literary/.test(t)) return 'Community';
   if (/outdoor|hike|trail|nature|garden/.test(t)) return 'Community';
   return 'Community';
 }
@@ -511,9 +574,82 @@ function transformAbqToDoEvent(ev) {
   };
 }
 
-// ── 4. Upsert to Supabase ─────────────────────────────────────────────────────
+// ── 4. Cross-source duplicate detection ──────────────────────────────────────
+/**
+ * Flag probable duplicates: same venue (normalised) + same date + start times
+ * within 6 hours of each other. Keeps the Ticketmaster version when available;
+ * otherwise keeps the first (higher-priority) source.
+ *
+ * Source priority: ticketmaster > seatgeek > eventbrite > do505 > local
+ */
+const SOURCE_PRIORITY = { ticketmaster: 0, seatgeek: 1, eventbrite: 2, do505: 3, local: 4 };
+
+function normVenue(name) {
+  return (name || '').toLowerCase()
+    .replace(/[^a-z0-9]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 40);
+}
+
+function timeToMinutes(localTime) {
+  if (!localTime) return null;
+  const [h, m] = localTime.split(':').map(Number);
+  return isNaN(h) ? null : h * 60 + (m || 0);
+}
+
+function deduplicateCrossSource(events) {
+  // Build a map: `${normVenueName}|${date}` → [event, ...]
+  const byVenueDate = new Map();
+  for (const ev of events) {
+    const venue = normVenue(ev._embedded?.venues?.[0]?.name);
+    const date  = ev.dates?.start?.localDate;
+    if (!venue || !date) continue;
+    const key = `${venue}|${date}`;
+    if (!byVenueDate.has(key)) byVenueDate.set(key, []);
+    byVenueDate.get(key).push(ev);
+  }
+
+  const duplicates = []; // for validation report
+  const toRemove   = new Set();
+
+  for (const [, group] of byVenueDate) {
+    if (group.length < 2) continue;
+    for (let i = 0; i < group.length; i++) {
+      for (let j = i + 1; j < group.length; j++) {
+        const a = group[i], b = group[j];
+        if (toRemove.has(a.id) || toRemove.has(b.id)) continue;
+        const tA = timeToMinutes(a.dates?.start?.localTime);
+        const tB = timeToMinutes(b.dates?.start?.localTime);
+        // Within 6 hours (360 min) or both times unknown → probable duplicate
+        const timeDiff = (tA !== null && tB !== null) ? Math.abs(tA - tB) : 0;
+        if (timeDiff <= 360) {
+          // Keep whichever has higher priority (lower number)
+          const prioA = SOURCE_PRIORITY[a._source] ?? 99;
+          const prioB = SOURCE_PRIORITY[b._source] ?? 99;
+          const keep   = prioA <= prioB ? a : b;
+          const remove = prioA <= prioB ? b : a;
+          toRemove.add(remove.id);
+          duplicates.push({
+            kept:    `[${keep._source}] ${keep.name}`,
+            removed: `[${remove._source}] ${remove.name}`,
+            venue:   group[0]._embedded?.venues?.[0]?.name,
+            date:    group[0].dates?.start?.localDate,
+          });
+        }
+      }
+    }
+  }
+
+  return {
+    events: events.filter(e => !toRemove.has(e.id)),
+    duplicates,
+  };
+}
+
+// ── 5. Upsert to Supabase ─────────────────────────────────────────────────────
 async function upsertEvents(source, rawArr) {
-  if (!_sb || !rawArr.length) return;
+  if (!_sb || !rawArr.length) return { inserted: 0 };
   const rows = rawArr.map(raw => ({
     id:         raw.id,
     source,
@@ -521,8 +657,12 @@ async function upsertEvents(source, rawArr) {
     event_date: raw.dates?.start?.localDate || null,
   }));
   const { error } = await _sb.from('events').upsert(rows, { onConflict: 'id' });
-  if (error) console.error(`[Supabase] ${source} upsert error:`, error.message);
-  else console.log(`[Supabase] ✓ upserted ${rows.length} ${source} events`);
+  if (error) {
+    console.error(`[Supabase] ${source} upsert error:`, error.message);
+    return { inserted: 0 };
+  }
+  console.log(`[Supabase] ✓ upserted ${rows.length} ${source} events`);
+  return { inserted: rows.length };
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -530,18 +670,25 @@ async function upsertEvents(source, rawArr) {
   console.log('🗓️  ABQ Unplugged — Local Event Sources');
   console.log('   Sources: Eventbrite (HTML/JSON-LD), Do505 (WP API), ABQToDo (WP API)\n');
 
-  const [ebEvents, do505Events, abqTodoEvents] = await Promise.all([
+  const [ebResult, do505Events, abqTodoEvents] = await Promise.all([
     fetchEventbriteEvents(),
     fetchDo505Events(),
     fetchAbqToDoEvents(),
   ]);
+
+  const ebEvents      = ebResult.events;
+  const ebRejections  = ebResult.rejections;
 
   // Enrich events still missing photos — fetch og:image from each event's page
   await enrichImagesFromOg(ebEvents,      'Eventbrite');
   await enrichImagesFromOg(do505Events,   'Do505');
   await enrichImagesFromOg(abqTodoEvents, 'ABQToDo');
 
-  const allLocal = [...ebEvents, ...do505Events, ...abqTodoEvents];
+  const allBeforeDedup = [...ebEvents, ...do505Events, ...abqTodoEvents];
+
+  // Cross-source duplicate detection
+  const { events: allLocal, duplicates } = deduplicateCrossSource(allBeforeDedup);
+
   console.log(`\n📊 Total local/EB events: ${allLocal.length}`);
   console.log(`   Eventbrite: ${ebEvents.length}  |  Do505: ${do505Events.length}  |  ABQToDo: ${abqTodoEvents.length}`);
 
@@ -553,13 +700,31 @@ async function upsertEvents(source, rawArr) {
   console.log(`✅ Saved → ${outPath}`);
 
   // Upsert to Supabase by source bucket
-  const ebRows       = allLocal.filter(e => e._source === 'eventbrite');
-  const do505Rows    = allLocal.filter(e => e._source === 'do505');
-  const localRows    = allLocal.filter(e => e._source === 'local');
+  const ebRows    = allLocal.filter(e => e._source === 'eventbrite');
+  const do505Rows = allLocal.filter(e => e._source === 'do505');
+  const localRows = allLocal.filter(e => e._source === 'local');
 
-  await upsertEvents('eventbrite', ebRows);
-  await upsertEvents('do505',      do505Rows);
-  await upsertEvents('local',      localRows);
+  const r1 = await upsertEvents('eventbrite', ebRows);
+  const r2 = await upsertEvents('do505',      do505Rows);
+  const r3 = await upsertEvents('local',      localRows);
 
+  // ── Validation Report ──────────────────────────────────────────────────────
+  console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('📋 VALIDATION REPORT');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log(`  ✅ Events upserted:     ${r1.inserted + r2.inserted + r3.inserted}`);
+  console.log(`     • Eventbrite:        ${r1.inserted}`);
+  console.log(`     • Do505:             ${r2.inserted}`);
+  console.log(`     • ABQToDo:           ${r3.inserted}`);
+  console.log(`  ⛔ Geo-rejected (EB):   ${ebRejections.length}`);
+  if (ebRejections.length) {
+    ebRejections.slice(0, 5).forEach(r => console.log(`     • ${r.title} — ${r.reason}`));
+    if (ebRejections.length > 5) console.log(`     … +${ebRejections.length - 5} more`);
+  }
+  console.log(`  🔁 Duplicates removed:  ${duplicates.length}`);
+  if (duplicates.length) {
+    duplicates.forEach(d => console.log(`     • Kept: ${d.kept} | Removed: ${d.removed} @ ${d.venue} ${d.date}`));
+  }
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('\n✅ Done.');
 })();
