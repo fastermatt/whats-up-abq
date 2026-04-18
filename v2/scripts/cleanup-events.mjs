@@ -113,6 +113,44 @@ async function main() {
     q => q.eq('source', 'ticketmaster').filter('raw->dates->status->>code', 'eq', 'cancelled'),
   )
 
+  // 4. Eventbrite B2B training / workshop spam farms.
+  //    These listings spam every US city with generic "certification" /
+  //    "1-day workshop" content. We match on venue AND title patterns —
+  //    venue "For venue details reach us at info@..." is a canonical tell,
+  //    and titles like "PMP Certification ... in Albuquerque, NM" are spam boilerplate.
+  await hide(
+    'eb_spam_bootcamp_daily',
+    q => q.eq('source', 'eventbrite').or([
+      'venue_name.ilike.%info@%',
+      'venue_name.ilike.%for venue details%',
+      'venue_name.ilike.%reach us at%',
+    ].join(',')),
+  )
+  // Title-regex arm — PostgREST .or() can't drill into raw JSONB, so we fetch
+  // the small EB set and filter client-side. Reads ~200 rows daily.
+  {
+    const SPAM_TITLE = /(1[\s-]?day\s+workshop|[1-9][\s-]?day\s+(bootcamp|training|certification)|(pmp|lean six sigma|lssgb|ceh|scrum master|itil|agile|data science).*(certification|training|bootcamp)|in\s+(albuquerque|rio rancho|santa fe),?\s*n\.?m\.?$)/i
+    const { data } = await supabase.schema('public').from('events')
+      .select('id, raw, ai_enrichment')
+      .eq('source', 'eventbrite')
+      .eq('hidden', false)
+    let hidden = 0
+    for (const row of data || []) {
+      const title = typeof row.raw?.name === 'string' ? row.raw.name : row.raw?.name?.text
+      if (!title || !SPAM_TITLE.test(title)) continue
+      const merged = {
+        ...(row.ai_enrichment || {}),
+        hide_reason: 'eb_spam_title_daily',
+        hidden_at: new Date().toISOString(),
+      }
+      const { error } = await supabase.schema('public').from('events')
+        .update({ hidden: true, ai_enrichment: merged })
+        .eq('id', row.id)
+      if (!error) hidden += 1
+    }
+    console.log(`  [eb_spam_title_daily] hid ${hidden} rows`)
+  }
+
   console.log('\n✅ Cleanup complete')
 }
 
