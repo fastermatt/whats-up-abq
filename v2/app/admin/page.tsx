@@ -38,17 +38,17 @@ export default async function AdminDashboard() {
     supabase.from('event_reports').select('id,event_id,event_title,report_type,message,created_at,status').order('created_at', { ascending: false }).limit(5),
     // Most-saved events
     supabase.from('user_events').select('event_id, event_name').limit(500),
-    // Category breakdown
-    supabase.from('events').select('ai_enrichment').eq('hidden', false).gte('event_date', today).not('ai_enrichment', 'is', null),
+    // Category breakdown — read the actual category column, not ai_enrichment
+    supabase.from('events').select('category').eq('hidden', false).gte('event_date', today),
     // Analytics events in last 7 days (pulls `data` so we can filter out V1 noise)
     supabase.from('analytics').select('event_type, data, created_at').gte('created_at', weekAgo + 'T00:00:00').order('created_at', { ascending: false }).limit(500),
   ])
 
-  // Category tally
+  // Category tally from the actual category column
   const categoryCounts: Record<string, number> = {}
   let uncategorized = 0
   for (const row of catRows ?? []) {
-    const cat = (row.ai_enrichment as Record<string, unknown>)?.category as string | undefined
+    const cat = row.category as string | null | undefined
     if (cat) categoryCounts[cat] = (categoryCounts[cat] ?? 0) + 1
     else uncategorized++
   }
@@ -91,14 +91,25 @@ export default async function AdminDashboard() {
         <p className="text-white/40 text-sm">ABQ Unplugged — site management & analytics</p>
       </div>
 
+      {/* ── Help banner ── */}
+      <section className="bg-white/5 border border-white/10 rounded-2xl p-4 text-sm text-white/50 leading-relaxed space-y-1">
+        <p className="text-white/70 font-semibold text-xs uppercase tracking-widest mb-2">How this works</p>
+        <p><span className="text-white/70">Live Events</span> — Visible on the public site right now (today or future, not hidden).</p>
+        <p><span className="text-white/70">Hidden</span> — Filtered out: past events, cross-source duplicates, non-ABQ listings, cancelled shows, Eventbrite spam. Click to review and unhide anything that shouldn&apos;t be hidden.</p>
+        <p><span className="text-white/70">Featured</span> — Pinned to the top of the homepage &quot;Featured&quot; section. Use sparingly — 3–6 events max.</p>
+        <p><span className="text-white/70">Pending Reports</span> — Users flagged these events as wrong/inappropriate. Review and resolve in Reports.</p>
+        <p><span className="text-white/70">AI Enrichment</span> — Events that have been enriched with descriptions, highlights, venue tips, and mood tags by the AI pipeline. Run <code className="text-[#9a442d] text-xs">node scripts/enrich-moods-lm.mjs</code> to enrich more.</p>
+        <p><span className="text-white/70">Submissions</span> — Community-submitted events awaiting your approval before going live.</p>
+      </section>
+
       {/* ── Events stats ── */}
       <section>
         <h2 className="text-xs uppercase tracking-widest text-white/30 mb-3">Events</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <StatCard label="Live Events"      value={totalEvents ?? 0}   href="/admin/events"           />
-          <StatCard label="Hidden"           value={hiddenCount ?? 0}   href="/admin/events?hidden=1"  color="yellow" />
-          <StatCard label="Featured"         value={featuredCount ?? 0} href="/admin/events?featured=1" color="blue" />
-          <StatCard label="Pending Reports"  value={pendingCount ?? 0}  href="/admin/reports"          color={pendingCount ? 'red' : 'green'} />
+          <StatCard label="Live Events"      value={totalEvents ?? 0}   href="/admin/events"            tip="Upcoming events visible to the public" />
+          <StatCard label="Hidden"           value={hiddenCount ?? 0}   href="/admin/events?hidden=1"   color="yellow" tip="Filtered out — click to review" />
+          <StatCard label="Featured"         value={featuredCount ?? 0} href="/admin/events?featured=1" color="blue"   tip="Pinned to the homepage hero" />
+          <StatCard label="Pending Reports"  value={pendingCount ?? 0}  href="/admin/reports"           color={pendingCount ? 'red' : 'green'} tip="User-flagged events needing review" />
         </div>
       </section>
 
@@ -241,12 +252,14 @@ export default async function AdminDashboard() {
         <h2 className="text-xs uppercase tracking-widest text-white/30 mb-3">Quick Actions</h2>
         <div className="flex flex-wrap gap-2">
           {[
-            { href: '/admin/reports',        label: 'Review Reports' },
-            { href: '/admin/events',          label: 'Browse Events' },
-            { href: '/admin/events?featured=1', label: 'Featured' },
-            { href: '/admin/events?hidden=1', label: 'Hidden' },
-            { href: '/leaderboard',           label: 'Leaderboard' },
-            { href: '/events',               label: '↗ View Site' },
+            { href: '/admin/analytics',         label: '📊 Analytics' },
+            { href: '/admin/reports',            label: 'Review Reports' },
+            { href: '/admin/submissions',        label: 'Submissions' },
+            { href: '/admin/events',             label: 'Browse Events' },
+            { href: '/admin/events?featured=1',  label: 'Featured' },
+            { href: '/admin/events?hidden=1',    label: 'Hidden' },
+            { href: '/leaderboard',              label: 'Leaderboard' },
+            { href: '/events',                   label: '↗ View Site' },
           ].map(({ href, label }) => (
             <Link key={href} href={href} className="px-4 py-2 bg-white/10 rounded-xl text-sm hover:bg-white/15 transition-colors">
               {label}
@@ -258,16 +271,17 @@ export default async function AdminDashboard() {
   )
 }
 
-function StatCard({ label, value, href, color }: { label: string; value: number; href: string; color?: string }) {
+function StatCard({ label, value, href, color, tip }: { label: string; value: number; href: string; color?: string; tip?: string }) {
   const colors: Record<string, string> = {
     red: 'text-red-400', yellow: 'text-yellow-400', green: 'text-green-400', blue: 'text-blue-400',
   }
   return (
-    <Link href={href} className="bg-white/5 hover:bg-white/10 rounded-2xl p-4 transition-colors">
+    <Link href={href} className="bg-white/5 hover:bg-white/10 rounded-2xl p-4 transition-colors group" title={tip}>
       <p className="text-white/40 text-xs uppercase tracking-wider mb-2">{label}</p>
       <p className={`text-4xl font-black tabular-nums ${colors[color ?? ''] ?? 'text-white'}`} style={{ fontFamily: 'var(--font-epilogue)' }}>
         {value.toLocaleString()}
       </p>
+      {tip && <p className="text-white/20 text-[10px] mt-1.5 leading-tight">{tip}</p>}
     </Link>
   )
 }
