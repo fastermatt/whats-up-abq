@@ -397,6 +397,8 @@ export default async function EventDetailPage({ params }: PageProps) {
             eventId={event.id}
             eventName={event.title}
             eventDate={event.date}
+            venueName={event.venue ?? null}
+            venueAddress={event.address ?? null}
           />
         </div>
 
