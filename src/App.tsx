@@ -4008,6 +4008,28 @@ function DiscoverScreen({
   const [calendarDate, setCalendarDate] = useState<string | null>(null);
   const [showCalendar, setShowCalendar] = useState(true);
   const [discoverFilter, setDiscoverFilter] = useState<'Tonight' | 'This Weekend' | 'Free' | 'Volunteer'>('Tonight');
+
+  // ── Hero image crossfade carousel ─────────────────────────────────────────
+  const HERO_IMAGES = ['/hero/hero-1.webp','/hero/hero-2.webp','/hero/hero-3.webp','/hero/hero-4.webp','/hero/hero-5.webp','/hero/hero-6.webp','/hero/hero-7.webp'];
+  const h = new Date().getHours();
+  const startIdx = h < 7 ? 6 : h < 12 ? 0 : h < 17 ? 2 : h < 21 ? 4 : 6;
+  const [heroImgIdx, setHeroImgIdx] = useState(startIdx);
+  const [heroImgNext, setHeroImgNext] = useState((startIdx + 1) % HERO_IMAGES.length);
+  const [heroFading, setHeroFading] = useState(false);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setHeroFading(true);
+      setTimeout(() => {
+        setHeroImgIdx(prev => {
+          const next = (prev + 1) % HERO_IMAGES.length;
+          setHeroImgNext((next + 1) % HERO_IMAGES.length);
+          return next;
+        });
+        setHeroFading(false);
+      }, 1500);
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
   useEffect(() => {
     let cancelled = false;
     const phrasePool = (adminHeroLines?.length) ? adminHeroLines : HERO_PHRASES;
@@ -4149,15 +4171,20 @@ function DiscoverScreen({
       <StreakBanner />
 
       {/* Hero — value prop + filter pills + featured event card */}
-      <div style={{ background: "url('/hero-texture.webp') center/cover no-repeat, var(--bg)", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+      <div style={{ position: 'relative', borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)', overflow: 'hidden' }}>
+        {/* Crossfade background layers */}
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${HERO_IMAGES[heroImgIdx]})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: heroFading ? 0 : 1, transition: 'opacity 1.5s ease-in-out', zIndex: 0 }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${HERO_IMAGES[heroImgNext]})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: heroFading ? 1 : 0, transition: 'opacity 1.5s ease-in-out', zIndex: 0 }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.38)', zIndex: 1 }} />
+        <div style={{ position: 'relative', zIndex: 2 }}>
         <div className="px-5 pt-5 pb-3">
-          <p className="text-xs font-black uppercase mb-2" style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.12em' }}>
+          <p className="text-xs font-black uppercase mb-2" style={{ color: 'rgba(255,255,255,0.85)', fontFamily: 'Public Sans, sans-serif', letterSpacing: '0.12em', textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}>
             Greater ABQ Metro
           </p>
-          <h1 className="font-black leading-none mt-1 mb-1" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '40px', letterSpacing: '-0.04em', color: 'var(--ink)', minHeight: '48px' }}>
-            {heroDisplay}{!heroDone && <span style={{ display: 'inline-block', width: '3px', height: '0.85em', background: 'var(--ink)', marginLeft: '2px', verticalAlign: 'baseline', animation: 'cursorBlink 0.8s step-end infinite' }} />}
+          <h1 className="font-black leading-none mt-1 mb-1" style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '40px', letterSpacing: '-0.04em', color: '#fff', minHeight: '48px', textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
+            {heroDisplay}{!heroDone && <span style={{ display: 'inline-block', width: '3px', height: '0.85em', background: '#fff', marginLeft: '2px', verticalAlign: 'baseline', animation: 'cursorBlink 0.8s step-end infinite' }} />}
           </h1>
-          <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '12px', color: 'var(--ink)', opacity: 0.65, fontWeight: 500, marginBottom: '14px' }}>
+          <p style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '12px', color: 'rgba(255,255,255,0.75)', fontWeight: 500, marginBottom: '14px', textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}>
             {filterMeta[discoverFilter].subtitle(filterPool.length)}
           </p>
         </div>
@@ -4244,6 +4271,7 @@ function DiscoverScreen({
             </button>
           );
         })()}
+        </div>
       </div>
 
       {/* Geo Banner */}
@@ -4973,7 +5001,7 @@ function EventsScreen({
 
   return (
     <div className="w-full" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', maxWidth: isDesktopInner ? '1400px' : undefined, marginLeft: isDesktopInner ? 'auto' : undefined, marginRight: isDesktopInner ? 'auto' : undefined } as React.CSSProperties}>
-      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero-texture.webp') center/cover no-repeat, var(--bg)", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)', paddingLeft: isDesktopInner ? 32 : undefined, paddingRight: isDesktopInner ? 32 : undefined }}>
+      <div className="px-5 pt-5 pb-4" style={{ background: "url('/hero/hero-1.webp') center/cover no-repeat, var(--bg)", borderTop: '3px solid var(--brand)', borderBottom: '1px solid rgba(0,0,0,0.08)', paddingLeft: isDesktopInner ? 32 : undefined, paddingRight: isDesktopInner ? 32 : undefined }}>
         <p
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: 'var(--brand)', fontFamily: 'Public Sans, sans-serif' }}
