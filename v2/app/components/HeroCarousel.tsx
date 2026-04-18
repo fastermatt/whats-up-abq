@@ -15,8 +15,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { CAROUSEL_IMAGES } from '@/lib/fallback-images'
 
-const INTERVAL_MS  = 5500   // ms between slides
-const FADE_MS      = 1200   // CSS transition duration
+const INTERVAL_MS  = 11000  // ms between slides
+const FADE_MS      = 1500   // CSS transition duration
 
 interface Props {
   /** Server-rendered start index (day-of-week-based); refined client-side to hour */

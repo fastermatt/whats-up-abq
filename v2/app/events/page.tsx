@@ -139,12 +139,9 @@ export default async function EventsPage({ searchParams }: PageProps) {
       {/* ── Nav ── */}
       <header className="sticky top-0 z-20 bg-[--bg]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link
-            href="/"
-            className="font-black text-xl text-[#1a1614] tracking-tight hover:text-[#9a442d] transition-colors"
-            style={{ fontFamily: 'var(--font-epilogue)' }}
-          >
-            ABQ Unplugged
+          <Link href="/" className="hover:opacity-80 transition-opacity">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo-black.svg" alt="ABQ Unplugged" className="h-7 w-auto" />
           </Link>
           <span className="text-xs text-[#8a7a74] tabular-nums">{total.toLocaleString()} events</span>
         </div>
