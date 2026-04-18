@@ -37,7 +37,15 @@ async function _upsertEvents(source, rawArr) {
     let d = raw.dates?.start?.localDate || raw.datetime_local?.split('T')[0]
            || raw.datetime_utc?.split('T')[0] || raw.start?.local?.split('T')[0]
            || raw.date?.split('T')[0] || null;
-    return { id: source+'_'+String(raw.id||raw.event_id||raw.uid||Math.random()), source, raw, event_date: d };
+    // Use raw.id directly if it already has a source prefix (e.g. 'sg-123' from transformSeatGeekEvent)
+    // Otherwise prepend source to avoid bare numeric IDs
+    const rawId = raw.id || raw.event_id || raw.uid;
+    const storedId = rawId
+      ? (String(rawId).includes('-') || String(rawId).includes('_')
+          ? source + '_' + String(rawId)   // e.g. seatgeek_sg-18163314 or ticketmaster_G5vzZ...
+          : source + '_' + String(rawId))  // e.g. seatgeek_18163314 (numeric — normalize to this form)
+      : source + '_' + Math.random();
+    return { id: storedId, source, raw, event_date: d };
   });
   const {error} = await _sb.from('events').upsert(rows, {onConflict:'id'});
   if (error) console.error('[Supabase] events error:', source, error.message);
@@ -351,7 +359,7 @@ function transformSeatGeekEvent(ev) {
   const perf  = ev.performers?.[0] || {};
 
   return {
-    id:      `sg-${ev.id}`,
+    id:      String(ev.id),  // numeric SG id; _upsertEvents prepends 'seatgeek_' → seatgeek_18163107
     name:    ev.title || perf.name || 'Untitled Event',
     url:     ev.url,
     _source: 'seatgeek',
@@ -366,6 +374,9 @@ function transformSeatGeekEvent(ev) {
 
     dates: {
       start: {
+        // Use datetime_local (local Mountain Time) — NOT datetime_utc.
+        // Storing the UTC dateTime alongside localTime has caused display bugs
+        // where the app accidentally renders the UTC time instead of local.
         localDate: ev.datetime_local ? ev.datetime_local.split('T')[0] : undefined,
         localTime: ev.datetime_local ? ev.datetime_local.split('T')[1]?.slice(0, 5) : undefined,
       },
