@@ -100,7 +100,7 @@ export default async function DiscoverPage() {
           <div className="flex items-center justify-between mb-5 animate-slide-down">
             <div className="flex items-center gap-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo-white.svg" alt="ABQ Unplugged" className="h-9 w-auto drop-shadow-md" />
+              <img src="/logo-white.svg" alt="ABQ Unplugged" className="h-9 w-auto" />
             </div>
             <Link
               href="/events"
