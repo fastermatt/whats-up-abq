@@ -1,7 +1,9 @@
 import Link from 'next/link'
+import { Fragment } from 'react'
 import type { Metadata } from 'next'
 import { fetchEvents, fetchRecentlyAdded, fetchFeaturedEvents, fetchNeighborhoodCounts, NormalizedEvent } from '@/lib/events'
 import { getHeroImage, getCategoryFallback, OG_IMAGE } from '@/lib/fallback-images'
+import { getHeroCopy } from '@/lib/hero-copy'
 import { EventImage } from '@/app/components/EventImage'
 import { MapPin, ArrowRight } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
@@ -72,6 +74,8 @@ export default async function DiscoverPage() {
     timeZone: 'America/Denver',
   })
 
+  const heroCopy = getHeroCopy(allUpcoming.total)
+
   return (
     <main id="main" className="min-h-dvh bg-[--bg]">
       <script
@@ -118,13 +122,18 @@ export default async function DiscoverPage() {
           {/* Hero text */}
           <div className="animate-hero-text">
             <p className="text-[11px] uppercase tracking-[0.2em] text-[#e8a898] mb-2">
-              Tonight in the 505
+              {heroCopy.eyebrow}
             </p>
             <h2
               className="text-4xl sm:text-5xl font-black leading-[1.05] mb-3"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
-              What&apos;s<br />Happening<br />Tonight
+              {heroCopy.lines.map((line, i) => (
+                <Fragment key={i}>
+                  {i > 0 && <br />}
+                  {line}
+                </Fragment>
+              ))}
             </h2>
             <p className="text-sm text-white/60 mb-4">{dayStr}</p>
             {/* Surprise Me CTA — inline with hero */}
