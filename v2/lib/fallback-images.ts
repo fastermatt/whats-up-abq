@@ -20,16 +20,70 @@ const CDN = 'https://cdn.abqunplugged.com'
 // Once populated, these take priority over Midjourney illustrations.
 // Images are stored permanently in R2 at fallbacks/pixabay/{category}/{n}.jpg
 
+// Real photographs served from /public/fallbacks/pixabay/ (committed to repo,
+// served by Netlify CDN). Downloaded 2026-04-19 via Pixabay API (image_type=photo,
+// order=popular) — 4 distinct real photos per category, no AI art.
 const PIXABAY_IMAGES: Record<string, string[]> = {
-  // Populated after running: PIXABAY_API_KEY=your_key node scripts/fetch-pixabay-fallbacks.mjs
-  // The script will output the TypeScript lines to paste here.
-  //
-  // Example (replace with script output):
-  // music: [
-  //   `${CDN}/fallbacks/pixabay/music/0.jpg`,
-  //   `${CDN}/fallbacks/pixabay/music/1.jpg`,
-  //   ...
-  // ],
+  'music': [
+    '/fallbacks/pixabay/music/0.jpg',
+    '/fallbacks/pixabay/music/1.jpg',
+    '/fallbacks/pixabay/music/2.jpg',
+    '/fallbacks/pixabay/music/3.jpg',
+  ],
+  'comedy': [
+    '/fallbacks/pixabay/comedy/0.jpg',
+    '/fallbacks/pixabay/comedy/1.jpg',
+    '/fallbacks/pixabay/comedy/2.jpg',
+    '/fallbacks/pixabay/comedy/3.jpg',
+  ],
+  'sports': [
+    '/fallbacks/pixabay/sports/0.jpg',
+    '/fallbacks/pixabay/sports/1.jpg',
+    '/fallbacks/pixabay/sports/2.jpg',
+    '/fallbacks/pixabay/sports/3.jpg',
+  ],
+  'arts & theater': [
+    '/fallbacks/pixabay/arts-theater/0.jpg',
+    '/fallbacks/pixabay/arts-theater/1.jpg',
+    '/fallbacks/pixabay/arts-theater/2.jpg',
+    '/fallbacks/pixabay/arts-theater/3.jpg',
+  ],
+  'family': [
+    '/fallbacks/pixabay/family/0.jpg',
+    '/fallbacks/pixabay/family/1.jpg',
+    '/fallbacks/pixabay/family/2.jpg',
+    '/fallbacks/pixabay/family/3.jpg',
+  ],
+  'food & drink': [
+    '/fallbacks/pixabay/food-drink/0.jpg',
+    '/fallbacks/pixabay/food-drink/1.jpg',
+    '/fallbacks/pixabay/food-drink/2.jpg',
+    '/fallbacks/pixabay/food-drink/3.jpg',
+  ],
+  'film': [
+    '/fallbacks/pixabay/film/0.jpg',
+    '/fallbacks/pixabay/film/1.jpg',
+    '/fallbacks/pixabay/film/2.jpg',
+    '/fallbacks/pixabay/film/3.jpg',
+  ],
+  'outdoor': [
+    '/fallbacks/pixabay/outdoor/0.jpg',
+    '/fallbacks/pixabay/outdoor/1.jpg',
+    '/fallbacks/pixabay/outdoor/2.jpg',
+    '/fallbacks/pixabay/outdoor/3.jpg',
+  ],
+  'community': [
+    '/fallbacks/pixabay/community/0.jpg',
+    '/fallbacks/pixabay/community/1.jpg',
+    '/fallbacks/pixabay/community/2.jpg',
+    '/fallbacks/pixabay/community/3.jpg',
+  ],
+  'festivals': [
+    '/fallbacks/pixabay/festivals/0.jpg',
+    '/fallbacks/pixabay/festivals/1.jpg',
+    '/fallbacks/pixabay/festivals/2.jpg',
+    '/fallbacks/pixabay/festivals/3.jpg',
+  ],
 }
 
 // ── Midjourney Fallbacks (last resort) ─────────────────────────────────────
