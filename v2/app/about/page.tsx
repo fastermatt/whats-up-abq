@@ -185,6 +185,16 @@ export default function AboutPage() {
               View Leaderboard
             </Link>
           </div>
+
+          {/* Utility links */}
+          <p className="mt-6 text-xs text-[#8a7a74]">
+            <Link
+              href="/privacy"
+              className="hover:text-[#9a442d] transition-colors underline underline-offset-2"
+            >
+              Privacy Policy
+            </Link>
+          </p>
         </AnimateIn>
       </div>
     </main>
