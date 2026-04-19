@@ -968,7 +968,10 @@ function normalizeLocal(row: RawEventRow): NormalizedEvent {
       }
       return null
     })(),
-    imageUrl: row.cached_photo_url ?? (r.image as string | undefined) ?? null,
+    imageUrl: row.cached_photo_url
+      ?? (r.image as string | undefined)
+      ?? ((r.images as Array<Record<string, unknown>> | undefined)?.[0]?.url as string | undefined)
+      ?? null,
     ticketUrl: (r.url as string | undefined) ?? (r.ticket_url as string | undefined) ?? null,
     source: row.source,
     isFeatured: row.featured ?? false,
