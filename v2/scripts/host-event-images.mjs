@@ -108,10 +108,15 @@ const FETCH_HEADERS_BY_HOST = (host) => ({
 
 const TARGET_WIDTH = 1080
 const WEBP_QUALITY = 82
-// TM's smallest non-thumbnail image is 640×360. Anything below that is a
-// thumbnail we shouldn't use. 400×225 = most TM REC_16_9, good floor.
-const MIN_SOURCE_WIDTH  = 500
-const MIN_SOURCE_HEIGHT = 280
+// Philosophy: a real event photo, even if small, beats a random category
+// placeholder. Eventbrite returns 512×256 thumbnails for many events, and
+// those are still THE actual event image. Use the lowest floor that rules
+// out obvious junk (tracking pixels, favicons).
+// - 250×140 floor rejects anything uselessly small
+// - Images below 1080px wide are UPSCALED with lanczos3 to 1080 using
+//   mild unsharp mask so EB thumbnails still look reasonable on IG.
+const MIN_SOURCE_WIDTH  = 250
+const MIN_SOURCE_HEIGHT = 140
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -206,12 +211,23 @@ async function optimizeImage(buffer) {
       return { ok: false, reason: `too-low-res: ${meta.width}x${meta.height}` }
     }
 
-    // Only resize DOWN. If source is smaller than TARGET_WIDTH, don't upscale.
-    const resizeWidth = Math.min(meta.width, TARGET_WIDTH)
+    // Always target 1080px width. For sources larger than that, downscale.
+    // For sources SMALLER than that, upscale with lanczos3 + light sharpen —
+    // a 512×256 EB thumb becomes 1080×540 that's still the correct event
+    // image, which beats a generic category placeholder every time.
+    const isUpscale = meta.width < TARGET_WIDTH
+    let pipeline = img.resize(TARGET_WIDTH, null, {
+      withoutEnlargement: false,
+      fit: 'inside',
+      kernel: isUpscale ? sharp.kernel.lanczos3 : sharp.kernel.lanczos3,
+    })
 
-    const out = await img
-      .resize(resizeWidth, null, { withoutEnlargement: true, fit: 'inside' })
-      .webp({ quality: WEBP_QUALITY, effort: 4 })  // effort 4 = balanced speed/size
+    // Light sharpen on upscales to counter the softness lanczos produces.
+    // sigma=0.6 is mild — sharpens edges without introducing ringing.
+    if (isUpscale) pipeline = pipeline.sharpen({ sigma: 0.6 })
+
+    const out = await pipeline
+      .webp({ quality: WEBP_QUALITY, effort: 4 })
       .toBuffer({ resolveWithObject: true })
 
     return {
@@ -222,6 +238,7 @@ async function optimizeImage(buffer) {
       srcW: meta.width, srcH: meta.height,
       outW: out.info.width, outH: out.info.height,
       outSize: out.data.length,
+      upscaled: isUpscale,
     }
   } catch (e) {
     return { ok: false, reason: `sharp: ${e.message.slice(0, 80)}` }
@@ -358,7 +375,10 @@ async function main() {
       continue
     }
     const compressionRatio = (dl.buffer.length / opt.outSize).toFixed(1)
-    console.log(`  ↓ ${dl.buffer.length}B → ${opt.outSize}B (${opt.srcW}×${opt.srcH} → ${opt.outW}×${opt.outH}, ${compressionRatio}× smaller, webp q${WEBP_QUALITY})`)
+    const sizeChange = opt.upscaled
+      ? `${opt.srcW}×${opt.srcH} → ${opt.outW}×${opt.outH} (upscaled+sharpened, webp q${WEBP_QUALITY})`
+      : `${opt.srcW}×${opt.srcH} → ${opt.outW}×${opt.outH}, ${compressionRatio}× smaller, webp q${WEBP_QUALITY}`
+    console.log(`  ↓ ${dl.buffer.length}B → ${opt.outSize}B (${sizeChange})`)
 
     const filename = `${sanitize(id)}-${Date.now()}.${opt.ext}`
     const up = await uploadToStorage(opt.buffer, filename, opt.contentType)

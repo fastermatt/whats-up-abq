@@ -84,10 +84,20 @@ export function IGCardClient({ event, image, initialFormat = 'portrait', embedde
   // the IG card and the public event page never diverge when an image 404s.
   // (Added 2026-04-19 as part of image-system overhaul — before this, IGCard
   // would just show a broken image when the source URL failed.)
+  //
+  // Our own Supabase Storage and R2 URLs are public + CORS-enabled, so they
+  // DON'T need the /api/image-proxy round-trip. Proxying adds latency and
+  // risks serving a stale Netlify edge cache. Only third-party sources go
+  // through the proxy (for CAPTCHA bypass + html-to-image CORS).
   const categoryFallback = getCategoryFallback(event.category ?? undefined, event.id)
   const [imgSrc, setImgSrc] = useState(image)
   useEffect(() => { setImgSrc(image) }, [image])
-  const proxiedSrc = imgSrc.startsWith('http')
+
+  const isOurHostedImage = typeof imgSrc === 'string' && (
+    imgSrc.includes('supabase.co/storage') ||
+    imgSrc.includes('pub-9b12296957cd4149ac1833b591cdc0ff.r2.dev')
+  )
+  const proxiedSrc = imgSrc.startsWith('http') && !isOurHostedImage
     ? `/api/image-proxy?url=${encodeURIComponent(imgSrc)}`
     : imgSrc
 
