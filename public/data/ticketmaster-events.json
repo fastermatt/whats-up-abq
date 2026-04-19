@@ -2,1610 +2,6 @@
   {
     "name": "Albuquerque Isotopes vs. Oklahoma City Comets",
     "type": "event",
-    "id": "Z7r9jZ1A7QkPp",
-    "test": false,
-    "url": "https://www.ticketmaster.com/event/Z7r9jZ1A7QkPp",
-    "locale": "en-us",
-    "images": [
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
-        "width": 1024,
-        "height": 576,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RETINA_LANDSCAPE_16_9.jpg",
-        "width": 1136,
-        "height": 639,
-        "fallback": false
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_ARTIST_PAGE_3_2.jpg",
-        "width": 305,
-        "height": 203,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_LARGE_16_9.jpg",
-        "width": 2048,
-        "height": 1152,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_SOURCE",
-        "width": 2426,
-        "height": 1365,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_EVENT_DETAIL_PAGE_16_9.jpg",
-        "width": 205,
-        "height": 115,
-        "fallback": false
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RETINA_PORTRAIT_3_2.jpg",
-        "width": 640,
-        "height": 427,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RETINA_PORTRAIT_16_9.jpg",
-        "width": 640,
-        "height": 360,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RECOMENDATION_16_9.jpg",
-        "width": 100,
-        "height": 56,
-        "fallback": false
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_3_2.jpg",
-        "width": 1024,
-        "height": 683,
-        "fallback": false
-      },
-      {
-        "ratio": "4_3",
-        "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_CUSTOM.jpg",
-        "width": 305,
-        "height": 225,
-        "fallback": false
-      }
-    ],
-    "distance": 4.03,
-    "units": "MILES",
-    "sales": {
-      "public": {
-        "startDateTime": "9999-12-31T06:00:00Z",
-        "startTBD": false,
-        "startTBA": false,
-        "endDateTime": "2026-04-19T05:59:20Z"
-      }
-    },
-    "dates": {
-      "start": {
-        "localDate": "2026-04-18",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBA": true,
-        "noSpecificTime": false,
-        "localTime": "TBD"
-      },
-      "status": {
-        "code": "offsale"
-      },
-      "spanMultipleDays": false
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nE",
-          "name": "Sports"
-        },
-        "genre": {
-          "id": "KnvZfZ7vAdv",
-          "name": "Baseball"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vF1t",
-          "name": "Minor League"
-        },
-        "family": false
-      }
-    ],
-    "outlets": [
-      {
-        "url": "https://www.ticketmaster.com/event/Z7r9jZ1A7QkPp",
-        "type": "tmMarketPlace"
-      }
-    ],
-    "ticketing": {
-      "allInclusivePricing": {
-        "enabled": true
-      }
-    },
-    "nameOrigin": "custom",
-    "_links": {
-      "self": {
-        "href": "/discovery/v2/events/Z7r9jZ1A7QkPp?locale=en-us"
-      },
-      "attractions": [
-        {
-          "href": "/discovery/v2/attractions/K8vZ917549V?locale=en-us"
-        },
-        {
-          "href": "/discovery/v2/attractions/K8vZ9171-hf?locale=en-us"
-        }
-      ],
-      "venues": [
-        {
-          "href": "/discovery/v2/venues/ZFr9jZ77ee?locale=en-us"
-        }
-      ]
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Rio Grande Credit Union Field at Isotopes Park",
-          "type": "venue",
-          "id": "ZFr9jZ77ee",
-          "test": false,
-          "locale": "en-us",
-          "distance": 4.03,
-          "units": "MILES",
-          "postalCode": "87106",
-          "timezone": "America/Denver",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "1601 Avenida Cesar Chavez Se"
-          },
-          "location": {
-            "longitude": "-106.615997000",
-            "latitude": "35.052502000"
-          },
-          "dmas": [
-            {
-              "id": 215
-            }
-          ],
-          "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
-            "_filtered": 0
-          },
-          "_links": {
-            "self": {
-              "href": "/discovery/v2/venues/ZFr9jZ77ee?locale=en-us"
-            }
-          }
-        }
-      ],
-      "attractions": [
-        {
-          "name": "Albuquerque Isotopes",
-          "type": "attraction",
-          "id": "K8vZ917549V",
-          "test": false,
-          "url": "https://www.ticketmaster.com/albuquerque-isotopes-tickets/artist/859541",
-          "locale": "en-us",
-          "images": [
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_16_9.jpg",
-              "width": 1024,
-              "height": 576,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RETINA_LANDSCAPE_16_9.jpg",
-              "width": 1136,
-              "height": 639,
-              "fallback": false
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_ARTIST_PAGE_3_2.jpg",
-              "width": 305,
-              "height": 203,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_LARGE_16_9.jpg",
-              "width": 2048,
-              "height": 1152,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_SOURCE",
-              "width": 2426,
-              "height": 1365,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_EVENT_DETAIL_PAGE_16_9.jpg",
-              "width": 205,
-              "height": 115,
-              "fallback": false
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RETINA_PORTRAIT_3_2.jpg",
-              "width": 640,
-              "height": 427,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RETINA_PORTRAIT_16_9.jpg",
-              "width": 640,
-              "height": 360,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_RECOMENDATION_16_9.jpg",
-              "width": 100,
-              "height": 56,
-              "fallback": false
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_TABLET_LANDSCAPE_3_2.jpg",
-              "width": 1024,
-              "height": 683,
-              "fallback": false
-            },
-            {
-              "ratio": "4_3",
-              "url": "https://s1.ticketm.net/dam/a/d39/a97887d7-cc21-4e08-9cc1-c9fa45f45d39_94381_CUSTOM.jpg",
-              "width": 305,
-              "height": 225,
-              "fallback": false
-            }
-          ],
-          "classifications": [
-            {
-              "primary": true,
-              "segment": {
-                "id": "KZFzniwnSyZfZ7v7nE",
-                "name": "Sports"
-              },
-              "genre": {
-                "id": "KnvZfZ7vAdv",
-                "name": "Baseball"
-              },
-              "subGenre": {
-                "id": "KZazBEonSMnZfZ7vF1t",
-                "name": "Minor League"
-              },
-              "type": {
-                "id": "KZAyXgnZfZ7v7l1",
-                "name": "Group"
-              },
-              "subType": {
-                "id": "KZFzBErXgnZfZ7vA7d",
-                "name": "Team"
-              },
-              "family": false
-            }
-          ],
-          "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
-            "_filtered": 0
-          },
-          "_links": {
-            "self": {
-              "href": "/discovery/v2/attractions/K8vZ917549V?locale=en-us"
-            }
-          }
-        },
-        {
-          "name": "Oklahoma City Comets",
-          "type": "attraction",
-          "id": "K8vZ9171-hf",
-          "test": false,
-          "url": "https://www.ticketmaster.com/oklahoma-city-comets-tickets/artist/821578",
-          "locale": "en-us",
-          "externalLinks": {
-            "twitter": [
-              {
-                "url": "@okcredhawks"
-              }
-            ]
-          },
-          "aliases": [
-            "OKC"
-          ],
-          "images": [
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/a/9a0/5072e658-151c-4645-872c-7c637e5679a0_ARTIST_PAGE_3_2.jpg",
-              "width": 305,
-              "height": 203,
-              "fallback": false
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/a/9a0/5072e658-151c-4645-872c-7c637e5679a0_RETINA_PORTRAIT_3_2.jpg",
-              "width": 640,
-              "height": 427,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/9a0/5072e658-151c-4645-872c-7c637e5679a0_TABLET_LANDSCAPE_LARGE_16_9.jpg",
-              "width": 2048,
-              "height": 1152,
-              "fallback": false
-            },
-            {
-              "ratio": "4_3",
-              "url": "https://s1.ticketm.net/dam/a/9a0/5072e658-151c-4645-872c-7c637e5679a0_CUSTOM.jpg",
-              "width": 305,
-              "height": 225,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/9a0/5072e658-151c-4645-872c-7c637e5679a0_RETINA_PORTRAIT_16_9.jpg",
-              "width": 640,
-              "height": 360,
-              "fallback": false
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/a/9a0/5072e658-151c-4645-872c-7c637e5679a0_TABLET_LANDSCAPE_3_2.jpg",
-              "width": 1024,
-              "height": 683,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/9a0/5072e658-151c-4645-872c-7c637e5679a0_TABLET_LANDSCAPE_16_9.jpg",
-              "width": 1024,
-              "height": 576,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/9a0/5072e658-151c-4645-872c-7c637e5679a0_RECOMENDATION_16_9.jpg",
-              "width": 100,
-              "height": 56,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/9a0/5072e658-151c-4645-872c-7c637e5679a0_RETINA_LANDSCAPE_16_9.jpg",
-              "width": 1136,
-              "height": 639,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/9a0/5072e658-151c-4645-872c-7c637e5679a0_EVENT_DETAIL_PAGE_16_9.jpg",
-              "width": 205,
-              "height": 115,
-              "fallback": false
-            },
-            {
-              "url": "https://s1.ticketm.net/dam/a/9a0/5072e658-151c-4645-872c-7c637e5679a0_SOURCE",
-              "width": 2426,
-              "height": 1536,
-              "fallback": false
-            }
-          ],
-          "classifications": [
-            {
-              "primary": true,
-              "segment": {
-                "id": "KZFzniwnSyZfZ7v7nE",
-                "name": "Sports"
-              },
-              "genre": {
-                "id": "KnvZfZ7vAdv",
-                "name": "Baseball"
-              },
-              "subGenre": {
-                "id": "KZazBEonSMnZfZ7vF1t",
-                "name": "Minor League"
-              },
-              "type": {
-                "id": "KZAyXgnZfZ7v7l1",
-                "name": "Group"
-              },
-              "subType": {
-                "id": "KZFzBErXgnZfZ7vA7d",
-                "name": "Team"
-              },
-              "family": false
-            }
-          ],
-          "upcomingEvents": {
-            "tmr": 116,
-            "ticketmaster": 90,
-            "_total": 206,
-            "_filtered": 0
-          },
-          "_links": {
-            "self": {
-              "href": "/discovery/v2/attractions/K8vZ9171-hf?locale=en-us"
-            }
-          }
-        }
-      ]
-    }
-  },
-  {
-    "name": "Bingo Loco - 21+",
-    "type": "event",
-    "id": "Z7r9jZ1A7-778",
-    "test": false,
-    "url": "https://www.ticketmaster.com/event/Z7r9jZ1A7-778",
-    "locale": "en-us",
-    "images": [
-      {
-        "url": "https://s1.ticketm.net/dam/a/70b/dcda4fe8-2449-483c-93a1-03877718a70b_SOURCE",
-        "width": 2426,
-        "height": 1571,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/70b/dcda4fe8-2449-483c-93a1-03877718a70b_TABLET_LANDSCAPE_LARGE_16_9.jpg",
-        "width": 2048,
-        "height": 1152,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/70b/dcda4fe8-2449-483c-93a1-03877718a70b_RETINA_LANDSCAPE_16_9.jpg",
-        "width": 1136,
-        "height": 639,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/70b/dcda4fe8-2449-483c-93a1-03877718a70b_TABLET_LANDSCAPE_16_9.jpg",
-        "width": 1024,
-        "height": 576,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/70b/dcda4fe8-2449-483c-93a1-03877718a70b_EVENT_DETAIL_PAGE_16_9.jpg",
-        "width": 205,
-        "height": 115,
-        "fallback": false
-      },
-      {
-        "ratio": "4_3",
-        "url": "https://s1.ticketm.net/dam/a/70b/dcda4fe8-2449-483c-93a1-03877718a70b_CUSTOM.jpg",
-        "width": 305,
-        "height": 225,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/70b/dcda4fe8-2449-483c-93a1-03877718a70b_RETINA_PORTRAIT_16_9.jpg",
-        "width": 640,
-        "height": 360,
-        "fallback": false
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/a/70b/dcda4fe8-2449-483c-93a1-03877718a70b_ARTIST_PAGE_3_2.jpg",
-        "width": 305,
-        "height": 203,
-        "fallback": false
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/a/70b/dcda4fe8-2449-483c-93a1-03877718a70b_TABLET_LANDSCAPE_3_2.jpg",
-        "width": 1024,
-        "height": 683,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/70b/dcda4fe8-2449-483c-93a1-03877718a70b_RECOMENDATION_16_9.jpg",
-        "width": 100,
-        "height": 56,
-        "fallback": false
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/a/70b/dcda4fe8-2449-483c-93a1-03877718a70b_RETINA_PORTRAIT_3_2.jpg",
-        "width": 640,
-        "height": 427,
-        "fallback": false
-      }
-    ],
-    "distance": 2.28,
-    "units": "MILES",
-    "sales": {
-      "public": {
-        "startDateTime": "1900-01-01T06:00:00Z",
-        "startTBD": false,
-        "startTBA": false,
-        "endDateTime": "2026-04-19T01:00:00Z"
-      }
-    },
-    "dates": {
-      "start": {
-        "localDate": "2026-04-18",
-        "localTime": "19:00:00",
-        "dateTime": "2026-04-19T01:00:00Z",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBA": false,
-        "noSpecificTime": false
-      },
-      "status": {
-        "code": "onsale"
-      },
-      "spanMultipleDays": false
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nJ",
-          "name": "Music"
-        },
-        "genre": {
-          "id": "KnvZfZ7vAvl",
-          "name": "Other"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vk1I",
-          "name": "Other"
-        },
-        "family": false
-      }
-    ],
-    "outlets": [
-      {
-        "url": "https://www.revelabq.com/",
-        "type": "venueBoxOffice"
-      },
-      {
-        "url": "https://www.ticketmaster.com/event/Z7r9jZ1A7-778",
-        "type": "tmMarketPlace"
-      }
-    ],
-    "ticketing": {
-      "allInclusivePricing": {
-        "enabled": true
-      }
-    },
-    "nameOrigin": "custom",
-    "_links": {
-      "self": {
-        "href": "/discovery/v2/events/Z7r9jZ1A7-778?locale=en-us"
-      },
-      "attractions": [
-        {
-          "href": "/discovery/v2/attractions/K8vZ91798_7?locale=en-us"
-        }
-      ],
-      "venues": [
-        {
-          "href": "/discovery/v2/venues/Z7r9jZa7ET?locale=en-us"
-        }
-      ]
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Revel Entertainment Center",
-          "type": "venue",
-          "id": "Z7r9jZa7ET",
-          "test": false,
-          "locale": "en-us",
-          "distance": 2.28,
-          "units": "MILES",
-          "postalCode": "87107",
-          "timezone": "America/Denver",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "4720 Alexander Blvd NE"
-          },
-          "location": {
-            "longitude": "-106.644997000",
-            "latitude": "35.138302000"
-          },
-          "dmas": [
-            {
-              "id": 215
-            }
-          ],
-          "upcomingEvents": {
-            "tmr": 16,
-            "ticketmaster": 11,
-            "_total": 27,
-            "_filtered": 0
-          },
-          "_links": {
-            "self": {
-              "href": "/discovery/v2/venues/Z7r9jZa7ET?locale=en-us"
-            }
-          }
-        }
-      ],
-      "attractions": [
-        {
-          "name": "Bingo Loco",
-          "type": "attraction",
-          "id": "K8vZ91798_7",
-          "test": false,
-          "url": "https://www.ticketmaster.com/bingo-loco-tickets/artist/2520252",
-          "locale": "en-us",
-          "images": [
-            {
-              "url": "https://s1.ticketm.net/dam/a/70b/dcda4fe8-2449-483c-93a1-03877718a70b_SOURCE",
-              "width": 2426,
-              "height": 1571,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/70b/dcda4fe8-2449-483c-93a1-03877718a70b_TABLET_LANDSCAPE_LARGE_16_9.jpg",
-              "width": 2048,
-              "height": 1152,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/70b/dcda4fe8-2449-483c-93a1-03877718a70b_RETINA_LANDSCAPE_16_9.jpg",
-              "width": 1136,
-              "height": 639,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/70b/dcda4fe8-2449-483c-93a1-03877718a70b_TABLET_LANDSCAPE_16_9.jpg",
-              "width": 1024,
-              "height": 576,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/70b/dcda4fe8-2449-483c-93a1-03877718a70b_EVENT_DETAIL_PAGE_16_9.jpg",
-              "width": 205,
-              "height": 115,
-              "fallback": false
-            },
-            {
-              "ratio": "4_3",
-              "url": "https://s1.ticketm.net/dam/a/70b/dcda4fe8-2449-483c-93a1-03877718a70b_CUSTOM.jpg",
-              "width": 305,
-              "height": 225,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/70b/dcda4fe8-2449-483c-93a1-03877718a70b_RETINA_PORTRAIT_16_9.jpg",
-              "width": 640,
-              "height": 360,
-              "fallback": false
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/a/70b/dcda4fe8-2449-483c-93a1-03877718a70b_ARTIST_PAGE_3_2.jpg",
-              "width": 305,
-              "height": 203,
-              "fallback": false
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/a/70b/dcda4fe8-2449-483c-93a1-03877718a70b_TABLET_LANDSCAPE_3_2.jpg",
-              "width": 1024,
-              "height": 683,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/70b/dcda4fe8-2449-483c-93a1-03877718a70b_RECOMENDATION_16_9.jpg",
-              "width": 100,
-              "height": 56,
-              "fallback": false
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/a/70b/dcda4fe8-2449-483c-93a1-03877718a70b_RETINA_PORTRAIT_3_2.jpg",
-              "width": 640,
-              "height": 427,
-              "fallback": false
-            }
-          ],
-          "classifications": [
-            {
-              "primary": true,
-              "segment": {
-                "id": "KZFzniwnSyZfZ7v7nJ",
-                "name": "Music"
-              },
-              "genre": {
-                "id": "KnvZfZ7vAev",
-                "name": "Pop"
-              },
-              "subGenre": {
-                "id": "KZazBEonSMnZfZ7vk1t",
-                "name": "Pop"
-              },
-              "type": {
-                "id": "KZAyXgnZfZ7v7lt",
-                "name": "Event Style"
-              },
-              "subType": {
-                "id": "KZFzBErXgnZfZ7vA6E",
-                "name": "Festival"
-              },
-              "family": false
-            }
-          ],
-          "upcomingEvents": {
-            "tmr": 5,
-            "ticketmaster": 23,
-            "ticketweb": 8,
-            "_total": 36,
-            "_filtered": 0
-          },
-          "_links": {
-            "self": {
-              "href": "/discovery/v2/attractions/K8vZ91798_7?locale=en-us"
-            }
-          }
-        }
-      ]
-    }
-  },
-  {
-    "name": "I Love the 90s featuring Vanilla Ice, Color Me Badd, C&C Music Factory",
-    "type": "event",
-    "id": "G5vzZbz38MpjC",
-    "test": false,
-    "url": "https://www.ticketmaster.com/i-love-the-90s-featuring-vanilla-albuquerque-new-mexico-04-18-2026/event/1E00638490DD670E",
-    "locale": "en-us",
-    "images": [
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/a/6df/cf97c4a4-1447-4de9-9d73-bf2b15c236df_79081_TABLET_LANDSCAPE_3_2.jpg",
-        "width": 1024,
-        "height": 683,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/6df/cf97c4a4-1447-4de9-9d73-bf2b15c236df_SOURCE",
-        "width": 2426,
-        "height": 1365,
-        "fallback": false
-      },
-      {
-        "ratio": "4_3",
-        "url": "https://s1.ticketm.net/dam/a/6df/cf97c4a4-1447-4de9-9d73-bf2b15c236df_79081_CUSTOM.jpg",
-        "width": 305,
-        "height": 225,
-        "fallback": false
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/a/6df/cf97c4a4-1447-4de9-9d73-bf2b15c236df_79081_RETINA_PORTRAIT_3_2.jpg",
-        "width": 640,
-        "height": 427,
-        "fallback": false
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/a/6df/cf97c4a4-1447-4de9-9d73-bf2b15c236df_79081_ARTIST_PAGE_3_2.jpg",
-        "width": 305,
-        "height": 203,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/6df/cf97c4a4-1447-4de9-9d73-bf2b15c236df_79081_RETINA_PORTRAIT_16_9.jpg",
-        "width": 640,
-        "height": 360,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/6df/cf97c4a4-1447-4de9-9d73-bf2b15c236df_79081_RECOMENDATION_16_9.jpg",
-        "width": 100,
-        "height": 56,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/6df/cf97c4a4-1447-4de9-9d73-bf2b15c236df_79081_RETINA_LANDSCAPE_16_9.jpg",
-        "width": 1136,
-        "height": 639,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/6df/cf97c4a4-1447-4de9-9d73-bf2b15c236df_79081_TABLET_LANDSCAPE_16_9.jpg",
-        "width": 1024,
-        "height": 576,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/6df/cf97c4a4-1447-4de9-9d73-bf2b15c236df_79081_EVENT_DETAIL_PAGE_16_9.jpg",
-        "width": 205,
-        "height": 115,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/6df/cf97c4a4-1447-4de9-9d73-bf2b15c236df_79081_TABLET_LANDSCAPE_LARGE_16_9.jpg",
-        "width": 2048,
-        "height": 1152,
-        "fallback": false
-      }
-    ],
-    "distance": 18.12,
-    "units": "MILES",
-    "sales": {
-      "public": {
-        "startDateTime": "2025-12-12T17:00:00Z",
-        "startTBD": false,
-        "startTBA": false,
-        "endDateTime": "2026-04-19T01:00:00Z"
-      },
-      "presales": [
-        {
-          "startDateTime": "2025-12-10T17:00:00Z",
-          "endDateTime": "2025-12-11T19:59:00Z",
-          "name": "ARTIST PRE SALE"
-        },
-        {
-          "startDateTime": "2025-12-10T17:00:00Z",
-          "endDateTime": "2025-12-12T05:00:00Z",
-          "name": "VIP Package Presale"
-        },
-        {
-          "startDateTime": "2025-12-12T17:00:00Z",
-          "endDateTime": "2026-04-09T04:00:00Z",
-          "name": "VIP Package Onsale"
-        },
-        {
-          "startDateTime": "2026-03-19T23:00:00Z",
-          "endDateTime": "2026-04-12T05:00:00Z",
-          "name": "Casino Email",
-          "shortDescription": "Casino Email"
-        }
-      ]
-    },
-    "dates": {
-      "start": {
-        "localDate": "2026-04-18",
-        "localTime": "19:00:00",
-        "dateTime": "2026-04-19T01:00:00Z",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBA": false,
-        "noSpecificTime": false
-      },
-      "timezone": "America/Denver",
-      "status": {
-        "code": "onsale"
-      },
-      "spanMultipleDays": false
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nJ",
-          "name": "Music"
-        },
-        "genre": {
-          "id": "KnvZfZ7vAev",
-          "name": "Pop"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vk1t",
-          "name": "Pop"
-        },
-        "type": {
-          "id": "KZAyXgnZfZ7v7nI",
-          "name": "Undefined"
-        },
-        "subType": {
-          "id": "KZFzBErXgnZfZ7v7lJ",
-          "name": "Undefined"
-        },
-        "family": false
-      }
-    ],
-    "info": "IMPORTANT EVENT DETAILS: All bags subject to search Bag size max 12 x 12 x 6 in. No Backpacks. Photography Restrictions: No flash or professional cameras with detachable lenses. Box Office Payments: No cash accepted Credit/debit card only. Concessions: Accept cash, credit, and debit cards. ACCESSIBLE SEATING: ADA seating is available for guests with disabilities. For special accommodations, contact the box office at (505) 352 7866. For full event details, visit: www.rt66casino.com/legends",
-    "pleaseNote": "IMPORTANT TICKET INFORMATION | LEGENDS THEATER AT ROUTE 66 CASINO Download and save your tickets before arriving. Cell service at the venue is limited, and last-minute access may cause delays. Only purchase tickets from Ticketmaster or our official website. Third party resellers may sell fake or duplicate tickets that will not be honored. Have your ticket open and ready to scan before reaching the entrance. Arrive early to avoid long lines. For questions, contact the Box Office at (505) 352 7866 . Plan ahead and download your tickets now.",
-    "seatmap": {
-      "staticUrl": "https://mapsapi.tmol.io/maps/geometry/3/event/1E00638490DD670E/staticImage?type=png&systemId=HOST"
-    },
-    "accessibility": {
-      "ticketLimit": 4
-    },
-    "ageRestrictions": {
-      "legalAgeEnforced": false
-    },
-    "doorsTimes": {
-      "localDate": "2026-04-18",
-      "localTime": "18:00:00",
-      "dateTime": "2026-04-19T00:00:00Z"
-    },
-    "ticketing": {
-      "safeTix": {
-        "enabled": true
-      },
-      "allInclusivePricing": {
-        "enabled": true
-      }
-    },
-    "nameOrigin": "custom",
-    "_links": {
-      "self": {
-        "href": "/discovery/v2/events/G5vzZbz38MpjC?locale=en-us"
-      },
-      "attractions": [
-        {
-          "href": "/discovery/v2/attractions/K8vZ917K0C7?locale=en-us"
-        }
-      ],
-      "venues": [
-        {
-          "href": "/discovery/v2/venues/KovZpZAIEdFA?locale=en-us"
-        }
-      ]
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Route 66 Casino",
-          "type": "venue",
-          "id": "KovZpZAIEdFA",
-          "test": false,
-          "url": "https://www.ticketmaster.com/route-66-casino-tickets-albuquerque/venue/246845",
-          "locale": "en-us",
-          "distance": 18.12,
-          "units": "MILES",
-          "postalCode": "87121",
-          "timezone": "America/Denver",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "14500 Central Ave SW"
-          },
-          "location": {
-            "longitude": "-106.95271500",
-            "latitude": "35.02840100"
-          },
-          "markets": [
-            {
-              "name": "El Paso and New Mexico",
-              "id": "8"
-            }
-          ],
-          "dmas": [
-            {
-              "id": 215
-            },
-            {
-              "id": 269
-            }
-          ],
-          "upcomingEvents": {
-            "ticketmaster": 11,
-            "_total": 11,
-            "_filtered": 0
-          },
-          "_links": {
-            "self": {
-              "href": "/discovery/v2/venues/KovZpZAIEdFA?locale=en-us"
-            }
-          }
-        }
-      ],
-      "attractions": [
-        {
-          "name": "I Love the 90s",
-          "type": "attraction",
-          "id": "K8vZ917K0C7",
-          "test": false,
-          "url": "https://www.ticketmaster.com/i-love-the-90s-tickets/artist/2136667",
-          "locale": "en-us",
-          "externalLinks": {
-            "twitter": [
-              {
-                "url": "https://twitter.com/ilovethe90stour"
-              }
-            ],
-            "facebook": [
-              {
-                "url": "https://www.facebook.com/ILoveThe90sTour/"
-              }
-            ],
-            "homepage": [
-              {
-                "url": "https://ilovethe90stour.com/"
-              }
-            ]
-          },
-          "images": [
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/a/6df/cf97c4a4-1447-4de9-9d73-bf2b15c236df_79081_TABLET_LANDSCAPE_3_2.jpg",
-              "width": 1024,
-              "height": 683,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/6df/cf97c4a4-1447-4de9-9d73-bf2b15c236df_SOURCE",
-              "width": 2426,
-              "height": 1365,
-              "fallback": false
-            },
-            {
-              "ratio": "4_3",
-              "url": "https://s1.ticketm.net/dam/a/6df/cf97c4a4-1447-4de9-9d73-bf2b15c236df_79081_CUSTOM.jpg",
-              "width": 305,
-              "height": 225,
-              "fallback": false
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/a/6df/cf97c4a4-1447-4de9-9d73-bf2b15c236df_79081_RETINA_PORTRAIT_3_2.jpg",
-              "width": 640,
-              "height": 427,
-              "fallback": false
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/a/6df/cf97c4a4-1447-4de9-9d73-bf2b15c236df_79081_ARTIST_PAGE_3_2.jpg",
-              "width": 305,
-              "height": 203,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/6df/cf97c4a4-1447-4de9-9d73-bf2b15c236df_79081_RETINA_PORTRAIT_16_9.jpg",
-              "width": 640,
-              "height": 360,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/6df/cf97c4a4-1447-4de9-9d73-bf2b15c236df_79081_RECOMENDATION_16_9.jpg",
-              "width": 100,
-              "height": 56,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/6df/cf97c4a4-1447-4de9-9d73-bf2b15c236df_79081_RETINA_LANDSCAPE_16_9.jpg",
-              "width": 1136,
-              "height": 639,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/6df/cf97c4a4-1447-4de9-9d73-bf2b15c236df_79081_TABLET_LANDSCAPE_16_9.jpg",
-              "width": 1024,
-              "height": 576,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/6df/cf97c4a4-1447-4de9-9d73-bf2b15c236df_79081_EVENT_DETAIL_PAGE_16_9.jpg",
-              "width": 205,
-              "height": 115,
-              "fallback": false
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/6df/cf97c4a4-1447-4de9-9d73-bf2b15c236df_79081_TABLET_LANDSCAPE_LARGE_16_9.jpg",
-              "width": 2048,
-              "height": 1152,
-              "fallback": false
-            }
-          ],
-          "classifications": [
-            {
-              "primary": true,
-              "segment": {
-                "id": "KZFzniwnSyZfZ7v7nJ",
-                "name": "Music"
-              },
-              "genre": {
-                "id": "KnvZfZ7vAev",
-                "name": "Pop"
-              },
-              "subGenre": {
-                "id": "KZazBEonSMnZfZ7vk1t",
-                "name": "Pop"
-              },
-              "type": {
-                "id": "KZAyXgnZfZ7v7nI",
-                "name": "Undefined"
-              },
-              "subType": {
-                "id": "KZFzBErXgnZfZ7v7lJ",
-                "name": "Undefined"
-              },
-              "family": false
-            }
-          ],
-          "upcomingEvents": {
-            "ticketmaster": 1,
-            "_total": 1,
-            "_filtered": 0
-          },
-          "_links": {
-            "self": {
-              "href": "/discovery/v2/attractions/K8vZ917K0C7?locale=en-us"
-            }
-          }
-        }
-      ]
-    }
-  },
-  {
-    "name": "Ice Cube",
-    "type": "event",
-    "id": "Z7r9jZ1A7OKvz",
-    "test": false,
-    "url": "https://www.ticketmaster.com/event/Z7r9jZ1A7OKvz",
-    "locale": "en-us",
-    "images": [
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/cd2/82cffc51-59cf-4807-81d1-4c0a34181cd2_EVENT_DETAIL_PAGE_16_9.jpg",
-        "width": 205,
-        "height": 115,
-        "fallback": false,
-        "attribution": "Brita Christensen/Jeff Taylor"
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/cd2/82cffc51-59cf-4807-81d1-4c0a34181cd2_TABLET_LANDSCAPE_LARGE_16_9.jpg",
-        "width": 2048,
-        "height": 1152,
-        "fallback": false,
-        "attribution": "Brita Christensen/Jeff Taylor"
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/a/cd2/82cffc51-59cf-4807-81d1-4c0a34181cd2_TABLET_LANDSCAPE_3_2.jpg",
-        "width": 1024,
-        "height": 683,
-        "fallback": false,
-        "attribution": "Brita Christensen/Jeff Taylor"
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/cd2/82cffc51-59cf-4807-81d1-4c0a34181cd2_RETINA_PORTRAIT_16_9.jpg",
-        "width": 640,
-        "height": 360,
-        "fallback": false,
-        "attribution": "Brita Christensen/Jeff Taylor"
-      },
-      {
-        "ratio": "4_3",
-        "url": "https://s1.ticketm.net/dam/a/cd2/82cffc51-59cf-4807-81d1-4c0a34181cd2_CUSTOM.jpg",
-        "width": 305,
-        "height": 225,
-        "fallback": false,
-        "attribution": "Brita Christensen/Jeff Taylor"
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/a/cd2/82cffc51-59cf-4807-81d1-4c0a34181cd2_RETINA_PORTRAIT_3_2.jpg",
-        "width": 640,
-        "height": 427,
-        "fallback": false,
-        "attribution": "Brita Christensen/Jeff Taylor"
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/a/cd2/82cffc51-59cf-4807-81d1-4c0a34181cd2_ARTIST_PAGE_3_2.jpg",
-        "width": 305,
-        "height": 203,
-        "fallback": false,
-        "attribution": "Brita Christensen/Jeff Taylor"
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/cd2/82cffc51-59cf-4807-81d1-4c0a34181cd2_SOURCE",
-        "width": 2426,
-        "height": 1365,
-        "fallback": false,
-        "attribution": "Brita Christensen/Jeff Taylor"
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/cd2/82cffc51-59cf-4807-81d1-4c0a34181cd2_TABLET_LANDSCAPE_16_9.jpg",
-        "width": 1024,
-        "height": 576,
-        "fallback": false,
-        "attribution": "Brita Christensen/Jeff Taylor"
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/cd2/82cffc51-59cf-4807-81d1-4c0a34181cd2_RETINA_LANDSCAPE_16_9.jpg",
-        "width": 1136,
-        "height": 639,
-        "fallback": false,
-        "attribution": "Brita Christensen/Jeff Taylor"
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/cd2/82cffc51-59cf-4807-81d1-4c0a34181cd2_RECOMENDATION_16_9.jpg",
-        "width": 100,
-        "height": 56,
-        "fallback": false,
-        "attribution": "Brita Christensen/Jeff Taylor"
-      }
-    ],
-    "distance": 8.33,
-    "units": "MILES",
-    "sales": {
-      "public": {
-        "startDateTime": "1900-01-01T06:00:00Z",
-        "startTBD": false,
-        "startTBA": false,
-        "endDateTime": "2026-04-19T02:00:00Z"
-      }
-    },
-    "dates": {
-      "start": {
-        "localDate": "2026-04-18",
-        "localTime": "20:00:00",
-        "dateTime": "2026-04-19T02:00:00Z",
-        "dateTBD": false,
-        "dateTBA": false,
-        "timeTBA": false,
-        "noSpecificTime": false
-      },
-      "status": {
-        "code": "onsale"
-      },
-      "spanMultipleDays": false
-    },
-    "classifications": [
-      {
-        "primary": true,
-        "segment": {
-          "id": "KZFzniwnSyZfZ7v7nJ",
-          "name": "Music"
-        },
-        "genre": {
-          "id": "KnvZfZ7vAv1",
-          "name": "Hip-Hop/Rap"
-        },
-        "subGenre": {
-          "id": "KZazBEonSMnZfZ7vkvl",
-          "name": "Hip-Hop/Rap"
-        },
-        "family": false
-      }
-    ],
-    "outlets": [
-      {
-        "url": "http://www.isleta.com/",
-        "type": "venueBoxOffice"
-      },
-      {
-        "url": "https://www.ticketmaster.com/event/Z7r9jZ1A7OKvz",
-        "type": "tmMarketPlace"
-      }
-    ],
-    "ticketing": {
-      "allInclusivePricing": {
-        "enabled": true
-      }
-    },
-    "nameOrigin": "custom",
-    "_links": {
-      "self": {
-        "href": "/discovery/v2/events/Z7r9jZ1A7OKvz?locale=en-us"
-      },
-      "attractions": [
-        {
-          "href": "/discovery/v2/attractions/K8vZ9171Ga0?locale=en-us"
-        }
-      ],
-      "venues": [
-        {
-          "href": "/discovery/v2/venues/ZFr9jZ7AkF?locale=en-us"
-        }
-      ]
-    },
-    "_embedded": {
-      "venues": [
-        {
-          "name": "Isleta Casino and Resort",
-          "type": "venue",
-          "id": "ZFr9jZ7AkF",
-          "test": false,
-          "locale": "en-us",
-          "distance": 8.33,
-          "units": "MILES",
-          "postalCode": "87105",
-          "timezone": "America/Denver",
-          "city": {
-            "name": "Albuquerque"
-          },
-          "state": {
-            "name": "New Mexico",
-            "stateCode": "NM"
-          },
-          "country": {
-            "name": "United States Of America",
-            "countryCode": "US"
-          },
-          "address": {
-            "line1": "11000 Broadway Blvd Se"
-          },
-          "location": {
-            "longitude": "-106.629204000",
-            "latitude": "34.985600000"
-          },
-          "dmas": [
-            {
-              "id": 215
-            }
-          ],
-          "upcomingEvents": {
-            "tmr": 7,
-            "_total": 7,
-            "_filtered": 0
-          },
-          "_links": {
-            "self": {
-              "href": "/discovery/v2/venues/ZFr9jZ7AkF?locale=en-us"
-            }
-          }
-        }
-      ],
-      "attractions": [
-        {
-          "name": "Ice Cube",
-          "type": "attraction",
-          "id": "K8vZ9171Ga0",
-          "test": false,
-          "url": "https://www.ticketmaster.com/ice-cube-tickets/artist/702485",
-          "locale": "en-us",
-          "externalLinks": {
-            "youtube": [
-              {
-                "url": "https://www.youtube.com/channel/UCRZvImLvRIE5BoZvmVHMTqw"
-              }
-            ],
-            "twitter": [
-              {
-                "url": "https://twitter.com/icecube"
-              }
-            ],
-            "itunes": [
-              {
-                "url": "https://itunes.apple.com/artist/id471370"
-              }
-            ],
-            "spotify": [
-              {
-                "url": "https://open.spotify.com/artist/3Mcii5XWf6E0lrY3Uky4cA"
-              }
-            ],
-            "facebook": [
-              {
-                "url": "https://www.facebook.com/IceCube"
-              }
-            ],
-            "instagram": [
-              {
-                "url": "https://www.instagram.com/icecube/"
-              }
-            ],
-            "musicbrainz": [
-              {
-                "id": "1d11e2a1-4531-4d61-a8c7-7b5c6a608fd2",
-                "url": "https://musicbrainz.org/artist/1d11e2a1-4531-4d61-a8c7-7b5c6a608fd2"
-              }
-            ],
-            "homepage": [
-              {
-                "url": "http://www.icecube.com/"
-              }
-            ]
-          },
-          "images": [
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/cd2/82cffc51-59cf-4807-81d1-4c0a34181cd2_EVENT_DETAIL_PAGE_16_9.jpg",
-              "width": 205,
-              "height": 115,
-              "fallback": false,
-              "attribution": "Brita Christensen/Jeff Taylor"
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/cd2/82cffc51-59cf-4807-81d1-4c0a34181cd2_TABLET_LANDSCAPE_LARGE_16_9.jpg",
-              "width": 2048,
-              "height": 1152,
-              "fallback": false,
-              "attribution": "Brita Christensen/Jeff Taylor"
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/a/cd2/82cffc51-59cf-4807-81d1-4c0a34181cd2_TABLET_LANDSCAPE_3_2.jpg",
-              "width": 1024,
-              "height": 683,
-              "fallback": false,
-              "attribution": "Brita Christensen/Jeff Taylor"
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/cd2/82cffc51-59cf-4807-81d1-4c0a34181cd2_RETINA_PORTRAIT_16_9.jpg",
-              "width": 640,
-              "height": 360,
-              "fallback": false,
-              "attribution": "Brita Christensen/Jeff Taylor"
-            },
-            {
-              "ratio": "4_3",
-              "url": "https://s1.ticketm.net/dam/a/cd2/82cffc51-59cf-4807-81d1-4c0a34181cd2_CUSTOM.jpg",
-              "width": 305,
-              "height": 225,
-              "fallback": false,
-              "attribution": "Brita Christensen/Jeff Taylor"
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/a/cd2/82cffc51-59cf-4807-81d1-4c0a34181cd2_RETINA_PORTRAIT_3_2.jpg",
-              "width": 640,
-              "height": 427,
-              "fallback": false,
-              "attribution": "Brita Christensen/Jeff Taylor"
-            },
-            {
-              "ratio": "3_2",
-              "url": "https://s1.ticketm.net/dam/a/cd2/82cffc51-59cf-4807-81d1-4c0a34181cd2_ARTIST_PAGE_3_2.jpg",
-              "width": 305,
-              "height": 203,
-              "fallback": false,
-              "attribution": "Brita Christensen/Jeff Taylor"
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/cd2/82cffc51-59cf-4807-81d1-4c0a34181cd2_SOURCE",
-              "width": 2426,
-              "height": 1365,
-              "fallback": false,
-              "attribution": "Brita Christensen/Jeff Taylor"
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/cd2/82cffc51-59cf-4807-81d1-4c0a34181cd2_TABLET_LANDSCAPE_16_9.jpg",
-              "width": 1024,
-              "height": 576,
-              "fallback": false,
-              "attribution": "Brita Christensen/Jeff Taylor"
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/cd2/82cffc51-59cf-4807-81d1-4c0a34181cd2_RETINA_LANDSCAPE_16_9.jpg",
-              "width": 1136,
-              "height": 639,
-              "fallback": false,
-              "attribution": "Brita Christensen/Jeff Taylor"
-            },
-            {
-              "ratio": "16_9",
-              "url": "https://s1.ticketm.net/dam/a/cd2/82cffc51-59cf-4807-81d1-4c0a34181cd2_RECOMENDATION_16_9.jpg",
-              "width": 100,
-              "height": 56,
-              "fallback": false,
-              "attribution": "Brita Christensen/Jeff Taylor"
-            }
-          ],
-          "classifications": [
-            {
-              "primary": true,
-              "segment": {
-                "id": "KZFzniwnSyZfZ7v7nJ",
-                "name": "Music"
-              },
-              "genre": {
-                "id": "KnvZfZ7vAv1",
-                "name": "Hip-Hop/Rap"
-              },
-              "subGenre": {
-                "id": "KZazBEonSMnZfZ7vkdA",
-                "name": "Urban"
-              },
-              "type": {
-                "id": "KZAyXgnZfZ7v7nI",
-                "name": "Undefined"
-              },
-              "subType": {
-                "id": "KZFzBErXgnZfZ7v7lJ",
-                "name": "Undefined"
-              },
-              "family": false
-            }
-          ],
-          "upcomingEvents": {
-            "tmr": 5,
-            "ticketmaster": 6,
-            "_total": 11,
-            "_filtered": 0
-          },
-          "_links": {
-            "self": {
-              "href": "/discovery/v2/attractions/K8vZ9171Ga0?locale=en-us"
-            }
-          }
-        }
-      ]
-    }
-  },
-  {
-    "name": "Albuquerque Isotopes vs. Oklahoma City Comets",
-    "type": "event",
     "id": "G5vzZ_eJiK65t",
     "test": false,
     "url": "https://www.ticketmaster.com/albuquerque-isotopes-vs-oklahoma-city-comets-albuquerque-new-mexico-04-19-2026/event/1E006429AC4C72E9",
@@ -1853,9 +249,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -1979,9 +375,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -2112,9 +508,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 116,
-            "ticketmaster": 90,
-            "_total": 206,
+            "tmr": 115,
+            "ticketmaster": 89,
+            "_total": 204,
             "_filtered": 0
           },
           "_links": {
@@ -4821,9 +3217,9 @@
             "mfx-ch": 1,
             "tmr": 3,
             "mfx-nl": 1,
-            "ticketmaster": 13,
+            "ticketmaster": 12,
             "moshtix": 2,
-            "_total": 21,
+            "_total": 20,
             "_filtered": 0
           },
           "_links": {
@@ -4996,9 +3392,9 @@
             "mfx-fi": 1,
             "tmr": 3,
             "mfx-nl": 1,
-            "ticketmaster": 11,
+            "ticketmaster": 10,
             "trium": 9,
-            "_total": 25,
+            "_total": 24,
             "_filtered": 0
           },
           "_links": {
@@ -5877,8 +4273,8 @@
             }
           ],
           "upcomingEvents": {
-            "ticketmaster": 11,
-            "_total": 11,
+            "ticketmaster": 10,
+            "_total": 10,
             "_filtered": 0
           },
           "_links": {
@@ -6586,8 +4982,8 @@
             }
           ],
           "upcomingEvents": {
-            "ticketmaster": 11,
-            "_total": 11,
+            "ticketmaster": 10,
+            "_total": 10,
             "_filtered": 0
           },
           "_links": {
@@ -6912,9 +5308,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -8180,8 +6576,8 @@
           ],
           "upcomingEvents": {
             "tmr": 2,
-            "ticketmaster": 2,
-            "_total": 4,
+            "ticketmaster": 1,
+            "_total": 3,
             "_filtered": 0
           },
           "_links": {
@@ -8569,9 +6965,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 6,
+            "tmr": 5,
             "ticketmaster": 10,
-            "_total": 16,
+            "_total": 15,
             "_filtered": 0
           },
           "_links": {
@@ -8777,9 +7173,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -8903,9 +7299,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -9020,9 +7416,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 42,
-            "_total": 156,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -9228,9 +7624,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -9354,9 +7750,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -9471,9 +7867,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 42,
-            "_total": 156,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -11003,9 +9399,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -11129,9 +9525,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -11246,9 +9642,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 42,
-            "_total": 156,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -11454,9 +9850,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -11580,9 +9976,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -11697,9 +10093,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 42,
-            "_total": 156,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -12144,9 +10540,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 8,
-            "ticketmaster": 18,
-            "_total": 26,
+            "tmr": 7,
+            "ticketmaster": 17,
+            "_total": 24,
             "_filtered": 0
           },
           "_links": {
@@ -12671,9 +11067,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 8,
-            "ticketmaster": 18,
-            "_total": 26,
+            "tmr": 7,
+            "ticketmaster": 17,
+            "_total": 24,
             "_filtered": 0
           },
           "_links": {
@@ -13011,9 +11407,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -13137,9 +11533,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -13254,9 +11650,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 42,
-            "_total": 156,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -13504,8 +11900,8 @@
             }
           ],
           "upcomingEvents": {
-            "ticketmaster": 11,
-            "_total": 11,
+            "ticketmaster": 10,
+            "_total": 10,
             "_filtered": 0
           },
           "_links": {
@@ -14345,9 +12741,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -14471,9 +12867,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -14588,9 +12984,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 42,
-            "_total": 156,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -14790,9 +13186,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -15210,9 +13606,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -15677,8 +14073,8 @@
             }
           ],
           "upcomingEvents": {
-            "ticketmaster": 11,
-            "_total": 11,
+            "ticketmaster": 10,
+            "_total": 10,
             "_filtered": 0
           },
           "_links": {
@@ -16009,9 +14405,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -16135,9 +14531,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -16268,9 +14664,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 116,
-            "ticketmaster": 90,
-            "_total": 206,
+            "tmr": 115,
+            "ticketmaster": 89,
+            "_total": 204,
             "_filtered": 0
           },
           "_links": {
@@ -16476,9 +14872,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -16602,9 +14998,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -16735,9 +15131,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 116,
-            "ticketmaster": 90,
-            "_total": 206,
+            "tmr": 115,
+            "ticketmaster": 89,
+            "_total": 204,
             "_filtered": 0
           },
           "_links": {
@@ -16999,9 +15395,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -17125,9 +15521,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -17258,9 +15654,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 116,
-            "ticketmaster": 90,
-            "_total": 206,
+            "tmr": 115,
+            "ticketmaster": 89,
+            "_total": 204,
             "_filtered": 0
           },
           "_links": {
@@ -17466,9 +15862,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -17592,9 +15988,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -17725,9 +16121,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 116,
-            "ticketmaster": 90,
-            "_total": 206,
+            "tmr": 115,
+            "ticketmaster": 89,
+            "_total": 204,
             "_filtered": 0
           },
           "_links": {
@@ -18429,9 +16825,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -18555,9 +16951,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -18688,9 +17084,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 116,
-            "ticketmaster": 90,
-            "_total": 206,
+            "tmr": 115,
+            "ticketmaster": 89,
+            "_total": 204,
             "_filtered": 0
           },
           "_links": {
@@ -18952,9 +17348,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -19078,9 +17474,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -19211,9 +17607,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 116,
-            "ticketmaster": 90,
-            "_total": 206,
+            "tmr": 115,
+            "ticketmaster": 89,
+            "_total": 204,
             "_filtered": 0
           },
           "_links": {
@@ -19769,9 +18165,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -21594,9 +19990,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -22029,9 +20425,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -22155,9 +20551,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -22272,9 +20668,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 42,
-            "_total": 156,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -22895,9 +21291,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -23021,9 +21417,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -23138,9 +21534,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 42,
-            "_total": 156,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -24352,9 +22748,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -24478,9 +22874,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -24595,9 +22991,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 42,
-            "_total": 156,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -24803,9 +23199,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -24929,9 +23325,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -25046,9 +23442,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 42,
-            "_total": 156,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -25994,9 +24390,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -26120,9 +24516,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -26237,9 +24633,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 42,
-            "_total": 156,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -27297,9 +25693,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -27423,9 +25819,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -27540,9 +25936,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 114,
+            "tmr": 113,
             "ticketmaster": 42,
-            "_total": 156,
+            "_total": 155,
             "_filtered": 0
           },
           "_links": {
@@ -28354,8 +26750,8 @@
           ],
           "upcomingEvents": {
             "tmr": 22,
-            "ticketmaster": 47,
-            "_total": 69,
+            "ticketmaster": 46,
+            "_total": 68,
             "_filtered": 0
           },
           "_links": {
@@ -28933,9 +27329,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -29895,8 +28291,8 @@
             }
           ],
           "upcomingEvents": {
-            "ticketmaster": 11,
-            "_total": 11,
+            "ticketmaster": 10,
+            "_total": 10,
             "_filtered": 0
           },
           "_links": {
@@ -30074,9 +28470,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 4,
-            "ticketmaster": 12,
-            "_total": 16,
+            "tmr": 3,
+            "ticketmaster": 11,
+            "_total": 14,
             "_filtered": 0
           },
           "_links": {
@@ -30276,9 +28672,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -31909,9 +30305,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -32035,9 +30431,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -32351,9 +30747,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -32477,9 +30873,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -33305,9 +31701,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -33431,9 +31827,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -33549,8 +31945,8 @@
           ],
           "upcomingEvents": {
             "tmr": 111,
-            "ticketmaster": 46,
-            "_total": 157,
+            "ticketmaster": 45,
+            "_total": 156,
             "_filtered": 0
           },
           "_links": {
@@ -33756,9 +32152,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -33882,9 +32278,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -34645,9 +33041,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -34771,9 +33167,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -35140,8 +33536,8 @@
             }
           ],
           "upcomingEvents": {
-            "ticketmaster": 11,
-            "_total": 11,
+            "ticketmaster": 10,
+            "_total": 10,
             "_filtered": 0
           },
           "_links": {
@@ -35525,9 +33921,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -35651,9 +34047,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -35967,9 +34363,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -36093,9 +34489,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -36218,8 +34614,8 @@
           ],
           "upcomingEvents": {
             "tmr": 42,
-            "ticketmaster": 110,
-            "_total": 152,
+            "ticketmaster": 109,
+            "_total": 151,
             "_filtered": 0
           },
           "_links": {
@@ -36826,9 +35222,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -36952,9 +35348,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -37077,8 +35473,8 @@
           ],
           "upcomingEvents": {
             "tmr": 42,
-            "ticketmaster": 110,
-            "_total": 152,
+            "ticketmaster": 109,
+            "_total": 151,
             "_filtered": 0
           },
           "_links": {
@@ -37340,9 +35736,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -37466,9 +35862,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -37591,8 +35987,8 @@
           ],
           "upcomingEvents": {
             "tmr": 42,
-            "ticketmaster": 110,
-            "_total": 152,
+            "ticketmaster": 109,
+            "_total": 151,
             "_filtered": 0
           },
           "_links": {
@@ -37982,9 +36378,9 @@
           ],
           "upcomingEvents": {
             "tmr": 5,
-            "ticketmaster": 30,
+            "ticketmaster": 28,
             "ticketweb": 1,
-            "_total": 36,
+            "_total": 34,
             "_filtered": 0
           },
           "_links": {
@@ -38190,9 +36586,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -38316,9 +36712,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -38441,8 +36837,8 @@
           ],
           "upcomingEvents": {
             "tmr": 42,
-            "ticketmaster": 110,
-            "_total": 152,
+            "ticketmaster": 109,
+            "_total": 151,
             "_filtered": 0
           },
           "_links": {
@@ -39042,9 +37438,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -39168,9 +37564,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -39293,8 +37689,8 @@
           ],
           "upcomingEvents": {
             "tmr": 42,
-            "ticketmaster": 110,
-            "_total": 152,
+            "ticketmaster": 109,
+            "_total": 151,
             "_filtered": 0
           },
           "_links": {
@@ -39632,9 +38028,9 @@
           "upcomingEvents": {
             "tmr": 5,
             "ticketmaster": 35,
-            "ticketweb": 4,
+            "ticketweb": 2,
             "mfx-pl": 1,
-            "_total": 45,
+            "_total": 43,
             "_filtered": 0
           },
           "_links": {
@@ -39654,6 +38050,27 @@
     "url": "https://www.ticketmaster.com/ralph-barbosa-albuquerque-new-mexico-06-27-2026/event/1E00645281B55407",
     "locale": "en-us",
     "images": [
+      {
+        "ratio": "16_9",
+        "url": "https://s1.ticketm.net/dam/a/cbe/d45a6e3e-b85a-4a7e-bbc1-adf74ae41cbe_RETINA_LANDSCAPE_16_9.jpg",
+        "width": 1136,
+        "height": 639,
+        "fallback": false
+      },
+      {
+        "ratio": "16_9",
+        "url": "https://s1.ticketm.net/dam/a/cbe/d45a6e3e-b85a-4a7e-bbc1-adf74ae41cbe_TABLET_LANDSCAPE_16_9.jpg",
+        "width": 1024,
+        "height": 576,
+        "fallback": false
+      },
+      {
+        "ratio": "16_9",
+        "url": "https://s1.ticketm.net/dam/a/cbe/d45a6e3e-b85a-4a7e-bbc1-adf74ae41cbe_EVENT_DETAIL_PAGE_16_9.jpg",
+        "width": 205,
+        "height": 115,
+        "fallback": false
+      },
       {
         "ratio": "16_9",
         "url": "https://s1.ticketm.net/dam/a/cbe/d45a6e3e-b85a-4a7e-bbc1-adf74ae41cbe_SOURCE",
@@ -39687,27 +38104,6 @@
         "url": "https://s1.ticketm.net/dam/a/cbe/d45a6e3e-b85a-4a7e-bbc1-adf74ae41cbe_TABLET_LANDSCAPE_3_2.jpg",
         "width": 1024,
         "height": 683,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/cbe/d45a6e3e-b85a-4a7e-bbc1-adf74ae41cbe_RETINA_LANDSCAPE_16_9.jpg",
-        "width": 1136,
-        "height": 639,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/cbe/d45a6e3e-b85a-4a7e-bbc1-adf74ae41cbe_TABLET_LANDSCAPE_16_9.jpg",
-        "width": 1024,
-        "height": 576,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/cbe/d45a6e3e-b85a-4a7e-bbc1-adf74ae41cbe_EVENT_DETAIL_PAGE_16_9.jpg",
-        "width": 205,
-        "height": 115,
         "fallback": false
       },
       {
@@ -39896,8 +38292,8 @@
             }
           ],
           "upcomingEvents": {
-            "ticketmaster": 11,
-            "_total": 11,
+            "ticketmaster": 10,
+            "_total": 10,
             "_filtered": 0
           },
           "_links": {
@@ -40286,9 +38682,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -40412,9 +38808,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -40537,8 +38933,8 @@
           ],
           "upcomingEvents": {
             "tmr": 42,
-            "ticketmaster": 110,
-            "_total": 152,
+            "ticketmaster": 109,
+            "_total": 151,
             "_filtered": 0
           },
           "_links": {
@@ -41762,9 +40158,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -41996,9 +40392,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 27,
+            "tmr": 26,
             "ticketmaster": 4,
-            "_total": 31,
+            "_total": 30,
             "_filtered": 0
           },
           "_links": {
@@ -45186,9 +43582,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -45312,9 +43708,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -45444,8 +43840,8 @@
           ],
           "upcomingEvents": {
             "tmr": 39,
-            "ticketmaster": 103,
-            "_total": 142,
+            "ticketmaster": 101,
+            "_total": 140,
             "_filtered": 0
           },
           "_links": {
@@ -45651,9 +44047,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -45777,9 +44173,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -45909,8 +44305,8 @@
           ],
           "upcomingEvents": {
             "tmr": 39,
-            "ticketmaster": 103,
-            "_total": 142,
+            "ticketmaster": 101,
+            "_total": 140,
             "_filtered": 0
           },
           "_links": {
@@ -46116,9 +44512,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -46242,9 +44638,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -46374,8 +44770,8 @@
           ],
           "upcomingEvents": {
             "tmr": 39,
-            "ticketmaster": 103,
-            "_total": 142,
+            "ticketmaster": 101,
+            "_total": 140,
             "_filtered": 0
           },
           "_links": {
@@ -46581,9 +44977,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -46707,9 +45103,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -46824,9 +45220,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 102,
+            "tmr": 101,
             "ticketmaster": 42,
-            "_total": 144,
+            "_total": 143,
             "_filtered": 0
           },
           "_links": {
@@ -47032,9 +45428,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -47158,9 +45554,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -47275,9 +45671,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 102,
+            "tmr": 101,
             "ticketmaster": 42,
-            "_total": 144,
+            "_total": 143,
             "_filtered": 0
           },
           "_links": {
@@ -48056,9 +46452,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -48182,9 +46578,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -48299,9 +46695,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 102,
+            "tmr": 101,
             "ticketmaster": 42,
-            "_total": 144,
+            "_total": 143,
             "_filtered": 0
           },
           "_links": {
@@ -48507,9 +46903,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -48633,9 +47029,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -48750,9 +47146,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 102,
+            "tmr": 101,
             "ticketmaster": 42,
-            "_total": 144,
+            "_total": 143,
             "_filtered": 0
           },
           "_links": {
@@ -49652,8 +48048,8 @@
           "upcomingEvents": {
             "tmr": 6,
             "mfx-nl": 1,
-            "ticketmaster": 18,
-            "_total": 25,
+            "ticketmaster": 17,
+            "_total": 24,
             "_filtered": 0
           },
           "_links": {
@@ -49990,9 +48386,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -50116,9 +48512,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -50233,9 +48629,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 102,
+            "tmr": 101,
             "ticketmaster": 42,
-            "_total": 144,
+            "_total": 143,
             "_filtered": 0
           },
           "_links": {
@@ -50497,9 +48893,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -50623,9 +49019,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -50740,9 +49136,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 102,
+            "tmr": 101,
             "ticketmaster": 42,
-            "_total": 144,
+            "_total": 143,
             "_filtered": 0
           },
           "_links": {
@@ -51619,8 +50015,8 @@
           ],
           "upcomingEvents": {
             "tmr": 8,
-            "ticketmaster": 42,
-            "_total": 50,
+            "ticketmaster": 41,
+            "_total": 49,
             "_filtered": 0
           },
           "_links": {
@@ -52586,8 +50982,8 @@
             }
           ],
           "upcomingEvents": {
-            "ticketmaster": 11,
-            "_total": 11,
+            "ticketmaster": 10,
+            "_total": 10,
             "_filtered": 0
           },
           "_links": {
@@ -53004,8 +51400,8 @@
             }
           ],
           "upcomingEvents": {
-            "ticketmaster": 11,
-            "_total": 11,
+            "ticketmaster": 10,
+            "_total": 10,
             "_filtered": 0
           },
           "_links": {
@@ -53331,9 +51727,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -53757,9 +52153,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -53883,9 +52279,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -54199,9 +52595,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -54325,9 +52721,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -55732,9 +54128,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -55858,9 +54254,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -55976,8 +54372,8 @@
           ],
           "upcomingEvents": {
             "tmr": 111,
-            "ticketmaster": 46,
-            "_total": 157,
+            "ticketmaster": 45,
+            "_total": 156,
             "_filtered": 0
           },
           "_links": {
@@ -56183,9 +54579,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -56309,9 +54705,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -56625,9 +55021,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -56751,9 +55147,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -57123,9 +55519,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -57249,9 +55645,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -57367,8 +55763,8 @@
           ],
           "upcomingEvents": {
             "tmr": 111,
-            "ticketmaster": 46,
-            "_total": 157,
+            "ticketmaster": 45,
+            "_total": 156,
             "_filtered": 0
           },
           "_links": {
@@ -59290,8 +57686,8 @@
             }
           ],
           "upcomingEvents": {
-            "ticketmaster": 11,
-            "_total": 11,
+            "ticketmaster": 10,
+            "_total": 10,
             "_filtered": 0
           },
           "_links": {
@@ -59645,9 +58041,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -59863,9 +58259,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 24,
+            "tmr": 23,
             "ticketmaster": 5,
-            "_total": 29,
+            "_total": 28,
             "_filtered": 0
           },
           "_links": {
@@ -61022,9 +59418,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -61148,9 +59544,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -61272,9 +59668,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 41,
+            "tmr": 40,
             "ticketmaster": 102,
-            "_total": 143,
+            "_total": 142,
             "_filtered": 0
           },
           "_links": {
@@ -61480,9 +59876,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -61606,9 +60002,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -61730,9 +60126,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 41,
+            "tmr": 40,
             "ticketmaster": 102,
-            "_total": 143,
+            "_total": 142,
             "_filtered": 0
           },
           "_links": {
@@ -61994,9 +60390,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -62120,9 +60516,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -62244,9 +60640,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 41,
+            "tmr": 40,
             "ticketmaster": 102,
-            "_total": 143,
+            "_total": 142,
             "_filtered": 0
           },
           "_links": {
@@ -63265,9 +61661,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -63391,9 +61787,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -63515,9 +61911,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 41,
+            "tmr": 40,
             "ticketmaster": 102,
-            "_total": 143,
+            "_total": 142,
             "_filtered": 0
           },
           "_links": {
@@ -63723,9 +62119,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -63849,9 +62245,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -63973,9 +62369,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 41,
+            "tmr": 40,
             "ticketmaster": 102,
-            "_total": 143,
+            "_total": 142,
             "_filtered": 0
           },
           "_links": {
@@ -64372,11 +62768,11 @@
             "mfx-be": 1,
             "mfx-fi": 2,
             "tmr": 14,
-            "ticketmaster": 28,
+            "ticketmaster": 27,
             "mfx-de": 7,
             "mfx-it": 1,
             "mfx-pl": 2,
-            "_total": 58,
+            "_total": 57,
             "_filtered": 0
           },
           "_links": {
@@ -64638,9 +63034,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -64764,9 +63160,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -64888,9 +63284,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 41,
+            "tmr": 40,
             "ticketmaster": 102,
-            "_total": 143,
+            "_total": 142,
             "_filtered": 0
           },
           "_links": {
@@ -65090,9 +63486,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -65300,8 +63696,8 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 26,
-            "_total": 26,
+            "tmr": 25,
+            "_total": 25,
             "_filtered": 0
           },
           "_links": {
@@ -65501,9 +63897,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -65943,9 +64339,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -66069,9 +64465,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -66194,8 +64590,8 @@
           ],
           "upcomingEvents": {
             "tmr": 30,
-            "ticketmaster": 114,
-            "_total": 144,
+            "ticketmaster": 112,
+            "_total": 142,
             "_filtered": 0
           },
           "_links": {
@@ -66401,9 +64797,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -66527,9 +64923,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -66652,8 +65048,8 @@
           ],
           "upcomingEvents": {
             "tmr": 30,
-            "ticketmaster": 114,
-            "_total": 144,
+            "ticketmaster": 112,
+            "_total": 142,
             "_filtered": 0
           },
           "_links": {
@@ -66915,9 +65311,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -67041,9 +65437,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -67166,8 +65562,8 @@
           ],
           "upcomingEvents": {
             "tmr": 30,
-            "ticketmaster": 114,
-            "_total": 144,
+            "ticketmaster": 112,
+            "_total": 142,
             "_filtered": 0
           },
           "_links": {
@@ -67373,9 +65769,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -67499,9 +65895,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -67624,8 +66020,8 @@
           ],
           "upcomingEvents": {
             "tmr": 30,
-            "ticketmaster": 114,
-            "_total": 144,
+            "ticketmaster": 112,
+            "_total": 142,
             "_filtered": 0
           },
           "_links": {
@@ -69024,9 +67420,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -69150,9 +67546,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -69275,8 +67671,8 @@
           ],
           "upcomingEvents": {
             "tmr": 30,
-            "ticketmaster": 114,
-            "_total": 144,
+            "ticketmaster": 112,
+            "_total": 142,
             "_filtered": 0
           },
           "_links": {
@@ -69538,9 +67934,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -69664,9 +68060,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -69789,8 +68185,8 @@
           ],
           "upcomingEvents": {
             "tmr": 30,
-            "ticketmaster": 114,
-            "_total": 144,
+            "ticketmaster": 112,
+            "_total": 142,
             "_filtered": 0
           },
           "_links": {
@@ -71869,9 +70265,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -72103,9 +70499,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 8,
+            "tmr": 7,
             "ticketmaster": 18,
-            "_total": 26,
+            "_total": 25,
             "_filtered": 0
           },
           "_links": {
@@ -73896,9 +72292,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -74022,9 +72418,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -74147,8 +72543,8 @@
           ],
           "upcomingEvents": {
             "tmr": 42,
-            "ticketmaster": 110,
-            "_total": 152,
+            "ticketmaster": 109,
+            "_total": 151,
             "_filtered": 0
           },
           "_links": {
@@ -74354,9 +72750,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -74480,9 +72876,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -74605,8 +73001,8 @@
           ],
           "upcomingEvents": {
             "tmr": 42,
-            "ticketmaster": 110,
-            "_total": 152,
+            "ticketmaster": 109,
+            "_total": 151,
             "_filtered": 0
           },
           "_links": {
@@ -74868,9 +73264,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -74994,9 +73390,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -75119,8 +73515,8 @@
           ],
           "upcomingEvents": {
             "tmr": 42,
-            "ticketmaster": 110,
-            "_total": 152,
+            "ticketmaster": 109,
+            "_total": 151,
             "_filtered": 0
           },
           "_links": {
@@ -75326,9 +73722,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -75452,9 +73848,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -75577,8 +73973,8 @@
           ],
           "upcomingEvents": {
             "tmr": 42,
-            "ticketmaster": 110,
-            "_total": 152,
+            "ticketmaster": 109,
+            "_total": 151,
             "_filtered": 0
           },
           "_links": {
@@ -75784,9 +74180,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -75910,9 +74306,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -76035,8 +74431,8 @@
           ],
           "upcomingEvents": {
             "tmr": 42,
-            "ticketmaster": 110,
-            "_total": 152,
+            "ticketmaster": 109,
+            "_total": 151,
             "_filtered": 0
           },
           "_links": {
@@ -76298,9 +74694,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -76424,9 +74820,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 107,
-            "ticketmaster": 96,
-            "_total": 203,
+            "tmr": 106,
+            "ticketmaster": 95,
+            "_total": 201,
             "_filtered": 0
           },
           "_links": {
@@ -76549,8 +74945,8 @@
           ],
           "upcomingEvents": {
             "tmr": 42,
-            "ticketmaster": 110,
-            "_total": 152,
+            "ticketmaster": 109,
+            "_total": 151,
             "_filtered": 0
           },
           "_links": {
@@ -76791,9 +75187,9 @@
             "childRule": "Children ages 2 and older require a paid ticket for entrance into Rio Grande Credit Union Field at Isotopes Park."
           },
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -78722,9 +77118,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -82626,9 +81022,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -84629,8 +83025,8 @@
           ],
           "upcomingEvents": {
             "tmr": 3,
-            "ticketmaster": 35,
-            "_total": 38,
+            "ticketmaster": 34,
+            "_total": 37,
             "_filtered": 0
           },
           "_links": {
@@ -86978,10 +85374,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 3,
+            "tmr": 1,
             "ticketmaster": 37,
-            "ticketweb": 1,
-            "_total": 41,
+            "_total": 38,
             "_filtered": 0
           },
           "_links": {
@@ -87435,9 +85830,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -88706,10 +87101,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 3,
+            "tmr": 1,
             "ticketmaster": 37,
-            "ticketweb": 1,
-            "_total": 41,
+            "_total": 38,
             "_filtered": 0
           },
           "_links": {
@@ -90585,8 +88979,8 @@
           ],
           "upcomingEvents": {
             "tmr": 121,
-            "ticketmaster": 110,
-            "_total": 231,
+            "ticketmaster": 108,
+            "_total": 229,
             "_filtered": 0
           },
           "_links": {
@@ -90920,8 +89314,8 @@
           ],
           "upcomingEvents": {
             "tmr": 121,
-            "ticketmaster": 110,
-            "_total": 231,
+            "ticketmaster": 108,
+            "_total": 229,
             "_filtered": 0
           },
           "_links": {
@@ -91658,8 +90052,8 @@
           ],
           "upcomingEvents": {
             "tmr": 121,
-            "ticketmaster": 110,
-            "_total": 231,
+            "ticketmaster": 108,
+            "_total": 229,
             "_filtered": 0
           },
           "_links": {
@@ -91993,8 +90387,8 @@
           ],
           "upcomingEvents": {
             "tmr": 121,
-            "ticketmaster": 110,
-            "_total": 231,
+            "ticketmaster": 108,
+            "_total": 229,
             "_filtered": 0
           },
           "_links": {
@@ -92182,9 +90576,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 82,
-            "ticketmaster": 67,
-            "_total": 149,
+            "tmr": 81,
+            "ticketmaster": 66,
+            "_total": 147,
             "_filtered": 0
           },
           "_links": {
@@ -92284,8 +90678,8 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 25,
-            "_total": 25,
+            "tmr": 24,
+            "_total": 24,
             "_filtered": 0
           },
           "_links": {
@@ -92669,10 +91063,10 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 17,
+            "tmr": 16,
             "ticketmaster": 44,
             "mfx-de": 1,
-            "_total": 62,
+            "_total": 61,
             "_filtered": 0
           },
           "_links": {
@@ -93006,8 +91400,8 @@
           ],
           "upcomingEvents": {
             "tmr": 121,
-            "ticketmaster": 110,
-            "_total": 231,
+            "ticketmaster": 108,
+            "_total": 229,
             "_filtered": 0
           },
           "_links": {
@@ -94524,8 +92918,8 @@
           ],
           "upcomingEvents": {
             "tmr": 56,
-            "ticketmaster": 53,
-            "_total": 109,
+            "ticketmaster": 51,
+            "_total": 107,
             "_filtered": 0
           },
           "_links": {
@@ -94859,8 +93253,8 @@
           ],
           "upcomingEvents": {
             "tmr": 56,
-            "ticketmaster": 53,
-            "_total": 109,
+            "ticketmaster": 51,
+            "_total": 107,
             "_filtered": 0
           },
           "_links": {
@@ -95194,8 +93588,8 @@
           ],
           "upcomingEvents": {
             "tmr": 56,
-            "ticketmaster": 53,
-            "_total": 109,
+            "ticketmaster": 51,
+            "_total": 107,
             "_filtered": 0
           },
           "_links": {
@@ -95529,8 +93923,8 @@
           ],
           "upcomingEvents": {
             "tmr": 56,
-            "ticketmaster": 53,
-            "_total": 109,
+            "ticketmaster": 51,
+            "_total": 107,
             "_filtered": 0
           },
           "_links": {
@@ -95864,8 +94258,8 @@
           ],
           "upcomingEvents": {
             "tmr": 56,
-            "ticketmaster": 53,
-            "_total": 109,
+            "ticketmaster": 51,
+            "_total": 107,
             "_filtered": 0
           },
           "_links": {
@@ -96199,8 +94593,8 @@
           ],
           "upcomingEvents": {
             "tmr": 56,
-            "ticketmaster": 53,
-            "_total": 109,
+            "ticketmaster": 51,
+            "_total": 107,
             "_filtered": 0
           },
           "_links": {
@@ -97101,10 +95495,38 @@
     "locale": "en-us",
     "images": [
       {
+        "ratio": "16_9",
+        "url": "https://s1.ticketm.net/dam/a/cc1/0e35525a-c00e-494a-b080-a31c3deaccc1_SOURCE",
+        "width": 2426,
+        "height": 1365,
+        "fallback": false
+      },
+      {
+        "ratio": "16_9",
+        "url": "https://s1.ticketm.net/dam/a/cc1/0e35525a-c00e-494a-b080-a31c3deaccc1_EVENT_DETAIL_PAGE_16_9.jpg",
+        "width": 205,
+        "height": 115,
+        "fallback": false
+      },
+      {
         "ratio": "3_2",
         "url": "https://s1.ticketm.net/dam/a/cc1/0e35525a-c00e-494a-b080-a31c3deaccc1_ARTIST_PAGE_3_2.jpg",
         "width": 305,
         "height": 203,
+        "fallback": false
+      },
+      {
+        "ratio": "3_2",
+        "url": "https://s1.ticketm.net/dam/a/cc1/0e35525a-c00e-494a-b080-a31c3deaccc1_RETINA_PORTRAIT_3_2.jpg",
+        "width": 640,
+        "height": 427,
+        "fallback": false
+      },
+      {
+        "ratio": "16_9",
+        "url": "https://s1.ticketm.net/dam/a/cc1/0e35525a-c00e-494a-b080-a31c3deaccc1_RECOMENDATION_16_9.jpg",
+        "width": 100,
+        "height": 56,
         "fallback": false
       },
       {
@@ -97133,34 +95555,6 @@
         "url": "https://s1.ticketm.net/dam/a/cc1/0e35525a-c00e-494a-b080-a31c3deaccc1_TABLET_LANDSCAPE_16_9.jpg",
         "width": 1024,
         "height": 576,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/cc1/0e35525a-c00e-494a-b080-a31c3deaccc1_SOURCE",
-        "width": 2426,
-        "height": 1365,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/cc1/0e35525a-c00e-494a-b080-a31c3deaccc1_EVENT_DETAIL_PAGE_16_9.jpg",
-        "width": 205,
-        "height": 115,
-        "fallback": false
-      },
-      {
-        "ratio": "3_2",
-        "url": "https://s1.ticketm.net/dam/a/cc1/0e35525a-c00e-494a-b080-a31c3deaccc1_RETINA_PORTRAIT_3_2.jpg",
-        "width": 640,
-        "height": 427,
-        "fallback": false
-      },
-      {
-        "ratio": "16_9",
-        "url": "https://s1.ticketm.net/dam/a/cc1/0e35525a-c00e-494a-b080-a31c3deaccc1_RECOMENDATION_16_9.jpg",
-        "width": 100,
-        "height": 56,
         "fallback": false
       },
       {
@@ -100106,9 +98500,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 150,
+            "tmr": 147,
             "ticketmaster": 24,
-            "_total": 174,
+            "_total": 171,
             "_filtered": 0
           },
           "_links": {
@@ -100441,9 +98835,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 150,
+            "tmr": 147,
             "ticketmaster": 24,
-            "_total": 174,
+            "_total": 171,
             "_filtered": 0
           },
           "_links": {
@@ -100776,9 +99170,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 150,
+            "tmr": 147,
             "ticketmaster": 24,
-            "_total": 174,
+            "_total": 171,
             "_filtered": 0
           },
           "_links": {
@@ -101111,9 +99505,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 150,
+            "tmr": 147,
             "ticketmaster": 24,
-            "_total": 174,
+            "_total": 171,
             "_filtered": 0
           },
           "_links": {
@@ -101446,9 +99840,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 150,
+            "tmr": 147,
             "ticketmaster": 24,
-            "_total": 174,
+            "_total": 171,
             "_filtered": 0
           },
           "_links": {
@@ -101781,9 +100175,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 150,
+            "tmr": 147,
             "ticketmaster": 24,
-            "_total": 174,
+            "_total": 171,
             "_filtered": 0
           },
           "_links": {
@@ -102122,9 +100516,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 97,
+            "tmr": 95,
             "ticketmaster": 40,
-            "_total": 137,
+            "_total": 135,
             "_filtered": 0
           },
           "_links": {
@@ -102463,9 +100857,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 97,
+            "tmr": 95,
             "ticketmaster": 40,
-            "_total": 137,
+            "_total": 135,
             "_filtered": 0
           },
           "_links": {
@@ -102804,9 +101198,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 97,
+            "tmr": 95,
             "ticketmaster": 40,
-            "_total": 137,
+            "_total": 135,
             "_filtered": 0
           },
           "_links": {
@@ -103145,9 +101539,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 97,
+            "tmr": 95,
             "ticketmaster": 40,
-            "_total": 137,
+            "_total": 135,
             "_filtered": 0
           },
           "_links": {
@@ -103486,9 +101880,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 97,
+            "tmr": 95,
             "ticketmaster": 40,
-            "_total": 137,
+            "_total": 135,
             "_filtered": 0
           },
           "_links": {
@@ -103827,9 +102221,9 @@
             }
           ],
           "upcomingEvents": {
-            "tmr": 97,
+            "tmr": 95,
             "ticketmaster": 40,
-            "_total": 137,
+            "_total": 135,
             "_filtered": 0
           },
           "_links": {
