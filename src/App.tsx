@@ -1783,6 +1783,29 @@ interface CardAdjustments {
 
 const DEFAULT_ADJUSTMENTS: CardAdjustments = { zoom: 1, darkness: 0.5, offsetX: 0, offsetY: 0 };
 
+// ── Per-element override positions and scales ─────────────────────────────
+// x/y are in canvas pixels (1080×1920 space). scale multiplies font/size.
+type ElementKey = 'badge' | 'tag' | 'title' | 'meta' | 'sticker';
+
+interface ElementOverride {
+  x: number;   // canvas px — horizontal anchor
+  y: number;   // canvas px — vertical anchor
+  scale: number; // 0.5–2.0
+}
+
+type ElementOverrides = Record<ElementKey, ElementOverride>;
+
+function defaultElementOverrides(format: 'story' | 'square'): ElementOverrides {
+  const H = format === 'story' ? 1920 : 1080;
+  return {
+    badge:   { x: 72,  y: format === 'story' ? 160 : 72,  scale: 1 },
+    tag:     { x: 72,  y: H - 80 - 350,                   scale: 1 },  // approx contentTop
+    title:   { x: 72,  y: H - 80 - 290,                   scale: 1 },
+    meta:    { x: 72,  y: H - 80 - 160,                   scale: 1 },
+    sticker: { x: -1,  y: format === 'story' ? 240 : 140, scale: 1 },  // x=-1 means auto right-align
+  };
+}
+
 // ── Sticker presets — composited as static text onto the card ─────────────
 interface StickerPreset {
   id: string;
@@ -1807,7 +1830,8 @@ function drawShareCard(
   photo: HTMLImageElement | null,
   photoFit: 'cover' | 'contain',
   adj: CardAdjustments = DEFAULT_ADJUSTMENTS,
-  stickerId = 'none'
+  stickerId = 'none',
+  elOverrides?: ElementOverrides
 ): void {
   const W = 1080;
   const H = format === 'story' ? 1920 : 1080;
@@ -1816,6 +1840,7 @@ function drawShareCard(
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
+  const el = elOverrides ?? defaultElementOverrides(format);
   const ox = adj.offsetX * W;
   const oy = adj.offsetY * H;
 
@@ -1883,65 +1908,69 @@ function drawShareCard(
   ctx.fillRect(0, H - 16, W, 16);
 
   // ── ABQ Unplugged badge (top-left) ────────────────────────────
-  const BADGE_X = 72;
-  const BADGE_Y = format === 'story' ? 160 : 72;
-  const dotR = 16;
+  const BADGE_X = el.badge.x;
+  const BADGE_Y = el.badge.y;
+  const badgeScale = el.badge.scale;
+  const dotR = Math.round(16 * badgeScale);
   ctx.fillStyle = '#d4ef4d';
   ctx.beginPath(); ctx.arc(BADGE_X + dotR, BADGE_Y + dotR, dotR, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = '#ffffff';
-  ctx.font = `900 ${format === 'story' ? 48 : 40}px "Public Sans", sans-serif`;
+  ctx.font = `900 ${Math.round((format === 'story' ? 48 : 40) * badgeScale)}px "Public Sans", sans-serif`;
   ctx.textBaseline = 'top';
   ctx.fillText('ABQ', BADGE_X + dotR * 2 + 12, BADGE_Y);
   ctx.fillStyle = '#d4ef4d';
-  ctx.font = `900 ${format === 'story' ? 32 : 28}px "Public Sans", sans-serif`;
-  ctx.fillText('UNPLUGGED', BADGE_X + dotR * 2 + 12, BADGE_Y + (format === 'story' ? 50 : 43));
+  ctx.font = `900 ${Math.round((format === 'story' ? 32 : 28) * badgeScale)}px "Public Sans", sans-serif`;
+  ctx.fillText('UNPLUGGED', BADGE_X + dotR * 2 + 12, BADGE_Y + Math.round((format === 'story' ? 50 : 43) * badgeScale));
 
-  // ── Content block (bottom-up) ─────────────────────────────────
-  const PAD = 72; const CONTENT_W = W - PAD * 2; const BOTTOM_PAD = 80;
-  const tagFontSize = 28;
-  ctx.font = `800 ${tagFontSize}px "Public Sans", sans-serif`;
-  const tagText = data.category.toUpperCase();
-  const tagPadX = 28; const tagH = 56;
-  const tagW = ctx.measureText(tagText).width + tagPadX * 2;
-  const titleFontSize = format === 'story' ? 88 : 76;
-  const titleLineH = titleFontSize * 1.15;
-  const metaLineH = 52;
-  const metaBlockH = data.metaLines.length * metaLineH;
-  const totalContentH = tagH + 24 + 2 * titleLineH + 24 + metaBlockH;
-  const contentTop = H - BOTTOM_PAD - totalContentH;
+  // ── Content block (element-overrideable positions) ────────────
+  const CONTENT_W = W - 72 * 2;
 
   // Tag pill
-  const tagY = contentTop;
+  const tagScale = el.tag.scale;
+  const tagFontSize = Math.round(28 * tagScale);
+  ctx.font = `800 ${tagFontSize}px "Public Sans", sans-serif`;
+  const tagText = data.category.toUpperCase();
+  const tagPadX = Math.round(28 * tagScale); const tagH = Math.round(56 * tagScale);
+  const tagW = ctx.measureText(tagText).width + tagPadX * 2;
+  const tagX = el.tag.x; const tagY = el.tag.y;
   ctx.fillStyle = '#566500'; ctx.beginPath();
   if ('roundRect' in ctx) {
-    (ctx as CanvasRenderingContext2D & { roundRect: (x: number, y: number, w: number, h: number, r: number) => void }).roundRect(PAD, tagY, tagW, tagH, tagH / 2);
-  } else { ctx.rect(PAD, tagY, tagW, tagH); }
+    (ctx as CanvasRenderingContext2D & { roundRect: (x: number, y: number, w: number, h: number, r: number) => void }).roundRect(tagX, tagY, tagW, tagH, tagH / 2);
+  } else { ctx.rect(tagX, tagY, tagW, tagH); }
   ctx.fill();
   ctx.fillStyle = '#d4ef4d'; ctx.font = `800 ${tagFontSize}px "Public Sans", sans-serif`;
-  ctx.textBaseline = 'middle'; ctx.fillText(tagText, PAD + tagPadX, tagY + tagH / 2);
+  ctx.textBaseline = 'middle'; ctx.fillText(tagText, tagX + tagPadX, tagY + tagH / 2);
 
   // Title
+  const titleScale = el.title.scale;
+  const titleFontSize = Math.round((format === 'story' ? 88 : 76) * titleScale);
+  const titleLineH = titleFontSize * 1.15;
   ctx.fillStyle = '#ffffff'; ctx.font = `900 ${titleFontSize}px "Public Sans", sans-serif`;
   ctx.textBaseline = 'top';
-  const titleY = tagY + tagH + 24;
-  const linesDrawn = wrapCanvasText(ctx, data.title, PAD, titleY, CONTENT_W, titleLineH, 2);
+  const titleX = el.title.x; const titleY = el.title.y;
+  const linesDrawn = wrapCanvasText(ctx, data.title, titleX, titleY, CONTENT_W, titleLineH, 2);
 
   // Meta lines
-  const metaY = titleY + linesDrawn * titleLineH + 24;
+  const metaScale = el.meta.scale;
+  const metaFontSize = Math.round(34 * metaScale);
+  const metaDotR = Math.round(8 * metaScale);
+  const metaLineH = Math.round(52 * metaScale);
+  const metaX = el.meta.x; const metaY = el.meta.y;
   data.metaLines.forEach((item, i) => {
     const y = metaY + i * metaLineH;
-    ctx.fillStyle = '#d4ef4d'; ctx.beginPath(); ctx.arc(PAD + 10, y + 17, 8, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.font = `400 34px "Public Sans", sans-serif`;
-    ctx.textBaseline = 'top'; ctx.fillText(item, PAD + 30, y);
+    ctx.fillStyle = '#d4ef4d'; ctx.beginPath(); ctx.arc(metaX + Math.round(10 * metaScale), y + Math.round(17 * metaScale), metaDotR, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.font = `400 ${metaFontSize}px "Public Sans", sans-serif`;
+    ctx.textBaseline = 'top'; ctx.fillText(item, metaX + Math.round(30 * metaScale), y);
   });
 
   // ── Sticker overlay ───────────────────────────────────────────
   // Drawn in the upper-right area so it doesn't clash with the bottom content block
   const preset = STICKER_PRESETS.find(s => s.id === stickerId);
   if (preset && preset.id !== 'none') {
-    const stickerFontSize = format === 'story' ? 52 : 44;
-    const stickerPadX = 36;
-    const stickerPadY = 28;
+    const stickerScale = el.sticker.scale;
+    const stickerFontSize = Math.round((format === 'story' ? 52 : 44) * stickerScale);
+    const stickerPadX = Math.round(36 * stickerScale);
+    const stickerPadY = Math.round(28 * stickerScale);
     const stickerH = stickerFontSize + stickerPadY * 2;
     const fullText = `${preset.emoji}  ${preset.text}`;
 
@@ -1949,9 +1978,9 @@ function drawShareCard(
     const textW = ctx.measureText(fullText).width;
     const stickerW = textW + stickerPadX * 2;
 
-    // Position: top-right, below the ABQ badge area
-    const stickerX = W - PAD - stickerW;
-    const stickerY = format === 'story' ? 240 : 140;
+    // Position: if x override is -1, auto right-align; otherwise use el.sticker.x as left edge
+    const stickerX = el.sticker.x < 0 ? W - 72 - stickerW : el.sticker.x;
+    const stickerY = el.sticker.y;
 
     // Pill background — semi-transparent dark with lime border
     ctx.fillStyle = 'rgba(0,0,0,0.72)';
@@ -1990,8 +2019,12 @@ function ShareCardModal({ data, photoUrl, onClose, analyticsType }: {
   const [adj, setAdj] = useState<CardAdjustments>(DEFAULT_ADJUSTMENTS);
   const [stickerId, setStickerId] = useState('none');
   const [shareState, setShareState] = useState<'idle' | 'saved' | 'shared'>('idle');
+  // Element overrides — position + scale per element
+  const [elOverrides, setElOverrides] = useState<ElementOverrides>(() => defaultElementOverrides('story'));
+  // Which element is selected in the element panel ('photo' | ElementKey | null)
+  const [selectedEl, setSelectedEl] = useState<'photo' | ElementKey | null>('photo');
   // Drag state (ref so it doesn't trigger re-renders mid-drag)
-  const dragRef = useRef<{ active: boolean; lastX: number; lastY: number }>({ active: false, lastX: 0, lastY: 0 });
+  const dragRef = useRef<{ active: boolean; lastX: number; lastY: number; mode: 'photo' | ElementKey }>({ active: false, lastX: 0, lastY: 0, mode: 'photo' });
 
   const W = 1080;
   const H = format === 'story' ? 1920 : 1080;
@@ -1999,29 +2032,49 @@ function ShareCardModal({ data, photoUrl, onClose, analyticsType }: {
   const previewW = Math.round(W * previewScale);
   const previewH = Math.round(H * previewScale);
 
+  // Reset element overrides when format changes
+  const prevFormatRef = useRef(format);
+  if (prevFormatRef.current !== format) {
+    prevFormatRef.current = format;
+    setElOverrides(defaultElementOverrides(format));
+  }
+
   // Redraw whenever any parameter changes
-  const redraw = useCallback((overrideAdj?: CardAdjustments) => {
+  const redraw = useCallback((overrideAdj?: CardAdjustments, overrideEl?: ElementOverrides) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    drawShareCard(canvas, data, format, photoRef.current, photoFit, overrideAdj ?? adj, stickerId);
-  }, [data, format, photoFit, adj, stickerId]);
+    drawShareCard(canvas, data, format, photoRef.current, photoFit, overrideAdj ?? adj, stickerId, overrideEl ?? elOverrides);
+  }, [data, format, photoFit, adj, stickerId, elOverrides]);
 
   // Load photo once, then redraw on every param change
+  // Use fetch→blob→objectURL to avoid CORS canvas taint issues with CDN images
   useEffect(() => {
     if (!photoUrl) { redraw(); return; }
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => { photoRef.current = img; redraw(); };
-    img.onerror = () => { photoRef.current = null; redraw(); };
-    img.src = photoUrl;
+    let objectUrl: string | null = null;
+    let cancelled = false;
+    fetch(photoUrl)
+      .then(r => r.blob())
+      .then(blob => {
+        if (cancelled) return;
+        objectUrl = URL.createObjectURL(blob);
+        const img = new Image();
+        img.onload = () => { if (!cancelled) { photoRef.current = img; redraw(); } };
+        img.onerror = () => { if (!cancelled) { photoRef.current = null; redraw(); } };
+        img.src = objectUrl;
+      })
+      .catch(() => { if (!cancelled) { photoRef.current = null; redraw(); } });
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
   }, [photoUrl]); // only reload image when URL changes
 
   useEffect(() => { redraw(); }, [redraw]);
 
-  // Drag handlers — reposition photo by dragging the preview
+  // Drag handlers — when selectedEl is 'photo' drag repositions photo; otherwise drags the selected element
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!photoUrl) return;
-    dragRef.current = { active: true, lastX: e.clientX, lastY: e.clientY };
+    if (!selectedEl) return;
+    dragRef.current = { active: true, lastX: e.clientX, lastY: e.clientY, mode: selectedEl === 'photo' ? 'photo' : selectedEl };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -2030,17 +2083,34 @@ function ShareCardModal({ data, photoUrl, onClose, analyticsType }: {
     const dy = e.clientY - dragRef.current.lastY;
     dragRef.current.lastX = e.clientX;
     dragRef.current.lastY = e.clientY;
-    setAdj(prev => {
-      const next = {
-        ...prev,
-        offsetX: Math.max(-0.5, Math.min(0.5, prev.offsetX + dx / (W * previewScale))),
-        offsetY: Math.max(-0.5, Math.min(0.5, prev.offsetY + dy / (H * previewScale))),
-      };
-      // Redraw immediately with next value so it feels live
-      const canvas = canvasRef.current;
-      if (canvas) drawShareCard(canvas, data, format, photoRef.current, photoFit, next, stickerId);
-      return next;
-    });
+    const mode = dragRef.current.mode;
+    if (mode === 'photo') {
+      setAdj(prev => {
+        const next = {
+          ...prev,
+          offsetX: Math.max(-0.5, Math.min(0.5, prev.offsetX + dx / (W * previewScale))),
+          offsetY: Math.max(-0.5, Math.min(0.5, prev.offsetY + dy / (H * previewScale))),
+        };
+        // Redraw immediately with next value so it feels live
+        const canvas = canvasRef.current;
+        if (canvas) drawShareCard(canvas, data, format, photoRef.current, photoFit, next, stickerId, elOverrides);
+        return next;
+      });
+    } else {
+      // Move the selected overlay element
+      const canvasDx = dx / previewScale;
+      const canvasDy = dy / previewScale;
+      setElOverrides(prev => {
+        const el = prev[mode as ElementKey];
+        const next: ElementOverrides = {
+          ...prev,
+          [mode]: { ...el, x: el.x + canvasDx, y: el.y + canvasDy },
+        };
+        const canvas = canvasRef.current;
+        if (canvas) drawShareCard(canvas, data, format, photoRef.current, photoFit, adj, stickerId, next);
+        return next;
+      });
+    }
   };
   const onPointerUp = () => { dragRef.current.active = false; };
 
@@ -2111,17 +2181,17 @@ function ShareCardModal({ data, photoUrl, onClose, analyticsType }: {
         ))}
       </div>
 
-      {/* Canvas preview — drag to reposition photo */}
+      {/* Canvas preview — drag to reposition selected element */}
       <div className="flex-1 flex items-center justify-center overflow-hidden px-4"
-        style={{ touchAction: 'none', cursor: photoUrl ? 'grab' : 'default' }}
+        style={{ touchAction: 'none', cursor: selectedEl ? 'grab' : 'default' }}
         onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}>
         <canvas ref={canvasRef} width={W} height={H}
           style={{ width: previewW, height: previewH, display: 'block', border: '2px solid rgba(255,255,255,0.15)', borderRadius: 4, userSelect: 'none' }} />
       </div>
 
-      {photoUrl && (
+      {selectedEl && (
         <p className="text-center" style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', fontFamily: 'Public Sans, sans-serif', margin: '2px 0' }}>
-          Drag to reposition photo
+          {selectedEl === 'photo' ? 'Drag to reposition photo' : `Drag to reposition ${selectedEl}`}
         </p>
       )}
 
@@ -2158,34 +2228,90 @@ function ShareCardModal({ data, photoUrl, onClose, analyticsType }: {
         </div>
       </div>
 
-      {/* Adjustments */}
-      {photoUrl && (
-        <div className="px-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 6, paddingBottom: 4 }}>
-          {/* Zoom */}
-          <div className="flex items-center gap-2">
-            <span style={labelStyle}>ZOOM</span>
-            <input type="range" min={0.5} max={2} step={0.01} value={adj.zoom}
-              onChange={e => updateAdj('zoom', parseFloat(e.target.value))}
-              style={sliderStyle} />
-            <span style={{ ...labelStyle, minWidth: 32, textAlign: 'right' }}>{Math.round(adj.zoom * 100)}%</span>
-          </div>
-          {/* Darkness */}
-          <div className="flex items-center gap-2">
-            <span style={labelStyle}>DARK</span>
-            <input type="range" min={0} max={1} step={0.01} value={adj.darkness}
-              onChange={e => updateAdj('darkness', parseFloat(e.target.value))}
-              style={sliderStyle} />
-            <span style={{ ...labelStyle, minWidth: 32, textAlign: 'right' }}>{Math.round(adj.darkness * 100)}%</span>
-          </div>
-          {/* Reset */}
-          {(adj.zoom !== 1 || adj.darkness !== 0.5 || adj.offsetX !== 0 || adj.offsetY !== 0) && (
-            <button onClick={() => setAdj(DEFAULT_ADJUSTMENTS)}
-              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', fontFamily: 'Public Sans, sans-serif', fontSize: 10, cursor: 'pointer', padding: '2px 0', letterSpacing: '0.05em' }}>
-              ↺ Reset adjustments
-            </button>
-          )}
+      {/* Element selector + controls */}
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 6, paddingBottom: 4 }}>
+        {/* Element chips */}
+        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingLeft: 16, paddingRight: 16, scrollbarWidth: 'none', marginBottom: 4 }}>
+          {([
+            { key: 'photo', label: '📸 Photo' },
+            { key: 'badge', label: '🏷 Logo' },
+            { key: 'tag', label: '🏷 Category' },
+            { key: 'title', label: '✏️ Title' },
+            { key: 'meta', label: '📋 Info' },
+            ...(stickerId !== 'none' ? [{ key: 'sticker', label: '⭐ Sticker' }] : []),
+          ] as { key: 'photo' | ElementKey; label: string }[]).map(({ key, label }) => {
+            const active = selectedEl === key;
+            return (
+              <button key={key} onClick={() => setSelectedEl(active ? null : key)}
+                style={{
+                  flexShrink: 0, padding: '4px 10px', borderRadius: 999,
+                  border: active ? '2px solid #d4ef4d' : '1.5px solid rgba(255,255,255,0.15)',
+                  background: active ? 'rgba(212,239,77,0.12)' : 'rgba(255,255,255,0.05)',
+                  color: active ? '#d4ef4d' : 'rgba(255,255,255,0.55)',
+                  fontFamily: 'Public Sans, sans-serif', fontSize: 10, fontWeight: active ? 800 : 600,
+                  cursor: 'pointer', whiteSpace: 'nowrap', letterSpacing: '0.03em',
+                }}>
+                {label}
+              </button>
+            );
+          })}
         </div>
-      )}
+
+        {/* Per-element size slider */}
+        {selectedEl && selectedEl !== 'photo' && (
+          <div className="flex items-center gap-2 px-4" style={{ marginTop: 2 }}>
+            <span style={labelStyle}>SIZE</span>
+            <input type="range" min={0.5} max={2} step={0.02}
+              value={elOverrides[selectedEl as ElementKey].scale}
+              onChange={e => {
+                const val = parseFloat(e.target.value);
+                setElOverrides(prev => ({ ...prev, [selectedEl]: { ...prev[selectedEl as ElementKey], scale: val } }));
+              }}
+              style={sliderStyle} />
+            <span style={{ ...labelStyle, minWidth: 32, textAlign: 'right' }}>
+              {Math.round(elOverrides[selectedEl as ElementKey].scale * 100)}%
+            </span>
+            <button onClick={() => setElOverrides(prev => ({ ...prev, [selectedEl]: { ...prev[selectedEl as ElementKey], ...defaultElementOverrides(format)[selectedEl as ElementKey] } }))}
+              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontFamily: 'Public Sans, sans-serif', fontSize: 9, cursor: 'pointer', padding: '0 4px', flexShrink: 0 }}>
+              ↺
+            </button>
+          </div>
+        )}
+
+        {/* Photo adjustments when photo is selected */}
+        {selectedEl === 'photo' && photoUrl && (
+          <div className="px-4" style={{ paddingTop: 2, paddingBottom: 2 }}>
+            <div className="flex items-center gap-2">
+              <span style={labelStyle}>ZOOM</span>
+              <input type="range" min={0.5} max={2} step={0.01} value={adj.zoom}
+                onChange={e => updateAdj('zoom', parseFloat(e.target.value))}
+                style={sliderStyle} />
+              <span style={{ ...labelStyle, minWidth: 32, textAlign: 'right' }}>{Math.round(adj.zoom * 100)}%</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span style={labelStyle}>DARK</span>
+              <input type="range" min={0} max={1} step={0.01} value={adj.darkness}
+                onChange={e => updateAdj('darkness', parseFloat(e.target.value))}
+                style={sliderStyle} />
+              <span style={{ ...labelStyle, minWidth: 32, textAlign: 'right' }}>{Math.round(adj.darkness * 100)}%</span>
+            </div>
+            {(adj.zoom !== 1 || adj.darkness !== 0.5 || adj.offsetX !== 0 || adj.offsetY !== 0) && (
+              <button onClick={() => setAdj(DEFAULT_ADJUSTMENTS)}
+                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontFamily: 'Public Sans, sans-serif', fontSize: 9, cursor: 'pointer', padding: '0', letterSpacing: '0.05em' }}>
+                ↺ Reset photo
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Reset all overlays */}
+        <div style={{ paddingLeft: 16, paddingTop: 2 }}>
+          <button onClick={() => { setElOverrides(defaultElementOverrides(format)); setAdj(DEFAULT_ADJUSTMENTS); }}
+            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.2)', fontFamily: 'Public Sans, sans-serif', fontSize: 9, cursor: 'pointer', padding: '0', letterSpacing: '0.05em' }}>
+            ↺ Reset all
+          </button>
+        </div>
+      </div>
 
       {/* Actions */}
       <div className="flex gap-3 px-4" style={{ paddingBottom: 'max(20px, env(safe-area-inset-bottom, 20px))', paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
