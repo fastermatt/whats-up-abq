@@ -6,6 +6,20 @@
 
 ---
 
+## 🔴 MANDATORY SESSION START — Read this first, every time
+
+Before doing ANY work in this project, read the wiki page:
+
+**`/Users/matt/Documents/ClaudeObsidian/wiki/ABQ Unplugged V2.md`**
+
+It contains: current status, known issues, security status, recent bug fixes, deploy gotchas, and open threads. Skipping it means working blind and repeating solved problems. This is not optional and is not subject to the "lazy load" rule in the root CLAUDE.md — this project moves fast and the wiki is always more current than your training or conversation context.
+
+After reading it, also check:
+- **`/Users/matt/.claude/projects/.../memory/security_rules.md`** — never hardcode secrets, always enable RLS on new tables
+- **GitHub Actions status** — CI has had recurring failures; verify it's green before assuming deploys work
+
+---
+
 ## What this is
 
 A cultural events aggregator for Albuquerque, NM. Shows ~1,000+ upcoming events from
@@ -49,13 +63,21 @@ project_id: bsmvfutebmbkjvlrhiyq
 
 - Push to `v2` branch → GitHub Actions → Netlify auto-deploy (~90s)
 - Netlify site ID: `a0ff66c2`
-- **Never push to `main`** — that's the abandoned V1 React SPA
+- **`v2` is the default GitHub branch** (changed 2026-04-19). `main` branch still exists but is the abandoned V1 React SPA — never push there.
+- CI uses `npm install --legacy-peer-deps`. **Always commit `package.json` AND `package-lock.json` when installing new npm packages.** If you `npm install foo` locally and don't commit the lockfile, CI will fail with "Module not found" because it checks out the old lockfile.
+
+### ⚠️ CI GOTCHA — html-to-image incident
+Every time you install a new npm package locally (`npm install X`), you MUST commit both:
+1. `v2/package.json` — the new dependency entry
+2. `v2/package-lock.json` — the resolved version
+
+If only the source files are committed (without the lockfile update), CI runs `npm install` against the OLD lockfile and can't find the package. The build fails with `Module not found`. **Diagnose CI failures by checking the "Build Next.js app" step log — missing packages show up there immediately.**
 
 ---
 
 ## Key architecture decisions
 
-- Reads from `public.events` (v1 ingestion table) — `v2.events` is empty / unused
+- Reads from `public.events` (legacy ingestion table) — `v2.events` is empty / unused
 - Event normalization happens in `v2/lib/events.ts` → `normalizeRow()` dispatch
 - Category stored in denormalized `category` column on the row (set at import time)
 - Images: `cached_photo_url` first, then `raw` JSON fallback
@@ -78,9 +100,18 @@ Scripts load creds from `v2/scripts/.env` automatically.
 
 ---
 
+## Image System
+
+- `EventImage` component auto-routes abqtodo.com / nhccnm.org / do505.com / lovenm.org URLs through `/api/image-proxy` (server-side fetch bypasses CAPTCHA)
+- Permanent CDN copies: 168 local/volunteer event images cached at `cdn.abqunplugged.com/{id}.{ext}` (2026-04-19). Run `cache-images.yml` workflow from GitHub Actions to refresh.
+- Fallback chain: `cached_photo_url` → image-proxy → `PIXABAY_IMAGES` real photos (run `scripts/fetch-pixabay-fallbacks.mjs` with `PIXABAY_API_KEY`) → Midjourney category illustrations
+- **workflow_dispatch triggers require the workflow file to be on the default branch.** Since `v2` IS now the default branch, all `workflow_dispatch` workflows in `.github/workflows/` work from the GitHub UI.
+
+---
+
 ## DO NOT
 
-- Edit anything in `src/` — that's the dead V1 React SPA
-- Push to `main` branch — V1 Netlify site, not the live site
+- Edit anything in `src/` — that's the dead V1 React SPA (but V1 is fully retired — don't worry about it)
+- Push to `main` branch — nobody uses it, V2 is the default
 - Run `npm run dev` from repo root — run it from `v2/`
-- Add new npm packages without checking `v2/package.json` first
+- Install npm packages without committing BOTH `package.json` AND `package-lock.json` — CI will break
