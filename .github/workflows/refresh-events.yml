@@ -1,10 +1,16 @@
-name: Refresh Event & Places Data
+name: Refresh Event & Places Data (LEGACY V1 — MANUAL ONLY)
+
+# 2026-04-19: Daily cron schedule DISABLED. This workflow ran V1 importers
+# (fetch-data.cjs, fetch-local-events.cjs) which wrote to public.events using
+# old formats that could clobber V2 ingestion. V1 is retired — the V2 weekly
+# pipeline (v2-weekly-refresh.yml) is the source of truth now.
+#
+# This workflow is kept available for manual trigger only in case someone
+# needs the legacy Google Places place-photos refresh. Don't re-enable the
+# schedule without auditing what the .cjs scripts actually write.
 
 on:
-  # Daily at 4 AM Mountain Time (11:00 UTC, accounting for MDT UTC-6)
-  schedule:
-    - cron: '0 11 * * *'
-  # Allow manual trigger from the GitHub Actions tab
+  # Manual trigger only — previously ran daily at 4 AM MT
   workflow_dispatch:
     inputs:
       skip_places:

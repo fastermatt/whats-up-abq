@@ -1,40 +1,48 @@
 name: V2 Weekly Event Refresh
 
+# Single-command foolproof pipeline. All the logic lives in
+# v2/scripts/ingest.mjs — imports, enrichment, category backfill, cleanup,
+# invariant checks, smoke tests, auto-reject of bad shared-image URLs.
+# Exit code 0 = site healthy, non-zero = something needs fixing.
+
 on:
   # Every Tuesday at 7:00 AM Mountain Time (14:00 UTC / covers MDT & MST)
   schedule:
     - cron: '0 14 * * 2'
 
-  # Manual trigger from GitHub Actions tab (useful for testing or on-demand refresh)
+  # Manual trigger from GitHub Actions tab
   workflow_dispatch:
     inputs:
-      enrich_all:
-        description: 'Re-enrich ALL events (not just new ones)'
+      only:
+        description: 'Run only one source (tm|sg|eb|nhcc) — leave blank for all'
         required: false
-        default: 'false'
-        type: boolean
+        default: ''
+        type: string
       skip_imports:
-        description: 'Skip imports and only run enrichment + validation'
+        description: 'Skip imports, only run enrichment + validation'
         required: false
-        default: 'false'
+        default: false
+        type: boolean
+      smoke_only:
+        description: 'Only run smoke tests (no imports, no enrichment)'
+        required: false
+        default: false
         type: boolean
 
 jobs:
-  refresh:
-    name: Import → Enrich → Validate
+  ingest:
+    name: Foolproof Ingest Pipeline
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     env:
-      SUPABASE_URL:            ${{ secrets.SUPABASE_URL }}
+      SUPABASE_URL:              ${{ secrets.SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      TICKETMASTER_API_KEY:    ${{ secrets.TICKETMASTER_API_KEY }}
-      SEATGEEK_AID:            ${{ secrets.SEATGEEK_AID }}
-      EVENTBRITE_TOKEN:        ${{ secrets.EVENTBRITE_TOKEN }}
+      TICKETMASTER_API_KEY:      ${{ secrets.TICKETMASTER_API_KEY }}
+      SEATGEEK_AID:              ${{ secrets.SEATGEEK_AID }}
+      EVENTBRITE_TOKEN:          ${{ secrets.EVENTBRITE_TOKEN }}
 
     steps:
-      # ── Setup ────────────────────────────────────────────────────────────────
-
       - name: Checkout repo
         uses: actions/checkout@v4
 
@@ -49,81 +57,39 @@ jobs:
         working-directory: v2
         run: npm install --legacy-peer-deps --ignore-scripts
 
-      # ── Step 1: Import events from all sources ────────────────────────────────
-
-      - name: Import — Ticketmaster
-        if: ${{ inputs.skip_imports != 'true' }}
-        working-directory: v2
-        run: node scripts/import-ticketmaster.mjs
-        continue-on-error: true   # one source failing shouldn't kill the whole run
-
-      - name: Import — SeatGeek
-        if: ${{ inputs.skip_imports != 'true' }}
-        working-directory: v2
-        run: node scripts/import-seatgeek.mjs
-        continue-on-error: true
-
-      - name: Import — Eventbrite
-        if: ${{ inputs.skip_imports != 'true' }}
-        working-directory: v2
-        run: node scripts/import-eventbrite.mjs
-        continue-on-error: true
-
-      - name: Import — NHCC Community Events
-        if: ${{ inputs.skip_imports != 'true' }}
-        working-directory: v2
-        run: node scripts/import-nhcc.mjs
-        continue-on-error: true
-
-      # ── Step 2: Enrich new events ─────────────────────────────────────────────
-
-      - name: Enrich — Neighborhood tags
-        working-directory: v2
-        # --dry-run removed so it actually writes; tag-neighborhoods reads from DB
-        run: node scripts/tag-neighborhoods.mjs
-        continue-on-error: true
-
-      - name: Enrich — Mood / indoor-outdoor / age-appeal (rule-based)
+      - name: Run foolproof ingest pipeline
+        id: ingest
         working-directory: v2
         run: |
-          EXTRA_FLAGS=""
-          if [ "${{ inputs.enrich_all }}" = "true" ]; then
-            EXTRA_FLAGS="--all"
-          fi
-          node scripts/enrich-moods-rules.mjs --limit=5000 $EXTRA_FLAGS
+          ARGS=""
+          if [ -n "${{ inputs.only }}" ]; then ARGS="$ARGS --only=${{ inputs.only }}"; fi
+          if [ "${{ inputs.skip_imports }}" = "true" ]; then ARGS="$ARGS --skip-imports"; fi
+          if [ "${{ inputs.smoke_only }}" = "true" ]; then ARGS="$ARGS --smoke-only"; fi
+          echo "Running: node scripts/ingest.mjs $ARGS"
+          node scripts/ingest.mjs $ARGS
 
-      # ── Step 3: Hygiene — hide past events, dupes, cancelled ──────────────────
-
-      - name: Event cleanup (past / dupes / cancelled)
-        working-directory: v2
-        run: node scripts/cleanup-events.mjs
-        continue-on-error: true
-
-      # ── Step 4: Validate data quality ─────────────────────────────────────────
-
-      - name: Validate event data
-        working-directory: v2
-        run: node scripts/validate-events.mjs
-
-      # ── Step 4: Summary ──────────────────────────────────────────────────────
-
-      - name: Write job summary
+      - name: Write GitHub step summary
         if: always()
         run: |
           {
-            echo "## 📅 V2 Weekly Event Refresh"
+            echo "## 📅 V2 Ingest Pipeline"
             echo ""
             echo "**Run at:** $(date -u '+%Y-%m-%d %H:%M UTC')"
             echo "**Trigger:** ${{ github.event_name }}"
+            echo "**Pipeline result:** ${{ steps.ingest.outcome }}"
             echo ""
-            echo "### Pipeline"
-            echo "| Step | Result |"
-            echo "|------|--------|"
-            echo "| Import: Ticketmaster | ${{ steps.import-ticketmaster.outcome || 'skipped' }} |"
-            echo "| Import: SeatGeek | ${{ steps.import-seatgeek.outcome || 'skipped' }} |"
-            echo "| Import: Eventbrite | ${{ steps.import-eventbrite.outcome || 'skipped' }} |"
-            echo "| Import: NHCC | ${{ steps.import-nhcc.outcome || 'skipped' }} |"
-            echo "| Enrich: Neighborhoods | ${{ steps.enrich-neighborhoods.outcome || 'skipped' }} |"
-            echo "| Enrich: Moods | ${{ steps.enrich-moods.outcome || 'skipped' }} |"
-            echo "| Validate | ${{ steps.validate.outcome || 'skipped' }} |"
+            if [ "${{ steps.ingest.outcome }}" = "success" ]; then
+              echo "✅ All gates and smoke tests passed. Site is healthy."
+            else
+              echo "❌ Pipeline failed. Check the ingest step logs above for specific failures."
+              echo ""
+              echo "Common causes:"
+              echo "- Source API down or returning empty (check the failed source's logs)"
+              echo "- Coverage gates dropped below threshold (category/image/neighborhood/mood)"
+              echo "- Smoke tests caught invalid image/time/venue in a sampled event"
+              echo "- Image-URL misassociation detected across 5+ unrelated events (auto-rejected)"
+            fi
+            echo ""
+            echo "---"
+            echo "Full playbook: memory/ingestion.md + memory/image_system.md"
           } >> $GITHUB_STEP_SUMMARY
