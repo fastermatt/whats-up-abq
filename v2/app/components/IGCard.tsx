@@ -1,24 +1,39 @@
+'use client'
+
 /**
- * IGCard — shared Instagram card renderer.
+ * IGCard — Instagram card design tool.
  *
- * format:
- *   'square'   → 1:1  (1080×1080) — standard feed post
- *   'portrait' → 4:5  (1080×1350) — tall feed post, fits more info
- *   'story'    → 9:16 (1080×1920) — full-screen story
+ * A client-side design studio for generating share cards:
+ *   • Three formats: 1:1 square, 4:5 portrait, 9:16 story
+ *   • Live toggle controls: logo, category, date/time, venue, CTA
+ *   • Overlay darkness slider
+ *   • "Download PNG" button via html-to-image (1080px output)
+ *
+ * Data is fetched server-side by the parent page and passed as props.
  */
 
-import { notFound } from 'next/navigation'
+import { useState, useRef, useCallback } from 'react'
 import Link from 'next/link'
-import { fetchEventById } from '@/lib/events'
-import { getCategoryFallback } from '@/lib/fallback-images'
-import { MapPin, Clock } from 'lucide-react'
+import { toBlob } from 'html-to-image'
+import { MapPin, Clock, Download, ChevronLeft, Loader2 } from 'lucide-react'
+import type { NormalizedEvent } from '@/lib/events'
 
 export type IGFormat = 'square' | 'portrait' | 'story'
 
-interface Props {
-  id: string
-  format: IGFormat
+const FORMATS: { key: IGFormat; label: string; desc: string; ratio: string }[] = [
+  { key: 'square',   label: '1:1',  desc: 'Square',   ratio: '1 / 1'  },
+  { key: 'portrait', label: '4:5',  desc: 'Portrait', ratio: '4 / 5'  },
+  { key: 'story',    label: '9:16', desc: 'Story',    ratio: '9 / 16' },
+]
+
+// Target output width per format (height derived from aspect ratio)
+const OUTPUT_WIDTH: Record<IGFormat, number> = {
+  square:   1080,
+  portrait: 1080,
+  story:    1080,
 }
+
+// ─── Date / time helpers ────────────────────────────────────────────────────
 
 function formatDateLong(iso: string): string {
   if (!iso) return ''
@@ -31,200 +46,366 @@ function formatDateLong(iso: string): string {
   } catch { return '' }
 }
 
-function fmtTime(t: string | null): string {
-  if (!t) return ''
-  try {
-    // Handle "HH:MM:SS" local time strings
-    const clean = t.includes('T') ? t.split('T')[1].slice(0, 5) : t.slice(0, 5)
-    const [h, m] = clean.split(':').map(Number)
-    const ampm = h >= 12 ? 'PM' : 'AM'
-    const hour = h % 12 || 12
-    return m === 0 ? `${hour} ${ampm}` : `${hour}:${String(m).padStart(2, '0')} ${ampm}`
-  } catch { return t }
+function parseDateISO(iso: string): Date {
+  return new Date(/^\d{4}-\d{2}-\d{2}$/.test(iso) ? iso + 'T12:00:00' : iso)
 }
 
-const ASPECT: Record<IGFormat, string> = {
-  square:   '1 / 1',
-  portrait: '4 / 5',
-  story:    '9 / 16',
+// NOTE: event.time is already formatted by lib/events.ts formatTime() → e.g. "8:00 PM".
+// Do NOT re-parse it — that would corrupt 8 PM → 8 AM by stripping the AM/PM context.
+
+// ─── Component ──────────────────────────────────────────────────────────────
+
+interface Props {
+  event: NormalizedEvent
+  /** Pre-resolved image URL (imageUrl fallback already applied by the server page) */
+  image: string
+  initialFormat?: IGFormat
 }
 
-const FORMAT_LABEL: Record<IGFormat, string> = {
-  square:   '1:1 · Square feed post',
-  portrait: '4:5 · Portrait feed post',
-  story:    '9:16 · Story / Reel',
-}
+export function IGCardClient({ event, image, initialFormat = 'square' }: Props) {
+  const [format, setFormat]           = useState<IGFormat>(initialFormat)
+  const [showLogo, setShowLogo]       = useState(true)
+  const [showCategory, setShowCategory] = useState(true)
+  const [showDateTime, setShowDateTime] = useState(true)
+  const [showVenue, setShowVenue]     = useState(true)
+  const [showCTA, setShowCTA]         = useState(false) // off by default — URL was the problem
+  const [showBigDate, setShowBigDate] = useState(true)
+  const [overlayPct, setOverlayPct]   = useState(55)
+  const [downloading, setDownloading] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
 
-const OTHER_FORMATS: Record<IGFormat, { label: string; suffix: string }[]> = {
-  square:   [{ label: '4:5 Portrait', suffix: 'ig2' }, { label: '9:16 Story', suffix: 'ig3' }],
-  portrait: [{ label: '1:1 Square',  suffix: 'ig'  }, { label: '9:16 Story', suffix: 'ig3' }],
-  story:    [{ label: '1:1 Square',  suffix: 'ig'  }, { label: '4:5 Portrait', suffix: 'ig2' }],
-}
+  const isStory   = format === 'story'
+  const isPortrait = format === 'portrait'
+  const fmt       = FORMATS.find(f => f.key === format)!
+  const dateStr   = formatDateLong(event.date)
+  const timeStr   = event.time ?? ''   // already formatted: "8:00 PM", "7:30 PM", etc.
+  const category  = event.category ?? ''
+  const venue     = event.venue ?? 'Albuquerque, NM'
 
-export async function IGCard({ id, format }: Props) {
-  const event = await fetchEventById(id)
-  if (!event) notFound()
-
-  const image    = event.imageUrl || getCategoryFallback(event.category ?? undefined, id)
-  const dateStr  = formatDateLong(event.date)
-  const timeStr  = fmtTime(event.time)
-  const category = event.category ?? ''
-  const venue    = event.venue ?? 'Albuquerque, NM'
-  const eventUrl = `abqunplugged.com/events/${id}`
-  const isStory  = format === 'story'
-
-  // Title font size — smaller for long titles, bigger for short
-  const titleLen = event.title.length
+  // Title font size — smaller for long titles
+  const titleLen  = event.title.length
   const titleSize = isStory
     ? (titleLen > 50 ? '1.8rem' : titleLen > 30 ? '2.4rem' : '3rem')
     : (titleLen > 50 ? '1.2rem' : titleLen > 30 ? '1.5rem' : '1.9rem')
 
+  // Dynamic overlay values from slider
+  const baseAlpha = overlayPct / 100
+
+  // ── Download handler ──────────────────────────────────────────────────────
+  const handleDownload = useCallback(async () => {
+    if (!cardRef.current || downloading) return
+    setDownloading(true)
+    try {
+      const node = cardRef.current
+      // Cap pixel ratio at 3× to avoid Mobile Safari memory pressure
+      const naturalRatio = OUTPUT_WIDTH[format] / node.offsetWidth
+      const pixelRatio = Math.min(naturalRatio, 3)
+      // All display images are already routed through /api/image-proxy (same-origin),
+      // so html-to-image can fetch them without any CORS issues — no pre-processing needed.
+      const blob = await toBlob(node, { pixelRatio, cacheBust: false })
+      if (!blob) throw new Error('toBlob returned null')
+      const objectUrl = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      const slug = event.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40)
+      a.download = `abq-${slug}-${format}.png`
+      a.href = objectUrl
+      a.click()
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 5000)
+    } catch (err) {
+      console.error('[IGCard] download failed:', err)
+      alert('Download failed — try screenshotting the card instead.')
+    } finally {
+      setDownloading(false)
+    }
+  }, [cardRef, format, event.title, downloading])
+
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <>
-      {/* Full-screen overlay — covers nav so screenshot is clean */}
-      <div
-        className="fixed inset-0 z-[9999] bg-[#111] flex flex-col items-center justify-center gap-4 overflow-auto py-6"
-        style={{ fontFamily: 'var(--font-epilogue)' }}
-      >
-        {/* ── Card ── */}
+    <div
+      className="min-h-screen flex flex-col bg-[#0d0d0d] select-none"
+      style={{ fontFamily: 'var(--font-epilogue, Epilogue, sans-serif)' }}
+    >
+
+      {/* ── Toolbar ── */}
+      <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-white/[0.07] shrink-0">
+
+        {/* Back link */}
+        <Link
+          href={`/events/${event.id}`}
+          className="flex items-center gap-1 text-white/35 hover:text-white/65 text-sm transition-colors shrink-0"
+        >
+          <ChevronLeft size={16} strokeWidth={2.5} />
+          <span className="hidden sm:inline">Back</span>
+        </Link>
+
+        {/* Format switcher */}
+        <div className="flex items-center gap-0.5 bg-white/[0.06] rounded-xl p-1">
+          {FORMATS.map(f => (
+            <button
+              key={f.key}
+              onClick={() => setFormat(f.key)}
+              className={`
+                px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide transition-all
+                ${format === f.key
+                  ? 'bg-[#9a442d] text-white shadow-sm'
+                  : 'text-white/35 hover:text-white/65 hover:bg-white/[0.04]'
+                }
+              `}
+            >
+              {f.label}
+              <span className={`hidden sm:inline ml-1 text-[10px] font-normal ${format === f.key ? 'opacity-75' : 'opacity-50'}`}>
+                {f.desc}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* Download */}
+        <button
+          onClick={handleDownload}
+          disabled={downloading}
+          className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-[#9a442d] text-white text-sm font-semibold hover:bg-[#b5502f] active:scale-95 transition-all disabled:opacity-50 shrink-0"
+        >
+          {downloading
+            ? <Loader2 size={15} className="animate-spin" />
+            : <Download size={15} />
+          }
+          <span className="hidden sm:inline">
+            {downloading ? 'Generating…' : 'Download PNG'}
+          </span>
+        </button>
+      </div>
+
+      {/* ── Card preview ── */}
+      <div className="flex-1 flex items-center justify-center p-5 sm:p-8 overflow-auto">
         <div
+          ref={cardRef}
           id="ig-card"
-          className="relative bg-black overflow-hidden shadow-2xl flex-shrink-0"
+          className="relative bg-black overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.7)] shrink-0"
           style={{
-            aspectRatio: ASPECT[format],
-            // Square/portrait: fill phone width. Story: fill phone height.
-            width: isStory ? 'auto' : 'min(100vw, 480px)',
-            height: isStory ? 'min(100svh, 640px)' : 'auto',
-            maxWidth: isStory ? '360px' : undefined,
+            aspectRatio: fmt.ratio,
+            borderRadius: '2px', // tiny radius looks pro but doesn't affect Instagram crop
+            // All formats use explicit width + height:auto so mobile Safari correctly
+            // fills the absolute-positioned background image (width:auto + height:fixed
+            // causes w-full→0 on the img in some mobile browsers).
+            width: isStory
+              ? 'min(65vw, 340px)'    // 9:16 → height auto-derived (≈600px at 340px)
+              : isPortrait
+              ? 'min(82vw, 380px)'    // 4:5
+              : 'min(88vw, 460px)',   // 1:1
+            height: 'auto',
           }}
         >
-          {/* Background image */}
+          {/* Background image — always routed through same-origin proxy for reliable loading.
+              No crossOrigin attr needed (proxy is same-origin, no CORS preflight). */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={image}
+            src={image.startsWith('http') ? `/api/image-proxy?url=${encodeURIComponent(image)}` : image}
             alt=""
             className="absolute inset-0 w-full h-full object-cover"
-            style={{ filter: 'brightness(0.65)' }}
+            style={{ filter: `brightness(${Math.max(0.35, 1 - overlayPct * 0.0032)})` }}
           />
 
-          {/* Gradient overlay */}
+          {/* Gradient overlay — intensity driven by slider */}
           <div
             className="absolute inset-0"
             style={{
               background: isStory
-                ? 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.1) 30%, rgba(0,0,0,0.75) 70%, rgba(0,0,0,0.95) 100%)'
-                : 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.9) 100%)',
+                ? `linear-gradient(to bottom,
+                    rgba(0,0,0,${(baseAlpha * 0.28).toFixed(2)}) 0%,
+                    rgba(0,0,0,${(baseAlpha * 0.08).toFixed(2)}) 28%,
+                    rgba(0,0,0,${(baseAlpha * 0.80).toFixed(2)}) 68%,
+                    rgba(0,0,0,${Math.min(baseAlpha * 0.97, 0.97).toFixed(2)}) 100%)`
+                : `linear-gradient(to bottom,
+                    rgba(0,0,0,${(baseAlpha * 0.08).toFixed(2)}) 0%,
+                    rgba(0,0,0,${(baseAlpha * 0.12).toFixed(2)}) 38%,
+                    rgba(0,0,0,${Math.min(baseAlpha * 0.97, 0.97).toFixed(2)}) 100%)`,
             }}
           />
 
-          {/* Top bar — logo + category */}
-          <div className="absolute top-0 left-0 right-0 flex items-center justify-between"
-            style={{ padding: isStory ? '1.5rem' : '0.875rem 1rem' }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/logo-white.svg"
-              alt="ABQ Unplugged"
-              style={{ height: isStory ? '2rem' : '1.25rem', width: 'auto' }}
-            />
-            {category && (
+          {/* ── Top bar: logo + category ── */}
+          {/* Story safe zone: Instagram overlays profile/timer in top 13% (250/1920px).
+              14% padding pushes our logo just below that overlay.
+              Feed posts: 1rem top margin is fine — UI is above the image in the feed. */}
+          <div
+            className="absolute top-0 left-0 right-0 flex items-start justify-between"
+            style={{ padding: isStory ? '14% 1.2rem 0' : '1rem 1rem 0' }}
+          >
+            {showLogo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src="/logo-white.svg"
+                alt="ABQ Unplugged"
+                style={{ height: isStory ? '1.9rem' : '1.2rem', width: 'auto', flexShrink: 0 }}
+              />
+            ) : <div />}
+
+            {showCategory && category && (
               <div
                 className="bg-[#9a442d] text-white font-bold uppercase tracking-wide rounded-full"
-                style={{ fontSize: isStory ? '0.8rem' : '0.65rem', padding: isStory ? '0.35rem 0.9rem' : '0.2rem 0.65rem' }}
+                style={{
+                  fontSize: isStory ? '0.78rem' : '0.62rem',
+                  padding: isStory ? '0.32rem 0.85rem' : '0.18rem 0.6rem',
+                  marginLeft: '0.5rem',
+                }}
               >
                 {category}
               </div>
             )}
           </div>
 
-          {/* Story middle — large decorative date pill */}
-          {isStory && (
-            <div className="absolute inset-0 flex items-center justify-center">
+          {/* ── Story: large date centrepiece ── */}
+          {/* Centered within the safe zone (14%–86%), not the full card,
+              so it stays visible between Instagram's top and bottom UI. */}
+          {isStory && showBigDate && (
+            <div className="absolute flex items-center justify-center pointer-events-none"
+              style={{ top: '14%', bottom: '14%', left: 0, right: 0 }}>
               <div className="text-center px-8">
-                <p className="text-white/40 text-xs uppercase tracking-[0.2em] mb-2">
-                  {new Date((/^\d{4}-\d{2}-\d{2}$/.test(event.date) ? event.date + 'T12:00:00' : event.date))
-                    .toLocaleDateString('en-US', { month: 'long', timeZone: 'America/Denver' }).toUpperCase()}
+                <p className="text-white/40 text-xs uppercase tracking-[0.22em] mb-1">
+                  {parseDateISO(event.date)
+                    .toLocaleDateString('en-US', { month: 'long', timeZone: 'America/Denver' })
+                    .toUpperCase()}
                 </p>
-                <p className="text-white font-black" style={{ fontSize: '6rem', lineHeight: 1 }}>
-                  {new Date((/^\d{4}-\d{2}-\d{2}$/.test(event.date) ? event.date + 'T12:00:00' : event.date))
+                <p
+                  className="text-white font-black"
+                  style={{ fontSize: '6rem', lineHeight: 1, textShadow: '0 4px 24px rgba(0,0,0,0.5)' }}
+                >
+                  {parseDateISO(event.date)
                     .toLocaleDateString('en-US', { day: 'numeric', timeZone: 'America/Denver' })}
                 </p>
-                <p className="text-white/60 text-sm uppercase tracking-widest mt-1">
-                  {new Date((/^\d{4}-\d{2}-\d{2}$/.test(event.date) ? event.date + 'T12:00:00' : event.date))
+                <p className="text-white/55 text-sm uppercase tracking-widest mt-1">
+                  {parseDateISO(event.date)
                     .toLocaleDateString('en-US', { weekday: 'long', timeZone: 'America/Denver' })}
                 </p>
               </div>
             </div>
           )}
 
-          {/* Bottom content */}
+          {/* ── Bottom content block ── */}
+          {/* Story: 14% bottom padding keeps content above Instagram's reply bar (bottom 13%).
+              Feed: 1rem bottom margin keeps text from the very edge. */}
           <div
-            className="absolute bottom-0 left-0 right-0 space-y-2"
-            style={{ padding: isStory ? '1.5rem' : '0.875rem 1rem' }}
+            className="absolute bottom-0 left-0 right-0"
+            style={{ padding: isStory ? '0 1.2rem 14%' : '0 1rem 1rem' }}
           >
             {/* Title */}
             <h1
               className="text-white font-black leading-tight"
-              style={{ fontSize: titleSize, lineHeight: 1.05, textShadow: '0 2px 12px rgba(0,0,0,0.6)' }}
+              style={{
+                fontSize: titleSize,
+                lineHeight: 1.05,
+                textShadow: '0 2px 14px rgba(0,0,0,0.65)',
+                marginBottom: (showDateTime || showVenue) ? (isStory ? '0.75rem' : '0.5rem') : 0,
+              }}
             >
               {event.title}
             </h1>
 
             {/* Date + time */}
-            <div className="flex items-center gap-1.5 text-white/90">
-              <Clock className="flex-shrink-0 text-[#e8a898]" style={{ width: isStory ? '1rem' : '0.8rem', height: isStory ? '1rem' : '0.8rem' }} />
-              <span style={{ fontSize: isStory ? '0.95rem' : '0.78rem' }} className="font-semibold">
-                {timeStr ? `${dateStr} · ${timeStr}` : dateStr}
-              </span>
-            </div>
+            {showDateTime && (
+              <div className="flex items-center gap-1.5 text-white/90" style={{ marginBottom: showVenue ? '0.35rem' : 0 }}>
+                <Clock
+                  className="flex-shrink-0 text-[#e8a898]"
+                  style={{ width: isStory ? '1rem' : '0.78rem', height: isStory ? '1rem' : '0.78rem' }}
+                />
+                <span
+                  className="font-semibold"
+                  style={{ fontSize: isStory ? '0.92rem' : '0.75rem' }}
+                >
+                  {timeStr ? `${dateStr} · ${timeStr}` : dateStr}
+                </span>
+              </div>
+            )}
 
             {/* Venue */}
-            <div className="flex items-center gap-1.5 text-white/75">
-              <MapPin className="flex-shrink-0 text-[#e8a898]" style={{ width: isStory ? '1rem' : '0.8rem', height: isStory ? '1rem' : '0.8rem' }} />
-              <span style={{ fontSize: isStory ? '0.9rem' : '0.75rem' }}>{venue}</span>
-            </div>
+            {showVenue && (
+              <div className="flex items-center gap-1.5 text-white/70" style={{ marginBottom: showCTA ? (isStory ? '0.75rem' : '0.45rem') : 0 }}>
+                <MapPin
+                  className="flex-shrink-0 text-[#e8a898]"
+                  style={{ width: isStory ? '1rem' : '0.78rem', height: isStory ? '1rem' : '0.78rem' }}
+                />
+                <span style={{ fontSize: isStory ? '0.88rem' : '0.72rem' }}>
+                  {venue}
+                </span>
+              </div>
+            )}
 
             {/* CTA strip */}
-            <div
-              className="flex items-center justify-between"
-              style={{
-                borderTop: '1px solid rgba(255,255,255,0.18)',
-                paddingTop: isStory ? '0.75rem' : '0.5rem',
-                marginTop: isStory ? '0.5rem' : '0.25rem',
-              }}
-            >
-              <span className="text-white/50 font-medium" style={{ fontSize: isStory ? '0.75rem' : '0.6rem' }}>
-                Tickets &amp; info
-              </span>
-              <span className="text-white font-bold tracking-wide" style={{ fontSize: isStory ? '0.85rem' : '0.65rem' }}>
-                {eventUrl}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Controls below card ── */}
-        <div className="text-center space-y-2 px-4">
-          <p className="text-white/40 text-xs">{FORMAT_LABEL[format]}</p>
-          <p className="text-white/30 text-[11px]">📸 Screenshot → crop to card → post</p>
-
-          {/* Switch format */}
-          <div className="flex items-center gap-2 justify-center mt-2">
-            {OTHER_FORMATS[format].map(({ label, suffix }) => (
-              <Link
-                key={suffix}
-                href={`/events/${id}/${suffix}`}
-                className="px-3 py-1.5 rounded-full border border-white/20 text-white/50 text-[11px] hover:border-[#9a442d] hover:text-white/80 transition-colors"
+            {showCTA && (
+              <div
+                className="flex items-center justify-between"
+                style={{ borderTop: '1px solid rgba(255,255,255,0.16)', paddingTop: isStory ? '0.65rem' : '0.4rem' }}
               >
-                {label}
-              </Link>
-            ))}
+                <span className="text-white/45 font-medium" style={{ fontSize: isStory ? '0.72rem' : '0.58rem' }}>
+                  Tickets &amp; info
+                </span>
+                <span className="text-white font-bold tracking-wide" style={{ fontSize: isStory ? '0.82rem' : '0.62rem' }}>
+                  abqunplugged.com
+                </span>
+              </div>
+            )}
           </div>
-
-          <Link href={`/events/${id}`} className="inline-block mt-1 text-[#9a442d] text-xs hover:text-[#c4603f] transition-colors">
-            ← Back to event
-          </Link>
         </div>
       </div>
-    </>
+
+      {/* ── Controls panel ── */}
+      <div className="border-t border-white/[0.07] px-4 py-4 space-y-3 shrink-0">
+
+        {/* Label row */}
+        <p className="text-white/20 text-[10px] uppercase tracking-[0.18em]">Customize</p>
+
+        {/* Toggle chips */}
+        <div className="flex flex-wrap gap-2">
+          {(
+            [
+              { label: 'Logo',       val: showLogo,     set: setShowLogo },
+              { label: 'Category',   val: showCategory, set: setShowCategory },
+              ...(isStory ? [{ label: 'Big Date', val: showBigDate, set: setShowBigDate }] : []),
+              { label: 'Date & Time',val: showDateTime, set: setShowDateTime },
+              { label: 'Venue',      val: showVenue,    set: setShowVenue },
+              { label: 'CTA',        val: showCTA,      set: setShowCTA },
+            ] as { label: string; val: boolean; set: (v: boolean) => void }[]
+          ).map(({ label, val, set }) => (
+            <button
+              key={label}
+              onClick={() => set(!val)}
+              className={`
+                px-3 py-1.5 rounded-full text-xs font-semibold transition-all
+                ${val
+                  ? 'bg-[#9a442d] text-white'
+                  : 'bg-white/[0.07] text-white/30 hover:text-white/55 hover:bg-white/[0.1]'
+                }
+              `}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Overlay darkness slider */}
+        <div className="flex items-center gap-3">
+          <span className="text-white/25 text-[10px] uppercase tracking-[0.12em] w-[4.5rem] shrink-0">
+            Darkness
+          </span>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={overlayPct}
+            onChange={e => setOverlayPct(Number(e.target.value))}
+            className="flex-1 accent-[#9a442d]"
+            style={{ height: '2px' }}
+          />
+          <span className="text-white/35 text-xs tabular-nums w-8 text-right shrink-0">
+            {overlayPct}%
+          </span>
+        </div>
+
+        {/* Hint */}
+        <p className="text-white/15 text-[10px]">
+          Tip: toggle CTA off to keep the card clean — or on to show abqunplugged.com
+        </p>
+      </div>
+    </div>
   )
 }

@@ -1,12 +1,19 @@
 /**
  * Instagram Card — Portrait 4:5 (/events/[id]/ig2)
- * Taller feed post, shows more info.
+ * Server Component: fetches event, passes to client design tool.
  */
-import { IGCard } from '@/app/components/IGCard'
+import { notFound } from 'next/navigation'
+import { fetchEventById } from '@/lib/events'
+import { getCategoryFallback } from '@/lib/fallback-images'
+import { IGCardClient } from '@/app/components/IGCard'
 
 interface PageProps { params: Promise<{ id: string }> }
 
 export default async function IGPortraitPage({ params }: PageProps) {
   const { id } = await params
-  return <IGCard id={id} format="portrait" />
+  const event = await fetchEventById(id)
+  if (!event) notFound()
+
+  const image = event.imageUrl || getCategoryFallback(event.category ?? undefined, id)
+  return <IGCardClient event={event} image={image} initialFormat="portrait" />
 }
