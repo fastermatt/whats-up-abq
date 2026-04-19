@@ -122,7 +122,11 @@ async function main() {
     const short = id.length > 35 ? id.slice(0, 35) + '…' : id
     process.stdout.write(`  [${i + 1}/${toProcess.length}] ${short} … `)
 
-    const ogImg = await fetchOgImage(pageUrl)
+    // abqtodo.com event pages have no og:image meta tags — try raw.website (organizer's
+    // external page) first, then fall back to raw.url (the abqtodo listing page).
+    const websiteUrl = raw?.website
+    const ogImg = (websiteUrl ? await fetchOgImage(websiteUrl) : null)
+               || await fetchOgImage(pageUrl)
 
     if (!ogImg) {
       console.log(`⚠️  no OG image (kept: ${cached_photo_url?.split('/').pop()?.slice(0, 30) ?? 'null'})`)

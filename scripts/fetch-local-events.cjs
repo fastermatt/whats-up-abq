@@ -139,7 +139,10 @@ async function enrichImagesFromOg(events, label) {
   for (let i = 0; i < noImg.length; i += 5) {
     const batch = noImg.slice(i, i + 5);
     await Promise.all(batch.map(async ev => {
-      const imgUrl = await fetchOgImage(ev.url);
+      // abqtodo.com event pages have no og:image — try organizer's external website first,
+      // then fall back to the event URL. Do505/EB pages do have og:image so ev.url works.
+      const imgUrl = (ev.website ? await fetchOgImage(ev.website) : null)
+                   || await fetchOgImage(ev.url);
       if (imgUrl) { ev.images = [{ url: imgUrl, _source: 'og' }]; found++; }
     }));
     if (i + 5 < noImg.length) await sleep(500); // polite pause between batches
@@ -509,6 +512,7 @@ function transformAbqToDoEvent(ev) {
     id:      `abqtodo-${ev.id}`,
     name:    ev.title || 'Untitled Event',
     url:     ev.url,
+    website: ev.website || null,  // organizer's external page — often has the real event photo
     _source: 'local',
     info:    stripHtml(ev.excerpt || ''),
     description: stripHtml(ev.description || ''),
@@ -526,7 +530,11 @@ function transformAbqToDoEvent(ev) {
     classifications: [{ segment: { name: segment } }],
     priceRanges: _cMin > 0 ? [{ min: _cMin, max: _cMax, currency: 'USD' }] : undefined,
     isFree: _cFree,
-    ticketLinks: ev.url ? [{ url: ev.url }] : [],
+    // Prefer organizer's website for ticket/RSVP link (richer page with real images)
+    ticketLinks: [
+      ...(ev.website ? [{ url: ev.website }] : []),
+      ...(ev.url && ev.url !== ev.website ? [{ url: ev.url }] : []),
+    ],
   };
 }
 
