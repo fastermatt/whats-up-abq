@@ -61,9 +61,11 @@ interface Props {
   /** Pre-resolved image URL (imageUrl fallback already applied by the server page) */
   image: string
   initialFormat?: IGFormat
+  /** When true: hides back link, removes full-screen wrapper so parent controls layout */
+  embedded?: boolean
 }
 
-export function IGCardClient({ event, image, initialFormat = 'portrait' }: Props) {
+export function IGCardClient({ event, image, initialFormat = 'portrait', embedded = false }: Props) {
   const [format, setFormat]             = useState<IGFormat>(initialFormat)
   const [showLogo, setShowLogo]         = useState(true)
   const [showCategory, setShowCategory] = useState(true)
@@ -125,21 +127,23 @@ export function IGCardClient({ event, image, initialFormat = 'portrait' }: Props
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div
-      className="min-h-screen flex flex-col bg-[#0d0d0d] select-none"
+      className={`flex flex-col select-none ${embedded ? '' : 'min-h-screen bg-[#0d0d0d]'}`}
       style={{ fontFamily: 'var(--font-epilogue, Epilogue, sans-serif)' }}
     >
 
       {/* ── Toolbar ── */}
       <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-white/[0.07] shrink-0">
 
-        {/* Back link */}
-        <Link
-          href={`/events/${event.id}`}
-          className="flex items-center gap-1 text-white/35 hover:text-white/65 text-sm transition-colors shrink-0"
-        >
-          <ChevronLeft size={16} strokeWidth={2.5} />
-          <span className="hidden sm:inline">Back</span>
-        </Link>
+        {/* Back link — hidden when embedded */}
+        {!embedded && (
+          <Link
+            href={`/events/${event.id}`}
+            className="flex items-center gap-1 text-white/35 hover:text-white/65 text-sm transition-colors shrink-0"
+          >
+            <ChevronLeft size={16} strokeWidth={2.5} />
+            <span className="hidden sm:inline">Back</span>
+          </Link>
+        )}
 
         {/* Format switcher */}
         <div className="flex items-center gap-0.5 bg-white/[0.06] rounded-xl p-1">

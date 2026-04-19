@@ -39,8 +39,7 @@ export function QuickPostInput() {
       return
     }
     setError('')
-    // The ig2 page calls notFound() if the event doesn't exist — no pre-flight needed
-    router.push(`/events/${id}/ig2`)
+    router.push(`/admin/ig?id=${id}`)
   }
 
   return (

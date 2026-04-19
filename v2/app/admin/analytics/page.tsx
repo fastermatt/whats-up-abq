@@ -21,35 +21,45 @@ export default async function AnalyticsPage() {
     { data: rawDow },
     { data: rawTopPages },
     { data: rawEngagement },
-  ] = await Promise.all([
-    // 30-day daily sessions
-    supabase.rpc('analytics_sessions_by_day' as never, {} as never).then(() =>
-      supabase.from('analytics')
-        .select('created_at, session_id, device')
-        .eq('event_type', 'session_start')
-        .gte('created_at', ago30 + 'T00:00:00')
-    ),
-    // Hourly distribution
-    supabase.from('analytics')
-      .select('created_at, session_id')
-      .eq('event_type', 'session_start')
-      .gte('created_at', ago30 + 'T00:00:00'),
-    // Day of week
-    supabase.from('analytics')
-      .select('created_at, session_id')
-      .eq('event_type', 'session_start')
-      .gte('created_at', ago30 + 'T00:00:00'),
-    // Top pages
-    supabase.from('analytics')
-      .select('data, session_id')
-      .eq('event_type', 'pageview')
-      .gte('created_at', ago30 + 'T00:00:00'),
-    // Engagement events
-    supabase.from('analytics')
-      .select('event_type, session_id')
-      .in('event_type', ['event_click', 'search', 'wishlist_add', 'wishlist_remove', 'category_click', 'checkin', 'share_click', 'directions_click'])
-      .gte('created_at', ago30 + 'T00:00:00'),
-  ])
+  ] = await (async () => {
+    try {
+      return await Promise.all([
+        // 30-day daily sessions
+        supabase.from('analytics')
+          .select('created_at, session_id, device')
+          .eq('event_type', 'session_start')
+          .gte('created_at', ago30 + 'T00:00:00'),
+        // Hourly distribution
+        supabase.from('analytics')
+          .select('created_at, session_id')
+          .eq('event_type', 'session_start')
+          .gte('created_at', ago30 + 'T00:00:00'),
+        // Day of week
+        supabase.from('analytics')
+          .select('created_at, session_id')
+          .eq('event_type', 'session_start')
+          .gte('created_at', ago30 + 'T00:00:00'),
+        // Top pages
+        supabase.from('analytics')
+          .select('data, session_id')
+          .eq('event_type', 'pageview')
+          .gte('created_at', ago30 + 'T00:00:00'),
+        // Engagement events
+        supabase.from('analytics')
+          .select('event_type, session_id')
+          .in('event_type', ['event_click', 'search', 'wishlist_add', 'wishlist_remove', 'category_click', 'checkin', 'share_click', 'directions_click'])
+          .gte('created_at', ago30 + 'T00:00:00'),
+      ])
+    } catch {
+      return [
+        { data: [] },
+        { data: [] },
+        { data: [] },
+        { data: [] },
+        { data: [] },
+      ]
+    }
+  })()
 
   // ── Daily sessions chart ───────────────────────────────────────────────────
   const byDay: Record<string, { sessions: Set<string>; mobile: number; desktop: number }> = {}
