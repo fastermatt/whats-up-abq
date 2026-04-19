@@ -19,11 +19,12 @@ import { MapPin, Clock, Download, ChevronLeft, Loader2 } from 'lucide-react'
 import type { NormalizedEvent } from '@/lib/events'
 
 export type IGFormat = 'square' | 'portrait' | 'story'
+type TitlePos = 'bottom' | 'center' | 'top'
 
 const FORMATS: { key: IGFormat; label: string; desc: string; ratio: string }[] = [
-  { key: 'square',   label: '1:1',  desc: 'Square',   ratio: '1 / 1'  },
   { key: 'portrait', label: '4:5',  desc: 'Portrait', ratio: '4 / 5'  },
   { key: 'story',    label: '9:16', desc: 'Story',    ratio: '9 / 16' },
+  { key: 'square',   label: '1:1',  desc: 'Square',   ratio: '1 / 1'  },
 ]
 
 // Target output width per format (height derived from aspect ratio)
@@ -62,16 +63,18 @@ interface Props {
   initialFormat?: IGFormat
 }
 
-export function IGCardClient({ event, image, initialFormat = 'square' }: Props) {
-  const [format, setFormat]           = useState<IGFormat>(initialFormat)
-  const [showLogo, setShowLogo]       = useState(true)
+export function IGCardClient({ event, image, initialFormat = 'portrait' }: Props) {
+  const [format, setFormat]             = useState<IGFormat>(initialFormat)
+  const [showLogo, setShowLogo]         = useState(true)
   const [showCategory, setShowCategory] = useState(true)
   const [showDateTime, setShowDateTime] = useState(true)
-  const [showVenue, setShowVenue]     = useState(true)
-  const [showCTA, setShowCTA]         = useState(false) // off by default — URL was the problem
-  const [showBigDate, setShowBigDate] = useState(true)
-  const [overlayPct, setOverlayPct]   = useState(55)
-  const [downloading, setDownloading] = useState(false)
+  const [showVenue, setShowVenue]       = useState(true)
+  const [showCTA, setShowCTA]           = useState(false)
+  const [showBigDate, setShowBigDate]   = useState(true)
+  const [showSafeZone, setShowSafeZone] = useState(false)
+  const [titlePos, setTitlePos]         = useState<TitlePos>('bottom')
+  const [overlayPct, setOverlayPct]     = useState(55)
+  const [downloading, setDownloading]   = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
 
   const isStory   = format === 'story'
@@ -281,12 +284,44 @@ export function IGCardClient({ event, image, initialFormat = 'square' }: Props) 
             </div>
           )}
 
+          {/* ── Safe zone overlay (toggleable) ── */}
+          {showSafeZone && (
+            <div className="absolute inset-0 pointer-events-none z-20">
+              {/* Top safe zone — 14% for story, 8% for feed */}
+              <div
+                className="absolute left-0 right-0 top-0 border-b-2 border-dashed border-yellow-400/70"
+                style={{ height: isStory ? '14%' : '8%', background: 'rgba(250,204,21,0.08)' }}
+              />
+              {/* Bottom safe zone */}
+              <div
+                className="absolute left-0 right-0 bottom-0 border-t-2 border-dashed border-yellow-400/70"
+                style={{ height: isStory ? '14%' : '8%', background: 'rgba(250,204,21,0.08)' }}
+              />
+              {/* Side margins */}
+              <div className="absolute top-0 bottom-0 left-0 border-r-2 border-dashed border-yellow-400/40"
+                style={{ width: '5%', background: 'rgba(250,204,21,0.04)' }} />
+              <div className="absolute top-0 bottom-0 right-0 border-l-2 border-dashed border-yellow-400/40"
+                style={{ width: '5%', background: 'rgba(250,204,21,0.04)' }} />
+              {/* Label */}
+              <div className="absolute top-1 left-1/2 -translate-x-1/2 text-yellow-300 text-[9px] font-bold uppercase tracking-widest bg-black/60 rounded px-1.5 py-0.5">
+                safe zone
+              </div>
+            </div>
+          )}
+
           {/* ── Bottom content block ── */}
           {/* Story: 14% bottom padding keeps content above Instagram's reply bar (bottom 13%).
               Feed: 1rem bottom margin keeps text from the very edge. */}
           <div
-            className="absolute bottom-0 left-0 right-0"
-            style={{ padding: isStory ? '0 1.2rem 14%' : '0 1rem 1rem' }}
+            className="absolute left-0 right-0"
+            style={{
+              ...(titlePos === 'bottom'
+                ? { bottom: 0, padding: isStory ? '0 1.2rem 14%' : '0 1rem 1rem' }
+                : titlePos === 'top'
+                ? { top: 0, padding: isStory ? '14% 1.2rem 0' : '3.5rem 1rem 0' }
+                : { top: '50%', transform: 'translateY(-50%)', padding: '0 1.2rem' }
+              ),
+            }}
           >
             {/* Title */}
             <h1
@@ -380,6 +415,43 @@ export function IGCardClient({ event, image, initialFormat = 'square' }: Props) 
               {label}
             </button>
           ))}
+          {/* Safe zone toggle — separate style (yellow) */}
+          <button
+            onClick={() => setShowSafeZone(v => !v)}
+            className={`
+              px-3 py-1.5 rounded-full text-xs font-semibold transition-all
+              ${showSafeZone
+                ? 'bg-yellow-500 text-black'
+                : 'bg-white/[0.07] text-white/30 hover:text-white/55 hover:bg-white/[0.1]'
+              }
+            `}
+          >
+            Safe Zone
+          </button>
+        </div>
+
+        {/* Title position presets */}
+        <div className="flex items-center gap-3">
+          <span className="text-white/25 text-[10px] uppercase tracking-[0.12em] w-[4.5rem] shrink-0">
+            Text pos
+          </span>
+          <div className="flex gap-1.5">
+            {(['bottom', 'center', 'top'] as TitlePos[]).map(pos => (
+              <button
+                key={pos}
+                onClick={() => setTitlePos(pos)}
+                className={`
+                  px-3 py-1 rounded-lg text-xs font-semibold transition-all capitalize
+                  ${titlePos === pos
+                    ? 'bg-white/20 text-white'
+                    : 'bg-white/[0.05] text-white/30 hover:text-white/55 hover:bg-white/[0.08]'
+                  }
+                `}
+              >
+                {pos}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Overlay darkness slider */}

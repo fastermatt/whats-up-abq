@@ -11,6 +11,7 @@ import { CaptionCard } from './CaptionCard'
 import { PromoCard, PromoVariant } from './PromoCard'
 import { RoundUpCard } from './RoundUpCard'
 import { EventSpotlightCard } from './EventSpotlightCard'
+import { QuickPostInput } from './QuickPostInput'
 
 export const dynamic = 'force-dynamic'
 
@@ -287,11 +288,13 @@ export default async function IGCaptionsPage() {
         <p className="text-white/50 text-sm mb-3">
           Download the image, then copy the caption — paste both into Instagram.
         </p>
-        <div className="flex gap-4 text-xs text-white/30">
+        <div className="flex gap-4 text-xs text-white/30 mb-4">
           <span>📊 {total} upcoming events</span>
           <span>🌙 {tonightEvents.length} tonight</span>
           <span>🎟️ {spotlightEvents.length} event spotlights</span>
         </div>
+        {/* Quick URL-to-card shortcut */}
+        <QuickPostInput />
       </div>
 
       {/* ── Section 1: Site Promo Posts ─────────────────────────────────────── */}

@@ -18,10 +18,11 @@ export function EventIGThumb({ eventId, title, imageUrl }: Props) {
     ? `/api/image-proxy?url=${encodeURIComponent(imageUrl)}`
     : imageUrl ?? null
 
+  // Portrait first — Instagram now prefers 4:5 over square
   const formats = [
-    { label: '1:1', href: `/events/${eventId}/ig`,  title: 'Square (1:1)' },
-    { label: '4:5', href: `/events/${eventId}/ig2`, title: 'Portrait (4:5)' },
+    { label: '4:5', href: `/events/${eventId}/ig2`, title: 'Portrait (4:5) ★' },
     { label: '9:16',href: `/events/${eventId}/ig3`, title: 'Story (9:16)' },
+    { label: '1:1', href: `/events/${eventId}/ig`,  title: 'Square (1:1)' },
   ]
 
   return (
