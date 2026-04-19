@@ -954,7 +954,20 @@ function normalizeLocal(row: RawEventRow): NormalizedEvent {
       (r.title as string | undefined) ?? (r.name as string | undefined)
     ),
     description: (r.description as string | undefined)?.slice(0, 300) ?? null,
-    price: isFree ? 'Free' : (r.price as string | undefined) ?? (r.cost as string | undefined) ?? null,
+    price: (() => {
+      if (isFree) return 'Free'
+      // Explicit string fields (legacy local/volunteer format)
+      const strPrice = (r.price as string | undefined) ?? (r.cost as string | undefined)
+      if (strPrice) return strPrice
+      // priceRanges array (same TM-compat format used by abqtodo/do505 importers)
+      const ranges = r.priceRanges as Array<Record<string, unknown>> | undefined
+      const minP = ranges?.[0]?.min as number | undefined
+      const maxP = ranges?.[0]?.max as number | undefined
+      if (minP !== undefined && maxP !== undefined && minP > 0) {
+        return minP === maxP ? `$${Math.round(minP)}` : `$${Math.round(minP)}–$${Math.round(maxP)}`
+      }
+      return null
+    })(),
     imageUrl: row.cached_photo_url ?? (r.image as string | undefined) ?? null,
     ticketUrl: (r.url as string | undefined) ?? (r.ticket_url as string | undefined) ?? null,
     source: row.source,

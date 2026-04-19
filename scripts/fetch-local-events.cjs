@@ -110,10 +110,28 @@ async function fetchOgImage(url) {
   }
 }
 
-// After building an events array, fetch og:image for events still missing photos.
+// Generic image filenames that the WP API returns as placeholders/banners rather
+// than actual event-specific photos. We treat these as "missing" and try OG instead.
+const GENERIC_IMAGE_PATTERNS = [
+  'banner', 'default', 'placeholder', 'logo', 'header', 'thumbnail',
+  'featured-image', 'no-image', 'noimage', 'event-default',
+];
+function isGenericImage(url) {
+  if (!url) return true;
+  const lc = url.toLowerCase().split('?')[0].split('/').pop() || '';
+  return GENERIC_IMAGE_PATTERNS.some(p => lc.includes(p));
+}
+
+// After building an events array, fetch og:image for events still missing photos
+// OR whose WP API image looks like a generic placeholder/banner.
 // Runs concurrently in small batches to stay polite but not too slow.
 async function enrichImagesFromOg(events, label) {
-  const noImg = events.filter(e => (!e.images || e.images.length === 0) && e.url);
+  const noImg = events.filter(e => {
+    if (!e.url) return false;
+    if (!e.images || e.images.length === 0) return true;
+    // Also re-fetch if the image looks like a generic site banner / placeholder
+    return isGenericImage(e.images[0]?.url);
+  });
   if (!noImg.length) return;
   console.log(`  🖼️  Fetching OG images for ${noImg.length} ${label} events without photos...`);
   let found = 0;
@@ -516,10 +534,14 @@ function transformAbqToDoEvent(ev) {
 async function upsertEvents(source, rawArr) {
   if (!_sb || !rawArr.length) return;
   const rows = rawArr.map(raw => ({
-    id:         raw.id,
+    id:               raw.id,
     source,
     raw,
-    event_date: raw.dates?.start?.localDate || null,
+    event_date:       raw.dates?.start?.localDate || null,
+    // Denormalized columns — populated here so listing queries avoid raw JSONB
+    cached_photo_url: raw.images?.[0]?.url || null,
+    venue_name:       raw._embedded?.venues?.[0]?.name || null,
+    category:         raw.classifications?.[0]?.segment?.name || null,
   }));
   const { error } = await _sb.from('events').upsert(rows, { onConflict: 'id' });
   if (error) console.error(`[Supabase] ${source} upsert error:`, error.message);
