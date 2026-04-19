@@ -16,33 +16,21 @@ jobs:
     name: Add cdn.abqunplugged.com to R2 bucket
     runs-on: ubuntu-latest
     steps:
+      - name: Install Wrangler
+        run: npm install -g wrangler
+
       - name: Add custom domain to R2 bucket
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           echo "Adding cdn.abqunplugged.com as custom domain to abq-unplugged-images..."
-
-          RESPONSE=$(curl -s -X PUT \
-            "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/r2/buckets/abq-unplugged-images/domains/custom" \
-            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{"domain": "cdn.abqunplugged.com", "enabled": true}')
-
-          echo "Response: $RESPONSE"
-
-          SUCCESS=$(echo "$RESPONSE" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('success', False))")
-
-          if [ "$SUCCESS" = "True" ]; then
-            echo "✅ Custom domain added successfully!"
-            echo "cdn.abqunplugged.com now points to the R2 bucket."
-            echo "DNS propagation may take a few minutes."
-          else
-            echo "❌ Failed to add custom domain."
-            echo "$RESPONSE" | python3 -m json.tool
-            exit 1
-          fi
+          wrangler r2 bucket domain add abq-unplugged-images cdn.abqunplugged.com
+          echo "✅ Done. DNS propagation may take a few minutes."
 
       - name: Verify DNS resolves
         run: |
-          echo "Waiting 30s for DNS propagation..."
-          sleep 30
+          echo "Waiting 45s for DNS propagation..."
+          sleep 45
           echo "Testing cdn.abqunplugged.com..."
-          curl -sI "https://cdn.abqunplugged.com/lovenm-national-day-of-prayer-2026.jpg" | head -5 || echo "DNS may still be propagating — check again in a few minutes."
+          curl -sI "https://cdn.abqunplugged.com/lovenm-national-day-of-prayer-2026.jpg" | head -3 || echo "Still propagating — check again in a few minutes."
