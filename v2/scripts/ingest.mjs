@@ -503,6 +503,11 @@ async function main() {
       ok(`category backfill: ${totalBackfilled} events updated${(catResult ?? []).length ? ' — ' + (catResult ?? []).map(r => `${r.source}: ${r.updated_count}`).join(', ') : ''}`)
     }
 
+    step('Hosting event images on Supabase Storage (download + resize + upload)')
+    const hostRes = await runScript('host-event-images.mjs', ['--limit=200'])
+    if (hostRes.ok) ok(`host-event-images (${(hostRes.durationMs/1000).toFixed(1)}s)`)
+    else warn(`host-event-images failed (exit=${hostRes.exitCode}) — continuing, images use source URLs`)
+
     step('Enriching (neighborhoods, moods)')
     const enrichScripts = [
       { name: 'tag-neighborhoods',  script: 'tag-neighborhoods.mjs' },
@@ -512,6 +517,38 @@ async function main() {
       const r = await runScript(e.script, e.args || [])
       if (r.ok) ok(`${e.name} (${(r.durationMs/1000).toFixed(1)}s)`)
       else fail(`${e.name} failed (exit=${r.exitCode})`)
+    }
+
+    // LM Studio LLM enrichment — optional, runs only if LM Studio is reachable.
+    // Generates richer data: about/highlights/venue_tips/local_tips via Gemma.
+    // Skips if LM_STUDIO_URL is unreachable (rules-based enrichment above is
+    // the hard-required baseline). 2026-04-19: verified working end-to-end.
+    const lmUrl = process.env.LM_STUDIO_URL || 'http://localhost:1234'
+    try {
+      const ping = await fetch(`${lmUrl}/v1/models`, { signal: AbortSignal.timeout(3000) })
+      if (ping.ok) {
+        step('LM Studio enrichment (Gemma — about/highlights/tips)')
+        // enrich-events-lm.cjs lives at the repo root, not v2/scripts
+        const repoRoot = path.join(__dirname, '..', '..')
+        const llmScript = path.join(repoRoot, 'scripts', 'enrich-events-lm.cjs')
+        if (fs.existsSync(llmScript)) {
+          const r = await new Promise((resolve) => {
+            const start = Date.now()
+            const child = spawn('node', [llmScript, '--limit=50'], {
+              stdio: QUIET ? 'ignore' : 'inherit',
+              env: { ...process.env, SUPABASE_URL: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY: SUPABASE_KEY, LM_MODEL: process.env.LM_MODEL || 'google/gemma-4-e4b' },
+            })
+            child.on('close', (code) => resolve({ ok: code === 0, exitCode: code, durationMs: Date.now() - start }))
+            child.on('error', () => resolve({ ok: false, durationMs: Date.now() - start }))
+          })
+          if (r.ok) ok(`LM Studio enrichment (${(r.durationMs/1000).toFixed(1)}s)`)
+          else warn(`LM Studio enrichment returned non-zero — rules-based baseline still in place`)
+        }
+      } else {
+        warn('LM Studio unreachable — skipping LLM enrichment (rules-based covers the baseline)')
+      }
+    } catch {
+      warn('LM Studio unreachable — skipping LLM enrichment (rules-based covers the baseline)')
     }
 
     step('Cleanup (hide past, duplicates, cancelled)')
