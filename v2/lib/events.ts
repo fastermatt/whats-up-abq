@@ -755,7 +755,11 @@ function normalizeTM(row: RawEventRow): NormalizedEvent {
   const segment = (classifications?.[0]?.segment as Record<string, unknown> | undefined)?.name as string | undefined
   const genre = (classifications?.[0]?.genre as Record<string, unknown> | undefined)?.name as string | undefined
 
+  // Prefer non-fallback images — TM marks generic venue/stadium placeholders as fallback:true
+  const realImages = images?.filter(i => !i.fallback)
   const image = row.cached_photo_url
+    ?? realImages?.find(i => i.ratio === '16_9' && (i.width as number) >= 640)?.url as string | undefined
+    ?? realImages?.[0]?.url as string | undefined
     ?? images?.find(i => i.ratio === '16_9' && (i.width as number) >= 640)?.url as string | undefined
     ?? images?.[0]?.url as string | undefined
     ?? null
