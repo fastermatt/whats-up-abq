@@ -1,15 +1,39 @@
 /**
  * Category-based fallback images for events without photos.
- * Generated via Midjourney — illustrated Southwest/ABQ style.
- * Served from Midjourney CDN; will migrate to R2/CDN later.
+ *
+ * Fallback priority (highest → lowest):
+ *   1. PIXABAY_IMAGES — real photographs from Pixabay (cdn.abqunplugged.com/fallbacks/pixabay/)
+ *      Run `scripts/fetch-pixabay-fallbacks.mjs` with your API key to populate.
+ *   2. CATEGORY_IMAGES — Midjourney Southwest illustrations (last resort)
  *
  * Each category has multiple variations to avoid visual repetition.
  * Hero images rotate daily for a fresh homepage feel.
  */
 
-const MJ = 'https://cdn.midjourney.com'
+const MJ  = 'https://cdn.midjourney.com'
+const CDN = 'https://cdn.abqunplugged.com'
 
-// ── Category Fallback Images ────────────────────────────────────────────────
+// ── Pixabay Real-Photo Fallbacks ────────────────────────────────────────────
+// Real photographs (not AI art) sourced via Pixabay API with image_type=photo.
+// Populated by running: node scripts/fetch-pixabay-fallbacks.mjs
+//
+// Once populated, these take priority over Midjourney illustrations.
+// Images are stored permanently in R2 at fallbacks/pixabay/{category}/{n}.jpg
+
+const PIXABAY_IMAGES: Record<string, string[]> = {
+  // Populated after running: PIXABAY_API_KEY=your_key node scripts/fetch-pixabay-fallbacks.mjs
+  // The script will output the TypeScript lines to paste here.
+  //
+  // Example (replace with script output):
+  // music: [
+  //   `${CDN}/fallbacks/pixabay/music/0.jpg`,
+  //   `${CDN}/fallbacks/pixabay/music/1.jpg`,
+  //   ...
+  // ],
+}
+
+// ── Midjourney Fallbacks (last resort) ─────────────────────────────────────
+// Used when no Pixabay image is available for a category.
 // Multiple variations per category (all 4 Midjourney outputs preserved)
 
 const CATEGORY_IMAGES: Record<string, string[]> = {
@@ -192,16 +216,30 @@ export function getHeroImage(): string {
 
 /**
  * Get a fallback image URL for a given event category.
- * Uses a hash of the event ID (or random) to pick a variation,
- * ensuring visual variety across the grid.
+ *
+ * Priority:
+ *   1. Pixabay real photograph for the category (cdn.abqunplugged.com/fallbacks/pixabay/)
+ *   2. Midjourney Southwest illustration for the category
+ *   3. Default Midjourney landscape images
+ *
+ * Uses a hash of the event ID to pick a variation deterministically,
+ * ensuring visual variety across the grid without random flicker.
  */
 export function getCategoryFallback(
   category: string | undefined,
   eventId?: string
 ): string {
-  const images = category
-    ? CATEGORY_IMAGES[category.toLowerCase()] ?? DEFAULT_IMAGES
+  const key = category?.toLowerCase() ?? ''
+
+  // Prefer real Pixabay photographs when available
+  const pixabayImages = key ? (PIXABAY_IMAGES[key] ?? []) : []
+
+  // Fall back to Midjourney illustrations
+  const mjImages = key
+    ? (CATEGORY_IMAGES[key] ?? DEFAULT_IMAGES)
     : DEFAULT_IMAGES
+
+  const images = pixabayImages.length > 0 ? pixabayImages : mjImages
 
   if (!images.length) return ''
 
