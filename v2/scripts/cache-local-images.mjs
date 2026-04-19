@@ -22,7 +22,9 @@
  *   R2_ACCOUNT_ID         — Cloudflare account ID (right sidebar on dashboard)
  *
  * R2 bucket : abq-unplugged-images
- * CDN       : https://cdn.abqunplugged.com
+ * CDN       : https://pub-9b12296957cd4149ac1833b591cdc0ff.r2.dev
+ *             (r2.dev public URL — enabled 2026-04-19 via Cloudflare managed domains API)
+ *             Optional vanity: add CNAME cdn.abqunplugged.com → pub-9b12296957cd4149ac1833b591cdc0ff.r2.dev in GoDaddy
  */
 
 import { createClient } from '@supabase/supabase-js'
@@ -53,7 +55,9 @@ const R2_ACCESS_KEY   = process.env.R2_ACCESS_KEY_ID || process.env.CLOUDFLARE_R
 const R2_SECRET_KEY   = process.env.R2_SECRET_ACCESS_KEY || process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY
 const R2_ACCOUNT_ID   = process.env.R2_ACCOUNT_ID || process.env.CLOUDFLARE_ACCOUNT_ID
 const R2_BUCKET       = 'abq-unplugged-images'
-const CDN_BASE        = 'https://cdn.abqunplugged.com'
+const CDN_BASE        = 'https://pub-9b12296957cd4149ac1833b591cdc0ff.r2.dev'
+// Note: cdn.abqunplugged.com is not yet configured in GoDaddy DNS.
+// Using r2.dev public URL (enabled 2026-04-19). Optional: add CNAME in GoDaddy for vanity URL.
 
 if (!SUPABASE_KEY) {
   console.error('❌ SUPABASE_SERVICE_ROLE_KEY not set.')
@@ -99,6 +103,7 @@ function isAlreadyCached(url) {
   if (!url) return false
   return (
     url.includes('cdn.abqunplugged.com') ||
+    url.includes('pub-9b12296957cd4149ac1833b591cdc0ff.r2.dev') ||
     url.includes('img.evbuc.com') ||
     url.includes('cdn.evbuc.com') ||
     url.includes('s1.ticketm.net') ||

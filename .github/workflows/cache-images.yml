@@ -1,7 +1,12 @@
 name: Cache Event Images to R2
 
 # Downloads third-party event images (abqtodo.com, nhccnm.org, etc.) and
-# uploads them to Cloudflare R2 so they're served from cdn.abqunplugged.com.
+# uploads them to Cloudflare R2, served from:
+#   https://pub-9b12296957cd4149ac1833b591cdc0ff.r2.dev/{id}.{ext}
+#
+# CDN_BASE is set in v2/scripts/cache-local-images.mjs.
+# r2.dev public access enabled 2026-04-19 (cdn.abqunplugged.com has no DNS
+# record — abqunplugged.com uses GoDaddy nameservers, not Cloudflare).
 #
 # GitHub Actions IPs are not CAPTCHA-blocked by abqtodo.com, unlike browser
 # requests from external origins. Running this workflow permanently fixes the
