@@ -111,6 +111,8 @@ interface RawEventRow {
   category?: string | null
   venue_name?: string | null
   submitted_by?: string | null
+  // Admin image control (added 2026-04-19): 'rejected' forces category fallback
+  image_status?: 'unverified' | 'verified' | 'rejected' | null
 }
 
 // ─── Category counts ──────────────────────────────────────────────────────────
@@ -148,7 +150,7 @@ export async function fetchCategoryCounts(): Promise<CategoryCount[]> {
 // ─── Main fetch function ──────────────────────────────────────────────────────
 
 // Columns for queries that need full normalisation (includes raw JSONB)
-const COLS = 'id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, neighborhood, venue_slug, category, venue_name, submitted_by'
+const COLS = 'id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, neighborhood, venue_slug, category, venue_name, submitted_by, image_status'
 
 export async function fetchEvents({
   timeFilter = 'upcoming',
@@ -712,6 +714,11 @@ function normalizeRow(row: RawEventRow): NormalizedEvent | null {
       if (row.category != null) evt.category = row.category
       // Fall back to DB venue_name for sources whose normalizer couldn't extract it
       if (evt.venue === null && row.venue_name != null) evt.venue = decodeHtml(row.venue_name) || null
+      // ADMIN IMAGE CONTROL: image_status='rejected' kills the image across ALL sources.
+      // Consumers fall back to getCategoryFallback(). This is the single chokepoint
+      // so a wrong image (TM/SG/EB/R2 cache/any future mess) gets neutralized with
+      // one DB flag. Added 2026-04-19 to stop the whack-a-mole wrong-image bug.
+      if (row.image_status === 'rejected') evt.imageUrl = null
     }
     // Apply ai_enrichment overrides (from LLM enrichment pass)
     if (evt && row.ai_enrichment) {

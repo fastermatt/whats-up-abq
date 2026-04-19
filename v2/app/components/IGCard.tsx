@@ -12,11 +12,12 @@
  * Data is fetched server-side by the parent page and passed as props.
  */
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import Link from 'next/link'
 import { toBlob } from 'html-to-image'
 import { MapPin, Clock, Download, ChevronLeft, Loader2 } from 'lucide-react'
 import type { NormalizedEvent } from '@/lib/events'
+import { getCategoryFallback } from '@/lib/fallback-images'
 
 export type IGFormat = 'square' | 'portrait' | 'story'
 type TitlePos = 'bottom' | 'center' | 'top'
@@ -78,6 +79,21 @@ export function IGCardClient({ event, image, initialFormat = 'portrait', embedde
   const [overlayPct, setOverlayPct]     = useState(55)
   const [downloading, setDownloading]   = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
+
+  // Image with onError fallback to category image — matches EventImage behavior so
+  // the IG card and the public event page never diverge when an image 404s.
+  // (Added 2026-04-19 as part of image-system overhaul — before this, IGCard
+  // would just show a broken image when the source URL failed.)
+  const categoryFallback = getCategoryFallback(event.category ?? undefined, event.id)
+  const [imgSrc, setImgSrc] = useState(image)
+  useEffect(() => { setImgSrc(image) }, [image])
+  const proxiedSrc = imgSrc.startsWith('http')
+    ? `/api/image-proxy?url=${encodeURIComponent(imgSrc)}`
+    : imgSrc
+
+  // Admin "Reject image" state
+  const [rejecting, setRejecting] = useState(false)
+  const [rejected, setRejected]   = useState(false)
 
   const isStory   = format === 'story'
   const isPortrait = format === 'portrait'
@@ -167,6 +183,47 @@ export function IGCardClient({ event, image, initialFormat = 'portrait', embedde
           ))}
         </div>
 
+        {/* Reject image (admin only — only shown when embedded in /admin/ig).
+            One-click fix for wrong images from TM/SG/EB: sets image_status='rejected'
+            so normalizeRow forces imageUrl=null → category fallback everywhere.
+            See /api/admin/reject-image. */}
+        {embedded && (
+          <button
+            onClick={async () => {
+              if (rejecting || rejected) return
+              if (!confirm('Reject this image? The event will use a category fallback photo on every page of the site until you manually upload a replacement.')) return
+              setRejecting(true)
+              try {
+                const res = await fetch('/api/admin/reject-image', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ id: event.id, status: 'rejected' }),
+                })
+                if (!res.ok) throw new Error(await res.text())
+                setRejected(true)
+                setImgSrc(categoryFallback)
+              } catch (err) {
+                console.error('[IGCard] reject failed:', err)
+                alert('Reject failed — check console.')
+              } finally {
+                setRejecting(false)
+              }
+            }}
+            disabled={rejecting || rejected}
+            title={rejected ? 'Image rejected — now using category fallback' : 'Mark this image as wrong'}
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 ${
+              rejected
+                ? 'bg-green-600/20 text-green-300 border border-green-600/30 cursor-not-allowed'
+                : 'bg-red-600/15 text-red-300 hover:bg-red-600/25 border border-red-600/25 active:scale-95'
+            }`}
+          >
+            {rejecting ? <Loader2 size={14} className="animate-spin" /> : <span className="text-base leading-none">{rejected ? '✓' : '🚫'}</span>}
+            <span className="hidden sm:inline">
+              {rejected ? 'Rejected' : 'Wrong image?'}
+            </span>
+          </button>
+        )}
+
         {/* Download */}
         <button
           onClick={handleDownload}
@@ -208,13 +265,17 @@ export function IGCardClient({ event, image, initialFormat = 'portrait', embedde
           }}
         >
           {/* Background image — always routed through same-origin proxy for reliable loading.
-              No crossOrigin attr needed (proxy is same-origin, no CORS preflight). */}
+              No crossOrigin attr needed (proxy is same-origin, no CORS preflight).
+              onError → swap to category fallback so the card never shows a broken image. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={image.startsWith('http') ? `/api/image-proxy?url=${encodeURIComponent(image)}` : image}
+            src={proxiedSrc}
             alt=""
             className="absolute inset-0 w-full h-full object-cover"
             style={{ filter: `brightness(${Math.max(0.35, 1 - overlayPct * 0.0032)})` }}
+            onError={() => {
+              if (imgSrc !== categoryFallback) setImgSrc(categoryFallback)
+            }}
           />
 
           {/* Gradient overlay — intensity driven by slider */}
