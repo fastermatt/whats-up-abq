@@ -1,0 +1,48 @@
+name: Setup R2 Custom Domain (cdn.abqunplugged.com)
+
+# One-time workflow to add cdn.abqunplugged.com as a custom domain
+# to the abq-unplugged-images R2 bucket. Cloudflare will auto-create
+# the CNAME record in the abqunplugged.com DNS zone.
+#
+# Run this ONCE from GitHub Actions → workflow_dispatch.
+# After it succeeds, cdn.abqunplugged.com will resolve and the
+# cache-images.yml workflow can safely be used again.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup-cdn:
+    name: Add cdn.abqunplugged.com to R2 bucket
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add custom domain to R2 bucket
+        run: |
+          echo "Adding cdn.abqunplugged.com as custom domain to abq-unplugged-images..."
+
+          RESPONSE=$(curl -s -X PUT \
+            "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/r2/buckets/abq-unplugged-images/domains/custom" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"domain": "cdn.abqunplugged.com", "enabled": true}')
+
+          echo "Response: $RESPONSE"
+
+          SUCCESS=$(echo "$RESPONSE" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('success', False))")
+
+          if [ "$SUCCESS" = "True" ]; then
+            echo "✅ Custom domain added successfully!"
+            echo "cdn.abqunplugged.com now points to the R2 bucket."
+            echo "DNS propagation may take a few minutes."
+          else
+            echo "❌ Failed to add custom domain."
+            echo "$RESPONSE" | python3 -m json.tool
+            exit 1
+          fi
+
+      - name: Verify DNS resolves
+        run: |
+          echo "Waiting 30s for DNS propagation..."
+          sleep 30
+          echo "Testing cdn.abqunplugged.com..."
+          curl -sI "https://cdn.abqunplugged.com/lovenm-national-day-of-prayer-2026.jpg" | head -5 || echo "DNS may still be propagating — check again in a few minutes."
