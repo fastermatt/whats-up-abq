@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import type { ReactNode } from 'react'
+import type { ReactNode, CSSProperties } from 'react'
 import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { LogoutButton } from './LogoutButton'
@@ -27,22 +27,27 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   }
   return (
     <div className="min-h-dvh bg-[#1a1614] text-white">
-      <nav className="border-b border-white/10 px-6 py-3 flex items-center gap-6 sticky top-0 bg-[#1a1614]/95 backdrop-blur z-10">
-        <span className="font-black text-[#9a442d]" style={{ fontFamily: 'var(--font-epilogue)' }}>
-          Admin
-        </span>
-        <Link href="/admin" className="text-sm text-white/60 hover:text-white transition-colors">Dashboard</Link>
-        <Link href="/admin/submissions" className="text-sm text-white/60 hover:text-white transition-colors">Submissions</Link>
-        <Link href="/admin/feedback" className="text-sm text-white/60 hover:text-white transition-colors">Feedback</Link>
-        <Link href="/admin/reports" className="text-sm text-white/60 hover:text-white transition-colors">Reports</Link>
-        <Link href="/admin/events" className="text-sm text-white/60 hover:text-white transition-colors">Events</Link>
-        <Link href="/admin/analytics" className="text-sm text-white/60 hover:text-white transition-colors">Analytics</Link>
-        <Link href="/admin/ig" className="text-sm text-white/60 hover:text-white transition-colors">Instagram</Link>
-        <div className="flex-1" />
-        <Link href="/" className="text-xs text-white/40 hover:text-white/60 transition-colors">← Site</Link>
-        <LogoutButton />
+      {/* Nav — scrolls horizontally on mobile so all links are reachable */}
+      <nav className="border-b border-white/10 sticky top-0 bg-[#1a1614]/95 backdrop-blur z-10">
+        <div className="flex items-center gap-4 px-4 py-3 overflow-x-auto"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' } as CSSProperties}
+        >
+          <span className="font-black text-[#9a442d] shrink-0" style={{ fontFamily: 'var(--font-epilogue)' }}>
+            Admin
+          </span>
+          <Link href="/admin"             className="text-sm text-white/60 hover:text-white transition-colors shrink-0">Dashboard</Link>
+          <Link href="/admin/ig"          className="text-sm text-white/60 hover:text-white transition-colors shrink-0 font-semibold">📸 Instagram</Link>
+          <Link href="/admin/events"      className="text-sm text-white/60 hover:text-white transition-colors shrink-0">Events</Link>
+          <Link href="/admin/submissions" className="text-sm text-white/60 hover:text-white transition-colors shrink-0">Submissions</Link>
+          <Link href="/admin/feedback"    className="text-sm text-white/60 hover:text-white transition-colors shrink-0">Feedback</Link>
+          <Link href="/admin/reports"     className="text-sm text-white/60 hover:text-white transition-colors shrink-0">Reports</Link>
+          <Link href="/admin/analytics"   className="text-sm text-white/60 hover:text-white transition-colors shrink-0">Analytics</Link>
+          <span className="flex-1 shrink-0 min-w-4" />
+          <Link href="/"                  className="text-xs text-white/40 hover:text-white/60 transition-colors shrink-0">← Site</Link>
+          <LogoutButton />
+        </div>
       </nav>
-      <main className="max-w-6xl mx-auto px-6 py-8">
+      <main className="max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
         {children}
       </main>
     </div>

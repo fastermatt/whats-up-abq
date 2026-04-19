@@ -184,7 +184,11 @@ export function IGCardClient({ event, image, initialFormat = 'portrait', embedde
       </div>
 
       {/* ── Card preview ── */}
-      <div className="flex-1 flex items-center justify-center p-5 sm:p-8 overflow-auto">
+      {/* embedded: flex-1 collapses to 0 in unconstrained parent — use plain div instead */}
+      <div className={embedded
+        ? 'flex items-center justify-center p-4'
+        : 'flex-1 flex items-center justify-center p-5 sm:p-8 overflow-auto'
+      }>
         <div
           ref={cardRef}
           id="ig-card"
