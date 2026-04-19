@@ -1,0 +1,65 @@
+name: Cache Event Images to R2
+
+# Downloads third-party event images (abqtodo.com, nhccnm.org, etc.) and
+# uploads them to Cloudflare R2 so they're served from cdn.abqunplugged.com.
+#
+# GitHub Actions IPs are not CAPTCHA-blocked by abqtodo.com, unlike browser
+# requests from external origins. Running this workflow permanently fixes the
+# placeholder image problem for ~121 abqtodo community events.
+
+on:
+  workflow_dispatch:
+    inputs:
+      source:
+        description: 'Source to cache (local, volunteer, nhcc, or all)'
+        required: false
+        default: 'local'
+        type: string
+      limit:
+        description: 'Max events to process (default 500)'
+        required: false
+        default: '500'
+        type: string
+      dry_run:
+        description: 'Dry run (no writes to R2 or DB)'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  cache-images:
+    name: Download → R2 → Update DB
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      SUPABASE_URL:                   ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY:      ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      CLOUDFLARE_R2_ACCESS_KEY_ID:    ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+      CLOUDFLARE_R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+      CLOUDFLARE_ACCOUNT_ID:          ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: v2/package-lock.json
+
+      - name: Install dependencies
+        working-directory: v2
+        run: npm ci --legacy-peer-deps
+
+      - name: Cache images to R2
+        working-directory: v2
+        run: |
+          ARGS="--source=${{ github.event.inputs.source || 'local' }} --limit=${{ github.event.inputs.limit || '500' }}"
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          echo "Running: node scripts/cache-local-images.mjs $ARGS"
+          node scripts/cache-local-images.mjs $ARGS
