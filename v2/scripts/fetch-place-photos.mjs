@@ -86,8 +86,8 @@ const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (
 
 const PLACES = [
   // OUTDOORS
-  { id: 'sandia-peak-tramway',          website: 'https://sandiapeak.com',                                                             hasImage: true  },
-  { id: 'petroglyph-national-monument', website: 'https://www.nps.gov/petr',                                                           hasImage: true  },
+  { id: 'sandia-peak-tramway',          website: 'https://sandiapeak.com',                                                             hasImage: true,  directUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Sandia_Peak_Tram_2.jpg/1200px-Sandia_Peak_Tram_2.jpg' },
+  { id: 'petroglyph-national-monument', website: 'https://www.nps.gov/petr',                                                           hasImage: true,  directUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Petroglyph_National_Monument_NPS.jpg/1200px-Petroglyph_National_Monument_NPS.jpg' },
   { id: 'rio-grande-nature-center',     website: 'https://www.rgnc.org',                                                               hasImage: false },
   { id: 'paseo-del-bosque-trail',       website: 'https://www.cabq.gov/parksandrecreation/parks/paseo-del-bosque-trail',               hasImage: false },
   { id: 'elena-gallegos-open-space',    website: 'https://www.cabq.gov/parksandrecreation/open-space/lands/elena-gallegos-open-space', hasImage: false },
@@ -100,12 +100,12 @@ const PLACES = [
   { id: 'west-mesa-aquatic-center',    website: 'https://www.cabq.gov/parksandrecreation/recreation-centers/west-mesa-community-center', hasImage: false },
   { id: 'bosque-trail',                website: 'https://www.cabq.gov/parksandrecreation/open-space',                                 hasImage: false },
   // ARTS & CULTURE
-  { id: 'albuquerque-museum',          website: 'https://www.albuquerquemuseum.org',                                                  hasImage: true  },
+  { id: 'albuquerque-museum',          website: 'https://www.albuquerquemuseum.org',                                                  hasImage: true,  directUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Albuquerque_Museum_exterior.jpg/1200px-Albuquerque_Museum_exterior.jpg' },
   { id: 'indian-pueblo-cultural-center', website: 'https://www.indianpueblo.org',                                                    hasImage: false },
   { id: 'national-hispanic-cultural-center', website: 'https://www.nhccnm.org',                                                      hasImage: false },
   { id: 'explora-science-center',      website: 'https://www.explora.us',                                                             hasImage: false },
   { id: '516-arts',                    website: 'https://www.516arts.org',                                                             hasImage: false },
-  { id: 'kimo-theatre',                website: 'https://www.cabq.gov/kimo',                                                          hasImage: true  },
+  { id: 'kimo-theatre',                website: 'https://www.cabq.gov/kimo',                                                          hasImage: true,  directUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/KiMo_Theatre_Albuquerque.jpg/1200px-KiMo_Theatre_Albuquerque.jpg' },
   { id: 'harwood-art-center',          website: 'https://www.harwoodartcenter.org',                                                   hasImage: false },
   { id: 'popejoy-hall',                website: 'https://www.popejoypresents.com',                                                    hasImage: false },
   // FOOD & DRINK
@@ -130,7 +130,7 @@ const PLACES = [
   { id: 'national-museum-nuclear-science', website: 'https://www.nuclearmuseum.org',                                                 hasImage: false },
   { id: 'balloon-museum',              website: 'https://www.balloonmuseum.com',                                                     hasImage: false },
   // HISTORY
-  { id: 'old-town-albuquerque',        website: 'https://albuquerqueoldtown.com',                                                    hasImage: true  },
+  { id: 'old-town-albuquerque',        website: 'https://albuquerqueoldtown.com',                                                    hasImage: true,  directUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Albuquerque_Old_Town_Plaza.jpg/1200px-Albuquerque_Old_Town_Plaza.jpg' },
   { id: 'san-felipe-de-neri-church',   website: 'https://www.sanfelipedeneri.org',                                                   hasImage: false },
   { id: 'route-66',                    website: 'https://www.rt66nm.org',                                                            hasImage: false },
   { id: 'albuquerque-rattlesnake-museum', website: 'https://www.rattlesnakes.com',                                                   hasImage: false },
@@ -256,7 +256,11 @@ async function main() {
   // Filter to places we should process
   let queue = PLACES.filter(p => {
     if (ONLY) return p.id === ONLY
-    if (!FORCE && p.hasImage) return false   // skip already-imaged places
+    if (FORCE) return true
+    // Places with a directUrl (Wikimedia) need migrating to our storage
+    if (p.directUrl) return true
+    // Skip places already hosted (og:image was already fetched)
+    if (p.hasImage) return false
     return true
   })
 
@@ -276,23 +280,28 @@ async function main() {
     process.stdout.write(`  🔍 ${place.id}`)
 
     try {
-      // Step 1: Get og:image from venue website
-      const ogUrl = await extractOgImage(place.website)
-      if (!ogUrl) {
-        results.skipped.push({ id: place.id, reason: 'no og:image found' })
-        console.log(` → ⬜ no og:image`)
-        continue
+      // Step 1: Get image URL — use directUrl if provided, else scrape og:image
+      let imgUrl = place.directUrl || null
+      if (imgUrl) {
+        process.stdout.write(` → using direct URL`)
+      } else {
+        imgUrl = await extractOgImage(place.website)
+        if (!imgUrl) {
+          results.skipped.push({ id: place.id, reason: 'no og:image found' })
+          console.log(` → ⬜ no og:image`)
+          continue
+        }
+        process.stdout.write(` → found og:image`)
       }
-      process.stdout.write(` → found og:image`)
 
       if (DRY) {
-        results.ok.push({ id: place.id, url: '(dry run)', ogUrl })
+        results.ok.push({ id: place.id, url: '(dry run)', ogUrl: imgUrl })
         console.log(` ✓ (dry run)`)
         continue
       }
 
       // Step 2: Download
-      const rawBuf = await downloadImage(ogUrl)
+      const rawBuf = await downloadImage(imgUrl)
       process.stdout.write(` → downloaded ${(rawBuf.length / 1024).toFixed(0)}KB`)
 
       // Step 3: Process with sharp
@@ -301,7 +310,7 @@ async function main() {
 
       // Step 4: Upload
       const cdnUrl = await uploadToStorage(place.id, webpBuf)
-      results.ok.push({ id: place.id, url: cdnUrl, ogUrl })
+      results.ok.push({ id: place.id, url: cdnUrl, ogUrl: imgUrl })
       console.log(` → ✅ uploaded`)
 
     } catch (err) {
