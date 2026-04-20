@@ -69,6 +69,7 @@ const TYPE_TO_CATEGORY = {
   'nfl':                  'Sports',
   'nhl':                  'Sports',
   'mls':                  'Sports',
+  'usl':                  'Sports',   // USL Championship — NM United
   'ncaa_football':        'Sports',
   'ncaa_basketball':      'Sports',
   'ncaa_baseball':        'Sports',
@@ -93,7 +94,18 @@ const TYPE_TO_CATEGORY = {
   'food':                 'Food & Drink',
 }
 
-function mapType(type) {
+// Title-based overrides for events whose SG type doesn't map cleanly
+const TITLE_OVERRIDES = [
+  { pattern: /new mexico united/i,     category: 'Sports' },
+  { pattern: /albuquerque isotopes/i,  category: 'Sports' },
+  { pattern: /\bUSL\b/i,              category: 'Sports' },
+]
+
+function mapType(type, title = '') {
+  // Check title-based overrides first (highest confidence)
+  for (const { pattern, category } of TITLE_OVERRIDES) {
+    if (pattern.test(title)) return category
+  }
   if (!type) return 'Community'
   return TYPE_TO_CATEGORY[type] || 'Community'
 }
@@ -299,7 +311,7 @@ async function main() {
       continue
     }
 
-    const category = mapType(ev.type)
+    const category = mapType(ev.type, raw.name)
     const venueName = ev.venue?.name || null
 
     // Build event_date: include time if available
