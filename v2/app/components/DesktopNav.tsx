@@ -2,17 +2,17 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Compass, Calendar, Bookmark, User, Trophy, PlusCircle, Moon, CalendarDays } from 'lucide-react'
+import { Compass, Calendar, MapPin, User, Trophy, PlusCircle, Moon, CalendarDays } from 'lucide-react'
 
 const NAV_ITEMS = [
-  { href: '/',            label: 'Discover',     Icon: Compass },
-  { href: '/events',      label: 'Events',       Icon: Calendar },
-  { href: '/tonight',     label: 'Tonight',      Icon: Moon },
-  { href: '/weekend',     label: 'Weekend',      Icon: CalendarDays },
-  { href: '/saved',       label: 'Saved',        Icon: Bookmark },
-  { href: '/leaderboard', label: 'Leaderboard',  Icon: Trophy },
-  { href: '/submit',      label: 'Submit Event', Icon: PlusCircle },
-  { href: '/profile',     label: 'Profile',      Icon: User },
+  { href: '/',              label: 'Discover',      Icon: Compass },
+  { href: '/events',        label: 'Events',        Icon: Calendar },
+  { href: '/tonight',       label: 'Tonight',       Icon: Moon },
+  { href: '/weekend',       label: 'Weekend',       Icon: CalendarDays },
+  { href: '/things-to-do', label: 'Things To Do',  Icon: MapPin },
+  { href: '/leaderboard',   label: 'Leaderboard',   Icon: Trophy },
+  { href: '/submit',        label: 'Submit Event',  Icon: PlusCircle },
+  { href: '/profile',       label: 'Profile',       Icon: User },
 ] as const
 
 export default function DesktopNav() {

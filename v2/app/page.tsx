@@ -6,11 +6,12 @@ import { getCategoryFallback, OG_IMAGE, CAROUSEL_IMAGES } from '@/lib/fallback-i
 import { HeroCarousel } from '@/app/components/HeroCarousel'
 import { getHeroCopy } from '@/lib/hero-copy'
 import { EventImage } from '@/app/components/EventImage'
-import { MapPin, ArrowRight } from 'lucide-react'
+import { MapPin, ArrowRight, ExternalLink } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
 import MoodChips from '@/app/components/MoodChips'
 import SurpriseButton from '@/app/components/SurpriseButton'
 import { ConnectionQuote } from '@/app/components/ConnectionQuote'
+import { getFeaturedPlaces, PLACE_CATEGORIES, placeFallbackCategory, type Place } from '@/data/places'
 
 export const revalidate = 60
 
@@ -57,6 +58,8 @@ const websiteJsonLd = {
 }
 
 export default async function DiscoverPage() {
+  const featuredPlaces = getFeaturedPlaces(8)
+
   const [tonight, tomorrow, weekend, allUpcoming, featured, justAdded, neighborhoodCounts] = await Promise.all([
     fetchEvents({ timeFilter: 'tonight', limit: 10 }),
     fetchEvents({ timeFilter: 'tomorrow', limit: 10 }),
@@ -274,6 +277,69 @@ export default async function DiscoverPage() {
         </AnimateIn>
       )}
 
+      {/* ── Things To Do ── */}
+      <AnimateIn animation="fade-up" delay={175}>
+        <section className="py-6 border-t border-[#f0e4cc]/60">
+          <div className="max-w-6xl mx-auto px-4 flex items-end justify-between mb-4">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.15em] text-[#006a62] mb-0.5 font-semibold">
+                Anytime
+              </p>
+              <h2
+                className="text-xl font-black text-[#1a1614]"
+                style={{ fontFamily: 'var(--font-epilogue)' }}
+              >
+                Things To Do in ABQ
+              </h2>
+            </div>
+            <Link
+              href="/things-to-do"
+              className="text-xs font-semibold text-[#006a62] hover:underline flex-shrink-0 flex items-center gap-1 group"
+            >
+              See all
+              <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+          </div>
+
+          {/* Category chips */}
+          <div
+            className="flex gap-2 overflow-x-auto px-4 pb-3 mb-1"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {PLACE_CATEGORIES.map(cat => (
+              <Link
+                key={cat.slug}
+                href={`/things-to-do?category=${cat.slug}`}
+                className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#006a62]/10 text-[#006a62] text-[11px] font-semibold hover:bg-[#006a62] hover:text-white transition-all whitespace-nowrap"
+              >
+                <span>{cat.emoji}</span>
+                {cat.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Horizontal scroll cards */}
+          <div className="overflow-x-auto scrollbar-hide">
+            <div
+              className="flex gap-3 px-4 pb-2 snap-x"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {featuredPlaces.map((place, i) => (
+                <PlaceTeaseCard key={place.id} place={place} index={i} />
+              ))}
+              {/* See-all card */}
+              <Link
+                href="/things-to-do"
+                className="flex-shrink-0 w-[160px] snap-start flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#006a62]/30 text-[#006a62] hover:border-[#006a62] hover:bg-[#006a62]/5 transition-all gap-2 aspect-[4/3]"
+              >
+                <ArrowRight className="w-5 h-5" />
+                <span className="text-xs font-semibold">See all places</span>
+              </Link>
+            </div>
+          </div>
+        </section>
+      </AnimateIn>
+
       {/* ── Explore by Neighborhood ── */}
       {neighborhoodCounts.length > 0 && (
         <AnimateIn animation="fade-up" delay={200}>
@@ -343,6 +409,7 @@ export default async function DiscoverPage() {
               { href: '/events',               label: 'All Events' },
               { href: '/events?time=tonight',  label: 'Tonight' },
               { href: '/events?time=this-weekend', label: 'This Weekend' },
+              { href: '/things-to-do',         label: 'Things To Do' },
               { href: '/neighborhoods',        label: 'Neighborhoods' },
               { href: '/submit',               label: 'Share an event' },
               { href: '/feedback',             label: 'Feedback' },
@@ -362,6 +429,53 @@ export default async function DiscoverPage() {
         </div>
       </footer>
     </main>
+  )
+}
+
+// ─── Place Tease Card — compact card for homepage horizontal scroll ─────────
+
+function PlaceTeaseCard({ place, index }: { place: Place; index: number }) {
+  const imgSrc = place.image || getCategoryFallback(placeFallbackCategory(place.category), place.id)
+  const catMeta = PLACE_CATEGORIES.find(c => c.slug === place.category)
+
+  return (
+    <a
+      href={place.website}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group flex-shrink-0 w-[180px] snap-start scroll-reveal-slide"
+      style={{ animationDelay: `${Math.min(index * 40, 300)}ms` }}
+    >
+      <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] mb-1.5 shadow-sm group-hover:shadow-md transition-shadow duration-300">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={imgSrc}
+          alt={place.name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+          loading="lazy"
+        />
+        {/* Category */}
+        <div className="absolute top-1.5 left-1.5 text-[10px] font-semibold bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-full text-[#4a3f3a]">
+          {catMeta?.emoji} {catMeta?.label}
+        </div>
+        {place.free && (
+          <div className="absolute top-1.5 right-1.5 text-[10px] font-bold bg-[#006a62]/90 text-white px-1.5 py-0.5 rounded-full">
+            Free
+          </div>
+        )}
+        {/* Hover: external link hint */}
+        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+          <ExternalLink className="w-5 h-5 text-white drop-shadow" />
+        </div>
+      </div>
+      <h4
+        className="font-bold text-[#1a1614] text-xs leading-tight line-clamp-2 mb-0.5 group-hover:text-[#006a62] transition-colors"
+        style={{ fontFamily: 'var(--font-epilogue)' }}
+      >
+        {place.name}
+      </h4>
+      <p className="text-[10px] text-[#8a7a74] line-clamp-1">{place.tagline}</p>
+    </a>
   )
 }
 
