@@ -288,7 +288,11 @@ async function smokeTest({ perSource = 3 } = {}) {
       if (!row.category) checks.push('no-category')
 
       // 4. Has venue_name (denormalized) or raw fallback
-      const hasVenue = row.venue_name || row.raw?._embedded?.venues?.[0]?.name || row.raw?.venue?.name
+      // Empty-string venue names (online/virtual events) are allowed — treat as 'Online'
+      const hasVenue =
+        row.venue_name?.trim() ||
+        row.raw?._embedded?.venues?.[0]?.name?.trim() ||
+        row.raw?.venue?.name?.trim()
       if (!hasVenue) checks.push('no-venue')
 
       if (checks.length === 0) {

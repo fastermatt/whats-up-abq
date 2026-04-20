@@ -301,12 +301,12 @@ export default async function DiscoverPage() {
             </Link>
           </div>
 
-          {/* Category chips */}
+          {/* Category chips — only show categories that have places */}
           <div
             className="flex gap-2 overflow-x-auto px-4 pb-3 mb-1"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            {PLACE_CATEGORIES.map(cat => (
+            {PLACE_CATEGORIES.filter(cat => featuredPlaces.some(p => p.category === cat.slug)).map(cat => (
               <Link
                 key={cat.slug}
                 href={`/things-to-do?category=${cat.slug}`}
@@ -449,7 +449,7 @@ function PlaceTeaseCard({ place, index }: { place: Place; index: number }) {
       href={place.website}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex-shrink-0 w-[180px] snap-start scroll-reveal-slide"
+      className="group flex-shrink-0 w-[180px] snap-start"
       style={{ animationDelay: `${Math.min(index * 40, 300)}ms` }}
     >
       <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-1.5 shadow-sm group-hover:shadow-md transition-shadow duration-300">

@@ -839,7 +839,7 @@ function normalizeEB(row: RawEventRow): NormalizedEvent {
       : ebNativeLocal ? formatTime(ebNativeLocal)
       : ebNativeUtc   ? formatTime(ebNativeUtc)
       : null,
-    venue: (venue?.name as string | undefined) ?? null,
+    venue: (venue?.name as string | undefined)?.trim() || 'Online',
     address: venue ? buildEBAddress(venue) : null,
     city: (venue?.address as Record<string, unknown> | undefined)?.city as string | null ?? null,
     ...mapCategory(
