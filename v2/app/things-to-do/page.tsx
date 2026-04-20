@@ -63,7 +63,7 @@ export default async function ThingsToDoPage({
           </p>
           <div className="flex gap-4 mt-4 text-xs">
             <span className="text-white/50"><span className="text-white font-bold">{PLACES.length}</span> places</span>
-            <span className="text-white/50"><span className="text-white font-bold">{PLACE_CATEGORIES.length}</span> categories</span>
+            <span className="text-white/50"><span className="text-white font-bold">{PLACE_CATEGORIES.filter(c => PLACES.some(p => p.category === c.slug)).length}</span> categories</span>
             <span className="text-white/50"><span className="text-white font-bold">{PLACES.filter(p => p.free).length}</span> free</span>
           </div>
         </div>
@@ -90,7 +90,7 @@ export default async function ThingsToDoPage({
             </span>
           </Link>
 
-          {PLACE_CATEGORIES.map(cat => {
+          {PLACE_CATEGORIES.filter(cat => PLACES.some(p => p.category === cat.slug)).map(cat => {
             const count = PLACES.filter(p => p.category === cat.slug).length
             const isActive = activeCategory === cat.slug
             return (
