@@ -38,8 +38,8 @@ export default async function ThingsToDoPage({
     <main id="main" className="min-h-dvh bg-[#fbf7f1]">
 
       {/* ── Header ── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#006a62] via-[#004d47] to-[#003a35] text-white">
-        <div className="absolute inset-0 opacity-[0.06] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMS41IiBmaWxsPSIjZmZmIi8+PC9zdmc+')]" />
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#3d1a0e] via-[#7d3725] to-[#a0522d] text-white">
+        <div className="absolute inset-0 opacity-[0.07] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMS41IiBmaWxsPSIjZmZmIi8+PC9zdmc+')]" />
         <div className="max-w-6xl mx-auto px-4 pt-5 pb-6 relative">
           <Link
             href="/"
@@ -48,7 +48,7 @@ export default async function ThingsToDoPage({
             <ArrowLeft className="w-3 h-3" />
             Back
           </Link>
-          <p className="text-[11px] uppercase tracking-[0.2em] text-[#7ecfc9] mb-1.5 font-semibold">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-[#f5c9a0] mb-1.5 font-semibold">
             Albuquerque
           </p>
           <h1
