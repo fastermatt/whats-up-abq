@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { Bookmark, MapPin, Calendar, ExternalLink, ArrowLeft, User, Users } from 'lucide-react'
 import { ConnectionQuote } from '@/app/components/ConnectionQuote'
+import { affiliateUrl } from '@/lib/affiliate'
 
 export const metadata: Metadata = {
   title: 'Saved Events | ABQ Unplugged',
@@ -308,7 +309,7 @@ function FriendEventCard({ event, friendHandle }: { event: FriendEvent; friendHa
           </Link>
           {event.ticket_url && (
             <a
-              href={event.ticket_url}
+              href={affiliateUrl(event.ticket_url) ?? event.ticket_url ?? '#'}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-0.5 text-[10px] text-[#006a62] hover:underline"
@@ -372,7 +373,7 @@ function SavedEventCard({ event, activeTab }: { event: UserEvent; activeTab: Tab
           </Link>
           {event.ticket_url && (
             <a
-              href={event.ticket_url}
+              href={affiliateUrl(event.ticket_url) ?? event.ticket_url ?? '#'}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-0.5 text-[10px] text-[#006a62] hover:underline"

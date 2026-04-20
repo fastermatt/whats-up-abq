@@ -15,6 +15,7 @@ import { SaveEventButton } from '@/app/components/SaveEventButton'
 import { ReviewSection } from '@/app/components/ReviewSection'
 import { CheckInButton } from '@/app/components/CheckInButton'
 import { InviteCard } from '@/app/components/InviteCard'
+import { affiliateUrl } from '@/lib/affiliate'
 
 export const revalidate = 60
 
@@ -356,7 +357,7 @@ export default async function EventDetailPage({ params }: PageProps) {
         <div className="flex flex-wrap gap-3 mb-4">
           {event.ticketUrl && (
             <a
-              href={event.ticketUrl}
+              href={affiliateUrl(event.ticketUrl) ?? event.ticketUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#9a442d] text-white font-semibold text-sm hover:bg-[#7d3725] transition-all duration-300 hover:shadow-lg hover:shadow-[#9a442d]/20 hover:scale-[1.02]"
