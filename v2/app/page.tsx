@@ -404,6 +404,14 @@ export default async function DiscoverPage() {
           <div className="mb-4 max-w-md mx-auto">
             <ConnectionQuote size="sm" />
           </div>
+          {/* Submit CTA — stands out above the footer nav */}
+          <Link
+            href="/submit"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#9a442d] text-white text-sm font-bold hover:bg-[#7d3725] transition-colors mb-5 shadow-md shadow-[#9a442d]/20"
+          >
+            ✦ Submit your event
+          </Link>
+
           <nav className="flex items-center justify-center gap-4 flex-wrap">
             {[
               { href: '/events',               label: 'All Events' },
@@ -411,7 +419,6 @@ export default async function DiscoverPage() {
               { href: '/events?time=this-weekend', label: 'This Weekend' },
               { href: '/things-to-do',         label: 'Things To Do' },
               { href: '/neighborhoods',        label: 'Neighborhoods' },
-              { href: '/submit',               label: 'Share an event' },
               { href: '/feedback',             label: 'Feedback' },
               { href: '/why',                  label: 'Why we built this' },
               { href: '/about',                label: 'About' },

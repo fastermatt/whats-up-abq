@@ -204,6 +204,27 @@ export default async function EventsPage({ searchParams }: PageProps) {
           </>
         )}
 
+        {/* ── Submit CTA ── */}
+        <div className="mt-2 rounded-2xl bg-gradient-to-r from-[#3d1a0e] to-[#7d3725] p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.15em] text-[#f5c9a0] font-semibold mb-0.5">
+              Know something we don&apos;t?
+            </p>
+            <p className="text-base font-black text-white" style={{ fontFamily: 'var(--font-epilogue)' }}>
+              Submit your event
+            </p>
+            <p className="text-xs text-white/60 mt-0.5">
+              Community events reviewed within 24 hours · free to list
+            </p>
+          </div>
+          <Link
+            href="/submit"
+            className="flex-shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-[#7d3725] text-sm font-bold hover:bg-[#fbf7f1] transition-colors"
+          >
+            Add your event →
+          </Link>
+        </div>
+
         {/* ── Pagination ── */}
         {totalPages > 1 && (
           <Pagination
