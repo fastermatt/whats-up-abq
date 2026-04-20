@@ -11,7 +11,7 @@ import { AnimateIn } from '@/app/components/AnimateIn'
 import MoodChips from '@/app/components/MoodChips'
 import SurpriseButton from '@/app/components/SurpriseButton'
 import { ConnectionQuote } from '@/app/components/ConnectionQuote'
-import { getFeaturedPlaces, PLACE_CATEGORIES, placeFallbackCategory, type Place } from '@/data/places'
+import { getFeaturedPlaces, PLACE_CATEGORIES, type Place } from '@/data/places'
 
 export const revalidate = 60
 
@@ -435,7 +435,6 @@ export default async function DiscoverPage() {
 // ─── Place Tease Card — compact card for homepage horizontal scroll ─────────
 
 function PlaceTeaseCard({ place, index }: { place: Place; index: number }) {
-  const imgSrc = place.image || getCategoryFallback(placeFallbackCategory(place.category), place.id)
   const catMeta = PLACE_CATEGORIES.find(c => c.slug === place.category)
 
   return (
@@ -446,15 +445,28 @@ function PlaceTeaseCard({ place, index }: { place: Place; index: number }) {
       className="group flex-shrink-0 w-[180px] snap-start scroll-reveal-slide"
       style={{ animationDelay: `${Math.min(index * 40, 300)}ms` }}
     >
-      <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] mb-1.5 shadow-sm group-hover:shadow-md transition-shadow duration-300">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={imgSrc}
-          alt={place.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-          loading="lazy"
-        />
-        {/* Category */}
+      <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-1.5 shadow-sm group-hover:shadow-md transition-shadow duration-300">
+        {place.image ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={place.image}
+              alt={place.name}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors duration-300" />
+          </>
+        ) : (
+          <div
+            className={`w-full h-full bg-gradient-to-br ${catMeta?.gradientFrom} ${catMeta?.gradientTo} flex items-center justify-center group-hover:brightness-110 transition-all duration-300`}
+          >
+            <span className="text-3xl opacity-80 group-hover:scale-110 transition-transform duration-300">
+              {catMeta?.emoji}
+            </span>
+          </div>
+        )}
+        {/* Category chip */}
         <div className="absolute top-1.5 left-1.5 text-[10px] font-semibold bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-full text-[#4a3f3a]">
           {catMeta?.emoji} {catMeta?.label}
         </div>
@@ -464,8 +476,10 @@ function PlaceTeaseCard({ place, index }: { place: Place; index: number }) {
           </div>
         )}
         {/* Hover: external link hint */}
-        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <ExternalLink className="w-5 h-5 text-white drop-shadow" />
+        <div className="absolute bottom-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <div className="bg-white/95 rounded-full p-1 shadow-sm">
+            <ExternalLink className="w-2.5 h-2.5 text-[#006a62]" />
+          </div>
         </div>
       </div>
       <h4
