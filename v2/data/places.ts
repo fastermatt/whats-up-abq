@@ -180,6 +180,21 @@ export const PLACES: Place[] = [
     hours: 'Summer 7am–11pm · Winter 9am–10pm',
   },
   {
+    id: 'tower-skate-park',
+    name: 'Tower Skate Park',
+    tagline: 'Westside modular park with half-pipe and dog park',
+    description:
+      'A free public skate park on the Westside with a 5-foot half-pipe, rain bowl rail, pyramid with hubba, and fun box — lit until 11pm in summer. Adjacent dog park and walking trail.',
+    category: 'outdoors',
+    website: 'https://www.cabq.gov/parksandrecreation/recreation/skate-parks/tower-skate-park',
+    address: '700 82nd St SW, Albuquerque, NM 87121',
+    neighborhood: 'Westside',
+    tags: ['skate park', 'free', 'skateboarding', 'BMX', 'half-pipe'],
+    free: true,
+    hours: 'Summer 7am–11pm · Winter 9am–10pm',
+  },
+
+  {
     id: 'rio-grande-pool',
     name: 'Rio Grande Pool',
     tagline: 'Outdoor summer pool next to Tingley Beach',
@@ -221,6 +236,35 @@ export const PLACES: Place[] = [
     free: false,
     hours: 'Check website for current schedule',
   },
+  {
+    id: 'highland-pool',
+    name: 'Highland Pool',
+    tagline: 'Central ABQ indoor pool with 3-meter diving board',
+    description:
+      'A year-round indoor 25m×25yd pool in the heart of the city — one of the few with a 3-meter diving board. Also has a 1-meter board and an outdoor wading pool.',
+    category: 'outdoors',
+    website: 'https://www.cabq.gov/parksandrecreation/recreation/swimming/indoor-pools/highland-pool',
+    address: '400 Jackson St SE, Albuquerque, NM 87108',
+    neighborhood: 'Nob Hill',
+    tags: ['pool', 'swimming', 'indoor', 'year-round', 'diving board'],
+    free: false,
+    hours: 'Check website for current schedule',
+  },
+  {
+    id: 'valley-pool',
+    name: 'Valley Pool',
+    tagline: 'Solar-heated indoor pool with UV water treatment',
+    description:
+      'A 25-yard year-round indoor pool in the North Valley with 1-meter diving boards and an outdoor wading pool — renovated with solar heating and UV water treatment.',
+    category: 'outdoors',
+    website: 'https://www.cabq.gov/parksandrecreation/recreation/swimming/indoor-pools/valley-pool',
+    address: '1505 Candelaria Rd NW, Albuquerque, NM 87107',
+    neighborhood: 'North Valley',
+    tags: ['pool', 'swimming', 'indoor', 'year-round', 'solar', 'diving board'],
+    free: false,
+    hours: 'Check website for current schedule',
+  },
+
   // ── GOLF ─────────────────────────────────────────────────────────────────
   // Five city-operated courses — best golf value in Albuquerque
 
@@ -293,6 +337,23 @@ export const PLACES: Place[] = [
     tags: ['golf', 'city golf', 'driving range', 'par-3', 'affordable'],
     free: false,
     hours: 'Check website for current hours',
+  },
+
+  {
+    id: 'balloon-fiesta-park',
+    name: 'Balloon Fiesta Park',
+    tagline: '86-acre launch field open year-round for free',
+    description:
+      'Home of the International Balloon Fiesta every October, but open year-round as a free public park — 86 acres of launch field for walking, sports, and events. Lighted driving range and pitch & putt on site.',
+    category: 'outdoors',
+    website: 'https://www.cabq.gov/parksandrecreation/parks/balloon-fiesta-park',
+    address: 'Balloon Museum Dr NE & Alameda Blvd NE, Albuquerque, NM 87113',
+    neighborhood: 'North Albuquerque Acres',
+    image: 'https://bsmvfutebmbkjvlrhiyq.supabase.co/storage/v1/object/public/place-photos/balloon-fiesta-park.webp',
+    tags: ['balloons', 'park', 'free', 'events', 'golf', 'driving range'],
+    free: true,
+    hours: 'Open year-round (closed during Balloon Fiesta Oct)',
+    featured: true,
   },
 
   {

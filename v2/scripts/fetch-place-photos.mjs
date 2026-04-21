@@ -112,6 +112,8 @@ const PLACES = [
   // HISTORY
   { id: 'old-town-albuquerque',        website: 'https://albuquerqueoldtown.com',                                                    hasImage: false, directUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/4f/Albuquerque_Old_Town_Plaza_in_2008.jpg' },
   { id: 'route-66',                    website: 'https://www.rt66nm.org',                                                            hasImage: false, directUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/ab/La_Puerta_Lodge%2C_Albuquerque_NM.jpg' },
+  // PARKS
+  { id: 'balloon-fiesta-park',         website: 'https://www.cabq.gov/parksandrecreation/parks/balloon-fiesta-park',                      hasImage: false, directUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/3f/Albuquerque_Sunset_at_Balloon_Fiesta_Park.jpg' },
 ]
 
 // ── Helpers ────────────────────────────────────────────────────────────────
