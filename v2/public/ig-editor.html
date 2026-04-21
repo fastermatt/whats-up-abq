@@ -319,6 +319,30 @@
   .edit-hint kbd{display:inline-block;padding:1px 5px;background:#F4EADB;border:1px solid #D6CBB0;border-radius:3px;font-size:10px;font-family:inherit}
 
   @media (max-width:900px){body{grid-template-columns:1fr}.panel{position:relative;max-height:none}}
+
+  /* ── Logo colorization ─────────────────────────────────────────────────────
+     CSS filter pipeline starting from any source logo:
+     brightness(0) → collapses all channels to black first, then
+     remaining filters shift hue to the target colour.
+     !important so user override beats per-template defaults.           */
+  .post .logo-img{transition:filter .2s}
+  .post.logo-white .logo-img{filter:brightness(0) invert(1) !important}
+  .post.logo-black .logo-img{filter:brightness(0) !important}
+  /* Terracotta  #C75A3C */
+  .post.logo-terra .logo-img{filter:brightness(0) saturate(100%) invert(35%) sepia(92%) saturate(561%) hue-rotate(336deg) !important}
+  /* Sandstone cream #E8D9B8 */
+  .post.logo-cream .logo-img{filter:brightness(0) saturate(100%) invert(90%) sepia(18%) saturate(500%) hue-rotate(345deg) brightness(1.02) !important}
+
+  /* Logo colour picker swatches */
+  .logo-swatches{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+  .logo-sw{width:36px;height:36px;border-radius:8px;border:2px solid transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.04em;transition:border-color .15s,transform .1s}
+  .logo-sw:hover{transform:scale(1.08)}
+  .logo-sw.on{border-color:var(--terracotta)!important;box-shadow:0 0 0 2px rgba(199,90,60,.25)}
+  .logo-sw.sw-auto{background:#F4EADB;border-color:#D8CBB2;color:#7A6F5D}
+  .logo-sw.sw-white{background:#fff;border-color:#D8CBB2}
+  .logo-sw.sw-black{background:#1E1912;border-color:#1E1912}
+  .logo-sw.sw-terra{background:#C75A3C;border-color:#C75A3C}
+  .logo-sw.sw-cream{background:#E8D9B8;border-color:#C9BC9C}
 </style>
 </head>
 <body>
@@ -386,6 +410,16 @@ Great local company and good times.</textarea>
   <h3>Template <span class="hint">6 variations</span></h3>
   <div class="tmpl-grid" id="tmplGrid"></div>
 
+  <h3>Logo color <span class="hint">always visible</span></h3>
+  <div class="logo-swatches" id="logoSwatches">
+    <div class="logo-sw sw-auto on"  data-lc="auto"  title="Auto (per template)">Auto</div>
+    <div class="logo-sw sw-white"    data-lc="white" title="Force white"></div>
+    <div class="logo-sw sw-black"    data-lc="black" title="Force black"></div>
+    <div class="logo-sw sw-terra"    data-lc="terra" title="Terracotta"></div>
+    <div class="logo-sw sw-cream"    data-lc="cream" title="Cream / sand"></div>
+  </div>
+  <div class="auto-note" style="margin-top:5px">Pick white or cream on dark photos; black on light ones.</div>
+
   <h3>Export</h3>
   <div class="export-row">
     <button class="btn btn-dark" id="dlOne">Download PNG</button>
@@ -431,17 +465,18 @@ const state = {
   about:'Ole 60 is a classic country music performance designed to bring out the best in traditional honky-tonk sounds and singalongs.',
   bullets:['High-energy country tunes perfect for dancing.','Authentic old-school bar atmosphere.','Great local company and good times.'],
   tip:'Grab a bite at the historic Westside Diner before the show.',
-  imageUrl:'', // data URL or remote URL
+  imageUrl:'', // data URL, blob URL, or proxied URL
   format:'square', // square | portrait | story | carousel
   template:'poster', // poster | ticket | mesa | editorial | marquee | polaroid
   slide:0, // carousel slide index
   drags:{}, // { "template|format|slide|dragId": {x,y,s} } — element offset + scale
   imgPans:{}, // { "template|format|slide|dragId:pan": {bx,by,bz} } — bg-position %, zoom %
   editMode:false,
+  logoColor:'auto', // auto | white | black | terra | cream
 };
 
-// Default sample image from abqunplugged (Ole 60 ticketmaster image)
-state.imageUrl = 'https://s1.ticketm.net/dam/a/91c/45d2e7c3-da25-4194-b07f-9fa4eaad991c_SOURCE';
+// Default sample — proxy through our server so html2canvas can capture it on export
+state.imageUrl = '/api/image-proxy?url=' + encodeURIComponent('https://s1.ticketm.net/dam/a/91c/45d2e7c3-da25-4194-b07f-9fa4eaad991c_SOURCE');
 
 const TEMPLATES = [
   {id:'poster',   name:'Poster',     sub:'Full-bleed dark'},
@@ -468,7 +503,7 @@ function renderCover(tmpl, s){
     case 'poster': return `
       <div class="post t-poster">
         <div class="img drag" data-drag="img" data-img-pan="1" style="background-image:url('${s.imageUrl}')"></div>
-        <div class="logo drag" data-drag="logo"><img src="/logo-white.svg" alt="ABQ Unplugged"></div>
+        <div class="logo drag" data-drag="logo"><img src="/logo-white.svg" class="logo-img" alt="ABQ Unplugged"></div>
         <div class="bar drag" data-drag="bar">
           <div class="cat"><span class="dot-sm"></span>${escHtml(s.category)}</div>
           <h1>${escHtml(s.title)}</h1>
@@ -481,7 +516,7 @@ function renderCover(tmpl, s){
     case 'ticket': return `
       <div class="post t-ticket">
         <div class="tophead drag" data-drag="tophead">
-          <div class="brandblock"><img src="/logo-black.svg" alt="ABQ Unplugged"></div>
+          <div class="brandblock"><img src="/logo-black.svg" class="logo-img" alt="ABQ Unplugged"></div>
           <div class="admit">Featured Event</div>
         </div>
         <div class="middle">
@@ -509,7 +544,7 @@ function renderCover(tmpl, s){
           <div class="when">${escHtml(s.date)} · ${escHtml(s.time)}</div>
           <div class="where">${escHtml(s.venue)} — ${escHtml(s.address)}</div>
           <div class="footer">
-            <div class="brand2"><img src="/logo-white.svg" alt="ABQ Unplugged"></div>
+            <div class="brand2"><img src="/logo-white.svg" class="logo-img" alt="ABQ Unplugged"></div>
             <div class="cta">More at abqunplugged.com</div>
           </div>
         </div>
@@ -517,7 +552,7 @@ function renderCover(tmpl, s){
     case 'editorial': return `
       <div class="post t-editorial">
         <div class="header drag" data-drag="header">
-          <div class="masthead"><img src="/logo-black.svg" alt="ABQ Unplugged"></div>
+          <div class="masthead"><img src="/logo-black.svg" class="logo-img" alt="ABQ Unplugged"></div>
           <div class="issue">${escHtml((s.date.split(',')[1]||s.date).trim())}</div>
         </div>
         <div class="rule"></div>
@@ -536,7 +571,7 @@ function renderCover(tmpl, s){
         ${starsHtml()}
         <div class="frame"></div>
         <div class="inner">
-          <div class="topline drag" data-drag="topline"><span>★ Happening in ABQ</span><span class="tm-logo"><img src="/logo-white.svg" alt="ABQ Unplugged"></span></div>
+          <div class="topline drag" data-drag="topline"><span>★ Happening in ABQ</span><span class="tm-logo"><img src="/logo-white.svg" class="logo-img" alt="ABQ Unplugged"></span></div>
           <div class="img-wrap drag" data-drag="imgwrap" data-img-pan="1" style="background-image:url('${s.imageUrl}')"></div>
           <div class="topline drag" data-drag="cat2" style="margin:0 0 .5em;color:#F4EADB;opacity:.6">${escHtml(s.category)}</div>
           <h1 class="drag" data-drag="title">${escHtml(s.title)}</h1>
@@ -560,7 +595,7 @@ function renderCover(tmpl, s){
           <div class="venue">${escHtml(s.venue)}<br>${escHtml(s.address)}</div>
         </div>
         <div class="tip drag" data-drag="tip"><span class="lbl">Local tip</span>${escHtml(s.tip)}</div>
-        <div class="brand3 drag" data-drag="brand3"><img src="/logo-black.svg" alt="ABQ Unplugged"><span class="site">abqunplugged.com</span></div>
+        <div class="brand3 drag" data-drag="brand3"><img src="/logo-black.svg" class="logo-img" alt="ABQ Unplugged"><span class="site">abqunplugged.com</span></div>
       </div>`;
   }
 }
@@ -588,7 +623,7 @@ function renderExpect(s){
       <h2 class="drag" data-drag="title">Bring a friend.</h2>
       <ul class="drag" data-drag="list">${bullets.map(b=>`<li>${escHtml(b)}</li>`).join('')}</ul>
       <div class="footline drag" data-drag="footline">
-        <div class="brand"><img src="/logo-white.svg" alt="ABQ Unplugged"></div>
+        <div class="brand"><img src="/logo-white.svg" class="logo-img" alt="ABQ Unplugged"></div>
         <div class="cta">Find your night → abqunplugged.com</div>
       </div>
     </div>`;
@@ -656,6 +691,10 @@ function render(){
   const safeOn = document.getElementById('safeChk')?.checked;
   if (safeOn) postEl.appendChild(buildSafeOverlay(state.format));
   postEl.classList.add('format-' + state.format);
+
+  // Apply logo color override (removes any previous before adding new)
+  ['logo-white','logo-black','logo-terra','logo-cream'].forEach(c=>postEl.classList.remove(c));
+  if (state.logoColor !== 'auto') postEl.classList.add('logo-' + state.logoColor);
 
   // Scale to fit stage: max 640 wide
   const maxW = 600;
@@ -937,6 +976,15 @@ function bindInputs(){
   document.getElementById('editToggle').addEventListener('click', ()=>setEditMode(!state.editMode));
   document.getElementById('resetPos').addEventListener('click', resetDragsCurrent);
 
+  // Logo color swatches
+  document.getElementById('logoSwatches').addEventListener('click', e=>{
+    const sw = e.target.closest('.logo-sw'); if(!sw) return;
+    document.querySelectorAll('#logoSwatches .logo-sw').forEach(x=>x.classList.remove('on'));
+    sw.classList.add('on');
+    state.logoColor = sw.dataset.lc;
+    render();
+  });
+
   // File drop
   const drop = document.getElementById('drop');
   const file = document.getElementById('file');
@@ -979,23 +1027,27 @@ async function fetchFromUrl(){
     const res = await fetch('/api/ig-data?url=' + encodeURIComponent(url));
     if (!res.ok) throw new Error('API ' + res.status);
     const data = await res.json();
-    Object.assign(state, data);
-    if (data.bullets && Array.isArray(data.bullets)) state.bullets = data.bullets;
-    // Reflect in form
+
+    // Pull out imageUrl separately — we DON'T want Object.assign to overwrite
+    // state.imageUrl with '' when the event has no photo (keep whatever's there).
+    const { imageUrl: rawImageUrl, bullets: newBullets, ...textFields } = data;
+    Object.assign(state, textFields);
+    if (Array.isArray(newBullets)) state.bullets = newBullets;
+
+    // Reflect text fields in form
     ['category','title','tagline','date','time','venue','address','about','tip'].forEach(k=>{
       const el = document.getElementById(k); if (el && data[k]!=null) el.value = data[k];
     });
-    if (data.bullets) document.getElementById('bullets').value = data.bullets.join('\n');
+    if (newBullets) document.getElementById('bullets').value = newBullets.join('\n');
 
-    // Proxy the event image through our server → convert to data URL so
-    // html2canvas can render it in the export without CORS errors.
-    if (data.imageUrl) {
-      toast('Loading image…');
-      state.imageUrl = await proxyToDataUrl(data.imageUrl);
+    // Route image through our proxy (same-origin) so html2canvas can capture
+    // it on export without CORS restrictions. Only update if API returned one.
+    if (rawImageUrl) {
+      state.imageUrl = '/api/image-proxy?url=' + encodeURIComponent(rawImageUrl);
       const prev = document.getElementById('dropPreview');
       const txt  = document.getElementById('dropText');
       if (prev){ prev.src = state.imageUrl; prev.style.display = 'block'; }
-      if (txt)  txt.textContent = 'Event image (auto-loaded)';
+      if (txt)  txt.textContent = 'Event image';
     }
 
     render();
@@ -1003,25 +1055,6 @@ async function fetchFromUrl(){
   } catch (e){
     console.error(e);
     toast('Couldn\'t auto-fill — paste the event URL from abqunplugged.com');
-  }
-}
-
-/** Fetch an external image through our image-proxy and return a data URL.
- *  Falls back to the original URL if the proxy fails. */
-async function proxyToDataUrl(imgUrl){
-  try{
-    const proxied = await fetch('/api/image-proxy?url=' + encodeURIComponent(imgUrl));
-    if (!proxied.ok) throw new Error('proxy ' + proxied.status);
-    const blob = await proxied.blob();
-    return await new Promise((resolve, reject)=>{
-      const reader = new FileReader();
-      reader.onload = e => resolve(e.target.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  } catch(e){
-    console.warn('Image proxy failed, using direct URL:', e);
-    return imgUrl;
   }
 }
 
