@@ -376,6 +376,7 @@ export default async function EventDetailPage({ params }: PageProps) {
             📸 Share to Instagram
           </p>
           <div className="flex flex-wrap gap-2">
+            {/* Quick static cards */}
             {[
               { href: `/events/${event.id}/ig`,  label: '1:1 Square',    desc: 'Feed' },
               { href: `/events/${event.id}/ig2`, label: '4:5 Portrait',  desc: 'Feed' },
@@ -390,6 +391,16 @@ export default async function EventDetailPage({ params }: PageProps) {
                 <span className="text-[10px] text-[#8a7a74]">{desc}</span>
               </Link>
             ))}
+            {/* Full IG Post Editor */}
+            <a
+              href={`/ig-editor.html?url=/events/${event.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex flex-col items-center px-4 py-2 rounded-lg border border-[#9a442d]/40 bg-[#9a442d]/5 text-center hover:border-[#9a442d] hover:bg-[#9a442d]/10 hover:shadow-sm transition-all"
+            >
+              <span className="text-xs font-semibold text-[#9a442d]">✦ IG Editor</span>
+              <span className="text-[10px] text-[#8a7a74]">6 templates</span>
+            </a>
           </div>
         </div>
 

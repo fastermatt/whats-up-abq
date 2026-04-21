@@ -1,0 +1,1107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ABQ Unplugged — IG Post Generator</title>
+<meta name="viewport" content="width=1280">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400;1,9..144,600&family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg==" crossorigin="anonymous"></script>
+<style>
+  :root{
+    /* Desert southwest palette, pulled to feel cohesive w/ abqunplugged */
+    --terracotta:#C75A3C;   /* primary accent */
+    --sunset:#E8833A;       /* warm orange */
+    --turquoise:#2F8A8A;    /* Rio Grande teal */
+    --sandstone:#E8D9B8;    /* cream */
+    --sandstone-2:#F4EADB;  /* paper */
+    --dusty-rose:#C98B8B;
+    --mesa:#6B3D2A;         /* deep brown */
+    --ink:#1E1912;          /* near-black */
+    --sky:#D8C7A4;          /* muted gold */
+    --night:#1A2436;        /* deep night */
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:#F6F2EA;color:var(--ink);font-family:'Inter',system-ui,sans-serif}
+  body{display:grid;grid-template-columns:380px 1fr;min-height:100vh}
+
+  /* ========= CONTROL PANEL ========= */
+  .panel{background:#FBF8F1;border-right:1px solid #E6DFD0;padding:22px 22px 120px;overflow-y:auto;max-height:100vh;position:sticky;top:0}
+  .brand{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
+  .brand .mark{font-family:'Fraunces',serif;font-size:26px;font-weight:800;letter-spacing:-1px;color:var(--terracotta)}
+  .brand .mark em{font-style:italic;font-weight:400;color:var(--ink)}
+  .tag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#8A7D6A;margin-bottom:18px}
+
+  h3{font-family:'Fraunces',serif;font-weight:600;font-size:13px;letter-spacing:.02em;margin:22px 0 8px;color:var(--mesa);text-transform:uppercase;font-feature-settings:"smcp";display:flex;justify-content:space-between;align-items:center}
+  h3 .hint{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;color:#B0A28A;text-transform:none}
+  label{display:block;font-size:11px;color:#7A6F5D;margin:10px 0 4px;font-weight:500;letter-spacing:.02em;text-transform:uppercase}
+  input[type=text], input[type=url], textarea, select{
+    width:100%;padding:9px 10px;border:1px solid #E0D6C2;background:#fff;border-radius:6px;
+    font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);outline:none;transition:border .15s
+  }
+  input:focus,textarea:focus,select:focus{border-color:var(--terracotta)}
+  textarea{resize:vertical;min-height:72px;font-family:'Inter',sans-serif;line-height:1.45}
+
+  .url-row{display:flex;gap:6px}
+  .url-row input{flex:1}
+  .btn{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;border:none;cursor:pointer;border-radius:6px;padding:9px 14px;transition:transform .1s,background .15s}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:var(--terracotta);color:#fff}
+  .btn-primary:hover{background:#B24E31}
+  .btn-ghost{background:transparent;color:var(--mesa);border:1px solid #D8CBB2}
+  .btn-ghost:hover{background:#F1E7D2}
+  .btn-dark{background:var(--ink);color:var(--sandstone-2)}
+  .btn-dark:hover{background:#332b20}
+
+  .chips{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:6px}
+  .chip{font-family:'DM Mono',monospace;font-size:10px;padding:9px 6px;border:1px solid #E0D6C2;background:#fff;border-radius:5px;text-align:center;cursor:pointer;letter-spacing:.04em;color:#7A6F5D;text-transform:uppercase;user-select:none}
+  .chip.on{background:var(--ink);color:var(--sandstone-2);border-color:var(--ink)}
+
+  .tmpl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}
+  .tmpl{aspect-ratio:1;border:1.5px solid #E0D6C2;border-radius:6px;cursor:pointer;position:relative;overflow:hidden;background:#fff}
+  .tmpl.on{border-color:var(--terracotta);box-shadow:0 0 0 2px rgba(199,90,60,.18)}
+  .tmpl .mini{position:absolute;inset:0}
+  .tmpl .name{position:absolute;left:5px;bottom:4px;font-family:'DM Mono',monospace;font-size:9px;background:rgba(0,0,0,.6);color:#fff;padding:1px 5px;border-radius:3px;letter-spacing:.04em}
+
+  .file-drop{border:1.5px dashed #D8CBB2;border-radius:8px;padding:14px 10px;text-align:center;cursor:pointer;background:#fff;transition:border-color .15s,background .15s}
+  .file-drop:hover{border-color:var(--terracotta);background:#FFFBF4}
+  .file-drop.has{border-style:solid;border-color:#C9BC9C}
+  .file-drop .icon{font-family:'DM Mono',monospace;font-size:10px;color:#9C8F7A;letter-spacing:.12em}
+  .file-drop img{max-width:100%;max-height:100px;border-radius:4px;margin-top:4px}
+
+  .export-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+  .export-row .btn{padding:11px 8px}
+  .post-btn{margin-top:6px;width:100%;padding:11px;background:linear-gradient(90deg,#B24E31,#E8833A);color:#fff;font-weight:700}
+  .auto-note{font-family:'DM Mono',monospace;font-size:9px;color:#B0A28A;margin-top:6px;line-height:1.45}
+
+  /* ========= STAGE ========= */
+  .stage{padding:40px 40px 80px;display:flex;flex-direction:column;align-items:center;gap:16px}
+  .stage-header{display:flex;justify-content:space-between;width:100%;max-width:900px;align-items:center}
+  .stage-title{font-family:'Fraunces',serif;font-size:20px;font-weight:600;color:var(--mesa)}
+  .stage-meta{font-family:'DM Mono',monospace;font-size:11px;color:#9C8F7A;letter-spacing:.1em}
+  .carousel-nav{display:flex;gap:4px}
+  .dot{width:10px;height:10px;border-radius:50%;background:#D8CBB2;border:none;cursor:pointer;padding:0}
+  .dot.on{background:var(--terracotta);transform:scale(1.25)}
+
+  .canvas-wrap{display:flex;flex-direction:column;align-items:center;gap:18px}
+  .canvas-outer{background:#fff;box-shadow:0 30px 60px -20px rgba(40,30,15,.25),0 8px 20px -10px rgba(40,30,15,.15);border-radius:4px;overflow:hidden;position:relative}
+
+  /* Actual canvas always at 1080 × native; scaled via CSS transform on wrap */
+  .post{position:relative;background:#F4EADB;overflow:hidden;font-family:'Inter',sans-serif;color:var(--ink)}
+
+  /* ==================================================================
+     SIZING PHILOSOPHY
+     Base font-size = 1% of canvas width (1080 → 1em = 10.8px native).
+     On a phone IG feed at ~400px wide: 1em ≈ 4px. So body copy must be
+     ≥ 4em (scales to 16px+ on phone) and titles 10em+ to feel big.
+     Every template below respects:
+       • Feed (1:1, 4:5): content lives inside 10% top / 14% bottom.
+       • Story (9:16):    content lives inside 15% top / 22% bottom.
+     Safe zones are applied via a .safe-pad wrapper where needed.
+     ================================================================== */
+
+  /* ---------- Template 1: POSTER — full-bleed image, bottom bar ---------- */
+  .t-poster{background:#1A1410}
+  .t-poster .img{position:absolute;inset:0;background-size:cover;background-position:center;filter:contrast(1.05) saturate(1.05)}
+  .t-poster .img::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom, transparent 25%, rgba(26,20,16,.6) 55%, rgba(26,20,16,.96) 100%)}
+  .t-poster .bar{position:absolute;left:8%;right:8%;bottom:16%;color:#fff}
+  .t-poster .cat{font-family:'DM Mono',monospace;font-size:3em;letter-spacing:.22em;text-transform:uppercase;color:var(--sandstone);margin-bottom:.6em;display:flex;align-items:center;gap:.6em}
+  .t-poster .cat .dot-sm{width:.45em;height:.45em;border-radius:50%;background:var(--terracotta)}
+  .t-poster h1{font-family:'Fraunces',serif;font-weight:800;font-size:13em;line-height:.9;letter-spacing:-.03em;margin:0 0 .3em;text-wrap:balance}
+  .t-poster .meta{display:flex;justify-content:space-between;align-items:flex-end;gap:2em;border-top:2px solid rgba(255,255,255,.35);padding-top:.9em;margin-top:.9em}
+  .t-poster .meta .when{font-family:'Fraunces',serif;font-style:italic;font-size:5em;line-height:1.05}
+  .t-poster .meta .where{font-family:'DM Mono',monospace;font-size:2.4em;letter-spacing:.08em;text-transform:uppercase;text-align:right;color:var(--sandstone);line-height:1.35}
+  .t-poster .logo{position:absolute;top:11%;left:8%;color:#fff}
+  .t-poster .logo img{height:10em;display:block}
+
+  /* ---------- Template 2: TICKET — cream paper, polaroid photo ---------- */
+  .t-ticket{background:var(--sandstone-2);padding:12% 8% 18%}
+  .t-ticket::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle, rgba(107,61,42,.07) 1px, transparent 1.2px);background-size:14px 14px;opacity:.9;pointer-events:none}
+  .t-ticket .tophead{display:flex;justify-content:space-between;align-items:center;position:relative}
+  .t-ticket .brandblock img{height:13em;display:block}
+  .t-ticket .admit{font-family:'DM Mono',monospace;font-size:2.4em;letter-spacing:.2em;text-transform:uppercase;color:var(--mesa);border:2px solid var(--mesa);padding:.4em 1em;border-radius:999px}
+  .t-ticket .middle{display:grid;grid-template-columns:1fr 1.05fr;gap:5%;margin-top:6%;align-items:start;position:relative}
+  .t-ticket .photo{background:#fff;padding:3% 3% 10% 3%;transform:rotate(-2.5deg);box-shadow:0 12px 28px -10px rgba(26,20,16,.25);position:relative}
+  .t-ticket .photo .ph{aspect-ratio:4/5;background-size:cover;background-position:center;background-color:#d4c7a9}
+  .t-ticket .photo .caption{font-family:'DM Mono',monospace;font-size:2em;letter-spacing:.1em;color:var(--mesa);text-align:center;margin-top:.8em;text-transform:uppercase}
+  .t-ticket .details .cat{font-family:'DM Mono',monospace;font-size:2.6em;letter-spacing:.2em;text-transform:uppercase;color:var(--terracotta);margin-bottom:.6em}
+  .t-ticket .details h1{font-family:'Fraunces',serif;font-weight:800;font-size:9.5em;line-height:.92;letter-spacing:-.03em;color:var(--ink);margin:0 0 .35em;text-wrap:balance}
+  .t-ticket .details .date{font-family:'Fraunces',serif;font-style:italic;font-weight:400;font-size:5em;color:var(--mesa);line-height:1.05;margin-bottom:.15em}
+  .t-ticket .details .time{font-family:'Inter',sans-serif;font-weight:600;font-size:3.4em;color:var(--ink);margin-bottom:.55em}
+  .t-ticket .details .venue{font-family:'DM Mono',monospace;font-size:2.2em;letter-spacing:.06em;line-height:1.45;color:var(--mesa);padding-top:.6em;border-top:2px dashed #B89F7A;text-transform:uppercase}
+  .t-ticket .footstrip{position:absolute;left:0;right:0;bottom:16%;padding:1.2em 8%;display:flex;justify-content:space-between;align-items:center;border-top:2px dashed #B89F7A;font-family:'DM Mono',monospace;font-size:2.2em;color:var(--mesa);letter-spacing:.1em;text-transform:uppercase}
+  .t-ticket .footstrip .perf{flex:1;text-align:center}
+  .t-ticket .perf b{color:var(--terracotta)}
+
+  /* ---------- Template 3: MESA — terracotta block, bebas title ---------- */
+  .t-mesa{background:var(--terracotta)}
+  .t-mesa .img{position:absolute;top:0;left:0;right:0;height:50%;background-size:cover;background-position:center}
+  .t-mesa .img::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom, rgba(199,90,60,0) 55%, rgba(199,90,60,1) 100%)}
+  .t-mesa .content{position:absolute;bottom:15%;left:8%;right:8%;color:#FBF4E4}
+  .t-mesa .cat{display:inline-block;font-family:'DM Mono',monospace;font-size:2.4em;letter-spacing:.22em;text-transform:uppercase;background:#FBF4E4;color:var(--terracotta);padding:.45em 1em;border-radius:999px;margin-bottom:.6em}
+  .t-mesa h1{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:18em;line-height:.85;letter-spacing:.01em;margin:0 0 .18em;text-transform:uppercase;color:#FBF4E4;text-wrap:balance}
+  .t-mesa .when{font-family:'Fraunces',serif;font-weight:600;font-size:5em;line-height:1.05;margin-bottom:.15em;letter-spacing:-.02em}
+  .t-mesa .where{font-family:'DM Mono',monospace;font-size:2.4em;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.7em;opacity:.92;line-height:1.35}
+  .t-mesa .footer{display:flex;justify-content:space-between;align-items:center;padding-top:.8em;border-top:2px solid rgba(251,244,228,.35)}
+  .t-mesa .footer .brand2 img{height:10em;display:block}
+  .t-mesa .footer .cta{font-family:'DM Mono',monospace;font-size:2.2em;letter-spacing:.12em;text-transform:uppercase}
+
+  /* ---------- Template 4: EDITORIAL — magazine, serif, turquoise ---------- */
+  .t-editorial{background:#FBF8F1}
+  .t-editorial .header{padding:11% 8% 0;display:flex;justify-content:space-between;align-items:center}
+  .t-editorial .masthead img{height:10em;display:block}
+  .t-editorial .issue{font-family:'DM Mono',monospace;font-size:2.2em;letter-spacing:.2em;text-transform:uppercase;color:var(--turquoise)}
+  .t-editorial .rule{height:3px;background:var(--night);margin:3% 8% 0}
+  .t-editorial .kicker{padding:3% 8% 0;display:flex;justify-content:space-between;align-items:baseline;font-family:'DM Mono',monospace;font-size:2.4em;letter-spacing:.18em;text-transform:uppercase;color:var(--turquoise)}
+  .t-editorial h1{padding:0 8%;font-family:'Fraunces',serif;font-weight:800;font-size:14em;line-height:.88;letter-spacing:-.035em;color:var(--night);margin:.15em 0 0;text-wrap:balance}
+  .t-editorial .dek{padding:2% 8% 0;font-family:'Fraunces',serif;font-style:italic;font-weight:400;font-size:4.4em;line-height:1.2;color:var(--mesa);max-width:88%}
+  .t-editorial .img{margin:3% 8% 0;aspect-ratio:3/2;background-size:cover;background-position:center;background-color:#d4c7a9;position:relative}
+  .t-editorial .foot{position:absolute;left:8%;right:8%;bottom:16%;display:flex;justify-content:space-between;align-items:flex-end;padding-top:1em;border-top:2px solid #D1C6AD;font-family:'DM Mono',monospace;font-size:2.2em;letter-spacing:.08em;text-transform:uppercase;color:var(--night);line-height:1.5}
+  .t-editorial .foot .col b{color:var(--terracotta);display:block;margin-bottom:.2em}
+  .t-editorial .foot .page{font-family:'Fraunces',serif;font-style:italic;font-size:2em;color:var(--turquoise);text-transform:none;letter-spacing:0}
+
+  /* ---------- Template 5: MARQUEE — night sky, frame ---------- */
+  .t-marquee{background:var(--night);color:#F4EADB}
+  .t-marquee::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 20% 30%, rgba(232,131,58,.2) 0%, transparent 40%), radial-gradient(circle at 80% 70%, rgba(47,138,138,.2) 0%, transparent 45%);pointer-events:none}
+  .t-marquee .stars{position:absolute;inset:0;pointer-events:none;opacity:.7}
+  .t-marquee .stars span{position:absolute;width:3px;height:3px;background:#F4EADB;border-radius:50%}
+  .t-marquee .frame{position:absolute;top:11%;left:7%;right:7%;bottom:16%;border:3px solid rgba(244,234,219,.35);border-radius:2px}
+  .t-marquee .inner{position:absolute;top:11%;left:7%;right:7%;bottom:16%;padding:4%;display:flex;flex-direction:column}
+  .t-marquee .topline{display:flex;justify-content:space-between;align-items:center;font-family:'DM Mono',monospace;font-size:2em;letter-spacing:.18em;text-transform:uppercase;color:var(--sunset);margin-bottom:.9em}
+  .t-marquee .topline img{height:6em;display:block}
+  .t-marquee .topline .tm-logo{display:flex;align-items:center}
+  .t-marquee .img-wrap{flex:1;background-size:cover;background-position:center;background-color:#333;border-radius:2px;position:relative;margin-bottom:4%;min-height:200px}
+  .t-marquee .img-wrap::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(26,36,54,0) 55%,rgba(26,36,54,.9) 100%)}
+  .t-marquee h1{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:14em;line-height:.88;letter-spacing:.01em;color:var(--sunset);margin:.1em 0 .1em;text-transform:uppercase;text-wrap:balance}
+  .t-marquee .tagline{font-family:'Fraunces',serif;font-style:italic;font-size:3.8em;color:#F4EADB;opacity:.92;margin-bottom:.5em;line-height:1.15}
+  .t-marquee .meta{display:grid;grid-template-columns:1fr 1fr;gap:1em;padding-top:.8em;border-top:2px solid rgba(244,234,219,.3);font-family:'DM Mono',monospace;letter-spacing:.06em;text-transform:uppercase}
+  .t-marquee .meta .lbl{opacity:.6;font-size:1.6em;margin-bottom:.25em;letter-spacing:.15em}
+  .t-marquee .meta .v{color:var(--sunset);font-size:2.2em;font-weight:500;line-height:1.3}
+
+  /* ---------- Template 6: POLAROID — scrapbook ---------- */
+  .t-polaroid{background:linear-gradient(135deg,#F4EADB 0%,#EADFC5 100%)}
+  .t-polaroid::before{content:"";position:absolute;inset:0;background-image:
+    radial-gradient(circle, rgba(107,61,42,.04) 1px, transparent 1.5px),
+    radial-gradient(circle, rgba(107,61,42,.025) 1px, transparent 1.5px);
+  background-size:14px 14px, 23px 23px;pointer-events:none}
+  .t-polaroid .hand{position:absolute;top:12%;left:8%;font-family:'Fraunces',serif;font-style:italic;font-size:4.5em;color:var(--terracotta);font-weight:600;letter-spacing:-.02em;transform:rotate(-3deg);line-height:1}
+  .t-polaroid .hand .squiggle{display:block;width:1.6em;height:.16em;background:var(--terracotta);border-radius:4px;margin-top:.25em;opacity:.85}
+  .t-polaroid .date-stamp{position:absolute;top:12%;right:8%;font-family:'DM Mono',monospace;font-size:2.4em;letter-spacing:.08em;color:var(--mesa);text-align:right;line-height:1.25;text-transform:uppercase;border:2.5px solid var(--mesa);padding:.5em .9em;transform:rotate(2deg)}
+  .t-polaroid .date-stamp b{font-family:'Fraunces',serif;font-weight:800;font-size:1.3em;display:block;color:var(--terracotta)}
+  .t-polaroid .pola{position:absolute;top:27%;left:8%;width:42%;background:#fff;padding:4% 4% 12%;box-shadow:0 18px 40px -12px rgba(26,20,16,.28);transform:rotate(-4deg)}
+  .t-polaroid .pola .ph{aspect-ratio:1;background-size:cover;background-position:center;background-color:#d4c7a9}
+  .t-polaroid .pola .cap{font-family:'Fraunces',serif;font-style:italic;font-size:2.4em;text-align:center;margin-top:.5em;color:var(--mesa);line-height:1.1}
+  .t-polaroid .tape{position:absolute;top:24%;left:34%;width:10%;height:3%;background:rgba(232,131,58,.4);transform:rotate(-30deg);mix-blend-mode:multiply}
+  .t-polaroid .info{position:absolute;right:8%;top:31%;width:42%;text-align:right}
+  .t-polaroid .info .cat{font-family:'DM Mono',monospace;font-size:2.2em;letter-spacing:.18em;text-transform:uppercase;color:var(--turquoise);margin-bottom:.6em}
+  .t-polaroid .info h1{font-family:'Fraunces',serif;font-weight:800;font-size:8em;line-height:.92;letter-spacing:-.03em;color:var(--ink);margin:0 0 .25em;text-wrap:balance}
+  .t-polaroid .info .time{font-family:'Fraunces',serif;font-style:italic;font-size:3.6em;color:var(--mesa);line-height:1.05}
+  .t-polaroid .info .venue{font-family:'DM Mono',monospace;font-size:2em;letter-spacing:.06em;color:var(--mesa);line-height:1.45;margin-top:.5em;text-transform:uppercase}
+  .t-polaroid .tip{position:absolute;left:8%;bottom:17%;width:52%;font-family:'Fraunces',serif;font-style:italic;font-size:2.8em;line-height:1.3;color:var(--mesa);border-left:5px solid var(--terracotta);padding-left:.8em}
+  .t-polaroid .tip .lbl{display:block;font-family:'DM Mono',monospace;font-style:normal;font-size:.55em;letter-spacing:.2em;text-transform:uppercase;color:var(--terracotta);margin-bottom:.35em}
+  .t-polaroid .brand3{position:absolute;right:8%;bottom:17%;text-align:right}
+  .t-polaroid .brand3 img{height:8em;display:block;margin-left:auto}
+  .t-polaroid .brand3 .site{display:block;font-family:'DM Mono',monospace;font-size:1.5em;letter-spacing:.12em;margin-top:.4em;color:var(--mesa);text-transform:uppercase}
+
+  /* ---------- Carousel slide 2: DETAILS ---------- */
+  .c-details{background:var(--sandstone-2);padding:14% 9%;display:flex;flex-direction:column;justify-content:center}
+  .c-details::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle, rgba(107,61,42,.06) 1px, transparent 1.2px);background-size:14px 14px;pointer-events:none}
+  .c-details .num{font-family:'Fraunces',serif;font-style:italic;font-size:3.4em;color:var(--terracotta);margin-bottom:.1em;position:relative}
+  .c-details h2{font-family:'Fraunces',serif;font-weight:800;font-size:8em;line-height:.92;color:var(--ink);margin:0 0 .5em;letter-spacing:-.03em;text-wrap:balance;position:relative}
+  .c-details .rows{position:relative}
+  .c-details .row{display:flex;gap:1.2em;padding:1.1em 0;border-top:2px solid #D1C6AD}
+  .c-details .row:last-child{border-bottom:2px solid #D1C6AD}
+  .c-details .row .k{flex:0 0 28%;font-family:'DM Mono',monospace;font-size:2.2em;letter-spacing:.15em;text-transform:uppercase;color:var(--mesa);padding-top:.15em}
+  .c-details .row .v{flex:1;font-family:'Fraunces',serif;font-size:3.4em;line-height:1.15;color:var(--ink)}
+  .c-details .row .v em{font-style:italic;color:var(--terracotta)}
+  .c-details .row .v .sub{font-family:'DM Mono',monospace;font-size:.55em;letter-spacing:.08em;color:var(--mesa);display:block;margin-top:.2em;text-transform:uppercase}
+  .c-details .swipe{margin-top:1.5em;display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:2em;letter-spacing:.14em;text-transform:uppercase;color:var(--mesa);position:relative}
+
+  /* ---------- Carousel slide 3: WHAT TO EXPECT ---------- */
+  .c-expect{background:var(--terracotta);color:#FBF4E4;padding:14% 9%;display:flex;flex-direction:column;justify-content:center}
+  .c-expect .eyebrow{font-family:'DM Mono',monospace;font-size:2.4em;letter-spacing:.22em;text-transform:uppercase;color:#FBF4E4;opacity:.9;margin-bottom:.4em}
+  .c-expect h2{font-family:'Fraunces',serif;font-weight:800;font-size:8.5em;line-height:.92;margin:0 0 .5em;letter-spacing:-.03em;text-wrap:balance}
+  .c-expect ul{list-style:none;padding:0;margin:0}
+  .c-expect li{font-family:'Fraunces',serif;font-size:4em;line-height:1.2;padding:.55em 0 .55em 1.1em;border-top:2px solid rgba(251,244,228,.35);position:relative;text-wrap:balance}
+  .c-expect li:last-child{border-bottom:2px solid rgba(251,244,228,.35)}
+  .c-expect li::before{content:"→";position:absolute;left:0;font-family:'Fraunces',serif;font-weight:800;color:#FBF4E4}
+  .c-expect .footline{margin-top:1.2em;display:flex;justify-content:space-between;align-items:flex-end;padding-top:1em;border-top:3px solid rgba(251,244,228,.35)}
+  .c-expect .footline .brand img{height:10em;display:block}
+  .c-expect .footline .cta{font-family:'DM Mono',monospace;font-size:2.2em;letter-spacing:.14em;text-transform:uppercase}
+
+  /* ---------- STORY (9:16) — stricter safe zones: 15% top / 22% bottom ---------- */
+  .format-story .t-poster .bar{bottom:23%}
+  .format-story .t-poster .logo{top:16%}
+  .format-story .t-poster h1{font-size:15em}
+  .format-story .t-mesa .content{bottom:23%}
+  .format-story .t-mesa h1{font-size:20em}
+  .format-story .t-mesa .img{height:55%}
+  .format-story .t-editorial .header{padding-top:16%}
+  .format-story .t-editorial h1{font-size:16em}
+  .format-story .t-editorial .foot{bottom:23%}
+  .format-story .t-ticket{padding:17% 8% 25%}
+  .format-story .t-ticket .footstrip{bottom:23%}
+  .format-story .t-marquee .frame{top:16%;bottom:23%}
+  .format-story .t-marquee .inner{top:16%;bottom:23%}
+  .format-story .t-marquee h1{font-size:17em}
+  .format-story .t-polaroid .hand{top:18%}
+  .format-story .t-polaroid .date-stamp{top:18%}
+  .format-story .t-polaroid .pola{top:33%;width:48%}
+  .format-story .t-polaroid .info{top:37%;width:44%}
+  .format-story .t-polaroid .info h1{font-size:9em}
+  .format-story .t-polaroid .tip{bottom:25%}
+  .format-story .t-polaroid .brand3{bottom:25%}
+  .format-story .c-details{padding:19% 9% 26%}
+  .format-story .c-expect{padding:19% 9% 26%}
+
+  /* ---------- SQUARE (1080×1080) tweaks ---------- */
+  .format-square .t-editorial h1{font-size:11em}
+  .format-square .t-editorial .dek{font-size:3.6em}
+  .format-square .t-polaroid .info h1{font-size:6.5em}
+  .format-square .t-polaroid .pola{top:30%}
+  .format-square .t-polaroid .info{top:33%}
+  .format-square .t-mesa h1{font-size:15em}
+  .format-square .t-marquee h1{font-size:11em}
+  .format-square .t-ticket .details h1{font-size:7.5em}
+
+  /* Portrait density adjustments handled by vw-like units already */
+
+  /* Mini preview thumbnails */
+  .thumb{width:100%;height:100%;position:relative;font-size:.7px;overflow:hidden}
+
+  /* Info bar */
+  .help{position:fixed;right:24px;bottom:24px;background:var(--ink);color:var(--sandstone-2);padding:12px 16px;border-radius:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.1em;box-shadow:0 10px 30px -10px rgba(0,0,0,.3);max-width:320px;line-height:1.6;opacity:.95}
+  .help b{color:var(--sunset)}
+
+  .toast{position:fixed;left:50%;top:24px;transform:translateX(-50%);background:var(--ink);color:#F4EADB;padding:10px 18px;border-radius:8px;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.1em;opacity:0;transition:opacity .2s;pointer-events:none;z-index:999}
+  .toast.show{opacity:1}
+
+  .divider{height:1px;background:#E6DFD0;margin:16px 0 4px}
+  .brand-pill{display:inline-flex;align-items:center;gap:6px;background:var(--terracotta);color:#fff;padding:3px 8px;border-radius:999px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase}
+
+  /* IG safe-zone overlay (toggle) */
+  .safe-overlay{position:absolute;inset:0;pointer-events:none;z-index:10;display:none}
+  .safe-overlay.on{display:block}
+  .safe-overlay .zone{position:absolute;left:0;right:0;background:repeating-linear-gradient(45deg,rgba(199,90,60,.18) 0 8px,transparent 8px 16px);border:1.5px dashed rgba(199,90,60,.6)}
+  .safe-overlay .lbl{position:absolute;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;background:var(--terracotta);color:#fff;padding:2px 6px;border-radius:3px;text-transform:uppercase}
+  .safe-toggle{display:flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:10px;color:#7A6F5D;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;user-select:none;margin-top:6px}
+  .safe-toggle input{margin:0}
+
+  /* ---------- Draggable elements ---------- */
+  .post .drag{--dx:0px;--dy:0px;--ds:1;transition:outline-color .15s}
+  .post .drag:not(.dragging){transform:translate(var(--dx),var(--dy)) scale(var(--ds))}
+  .post .drag.dragging{transform:translate(var(--dx),var(--dy)) scale(var(--ds));cursor:grabbing !important}
+  /* Rotation variants — must beat the per-template transforms (same specificity, loaded later) */
+  .post .drag.rot-pola{transform:translate(var(--dx),var(--dy)) scale(var(--ds)) rotate(-4deg) !important}
+  .post .drag.rot-photo{transform:translate(var(--dx),var(--dy)) scale(var(--ds)) rotate(-2.5deg) !important}
+  .post .drag.rot-stamp{transform:translate(var(--dx),var(--dy)) scale(var(--ds)) rotate(2deg) !important}
+  .post .drag.rot-hand{transform:translate(var(--dx),var(--dy)) scale(var(--ds)) rotate(-3deg) !important}
+  .post .drag.rot-tape{transform:translate(var(--dx),var(--dy)) scale(var(--ds)) rotate(-30deg) !important}
+  /* Image pan: background position controlled via vars (percent) */
+  .post [data-img-pan]{--bx:50%;--by:50%;background-position:var(--bx) var(--by) !important;background-size:cover !important}
+  /* Resize handle */
+  .post .drag .resize-handle{position:absolute;right:-1.2em;bottom:-1.2em;width:2em;height:2em;background:var(--terracotta);border:.25em solid #fff;border-radius:50%;cursor:nwse-resize;display:none;z-index:20;box-shadow:0 .3em .8em rgba(0,0,0,.35);touch-action:none}
+  body.edit-mode .post .drag > .resize-handle{display:block}
+  /* Edit mode styling */
+  .edit-mode .post .drag{cursor:grab;outline:2px dashed transparent;outline-offset:4px}
+  .edit-mode .post .drag:hover{outline-color:rgba(199,90,60,.6)}
+  .edit-mode .post .drag.dragging{outline-color:var(--terracotta);outline-style:solid}
+  .edit-mode .post [data-img-pan]{cursor:move !important}
+  .edit-chip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;background:var(--terracotta);color:#fff;border-radius:8px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;user-select:none;border:none}
+  .edit-chip.off{background:#F0E6D4;color:var(--mesa)}
+  .edit-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .edit-row .btn-mini{padding:8px 12px;border:1px solid #D6CBB0;background:#fff;color:var(--ink);border-radius:8px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+  .edit-row .btn-mini:hover{background:#F4EADB}
+  .edit-hint{font-size:11px;color:#7A6F5D;margin-top:8px;line-height:1.45;font-family:'DM Mono',monospace}
+  .edit-hint b{color:var(--mesa)}
+  .edit-hint kbd{display:inline-block;padding:1px 5px;background:#F4EADB;border:1px solid #D6CBB0;border-radius:3px;font-size:10px;font-family:inherit}
+
+  @media (max-width:900px){body{grid-template-columns:1fr}.panel{position:relative;max-height:none}}
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <div class="brand"><img src="/logo-black.svg" alt="ABQ Unplugged" style="height:34px;display:block"></div>
+  <div class="tag" style="margin-top:8px">IG Post Generator <span class="brand-pill">v1</span></div>
+
+  <h3>Auto-fill <span class="hint">paste event url</span></h3>
+  <div class="url-row">
+    <input id="url" type="url" placeholder="https://abqunplugged.com/events/...">
+    <button class="btn btn-ghost" id="urlGo">Fetch</button>
+  </div>
+  <div class="auto-note">Paste any abqunplugged.com event page. The cover image, description, date, time, venue, expectations + tips all get pulled in.</div>
+
+  <div class="divider"></div>
+
+  <h3>Event</h3>
+  <label>Category</label>
+  <input id="category" type="text" value="Music · Country">
+  <label>Title</label>
+  <input id="title" type="text" value="Ole 60">
+  <label>Tagline / Subtitle</label>
+  <input id="tagline" type="text" value="Honky-tonk, line dances, singalongs.">
+  <label>Date</label>
+  <input id="date" type="text" value="Wed, April 22, 2026">
+  <label>Time</label>
+  <input id="time" type="text" value="8:15 PM">
+  <label>Venue</label>
+  <input id="venue" type="text" value="Revel Entertainment Center">
+  <label>Venue address</label>
+  <input id="address" type="text" value="4720 Alexander Blvd NE, North Valley">
+  <label>About (description)</label>
+  <textarea id="about">Ole 60 is a classic country music performance designed to bring out the best in traditional honky-tonk sounds and singalongs.</textarea>
+  <label>What to expect (one bullet per line)</label>
+  <textarea id="bullets">High-energy country tunes perfect for dancing.
+Authentic old-school bar atmosphere.
+Great local company and good times.</textarea>
+  <label>Local tip (short)</label>
+  <input id="tip" type="text" value="Grab a bite at the historic Westside Diner before the show.">
+
+  <h3>Event image <span class="hint">drop / click</span></h3>
+  <div class="file-drop" id="drop">
+    <div class="icon" id="dropText">▲ Click or drop image here</div>
+    <img id="dropPreview" style="display:none">
+    <input type="file" id="file" accept="image/*" style="display:none">
+  </div>
+
+  <h3>Format</h3>
+  <div class="chips" id="formatChips">
+    <div class="chip on" data-fmt="square">1:1<br>Feed</div>
+    <div class="chip" data-fmt="portrait">4:5<br>Portrait</div>
+    <div class="chip" data-fmt="story">9:16<br>Story</div>
+    <div class="chip" data-fmt="carousel">3×<br>Carousel</div>
+  </div>
+  <label class="safe-toggle"><input type="checkbox" id="safeChk"> Show IG safe-zone overlay</label>
+  <div class="edit-row">
+    <button class="edit-chip off" id="editToggle" type="button">✥ Edit elements: off</button>
+    <button class="btn-mini" id="resetPos" type="button" title="Reset this slide">Reset</button>
+  </div>
+  <div class="edit-hint" id="editHint" style="display:none">
+    <b>Drag</b> to move · <b>↘ handle</b> to resize · On photos, <b>drag the image</b> to pan inside its crop · <kbd>Alt</kbd>+drag a photo block to move it
+  </div>
+
+  <h3>Template <span class="hint">6 variations</span></h3>
+  <div class="tmpl-grid" id="tmplGrid"></div>
+
+  <h3>Export</h3>
+  <div class="export-row">
+    <button class="btn btn-dark" id="dlOne">Download PNG</button>
+    <button class="btn btn-dark" id="dlAll">Download ZIP</button>
+  </div>
+  <button class="btn post-btn" id="postIg">📸 Post to Instagram</button>
+  <div class="auto-note">The browser cannot log into Instagram directly. The Post button opens Meta's Creator Studio with your images ready to upload in one drag-and-drop.</div>
+</div>
+
+<div class="stage">
+  <div class="stage-header">
+    <div>
+      <div class="stage-title" id="stageTitle">Feed post · Poster</div>
+      <div class="stage-meta" id="stageMeta">1080 × 1080</div>
+    </div>
+    <div class="carousel-nav" id="carouselNav" style="display:none"></div>
+  </div>
+
+  <div class="canvas-wrap" id="canvasWrap">
+    <div class="canvas-outer" id="canvasOuter">
+      <!-- post rendered here -->
+    </div>
+  </div>
+</div>
+
+<div class="help" style="display:none">
+  <b>Tip</b><br>
+  Change any field on the left — the canvas updates live.<br>
+  For a carousel, 3 slides export together.
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== STATE ===================== */
+const state = {
+  category:'Music · Country',
+  title:'Ole 60',
+  tagline:'Honky-tonk, line dances, singalongs.',
+  date:'Wed, April 22, 2026',
+  time:'8:15 PM',
+  venue:'Revel Entertainment Center',
+  address:'4720 Alexander Blvd NE, North Valley',
+  about:'Ole 60 is a classic country music performance designed to bring out the best in traditional honky-tonk sounds and singalongs.',
+  bullets:['High-energy country tunes perfect for dancing.','Authentic old-school bar atmosphere.','Great local company and good times.'],
+  tip:'Grab a bite at the historic Westside Diner before the show.',
+  imageUrl:'', // data URL or remote URL
+  format:'square', // square | portrait | story | carousel
+  template:'poster', // poster | ticket | mesa | editorial | marquee | polaroid
+  slide:0, // carousel slide index
+  drags:{}, // { "template|format|slide|dragId": {x,y,s} } — element offset + scale
+  imgPans:{}, // { "template|format|slide|dragId:pan": {bx,by,bz} } — bg-position %, zoom %
+  editMode:false,
+};
+
+// Default sample image from abqunplugged (Ole 60 ticketmaster image)
+state.imageUrl = 'https://s1.ticketm.net/dam/a/91c/45d2e7c3-da25-4194-b07f-9fa4eaad991c_SOURCE';
+
+const TEMPLATES = [
+  {id:'poster',   name:'Poster',     sub:'Full-bleed dark'},
+  {id:'ticket',   name:'Ticket',     sub:'Paper + polaroid'},
+  {id:'mesa',     name:'Mesa',       sub:'Terracotta block'},
+  {id:'editorial',name:'Editorial',  sub:'Magazine, serif'},
+  {id:'marquee',  name:'Marquee',    sub:'Night-sky frame'},
+  {id:'polaroid', name:'Scrapbook',  sub:'Taped polaroid'},
+];
+
+const FORMATS = {
+  square:   {w:1080, h:1080, label:'1:1 Square'},
+  portrait: {w:1080, h:1350, label:'4:5 Portrait'},
+  story:    {w:1080, h:1920, label:'9:16 Story'},
+  carousel: {w:1080, h:1080, label:'Carousel (3 slides)'},
+};
+
+/* ===================== RENDER TEMPLATES ===================== */
+
+function escHtml(s){return String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+
+function renderCover(tmpl, s){
+  switch(tmpl){
+    case 'poster': return `
+      <div class="post t-poster">
+        <div class="img drag" data-drag="img" data-img-pan="1" style="background-image:url('${s.imageUrl}')"></div>
+        <div class="logo drag" data-drag="logo"><img src="/logo-white.svg" alt="ABQ Unplugged"></div>
+        <div class="bar drag" data-drag="bar">
+          <div class="cat"><span class="dot-sm"></span>${escHtml(s.category)}</div>
+          <h1>${escHtml(s.title)}</h1>
+          <div class="meta">
+            <div class="when">${escHtml(s.date)}<br>${escHtml(s.time)}</div>
+            <div class="where">${escHtml(s.venue)}<br>${escHtml(s.address)}</div>
+          </div>
+        </div>
+      </div>`;
+    case 'ticket': return `
+      <div class="post t-ticket">
+        <div class="tophead drag" data-drag="tophead">
+          <div class="brandblock"><img src="/logo-black.svg" alt="ABQ Unplugged"></div>
+          <div class="admit">Featured Event</div>
+        </div>
+        <div class="middle">
+          <div class="photo drag rot-photo" data-drag="photo"><div class="ph" data-img-pan="1" style="background-image:url('${s.imageUrl}')"></div><div class="caption">${escHtml(s.title)}</div></div>
+          <div class="details drag" data-drag="details">
+            <div class="cat">${escHtml(s.category)}</div>
+            <h1>${escHtml(s.title)}</h1>
+            <div class="date">${escHtml(s.date)}</div>
+            <div class="time">${escHtml(s.time)}</div>
+            <div class="venue">${escHtml(s.venue)}<br>${escHtml(s.address)}</div>
+          </div>
+        </div>
+        <div class="footstrip drag" data-drag="footstrip">
+          <span>abqunplugged.com</span>
+          <span class="perf">· <b>Every event in Albuquerque</b> ·</span>
+          <span>Find your night</span>
+        </div>
+      </div>`;
+    case 'mesa': return `
+      <div class="post t-mesa">
+        <div class="img drag" data-drag="img" data-img-pan="1" style="background-image:url('${s.imageUrl}')"></div>
+        <div class="content drag" data-drag="content">
+          <div class="cat">${escHtml(s.category)}</div>
+          <h1>${escHtml(s.title)}</h1>
+          <div class="when">${escHtml(s.date)} · ${escHtml(s.time)}</div>
+          <div class="where">${escHtml(s.venue)} — ${escHtml(s.address)}</div>
+          <div class="footer">
+            <div class="brand2"><img src="/logo-white.svg" alt="ABQ Unplugged"></div>
+            <div class="cta">More at abqunplugged.com</div>
+          </div>
+        </div>
+      </div>`;
+    case 'editorial': return `
+      <div class="post t-editorial">
+        <div class="header drag" data-drag="header">
+          <div class="masthead"><img src="/logo-black.svg" alt="ABQ Unplugged"></div>
+          <div class="issue">${escHtml((s.date.split(',')[1]||s.date).trim())}</div>
+        </div>
+        <div class="rule"></div>
+        <div class="kicker"><span>${escHtml(s.category)}</span><span>Tonight in ABQ</span></div>
+        <h1 class="drag" data-drag="title">${escHtml(s.title)}.</h1>
+        <div class="dek drag" data-drag="dek">${escHtml(s.tagline)}</div>
+        <div class="img drag" data-drag="img" data-img-pan="1" style="background-image:url('${s.imageUrl}')"></div>
+        <div class="foot drag" data-drag="foot">
+          <div class="col"><b>When</b>${escHtml(s.date)}<br>${escHtml(s.time)}</div>
+          <div class="col" style="text-align:center"><b>Where</b>${escHtml(s.venue)}<br>${escHtml(s.address)}</div>
+          <div class="page">№ 22</div>
+        </div>
+      </div>`;
+    case 'marquee': return `
+      <div class="post t-marquee">
+        ${starsHtml()}
+        <div class="frame"></div>
+        <div class="inner">
+          <div class="topline drag" data-drag="topline"><span>★ Happening in ABQ</span><span class="tm-logo"><img src="/logo-white.svg" alt="ABQ Unplugged"></span></div>
+          <div class="img-wrap drag" data-drag="imgwrap" data-img-pan="1" style="background-image:url('${s.imageUrl}')"></div>
+          <div class="topline drag" data-drag="cat2" style="margin:0 0 .5em;color:#F4EADB;opacity:.6">${escHtml(s.category)}</div>
+          <h1 class="drag" data-drag="title">${escHtml(s.title)}</h1>
+          <div class="tagline drag" data-drag="tagline">${escHtml(s.tagline)}</div>
+          <div class="meta drag" data-drag="meta">
+            <div><div class="lbl">WHEN</div><div class="v">${escHtml(s.date)}<br>${escHtml(s.time)}</div></div>
+            <div><div class="lbl">WHERE</div><div class="v">${escHtml(s.venue)}<br>${escHtml(s.address)}</div></div>
+          </div>
+        </div>
+      </div>`;
+    case 'polaroid': return `
+      <div class="post t-polaroid">
+        <div class="hand drag rot-hand" data-drag="hand">tonight —<span class="squiggle"></span></div>
+        <div class="date-stamp drag" data-drag="datestamp">${escHtml(s.time)}<b>${escHtml((s.date.split(',')[1]||s.date).trim())}</b></div>
+        <div class="pola drag rot-pola" data-drag="pola"><div class="ph" data-img-pan="1" style="background-image:url('${s.imageUrl}')"></div><div class="cap">${escHtml(s.title)}</div></div>
+        <div class="tape drag rot-tape" data-drag="tape"></div>
+        <div class="info drag" data-drag="info">
+          <div class="cat">${escHtml(s.category)}</div>
+          <h1>${escHtml(s.title)}</h1>
+          <div class="time">${escHtml(s.date)}</div>
+          <div class="venue">${escHtml(s.venue)}<br>${escHtml(s.address)}</div>
+        </div>
+        <div class="tip drag" data-drag="tip"><span class="lbl">Local tip</span>${escHtml(s.tip)}</div>
+        <div class="brand3 drag" data-drag="brand3"><img src="/logo-black.svg" alt="ABQ Unplugged"><span class="site">abqunplugged.com</span></div>
+      </div>`;
+  }
+}
+
+function renderDetails(s){
+  return `
+    <div class="post c-details">
+      <div class="num drag" data-drag="num">02 · Details</div>
+      <h2 class="drag" data-drag="title">${escHtml(s.title)}</h2>
+      <div class="rows drag" data-drag="rows">
+        <div class="row"><div class="k">When</div><div class="v"><em>${escHtml(s.date)}</em><span class="sub">${escHtml(s.time)}</span></div></div>
+        <div class="row"><div class="k">Where</div><div class="v">${escHtml(s.venue)}<span class="sub">${escHtml(s.address)}</span></div></div>
+        <div class="row"><div class="k">Category</div><div class="v">${escHtml(s.category)}</div></div>
+        <div class="row"><div class="k">About</div><div class="v" style="font-size:2.2em;line-height:1.3;font-style:italic">${escHtml(s.about)}</div></div>
+      </div>
+      <div class="swipe drag" data-drag="swipe"><span>Swipe →</span><span>Free · abqunplugged.com</span></div>
+    </div>`;
+}
+
+function renderExpect(s){
+  const bullets = (s.bullets||[]).slice(0,4);
+  return `
+    <div class="post c-expect">
+      <div class="eyebrow drag" data-drag="eyebrow">03 · What to expect</div>
+      <h2 class="drag" data-drag="title">Bring a friend.</h2>
+      <ul class="drag" data-drag="list">${bullets.map(b=>`<li>${escHtml(b)}</li>`).join('')}</ul>
+      <div class="footline drag" data-drag="footline">
+        <div class="brand"><img src="/logo-white.svg" alt="ABQ Unplugged"></div>
+        <div class="cta">Find your night → abqunplugged.com</div>
+      </div>
+    </div>`;
+}
+
+function randCode(){return Math.random().toString(36).slice(2,8).toUpperCase()}
+
+/* IG safe zones (proportion of canvas H).
+   Feed (1:1, 4:5): ~10% top for handle/menu, ~14% bottom for like/comment/caption.
+   Story (9:16):    ~15% top for profile sticker, ~22% bottom for name/reply box. */
+const SAFE = {
+  square:   {top:0.10, bot:0.14, side:0.05},
+  portrait: {top:0.08, bot:0.14, side:0.05},
+  story:    {top:0.15, bot:0.22, side:0.06},
+  carousel: {top:0.10, bot:0.14, side:0.05},
+};
+function buildSafeOverlay(fmt){
+  const s = SAFE[fmt];
+  const el = document.createElement('div');
+  el.className = 'safe-overlay on';
+  el.innerHTML = `
+    <div class="zone" style="top:0;height:${s.top*100}%"></div>
+    <div class="zone" style="bottom:0;height:${s.bot*100}%"></div>
+    <div class="zone" style="top:${s.top*100}%;bottom:${s.bot*100}%;left:0;right:auto;width:${s.side*100}%"></div>
+    <div class="zone" style="top:${s.top*100}%;bottom:${s.bot*100}%;right:0;left:auto;width:${s.side*100}%"></div>
+    <div class="lbl" style="top:.5em;left:.5em">IG UI · top</div>
+    <div class="lbl" style="bottom:.5em;left:.5em">IG UI · bottom</div>`;
+  return el;
+}
+function starsHtml(){
+  let s = '<div class="stars">';
+  const positions = [[12,15],[25,8],[40,22],[65,10],[85,18],[90,40],[8,55],[35,65],[55,50],[75,70],[20,85],[88,82],[5,30],[95,60],[50,3]];
+  for(const [x,y] of positions) s += `<span style="left:${x}%;top:${y}%"></span>`;
+  s += '</div>';
+  return s;
+}
+
+/* ===================== RENDER ENGINE ===================== */
+
+function render(){
+  const fmt = FORMATS[state.format];
+  const outer = document.getElementById('canvasOuter');
+  const wrap  = document.getElementById('canvasWrap');
+
+  // Decide slide content
+  let posts = [];
+  if (state.format === 'carousel'){
+    posts = [renderCover(state.template, state), renderDetails(state), renderExpect(state)];
+  } else {
+    posts = [renderCover(state.template, state)];
+  }
+
+  // Layout: only show current slide at full size; render all for zip export via hidden tree
+  const cur = state.slide % posts.length;
+  outer.innerHTML = posts[cur];
+
+  // Set native size on .post
+  const postEl = outer.querySelector('.post');
+  postEl.style.width = fmt.w + 'px';
+  postEl.style.height = fmt.h + 'px';
+  // Base font-size is 1.4% of width — so 1em ≈ 15px on a 1080 canvas, which scales
+  // to ~5.5px on a 400px phone preview. We then size type WELL above that baseline.
+  postEl.style.fontSize = (fmt.w / 100) + 'px';
+  // Attach IG safe-zone overlay
+  const safeOn = document.getElementById('safeChk')?.checked;
+  if (safeOn) postEl.appendChild(buildSafeOverlay(state.format));
+  postEl.classList.add('format-' + state.format);
+
+  // Scale to fit stage: max 640 wide
+  const maxW = 600;
+  const maxH = 720;
+  const scale = Math.min(maxW/fmt.w, maxH/fmt.h);
+  outer.style.width = (fmt.w*scale) + 'px';
+  outer.style.height = (fmt.h*scale) + 'px';
+  outer.style.position = 'relative';
+  postEl.style.transformOrigin = 'top left';
+  postEl.style.transform = `scale(${scale})`;
+  postEl.style.position = 'absolute';
+  postEl.style.top = 0; postEl.style.left = 0;
+
+  // Apply saved drag offsets + wire pointer handlers
+  applyDrags(postEl, scale);
+
+  // Header meta
+  const tmplName = TEMPLATES.find(t=>t.id===state.template).name;
+  const slideLabels = ['Cover', 'Details', 'What to expect'];
+  const slideLabel = state.format==='carousel' ? ` · slide ${cur+1}/3 (${slideLabels[cur]})` : '';
+  document.getElementById('stageTitle').textContent = `${fmt.label} · ${tmplName}${slideLabel}`;
+  document.getElementById('stageMeta').textContent = `${fmt.w} × ${fmt.h}`;
+
+  // Carousel nav
+  const nav = document.getElementById('carouselNav');
+  if (state.format==='carousel'){
+    nav.style.display='flex';
+    nav.innerHTML = posts.map((_,i)=>`<button class="dot ${i===cur?'on':''}" data-s="${i}"></button>`).join('');
+    nav.querySelectorAll('.dot').forEach(d=>d.onclick = ()=>{ state.slide = +d.dataset.s; render(); });
+  } else nav.style.display='none';
+
+  // Thumbnails
+  renderTmplThumbs();
+}
+
+function dragKey(dragId){
+  const slideId = state.format==='carousel' ? state.slide : 0;
+  return `${state.template}|${state.format}|${slideId}|${dragId}`;
+}
+
+function defaultDrag(){ return {x:0,y:0,s:1}; }
+function defaultImgPan(id){ return {bx:50,by:50}; }
+
+function applyDrags(postEl, scale){
+  // Element transform (move + resize)
+  postEl.querySelectorAll('[data-drag]').forEach(el=>{
+    const id = el.dataset.drag;
+    const key = dragKey(id);
+    const d = {...defaultDrag(), ...(state.drags[key]||{})};
+    el.style.setProperty('--dx', d.x+'px');
+    el.style.setProperty('--dy', d.y+'px');
+    el.style.setProperty('--ds', d.s);
+    el.classList.add('drag');
+
+    // Ensure a resize handle exists as child (hidden when edit mode off)
+    if (!el.querySelector(':scope > .resize-handle')){
+      const h = document.createElement('div');
+      h.className = 'resize-handle';
+      h.setAttribute('data-resize','1');
+      el.appendChild(h);
+    }
+    // Make sure the handle is positioned relative to THIS element, not an ancestor.
+    // If the element is statically positioned, promote it to relative so position:absolute
+    // children anchor here (only affects layout if no explicit top/left/right/bottom were set).
+    const cs = getComputedStyle(el);
+    if (cs.position === 'static'){
+      el.style.position = 'relative';
+    }
+
+    // Move: pointerdown anywhere that ISN'T the resize handle.
+    // For image-pan targets, the img-pan handler wraps this one (alt-key = move).
+    el.onpointerdown = (ev)=>{
+      if (!state.editMode) return;
+      if (ev.target.closest('[data-resize]')) return; // handled by resize wiring
+      // If a descendant is the pan target (e.g. .ph inside .photo), don't hijack —
+      // the descendant's own handler will manage it.
+      const panDescendant = ev.target.closest('[data-img-pan]');
+      if (panDescendant && panDescendant !== el && el.contains(panDescendant)) return;
+      ev.preventDefault(); ev.stopPropagation();
+      try{ el.setPointerCapture(ev.pointerId); }catch(_){}
+      el.classList.add('dragging');
+      const startX = ev.clientX, startY = ev.clientY;
+      const base = {...defaultDrag(), ...(state.drags[key]||{})};
+      const move = (e)=>{
+        const dx = (e.clientX - startX) / scale;
+        const dy = (e.clientY - startY) / scale;
+        const next = {...base, x: base.x+dx, y: base.y+dy};
+        state.drags[key] = next;
+        el.style.setProperty('--dx', next.x+'px');
+        el.style.setProperty('--dy', next.y+'px');
+      };
+      const up = ()=>{
+        el.classList.remove('dragging');
+        el.removeEventListener('pointermove', move);
+        el.removeEventListener('pointerup', up);
+        el.removeEventListener('pointercancel', up);
+        saveDrags();
+      };
+      el.addEventListener('pointermove', move);
+      el.addEventListener('pointerup', up);
+      el.addEventListener('pointercancel', up);
+    };
+
+    // Resize handle
+    const handle = el.querySelector(':scope > .resize-handle');
+    if (handle){
+      handle.onpointerdown = (ev)=>{
+        if (!state.editMode) return;
+        ev.preventDefault(); ev.stopPropagation();
+        try{ handle.setPointerCapture(ev.pointerId); }catch(_){}
+        el.classList.add('dragging');
+        const rect = el.getBoundingClientRect();
+        // Element center in screen coords (account for scale and translate already applied)
+        const cx = rect.left + rect.width/2;
+        const cy = rect.top + rect.height/2;
+        const startDist = Math.hypot(ev.clientX-cx, ev.clientY-cy) || 1;
+        const base = {...defaultDrag(), ...(state.drags[key]||{})};
+        const baseScale = base.s || 1;
+        const move = (e)=>{
+          const d = Math.hypot(e.clientX-cx, e.clientY-cy);
+          const ratio = d / startDist;
+          const ns = Math.max(0.2, Math.min(4, baseScale * ratio));
+          const next = {...base, s: ns};
+          state.drags[key] = next;
+          el.style.setProperty('--ds', ns);
+        };
+        const up = ()=>{
+          el.classList.remove('dragging');
+          handle.removeEventListener('pointermove', move);
+          handle.removeEventListener('pointerup', up);
+          handle.removeEventListener('pointercancel', up);
+          saveDrags();
+        };
+        handle.addEventListener('pointermove', move);
+        handle.addEventListener('pointerup', up);
+        handle.addEventListener('pointercancel', up);
+      };
+    }
+  });
+
+  // Image pan/zoom on background-image elements
+  postEl.querySelectorAll('[data-img-pan]').forEach(el=>{
+    // Use a stable id: prefer nearest [data-drag], else tag
+    const owner = el.closest('[data-drag]');
+    const panId = (owner?.dataset.drag || 'img') + ':pan';
+    const key = dragKey(panId);
+    const p = {...defaultImgPan(), ...(state.imgPans?.[key]||{})};
+    el.style.setProperty('--bx', p.bx+'%');
+    el.style.setProperty('--by', p.by+'%');
+
+    // If this same element is ALSO the draggable owner, chain: alt-drag = move, plain = pan.
+    const isDualRole = el.hasAttribute('data-drag');
+    const prevHandler = el.onpointerdown; // the move/resize handler set above
+
+    el.onpointerdown = (ev)=>{
+      if (!state.editMode) return;
+      if (ev.target.closest('[data-resize]')) return;
+      // Alt/Option key forces "move" on a dual-role image element
+      if (isDualRole && ev.altKey && prevHandler){
+        prevHandler(ev);
+        return;
+      }
+      ev.preventDefault(); ev.stopPropagation();
+      try{ el.setPointerCapture(ev.pointerId); }catch(_){}
+      const rect = el.getBoundingClientRect();
+      const startX = ev.clientX, startY = ev.clientY;
+      const base = {...defaultImgPan(), ...(state.imgPans?.[key]||{})};
+      const move = (e)=>{
+        const dxp = -(e.clientX - startX) / rect.width * 100;
+        const dyp = -(e.clientY - startY) / rect.height * 100;
+        const nbx = Math.max(-50, Math.min(150, base.bx + dxp));
+        const nby = Math.max(-50, Math.min(150, base.by + dyp));
+        state.imgPans = state.imgPans || {};
+        state.imgPans[key] = {bx: nbx, by: nby};
+        el.style.setProperty('--bx', nbx+'%');
+        el.style.setProperty('--by', nby+'%');
+      };
+      const up = ()=>{
+        el.removeEventListener('pointermove', move);
+        el.removeEventListener('pointerup', up);
+        el.removeEventListener('pointercancel', up);
+        saveDrags();
+      };
+      el.addEventListener('pointermove', move);
+      el.addEventListener('pointerup', up);
+      el.addEventListener('pointercancel', up);
+    };
+  });
+}
+
+function saveDrags(){
+  try{
+    localStorage.setItem('abq_ig_drags', JSON.stringify(state.drags));
+    localStorage.setItem('abq_ig_imgpans', JSON.stringify(state.imgPans||{}));
+  }catch(_){}
+}
+function loadDrags(){
+  try{
+    const v = localStorage.getItem('abq_ig_drags'); if (v) state.drags = JSON.parse(v)||{};
+    const p = localStorage.getItem('abq_ig_imgpans'); if (p) state.imgPans = JSON.parse(p)||{};
+  }catch(_){}
+}
+
+function resetDragsCurrent(){
+  const prefix = `${state.template}|${state.format}|${state.format==='carousel'?state.slide:0}|`;
+  for (const k of Object.keys(state.drags)){
+    if (k.startsWith(prefix)) delete state.drags[k];
+  }
+  if (state.imgPans){
+    for (const k of Object.keys(state.imgPans)){
+      if (k.startsWith(prefix)) delete state.imgPans[k];
+    }
+  }
+  saveDrags(); render();
+}
+
+function setEditMode(on){
+  state.editMode = !!on;
+  document.body.classList.toggle('edit-mode', state.editMode);
+  const btn = document.getElementById('editToggle');
+  const hint = document.getElementById('editHint');
+  if (btn){
+    btn.textContent = '✥ Edit elements: ' + (state.editMode?'on':'off');
+    btn.classList.toggle('off', !state.editMode);
+  }
+  if (hint) hint.style.display = state.editMode ? 'block' : 'none';
+}
+
+function renderTmplThumbs(){
+  const grid = document.getElementById('tmplGrid');
+  grid.innerHTML = TEMPLATES.map(t=>`
+    <div class="tmpl ${t.id===state.template?'on':''}" data-t="${t.id}" title="${t.name} — ${t.sub}">
+      <div class="mini" data-mini="${t.id}"></div>
+      <div class="name">${t.name}</div>
+    </div>
+  `).join('');
+  grid.querySelectorAll('.tmpl').forEach(el=>{
+    el.onclick = ()=>{ state.template = el.dataset.t; state.slide = 0; render(); };
+    const mini = el.querySelector('.mini');
+    mini.innerHTML = renderCover(el.dataset.t, state);
+    const post = mini.querySelector('.post');
+    if (post){
+      // Each thumb is a mini square preview
+      post.style.width='1080px'; post.style.height='1080px'; post.style.fontSize='10.8px';
+      post.classList.add('format-square');
+      const s = 110/1080; // approx
+      post.style.transformOrigin='top left';
+      post.style.transform = `scale(${s})`;
+      post.style.position='absolute'; post.style.top=0; post.style.left=0;
+    }
+  });
+}
+
+/* ===================== INPUTS ===================== */
+
+function bindInputs(){
+  const map = {
+    category:'category',title:'title',tagline:'tagline',date:'date',time:'time',
+    venue:'venue',address:'address',about:'about',tip:'tip'
+  };
+  Object.entries(map).forEach(([k,id])=>{
+    const el = document.getElementById(id);
+    el.addEventListener('input', ()=>{ state[k] = el.value; render(); });
+  });
+  document.getElementById('bullets').addEventListener('input', e=>{
+    state.bullets = e.target.value.split('\n').map(l=>l.replace(/^[\s•\-*]+/,'').trim()).filter(Boolean);
+    render();
+  });
+  document.getElementById('formatChips').addEventListener('click', e=>{
+    const c = e.target.closest('.chip'); if(!c) return;
+    document.querySelectorAll('#formatChips .chip').forEach(x=>x.classList.remove('on'));
+    c.classList.add('on');
+    state.format = c.dataset.fmt;
+    state.slide = 0;
+    render();
+  });
+
+  document.getElementById('safeChk').addEventListener('change', render);
+  document.getElementById('editToggle').addEventListener('click', ()=>setEditMode(!state.editMode));
+  document.getElementById('resetPos').addEventListener('click', resetDragsCurrent);
+
+  // File drop
+  const drop = document.getElementById('drop');
+  const file = document.getElementById('file');
+  drop.onclick = ()=> file.click();
+  file.onchange = e=> loadImage(e.target.files[0]);
+  drop.ondragover = e=>{ e.preventDefault(); drop.classList.add('has'); };
+  drop.ondragleave = ()=> drop.classList.remove('has');
+  drop.ondrop = e=>{ e.preventDefault(); drop.classList.remove('has'); loadImage(e.dataTransfer.files[0]); };
+
+  // URL fetch
+  document.getElementById('urlGo').onclick = fetchFromUrl;
+  document.getElementById('url').addEventListener('keydown', e=>{ if(e.key==='Enter') fetchFromUrl(); });
+
+  // Export
+  document.getElementById('dlOne').onclick = downloadCurrent;
+  document.getElementById('dlAll').onclick = downloadAll;
+  document.getElementById('postIg').onclick = postToIg;
+}
+
+function loadImage(f){
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = e=>{
+    state.imageUrl = e.target.result;
+    document.getElementById('dropPreview').src = e.target.result;
+    document.getElementById('dropPreview').style.display='block';
+    document.getElementById('dropText').textContent = f.name;
+    render();
+  };
+  r.readAsDataURL(f);
+}
+
+/* ===================== URL AUTOFILL ===================== */
+
+async function fetchFromUrl(){
+  const url = document.getElementById('url').value.trim();
+  if (!url) return;
+  toast('Fetching…');
+  try{
+    const res = await fetch('/api/ig-data?url=' + encodeURIComponent(url));
+    if (!res.ok) throw new Error('API ' + res.status);
+    const data = await res.json();
+    Object.assign(state, data);
+    if (data.bullets && Array.isArray(data.bullets)) state.bullets = data.bullets;
+    // Reflect in form
+    ['category','title','tagline','date','time','venue','address','about','tip'].forEach(k=>{
+      const el = document.getElementById(k); if (el && data[k]!=null) el.value = data[k];
+    });
+    if (data.bullets) document.getElementById('bullets').value = data.bullets.join('\n');
+    if (data.imageUrl) state.imageUrl = data.imageUrl;
+    render();
+    toast('Filled in! Drop a local image if the event photo doesn\'t load due to CORS.');
+  } catch (e){
+    console.error(e);
+    toast('Couldn\'t auto-fill — paste the event URL from abqunplugged.com');
+  }
+}
+
+/* ===================== EXPORT ===================== */
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+// Build a full-size standalone DOM tree for capture, off-screen
+function buildOffscreen(postHtml, w, h, fmtClass){
+  const node = document.createElement('div');
+  node.style.cssText = `position:fixed;left:-99999px;top:0;width:${w}px;height:${h}px;overflow:hidden;`;
+  node.innerHTML = postHtml;
+  const post = node.querySelector('.post');
+  post.style.width = w+'px'; post.style.height = h+'px';
+  post.style.fontSize = (w/100)+'px';
+  post.classList.add('format-'+fmtClass);
+  document.body.appendChild(node);
+  return node;
+}
+
+async function snapshot(postHtml, w, h, fmtClass){
+  const node = buildOffscreen(postHtml, w, h, fmtClass);
+  try{
+    const canvas = await html2canvas(node.firstElementChild, {
+      width: w, height: h, scale: 1, backgroundColor:null, useCORS:true, allowTaint:true, logging:false
+    });
+    return await new Promise(r=>canvas.toBlob(r,'image/png'));
+  } finally {
+    node.remove();
+  }
+}
+
+async function downloadCurrent(){
+  toast('Rendering…');
+  const fmt = FORMATS[state.format];
+  let posts = state.format==='carousel'
+    ? [renderCover(state.template, state), renderDetails(state), renderExpect(state)]
+    : [renderCover(state.template, state)];
+  const idx = state.format==='carousel' ? state.slide : 0;
+  try {
+    const blob = await snapshot(posts[idx], fmt.w, fmt.h, state.format);
+    triggerDownload(blob, filenameFor(idx));
+    toast('Saved.');
+  } catch(e){ console.error(e); toast('Export failed. Check image CORS.'); }
+}
+
+async function downloadAll(){
+  toast('Rendering all…');
+  const fmt = FORMATS[state.format];
+  const posts = state.format==='carousel'
+    ? [renderCover(state.template, state), renderDetails(state), renderExpect(state)]
+    : [renderCover(state.template, state)];
+
+  try{
+    const zip = new JSZip();
+    for (let i=0;i<posts.length;i++){
+      const blob = await snapshot(posts[i], fmt.w, fmt.h, state.format);
+      zip.file(filenameFor(i), blob);
+    }
+    const z = await zip.generateAsync({type:'blob'});
+    triggerDownload(z, slugify(state.title)+'_'+state.format+'_'+state.template+'.zip');
+    toast('ZIP saved.');
+  } catch(e){ console.error(e); toast('Export failed. Check image CORS.'); }
+}
+
+function slugify(s){return String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'event'}
+
+function filenameFor(i){
+  const slide = state.format==='carousel' ? `_slide${i+1}` : '';
+  return `${slugify(state.title)}_${state.format}_${state.template}${slide}.png`;
+}
+
+function triggerDownload(blob, filename){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+}
+
+async function postToIg(){
+  toast('Preparing images + opening Instagram…');
+  try{
+    await downloadAll();
+    setTimeout(()=>{
+      window.open('https://business.facebook.com/latest/home?asset_id=&nav_ref=creator_studio', '_blank');
+      toast('Images saved. Drag into Instagram → New post.');
+    }, 600);
+  } catch(e){ toast('Export failed.'); }
+}
+
+/* ===================== INIT ===================== */
+bindInputs();
+loadDrags();
+render();
+
+// Auto-load from ?url= query param (e.g. linked from event detail page)
+(function autoLoadFromQuery(){
+  const urlParam = new URLSearchParams(window.location.search).get('url');
+  if (!urlParam) return;
+  const urlInput = document.getElementById('url');
+  if (urlInput) { urlInput.value = urlParam; fetchFromUrl(); }
+})();
+</script>
+
+</body>
+</html>
