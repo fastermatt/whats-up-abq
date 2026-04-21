@@ -974,7 +974,7 @@ function loadImage(f){
 async function fetchFromUrl(){
   const url = document.getElementById('url').value.trim();
   if (!url) return;
-  toast('Fetching…');
+  toast('Fetching event data…');
   try{
     const res = await fetch('/api/ig-data?url=' + encodeURIComponent(url));
     if (!res.ok) throw new Error('API ' + res.status);
@@ -986,12 +986,42 @@ async function fetchFromUrl(){
       const el = document.getElementById(k); if (el && data[k]!=null) el.value = data[k];
     });
     if (data.bullets) document.getElementById('bullets').value = data.bullets.join('\n');
-    if (data.imageUrl) state.imageUrl = data.imageUrl;
+
+    // Proxy the event image through our server → convert to data URL so
+    // html2canvas can render it in the export without CORS errors.
+    if (data.imageUrl) {
+      toast('Loading image…');
+      state.imageUrl = await proxyToDataUrl(data.imageUrl);
+      const prev = document.getElementById('dropPreview');
+      const txt  = document.getElementById('dropText');
+      if (prev){ prev.src = state.imageUrl; prev.style.display = 'block'; }
+      if (txt)  txt.textContent = 'Event image (auto-loaded)';
+    }
+
     render();
-    toast('Filled in! Drop a local image if the event photo doesn\'t load due to CORS.');
+    toast('Ready! Pick a template and export.');
   } catch (e){
     console.error(e);
     toast('Couldn\'t auto-fill — paste the event URL from abqunplugged.com');
+  }
+}
+
+/** Fetch an external image through our image-proxy and return a data URL.
+ *  Falls back to the original URL if the proxy fails. */
+async function proxyToDataUrl(imgUrl){
+  try{
+    const proxied = await fetch('/api/image-proxy?url=' + encodeURIComponent(imgUrl));
+    if (!proxied.ok) throw new Error('proxy ' + proxied.status);
+    const blob = await proxied.blob();
+    return await new Promise((resolve, reject)=>{
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch(e){
+    console.warn('Image proxy failed, using direct URL:', e);
+    return imgUrl;
   }
 }
 
