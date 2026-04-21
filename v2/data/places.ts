@@ -128,7 +128,7 @@ export const PLACES: Place[] = [
     description:
       'Three stocked ponds for fishing, a model-boat sailing pond, and walking paths through the cottonwoods — right in the middle of the city.',
     category: 'outdoors',
-    website: 'https://www.cabq.gov/culturalservices/biopark/tingley-beach',
+    website: 'https://www.cabq.gov/artsculture/biopark/tingley',
     address: '1800 Tingley Dr SW, Albuquerque, NM 87102',
     neighborhood: 'Old Town',
     image: 'https://bsmvfutebmbkjvlrhiyq.supabase.co/storage/v1/object/public/place-photos/tingley-beach.webp',
@@ -352,7 +352,7 @@ export const PLACES: Place[] = [
     description:
       'One of America\'s most visually striking theaters — Pueblo Revival meets Art Deco with longhorn skulls, Native motifs, and original hand-painted murals.',
     category: 'arts',
-    website: 'https://www.cabq.gov/kimo',
+    website: 'https://www.cabq.gov/artsculture/kimo',
     address: '423 Central Ave NW, Albuquerque, NM 87102',
     neighborhood: 'Downtown',
     image: 'https://bsmvfutebmbkjvlrhiyq.supabase.co/storage/v1/object/public/place-photos/kimo-theatre.webp',
@@ -384,7 +384,7 @@ export const PLACES: Place[] = [
     description:
       'Home to 250+ species including African elephants, komodo dragons, and Amur tigers — connects to the Aquarium and Botanic Garden.',
     category: 'family',
-    website: 'https://www.cabq.gov/culturalservices/biopark/zoo',
+    website: 'https://www.cabq.gov/artsculture/biopark/zoo',
     address: '903 10th St SW, Albuquerque, NM 87102',
     neighborhood: 'Old Town',
     image: 'https://bsmvfutebmbkjvlrhiyq.supabase.co/storage/v1/object/public/place-photos/albuquerque-biopark-zoo.webp',
@@ -400,7 +400,7 @@ export const PLACES: Place[] = [
     description:
       'A surprisingly excellent aquarium with a 285,000-gallon shark tank, jellyfish gallery, and Gulf of Mexico exhibit.',
     category: 'family',
-    website: 'https://www.cabq.gov/culturalservices/biopark/aquarium',
+    website: 'https://www.cabq.gov/artsculture/biopark/aquarium',
     address: '2601 Central Ave NW, Albuquerque, NM 87104',
     neighborhood: 'Old Town',
     image: 'https://bsmvfutebmbkjvlrhiyq.supabase.co/storage/v1/object/public/place-photos/abq-aquarium.webp',
@@ -415,7 +415,7 @@ export const PLACES: Place[] = [
     description:
       'Ten acres of formal gardens, a butterfly pavilion, a children\'s fantasy garden — connected to the Aquarium by a seasonal river cruise.',
     category: 'family',
-    website: 'https://www.cabq.gov/culturalservices/biopark/botanic-garden',
+    website: 'https://www.cabq.gov/artsculture/biopark/garden',
     address: '2601 Central Ave NW, Albuquerque, NM 87104',
     neighborhood: 'Old Town',
     image: 'https://bsmvfutebmbkjvlrhiyq.supabase.co/storage/v1/object/public/place-photos/abq-botanic-garden.webp',

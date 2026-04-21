@@ -114,7 +114,33 @@ export default function RootLayout({
         <AuthCallbackCatcher />
         <div className="w-full overflow-x-clip">
           <DesktopNav />
-          <div className="pb-20 md:pb-0">{children}</div>
+          <div className="pb-20 md:pb-0">
+            {children}
+
+            {/* ── Site footer ── */}
+            <footer className="mt-16 pb-6 flex flex-col items-center gap-4 select-none" aria-label="Site footer">
+              {/* Ornamental rule */}
+              <div className="flex items-center gap-3 w-full max-w-[240px]">
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#c8b4a4] to-[#c8b4a4]" />
+                <div className="w-1 h-1 rounded-full bg-[#9a442d]/50" />
+                <div className="flex-1 h-px bg-gradient-to-l from-transparent via-[#c8b4a4] to-[#c8b4a4]" />
+              </div>
+
+              {/* The line */}
+              <p className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.22em] uppercase text-[#9a8880]">
+                <span>Made with</span>
+                <span
+                  className="animate-heartbeat text-[#9a442d]"
+                  style={{ fontSize: '1.15rem', lineHeight: 1 }}
+                  role="img"
+                  aria-label="love"
+                >
+                  ♥
+                </span>
+                <span>for Albuquerque</span>
+              </p>
+            </footer>
+          </div>
           <BottomNav />
         </div>
         <PWAManager />

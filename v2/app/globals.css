@@ -142,6 +142,22 @@ body {
   to   { opacity: 1; transform: translateX(0); }
 }
 
+/* ─── Heartbeat ───────────────────────────────────────────────────────── */
+/* Real double-beat pattern: lub-DUB, pause, lub-DUB, pause */
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1);    }
+  8%        { transform: scale(1.25); }
+  16%       { transform: scale(1);    }
+  24%       { transform: scale(1.15); }
+  36%       { transform: scale(1);    }
+}
+
+.animate-heartbeat {
+  animation: heartbeat 1.8s ease-in-out infinite;
+  display: inline-block;
+  transform-origin: center;
+}
+
 /* ─── Skeleton shimmer ────────────────────────────────────────────────── */
 .skeleton {
   background: linear-gradient(
