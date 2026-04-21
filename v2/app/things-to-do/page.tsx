@@ -13,11 +13,11 @@ import {
 export const metadata: Metadata = {
   title: 'Things To Do in Albuquerque | ABQ Unplugged',
   description:
-    'Explore the best things to do in Albuquerque — outdoor adventures, skate parks, public pools, arts & culture, local food & drink, and historic sites. Direct links to every venue.',
+    'Explore the best things to do in Albuquerque — outdoor adventures, skate parks, public pools, golf courses, arts & culture, museums, and historic sites. Direct links to every venue.',
   openGraph: {
     title: 'Things To Do in Albuquerque',
     description:
-      'The best outdoor adventures, arts, breweries, museums, skate parks, pools, and experiences in ABQ — all linking straight to the source.',
+      'The best outdoor adventures, skate parks, pools, golf courses, museums, arts & culture, and historic sites in ABQ — all linking straight to the source.',
     url: 'https://abqunplugged.com/things-to-do',
   },
   alternates: { canonical: 'https://abqunplugged.com/things-to-do' },
@@ -58,8 +58,7 @@ export default async function ThingsToDoPage({
             Things To Do
           </h1>
           <p className="text-xs text-white/60 max-w-lg">
-            The best of ABQ — outdoor adventures, arts, local breweries, family activities,
-            skate parks, pools, and historic sites. Every link goes straight to the venue.
+            Parks, skate parks, pools, golf courses, museums, arts & culture, and historic sites — all public, all Albuquerque. Every link goes straight to the venue.
           </p>
           <div className="flex gap-4 mt-4 text-xs">
             <span className="text-white/50"><span className="text-white font-bold">{PLACES.length}</span> places</span>
@@ -245,13 +244,16 @@ function PlaceCard({ place }: { place: Place }) {
           {place.tagline}
         </p>
 
-        {/* Neighborhood */}
+        {/* Footer */}
         <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#f5eee4]">
           <span className="flex items-center gap-0.5 text-[9px] text-[#8a7a74] truncate">
             <MapPin className="w-2 h-2 flex-shrink-0" />
             {place.neighborhood}
           </span>
-          <ExternalLink className="w-2.5 h-2.5 text-[#006a62] opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+          <span className="flex items-center gap-0.5 text-[9px] text-[#006a62] font-semibold whitespace-nowrap group-hover:underline">
+            Hours & info
+            <ExternalLink className="w-2 h-2 flex-shrink-0" />
+          </span>
         </div>
       </div>
     </a>
