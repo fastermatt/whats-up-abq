@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>ABQ Unplugged — IG Post Generator</title>
-<meta name="viewport" content="width=1280">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400;1,9..144,600&family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Bebas+Neue&display=swap" rel="stylesheet">
@@ -318,7 +318,54 @@
   .edit-hint b{color:var(--mesa)}
   .edit-hint kbd{display:inline-block;padding:1px 5px;background:#F4EADB;border:1px solid #D6CBB0;border-radius:3px;font-size:10px;font-family:inherit}
 
+  /* ── Desktop collapse ── */
   @media (max-width:900px){body{grid-template-columns:1fr}.panel{position:relative;max-height:none}}
+
+  /* ── Mobile / iPhone layout ─────────────────────────────────────── */
+  @media (max-width:600px){
+    body{display:flex;flex-direction:column}
+    .stage{order:0;padding:14px 12px 80px;align-items:stretch}
+    .canvas-outer,.canvas-wrap{width:100%!important}
+    .panel{order:1;padding:14px 14px 120px;border-right:none;border-top:1px solid #E6DFD0}
+    .stage-header{flex-direction:column;gap:4px;align-items:flex-start}
+    .stage-title{font-size:15px}
+    .stage-meta{font-size:10px}
+    h3{margin-top:16px}
+    .tmpl-grid{grid-template-columns:repeat(3,1fr)}
+    .logo-swatches{gap:8px}
+    .logo-sw{width:40px;height:40px}
+  }
+
+  /* ── Save overlay (iOS long-press to save) ──────────────────────── */
+  #save-overlay{
+    position:fixed;inset:0;background:rgba(8,6,3,.94);z-index:9999;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:env(safe-area-inset-top,20px) 20px env(safe-area-inset-bottom,20px);
+    gap:16px;
+  }
+  .save-hint{color:#fff;font-size:15px;font-family:'Inter',sans-serif;text-align:center;
+    margin:0;opacity:.8;line-height:1.4}
+  .save-hint strong{opacity:1;display:block;font-size:17px;margin-bottom:4px}
+  .save-img{max-width:100%;max-height:72vh;border-radius:8px;
+    box-shadow:0 24px 60px rgba(0,0,0,.55);display:block;
+    /* prevent long-press context from being hidden by user-select issues */
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:default}
+  .save-close{background:rgba(255,255,255,.13);color:#fff;
+    border:1.5px solid rgba(255,255,255,.22);padding:10px 32px;border-radius:24px;
+    cursor:pointer;font-size:14px;font-family:'Inter',sans-serif;font-weight:600;
+    -webkit-tap-highlight-color:transparent;margin-top:4px}
+  .save-close:active{background:rgba(255,255,255,.24)}
+
+  /* ── Sticky mobile export bar ───────────────────────────────────── */
+  #mobileBar{
+    display:none;
+    position:fixed;bottom:0;left:0;right:0;
+    background:#FBF8F1;border-top:1px solid #E0D6C2;
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));
+    z-index:200;gap:8px;
+  }
+  #mobileBar .btn{flex:1;padding:13px}
+  @media (max-width:600px){#mobileBar{display:flex}}
 
   /* ── Logo colorization ─────────────────────────────────────────────────────
      CSS filter pipeline starting from any source logo:
@@ -429,6 +476,11 @@ Great local company and good times.</textarea>
   <div class="auto-note">The browser cannot log into Instagram directly. The Post button opens Meta's Creator Studio with your images ready to upload in one drag-and-drop.</div>
 </div>
 
+<!-- Mobile sticky export bar (only visible on phones) -->
+<div id="mobileBar">
+  <button class="btn btn-dark" onclick="downloadCurrent()">📥 Save Image</button>
+</div>
+
 <div class="stage">
   <div class="stage-header">
     <div>
@@ -498,12 +550,43 @@ const FORMATS = {
 
 function escHtml(s){return String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
 
+/* ── Logo preloading ────────────────────────────────────────────────────────
+   SVG <img> tags are unreliable in html2canvas — it silently skips them.
+   We fetch the SVG text, encode as a data: URI, and embed that directly
+   in every template. Because data: URIs are inline content, html2canvas
+   captures them without any network request or CORS concern.           */
+const logoData = { white: '/logo-white.svg', black: '/logo-black.svg' }; // fallback paths
+
+async function preloadLogos(){
+  for (const key of ['white','black']){
+    try{
+      const res = await fetch(`/logo-${key}.svg`);
+      const text = await res.text();
+      // data:image/svg+xml;charset=utf-8,<url-encoded SVG>
+      logoData[key] = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(text);
+    } catch(e){
+      console.warn('Logo preload failed for', key, e);
+      // keeps the fallback path set above
+    }
+  }
+}
+
 function renderCover(tmpl, s){
+  /* Inject logo color class directly into the HTML string so that
+     buildOffscreen (which creates a fresh DOM from innerHTML) also
+     gets the class — not just the live preview element.             */
+  const lc = s.logoColor !== 'auto' ? ` logo-${s.logoColor}` : '';
+  let html = _renderCoverInner(tmpl, s);
+  if (lc) html = html.replace(/class="post /, `class="post${lc} `);
+  return html;
+}
+
+function _renderCoverInner(tmpl, s){
   switch(tmpl){
     case 'poster': return `
       <div class="post t-poster">
         <div class="img drag" data-drag="img" data-img-pan="1" style="background-image:url('${s.imageUrl}')"></div>
-        <div class="logo drag" data-drag="logo"><img src="/logo-white.svg" class="logo-img" alt="ABQ Unplugged"></div>
+        <div class="logo drag" data-drag="logo"><img src="${logoData.white}" class="logo-img" alt="ABQ Unplugged"></div>
         <div class="bar drag" data-drag="bar">
           <div class="cat"><span class="dot-sm"></span>${escHtml(s.category)}</div>
           <h1>${escHtml(s.title)}</h1>
@@ -516,7 +599,7 @@ function renderCover(tmpl, s){
     case 'ticket': return `
       <div class="post t-ticket">
         <div class="tophead drag" data-drag="tophead">
-          <div class="brandblock"><img src="/logo-black.svg" class="logo-img" alt="ABQ Unplugged"></div>
+          <div class="brandblock"><img src="${logoData.black}" class="logo-img" alt="ABQ Unplugged"></div>
           <div class="admit">Featured Event</div>
         </div>
         <div class="middle">
@@ -544,7 +627,7 @@ function renderCover(tmpl, s){
           <div class="when">${escHtml(s.date)} · ${escHtml(s.time)}</div>
           <div class="where">${escHtml(s.venue)} — ${escHtml(s.address)}</div>
           <div class="footer">
-            <div class="brand2"><img src="/logo-white.svg" class="logo-img" alt="ABQ Unplugged"></div>
+            <div class="brand2"><img src="${logoData.white}" class="logo-img" alt="ABQ Unplugged"></div>
             <div class="cta">More at abqunplugged.com</div>
           </div>
         </div>
@@ -552,7 +635,7 @@ function renderCover(tmpl, s){
     case 'editorial': return `
       <div class="post t-editorial">
         <div class="header drag" data-drag="header">
-          <div class="masthead"><img src="/logo-black.svg" class="logo-img" alt="ABQ Unplugged"></div>
+          <div class="masthead"><img src="${logoData.black}" class="logo-img" alt="ABQ Unplugged"></div>
           <div class="issue">${escHtml((s.date.split(',')[1]||s.date).trim())}</div>
         </div>
         <div class="rule"></div>
@@ -571,7 +654,7 @@ function renderCover(tmpl, s){
         ${starsHtml()}
         <div class="frame"></div>
         <div class="inner">
-          <div class="topline drag" data-drag="topline"><span>★ Happening in ABQ</span><span class="tm-logo"><img src="/logo-white.svg" class="logo-img" alt="ABQ Unplugged"></span></div>
+          <div class="topline drag" data-drag="topline"><span>★ Happening in ABQ</span><span class="tm-logo"><img src="${logoData.white}" class="logo-img" alt="ABQ Unplugged"></span></div>
           <div class="img-wrap drag" data-drag="imgwrap" data-img-pan="1" style="background-image:url('${s.imageUrl}')"></div>
           <div class="topline drag" data-drag="cat2" style="margin:0 0 .5em;color:#F4EADB;opacity:.6">${escHtml(s.category)}</div>
           <h1 class="drag" data-drag="title">${escHtml(s.title)}</h1>
@@ -595,7 +678,7 @@ function renderCover(tmpl, s){
           <div class="venue">${escHtml(s.venue)}<br>${escHtml(s.address)}</div>
         </div>
         <div class="tip drag" data-drag="tip"><span class="lbl">Local tip</span>${escHtml(s.tip)}</div>
-        <div class="brand3 drag" data-drag="brand3"><img src="/logo-black.svg" class="logo-img" alt="ABQ Unplugged"><span class="site">abqunplugged.com</span></div>
+        <div class="brand3 drag" data-drag="brand3"><img src="${logoData.black}" class="logo-img" alt="ABQ Unplugged"><span class="site">abqunplugged.com</span></div>
       </div>`;
   }
 }
@@ -623,7 +706,7 @@ function renderExpect(s){
       <h2 class="drag" data-drag="title">Bring a friend.</h2>
       <ul class="drag" data-drag="list">${bullets.map(b=>`<li>${escHtml(b)}</li>`).join('')}</ul>
       <div class="footline drag" data-drag="footline">
-        <div class="brand"><img src="/logo-white.svg" class="logo-img" alt="ABQ Unplugged"></div>
+        <div class="brand"><img src="${logoData.white}" class="logo-img" alt="ABQ Unplugged"></div>
         <div class="cta">Find your night → abqunplugged.com</div>
       </div>
     </div>`;
@@ -1101,20 +1184,28 @@ async function downloadCurrent(){
     : [renderCover(state.template, state)];
   const idx = state.format==='carousel' ? state.slide : 0;
   try {
+    toast('Rendering…');
     const blob = await snapshot(posts[idx], fmt.w, fmt.h, state.format);
-    triggerDownload(blob, filenameFor(idx));
-    toast('Saved.');
-  } catch(e){ console.error(e); toast('Export failed. Check image CORS.'); }
+    showExportImage(blob, filenameFor(idx));
+  } catch(e){ console.error(e); toast('Export failed — check console.'); }
 }
 
 async function downloadAll(){
-  toast('Rendering all…');
   const fmt = FORMATS[state.format];
   const posts = state.format==='carousel'
     ? [renderCover(state.template, state), renderDetails(state), renderExpect(state)]
     : [renderCover(state.template, state)];
 
+  if (isMobile()){
+    // On mobile, show slides one at a time (ZIP not useful on phone)
+    toast('Rendering…');
+    const blob = await snapshot(posts[state.slide % posts.length], fmt.w, fmt.h, state.format);
+    showExportImage(blob, filenameFor(state.slide % posts.length));
+    return;
+  }
+
   try{
+    toast('Rendering all…');
     const zip = new JSZip();
     for (let i=0;i<posts.length;i++){
       const blob = await snapshot(posts[i], fmt.w, fmt.h, state.format);
@@ -1123,7 +1214,7 @@ async function downloadAll(){
     const z = await zip.generateAsync({type:'blob'});
     triggerDownload(z, slugify(state.title)+'_'+state.format+'_'+state.template+'.zip');
     toast('ZIP saved.');
-  } catch(e){ console.error(e); toast('Export failed. Check image CORS.'); }
+  } catch(e){ console.error(e); toast('Export failed — check console.'); }
 }
 
 function slugify(s){return String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'event'}
@@ -1131,6 +1222,50 @@ function slugify(s){return String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').re
 function filenameFor(i){
   const slide = state.format==='carousel' ? `_slide${i+1}` : '';
   return `${slugify(state.title)}_${state.format}_${state.template}${slide}.png`;
+}
+
+/** True when running on a phone/tablet — drives the long-press save UI. */
+function isMobile(){
+  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || innerWidth < 640;
+}
+
+/**
+ * Desktop  → auto-download the PNG file as normal.
+ * Mobile   → show the image fullscreen so the user can long-press → Save to Photos.
+ *            iOS doesn't support the download attribute, so this is the only option.
+ */
+function showExportImage(blob, filename){
+  const url = URL.createObjectURL(blob);
+
+  if (!isMobile()){
+    triggerDownload(blob, filename);
+    toast('Downloaded!');
+    return;
+  }
+
+  // Remove any existing overlay
+  document.getElementById('save-overlay')?.remove();
+
+  const ov = document.createElement('div');
+  ov.id = 'save-overlay';
+  const img = document.createElement('img');
+  img.src = url;
+  img.className = 'save-img';
+  img.alt = 'Your IG post';
+
+  const hint = document.createElement('p');
+  hint.className = 'save-hint';
+  hint.innerHTML = '<strong>Hold the image → Save to Photos</strong>Then share directly to Instagram.';
+
+  const close = document.createElement('button');
+  close.className = 'save-close';
+  close.textContent = '✕  Close';
+  close.onclick = ()=>{ ov.remove(); URL.revokeObjectURL(url); };
+
+  ov.appendChild(hint);
+  ov.appendChild(img);
+  ov.appendChild(close);
+  document.body.appendChild(ov);
 }
 
 function triggerDownload(blob, filename){
@@ -1155,7 +1290,10 @@ async function postToIg(){
 /* ===================== INIT ===================== */
 bindInputs();
 loadDrags();
-render();
+
+// Preload logos as inline data URIs so html2canvas can capture them
+// without any network fetch or cross-origin issues, then render.
+preloadLogos().then(() => render());
 
 // Auto-load from ?url= query param (e.g. linked from event detail page)
 (function autoLoadFromQuery(){
