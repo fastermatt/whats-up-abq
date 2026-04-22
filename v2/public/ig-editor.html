@@ -401,6 +401,55 @@
   .logo-sw.sw-black{background:#1E1912;border-color:#1E1912}
   .logo-sw.sw-terra{background:#C75A3C;border-color:#C75A3C}
   .logo-sw.sw-cream{background:#E8D9B8;border-color:#C9BC9C}
+
+  /* ── Mobile element toolbar ──────────────────────────────────────── */
+  #elToolbar{
+    position:fixed;bottom:0;left:0;right:0;z-index:210;
+    background:#FBF8F1;border-top:1.5px solid #E0D6C2;
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));
+    box-shadow:0 -4px 20px rgba(0,0,0,.12);
+    flex-direction:column;gap:10px;display:none;
+  }
+  #elToolbar.active{display:flex}
+  .el-tb-header{display:flex;align-items:center;justify-content:space-between}
+  .el-tb-title{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mesa);font-weight:600}
+  .el-tb-close{background:var(--ink);border:none;color:var(--sandstone-2);cursor:pointer;padding:7px 14px;border-radius:6px;font-size:12px;line-height:1;font-family:'DM Mono',monospace;letter-spacing:.08em;-webkit-tap-highlight-color:transparent}
+  .el-tb-elements{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px}
+  .el-tb-elements::-webkit-scrollbar{display:none}
+  .el-elem-chip{flex-shrink:0;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:7px 11px;border:1.5px solid #E0D6C2;border-radius:6px;background:#fff;color:#7A6F5D;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent;min-height:36px;display:flex;align-items:center;border:none}
+  .el-elem-chip.selected{background:var(--ink);color:var(--sandstone-2)}
+  .el-tb-controls{display:flex;gap:10px;align-items:center}
+  .el-tb-scale{display:flex;align-items:center;gap:6px;flex:1}
+  .el-tb-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#9C8F7A;white-space:nowrap}
+  .el-tb-sz{width:40px;height:40px;border:1.5px solid #E0D6C2;background:#fff;border-radius:8px;font-size:22px;line-height:1;cursor:pointer;color:var(--ink);display:flex;align-items:center;justify-content:center;flex-shrink:0;-webkit-tap-highlight-color:transparent;padding:0;font-family:'Inter',sans-serif}
+  .el-tb-sz:active,.nudge-btn:active{background:#F4EADB}
+  #elTbScaleSlider{flex:1;height:4px;accent-color:var(--terracotta);cursor:pointer;min-width:60px}
+  .el-nudge{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0}
+  .nudge-row{display:flex;gap:3px}
+  .nudge-btn{width:40px;height:40px;border:1.5px solid #E0D6C2;background:#fff;border-radius:8px;font-size:17px;cursor:pointer;color:var(--ink);display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;flex-shrink:0;padding:0;line-height:1}
+  .nudge-btn.nudge-reset{font-size:12px;color:var(--terracotta);font-family:'DM Mono',monospace;letter-spacing:0}
+
+  /* Floating edit FAB — mobile only */
+  #mobileEditFab{
+    display:none;
+    position:fixed;bottom:74px;right:14px;
+    width:50px;height:50px;border-radius:50%;
+    background:var(--ink);color:var(--sandstone-2);
+    border:none;font-size:20px;cursor:pointer;z-index:195;
+    box-shadow:0 4px 16px rgba(0,0,0,.3);
+    align-items:center;justify-content:center;
+    -webkit-tap-highlight-color:transparent;
+    font-family:'DM Mono',monospace;
+    transition:background .15s;
+  }
+  #mobileEditFab.edit-on{background:var(--terracotta)}
+  @media(max-width:600px){
+    #mobileEditFab{display:flex}
+    /* Hide desktop resize handles on mobile — use toolbar slider instead */
+    .post .drag .resize-handle{display:none!important}
+  }
+  /* Selected element highlight — uses large outline value so it's visible after canvas scale */
+  body.edit-mode .post .drag.el-selected{outline:6px solid var(--terracotta)!important;outline-offset:3px;z-index:5}
 </style>
 </head>
 <body>
@@ -492,6 +541,37 @@ Great local company and good times.</textarea>
   <div class="auto-note" id="igNote">On iPhone: opens the native share sheet — pick Instagram, image goes straight to the composer. Caption is copied to your clipboard ready to paste.</div>
 </div>
 
+<!-- Mobile element editor toolbar (shows when edit mode is on) -->
+<div id="elToolbar">
+  <div class="el-tb-header">
+    <span class="el-tb-title">✥ Adjust Element</span>
+    <button class="el-tb-close" id="elTbClose">Done</button>
+  </div>
+  <div class="el-tb-elements" id="elTbElements">
+    <span style="font-family:'DM Mono',monospace;font-size:10px;color:#9C8F7A;letter-spacing:.08em;padding:7px 0">Tap an element below or on the canvas</span>
+  </div>
+  <div class="el-tb-controls" id="elTbControls" style="display:none">
+    <div class="el-tb-scale">
+      <span class="el-tb-label">Size</span>
+      <button class="el-tb-sz" id="elTbScaleDown">−</button>
+      <input type="range" id="elTbScaleSlider" min="0.2" max="3" step="0.05" value="1">
+      <button class="el-tb-sz" id="elTbScaleUp">+</button>
+    </div>
+    <div class="el-nudge">
+      <button class="nudge-btn" id="nudgeUp">↑</button>
+      <div class="nudge-row">
+        <button class="nudge-btn" id="nudgeLeft">←</button>
+        <button class="nudge-btn nudge-reset" id="nudgeReset" title="Reset position &amp; size">⊙</button>
+        <button class="nudge-btn" id="nudgeRight">→</button>
+      </div>
+      <button class="nudge-btn" id="nudgeDown">↓</button>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile floating edit FAB -->
+<button id="mobileEditFab" title="Toggle element editing">✥</button>
+
 <!-- Mobile sticky export bar (only visible on phones) -->
 <div id="mobileBar">
   <button class="btn btn-dark" onclick="downloadCurrent()">📥 Save Image</button>
@@ -541,6 +621,7 @@ const state = {
   imgPans:{}, // { "template|format|slide|dragId:pan": {bx,by,bz} } — bg-position %, zoom %
   editMode:false,
   logoColor:'auto', // auto | white | black | terra | cream
+  selectedDragId:null, // drag element currently selected in mobile toolbar
 };
 
 // Default sample — proxy through our server so html2canvas can capture it on export
@@ -810,6 +891,12 @@ function render(){
   // Apply saved drag offsets + wire pointer handlers
   applyDrags(postEl, scale);
 
+  // Refresh mobile toolbar element chips after DOM rebuild
+  if (state.editMode && isMobile()){
+    updateElToolbarElements();
+    if (state.selectedDragId) selectDragEl(state.selectedDragId);
+  }
+
   // Header meta
   const tmplName = TEMPLATES.find(t=>t.id===state.template).name;
   const slideLabels = ['Cover', 'Details', 'What to expect'];
@@ -877,7 +964,9 @@ function applyDrags(postEl, scale){
       el.classList.add('dragging');
       const startX = ev.clientX, startY = ev.clientY;
       const base = {...defaultDrag(), ...(state.drags[key]||{})};
+      let didMove = false;
       const move = (e)=>{
+        if (Math.abs(e.clientX-startX)>6 || Math.abs(e.clientY-startY)>6) didMove = true;
         const dx = (e.clientX - startX) / scale;
         const dy = (e.clientY - startY) / scale;
         const next = {...base, x: base.x+dx, y: base.y+dy};
@@ -890,7 +979,12 @@ function applyDrags(postEl, scale){
         el.removeEventListener('pointermove', move);
         el.removeEventListener('pointerup', up);
         el.removeEventListener('pointercancel', up);
-        saveDrags();
+        if (!didMove && isMobile()){
+          // Tap without drag — select this element in the mobile toolbar
+          selectDragEl(id);
+        } else {
+          saveDrags();
+        }
       };
       el.addEventListener('pointermove', move);
       el.addEventListener('pointerup', up);
@@ -1020,6 +1114,158 @@ function setEditMode(on){
     btn.classList.toggle('off', !state.editMode);
   }
   if (hint) hint.style.display = state.editMode ? 'block' : 'none';
+  // Mobile: show/hide floating toolbar and FAB indicator
+  if (isMobile()){
+    if (state.editMode) showElToolbar();
+    else hideElToolbar();
+  }
+  document.getElementById('mobileEditFab')?.classList.toggle('edit-on', state.editMode);
+}
+
+/* ── Mobile element toolbar ─────────────────────────────────────────────── */
+
+const DRAG_LABELS={
+  img:'Photo',logo:'Logo',bar:'Content Block',tophead:'Header',photo:'Polaroid Photo',
+  details:'Event Details',footstrip:'Footer',content:'Content Block',
+  header:'Header',title:'Title',dek:'Subtitle',foot:'Footer',
+  imgwrap:'Image',topline:'Top Line',cat2:'Category',tagline:'Tagline',
+  meta:'Date & Venue',hand:'Handwriting',datestamp:'Date Stamp',pola:'Polaroid',
+  tape:'Tape',info:'Info Block',tip:'Local Tip',brand3:'Logo',
+  num:'Number',rows:'Details',swipe:'Swipe Hint',
+  eyebrow:'Eyebrow',list:'Bullet List',footline:'Footer',
+};
+function dragLabel(id){return DRAG_LABELS[id]||id}
+
+function updateElToolbarElements(){
+  const chips=document.getElementById('elTbElements');
+  if(!chips)return;
+  const postEl=document.querySelector('#canvasOuter .post');
+  if(!postEl){chips.innerHTML='';return}
+  const drags=[...postEl.querySelectorAll('[data-drag]')];
+  chips.innerHTML=drags.map(el=>{
+    const id=el.dataset.drag;
+    const sel=id===state.selectedDragId;
+    return `<button class="el-elem-chip${sel?' selected':''}" data-drag-id="${id}">${dragLabel(id)}</button>`;
+  }).join('');
+  chips.querySelectorAll('.el-elem-chip').forEach(btn=>{
+    btn.addEventListener('click',()=>selectDragEl(btn.dataset.dragId));
+  });
+}
+
+function selectDragEl(dragId){
+  state.selectedDragId=dragId;
+  // Highlight on canvas
+  document.querySelectorAll('#canvasOuter .drag').forEach(el=>{
+    el.classList.toggle('el-selected', el.dataset.drag===dragId);
+  });
+  // Show controls
+  const controls=document.getElementById('elTbControls');
+  const slider=document.getElementById('elTbScaleSlider');
+  if(controls)controls.style.display=dragId?'flex':'none';
+  if(slider&&dragId){
+    const d={...defaultDrag(),...(state.drags[dragKey(dragId)]||{})};
+    slider.value=d.s;
+  }
+  // Update chip highlights
+  document.querySelectorAll('#elTbElements .el-elem-chip').forEach(btn=>{
+    btn.classList.toggle('selected', btn.dataset.dragId===dragId);
+  });
+}
+
+function deselectDragEl(){
+  state.selectedDragId=null;
+  document.querySelectorAll('#canvasOuter .drag').forEach(el=>el.classList.remove('el-selected'));
+  const controls=document.getElementById('elTbControls');
+  if(controls)controls.style.display='none';
+  document.querySelectorAll('#elTbElements .el-elem-chip').forEach(btn=>btn.classList.remove('selected'));
+}
+
+function nudgeSelected(dx,dy){
+  const id=state.selectedDragId; if(!id)return;
+  const key=dragKey(id);
+  const base={...defaultDrag(),...(state.drags[key]||{})};
+  const next={...base,x:base.x+dx,y:base.y+dy};
+  state.drags[key]=next;
+  const el=document.querySelector(`#canvasOuter [data-drag="${id}"]`);
+  if(el){el.style.setProperty('--dx',next.x+'px');el.style.setProperty('--dy',next.y+'px')}
+  saveDrags();
+}
+
+function scaleSelected(s){
+  const id=state.selectedDragId; if(!id)return;
+  const key=dragKey(id);
+  const base={...defaultDrag(),...(state.drags[key]||{})};
+  const ns=Math.max(0.2,Math.min(4,+s.toFixed(3)));
+  state.drags[key]={...base,s:ns};
+  const el=document.querySelector(`#canvasOuter [data-drag="${id}"]`);
+  if(el)el.style.setProperty('--ds',ns);
+  const slider=document.getElementById('elTbScaleSlider');
+  if(slider)slider.value=ns;
+  saveDrags();
+}
+
+function resetSelectedEl(){
+  const id=state.selectedDragId; if(!id)return;
+  const key=dragKey(id);
+  delete state.drags[key];
+  // Reset pan too if the element is an image pan target
+  const panKey=dragKey(id+':pan');
+  if(state.imgPans){delete state.imgPans[panKey]}
+  const el=document.querySelector(`#canvasOuter [data-drag="${id}"]`);
+  if(el){
+    el.style.setProperty('--dx','0px');
+    el.style.setProperty('--dy','0px');
+    el.style.setProperty('--ds','1');
+    // Reset bg-position on pan children
+    const panChild=el.querySelector('[data-img-pan]')||el;
+    if(panChild.hasAttribute('data-img-pan')){
+      panChild.style.setProperty('--bx','50%');
+      panChild.style.setProperty('--by','50%');
+    }
+  }
+  const slider=document.getElementById('elTbScaleSlider');
+  if(slider)slider.value=1;
+  saveDrags();
+}
+
+function showElToolbar(){
+  const tb=document.getElementById('elToolbar');
+  if(tb)tb.classList.add('active');
+  const mBar=document.getElementById('mobileBar');
+  if(mBar)mBar.style.display='none';
+  updateElToolbarElements();
+}
+
+function hideElToolbar(){
+  const tb=document.getElementById('elToolbar');
+  if(tb)tb.classList.remove('active');
+  const mBar=document.getElementById('mobileBar');
+  if(mBar)mBar.style.display='';
+  deselectDragEl();
+}
+
+function bindElToolbar(){
+  const NUDGE=18; // canvas-coordinate pixels per nudge tap
+  document.getElementById('nudgeUp')?.addEventListener('click',()=>nudgeSelected(0,-NUDGE));
+  document.getElementById('nudgeDown')?.addEventListener('click',()=>nudgeSelected(0,NUDGE));
+  document.getElementById('nudgeLeft')?.addEventListener('click',()=>nudgeSelected(-NUDGE,0));
+  document.getElementById('nudgeRight')?.addEventListener('click',()=>nudgeSelected(NUDGE,0));
+  document.getElementById('nudgeReset')?.addEventListener('click',resetSelectedEl);
+  document.getElementById('elTbClose')?.addEventListener('click',()=>setEditMode(false));
+  document.getElementById('elTbScaleSlider')?.addEventListener('input',e=>{
+    scaleSelected(parseFloat(e.target.value));
+  });
+  document.getElementById('elTbScaleDown')?.addEventListener('click',()=>{
+    const id=state.selectedDragId; if(!id)return;
+    const cur={...defaultDrag(),...(state.drags[dragKey(id)]||{})}.s;
+    scaleSelected(cur-0.1);
+  });
+  document.getElementById('elTbScaleUp')?.addEventListener('click',()=>{
+    const id=state.selectedDragId; if(!id)return;
+    const cur={...defaultDrag(),...(state.drags[dragKey(id)]||{})}.s;
+    scaleSelected(cur+0.1);
+  });
+  document.getElementById('mobileEditFab')?.addEventListener('click',()=>setEditMode(!state.editMode));
 }
 
 function renderTmplThumbs(){
@@ -1429,6 +1675,7 @@ async function postToIg(){
 
 /* ===================== INIT ===================== */
 bindInputs();
+bindElToolbar();
 loadDrags();
 
 // Preload logos as inline data URIs so html2canvas can capture them
