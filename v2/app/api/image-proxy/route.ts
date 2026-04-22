@@ -26,7 +26,8 @@ const ALLOWED_DOMAINS = [
   'sgassets.com',
   'cdn.abqunplugged.com',
   'supabase.co',
-  // Allow any https host for IG card generation — validated by the IG route itself
+  'r2.dev',           // Cloudflare R2 public buckets (pub-*.r2.dev) — used for cached_photo_url
+  'bsmvfutebmbkjvlrhiyq.supabase.co', // Supabase Storage CDN (place photos, etc.)
 ]
 
 const BROWSER_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
