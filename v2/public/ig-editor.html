@@ -65,6 +65,17 @@
   .tmpl .mini{position:absolute;inset:0}
   .tmpl .name{position:absolute;left:5px;bottom:4px;font-family:'DM Mono',monospace;font-size:9px;background:rgba(0,0,0,.6);color:#fff;padding:1px 5px;border-radius:3px;letter-spacing:.04em}
 
+  /* Copy buttons — inline with each label */
+  .label-row{display:flex;align-items:center;justify-content:space-between;margin:10px 0 4px}
+  .label-row label{margin:0}
+  .copy-btn{background:transparent;border:1px solid #E0D6C2;border-radius:4px;padding:2px 7px;
+    cursor:pointer;font-size:10px;color:#9C8F7A;font-family:'DM Mono',monospace;letter-spacing:.06em;
+    line-height:1.6;transition:all .15s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+  .copy-btn:hover{background:#F4EADB;border-color:#C9BC9C;color:var(--mesa)}
+  .copy-btn:active{transform:scale(.93)}
+  .copy-btn.ok{background:#EDF7EE;border-color:#7DC47F;color:#2E6B2E;transition:none}
+  .full-btn{width:100%;margin-top:6px;text-align:center}
+
   .file-drop{border:1.5px dashed #D8CBB2;border-radius:8px;padding:14px 10px;text-align:center;cursor:pointer;background:#fff;transition:border-color .15s,background .15s}
   .file-drop:hover{border-color:var(--terracotta);background:#FFFBF4}
   .file-drop.has{border-style:solid;border-color:#C9BC9C}
@@ -402,33 +413,34 @@
   <div class="url-row">
     <input id="url" type="url" placeholder="https://abqunplugged.com/events/...">
     <button class="btn btn-ghost" id="urlGo">Fetch</button>
+    <button class="btn btn-ghost copy-btn" id="urlCopy" title="Copy event URL">⎘</button>
   </div>
   <div class="auto-note">Paste any abqunplugged.com event page. The cover image, description, date, time, venue, expectations + tips all get pulled in.</div>
 
   <div class="divider"></div>
 
   <h3>Event</h3>
-  <label>Category</label>
+  <div class="label-row"><label>Category</label><button class="copy-btn" onclick="copyField('category')">⎘ copy</button></div>
   <input id="category" type="text" value="Music · Country">
-  <label>Title</label>
+  <div class="label-row"><label>Title</label><button class="copy-btn" onclick="copyField('title')">⎘ copy</button></div>
   <input id="title" type="text" value="Ole 60">
-  <label>Tagline / Subtitle</label>
+  <div class="label-row"><label>Tagline / Subtitle</label><button class="copy-btn" onclick="copyField('tagline')">⎘ copy</button></div>
   <input id="tagline" type="text" value="Honky-tonk, line dances, singalongs.">
-  <label>Date</label>
+  <div class="label-row"><label>Date</label><button class="copy-btn" onclick="copyField('date')">⎘ copy</button></div>
   <input id="date" type="text" value="Wed, April 22, 2026">
-  <label>Time</label>
+  <div class="label-row"><label>Time</label><button class="copy-btn" onclick="copyField('time')">⎘ copy</button></div>
   <input id="time" type="text" value="8:15 PM">
-  <label>Venue</label>
+  <div class="label-row"><label>Venue</label><button class="copy-btn" onclick="copyField('venue')">⎘ copy</button></div>
   <input id="venue" type="text" value="Revel Entertainment Center">
-  <label>Venue address</label>
+  <div class="label-row"><label>Venue address</label><button class="copy-btn" onclick="copyField('address')">⎘ copy</button></div>
   <input id="address" type="text" value="4720 Alexander Blvd NE, North Valley">
-  <label>About (description)</label>
+  <div class="label-row"><label>About (description)</label><button class="copy-btn" onclick="copyField('about')">⎘ copy</button></div>
   <textarea id="about">Ole 60 is a classic country music performance designed to bring out the best in traditional honky-tonk sounds and singalongs.</textarea>
-  <label>What to expect (one bullet per line)</label>
+  <div class="label-row"><label>What to expect (bullets)</label><button class="copy-btn" onclick="copyField('bullets')">⎘ copy</button></div>
   <textarea id="bullets">High-energy country tunes perfect for dancing.
 Authentic old-school bar atmosphere.
 Great local company and good times.</textarea>
-  <label>Local tip (short)</label>
+  <div class="label-row"><label>Local tip</label><button class="copy-btn" onclick="copyField('tip')">⎘ copy</button></div>
   <input id="tip" type="text" value="Grab a bite at the historic Westside Diner before the show.">
 
   <h3>Event image <span class="hint">drop / click</span></h3>
@@ -457,6 +469,10 @@ Great local company and good times.</textarea>
   <h3>Template <span class="hint">6 variations</span></h3>
   <div class="tmpl-grid" id="tmplGrid"></div>
 
+  <h3>Caption <span class="hint">ready to paste</span></h3>
+  <button class="btn btn-ghost full-btn" onclick="copyCaptionToClipboard()">⎘ Copy full IG caption</button>
+  <div class="auto-note" style="margin-top:5px">Builds title · date · venue · description · hashtags. Paste into IG after sharing the image.</div>
+
   <h3>Logo color <span class="hint">always visible</span></h3>
   <div class="logo-swatches" id="logoSwatches">
     <div class="logo-sw sw-auto on"  data-lc="auto"  title="Auto (per template)">Auto</div>
@@ -472,8 +488,8 @@ Great local company and good times.</textarea>
     <button class="btn btn-dark" id="dlOne">Download PNG</button>
     <button class="btn btn-dark" id="dlAll">Download ZIP</button>
   </div>
-  <button class="btn post-btn" id="postIg">📸 Post to Instagram</button>
-  <div class="auto-note">The browser cannot log into Instagram directly. The Post button opens Meta's Creator Studio with your images ready to upload in one drag-and-drop.</div>
+  <button class="btn post-btn" id="postIg">📲 Share to Instagram</button>
+  <div class="auto-note" id="igNote">On iPhone: opens the native share sheet — pick Instagram, image goes straight to the composer. Caption is copied to your clipboard ready to paste.</div>
 </div>
 
 <!-- Mobile sticky export bar (only visible on phones) -->
@@ -1077,8 +1093,9 @@ function bindInputs(){
   drop.ondragleave = ()=> drop.classList.remove('has');
   drop.ondrop = e=>{ e.preventDefault(); drop.classList.remove('has'); loadImage(e.dataTransfer.files[0]); };
 
-  // URL fetch
+  // URL fetch + URL copy
   document.getElementById('urlGo').onclick = fetchFromUrl;
+  document.getElementById('urlCopy').onclick = ()=> copyText(document.getElementById('url').value, document.getElementById('urlCopy'));
   document.getElementById('url').addEventListener('keydown', e=>{ if(e.key==='Enter') fetchFromUrl(); });
 
   // Export
@@ -1149,6 +1166,84 @@ function toast(msg){
   t.classList.add('show');
   clearTimeout(toast._t);
   toast._t = setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+/* ── Copy helpers ─────────────────────────────────────────────────── */
+
+/** Copy the value of a form field; flash the button green. */
+function copyField(id, btn){
+  const el = document.getElementById(id);
+  if (!el) return;
+  const text = el.value ?? el.textContent ?? '';
+  // btn may be passed from onclick or resolved by data attribute
+  const trigger = btn || document.querySelector(`[onclick="copyField('${id}')"]`);
+  copyText(text, trigger);
+}
+
+/** Copy arbitrary text to clipboard; briefly turn the trigger button green. */
+async function copyText(text, triggerEl){
+  if (!text) return;
+  try{
+    await navigator.clipboard.writeText(text);
+    if (triggerEl){
+      triggerEl.classList.add('ok');
+      const prev = triggerEl.textContent;
+      triggerEl.textContent = '✓ copied';
+      setTimeout(()=>{ triggerEl.classList.remove('ok'); triggerEl.textContent = prev; }, 1600);
+    } else {
+      toast('Copied!');
+    }
+  } catch(e){
+    toast('Copy failed — select and copy manually.');
+  }
+}
+
+/** Assemble a ready-to-paste Instagram caption from the current event fields. */
+function buildCaption(){
+  const g = id => (document.getElementById(id)?.value || '').trim();
+  const title    = g('title');
+  const date     = g('date');
+  const time     = g('time');
+  const venue    = g('venue');
+  const address  = g('address');
+  const tagline  = g('tagline');
+  const about    = g('about');
+  const tip      = g('tip');
+  const category = g('category');
+  const bullets  = (g('bullets') || '').split('\n').map(l=>l.replace(/^[\s•\-*]+/,'').trim()).filter(Boolean);
+
+  const parts = [];
+  if (title)   parts.push(title);
+  if (date || time || venue){
+    const meta = [];
+    if (venue)   meta.push(`📍 ${venue}`);
+    if (address) meta.push(address);
+    if (date)    meta.push(`🗓 ${date}${time ? ' · ' + time : ''}`);
+    parts.push(meta.join('\n'));
+  }
+  parts.push(''); // blank line
+  if (tagline) parts.push(tagline);
+  if (about)   parts.push(about);
+  if (bullets.length){
+    parts.push('');
+    bullets.forEach(b=> parts.push(`• ${b}`));
+  }
+  if (tip){ parts.push(''); parts.push(`💡 ${tip}`); }
+
+  // Hashtags — derive a tag from the category string
+  const catTag = '#' + category.replace(/[^a-zA-Z0-9]/g,'');
+  parts.push('');
+  parts.push(`#ABQUnplugged #AlbuquerqueEvents #ABQ #Albuquerque ${catTag !== '#' ? catTag : ''}`);
+
+  return parts.join('\n').trim();
+}
+
+/** Copy the assembled IG caption to clipboard. */
+async function copyCaptionToClipboard(){
+  const caption = buildCaption();
+  const btn = document.querySelector('[onclick="copyCaptionToClipboard()"]');
+  if (!caption){ toast('Fill in event details first.'); return; }
+  copyText(caption, btn);
 }
 
 // Build a full-size standalone DOM tree for capture, off-screen
@@ -1277,14 +1372,56 @@ function triggerDownload(blob, filename){
 }
 
 async function postToIg(){
-  toast('Preparing images + opening Instagram…');
+  const caption = buildCaption();
+  const fmt = FORMATS[state.format];
+
+  toast('Rendering image…');
   try{
-    await downloadAll();
-    setTimeout(()=>{
-      window.open('https://business.facebook.com/latest/home?asset_id=&nav_ref=creator_studio', '_blank');
-      toast('Images saved. Drag into Instagram → New post.');
-    }, 600);
-  } catch(e){ toast('Export failed.'); }
+    const blob = await snapshot(renderCover(state.template, state), fmt.w, fmt.h, state.format);
+    const filename = filenameFor(0);
+
+    // ── Mobile: Web Share API (iOS 15+ / Android Chrome) ──────────────
+    // Passes the actual image file to the native share sheet.
+    // User picks Instagram → image lands in the IG composer ready to post.
+    // Caption is pre-copied to clipboard so they just paste it.
+    if (isMobile()){
+      const file = new File([blob], filename, { type: 'image/png' });
+      const canShare = navigator.canShare?.({ files: [file] });
+
+      if (canShare){
+        // Copy caption before share so it's ready to paste in IG
+        await navigator.clipboard.writeText(caption).catch(()=>{});
+        try{
+          await navigator.share({
+            files: [file],
+            title: state.title,
+            // IG ignores `text` on iOS, but Android Chrome may use it
+            text: caption,
+          });
+          toast('Shared! Paste the caption in Instagram.');
+          return;
+        } catch(e){
+          if (e.name === 'AbortError') return; // user cancelled — do nothing
+          // Share failed for another reason — fall through to overlay
+        }
+      }
+
+      // Fallback: show the image overlay (long-press to save) + copy caption
+      await navigator.clipboard.writeText(caption).catch(()=>{});
+      showExportImage(blob, filename);
+      toast('Caption copied! Hold image → Save to Photos, then paste in IG.');
+      return;
+    }
+
+    // ── Desktop: download image + copy caption + open Instagram ───────
+    await navigator.clipboard.writeText(caption).catch(()=>{});
+    triggerDownload(blob, filename);
+    setTimeout(()=> window.open('https://www.instagram.com/', '_blank'), 500);
+    toast('Image downloaded & caption copied! Paste into Instagram.');
+  } catch(e){
+    console.error(e);
+    toast('Export failed — check console.');
+  }
 }
 
 /* ===================== INIT ===================== */
