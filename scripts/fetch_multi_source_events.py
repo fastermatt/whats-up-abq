@@ -180,9 +180,32 @@ def fetch_seatgeek() -> list:
 
 def _normalize_seatgeek_event(ev: dict) -> dict:
     """Convert a SeatGeek API event object to a Supabase row."""
-    dt = ev.get('datetime_local', '')  # "2026-04-04T15:00:00"
+    dt = ev.get('datetime_local', '')  # "2026-04-04T15:00:00" — should be venue local time
     local_date = dt[:10] if dt else ''
-    local_time = dt[11:19] if len(dt) > 10 else ''
+    local_time = dt[11:16] if len(dt) > 10 else ''  # HH:MM only
+
+    # SeatGeek sometimes returns datetime_local in UTC for multi-day passes and certain
+    # sports/festival events (e.g. "03:30" instead of the real local noon start time).
+    # Guard: if localTime is between 00:00–05:59 for an entertainment event, it's likely
+    # a bad UTC value. Try to correct using datetime_utc + MDT offset (-6h), or null it out.
+    if local_time and local_time < '06:00':
+        dt_utc = ev.get('datetime_utc', '')  # "2026-05-15T09:30:00"
+        if dt_utc and len(dt_utc) >= 16:
+            try:
+                from datetime import datetime, timedelta
+                utc_dt = datetime.strptime(dt_utc[:16], '%Y-%m-%dT%H:%M')
+                mdt_dt = utc_dt - timedelta(hours=6)  # MDT = UTC-6
+                corrected = mdt_dt.strftime('%H:%M')
+                # Only accept if corrected time is a plausible event time (6am–11:59pm)
+                if corrected >= '06:00':
+                    local_time = corrected
+                    local_date = mdt_dt.strftime('%Y-%m-%d')  # date may shift too
+                else:
+                    local_time = ''  # still bad — store as time unknown
+            except Exception:
+                local_time = ''  # parse failed — store as time unknown
+        else:
+            local_time = ''  # no UTC fallback — store as time unknown
 
     if not local_date or local_date < TODAY:
         return None
