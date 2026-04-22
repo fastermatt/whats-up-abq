@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { fetchEventById } from '@/lib/events'
+import { getCategoryFallback } from '@/lib/fallback-images'
 
 export const dynamic = 'force-dynamic'
 
@@ -74,7 +75,12 @@ export async function GET(req: NextRequest) {
     about,
     bullets,
     tip,
-    imageUrl: event.imageUrl ?? '',
+    // Use the event's own image, or fall back to the same category image
+    // the IG card pages show — so the editor always matches what the user sees
+    // on the event page. getCategoryFallback returns a same-origin /fallbacks/ path.
+    imageUrl: event.imageUrl
+      ?? getCategoryFallback(event.category ?? undefined, event.id)
+      ?? '',
   })
 }
 

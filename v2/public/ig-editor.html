@@ -1140,10 +1140,13 @@ async function fetchFromUrl(){
     });
     if (newBullets) document.getElementById('bullets').value = newBullets.join('\n');
 
-    // Route image through our proxy (same-origin) so html2canvas can capture
-    // it on export without CORS restrictions. Only update if API returned one.
+    // Route image through our proxy so html2canvas can capture it on export
+    // without CORS restrictions. Same-origin paths (/fallbacks/...) are already
+    // local — no proxy needed and it would create a pointless round-trip.
     if (rawImageUrl) {
-      state.imageUrl = '/api/image-proxy?url=' + encodeURIComponent(rawImageUrl);
+      state.imageUrl = rawImageUrl.startsWith('/')
+        ? rawImageUrl
+        : '/api/image-proxy?url=' + encodeURIComponent(rawImageUrl);
       const prev = document.getElementById('dropPreview');
       const txt  = document.getElementById('dropText');
       if (prev){ prev.src = state.imageUrl; prev.style.display = 'block'; }
