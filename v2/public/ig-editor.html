@@ -315,6 +315,20 @@
   .post .drag{--dx:0px;--dy:0px;--ds:1;transition:outline-color .15s}
   .post .drag:not(.dragging){transform:translate(var(--dx),var(--dy)) scale(var(--ds))}
   .post .drag.dragging{transform:translate(var(--dx),var(--dy)) scale(var(--ds));cursor:grabbing !important}
+
+  /* Per-element font-family + color overrides (set via data attributes
+     from the element inspector). These cascade into the element's text
+     children so typography changes reach the h1/p/span inside it. */
+  .post .drag[data-font="sans"],    .post .drag[data-font="sans"]    *{font-family:'Inter',sans-serif!important}
+  .post .drag[data-font="display"], .post .drag[data-font="display"] *{font-family:'Epilogue',sans-serif!important;font-weight:900!important;letter-spacing:-.02em}
+  .post .drag[data-font="serif"],   .post .drag[data-font="serif"]   *{font-family:'Fraunces',Georgia,serif!important;letter-spacing:-.015em}
+  .post .drag[data-font="mono"],    .post .drag[data-font="mono"]    *{font-family:'DM Mono',monospace!important;letter-spacing:.08em}
+  .post .drag[data-color="ink"]     ,.post .drag[data-color="ink"]     *{color:#1E1912!important}
+  .post .drag[data-color="cream"]   ,.post .drag[data-color="cream"]   *{color:#F4EADB!important}
+  .post .drag[data-color="white"]   ,.post .drag[data-color="white"]   *{color:#ffffff!important}
+  .post .drag[data-color="terra"]   ,.post .drag[data-color="terra"]   *{color:#C75A3C!important}
+  .post .drag[data-color="sage"]    ,.post .drag[data-color="sage"]    *{color:#5F7254!important}
+  .post .drag[data-color="turquoise"],.post .drag[data-color="turquoise"] *{color:#2B7A78!important}
   /* Rotation variants — must beat the per-template transforms (same specificity, loaded later) */
   .post .drag.rot-pola{transform:translate(var(--dx),var(--dy)) scale(var(--ds)) rotate(-4deg) !important}
   .post .drag.rot-photo{transform:translate(var(--dx),var(--dy)) scale(var(--ds)) rotate(-2.5deg) !important}
@@ -413,15 +427,43 @@
   .logo-sw.sw-terra{background:#C75A3C;border-color:#C75A3C}
   .logo-sw.sw-cream{background:#E8D9B8;border-color:#C9BC9C}
 
-  /* ── Mobile element toolbar ──────────────────────────────────────── */
+  /* ── Element inspector toolbar (both mobile + desktop) ─────────────── */
   #elToolbar{
     position:fixed;bottom:0;left:0;right:0;z-index:210;
     background:#FBF8F1;border-top:1.5px solid #E0D6C2;
     padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));
     box-shadow:0 -4px 20px rgba(0,0,0,.12);
-    flex-direction:column;gap:10px;display:none;
+    flex-direction:column;gap:8px;display:none;
+    max-height:60vh;overflow-y:auto;
   }
   #elToolbar.active{display:flex}
+  @media(min-width:900px){
+    /* Desktop — float as a compact inspector right of canvas */
+    #elToolbar{
+      position:fixed;right:18px;bottom:auto;top:80px;left:auto;width:360px;
+      max-height:calc(100vh - 120px);border:1.5px solid #E0D6C2;
+      border-top:1.5px solid #E0D6C2;border-radius:14px;
+      padding:14px;
+      box-shadow:0 12px 40px -10px rgba(0,0,0,.20);
+    }
+  }
+  .el-tb-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .el-tb-font-row,.el-tb-color-row{padding-top:6px;border-top:1px dashed #E0D6C2;margin-top:2px}
+  .el-tb-chips{display:flex;gap:6px;flex-wrap:wrap;flex:1}
+  .el-tb-chip{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:8px 12px;border-radius:6px;border:1.5px solid #E0D6C2;background:#fff;color:#7A6F5D;cursor:pointer;min-height:36px;-webkit-tap-highlight-color:transparent}
+  .el-tb-chip:active{background:#F4EADB}
+  .el-tb-chip.selected{background:var(--ink);color:var(--sandstone-2);border-color:var(--ink)}
+  .el-tb-swatches{display:flex;gap:6px;flex-wrap:wrap;flex:1}
+  .el-tb-sw{width:36px;height:36px;border-radius:50%;border:2px solid #E0D6C2;cursor:pointer;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:10px;color:#7A6F5D}
+  .el-tb-sw:active{transform:scale(.95)}
+  .el-tb-sw.selected{border-color:var(--ink);box-shadow:0 0 0 2px rgba(30,25,18,.18)}
+  .el-tb-sw.sw-auto{background:#F4EADB}
+  .el-tb-sw.sw-ink{background:#1E1912}
+  .el-tb-sw.sw-cream{background:#F4EADB}
+  .el-tb-sw.sw-white{background:#fff}
+  .el-tb-sw.sw-terra{background:#C75A3C;border-color:#C75A3C}
+  .el-tb-sw.sw-sage{background:#5F7254;border-color:#5F7254}
+  .el-tb-sw.sw-turquoise{background:#2B7A78;border-color:#2B7A78}
   .el-tb-header{display:flex;align-items:center;justify-content:space-between}
   .el-tb-title{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mesa);font-weight:600}
   .el-tb-close{background:var(--ink);border:none;color:var(--sandstone-2);cursor:pointer;padding:7px 14px;border-radius:6px;font-size:12px;line-height:1;font-family:'DM Mono',monospace;letter-spacing:.08em;-webkit-tap-highlight-color:transparent}
@@ -562,20 +604,44 @@ Great local company and good times.</textarea>
     <span style="font-family:'DM Mono',monospace;font-size:10px;color:#9C8F7A;letter-spacing:.08em;padding:7px 0">Tap an element below or on the canvas</span>
   </div>
   <div class="el-tb-controls" id="elTbControls" style="display:none">
-    <div class="el-tb-scale">
-      <span class="el-tb-label">Size</span>
-      <button class="el-tb-sz" id="elTbScaleDown">−</button>
-      <input type="range" id="elTbScaleSlider" min="0.2" max="3" step="0.05" value="1">
-      <button class="el-tb-sz" id="elTbScaleUp">+</button>
-    </div>
-    <div class="el-nudge">
-      <button class="nudge-btn" id="nudgeUp">↑</button>
-      <div class="nudge-row">
-        <button class="nudge-btn" id="nudgeLeft">←</button>
-        <button class="nudge-btn nudge-reset" id="nudgeReset" title="Reset position &amp; size">⊙</button>
-        <button class="nudge-btn" id="nudgeRight">→</button>
+    <div class="el-tb-row">
+      <div class="el-tb-scale">
+        <span class="el-tb-label">Size</span>
+        <button class="el-tb-sz" id="elTbScaleDown">−</button>
+        <input type="range" id="elTbScaleSlider" min="0.2" max="3" step="0.05" value="1">
+        <button class="el-tb-sz" id="elTbScaleUp">+</button>
       </div>
-      <button class="nudge-btn" id="nudgeDown">↓</button>
+      <div class="el-nudge">
+        <button class="nudge-btn" id="nudgeUp">↑</button>
+        <div class="nudge-row">
+          <button class="nudge-btn" id="nudgeLeft">←</button>
+          <button class="nudge-btn nudge-reset" id="nudgeReset" title="Reset position &amp; size">⊙</button>
+          <button class="nudge-btn" id="nudgeRight">→</button>
+        </div>
+        <button class="nudge-btn" id="nudgeDown">↓</button>
+      </div>
+    </div>
+    <div class="el-tb-row el-tb-font-row">
+      <span class="el-tb-label">Font</span>
+      <div class="el-tb-chips" id="elTbFontChips">
+        <button class="el-tb-chip" data-font=""        title="Template default">Auto</button>
+        <button class="el-tb-chip" data-font="display" title="Epilogue 900">Display</button>
+        <button class="el-tb-chip" data-font="serif"   title="Fraunces serif">Serif</button>
+        <button class="el-tb-chip" data-font="sans"    title="Inter sans">Sans</button>
+        <button class="el-tb-chip" data-font="mono"    title="DM Mono">Mono</button>
+      </div>
+    </div>
+    <div class="el-tb-row el-tb-color-row">
+      <span class="el-tb-label">Color</span>
+      <div class="el-tb-swatches" id="elTbColorChips">
+        <button class="el-tb-sw sw-auto"      data-color=""          title="Template default">A</button>
+        <button class="el-tb-sw sw-ink"       data-color="ink"       title="Ink"></button>
+        <button class="el-tb-sw sw-cream"     data-color="cream"     title="Cream"></button>
+        <button class="el-tb-sw sw-white"     data-color="white"     title="White"></button>
+        <button class="el-tb-sw sw-terra"     data-color="terra"     title="Terracotta"></button>
+        <button class="el-tb-sw sw-sage"      data-color="sage"      title="Sage"></button>
+        <button class="el-tb-sw sw-turquoise" data-color="turquoise" title="Turquoise"></button>
+      </div>
     </div>
   </div>
 </div>
@@ -947,6 +1013,12 @@ function applyDrags(postEl, scale){
     el.style.setProperty('--dx', d.x+'px');
     el.style.setProperty('--dy', d.y+'px');
     el.style.setProperty('--ds', d.s);
+    // Per-element font family override
+    if (d.f) el.setAttribute('data-font', d.f);
+    else     el.removeAttribute('data-font');
+    // Per-element color override
+    if (d.c) el.setAttribute('data-color', d.c);
+    else     el.removeAttribute('data-color');
     el.classList.add('drag');
 
     // Ensure a resize handle exists as child (hidden when edit mode off)
@@ -1128,11 +1200,9 @@ function setEditMode(on){
     btn.classList.toggle('off', !state.editMode);
   }
   if (hint) hint.style.display = state.editMode ? 'block' : 'none';
-  // Mobile: show/hide floating toolbar and FAB indicator
-  if (isMobile()){
-    if (state.editMode) showElToolbar();
-    else hideElToolbar();
-  }
+  // Element inspector — show on BOTH mobile and desktop when editing.
+  if (state.editMode) showElToolbar();
+  else hideElToolbar();
   document.getElementById('mobileEditFab')?.classList.toggle('edit-on', state.editMode);
 }
 
@@ -1180,7 +1250,17 @@ function selectDragEl(dragId){
     const d={...defaultDrag(),...(state.drags[dragKey(dragId)]||{})};
     slider.value=d.s;
   }
-  // Update chip highlights
+  // Font + color chip highlights reflect current element settings
+  if(dragId){
+    const d={...defaultDrag(),...(state.drags[dragKey(dragId)]||{})};
+    document.querySelectorAll('#elTbFontChips .el-tb-chip').forEach(btn=>{
+      btn.classList.toggle('selected', (btn.dataset.font||'') === (d.f||''));
+    });
+    document.querySelectorAll('#elTbColorChips .el-tb-sw').forEach(btn=>{
+      btn.classList.toggle('selected', (btn.dataset.color||'') === (d.c||''));
+    });
+  }
+  // Element chip highlights
   document.querySelectorAll('#elTbElements .el-elem-chip').forEach(btn=>{
     btn.classList.toggle('selected', btn.dataset.dragId===dragId);
   });
@@ -1222,6 +1302,12 @@ function resetSelectedEl(){
   const id=state.selectedDragId; if(!id)return;
   const key=dragKey(id);
   delete state.drags[key];
+  // Also clear font/color DOM overrides
+  const elRef=document.querySelector(`#canvasOuter [data-drag="${id}"]`);
+  if(elRef){elRef.removeAttribute('data-font');elRef.removeAttribute('data-color')}
+  // Reset font+color chip selections to Auto
+  document.querySelectorAll('#elTbFontChips .el-tb-chip').forEach(b=>b.classList.toggle('selected',!b.dataset.font));
+  document.querySelectorAll('#elTbColorChips .el-tb-sw').forEach(b=>b.classList.toggle('selected',!b.dataset.color));
   // Reset pan too if the element is an image pan target
   const panKey=dragKey(id+':pan');
   if(state.imgPans){delete state.imgPans[panKey]}
@@ -1278,6 +1364,36 @@ function bindElToolbar(){
     const id=state.selectedDragId; if(!id)return;
     const cur={...defaultDrag(),...(state.drags[dragKey(id)]||{})}.s;
     scaleSelected(cur+0.1);
+  });
+  // Font chips
+  document.getElementById('elTbFontChips')?.addEventListener('click',e=>{
+    const btn=e.target.closest('.el-tb-chip'); if(!btn)return;
+    const id=state.selectedDragId; if(!id)return;
+    const key=dragKey(id);
+    const base={...defaultDrag(),...(state.drags[key]||{})};
+    state.drags[key]={...base,f:btn.dataset.font||undefined};
+    const el=document.querySelector(`#canvasOuter [data-drag="${id}"]`);
+    if(el){
+      if(btn.dataset.font) el.setAttribute('data-font',btn.dataset.font);
+      else                 el.removeAttribute('data-font');
+    }
+    document.querySelectorAll('#elTbFontChips .el-tb-chip').forEach(b=>b.classList.toggle('selected',b===btn));
+    saveDrags();
+  });
+  // Color swatches
+  document.getElementById('elTbColorChips')?.addEventListener('click',e=>{
+    const btn=e.target.closest('.el-tb-sw'); if(!btn)return;
+    const id=state.selectedDragId; if(!id)return;
+    const key=dragKey(id);
+    const base={...defaultDrag(),...(state.drags[key]||{})};
+    state.drags[key]={...base,c:btn.dataset.color||undefined};
+    const el=document.querySelector(`#canvasOuter [data-drag="${id}"]`);
+    if(el){
+      if(btn.dataset.color) el.setAttribute('data-color',btn.dataset.color);
+      else                  el.removeAttribute('data-color');
+    }
+    document.querySelectorAll('#elTbColorChips .el-tb-sw').forEach(b=>b.classList.toggle('selected',b===btn));
+    saveDrags();
   });
   document.getElementById('mobileEditFab')?.addEventListener('click',()=>setEditMode(!state.editMode));
 }
