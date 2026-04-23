@@ -103,6 +103,12 @@ export default async function EventDetailPage({ params }: PageProps) {
   const dateStr = formatDateLong(event.date)
   const timeStr = event.time ?? ''
 
+  // Events without a single fixed start time (e.g. Roadrunner Food Bank volunteer
+  // shifts, NHCC walk-in tours, some multi-session workshops) should display a
+  // helpful note instead of a blank time row.
+  const timesVary = !timeStr && (event.source === 'volunteer'
+    || /shift|shifts|multiple sessions|various times|drop.?in|walk.?in|sign up/i.test(event.description || ''))
+
   // Build ISO start date for JSON-LD
   const startDate = /^\d{4}-\d{2}-\d{2}$/.test(event.date)
     ? `${event.date}T12:00:00-06:00`
@@ -243,6 +249,9 @@ export default async function EventDetailPage({ params }: PageProps) {
               <div>
                 <p className="text-xs font-semibold text-[#1a1614]">{dateStr}</p>
                 {timeStr && <p className="text-[11px] text-[#8a7a74]">{timeStr}</p>}
+                {!timeStr && timesVary && (
+                  <p className="text-[11px] text-[#4f6249] font-semibold">Times vary — see host site</p>
+                )}
               </div>
             </div>
           )}
