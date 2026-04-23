@@ -1723,6 +1723,8 @@ preloadLogos().then(() => render());
   // Uses the same offscreen-render path as downloadCurrent() so the output
   // matches what a human gets from the "Save Image" button exactly.
   //   await window.__igEditorCapturePNG()  →  returns Blob (1080×H @ 1x)
+  // Expose state (read-only by convention) for headless automation debugging
+  window.__igEditorState = state;
   window.__igEditorCapturePNG = async function(){
     const fmt = FORMATS[state.format];
     if (!fmt) throw new Error('Unknown format: ' + state.format);
