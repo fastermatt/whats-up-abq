@@ -292,6 +292,17 @@
   .divider{height:1px;background:#E6DFD0;margin:16px 0 4px}
   .brand-pill{display:inline-flex;align-items:center;gap:6px;background:var(--terracotta);color:#fff;padding:3px 8px;border-radius:999px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase}
 
+  /* Brand URL stamp — guaranteed on every template so every IG post
+     carries "abqunplugged.com" as the minimum brand footprint. */
+  .brand-site{position:absolute;bottom:4%;left:8%;right:8%;display:flex;justify-content:center;font-family:'DM Mono',monospace;font-size:1.6em;letter-spacing:.18em;text-transform:uppercase;z-index:5;pointer-events:none}
+  .brand-site span{opacity:.85}
+  .t-poster   .brand-site span{color:#F4EADB}
+  .t-marquee  .brand-site span{color:#F4EADB;opacity:.7}
+  .t-editorial .brand-site span{color:var(--ink);opacity:.5}
+  .t-mesa     .brand-site{display:none} /* already has "More at …" */
+  .t-ticket   .brand-site{display:none} /* already in footstrip */
+  .t-polaroid .brand-site{display:none} /* already in brand3 */
+
   /* IG safe-zone overlay (toggle) */
   .safe-overlay{position:absolute;inset:0;pointer-events:none;z-index:10;display:none}
   .safe-overlay.on{display:block}
@@ -692,6 +703,7 @@ function _renderCoverInner(tmpl, s){
             <div class="where">${escHtml(s.venue)}<br>${escHtml(s.address)}</div>
           </div>
         </div>
+        <div class="brand-site"><span>abqunplugged.com</span></div>
       </div>`;
     case 'ticket': return `
       <div class="post t-ticket">
@@ -745,6 +757,7 @@ function _renderCoverInner(tmpl, s){
           <div class="col" style="text-align:center"><b>Where</b>${escHtml(s.venue)}<br>${escHtml(s.address)}</div>
           <div class="page">№ 22</div>
         </div>
+        <div class="brand-site"><span>abqunplugged.com</span></div>
       </div>`;
     case 'marquee': return `
       <div class="post t-marquee">
@@ -761,6 +774,7 @@ function _renderCoverInner(tmpl, s){
             <div><div class="lbl">WHERE</div><div class="v">${escHtml(s.venue)}<br>${escHtml(s.address)}</div></div>
           </div>
         </div>
+        <div class="brand-site"><span>abqunplugged.com</span></div>
       </div>`;
     case 'polaroid': return `
       <div class="post t-polaroid">
