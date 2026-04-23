@@ -88,6 +88,11 @@ export async function GET(request: Request) {
         // Cache aggressively — event images are effectively immutable
         'Cache-Control': 'public, max-age=604800, stale-while-revalidate=86400',
         'Netlify-CDN-Cache-Control': 'public, max-age=604800, stale-while-revalidate=86400',
+        // CRITICAL: Netlify's CDN defaults only vary on next.js query params
+        // (__nextDataReq, _rsc). Without this header, every /api/image-proxy
+        // request returns whatever image was cached first — a production bug
+        // that caused wrong event images to render everywhere.
+        'Netlify-Vary': 'query=url',
       },
     })
   } catch (err) {
