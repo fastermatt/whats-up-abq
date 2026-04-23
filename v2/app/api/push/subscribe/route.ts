@@ -9,12 +9,13 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
+import { createClient as createSsrClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
-// Use service role — no user auth needed for device-level subscriptions
-const supabase = createClient(
+// Service role client for writing to push_subscriptions (bypasses RLS)
+const svcClient = createServiceClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
@@ -31,15 +32,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid subscription object' }, { status: 400 })
     }
 
+    // Try to identify the user (optional — subscription still works anonymously)
+    let userId: string | null = null
+    try {
+      const ssr = await createSsrClient()
+      const { data: { user } } = await ssr.auth.getUser()
+      userId = user?.id ?? null
+    } catch {
+      // Anonymous — no session cookies — proceed without user_id
+    }
+
     // Upsert by endpoint — same device re-subscribing gets updated keys
-    const { error } = await supabase
+    const { error } = await svcClient
       .from('push_subscriptions')
       .upsert(
         {
           endpoint: sub.endpoint,
           p256dh:   sub.keys.p256dh,
           auth:     sub.keys.auth,
-          prefs:    body.prefs ?? { new_events: true, upcoming: true },
+          user_id:  userId,
+          prefs:    body.prefs ?? { new_events: true, upcoming: true, matches: true },
           updated_at: new Date().toISOString(),
         },
         { onConflict: 'endpoint' }
@@ -50,7 +62,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'DB error' }, { status: 500 })
     }
 
-    return NextResponse.json({ subscribed: true }, { status: 201 })
+    return NextResponse.json({ subscribed: true, linkedToUser: !!userId }, { status: 201 })
   } catch (e) {
     console.error('[push/subscribe] Error:', e)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
@@ -66,7 +78,7 @@ export async function DELETE(req: NextRequest) {
     const { endpoint } = await req.json()
     if (!endpoint) return NextResponse.json({ error: 'Missing endpoint' }, { status: 400 })
 
-    await supabase.from('push_subscriptions').delete().eq('endpoint', endpoint)
+    await svcClient.from('push_subscriptions').delete().eq('endpoint', endpoint)
     return NextResponse.json({ unsubscribed: true })
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 })

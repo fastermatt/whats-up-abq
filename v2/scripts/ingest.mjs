@@ -106,6 +106,13 @@ const SOURCES = [
   { key: 'nhcc',         script: 'import-nhcc.mjs',         requires: [],                        minExpected: 5,   maxDrop: 0.3 },
 ]
 
+// Extra importers that share the 'local' source bucket (community + city-wide
+// scrapers that aren't tied to a ticket API). No drop/count gates — they're
+// additive. If they fail, the pipeline warns but doesn't fail.
+const EXTRA_IMPORTERS = [
+  { key: 'abqtodo', script: 'import-abqtodo.mjs', requires: [] },
+]
+
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 function runScript(scriptName, extraArgs = []) {
@@ -493,6 +500,23 @@ async function main() {
         importResults[src.key] = { ok: false, reason: e.message }
       }
     }
+
+    // Extra importers (community scrapers sharing 'local' bucket). Non-fatal.
+    for (const ex of EXTRA_IMPORTERS) {
+      if (ONLY_SOURCE && ex.key !== ONLY_SOURCE) continue
+      const missingEnv = ex.requires.filter(k => !process.env[k])
+      if (missingEnv.length > 0) {
+        warn(`[extra:${ex.key}] skipping — missing env: ${missingEnv.join(', ')}`)
+        continue
+      }
+      try {
+        const r = await runWithRetry(ex.script, 1)
+        if (r.ok) ok(`[extra:${ex.key}] done in ${(r.durationMs/1000).toFixed(1)}s`)
+        else warn(`[extra:${ex.key}] failed (exit=${r.exitCode ?? 'err'}) — continuing`)
+      } catch (e) {
+        warn(`[extra:${ex.key}] crashed: ${e.message} — continuing`)
+      }
+    }
   } else {
     warn('Skipped imports (--skip-imports)')
   }
@@ -555,18 +579,21 @@ async function main() {
       warn('LM Studio unreachable — skipping LLM enrichment (rules-based covers the baseline)')
     }
 
-    step('Cleanup (hide past, duplicates, cancelled)')
-    const r = await runScript('cleanup-events.mjs')
-    if (r.ok) ok(`cleanup-events (${(r.durationMs/1000).toFixed(1)}s)`)
-    else fail(`cleanup-events failed (exit=${r.exitCode})`)
-
-    step('Notification matcher (user prefs → events)')
-    const mnRes = await runScript('match-notifications.mjs')
-    if (mnRes.ok) ok(`match-notifications (${(mnRes.durationMs/1000).toFixed(1)}s)`)
-    else warn(`match-notifications failed (exit=${mnRes.exitCode}) — not fatal`)
   } else {
     warn('Skipped enrichment (--skip-enrich)')
   }
+
+  // Cleanup + matcher always run — they're hygiene, not enrichment.
+  // Even in --skip-enrich mode these are valuable.
+  step('Cleanup (hide past, duplicates, cancelled)')
+  const cleanupRes = await runScript('cleanup-events.mjs')
+  if (cleanupRes.ok) ok(`cleanup-events (${(cleanupRes.durationMs/1000).toFixed(1)}s)`)
+  else fail(`cleanup-events failed (exit=${cleanupRes.exitCode})`)
+
+  step('Notification matcher (user prefs → events)')
+  const mnRes = await runScript('match-notifications.mjs')
+  if (mnRes.ok) ok(`match-notifications (${(mnRes.durationMs/1000).toFixed(1)}s)`)
+  else warn(`match-notifications failed (exit=${mnRes.exitCode}) — not fatal`)
 
   // 3. POST-RUN SNAPSHOT
   step('Post-run snapshot')

@@ -8,6 +8,7 @@
  *   node scripts/send-push.mjs --type=new-events   # "X new events added"
  *   node scripts/send-push.mjs --type=tonight       # "Events happening tonight"
  *   node scripts/send-push.mjs --type=upcoming      # "You're going to X tonight" (per-user)
+ *   node scripts/send-push.mjs --type=matches       # Per-user, personalized match alerts
  *   node scripts/send-push.mjs --type=custom --title="Title" --body="Body" --url="/events"
  *   node scripts/send-push.mjs --dry-run            # preview only, no sends
  *
@@ -117,9 +118,115 @@ async function buildPayload(type) {
   }
 }
 
+// ── Personalized match-based push — per user, targeted ────────────────────────
+async function sendMatchPushes() {
+  console.log(`\n🔔 ABQ Unplugged — Match push sender`)
+  if (isDryRun) console.log('   [DRY RUN]')
+
+  // Find user prefs with 'push' channel + enabled
+  const { data: prefs } = await supabase
+    .from('user_event_preferences')
+    .select('user_id, channels')
+    .eq('enabled', true)
+
+  const users = (prefs ?? []).filter(p => (p.channels ?? []).includes('push'))
+  if (users.length === 0) { console.log('   No users opted into push matches.'); return }
+  console.log(`   ${users.length} user(s) with push channel`)
+
+  let sent = 0, skipped = 0, stale = 0, failed = 0
+
+  for (const p of users) {
+    // Top unsent high-score matches for this user
+    const { data: matches } = await supabase
+      .from('notification_matches')
+      .select('event_id, score, match_reasons, sent_at, channels_sent')
+      .eq('user_id', p.user_id)
+      .eq('dismissed', false)
+      .gte('score', 80)
+      .order('score', { ascending: false })
+      .limit(3)
+
+    const unsent = (matches ?? []).filter(m => !(m.channels_sent ?? []).includes('push'))
+    if (unsent.length === 0) { skipped++; continue }
+
+    // Find subscription for this user
+    const { data: subs } = await supabase
+      .from('push_subscriptions')
+      .select('endpoint, p256dh, auth, prefs')
+      .eq('user_id', p.user_id)
+
+    const userSubs = (subs ?? []).filter(s => s.prefs?.matches !== false)
+    if (userSubs.length === 0) { skipped++; continue }
+
+    // Pick the top event's details for the notification
+    const topId = unsent[0].event_id
+    const { data: ev } = await supabase
+      .from('events').select('raw, event_date, venue_name, category')
+      .eq('id', topId).single()
+
+    const title = ev?.raw?.name || ev?.raw?.title || 'A match for you'
+    const body  = unsent.length === 1
+      ? `${ev?.category || 'Match'} · ${ev?.venue_name || ''} · ${ev?.event_date || ''}`
+      : `${title} + ${unsent.length - 1} more match${unsent.length - 1 > 1 ? 'es' : ''}`
+
+    const payload = {
+      title: `New match — ${unsent[0].score}% fit`,
+      body:  body.slice(0, 100),
+      url:   '/for-you',
+      tag:   `match-${p.user_id.slice(0, 8)}`,
+    }
+
+    console.log(`   user=${p.user_id.slice(0, 8)}…  devices=${userSubs.length}  matches=${unsent.length}`)
+    if (isDryRun) { sent++; continue }
+
+    const payloadStr = JSON.stringify(payload)
+    for (const sub of userSubs) {
+      try {
+        await webpush.sendNotification(
+          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+          payloadStr,
+          { TTL: 43200 }  // 12h
+        )
+        sent++
+      } catch (err) {
+        if (err.statusCode === 410 || err.statusCode === 404) {
+          stale++
+          await supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint)
+        } else {
+          failed++
+          console.warn(`     ⚠ failed: ${err.message}`)
+        }
+      }
+      await new Promise(r => setTimeout(r, 50))
+    }
+
+    // Mark all these matches as pushed
+    for (const m of unsent) {
+      const next = Array.from(new Set([...(m.channels_sent || []), 'push']))
+      await supabase
+        .from('notification_matches')
+        .update({ channels_sent: next, sent_at: m.sent_at || new Date().toISOString() })
+        .eq('user_id', p.user_id).eq('event_id', m.event_id)
+    }
+  }
+
+  console.log(`
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Match push complete
+   Delivered : ${sent}
+   Skipped   : ${skipped}
+   Failed    : ${failed}
+   Stale     : ${stale}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`)
+}
+
 // ── Send to all subscribers ───────────────────────────────────────────────────
 
 async function main() {
+  if (typeArg === 'matches') {
+    return sendMatchPushes()
+  }
+
   console.log(`\n🔔 ABQ Unplugged — Push Sender`)
   console.log(`   Type: ${typeArg}${isDryRun ? '  [DRY RUN]' : ''}`)
 
