@@ -1720,19 +1720,16 @@ preloadLogos().then(() => render());
 
   // Expose a small hook for headless automation so a Playwright script can
   // wait for the editor to settle + grab the PNG blob without clicking.
-  //   await window.__igEditorCapturePNG()  →  returns Blob
+  // Uses the same offscreen-render path as downloadCurrent() so the output
+  // matches what a human gets from the "Save Image" button exactly.
+  //   await window.__igEditorCapturePNG()  →  returns Blob (1080×H @ 1x)
   window.__igEditorCapturePNG = async function(){
-    const slide = state.slide || 0;
-    const post  = document.querySelector(`[data-slide="${slide}"]`) || document.querySelector('.post');
-    if (!post) throw new Error('No post element found');
-    const canvas = await html2canvas(post, {
-      backgroundColor: null,
-      scale: 2,
-      useCORS: true,
-      allowTaint: false,
-      logging: false,
-    });
-    return await new Promise(r => canvas.toBlob(r, 'image/png'));
+    const fmt = FORMATS[state.format];
+    if (!fmt) throw new Error('Unknown format: ' + state.format);
+    const html = (state.format === 'carousel')
+      ? [renderCover(state.template, state), renderDetails(state), renderExpect(state)][state.slide || 0]
+      : renderCover(state.template, state);
+    return await snapshot(html, fmt.w, fmt.h, state.format);
   };
 })();
 </script>
