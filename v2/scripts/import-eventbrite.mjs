@@ -56,6 +56,13 @@ const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
+// ABQ metro city names — used when no lat/lng is available
+const ABQ_CITIES = new Set([
+  'albuquerque', 'rio rancho', 'bernalillo', 'corrales', 'los lunas',
+  'belen', 'edgewood', 'tijeras', 'cedar crest', 'los ranchos',
+  'los ranchos de albuquerque', 'alburquerque',
+])
+
 // ── Discovery pages to scrape ─────────────────────────────────────────────────
 const DISCOVERY_URLS = [
   'https://www.eventbrite.com/d/nm--albuquerque/events/',
@@ -131,9 +138,27 @@ function transformJsonLd(item, timeBySlug) {
   const lat   = geo.latitude
   const lng   = geo.longitude
 
-  // Filter to ABQ metro (skip online events and far-away events)
-  const isVirtual = loc['@type'] === 'VirtualLocation'
-  if (!isVirtual && lat && lng && !isInMetro(lat, lng)) return null
+  // ── Geo-filter: require positive ABQ evidence ──────────────────────────────
+  // Block virtual/online events
+  if (loc['@type'] === 'VirtualLocation') return null
+
+  // Block non-US Eventbrite domains (co.uk, .ca, .fr, .es, .nl, .com.mx, etc.)
+  const eventUrl = item.url || ''
+  if (eventUrl && !/eventbrite\.com\//.test(eventUrl)) return null
+
+  const cityName = (addr.addressLocality || '').toLowerCase().trim()
+
+  if (lat && lng) {
+    // Has coordinates — apply metro bounding box
+    if (!isInMetro(lat, lng)) return null
+  } else if (cityName) {
+    // No coords but has a city — must be in ABQ area
+    if (!ABQ_CITIES.has(cityName)) return null
+  } else {
+    // No location evidence at all — reject
+    return null
+  }
+  // ───────────────────────────────────────────────────────────────────────────
 
   const name   = item.name || 'Untitled Event'
   const desc   = typeof item.description === 'string' ? item.description : ''
@@ -159,8 +184,8 @@ function transformJsonLd(item, timeBySlug) {
       venues: [{
         name:    loc.name || addr.streetAddress || '',
         address: { line1: addr.streetAddress || '' },
-        city:    { name: addr.addressLocality || 'Albuquerque' },
-        state:   { name: addr.addressRegion || 'NM' },
+        city:    { name: addr.addressLocality || '' },
+        state:   { name: addr.addressRegion   || '' },
         location: (lat && lng) ? { latitude: String(lat), longitude: String(lng) } : undefined,
       }],
     },
