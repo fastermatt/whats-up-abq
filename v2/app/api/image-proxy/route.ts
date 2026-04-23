@@ -85,14 +85,17 @@ export async function GET(request: Request) {
       headers: {
         'Content-Type': contentType || 'image/jpeg',
         'Access-Control-Allow-Origin': '*',
-        // Cache aggressively — event images are effectively immutable
+        // Browser cache aggressively — each ?url= is a distinct URL from
+        // the browser's perspective.
         'Cache-Control': 'public, max-age=604800, stale-while-revalidate=86400',
-        'Netlify-CDN-Cache-Control': 'public, max-age=604800, stale-while-revalidate=86400',
-        // CRITICAL: Netlify's CDN defaults only vary on next.js query params
-        // (__nextDataReq, _rsc). Without this header, every /api/image-proxy
-        // request returns whatever image was cached first — a production bug
-        // that caused wrong event images to render everywhere.
-        'Netlify-Vary': 'query=url',
+        // BYPASS Netlify's CDN cache entirely. Netlify's edge only varies
+        // on Next.js internal query params (__nextDataReq, _rsc) by
+        // default, so every /api/image-proxy?url=X response got cached
+        // under the bare path — every visitor got the first image that
+        // happened to be cached, regardless of which URL they asked for.
+        // Browser cache + source CDN (Cloudflare R2, Ticketmaster's CDN,
+        // Supabase Storage, etc.) still cover the performance story.
+        'Netlify-CDN-Cache-Control': 'public, max-age=0, must-revalidate',
       },
     })
   } catch (err) {
