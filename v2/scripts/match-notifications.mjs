@@ -220,7 +220,21 @@ async function main() {
       continue
     }
 
-    const rows = slice.map(m => ({
+    // Skip events the user has already dismissed — they thumbs-downed it.
+    const { data: dismissed } = await supabase
+      .from('notification_matches')
+      .select('event_id')
+      .eq('user_id', prefs.user_id)
+      .eq('dismissed', true)
+    const skipSet = new Set((dismissed ?? []).map(d => d.event_id))
+    const keep = slice.filter(m => !skipSet.has(m.event_id))
+    if (keep.length < slice.length) {
+      console.log(`    respecting ${slice.length - keep.length} dismissal(s)`)
+    }
+
+    if (!keep.length) continue
+
+    const rows = keep.map(m => ({
       user_id:       prefs.user_id,
       event_id:      m.event_id,
       score:         m.score,
@@ -228,7 +242,8 @@ async function main() {
       matched_at:    new Date().toISOString(),
     }))
 
-    // Upsert on (user_id, event_id) — refresh scores, don't duplicate
+    // Upsert on (user_id, event_id) — refresh scores, don't duplicate.
+    // Explicitly DON'T reset `dismissed` (covered above by skipping dismissed ids).
     const { error } = await supabase
       .from('notification_matches')
       .upsert(rows, { onConflict: 'user_id,event_id', ignoreDuplicates: false })

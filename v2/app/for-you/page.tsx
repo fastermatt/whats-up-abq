@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { fetchEventById } from '@/lib/events'
 import { EventImage } from '@/app/components/EventImage'
 import { getCategoryFallback } from '@/lib/fallback-images'
+import { DismissButton } from './DismissButton'
 
 export const metadata: Metadata = {
   title: 'For You | ABQ Unplugged',
@@ -134,6 +135,7 @@ export default async function ForYouPage() {
                       alt={event.title}
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
+                    <DismissButton eventId={event.id} />
                     <div className="absolute top-2 right-2 z-10 px-2 py-0.5 rounded-full bg-[#9a442d] text-white text-[10px] font-black shadow">
                       {score}%
                     </div>
