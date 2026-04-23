@@ -139,8 +139,18 @@ function transformJsonLd(item, timeBySlug) {
   const lng   = geo.longitude
 
   // ── Geo-filter: require positive ABQ evidence ──────────────────────────────
-  // Block virtual/online events
+  // Block virtual/online events — multi-signal check
   if (loc['@type'] === 'VirtualLocation') return null
+
+  // Virtual signals: title, venue name, or street address explicitly says so
+  const VIRTUAL_RE = /\b(virtual event|online (class|event|workshop|webinar|meeting)|zoom webinar|zoom meeting|via zoom|live ?stream|webinar|online\/virtual|google meet|microsoft teams)\b/i
+  const _virtualHaystack = [
+    item.name || '',
+    loc.name || '',
+    addr.streetAddress || '',
+    typeof item.description === 'string' ? item.description.slice(0, 300) : '',
+  ].join(' | ')
+  if (VIRTUAL_RE.test(_virtualHaystack)) return null
 
   // Block non-US Eventbrite domains (co.uk, .ca, .fr, .es, .nl, .com.mx, etc.)
   const eventUrl = item.url || ''
