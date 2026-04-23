@@ -1682,12 +1682,58 @@ loadDrags();
 // without any network fetch or cross-origin issues, then render.
 preloadLogos().then(() => render());
 
-// Auto-load from ?url= query param (e.g. linked from event detail page)
+// Auto-load from ?url= / ?tmpl= / ?fmt= query params.
+//   ?url=/events/[id]        — auto-fill from event (existing)
+//   ?tmpl=poster|ticket|mesa|editorial|marquee|polaroid
+//   ?fmt=square|portrait|story|carousel
+// These let you share a preset URL or drive the editor programmatically
+// (e.g. a Playwright script generating launch posts).
 (function autoLoadFromQuery(){
-  const urlParam = new URLSearchParams(window.location.search).get('url');
-  if (!urlParam) return;
-  const urlInput = document.getElementById('url');
-  if (urlInput) { urlInput.value = urlParam; fetchFromUrl(); }
+  const q = new URLSearchParams(window.location.search);
+
+  // Template
+  const tmplParam = q.get('tmpl');
+  if (tmplParam && TEMPLATES.some(t => t.id === tmplParam)) {
+    state.template = tmplParam;
+    state.slide = 0;
+  }
+
+  // Format
+  const fmtParam = q.get('fmt');
+  if (fmtParam && FORMATS[fmtParam]) {
+    state.format = fmtParam;
+    state.slide = 0;
+    document.querySelectorAll('#formatChips .chip').forEach(x => {
+      x.classList.toggle('on', x.dataset.fmt === fmtParam);
+    });
+  }
+
+  // Event URL — kicks off fetchFromUrl(); re-render happens after data loads.
+  const urlParam = q.get('url');
+  if (urlParam) {
+    const urlInput = document.getElementById('url');
+    if (urlInput) { urlInput.value = urlParam; fetchFromUrl(); }
+  }
+
+  // Re-render once if we changed template/format but no url to fetch
+  if ((tmplParam || fmtParam) && !urlParam) render();
+
+  // Expose a small hook for headless automation so a Playwright script can
+  // wait for the editor to settle + grab the PNG blob without clicking.
+  //   await window.__igEditorCapturePNG()  →  returns Blob
+  window.__igEditorCapturePNG = async function(){
+    const slide = state.slide || 0;
+    const post  = document.querySelector(`[data-slide="${slide}"]`) || document.querySelector('.post');
+    if (!post) throw new Error('No post element found');
+    const canvas = await html2canvas(post, {
+      backgroundColor: null,
+      scale: 2,
+      useCORS: true,
+      allowTaint: false,
+      logging: false,
+    });
+    return await new Promise(r => canvas.toBlob(r, 'image/png'));
+  };
 })();
 </script>
 
