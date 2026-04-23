@@ -662,9 +662,10 @@ async function main() {
   if (SINGLE_ID) {
     filter = `id=eq.${encodeURIComponent(SINGLE_ID)}`;
   } else if (FORCE) {
-    filter = `event_date=gte.${today}&raw->>name=not.is.null&order=event_date.asc&limit=500`;
+    filter = `event_date=gte.${today}&hidden=eq.false&raw->>name=not.is.null&order=event_date.asc&limit=500`;
   } else {
-    filter = `event_date=gte.${today}&ai_enrichment=is.null&raw->>name=not.is.null&order=event_date.asc&limit=500`;
+    // Only enrich events that are missing ai_enrichment OR have the old schema (no nearby_dining)
+    filter = `event_date=gte.${today}&hidden=eq.false&raw->>name=not.is.null&or=(ai_enrichment.is.null,ai_enrichment->nearby_dining.is.null)&order=event_date.asc&limit=500`;
   }
 
   console.log('📥  Fetching events from Supabase…');
