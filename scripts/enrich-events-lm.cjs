@@ -105,7 +105,7 @@ async function callLM(prompt, retries = 2) {
     model:       LM_MODEL,
     messages:    [{ role: 'user', content: prompt }],
     temperature: 0.5,
-    max_tokens:  1200,
+    max_tokens:  1600,
     stream:      false,
   };
   for (let attempt = 0; attempt <= retries; attempt++) {
@@ -149,51 +149,278 @@ function detectCategory(event) {
   return 'general';
 }
 
-// Category-specific motivation hooks for the "why go" highlight
-const MOTIVATION_HOOKS = {
-  comedy:    'Science says: laughter triggers endorphins and cuts cortisol in half — this is literally medicine for your stress.',
-  outdoor:   'Getting outdoors reduces anxiety and cortisol levels within 20 minutes — your nervous system was built for this.',
-  craft:     'Hands-on making puts you in a flow state that silences the mental chatter modern life never shuts off.',
-  wellness:  'Communal movement and breathwork create a sense of shared presence that solo home practice simply can\'t replicate.',
-  community: 'Research shows volunteering and community involvement are among the strongest predictors of long-term life satisfaction.',
-  food:      'Breaking bread together is one of the oldest human bonding rituals — meals out strengthen relationships in ways texting can\'t.',
-  sports:    'Live sports trigger the same tribal belonging circuits that kept human communities tight for 200,000 years. Feel the crowd.',
-  arts:      'Experiencing art with others activates mirror neurons and creates shared emotional memories that last years.',
-  family:    'Shared experiences outside the home build family identity — kids remember adventures, not screen time.',
-  music:     'Live music synchronizes heartbeats across strangers. Your body literally gets on the same rhythm as the people around you.',
-  general:   'Getting out and meeting people in person is one of the most powerful things you can do for your mental health.',
-};
-
 // ── ABQ neighborhood lookup ────────────────────────────────────────────────────
-// Maps venue names and street addresses to accurate Albuquerque neighborhood context.
-// This prevents the LLM from guessing and hallucinating location details.
+// Maps venue names and street addresses to accurate neighborhood context,
+// parking info, and pre-seeded nearby dining so the LLM doesn't have to guess.
 const KNOWN_VENUES = {
-  'nexus brewery':              { neighborhood: 'near I-25 / Pan American Freeway in northeast Albuquerque (midtown, close to Uptown)', parking: 'Large parking lot on-site.' },
-  'isleta amphitheater':        { neighborhood: 'in the South Valley near I-25 south', parking: 'Large parking lots on-site; expect traffic — arrive 45 min early for big shows.' },
-  'isleta amphitheatre':        { neighborhood: 'in the South Valley near I-25 south', parking: 'Large parking lots on-site; expect traffic — arrive 45 min early for big shows.' },
-  'tingley coliseum':           { neighborhood: 'at Expo New Mexico / State Fairgrounds, midtown (near Louisiana Blvd)', parking: 'Fairgrounds parking on-site; $10–15 typical.' },
-  'expo new mexico':            { neighborhood: 'at the State Fairgrounds, midtown Albuquerque', parking: 'Large fairgrounds parking; $10–15 typical.' },
-  'sandia resort':              { neighborhood: 'at the base of the Sandia Mountains in the far northeast (Tramway area)', parking: 'Free valet and self-parking on-site.' },
-  'sandia casino':              { neighborhood: 'at the base of the Sandia Mountains in the far northeast (Tramway area)', parking: 'Free parking on-site.' },
-  'hard rock hotel':            { neighborhood: 'in the South Valley near I-25 south (exit 220)', parking: 'Free parking on-site.' },
-  'hard rock casino':           { neighborhood: 'in the South Valley near I-25 south (exit 220)', parking: 'Free parking on-site.' },
-  'popejoy hall':               { neighborhood: 'on the UNM campus in central Albuquerque', parking: 'UNM parking structures nearby; Yale Parking Structure is closest.' },
-  'keller hall':                { neighborhood: 'on the UNM campus in central Albuquerque', parking: 'UNM parking structures nearby.' },
-  'launchpad':                  { neighborhood: 'on Central Ave in Downtown/EDo (East Downtown)', parking: 'Street parking on Central and side streets; Albuquerque has free 2-hour street parking downtown.' },
-  'sunshine theater':           { neighborhood: 'on Central Ave in Downtown Albuquerque', parking: 'Street parking on Central; free city lot nearby on 1st St.' },
-  'meow wolf':                  { neighborhood: 'in the Railyard district of Santa Fe (not Albuquerque — about 60 miles north)', parking: 'Dedicated parking lot adjacent.' },
-  'kiva auditorium':            { neighborhood: 'at the Albuquerque Convention Center, Downtown', parking: 'Convention Center parking garage on-site (paid).' },
-  'albuquerque convention':     { neighborhood: 'in Downtown Albuquerque', parking: 'Convention Center parking garage (paid); street parking available.' },
-  'isotopes park':              { neighborhood: 'just south of UNM on Avenida Cesar Chavez, central Albuquerque', parking: 'Large stadium lots on-site; $5–10.' },
-  'rio rancho events center':   { neighborhood: 'in Rio Rancho, about 15 miles northwest of downtown Albuquerque', parking: 'Free parking on-site.' },
-  'rio rancho civic center':    { neighborhood: 'in Rio Rancho, about 15 miles northwest of downtown Albuquerque', parking: 'Free parking adjacent.' },
-  'nob hill':                   { neighborhood: 'in the Nob Hill neighborhood along Central Ave, east of Downtown', parking: 'Street parking on Central and side streets.' },
-  'hotel albuquerque':          { neighborhood: 'in Old Town Albuquerque, near the original plaza', parking: 'Hotel parking garage on-site.' },
-  'duran\'s pharmacy':          { neighborhood: 'in Old Town / Barelas neighborhood near 12th and Central', parking: 'Small lot; street parking nearby.' },
-  'abq biopark':                { neighborhood: 'in Albuquerque\'s South Valley/Barelas near the Rio Grande', parking: 'Large parking lots on-site; $3 typical.' },
-  'biopark':                    { neighborhood: 'near the Rio Grande in central/south Albuquerque', parking: 'Large parking lots on-site.' },
-  'albuquerque museum':         { neighborhood: 'in Old Town Albuquerque near the plaza', parking: 'Museum lot on Mountain Rd; Old Town street parking nearby.' },
-  'national hispanic cultural': { neighborhood: 'in the Barelas neighborhood, south of Downtown along 4th St', parking: 'Free parking lot on-site.' },
+  'nexus brewery':              {
+    neighborhood: 'near I-25 / Pan American Freeway in northeast Albuquerque (midtown, close to Uptown)',
+    parking: 'Large parking lot on-site.',
+    nearby_dining: [
+      { name: 'Flying Star Cafe (Juan Tabo)', why: 'Excellent NM comfort food, great green chile, 10 min away' },
+      { name: 'Gecko\'s Bar & Tapas (Montgomery)', why: 'Lively bar, solid pub grub, 5 min drive' },
+    ],
+  },
+  'isleta amphitheater':        {
+    neighborhood: 'in the South Valley near I-25 south',
+    parking: 'Large parking lots on-site; expect heavy traffic — arrive 45–60 min early for big shows.',
+    nearby_dining: [
+      { name: 'El Pinto (4th St NW)', why: 'Legendary NM restaurant with a huge patio; 20 min north' },
+      { name: 'Garcia\'s Kitchen (Central)', why: 'Classic NM diner, open late, green chile everything' },
+    ],
+  },
+  'isleta amphitheatre':        {
+    neighborhood: 'in the South Valley near I-25 south',
+    parking: 'Large parking lots on-site; expect heavy traffic — arrive 45–60 min early for big shows.',
+    nearby_dining: [
+      { name: 'El Pinto (4th St NW)', why: 'Legendary NM restaurant with a huge patio; 20 min north' },
+      { name: 'Garcia\'s Kitchen (Central)', why: 'Classic NM diner, open late, green chile everything' },
+    ],
+  },
+  'first financial credit union amphitheater': {
+    neighborhood: 'in the South Valley near I-25 south',
+    parking: 'Large parking lots on-site; expect heavy traffic — arrive 45–60 min early for big shows.',
+    nearby_dining: [
+      { name: 'El Pinto (4th St NW)', why: 'Legendary NM restaurant with a huge patio; 20 min north' },
+      { name: 'Garcia\'s Kitchen (Central)', why: 'Classic NM diner, open late, green chile everything' },
+    ],
+  },
+  'tingley coliseum':           {
+    neighborhood: 'at Expo New Mexico / State Fairgrounds, midtown (near Louisiana Blvd)',
+    parking: 'Fairgrounds parking on-site; $10–15 typical.',
+    nearby_dining: [
+      { name: 'Flying Star Cafe (Nob Hill, Central Ave)', why: 'New Mexican comfort food and espresso, 10 min east' },
+      { name: 'Casa de Benavidez (Rio Grande Blvd)', why: 'Family-run NM classics, great margaritas, 15 min west' },
+    ],
+  },
+  'expo new mexico':            {
+    neighborhood: 'at the State Fairgrounds, midtown Albuquerque',
+    parking: 'Large fairgrounds parking; $10–15 typical.',
+    nearby_dining: [
+      { name: 'Flying Star Cafe (Nob Hill, Central Ave)', why: 'Excellent green chile dishes and pastries, 10 min east' },
+      { name: 'Quarters BBQ (Louisiana Blvd)', why: 'Local BBQ institution right nearby' },
+    ],
+  },
+  'sandia resort':              {
+    neighborhood: 'at the base of the Sandia Mountains in the far northeast (Tramway area)',
+    parking: 'Free valet and self-parking on-site.',
+    nearby_dining: [
+      { name: 'Range Cafe (Bernalillo)', why: 'NM diner institution, great breakfast/lunch, 20 min north on I-25' },
+      { name: 'Saddle Up New Mexican (Tramway area)', why: 'NM food within 10 min drive' },
+    ],
+  },
+  'sandia casino':              {
+    neighborhood: 'at the base of the Sandia Mountains in the far northeast (Tramway area)',
+    parking: 'Free parking on-site.',
+    nearby_dining: [
+      { name: 'Range Cafe (Bernalillo)', why: 'NM diner institution, great breakfast/lunch, 20 min north' },
+    ],
+  },
+  'hard rock hotel':            {
+    neighborhood: 'in the South Valley near I-25 south (exit 220)',
+    parking: 'Free parking on-site.',
+    nearby_dining: [
+      { name: 'El Pinto (4th St NW)', why: 'Legendary NM restaurant, huge patio, 20 min north on I-25' },
+      { name: 'Barelas Coffee House (4th St SW)', why: 'Classic green chile breakfast, cash only, 15 min north' },
+    ],
+  },
+  'hard rock casino':           {
+    neighborhood: 'in the South Valley near I-25 south (exit 220)',
+    parking: 'Free parking on-site.',
+    nearby_dining: [
+      { name: 'El Pinto (4th St NW)', why: 'Legendary NM restaurant, huge patio, 20 min north on I-25' },
+      { name: 'Barelas Coffee House (4th St SW)', why: 'Classic green chile breakfast, cash only, 15 min north' },
+    ],
+  },
+  'popejoy hall':               {
+    neighborhood: 'on the UNM campus in central Albuquerque',
+    parking: 'UNM parking structures nearby; Yale Parking Structure is closest ($1–2/hr after 5 PM).',
+    nearby_dining: [
+      { name: 'Frontier Restaurant (Central & Cornell)', why: 'Open until midnight, legendary green chile cheeseburgers, a UNM institution since 1971' },
+      { name: 'Flying Star Cafe (Nob Hill)', why: 'Upscale diner vibe, great cocktails and NM food, 10 min walk east' },
+    ],
+  },
+  'keller hall':                {
+    neighborhood: 'on the UNM campus in central Albuquerque',
+    parking: 'UNM parking structures nearby.',
+    nearby_dining: [
+      { name: 'Frontier Restaurant (Central & Cornell)', why: 'Open until midnight, legendary NM food, 2 min walk' },
+    ],
+  },
+  'launchpad':                  {
+    neighborhood: 'on Central Ave in Downtown/EDo (East Downtown)',
+    parking: 'Free 2-hr street parking on Central and side streets; free after 6 PM.',
+    nearby_dining: [
+      { name: 'Frontier Restaurant (Central & Cornell)', why: '10 min east, open until midnight, legendary green chile' },
+      { name: 'Twisters Burritos (Central Ave)', why: 'Local chain, great late-night green chile burritos, 5 min walk' },
+      { name: 'Gold Street Caffe', why: 'Cozy downtown spot, solid cocktails and small plates, 5 min walk' },
+    ],
+  },
+  'sunshine theater':           {
+    neighborhood: 'on Central Ave in Downtown Albuquerque',
+    parking: 'Street parking on Central; free city lot 1 block south on 1st St (free after 6 PM).',
+    nearby_dining: [
+      { name: 'Frontier Restaurant (Central & Cornell)', why: '10 min east, open until midnight, NM institution' },
+      { name: 'Gold Street Caffe', why: 'Downtown cocktail bar and bites, a short walk away' },
+      { name: 'Twisters Burritos (Central Ave)', why: 'Classic late-night green chile stop near the venue' },
+    ],
+  },
+  'el rey theater':             {
+    neighborhood: 'on Central Ave in Downtown/EDo (East Downtown)',
+    parking: 'Free street parking on Central Ave and surrounding side streets after 6 PM.',
+    nearby_dining: [
+      { name: 'Frontier Restaurant (Central & Cornell)', why: 'Open until midnight, legendary green chile, 10 min east' },
+      { name: 'Twisters Burritos (Central Ave)', why: 'Quick NM burritos, walking distance' },
+    ],
+  },
+  'kimo theatre':               {
+    neighborhood: 'on Central Ave in Downtown Albuquerque (Pueblo Deco landmark, 1927)',
+    parking: 'Street parking on Central; city garage on 2nd St.',
+    nearby_dining: [
+      { name: 'Gold Street Caffe', why: 'Right downtown, cocktails and small plates' },
+      { name: 'Frontier Restaurant', why: '15 min walk east on Central, open late' },
+    ],
+  },
+  'meow wolf':                  {
+    neighborhood: 'in the Railyard district of Santa Fe — NOT Albuquerque, about 60 miles north on I-25',
+    parking: 'Dedicated parking lot adjacent to the venue.',
+    nearby_dining: [
+      { name: 'Tomasita\'s (Santa Fe)', why: 'Classic NM restaurant in the Railyard area, 5 min walk' },
+      { name: 'Second Street Brewery (Santa Fe)', why: 'Local brewery with great food, walking distance in Railyard' },
+    ],
+  },
+  'kiva auditorium':            {
+    neighborhood: 'at the Albuquerque Convention Center, Downtown',
+    parking: 'Convention Center parking garage on-site (paid, ~$10); street parking available on surrounding blocks.',
+    nearby_dining: [
+      { name: 'Casa de Benavidez (Rio Grande Blvd)', why: 'Family NM restaurant, killer margaritas, 15 min west' },
+      { name: 'Gold Street Caffe (Gold Ave)', why: 'Walkable from Convention Center, cocktails and tapas' },
+    ],
+  },
+  'albuquerque convention':     {
+    neighborhood: 'in Downtown Albuquerque',
+    parking: 'Convention Center parking garage (paid); street parking on 2nd and 3rd St.',
+    nearby_dining: [
+      { name: 'Gold Street Caffe (Gold Ave)', why: 'Walking distance, cocktails and small plates' },
+      { name: 'Casa de Benavidez (Rio Grande Blvd)', why: 'Full NM dinner, great for pre-event, 15 min west' },
+    ],
+  },
+  'isotopes park':              {
+    neighborhood: 'just south of UNM on Avenida Cesar Chavez, central Albuquerque',
+    parking: 'Large stadium lots on-site; $5–10 cash. Arrive 30 min early for big games.',
+    nearby_dining: [
+      { name: 'Frontier Restaurant (Central & Cornell)', why: 'Open until midnight, right by UNM, legendary NM food' },
+      { name: 'Flying Star Cafe (Nob Hill)', why: 'Great for pre-game brunch or dinner, 10 min east on Central' },
+    ],
+  },
+  'rio grande credit union field': {
+    neighborhood: 'just south of UNM on Avenida Cesar Chavez, central Albuquerque',
+    parking: 'Large stadium lots on-site; $5–10 cash. Arrive 30 min early for big games.',
+    nearby_dining: [
+      { name: 'Frontier Restaurant (Central & Cornell)', why: 'Open until midnight, right by UNM, a local staple' },
+      { name: 'Flying Star Cafe (Nob Hill)', why: 'Great for pre-game dinner, 10 min east on Central' },
+    ],
+  },
+  'rio rancho events center':   {
+    neighborhood: 'in Rio Rancho, about 15 miles northwest of downtown Albuquerque',
+    parking: 'Free parking on-site.',
+    nearby_dining: [
+      { name: 'Tucanos Brazilian Grill (Rio Rancho)', why: 'All-you-can-eat Brazilian BBQ, popular pre-show spot nearby' },
+      { name: 'Quarters BBQ (Rio Rancho)', why: 'Local BBQ, close to the events center' },
+    ],
+  },
+  'revel entertainment':        {
+    neighborhood: 'near the Pan American Freeway (I-25 & Paseo del Norte area), north Albuquerque',
+    parking: 'Large parking lot on-site; free.',
+    nearby_dining: [
+      { name: 'Flying Star Cafe (Juan Tabo)', why: 'Solid NM food and coffee, 10 min drive' },
+      { name: 'El Pinto (4th St NW)', why: 'Huge NM restaurant with great margaritas, 15 min southwest' },
+    ],
+  },
+  'hotel albuquerque':          {
+    neighborhood: 'in Old Town Albuquerque, near the original plaza',
+    parking: 'Hotel parking garage on-site.',
+    nearby_dining: [
+      { name: 'Casa de Benavidez (Rio Grande Blvd NW)', why: 'New Mexico classics and great margaritas, 5 min drive' },
+      { name: 'Casa Chaco (inside Hotel Albuquerque)', why: 'Right there — patio dining with Old Town views' },
+      { name: 'Antiquity Restaurant (Old Town)', why: 'Old Town staple, classic steaks and NM food' },
+    ],
+  },
+  'duran\'s pharmacy':          {
+    neighborhood: 'in the Old Town / Barelas neighborhood near 12th and Central',
+    parking: 'Small lot; street parking nearby.',
+    nearby_dining: [],
+  },
+  'abq biopark':                {
+    neighborhood: 'in Albuquerque\'s South Valley/Barelas near the Rio Grande',
+    parking: 'Large parking lots on-site; $3 typical.',
+    nearby_dining: [
+      { name: 'Barelas Coffee House (4th St SW)', why: 'Legendary NM breakfast spot, 5 min away — go early, it gets packed' },
+      { name: 'Casa de Benavidez (Rio Grande Blvd)', why: 'NM classics and margaritas, 15 min north along Rio Grande' },
+    ],
+  },
+  'biopark':                    {
+    neighborhood: 'near the Rio Grande in central/south Albuquerque',
+    parking: 'Large parking lots on-site.',
+    nearby_dining: [
+      { name: 'Barelas Coffee House (4th St SW)', why: 'Legendary local breakfast, 5 min away' },
+    ],
+  },
+  'albuquerque museum':         {
+    neighborhood: 'in Old Town Albuquerque near the plaza',
+    parking: 'Museum lot on Mountain Rd NW; street parking around Old Town plaza.',
+    nearby_dining: [
+      { name: 'Casa Chaco (Hotel Albuquerque)', why: 'Patio dining with Old Town views, 5 min walk' },
+      { name: 'Casa de Benavidez (Rio Grande Blvd)', why: 'NM classics and margaritas, 5 min drive' },
+      { name: 'Antiquity Restaurant (Old Town)', why: 'Old-school NM steaks and enchiladas right in Old Town' },
+    ],
+  },
+  'national hispanic cultural': {
+    neighborhood: 'in the Barelas neighborhood, south of Downtown along 4th St SW',
+    parking: 'Free parking lot on-site.',
+    nearby_dining: [
+      { name: 'Barelas Coffee House (4th St SW)', why: 'Cash-only NM breakfast institution, literally around the corner' },
+      { name: 'Casa de Benavidez (Rio Grande Blvd)', why: 'Full NM dinner, 10 min drive north' },
+    ],
+  },
+  'nhcc': {
+    neighborhood: 'in the Barelas neighborhood, south of Downtown along 4th St SW',
+    parking: 'Free parking lot on-site.',
+    nearby_dining: [
+      { name: 'Barelas Coffee House (4th St SW)', why: 'Cash-only NM breakfast institution, literally around the corner' },
+    ],
+  },
+  'harwood art center':         {
+    neighborhood: 'in the EDo / East Downtown neighborhood on Menaul Blvd NE',
+    parking: 'Street parking on Menaul and side streets.',
+    nearby_dining: [
+      { name: 'Frontier Restaurant (Central & Cornell)', why: 'Open until midnight, 15 min south on Central' },
+      { name: 'Flying Star Cafe (Nob Hill)', why: 'Great coffee and NM food, 15 min east on Central' },
+    ],
+  },
+  'outpost performance space':  {
+    neighborhood: 'in the EDo / East Downtown neighborhood',
+    parking: 'Street parking nearby.',
+    nearby_dining: [
+      { name: 'Frontier Restaurant (Central & Cornell)', why: 'Open until midnight, nearby NM institution' },
+      { name: 'Twisters Burritos', why: 'Quick green chile burritos, walking distance on Central' },
+    ],
+  },
+  'hyena\'s comedy':            {
+    neighborhood: 'in the Uptown / Northeast Heights area (near Menaul & Louisiana)',
+    parking: 'Strip mall parking lot on-site; free.',
+    nearby_dining: [
+      { name: 'Quarters BBQ (Louisiana Blvd)', why: 'Local BBQ institution right nearby, great pre-show dinner' },
+      { name: 'Flying Star Cafe (Juan Tabo)', why: 'Good NM comfort food and cocktails, 10 min east' },
+    ],
+  },
+  'route 66 casino':            {
+    neighborhood: 'west of Albuquerque on I-40 (exit 140), about 20 miles from Downtown',
+    parking: 'Free parking lots on-site.',
+    nearby_dining: [
+      { name: 'Route 66 Casino restaurants', why: 'Several on-site dining options; Six66 Steakhouse for pre-show' },
+    ],
+  },
 };
 
 function getVenueContext(venueName, address) {
@@ -201,46 +428,100 @@ function getVenueContext(venueName, address) {
   const addr = (address || '').toLowerCase();
   const combined = key + ' ' + addr;
 
-  // Check known venues first (most accurate)
+  // Check known venues first (most accurate, includes pre-seeded nearby_dining)
   for (const [pattern, info] of Object.entries(KNOWN_VENUES)) {
     if (combined.includes(pattern)) return info;
   }
 
-  // Derive neighborhood from street/address patterns
+  // Derive neighborhood + dining suggestions from street/address patterns
   let neighborhood = null;
   let parking = null;
+  let nearby_dining = [];
 
   if (/pan american|pan-american freeway/.test(addr)) {
-    neighborhood = 'near the Pan American Freeway (I-25), midtown Albuquerque';
-    parking = 'Parking is typically available in adjacent lots off the frontage road.';
+    neighborhood = 'near the Pan American Freeway (I-25), midtown/north Albuquerque';
+    parking = 'Parking typically available in adjacent lots.';
+    nearby_dining = [{ name: 'Flying Star Cafe (Juan Tabo)', why: 'Good NM comfort food and coffee, 10 min east' }];
   } else if (/central ave/.test(addr)) {
     const block = parseInt(addr.match(/(\d+)\s+central/)?.[1] || '0');
-    if (block < 1000)       neighborhood = 'on Central Ave in Downtown Albuquerque';
-    else if (block < 3000)  neighborhood = 'on Central Ave / EDo (East Downtown)';
-    else if (block < 5000)  neighborhood = 'on Central Ave in the Nob Hill neighborhood';
-    else if (block < 8000)  neighborhood = 'on Central Ave in the Heights';
-    else                    neighborhood = 'on Central Ave in the Far Heights';
+    if (block < 1000) {
+      neighborhood = 'on Central Ave in Downtown Albuquerque';
+      nearby_dining = [
+        { name: 'Gold Street Caffe', why: 'Cocktails and small plates, walkable from here' },
+        { name: 'Frontier Restaurant (Central & Cornell)', why: 'Open until midnight, 10 min east, NM institution' },
+      ];
+    } else if (block < 3000) {
+      neighborhood = 'on Central Ave / EDo (East Downtown)';
+      nearby_dining = [
+        { name: 'Frontier Restaurant (Central & Cornell)', why: 'Open until midnight, green chile institution, 5 min walk' },
+        { name: 'Twisters Burritos', why: 'Quick green chile burritos, nearby on Central' },
+      ];
+    } else if (block < 5000) {
+      neighborhood = 'on Central Ave in the Nob Hill neighborhood';
+      nearby_dining = [
+        { name: 'Flying Star Cafe (Nob Hill)', why: 'Right in Nob Hill, great NM food and cocktails' },
+        { name: 'Frontier Restaurant (Central & Cornell)', why: '10 min walk west, open until midnight' },
+      ];
+    } else if (block < 8000) {
+      neighborhood = 'on Central Ave in the Heights';
+      nearby_dining = [
+        { name: 'Garcia\'s Kitchen (Central)', why: 'Classic NM diner with green chile, a Heights staple' },
+      ];
+    } else {
+      neighborhood = 'on Central Ave in the Far East Heights';
+    }
   } else if (/university blvd/.test(addr)) {
     neighborhood = 'on University Blvd near UNM, central Albuquerque';
+    nearby_dining = [
+      { name: 'Frontier Restaurant (Central & Cornell)', why: 'UNM institution, open until midnight, 5 min walk' },
+    ];
   } else if (/lomas blvd/.test(addr)) {
     neighborhood = 'on Lomas Blvd in central Albuquerque';
+    nearby_dining = [
+      { name: 'Flying Star Cafe (Nob Hill)', why: 'Good NM food and coffee, 10 min east' },
+    ];
   } else if (/paseo del norte/.test(addr)) {
     neighborhood = 'near Paseo del Norte, in the north Albuquerque / Journal Center area';
+    nearby_dining = [
+      { name: 'El Pinto (4th St NW)', why: 'NM classics and margaritas, 10 min southwest on 4th' },
+    ];
   } else if (/montgomery/.test(addr)) {
     neighborhood = 'on Montgomery in the Northeast Heights';
+    nearby_dining = [
+      { name: 'Quarters BBQ (Louisiana Blvd)', why: 'Local BBQ landmark nearby' },
+      { name: 'Flying Star Cafe (Juan Tabo)', why: 'Good NM comfort food and pastries, 10 min east' },
+    ];
   } else if (/academy.*ne|ne.*academy/.test(addr)) {
     neighborhood = 'in the Northeast Heights near Academy Blvd';
+    nearby_dining = [
+      { name: 'Flying Star Cafe (Juan Tabo)', why: 'NM comfort food, pastries, great margaritas' },
+    ];
   } else if (/rio rancho/.test(addr) || /rio rancho/.test(key)) {
     neighborhood = 'in Rio Rancho, about 15 miles northwest of downtown Albuquerque';
+    nearby_dining = [
+      { name: 'Tucanos Brazilian Grill (Rio Rancho)', why: 'All-you-can-eat Brazilian BBQ, popular in Rio Rancho' },
+    ];
   } else if (/4th st.*nw|nw.*4th/.test(addr)) {
     neighborhood = 'on North 4th St NW, in the North Valley area';
+    nearby_dining = [
+      { name: 'El Pinto Restaurant (N 4th St NW)', why: 'Legendary NM restaurant with huge patio and great margaritas' },
+      { name: 'Casa de Benavidez (Rio Grande Blvd)', why: 'Family NM cooking, a North Valley institution' },
+    ];
   } else if (/old town|mountain rd nw/.test(addr)) {
     neighborhood = 'in Old Town Albuquerque';
+    nearby_dining = [
+      { name: 'Casa Chaco (Hotel Albuquerque)', why: 'Patio dining with Old Town views' },
+      { name: 'Casa de Benavidez (Rio Grande Blvd)', why: 'NM classics and margaritas, 5 min drive' },
+    ];
   } else if (/downtown|civic plaza|marquette|gold ave|copper ave/.test(addr)) {
     neighborhood = 'in Downtown Albuquerque';
+    nearby_dining = [
+      { name: 'Gold Street Caffe', why: 'Cocktails and tapas, walkable downtown spot' },
+      { name: 'Frontier Restaurant (Central & Cornell)', why: 'Open until midnight, 15 min walk east on Central' },
+    ];
   }
 
-  if (neighborhood || parking) return { neighborhood, parking };
+  if (neighborhood || parking || nearby_dining.length) return { neighborhood, parking, nearby_dining };
   return null;
 }
 
@@ -264,55 +545,60 @@ function buildPrompt(event) {
   const segment    = raw.classifications?.[0]?.segment?.name || '';
   const genre      = raw.classifications?.[0]?.genre?.name   || '';
   const info       = raw.info || raw.description || (typeof raw.description === 'object' ? raw.description?.text : '') || '';
-  const parking    = tmVenue?.parkingDetail || '';
+  const tmParking  = tmVenue?.parkingDetail || '';
   const category   = [segment, genre].filter(Boolean).join(' / ');
-  const cat        = detectCategory(event);
-  const motivation = MOTIVATION_HOOKS[cat];
 
-  // Pre-compute neighborhood so the model doesn't have to guess
-  const venueCtx   = getVenueContext(venueName, addrLine);
+  // Pre-compute venue context (neighborhood, parking, nearby dining seeds)
+  const venueCtx      = getVenueContext(venueName, addrLine);
   const neighborhoodLine = venueCtx?.neighborhood
-    ? `- Venue neighborhood (use this, do NOT contradict it): ${venueCtx.neighborhood}`
+    ? `- Venue neighborhood (USE VERBATIM — never contradict): ${venueCtx.neighborhood}`
     : '';
-  const parkingLine = (venueCtx?.parking || parking)
-    ? `- Parking info: ${venueCtx?.parking || parking.slice(0, 200)}`
+  const parkingLine      = (venueCtx?.parking || tmParking)
+    ? `- Parking: ${venueCtx?.parking || tmParking.slice(0, 200)}`
+    : '';
+  // Inject pre-seeded nearby dining so the LLM has real names to work with
+  const diningSeeds = venueCtx?.nearby_dining?.length
+    ? `- Nearby dining (verified, use these): ${JSON.stringify(venueCtx.nearby_dining)}`
     : '';
 
-  return `You are a passionate local Albuquerque events guide whose mission is to get people off their couches and into the city together. You believe in-person experiences are transformative.
+  return `You are a knowledgeable local Albuquerque guide helping people decide whether to attend an event and how to make a great night of it.
 
-Given the following event details, produce a JSON object with exactly these keys:
+Given the event details below, produce a JSON object with EXACTLY these keys:
 
 {
-  "about": "1-2 sentences about the artist, performer, or event — specific and interesting, NOT generic. For bands: mention their sound and a notable fact. For sports: mention teams and stakes. For community events: paint the vivid experience.",
+  "about": "1-2 SPECIFIC sentences about the performer, act, or event. What makes THIS event distinctive — the artist's sound, their story, the stakes, what the experience is like. Return null if you have nothing specific to say beyond the event title.",
   "highlights": [
-    "specific highlight about what attendees will experience",
-    "another concrete, enthusiastic thing to expect",
-    "${motivation}"
+    "One concrete, specific detail attendees will experience (not generic hype)",
+    "Another specific detail — an aspect of the performance, sport, or activity",
+    "A third highlight — could be practical, crowd vibe, or something unique about this particular event"
   ],
-  "venue_tips": "1-2 practical sentences covering: where the venue is in the city (use the neighborhood context provided — do NOT contradict it), parking or transit tips, and anything useful about arrival.",
-  "local_tips": "1 warm, insider sentence — a nearby restaurant, bar, coffee shop, or activity to pair with this event. Name a real, specific ABQ spot."
+  "venue_tips": "1-2 sentences: WHERE in Albuquerque the venue is (use the neighborhood context below if provided), plus useful parking or arrival info. Return null only if the venue is truly unknown and no address was given.",
+  "nearby_dining": [
+    {"name": "Restaurant or bar name", "why": "What it's known for and why it pairs well with this event"}
+  ],
+  "local_rec": "One insider tip — something a local would know about this venue, this neighborhood, or this kind of event in ABQ that makes the experience better. Return null if you have nothing specific."
 }
 
 EVENT DETAILS:
 - Name: ${name}
-- Category: ${category || 'Event'}
+- Category: ${category || event.category || 'Event'}
 - Date: ${date}${time ? ' at ' + time : ''}
-- Venue: ${venueName}${venueAddr !== cityName + ', NM' ? ' — ' + venueAddr : ''}
+- Venue: ${venueName || '(unknown)'}${venueAddr !== cityName + ', NM' ? ' — ' + venueAddr : ''}
 ${neighborhoodLine}
 ${parkingLine}
-${info ? `- Description: ${info.slice(0, 400)}` : ''}
+${diningSeeds}
+${info ? `- Description: ${info.slice(0, 500)}` : ''}
 
-Rules:
-- Return ONLY the raw JSON object. No markdown, no code fences, no extra text.
-- "highlights" MUST be an array of exactly 3 strings.
-- The third highlight MUST be the motivation hook provided — include it verbatim or closely paraphrased.
-- Keep each field warm, direct, and human. Avoid corporate/generic language.
-- CRITICAL: If a "Venue neighborhood" line is provided above, use it verbatim for location context in venue_tips. NEVER contradict it or substitute your own geographic claim.
-- If no neighborhood context is provided, describe the venue only by its street/address — do NOT guess or claim which part of the city it is in.
-- Local tips should name specific, real ABQ restaurants or bars near the venue (Frontier Restaurant, Casa de Benavidez, Duran's Pharmacy, Nob Hill spots, etc.).
-- NEVER mention specific days of the week (Monday, Tuesday, Friday, etc.) in "about" or "highlights" unless the event details above explicitly state which days. Never invent a recurring schedule.
-- For volunteer/signup events, describe what participants do — not when slots are available.
-- If the event is in Rio Rancho or Santa Fe (not Albuquerque), acknowledge that in venue_tips.`;
+RULES — read carefully:
+1. Return ONLY the raw JSON object. No markdown fences, no explanation, no preamble.
+2. "highlights" MUST be an array of exactly 3 strings. All 3 must be event-specific, not generic category platitudes.
+3. CRITICAL: If a "Venue neighborhood" line is provided, use that exact phrasing in venue_tips. Never contradict it.
+4. "nearby_dining": Use the verified dining seeds above if provided — include 2-3 of them. If NO seeds are provided, name only real, specific ABQ restaurants you are confident are near this address. If you are not confident, return an EMPTY array []. Never invent restaurants or give vague suggestions like "there are many nearby options."
+5. "about": If the event is a recurring class, library program, or generic community meeting with no interesting performer or angle, return null. Do not write "This is a great opportunity to..."
+6. "local_rec": Name a specific thing locals know — a parking trick, a venue quirk, a pre-show tradition. Return null rather than something generic.
+7. Never mention specific days of the week in "about" or "highlights" unless the event details explicitly state them.
+8. If the venue is in Rio Rancho or Santa Fe, note that in venue_tips (these are NOT in Albuquerque).
+9. For volunteer/service events: describe what participants actually DO, not logistics.`;
 }
 
 // ── Parse LM response ─────────────────────────────────────────────────────────
@@ -328,12 +614,25 @@ function parseEnrichment(text) {
     throw new Error('No JSON found in response');
   }
   const parsed = JSON.parse(jsonMatch[0]);
+
+  // Sanitize nearby_dining — must be array of {name, why} objects
+  let nearby_dining = [];
+  if (Array.isArray(parsed.nearby_dining)) {
+    nearby_dining = parsed.nearby_dining
+      .filter(d => d && typeof d.name === 'string' && d.name.trim())
+      .map(d => ({ name: d.name.trim(), why: (d.why || '').trim() }))
+      .slice(0, 4); // cap at 4 entries
+  }
+
   // Validate and sanitize
   return {
-    about:       typeof parsed.about       === 'string'  ? parsed.about.trim()                         : null,
-    highlights:  Array.isArray(parsed.highlights)        ? parsed.highlights.map(h => String(h).trim()) : [],
-    venue_tips:  typeof parsed.venue_tips  === 'string'  ? parsed.venue_tips.trim()                    : null,
-    local_tips:  typeof parsed.local_tips  === 'string'  ? parsed.local_tips.trim()                    : null,
+    about:          typeof parsed.about       === 'string'  ? parsed.about.trim()                          : null,
+    highlights:     Array.isArray(parsed.highlights)        ? parsed.highlights.map(h => String(h).trim())  : [],
+    venue_tips:     typeof parsed.venue_tips  === 'string'  ? parsed.venue_tips.trim()                     : null,
+    nearby_dining,
+    local_rec:      typeof parsed.local_rec   === 'string'  ? parsed.local_rec.trim()                      : null,
+    // Backwards compat: carry forward local_tips if still present in old responses
+    local_tips:     typeof parsed.local_tips  === 'string'  ? parsed.local_tips.trim()                     : null,
   };
 }
 
