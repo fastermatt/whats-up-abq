@@ -37,7 +37,9 @@ const POSTS = [
 
 async function generateOne(browser, post) {
   const url = `${SITE}/ig-editor.html?url=/events/${post.id}&tmpl=${post.tmpl}&fmt=portrait`
-  const page = await browser.newPage({ viewport: { width: 1400, height: 1700 } })
+  // Fresh context per post — no cache / localStorage / cookies from previous runs
+  const context = await browser.newContext({ viewport: { width: 1400, height: 1700 } })
+  const page = await context.newPage()
   console.log(`→ ${post.slug} (${post.tmpl})`)
 
   try {
@@ -100,6 +102,7 @@ async function generateOne(browser, post) {
     console.error(`  ✗ ${post.slug} failed:`, err.message)
   } finally {
     await page.close()
+    await context.close()
   }
 }
 
