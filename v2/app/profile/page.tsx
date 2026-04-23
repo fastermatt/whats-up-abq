@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { SignOutButton } from './SignOutButton'
 import { EditProfileForm } from './EditProfileForm'
-import { MapPin, Trophy, Zap, Star, CheckSquare, Calendar, ArrowLeft, Heart, Users, Bell, Search, UserPlus, HelpCircle } from 'lucide-react'
+import { MapPin, Trophy, Zap, Star, CheckSquare, Calendar, ArrowLeft, Heart, Users, Bell, Search, UserPlus, HelpCircle, Sparkles } from 'lucide-react'
 import { PushBell } from '@/app/components/PushBell'
 
 export const metadata: Metadata = {
@@ -159,17 +159,29 @@ export default async function ProfilePage() {
         </section>
 
         {/* Quick links */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
+          <Link
+            href="/for-you"
+            className="flex items-center gap-3 bg-white rounded-xl p-4 border border-[#f0e4cc] hover:border-[#9a442d]/30 transition-all group"
+          >
+            <div className="w-8 h-8 rounded-lg bg-[#9a442d]/10 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-[#9a442d]" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-[#1a1614]">For You</p>
+              <p className="text-[10px] text-[#8a7a74]">Matched events</p>
+            </div>
+          </Link>
           <Link
             href="/saved"
             className="flex items-center gap-3 bg-white rounded-xl p-4 border border-[#f0e4cc] hover:border-[#9a442d]/30 transition-all group"
           >
-            <div className="w-8 h-8 rounded-lg bg-[#9a442d]/10 flex items-center justify-center">
-              <Star className="w-4 h-4 text-[#9a442d]" />
+            <div className="w-8 h-8 rounded-lg bg-[#4f6249]/10 flex items-center justify-center">
+              <Star className="w-4 h-4 text-[#4f6249]" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-bold text-[#1a1614]">{savedCount + goingCount}</p>
-              <p className="text-[10px] text-[#8a7a74]">Saved Events</p>
+              <p className="text-[10px] text-[#8a7a74]">Saved</p>
             </div>
           </Link>
           <Link
@@ -179,7 +191,7 @@ export default async function ProfilePage() {
             <div className="w-8 h-8 rounded-lg bg-[#006a62]/10 flex items-center justify-center">
               <Trophy className="w-4 h-4 text-[#006a62]" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-bold text-[#1a1614]">
                 {myRank >= 0 ? `#${myRank + 1}` : 'Unranked'}
               </p>
@@ -235,15 +247,30 @@ export default async function ProfilePage() {
           <h2 className="text-base font-black text-[#1a1614] mb-3" style={{ fontFamily: 'var(--font-epilogue)' }}>
             Notifications
           </h2>
-          <div className="bg-white rounded-xl border border-[#f0e4cc] p-4 flex items-center justify-between gap-3">
-            <div className="flex items-start gap-3">
-              <Bell className="w-4 h-4 text-[#9a442d] mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="text-sm font-semibold text-[#1a1614]">Event reminders</p>
-                <p className="text-[10px] text-[#8a7a74] mt-0.5">Get notified about new events and upcoming things you&apos;re going to</p>
+          <div className="bg-white rounded-xl border border-[#f0e4cc] divide-y divide-[#f0e4cc]">
+            <div className="p-4 flex items-center justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <Bell className="w-4 h-4 text-[#9a442d] mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-[#1a1614]">Event reminders</p>
+                  <p className="text-[10px] text-[#8a7a74] mt-0.5">Push notifications for events you&apos;re going to</p>
+                </div>
               </div>
+              <PushBell />
             </div>
-            <PushBell />
+            <Link
+              href="/profile/notifications"
+              className="p-4 flex items-center justify-between gap-3 hover:bg-[#fbf7f1]/60 transition-colors"
+            >
+              <div className="flex items-start gap-3">
+                <Bell className="w-4 h-4 text-[#4f6249] mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-[#1a1614]">What to hear about</p>
+                  <p className="text-[10px] text-[#8a7a74] mt-0.5">Categories, venues, artists, neighborhoods — only get notified about stuff you care about</p>
+                </div>
+              </div>
+              <span className="text-[#9a442d] text-lg">›</span>
+            </Link>
           </div>
         </section>
 

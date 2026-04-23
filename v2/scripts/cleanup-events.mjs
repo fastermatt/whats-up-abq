@@ -151,6 +151,80 @@ async function main() {
     console.log(`  [eb_spam_title_daily] hid ${hidden} rows`)
   }
 
+  // 5. Cross-source + intra-source duplicates.
+  //    Key: (title, date, venue_name, localTime5). Keep highest-scoring row per key.
+  //    Scoring: has-time > TM-canonical-G5vzZ prefix > TM > SG > photo present.
+  //    Also: timeless listings are hidden when a timed sibling exists.
+  {
+    const { data: live } = await supabase.schema('public').from('events')
+      .select('id, source, raw, event_date, venue_name, cached_photo_url')
+      .eq('hidden', false)
+      .gte('event_date', today)
+    let hidden = 0
+    if (live) {
+      // Build scoring
+      const scored = live.map(e => {
+        const title = typeof e.raw?.name === 'string' ? e.raw.name : (e.raw?.name?.text || e.raw?.title || '')
+        const lt    = e.raw?.dates?.start?.localTime ?? null
+        const lt5   = typeof lt === 'string' ? lt.slice(0, 5) : ''
+        const score = (lt ? 100 : 0)
+                    + (e.source === 'ticketmaster' && String(e.id).startsWith('ticketmaster_G5vzZ') ? 50 : 0)
+                    + (e.source === 'ticketmaster' ? 20 : 0)
+                    + (e.source === 'seatgeek'     ? 10 : 0)
+                    + (e.cached_photo_url ? 5 : 0)
+        return { id: e.id, title: String(title).trim(), date: e.event_date, venue: (e.venue_name || '').trim(), lt5, score }
+      }).filter(x => x.title && x.venue)
+
+      // Group by title+date+venue
+      const groups = new Map()
+      for (const s of scored) {
+        const k = `${s.title}|${s.date}|${s.venue}`
+        if (!groups.has(k)) groups.set(k, [])
+        groups.get(k).push(s)
+      }
+
+      const toHide = new Set()
+      for (const [, arr] of groups) {
+        if (arr.length < 2) continue
+        // Same-time dedup buckets
+        const byTime = new Map()
+        for (const s of arr) {
+          const t = s.lt5 || '__none__'
+          if (!byTime.has(t)) byTime.set(t, [])
+          byTime.get(t).push(s)
+        }
+        // Same time → keep highest score
+        for (const [t, group] of byTime) {
+          if (t === '__none__' || group.length < 2) continue
+          group.sort((a, b) => b.score - a.score || a.id.localeCompare(b.id))
+          for (let i = 1; i < group.length; i++) toHide.add(group[i].id)
+        }
+        // Timeless listings that have a timed sibling → hide
+        const hasTimed = [...byTime.keys()].some(k => k !== '__none__')
+        if (hasTimed && byTime.has('__none__')) {
+          for (const s of byTime.get('__none__')) toHide.add(s.id)
+        }
+      }
+
+      if (toHide.size > 0) {
+        const ids = [...toHide]
+        const now = new Date().toISOString()
+        for (let i = 0; i < ids.length; i += 200) {
+          const chunk = ids.slice(i, i + 200)
+          const { data: existing } = await supabase.schema('public').from('events')
+            .select('id, ai_enrichment').in('id', chunk)
+          await Promise.all((existing || []).map(async row => {
+            const merged = { ...(row.ai_enrichment || {}), hide_reason: 'auto_dedup_daily', hidden_at: now }
+            const { error } = await supabase.schema('public').from('events')
+              .update({ hidden: true, ai_enrichment: merged }).eq('id', row.id)
+            if (!error) hidden += 1
+          }))
+        }
+      }
+      console.log(`  [auto_dedup_daily] hid ${hidden} dup row(s)`)
+    }
+  }
+
   console.log('\n✅ Cleanup complete')
 }
 

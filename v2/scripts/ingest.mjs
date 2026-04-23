@@ -559,6 +559,11 @@ async function main() {
     const r = await runScript('cleanup-events.mjs')
     if (r.ok) ok(`cleanup-events (${(r.durationMs/1000).toFixed(1)}s)`)
     else fail(`cleanup-events failed (exit=${r.exitCode})`)
+
+    step('Notification matcher (user prefs → events)')
+    const mnRes = await runScript('match-notifications.mjs')
+    if (mnRes.ok) ok(`match-notifications (${(mnRes.durationMs/1000).toFixed(1)}s)`)
+    else warn(`match-notifications failed (exit=${mnRes.exitCode}) — not fatal`)
   } else {
     warn('Skipped enrichment (--skip-enrich)')
   }

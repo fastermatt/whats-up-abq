@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Compass, Calendar, MapPin, User, Trophy, PlusCircle, Moon, CalendarDays } from 'lucide-react'
+import { Compass, Calendar, MapPin, User, Trophy, PlusCircle, Moon, CalendarDays, Sparkles } from 'lucide-react'
 
 const NAV_ITEMS = [
   { href: '/',              label: 'Discover',      Icon: Compass },
   { href: '/events',        label: 'Events',        Icon: Calendar },
+  { href: '/for-you',       label: 'For You',       Icon: Sparkles },
   { href: '/tonight',       label: 'Tonight',       Icon: Moon },
   { href: '/weekend',       label: 'Weekend',       Icon: CalendarDays },
   { href: '/things-to-do', label: 'Things To Do',  Icon: MapPin },
