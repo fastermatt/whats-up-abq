@@ -147,6 +147,10 @@ const CAPTCHA_HOSTS = /abqtodo\.com|nhccnm\.org|lovenm\.org|do505\.com/
 // are spotted (multiple distinct source URLs returning identical bytes).
 const PLACEHOLDER_HASHES = new Set([
   'e9bd5d127ea719b6e5a2a1384173123c',  // abqtodo 400x304 WP error placeholder
+  '336632ccecb6e1590bdebb49771d9f53',  // SG 280x210 cartoon redhead-with-guitar
+                                       // placeholder. Served byte-identical for
+                                       // performers lacking real art (Letdown,
+                                       // Crane Wives, ADULT., Cheekface, etc.)
 ])
 
 async function sha256First(buffer) {
@@ -363,6 +367,18 @@ async function main() {
       console.log(`  ✗ download failed: ${dl.reason}`)
       failures.push({ id, step: 'download', reason: dl.reason, sourceUrl })
       stats.failed++
+
+      // If the source served a known-bad placeholder (blacklisted MD5),
+      // reject the event's image_status so we stop trying on every re-run
+      // and the event falls back to its category image sitewide.
+      if (dl.reason && dl.reason.startsWith('placeholder-match')) {
+        // eslint-disable-next-line
+        const { error: rejErr } = await supabase
+          .schema('public').from('events')
+          .update({ image_status: 'rejected' })
+          .eq('id', id)
+        if (!rejErr) console.log(`  🚫 auto-rejected (placeholder source) — fallback to category image`)
+      }
       continue
     }
     stats.downloaded++
