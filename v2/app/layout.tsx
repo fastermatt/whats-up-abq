@@ -119,11 +119,11 @@ export default function RootLayout({
 
             {/* ── Site footer ── */}
             <footer className="mt-16 pb-6 w-full flex flex-col items-center gap-4 select-none" aria-label="Site footer">
-              {/* Ornamental rule */}
-              <div className="flex items-center gap-3 w-full max-w-[240px]">
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#c8b4a4] to-[#c8b4a4]" />
+              {/* Ornamental rule — left line shorter so dot sits above the ♥ */}
+              <div className="flex items-center gap-3">
+                <div className="w-[77px] h-px bg-gradient-to-r from-transparent via-[#c8b4a4] to-[#c8b4a4]" />
                 <div className="w-1 h-1 rounded-full bg-[#9a442d]/50" />
-                <div className="flex-1 h-px bg-gradient-to-l from-transparent via-[#c8b4a4] to-[#c8b4a4]" />
+                <div className="w-[135px] h-px bg-gradient-to-l from-transparent via-[#c8b4a4] to-[#c8b4a4]" />
               </div>
 
               {/* The line */}
