@@ -6,6 +6,7 @@ import DesktopNav from './components/DesktopNav'
 import { InstallPrompt } from './components/InstallPrompt'
 import { PWAManager } from './components/PWAManager'
 import { AuthCallbackCatcher } from './components/AuthCallbackCatcher'
+import { NewsletterBar } from './components/NewsletterBar'
 import { OG_IMAGE } from '@/lib/fallback-images'
 import './globals.css'
 
@@ -116,6 +117,9 @@ export default function RootLayout({
           <DesktopNav />
           <div className="pb-20 md:pb-0">
             {children}
+
+            {/* ── Newsletter signup ── */}
+            <NewsletterBar />
 
             {/* ── Site footer ── */}
             <footer className="mt-16 pb-6 w-full flex flex-col items-center gap-4 select-none" aria-label="Site footer">
