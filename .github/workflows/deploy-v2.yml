@@ -6,6 +6,7 @@ on:
     paths:
       - 'v2/**'
       - '.github/workflows/deploy-v2.yml'
+  workflow_dispatch:
 
 jobs:
   deploy:
