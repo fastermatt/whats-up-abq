@@ -104,7 +104,7 @@ async function callLM(prompt, retries = 2) {
   const payload = {
     model:       LM_MODEL,
     messages:    [{ role: 'user', content: prompt }],
-    temperature: 0.5,
+    temperature: 0.2,
     max_tokens:  1600,
     stream:      false,
   };
@@ -561,22 +561,24 @@ function buildPrompt(event) {
     ? `- Nearby dining (verified, use these): ${JSON.stringify(venueCtx.nearby_dining)}`
     : '';
 
-  return `You are a knowledgeable local Albuquerque guide helping people decide whether to attend an event and how to make a great night of it.
+  const hasSeeds = !!(venueCtx?.nearby_dining?.length);
+
+  const prompt = `You are a knowledgeable local Albuquerque guide helping people decide whether to attend an event.
 
 Given the event details below, produce a JSON object with EXACTLY these keys:
 
 {
-  "about": "1-2 SPECIFIC sentences about the performer, act, or event. What makes THIS event distinctive — the artist's sound, their story, the stakes, what the experience is like. Return null if you have nothing specific to say beyond the event title.",
+  "about": "1-2 SPECIFIC sentences about the performer, act, or event — the artist's sound, the teams/stakes, what makes THIS distinctive. Return null if you have nothing specific beyond restating the title.",
   "highlights": [
-    "One concrete, specific detail attendees will experience (not generic hype)",
-    "Another specific detail — an aspect of the performance, sport, or activity",
-    "A third highlight — could be practical, crowd vibe, or something unique about this particular event"
+    "A specific detail about the experience — NOT venue address, parking, or event time",
+    "Another specific detail about the performance, sport, or activity itself",
+    "Optional third highlight — only if you have a genuinely distinct third thing to say"
   ],
-  "venue_tips": "1-2 sentences: WHERE in Albuquerque the venue is (use the neighborhood context below if provided), plus useful parking or arrival info. Return null only if the venue is truly unknown and no address was given.",
+  "venue_tips": "WHERE in Albuquerque the venue is + parking/arrival info. Use the Venue neighborhood line verbatim if provided. Return null only if venue is completely unknown.",
   "nearby_dining": [
-    {"name": "Restaurant or bar name", "why": "What it's known for and why it pairs well with this event"}
+    {"name": "Restaurant name", "why": "What it is and why it pairs with this event"}
   ],
-  "local_rec": "One insider tip — something a local would know about this venue, this neighborhood, or this kind of event in ABQ that makes the experience better. Return null if you have nothing specific."
+  "local_rec": "One SPECIFIC verifiable insider tip about this exact venue or neighborhood in ABQ. Return null if you cannot name something concrete."
 }
 
 EVENT DETAILS:
@@ -589,20 +591,25 @@ ${parkingLine}
 ${diningSeeds}
 ${info ? `- Description: ${info.slice(0, 500)}` : ''}
 
-RULES — read carefully:
-1. Return ONLY the raw JSON object. No markdown fences, no explanation, no preamble.
-2. "highlights" MUST be an array of exactly 3 strings. All 3 must be event-specific, not generic category platitudes.
-3. CRITICAL: If a "Venue neighborhood" line is provided, use that exact phrasing in venue_tips. Never contradict it.
-4. "nearby_dining": Use the verified dining seeds above if provided — include 2-3 of them. If NO seeds are provided, name only real, specific ABQ restaurants you are confident are near this address. If you are not confident, return an EMPTY array []. Never invent restaurants or give vague suggestions like "there are many nearby options."
-5. "about": If the event is a recurring class, library program, or generic community meeting with no interesting performer or angle, return null. Do not write "This is a great opportunity to..."
-6. "local_rec": Name a specific thing locals know — a parking trick, a venue quirk, a pre-show tradition. Return null rather than something generic.
-7. Never mention specific days of the week in "about" or "highlights" unless the event details explicitly state them.
-8. If the venue is in Rio Rancho or Santa Fe, note that in venue_tips (these are NOT in Albuquerque).
-9. For volunteer/service events: describe what participants actually DO, not logistics.`;
+RULES — follow exactly:
+1. Return ONLY the raw JSON object. No markdown fences, no preamble, no trailing text.
+2. "about": Return null for generic community meetings, recurring library programs, or any event where you can only restate the title. Never write "This promises to be..." or "This is a great opportunity to..."
+3. "highlights": Return 2–3 items. EVERY item must be specific to THIS event. NEVER include venue address, parking info, event start time, or anything that belongs in venue_tips. Return 2 items rather than padding to 3.
+4. "venue_tips": Use the "Venue neighborhood" line verbatim if provided. Never contradict it.
+5. "nearby_dining": ${hasSeeds
+    ? 'Use the verified "Nearby dining" seeds listed above — include 2–3 of them. Do not add any others.'
+    : 'Return [] — no dining seeds were provided for this venue. Do NOT suggest any restaurants.'
+  }
+6. "local_rec": Return null UNLESS you know a SPECIFIC, VERIFIABLE fact about this exact venue — e.g., "The KiMo has a stunning 1927 Pueblo Deco lobby worth arriving early for" or "Exit Isleta Amphitheater via Isleta Blvd south — the I-25 ramp backs up for miles after big shows." Generic tips like "near the freeway so check traffic" or "parking can be busy" are NOT acceptable. Return null.
+7. Never state specific day names (Monday, Friday…) unless the event text explicitly says them.
+8. If venue is in Rio Rancho or Santa Fe, note the distance from Albuquerque in venue_tips.
+9. For volunteer/service events: say what participants actually DO, not why it matters.`;
+
+  return { prompt, hasSeeds };
 }
 
 // ── Parse LM response ─────────────────────────────────────────────────────────
-function parseEnrichment(text) {
+function parseEnrichment(text, hasSeeds = false) {
   // Strip thinking tags if present (some models emit <think>...</think>)
   text = text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
   // Strip markdown code fences
@@ -621,18 +628,46 @@ function parseEnrichment(text) {
     nearby_dining = parsed.nearby_dining
       .filter(d => d && typeof d.name === 'string' && d.name.trim())
       .map(d => ({ name: d.name.trim(), why: (d.why || '').trim() }))
-      .slice(0, 4); // cap at 4 entries
+      .slice(0, 4);
+  }
+  // Hard rule: no seeds → no suggestions (model hallucinate restaurant names)
+  if (!hasSeeds) nearby_dining = [];
+
+  // Null out generic local_recs — these are things any LLM would write for any venue
+  let local_rec = typeof parsed.local_rec === 'string' ? parsed.local_rec.trim() : null;
+  const GENERIC_LOCAL_REC_PATTERNS = [
+    /traffic\s+cam/i,
+    /live\s+traffic/i,
+    /unexpected\s+congestion/i,
+    /before\s+heading\s+over/i,
+    /near.*freeway.*locals/i,
+    /locals\s+often\s+recommend/i,
+    /great\s+(opportunity|way\s+to)/i,
+    /consider\s+arriving\s+early/i,
+  ];
+  if (local_rec && GENERIC_LOCAL_REC_PATTERNS.some(p => p.test(local_rec))) {
+    local_rec = null;
   }
 
-  // Validate and sanitize
+  // Filter highlights: remove venue-location / parking / time padding
+  let highlights = Array.isArray(parsed.highlights)
+    ? parsed.highlights.map(h => String(h).trim()).filter(h => h.length > 10)
+    : [];
+  const HIGHLIGHT_PADDING = [
+    /^(the\s+event\s+takes\s+place\s+at|this\s+is\s+an?\s+(evening|morning|afternoon))/i,
+    /parking\s+lot\s+located/i,
+    /free\s+(on-?site\s+)?parking/i,
+    /attendees\s+can\s+utilize/i,
+  ];
+  highlights = highlights.filter(h => !HIGHLIGHT_PADDING.some(p => p.test(h)));
+
   return {
-    about:          typeof parsed.about       === 'string'  ? parsed.about.trim()                          : null,
-    highlights:     Array.isArray(parsed.highlights)        ? parsed.highlights.map(h => String(h).trim())  : [],
-    venue_tips:     typeof parsed.venue_tips  === 'string'  ? parsed.venue_tips.trim()                     : null,
+    about:          typeof parsed.about       === 'string'  ? parsed.about.trim()    : null,
+    highlights,
+    venue_tips:     typeof parsed.venue_tips  === 'string'  ? parsed.venue_tips.trim() : null,
     nearby_dining,
-    local_rec:      typeof parsed.local_rec   === 'string'  ? parsed.local_rec.trim()                      : null,
-    // Backwards compat: carry forward local_tips if still present in old responses
-    local_tips:     typeof parsed.local_tips  === 'string'  ? parsed.local_tips.trim()                     : null,
+    local_rec,
+    local_tips:     typeof parsed.local_tips  === 'string'  ? parsed.local_tips.trim() : null,
   };
 }
 
@@ -689,9 +724,9 @@ async function main() {
   async function processOne(row) {
     const eventName = row.raw?.name || row.id;
     try {
-      const prompt     = buildPrompt(row);
+      const { prompt, hasSeeds } = buildPrompt(row);
       const response   = await callLM(prompt);
-      const enrichment = parseEnrichment(response);
+      const enrichment = parseEnrichment(response, hasSeeds);
       await sbPatch('events', row.id, { ai_enrichment: enrichment });
       done++;
       console.log(`  ✅ [${done}/${toProcess.length}] ${eventName}`);
