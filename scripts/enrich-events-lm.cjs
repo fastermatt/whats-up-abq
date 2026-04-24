@@ -562,6 +562,7 @@ function buildPrompt(event) {
     : '';
 
   const hasSeeds = !!(venueCtx?.nearby_dining?.length);
+  const hasVenue = !!(venueName && venueName.trim().length);
 
   const prompt = `You are a knowledgeable local Albuquerque guide helping people decide whether to attend an event.
 
@@ -593,23 +594,24 @@ ${info ? `- Description: ${info.slice(0, 500)}` : ''}
 
 RULES — follow exactly:
 1. Return ONLY the raw JSON object. No markdown fences, no preamble, no trailing text.
-2. "about": Return null for generic community meetings, recurring library programs, or any event where you can only restate the title. Never write "This promises to be..." or "This is a great opportunity to..."
-3. "highlights": Return 2–3 items. EVERY item must be specific to THIS event. NEVER include venue address, parking info, event start time, or anything that belongs in venue_tips. Return 2 items rather than padding to 3.
-4. "venue_tips": Use the "Venue neighborhood" line verbatim if provided. Never contradict it.
+2. "about": If NO "Description:" line is provided below, return null. Do NOT infer what the event is from the title alone — a person's name, a band name, or a generic title is NOT enough. Never write "This promises to be...", "This is a great opportunity to...", or describe a performer's style/sound/genre unless the description explicitly says it.
+3. "highlights": Every item MUST come from facts in the Description or title. NEVER invent crowd vibe, performer style, atmosphere, capacity, or audience experience. If you have no description, return at most 1 highlight that ONLY restates the category ("Stand-up comedy performance.", "Live music event.", "Community workshop."). NEVER include venue address, parking, start time, or venue-capacity claims like "designed for large-scale performances" or "a dedicated evening of entertainment" — those are venue_tips content, not highlights. Prefer 1–2 honest bullets over 3 padded ones.
+4. "venue_tips": Use the "Venue neighborhood" line verbatim if provided. If no Venue was provided at all above, return null. Never invent a neighborhood name not in the known ABQ neighborhoods (Downtown, EDo, Nob Hill, UNM, Old Town, North Valley, South Valley, Barelas, NE Heights, NW, Far NE Heights, West Side, Uptown, Midtown, State Fairgrounds, Rio Rancho).
 5. "nearby_dining": ${hasSeeds
     ? 'Use the verified "Nearby dining" seeds listed above — include 2–3 of them. Do not add any others.'
     : 'Return [] — no dining seeds were provided for this venue. Do NOT suggest any restaurants.'
   }
-6. "local_rec": Return null UNLESS you know a SPECIFIC, VERIFIABLE fact about this exact venue — e.g., "The KiMo has a stunning 1927 Pueblo Deco lobby worth arriving early for" or "Exit Isleta Amphitheater via Isleta Blvd south — the I-25 ramp backs up for miles after big shows." Generic tips like "near the freeway so check traffic" or "parking can be busy" are NOT acceptable. Return null.
+6. "local_rec": Return null UNLESS you know a SPECIFIC, VERIFIABLE fact about this exact venue — e.g., "The KiMo has a stunning 1927 Pueblo Deco lobby worth arriving early for" or "Exit Isleta Amphitheater via Isleta Blvd south — the I-25 ramp backs up for miles after big shows." Generic tips like "near the freeway so check traffic", "parking can be busy", or "the theater itself is a piece of history" are NOT acceptable. Return null.
 7. Never state specific day names (Monday, Friday…) unless the event text explicitly says them.
 8. If venue is in Rio Rancho or Santa Fe, note the distance from Albuquerque in venue_tips.
-9. For volunteer/service events: say what participants actually DO, not why it matters.`;
+9. For volunteer/service events: say what participants actually DO, not why it matters.
+10. NEVER invent practical claims like "bring a camera", "cannot be taken home", "free for members", "RSVP required" unless the description explicitly states them.`;
 
-  return { prompt, hasSeeds };
+  return { prompt, hasSeeds, hasVenue, hasDescription: !!(info && info.trim().length) };
 }
 
 // ── Parse LM response ─────────────────────────────────────────────────────────
-function parseEnrichment(text, hasSeeds = false) {
+function parseEnrichment(text, { hasSeeds = false, hasVenue = false, hasDescription = false } = {}) {
   // Strip thinking tags if present (some models emit <think>...</think>)
   text = text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
   // Strip markdown code fences
@@ -649,7 +651,8 @@ function parseEnrichment(text, hasSeeds = false) {
     local_rec = null;
   }
 
-  // Filter highlights: remove venue-location / parking / time padding
+  // Filter highlights: remove venue-location / parking / time padding, and generic
+  // "attendees can expect" / "designed for large-scale" style filler.
   let highlights = Array.isArray(parsed.highlights)
     ? parsed.highlights.map(h => String(h).trim()).filter(h => h.length > 10)
     : [];
@@ -657,14 +660,35 @@ function parseEnrichment(text, hasSeeds = false) {
     /^(the\s+event\s+takes\s+place\s+at|this\s+is\s+an?\s+(evening|morning|afternoon))/i,
     /parking\s+lot\s+located/i,
     /free\s+(on-?site\s+)?parking/i,
-    /attendees\s+can\s+utilize/i,
+    /attendees\s+can\s+(utilize|expect)/i,
+    /designed\s+for\s+(large-?scale|major)/i,
+    /dedicated\s+evening\s+of\s+entertainment/i,
+    /offers?\s+a\s+unique\s+(entertainment|experience|setting)/i,
+    /within\s+the\s+(large|major|historic)\s+[\w\s]+\s+(complex|setting)/i,
+    /takes\s+place\s+(within|in)\s+the\s+\w+/i,
+    /professional\s+and\s+engaging\s+evening/i,
   ];
   highlights = highlights.filter(h => !HIGHLIGHT_PADDING.some(p => p.test(h)));
 
+  // Hard guards: zero fabrications when source data is missing.
+  // 1) No description → no `about`. Title alone is not enough.
+  let about = typeof parsed.about === 'string' ? parsed.about.trim() : null;
+  if (!hasDescription) about = null;
+
+  // 2) No venue → no venue_tips and no nearby_dining (can't be accurate without a venue).
+  let venue_tips = typeof parsed.venue_tips === 'string' ? parsed.venue_tips.trim() : null;
+  if (!hasVenue) {
+    venue_tips = null;
+    nearby_dining = [];
+  }
+
+  // 3) If we have no description, cap highlights at 1 (a safe category restatement).
+  if (!hasDescription) highlights = highlights.slice(0, 1);
+
   return {
-    about:          typeof parsed.about       === 'string'  ? parsed.about.trim()    : null,
+    about,
     highlights,
-    venue_tips:     typeof parsed.venue_tips  === 'string'  ? parsed.venue_tips.trim() : null,
+    venue_tips,
     nearby_dining,
     local_rec,
     local_tips:     typeof parsed.local_tips  === 'string'  ? parsed.local_tips.trim() : null,
@@ -724,9 +748,9 @@ async function main() {
   async function processOne(row) {
     const eventName = row.raw?.name || row.id;
     try {
-      const { prompt, hasSeeds } = buildPrompt(row);
+      const { prompt, hasSeeds, hasVenue, hasDescription } = buildPrompt(row);
       const response   = await callLM(prompt);
-      const enrichment = parseEnrichment(response, hasSeeds);
+      const enrichment = parseEnrichment(response, { hasSeeds, hasVenue, hasDescription });
       await sbPatch('events', row.id, { ai_enrichment: enrichment });
       done++;
       console.log(`  ✅ [${done}/${toProcess.length}] ${eventName}`);
