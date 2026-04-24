@@ -371,6 +371,10 @@ export default async function EventDetailPage({ params }: PageProps) {
               rel="noopener noreferrer"
               className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#9a442d] text-white font-semibold text-sm hover:bg-[#7d3725] transition-all duration-300 hover:shadow-lg hover:shadow-[#9a442d]/20 hover:scale-[1.02]"
               style={{ fontFamily: 'var(--font-epilogue)' }}
+              data-umami-event="ticket-click"
+              data-umami-event-event-id={event.id}
+              data-umami-event-source={event.source}
+              data-umami-event-label={getCtaLabel(event.source, event.price, event.ticketUrl, isFree)}
             >
               {getCtaLabel(event.source, event.price, event.ticketUrl, isFree)}
               <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
