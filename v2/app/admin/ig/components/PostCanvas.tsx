@@ -7,6 +7,7 @@ import useImage from 'use-image'
 import type { Slide, Layer, TextLayer, ImageLayer, ShapeLayer, CanvasFormat } from '../types'
 import { CANVAS_DIMS } from '../types'
 import { useEditor } from '../store'
+import { proxyIfNeeded } from '../lib/image-proxy'
 
 // ── Background renderer ──────────────────────────────────────────────────
 
@@ -36,7 +37,7 @@ function Background({ slide, w, h }: { slide: Slide; w: number; h: number }) {
 
 function BackgroundImage({ slide, w, h }: { slide: Slide; w: number; h: number }) {
   const bg = slide.background as Extract<Slide['background'], { type: 'image' }>
-  const [img] = useImage(bg.src, 'anonymous')
+  const [img] = useImage(proxyIfNeeded(bg.src), 'anonymous')
   if (!img) return <Rect x={0} y={0} width={w} height={h} fill="#222" listening={false} />
   const ar = img.width / img.height
   const target = w / h
@@ -120,7 +121,7 @@ function ImageNode({ layer, onSelect, onChange }: {
   onChange: (patch: Partial<ImageLayer>) => void
 }) {
   const ref = useRef<Konva.Image>(null)
-  const [img] = useImage(layer.src, 'anonymous')
+  const [img] = useImage(proxyIfNeeded(layer.src), 'anonymous')
   return (
     <KImage
       ref={ref}
