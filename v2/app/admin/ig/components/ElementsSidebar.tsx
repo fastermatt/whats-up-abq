@@ -1,0 +1,105 @@
+'use client'
+
+import { useEditor, makeTextLayer, makeImageLayer, makeShapeLayer } from '../store'
+import { CANVAS_DIMS, BRAND_COLORS } from '../types'
+import type { Layer } from '../types'
+import { Type, ImageIcon, Square, Circle as CircleIcon, Minus, Eye, EyeOff, Lock, Unlock, Trash2, ChevronUp, ChevronDown, Copy } from 'lucide-react'
+
+function LeftIcon({ label, onClick, children }: { label: string; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button onClick={onClick} title={label}
+      className="w-full flex flex-col items-center gap-1 py-3 px-2 rounded-lg hover:bg-white/[0.06] text-white/70 hover:text-white transition-colors">
+      {children}
+      <span className="text-[10px] font-semibold">{label}</span>
+    </button>
+  )
+}
+
+export function ElementsSidebar() {
+  const { design, addLayer, getActiveSlide, selectedLayerId, selectLayer, updateLayer, removeLayer, duplicateLayer, reorderLayer } = useEditor()
+  const { w, h } = CANVAS_DIMS[design.format]
+  const slide = getActiveSlide()
+
+  const addText = () => addLayer(makeTextLayer({ x: w / 2 - 300, y: h / 2 - 60, width: 600, text: 'Double-click to edit', align: 'center', fontSize: 80 }))
+  const addHeadline = () => addLayer(makeTextLayer({
+    x: w / 2 - 400, y: h / 2 - 100, width: 800, text: 'HEADLINE',
+    fontSize: 160, fontWeight: 900, fill: BRAND_COLORS.ink, align: 'center',
+    fontFamily: 'var(--font-epilogue), Epilogue, sans-serif',
+  }))
+  const addImage = (src: string) => addLayer(makeImageLayer({ src, x: w / 2 - 300, y: h / 2 - 300, width: 600, height: 600 }))
+  const addRect = () => addLayer(makeShapeLayer({ shape: 'rect', x: w / 2 - 200, y: h / 2 - 100, width: 400, height: 200, fill: BRAND_COLORS.terra, cornerRadius: 12 }))
+  const addCircle = () => addLayer(makeShapeLayer({ shape: 'circle', x: w / 2 - 150, y: h / 2 - 150, width: 300, height: 300, fill: BRAND_COLORS.turquoise }))
+  const addLine = () => addLayer(makeShapeLayer({ shape: 'line', x: w / 2 - 300, y: h / 2, width: 600, height: 4, fill: BRAND_COLORS.ink }))
+  const addLogo = () => addLayer(makeImageLayer({ src: '/logo-icon.svg', x: 60, y: 60, width: 180, height: 180 }))
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => addImage(String(reader.result))
+    reader.readAsDataURL(file)
+    e.target.value = ''
+  }
+
+  return (
+    <div className="w-[220px] shrink-0 bg-[#0d0d0d] border border-white/[0.07] rounded-xl flex flex-col max-h-[calc(100vh-180px)]">
+      {/* Add elements */}
+      <div className="p-2 border-b border-white/[0.06]">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 px-2 mb-1.5">Add</p>
+        <div className="grid grid-cols-3 gap-1">
+          <LeftIcon label="Text"     onClick={addText}>    <Type size={18} /></LeftIcon>
+          <LeftIcon label="Headline" onClick={addHeadline}><Type size={22} strokeWidth={2.5} /></LeftIcon>
+          <label className="w-full flex flex-col items-center gap-1 py-3 px-2 rounded-lg hover:bg-white/[0.06] text-white/70 hover:text-white transition-colors cursor-pointer" title="Image">
+            <ImageIcon size={18} />
+            <span className="text-[10px] font-semibold">Image</span>
+            <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+          </label>
+          <LeftIcon label="Rect"   onClick={addRect}>  <Square size={18} /></LeftIcon>
+          <LeftIcon label="Circle" onClick={addCircle}><CircleIcon size={18} /></LeftIcon>
+          <LeftIcon label="Line"   onClick={addLine}>  <Minus size={18} /></LeftIcon>
+        </div>
+        <div className="grid grid-cols-1 gap-1 mt-1">
+          <LeftIcon label="ABQ Logo" onClick={addLogo}><span className="text-base">🌵</span></LeftIcon>
+        </div>
+      </div>
+
+      {/* Layers list */}
+      <div className="flex-1 overflow-y-auto min-h-0">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 px-3 pt-3 pb-1.5">Layers ({slide.layers.length})</p>
+        <div className="px-2 pb-2 space-y-0.5">
+          {[...slide.layers].reverse().map((layer: Layer) => {
+            const selected = layer.id === selectedLayerId
+            return (
+              <div key={layer.id}
+                onClick={() => selectLayer(layer.id)}
+                className={`group flex items-center gap-1.5 px-2 py-1.5 rounded cursor-pointer ${
+                  selected ? 'bg-[#9a442d]/30 text-white' : 'hover:bg-white/[0.04] text-white/70'
+                }`}>
+                <button onClick={e => { e.stopPropagation(); updateLayer(layer.id, { visible: !layer.visible }) }}
+                  className="text-white/40 hover:text-white">
+                  {layer.visible ? <Eye size={12} /> : <EyeOff size={12} />}
+                </button>
+                <button onClick={e => { e.stopPropagation(); updateLayer(layer.id, { locked: !layer.locked }) }}
+                  className="text-white/40 hover:text-white">
+                  {layer.locked ? <Lock size={12} /> : <Unlock size={12} />}
+                </button>
+                <span className="flex-1 text-[11px] truncate">
+                  {layer.type === 'text' ? (layer as { text: string }).text.slice(0, 18) : layer.name}
+                </span>
+                <div className="hidden group-hover:flex items-center gap-0.5">
+                  <button onClick={e => { e.stopPropagation(); reorderLayer(layer.id, 'up') }}   className="text-white/40 hover:text-white p-0.5"><ChevronUp size={11} /></button>
+                  <button onClick={e => { e.stopPropagation(); reorderLayer(layer.id, 'down') }} className="text-white/40 hover:text-white p-0.5"><ChevronDown size={11} /></button>
+                  <button onClick={e => { e.stopPropagation(); duplicateLayer(layer.id) }}       className="text-white/40 hover:text-white p-0.5"><Copy size={11} /></button>
+                  <button onClick={e => { e.stopPropagation(); removeLayer(layer.id) }}          className="text-red-400/70 hover:text-red-300 p-0.5"><Trash2 size={11} /></button>
+                </div>
+              </div>
+            )
+          })}
+          {slide.layers.length === 0 && (
+            <p className="text-[11px] text-white/30 italic px-2 py-3">No layers yet — use Add above.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
