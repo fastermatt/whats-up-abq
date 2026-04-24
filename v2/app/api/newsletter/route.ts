@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
-const PUBLICATION_ID = 'ad8d3710-77c3-4bda-947b-18a1497ccbc6'
+const PUBLICATION_ID = 'pub_ad8d3710-77c3-4bda-947b-18a1497ccbc6'
 
 export async function POST(req: NextRequest) {
   const { email } = await req.json().catch(() => ({}))
