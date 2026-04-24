@@ -30,6 +30,7 @@ jobs:
       NEXT_PUBLIC_SITE_URL: https://abqunplugged.com
       NEXT_PUBLIC_SITE_NAME: ABQ Unplugged
       NOMINATIM_USER_AGENT: ${{ secrets.NOMINATIM_USER_AGENT }}
+      BEEHIIV_API_KEY: ${{ secrets.BEEHIIV_API_KEY }}
       NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
       NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
 
