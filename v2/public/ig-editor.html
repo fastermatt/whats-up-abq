@@ -1516,16 +1516,26 @@ async function fetchFromUrl(){
     });
     if (newBullets) document.getElementById('bullets').value = newBullets.join('\n');
 
-    // Route image through our proxy so html2canvas can capture it on export
-    // without CORS restrictions. Same-origin paths (/fallbacks/...) are already
-    // local — no proxy needed and it would create a pointless round-trip.
+    // Only proxy domains that CAPTCHA-block direct browser requests.
+    // Supabase/R2/TM/SG/EB all serve Access-Control-Allow-Origin:* so
+    // html2canvas can capture them directly — no proxy needed, and proxying
+    // them causes stale-cache divergence (7-day browser cache on the proxy
+    // URL means a changed Supabase image won't appear for a week).
+    const CAPTCHA_DOMAINS = ['abqtodo.com','nhccnm.org','do505.com','lovenm.org'];
     if (rawImageUrl) {
-      state.imageUrl = rawImageUrl.startsWith('/')
-        ? rawImageUrl
-        : '/api/image-proxy?url=' + encodeURIComponent(rawImageUrl);
+      let resolvedUrl = rawImageUrl;
+      if (!rawImageUrl.startsWith('/')) {
+        try {
+          const host = new URL(rawImageUrl).hostname;
+          if (CAPTCHA_DOMAINS.some(d => host === d || host.endsWith('.' + d))) {
+            resolvedUrl = '/api/image-proxy?url=' + encodeURIComponent(rawImageUrl);
+          }
+        } catch {}
+      }
+      state.imageUrl = resolvedUrl;
       const prev = document.getElementById('dropPreview');
       const txt  = document.getElementById('dropText');
-      if (prev){ prev.src = state.imageUrl; prev.style.display = 'block'; }
+      if (prev){ prev.src = resolvedUrl; prev.style.display = 'block'; }
       if (txt)  txt.textContent = 'Event image';
     }
 
