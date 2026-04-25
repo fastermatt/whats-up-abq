@@ -803,7 +803,14 @@ function normalizeTM(row: RawEventRow): NormalizedEvent {
 
 function normalizeEB(row: RawEventRow): NormalizedEvent {
   const r = row.raw as Record<string, unknown>
-  const venue = r.venue as Record<string, unknown> | undefined
+  // EB events are stored in TM-compatible format — venue lives in _embedded.venues[0].
+  // r.venue (native EB format) is null for all ingested rows; kept as fallback for any edge cases.
+  const embedded = r._embedded as Record<string, unknown> | undefined
+  const embeddedVenues = embedded?.venues as Array<Record<string, unknown>> | undefined
+  const embeddedVenue = embeddedVenues?.[0] ?? null
+  const nativeVenue = r.venue as Record<string, unknown> | undefined
+  const venue = embeddedVenue ?? nativeVenue ?? null
+  const isTMFormat = embeddedVenue != null   // TM format uses city.name; native EB uses address.city
   // Data is stored in TM-compatible camelCase (isFree) not native EB snake_case (is_free)
   const isFree = (r.isFree ?? r.is_free) as boolean | undefined
   const tickets = r.ticket_availability as Record<string, unknown> | undefined
@@ -839,9 +846,13 @@ function normalizeEB(row: RawEventRow): NormalizedEvent {
       : ebNativeLocal ? formatTime(ebNativeLocal)
       : ebNativeUtc   ? formatTime(ebNativeUtc)
       : null,
-    venue: (venue?.name as string | undefined)?.trim() || 'Online',
-    address: venue ? buildEBAddress(venue) : null,
-    city: (venue?.address as Record<string, unknown> | undefined)?.city as string | null ?? null,
+    venue: (venue?.name as string | undefined)?.trim() || row.venue_name || null,
+    address: venue
+      ? (isTMFormat ? buildTMAddress(venue) : buildEBAddress(venue))
+      : null,
+    city: isTMFormat
+      ? (venue?.city as Record<string, unknown> | undefined)?.name as string | null ?? null
+      : (venue?.address as Record<string, unknown> | undefined)?.city as string | null ?? null,
     ...mapCategory(
       (r.category as Record<string, unknown> | undefined)?.name as string | undefined,
       title
