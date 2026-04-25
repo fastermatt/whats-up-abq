@@ -311,7 +311,15 @@ function transformEventbriteJsonLd(item, timeBySlug, rejections) {
   }
   // Fix 4: 00:00 means "no time known" — null it out so app shows "Time TBD" not "12:00 AM"
   if (localTime === '00:00' || localTime === '00:00:00') localTime = undefined;
-  const loc     = item.location || {};
+  // Eventbrite hybrid events emit location as an array: [Place, VirtualLocation].
+  // Always prefer the physical Place; only use VirtualLocation if no Place exists.
+  const rawLoc = item.location;
+  const locList = Array.isArray(rawLoc) ? rawLoc : (rawLoc ? [rawLoc] : []);
+  const loc = locList.find(l => l['@type'] === 'Place')
+           || locList.find(l => l['@type'] !== 'VirtualLocation')
+           || locList[0]
+           || {};
+  const isVirtual = loc['@type'] === 'VirtualLocation';
   const addr    = loc.address || {};
   const geo     = loc.geo    || {};
   const lat     = geo.latitude;
@@ -320,7 +328,9 @@ function transformEventbriteJsonLd(item, timeBySlug, rejections) {
   const stateName = addr.addressRegion   || '';
 
   // Hard geo-filter: online events always pass; physical events must be in ABQ metro
-  if (loc['@type'] !== 'VirtualLocation') {
+  if (isVirtual) {
+    // Pure online event — allow through but don't treat as physical
+  } else {
     const geoResult = eventbriteGeoCheck(cityName, stateName, lat, lng);
     if (!geoResult.pass) {
       if (rejections) rejections.push({ title: item.name, reason: geoResult.reason });
@@ -345,8 +355,11 @@ function transformEventbriteJsonLd(item, timeBySlug, rejections) {
     dates:   { start: { localDate, localTime } },
     _embedded: {
       venues: [{
-        name:    loc.name || addr.streetAddress || '',
-        address: { line1: addr.streetAddress || '' },
+        // Never let a VirtualLocation's name (e.g. "Online") become the venue name.
+        // For physical locations: prefer loc.name, fall back to street address.
+        // For virtual-only events: leave blank so the UI can show "Online Event".
+        name:    isVirtual ? '' : (loc.name || addr.streetAddress || ''),
+        address: { line1: isVirtual ? '' : (addr.streetAddress || '') },
         city:    { name: addr.addressLocality || 'Albuquerque' },
         state:   { name: addr.addressRegion || 'NM' },
         location: (lat && lng) ? { latitude: String(lat), longitude: String(lng) } : undefined,
