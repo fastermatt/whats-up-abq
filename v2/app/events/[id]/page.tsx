@@ -261,6 +261,12 @@ export default async function EventDetailPage({ params }: PageProps) {
                 {!timeStr && timesVary && (
                   <p className="text-[11px] text-[#4f6249] font-semibold">Times vary — see host site</p>
                 )}
+                {/* Persona testing flagged blank time as "looks broken" — show
+                    an explicit "Time TBA" fallback when the source didn't expose
+                    a start time and the event isn't a multi-session/walk-in event. */}
+                {!timeStr && !timesVary && (
+                  <p className="text-[11px] text-[#6b5d57] italic">Time TBA — see ticket page</p>
+                )}
               </div>
             </div>
           )}

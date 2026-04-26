@@ -352,6 +352,68 @@ const TESTS = [
         : { ok: false, detail: `${dupes} duplicate events: ${examples.join(', ')}` }
     },
   },
+  // ── Cross-source duplicates (SeatGeek ↔ Ticketmaster same showing) ─────
+  // Title strings differ across sources ("Mrs. Doubtfire (Touring)" vs
+  // "Mrs. Doubtfire - Albuquerque"), so the strict dupe test above misses
+  // these. This test matches on (date, venue, time, first-8-chars-of-title).
+  {
+    id: 'no-cross-source-duplicates',
+    tag: 'data-hygiene',
+    description: 'No SeatGeek ↔ Ticketmaster pairs sharing date+venue+time+title-prefix should both be visible',
+    async fn() {
+      const { data, error } = await sb
+        .from('events')
+        .select('id, source, raw, event_date, venue_name')
+        .eq('hidden', false)
+        .gte('event_date', new Date().toISOString().slice(0, 10))
+        .in('source', ['seatgeek', 'ticketmaster'])
+      if (error) return { ok: false, detail: error.message }
+      const seen = new Map()
+      let pairs = 0
+      const examples = []
+      for (const r of data || []) {
+        const title = (r.raw?.name ?? '').toString().toLowerCase().trim().slice(0, 8)
+        const time  = (r.raw?.dates?.start?.localTime ?? '').toString().slice(0, 5)
+        if (!title || !time || !r.venue_name) continue
+        const k = `${title}|${r.event_date}|${r.venue_name.toLowerCase()}|${time}`
+        if (seen.has(k) && seen.get(k).source !== r.source) {
+          pairs++
+          if (examples.length < 3) examples.push(`${seen.get(k).id}↔${r.id}`)
+        } else if (!seen.has(k)) {
+          seen.set(k, { id: r.id, source: r.source })
+        }
+      }
+      return pairs === 0
+        ? { ok: true, detail: 'no cross-source dupes' }
+        : { ok: false, detail: `${pairs} SG↔TM dupe pair(s): ${examples.join(', ')}` }
+    },
+  },
+  // ── Rio Rancho leaks ─────────────────────────────────────────────────────
+  {
+    id: 'no-rio-rancho-events',
+    tag: 'geo',
+    description: 'Rio Rancho is a separate city — should not appear in the visible feed',
+    async fn() {
+      const { data, error } = await sb
+        .from('events')
+        .select('id, venue_name, raw')
+        .eq('hidden', false)
+        .gte('event_date', new Date().toISOString().slice(0, 10))
+      if (error) return { ok: false, detail: error.message }
+      let hits = 0
+      const examples = []
+      for (const r of data || []) {
+        const blob = `${r.venue_name ?? ''} ${JSON.stringify(r.raw).slice(0, 2000)}`
+        if (/\b(rio rancho|87124|87144)\b/i.test(blob)) {
+          hits++
+          if (examples.length < 3) examples.push(r.id)
+        }
+      }
+      return hits === 0
+        ? { ok: true, detail: 'no Rio Rancho events visible' }
+        : { ok: false, detail: `${hits} Rio Rancho event(s) visible: ${examples.join(', ')}` }
+    },
+  },
   // ── Image status integrity (#20) ────────────────────────────────────────
   {
     id: 'rejected-images-have-no-url',

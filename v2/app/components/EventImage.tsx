@@ -13,12 +13,17 @@ import { useState } from 'react'
  * pass it in. This component just handles the swap.
  */
 
-/** Domains that CAPTCHA/hotlink-block direct browser loads */
+/** Domains that CAPTCHA/hotlink-block direct browser loads, OR get blocked by
+ *  common ad-blockers / corporate firewalls. Routing through our proxy makes
+ *  the image load reliably from Netlify's IP regardless of the user's network. */
 const PROXY_DOMAINS = [
   'abqtodo.com',
   'nhccnm.org',
   'do505.com',
   'lovenm.org',
+  'seatgeekimages.com',   // ad-blockers sometimes flag SeatGeek's image CDN
+  's1.ticketm.net',       // Ticketmaster CDN
+  'media.ticketmaster.com',
 ]
 
 function proxyIfNeeded(url: string): string {

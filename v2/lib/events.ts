@@ -868,7 +868,7 @@ function normalizeEB(row: RawEventRow): NormalizedEvent {
       (r.category as Record<string, unknown> | undefined)?.name as string | undefined,
       title
     ),
-    description: ((r.description as Record<string, unknown> | undefined)?.text as string | undefined)?.slice(0, 300) ?? null,
+    description: cleanDescription((r.description as Record<string, unknown> | undefined)?.text as string | undefined),
     price: cost,
     imageUrl: row.cached_photo_url ?? (r.logo as Record<string, unknown> | undefined)?.url as string | null ?? null,
     ticketUrl: (r.url as string | undefined) ?? null,
@@ -924,7 +924,7 @@ function normalizeSG(row: RawEventRow): NormalizedEvent {
     address: v ? buildTMAddress(v) : null,
     city: (v?.city as Record<string, unknown> | undefined)?.name as string | null ?? null,
     ...mapCategory(segment, genre ?? title),
-    description: (r.info as string | undefined)?.slice(0, 300) ?? null,
+    description: cleanDescription(r.info as string | undefined),
     price: priceStr,
     imageUrl: (image as string | null) ?? null,
     ticketUrl: (r.url as string | undefined) ?? null,
@@ -951,7 +951,7 @@ function normalizeBIT(row: RawEventRow): NormalizedEvent {
     city: (venue?.city as string | undefined) ?? null,
     category: 'Music',
     subcategory: null,
-    description: (r.description as string | undefined)?.slice(0, 300) ?? null,
+    description: cleanDescription(r.description as string | undefined),
     price: null,
     imageUrl: row.cached_photo_url
       ?? (r.artist as Record<string, unknown> | undefined)?.image_url as string | undefined
@@ -986,7 +986,7 @@ function normalizeLocal(row: RawEventRow): NormalizedEvent {
       (r.category as string | undefined),
       (r.title as string | undefined) ?? (r.name as string | undefined)
     ),
-    description: (r.description as string | undefined)?.slice(0, 300) ?? null,
+    description: cleanDescription(r.description as string | undefined),
     price: (() => {
       if (isFree) return 'Free'
       // Explicit string fields (legacy local/volunteer format)
@@ -1052,6 +1052,22 @@ function parsePriceMin(price: string | null): number | null {
  * the normalizer dispatch) can decode too — otherwise things like `&#038;`
  * and `&#8211;` leak into the admin UI.
  */
+/** Trim a description to ~maxLen chars at a word boundary, decode HTML
+ *  entities (curly apostrophe etc.) and append ellipsis. Used by every
+ *  normalizer so descriptions never render as `&#8217;` or cut mid-word. */
+export function cleanDescription(input: string | null | undefined, maxLen = 320): string | null {
+  if (!input) return null
+  // Strip simple HTML tags (NHCC + abqtodo descriptions sometimes include <p>)
+  const stripped = input.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+  const decoded = decodeHtml(stripped)
+  if (decoded.length <= maxLen) return decoded
+  // Cut at last whitespace before the limit so we never end mid-word
+  const slice = decoded.slice(0, maxLen)
+  const lastSpace = slice.lastIndexOf(' ')
+  const cleanCut = lastSpace > maxLen - 80 ? slice.slice(0, lastSpace) : slice
+  return cleanCut.replace(/[.,;:!?\-—–]+$/g, '') + '…'
+}
+
 export function decodeHtml(str: string | undefined | null): string {
   if (!str) return ''
   return str
