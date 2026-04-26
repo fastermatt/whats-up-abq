@@ -152,6 +152,19 @@ export function CuratedListPage({
 
 function CuratedCard({ event, index }: { event: NormalizedEvent; index: number }) {
   const timeStr = event.time ?? ''
+  // Build a short day label ("Sat Apr 26") so a parent skimming the page on
+  // Friday night can tell at a glance whether each event is THIS weekend or
+  // a random Tuesday three weeks out. Persona testing flagged missing dates
+  // as the #1 trust signal gap on /family-friendly.
+  const dayLabel = (() => {
+    if (!event.date) return ''
+    const ymd = /^\d{4}-\d{2}-\d{2}$/.test(event.date) ? `${event.date}T12:00:00` : event.date
+    const d = new Date(ymd)
+    if (isNaN(d.getTime())) return ''
+    return d.toLocaleDateString('en-US', {
+      weekday: 'short', month: 'short', day: 'numeric', timeZone: 'America/Denver',
+    })
+  })()
   return (
     <div
       className="group relative spring-card rounded-xl overflow-hidden border border-[#f0e4cc]/80 bg-white shadow-[0_1px_3px_rgba(26,22,20,0.04)] hover:shadow-[0_8px_24px_rgba(26,22,20,0.12)] transition-all duration-300 hover:-translate-y-1"
@@ -184,10 +197,12 @@ function CuratedCard({ event, index }: { event: NormalizedEvent; index: number }
           >
             {event.title}
           </h3>
-          {timeStr && (
+          {(dayLabel || timeStr) && (
             <p className="text-[10px] text-[#9a442d] font-medium flex items-center gap-1">
               <Clock className="w-2.5 h-2.5 flex-shrink-0" />
-              <span>{timeStr}</span>
+              <span>
+                {dayLabel}{dayLabel && timeStr ? ' · ' : ''}{timeStr}
+              </span>
             </p>
           )}
           {event.venue && (

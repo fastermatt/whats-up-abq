@@ -300,11 +300,34 @@ export default async function EventDetailPage({ params }: PageProps) {
             </div>
           )}
 
-          {/* Price */}
-          {event.price && (
-            <div className="flex items-center gap-2 bg-white rounded-xl px-3 py-2 border border-[#f0e4cc] shadow-sm">
-              <Ticket className="w-4 h-4 text-[#4f6249]" />
+          {/* Price — always show; if upstream API didn't expose a price (common
+              for some Ticketmaster / SeatGeek events) we still tell the user
+              where to check. Persona testing surfaced "no idea if it's $40 or
+              $200" as the #1 friction for budget-conscious users. */}
+          <div className="flex items-center gap-2 bg-white rounded-xl px-3 py-2 border border-[#f0e4cc] shadow-sm">
+            <Ticket className="w-4 h-4 text-[#4f6249]" />
+            {event.price ? (
               <p className="text-xs font-semibold text-[#1a1614]">{event.price}</p>
+            ) : event.ticketUrl ? (
+              <p className="text-xs text-[#6b5d57]">
+                Price on{' '}
+                <a
+                  href={event.ticketUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-[#9a442d] underline-offset-2 hover:underline"
+                >
+                  ticket page →
+                </a>
+              </p>
+            ) : (
+              <p className="text-xs text-[#6b5d57]">Price not listed</p>
+            )}
+          </div>
+          {/* Free events get a sage-colored chip too */}
+          {isFree && (
+            <div className="flex items-center gap-2 bg-[#4f6249]/10 rounded-xl px-3 py-2 border border-[#4f6249]/20">
+              <span className="text-[10px] uppercase tracking-wider font-bold text-[#4f6249]">FREE</span>
             </div>
           )}
 

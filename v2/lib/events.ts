@@ -433,7 +433,7 @@ export async function fetchEventsByVenue(venueName: string, limit = 20): Promise
     .select(COLS)
     .eq('hidden', false)
     .gte('event_date', today)
-    .ilike('venue_name', `%${venueName}%`)  // DB-level filter — no in-memory scan
+    .eq('venue_name', venueName)  // exact match — see fetchVenueBySlug for slug → name resolution
     .order('event_date', { ascending: true })
     .limit(limit)
 
@@ -445,6 +445,17 @@ export async function fetchEventsByVenue(venueName: string, limit = 20): Promise
   return ((data ?? []) as RawEventRow[])
     .map(normalizeRow)
     .filter((e): e is NormalizedEvent => e !== null)
+}
+
+/** Resolve a URL slug back to its canonical venue_name (with apostrophes,
+ *  hyphens, and casing intact). Uses fetchTopVenues internally so it covers
+ *  the same ~80 venues we pre-render. Returns null if no venue matches. */
+export async function fetchVenueBySlug(slug: string): Promise<string | null> {
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  const target = norm(decodeURIComponent(slug))
+  const venues = await fetchTopVenues(200)
+  const hit = venues.find(v => norm(v.venueName) === target)
+  return hit?.venueName ?? null
 }
 
 /** Return top venues by upcoming event count — used for generateStaticParams pre-rendering.

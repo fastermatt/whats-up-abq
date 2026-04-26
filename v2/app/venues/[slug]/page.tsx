@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { fetchEventsByVenue, fetchTopVenues, neighborhoodToSlug } from '@/lib/events'
+import { fetchEventsByVenue, fetchTopVenues, fetchVenueBySlug, neighborhoodToSlug } from '@/lib/events'
 import { buildBreadcrumbs } from '@/lib/seo'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
@@ -14,20 +14,23 @@ interface PageProps {
   params: Promise<{ slug: string }>
 }
 
-/** Convert a venue name to a URL-safe slug. */
+/** Convert a venue name to a URL-safe slug. Idempotent.
+ *  "Hyena's Comedy Nightclub - Albuquerque" → "hyenas-comedy-nightclub-albuquerque"
+ *  (Previously produced "hyenas-comedy-nightclub---albuquerque" — three hyphens
+ *  from " - " collapse — which broke shareability and 404'd when users typed
+ *  the natural single-hyphen slug.) */
 export function venueToSlug(name: string): string {
-  return encodeURIComponent(
-    name
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .trim()
-      .replace(/\s+/g, '-')
-  )
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')   // any run of non-alphanum → single hyphen
+    .replace(/^-|-$/g, '')          // strip leading/trailing
 }
 
-/** Convert URL slug back to a displayable venue name (for DB ilike search). */
-function slugToVenue(slug: string): string {
-  return decodeURIComponent(slug).replace(/-/g, ' ')
+/** Symmetric slug equality — both sides go through `venueToSlug` so any
+ *  historical/typed variant (single, double, triple hyphens, missing
+ *  apostrophes, etc.) all resolve to the same canonical form. */
+export function venueSlugMatches(slug: string, venueName: string): boolean {
+  return venueToSlug(decodeURIComponent(slug)) === venueToSlug(venueName)
 }
 
 /**
@@ -59,7 +62,8 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
-  const venueName = slugToVenue(slug)
+  const venueName = await fetchVenueBySlug(slug)
+  if (!venueName) return { title: 'Venue Not Found' }
   const events = await fetchEventsByVenue(venueName, 1)
   if (events.length === 0) return { title: 'Venue Not Found' }
 
@@ -82,9 +86,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function VenuePage({ params }: PageProps) {
   const { slug } = await params
-  const venueName = slugToVenue(slug)
+  const venueName = await fetchVenueBySlug(slug)
+  if (!venueName) notFound()
   const events = await fetchEventsByVenue(venueName, 40)
-
   if (events.length === 0) notFound()
 
   // Use proper casing from the first event's venue field
