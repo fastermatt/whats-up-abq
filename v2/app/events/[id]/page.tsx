@@ -103,10 +103,24 @@ export default async function EventDetailPage({ params }: PageProps) {
   const timesVary = !timeStr && (event.source === 'volunteer'
     || /shift|shifts|multiple sessions|various times|drop.?in|walk.?in|sign up/i.test(event.description || ''))
 
-  // Build ISO start date for JSON-LD
-  const startDate = /^\d{4}-\d{2}-\d{2}$/.test(event.date)
-    ? `${event.date}T12:00:00-06:00`
-    : event.date
+  // Build ISO start date for JSON-LD. If event.time is HH:MM, prefer that.
+  // Google Events results require a precise startDate; lacking one is the #1
+  // reason events drop out of the carousel.
+  const startDate = (() => {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(event.date)) {
+      const time = event.time && /^\d{1,2}:\d{2}/.test(event.time) ? event.time.padStart(5, '0') : '12:00'
+      return `${event.date}T${time}:00-06:00`
+    }
+    return event.date
+  })()
+  // Most events end ~3 hours after start. Provides Google with a duration signal,
+  // which helps the carousel filter "happening now" results correctly.
+  const endDate = (() => {
+    const start = new Date(startDate)
+    if (isNaN(start.getTime())) return undefined
+    start.setHours(start.getHours() + 3)
+    return start.toISOString()
+  })()
 
   const eventImage = event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)
 
@@ -130,6 +144,7 @@ export default async function EventDetailPage({ params }: PageProps) {
     '@type': 'Event',
     name: event.title,
     startDate,
+    ...(endDate ? { endDate } : {}),
     eventStatus: 'https://schema.org/EventScheduled',
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     ...(event.description ? { description: event.description } : {}),
