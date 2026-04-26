@@ -10056,6 +10056,7 @@ export default function App() {
             ...(sbEvents['do505'] || []),
             ...(sbEvents['local'] || []),
             ...(sbEvents['volunteer'] || []),
+            ...(sbEvents['nhcc'] || []),
           ];
         } catch (err) {
           console.warn('[Events] Supabase failed or timed out, using static fallback:', err);
@@ -10200,7 +10201,12 @@ export default function App() {
           .filter(hasActionableLink)
           .filter(e => !isJunkEvent(e))
           .map(tagAdultEvent)
-          .map(e => e.name?.includes('&') ? { ...e, name: decodeEntities(e.name) } : e);
+          .map(e => ({
+            ...e,
+            name: e.name?.includes('&') ? decodeEntities(e.name) : e.name,
+            info: e.info?.includes('&') ? decodeEntities(e.info) : e.info,
+            description: (e as any).description?.includes?.('&') ? decodeEntities((e as any).description) : (e as any).description,
+          }));
         setEvents(merged);
         // Trigger scheduled local notifications now that we have fresh data
         checkAndTriggerNotifications(loadNotifPrefs(), { events: merged });
