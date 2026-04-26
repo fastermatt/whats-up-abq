@@ -804,7 +804,7 @@ function normalizeTM(row: RawEventRow): NormalizedEvent {
 function normalizeEB(row: RawEventRow): NormalizedEvent {
   const r = row.raw as Record<string, unknown>
   // EB events are stored in TM-compatible format — venue lives in _embedded.venues[0].
-  // r.venue (native EB format) is null for all ingested rows; kept as fallback for any edge cases.
+  // r.venue (native EB format) is always null for our ingested rows; kept as fallback for any edge cases.
   const embedded = r._embedded as Record<string, unknown> | undefined
   const embeddedVenues = embedded?.venues as Array<Record<string, unknown>> | undefined
   const embeddedVenue = embeddedVenues?.[0] ?? null

@@ -57,12 +57,16 @@ export function getTimeRange(filter: TimeFilter): { gte: string; lte?: string } 
         lte: endOfToday().toISOString(),
       }
     case 'tonight': {
+      // "Tonight" = anything from 5 PM today through end of today, regardless of
+      // current time. Previously this used `gte: max(5pm, now)`, which after 9 PM
+      // cut off shows that started at 7 or 8 (still in progress / still relevant).
+      // Now anyone landing at 9 PM still sees the night's lineup including events
+      // that just started.
       const start = new TZDate(now, ABQ_TZ)
       start.setHours(17, 0, 0, 0)
-      const end = endOfToday()
       return {
-        gte: (isAfter(now, start) ? now : start).toISOString(),
-        lte: end.toISOString(),
+        gte: start.toISOString(),
+        lte: endOfToday().toISOString(),
       }
     }
     case 'tomorrow': {

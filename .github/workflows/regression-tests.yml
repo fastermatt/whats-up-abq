@@ -1,0 +1,72 @@
+name: Regression Tests
+
+# Runs the data-shape invariant suite (v2/scripts/regression-tests.mjs).
+# Catches the recurring bug classes documented in the wiki:
+#   - "Online" venue fallback (EB normalizer reading wrong field)
+#   - missing photos / virtual events slipping through
+#   - kids events miscategorised, foreign events imported
+#   - dupes, recurring-event explosion, broken image_status integrity
+#
+# Every test is a quick SQL count — full run < 30 seconds. Safe to run on every
+# push and on a daily schedule.
+
+on:
+  push:
+    branches: [v2]
+    paths:
+      - 'v2/lib/**'
+      - 'v2/scripts/**'
+      - '.github/workflows/regression-tests.yml'
+  schedule:
+    - cron: '0 13 * * *'   # Every day 6 AM MT
+  workflow_dispatch:
+    inputs:
+      include_live:
+        description: 'Also hit live abqunplugged.com URLs'
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  regression:
+    name: Data invariants
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    env:
+      SUPABASE_URL:              ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: v2/package-lock.json
+
+      - name: Install dependencies
+        working-directory: v2
+        run: npm install --legacy-peer-deps --ignore-scripts
+
+      - name: Run regression tests
+        working-directory: v2
+        run: |
+          if [ "${{ inputs.include_live }}" = "false" ]; then
+            node scripts/regression-tests.mjs
+          else
+            node scripts/regression-tests.mjs --site=https://abqunplugged.com
+          fi
+
+      - name: Step summary
+        if: always()
+        run: |
+          {
+            echo "## 🧪 Regression Tests"
+            echo ""
+            echo "**Trigger:** ${{ github.event_name }}"
+            echo "**Outcome:** ${{ job.status }}"
+            echo ""
+            echo "Test descriptions live in v2/scripts/regression-tests.mjs"
+          } >> $GITHUB_STEP_SUMMARY
