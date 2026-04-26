@@ -8,7 +8,7 @@ export default function VenueNotFound() {
       <h1 className="text-2xl font-black text-[#1a1614] mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
         Venue Not Found
       </h1>
-      <p className="text-sm text-[#8a7a74] mb-6">No upcoming events found at this venue.</p>
+      <p className="text-sm text-[#6b5d57] mb-6">No upcoming events found at this venue.</p>
       <Link
         href="/events"
         className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#9a442d] text-white font-semibold text-sm hover:bg-[#7d3725] transition-all"

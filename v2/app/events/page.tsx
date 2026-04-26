@@ -143,7 +143,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo-black.svg" alt="ABQ Unplugged" className="h-7 w-auto" />
           </Link>
-          <span className="text-xs text-[#8a7a74] tabular-nums">{total.toLocaleString()} events</span>
+          <span className="text-xs text-[#6b5d57] tabular-nums">{total.toLocaleString()} events</span>
         </div>
       </header>
 
@@ -157,7 +157,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
             >
               {timeLabel}
             </h1>
-            <p className="text-[#8a7a74] text-xs mt-0.5">Albuquerque, NM</p>
+            <p className="text-[#6b5d57] text-xs mt-0.5">Albuquerque, NM</p>
           </div>
           {/* Calendar toggle button — client component so it can read/set URL param */}
           <Suspense>
@@ -193,7 +193,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
           <EmptyState timeLabel={timeLabel} />
         ) : (
           <>
-            <p className="text-xs text-[#8a7a74] tabular-nums">
+            <p className="text-xs text-[#6b5d57] tabular-nums">
               {offset + 1}–{Math.min(offset + limit, total)} of {total.toLocaleString()}
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
@@ -307,7 +307,7 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
           )}
 
           {event.venue && (
-            <p className="text-[10px] text-[#8a7a74] line-clamp-1 flex items-center gap-1">
+            <p className="text-[10px] text-[#6b5d57] line-clamp-1 flex items-center gap-1">
               <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
               {event.venue}
             </p>
@@ -342,7 +342,7 @@ function EmptyState({ timeLabel }: { timeLabel: string }) {
       >
         No events found
       </h2>
-      <p className="text-[#8a7a74] text-xs max-w-xs">
+      <p className="text-[#6b5d57] text-xs max-w-xs">
         No {timeLabel.toLowerCase()} events right now. Try a different time range.
       </p>
       <Link
@@ -393,7 +393,7 @@ function Pagination({
           ← Prev
         </Link>
       )}
-      <span className="text-xs text-[#8a7a74] tabular-nums">
+      <span className="text-xs text-[#6b5d57] tabular-nums">
         {page} / {totalPages}
       </span>
       {page < totalPages && (

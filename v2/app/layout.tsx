@@ -4,6 +4,7 @@ import Script from 'next/script'
 import BottomNav from './components/BottomNav'
 import DesktopNav from './components/DesktopNav'
 import { InstallPrompt } from './components/InstallPrompt'
+import { FirstVisitBanner } from './components/FirstVisitBanner'
 import { PWAManager } from './components/PWAManager'
 import { AuthCallbackCatcher } from './components/AuthCallbackCatcher'
 import { NewsletterBar } from './components/NewsletterBar'
@@ -155,6 +156,7 @@ export default function RootLayout({
         </div>
         <PWAManager />
         <InstallPrompt />
+        <FirstVisitBanner />
 
         {/* Umami analytics — loads after page is interactive, privacy-first */}
         {umamiId && (

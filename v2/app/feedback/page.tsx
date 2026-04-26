@@ -82,7 +82,7 @@ export default function FeedbackPage() {
           <h1 className="text-2xl font-black text-[#1a1614] mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
             Thanks — we got it
           </h1>
-          <p className="text-sm text-[#8a7a74] mb-6 leading-relaxed">
+          <p className="text-sm text-[#6b5d57] mb-6 leading-relaxed">
             Your feedback is in the inbox. If you gave us an email, we&apos;ll follow up if there&apos;s anything to share.
           </p>
           <div className="flex justify-center gap-3 flex-wrap">
@@ -118,7 +118,7 @@ export default function FeedbackPage() {
           <h1 className="text-2xl font-black text-[#1a1614] mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
             Tell us what you think
           </h1>
-          <p className="text-sm text-[#8a7a74]">
+          <p className="text-sm text-[#6b5d57]">
             Every message lands in our inbox and gets read. Bugs, ideas, event reports — all welcome.
           </p>
           {presetEventId && (
@@ -155,7 +155,7 @@ export default function FeedbackPage() {
                   </div>
                   <div className="min-w-0">
                     <p className="font-semibold text-sm text-[#1a1614]">{label}</p>
-                    <p className="text-xs text-[#8a7a74] mt-0.5">{blurb}</p>
+                    <p className="text-xs text-[#6b5d57] mt-0.5">{blurb}</p>
                   </div>
                 </button>
               )
@@ -167,7 +167,7 @@ export default function FeedbackPage() {
               <div className="bg-white rounded-2xl border border-[#f0e4cc] p-5 space-y-4">
                 <div>
                   <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">
-                    Subject <span className="text-[#8a7a74] font-normal">(optional)</span>
+                    Subject <span className="text-[#6b5d57] font-normal">(optional)</span>
                   </label>
                   <input type="text" maxLength={200} value={subject}
                     onChange={e => setSubject(e.target.value)}
@@ -182,13 +182,13 @@ export default function FeedbackPage() {
                     onChange={e => setMessage(e.target.value)}
                     placeholder="The more detail the better..."
                     className={inputClass + ' resize-none'} />
-                  <p className="text-[10px] text-[#8a7a74] mt-1">{message.length}/5000</p>
+                  <p className="text-[10px] text-[#6b5d57] mt-1">{message.length}/5000</p>
                 </div>
 
                 {!userEmail && (
                   <div>
                     <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">
-                      Email <span className="text-[#8a7a74] font-normal">(optional — only if you want a reply)</span>
+                      Email <span className="text-[#6b5d57] font-normal">(optional — only if you want a reply)</span>
                     </label>
                     <input type="email" maxLength={200} value={email}
                       onChange={e => setEmail(e.target.value)}
@@ -197,7 +197,7 @@ export default function FeedbackPage() {
                 )}
 
                 {userEmail && (
-                  <p className="text-[11px] text-[#8a7a74]">Sending as <b>{userEmail}</b></p>
+                  <p className="text-[11px] text-[#6b5d57]">Sending as <b>{userEmail}</b></p>
                 )}
               </div>
 

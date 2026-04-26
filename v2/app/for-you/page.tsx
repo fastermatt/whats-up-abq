@@ -104,7 +104,7 @@ export default async function ForYouPage() {
             <p className="text-sm text-[#4a3f3a] mb-2">
               No matches yet for your current preferences.
             </p>
-            <p className="text-xs text-[#8a7a74] mb-4">
+            <p className="text-xs text-[#6b5d57] mb-4">
               The matcher runs daily. Come back tomorrow, or broaden your picks.
             </p>
             <Link
@@ -151,7 +151,7 @@ export default async function ForYouPage() {
                       {event.title}
                     </h3>
                     {event.venue && (
-                      <p className="text-[10px] text-[#8a7a74] mt-1 line-clamp-1">{event.venue}</p>
+                      <p className="text-[10px] text-[#6b5d57] mt-1 line-clamp-1">{event.venue}</p>
                     )}
                     {reasons?.length > 0 && (
                       <p className="text-[9px] text-[#4f6249] mt-1 line-clamp-1 font-semibold">

@@ -70,7 +70,7 @@ export function ReportForm({ eventId, eventTitle }: Props) {
       {/* Trigger button */}
       <button
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 text-xs text-[#8a7a74] hover:text-[#1a1614] transition-colors py-1"
+        className="inline-flex items-center gap-1.5 text-xs text-[#6b5d57] hover:text-[#1a1614] transition-colors py-1"
       >
         <Flag className="w-3 h-3" />
         Report an issue
@@ -88,7 +88,7 @@ export function ReportForm({ eventId, eventTitle }: Props) {
               <h3 className="font-bold text-[#1a1614] text-sm" style={{ fontFamily: 'var(--font-epilogue)' }}>
                 Report an issue
               </h3>
-              <button onClick={reset} className="text-[#8a7a74] hover:text-[#1a1614] transition-colors">
+              <button onClick={reset} className="text-[#6b5d57] hover:text-[#1a1614] transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -97,12 +97,12 @@ export function ReportForm({ eventId, eventTitle }: Props) {
               <div className="px-5 py-10 text-center">
                 <p className="text-2xl mb-2">✓</p>
                 <p className="font-semibold text-[#1a1614] text-sm">Thanks for the report!</p>
-                <p className="text-xs text-[#8a7a74] mt-1">We&apos;ll review it soon.</p>
+                <p className="text-xs text-[#6b5d57] mt-1">We&apos;ll review it soon.</p>
               </div>
             ) : (
               <form onSubmit={submit} className="px-5 py-4 space-y-4">
                 {/* Event name preview */}
-                <p className="text-xs text-[#8a7a74] line-clamp-1 italic">{eventTitle}</p>
+                <p className="text-xs text-[#6b5d57] line-clamp-1 italic">{eventTitle}</p>
 
                 {/* Report type */}
                 <div className="space-y-2">

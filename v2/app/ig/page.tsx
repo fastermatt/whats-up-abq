@@ -153,18 +153,18 @@ export default async function IgLandingPage() {
                style={{ fontFamily: 'var(--font-epilogue)' }}>
               {weekend.total}
             </p>
-            <p className="text-[10px] text-[#8a7a74]">events Fri–Sun</p>
+            <p className="text-[10px] text-[#6b5d57]">events Fri–Sun</p>
           </Link>
           <Link
             href={`/events?time=tomorrow${utmAmp}`}
             className="bg-white border border-[#ddc9a3] rounded-2xl p-3 shadow-sm active:scale-[0.98] transition-transform"
           >
-            <p className="text-[9px] uppercase tracking-wider text-[#8a7a74] font-semibold">Tomorrow</p>
+            <p className="text-[9px] uppercase tracking-wider text-[#6b5d57] font-semibold">Tomorrow</p>
             <p className="text-xl font-black text-[#1a1614] leading-tight tabular-nums mt-0.5"
                style={{ fontFamily: 'var(--font-epilogue)' }}>
               {tomorrow.total}
             </p>
-            <p className="text-[10px] text-[#8a7a74]">events</p>
+            <p className="text-[10px] text-[#6b5d57]">events</p>
           </Link>
         </div>
       </section>
@@ -244,7 +244,7 @@ export default async function IgLandingPage() {
                         style={{ fontFamily: 'var(--font-epilogue)' }}>
                       {event.title}
                     </h3>
-                    <p className="text-[10px] text-[#8a7a74] mt-0.5 line-clamp-1">
+                    <p className="text-[10px] text-[#6b5d57] mt-0.5 line-clamp-1">
                       {dateStr}{event.venue ? ` · ${event.venue}` : ''}
                     </p>
                   </div>
@@ -304,7 +304,7 @@ export default async function IgLandingPage() {
 
       {/* ── Secondary links (compact grid) ── */}
       <section className="max-w-md mx-auto px-5 pt-6">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-[#8a7a74] mb-2.5 font-semibold">
+        <p className="text-[10px] uppercase tracking-[0.2em] text-[#6b5d57] mb-2.5 font-semibold">
           More of the site
         </p>
         <div className="grid grid-cols-2 gap-2">
@@ -333,7 +333,7 @@ export default async function IgLandingPage() {
             href={`/about${utm}`}
             className="flex items-center gap-2 bg-white border border-[#ddc9a3] rounded-xl p-3 text-xs font-semibold text-[#4a3f3a] active:scale-[0.98] transition-transform"
           >
-            <Info className="w-3.5 h-3.5 text-[#8a7a74] flex-shrink-0" />
+            <Info className="w-3.5 h-3.5 text-[#6b5d57] flex-shrink-0" />
             <span className="flex-1">About the site</span>
           </Link>
         </div>
@@ -350,7 +350,7 @@ export default async function IgLandingPage() {
         >
           See the full site →
         </Link>
-        <p className="text-[10px] text-[#8a7a74] mt-3">
+        <p className="text-[10px] text-[#6b5d57] mt-3">
           abqunplugged.com · Greater Albuquerque
         </p>
         <p className="text-[10px] text-[#ddc9a3] mt-0.5">

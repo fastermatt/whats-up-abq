@@ -143,7 +143,7 @@ export default function LoginPage() {
               {messages.heading}
             </h1>
             <p className="text-sm text-[#4a3f3a] mb-2">{messages.body}</p>
-            <p className="text-xs text-[#8a7a74] mb-6">{messages.sub}</p>
+            <p className="text-xs text-[#6b5d57] mb-6">{messages.sub}</p>
             <button onClick={() => { setDone(null); setShowMagic(false) }} className="text-xs text-[#9a442d] hover:underline">
               ← Back to sign in
             </button>
@@ -166,7 +166,7 @@ export default function LoginPage() {
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#9a442d] text-white text-2xl font-black mb-3" style={{ fontFamily: 'var(--font-epilogue)' }}>
               A
             </div>
-            <p className="text-sm text-[#8a7a74]">Save events · Check in · Earn badges</p>
+            <p className="text-sm text-[#6b5d57]">Save events · Check in · Earn badges</p>
           </div>
 
           {/* Tabs */}
@@ -178,7 +178,7 @@ export default function LoginPage() {
                 className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${
                   tab === t
                     ? 'bg-white text-[#1a1614] shadow-sm'
-                    : 'text-[#8a7a74] hover:text-[#4a3f3a]'
+                    : 'text-[#6b5d57] hover:text-[#4a3f3a]'
                 }`}
                 style={{ fontFamily: 'var(--font-epilogue)' }}
               >
@@ -195,11 +195,11 @@ export default function LoginPage() {
               <div>
                 <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">Email</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8a7a74]" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" />
                   <input
                     type="email" value={email} onChange={e => setEmail(e.target.value)}
                     placeholder="you@example.com" required autoComplete="email"
-                    className="w-full pl-9 pr-4 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#8a7a74] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
+                    className="w-full pl-9 pr-4 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#6b5d57] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
                   />
                 </div>
               </div>
@@ -208,18 +208,18 @@ export default function LoginPage() {
               <div>
                 <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">Password</label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8a7a74]" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" />
                   <input
                     type={showPw ? 'text' : 'password'} value={password}
                     onChange={e => setPassword(e.target.value)}
                     placeholder={tab === 'signup' ? 'At least 6 characters' : '••••••••'}
                     required minLength={6}
                     autoComplete={tab === 'signin' ? 'current-password' : 'new-password'}
-                    className="w-full pl-9 pr-10 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#8a7a74] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
+                    className="w-full pl-9 pr-10 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#6b5d57] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
                   />
                   <button
                     type="button" onClick={() => setShowPw(v => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8a7a74] hover:text-[#4a3f3a]"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b5d57] hover:text-[#4a3f3a]"
                     aria-label={showPw ? 'Hide password' : 'Show password'}
                   >
                     {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -232,13 +232,13 @@ export default function LoginPage() {
                 <div>
                   <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">Confirm password</label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8a7a74]" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" />
                     <input
                       type={showPw ? 'text' : 'password'} value={confirm}
                       onChange={e => setConfirm(e.target.value)}
                       placeholder="Same password again"
                       required autoComplete="new-password"
-                      className="w-full pl-9 pr-4 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#8a7a74] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
+                      className="w-full pl-9 pr-4 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#6b5d57] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
                     />
                   </div>
                 </div>
@@ -280,11 +280,11 @@ export default function LoginPage() {
               <div>
                 <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">Email</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8a7a74]" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" />
                   <input
                     type="email" value={email} onChange={e => setEmail(e.target.value)}
                     placeholder="you@example.com" required autoComplete="email"
-                    className="w-full pl-9 pr-4 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#8a7a74] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
+                    className="w-full pl-9 pr-4 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#6b5d57] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
                   />
                 </div>
               </div>
@@ -306,7 +306,7 @@ export default function LoginPage() {
           <div className="mt-6 text-center">
             <button
               onClick={() => { setShowMagic(v => !v); reset() }}
-              className="text-xs text-[#8a7a74] hover:text-[#9a442d] transition-colors"
+              className="text-xs text-[#6b5d57] hover:text-[#9a442d] transition-colors"
             >
               {showMagic ? '← Sign in with password instead' : 'Or sign in without a password →'}
             </button>
@@ -321,12 +321,12 @@ export default function LoginPage() {
             ].map(({ n, label }) => (
               <div key={label} className="bg-white rounded-xl p-3 border border-[#f0e4cc]">
                 <p className="text-sm font-black text-[#9a442d]" style={{ fontFamily: 'var(--font-epilogue)' }}>{n}</p>
-                <p className="text-[10px] text-[#8a7a74]">{label}</p>
+                <p className="text-[10px] text-[#6b5d57]">{label}</p>
               </div>
             ))}
           </div>
 
-          <p className="text-center text-[10px] text-[#8a7a74] mt-4">
+          <p className="text-center text-[10px] text-[#6b5d57] mt-4">
             No spam. Just Albuquerque.
           </p>
         </div>

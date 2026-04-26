@@ -187,7 +187,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
           {(goingEvents?.length ?? 0) === 0 ? (
             <div className="text-center py-8 bg-white rounded-2xl border border-[#f0e4cc]">
               <Calendar className="w-8 h-8 text-[#ddc9a3] mx-auto mb-2" />
-              <p className="text-sm text-[#8a7a74]">No upcoming events</p>
+              <p className="text-sm text-[#6b5d57]">No upcoming events</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -220,7 +220,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
                         </p>
                       )}
                       {ev.venue_name && (
-                        <p className="text-[10px] text-[#8a7a74] flex items-center gap-1">
+                        <p className="text-[10px] text-[#6b5d57] flex items-center gap-1">
                           <MapPin className="w-2.5 h-2.5" />
                           {ev.venue_name}
                         </p>
@@ -240,7 +240,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
               <h2 className="text-base font-black text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
                 Badges
               </h2>
-              <span className="text-xs text-[#8a7a74]">{earnedBadges.length}/{BADGE_DEFS.length}</span>
+              <span className="text-xs text-[#6b5d57]">{earnedBadges.length}/{BADGE_DEFS.length}</span>
             </div>
             <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
               {BADGE_DEFS.map(badge => {
@@ -270,7 +270,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
           <div className="bg-white rounded-2xl border border-[#f0e4cc] p-5 text-center">
             <Users className="w-8 h-8 text-[#ddc9a3] mx-auto mb-2" />
             <p className="text-sm font-bold text-[#1a1614] mb-1">Follow {displayName}</p>
-            <p className="text-xs text-[#8a7a74] mb-3">Sign in to follow and see where your friends are going.</p>
+            <p className="text-xs text-[#6b5d57] mb-3">Sign in to follow and see where your friends are going.</p>
             <Link
               href="/login"
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#9a442d] text-white text-xs font-semibold hover:bg-[#7d3725] transition-colors"

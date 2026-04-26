@@ -232,7 +232,7 @@ export function CheckInButton({ eventId, eventName, eventDate, venueName, venueA
 
   if (geoState === 'verifying') {
     return (
-      <div className="flex items-center gap-2 text-[#8a7a74]">
+      <div className="flex items-center gap-2 text-[#6b5d57]">
         <Loader2 className="w-3.5 h-3.5 animate-spin" />
         <span className="text-xs">Getting your location…</span>
       </div>
@@ -251,7 +251,7 @@ export function CheckInButton({ eventId, eventName, eventDate, venueName, venueA
           <Navigation className="w-3.5 h-3.5" />
           <span className="text-xs font-semibold">Get a little closer to check in{displayDist}</span>
         </div>
-        <p className="text-[10px] text-[#8a7a74]">You need to be at the venue to check in.</p>
+        <p className="text-[10px] text-[#6b5d57]">You need to be at the venue to check in.</p>
       </div>
     )
   }
@@ -259,11 +259,11 @@ export function CheckInButton({ eventId, eventName, eventDate, venueName, venueA
   if (geoState === 'geo_denied') {
     return (
       <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-1.5 text-[#8a7a74]">
+        <div className="flex items-center gap-1.5 text-[#6b5d57]">
           <MapPin className="w-3.5 h-3.5" />
           <span className="text-xs font-semibold">Location access needed</span>
         </div>
-        <p className="text-[10px] text-[#8a7a74]">Enable location services to verify you&apos;re at the event.</p>
+        <p className="text-[10px] text-[#6b5d57]">Enable location services to verify you&apos;re at the event.</p>
       </div>
     )
   }
@@ -282,7 +282,7 @@ export function CheckInButton({ eventId, eventName, eventDate, venueName, venueA
         {geoState !== 'submitting' && (
           <button
             onClick={() => setGeoState('idle')}
-            className="text-xs text-[#8a7a74] hover:text-[#4a3f3a]"
+            className="text-xs text-[#6b5d57] hover:text-[#4a3f3a]"
           >
             Cancel
           </button>

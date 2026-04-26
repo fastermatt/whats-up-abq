@@ -264,7 +264,7 @@ export function FilterBar({
           {activeCount > 1 && (
             <button
               onClick={clearAll}
-              className="px-2.5 py-1 rounded-full text-xs font-medium text-[#8a7a74] border border-[#ddc9a3] hover:text-[#9a442d] hover:border-[#9a442d] transition-colors"
+              className="px-2.5 py-1 rounded-full text-xs font-medium text-[#6b5d57] border border-[#ddc9a3] hover:text-[#9a442d] hover:border-[#9a442d] transition-colors"
             >
               Clear all
             </button>
@@ -413,7 +413,7 @@ export function FilterBar({
 
       {/* Vibe row — compact discovery shortcuts, always visible */}
       <ScrollRow>
-        <span className="flex-none self-center text-[9px] uppercase tracking-[0.12em] text-[#8a7a74] font-semibold pr-0.5 pl-0.5 whitespace-nowrap">
+        <span className="flex-none self-center text-[9px] uppercase tracking-[0.12em] text-[#6b5d57] font-semibold pr-0.5 pl-0.5 whitespace-nowrap">
           Vibe
         </span>
         {VIBES.map((v) => (

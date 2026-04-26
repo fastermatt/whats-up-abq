@@ -70,7 +70,7 @@ export function InviteCard({ eventId, eventTitle, eventDate, venue }: Props) {
           >
             Who would love this?
           </p>
-          <p className="text-[11px] text-[#8a7a74] mt-0.5 leading-relaxed">
+          <p className="text-[11px] text-[#6b5d57] mt-0.5 leading-relaxed">
             More fun with someone else. Take 10 seconds to invite them.
           </p>
           <div className="flex flex-wrap gap-2 mt-2.5">

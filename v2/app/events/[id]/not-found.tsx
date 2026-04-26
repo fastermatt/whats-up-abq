@@ -11,7 +11,7 @@ export default function EventNotFound() {
         >
           Event not found
         </h1>
-        <p className="text-sm text-[#8a7a74] mb-6">
+        <p className="text-sm text-[#6b5d57] mb-6">
           This event may have been removed or the link is incorrect.
         </p>
         <Link

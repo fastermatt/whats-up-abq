@@ -112,7 +112,7 @@ export default function AboutPage() {
                   <p className="text-sm font-bold text-[#1a1614] mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
                     {title}
                   </p>
-                  <p className="text-xs text-[#8a7a74] leading-relaxed">{desc}</p>
+                  <p className="text-xs text-[#6b5d57] leading-relaxed">{desc}</p>
                 </div>
               ))}
             </div>
@@ -128,7 +128,7 @@ export default function AboutPage() {
             >
               Where events come from
             </h2>
-            <p className="text-sm text-[#8a7a74] mb-3">
+            <p className="text-sm text-[#6b5d57] mb-3">
               Updated daily from multiple trusted ticket and event sources:
             </p>
             <div className="space-y-2">
@@ -140,7 +140,7 @@ export default function AboutPage() {
                   <span className="w-2 h-2 rounded-full bg-[#9a442d] flex-shrink-0" />
                   <div>
                     <p className="text-sm font-semibold text-[#1a1614]">{name}</p>
-                    <p className="text-xs text-[#8a7a74]">{desc}</p>
+                    <p className="text-xs text-[#6b5d57]">{desc}</p>
                   </div>
                 </div>
               ))}
@@ -160,7 +160,7 @@ export default function AboutPage() {
             <p className="text-base text-[#1a1614]">
               Matt Carlson, Albuquerque, NM
             </p>
-            <p className="text-sm text-[#8a7a74] mt-1">
+            <p className="text-sm text-[#6b5d57] mt-1">
               Built to make it easier for Albuquerqueans to get off the couch and experience
               what makes this city great.
             </p>
@@ -187,7 +187,7 @@ export default function AboutPage() {
           </div>
 
           {/* Utility links */}
-          <p className="mt-6 text-xs text-[#8a7a74]">
+          <p className="mt-6 text-xs text-[#6b5d57]">
             <Link
               href="/privacy"
               className="hover:text-[#9a442d] transition-colors underline underline-offset-2"

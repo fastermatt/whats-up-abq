@@ -90,7 +90,7 @@ export default function AdminVerifyPage() {
           <>
             <Loader2 className="w-10 h-10 text-[#9a442d] mx-auto mb-4 animate-spin" />
             <p className="text-white font-semibold">Verifying your login link…</p>
-            <p className="text-[#8a7a74] text-sm mt-1">This only takes a moment.</p>
+            <p className="text-[#6b5d57] text-sm mt-1">This only takes a moment.</p>
           </>
         )}
         {status === 'success' && (
@@ -99,7 +99,7 @@ export default function AdminVerifyPage() {
             <p className="text-white font-semibold text-lg" style={{ fontFamily: 'var(--font-epilogue)' }}>
               Verified!
             </p>
-            <p className="text-[#8a7a74] text-sm mt-1">Taking you to the admin panel…</p>
+            <p className="text-[#6b5d57] text-sm mt-1">Taking you to the admin panel…</p>
             <p className="text-[#4a4040] text-[11px] mt-4">
               This device is now trusted for 90 days.
             </p>
@@ -111,7 +111,7 @@ export default function AdminVerifyPage() {
             <p className="text-white font-semibold text-lg" style={{ fontFamily: 'var(--font-epilogue)' }}>
               Verification failed
             </p>
-            <p className="text-[#8a7a74] text-sm mt-1 leading-relaxed">{errorMsg}</p>
+            <p className="text-[#6b5d57] text-sm mt-1 leading-relaxed">{errorMsg}</p>
             <a
               href="/admin/login"
               className="inline-block mt-6 px-4 py-2 rounded-lg bg-[#9a442d]/20 text-[#9a442d] text-sm hover:bg-[#9a442d]/30 transition-colors"

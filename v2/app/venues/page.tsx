@@ -68,7 +68,7 @@ export default async function VenuesPage() {
             >
               Event Venues
             </h1>
-            <p className="text-sm text-[#8a7a74]">
+            <p className="text-sm text-[#6b5d57]">
               {venues.length} venues with upcoming events — concerts, comedy, arts, sports, and more.
             </p>
           </div>
@@ -93,7 +93,7 @@ export default async function VenuesPage() {
                     {v.venueName}
                   </span>
                 </div>
-                <span className="ml-3 flex-shrink-0 text-[10px] font-bold text-[#8a7a74] bg-[#f0e4cc] rounded-full px-2 py-0.5 tabular-nums">
+                <span className="ml-3 flex-shrink-0 text-[10px] font-bold text-[#6b5d57] bg-[#f0e4cc] rounded-full px-2 py-0.5 tabular-nums">
                   {v.count}
                 </span>
               </Link>

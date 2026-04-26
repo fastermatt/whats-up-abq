@@ -157,7 +157,7 @@ export default function WhyPage() {
               you to pick a night, pick a thing, and &mdash; ideally &mdash; pick a person.
               The city is out there. It&rsquo;s more fun when you&rsquo;re in it.
             </p>
-            <p className="text-sm text-[#8a7a74] italic">
+            <p className="text-sm text-[#6b5d57] italic">
               Put the phone down. Pick up a plan.
             </p>
           </div>

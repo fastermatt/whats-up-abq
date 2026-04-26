@@ -99,7 +99,7 @@ export function CuratedListPage({
           >
             {config.heading}
           </h1>
-          <p className="text-[#8a7a74] text-sm mt-1">{config.lede}</p>
+          <p className="text-[#6b5d57] text-sm mt-1">{config.lede}</p>
 
           {/* SEO body copy — keeps the page above the threshold for crawlable text */}
           <p className="text-sm text-[#4a3f3a] mt-4 max-w-3xl leading-relaxed">
@@ -116,7 +116,7 @@ export function CuratedListPage({
             >
               {config.emptyHeading}
             </h2>
-            <p className="text-[#8a7a74] text-sm max-w-xs mb-6">
+            <p className="text-[#6b5d57] text-sm max-w-xs mb-6">
               {config.emptyBody}
             </p>
             <Link
@@ -191,7 +191,7 @@ function CuratedCard({ event, index }: { event: NormalizedEvent; index: number }
             </p>
           )}
           {event.venue && (
-            <p className="text-[10px] text-[#8a7a74] line-clamp-1 flex items-center gap-1">
+            <p className="text-[10px] text-[#6b5d57] line-clamp-1 flex items-center gap-1">
               <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
               {event.venue}
             </p>

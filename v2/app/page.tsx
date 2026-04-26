@@ -345,7 +345,7 @@ export default async function DiscoverPage() {
         <AnimateIn animation="fade-up" delay={200}>
           <section className="py-6 border-t border-[#f0e4cc]/60">
             <div className="max-w-6xl mx-auto px-4 mb-3">
-              <p className="text-[10px] uppercase tracking-[0.15em] text-[#8a7a74] mb-0.5">Browse by area</p>
+              <p className="text-[10px] uppercase tracking-[0.15em] text-[#6b5d57] mb-0.5">Browse by area</p>
               <h2
                 className="text-xl font-black text-[#1a1614]"
                 style={{ fontFamily: 'var(--font-epilogue)' }}
@@ -366,7 +366,7 @@ export default async function DiscoverPage() {
                     <span className="text-xs font-bold text-[#1a1614] group-hover:text-[#006a62] transition-colors whitespace-nowrap">
                       {neighborhood}
                     </span>
-                    <span className="text-[10px] text-[#8a7a74] tabular-nums">
+                    <span className="text-[10px] text-[#6b5d57] tabular-nums">
                       {count} event{count !== 1 ? 's' : ''}
                     </span>
                   </Link>
@@ -400,7 +400,7 @@ export default async function DiscoverPage() {
           >
             ABQ Unplugged
           </p>
-          <p className="text-xs text-[#8a7a74] mb-1">Every event in Albuquerque, one place</p>
+          <p className="text-xs text-[#6b5d57] mb-1">Every event in Albuquerque, one place</p>
           <div className="mb-4 max-w-md mx-auto">
             <ConnectionQuote size="sm" />
           </div>
@@ -426,13 +426,13 @@ export default async function DiscoverPage() {
               <Link
                 key={href}
                 href={href}
-                className="text-xs text-[#8a7a74] hover:text-[#9a442d] transition-colors"
+                className="text-xs text-[#6b5d57] hover:text-[#9a442d] transition-colors"
               >
                 {label}
               </Link>
             ))}
           </nav>
-          <p className="text-[10px] text-[#8a7a74]/60 mt-5">© {new Date().getFullYear()} ABQ Unplugged · Albuquerque, NM</p>
+          <p className="text-[10px] text-[#6b5d57]/60 mt-5">© {new Date().getFullYear()} ABQ Unplugged · Albuquerque, NM</p>
         </div>
       </footer>
     </main>
@@ -489,13 +489,13 @@ function PlaceTeaseCard({ place, index }: { place: Place; index: number }) {
           </div>
         </div>
       </div>
-      <h4
+      <h3
         className="font-bold text-[#1a1614] text-xs leading-tight line-clamp-2 mb-0.5 group-hover:text-[#006a62] transition-colors"
         style={{ fontFamily: 'var(--font-epilogue)' }}
       >
         {place.name}
-      </h4>
-      <p className="text-[10px] text-[#8a7a74] line-clamp-1">{place.tagline}</p>
+      </h3>
+      <p className="text-[10px] text-[#6b5d57] line-clamp-1">{place.tagline}</p>
     </a>
   )
 }
@@ -637,14 +637,14 @@ function HorizontalCard({
       </div>
 
       {/* Info */}
-      <h4
+      <h3
         className="font-bold text-[#1a1614] text-xs leading-tight line-clamp-2 mb-0.5 group-hover:text-[#9a442d] transition-colors"
         style={{ fontFamily: 'var(--font-epilogue)' }}
       >
         {event.title}
-      </h4>
+      </h3>
       {event.venue && (
-        <p className="text-[10px] text-[#8a7a74] line-clamp-1 flex items-center gap-0.5">
+        <p className="text-[10px] text-[#6b5d57] line-clamp-1 flex items-center gap-0.5">
           <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
           {event.venue}
         </p>
@@ -694,14 +694,14 @@ function FeaturedCard({ event }: { event: NormalizedEvent }) {
           </div>
         )}
       </div>
-      <h4
+      <h3
         className="font-bold text-[#1a1614] text-sm leading-tight line-clamp-2 mb-0.5 group-hover:text-[#9a442d] transition-colors"
         style={{ fontFamily: 'var(--font-epilogue)' }}
       >
         {event.title}
-      </h4>
+      </h3>
       {event.venue && (
-        <p className="text-[10px] text-[#8a7a74] line-clamp-1 flex items-center gap-0.5">
+        <p className="text-[10px] text-[#6b5d57] line-clamp-1 flex items-center gap-0.5">
           <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
           {event.venue}
         </p>

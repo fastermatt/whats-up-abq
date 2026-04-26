@@ -191,7 +191,7 @@ export default async function VenuePage({ params }: PageProps) {
 
       <div className="max-w-3xl mx-auto px-4 py-5 space-y-5">
         {/* Third-place framing — venues are rooms that belong to the people in them */}
-        <p className="text-xs italic text-[#8a7a74] leading-relaxed">
+        <p className="text-xs italic text-[#6b5d57] leading-relaxed">
           {thirdPlaceLine(topCategory, events.length)}
         </p>
 
@@ -313,7 +313,7 @@ export default async function VenuePage({ params }: PageProps) {
                       </div>
                     </div>
 
-                    <ExternalLink className="w-3.5 h-3.5 text-[#8a7a74] flex-shrink-0 mt-0.5 group-hover:text-[#9a442d] transition-colors" />
+                    <ExternalLink className="w-3.5 h-3.5 text-[#6b5d57] flex-shrink-0 mt-0.5 group-hover:text-[#9a442d] transition-colors" />
                   </Link>
                 </AnimateIn>
               )

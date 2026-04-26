@@ -123,7 +123,7 @@ export function PushBell({ className = '' }: { className?: string }) {
         ${state === 'subscribed'
           ? 'bg-[#4f6249]/10 border-[#4f6249]/30 text-[#4f6249]'
           : state === 'denied'
-          ? 'bg-[#f0e4cc] border-[#ddc9a3] text-[#8a7a74] cursor-not-allowed'
+          ? 'bg-[#f0e4cc] border-[#ddc9a3] text-[#6b5d57] cursor-not-allowed'
           : 'bg-white border-[#ddc9a3] text-[#4a3f3a] hover:border-[#9a442d] hover:text-[#9a442d]'
         }
         ${state === 'loading' ? 'opacity-60 cursor-wait' : ''}

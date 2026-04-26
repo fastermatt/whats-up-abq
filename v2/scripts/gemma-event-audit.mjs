@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Gemma-powered event accuracy audit.
+ * LLM-powered event accuracy audit (model-agnostic).
  *
  * For each sampled event, ask local Gemma (LM Studio at :1234) to flag specific
  * accuracy issues that the regression test suite can't catch from data shape alone:
@@ -26,6 +26,7 @@ import { createClient } from '@supabase/supabase-js'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { chatJson, printLLMHeader } from './lib/llm.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 for (const envFile of [path.join(__dirname, '.env'), path.join(__dirname, '..', '..', 'scripts', '.env')]) {
@@ -48,8 +49,6 @@ const argv = Object.fromEntries(
 const LIMIT  = parseInt(argv.limit ?? '50', 10)
 const SOURCE = typeof argv.source === 'string' ? argv.source : null
 const APPLY  = argv.apply === true
-const MODEL  = process.env.LM_STUDIO_MODEL || 'gemma-4-e4b-uncensored-hauhaucs-aggressive'
-const LM_URL = process.env.LM_STUDIO_URL || 'http://localhost:1234/v1/chat/completions'
 
 const sb = createClient(
   process.env.SUPABASE_URL || 'https://bsmvfutebmbkjvlrhiyq.supabase.co',
@@ -92,10 +91,21 @@ function stratifySample(rows, total) {
 }
 
 const sample = stratifySample(events, LIMIT)
-console.log(`Auditing ${sample.length} events across ${new Set(sample.map(e => e.source)).size} sources via Gemma…\n`)
+await printLLMHeader()
+console.log(`Auditing ${sample.length} events across ${new Set(sample.map(e => e.source)).size} sources…\n`)
 
-// ── Gemma prompt ────────────────────────────────────────────────────────────
+// ── LLM prompt ──────────────────────────────────────────────────────────────
+const TODAY_ISO = new Date().toISOString().slice(0, 10)
 const SYSTEM = `You audit cultural-event listings for an Albuquerque, New Mexico events website.
+
+Today's date is ${TODAY_ISO}. ANY event whose date is ON or AFTER today is in the future and is NOT stale. Only flag "stale-date" if the event date is strictly before today.
+
+Albuquerque metro context (these venues ARE in Albuquerque — do NOT flag as non-abq):
+- "NHCC", "National Hispanic Cultural Center", "NHCC Torreón" — all on the SAME ABQ campus in Barelas. "Torreón" here is a building name, NOT the Mexican city.
+- "Sandia Casino", "Sandia Resort", "Sandia Pueblo" — north ABQ metro.
+- "Isleta Casino", "Isleta Resort", "Isleta Pueblo" — south ABQ metro.
+- Any address with city = "Albuquerque", "Bernalillo", "Rio Rancho", "Tijeras", "Corrales", "Placitas", "Tome", "Los Lunas", "Belen", "Sandia Park", "Cedar Crest" is OK.
+
 For each event, return STRICT JSON with this exact shape — no prose, no code fences, no commentary:
 {
   "flags": [
@@ -137,33 +147,15 @@ function buildUserMsg(e) {
   ].filter(Boolean).join('\n')
 }
 
-async function askGemma(userMsg) {
-  const res = await fetch(LM_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [
-        { role: 'system', content: SYSTEM },
-        { role: 'user', content: userMsg },
-      ],
-      temperature: 0.2,
-      max_tokens: 400,
-      stream: false,
-    }),
+async function askLLM(userMsg) {
+  const res = await chatJson({
+    system: SYSTEM,
+    user: userMsg,
+    schemaHint: '{ "flags": [{ "severity": "info"|"warn"|"block", "code": "...", "reason": "...", "suggestion": "..." }] }',
+    maxTokens: 400,
   })
-  if (!res.ok) throw new Error(`LM Studio HTTP ${res.status}`)
-  const j = await res.json()
-  const txt = j.choices?.[0]?.message?.content?.trim() ?? '{"flags":[]}'
-  // Strip code fences if Gemma adds them anyway
-  const clean = txt.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim()
-  try { return JSON.parse(clean) }
-  catch {
-    // Try to find the first JSON object in the response
-    const m = clean.match(/\{[\s\S]*\}/)
-    if (m) { try { return JSON.parse(m[0]) } catch {} }
-    return { flags: [], _parseError: clean.slice(0, 120) }
-  }
+  if (res._parseError) return { flags: [], _parseError: res._parseError }
+  return res
 }
 
 // ── Run audit ───────────────────────────────────────────────────────────────
@@ -173,7 +165,7 @@ for (const e of sample) {
   i++
   process.stdout.write(`  [${String(i).padStart(3)}/${sample.length}] ${e.id.padEnd(35)} … `)
   try {
-    const res = await askGemma(buildUserMsg(e))
+    const res = await askLLM(buildUserMsg(e))
     const flags = Array.isArray(res.flags) ? res.flags : []
     if (flags.length === 0) {
       console.log('OK')

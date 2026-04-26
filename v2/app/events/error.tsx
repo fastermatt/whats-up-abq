@@ -25,7 +25,7 @@ export default function EventsError({
         </h1>
 
         {/* Subtitle */}
-        <p className="text-[#8a7a74]">
+        <p className="text-[#6b5d57]">
           The event data source may be temporarily unavailable.
         </p>
 

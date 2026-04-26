@@ -146,7 +146,7 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
                 <div className="mt-0.5 flex-shrink-0">{c.icon}</div>
                 <div className="min-w-0">
                   <div className="text-sm font-semibold leading-tight">{c.label}</div>
-                  <div className={`text-[10px] leading-snug mt-0.5 ${on ? 'text-white/70' : 'text-[#8a7a74]'}`}>{c.hint}</div>
+                  <div className={`text-[10px] leading-snug mt-0.5 ${on ? 'text-white/70' : 'text-[#6b5d57]'}`}>{c.hint}</div>
                 </div>
                 {on && <Check className="w-4 h-4 ml-auto flex-shrink-0" />}
               </button>
@@ -160,7 +160,7 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
         <h3 className="text-sm font-black text-[#1a1614] uppercase tracking-wide mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
           Specific sub-genres / styles
         </h3>
-        <p className="text-xs text-[#8a7a74] mb-3">Pick anything. We match these against event titles + descriptions.</p>
+        <p className="text-xs text-[#6b5d57] mb-3">Pick anything. We match these against event titles + descriptions.</p>
         <div className="flex flex-wrap gap-2">
           {SUBCATEGORY_TAGS.map(t => {
             const on = state.subcategory_tags.includes(t)
@@ -185,7 +185,7 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
         <h3 className="text-sm font-black text-[#1a1614] uppercase tracking-wide mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
           Artists, teams, or keywords
         </h3>
-        <p className="text-xs text-[#8a7a74] mb-3">e.g. &ldquo;john mulaney&rdquo;, &ldquo;nm united&rdquo;, &ldquo;balloon fiesta&rdquo;. Case-insensitive.</p>
+        <p className="text-xs text-[#6b5d57] mb-3">e.g. &ldquo;john mulaney&rdquo;, &ldquo;nm united&rdquo;, &ldquo;balloon fiesta&rdquo;. Case-insensitive.</p>
         <div className="flex gap-2">
           <input
             type="text"
@@ -216,7 +216,7 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
         <h3 className="text-sm font-black text-[#1a1614] uppercase tracking-wide mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
           Favorite venues
         </h3>
-        <p className="text-xs text-[#8a7a74] mb-3">Tap a venue to favorite it, or type a custom one.</p>
+        <p className="text-xs text-[#6b5d57] mb-3">Tap a venue to favorite it, or type a custom one.</p>
         <div className="flex flex-wrap gap-1.5 mb-3">
           {topVenues.slice(0, 20).map(v => {
             const on = state.venues.includes(v.name)
@@ -229,7 +229,7 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
                   on ? 'bg-[#4f6249] text-white border-[#4f6249]' : 'bg-white text-[#1a1614] border-[#f0e4cc] hover:border-[#4f6249]/40'
                 }`}
               >
-                {v.name} <span className={on ? 'text-white/70' : 'text-[#8a7a74]'}>· {v.count}</span>
+                {v.name} <span className={on ? 'text-white/70' : 'text-[#6b5d57]'}>· {v.count}</span>
               </button>
             )
           })}
@@ -316,7 +316,7 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
             placeholder="Any"
             className="w-24 px-2 py-1 rounded-lg border border-[#f0e4cc] bg-[#fbf7f1] focus:outline-none focus:border-[#9a442d]"
           />
-          <span className="text-xs text-[#8a7a74]">(leave blank for any)</span>
+          <span className="text-xs text-[#6b5d57]">(leave blank for any)</span>
         </div>
       </section>
 
@@ -388,7 +388,7 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
             onChange={e => setState(s => ({ ...s, days_ahead: parseInt(e.target.value, 10) }))}
             className="w-full accent-[#9a442d]"
           />
-          <p className="text-[11px] text-[#8a7a74] text-center">Notify me about events happening in the next <strong>{state.days_ahead}</strong> days</p>
+          <p className="text-[11px] text-[#6b5d57] text-center">Notify me about events happening in the next <strong>{state.days_ahead}</strong> days</p>
         </div>
       </section>
 

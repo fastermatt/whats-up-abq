@@ -225,7 +225,7 @@ export default function SubmitEventPage() {
           <h1 className="text-2xl font-black text-[#1a1614] mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
             Event submitted!
           </h1>
-          <p className="text-sm text-[#8a7a74] mb-6 leading-relaxed">
+          <p className="text-sm text-[#6b5d57] mb-6 leading-relaxed">
             Thanks for contributing to ABQ Unplugged. We review every submission before it goes live — usually within 24 hours.
             You&apos;ll see the event appear on the site once approved.
           </p>
@@ -282,7 +282,7 @@ export default function SubmitEventPage() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6">
-        <p className="text-[11px] text-[#8a7a74] mb-5">
+        <p className="text-[11px] text-[#6b5d57] mb-5">
           All fields marked <span className="text-[#9a442d] font-bold">*</span> are required.
         </p>
 
@@ -317,7 +317,7 @@ export default function SubmitEventPage() {
               />
               <div className="flex items-center justify-between mt-1">
                 <FieldError name="description" />
-                <p className="text-[10px] text-[#8a7a74] ml-auto">{form.description.length}/2000</p>
+                <p className="text-[10px] text-[#6b5d57] ml-auto">{form.description.length}/2000</p>
               </div>
             </div>
 
@@ -480,7 +480,7 @@ export default function SubmitEventPage() {
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-[#4a3f3a]">Tap to upload photo</p>
-                    <p className="text-[10px] text-[#8a7a74] mt-0.5">Landscape · min 800×500 · JPG/PNG/WebP · max 5 MB</p>
+                    <p className="text-[10px] text-[#6b5d57] mt-0.5">Landscape · min 800×500 · JPG/PNG/WebP · max 5 MB</p>
                   </div>
                 </div>
                 <input
@@ -502,7 +502,7 @@ export default function SubmitEventPage() {
 
             {status === 'submitting' && photoFile && uploadProgress > 0 && uploadProgress < 100 && (
               <div className="space-y-1">
-                <p className="text-[10px] text-[#8a7a74]">Uploading photo… {uploadProgress}%</p>
+                <p className="text-[10px] text-[#6b5d57]">Uploading photo… {uploadProgress}%</p>
                 <div className="h-1.5 bg-[#f0e4cc] rounded-full overflow-hidden">
                   <div className="h-full bg-[#9a442d] transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
                 </div>
@@ -593,7 +593,7 @@ export default function SubmitEventPage() {
             )}
           </button>
 
-          <p className="text-[10px] text-[#8a7a74] text-center pb-6">
+          <p className="text-[10px] text-[#6b5d57] text-center pb-6">
             Submitting as <b>{user?.email}</b> · Limit 3 submissions per day · Reviewed within 24 hours
           </p>
         </form>

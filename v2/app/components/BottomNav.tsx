@@ -34,7 +34,7 @@ export default function BottomNav() {
               className={`
                 flex flex-col items-center justify-center gap-1 relative
                 transition-colors duration-150
-                ${isActive ? 'text-[#9a442d]' : 'text-[#8a7a74]'}
+                ${isActive ? 'text-[#9a442d]' : 'text-[#6b5d57]'}
               `}
             >
               {/* Active indicator bar */}

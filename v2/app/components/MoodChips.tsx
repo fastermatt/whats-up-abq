@@ -39,7 +39,7 @@ export default function MoodChips() {
   return (
     <section aria-label="Browse by mood" className="py-4 border-b border-[#f0e4cc]/60">
       <div className="px-4 mb-2">
-        <p className="text-[10px] uppercase tracking-[0.15em] text-[#8a7a74] font-semibold">
+        <p className="text-[10px] uppercase tracking-[0.15em] text-[#6b5d57] font-semibold">
           What&apos;s your vibe?
         </p>
       </div>

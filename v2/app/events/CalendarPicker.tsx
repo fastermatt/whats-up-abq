@@ -115,7 +115,7 @@ export function CalendarPicker({ counts, selectedDate }: CalendarPickerProps) {
           <p className="text-sm font-bold text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
             {monthLabel}
           </p>
-          <p className="text-[10px] text-[#8a7a74]">
+          <p className="text-[10px] text-[#6b5d57]">
             {monthTotal > 0 ? `${monthTotal} events this month` : 'No events this month'}
           </p>
         </div>
@@ -132,7 +132,7 @@ export function CalendarPicker({ counts, selectedDate }: CalendarPickerProps) {
       {/* ── Day headers ── */}
       <div className="grid grid-cols-7 gap-0.5 mb-1">
         {DAY_HEADERS.map(d => (
-          <div key={d} className="text-center text-[10px] font-semibold text-[#8a7a74] py-1">
+          <div key={d} className="text-center text-[10px] font-semibold text-[#6b5d57] py-1">
             {d}
           </div>
         ))}
@@ -182,7 +182,7 @@ export function CalendarPicker({ counts, selectedDate }: CalendarPickerProps) {
 
       {/* ── Legend ── */}
       <div className="flex items-center gap-3 mt-3 justify-end">
-        <span className="text-[9px] text-[#8a7a74]">Events:</span>
+        <span className="text-[9px] text-[#6b5d57]">Events:</span>
         {[
           { label: '1–3',  cls: 'bg-[#f5ede0]' },
           { label: '4–8',  cls: 'bg-[#e8d4b8]' },
@@ -191,7 +191,7 @@ export function CalendarPicker({ counts, selectedDate }: CalendarPickerProps) {
         ].map(({ label, cls }) => (
           <div key={label} className="flex items-center gap-1">
             <div className={`w-3 h-3 rounded-sm ${cls}`} />
-            <span className="text-[9px] text-[#8a7a74]">{label}</span>
+            <span className="text-[9px] text-[#6b5d57]">{label}</span>
           </div>
         ))}
       </div>

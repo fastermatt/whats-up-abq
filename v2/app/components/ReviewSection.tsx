@@ -111,7 +111,7 @@ export function ReviewSection({ eventId }: Props) {
           {reviews.length > 0 && (
             <div className="flex items-center gap-1.5 mt-0.5">
               <StarDisplay rating={avgRating} size="sm" />
-              <span className="text-xs text-[#8a7a74]">
+              <span className="text-xs text-[#6b5d57]">
                 {avgRating.toFixed(1)} · {reviews.length} review{reviews.length !== 1 ? 's' : ''}
               </span>
             </div>
@@ -126,7 +126,7 @@ export function ReviewSection({ eventId }: Props) {
           </button>
         )}
         {!user && (
-          <a href="/login" className="text-xs text-[#8a7a74] hover:text-[#9a442d]">
+          <a href="/login" className="text-xs text-[#6b5d57] hover:text-[#9a442d]">
             Sign in to review
           </a>
         )}
@@ -194,7 +194,7 @@ export function ReviewSection({ eventId }: Props) {
             <div key={review.id} className="bg-white rounded-xl border border-[#f0e4cc] p-3 shadow-sm">
               <div className="flex items-center justify-between mb-1.5">
                 <StarDisplay rating={review.rating} size="sm" />
-                <span className="text-[10px] text-[#8a7a74]">
+                <span className="text-[10px] text-[#6b5d57]">
                   {new Date(review.created_at).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
@@ -208,7 +208,7 @@ export function ReviewSection({ eventId }: Props) {
           ))}
         </div>
       ) : (
-        <p className="text-sm text-[#8a7a74]">
+        <p className="text-sm text-[#6b5d57]">
           {user ? 'Be the first to review this event.' : 'No reviews yet.'}
         </p>
       )}

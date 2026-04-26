@@ -99,7 +99,7 @@ export default async function NeighborhoodPage({ params }: PageProps) {
             Things to Do in {neighborhood}
           </h1>
 
-          <div className="flex flex-wrap items-center gap-3 text-sm text-[#8a7a74]">
+          <div className="flex flex-wrap items-center gap-3 text-sm text-[#6b5d57]">
             <span className="flex items-center gap-1.5">
               <MapPin className="w-4 h-4 text-[#9a442d]" />
               Albuquerque, NM
@@ -133,7 +133,7 @@ export default async function NeighborhoodPage({ params }: PageProps) {
         {topVenues.length > 0 && (
           <div className="mb-5">
             <h2
-              className="text-xs font-bold text-[#8a7a74] uppercase tracking-wider mb-2"
+              className="text-xs font-bold text-[#6b5d57] uppercase tracking-wider mb-2"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               Venues in this area
@@ -149,7 +149,7 @@ export default async function NeighborhoodPage({ params }: PageProps) {
                 >
                   <MapPin className="w-2.5 h-2.5 text-[#9a442d]" />
                   {venue}
-                  <span className="text-[#8a7a74] font-semibold">{cnt}</span>
+                  <span className="text-[#6b5d57] font-semibold">{cnt}</span>
                 </Link>
               ))}
             </div>
@@ -205,7 +205,7 @@ export default async function NeighborhoodPage({ params }: PageProps) {
                       {event.title}
                     </h3>
                     {event.venue && (
-                      <p className="text-[10px] text-[#8a7a74] flex items-center gap-0.5 mt-0.5">
+                      <p className="text-[10px] text-[#6b5d57] flex items-center gap-0.5 mt-0.5">
                         <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
                         {event.venue}
                       </p>
@@ -239,7 +239,7 @@ export default async function NeighborhoodPage({ params }: PageProps) {
 
         {/* ── SEO footer ── */}
         <div className="mt-8 pt-6 border-t border-[#f0e4cc]">
-          <p className="text-xs text-[#8a7a74] leading-relaxed">
+          <p className="text-xs text-[#6b5d57] leading-relaxed">
             Find upcoming concerts, comedy shows, arts events, sports, food &amp; drink festivals,
             and more in the {neighborhood} area of Albuquerque, NM.
             ABQ Unplugged aggregates events from Ticketmaster, Eventbrite, SeatGeek, and local sources.

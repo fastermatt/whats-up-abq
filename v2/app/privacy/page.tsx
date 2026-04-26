@@ -44,7 +44,7 @@ export default function PrivacyPage() {
           Privacy Policy
         </h1>
 
-        <p className="text-sm text-[#8a7a74] mb-10">
+        <p className="text-sm text-[#6b5d57] mb-10">
           Last updated: April 19, 2026
         </p>
 

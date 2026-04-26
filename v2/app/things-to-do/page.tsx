@@ -116,7 +116,7 @@ export default async function ThingsToDoPage({
       {/* ── Grid ── */}
       <section className="max-w-6xl mx-auto px-4 py-6">
         {activeCategory && (
-          <p className="text-xs text-[#8a7a74] mb-4">
+          <p className="text-xs text-[#6b5d57] mb-4">
             {PLACE_CATEGORIES.find(c => c.slug === activeCategory)?.emoji}{' '}
             <span className="font-semibold text-[#1a1614]">
               {PLACE_CATEGORIES.find(c => c.slug === activeCategory)?.label}
@@ -138,7 +138,7 @@ export default async function ThingsToDoPage({
         </div>
 
         {places.length === 0 && (
-          <div className="text-center py-16 text-[#8a7a74]">
+          <div className="text-center py-16 text-[#6b5d57]">
             <p className="text-base font-semibold mb-1">Nothing here yet</p>
             <Link href="/things-to-do" className="text-sm text-[#006a62] hover:underline">
               View all places
@@ -157,7 +157,7 @@ export default async function ThingsToDoPage({
             <p className="text-base font-black text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
               Check the event calendar
             </p>
-            <p className="text-xs text-[#8a7a74] mt-0.5">
+            <p className="text-xs text-[#6b5d57] mt-0.5">
               Concerts, shows, sports — updated daily
             </p>
           </div>
@@ -229,7 +229,7 @@ function PlaceCard({ place }: { place: Place }) {
       {/* Content */}
       <div className="p-2.5 flex flex-col flex-1">
         {/* Category label */}
-        <p className="text-[9px] font-bold uppercase tracking-wider text-[#8a7a74] mb-0.5">
+        <p className="text-[9px] font-bold uppercase tracking-wider text-[#6b5d57] mb-0.5">
           {catMeta?.emoji} {catMeta?.label}
         </p>
 
@@ -240,13 +240,13 @@ function PlaceCard({ place }: { place: Place }) {
           {place.name}
         </h3>
 
-        <p className="text-[10px] text-[#8a7a74] line-clamp-2 flex-1">
+        <p className="text-[10px] text-[#6b5d57] line-clamp-2 flex-1">
           {place.tagline}
         </p>
 
         {/* Footer */}
         <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#f5eee4]">
-          <span className="flex items-center gap-0.5 text-[9px] text-[#8a7a74] truncate">
+          <span className="flex items-center gap-0.5 text-[9px] text-[#6b5d57] truncate">
             <MapPin className="w-2 h-2 flex-shrink-0" />
             {place.neighborhood}
           </span>

@@ -135,7 +135,7 @@ export default async function ProfilePage() {
             <h2 className="text-base font-black text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
               Badges
             </h2>
-            <span className="text-xs text-[#8a7a74]">{earnedBadges.length}/{BADGE_DEFS.length}</span>
+            <span className="text-xs text-[#6b5d57]">{earnedBadges.length}/{BADGE_DEFS.length}</span>
           </div>
           <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
             {BADGE_DEFS.map(badge => {
@@ -169,7 +169,7 @@ export default async function ProfilePage() {
             </div>
             <div className="min-w-0">
               <p className="text-sm font-bold text-[#1a1614]">For You</p>
-              <p className="text-[10px] text-[#8a7a74]">Matched events</p>
+              <p className="text-[10px] text-[#6b5d57]">Matched events</p>
             </div>
           </Link>
           <Link
@@ -181,7 +181,7 @@ export default async function ProfilePage() {
             </div>
             <div className="min-w-0">
               <p className="text-sm font-bold text-[#1a1614]">{savedCount + goingCount}</p>
-              <p className="text-[10px] text-[#8a7a74]">Saved</p>
+              <p className="text-[10px] text-[#6b5d57]">Saved</p>
             </div>
           </Link>
           <Link
@@ -195,7 +195,7 @@ export default async function ProfilePage() {
               <p className="text-sm font-bold text-[#1a1614]">
                 {myRank >= 0 ? `#${myRank + 1}` : 'Unranked'}
               </p>
-              <p className="text-[10px] text-[#8a7a74]">Leaderboard</p>
+              <p className="text-[10px] text-[#6b5d57]">Leaderboard</p>
             </div>
           </Link>
         </div>
@@ -212,9 +212,9 @@ export default async function ProfilePage() {
                   <CheckSquare className="w-4 h-4 text-[#4f6249] flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-[#1a1614] truncate">{ci.event_name}</p>
-                    <p className="text-[10px] text-[#8a7a74]">{ci.venue_name}</p>
+                    <p className="text-[10px] text-[#6b5d57]">{ci.venue_name}</p>
                   </div>
-                  <p className="text-[10px] text-[#8a7a74] flex-shrink-0">
+                  <p className="text-[10px] text-[#6b5d57] flex-shrink-0">
                     {ci.event_date ? new Date(ci.event_date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}
                   </p>
                 </div>
@@ -229,7 +229,7 @@ export default async function ProfilePage() {
             <h3 className="text-base font-bold text-[#1a1614] mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
               Time to get out there
             </h3>
-            <p className="text-xs text-[#8a7a74] mb-4 max-w-xs mx-auto">
+            <p className="text-xs text-[#6b5d57] mb-4 max-w-xs mx-auto">
               Attend events, check in, earn badges, and climb the leaderboard.
             </p>
             <Link
@@ -253,7 +253,7 @@ export default async function ProfilePage() {
                 <Bell className="w-4 h-4 text-[#9a442d] mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm font-semibold text-[#1a1614]">Event reminders</p>
-                  <p className="text-[10px] text-[#8a7a74] mt-0.5">Push notifications for events you&apos;re going to</p>
+                  <p className="text-[10px] text-[#6b5d57] mt-0.5">Push notifications for events you&apos;re going to</p>
                 </div>
               </div>
               <PushBell />
@@ -266,7 +266,7 @@ export default async function ProfilePage() {
                 <Bell className="w-4 h-4 text-[#4f6249] mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm font-semibold text-[#1a1614]">What to hear about</p>
-                  <p className="text-[10px] text-[#8a7a74] mt-0.5">Categories, venues, artists, neighborhoods — only get notified about stuff you care about</p>
+                  <p className="text-[10px] text-[#6b5d57] mt-0.5">Categories, venues, artists, neighborhoods — only get notified about stuff you care about</p>
                 </div>
               </div>
               <span className="text-[#9a442d] text-lg">›</span>
@@ -327,7 +327,7 @@ export default async function ProfilePage() {
                 <div className="mt-0.5 flex-shrink-0">{icon}</div>
                 <div>
                   <p className="text-sm font-semibold text-[#1a1614]">{title}</p>
-                  <p className="text-[11px] text-[#8a7a74] mt-0.5 leading-relaxed">{desc}</p>
+                  <p className="text-[11px] text-[#6b5d57] mt-0.5 leading-relaxed">{desc}</p>
                 </div>
               </div>
             ))}

@@ -71,7 +71,7 @@ export default async function NeighborhoodsPage() {
             >
               Albuquerque Neighborhoods
             </h1>
-            <p className="text-sm text-[#8a7a74]">
+            <p className="text-sm text-[#6b5d57]">
               Find events happening near you across all of Albuquerque.
             </p>
           </div>
@@ -94,12 +94,12 @@ export default async function NeighborhoodsPage() {
                       {n.neighborhood}
                     </h2>
                     {NEIGHBORHOOD_DESC[n.slug] && (
-                      <p className="text-[10px] text-[#8a7a74] line-clamp-1">
+                      <p className="text-[10px] text-[#6b5d57] line-clamp-1">
                         {NEIGHBORHOOD_DESC[n.slug]}
                       </p>
                     )}
                   </div>
-                  <span className="flex-shrink-0 text-[10px] font-bold text-[#8a7a74] bg-[#f0e4cc] rounded-full px-2.5 py-1 tabular-nums">
+                  <span className="flex-shrink-0 text-[10px] font-bold text-[#6b5d57] bg-[#f0e4cc] rounded-full px-2.5 py-1 tabular-nums">
                     {n.count} events
                   </span>
                 </div>

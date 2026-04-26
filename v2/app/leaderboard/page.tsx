@@ -100,7 +100,7 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
             <h3 className="font-bold text-[#1a1614] mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
               {isWeekly ? 'No check-ins this week yet' : 'No one here yet'}
             </h3>
-            <p className="text-xs text-[#8a7a74] mb-4">
+            <p className="text-xs text-[#6b5d57] mb-4">
               {isWeekly
                 ? 'Check into an event this week to appear on the board!'
                 : 'Be the first to check in and claim the #1 spot!'}
@@ -129,7 +129,7 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
                     {medal ? (
                       <span className="text-xl">{medal}</span>
                     ) : (
-                      <span className="text-sm font-bold text-[#8a7a74]">#{idx + 1}</span>
+                      <span className="text-sm font-bold text-[#6b5d57]">#{idx + 1}</span>
                     )}
                   </div>
 
@@ -146,7 +146,7 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
                       {person.display_name || person.handle || 'ABQ Fan'}
                       {isMe && <span className="ml-1.5 text-[10px] text-[#9a442d] font-normal">you</span>}
                     </p>
-                    <div className="flex items-center gap-2 text-[10px] text-[#8a7a74]">
+                    <div className="flex items-center gap-2 text-[10px] text-[#6b5d57]">
                       {person.neighborhood && (
                         <span className="flex items-center gap-0.5">
                           <MapPin className="w-2.5 h-2.5" />
@@ -164,7 +164,7 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
                     <p className="text-base font-black text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
                       {score}
                     </p>
-                    <p className="text-[10px] text-[#8a7a74]">
+                    <p className="text-[10px] text-[#6b5d57]">
                       {isWeekly ? 'this week' : 'total'}
                     </p>
                   </div>
@@ -189,7 +189,7 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
           <p className="text-xs font-bold text-[#1a1614] mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
             How to climb the ranks
           </p>
-          <ul className="space-y-1.5 text-xs text-[#8a7a74]">
+          <ul className="space-y-1.5 text-xs text-[#6b5d57]">
             <li className="flex items-center gap-2">
               <span className="w-4 h-4 rounded-full bg-[#9a442d]/10 flex items-center justify-center text-[9px]">1</span>
               Browse events and tap &quot;I&apos;m going&quot;
@@ -209,7 +209,7 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
         {!user && (
           <div className="bg-white rounded-2xl border border-[#f0e4cc] p-5 text-center">
             <p className="text-sm font-bold text-[#1a1614] mb-1">Want to compete?</p>
-            <p className="text-xs text-[#8a7a74] mb-3">Create a free account to track your check-ins and climb the rankings.</p>
+            <p className="text-xs text-[#6b5d57] mb-3">Create a free account to track your check-ins and climb the rankings.</p>
             <Link
               href="/login"
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#9a442d] text-white text-xs font-semibold hover:bg-[#7d3725] transition-colors"

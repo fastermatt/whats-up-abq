@@ -64,7 +64,7 @@ export function EditProfileForm({ userId, currentDisplayName, currentHandle, cur
         className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-[#f7f2ec] transition-colors"
       >
         <span className="text-sm font-semibold text-[#1a1614]">Edit Profile</span>
-        {open ? <ChevronUp className="w-4 h-4 text-[#8a7a74]" /> : <ChevronDown className="w-4 h-4 text-[#8a7a74]" />}
+        {open ? <ChevronUp className="w-4 h-4 text-[#6b5d57]" /> : <ChevronDown className="w-4 h-4 text-[#6b5d57]" />}
       </button>
 
       {open && (
@@ -87,7 +87,7 @@ export function EditProfileForm({ userId, currentDisplayName, currentHandle, cur
                 Handle
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#8a7a74]">@</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#6b5d57]">@</span>
                 <input
                   type="text"
                   value={handle}

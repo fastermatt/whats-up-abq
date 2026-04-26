@@ -19,7 +19,7 @@ export function ConnectionQuote({
 
   return (
     <p
-      className={`${textSize} italic text-[#8a7a74] leading-relaxed ${className}`}
+      className={`${textSize} italic text-[#6b5d57] leading-relaxed ${className}`}
     >
       &ldquo;{q.text}&rdquo;
     </p>

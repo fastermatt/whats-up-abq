@@ -122,8 +122,8 @@ export default async function CategoryPage({ params }: PageProps) {
           <h1 className="text-2xl sm:text-3xl font-black text-[#1a1614] leading-tight mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
             {emoji} {category} in Albuquerque
           </h1>
-          <p className="text-sm text-[#8a7a74] leading-relaxed mb-3">{description}</p>
-          <div className="flex flex-wrap items-center gap-3 text-sm text-[#8a7a74]">
+          <p className="text-sm text-[#6b5d57] leading-relaxed mb-3">{description}</p>
+          <div className="flex flex-wrap items-center gap-3 text-sm text-[#6b5d57]">
             <span className="font-medium text-[#1a1614]">{total.toLocaleString()} upcoming event{total !== 1 ? 's' : ''}</span>
           </div>
         </div>
@@ -146,7 +146,7 @@ export default async function CategoryPage({ params }: PageProps) {
 
         {topVenues.length > 0 && (
           <div className="mb-5">
-            <h2 className="text-xs font-bold text-[#8a7a74] uppercase tracking-wider mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
+            <h2 className="text-xs font-bold text-[#6b5d57] uppercase tracking-wider mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
               Top Venues
             </h2>
             <div className="flex flex-wrap gap-2">
@@ -156,7 +156,7 @@ export default async function CategoryPage({ params }: PageProps) {
                   className="inline-flex items-center gap-1.5 text-xs bg-white border border-[#ddc9a3] text-[#4a3f3a] px-2.5 py-1 rounded-full hover:border-[#9a442d] hover:text-[#9a442d] transition-colors">
                   <MapPin className="w-2.5 h-2.5 text-[#9a442d]" />
                   {venue}
-                  <span className="text-[#8a7a74] font-semibold">{cnt}</span>
+                  <span className="text-[#6b5d57] font-semibold">{cnt}</span>
                 </Link>
               ))}
             </div>
@@ -192,7 +192,7 @@ export default async function CategoryPage({ params }: PageProps) {
                       {event.title}
                     </h3>
                     {event.venue && (
-                      <p className="text-[10px] text-[#8a7a74] flex items-center gap-0.5 mt-0.5">
+                      <p className="text-[10px] text-[#6b5d57] flex items-center gap-0.5 mt-0.5">
                         <MapPin className="w-2.5 h-2.5 flex-shrink-0" />{event.venue}
                       </p>
                     )}
@@ -213,14 +213,14 @@ export default async function CategoryPage({ params }: PageProps) {
         </div>
 
         <div className="mt-8 pt-6 border-t border-[#f0e4cc]">
-          <p className="text-xs text-[#8a7a74] leading-relaxed">
+          <p className="text-xs text-[#6b5d57] leading-relaxed">
             Find upcoming {category.toLowerCase()} events in Albuquerque, NM.
             ABQ Unplugged aggregates events from Ticketmaster, Eventbrite, SeatGeek, and local sources.
           </p>
           <div className="flex flex-wrap gap-3 mt-3">
             <Link href="/events" className="text-xs font-semibold text-[#9a442d] hover:underline">Browse all events →</Link>
             {Object.entries(CATEGORY_MAP).filter(([s]) => s !== slug).slice(0, 4).map(([s, c]) => (
-              <Link key={s} href={`/categories/${s}`} className="text-xs text-[#8a7a74] hover:text-[#9a442d] transition-colors">{c}</Link>
+              <Link key={s} href={`/categories/${s}`} className="text-xs text-[#6b5d57] hover:text-[#9a442d] transition-colors">{c}</Link>
             ))}
           </div>
         </div>

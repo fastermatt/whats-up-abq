@@ -119,7 +119,7 @@ export function SaveEventButton({ eventId, eventName, eventDate, venueName, cate
 
       {/* Going count */}
       {count > 0 && (
-        <span className="text-[10px] text-[#8a7a74]">
+        <span className="text-[10px] text-[#6b5d57]">
           {count} {count === 1 ? 'person' : 'people'} going
         </span>
       )}

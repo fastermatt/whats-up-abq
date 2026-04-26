@@ -85,7 +85,7 @@ export default async function TonightPage() {
           >
             Tonight in Albuquerque
           </h1>
-          <p className="text-[#8a7a74] text-sm mt-1">{todayLabel}</p>
+          <p className="text-[#6b5d57] text-sm mt-1">{todayLabel}</p>
         </div>
 
         {/* ── Empty state ── */}
@@ -98,7 +98,7 @@ export default async function TonightPage() {
             >
               Quiet night.
             </h2>
-            <p className="text-[#8a7a74] text-sm max-w-xs mb-6">
+            <p className="text-[#6b5d57] text-sm max-w-xs mb-6">
               Nothing listed for tonight just yet — check back later or see what&apos;s coming up this weekend.
             </p>
             <Link
@@ -177,7 +177,7 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
             </p>
           )}
           {event.venue && (
-            <p className="text-[10px] text-[#8a7a74] line-clamp-1 flex items-center gap-1">
+            <p className="text-[10px] text-[#6b5d57] line-clamp-1 flex items-center gap-1">
               <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
               {event.venue}
             </p>

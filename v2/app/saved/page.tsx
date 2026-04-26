@@ -58,7 +58,7 @@ export default async function SavedPage({ searchParams }: PageProps) {
         <h1 className="text-2xl font-black text-[#1a1614] mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
           Saved Events
         </h1>
-        <p className="text-sm text-[#8a7a74] mb-6">Sign in to save events and track where you&apos;re going. The best ones come with a plan and a person.</p>
+        <p className="text-sm text-[#6b5d57] mb-6">Sign in to save events and track where you&apos;re going. The best ones come with a plan and a person.</p>
         <Link
           href="/login"
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#9a442d] text-white font-semibold text-sm hover:bg-[#7d3725] transition-all"
@@ -145,7 +145,7 @@ export default async function SavedPage({ searchParams }: PageProps) {
           <h1 className="font-black text-lg text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
             My Events
           </h1>
-          <Link href="/profile" className="text-xs text-[#8a7a74] hover:text-[#9a442d] transition-colors">
+          <Link href="/profile" className="text-xs text-[#6b5d57] hover:text-[#9a442d] transition-colors">
             <User className="w-4 h-4" />
           </Link>
         </div>
@@ -185,7 +185,7 @@ export default async function SavedPage({ searchParams }: PageProps) {
               <h2 className="text-base font-bold text-[#1a1614] mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
                 Follow people to see their plans
               </h2>
-              <p className="text-xs text-[#8a7a74] mb-4">
+              <p className="text-xs text-[#6b5d57] mb-4">
                 When you follow someone, their upcoming events will appear here.
               </p>
               <Link
@@ -201,7 +201,7 @@ export default async function SavedPage({ searchParams }: PageProps) {
               <h2 className="text-base font-bold text-[#1a1614] mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
                 Nothing coming up yet
               </h2>
-              <p className="text-xs text-[#8a7a74] mb-4">
+              <p className="text-xs text-[#6b5d57] mb-4">
                 The people you follow haven&apos;t marked any upcoming events.
               </p>
               <Link href="/events" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#9a442d] text-white text-xs font-semibold hover:bg-[#7d3725] transition-colors">
@@ -229,7 +229,7 @@ export default async function SavedPage({ searchParams }: PageProps) {
                activeTab === 'saved'  ? 'No saved events' :
                'No past events'}
             </h2>
-            <p className="text-xs text-[#8a7a74] mb-4">
+            <p className="text-xs text-[#6b5d57] mb-4">
               {activeTab === 'past'
                 ? 'Events you attend will appear here.'
                 : 'Save events from any event page to track them here. The best ones come with a plan and a person.'}
@@ -291,7 +291,7 @@ function FriendEventCard({ event, friendHandle }: { event: FriendEvent; friendHa
             </p>
           )}
           {event.venue_name && (
-            <p className="text-[10px] text-[#8a7a74] flex items-center gap-1">
+            <p className="text-[10px] text-[#6b5d57] flex items-center gap-1">
               <MapPin className="w-2.5 h-2.5" />
               {event.venue_name}
             </p>
@@ -357,7 +357,7 @@ function SavedEventCard({ event, activeTab }: { event: UserEvent; activeTab: Tab
             </p>
           )}
           {event.venue_name && (
-            <p className="text-[10px] text-[#8a7a74] flex items-center gap-1">
+            <p className="text-[10px] text-[#6b5d57] flex items-center gap-1">
               <MapPin className="w-2.5 h-2.5" />
               {event.venue_name}
             </p>

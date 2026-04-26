@@ -257,7 +257,7 @@ export default async function EventDetailPage({ params }: PageProps) {
               <Calendar className="w-4 h-4 text-[#9a442d]" />
               <div>
                 <p className="text-xs font-semibold text-[#1a1614]">{dateStr}</p>
-                {timeStr && <p className="text-[11px] text-[#8a7a74]">{timeStr}</p>}
+                {timeStr && <p className="text-[11px] text-[#6b5d57]">{timeStr}</p>}
                 {!timeStr && timesVary && (
                   <p className="text-[11px] text-[#4f6249] font-semibold">Times vary — see host site</p>
                 )}
@@ -274,7 +274,7 @@ export default async function EventDetailPage({ params }: PageProps) {
               <MapPin className="w-4 h-4 text-[#006a62] group-hover:text-[#9a442d] transition-colors flex-shrink-0" />
               <div>
                 <p className="text-xs font-semibold text-[#1a1614] group-hover:text-[#9a442d] transition-colors">{event.venue}</p>
-                {event.address && <p className="text-[11px] text-[#8a7a74]">{event.address}</p>}
+                {event.address && <p className="text-[11px] text-[#6b5d57]">{event.address}</p>}
               </div>
             </Link>
           )}
@@ -316,7 +316,7 @@ export default async function EventDetailPage({ params }: PageProps) {
             >
               <MapPin className="w-4 h-4 text-[#006a62] group-hover:text-[#9a442d] transition-colors flex-shrink-0" />
               <div>
-                <p className="text-[9px] uppercase tracking-wider text-[#8a7a74] font-semibold leading-none mb-0.5">Neighborhood</p>
+                <p className="text-[9px] uppercase tracking-wider text-[#6b5d57] font-semibold leading-none mb-0.5">Neighborhood</p>
                 <p className="text-xs font-semibold text-[#1a1614] group-hover:text-[#006a62] transition-colors">{event.neighborhood}</p>
               </div>
             </Link>
@@ -394,7 +394,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 
         {/* Instagram share strip */}
         <div className="mb-4 rounded-xl border border-[#f0e4cc] bg-[#fdf9f4] px-4 py-3">
-          <p className="text-[11px] font-semibold text-[#8a7a74] uppercase tracking-wide mb-2.5">
+          <p className="text-[11px] font-semibold text-[#6b5d57] uppercase tracking-wide mb-2.5">
             📸 Share to Instagram
           </p>
           <div className="flex flex-wrap gap-2">
@@ -410,7 +410,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                 className="inline-flex flex-col items-center px-4 py-2 rounded-lg border border-[#e8d9bf] bg-white text-center hover:border-[#9a442d] hover:shadow-sm transition-all"
               >
                 <span className="text-xs font-semibold text-[#1a1614]">{label}</span>
-                <span className="text-[10px] text-[#8a7a74]">{desc}</span>
+                <span className="text-[10px] text-[#6b5d57]">{desc}</span>
               </Link>
             ))}
             {/* Full IG Post Editor */}
@@ -421,7 +421,7 @@ export default async function EventDetailPage({ params }: PageProps) {
               className="inline-flex flex-col items-center px-4 py-2 rounded-lg border border-[#9a442d]/40 bg-[#9a442d]/5 text-center hover:border-[#9a442d] hover:bg-[#9a442d]/10 hover:shadow-sm transition-all"
             >
               <span className="text-xs font-semibold text-[#9a442d]">✦ IG Editor</span>
-              <span className="text-[10px] text-[#8a7a74]">6 templates</span>
+              <span className="text-[10px] text-[#6b5d57]">6 templates</span>
             </a>
           </div>
         </div>
@@ -461,18 +461,18 @@ export default async function EventDetailPage({ params }: PageProps) {
 
         {/* Belonging proof — "N saved this" as a soft inline signal (never scarcity) */}
         {(savedCount ?? 0) > 0 && (goingCount ?? 0) === 0 && (
-          <p className="text-[11px] text-[#8a7a74] mb-4 italic">
+          <p className="text-[11px] text-[#6b5d57] mb-4 italic">
             {savedCount} {savedCount === 1 ? 'person has' : 'people have'} saved this
           </p>
         )}
 
         {(goingCount ?? 0) > 0 && (
           <div className="mb-6 bg-white rounded-xl border border-[#f0e4cc] px-4 py-3 shadow-sm">
-            <p className="text-xs font-bold text-[#8a7a74] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <p className="text-xs font-bold text-[#6b5d57] uppercase tracking-wider mb-2 flex items-center gap-1.5">
               <Users className="w-3.5 h-3.5" />
               {goingCount} {goingCount === 1 ? 'person' : 'people'} going
               {(savedCount ?? 0) > 0 && (
-                <span className="font-normal text-[#8a7a74]/70 normal-case tracking-normal">
+                <span className="font-normal text-[#6b5d57]/70 normal-case tracking-normal">
                   · {savedCount} saved
                 </span>
               )}
@@ -498,7 +498,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                 })}
                 {(goingCount ?? 0) > attendees.length && (
                   <div className="flex items-center px-2.5 py-1">
-                    <span className="text-[11px] text-[#8a7a74]">+{(goingCount ?? 0) - attendees.length} more</span>
+                    <span className="text-[11px] text-[#6b5d57]">+{(goingCount ?? 0) - attendees.length} more</span>
                   </div>
                 )}
               </div>
@@ -533,12 +533,12 @@ export default async function EventDetailPage({ params }: PageProps) {
 
         {/* Source + report */}
         <div className="flex items-center justify-between mb-2">
-          <p className="text-[10px] text-[#8a7a74]">
+          <p className="text-[10px] text-[#6b5d57]">
             Source: {event.source === 'community' ? 'Community submission' : event.source.charAt(0).toUpperCase() + event.source.slice(1)}
           </p>
           <Link
             href={`/feedback?category=event_report&event_id=${event.id}`}
-            className="inline-flex items-center gap-1.5 text-xs text-[#8a7a74] hover:text-[#9a442d] transition-colors py-1"
+            className="inline-flex items-center gap-1.5 text-xs text-[#6b5d57] hover:text-[#9a442d] transition-colors py-1"
           >
             <Flag className="w-3 h-3" />
             Report an issue
@@ -603,7 +603,7 @@ async function SimilarEvents({ eventId, category }: { eventId: string; category:
                 {event.title}
               </h3>
               {event.venue && (
-                <p className="text-[10px] text-[#8a7a74] line-clamp-1">{event.venue}</p>
+                <p className="text-[10px] text-[#6b5d57] line-clamp-1">{event.venue}</p>
               )}
             </Link>
           ))}

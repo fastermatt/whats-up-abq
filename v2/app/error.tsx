@@ -25,7 +25,7 @@ export default function RootError({
         </h1>
 
         {/* Subtitle */}
-        <p className="text-[#8a7a74]">
+        <p className="text-[#6b5d57]">
           We couldn&apos;t load the page. This is usually temporary.
         </p>
 

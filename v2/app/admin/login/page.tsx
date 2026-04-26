@@ -43,7 +43,7 @@ export default function AdminLoginPage() {
         <h1 className="text-2xl font-black text-white mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
           ABQ Unplugged
         </h1>
-        <p className="text-[#8a7a74] text-sm mb-8">Admin portal</p>
+        <p className="text-[#6b5d57] text-sm mb-8">Admin portal</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <input

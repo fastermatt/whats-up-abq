@@ -44,7 +44,7 @@ export default function ResetPasswordPage() {
             <h1 className="text-2xl font-black text-[#1a1614] mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
               Password updated
             </h1>
-            <p className="text-sm text-[#8a7a74]">Redirecting you to your profile…</p>
+            <p className="text-sm text-[#6b5d57]">Redirecting you to your profile…</p>
           </div>
         </div>
       </main>
@@ -64,24 +64,24 @@ export default function ResetPasswordPage() {
             <h1 className="text-2xl font-black text-[#1a1614] mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
               Set new password
             </h1>
-            <p className="text-sm text-[#8a7a74]">Choose a password for your account</p>
+            <p className="text-sm text-[#6b5d57]">Choose a password for your account</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">New password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8a7a74]" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" />
                 <input
                   type={showPw ? 'text' : 'password'}
                   value={password} onChange={e => setPassword(e.target.value)}
                   placeholder="At least 6 characters" required minLength={6}
                   autoComplete="new-password"
-                  className="w-full pl-9 pr-10 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#8a7a74] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
+                  className="w-full pl-9 pr-10 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#6b5d57] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
                 />
                 <button
                   type="button" onClick={() => setShowPw(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8a7a74] hover:text-[#4a3f3a]"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b5d57] hover:text-[#4a3f3a]"
                   aria-label={showPw ? 'Hide password' : 'Show password'}
                 >
                   {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -92,13 +92,13 @@ export default function ResetPasswordPage() {
             <div>
               <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">Confirm password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8a7a74]" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" />
                 <input
                   type={showPw ? 'text' : 'password'}
                   value={confirm} onChange={e => setConfirm(e.target.value)}
                   placeholder="Same password again" required
                   autoComplete="new-password"
-                  className="w-full pl-9 pr-4 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#8a7a74] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
+                  className="w-full pl-9 pr-4 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#6b5d57] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
                 />
               </div>
             </div>
@@ -119,7 +119,7 @@ export default function ResetPasswordPage() {
           </form>
 
           <p className="text-center mt-6">
-            <Link href="/login" className="text-xs text-[#8a7a74] hover:text-[#9a442d] transition-colors">
+            <Link href="/login" className="text-xs text-[#6b5d57] hover:text-[#9a442d] transition-colors">
               ← Back to sign in
             </Link>
           </p>
