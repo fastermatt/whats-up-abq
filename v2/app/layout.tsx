@@ -61,7 +61,10 @@ export const metadata: Metadata = {
     follow: true,
   },
   verification: {
-    google: process.env.NEXT_PUBLIC_GSC_VERIFICATION,
+    // Public Google Search Console verification token — safe to commit. Pinned
+    // here so verification keeps working even if the Netlify env var is unset.
+    // Created 2026-04-26 for the URL-prefix property `https://abqunplugged.com/`.
+    google: process.env.NEXT_PUBLIC_GSC_VERIFICATION ?? 'VyqMRyVfgsMPxQqQLbp0-iFnZiiHJ6riNpWNm3q4Wns',
   },
   manifest: '/manifest.json',
   appleWebApp: {
