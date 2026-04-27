@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { fetchEvents, fetchCategoryCounts, fetchEventCountsByDate, NormalizedEvent } from '@/lib/events'
+import { fetchEvents, fetchCategoryCounts, fetchEventCountsByDate, NormalizedEvent, CATEGORY_SLUG_MAP } from '@/lib/events'
 import { OG_IMAGE } from '@/lib/fallback-images'
 import { TimeFilter } from '@/lib/utils/dates'
 import { getCategoryFallback } from '@/lib/fallback-images'
@@ -41,7 +41,9 @@ const TIME_TITLE_MAP: Record<string, string> = {
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const params = await searchParams
-  const category = params.category
+  // Normalize slug-form category params to canonical DB names before building title/description
+  const rawCategory = params.category
+  const category = rawCategory ? (CATEGORY_SLUG_MAP[rawCategory.toLowerCase()] ?? rawCategory) : undefined
   const time = params.time
   const q = params.q?.trim()
 
@@ -96,7 +98,9 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
 export default async function EventsPage({ searchParams }: PageProps) {
   const params = await searchParams
   const timeFilter = (params.time as TimeFilter) || 'upcoming'
-  const category = params.category || null
+  // Normalize slug-form category params (food-drink → Food & Drink, arts → Arts & Theater)
+  const rawCat = params.category || null
+  const category = rawCat ? (CATEGORY_SLUG_MAP[rawCat.toLowerCase()] ?? rawCat) : null
   const mood = params.mood || undefined
   const neighborhood = params.neighborhood || undefined
   const search = params.q?.trim() || undefined

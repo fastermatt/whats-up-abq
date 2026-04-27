@@ -153,22 +153,48 @@ export async function fetchCategoryCounts(): Promise<CategoryCount[]> {
 const COLS = 'id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, neighborhood, venue_slug, category, venue_name, submitted_by, image_status'
 
 /** Normalize URL-safe category slug forms to canonical DB values.
- *  Handles: food-drink → "Food & Drink", arts-culture → "Arts", etc.
+ *  DB categories: Music, Comedy, Sports, Arts & Theater, Family, Festivals,
+ *                 Food & Drink, Film, Outdoor, Community
+ *  Handles: food-drink → "Food & Drink", arts-culture → "Arts & Theater", etc.
  *  Also handles raw DB values passed as-is (no-op for already-canonical names). */
 export const CATEGORY_SLUG_MAP: Record<string, string> = {
-  'music':          'Music',
-  'comedy':         'Comedy',
-  'sports':         'Sports',
-  'arts':           'Arts',
-  'arts-culture':   'Arts',
-  'food':           'Food & Drink',
-  'food-drink':     'Food & Drink',
-  'food-and-drink': 'Food & Drink',
-  'family':         'Family',
-  'nightlife':      'Nightlife',
-  'community':      'Community',
-  'film':           'Film',
-  'film-cinema':    'Film',
+  // Music
+  'music':                'Music',
+  // Comedy
+  'comedy':               'Comedy',
+  // Sports
+  'sports':               'Sports',
+  // Arts & Theater — many natural slug variants
+  'arts':                 'Arts & Theater',
+  'arts-culture':         'Arts & Theater',
+  'arts-theater':         'Arts & Theater',
+  'arts-and-theater':     'Arts & Theater',
+  'arts-theatre':         'Arts & Theater',
+  'theater':              'Arts & Theater',
+  'theatre':              'Arts & Theater',
+  // Food & Drink
+  'food':                 'Food & Drink',
+  'food-drink':           'Food & Drink',
+  'food-and-drink':       'Food & Drink',
+  'drink':                'Food & Drink',
+  // Family
+  'family':               'Family',
+  'kids':                 'Family',
+  // Festivals
+  'festivals':            'Festivals',
+  'festival':             'Festivals',
+  // Film
+  'film':                 'Film',
+  'film-cinema':          'Film',
+  'cinema':               'Film',
+  'movies':               'Film',
+  // Outdoor
+  'outdoor':              'Outdoor',
+  'outdoors':             'Outdoor',
+  // Community
+  'community':            'Community',
+  // Nightlife — no DB category exists; map to Community so it returns results
+  'nightlife':            'Community',
 }
 
 export async function fetchEvents({
