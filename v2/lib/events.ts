@@ -1135,11 +1135,31 @@ function parsePriceMin(price: string | null): number | null {
 /** Trim a description to ~maxLen chars at a word boundary, decode HTML
  *  entities (curly apostrophe etc.) and append ellipsis. Used by every
  *  normalizer so descriptions never render as `&#8217;` or cut mid-word. */
+/** Boilerplate placeholder descriptions to filter out — these come from
+ *  source-side autogeneration and add no value vs showing nothing. */
+const BOILERPLATE_DESCRIPTIONS = new Set([
+  'live music event',
+  'live music event.',
+  'live music performance',
+  'live music performance.',
+  'concert',
+  'concert.',
+  'live event',
+  'live event.',
+  'sports event',
+  'sports event.',
+  'event',
+  'event.',
+])
+
 export function cleanDescription(input: string | null | undefined, maxLen = 320): string | null {
   if (!input) return null
   // Strip simple HTML tags (NHCC + abqtodo descriptions sometimes include <p>)
   const stripped = input.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
   const decoded = decodeHtml(stripped)
+  // Filter out boilerplate placeholders — better to show no description than
+  // useless filler like "Live music event."
+  if (BOILERPLATE_DESCRIPTIONS.has(decoded.toLowerCase())) return null
   if (decoded.length <= maxLen) return decoded
   // Cut at last whitespace before the limit so we never end mid-word
   const slice = decoded.slice(0, maxLen)
