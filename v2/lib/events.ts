@@ -152,6 +152,25 @@ export async function fetchCategoryCounts(): Promise<CategoryCount[]> {
 // Columns for queries that need full normalisation (includes raw JSONB)
 const COLS = 'id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, neighborhood, venue_slug, category, venue_name, submitted_by, image_status'
 
+/** Normalize URL-safe category slug forms to canonical DB values.
+ *  Handles: food-drink → "Food & Drink", arts-culture → "Arts", etc.
+ *  Also handles raw DB values passed as-is (no-op for already-canonical names). */
+export const CATEGORY_SLUG_MAP: Record<string, string> = {
+  'music':          'Music',
+  'comedy':         'Comedy',
+  'sports':         'Sports',
+  'arts':           'Arts',
+  'arts-culture':   'Arts',
+  'food':           'Food & Drink',
+  'food-drink':     'Food & Drink',
+  'food-and-drink': 'Food & Drink',
+  'family':         'Family',
+  'nightlife':      'Nightlife',
+  'community':      'Community',
+  'film':           'Film',
+  'film-cinema':    'Film',
+}
+
 export async function fetchEvents({
   timeFilter = 'upcoming',
   category,
@@ -167,11 +186,17 @@ export async function fetchEvents({
   const supabase = await createClient()
   const { gte, lte } = getTimeRange(timeFilter)
 
-  // Parse category filter — top-level ("Music") vs subcategory ("Sports > Baseball")
-  const topLevelCat = category
-    ? (category.includes(' > ') ? category.split(' > ')[0] : category)
+  // Normalize URL slug category names to canonical DB values
+  // e.g. "food-drink" → "Food & Drink", "arts-culture" → "Arts"
+  const resolvedCategory = category
+    ? (CATEGORY_SLUG_MAP[category.toLowerCase()] ?? category)
     : null
-  const subCat = category?.includes(' > ') ? category.split(' > ')[1] : null
+
+  // Parse category filter — top-level ("Music") vs subcategory ("Sports > Baseball")
+  const topLevelCat = resolvedCategory
+    ? (resolvedCategory.includes(' > ') ? resolvedCategory.split(' > ')[0] : resolvedCategory)
+    : null
+  const subCat = resolvedCategory?.includes(' > ') ? resolvedCategory.split(' > ')[1] : null
 
   // In-memory filtering is needed for: subcategory, search, freeOnly, maxPrice.
   // Mood filter is handled at DB level (ai_enrichment JSONB column).
@@ -252,6 +277,9 @@ export async function fetchEvents({
   if (search) {
     const terms = search.toLowerCase().split(/\s+/).filter(Boolean)
     allNormalized = allNormalized.filter((e) => {
+      // Exclude volunteer food-bank shifts from keyword search — they flood results
+      // for "food" because the venue name "Roadrunner Food Bank" matches, not the event
+      if (e.id.startsWith('rrfb_')) return false
       const haystack = `${e.title} ${e.venue ?? ''} ${e.category ?? ''} ${e.subcategory ?? ''} ${e.description ?? ''}`.toLowerCase()
       return terms.every((t) => haystack.includes(t))
     })
@@ -931,7 +959,13 @@ function normalizeSG(row: RawEventRow): NormalizedEvent {
     address: v ? buildTMAddress(v) : null,
     city: (v?.city as Record<string, unknown> | undefined)?.name as string | null ?? null,
     ...mapCategory(segment, genre ?? title),
-    description: cleanDescription(r.info as string | undefined),
+    description: (() => {
+      const rawInfo = r.info as string | undefined
+      // Filter out raw SeatGeek category path strings like "Comedy / theater_comedy performance."
+      // These leak in when perf.description is a SG internal category descriptor, not a real description.
+      const isSGCategoryStr = rawInfo != null && /\/\s*\w+_\w/.test(rawInfo) && rawInfo.length < 120
+      return isSGCategoryStr ? null : cleanDescription(rawInfo)
+    })(),
     price: priceStr,
     imageUrl: (image as string | null) ?? null,
     ticketUrl: (r.url as string | undefined) ?? null,

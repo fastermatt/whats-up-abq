@@ -18,6 +18,9 @@ const NEIGHBORHOOD_ALIASES: Record<string, string> = {
   'downtown-abq':    'downtown',
   'central':         'downtown',
   'east-mountains':  'east-mountains',
+  'barelas':         'barelas-south-downtown',
+  'south-downtown':  'barelas-south-downtown',
+  'barelas-south':   'barelas-south-downtown',
   'rio-rancho':      null as unknown as string,  // hard block — we don't cover RR
 }
 
