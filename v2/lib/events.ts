@@ -416,6 +416,19 @@ export function neighborhoodToSlug(name: string): string {
     .replace(/^-|-$/g, '')
 }
 
+/** Convert a venue name to a URL-safe slug. Idempotent. Must match the
+ *  venueToSlug() in venues/[slug]/page.tsx exactly:
+ *  1. Strip apostrophes/quotes first ("Hyena's" → "hyenas")
+ *  2. Collapse non-alphanum runs to single hyphens
+ *  3. Strip leading/trailing hyphens */
+export function venueToSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[''`"]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
 /** Fetch upcoming events in a specific neighborhood by slug.
  *  Uses the generated `neighborhood_slug` DB column — no in-memory filter needed. */
 export async function fetchEventsByNeighborhood(slug: string, limit = 30): Promise<NormalizedEvent[]> {

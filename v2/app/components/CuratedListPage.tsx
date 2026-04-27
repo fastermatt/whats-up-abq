@@ -5,7 +5,7 @@
  */
 import Link from 'next/link'
 import { Clock, MapPin } from 'lucide-react'
-import { NormalizedEvent } from '@/lib/events'
+import { NormalizedEvent, venueToSlug } from '@/lib/events'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { EventImage } from './EventImage'
 import { QuickSaveButton } from './QuickSaveButton'
@@ -190,7 +190,7 @@ function CuratedCard({ event, index }: { event: NormalizedEvent; index: number }
             </div>
           )}
         </div>
-        <div className="p-2 space-y-0.5 flex-1 flex flex-col">
+        <div className="px-2 pt-2 pb-0.5 space-y-0.5 flex-1 flex flex-col">
           <h3
             className="font-bold text-[#1a1614] text-xs leading-tight line-clamp-2 group-hover:text-[#9a442d] transition-colors"
             style={{ fontFamily: 'var(--font-epilogue)' }}
@@ -205,14 +205,19 @@ function CuratedCard({ event, index }: { event: NormalizedEvent; index: number }
               </span>
             </p>
           )}
-          {event.venue && (
-            <p className="text-[10px] text-[#6b5d57] line-clamp-1 flex items-center gap-1">
-              <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
-              {event.venue}
-            </p>
-          )}
         </div>
       </Link>
+      {/* Venue link — outside main <Link> to avoid nested anchors */}
+      {event.venue && (
+        <Link
+          href={`/venues/${venueToSlug(event.venue)}`}
+          className="block px-2 pb-2 text-[10px] text-[#6b5d57] hover:text-[#9a442d] hover:underline line-clamp-1 flex items-center gap-1 transition-colors"
+          aria-label={`See all events at ${event.venue}`}
+        >
+          <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
+          {event.venue}
+        </Link>
+      )}
       <QuickSaveButton
         eventId={event.id}
         eventName={event.title}

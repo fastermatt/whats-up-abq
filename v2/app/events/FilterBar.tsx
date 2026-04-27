@@ -193,7 +193,22 @@ export function FilterBar({
         : 'bg-[#f0e4cc]/60 border border-[#ddc9a3]/60 text-[#4a3f3a] hover:border-[#006a62] hover:text-[#006a62]'
     }`
 
-  const vibePill = `flex-none px-2.5 py-1 rounded-full text-[10px] font-semibold whitespace-nowrap transition-colors bg-white border border-[#ddc9a3]/80 text-[#4a3f3a] hover:border-[#9a442d]/50 hover:text-[#9a442d] hover:bg-[#9a442d]/5`
+  const vibePill = (isActive: boolean) =>
+    `flex-none px-2.5 py-1 rounded-full text-[10px] font-semibold whitespace-nowrap transition-colors ${
+      isActive
+        ? 'bg-[#9a442d] text-white border border-[#9a442d] shadow-sm'
+        : 'bg-white border border-[#ddc9a3]/80 text-[#4a3f3a] hover:border-[#9a442d]/50 hover:text-[#9a442d] hover:bg-[#9a442d]/5'
+    }`
+
+  /** A vibe is "active" when ALL of its preset params currently match the URL.
+   *  This gives users visual confirmation that a vibe filter is applied. */
+  const isVibeActive = (vibeParams: Record<string, string>): boolean => {
+    if (vibeParams.category && currentCategory !== vibeParams.category) return false
+    if (vibeParams.time && currentTime !== vibeParams.time) return false
+    if (vibeParams.price && priceFilter !== vibeParams.price) return false
+    // Must have at least one param matching to count as active (not just empty default)
+    return !!(vibeParams.category || vibeParams.time || vibeParams.price)
+  }
 
   // Active filter badges
   const activeTimeFilter = TIME_FILTERS.find(f => f.value === currentTime && currentTime && currentTime !== 'upcoming')
@@ -416,11 +431,19 @@ export function FilterBar({
         <span className="flex-none self-center text-[9px] uppercase tracking-[0.12em] text-[#6b5d57] font-semibold pr-0.5 pl-0.5 whitespace-nowrap">
           Vibe
         </span>
-        {VIBES.map((v) => (
-          <button key={v.slug} onClick={() => setVibe(v.params as Record<string, string>)} className={vibePill}>
-            {v.label}
-          </button>
-        ))}
+        {VIBES.map((v) => {
+          const active = isVibeActive(v.params as Record<string, string>)
+          return (
+            <button
+              key={v.slug}
+              onClick={() => setVibe(v.params as Record<string, string>)}
+              className={vibePill(active)}
+              aria-pressed={active}
+            >
+              {v.label}
+            </button>
+          )
+        })}
         <div className="flex-none w-6" />
       </ScrollRow>
 
