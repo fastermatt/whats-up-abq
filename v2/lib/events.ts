@@ -449,9 +449,16 @@ export async function fetchEventsByVenue(venueName: string, limit = 20): Promise
 
 /** Resolve a URL slug back to its canonical venue_name (with apostrophes,
  *  hyphens, and casing intact). Uses fetchTopVenues internally so it covers
- *  the same ~80 venues we pre-render. Returns null if no venue matches. */
+ *  the same ~80 venues we pre-render. Returns null if no venue matches.
+ *
+ *  norm() must match venueToSlug() in venues/[slug]/page.tsx exactly:
+ *  strip apostrophes/quotes first so "Hyena's" → "hyenas" (not "hyena-s"). */
 export async function fetchVenueBySlug(slug: string): Promise<string | null> {
-  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  const norm = (s: string) =>
+    s.toLowerCase()
+      .replace(/[''`"]/g, '')        // strip apostrophes/quotes before hyphenating
+      .replace(/[^a-z0-9]+/g, '-')  // non-alphanum runs → single hyphen
+      .replace(/^-|-$/g, '')
   const target = norm(decodeURIComponent(slug))
   const venues = await fetchTopVenues(200)
   const hit = venues.find(v => norm(v.venueName) === target)

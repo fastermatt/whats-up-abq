@@ -103,6 +103,7 @@ const ENRICH_STEPS = [
   { key: 'tag',      name: 'Tag Neighborhoods', script: 'tag-neighborhoods.mjs', args: ['--force'] },
   { key: 'moods',    name: 'Enrich Moods',       script: 'enrich-moods-rules.mjs' },
   { key: 'cleanup',  name: 'Cleanup Events',     script: 'cleanup-events.mjs' },
+  { key: 'dedup',    name: 'Dedup Events',       script: 'dedup-events.mjs' },
   { key: 'validate', name: 'Validate Events',    script: 'validate-events.mjs' },
 ]
 

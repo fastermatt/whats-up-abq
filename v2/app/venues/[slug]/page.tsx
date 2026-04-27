@@ -10,18 +10,37 @@ import { AnimateIn } from '@/app/components/AnimateIn'
 
 export const revalidate = 3600
 
+/** Slug aliases for common misspellings / alternate spellings that won't
+ *  resolve via the normal fetchVenueBySlug lookup.
+ *  Key: what the user typed. Value: the canonical slug (must match venueToSlug(DB venue_name)). */
+const VENUE_SLUG_ALIASES: Record<string, string> = {
+  // "Theatre" vs "Theater" — DB uses "Theatre"
+  'kimo-theater':         'kimo-theatre',
+  'popejoy-theater':      'popejoy-hall',
+  // Common shorthand
+  'el-rey':               'the-historic-el-rey-theater-albuquerque',
+  'isotopes-park':        'rio-grande-credit-union-field-at-isotopes-park',
+  'isotopes':             'rio-grande-credit-union-field-at-isotopes-park',
+  'kiva-auditorium':      'kiva-auditorium-at-the-albuquerque-convention-center',
+  'convention-center':    'kiva-auditorium-at-the-albuquerque-convention-center',
+  'nhcc':                 'national-hispanic-cultural-center',
+  'national-hispanic-cultural-center': 'national-hispanic-cultural-center',
+}
+
 interface PageProps {
   params: Promise<{ slug: string }>
 }
 
 /** Convert a venue name to a URL-safe slug. Idempotent.
  *  "Hyena's Comedy Nightclub - Albuquerque" → "hyenas-comedy-nightclub-albuquerque"
- *  (Previously produced "hyenas-comedy-nightclub---albuquerque" — three hyphens
- *  from " - " collapse — which broke shareability and 404'd when users typed
- *  the natural single-hyphen slug.) */
+ *  Rules:
+ *  1. Strip apostrophes/quotes first so "Hyena's" → "hyenas" (not "hyena-s")
+ *  2. Collapse any remaining run of non-alphanum chars to a single hyphen
+ *  3. Strip leading/trailing hyphens */
 export function venueToSlug(name: string): string {
   return name
     .toLowerCase()
+    .replace(/[''`"]/g, '')         // strip apostrophes/quotes (Hyena's → hyenas)
     .replace(/[^a-z0-9]+/g, '-')   // any run of non-alphanum → single hyphen
     .replace(/^-|-$/g, '')          // strip leading/trailing
 }
@@ -61,7 +80,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params
+  const { slug: rawSlug } = await params
+  const slug = VENUE_SLUG_ALIASES[rawSlug] ?? rawSlug
   const venueName = await fetchVenueBySlug(slug)
   if (!venueName) return { title: 'Venue Not Found' }
   const events = await fetchEventsByVenue(venueName, 1)
@@ -85,7 +105,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function VenuePage({ params }: PageProps) {
-  const { slug } = await params
+  const { slug: rawSlug } = await params
+  // Resolve alias → canonical slug, then resolve slug → canonical venue name
+  const slug = VENUE_SLUG_ALIASES[rawSlug] ?? rawSlug
   const venueName = await fetchVenueBySlug(slug)
   if (!venueName) notFound()
   const events = await fetchEventsByVenue(venueName, 40)

@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { fetchEventsByNeighborhood, neighborhoodToSlug } from '@/lib/events'
@@ -8,12 +8,27 @@ import { MapPin, Calendar, ArrowLeft, ExternalLink, Map } from 'lucide-react'
 
 export const revalidate = 3600
 
+/** Common alternate slugs users type → canonical slug we use in the DB.
+ *  Avoids 404s for natural-language neighborhood names. */
+const NEIGHBORHOOD_ALIASES: Record<string, string> = {
+  'university':      'unm-campus',
+  'unm':             'unm-campus',
+  'nob-hill':        'nob-hill',          // already canonical but guards against future rename
+  'old-town':        'old-town',
+  'downtown-abq':    'downtown',
+  'central':         'downtown',
+  'east-mountains':  'east-mountains',
+  'rio-rancho':      null as unknown as string,  // hard block — we don't cover RR
+}
+
 interface PageProps {
   params: Promise<{ slug: string }>
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params
+  const { slug: rawSlug } = await params
+  const slug = NEIGHBORHOOD_ALIASES[rawSlug] ?? rawSlug
+  if (!slug) return { title: 'Neighborhood Not Found' }
   const events = await fetchEventsByNeighborhood(slug, 1)
   if (events.length === 0) return { title: 'Neighborhood Not Found' }
 
@@ -31,7 +46,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function NeighborhoodPage({ params }: PageProps) {
-  const { slug } = await params
+  const { slug: rawSlug } = await params
+
+  // Resolve aliases and redirect to canonical slug
+  const canonical = NEIGHBORHOOD_ALIASES[rawSlug]
+  if (canonical === null) notFound()               // hard-blocked areas (e.g. Rio Rancho)
+  if (canonical && canonical !== rawSlug) redirect(`/neighborhoods/${canonical}`)
+
+  const slug = rawSlug
   const events = await fetchEventsByNeighborhood(slug, 40)
 
   if (events.length === 0) notFound()

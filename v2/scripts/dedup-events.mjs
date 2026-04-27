@@ -74,10 +74,34 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 const today = new Date().toISOString().slice(0, 10)
 
 // Source priority — higher index = higher priority (winner)
-const SOURCE_PRIORITY = ['nhcc', 'volunteer', 'local', 'eventbrite', 'seatgeek', 'ticketmaster']
+// SeatGeek > Ticketmaster because SG URLs are event-slug-based (don't 404);
+// TM URLs are opaque IDs that sometimes redirect to wrong pages.
+const SOURCE_PRIORITY = ['nhcc', 'volunteer', 'local', 'eventbrite', 'ticketmaster', 'seatgeek']
 function sourcePriority(source) {
   const idx = SOURCE_PRIORITY.indexOf(source)
   return idx === -1 ? 0 : idx
+}
+
+// Sports venues where there is only ONE event per date — any TM+SG pair here
+// is definitely the same event (home/away team order in title doesn't matter).
+const SPORTS_VENUES = new Set([
+  'Rio Grande Credit Union Field at Isotopes Park',
+])
+
+// Detect Ticketmaster "PSS VIP Parking" / add-on listings — these are never
+// real events; they're parking passes sold alongside the main ticket.
+function isTMAddOn(row) {
+  if (row.source !== 'ticketmaster') return false
+  const name = ((row.raw || {}).name || '').toLowerCase()
+  return name.includes('pss vip parking') || name.includes('vip parking') || name.includes('photo in the lobby')
+}
+
+// Normalize a title for fuzzy first-word comparison.
+// Strips punctuation and returns the first word in lowercase.
+function firstWordNorm(title) {
+  if (!title) return ''
+  const stripped = title.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').trim()
+  return stripped.split(/\s+/)[0] || ''
 }
 
 // ─── Title normalizer ──────────────────────────────────────────────────────────
@@ -286,6 +310,111 @@ async function main() {
     }
 
     groupsProcessed++
+  }
+
+  // ─── Pass 2: Venue+Date cross-source dedup ────────────────────────────────────
+  // Catches events where titles differ between sources (sports games home/away
+  // order, concert "Artist Tour Name" vs "Artist with Opener", etc.).
+  // Strategy:
+  //   A) Any TM add-on (PSS VIP Parking, Photo in the Lobby) — always hide
+  //   B) Sports venue (1 event/date rule): TM at same venue+date as SG → hide TM
+  //   C) Concert venues: TM at same venue+date as SG, first word of titles match → hide TM
+  //   D) Substring match: TM title contains SG title as substring (or vice versa) → hide TM
+
+  console.log('\n─── Pass 2: Venue+Date cross-source dedup ─────────────')
+
+  // Re-fetch to pick up any changes from Pass 1
+  const { data: rows2, error: err2 } = await supabase
+    .schema('public')
+    .from('events')
+    .select('id, source, event_date, venue_name, raw, ai_enrichment, cached_photo_url')
+    .eq('hidden', false)
+    .gte('event_date', today)
+    .order('event_date', { ascending: true })
+
+  if (err2) {
+    console.error('Pass 2 fetch error:', err2.message)
+  } else {
+    // Group by venue_name + event_date (date only, not time)
+    const byVenueDate = new Map()
+    for (const row of rows2) {
+      if (!row.venue_name) continue
+      const dateOnly = String(row.event_date).slice(0, 10)
+      const key = `${row.venue_name}::${dateOnly}`
+      if (!byVenueDate.has(key)) byVenueDate.set(key, [])
+      byVenueDate.get(key).push(row)
+    }
+
+    // Keep only groups with both TM and SG present
+    const venueGroups = [...byVenueDate.values()].filter(g => {
+      const sources = new Set(g.map(r => r.source))
+      return sources.has('ticketmaster') && sources.has('seatgeek')
+    })
+
+    let pass2Hidden = 0
+    for (const group of venueGroups) {
+      const tmRows = group.filter(r => r.source === 'ticketmaster')
+      const sgRows = group.filter(r => r.source === 'seatgeek')
+
+      for (const tm of tmRows) {
+        if (tm.hidden) continue
+        const tmTitle = getTitle(tm)
+        const venueName = tm.venue_name
+
+        // A) TM add-ons (parking passes, merch, photo packages) — always hide
+        const isAddOn = isTMAddOn(tm)
+
+        // B) Sports venue — one game per date; any TM+SG pair is the same event
+        const isSports = SPORTS_VENUES.has(venueName)
+
+        // C & D) Concert match: first-word match OR SG title is substring of TM title
+        const concertMatch = !isAddOn && !isSports && sgRows.some(sg => {
+          const sgTitle = getTitle(sg)
+          const tmFirst = firstWordNorm(tmTitle)
+          const sgFirst = firstWordNorm(sgTitle)
+          // First word match (>= 4 chars to avoid false positives on "The", "A", etc.)
+          if (tmFirst.length >= 4 && tmFirst === sgFirst) return true
+          // Normalized 5-char prefix match (handles "The Kid LAROI" → "theki" == "theki")
+          const tmNorm5 = tmTitle.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 5)
+          const sgNorm5 = sgTitle.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 5)
+          if (tmNorm5.length >= 5 && tmNorm5 === sgNorm5) return true
+          // SG title (>= 5 chars) is substring of TM title
+          if (sgTitle.length >= 5 && tmTitle.toLowerCase().includes(sgTitle.toLowerCase())) return true
+          return false
+        })
+
+        if (!isAddOn && !isSports && !concertMatch) continue
+
+        // Hide this TM event
+        const reason = isAddOn ? 'TM add-on/parking pass'
+          : isSports ? `Sports venue dedup (${venueName})`
+          : 'Concert venue+date title match'
+
+        if (isDryRun) {
+          console.log(`[DRY P2] Hide TM ${tm.id}: "${tmTitle.slice(0, 50)}" (${reason})`)
+          pass2Hidden++
+        } else {
+          const enrichment = {
+            ...(tm.ai_enrichment || {}),
+            dedup_reason: `${reason}. Hidden by dedup-events.mjs pass 2 on ${today}.`,
+            dedup_hidden_at: new Date().toISOString(),
+          }
+          const { error: hideErr } = await supabase
+            .schema('public').from('events')
+            .update({ hidden: true, ai_enrichment: enrichment })
+            .eq('id', tm.id)
+          if (hideErr) {
+            console.error(`  ERROR hiding ${tm.id}: ${hideErr.message}`)
+            totalErrors++
+          } else {
+            console.log(`  P2 hidden: ${tm.id} (${reason}): "${tmTitle.slice(0, 45)}"`)
+            pass2Hidden++
+            totalHidden++
+          }
+        }
+      }
+    }
+    console.log(`Pass 2 hidden: ${pass2Hidden}`)
   }
 
   // ─── Summary ─────────────────────────────────────────────────────────────────
