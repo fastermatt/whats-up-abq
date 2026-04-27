@@ -42,6 +42,32 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url, { status: 308 })
   }
 
+  // ── Venue slug aliases (/venues/[slug]) ─────────────────────────────────────
+  // Same ISR cache issue: redirect common shorthand slugs → canonical slugs.
+  if (pathname.startsWith('/venues/')) {
+    const venueSlug = pathname.slice('/venues/'.length)
+    const VENUE_SLUG_REDIRECTS: Record<string, string> = {
+      'el-rey':             'the-historic-el-rey-theater-albuquerque',
+      'el-rey-theater':     'the-historic-el-rey-theater-albuquerque',
+      'el-rey-theatre':     'the-historic-el-rey-theater-albuquerque',
+      'kimo-theater':       'kimo-theatre',
+      'popejoy-theater':    'popejoy-hall',
+      'revel-abq':          'revel-entertainment-center',
+      'revel':              'revel-entertainment-center',
+      'sunshine':           'sunshine-theater',
+      'isotopes':           'rio-grande-credit-union-field-at-isotopes-park',
+      'isotopes-park':      'rio-grande-credit-union-field-at-isotopes-park',
+      'nhcc':               'national-hispanic-cultural-center',
+      'national-hispanic':  'national-hispanic-cultural-center',
+    }
+    const canonical = VENUE_SLUG_REDIRECTS[venueSlug]
+    if (canonical) {
+      const url = request.nextUrl.clone()
+      url.pathname = `/venues/${canonical}`
+      return NextResponse.redirect(url, { status: 308 })
+    }
+  }
+
   // ── Category slug normalization on /events ───────────────────────────────────
   // Redirect slug-form params to canonical DB names so ISR caches canonical URLs.
   if (pathname === '/events') {

@@ -15,15 +15,23 @@ export const revalidate = 3600
  *  Key: what the user typed. Value: the canonical slug (must match venueToSlug(DB venue_name)). */
 const VENUE_SLUG_ALIASES: Record<string, string> = {
   // "Theatre" vs "Theater" — DB uses "Theatre"
-  'kimo-theater':         'kimo-theatre',
-  'popejoy-theater':      'popejoy-hall',
-  // Common shorthand
-  'el-rey':               'the-historic-el-rey-theater-albuquerque',
-  'isotopes-park':        'rio-grande-credit-union-field-at-isotopes-park',
-  'isotopes':             'rio-grande-credit-union-field-at-isotopes-park',
-  'kiva-auditorium':      'kiva-auditorium-at-the-albuquerque-convention-center',
-  'convention-center':    'kiva-auditorium-at-the-albuquerque-convention-center',
-  'nhcc':                 'national-hispanic-cultural-center',
+  'kimo-theater':            'kimo-theatre',
+  'popejoy-theater':         'popejoy-hall',
+  // Common shorthand / informal names
+  'el-rey':                  'the-historic-el-rey-theater-albuquerque',
+  'el-rey-theater':          'the-historic-el-rey-theater-albuquerque',
+  'el-rey-theatre':          'the-historic-el-rey-theater-albuquerque',
+  'revel-abq':               'revel-entertainment-center',
+  'revel':                   'revel-entertainment-center',
+  'sunshine':                'sunshine-theater',
+  'hyenas':                  'hyenas-comedy-nightclub-albuquerque',
+  'hyenas-comedy':           'hyenas-comedy-nightclub-albuquerque',
+  'isotopes-park':           'rio-grande-credit-union-field-at-isotopes-park',
+  'isotopes':                'rio-grande-credit-union-field-at-isotopes-park',
+  'kiva-auditorium':         'kiva-auditorium-at-the-albuquerque-convention-center',
+  'convention-center':       'kiva-auditorium-at-the-albuquerque-convention-center',
+  'nhcc':                    'national-hispanic-cultural-center',
+  'national-hispanic':       'national-hispanic-cultural-center',
   'national-hispanic-cultural-center': 'national-hispanic-cultural-center',
 }
 
