@@ -812,7 +812,13 @@ function normalizeRow(row: RawEventRow): NormalizedEvent | null {
       if (typeof ai.category === 'string' && evt.category === null) evt.category = ai.category
       if (typeof ai.subcategory === 'string' && evt.subcategory === null) evt.subcategory = ai.subcategory
       if (typeof ai.about === 'string')       evt.about      = ai.about
-      if (Array.isArray(ai.highlights))       evt.highlights = (ai.highlights as unknown[]).map(h => String(h))
+      if (Array.isArray(ai.highlights)) {
+        // Filter out boilerplate highlights like "Live music event." that add
+        // no value vs showing nothing. They're a known Gemma autogen failure mode.
+        evt.highlights = (ai.highlights as unknown[])
+          .map(h => String(h))
+          .filter(h => !BOILERPLATE_DESCRIPTIONS.has(h.toLowerCase().trim()))
+      }
       if (typeof ai.venue_tips === 'string')  evt.venueTips  = ai.venue_tips
       if (typeof ai.local_tips === 'string')  evt.localTips  = ai.local_tips
     }
