@@ -2,11 +2,59 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
+// ── Edge-level URL normalization ──────────────────────────────────────────────
+// These redirects run BEFORE ISR cache, so stale cached empty-result pages
+// for slug-form category params are bypassed entirely.
+
+/** Map URL-slug category params to canonical DB values.
+ *  Keys are lowercase slug forms; values are the exact DB category names. */
+const CATEGORY_SLUG_REDIRECTS: Record<string, string> = {
+  'arts':             'Arts & Theater',
+  'arts-culture':     'Arts & Theater',
+  'arts-theater':     'Arts & Theater',
+  'arts-theatre':     'Arts & Theater',
+  'arts-and-theater': 'Arts & Theater',
+  'theater':          'Arts & Theater',
+  'theatre':          'Arts & Theater',
+  'food':             'Food & Drink',
+  'food-drink':       'Food & Drink',
+  'food-and-drink':   'Food & Drink',
+  'drink':            'Food & Drink',
+  'film-cinema':      'Film',
+  'cinema':           'Film',
+  'movies':           'Film',
+  'outdoors':         'Outdoor',
+  'festival':         'Festivals',
+  'kids':             'Family',
+  'nightlife':        'Nightlife',   // kept as-is (UI uses it; page shows Community fallback)
+}
+
 // Middleware runs on Edge Runtime.
 // For admin: checks cookie presence only (actual secret compared in layout.tsx / Node.js runtime).
 // For Supabase auth: refreshes the session so server components can read the user.
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
+  const { pathname, searchParams } = request.nextUrl
+
+  // ── /search → /events redirect (edge-level, before ISR) ─────────────────────
+  if (pathname === '/search') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/events'
+    return NextResponse.redirect(url, { status: 308 })
+  }
+
+  // ── Category slug normalization on /events ───────────────────────────────────
+  // Redirect slug-form params to canonical DB names so ISR caches canonical URLs.
+  if (pathname === '/events') {
+    const cat = searchParams.get('category')
+    if (cat) {
+      const canonical = CATEGORY_SLUG_REDIRECTS[cat.toLowerCase()]
+      if (canonical && canonical !== cat) {
+        const url = request.nextUrl.clone()
+        url.searchParams.set('category', canonical)
+        return NextResponse.redirect(url, { status: 308 })
+      }
+    }
+  }
 
   // Forward pathname so AdminLayout can detect /admin/login and skip auth check
   const requestHeaders = new Headers(request.headers)
