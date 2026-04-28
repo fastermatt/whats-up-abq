@@ -1058,6 +1058,10 @@ function normalizeLocal(row: RawEventRow): NormalizedEvent {
   const localStartObj = (r.dates as Record<string, unknown> | undefined)?.start as Record<string, unknown> | undefined
   const localStartDate = localStartObj?.localDate as string | undefined
   const localStartTime = localStartObj?.localTime as string | undefined
+  // abqtodo importer uses TM-compat format: address lives at _embedded.venues[0].address.line1
+  const embedded = r._embedded as Record<string, unknown> | undefined
+  const tmVenues = embedded?.venues as Array<Record<string, unknown>> | undefined
+  const tmVenue = tmVenues?.[0]
   return {
     id: row.id,
     title: decodeHtml((r.title as string) ?? (r.name as string)) || 'Local Event',
@@ -1065,9 +1069,19 @@ function normalizeLocal(row: RawEventRow): NormalizedEvent {
     time: (localStartDate && localStartTime)
       ? formatTime(`${localStartDate}T${localStartTime}`)
       : row.event_date ? (formatTime(row.event_date) || null) : null,
-    venue: decodeHtml(typeof r.venue === 'string' ? r.venue : (r.venue_name as string | undefined) ?? null) || null,
-    address: decodeHtml((r.address as string | undefined) ?? null) || null,
-    city: (r.city as string | undefined) ?? 'Albuquerque',
+    venue: decodeHtml(
+      typeof r.venue === 'string' ? r.venue
+      : (r.venue_name as string | undefined)
+      ?? (tmVenue?.name as string | undefined)
+      ?? null
+    ) || null,
+    // Address fallback chain: explicit `address` string → TM-format _embedded.venues[0].address.line1
+    address: decodeHtml((r.address as string | undefined) ?? null)
+      || (tmVenue ? buildTMAddress(tmVenue) : null)
+      || null,
+    city: (r.city as string | undefined)
+      ?? ((tmVenue?.city as Record<string, unknown> | undefined)?.name as string | undefined)
+      ?? 'Albuquerque',
     ...mapCategory(
       (r.category as string | undefined),
       (r.title as string | undefined) ?? (r.name as string | undefined)
