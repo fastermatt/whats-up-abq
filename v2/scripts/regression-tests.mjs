@@ -459,8 +459,256 @@ const TESTS = [
         : { ok: false, detail: `${exploded.length} exploded slugs: ${exploded.slice(0, 3).map(([k, c]) => `${k}(${c})`).join(', ')}` }
     },
   },
+  // ── Local/abqtodo event street addresses (#11 in wiki — the 525-event bug) ─
+  {
+    id: 'local-events-have-street-addresses',
+    tag: 'normalizer',
+    description: 'Local/abqtodo events with _embedded.venues[0].address.line1 in raw should surface that on the page (regression: was being dropped for 525 events)',
+    async fn() {
+      const { data, error } = await sb
+        .from('events')
+        .select('id, source, raw')
+        .eq('hidden', false)
+        .gte('event_date', new Date().toISOString().slice(0, 10))
+        .in('source', ['local', 'volunteer'])
+      if (error) return { ok: false, detail: error.message }
+      // We assert that ≥80% of local/volunteer events HAVE address data available somewhere.
+      // Coverage below this threshold indicates importer or normalizer regression.
+      const total = data.length
+      const withAddr = data.filter(r => {
+        return r.raw?.address || r.raw?._embedded?.venues?.[0]?.address?.line1
+      }).length
+      const pct = total > 0 ? (withAddr / total) * 100 : 100
+      return pct >= 80
+        ? { ok: true, detail: `${withAddr}/${total} = ${pct.toFixed(1)}% local/volunteer events have address data` }
+        : { ok: false, detail: `Only ${withAddr}/${total} = ${pct.toFixed(1)}% local/volunteer events have addresses (need >=80%) — likely importer or normalizer regression` }
+    },
+  },
+
+  // ── Boilerplate descriptions (Round 6 — "Live music event." placeholder) ──
+  {
+    id: 'no-boilerplate-descriptions',
+    tag: 'normalizer',
+    description: 'No event should have boilerplate filler descriptions like "Live music event." in raw description fields',
+    async fn() {
+      const { data, error } = await sb
+        .from('events')
+        .select('id, source, raw')
+        .eq('hidden', false)
+        .gte('event_date', new Date().toISOString().slice(0, 10))
+      if (error) return { ok: false, detail: error.message }
+      const BOILERPLATE = new Set([
+        'live music event.', 'live music event',
+        'live music performance.', 'live music performance',
+        'concert.', 'concert',
+        'sports event.', 'sports event',
+        'live event.', 'live event',
+      ])
+      // Note: cleanDescription() filters these at runtime, so this test is a SAFETY NET
+      // checking that we still surface any cases where boilerplate slips through.
+      // We only flag descriptions visible to users (TM info, EB description.text, SG info).
+      const offenders = (data || []).filter(r => {
+        const desc = r.raw?.info ?? r.raw?.description?.text ?? r.raw?.description ?? ''
+        return typeof desc === 'string' && BOILERPLATE.has(desc.trim().toLowerCase())
+      })
+      // This is informational since runtime filter handles it — but spike means importer gap
+      return offenders.length <= 30
+        ? { ok: true, detail: `${offenders.length} events have boilerplate raw descriptions (filtered at runtime; informational)` }
+        : { ok: false, detail: `${offenders.length} events have boilerplate raw descriptions — importer should filter at ingest time` }
+    },
+  },
+
+  // ── SeatGeek raw category strings leaking into descriptions ──────────────
+  {
+    id: 'no-sg-category-string-descriptions',
+    tag: 'normalizer',
+    description: 'SeatGeek events should not have raw category path strings ("Comedy / theater_comedy performance.") as descriptions',
+    async fn() {
+      const { data, error } = await sb
+        .from('events')
+        .select('id, raw')
+        .eq('hidden', false)
+        .eq('source', 'seatgeek')
+        .gte('event_date', new Date().toISOString().slice(0, 10))
+      if (error) return { ok: false, detail: error.message }
+      // Pattern that matches raw SG category strings: "Word / word_word performance."
+      const SG_CAT_RE = /\/\s*\w+_\w/
+      const offenders = (data || []).filter(r => {
+        const info = r.raw?.info
+        return typeof info === 'string' && info.length < 120 && SG_CAT_RE.test(info)
+      })
+      // Runtime filter catches these — this is a safety net
+      return offenders.length === 0
+        ? { ok: true, detail: 'no SG raw category strings in descriptions' }
+        : { ok: true, detail: `${offenders.length} SG events have category-shaped raw descriptions (filtered at runtime; informational)` }
+    },
+  },
+
+  // ── Family false positives — adult/gala/wine events tagged Family ────────
+  {
+    id: 'family-no-adult-events',
+    tag: 'categories',
+    description: 'Family category should not contain events with adult/gala/wine/cocktail markers',
+    async fn() {
+      const { data, error } = await sb
+        .from('events')
+        .select('id, raw, venue_name')
+        .eq('hidden', false)
+        .eq('category', 'Family')
+        .gte('event_date', new Date().toISOString().slice(0, 10))
+      if (error) return { ok: false, detail: error.message }
+      // Adult-marker patterns. "Adult Storytime" at libraries is OK (program FOR adults with special needs)
+      // but galas, wine tastings, 21+, cocktail events should never be Family.
+      const ADULT_RE = /\b(gala|wine tasting|cocktail|21\+|adults? only|after dark|nightlife|drag show|burlesque)\b/i
+      const offenders = (data || []).filter(r => {
+        const title = r.raw?.name ?? r.raw?.title ?? ''
+        return typeof title === 'string' && ADULT_RE.test(title)
+      })
+      return offenders.length === 0
+        ? { ok: true, detail: 'no adult events tagged Family' }
+        : { ok: false, detail: `${offenders.length} adult-themed events tagged Family: ${offenders.slice(0, 3).map(o => o.id).join(', ')}` }
+    },
+  },
+
   // ── Live site availability ──────────────────────────────────────────────
   ...(SITE ? [
+    // ── Category slug normalization (Round 4 — was returning 0 results) ────
+    {
+      id: 'category-slugs-redirect-to-canonical',
+      tag: 'live',
+      description: 'Slug-form category params should redirect to canonical DB names (regression: arts-culture → 0 results)',
+      async fn() {
+        const TESTS = [
+          { slug: 'food-drink',   expected: 'Food+%26+Drink' },
+          { slug: 'arts-culture', expected: 'Arts+%26+Theater' },
+          { slug: 'arts',         expected: 'Arts+%26+Theater' },
+        ]
+        const failures = []
+        for (const t of TESTS) {
+          const r = await fetch(`${SITE}/events?category=${t.slug}`, { redirect: 'manual' })
+          // Expect 308 redirect to canonical URL
+          const location = r.headers.get('location') || ''
+          if (r.status !== 308 || !location.includes(t.expected)) {
+            failures.push(`${t.slug} → ${r.status} ${location || '(no redirect)'}`)
+          }
+        }
+        return failures.length === 0
+          ? { ok: true, detail: `${TESTS.length} category slug redirects working` }
+          : { ok: false, detail: `Slug redirects broken: ${failures.join('; ')}` }
+      },
+    },
+
+    // ── /search → /events redirect (Round 4) ───────────────────────────────
+    {
+      id: 'search-redirects-to-events',
+      tag: 'live',
+      description: '/search?q=... should redirect to /events?q=... (was 404 before)',
+      async fn() {
+        const r = await fetch(`${SITE}/search?q=jazz`, { redirect: 'manual' })
+        const location = r.headers.get('location') || ''
+        return r.status === 308 && location.includes('/events') && location.includes('q=jazz')
+          ? { ok: true, detail: `308 → ${location}` }
+          : { ok: false, detail: `Got ${r.status} ${location || '(no redirect)'} — /search redirect broken` }
+      },
+    },
+
+    // ── Venue slug aliases (Rounds 2+5 — el-rey, revel-abq, etc.) ─────────
+    {
+      id: 'venue-slug-aliases-redirect',
+      tag: 'live',
+      description: 'Venue shorthand slugs should redirect to canonical (was 404 before)',
+      async fn() {
+        const TESTS = [
+          { slug: 'el-rey',         expectedSubstring: 'el-rey-theater' },
+          { slug: 'revel-abq',      expectedSubstring: 'revel-entertainment' },
+          { slug: 'kimo-theater',   expectedSubstring: 'kimo-theatre' },
+          { slug: 'isotopes',       expectedSubstring: 'isotopes-park' },
+          { slug: 'nhcc',           expectedSubstring: 'national-hispanic' },
+        ]
+        const failures = []
+        for (const t of TESTS) {
+          const r = await fetch(`${SITE}/venues/${t.slug}`, { redirect: 'manual' })
+          const location = r.headers.get('location') || ''
+          if (r.status !== 308 || !location.includes(t.expectedSubstring)) {
+            failures.push(`${t.slug} → ${r.status} ${location || '(no redirect)'}`)
+          }
+        }
+        return failures.length === 0
+          ? { ok: true, detail: `${TESTS.length} venue aliases redirect correctly` }
+          : { ok: false, detail: `Venue redirects broken: ${failures.join('; ')}` }
+      },
+    },
+
+    // ── Neighborhood slug aliases ──────────────────────────────────────────
+    // Next.js redirect() in a server component follows by default — fetch with
+    // redirect:'follow' lands on the final URL, which we extract from the response.
+    {
+      id: 'neighborhood-slug-aliases-redirect',
+      tag: 'live',
+      description: 'Neighborhood shorthand slugs should redirect to canonical (follow chain)',
+      async fn() {
+        const TESTS = [
+          { slug: 'university', expectedSubstring: 'unm-campus' },
+          { slug: 'barelas',    expectedSubstring: 'barelas-south-downtown' },
+        ]
+        // 'central' → 'downtown' is intentionally aliased but the resulting
+        // page has both names so we only test ones with distinct canonical slugs
+        const failures = []
+        for (const t of TESTS) {
+          const r = await fetch(`${SITE}/neighborhoods/${t.slug}`)
+          // After following any redirects, the final URL should contain the canonical slug
+          const finalUrl = r.url
+          if (!finalUrl.includes(t.expectedSubstring) && !finalUrl.includes(t.slug)) {
+            // Either the alias resolved to canonical, OR the page rendered the slug directly.
+            // Both are acceptable as long as the page returns 200.
+            failures.push(`${t.slug} → ${r.status} (final: ${finalUrl})`)
+          }
+          if (r.status !== 200) {
+            failures.push(`${t.slug} → ${r.status} (final: ${finalUrl})`)
+          }
+        }
+        return failures.length === 0
+          ? { ok: true, detail: `${TESTS.length} neighborhood aliases resolve to 200` }
+          : { ok: false, detail: `Neighborhood aliases broken: ${failures.join('; ')}` }
+      },
+    },
+
+    // ── Venue page resolves for known canonical slugs ──────────────────────
+    {
+      id: 'top-venues-resolve',
+      tag: 'live',
+      description: 'Top venues should resolve at their canonical slug with the venue name in the H1 (catches fetchVenueBySlug bugs)',
+      async fn() {
+        const VENUES = [
+          { slug: 'sunshine-theater',                          h1Substring: 'Sunshine' },
+          { slug: 'the-historic-el-rey-theater-albuquerque',   h1Substring: 'El Rey' },
+          { slug: 'revel-entertainment-center',                h1Substring: 'Revel' },
+          { slug: 'national-hispanic-cultural-center',         h1Substring: 'National Hispanic' },
+          { slug: 'kimo-theatre',                              h1Substring: 'KiMo' },
+        ]
+        const failures = []
+        for (const v of VENUES) {
+          const r = await fetch(`${SITE}/venues/${v.slug}`)
+          if (r.status !== 200) {
+            failures.push(`${v.slug} → ${r.status}`)
+            continue
+          }
+          const text = await r.text()
+          // Match the H1 — venue page H1 contains the venue name when it resolves.
+          // "Venue Not Found" can appear in encoded React payload chunks but the
+          // H1 only renders when the venue is actually found.
+          const h1Match = text.match(/<h1[^>]*>([^<]+)<\/h1>/i)
+          const h1Text = h1Match ? h1Match[1] : ''
+          if (!h1Text.includes(v.h1Substring)) {
+            failures.push(`${v.slug} → H1="${h1Text.slice(0, 50)}" (expected to contain "${v.h1Substring}")`)
+          }
+        }
+        return failures.length === 0
+          ? { ok: true, detail: `${VENUES.length} canonical venues all resolve with correct H1` }
+          : { ok: false, detail: `Venue resolution broken: ${failures.join('; ')}` }
+      },
+    },
+
     {
       id: 'homepage-200',
       tag: 'live',

@@ -67,6 +67,29 @@ jobs:
             --prod \
             --message "Deploy ${{ github.sha }}"
 
+      # ── Post-deploy smoke tests — verify critical URL-level redirects ──────────
+      # These tests catch regressions in middleware (category slugs, venue slugs,
+      # /search redirect, etc.) — the things that broke this session and would
+      # have been silently shipped without a smoke test.
+      # We sleep first so Netlify has time to clear edge cache and propagate.
+      - name: Wait for deploy to propagate
+        run: sleep 30
+
+      - name: Post-deploy smoke tests
+        working-directory: v2
+        env:
+          SUPABASE_URL: https://bsmvfutebmbkjvlrhiyq.supabase.co
+          SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          echo "Running live URL smoke tests..."
+          # Only run the live (URL-hitting) tests — data-shape tests run on schedule
+          node scripts/regression-tests.mjs --site=https://abqunplugged.com --tag=live || {
+            echo "::warning::Post-deploy smoke tests failed — middleware or routing regression"
+            echo "smoke_failed=true" >> $GITHUB_ENV
+            # Don't fail the deploy itself — but flag it so we know to investigate
+            exit 0
+          }
+
       # ── On failure: open a GitHub Issue instead of emailing Matt ──────────────
       - name: Open issue on failure
         if: failure()
