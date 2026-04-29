@@ -108,7 +108,13 @@ export default function RootLayout({
       lang="en"
       className={`${epilogue.variable} ${inter.variable} ${spaceGrotesk.variable} h-full`}
     >
-      <head />
+      <head>
+        {/* Flaticon Uicons — CSS icon font, color-adjustable via CSS `color` */}
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+        <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css" />
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+        <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-solid-rounded/css/uicons-solid-rounded.css" />
+      </head>
       <body className="bg-[#fbf7f1] text-[#1a1614] min-h-full flex flex-col">
         {/* Skip to main content — for keyboard/screen-reader users */}
         <a
@@ -139,14 +145,13 @@ export default function RootLayout({
 
               {/* The line */}
               <p className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.22em] uppercase text-[#9a8880]">
-                <span>Made with</span>
+                <span>Built with</span>
                 <span
-                  className="animate-heartbeat text-[#9a442d]"
-                  style={{ fontSize: '1.15rem', lineHeight: 1 }}
-                  role="img"
+                  className="animate-heartbeat-word inline-flex items-center gap-0.5 text-[#9a442d]"
                   aria-label="love"
                 >
-                  ♥
+                  <span style={{ fontSize: '0.95rem', lineHeight: 1 }} aria-hidden="true">♥</span>
+                  <span>Love</span>
                 </span>
                 <span>for Albuquerque</span>
               </p>

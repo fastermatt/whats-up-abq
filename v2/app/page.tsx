@@ -153,37 +153,113 @@ export default async function DiscoverPage() {
       {/* ── Category quick links ── */}
       <section className="py-4 border-b border-[#f0e4cc]/60 animate-fade-in">
         <div className="overflow-x-auto scrollbar-hide">
-        <div
-          className="flex gap-2 px-4 pb-1 scroll-hint-inner"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          {[
-            { label: 'Music',       emoji: '🎵', cat: 'Music' },
-            { label: 'Comedy',      emoji: '😂', cat: 'Comedy' },
-            { label: 'Arts',        emoji: '🎭', cat: 'Arts & Theater' },
-            { label: 'Sports',      emoji: '🏟️', cat: 'Sports' },
-            { label: 'Food & Drink',emoji: '🍽️', cat: 'Food & Drink' },
-            { label: 'Family',      emoji: '👨‍👩‍👧', cat: 'Family' },
-            { label: 'Festivals',   emoji: '🎪', cat: 'Festivals' },
-            { label: 'Film',        emoji: '🎬', cat: 'Film' },
-            { label: 'Outdoor',     emoji: '🌵', cat: 'Outdoor' },
-            { label: 'Free',        emoji: '✨', cat: null, price: 'free' },
-          ].map(({ label, emoji, cat, price }) => (
-            <Link
-              key={label}
-              href={cat ? `/events?category=${encodeURIComponent(cat)}` : `/events?price=${price}`}
-              className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full bg-white border border-[#ddc9a3] text-xs font-semibold text-[#4a3f3a] hover:border-[#9a442d] hover:text-[#9a442d] transition-all whitespace-nowrap"
-            >
-              <span>{emoji}</span>
-              {label}
-            </Link>
-          ))}
-        </div>
+          <div
+            className="flex gap-2 px-4 pb-1 scroll-hint-inner"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {[
+              { label: 'Music',        icon: 'fi-rr-music-note', cat: 'Music' },
+              { label: 'Comedy',       icon: 'fi-rr-smile',      cat: 'Comedy' },
+              { label: 'Arts',         icon: 'fi-rr-palette',    cat: 'Arts & Theater' },
+              { label: 'Sports',       icon: 'fi-rr-ball',       cat: 'Sports' },
+              { label: 'Food & Drink', icon: 'fi-rr-utensils',   cat: 'Food & Drink' },
+              { label: 'Family',       icon: 'fi-rr-users',      cat: 'Family' },
+              { label: 'Festivals',    icon: 'fi-rr-star',       cat: 'Festivals' },
+              { label: 'Film',         icon: 'fi-rr-film',       cat: 'Film' },
+              { label: 'Outdoor',      icon: 'fi-rr-leaf',       cat: 'Outdoor' },
+              { label: 'Free',         icon: 'fi-rr-ticket',     cat: null, price: 'free' },
+            ].map(({ label, icon, cat, price }) => (
+              <Link
+                key={label}
+                href={cat ? `/events?category=${encodeURIComponent(cat)}` : `/events?price=${price}`}
+                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full bg-white border border-[#ddc9a3] text-xs font-semibold text-[#4a3f3a] hover:border-[#9a442d] hover:text-[#9a442d] transition-all whitespace-nowrap group"
+              >
+                <i className={`fi ${icon} text-[13px] text-[#9a442d] group-hover:text-[#9a442d]`} aria-hidden="true" />
+                {label}
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* ── Mood chips ── */}
       <MoodChips />
+
+      {/* ── Find Your Vibe ── */}
+      <AnimateIn animation="fade-up">
+        <section className="py-6 border-t border-[#f0e4cc]/60">
+          <div className="max-w-6xl mx-auto px-4 flex items-end justify-between mb-4">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] mb-0.5 font-semibold">Discover</p>
+              <h2 className="text-xl font-black text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
+                Find your vibe
+              </h2>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 px-4 max-w-6xl mx-auto">
+            {[
+              {
+                label: 'Date Night',
+                icon: 'fi-rr-heart',
+                sub: 'Arts, dining, live music',
+                href: '/date-night',
+                from: '#2d0f3d',
+                to: '#7a2d5a',
+              },
+              {
+                label: 'Live Music',
+                icon: 'fi-rr-music-note',
+                sub: 'Concerts & shows this week',
+                href: '/events?category=Music',
+                from: '#0f1a2d',
+                to: '#1a4d7a',
+              },
+              {
+                label: 'Free Tonight',
+                icon: 'fi-rr-ticket',
+                sub: 'Zero cost, all fun',
+                href: '/free',
+                from: '#1a2d0f',
+                to: '#2d6b1a',
+              },
+              {
+                label: 'With Kids',
+                icon: 'fi-rr-baby',
+                sub: 'Family-friendly picks',
+                href: '/family-friendly',
+                from: '#0f2a2d',
+                to: '#0d5a5a',
+              },
+            ].map((vibe) => (
+              <Link
+                key={vibe.label}
+                href={vibe.href}
+                className="group relative aspect-[4/3] rounded-2xl overflow-hidden"
+              >
+                {/* Gradient background */}
+                <div
+                  className="absolute inset-0 transition-transform duration-300 group-hover:scale-[1.03]"
+                  style={{ background: `linear-gradient(160deg, ${vibe.from} 0%, ${vibe.to} 100%)` }}
+                />
+                {/* Bottom shadow for text legibility */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                {/* Arrow chip */}
+                <div className="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center">
+                  <i className="fi fi-rr-arrow-right text-[11px] text-white" aria-hidden="true" />
+                </div>
+                {/* Content */}
+                <div className="absolute bottom-0 left-0 right-0 p-3.5">
+                  <i className={`fi ${vibe.icon} text-[22px] text-white/90 block mb-1.5`} aria-hidden="true" />
+                  <p className="font-black text-[15px] text-white leading-tight" style={{ fontFamily: 'var(--font-epilogue)' }}>
+                    {vibe.label}
+                  </p>
+                  <p className="text-[11px] text-white/60 mt-0.5">{vibe.sub}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      </AnimateIn>
 
       {/* ── Editor's Picks — Featured Events ── */}
       {featured.length > 0 && (

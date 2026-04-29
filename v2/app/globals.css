@@ -158,6 +158,21 @@ body {
   transform-origin: center;
 }
 
+/* Gentler heartbeat — for the "Love" word in the footer */
+@keyframes heartbeat-word {
+  0%, 100% { transform: scale(1);    }
+  8%        { transform: scale(1.10); }
+  16%       { transform: scale(1);    }
+  24%       { transform: scale(1.06); }
+  36%       { transform: scale(1);    }
+}
+
+.animate-heartbeat-word {
+  animation: heartbeat-word 1.8s ease-in-out infinite;
+  display: inline-block;
+  transform-origin: center;
+}
+
 /* ─── Skeleton shimmer ────────────────────────────────────────────────── */
 .skeleton {
   background: linear-gradient(
