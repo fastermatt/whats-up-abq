@@ -98,7 +98,7 @@ export default async function DiscoverPage() {
         {/* Subtle dot texture */}
         <div className="absolute inset-0 opacity-[0.06] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMS41IiBmaWxsPSIjZmZmIi8+PC9zdmc+')] animate-fade-in" />
 
-        <div className="max-w-6xl mx-auto px-4 pt-5 pb-5 relative">
+        <div className="max-w-6xl mx-auto px-4 pt-5 pb-5 relative z-10">
           {/* Top bar */}
           <div className="flex items-center justify-between mb-5 animate-slide-down">
             <div className="flex items-center gap-2">
