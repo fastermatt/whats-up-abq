@@ -8,6 +8,7 @@ import { AnimateIn } from '@/app/components/AnimateIn'
 import MoodChips from '@/app/components/MoodChips'
 import SurpriseButton from '@/app/components/SurpriseButton'
 import { ConnectionQuote } from '@/app/components/ConnectionQuote'
+import { ABQMapSVG } from '@/app/components/ABQMapSVG'
 import { getFeaturedPlaces, PLACE_CATEGORIES, type Place } from '@/data/places'
 
 export const revalidate = 60
@@ -108,8 +109,8 @@ export default async function DiscoverPage() {
       <section className="relative overflow-hidden text-white">
         {/* Layered desert atmosphere — matches mockup exactly */}
         <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 120% 60% at 50% 130%, rgba(154,68,45,.55) 0%, transparent 70%), radial-gradient(ellipse 80% 50% at 80% 80%, rgba(79,98,73,.3) 0%, transparent 60%), linear-gradient(165deg, #0f0b09 0%, #1a1008 40%, #221508 100%)' }} />
-        {/* Subtle grid texture */}
-        <div className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
+        {/* ABQ street map — line drawing of Albuquerque's streets */}
+        <ABQMapSVG />
         {/* Warm glow orb at bottom center */}
         <div className="absolute pointer-events-none" style={{ bottom: '-80px', left: '50%', transform: 'translateX(-50%)', width: '700px', height: '260px', background: 'radial-gradient(ellipse, rgba(154,68,45,.35) 0%, transparent 70%)', borderRadius: '50%' }} />
 
@@ -128,14 +129,14 @@ export default async function DiscoverPage() {
             className="font-black leading-[1.05] mb-5 animate-hero-text"
             style={{ fontFamily: 'var(--font-epilogue)', fontSize: 'clamp(34px, 7vw, 58px)', letterSpacing: '-1.5px' }}
           >
-            Your city.<br />
+            Burque&rsquo;s got<br />
             <span style={{ color: 'transparent', WebkitTextStroke: '1.5px rgba(255,255,255,.5)' }}>
-              Wide open.
+              something going on.
             </span>
           </h2>
 
           <p className="text-sm text-white/55 mb-7 max-w-[420px] leading-[1.6] animate-fade-up">
-            Music, food, sports, art — {allUpcoming.total.toLocaleString()} things happening around ABQ.
+            {allUpcoming.total.toLocaleString()} events across every neighborhood — find them before everyone else does.
           </p>
 
           {/* Search bar */}
