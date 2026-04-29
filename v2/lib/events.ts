@@ -946,10 +946,19 @@ function normalizeEB(row: RawEventRow): NormalizedEvent {
       : ebNativeLocal ? formatTime(ebNativeLocal)
       : ebNativeUtc   ? formatTime(ebNativeUtc)
       : null,
-    venue: (venue?.name as string | undefined)?.trim() || row.venue_name || null,
-    address: venue
-      ? (isTMFormat ? buildTMAddress(venue) : buildEBAddress(venue))
-      : null,
+    // If venue.name looks like a street address (starts with digits), skip it as a name —
+    // the actual address is already captured via buildTMAddress(). Use row.venue_name only
+    // if it doesn't also look like a street address.
+    venue: (() => {
+      const raw = (venue?.name as string | undefined)?.trim() ?? row.venue_name ?? null
+      return raw && /^\d+\s/.test(raw) ? null : raw
+    })(),
+    address: (() => {
+      const built = venue ? (isTMFormat ? buildTMAddress(venue) : buildEBAddress(venue)) : null
+      // If venue.name was a street address, promote it to the address field if nothing better exists
+      const nameAsAddr = (venue?.name as string | undefined)?.trim()
+      return built ?? (nameAsAddr && /^\d+\s/.test(nameAsAddr) ? nameAsAddr : null)
+    })(),
     city: isTMFormat
       ? (venue?.city as Record<string, unknown> | undefined)?.name as string | null ?? null
       : (venue?.address as Record<string, unknown> | undefined)?.city as string | null ?? null,

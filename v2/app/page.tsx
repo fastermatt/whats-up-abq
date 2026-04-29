@@ -69,6 +69,26 @@ export default async function DiscoverPage() {
 
   const now = new Date()
 
+  // Per-neighborhood character descriptions — gives cards personality instead of generic "Events & local spots"
+  const NEIGHBORHOOD_TAGLINES: Record<string, string> = {
+    'downtown':                    'Arts, dining & live music',
+    'nob-hill':                    'Bars, galleries & boutiques',
+    'unm-nob-hill':                'Campus edge & nightlife',
+    'unm-campus':                  'Student life & culture',
+    'uptown-midtown':              'Shopping & entertainment',
+    'state-fairgrounds-midtown':   'Events, fairs & spectacles',
+    'northeast-heights':           'Family picks & local favorites',
+    'far-northeast-sandia-foothills': 'Outdoor adventures & views',
+    'north-valley':                'Local flavor & green spaces',
+    'west-side':                   'Family events & open spaces',
+    'international-district':      'Diverse culture & community',
+    'south-valley':                'Community roots & tradition',
+    'south-i-25-university-se':    'Midtown energy & university life',
+    'barelas-south-downtown':      'Historic streets & community',
+    'old-town':                    'Culture, history & tourism',
+    'east-mountains':              'Mountain escapes & outdoor life',
+  }
+
   const abqHour = parseInt(
     now.toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: 'America/Denver' })
   )
@@ -358,7 +378,7 @@ export default async function DiscoverPage() {
         <AnimateIn animation="fade-up">
           <EventSection
             title="Doors are open"
-            subtitle="Happening right now"
+            subtitle="Opening today"
             events={tonight.events}
             seeAllHref="/events?time=tonight"
             sectionLabel="Tonight"
@@ -553,7 +573,7 @@ export default async function DiscoverPage() {
                     <span className="font-black text-[13.5px] text-[#1a1614] group-hover:text-[#9a442d] transition-colors whitespace-nowrap mb-0.5" style={{ fontFamily: 'var(--font-epilogue)' }}>
                       {neighborhood}
                     </span>
-                    <span className="text-[11px] text-[#6b5d57]">Events &amp; local spots</span>
+                    <span className="text-[11px] text-[#6b5d57]">{NEIGHBORHOOD_TAGLINES[slug] ?? 'Events & local spots'}</span>
                     <span className="mt-2 flex items-center gap-1 text-[11px] font-bold text-[#9a442d]">
                       <span className="w-[5px] h-[5px] rounded-full bg-[#9a442d] flex-shrink-0" />
                       {count} event{count !== 1 ? 's' : ''}
@@ -589,10 +609,7 @@ export default async function DiscoverPage() {
           >
             ABQ Unplugged
           </p>
-          <p className="text-xs text-[#6b5d57] mb-1">Every event in Albuquerque, one place</p>
-          <div className="mb-4 max-w-md mx-auto">
-            <ConnectionQuote size="sm" />
-          </div>
+          <p className="text-xs text-[#6b5d57] mb-4">Every event in Albuquerque, one place</p>
           {/* Submit CTA — stands out above the footer nav */}
           <Link
             href="/submit"
