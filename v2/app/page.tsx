@@ -1,10 +1,7 @@
 import Link from 'next/link'
-import { Fragment } from 'react'
 import type { Metadata } from 'next'
 import { fetchEvents, fetchRecentlyAdded, fetchFeaturedEvents, fetchNeighborhoodCounts, NormalizedEvent } from '@/lib/events'
-import { getCategoryFallback, OG_IMAGE, CAROUSEL_IMAGES } from '@/lib/fallback-images'
-import { HeroCarousel } from '@/app/components/HeroCarousel'
-import { getHeroCopy } from '@/lib/hero-copy'
+import { getCategoryFallback, OG_IMAGE } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
 import { MapPin, ArrowRight, ExternalLink } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
@@ -71,14 +68,12 @@ export default async function DiscoverPage() {
   ])
 
   const now = new Date()
-  const dayStr = now.toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'America/Denver',
-  })
 
-  const heroCopy = getHeroCopy(allUpcoming.total)
+  const abqHour = parseInt(
+    now.toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: 'America/Denver' })
+  )
+  const greeting =
+    abqHour < 12 ? 'Good morning' : abqHour < 17 ? 'Good afternoon' : 'Good evening'
 
   return (
     <main id="main" className="min-h-dvh bg-[--bg]">
@@ -91,56 +86,115 @@ export default async function DiscoverPage() {
 
       {/* ── Hero ── */}
       <section className="relative overflow-hidden text-white">
-        {/* Hero carousel — 7 WebP images, crossfade every 5.5s, time-of-day start */}
-        <HeroCarousel serverIndex={Math.floor(Date.now() / 86400000) % CAROUSEL_IMAGES.length} />
-        {/* Dark overlay — directional so the photo shows through at bottom */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#5a2416]/85 via-[#7d3725]/70 to-[#5a2416]/65" />
-        {/* Subtle dot texture */}
-        <div className="absolute inset-0 opacity-[0.06] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMS41IiBmaWxsPSIjZmZmIi8+PC9zdmc+')] animate-fade-in" />
+        {/* Dark atmospheric base */}
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(165deg, #0f0b09 0%, #1a1008 45%, #1f1208 100%)' }} />
+        {/* Terra glow from bottom */}
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 130% 55% at 50% 130%, rgba(154,68,45,.52) 0%, transparent 68%)' }} />
+        {/* Sage accent top-right */}
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 60% 40% at 85% 20%, rgba(79,98,73,.22) 0%, transparent 60%)' }} />
+        {/* Subtle grid lines */}
+        <div className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
 
-        <div className="max-w-6xl mx-auto px-4 pt-5 pb-5 relative z-10">
-          {/* Top bar */}
-          <div className="flex items-center justify-between mb-5 animate-slide-down">
-            <div className="flex items-center gap-2">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo-white.svg" alt="ABQ Unplugged" className="h-9 w-auto" />
-            </div>
-            <Link
-              href="/events"
-              className="text-xs font-medium bg-white/15 backdrop-blur-sm px-3.5 py-1.5 rounded-full hover:bg-white/25 transition-all duration-300 hover:scale-105"
-            >
-              All Events
-            </Link>
-          </div>
-
-          {/* Hero text */}
-          <div className="animate-hero-text">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-[#e8a898] mb-2">
-              {heroCopy.eyebrow}
+        {/* Hero content */}
+        <div className="relative z-10 max-w-6xl mx-auto px-4 pt-12 sm:pt-16 pb-0">
+          {/* Eyebrow */}
+          <div className="flex items-center gap-2 mb-5 animate-slide-down">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#f5a623] animate-pulse" />
+            <p className="text-[11px] uppercase tracking-[0.2em] text-white/50 font-semibold">
+              {greeting}, Albuquerque
             </p>
-            <h2
-              className="text-[28px] sm:text-4xl font-black leading-[1.05] mb-2"
-              style={{ fontFamily: 'var(--font-epilogue)' }}
-            >
-              {heroCopy.lines.map((line, i) => (
-                <Fragment key={i}>
-                  {i > 0 && <br />}
-                  {line}
-                </Fragment>
-              ))}
-            </h2>
-            <p className="text-xs text-white/60 mb-3">{dayStr}</p>
-            {/* Surprise Me CTA — inline with hero */}
-            <div className="mb-4">
-              <SurpriseButton />
-            </div>
           </div>
 
-          {/* Quick stats */}
-          <div className="grid grid-cols-3 gap-2 animate-fade-up-delay">
-            <QuickStat label="Tonight" count={tonight.total} href="/events?time=tonight" />
-            <QuickStat label="Tomorrow" count={tomorrow.total} href="/events?time=tomorrow" />
-            <QuickStat label="Weekend" count={weekend.total} href="/events?time=this-weekend" />
+          {/* Headline */}
+          <h2
+            className="font-black leading-[1.05] mb-5 animate-hero-text"
+            style={{ fontFamily: 'var(--font-epilogue)', fontSize: 'clamp(34px, 7vw, 58px)', letterSpacing: '-1.5px' }}
+          >
+            Your city.<br />
+            <span style={{ color: 'transparent', WebkitTextStroke: '1.5px rgba(255,255,255,.42)' }}>
+              Wide open.
+            </span>
+          </h2>
+
+          <p className="text-sm text-white/55 mb-7 max-w-[420px] leading-[1.6] animate-fade-up">
+            Music, food, sports, art — {allUpcoming.total.toLocaleString()} things happening around ABQ.
+          </p>
+
+          {/* Search bar */}
+          <form
+            action="/events"
+            method="get"
+            className="flex max-w-[520px] mb-5 rounded-xl overflow-hidden animate-fade-up"
+            style={{ boxShadow: '0 8px 32px rgba(0,0,0,.4)' }}
+          >
+            <input
+              name="q"
+              type="text"
+              placeholder="Search events, venues, neighborhoods…"
+              className="flex-1 bg-white text-[#1a1614] text-sm px-4 py-3.5 outline-none placeholder:text-[#8a7a74]"
+              aria-label="Search events"
+            />
+            <button
+              type="submit"
+              className="bg-[#9a442d] text-white font-bold text-sm px-5 hover:bg-[#7d3725] transition-colors flex items-center gap-2 whitespace-nowrap"
+            >
+              <i className="fi fi-rr-search text-[13px]" aria-hidden="true" />
+              Search
+            </button>
+          </form>
+
+          {/* Vibe quick-filter pills */}
+          <div className="flex gap-2 flex-wrap mb-2 animate-fade-up-delay">
+            {[
+              { label: 'Live Music',   icon: 'fi-rr-music-note', href: '/events?category=Music' },
+              { label: 'Free Tonight', icon: 'fi-rr-ticket',     href: '/free' },
+              { label: 'Date Night',   icon: 'fi-rr-heart',      href: '/date-night' },
+              { label: 'With Kids',    icon: 'fi-rr-baby',       href: '/family-friendly' },
+              { label: 'Out Late',     icon: 'fi-rr-moon',       href: '/events?time=tonight' },
+              { label: 'Outdoors',     icon: 'fi-rr-leaf',       href: '/events?category=Outdoor' },
+            ].map((pill) => (
+              <Link
+                key={pill.label}
+                href={pill.href}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all hover:bg-white/10 hover:border-white/40 hover:text-white"
+                style={{ border: '1.5px solid rgba(255,255,255,.18)', color: 'rgba(255,255,255,.75)', background: 'rgba(255,255,255,.06)', backdropFilter: 'blur(6px)' }}
+              >
+                <i className={`fi ${pill.icon} text-[11px]`} aria-hidden="true" />
+                {pill.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Surprise Me — secondary CTA */}
+          <div className="mb-0 mt-3">
+            <SurpriseButton />
+          </div>
+        </div>
+
+        {/* Stat tabs strip */}
+        <div className="relative z-10 mt-8" style={{ background: 'rgba(255,255,255,.06)', borderTop: '1px solid rgba(255,255,255,.08)', backdropFilter: 'blur(8px)' }}>
+          <div className="max-w-6xl mx-auto grid grid-cols-4">
+            {[
+              { label: 'Tonight',      count: tonight.total,            href: '/events?time=tonight',      accent: true },
+              { label: 'This Weekend', count: weekend.total,            href: '/events?time=this-weekend', accent: false },
+              { label: 'Tomorrow',     count: tomorrow.total,           href: '/events?time=tomorrow',     accent: false },
+              { label: 'All Upcoming', count: allUpcoming.total,        href: '/events',                   accent: false },
+            ].map((tab, i) => (
+              <Link
+                key={tab.label}
+                href={tab.href}
+                className="py-3.5 flex flex-col items-center transition-colors hover:bg-white/5"
+                style={i < 3 ? { borderRight: '1px solid rgba(255,255,255,.08)' } : {}}
+              >
+                <span
+                  className="font-black text-xl sm:text-2xl leading-none"
+                  style={{ fontFamily: 'var(--font-epilogue)', color: tab.accent ? '#f5c842' : 'white' }}
+                >
+                  {tab.count.toLocaleString()}
+                </span>
+                <span className="text-[10px] sm:text-[11px] text-white/45 mt-0.5">{tab.label}</span>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -573,26 +627,6 @@ function PlaceTeaseCard({ place, index }: { place: Place; index: number }) {
       </h3>
       <p className="text-[10px] text-[#6b5d57] line-clamp-1">{place.tagline}</p>
     </a>
-  )
-}
-
-// ─── Quick Stat Card ────────────────────────────────────────────────────────
-
-function QuickStat({ label, count, href }: { label: string; count: number; href: string }) {
-  return (
-    <Link
-      href={href}
-      className="bg-white/10 backdrop-blur-sm rounded-xl p-2.5 hover:bg-white/20 transition-all duration-300 hover:scale-[1.02] group"
-    >
-      <p className="text-[9px] uppercase tracking-widest text-white/50 mb-0.5">{label}</p>
-      <p
-        className="text-2xl font-black tabular-nums"
-        style={{ fontFamily: 'var(--font-epilogue)' }}
-      >
-        {count}
-      </p>
-      <p className="text-[10px] text-white/40 group-hover:text-white/60 transition-colors">events</p>
-    </Link>
   )
 }
 
