@@ -86,14 +86,12 @@ export default async function DiscoverPage() {
 
       {/* ── Hero ── */}
       <section className="relative overflow-hidden text-white">
-        {/* Dark atmospheric base */}
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(165deg, #0f0b09 0%, #1a1008 45%, #1f1208 100%)' }} />
-        {/* Terra glow from bottom */}
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 130% 55% at 50% 130%, rgba(154,68,45,.52) 0%, transparent 68%)' }} />
-        {/* Sage accent top-right */}
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 60% 40% at 85% 20%, rgba(79,98,73,.22) 0%, transparent 60%)' }} />
-        {/* Subtle grid lines */}
-        <div className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
+        {/* Layered desert atmosphere — matches mockup exactly */}
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 120% 60% at 50% 130%, rgba(154,68,45,.55) 0%, transparent 70%), radial-gradient(ellipse 80% 50% at 80% 80%, rgba(79,98,73,.3) 0%, transparent 60%), linear-gradient(165deg, #0f0b09 0%, #1a1008 40%, #221508 100%)' }} />
+        {/* Subtle grid texture */}
+        <div className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
+        {/* Warm glow orb at bottom center */}
+        <div className="absolute pointer-events-none" style={{ bottom: '-80px', left: '50%', transform: 'translateX(-50%)', width: '700px', height: '260px', background: 'radial-gradient(ellipse, rgba(154,68,45,.35) 0%, transparent 70%)', borderRadius: '50%' }} />
 
         {/* Hero content */}
         <div className="relative z-10 max-w-6xl mx-auto px-4 pt-12 sm:pt-16 pb-0">
@@ -111,7 +109,7 @@ export default async function DiscoverPage() {
             style={{ fontFamily: 'var(--font-epilogue)', fontSize: 'clamp(34px, 7vw, 58px)', letterSpacing: '-1.5px' }}
           >
             Your city.<br />
-            <span style={{ color: 'transparent', WebkitTextStroke: '1.5px rgba(255,255,255,.42)' }}>
+            <span style={{ color: 'transparent', WebkitTextStroke: '1.5px rgba(255,255,255,.5)' }}>
               Wide open.
             </span>
           </h2>
@@ -407,6 +405,64 @@ export default async function DiscoverPage() {
         </AnimateIn>
       )}
 
+      {/* ── Community CTA — dark atmospheric, matches mockup ── */}
+      <AnimateIn animation="fade-up" delay={160}>
+        <section className="py-10" style={{ background: 'linear-gradient(135deg, #1a0f08 0%, #2d1a0d 100%)' }}>
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="flex flex-col md:grid md:grid-cols-2 md:gap-12 md:items-center gap-6">
+              {/* Left: copy */}
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-[#e8a898] mb-3 font-semibold">ABQ Unplugged community</p>
+                <h2
+                  className="font-black text-2xl sm:text-3xl text-white mb-3 leading-tight"
+                  style={{ fontFamily: 'var(--font-epilogue)', letterSpacing: '-0.4px' }}
+                >
+                  Albuquerque showing<br/>up for itself
+                </h2>
+                <p className="text-sm text-white/50 mb-5 leading-relaxed max-w-sm">
+                  Track events, save favorites, and see what other ABQ locals are into. Free to join — no spam, no noise.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href="/login"
+                    className="inline-flex items-center gap-2 bg-[#9a442d] text-white font-bold text-sm px-5 py-2.5 rounded-full hover:bg-[#7d3725] transition-colors"
+                  >
+                    Join the community
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <Link
+                    href="/leaderboard"
+                    className="inline-flex items-center gap-2 text-white/60 font-semibold text-sm px-5 py-2.5 rounded-full border border-white/15 hover:border-white/30 hover:text-white/80 transition-all"
+                  >
+                    See leaderboard
+                  </Link>
+                </div>
+              </div>
+              {/* Right: live stat cards */}
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: 'Events this month', value: allUpcoming.total.toLocaleString(), icon: 'fi-rr-calendar' },
+                  { label: 'Free events tonight', value: tonight.total.toLocaleString(), icon: 'fi-rr-ticket' },
+                  { label: 'Neighborhoods covered', value: '14+', icon: 'fi-rr-marker' },
+                  { label: 'Sources aggregated', value: '5', icon: 'fi-rr-database' },
+                ].map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="bg-white/5 border border-white/10 rounded-xl p-4"
+                  >
+                    <i className={`fi ${stat.icon} text-[20px] text-[#9a442d] block mb-2`} aria-hidden="true" />
+                    <p className="text-2xl font-black text-white leading-none mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
+                      {stat.value}
+                    </p>
+                    <p className="text-[11px] text-white/40">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      </AnimateIn>
+
       {/* ── Things To Do ── */}
       <AnimateIn animation="fade-up" delay={175}>
         <section className="py-6 border-t border-[#f0e4cc]/60">
@@ -491,12 +547,15 @@ export default async function DiscoverPage() {
                 <AnimateIn key={slug} animation="fade-up" delay={Math.min(i * 50, 300)} className="flex-shrink-0">
                   <Link
                     href={`/neighborhoods/${slug}`}
-                    className="flex flex-col items-start px-3.5 py-2.5 rounded-xl bg-white border border-[#ddc9a3] hover:border-[#006a62] hover:shadow-sm transition-all group"
+                    className="flex flex-col items-start px-4 py-3 rounded-xl bg-white border-[1.5px] border-[#ede4d3] hover:border-[#9a442d] hover:shadow-md transition-all group"
+                    style={{ minWidth: '140px' }}
                   >
-                    <span className="text-xs font-bold text-[#1a1614] group-hover:text-[#006a62] transition-colors whitespace-nowrap">
+                    <span className="font-black text-[13.5px] text-[#1a1614] group-hover:text-[#9a442d] transition-colors whitespace-nowrap mb-0.5" style={{ fontFamily: 'var(--font-epilogue)' }}>
                       {neighborhood}
                     </span>
-                    <span className="text-[10px] text-[#6b5d57] tabular-nums">
+                    <span className="text-[11px] text-[#6b5d57]">Events &amp; local spots</span>
+                    <span className="mt-2 flex items-center gap-1 text-[11px] font-bold text-[#9a442d]">
+                      <span className="w-[5px] h-[5px] rounded-full bg-[#9a442d] flex-shrink-0" />
                       {count} event{count !== 1 ? 's' : ''}
                     </span>
                   </Link>
