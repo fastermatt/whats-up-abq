@@ -114,7 +114,7 @@ export function SaveEventButton({ eventId, eventName, eventDate, venueName, cate
         {state === 'going'
           ? <Check className="w-3.5 h-3.5" />
           : <Calendar className="w-3.5 h-3.5" />}
-        {state === 'going' ? "I'm going" : "I'm going"}
+        {state === 'going' ? "Going!" : "I'm going"}
       </button>
 
       {/* Going count */}
