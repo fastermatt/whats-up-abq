@@ -4,9 +4,9 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { SignOutButton } from './SignOutButton'
 import { EditProfileForm } from './EditProfileForm'
-import { MapPin, Trophy, Zap, Star, CheckSquare, Calendar, ArrowLeft, Heart, Users, Bell, Search, UserPlus, HelpCircle, Sparkles, SlidersHorizontal } from 'lucide-react'
+import { MapPin, Trophy, Zap, Star, CheckSquare, Calendar, ArrowLeft, Heart, Users, Bell, Search, UserPlus, HelpCircle, Sparkles } from 'lucide-react'
 import { PushBell } from '@/app/components/PushBell'
-import { PreferencesPicker, type UserPreferences } from '@/app/components/PreferencesPicker'
+import type { UserPreferences } from '@/app/components/PreferencesPicker'
 
 export const metadata: Metadata = {
   title: 'My Profile | ABQ Unplugged',
@@ -121,34 +121,15 @@ export default async function ProfilePage() {
           </div>
         </div>
 
-        {/* Edit profile */}
+        {/* Edit profile + preferences — combined accordion */}
         <EditProfileForm
           userId={user.id}
           currentDisplayName={profile?.display_name ?? ''}
           currentHandle={profile?.handle ?? ''}
           currentNeighborhood={profile?.neighborhood ?? ''}
           currentBio={profile?.bio ?? ''}
+          currentPreferences={(profile?.preferences as UserPreferences) ?? {}}
         />
-
-        {/* ── Preferences ── */}
-        <section id="preferences" className="scroll-mt-20">
-          <div className="flex items-center gap-2 mb-4">
-            <SlidersHorizontal className="w-4 h-4 text-[#9a442d]" />
-            <h2 className="text-base font-black text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
-              What are you into?
-            </h2>
-          </div>
-          <div className="bg-[#fdf9f4] rounded-2xl border border-[#e8d9bf] p-5">
-            <p className="text-[12px] text-[#6b5d57] mb-5 leading-relaxed">
-              Tell us what you&apos;re into and we&apos;ll stop showing you what you&apos;re not.
-              Your <strong className="text-[#4a3f3a]">For You</strong> feed and weekly digest use these picks.
-            </p>
-            <PreferencesPicker
-              userId={user.id}
-              initial={(profile?.preferences as UserPreferences) ?? {}}
-            />
-          </div>
-        </section>
 
         {/* Badges */}
         <section>
