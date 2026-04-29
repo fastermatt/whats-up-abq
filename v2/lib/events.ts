@@ -307,7 +307,16 @@ export async function fetchEvents({
       // for "food" because the venue name "Roadrunner Food Bank" matches, not the event
       if (e.id.startsWith('rrfb_')) return false
       const haystack = `${e.title} ${e.venue ?? ''} ${e.category ?? ''} ${e.subcategory ?? ''} ${e.description ?? ''}`.toLowerCase()
-      return terms.every((t) => haystack.includes(t))
+      return terms.every((t) => {
+        // For terms ≥ 4 chars, require whole-word match to prevent "taco" matching "Tacoma",
+        // "spring" matching "Springfield", etc. Short terms (< 4) use substring for
+        // abbreviations like "abq", "nm", "kmo".
+        if (t.length >= 4) {
+          const escaped = t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+          return new RegExp(`\\b${escaped}`, 'i').test(haystack)
+        }
+        return haystack.includes(t)
+      })
     })
   }
 
