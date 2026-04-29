@@ -1386,6 +1386,19 @@ function mapCategory(segment?: string, genre?: string): CategoryResult {
     ])
   ) return { category: 'Music', subcategory: musicSub }
 
+  // ── Outdoor races & participatory events ─────────────────────────────────
+  // Events people DO outside (runs, walks, hikes, rides) — not spectator sports.
+  // Must come BEFORE the Sports block so "5K" doesn't land in Sports > Running.
+  if (anyWord(both, [
+    '5k', '10k', '1m', '13.1', '26.2',
+    'marathon', 'half marathon', 'triathlon', 'duathlon',
+    'fun run', 'road race', 'trail run', 'color run', 'mud run',
+    'obstacle course', 'obstacle race', 'charity walk', 'fun walk',
+    'walk/run', 'run/walk',
+    'group hike', 'guided hike', 'nature hike', 'led hike',
+    'bike ride', 'cycling tour', 'kayak tour', 'paddleboard tour',
+  ])) return { category: 'Outdoor', subcategory: null }
+
   // ── Sports — with subcategories per strategy doc taxonomy ───────────────
   // Check specific teams/sports first for subcategory, then generic "sports"
   if (anyWord(both, ['isotopes']))
@@ -1412,8 +1425,6 @@ function mapCategory(segment?: string, genre?: string): CategoryResult {
     return { category: 'Sports', subcategory: 'Motorsports' }
   if (anyWord(both, ['rodeo']))
     return { category: 'Sports', subcategory: 'Rodeo' }
-  if (anyWord(both, ['marathon', '5k', '10k', 'triathlon', 'half marathon']))
-    return { category: 'Sports', subcategory: 'Running' }
   if (anyWord(both, ['bodybuilding']))
     return { category: 'Sports', subcategory: null }
   if (anyWord(s, ['sport', 'sports']))
@@ -1449,10 +1460,14 @@ function mapCategory(segment?: string, genre?: string): CategoryResult {
     'block party',
   ])) return { category: 'Festivals', subcategory: null }
 
-  // ── Outdoor & Adventure ────────────────────────────────────────────────
+  // ── Outdoor & Adventure (secondary catch) ─────────────────────────────
+  // Primary run/walk/race keywords are caught BEFORE Sports above.
+  // This block catches outdoor-adjacent titles that don't match earlier blocks.
   if (anyWord(both, [
-    'outdoor', 'hiking', 'cycling', 'balloon', 'camping', 'adventure',
-    'trail', 'nature walk', 'birding', 'stargazing', 'garden tour',
+    'outdoor', 'hiking', 'hike', 'cycling', 'balloon fiesta', 'camping',
+    'adventure', 'trail', 'nature walk', 'birding', 'stargazing',
+    'garden tour', 'kayaking', 'paddling', 'rafting', 'rock climbing',
+    'backpacking', 'wilderness',
   ])) return { category: 'Outdoor', subcategory: null }
 
   // ── Community — broadest bucket, check last ────────────────────────────
