@@ -111,81 +111,43 @@ export default async function DiscoverPage() {
         <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 120% 60% at 50% 130%, rgba(154,68,45,.55) 0%, transparent 70%), radial-gradient(ellipse 80% 50% at 80% 80%, rgba(79,98,73,.3) 0%, transparent 60%), linear-gradient(165deg, #0f0b09 0%, #1a1008 40%, #221508 100%)' }} />
         {/* ABQ street map — line drawing of Albuquerque's streets */}
         <ABQMapSVG />
-        {/* Warm glow orb at bottom center */}
-        <div className="absolute pointer-events-none" style={{ bottom: '-80px', left: '50%', transform: 'translateX(-50%)', width: '700px', height: '260px', background: 'radial-gradient(ellipse, rgba(154,68,45,.35) 0%, transparent 70%)', borderRadius: '50%' }} />
 
         {/* Hero content */}
-        <div className="relative z-10 max-w-6xl mx-auto px-4 pt-12 sm:pt-16 pb-0">
-          {/* Eyebrow */}
-          <div className="flex items-center gap-2 mb-5 animate-slide-down">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#f5a623] animate-pulse" />
-            <p className="text-[11px] uppercase tracking-[0.2em] text-white/50 font-semibold">
-              {greeting}, Albuquerque
-            </p>
-          </div>
-
-          {/* Headline */}
+        <div className="relative z-10 max-w-6xl mx-auto px-4 pt-5 pb-4">
           <h2
-            className="font-black leading-[1.05] mb-5 animate-hero-text"
-            style={{ fontFamily: 'var(--font-epilogue)', fontSize: 'clamp(34px, 7vw, 58px)', letterSpacing: '-1.5px' }}
+            className="font-black leading-none mb-3 animate-hero-kern"
+            style={{ fontFamily: 'var(--font-epilogue)', fontSize: 'clamp(28px, 5.5vw, 60px)', letterSpacing: '-1.5px' }}
           >
-            Burque&rsquo;s got<br />
-            <span style={{ color: 'transparent', WebkitTextStroke: '1.5px rgba(255,255,255,.5)' }}>
+            Burque&rsquo;s got{' '}
+            <span style={{ color: 'transparent', WebkitTextStroke: '1.5px rgba(255,255,255,.4)' }}>
               something going on.
             </span>
           </h2>
-
-          <p className="text-sm text-white/55 mb-7 max-w-[420px] leading-[1.6] animate-fade-up">
-            {allUpcoming.total.toLocaleString()} events across every neighborhood — find them before everyone else does.
-          </p>
-
-          {/* Search bar */}
-          <form
-            action="/events"
-            method="get"
-            className="flex max-w-[520px] mb-5 rounded-xl overflow-hidden animate-fade-up"
-            style={{ boxShadow: '0 8px 32px rgba(0,0,0,.4)' }}
-          >
-            <input
-              name="q"
-              type="text"
-              placeholder="Search events, venues, neighborhoods…"
-              className="flex-1 bg-white text-[#1a1614] text-sm px-4 py-3.5 outline-none placeholder:text-[#8a7a74]"
-              aria-label="Search events"
-            />
-            <button
-              type="submit"
-              className="bg-[#9a442d] text-white font-bold text-sm px-5 hover:bg-[#7d3725] transition-colors flex items-center gap-2 whitespace-nowrap"
+          <div className="flex items-center gap-3 animate-hero-row">
+            <form
+              action="/events"
+              method="get"
+              className="flex flex-1 max-w-[460px] rounded-xl overflow-hidden"
+              style={{ boxShadow: '0 6px 28px rgba(0,0,0,.4)' }}
             >
-              <i className="fi fi-rr-search text-[13px]" aria-hidden="true" />
-              Search
-            </button>
-          </form>
-
-          {/* Vibe quick-filter pills */}
-          <div className="flex gap-2 flex-wrap mb-2 animate-fade-up-delay">
-            {[
-              { label: 'Live Music',   icon: 'fi-rr-music-note', href: '/events?category=Music' },
-              { label: 'Free Tonight', icon: 'fi-rr-ticket',     href: '/free' },
-              { label: 'Date Night',   icon: 'fi-rr-heart',      href: '/date-night' },
-              { label: 'With Kids',    icon: 'fi-rr-baby',       href: '/family-friendly' },
-              { label: 'Out Late',     icon: 'fi-rr-moon',       href: '/events?time=tonight' },
-              { label: 'Outdoors',     icon: 'fi-rr-leaf',       href: '/events?category=Outdoor' },
-            ].map((pill) => (
-              <Link
-                key={pill.label}
-                href={pill.href}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all hover:bg-white/10 hover:border-white/40 hover:text-white"
-                style={{ border: '1.5px solid rgba(255,255,255,.18)', color: 'rgba(255,255,255,.75)', background: 'rgba(255,255,255,.06)', backdropFilter: 'blur(6px)' }}
+              <input
+                name="q"
+                type="text"
+                placeholder="Search events, venues, neighborhoods…"
+                className="flex-1 bg-white text-[#1a1614] text-sm px-4 py-3 outline-none placeholder:text-[#8a7a74]"
+                aria-label="Search events"
+              />
+              <button
+                type="submit"
+                className="bg-[#9a442d] text-white font-bold text-sm px-5 hover:bg-[#7d3725] transition-colors flex items-center gap-1.5 whitespace-nowrap"
               >
-                <i className={`fi ${pill.icon} text-[11px]`} aria-hidden="true" />
-                {pill.label}
-              </Link>
-            ))}
-          </div>
-
-          {/* Surprise Me — secondary CTA */}
-          <div className="mb-0 mt-3">
+                <i className="fi fi-rr-search text-[12px]" aria-hidden="true" />
+                Search
+              </button>
+            </form>
+            <span className="text-white/35 text-xs hidden sm:block whitespace-nowrap">
+              {allUpcoming.total.toLocaleString()} events
+            </span>
             <SurpriseButton />
           </div>
         </div>
@@ -260,75 +222,23 @@ export default async function DiscoverPage() {
 
       {/* ── Find Your Vibe ── */}
       <AnimateIn animation="fade-up">
-        <section className="py-6 border-t border-[#f0e4cc]/60">
-          <div className="max-w-6xl mx-auto px-4 flex items-end justify-between mb-4">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] mb-0.5 font-semibold">Discover</p>
-              <h2 className="text-xl font-black text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
-                Find your vibe
-              </h2>
-            </div>
+        {/* ── Discover / Find your vibe — compact icon tiles ── */}
+        <section className="border-t border-[#f0e4cc]/60" style={{ paddingTop: 10, paddingBottom: 10 }}>
+          <div className="max-w-6xl mx-auto px-4 mb-2.5 flex items-center gap-3">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] font-semibold">Discover</p>
+            <h2 className="text-lg font-black text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)', letterSpacing: '-0.3px' }}>Find your vibe</h2>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 px-4 max-w-6xl mx-auto">
+          <div className="flex gap-2.5 px-4 max-w-6xl mx-auto">
             {[
-              {
-                label: 'Date Night',
-                icon: 'fi-rr-heart',
-                sub: 'Arts, dining, live music',
-                href: '/date-night',
-                from: '#2d0f3d',
-                to: '#7a2d5a',
-              },
-              {
-                label: 'Live Music',
-                icon: 'fi-rr-music-note',
-                sub: 'Concerts & shows this week',
-                href: '/events?category=Music',
-                from: '#0f1a2d',
-                to: '#1a4d7a',
-              },
-              {
-                label: 'Free Tonight',
-                icon: 'fi-rr-ticket',
-                sub: 'Zero cost, all fun',
-                href: '/free',
-                from: '#1a2d0f',
-                to: '#2d6b1a',
-              },
-              {
-                label: 'With Kids',
-                icon: 'fi-rr-baby',
-                sub: 'Family-friendly picks',
-                href: '/family-friendly',
-                from: '#0f2a2d',
-                to: '#0d5a5a',
-              },
-            ].map((vibe) => (
-              <Link
-                key={vibe.label}
-                href={vibe.href}
-                className="group relative aspect-[4/3] rounded-2xl overflow-hidden"
-              >
-                {/* Gradient background */}
-                <div
-                  className="absolute inset-0 transition-transform duration-300 group-hover:scale-[1.03]"
-                  style={{ background: `linear-gradient(160deg, ${vibe.from} 0%, ${vibe.to} 100%)` }}
-                />
-                {/* Bottom shadow for text legibility */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                {/* Arrow chip */}
-                <div className="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center">
-                  <i className="fi fi-rr-arrow-right text-[11px] text-white" aria-hidden="true" />
-                </div>
-                {/* Content */}
-                <div className="absolute bottom-0 left-0 right-0 p-3.5">
-                  <i className={`fi ${vibe.icon} text-[22px] text-white/90 block mb-1.5`} aria-hidden="true" />
-                  <p className="font-black text-[15px] text-white leading-tight" style={{ fontFamily: 'var(--font-epilogue)' }}>
-                    {vibe.label}
-                  </p>
-                  <p className="text-[11px] text-white/60 mt-0.5">{vibe.sub}</p>
-                </div>
-              </Link>
+              { href: '/date-night',        label: 'Date Night',   icon: 'fi-rr-heart',      bg: 'linear-gradient(135deg,#2d0f3d,#7a2d5a)' },
+              { href: '/events?category=Music', label: 'Live Music', icon: 'fi-rr-music-note', bg: 'linear-gradient(135deg,#0f1a2d,#1a4d7a)' },
+              { href: '/free',              label: 'Free Tonight', icon: 'fi-rr-ticket',     bg: 'linear-gradient(135deg,#1a2d0f,#2d6b1a)' },
+              { href: '/family-friendly',   label: 'With Kids',    icon: 'fi-rr-baby',       bg: 'linear-gradient(135deg,#0f2a2d,#0d5a5a)' },
+            ].map((item) => (
+              <a key={item.href} href={item.href} className="group flex-1 flex flex-col items-center justify-center gap-2 rounded-xl py-4 px-2 transition-transform duration-200 hover:scale-[1.03]" style={{ background: item.bg, minHeight: 88 }}>
+                <i className={`fi ${item.icon} text-[20px] text-white/85`} aria-hidden="true" />
+                <p className="font-black text-[12px] text-white text-center leading-tight" style={{ fontFamily: 'var(--font-epilogue)' }}>{item.label}</p>
+              </a>
             ))}
           </div>
         </section>
