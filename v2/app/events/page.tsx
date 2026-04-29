@@ -140,17 +140,6 @@ export default async function EventsPage({ searchParams }: PageProps) {
 
   return (
     <main id="main" className="min-h-dvh bg-[--bg]">
-      {/* ── Nav ── */}
-      <header className="sticky top-0 z-20 bg-[--bg]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="hover:opacity-80 transition-opacity">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo-black.svg" alt="ABQ Unplugged" className="h-7 w-auto" />
-          </Link>
-          <span className="text-xs text-[#6b5d57] tabular-nums">{total.toLocaleString()} events</span>
-        </div>
-      </header>
-
       <div className="max-w-6xl mx-auto px-4 py-5 space-y-4">
         {/* ── Title row + Calendar toggle ── */}
         <div className="flex items-center justify-between animate-fade-in">

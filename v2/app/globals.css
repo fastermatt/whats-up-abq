@@ -279,6 +279,8 @@ body {
 
 /* ─── Scroll-hint nudge — teaches users about horizontal scrollability ── */
 /* Runs once on mount, briefly nudges content left then snaps back.       */
+/* ScrollHintManager.tsx gates this to once per session via sessionStorage: */
+/* it adds `scroll-hint-done` to <html> on repeat visits to suppress it.  */
 @keyframes scroll-hint {
   0%   { transform: translateX(0); }
   35%  { transform: translateX(-14px); }
@@ -288,6 +290,11 @@ body {
 
 .scroll-hint-inner {
   animation: scroll-hint 1.6s ease-in-out 0.4s 1 both;
+}
+
+/* Suppress on repeat visits — set by ScrollHintManager after first session */
+html.scroll-hint-done .scroll-hint-inner {
+  animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

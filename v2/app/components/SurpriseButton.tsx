@@ -2,7 +2,10 @@
 
 /**
  * SurpriseButton — terra-colored icon square that sends the user to a random event.
- * Client component because it uses window.location for the redirect.
+ *
+ * Failure guard: if /api/surprise never triggers a navigation (network error, 5xx),
+ * an 8-second timeout resets the loading state so the button is usable again.
+ * The beforeunload listener cancels the timeout on successful navigation.
  */
 import { Shuffle } from 'lucide-react'
 import { useState } from 'react'
@@ -11,7 +14,15 @@ export default function SurpriseButton() {
   const [loading, setLoading] = useState(false)
 
   function handleClick() {
+    if (loading) return
     setLoading(true)
+
+    // Safety net: reset if the page hasn't navigated away within 8 seconds
+    const timeout = setTimeout(() => setLoading(false), 8000)
+
+    // Clear timeout when navigation fires (success path)
+    window.addEventListener('beforeunload', () => clearTimeout(timeout), { once: true })
+
     window.location.href = '/api/surprise'
   }
 

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { fetchEvents, fetchRecentlyAdded, fetchFeaturedEvents, fetchNeighborhoodCounts, NormalizedEvent } from '@/lib/events'
+import { fetchEvents, fetchFeaturedEvents, fetchNeighborhoodCounts, NormalizedEvent } from '@/lib/events'
 import { getCategoryFallback, OG_IMAGE } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
 import { MapPin, ArrowRight, ExternalLink } from 'lucide-react'
@@ -9,6 +9,7 @@ import MoodChips from '@/app/components/MoodChips'
 import SurpriseButton from '@/app/components/SurpriseButton'
 import { ConnectionQuote } from '@/app/components/ConnectionQuote'
 import { ABQMapSVG } from '@/app/components/ABQMapSVG'
+import { ScrollHintManager } from '@/app/components/ScrollHintManager'
 import { getFeaturedPlaces, PLACE_CATEGORIES, type Place } from '@/data/places'
 
 export const revalidate = 60
@@ -58,13 +59,11 @@ const websiteJsonLd = {
 export default async function DiscoverPage() {
   const featuredPlaces = getFeaturedPlaces(8)
 
-  const [tonight, tomorrow, weekend, allUpcoming, featured, justAdded, neighborhoodCounts] = await Promise.all([
+  const [tonight, weekend, allUpcoming, featured, neighborhoodCounts] = await Promise.all([
     fetchEvents({ timeFilter: 'tonight', limit: 10 }),
-    fetchEvents({ timeFilter: 'tomorrow', limit: 10 }),
     fetchEvents({ timeFilter: 'this-weekend', limit: 10 }),
     fetchEvents({ timeFilter: 'upcoming', limit: 1 }),
     fetchFeaturedEvents(6),
-    fetchRecentlyAdded(10),
     fetchNeighborhoodCounts(),
   ])
 
@@ -98,6 +97,7 @@ export default async function DiscoverPage() {
 
   return (
     <main id="main" className="min-h-dvh bg-[--bg]">
+      <ScrollHintManager />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
@@ -154,18 +154,17 @@ export default async function DiscoverPage() {
 
         {/* Stat tabs strip */}
         <div className="relative z-10 mt-8" style={{ background: 'rgba(255,255,255,.06)', borderTop: '1px solid rgba(255,255,255,.08)', backdropFilter: 'blur(8px)' }}>
-          <div className="max-w-6xl mx-auto grid grid-cols-4">
+          <div className="max-w-6xl mx-auto grid grid-cols-3">
             {[
-              { label: 'Tonight',      count: tonight.total,            href: '/events?time=tonight',      accent: true },
-              { label: 'This Weekend', count: weekend.total,            href: '/events?time=this-weekend', accent: false },
-              { label: 'Tomorrow',     count: tomorrow.total,           href: '/events?time=tomorrow',     accent: false },
-              { label: 'All Upcoming', count: allUpcoming.total,        href: '/events',                   accent: false },
+              { label: 'Tonight',      count: tonight.total,     href: '/events?time=tonight',      accent: true },
+              { label: 'This Weekend', count: weekend.total,     href: '/events?time=this-weekend', accent: false },
+              { label: 'All Upcoming', count: allUpcoming.total, href: '/events',                   accent: false },
             ].map((tab, i) => (
               <Link
                 key={tab.label}
                 href={tab.href}
                 className="py-3.5 flex flex-col items-center transition-colors hover:bg-white/5"
-                style={i < 3 ? { borderRight: '1px solid rgba(255,255,255,.08)' } : {}}
+                style={i < 2 ? { borderRight: '1px solid rgba(255,255,255,.08)' } : {}}
               >
                 <span
                   className="font-black text-xl sm:text-2xl leading-none"
@@ -220,30 +219,6 @@ export default async function DiscoverPage() {
       {/* ── Mood chips ── */}
       <MoodChips />
 
-      {/* ── Find Your Vibe ── */}
-      <AnimateIn animation="fade-up">
-        {/* ── Discover / Find your vibe — compact icon tiles ── */}
-        <section className="border-t border-[#f0e4cc]/60" style={{ paddingTop: 10, paddingBottom: 10 }}>
-          <div className="max-w-6xl mx-auto px-4 mb-2.5 flex items-center gap-3">
-            <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] font-semibold">Discover</p>
-            <h2 className="text-lg font-black text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)', letterSpacing: '-0.3px' }}>Find your vibe</h2>
-          </div>
-          <div className="flex gap-2.5 px-4 max-w-6xl mx-auto">
-            {[
-              { href: '/date-night',        label: 'Date Night',   icon: 'fi-rr-heart',      bg: 'linear-gradient(135deg,#2d0f3d,#7a2d5a)' },
-              { href: '/events?category=Music', label: 'Live Music', icon: 'fi-rr-music-note', bg: 'linear-gradient(135deg,#0f1a2d,#1a4d7a)' },
-              { href: '/free',              label: 'Free Tonight', icon: 'fi-rr-ticket',     bg: 'linear-gradient(135deg,#1a2d0f,#2d6b1a)' },
-              { href: '/family-friendly',   label: 'With Kids',    icon: 'fi-rr-baby',       bg: 'linear-gradient(135deg,#0f2a2d,#0d5a5a)' },
-            ].map((item) => (
-              <a key={item.href} href={item.href} className="group flex-1 flex flex-col items-center justify-center gap-2 rounded-xl py-4 px-2 transition-transform duration-200 hover:scale-[1.03]" style={{ background: item.bg, minHeight: 88 }}>
-                <i className={`fi ${item.icon} text-[20px] text-white/85`} aria-hidden="true" />
-                <p className="font-black text-[12px] text-white text-center leading-tight" style={{ fontFamily: 'var(--font-epilogue)' }}>{item.label}</p>
-              </a>
-            ))}
-          </div>
-        </section>
-      </AnimateIn>
-
       {/* ── Editor's Picks — Featured Events ── */}
       {featured.length > 0 && (
         <AnimateIn animation="fade-up">
@@ -297,19 +272,6 @@ export default async function DiscoverPage() {
         </AnimateIn>
       )}
 
-      {/* ── Tomorrow ── */}
-      {tomorrow.events.length > 0 && (
-        <AnimateIn animation="fade-up" delay={50}>
-          <EventSection
-            title="Coming up tomorrow"
-            subtitle="Plan ahead"
-            events={tomorrow.events}
-            seeAllHref="/events?time=tomorrow"
-            sectionLabel="Tomorrow"
-          />
-        </AnimateIn>
-      )}
-
       {/* ── This Weekend ── */}
       {weekend.events.length > 0 && (
         <AnimateIn animation="fade-up" delay={100}>
@@ -323,72 +285,36 @@ export default async function DiscoverPage() {
         </AnimateIn>
       )}
 
-      {/* ── Just Added ── */}
-      {justAdded.length > 0 && (
-        <AnimateIn animation="fade-up" delay={150}>
-          <EventSection
-            title="Just added"
-            subtitle="Fresh on the calendar"
-            events={justAdded}
-            seeAllHref="/events"
-            sectionLabel="New"
-          />
-        </AnimateIn>
-      )}
-
-      {/* ── Community CTA — dark atmospheric, matches mockup ── */}
+      {/* ── Community CTA ── */}
       <AnimateIn animation="fade-up" delay={160}>
-        <section className="py-10" style={{ background: 'linear-gradient(135deg, #1a0f08 0%, #2d1a0d 100%)' }}>
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="flex flex-col md:grid md:grid-cols-2 md:gap-12 md:items-center gap-6">
-              {/* Left: copy */}
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.18em] text-[#e8a898] mb-3 font-semibold">ABQ Unplugged community</p>
-                <h2
-                  className="font-black text-2xl sm:text-3xl text-white mb-3 leading-tight"
-                  style={{ fontFamily: 'var(--font-epilogue)', letterSpacing: '-0.4px' }}
-                >
-                  Albuquerque showing<br/>up for itself
-                </h2>
-                <p className="text-sm text-white/50 mb-5 leading-relaxed max-w-sm">
-                  Track events, save favorites, and see what other ABQ locals are into. Free to join — no spam, no noise.
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  <Link
-                    href="/login"
-                    className="inline-flex items-center gap-2 bg-[#9a442d] text-white font-bold text-sm px-5 py-2.5 rounded-full hover:bg-[#7d3725] transition-colors"
-                  >
-                    Join the community
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                  <Link
-                    href="/leaderboard"
-                    className="inline-flex items-center gap-2 text-white/60 font-semibold text-sm px-5 py-2.5 rounded-full border border-white/15 hover:border-white/30 hover:text-white/80 transition-all"
-                  >
-                    See leaderboard
-                  </Link>
-                </div>
-              </div>
-              {/* Right: live stat cards */}
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: 'Events this month', value: allUpcoming.total.toLocaleString(), icon: 'fi-rr-calendar' },
-                  { label: 'Free events tonight', value: tonight.total.toLocaleString(), icon: 'fi-rr-ticket' },
-                  { label: 'Neighborhoods covered', value: '14+', icon: 'fi-rr-marker' },
-                  { label: 'Sources aggregated', value: '5', icon: 'fi-rr-database' },
-                ].map((stat) => (
-                  <div
-                    key={stat.label}
-                    className="bg-white/5 border border-white/10 rounded-xl p-4"
-                  >
-                    <i className={`fi ${stat.icon} text-[20px] text-[#9a442d] block mb-2`} aria-hidden="true" />
-                    <p className="text-2xl font-black text-white leading-none mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
-                      {stat.value}
-                    </p>
-                    <p className="text-[11px] text-white/40">{stat.label}</p>
-                  </div>
-                ))}
-              </div>
+        <section className="py-12 border-t border-[#f0e4cc]/60">
+          <div className="max-w-xl mx-auto px-4 text-center">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-[#9a442d] mb-3 font-semibold">
+              ABQ Unplugged community
+            </p>
+            <h2
+              className="font-black text-2xl sm:text-3xl text-[#1a1614] mb-3 leading-tight"
+              style={{ fontFamily: 'var(--font-epilogue)', letterSpacing: '-0.4px' }}
+            >
+              Albuquerque showing<br />up for itself
+            </h2>
+            <p className="text-sm text-[#4a3f3a] mb-6 leading-relaxed">
+              Track events, save favorites, and see what other ABQ locals are into. Free to join, no spam, no noise.
+            </p>
+            <div className="flex flex-wrap gap-3 justify-center">
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-2 bg-[#9a442d] text-white font-bold text-sm px-5 py-2.5 rounded-full hover:bg-[#7d3725] transition-colors"
+              >
+                Join the community
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href="/leaderboard"
+                className="inline-flex items-center gap-2 text-[#4a3f3a] font-semibold text-sm px-5 py-2.5 rounded-full border border-[#ddc9a3] hover:border-[#9a442d] hover:text-[#9a442d] transition-all"
+              >
+                See leaderboard
+              </Link>
             </div>
           </div>
         </section>
@@ -621,10 +547,9 @@ function PlaceTeaseCard({ place, index }: { place: Place; index: number }) {
 
 // Section accent colors — each section gets a distinct accent to break monotony
 const SECTION_ACCENTS: Record<string, string> = {
-  Tonight:    '#006a62', // turquoise
-  Tomorrow:   '#4f6249', // sage
+  Tonight:        '#006a62', // turquoise
   'This Weekend': '#9a442d', // terra
-  New:        '#8a7a74', // ink-light
+  New:            '#4a3f3a', // ink-mid — was #8a7a74 which fails WCAG AA at 10px
 }
 
 function EventSection({
