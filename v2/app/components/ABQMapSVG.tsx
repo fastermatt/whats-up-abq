@@ -29,18 +29,19 @@ export function ABQMapSVG() {
       }}
     >
       {/*
-        Extended viewport — 50% taller above + below the hero so the SVG renders at a
-        larger virtual canvas. The outer overflow-hidden clips it to the hero bounds.
-        6% horizontal gutter gives pan room without edge gaps.
-        viewBox expands the coordinate window so the city appears at ~72% zoom, making
-        all three key features (Rio Grande, street grid, Sandia Mountains) readable at once.
+        Extended viewport — 15% gutter above/below + 6% left/right gives the pan
+        animation edge room without rendering the huge off-screen canvas that -50% caused.
+        The mapPan animation only translates 0.8% vertically and 4.5% horizontally,
+        so -15% / -6% is ample.
+        viewBox "-900 -420 3000 1800" shows the city at ~55% zoom — wide enough that
+        the Rio Grande, grid, and Sandia Mountains all read at once with breathing room.
       */}
       <div
         className="absolute animate-map-pan"
-        style={{ top: '-50%', bottom: '-50%', left: '-6%', right: '-6%' }}
+        style={{ top: '-15%', bottom: '-15%', left: '-6%', right: '-6%' }}
       >
         <svg
-          viewBox="-650 -300 2500 1500"
+          viewBox="-900 -420 3000 1800"
           preserveAspectRatio="xMidYMid slice"
           aria-hidden="true"
           className="absolute inset-0 w-full h-full"

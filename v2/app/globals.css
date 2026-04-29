@@ -307,6 +307,7 @@ body {
 
 .animate-map-pan {
   animation: mapPan 42s ease-in-out infinite;
+  will-change: transform; /* GPU-composited — no layout/paint cost per frame */
 }
 
 /* ─── Pulse glow — used on primary CTAs (Surprise Me button) ─────────── */
