@@ -53,19 +53,21 @@ export function getTimeRange(filter: TimeFilter): { gte: string; lte?: string } 
   switch (filter) {
     case 'today':
       return {
-        gte: startOfToday().toISOString(),
+        // Use a bare YYYY-MM-DD string so both date-only ('2026-04-29') and
+        // full-timestamp ('2026-04-29T10:00:00-06:00') event_date rows pass the
+        // gte filter. In PostgreSQL text comparison a plain date string sorts
+        // BEFORE any same-day timestamp, so an ISO timestamp gte was silently
+        // dropping all date-only events.
+        gte: format(nowInABQ(), 'yyyy-MM-dd'),
         lte: endOfToday().toISOString(),
       }
     case 'tonight': {
-      // "Tonight" = anything from 5 PM today through end of today, regardless of
-      // current time. Previously this used `gte: max(5pm, now)`, which after 9 PM
-      // cut off shows that started at 7 or 8 (still in progress / still relevant).
-      // Now anyone landing at 9 PM still sees the night's lineup including events
-      // that just started.
-      const start = new TZDate(now, ABQ_TZ)
-      start.setHours(17, 0, 0, 0)
+      // Same date-only gte trick — grabs all of today's events from the DB.
+      // fetchEvents then applies a 5 PM Mountain-time in-memory cutoff to drop
+      // morning events whose timestamps are known (see needsInMemory logic there).
+      // Date-only events (time unknown) are always kept — they might be evening shows.
       return {
-        gte: start.toISOString(),
+        gte: format(nowInABQ(), 'yyyy-MM-dd'),
         lte: endOfToday().toISOString(),
       }
     }

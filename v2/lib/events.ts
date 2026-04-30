@@ -4,8 +4,9 @@
  *
  * v2.events is intentionally empty until Phase 2 ingestion is wired up.
  */
+import { TZDate } from '@date-fns/tz'
 import { createClient } from '@/lib/supabase/server'
-import { getTimeRange, TimeFilter } from '@/lib/utils/dates'
+import { getTimeRange, TimeFilter, ABQ_TZ } from '@/lib/utils/dates'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -227,7 +228,10 @@ export async function fetchEvents({
   // In-memory filtering is needed for: subcategory, search, freeOnly, maxPrice.
   // Mood filter is handled at DB level (ai_enrichment JSONB column).
   // When only a top-level category is given, we can do pure DB pagination.
-  const needsInMemory = !!(subCat || search || freeOnly || maxPrice !== undefined)
+  // 'tonight' always goes through in-memory so we can apply the 5 PM time cutoff
+  // after fetching all of today's events (the DB gte is a bare date string — see
+  // the comment in getTimeRange('tonight') in lib/utils/dates.ts).
+  const needsInMemory = !!(subCat || search || freeOnly || maxPrice !== undefined || timeFilter === 'tonight')
 
   if (!needsInMemory) {
     // ── Pure DB path: category filter + pagination in DB (no raw scan) ─────────
@@ -334,6 +338,27 @@ export async function fetchEvents({
       const p = parsePriceMin(e.price)
       if (maxPrice === 0) return p === 0 || e.price === null
       return p === null || p <= maxPrice
+    })
+  }
+
+  // Tonight-specific: drop events whose start time is known to be before 5 PM MDT.
+  // The DB query used a bare date string as gte (to catch date-only event_date rows),
+  // so morning events are in the result set — this JS pass removes them.
+  // Events with date-only event_date (no time info) are kept: they might be evening shows.
+  if (timeFilter === 'tonight') {
+    const cutoff = (() => {
+      const d = new TZDate(new Date(), ABQ_TZ)
+      d.setHours(17, 0, 0, 0)
+      return d.getTime()
+    })()
+    allNormalized = allNormalized.filter((event) => {
+      // 'YYYY-MM-DD' → date-only, time unknown → include
+      if (/^\d{4}-\d{2}-\d{2}$/.test(event.date)) return true
+      try {
+        return new TZDate(new Date(event.date), ABQ_TZ).getTime() >= cutoff
+      } catch {
+        return true // parse failure → include rather than silently drop
+      }
     })
   }
 

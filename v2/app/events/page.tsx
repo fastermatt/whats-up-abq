@@ -12,8 +12,28 @@ import { CalendarPicker } from './CalendarPicker'
 import { CalendarToggle } from './CalendarToggle'
 import { MapPin, Clock } from 'lucide-react'
 import { QuickSaveButton } from '@/app/components/QuickSaveButton'
+import { createClient } from '@/lib/supabase/server'
+import type { UserPreferences } from '@/app/components/PreferencesPicker'
 
+// Note: reading cookies for user preferences makes this route dynamic for
+// logged-in users. The revalidate hint is still used as a fallback for
+// unauthenticated requests.
 export const revalidate = 60
+
+// Maps preference label → canonical DB category
+const PREF_TO_DB_CAT: Record<string, string> = {
+  'music':           'Music',
+  'comedy':          'Comedy',
+  'food & drink':    'Food & Drink',
+  'arts & theater':  'Arts & Theater',
+  'outdoors & sports': 'Outdoor',
+  'family / kids':   'Family',
+  'film':            'Film',
+  'nightlife':       'Community',
+  'volunteering':    'Community',
+}
+
+const FAMILY_RE = /\bkids?\b|\bchildren\b|\bfamily\b|\bstory.?time\b|\bplaydate\b/i
 
 interface PageProps {
   searchParams: Promise<{ time?: string; category?: string; mood?: string; neighborhood?: string; page?: string; q?: string; free?: string; price?: string; date?: string; cal?: string }>
@@ -121,11 +141,56 @@ export default async function EventsPage({ searchParams }: PageProps) {
   const calEnd = new Date(today.getFullYear(), today.getMonth() + 3, 0)
     .toISOString().slice(0, 10)
 
-  const [{ events, total }, categoryCounts, calendarCounts] = await Promise.all([
+  // Fetch user taste preferences (best-effort — does not block if auth fails)
+  let tastePrefs: UserPreferences = {}
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles').select('preferences').eq('id', user.id).single()
+      tastePrefs = (profile?.preferences ?? {}) as UserPreferences
+    }
+  } catch {
+    // Preference lookup is strictly best-effort — gracefully degrade to default order
+  }
+
+  const [{ events: rawEvents, total }, categoryCounts, calendarCounts] = await Promise.all([
     fetchEvents({ timeFilter, category, mood, neighborhood, search, freeOnly, maxPrice, date: selectedDate ?? undefined, limit, offset }),
     fetchCategoryCounts(),
     showCal ? fetchEventCountsByDate(calStart, calEnd) : Promise.resolve([]),
   ])
+
+  // ── Preference-aware filter + soft sort ─────────────────────────────────────
+  // Only applies when the user has set at least one taste preference.
+  // Note: this post-processes a single page of results, so pagination counts may
+  // be slightly off for logged-in users — acceptable trade-off for now.
+  let events: NormalizedEvent[] = rawEvents
+  const hasPrefs = !!(tastePrefs.who || tastePrefs.categories?.length)
+  if (hasPrefs) {
+    const isNonFamily = tastePrefs.who === 'solo' || tastePrefs.who === 'couple'
+
+    // Hard filter: hide family / kids events for solo & couple users
+    if (isNonFamily) {
+      events = events.filter(e =>
+        e.category !== 'Family' && !FAMILY_RE.test(e.title)
+      )
+    }
+
+    // Soft sort: events in preferred categories bubble to the top
+    if (tastePrefs.categories?.length) {
+      const preferredCats = new Set(
+        tastePrefs.categories
+          .map(p => PREF_TO_DB_CAT[p.toLowerCase()])
+          .filter((c): c is string => Boolean(c))
+      )
+      events = [...events].sort((a, b) => {
+        const aScore = preferredCats.has(a.category ?? '') ? 1 : 0
+        const bScore = preferredCats.has(b.category ?? '') ? 1 : 0
+        return bScore - aScore // preferred first; stable sort preserves date order within each tier
+      })
+    }
+  }
 
   const totalPages = Math.ceil(total / limit)
 
