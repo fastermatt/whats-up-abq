@@ -42,8 +42,10 @@ jobs:
         with:
           node-version: '22'
 
+      # Pin to 25.6.2 — last stable before 26.x which added an extensions
+      # API call that returns 403 with personal access tokens.
       - name: Install Netlify CLI
-        run: npm install -g netlify-cli
+        run: npm install -g netlify-cli@25.6.2
 
       - name: Remove root package-lock.json (avoid Turbopack lockfile confusion)
         run: rm -f package-lock.json
