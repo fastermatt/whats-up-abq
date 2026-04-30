@@ -8,6 +8,7 @@ import { FirstVisitBanner } from './components/FirstVisitBanner'
 import { PWAManager } from './components/PWAManager'
 import { AuthCallbackCatcher } from './components/AuthCallbackCatcher'
 import { NewsletterBar } from './components/NewsletterBar'
+import { AnalyticsTracker } from './components/AnalyticsTracker'
 import { OG_IMAGE } from '@/lib/fallback-images'
 import './globals.css'
 
@@ -159,6 +160,7 @@ export default function RootLayout({
           </div>
           <BottomNav />
         </div>
+        <AnalyticsTracker />
         <PWAManager />
         <InstallPrompt />
         <FirstVisitBanner />

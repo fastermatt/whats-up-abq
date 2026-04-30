@@ -50,7 +50,7 @@ export default async function AdminEventsPage({ searchParams }: PageProps) {
   }
 
   if (catFilter) {
-    q = q.eq('ai_enrichment->>category', catFilter)
+    q = q.eq('category', catFilter)
   }
 
   const { data: rows, count } = await q

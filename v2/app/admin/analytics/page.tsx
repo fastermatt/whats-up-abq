@@ -1,6 +1,6 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { ArrowLeft, Users, MousePointer, Search, Heart, TrendingUp, Smartphone, Monitor } from 'lucide-react'
+import { ArrowLeft, Users, MousePointer, Search, Heart, TrendingUp, Smartphone, Monitor, AlertTriangle } from 'lucide-react'
 
 export const revalidate = 0
 
@@ -11,7 +11,10 @@ export default async function AnalyticsPage() {
   const supabase = await createServiceClient()
 
   const now   = new Date()
-  const today = new Date(now.toLocaleString('en-CA', { timeZone: 'America/Denver' })).toISOString().slice(0, 10)
+  // Use toLocaleDateString (date-only) so the result is a clean 'YYYY-MM-DD' string.
+  // toLocaleString (with time) returns a locale-formatted string that new Date() can't
+  // reliably parse — it produced Invalid Date and crashed the page with RangeError.
+  const today = now.toLocaleDateString('en-CA', { timeZone: 'America/Denver' })
   const ago7  = new Date(Date.now() - 7  * 86400000).toISOString().slice(0, 10)
   const ago30 = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)
 
@@ -21,6 +24,7 @@ export default async function AnalyticsPage() {
     { data: rawDow },
     { data: rawTopPages },
     { data: rawEngagement },
+    { data: rawClickedEvents },
   ] = await (async () => {
     try {
       return await Promise.all([
@@ -49,9 +53,15 @@ export default async function AnalyticsPage() {
           .select('event_type, session_id')
           .in('event_type', ['event_click', 'search', 'wishlist_add', 'wishlist_remove', 'category_click', 'checkin', 'share_click', 'directions_click'])
           .gte('created_at', ago30 + 'T00:00:00'),
+        // Top clicked events (last 30d)
+        supabase.from('analytics')
+          .select('data')
+          .eq('event_type', 'event_click')
+          .gte('created_at', ago30 + 'T00:00:00'),
       ])
     } catch {
       return [
+        { data: [] },
         { data: [] },
         { data: [] },
         { data: [] },
@@ -90,6 +100,13 @@ export default async function AnalyticsPage() {
     ? Math.round((totalMobile / (totalMobile + totalDesktop)) * 100)
     : 0
 
+  // Data freshness: when was the last session_start?
+  const lastSession = dailyData.at(-1)?.day ?? null
+  const daysSilent  = lastSession
+    ? Math.round((Date.now() - new Date(lastSession + 'T12:00:00').getTime()) / 86400000)
+    : null
+  const isStale = daysSilent !== null && daysSilent > 1
+
   // ── Hourly distribution ────────────────────────────────────────────────────
   const hourCounts: Record<number, Set<string>> = {}
   for (let h = 0; h < 24; h++) hourCounts[h] = new Set()
@@ -114,14 +131,16 @@ export default async function AnalyticsPage() {
     const idx = DOW_LABELS.indexOf(dow)
     if (idx >= 0) dowCounts[idx].add(row.session_id)
   }
-  const dowData = DOW_LABELS.map((label, i) => ({ label, count: dowCounts[i].size }))
-  const maxDow  = Math.max(...dowData.map(d => d.count), 1)
+  const dowData    = DOW_LABELS.map((label, i) => ({ label, count: dowCounts[i].size }))
+  const maxDow     = Math.max(...dowData.map(d => d.count), 1)
+  // Stable copies for peak/slowest — don't mutate dowData used in the chart
+  const peakDay    = [...dowData].sort((a, b) => b.count - a.count)[0]?.label ?? '—'
+  const slowestDay = [...dowData].sort((a, b) => a.count - b.count)[0]?.label ?? '—'
 
   // ── Top pages ─────────────────────────────────────────────────────────────
   const pageCounts: Record<string, { views: number; unique: Set<string> }> = {}
   for (const row of rawTopPages ?? []) {
     const path = (row.data as Record<string, string> | null)?.path ?? '(unknown)'
-    // Skip V1 hash-router paths
     if (V1_PATH.test(path)) continue
     if (!pageCounts[path]) pageCounts[path] = { views: 0, unique: new Set() }
     pageCounts[path].views++
@@ -139,6 +158,22 @@ export default async function AnalyticsPage() {
     engCounts[row.event_type].total++
     engCounts[row.event_type].unique.add(row.session_id)
   }
+
+  // ── Top clicked events ─────────────────────────────────────────────────────
+  const clickedEventCounts: Record<string, { count: number; id: string }> = {}
+  for (const row of rawClickedEvents ?? []) {
+    const d = row.data as Record<string, string> | null
+    const id    = d?.event_id ?? ''
+    const title = d?.title    ?? d?.event_id ?? '(unknown)'
+    if (!id) continue
+    if (!clickedEventCounts[id]) clickedEventCounts[id] = { count: 0, id }
+    clickedEventCounts[id].count++
+    // store the last-seen title for display
+    ;(clickedEventCounts[id] as Record<string, unknown>).title = title
+  }
+  const topClickedEvents = Object.values(clickedEventCounts)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 8)
 
   const fmt = (n: number) => n.toLocaleString()
   const HOUR_LABEL = (h: number) => {
@@ -160,13 +195,26 @@ export default async function AnalyticsPage() {
         </div>
       </div>
 
+      {/* ── Staleness warning ── */}
+      {isStale && (
+        <div className="flex items-start gap-3 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-4">
+          <AlertTriangle className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-yellow-300 text-sm font-semibold">Data is {daysSilent} days old</p>
+            <p className="text-yellow-400/70 text-xs mt-0.5">
+              Last session recorded on {lastSession}. The analytics tracker is now active — new visits will appear here.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* ── Top KPIs ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Today',         value: todaySessions,   icon: TrendingUp,   color: 'text-[#9a442d]',  tip: 'Unique visitor sessions today' },
-          { label: 'This Week',     value: week7Sessions,    icon: Users,        color: 'text-[#7cc4bf]',  tip: 'Sessions in the last 7 days' },
-          { label: '30-Day Total',  value: totalSessions30,  icon: Users,        color: 'text-white',      tip: 'Total sessions this month' },
-          { label: 'Mobile Share',  value: `${mobileShare}%`, icon: Smartphone,  color: 'text-[#b0c4b1]',  tip: 'Percentage of mobile visitors' },
+          { label: 'Today',         value: todaySessions,    icon: TrendingUp,  color: 'text-[#9a442d]',  tip: 'Unique visitor sessions today' },
+          { label: 'This Week',     value: week7Sessions,    icon: Users,       color: 'text-[#7cc4bf]',  tip: 'Sessions in the last 7 days' },
+          { label: '30-Day Total',  value: totalSessions30,  icon: Users,       color: 'text-white',      tip: 'Total sessions this month' },
+          { label: 'Mobile Share',  value: `${mobileShare}%`, icon: Smartphone, color: 'text-[#b0c4b1]',  tip: 'Percentage of mobile visitors' },
         ].map(({ label, value, icon: Icon, color, tip }) => (
           <div key={label} className="bg-white/5 rounded-2xl p-4" title={tip}>
             <div className="flex items-center gap-2 mb-2">
@@ -183,30 +231,38 @@ export default async function AnalyticsPage() {
 
       {/* ── 30-Day Traffic Chart ── */}
       <section className="bg-white/5 rounded-2xl p-5">
-        <h2 className="text-xs uppercase tracking-widest text-white/30 mb-4">Daily Visitors — Last 30 Days</h2>
-        <div className="flex items-end gap-1 h-32">
-          {dailyData.map(({ day, count }) => {
-            const isToday = day === today
-            const pct     = Math.round((count / maxDay) * 100)
-            const label   = new Date(day + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-            return (
-              <div key={day} className="flex-1 flex flex-col items-center gap-1 group relative" title={`${label}: ${count} sessions`}>
-                <div
-                  className={`w-full rounded-t transition-all ${isToday ? 'bg-[#9a442d]' : 'bg-white/20 group-hover:bg-white/35'}`}
-                  style={{ height: `${Math.max(pct, 2)}%` }}
-                />
-                {/* Tooltip on hover */}
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:flex bg-black/80 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap z-10">
-                  {label}: {count}
-                </div>
-              </div>
-            )
-          })}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xs uppercase tracking-widest text-white/30">Daily Visitors — Last 30 Days</h2>
+          <span className="text-white/20 text-[10px] tabular-nums">{dailyData.length} days with data</span>
         </div>
-        <div className="flex justify-between mt-2">
-          <span className="text-white/20 text-[10px]">{dailyData[0]?.day ?? ''}</span>
-          <span className="text-white/20 text-[10px]">{today} (today)</span>
-        </div>
+        {dailyData.length === 0 ? (
+          <p className="text-white/20 text-sm py-8 text-center">No session data yet — tracker just reactivated.</p>
+        ) : (
+          <>
+            <div className="flex items-end gap-[2px] h-32">
+              {dailyData.map(({ day, count }) => {
+                const isToday = day === today
+                const pct     = Math.round((count / maxDay) * 100)
+                const label   = new Date(day + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                return (
+                  <div key={day} className="flex-1 flex flex-col items-center gap-1 group relative" title={`${label}: ${count} sessions`}>
+                    <div
+                      className={`w-full rounded-t transition-all ${isToday ? 'bg-[#9a442d]' : 'bg-white/20 group-hover:bg-white/35'}`}
+                      style={{ height: `${Math.max(pct, 2)}%` }}
+                    />
+                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:flex bg-black/80 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap z-10 pointer-events-none">
+                      {label}: {count}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+            <div className="flex justify-between mt-2">
+              <span className="text-white/20 text-[10px]">{dailyData[0]?.day ?? ''}</span>
+              <span className="text-white/20 text-[10px]">{today} (today)</span>
+            </div>
+          </>
+        )}
       </section>
 
       {/* ── Hourly + Day-of-Week ── */}
@@ -217,15 +273,15 @@ export default async function AnalyticsPage() {
           <p className="text-white/20 text-[10px] mb-4">When visitors are on the site (Denver time)</p>
           <div className="space-y-1">
             {hourlyData.map(({ hour, count }) => {
-              const pct = Math.round((count / maxHour) * 100)
-              const isTop = count === maxHour
+              const pct   = Math.round((count / maxHour) * 100)
+              const isTop = count === maxHour && count > 0
               return (
                 <div key={hour} className="flex items-center gap-2">
                   <span className="text-white/30 text-[10px] w-8 text-right tabular-nums">{HOUR_LABEL(hour)}</span>
                   <div className="flex-1 h-3 bg-white/10 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${isTop ? 'bg-[#9a442d]' : 'bg-white/30'}`}
-                      style={{ width: `${Math.max(pct, 1)}%` }}
+                      style={{ width: `${Math.max(pct, count > 0 ? 2 : 0)}%` }}
                     />
                   </div>
                   <span className="text-white/30 text-[10px] w-5 tabular-nums">{count}</span>
@@ -242,14 +298,14 @@ export default async function AnalyticsPage() {
           <div className="flex items-end gap-2 h-40">
             {dowData.map(({ label, count }) => {
               const pct    = Math.round((count / maxDow) * 100)
-              const isTop  = count === maxDow
+              const isTop  = count === maxDow && count > 0
               return (
                 <div key={label} className="flex-1 flex flex-col items-center gap-1.5">
                   <span className="text-white/30 text-[10px] tabular-nums">{count}</span>
                   <div className="w-full flex-1 flex items-end">
                     <div
                       className={`w-full rounded-t transition-all ${isTop ? 'bg-[#9a442d]' : 'bg-white/20'}`}
-                      style={{ height: `${Math.max(pct, 4)}%` }}
+                      style={{ height: `${Math.max(pct, count > 0 ? 4 : 0)}%` }}
                     />
                   </div>
                   <span className="text-white/40 text-[10px] font-semibold">{label}</span>
@@ -258,7 +314,7 @@ export default async function AnalyticsPage() {
             })}
           </div>
           <p className="text-white/20 text-[10px] mt-2">
-            Peak: {dowData.sort((a,b) => b.count - a.count)[0]?.label ?? '—'} · Slowest: {dowData.sort((a,b) => a.count - b.count)[0]?.label ?? '—'}
+            Peak: {peakDay} · Slowest: {slowestDay}
           </p>
         </section>
       </div>
@@ -305,8 +361,8 @@ export default async function AnalyticsPage() {
                   <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
                     <div className="h-full bg-[#9a442d] rounded-full" style={{ width: `${pct}%` }} />
                   </div>
-                  <span className="text-white/30 text-xs tabular-nums w-12 text-right">{views} views</span>
-                  <span className="text-white/20 text-[10px] w-16 text-right">{unique} unique</span>
+                  <span className="text-white/40 text-xs tabular-nums w-12 text-right">{views}</span>
+                  <span className="text-white/20 text-[10px] w-16 text-right">{unique} uniq</span>
                 </div>
               )
             })}
@@ -320,10 +376,10 @@ export default async function AnalyticsPage() {
         <p className="text-white/20 text-[10px] mb-4">Actions taken in the last 30 days</p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { key: 'event_click',    label: 'Event Clicks',    icon: MousePointer, color: 'text-[#9a442d]',   tip: 'Tapped through to an event detail page' },
-            { key: 'search',         label: 'Searches',         icon: Search,       color: 'text-[#7cc4bf]',  tip: 'Used the search bar' },
-            { key: 'wishlist_add',   label: 'Events Saved',     icon: Heart,        color: 'text-[#e8a898]',  tip: 'Added an event to wishlist/saved' },
-            { key: 'category_click', label: 'Category Clicks',  icon: TrendingUp,   color: 'text-[#b0c4b1]',  tip: 'Clicked a category filter' },
+            { key: 'event_click',    label: 'Event Clicks',   icon: MousePointer, color: 'text-[#9a442d]',  tip: 'Tapped through to an event detail page' },
+            { key: 'search',         label: 'Searches',        icon: Search,       color: 'text-[#7cc4bf]',  tip: 'Used the search bar' },
+            { key: 'wishlist_add',   label: 'Events Saved',    icon: Heart,        color: 'text-[#e8a898]',  tip: 'Added an event to wishlist/saved' },
+            { key: 'category_click', label: 'Category Clicks', icon: TrendingUp,   color: 'text-[#b0c4b1]',  tip: 'Clicked a category filter' },
           ].map(({ key, label, icon: Icon, color, tip }) => {
             const d = engCounts[key]
             return (
@@ -342,8 +398,35 @@ export default async function AnalyticsPage() {
         </div>
       </section>
 
+      {/* ── Top clicked events ── */}
+      {topClickedEvents.length > 0 && (
+        <section className="bg-white/5 rounded-2xl p-5">
+          <h2 className="text-xs uppercase tracking-widest text-white/30 mb-1">Top Clicked Events</h2>
+          <p className="text-white/20 text-[10px] mb-4">Events users opened most in the last 30 days</p>
+          <div className="space-y-2">
+            {topClickedEvents.map((ev, i) => {
+              const title = (ev as Record<string, unknown>).title as string ?? ev.id
+              const maxCt = topClickedEvents[0]?.count ?? 1
+              const pct   = Math.round((ev.count / maxCt) * 100)
+              return (
+                <div key={ev.id} className="flex items-center gap-3">
+                  <span className="text-white/20 text-[10px] w-4 tabular-nums text-right">{i + 1}</span>
+                  <Link href={`/events/${ev.id}`} target="_blank" className="text-white/60 text-xs truncate w-48 hover:text-white transition-colors" title={title}>
+                    {title}
+                  </Link>
+                  <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-[#7cc4bf] rounded-full" style={{ width: `${pct}%` }} />
+                  </div>
+                  <span className="text-white/30 text-xs tabular-nums w-10 text-right">{ev.count}×</span>
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      )}
+
       {/* ── Notes ── */}
-      <section className="bg-white/3 border border-white/10 rounded-2xl p-4 text-white/30 text-xs leading-relaxed space-y-1">
+      <section className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-white/30 text-xs leading-relaxed space-y-1">
         <p className="text-white/50 font-semibold text-[10px] uppercase tracking-widest mb-2">How to read this</p>
         <p><span className="text-white/50">Sessions</span> = one visit per device per day. If someone uses the site twice in a day, that&apos;s 2 sessions.</p>
         <p><span className="text-white/50">Unique visitors</span> = distinct session IDs — a proxy for individual people.</p>
