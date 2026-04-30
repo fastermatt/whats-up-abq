@@ -189,7 +189,7 @@ const broadside: Template = {
       layers.push(textLayer({
         name: 'Date & Venue', text: dateLine,
         x: 80, y: 1042, width: w - 160,
-        fontFamily: font('Inter'), fontSize: 40, fontWeight: 600,
+        fontFamily: font('Inter'), fontSize: 48, fontWeight: 600,
         fill: BRAND_COLORS.ink, lineHeight: 1.3,
       }))
     }
@@ -240,23 +240,23 @@ const marquee: Template = {
       textLayer({
         name: 'Date', text: formatDate(ctx.date, ctx.time),
         x: 80, y: 980, width: w - 160,
-        fontFamily: font('Inter'), fontSize: 38, fontWeight: 500,
-        fill: BRAND_COLORS.cream, opacity: 0.5, align: 'center',
+        fontFamily: font('Inter'), fontSize: 48, fontWeight: 500,
+        fill: BRAND_COLORS.cream, opacity: 0.75, align: 'center',
       }),
     )
     if (ctx.venue) {
       layers.push(textLayer({
         name: 'Venue', text: ctx.venue,
-        x: 80, y: 1055, width: w - 160,
-        fontFamily: font('Inter'), fontSize: 34, fontWeight: 400,
-        fill: BRAND_COLORS.cream, opacity: 0.35, align: 'center',
+        x: 80, y: 1060, width: w - 160,
+        fontFamily: font('Inter'), fontSize: 42, fontWeight: 400,
+        fill: BRAND_COLORS.cream, opacity: 0.55, align: 'center',
       }))
     }
     layers.push(textLayer({
       name: 'CTA', text: ctx.cta ?? 'abqunplugged.com',
-      x: 80, y: h - 100, width: w - 160,
-      fontFamily: font('DM Mono'), fontSize: 26, fontWeight: 500,
-      fill: BRAND_COLORS.cream, opacity: 0.25, align: 'center', letterSpacing: 2,
+      x: 80, y: h - 95, width: w - 160,
+      fontFamily: font('DM Mono'), fontSize: 30, fontWeight: 500,
+      fill: BRAND_COLORS.cream, opacity: 0.4, align: 'center', letterSpacing: 2,
     }))
     return {
       id: uid(), name: ctx.title ?? 'Marquee post', format: '4:5',
@@ -276,7 +276,8 @@ const split: Template = {
     const { w, h } = CANVAS_DIMS['4:5']
     const splitY = Math.round(h * 0.52) // 702
     const title = ctx.title ?? 'Your Event'
-    const titleSize = title.length < 20 ? 110 : title.length < 35 ? 95 : 80
+    // Bigger title — needs to dominate the cream zone
+    const titleSize = title.length < 15 ? 170 : title.length < 25 ? 145 : title.length < 40 ? 115 : 95
     const layers: Layer[] = []
     if (ctx.imageUrl) {
       layers.push(imageLayer({ src: ctx.imageUrl, x: 0, y: 0, width: w, height: splitY }))
@@ -285,50 +286,53 @@ const split: Template = {
       if (ctx.category) {
         layers.push(textLayer({
           name: 'Category Block', text: ctx.category,
-          x: 80, y: Math.round(splitY / 2) - 60, width: w - 160,
-          fontFamily: font('Inter'), fontSize: 72, fontWeight: 700,
-          fill: BRAND_COLORS.cream, opacity: 0.85, align: 'center',
+          x: 80, y: Math.round(splitY / 2) - 80, width: w - 160,
+          fontFamily: font('Inter'), fontSize: 90, fontWeight: 700,
+          fill: BRAND_COLORS.cream, opacity: 0.9, align: 'center',
         }))
       }
     }
-    layers.push(shape({ shape: 'rect', x: 0, y: splitY, width: w, height: 5, fill: BRAND_COLORS.terra }))
-    const textBaseY = splitY + 50
+    // Terra split rule — 6px for visual weight
+    layers.push(shape({ shape: 'rect', x: 0, y: splitY, width: w, height: 6, fill: BRAND_COLORS.terra }))
+    const textBaseY = splitY + 48
     if (ctx.category) {
       layers.push(textLayer({
         name: 'Category', text: ctx.category.toUpperCase(),
         x: 80, y: textBaseY, width: w - 160,
-        fontFamily: font('Inter'), fontSize: 32, fontWeight: 700,
-        fill: BRAND_COLORS.terra, letterSpacing: 5,
+        fontFamily: font('Inter'), fontSize: 42, fontWeight: 700,
+        fill: BRAND_COLORS.terra, letterSpacing: 3,
       }))
     }
+    // Title — the hero of the cream zone
     layers.push(textLayer({
       name: 'Title', text: title,
-      x: 80, y: textBaseY + (ctx.category ? 58 : 0), width: w - 160,
+      x: 80, y: textBaseY + (ctx.category ? 66 : 0), width: w - 160,
       fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 900,
-      fill: BRAND_COLORS.ink, lineHeight: 0.95,
+      fill: BRAND_COLORS.ink, lineHeight: 0.92,
     }))
+    // Date + venue anchored to bottom of cream zone — no dead gap
     const dateStr = formatDate(ctx.date, ctx.time)
     if (dateStr) {
       layers.push(textLayer({
         name: 'Date', text: dateStr,
-        x: 80, y: 1158, width: w - 160,
-        fontFamily: font('Inter'), fontSize: 36, fontWeight: 500,
-        fill: BRAND_COLORS.ink, opacity: 0.6,
+        x: 80, y: h - 230, width: w - 160,
+        fontFamily: font('Inter'), fontSize: 46, fontWeight: 600,
+        fill: BRAND_COLORS.ink, opacity: 0.75,
       }))
     }
     if (ctx.venue) {
       layers.push(textLayer({
         name: 'Venue', text: ctx.venue,
-        x: 80, y: 1215, width: w - 160,
-        fontFamily: font('Inter'), fontSize: 32, fontWeight: 400,
-        fill: BRAND_COLORS.ink, opacity: 0.45,
+        x: 80, y: h - 170, width: w - 160,
+        fontFamily: font('Inter'), fontSize: 40, fontWeight: 400,
+        fill: BRAND_COLORS.ink, opacity: 0.55,
       }))
     }
     layers.push(textLayer({
       name: 'CTA', text: ctx.cta ?? 'abqunplugged.com',
       x: 80, y: h - 80, width: w - 160,
-      fontFamily: font('DM Mono'), fontSize: 26, fontWeight: 500,
-      fill: BRAND_COLORS.terra, opacity: 0.7, letterSpacing: 2,
+      fontFamily: font('DM Mono'), fontSize: 30, fontWeight: 500,
+      fill: BRAND_COLORS.terra, letterSpacing: 2,
     }))
     return {
       id: uid(), name: ctx.title ?? 'Split post', format: '4:5',
@@ -382,13 +386,13 @@ const dispatch: Template = {
       textLayer({
         name: 'Meta', text: metaText,
         x: 80, y: 1228, width: w - 160,
-        fontFamily: font('Inter'), fontSize: 32, fontWeight: 400,
-        fill: BRAND_COLORS.ink, opacity: 0.55,
+        fontFamily: font('Inter'), fontSize: 42, fontWeight: 400,
+        fill: BRAND_COLORS.ink, opacity: 0.7,
       }),
       textLayer({
         name: 'CTA', text: `Find tickets: ${ctx.cta ?? 'abqunplugged.com'}`,
-        x: 80, y: h - 90, width: w - 160,
-        fontFamily: font('DM Mono'), fontSize: 24, fontWeight: 500,
+        x: 80, y: h - 85, width: w - 160,
+        fontFamily: font('DM Mono'), fontSize: 28, fontWeight: 500,
         fill: BRAND_COLORS.terra, letterSpacing: 1,
       }),
     )
@@ -409,59 +413,65 @@ const goldenHour: Template = {
   build: (ctx) => {
     const { w, h } = CANVAS_DIMS['4:5']
     const title = ctx.title ?? 'Your Event'
-    const titleSize = title.length < 15 ? 130 : title.length < 25 ? 110 : 90
-    const titleY = ctx.imageUrl
-      ? (ctx.category ? 888 : 864)
-      : (ctx.category ? 450 : 420)
+    // Big enough to read on a warm gradient — shadows handle contrast
+    const titleSize = title.length < 15 ? 170 : title.length < 25 ? 145 : title.length < 40 ? 115 : 95
     const layers: Layer[] = []
     if (ctx.category) {
       layers.push(textLayer({
         name: 'Category', text: ctx.category.toUpperCase(),
-        x: 80, y: 160, width: w - 160,
-        fontFamily: font('Inter'), fontSize: 34, fontWeight: 700,
-        fill: BRAND_COLORS.sandstone, opacity: 0.75, letterSpacing: 5, align: 'center',
+        x: 80, y: 150, width: w - 160,
+        fontFamily: font('Inter'), fontSize: 44, fontWeight: 700,
+        fill: BRAND_COLORS.cream, opacity: 0.9, letterSpacing: 5, align: 'center',
       }))
     }
+    // Sandstone rule — 2px for visibility
     layers.push(shape({
-      shape: 'rect', x: 300, y: ctx.category ? 222 : 200, width: 480, height: 1,
-      fill: BRAND_COLORS.sandstone, opacity: 0.45,
+      shape: 'rect', x: 240, y: ctx.category ? 218 : 190, width: 600, height: 2,
+      fill: BRAND_COLORS.sandstone, opacity: 0.6,
     }))
     if (ctx.imageUrl) {
-      const photoY = ctx.category ? 255 : 230
-      layers.push(imageLayer({ src: ctx.imageUrl, x: 90, y: photoY, width: w - 180, height: 560, cornerRadius: 6 }))
-      layers.push(shape({ shape: 'rect', x: 90, y: photoY, width: w - 180, height: 560, fill: BRAND_COLORS.terra, opacity: 0.35, cornerRadius: 6 }))
+      // Photo inset — no color overlay. The gradient provides the warmth.
+      // Slight dark vignette (ink not terra) so it doesn't clash with gold.
+      const photoY = ctx.category ? 248 : 218
+      layers.push(imageLayer({ src: ctx.imageUrl, x: 90, y: photoY, width: w - 180, height: 500, cornerRadius: 8 }))
+      layers.push(shape({ shape: 'rect', x: 90, y: photoY, width: w - 180, height: 500, fill: BRAND_COLORS.ink, opacity: 0.18, cornerRadius: 8 }))
     }
+    // Title — big and cream with strong shadow for gradient contrast
+    const titleY = ctx.imageUrl
+      ? (ctx.category ? 810 : 778)
+      : (ctx.category ? 460 : 430)
     layers.push(textLayer({
       name: 'Title', text: title,
       x: 80, y: titleY, width: w - 160,
       fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 900,
-      fill: BRAND_COLORS.cream, lineHeight: 0.95, align: 'center',
-      shadow: { enabled: true, color: 'rgba(0,0,0,0.45)', blur: 20, offsetX: 0, offsetY: 3 },
+      fill: BRAND_COLORS.cream, lineHeight: 0.92, align: 'center',
+      shadow: { enabled: true, color: 'rgba(0,0,0,0.6)', blur: 24, offsetX: 0, offsetY: 4 },
     }))
     // Centered skyGold accent bar
-    layers.push(shape({ shape: 'rect', x: Math.round((w - 80) / 2), y: 1185, width: 80, height: 4, fill: BRAND_COLORS.skyGold }))
+    layers.push(shape({ shape: 'rect', x: Math.round((w - 100) / 2), y: 1160, width: 100, height: 4, fill: BRAND_COLORS.skyGold }))
     const dateStr = formatDate(ctx.date, ctx.time)
     if (dateStr) {
       layers.push(textLayer({
         name: 'Date', text: dateStr,
-        x: 80, y: 1215, width: w - 160,
-        fontFamily: font('Inter'), fontSize: 36, fontWeight: 500,
-        fill: BRAND_COLORS.sandstone, align: 'center',
+        x: 80, y: 1188, width: w - 160,
+        fontFamily: font('Inter'), fontSize: 48, fontWeight: 600,
+        fill: BRAND_COLORS.cream, align: 'center',
+        shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', blur: 12, offsetX: 0, offsetY: 2 },
       }))
     }
     if (ctx.venue) {
       layers.push(textLayer({
         name: 'Venue', text: ctx.venue,
-        x: 80, y: dateStr ? 1272 : 1215, width: w - 160,
-        fontFamily: font('Inter'), fontSize: 34, fontWeight: 500,
-        fill: BRAND_COLORS.cream, opacity: 0.65, align: 'center',
+        x: 80, y: dateStr ? 1252 : 1188, width: w - 160,
+        fontFamily: font('Inter'), fontSize: 42, fontWeight: 400,
+        fill: BRAND_COLORS.sandstone, align: 'center', opacity: 0.9,
       }))
     }
     layers.push(textLayer({
       name: 'CTA', text: ctx.cta ?? 'abqunplugged.com',
-      x: 80, y: h - 90, width: w - 160,
-      fontFamily: font('DM Mono'), fontSize: 26, fontWeight: 500,
-      fill: BRAND_COLORS.cream, opacity: 0.35, align: 'center', letterSpacing: 2,
+      x: 80, y: h - 78, width: w - 160,
+      fontFamily: font('DM Mono'), fontSize: 30, fontWeight: 500,
+      fill: BRAND_COLORS.cream, opacity: 0.45, align: 'center', letterSpacing: 2,
     }))
     return {
       id: uid(), name: ctx.title ?? 'Golden Hour post', format: '4:5',
