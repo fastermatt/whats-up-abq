@@ -56,6 +56,14 @@ jobs:
         working-directory: v2
         run: npm run build
 
+      # netlify-cli 26.x requires state.json even when --site is passed.
+      # Create it at runtime so the CLI can "find" the project immediately.
+      - name: Link Netlify site (write state.json)
+        working-directory: v2
+        run: |
+          mkdir -p .netlify
+          printf '{"siteId":"%s"}\n' "$NETLIFY_SITE_ID" > .netlify/state.json
+
       - name: Deploy to Netlify
         working-directory: v2
         run: |
