@@ -1,12 +1,17 @@
-import type { Design, Slide, Layer, TextLayer, BrandFontName } from '../types'
+import type { Design, Slide, Layer, TextLayer, BrandFontName, CanvasFormat } from '../types'
 import { BRAND_COLORS, BRAND_FONTS, CANVAS_DIMS } from '../types'
 
 /**
- * Templates are pure "design recipes" — given optional event data, they return
- * a Design (canvas + slides + layers). User can then customize everything.
+ * Templates are pure "design recipes" — given optional event data (and an
+ * optional target canvas format), they return a Design ready to load.
  *
- * Each template includes a `thumb` descriptor used to render a visual swatch
- * in the template gallery — no canvas rendering needed.
+ * All y-positions in the build functions were originally calibrated for 4:5
+ * (h = 1350). When building for a different format, `sy(y)` scales them
+ * proportionally: sy(y) = round(y * h / 1350). Positions already expressed
+ * relative to `h` (e.g. `h - 96`) are left as-is — they self-adapt.
+ *
+ * Each template also includes a `thumb` descriptor used to render a visual
+ * swatch in the template gallery — no canvas rendering needed.
  */
 
 export interface TemplateContext {
@@ -39,7 +44,7 @@ export interface Template {
   description: string
   category: 'event' | 'brand'
   thumb: TemplateThumbnail
-  build: (ctx: TemplateContext) => Design
+  build: (ctx: TemplateContext, format?: CanvasFormat) => Design
 }
 
 const uid = () => Math.random().toString(36).slice(2, 10)
@@ -82,13 +87,17 @@ function textLayer(p: TextInit): TextLayer {
   }
 }
 
-function imageLayer(partial: { src: string; x: number; y: number; width: number; height: number; cornerRadius?: number }): Layer {
+function imageLayer(partial: {
+  src: string; x: number; y: number; width: number; height: number
+  cornerRadius?: number; fit?: 'cover' | 'contain' | 'stretch'
+}): Layer {
   return {
     id: uid(), name: 'Image', type: 'image',
     src: partial.src,
     x: partial.x, y: partial.y, width: partial.width, height: partial.height,
     rotation: 0, opacity: 1, visible: true, locked: false,
     cornerRadius: partial.cornerRadius ?? 0,
+    fit: partial.fit ?? 'cover',
   }
 }
 
@@ -108,11 +117,12 @@ function shape(partial: { shape: 'rect'|'circle'|'line'; x: number; y: number; w
 }
 
 // Logo image helpers — SVG viewBox is 1907×1032, so width = height × (1907/1032)
+// Logos use fit:'stretch' because their dimensions are pre-computed to the correct aspect ratio.
 const LOGO_R = 1907 / 1032
 const LOGO_W = '/logo-white.svg'  // white paths — for dark canvas backgrounds
 const LOGO_T = '/logo-terra.svg'  // terra paths — for cream/light backgrounds
 function logo(src: string, x: number, y: number, h: number): Layer {
-  return imageLayer({ src, x, y, width: Math.round(h * LOGO_R), height: h })
+  return imageLayer({ src, x, y, width: Math.round(h * LOGO_R), height: h, fit: 'stretch' })
 }
 
 const formatDate = (iso?: string, time?: string) => {
@@ -145,18 +155,19 @@ const poster: Template = {
       { x: 7, y: 83, w: 38, h: 2.5, c: '#fff', o: 0.45 },
     ],
   },
-  build: (ctx) => {
-    const { w, h } = CANVAS_DIMS['4:5']
+  build: (ctx, format) => {
+    const { w, h } = CANVAS_DIMS[format ?? '4:5']
+    const sy = (y: number) => Math.round(y * h / 1350)
     const slide: Slide = {
       id: uid(),
       background: ctx.imageUrl
         ? { type: 'image', src: ctx.imageUrl, fit: 'cover', overlayColor: '#000000', overlayOpacity: 0.55 }
         : { type: 'gradient', from: BRAND_COLORS.terra, to: BRAND_COLORS.mesaBrown, angle: 135 },
       layers: [
-        logo(LOGO_W, 80, 46, 60),
+        logo(LOGO_W, 80, sy(46), 60),
         ctx.category ? textLayer({
           name: 'Category', text: (ctx.category ?? '').toUpperCase(),
-          x: 80, y: 126, width: w - 160,
+          x: 80, y: sy(126), width: w - 160,
           fontFamily: font('Inter'), fontSize: 34, fontWeight: 700,
           fill: BRAND_COLORS.white, opacity: 0.85, letterSpacing: 4,
         }) : null,
@@ -183,7 +194,7 @@ const poster: Template = {
       ].filter(Boolean) as Layer[],
     }
     return {
-      id: uid(), name: ctx.title ?? 'Poster post', format: '4:5',
+      id: uid(), name: ctx.title ?? 'Poster post', format: format ?? '4:5',
       slides: [slide], createdAt: Date.now(), updatedAt: Date.now(),
     }
   },
@@ -207,27 +218,28 @@ const broadside: Template = {
       { x: 7, y: 82, w: 62, h: 5, c: BRAND_COLORS.ink, o: 0.65 },
     ],
   },
-  build: (ctx) => {
-    const { w, h } = CANVAS_DIMS['4:5']
+  build: (ctx, format) => {
+    const { w, h } = CANVAS_DIMS[format ?? '4:5']
+    const sy = (y: number) => Math.round(y * h / 1350)
     const title = ctx.title ?? 'Your Event'
     const titleSize = title.length < 15 ? 200 : title.length < 25 ? 170 : title.length < 40 ? 145 : 120
     const dateLine = [formatDate(ctx.date, ctx.time), ctx.venue].filter(Boolean).join('\n')
     const layers: Layer[] = [
-      shape({ shape: 'rect', x: 80, y: 78, width: 180, height: 4, fill: BRAND_COLORS.terra }),
-      logo(LOGO_T, 80, 96, 76),
-      shape({ shape: 'rect', x: 80, y: 188, width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.2 }),
+      shape({ shape: 'rect', x: 80, y: sy(78), width: 180, height: 4, fill: BRAND_COLORS.terra }),
+      logo(LOGO_T, 80, sy(96), 76),
+      shape({ shape: 'rect', x: 80, y: sy(188), width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.2 }),
       textLayer({
         name: 'Title', text: title,
-        x: 80, y: 230, width: w - 160,
+        x: 80, y: sy(230), width: w - 160,
         fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 900,
         fill: BRAND_COLORS.ink, lineHeight: 0.88, letterSpacing: -2,
       }),
-      shape({ shape: 'rect', x: 80, y: 1010, width: w - 160, height: 4, fill: BRAND_COLORS.terra }),
+      shape({ shape: 'rect', x: 80, y: h - 340, width: w - 160, height: 4, fill: BRAND_COLORS.terra }),
     ]
     if (dateLine) {
       layers.push(textLayer({
         name: 'Date & Venue', text: dateLine,
-        x: 80, y: 1042, width: w - 160,
+        x: 80, y: h - 308, width: w - 160,
         fontFamily: font('Inter'), fontSize: 48, fontWeight: 600,
         fill: BRAND_COLORS.ink, lineHeight: 1.3,
       }))
@@ -239,7 +251,7 @@ const broadside: Template = {
       fill: BRAND_COLORS.terra, letterSpacing: 3, opacity: 0.85,
     }))
     return {
-      id: uid(), name: ctx.title ?? 'Broadside post', format: '4:5',
+      id: uid(), name: ctx.title ?? 'Broadside post', format: format ?? '4:5',
       slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.cream }, layers }],
       createdAt: Date.now(), updatedAt: Date.now(),
     }
@@ -263,18 +275,19 @@ const marquee: Template = {
       { x: 7, y: 84, w: 86, h: 3, c: BRAND_COLORS.cream, o: 0.35 },
     ],
   },
-  build: (ctx) => {
-    const { w, h } = CANVAS_DIMS['4:5']
+  build: (ctx, format) => {
+    const { w, h } = CANVAS_DIMS[format ?? '4:5']
+    const sy = (y: number) => Math.round(y * h / 1350)
     const title = (ctx.title ?? 'Your Event').toUpperCase()
     // Uppercase Epilogue 900 is very wide — conservative sizes to avoid mid-word line-breaks
     const titleSize = title.length < 8 ? 220 : title.length < 14 ? 190 : title.length < 22 ? 160 : title.length < 32 ? 130 : 110
-    const ruleY = ctx.category ? 248 : 200
+    const ruleY = sy(ctx.category ? 248 : 200)
     const titleY = ruleY + 32
-    const layers: Layer[] = [logo(LOGO_W, Math.round((w - Math.round(70 * LOGO_R)) / 2), 46, 70)]
+    const layers: Layer[] = [logo(LOGO_W, Math.round((w - Math.round(70 * LOGO_R)) / 2), sy(46), 70)]
     if (ctx.category) {
       layers.push(textLayer({
         name: 'Category', text: ctx.category.toUpperCase(),
-        x: 80, y: 180, width: w - 160,
+        x: 80, y: sy(180), width: w - 160,
         fontFamily: font('Inter'), fontSize: 36, fontWeight: 700,
         fill: BRAND_COLORS.terra, letterSpacing: 6, align: 'center',
       }))
@@ -287,10 +300,10 @@ const marquee: Template = {
         fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 900,
         fill: BRAND_COLORS.cream, lineHeight: 0.88, align: 'center',
       }),
-      shape({ shape: 'rect', x: 280, y: 950, width: 520, height: 2, fill: BRAND_COLORS.terra, opacity: 0.7 }),
+      shape({ shape: 'rect', x: 280, y: h - 400, width: 520, height: 2, fill: BRAND_COLORS.terra, opacity: 0.7 }),
       textLayer({
         name: 'Date', text: formatDate(ctx.date, ctx.time),
-        x: 80, y: 980, width: w - 160,
+        x: 80, y: h - 370, width: w - 160,
         fontFamily: font('Inter'), fontSize: 48, fontWeight: 500,
         fill: BRAND_COLORS.cream, opacity: 0.75, align: 'center',
       }),
@@ -298,13 +311,13 @@ const marquee: Template = {
     if (ctx.venue) {
       layers.push(textLayer({
         name: 'Venue', text: ctx.venue,
-        x: 80, y: 1060, width: w - 160,
+        x: 80, y: h - 290, width: w - 160,
         fontFamily: font('Inter'), fontSize: 42, fontWeight: 400,
         fill: BRAND_COLORS.cream, opacity: 0.55, align: 'center',
       }))
     }
     return {
-      id: uid(), name: ctx.title ?? 'Marquee post', format: '4:5',
+      id: uid(), name: ctx.title ?? 'Marquee post', format: format ?? '4:5',
       slides: [{ id: uid(), background: { type: 'color', color: '#0c0b0a' }, layers }],
       createdAt: Date.now(), updatedAt: Date.now(),
     }
@@ -328,14 +341,15 @@ const split: Template = {
       { x: 7, y: 86, w: 55, h: 3.5, c: BRAND_COLORS.ink, o: 0.6 },
     ],
   },
-  build: (ctx) => {
-    const { w, h } = CANVAS_DIMS['4:5']
+  build: (ctx, format) => {
+    const { w, h } = CANVAS_DIMS[format ?? '4:5']
     const splitY = Math.round(h * 0.52)
     const title = ctx.title ?? 'Your Event'
     const titleSize = title.length < 15 ? 170 : title.length < 25 ? 145 : title.length < 40 ? 115 : 95
     const layers: Layer[] = []
     if (ctx.imageUrl) {
-      layers.push(imageLayer({ src: ctx.imageUrl, x: 0, y: 0, width: w, height: splitY }))
+      // fit:'cover' ensures the photo fills the split zone without stretching
+      layers.push(imageLayer({ src: ctx.imageUrl, x: 0, y: 0, width: w, height: splitY, fit: 'cover' }))
     } else {
       layers.push(shape({ shape: 'rect', x: 0, y: 0, width: w, height: splitY, fill: BRAND_COLORS.terra }))
       if (ctx.category) {
@@ -382,7 +396,7 @@ const split: Template = {
     }
     layers.push(logo(LOGO_T, 80, h - 96, 60))
     return {
-      id: uid(), name: ctx.title ?? 'Split post', format: '4:5',
+      id: uid(), name: ctx.title ?? 'Split post', format: format ?? '4:5',
       slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.cream }, layers }],
       createdAt: Date.now(), updatedAt: Date.now(),
     }
@@ -411,8 +425,9 @@ const dispatch: Template = {
       { x: 7, y: 92, w: 65, h: 3, c: BRAND_COLORS.terra },
     ],
   },
-  build: (ctx) => {
-    const { w, h } = CANVAS_DIMS['4:5']
+  build: (ctx, format) => {
+    const { w, h } = CANVAS_DIMS[format ?? '4:5']
+    const sy = (y: number) => Math.round(y * h / 1350)
     const title = ctx.title ?? 'Event of the Year'
     const titleSize = title.length < 15 ? 155 : title.length < 25 ? 135 : title.length < 40 ? 110 : 90
     const dateLine = formatDate(ctx.date, ctx.time) ||
@@ -421,41 +436,41 @@ const dispatch: Template = {
     const layers: Layer[] = [
       textLayer({
         name: 'Masthead', text: 'ABQ DISPATCH',
-        x: 80, y: 80, width: w - 160,
+        x: 80, y: sy(80), width: w - 160,
         fontFamily: font('DM Mono'), fontSize: 28, fontWeight: 500,
         fill: BRAND_COLORS.terra, letterSpacing: 6, align: 'center',
       }),
-      shape({ shape: 'rect', x: 80, y: 142, width: w - 160, height: 4, fill: BRAND_COLORS.ink }),
-      shape({ shape: 'rect', x: 80, y: 154, width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.4 }),
+      shape({ shape: 'rect', x: 80, y: sy(142), width: w - 160, height: 4, fill: BRAND_COLORS.ink }),
+      shape({ shape: 'rect', x: 80, y: sy(154), width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.4 }),
       textLayer({
         name: 'Date Line', text: dateLine,
-        x: 80, y: 176, width: w - 160,
+        x: 80, y: sy(176), width: w - 160,
         fontFamily: font('DM Mono'), fontSize: 24, fontWeight: 500,
         fill: BRAND_COLORS.ink, opacity: 0.45, align: 'center',
       }),
-      shape({ shape: 'rect', x: 80, y: 222, width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.25 }),
+      shape({ shape: 'rect', x: 80, y: sy(222), width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.25 }),
       textLayer({
         name: 'Title', text: title,
-        x: 80, y: 258, width: w - 160,
+        x: 80, y: sy(258), width: w - 160,
         fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 900,
         fill: BRAND_COLORS.ink, lineHeight: 0.9, letterSpacing: -1,
       }),
     ]
     if (ctx.imageUrl) {
-      layers.push(imageLayer({ src: ctx.imageUrl, x: 80, y: 840, width: w - 160, height: 350, cornerRadius: 4 }))
+      layers.push(imageLayer({ src: ctx.imageUrl, x: 80, y: sy(840), width: w - 160, height: sy(350), cornerRadius: 4, fit: 'cover' }))
     }
     layers.push(
-      shape({ shape: 'rect', x: 80, y: 1198, width: w - 160, height: 2, fill: BRAND_COLORS.ink, opacity: 0.25 }),
+      shape({ shape: 'rect', x: 80, y: h - 152, width: w - 160, height: 2, fill: BRAND_COLORS.ink, opacity: 0.25 }),
       textLayer({
         name: 'Meta', text: metaText,
-        x: 80, y: 1215, width: w - 160,
+        x: 80, y: h - 135, width: w - 160,
         fontFamily: font('Inter'), fontSize: 42, fontWeight: 400,
         fill: BRAND_COLORS.ink, opacity: 0.7,
       }),
       logo(LOGO_T, 80, h - 65, 52),
     )
     return {
-      id: uid(), name: ctx.title ?? 'Dispatch post', format: '4:5',
+      id: uid(), name: ctx.title ?? 'Dispatch post', format: format ?? '4:5',
       slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.cream }, layers }],
       createdAt: Date.now(), updatedAt: Date.now(),
     }
@@ -481,31 +496,33 @@ const goldenHour: Template = {
       { x: 7, y: 95, w: 86, h: 3, c: 'rgba(251,247,241,0.4)' },
     ],
   },
-  build: (ctx) => {
-    const { w, h } = CANVAS_DIMS['4:5']
+  build: (ctx, format) => {
+    const { w, h } = CANVAS_DIMS[format ?? '4:5']
+    const sy = (y: number) => Math.round(y * h / 1350)
     const title = ctx.title ?? 'Your Event'
     const titleSize = title.length < 15 ? 170 : title.length < 25 ? 145 : title.length < 40 ? 115 : 95
     const layers: Layer[] = []
     if (ctx.category) {
       layers.push(textLayer({
         name: 'Category', text: ctx.category.toUpperCase(),
-        x: 80, y: 150, width: w - 160,
+        x: 80, y: sy(150), width: w - 160,
         fontFamily: font('Inter'), fontSize: 44, fontWeight: 700,
         fill: BRAND_COLORS.cream, opacity: 0.9, letterSpacing: 5, align: 'center',
       }))
     }
     layers.push(shape({
-      shape: 'rect', x: 240, y: ctx.category ? 218 : 190, width: 600, height: 2,
+      shape: 'rect', x: 240, y: sy(ctx.category ? 218 : 190), width: 600, height: 2,
       fill: BRAND_COLORS.sandstone, opacity: 0.6,
     }))
     if (ctx.imageUrl) {
-      const photoY = ctx.category ? 248 : 218
-      layers.push(imageLayer({ src: ctx.imageUrl, x: 90, y: photoY, width: w - 180, height: 500, cornerRadius: 8 }))
-      layers.push(shape({ shape: 'rect', x: 90, y: photoY, width: w - 180, height: 500, fill: BRAND_COLORS.ink, opacity: 0.18, cornerRadius: 8 }))
+      const photoY = sy(ctx.category ? 248 : 218)
+      const photoH = sy(500)
+      layers.push(imageLayer({ src: ctx.imageUrl, x: 90, y: photoY, width: w - 180, height: photoH, cornerRadius: 8, fit: 'cover' }))
+      layers.push(shape({ shape: 'rect', x: 90, y: photoY, width: w - 180, height: photoH, fill: BRAND_COLORS.ink, opacity: 0.18, cornerRadius: 8 }))
     }
-    const titleY = ctx.imageUrl
+    const titleY = sy(ctx.imageUrl
       ? (ctx.category ? 810 : 778)
-      : (ctx.category ? 460 : 430)
+      : (ctx.category ? 460 : 430))
     layers.push(textLayer({
       name: 'Title', text: title,
       x: 80, y: titleY, width: w - 160,
@@ -513,12 +530,12 @@ const goldenHour: Template = {
       fill: BRAND_COLORS.cream, lineHeight: 0.92, align: 'center',
       shadow: { enabled: true, color: 'rgba(0,0,0,0.6)', blur: 24, offsetX: 0, offsetY: 4 },
     }))
-    layers.push(shape({ shape: 'rect', x: Math.round((w - 100) / 2), y: 1135, width: 100, height: 4, fill: BRAND_COLORS.skyGold }))
+    layers.push(shape({ shape: 'rect', x: Math.round((w - 100) / 2), y: h - 215, width: 100, height: 4, fill: BRAND_COLORS.skyGold }))
     const dateStr = formatDate(ctx.date, ctx.time)
     if (dateStr) {
       layers.push(textLayer({
         name: 'Date', text: dateStr,
-        x: 80, y: 1160, width: w - 160,
+        x: 80, y: h - 190, width: w - 160,
         fontFamily: font('Inter'), fontSize: 48, fontWeight: 600,
         fill: BRAND_COLORS.cream, align: 'center',
         shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', blur: 12, offsetX: 0, offsetY: 2 },
@@ -527,14 +544,14 @@ const goldenHour: Template = {
     if (ctx.venue) {
       layers.push(textLayer({
         name: 'Venue', text: ctx.venue,
-        x: 80, y: dateStr ? 1220 : 1160, width: w - 160,
+        x: 80, y: h - (dateStr ? 130 : 190), width: w - 160,
         fontFamily: font('Inter'), fontSize: 42, fontWeight: 400,
         fill: BRAND_COLORS.sandstone, align: 'center', opacity: 0.9,
       }))
     }
     layers.push(logo(LOGO_W, Math.round((w - Math.round(60 * LOGO_R)) / 2), h - 65, 60))
     return {
-      id: uid(), name: ctx.title ?? 'Golden Hour post', format: '4:5',
+      id: uid(), name: ctx.title ?? 'Golden Hour post', format: format ?? '4:5',
       slides: [{
         id: uid(),
         background: { type: 'gradient', from: BRAND_COLORS.skyGold, to: BRAND_COLORS.night, angle: 155 },
@@ -568,15 +585,16 @@ const statement: Template = {
       { x: 25, y: 98, w: 50, h: 3, c: BRAND_COLORS.terra, o: 0.7 },
     ],
   },
-  build: () => {
-    const { w, h } = CANVAS_DIMS['4:5']
+  build: (_, format) => {
+    const { w, h } = CANVAS_DIMS[format ?? '4:5']
+    const sy = (y: number) => Math.round(y * h / 1350)
     const layers: Layer[] = [
-      shape({ shape: 'rect', x: 80, y: 78, width: 220, height: 4, fill: BRAND_COLORS.terra }),
-      logo(LOGO_T, 80, 96, 76),
-      shape({ shape: 'rect', x: 80, y: 188, width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.15 }),
+      shape({ shape: 'rect', x: 80, y: sy(78), width: 220, height: 4, fill: BRAND_COLORS.terra }),
+      logo(LOGO_T, 80, sy(96), 76),
+      shape({ shape: 'rect', x: 80, y: sy(188), width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.15 }),
       textLayer({
         name: 'Statement', text: 'Find it before\neveryone else does.',
-        x: 80, y: 320, width: w - 160,
+        x: 80, y: sy(320), width: w - 160,
         fontFamily: font('Epilogue'), fontSize: 160, fontWeight: 900,
         fill: BRAND_COLORS.ink, lineHeight: 0.88, letterSpacing: -2,
       }),
@@ -584,7 +602,7 @@ const statement: Template = {
       logo(LOGO_T, Math.round((w - Math.round(60 * LOGO_R)) / 2), h - 100, 60),
     ]
     return {
-      id: uid(), name: 'Statement post', format: '4:5',
+      id: uid(), name: 'Statement post', format: format ?? '4:5',
       slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.cream }, layers }],
       createdAt: Date.now(), updatedAt: Date.now(),
     }
@@ -606,8 +624,9 @@ const categorySpotlight: Template = {
       { x: 15, y: 95, w: 70, h: 4, c: 'rgba(251,247,241,0.6)' },
     ],
   },
-  build: (ctx) => {
-    const { w, h } = CANVAS_DIMS['4:5']
+  build: (ctx, format) => {
+    const { w, h } = CANVAS_DIMS[format ?? '4:5']
+    const sy = (y: number) => Math.round(y * h / 1350)
     const category = ctx.category ?? 'Music'
     const catUpper = category.toUpperCase()
     // Scale to fill width — shorter names get bigger
@@ -615,28 +634,28 @@ const categorySpotlight: Template = {
     const layers: Layer[] = [
       textLayer({
         name: 'Kicker', text: 'THIS WEEK IN',
-        x: 80, y: 150, width: w - 160,
+        x: 80, y: sy(150), width: w - 160,
         fontFamily: font('Inter'), fontSize: 40, fontWeight: 700,
         fill: BRAND_COLORS.cream, opacity: 0.75, letterSpacing: 8, align: 'center',
       }),
-      shape({ shape: 'rect', x: 280, y: 215, width: 520, height: 2, fill: BRAND_COLORS.cream, opacity: 0.4 }),
+      shape({ shape: 'rect', x: 280, y: sy(215), width: 520, height: 2, fill: BRAND_COLORS.cream, opacity: 0.4 }),
       textLayer({
         name: 'Category', text: catUpper,
-        x: 80, y: 268, width: w - 160,
+        x: 80, y: sy(268), width: w - 160,
         fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 900,
         fill: BRAND_COLORS.cream, lineHeight: 0.88, align: 'center',
       }),
-      shape({ shape: 'rect', x: 280, y: 960, width: 520, height: 2, fill: BRAND_COLORS.cream, opacity: 0.4 }),
+      shape({ shape: 'rect', x: 280, y: h - 390, width: 520, height: 2, fill: BRAND_COLORS.cream, opacity: 0.4 }),
       textLayer({
         name: 'Subcopy', text: 'All the best events in Albuquerque.',
-        x: 80, y: 996, width: w - 160,
+        x: 80, y: h - 354, width: w - 160,
         fontFamily: font('Fraunces'), fontSize: 52, fontStyle: 'italic', fontWeight: 400,
         fill: BRAND_COLORS.cream, opacity: 0.85, align: 'center', lineHeight: 1.2,
       }),
       logo(LOGO_W, Math.round((w - Math.round(60 * LOGO_R)) / 2), h - 100, 60),
     ]
     return {
-      id: uid(), name: `${category} spotlight`, format: '4:5',
+      id: uid(), name: `${category} spotlight`, format: format ?? '4:5',
       slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.terra }, layers }],
       createdAt: Date.now(), updatedAt: Date.now(),
     }
@@ -667,8 +686,9 @@ const weekendPreview: Template = {
       { x: 7, y: 98, w: 60, h: 3, c: BRAND_COLORS.terra, o: 0.75 },
     ],
   },
-  build: (ctx) => {
-    const { w, h } = CANVAS_DIMS['4:5']
+  build: (ctx, format) => {
+    const { w, h } = CANVAS_DIMS[format ?? '4:5']
+    const sy = (y: number) => Math.round(y * h / 1350)
     const today = new Date()
     // Saturday of this week
     const daysToSat = (6 - today.getDay() + 7) % 7 || 7
@@ -680,70 +700,70 @@ const weekendPreview: Template = {
     const weekendRange = `${fmt(sat)} – ${fmt(sun)}`
 
     const layers: Layer[] = [
-      logo(LOGO_T, 80, 64, 76),
-      shape({ shape: 'rect', x: 80, y: 152, width: w - 160, height: 4, fill: BRAND_COLORS.ink }),
-      shape({ shape: 'rect', x: 80, y: 152, width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.35 }),
+      logo(LOGO_T, 80, sy(64), 76),
+      shape({ shape: 'rect', x: 80, y: sy(152), width: w - 160, height: 4, fill: BRAND_COLORS.ink }),
+      shape({ shape: 'rect', x: 80, y: sy(152), width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.35 }),
       textLayer({
         name: 'Date Range', text: weekendRange,
-        x: 80, y: 174, width: w - 160,
+        x: 80, y: sy(174), width: w - 160,
         fontFamily: font('DM Mono'), fontSize: 24, fontWeight: 500,
         fill: BRAND_COLORS.ink, opacity: 0.45, align: 'center',
       }),
-      shape({ shape: 'rect', x: 80, y: 218, width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.2 }),
+      shape({ shape: 'rect', x: 80, y: sy(218), width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.2 }),
       textLayer({
         name: 'Headline', text: 'This Weekend\nin Burque',
-        x: 80, y: 252, width: w - 160,
+        x: 80, y: sy(252), width: w - 160,
         fontFamily: font('Epilogue'), fontSize: 155, fontWeight: 900,
         fill: BRAND_COLORS.ink, lineHeight: 0.9, letterSpacing: -2,
       }),
-      shape({ shape: 'rect', x: 80, y: 630, width: w - 160, height: 2, fill: BRAND_COLORS.ink, opacity: 0.15 }),
+      shape({ shape: 'rect', x: 80, y: sy(630), width: w - 160, height: 2, fill: BRAND_COLORS.ink, opacity: 0.15 }),
       // Item 01
       textLayer({
         name: 'No.', text: '01',
-        x: 80, y: 660, width: 100,
+        x: 80, y: sy(660), width: 100,
         fontFamily: font('DM Mono'), fontSize: 44, fontWeight: 500,
         fill: BRAND_COLORS.terra,
       }),
       textLayer({
         name: 'Event 1', text: ctx.title ?? 'Event name here',
-        x: 200, y: 668, width: w - 280,
+        x: 200, y: sy(668), width: w - 280,
         fontFamily: font('Fraunces'), fontSize: 52, fontStyle: 'italic', fontWeight: 400,
         fill: BRAND_COLORS.ink, lineHeight: 1.1,
       }),
-      shape({ shape: 'rect', x: 80, y: 758, width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.12 }),
+      shape({ shape: 'rect', x: 80, y: sy(758), width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.12 }),
       // Item 02
       textLayer({
         name: 'No.', text: '02',
-        x: 80, y: 786, width: 100,
+        x: 80, y: sy(786), width: 100,
         fontFamily: font('DM Mono'), fontSize: 44, fontWeight: 500,
         fill: BRAND_COLORS.terra,
       }),
       textLayer({
         name: 'Event 2', text: 'Second event name',
-        x: 200, y: 794, width: w - 280,
+        x: 200, y: sy(794), width: w - 280,
         fontFamily: font('Fraunces'), fontSize: 52, fontStyle: 'italic', fontWeight: 400,
         fill: BRAND_COLORS.ink, lineHeight: 1.1,
       }),
-      shape({ shape: 'rect', x: 80, y: 884, width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.12 }),
+      shape({ shape: 'rect', x: 80, y: sy(884), width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.12 }),
       // Item 03
       textLayer({
         name: 'No.', text: '03',
-        x: 80, y: 912, width: 100,
+        x: 80, y: sy(912), width: 100,
         fontFamily: font('DM Mono'), fontSize: 44, fontWeight: 500,
         fill: BRAND_COLORS.terra,
       }),
       textLayer({
         name: 'Event 3', text: 'Third event name',
-        x: 200, y: 920, width: w - 280,
+        x: 200, y: sy(920), width: w - 280,
         fontFamily: font('Fraunces'), fontSize: 52, fontStyle: 'italic', fontWeight: 400,
         fill: BRAND_COLORS.ink, lineHeight: 1.1,
       }),
-      shape({ shape: 'rect', x: 80, y: 1022, width: w - 160, height: 3, fill: BRAND_COLORS.terra }),
-      // Large centered logo sits in the footer zone (y=1025–1350) for brand presence
-      logo(LOGO_T, Math.round((w - Math.round(80 * LOGO_R)) / 2), 1120, 80),
+      shape({ shape: 'rect', x: 80, y: h - 328, width: w - 160, height: 3, fill: BRAND_COLORS.terra }),
+      // Large centered logo sits in the footer zone for brand presence
+      logo(LOGO_T, Math.round((w - Math.round(80 * LOGO_R)) / 2), h - 230, 80),
     ]
     return {
-      id: uid(), name: 'Weekend preview', format: '4:5',
+      id: uid(), name: 'Weekend preview', format: format ?? '4:5',
       slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.cream }, layers }],
       createdAt: Date.now(), updatedAt: Date.now(),
     }
@@ -767,33 +787,34 @@ const mesa: Template = {
       { x: 15, y: 98, w: 70, h: 3, c: 'rgba(251,247,241,0.5)' },
     ],
   },
-  build: (ctx) => {
-    const { w, h } = CANVAS_DIMS['4:5']
+  build: (ctx, format) => {
+    const { w, h } = CANVAS_DIMS[format ?? '4:5']
+    const sy = (y: number) => Math.round(y * h / 1350)
     const layers: Layer[] = [
       textLayer({
         name: 'Location', text: 'ALBUQUERQUE, NEW MEXICO',
-        x: 80, y: 130, width: w - 160,
+        x: 80, y: sy(130), width: w - 160,
         fontFamily: font('Inter'), fontSize: 30, fontWeight: 700,
         fill: BRAND_COLORS.cream, opacity: 0.55, letterSpacing: 6, align: 'center',
       }),
-      shape({ shape: 'rect', x: 340, y: 188, width: 400, height: 1, fill: BRAND_COLORS.sandstone, opacity: 0.45 }),
+      shape({ shape: 'rect', x: 340, y: sy(188), width: 400, height: 1, fill: BRAND_COLORS.sandstone, opacity: 0.45 }),
       textLayer({
         name: 'Place', text: ctx.tagline ?? 'Old Town to\nNob Hill.',
-        x: 80, y: 320, width: w - 160,
+        x: 80, y: sy(320), width: w - 160,
         fontFamily: font('Fraunces'), fontSize: 170, fontStyle: 'italic', fontWeight: 400,
         fill: BRAND_COLORS.cream, lineHeight: 0.92, align: 'center',
       }),
-      shape({ shape: 'rect', x: Math.round((w - 80) / 2), y: 850, width: 80, height: 3, fill: BRAND_COLORS.sandstone, opacity: 0.55 }),
+      shape({ shape: 'rect', x: Math.round((w - 80) / 2), y: sy(850), width: 80, height: 3, fill: BRAND_COLORS.sandstone, opacity: 0.55 }),
       textLayer({
         name: 'Tagline', text: ctx.title ?? 'All the events. All the time.',
-        x: 80, y: 890, width: w - 160,
+        x: 80, y: sy(890), width: w - 160,
         fontFamily: font('Inter'), fontSize: 46, fontWeight: 500,
         fill: BRAND_COLORS.cream, opacity: 0.7, align: 'center', lineHeight: 1.3,
       }),
       logo(LOGO_W, Math.round((w - Math.round(60 * LOGO_R)) / 2), h - 100, 60),
     ]
     return {
-      id: uid(), name: 'Mesa post', format: '4:5',
+      id: uid(), name: 'Mesa post', format: format ?? '4:5',
       slides: [{
         id: uid(),
         background: { type: 'gradient', from: BRAND_COLORS.night, to: BRAND_COLORS.sage, angle: 155 },
@@ -820,34 +841,35 @@ const tonightDrop: Template = {
       { x: 10, y: 85, w: 80, h: 3.5, c: 'rgba(232,214,183,0.65)' },
     ],
   },
-  build: () => {
-    const { w, h } = CANVAS_DIMS['4:5']
+  build: (_, format) => {
+    const { w, h } = CANVAS_DIMS[format ?? '4:5']
+    const sy = (y: number) => Math.round(y * h / 1350)
     return {
-      id: uid(), name: 'Tonight drop', format: '4:5',
+      id: uid(), name: 'Tonight drop', format: format ?? '4:5',
       slides: [{
         id: uid(),
         background: { type: 'gradient', from: BRAND_COLORS.night, to: BRAND_COLORS.terra, angle: 135 },
         layers: [
           textLayer({
             name: 'Day', text: new Date().toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase(),
-            x: 80, y: 180, width: w - 160,
+            x: 80, y: sy(180), width: w - 160,
             fontFamily: font('Inter'), fontSize: 40, fontWeight: 700,
             fill: BRAND_COLORS.sandstone, letterSpacing: 6, align: 'center',
           }),
           // Fixed: 190px + letterSpacing: 4 fits "TONIGHT" (7 chars) safely in 920px
           textLayer({
             name: 'Tonight', text: 'TONIGHT',
-            x: 80, y: 340, width: w - 160,
+            x: 80, y: sy(340), width: w - 160,
             fontFamily: font('Epilogue'), fontSize: 190, fontWeight: 900,
             fill: BRAND_COLORS.white, letterSpacing: 4, align: 'center',
           }),
           textLayer({
             name: 'Subtitle', text: 'in Albuquerque',
-            x: 80, y: 578, width: w - 160,
+            x: 80, y: sy(578), width: w - 160,
             fontFamily: font('Fraunces'), fontSize: 56, fontStyle: 'italic', fontWeight: 400,
             fill: BRAND_COLORS.white, opacity: 0.85, align: 'center',
           }),
-          shape({ shape: 'rect', x: Math.round((w - 120) / 2), y: 680, width: 120, height: 3, fill: BRAND_COLORS.sandstone, opacity: 0.5 }),
+          shape({ shape: 'rect', x: Math.round((w - 120) / 2), y: sy(680), width: 120, height: 3, fill: BRAND_COLORS.sandstone, opacity: 0.5 }),
           logo(LOGO_W, Math.round((w - Math.round(60 * LOGO_R)) / 2), h - 115, 60),
         ],
       }],
@@ -872,10 +894,11 @@ const hiddenGem: Template = {
       { x: 15, y: 90, w: 70, h: 3, c: 'rgba(232,214,183,0.6)' },
     ],
   },
-  build: (ctx) => {
-    const { w, h } = CANVAS_DIMS['4:5']
+  build: (ctx, format) => {
+    const { w, h } = CANVAS_DIMS[format ?? '4:5']
+    const sy = (y: number) => Math.round(y * h / 1350)
     return {
-      id: uid(), name: 'Hidden gem', format: '4:5',
+      id: uid(), name: 'Hidden gem', format: format ?? '4:5',
       slides: [{
         id: uid(),
         background: ctx.imageUrl
@@ -884,13 +907,13 @@ const hiddenGem: Template = {
         layers: [
           textLayer({
             name: 'Kicker', text: 'HIDDEN GEM',
-            x: 80, y: 140, width: w - 160,
+            x: 80, y: sy(140), width: w - 160,
             fontFamily: font('Inter'), fontSize: 34, fontWeight: 700,
             fill: BRAND_COLORS.sandstone, letterSpacing: 6, align: 'center',
           }),
           textLayer({
             name: 'Name', text: ctx.title ?? ctx.venue ?? 'Venue name',
-            x: 80, y: h / 2 - 140, width: w - 160,
+            x: 80, y: h / 2 - sy(140), width: w - 160,
             fontFamily: font('Fraunces'), fontSize: 130, fontStyle: 'italic', fontWeight: 400,
             fill: BRAND_COLORS.cream, align: 'center', lineHeight: 1.0,
           }),
@@ -922,8 +945,8 @@ const blank: Template = {
       { x: 49, y: 52, w: 2, h: 11, c: BRAND_COLORS.ink, o: 0.15 },
     ],
   },
-  build: () => ({
-    id: uid(), name: 'Blank post', format: '4:5',
+  build: (_, format) => ({
+    id: uid(), name: 'Blank post', format: format ?? '4:5',
     slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.cream }, layers: [] }],
     createdAt: Date.now(), updatedAt: Date.now(),
   }),

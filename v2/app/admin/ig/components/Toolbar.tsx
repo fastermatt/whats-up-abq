@@ -187,7 +187,7 @@ export function Toolbar({ mode, onModeChange, canvasRef, event, image }: Toolbar
 
   const applyTemplate = (t: Template) => {
     const ctx: TemplateContext = mode === 'event' && event ? eventCtx() : {}
-    loadDesign(t.build(ctx))
+    loadDesign(t.build(ctx, design.format))
     if (t.category === 'brand') onModeChange('generic')
     else onModeChange('event')
     setShowGallery(false)

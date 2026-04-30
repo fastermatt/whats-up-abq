@@ -152,6 +152,26 @@ function ImageNode({ layer, onSelect, onChange }: {
 }) {
   const ref = useRef<Konva.Image>(null)
   const [img] = useImage(proxyIfNeeded(layer.src), 'anonymous')
+
+  // Cover crop: compute which portion of the source image to show so it fills
+  // the layer rect without stretching, cropping to center (same math as BackgroundImage).
+  let coverCrop: { x: number; y: number; width: number; height: number } | undefined
+  if (img && layer.fit === 'cover') {
+    const imgAr  = img.width / img.height
+    const layerAr = layer.width / layer.height
+    if (imgAr > layerAr) {
+      // image is wider than the box — crop left/right, keep full height
+      const cropH = img.height
+      const cropW = img.height * layerAr
+      coverCrop = { x: (img.width - cropW) / 2, y: 0, width: cropW, height: cropH }
+    } else {
+      // image is taller than the box — crop top/bottom, keep full width
+      const cropW = img.width
+      const cropH = img.width / layerAr
+      coverCrop = { x: 0, y: (img.height - cropH) / 2, width: cropW, height: cropH }
+    }
+  }
+
   return (
     <KImage
       ref={ref}
@@ -166,6 +186,7 @@ function ImageNode({ layer, onSelect, onChange }: {
       opacity={layer.opacity}
       visible={layer.visible}
       cornerRadius={layer.cornerRadius}
+      crop={coverCrop}
       draggable={!layer.locked}
       onClick={onSelect}
       onTap={onSelect}
@@ -173,13 +194,13 @@ function ImageNode({ layer, onSelect, onChange }: {
       onTransformEnd={() => {
         const node = ref.current
         if (!node) return
-        const sx = node.scaleX(), sy = node.scaleY()
+        const scaleX = node.scaleX(), scaleY = node.scaleY()
         node.scaleX(1); node.scaleY(1)
         onChange({
           x: node.x(),
           y: node.y(),
-          width:  Math.max(20, node.width()  * sx),
-          height: Math.max(20, node.height() * sy),
+          width:  Math.max(20, node.width()  * scaleX),
+          height: Math.max(20, node.height() * scaleY),
           rotation: node.rotation(),
         })
       }}

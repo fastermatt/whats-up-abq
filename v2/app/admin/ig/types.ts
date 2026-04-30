@@ -51,6 +51,7 @@ export interface ImageLayer extends BaseLayer {
   width: number
   height: number
   cornerRadius: number
+  fit?: 'cover' | 'contain' | 'stretch'
 }
 
 export interface ShapeLayer extends BaseLayer {
