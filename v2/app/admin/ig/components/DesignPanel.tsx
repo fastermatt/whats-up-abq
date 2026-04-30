@@ -218,7 +218,10 @@ function TextPanel({ layer, update }: { layer: TextLayer; update: (p: Partial<Te
             <Label>Weight</Label>
             <select value={layer.fontWeight} onChange={e => update({ fontWeight: parseInt(e.target.value) })}
               className="w-full bg-black/40 border border-white/10 rounded px-2 py-1 text-xs text-white/90 focus:outline-none focus:border-[#9a442d]">
-              {[100, 200, 300, 400, 500, 600, 700, 800, 900].map(w => <option key={w} value={w}>{w}</option>)}
+              {/* Only show weights the selected font actually supports */}
+              {(BRAND_FONTS.find(f => f.stack === layer.fontFamily)?.weights ?? [400, 700, 900]).map(w => (
+                <option key={w} value={w}>{w}</option>
+              ))}
             </select>
           </div>
         </div>

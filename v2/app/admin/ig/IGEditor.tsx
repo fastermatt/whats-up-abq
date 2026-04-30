@@ -12,6 +12,7 @@ import { CaptionBuilder } from './components/CaptionBuilder'
 import type { PostCanvasHandle } from './components/PostCanvas'
 import { useEditor } from './store'
 import { TEMPLATES } from './lib/templates'
+import type { TemplateContext } from './lib/templates'
 
 // Konva needs to load client-side only (uses `window`)
 const PostCanvas = dynamic(
@@ -30,29 +31,55 @@ export function IGEditor({ event, image }: Props) {
   const [mode, setMode] = useState<EditorMode>(event ? 'event' : 'generic')
   const canvasRef = useRef<PostCanvasHandle | null>(null)
 
-  // When an event is first loaded, auto-populate the Poster template with event data.
-  // Only on mount / when event ID changes — never trample the user's in-progress work.
+  // Tracks the last event ID we auto-loaded, so we don't clobber in-progress work
   const lastEventIdRef = useRef<string | null>(null)
+  // Pending load: set when a new event arrives but the user has canvas work in progress
+  const [pendingLoad, setPendingLoad] = useState<{ event: NormalizedEvent; image: string } | null>(null)
+
+  const buildEventCtx = (evt: NormalizedEvent, img: string): TemplateContext => ({
+    title: evt.title,
+    date: evt.date ?? undefined,
+    time: evt.time ?? undefined,
+    venue: evt.venue ?? undefined,
+    category: evt.category ?? undefined,
+    imageUrl: img || undefined,
+    tagline: evt.about ?? undefined,
+    cta: 'abqunplugged.com',
+  })
+
+  const doLoadEvent = (evt: NormalizedEvent, img: string) => {
+    const poster = TEMPLATES.find(t => t.id === 'poster')
+    if (poster) {
+      loadDesign(poster.build(buildEventCtx(evt, img)))
+      setMode('event')
+    }
+  }
+
+  // When an event is first loaded, auto-populate the Poster template.
+  // If the canvas has in-progress work, ask before overwriting.
   useEffect(() => {
-    if (event && lastEventIdRef.current !== event.id) {
+    if (!event) return
+    if (lastEventIdRef.current === event.id) return
+
+    const hasWork = design.slides.some(s => s.layers.length > 0)
+    const isFirstLoad = lastEventIdRef.current === null
+
+    if (hasWork && !isFirstLoad) {
+      // Canvas has content from a previous session — confirm before replacing
+      setPendingLoad({ event, image })
+    } else {
       lastEventIdRef.current = event.id
-      const poster = TEMPLATES.find(t => t.id === 'poster')
-      if (poster) {
-        loadDesign(poster.build({
-          title: event.title,
-          date: event.date,
-          time: event.time ?? undefined,
-          venue: event.venue ?? undefined,
-          category: event.category ?? undefined,
-          imageUrl: image || undefined,
-          tagline: event.about ?? undefined,
-          cta: 'abqunplugged.com',
-        }))
-        setMode('event')
-      }
+      doLoadEvent(event, image)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [event?.id, image])
+
+  const confirmPendingLoad = () => {
+    if (!pendingLoad) return
+    lastEventIdRef.current = pendingLoad.event.id
+    doLoadEvent(pendingLoad.event, pendingLoad.image)
+    setPendingLoad(null)
+  }
 
   return (
     <div className="space-y-4">
@@ -64,12 +91,36 @@ export function IGEditor({ event, image }: Props) {
         <p className="text-white/40 text-sm mt-1">
           {mode === 'event'
             ? 'Canvas-based editor with full customization, layers, and carousel export.'
-            : 'Design any promo post from scratch — templates, fonts, colors, and graphics.'}
+            : 'Design any promo post from scratch — brand templates, fonts, colors, and graphics.'}
         </p>
       </div>
 
       {/* Event loader */}
       <QuickPostInput />
+
+      {/* Pending load confirmation */}
+      {pendingLoad && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 flex items-center gap-3 flex-wrap">
+          <p className="text-sm text-amber-200 flex-1 min-w-0">
+            Load <span className="font-semibold">&ldquo;{pendingLoad.event.title}&rdquo;</span> into the Poster template?
+            {' '}This replaces your current canvas work.
+          </p>
+          <div className="flex gap-2 flex-shrink-0">
+            <button
+              onClick={confirmPendingLoad}
+              className="text-xs px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-black rounded font-bold transition-colors"
+            >
+              Replace
+            </button>
+            <button
+              onClick={() => { lastEventIdRef.current = pendingLoad.event.id; setPendingLoad(null) }}
+              className="text-xs px-3 py-1.5 bg-white/10 hover:bg-white/15 text-white rounded transition-colors"
+            >
+              Keep current
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Toolbar */}
       <Toolbar mode={mode} onModeChange={setMode} canvasRef={canvasRef} event={event} image={image} />
@@ -80,7 +131,7 @@ export function IGEditor({ event, image }: Props) {
         <div className="flex-1 min-w-0 flex flex-col gap-3">
           <PostCanvas onExportRef={h => { canvasRef.current = h }} />
           <p className="text-[11px] text-white/30 text-center">
-            Click an element to edit · drag to move · corner handles to resize/rotate · click empty space to deselect
+            Click to select · drag to move · corner handles to resize/rotate · Delete key removes selected · ⌘Z undo
           </p>
         </div>
         <DesignPanel />
@@ -94,7 +145,9 @@ export function IGEditor({ event, image }: Props) {
 
       {/* Footer hint */}
       <p className="text-[10px] text-white/25 text-center pt-4">
-        {design.slides.length > 1 ? `Carousel: ${design.slides.length} slides · use the carousel export to download as ZIP` : 'Use Save to store this design · Download for a single PNG'}
+        {design.slides.length > 1
+          ? `Carousel: ${design.slides.length} slides · use Export ZIP to download all slides`
+          : 'Use Save to store this design · Download for a single PNG'}
       </p>
     </div>
   )

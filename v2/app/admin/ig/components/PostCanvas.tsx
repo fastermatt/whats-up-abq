@@ -9,6 +9,36 @@ import { CANVAS_DIMS } from '../types'
 import { useEditor } from '../store'
 import { proxyIfNeeded } from '../lib/image-proxy'
 
+// Global keyboard shortcuts — Delete removes selected layer, ⌘Z/⌘⇧Z undo/redo, Escape deselects.
+// Skipped when focus is inside an input/textarea/select (user is typing in the design panel).
+function useCanvasKeyboard() {
+  const { selectedLayerId, removeLayer, selectLayer, undo, redo } = useEditor()
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const active = document.activeElement
+      if (
+        active instanceof HTMLInputElement ||
+        active instanceof HTMLTextAreaElement ||
+        active instanceof HTMLSelectElement
+      ) return
+
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (selectedLayerId) { e.preventDefault(); removeLayer(selectedLayerId) }
+        return
+      }
+      if (e.key === 'Escape') {
+        selectLayer(null)
+        return
+      }
+      const mod = e.metaKey || e.ctrlKey
+      if (mod && !e.shiftKey && e.key === 'z') { e.preventDefault(); undo(); return }
+      if (mod && ((e.shiftKey && e.key === 'z') || e.key === 'y')) { e.preventDefault(); redo(); return }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [selectedLayerId, removeLayer, selectLayer, undo, redo])
+}
+
 // ── Background renderer ──────────────────────────────────────────────────
 
 function Background({ slide, w, h }: { slide: Slide; w: number; h: number }) {
@@ -218,6 +248,7 @@ const CANVAS_FONTS = [
 
 export function PostCanvas({ onExportRef }: { onExportRef?: (h: PostCanvasHandle) => void }) {
   const { design, activeSlideIndex, selectedLayerId, selectLayer, updateLayer } = useEditor()
+  useCanvasKeyboard()
   const slide = design.slides[activeSlideIndex]
   const { w: cW, h: cH } = CANVAS_DIMS[design.format]
 

@@ -24,16 +24,26 @@ const emptyDesign = (format: CanvasFormat = '4:5'): Design => ({
   updatedAt: Date.now(),
 })
 
+const MAX_HISTORY = 20
+
 interface EditorState {
   design: Design
   activeSlideIndex: number
   selectedLayerId: string | null
+  past: Design[]
+  future: Design[]
 
   // ── Design actions
   newDesign: (format?: CanvasFormat) => void
   loadDesign: (d: Design) => void
   renameDesign: (name: string) => void
   setFormat: (format: CanvasFormat) => void
+
+  // ── History
+  undo: () => void
+  redo: () => void
+  canUndo: () => boolean
+  canRedo: () => boolean
 
   // ── Slide actions
   addSlide: () => void
@@ -54,27 +64,85 @@ interface EditorState {
   getActiveSlide: () => Slide
 }
 
+// Inline snapshot helper — used inside set() calls for structural mutations
+const pushHistory = (design: Design, past: Design[]): Design[] =>
+  [...past.slice(-(MAX_HISTORY - 1)), design]
+
 export const useEditor = create<EditorState>((set, get) => ({
   design: emptyDesign(),
   activeSlideIndex: 0,
   selectedLayerId: null,
+  past: [],
+  future: [],
+
+  // ── History ──────────────────────────────────────────────────────────────
+
+  undo: () =>
+    set(state => {
+      if (state.past.length === 0) return state
+      const prev = state.past[state.past.length - 1]
+      return {
+        design: prev,
+        past: state.past.slice(0, -1),
+        future: [state.design, ...state.future.slice(0, MAX_HISTORY - 1)],
+        selectedLayerId: null,
+      }
+    }),
+
+  redo: () =>
+    set(state => {
+      if (state.future.length === 0) return state
+      const next = state.future[0]
+      return {
+        design: next,
+        past: pushHistory(state.design, state.past),
+        future: state.future.slice(1),
+        selectedLayerId: null,
+      }
+    }),
+
+  canUndo: () => get().past.length > 0,
+  canRedo: () => get().future.length > 0,
+
+  // ── Design actions ────────────────────────────────────────────────────────
 
   newDesign: (format = '4:5') =>
-    set({ design: emptyDesign(format), activeSlideIndex: 0, selectedLayerId: null }),
+    set(state => ({
+      past: pushHistory(state.design, state.past),
+      future: [],
+      design: emptyDesign(format),
+      activeSlideIndex: 0,
+      selectedLayerId: null,
+    })),
 
   loadDesign: (d) =>
-    set({ design: { ...d, updatedAt: Date.now() }, activeSlideIndex: 0, selectedLayerId: null }),
+    set(state => ({
+      past: pushHistory(state.design, state.past),
+      future: [],
+      design: { ...d, updatedAt: Date.now() },
+      activeSlideIndex: 0,
+      selectedLayerId: null,
+    })),
 
+  // renameDesign is NOT undoable — it's an administrative action
   renameDesign: (name) =>
     set(state => ({ design: { ...state.design, name, updatedAt: Date.now() } })),
 
   setFormat: (format) =>
-    set(state => ({ design: { ...state.design, format, updatedAt: Date.now() } })),
+    set(state => ({
+      past: pushHistory(state.design, state.past),
+      future: [],
+      design: { ...state.design, format, updatedAt: Date.now() },
+    })),
+
+  // ── Slide actions ─────────────────────────────────────────────────────────
 
   addSlide: () =>
     set(state => {
       const slides = [...state.design.slides, emptySlide()]
       return {
+        past: pushHistory(state.design, state.past),
+        future: [],
         design: { ...state.design, slides, updatedAt: Date.now() },
         activeSlideIndex: slides.length - 1,
       }
@@ -86,6 +154,8 @@ export const useEditor = create<EditorState>((set, get) => ({
       const slides = state.design.slides.filter((_, i) => i !== index)
       const activeSlideIndex = Math.max(0, Math.min(state.activeSlideIndex, slides.length - 1))
       return {
+        past: pushHistory(state.design, state.past),
+        future: [],
         design: { ...state.design, slides, updatedAt: Date.now() },
         activeSlideIndex,
       }
@@ -98,8 +168,14 @@ export const useEditor = create<EditorState>((set, get) => ({
       const slides = state.design.slides.map((s, i) =>
         i === state.activeSlideIndex ? { ...s, background: bg } : s
       )
-      return { design: { ...state.design, slides, updatedAt: Date.now() } }
+      return {
+        past: pushHistory(state.design, state.past),
+        future: [],
+        design: { ...state.design, slides, updatedAt: Date.now() },
+      }
     }),
+
+  // ── Layer actions ─────────────────────────────────────────────────────────
 
   addLayer: (partial) => {
     const id = uid()
@@ -112,6 +188,8 @@ export const useEditor = create<EditorState>((set, get) => ({
         i === state.activeSlideIndex ? { ...s, layers: [...s.layers, layer] } : s
       )
       return {
+        past: pushHistory(state.design, state.past),
+        future: [],
         design: { ...state.design, slides, updatedAt: Date.now() },
         selectedLayerId: id,
       }
@@ -119,6 +197,8 @@ export const useEditor = create<EditorState>((set, get) => ({
     return id
   },
 
+  // updateLayer is NOT individually undoable — too fine-grained (fired on every keystroke).
+  // Users get undo for structural actions (add/remove/duplicate/reorder/load).
   updateLayer: (id, patch) =>
     set(state => {
       const slides = state.design.slides.map((s, i) => {
@@ -139,6 +219,8 @@ export const useEditor = create<EditorState>((set, get) => ({
           : s
       )
       return {
+        past: pushHistory(state.design, state.past),
+        future: [],
         design: { ...state.design, slides, updatedAt: Date.now() },
         selectedLayerId: state.selectedLayerId === id ? null : state.selectedLayerId,
       }
@@ -154,6 +236,8 @@ export const useEditor = create<EditorState>((set, get) => ({
         i === state.activeSlideIndex ? { ...s, layers: [...s.layers, copy] } : s
       )
       return {
+        past: pushHistory(state.design, state.past),
+        future: [],
         design: { ...state.design, slides, updatedAt: Date.now() },
         selectedLayerId: copy.id,
       }
@@ -173,7 +257,11 @@ export const useEditor = create<EditorState>((set, get) => ({
         else                             layers.unshift(layer)
         return { ...s, layers }
       })
-      return { design: { ...state.design, slides, updatedAt: Date.now() } }
+      return {
+        past: pushHistory(state.design, state.past),
+        future: [],
+        design: { ...state.design, slides, updatedAt: Date.now() },
+      }
     }),
 
   selectLayer: (id) => set({ selectedLayerId: id }),
@@ -204,7 +292,8 @@ export function makeTextLayer(partial: Partial<TextLayer> = {}): Omit<TextLayer,
     opacity: partial.opacity ?? 1,
     visible: partial.visible ?? true,
     locked: partial.locked ?? false,
-    fontFamily: partial.fontFamily ?? 'var(--font-epilogue), Epilogue, sans-serif',
+    // NOTE: no var(--font-*) prefix — canvas 2D does not resolve CSS custom properties
+    fontFamily: partial.fontFamily ?? 'Epilogue, sans-serif',
     fontSize: partial.fontSize ?? 80,
     fontWeight: partial.fontWeight ?? 900,
     fontStyle: partial.fontStyle ?? 'normal',
