@@ -122,7 +122,9 @@ export function PromoCard({ variant, label, count, tonightCount, tonightEvents }
           disabled={busy}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
             bg-white/[0.06] text-white/50 hover:bg-[#9a442d] hover:text-white
-            transition-all active:scale-95 disabled:opacity-40"
+            transition-all active:scale-95 disabled:opacity-40
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9a442d]
+            focus-visible:ring-offset-2 focus-visible:ring-offset-[#201c1a]"
         >
           {busy
             ? <Loader2 size={12} className="animate-spin" />

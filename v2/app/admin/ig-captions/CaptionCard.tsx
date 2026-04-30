@@ -60,6 +60,11 @@ export function CaptionCard({ caption, label, sublabel }: Props) {
       <pre className="text-white/70 text-sm whitespace-pre-wrap leading-relaxed font-sans border-t border-white/[0.06] pt-3 group-hover:text-white/80 transition-colors">
         {caption}
       </pre>
+
+      {/* Screen-reader announcement for copy state */}
+      <span role="status" aria-live="polite" className="sr-only">
+        {copied ? 'Caption copied to clipboard' : ''}
+      </span>
     </div>
   )
 }

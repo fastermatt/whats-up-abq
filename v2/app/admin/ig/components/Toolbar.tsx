@@ -40,8 +40,7 @@ function downloadBlob(blob: Blob, filename: string) {
 export function Toolbar({ mode, onModeChange, canvasRef, event, image }: ToolbarProps) {
   const { design, loadDesign, renameDesign } = useEditor()
   const [showTemplates, setShowTemplates] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [savedAt, setSavedAt] = useState<number | null>(null)
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
 
   const eventCtx = (): TemplateContext => ({
     title: event?.title, date: event?.date ?? undefined, time: event?.time ?? undefined,
@@ -60,12 +59,15 @@ export function Toolbar({ mode, onModeChange, canvasRef, event, image }: Toolbar
   }
 
   const doSave = async () => {
-    setSaving(true)
+    setSaveState('saving')
     try {
       const thumb = canvasRef.current ? await canvasRef.current.exportPng() : undefined
       saveDesign(design, thumb)
-      setSavedAt(Date.now())
-    } finally { setSaving(false) }
+      setSaveState('saved')
+      setTimeout(() => setSaveState('idle'), 2000)
+    } catch {
+      setSaveState('idle')
+    }
   }
 
   const exportPng = async () => {
@@ -141,9 +143,9 @@ export function Toolbar({ mode, onModeChange, canvasRef, event, image }: Toolbar
       <span className="text-[11px] text-white/40">{design.slides.length} slide{design.slides.length > 1 ? 's' : ''} · {design.format}</span>
       <span className="flex-1" />
 
-      <button onClick={doSave} disabled={saving}
+      <button onClick={doSave} disabled={saveState === 'saving'}
         className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] rounded text-xs font-semibold text-white/80 disabled:opacity-50">
-        <Save size={13} /> {saving ? 'Saving…' : savedAt && Date.now() - savedAt < 2000 ? 'Saved!' : 'Save'}
+        <Save size={13} /> {saveState === 'saving' ? 'Saving…' : saveState === 'saved' ? 'Saved ✓' : 'Save'}
       </button>
 
       <button onClick={exportPng}

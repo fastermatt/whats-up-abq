@@ -1,17 +1,17 @@
 /**
- * Admin — Instagram Captions Generator
+ * Admin — Instagram Posts
  *
- * Three sections:
- *   1. Site Promo — 6 distinct visual cards (downloadable PNG) + matching caption text
- *   2. Weekly Round-Ups — tonight's picks + weekly digest caption
- *   3. Event Spotlights — per-event thumbnail, card designer links, 4 caption styles
+ * Sections in priority order:
+ *   1. Event Spotlights — per-event branded cards + 4 caption styles (searchable client-side)
+ *   2. Round-Up Posts   — Tonight's picks + weekly digest (live data, updates daily)
+ *   3. Site Promo Posts — 6 brand designs for site-promotion content
  */
 import { fetchEvents, fetchTonightRanked, NormalizedEvent } from '@/lib/events'
 import { CaptionCard } from './CaptionCard'
 import { PromoCard, PromoVariant } from './PromoCard'
 import { RoundUpCard } from './RoundUpCard'
-import { EventSpotlightCard } from './EventSpotlightCard'
 import { QuickPostInput } from './QuickPostInput'
+import { EventSpotlightsList, type SpotlightItem } from './EventSpotlightsList'
 
 export const dynamic = 'force-dynamic'
 
@@ -60,7 +60,7 @@ function shortDate(dateStr: string): string {
   })
 }
 
-// ─── Site promo captions (text only — visual is handled by PromoCard) ──────────
+// ─── Site promo captions ──────────────────────────────────────────────────────
 
 interface PromoEntry { variant: PromoVariant; label: string; description: string; caption: string }
 
@@ -203,11 +203,10 @@ ${BASE_TAGS} #ABQEvents #AlbuquerqueWeek #WhatsHappeningABQ`
 // ─── Event captions (4 styles) ────────────────────────────────────────────────
 
 type CaptionStyle = 'standard' | 'hype' | 'spotlight' | 'minimal'
-const EVENT_STYLES: CaptionStyle[] = ['standard', 'hype', 'spotlight', 'minimal']
 
 function buildEventCaption(event: NormalizedEvent, style: CaptionStyle): string {
-  const emoji   = catEmoji(event.category)
-  const tags    = [BASE_TAGS, catTags(event.category)].filter(Boolean).join('\n')
+  const emoji    = catEmoji(event.category)
+  const tags     = [BASE_TAGS, catTags(event.category)].filter(Boolean).join('\n')
   const priceStr = event.price ? `\n💵 ${event.price}` : ''
   const venueStr = event.venue ? `📍 ${event.venue}` : '📍 Albuquerque'
   const dateStr  = event.date  ? `📅 ${friendlyDate(event.date)}` : ''
@@ -226,7 +225,8 @@ ${dateStr}${timeStr}${priceStr}${ticketStr}
 ${tags}`
 
     case 'hype':
-      return `${emoji} ${event.title.toUpperCase()} IS COMING TO ABQ!
+      // Note: title stays in title case — all-caps performs worse in feed captions
+      return `${emoji} ${event.title} is coming to ABQ!
 
 Don't miss it — ${event.venue ? `${event.venue}, ` : ''}${event.date ? friendlyDate(event.date) : 'coming up'}${timeStr}.${priceStr}
 
@@ -264,20 +264,44 @@ export default async function IGCaptionsPage() {
     fetchEvents({ timeFilter: 'upcoming', limit: 60 }),
   ])
 
-  const promos          = buildPromos(total, tonightEvents.length)
-  const tonightRoundup  = buildTonightRoundup(tonightEvents)
-  const weeklyRoundup   = buildWeeklyRoundup(upcomingEvents)
-  const spotlightEvents = upcomingEvents.filter(e => e.title && e.date).slice(0, 30)
+  const promos         = buildPromos(total, tonightEvents.length)
+  const tonightRoundup = buildTonightRoundup(tonightEvents)
+  const weeklyRoundup  = buildWeeklyRoundup(upcomingEvents)
 
-  // Tonight events shaped for PromoCard
+  // Pre-compute all spotlight data server-side so the client component is pure display
+  const rawSpotlights = upcomingEvents.filter(e => e.title && e.date).slice(0, 40)
+  const spotlightItems: SpotlightItem[] = rawSpotlights.map(event => ({
+    id:        event.id,
+    title:     event.title,
+    category:  event.category,
+    dateLabel: event.date ? friendlyDate(event.date) : null,
+    time:      event.time,
+    venue:     event.venue,
+    price:     event.price,
+    imageUrl:  event.imageUrl,
+    emoji:     catEmoji(event.category),
+    metaLine:  [
+      event.date ? friendlyDate(event.date) : null,
+      event.time,
+      event.venue,
+      event.price,
+    ].filter(Boolean).join(' · '),
+    captions: {
+      standard:  buildEventCaption(event, 'standard'),
+      hype:      buildEventCaption(event, 'hype'),
+      spotlight: buildEventCaption(event, 'spotlight'),
+      minimal:   buildEventCaption(event, 'minimal'),
+    },
+  }))
+
   const tonightForCard = tonightEvents.slice(0, 5).map(e => ({
     title: e.title, category: e.category, venue: e.venue, time: e.time,
   }))
 
   return (
-    <div className="space-y-16">
+    <div className="space-y-12">
 
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      {/* ── Header ──────────────────────────────────────────────────────────── */}
       <div>
         <h1
           className="text-3xl font-black text-white mb-1"
@@ -286,74 +310,58 @@ export default async function IGCaptionsPage() {
           Instagram Posts
         </h1>
         <p className="text-white/50 text-sm mb-3">
-          Download the image, then copy the caption — paste both into Instagram.
+          Find an event below → download the card → copy a caption → paste into Instagram.
         </p>
-        <div className="flex gap-4 text-xs text-white/30 mb-4">
+        <div className="flex flex-wrap gap-4 text-xs text-white/30 mb-4">
           <span>📊 {total} upcoming events</span>
           <span>🌙 {tonightEvents.length} tonight</span>
-          <span>🎟️ {spotlightEvents.length} event spotlights</span>
+          <span>🎴 {spotlightItems.length} event cards ready</span>
         </div>
-        {/* Quick URL-to-card shortcut */}
+
+        {/* Quick URL-to-canvas shortcut */}
         <QuickPostInput />
       </div>
 
-      {/* ── Section 1: Site Promo Posts ─────────────────────────────────────── */}
-      <section>
-        <div className="mb-6">
+      {/* ── Section nav ─────────────────────────────────────────────────────── */}
+      <nav className="flex gap-1 pb-4 border-b border-white/[0.07]" aria-label="Jump to section">
+        {[
+          { href: '#events',   label: 'Event Spotlights', badge: spotlightItems.length },
+          { href: '#roundups', label: 'Round-Ups',         badge: null },
+          { href: '#promo',    label: 'Site Promo',        badge: 6 },
+        ].map(({ href, label, badge }) => (
+          <a
+            key={href}
+            href={href}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
+              text-white/50 hover:text-white hover:bg-white/[0.06] transition-colors"
+          >
+            {label}
+            {badge !== null && (
+              <span className="text-[10px] text-white/25 tabular-nums">{badge}</span>
+            )}
+          </a>
+        ))}
+      </nav>
+
+      {/* ── Section 1: Event Spotlights ─────────────────────────────────────── */}
+      <section id="events" className="scroll-mt-4">
+        <div className="mb-5">
           <h2
             className="text-xl font-black text-white mb-1"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
-            Site Promo Posts
+            Event Spotlights
           </h2>
           <p className="text-xs text-white/30">
-            6 distinct designs — mix these throughout the week. Download the image, copy the caption.
+            {spotlightItems.length} upcoming events · 4:5 portrait or 1:1 square · 4 caption styles · search to jump to any event.
           </p>
         </div>
-
-        <div className="space-y-10">
-          {promos.map(({ variant, label, description, caption }) => (
-            <div
-              key={variant}
-              className="bg-[#201c1a] border border-white/[0.07] rounded-2xl p-5 space-y-5"
-            >
-              {/* Variant label */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-white/20 bg-white/[0.04] rounded px-2 py-0.5">
-                  Design {variant + 1} of 6
-                </span>
-                <span className="text-xs text-white/30">{description}</span>
-              </div>
-
-              <div className="flex flex-col lg:flex-row gap-6">
-                {/* Visual card + download */}
-                <div className="shrink-0">
-                  <PromoCard
-                    variant={variant}
-                    label={label}
-                    count={total}
-                    tonightCount={tonightEvents.length}
-                    tonightEvents={tonightForCard}
-                  />
-                </div>
-
-                {/* Caption */}
-                <div className="flex-1 min-w-0">
-                  <CaptionCard
-                    label="Caption"
-                    sublabel="Copy & paste into Instagram"
-                    caption={caption}
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <EventSpotlightsList events={spotlightItems} />
       </section>
 
-      {/* ── Section 2: Round-Up Posts ──────────────────────────────────────── */}
-      <section>
-        <div className="mb-6">
+      {/* ── Section 2: Round-Up Posts ─────────────────────────────────────── */}
+      <section id="roundups" className="scroll-mt-4">
+        <div className="mb-5">
           <h2
             className="text-xl font-black text-white mb-1"
             style={{ fontFamily: 'var(--font-epilogue)' }}
@@ -361,16 +369,15 @@ export default async function IGCaptionsPage() {
             Round-Up Posts
           </h2>
           <p className="text-xs text-white/30">
-            Refresh these daily/weekly. Tonight&apos;s picks update in real time.
+            Tonight&apos;s picks update in real time. Use these daily or weekly.
           </p>
         </div>
 
         <div className="space-y-8">
-          {/* Tonight */}
           {tonightRoundup && (
             <div className="bg-[#201c1a] border border-white/[0.07] rounded-2xl p-5 space-y-5">
               <p className="text-xs text-white/30">
-                🌙 Tonight's picks — image + caption ready to paste into Instagram
+                🌙 Tonight&apos;s picks — image + caption ready to paste into Instagram
               </p>
               <div className="flex flex-col lg:flex-row gap-6">
                 <div className="shrink-0">
@@ -391,7 +398,6 @@ export default async function IGCaptionsPage() {
             </div>
           )}
 
-          {/* Weekly */}
           {weeklyRoundup && (
             <div className="bg-[#201c1a] border border-white/[0.07] rounded-2xl p-5 space-y-5">
               <p className="text-xs text-white/30">
@@ -424,80 +430,49 @@ export default async function IGCaptionsPage() {
         </div>
       </section>
 
-      {/* ── Section 3: Event Spotlights ────────────────────────────────────── */}
-      <section>
+      {/* ── Section 3: Site Promo Posts ───────────────────────────────────── */}
+      <section id="promo" className="scroll-mt-4">
         <div className="mb-6">
           <h2
             className="text-xl font-black text-white mb-1"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
-            Event Spotlights
+            Site Promo Posts
           </h2>
           <p className="text-xs text-white/30">
-            {spotlightEvents.length} upcoming events · click a format button to open the card designer,
-            customize, and download the image — then copy the caption.
+            6 distinct designs — mix these throughout the week to build the brand.
           </p>
         </div>
 
         <div className="space-y-10">
-          {spotlightEvents.map((event, i) => (
+          {promos.map(({ variant, label, description, caption }) => (
             <div
-              key={event.id}
+              key={variant}
               className="bg-[#201c1a] border border-white/[0.07] rounded-2xl p-5 space-y-5"
             >
-              {/* Event header */}
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-lg">{catEmoji(event.category)}</span>
-                    <p className="text-base font-bold text-white truncate">{event.title}</p>
-                  </div>
-                  <p className="text-xs text-white/40">
-                    {event.date ? friendlyDate(event.date) : ''}
-                    {event.time ? ` · ${event.time}` : ''}
-                    {event.venue ? ` · ${event.venue}` : ''}
-                    {event.price ? ` · ${event.price}` : ''}
-                  </p>
-                </div>
-                <span className="shrink-0 text-[10px] text-white/15 mt-1">#{i + 1}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-white/20 bg-white/[0.04] rounded px-2 py-0.5">
+                  Design {variant + 1} of 6
+                </span>
+                <span className="text-xs text-white/30">{description}</span>
               </div>
 
-              {/* Image card + captions side by side */}
               <div className="flex flex-col lg:flex-row gap-6">
-                {/* Downloadable branded image card */}
                 <div className="shrink-0">
-                  <EventSpotlightCard
-                    title={event.title}
-                    category={event.category}
-                    dateLabel={event.date ? friendlyDate(event.date) : null}
-                    time={event.time}
-                    venue={event.venue}
-                    price={event.price}
-                    imageUrl={event.imageUrl}
-                    eventId={event.id}
+                  <PromoCard
+                    variant={variant}
+                    label={label}
+                    count={total}
+                    tonightCount={tonightEvents.length}
+                    tonightEvents={tonightForCard}
                   />
                 </div>
-
-                {/* 4 caption styles */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-white/25 font-semibold mb-3">
-                    Caption Options
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {EVENT_STYLES.map(style => (
-                      <CaptionCard
-                        key={style}
-                        label={style.charAt(0).toUpperCase() + style.slice(1)}
-                        sublabel={
-                          style === 'standard'  ? 'Clear & informative' :
-                          style === 'hype'      ? 'High energy, FOMO-driven' :
-                          style === 'spotlight' ? 'Editorial, descriptive' :
-                                                 'Short & punchy'
-                        }
-                        caption={buildEventCaption(event, style)}
-                      />
-                    ))}
-                  </div>
+                  <CaptionCard
+                    label="Caption"
+                    sublabel="Copy & paste into Instagram"
+                    caption={caption}
+                  />
                 </div>
               </div>
             </div>

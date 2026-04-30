@@ -180,6 +180,13 @@ export default async function AdminEventsPage({ searchParams }: PageProps) {
               <QuickFeaturedButton eventId={event.id} featured={event.featured} />
               <QuickHideButton eventId={event.id} hidden={event.hidden} />
               <Link
+                href={`/admin/ig?id=${event.id}`}
+                className="text-xs px-2.5 py-1 bg-[#9a442d]/15 text-[#9a442d] rounded-lg hover:bg-[#9a442d]/30 transition-colors"
+                title="Create Instagram post"
+              >
+                📸
+              </Link>
+              <Link
                 href={`/admin/events/${event.id}`}
                 className="text-xs px-3 py-1 bg-white/10 rounded-lg hover:bg-white/15 transition-colors"
               >
