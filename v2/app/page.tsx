@@ -15,18 +15,16 @@ import { getFeaturedPlaces, PLACE_CATEGORIES, type Place } from '@/data/places'
 
 // Rotates hourly (server-side, ISR updates within 60s of the hour turning)
 const HERO_SAYINGS = [
-  'A small town pretending to be a city.',
-  'Sun 300 days a year. We still eat inside.',
-  'The Sandias turn pink at dusk. Every single night.',
-  'Green chile on everything. That’s the whole philosophy.',
-  'An hour from Santa Fe. Light years from pretentious.',
-  'One balloon festival a year. The whole city loses it.',
-  'Where the Rio Grande runs through the backyard.',
-  'Good shows in smaller rooms than you’d expect.',
-  'Old Town for tourists. Nob Hill for everyone else.',
-  'Named after a duke. Still eats at the truck by the road.',
-  '505 area code. One city. Zero confusion.',
-  'There’s always something on Central.',
+  "Burque’s better in person.",
+  "Stop scrolling. Start showing up.",
+  "ABQ is happening.",
+  "Your couch can wait.",
+  "Less screen. More scene.",
+  "Find your people, Burque.",
+  "Go make tonight happen.",
+  "Red, green, or something to do?",
+  "This hour looks good on ABQ.",
+  "Get out there, eh.",
 ]
 
 export const revalidate = 60
@@ -109,8 +107,6 @@ export default async function DiscoverPage() {
   const abqHour = parseInt(
     now.toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: 'America/Denver' })
   )
-  const greeting =
-    abqHour < 12 ? 'Good morning' : abqHour < 17 ? 'Good afternoon' : 'Good evening'
   const heroSaying = HERO_SAYINGS[abqHour % HERO_SAYINGS.length]
 
   return (
@@ -132,176 +128,78 @@ export default async function DiscoverPage() {
           style={{ background: 'linear-gradient(to bottom, transparent 40%, rgba(195,155,115,.22) 100%)' }}
         />
 
-        {/* Terra map — visible across the center, fades at both edges */}
+        {/* Real ABQ street map — fades at both edges and top/bottom */}
         <div
           className="absolute inset-0 pointer-events-none overflow-hidden"
           style={{
             maskImage:
-              'linear-gradient(to right, transparent 0%, rgba(0,0,0,.5) 15%, black 35%, black 72%, rgba(0,0,0,.2) 90%, transparent 100%), ' +
+              'linear-gradient(to right, transparent 0%, rgba(0,0,0,.45) 14%, black 32%, black 70%, rgba(0,0,0,.18) 88%, transparent 100%), ' +
               'linear-gradient(to bottom, transparent 0%, black 8%, black 90%, transparent 100%)',
             maskComposite: 'intersect',
             WebkitMaskImage:
-              'linear-gradient(to right, transparent 0%, rgba(0,0,0,.5) 15%, black 35%, black 72%, rgba(0,0,0,.2) 90%, transparent 100%), ' +
+              'linear-gradient(to right, transparent 0%, rgba(0,0,0,.45) 14%, black 32%, black 70%, rgba(0,0,0,.18) 88%, transparent 100%), ' +
               'linear-gradient(to bottom, transparent 0%, black 8%, black 90%, transparent 100%)',
             WebkitMaskComposite: 'source-in',
           }}
         >
+          {/* Panning container — map drifts slowly east→west */}
           <div className="absolute animate-map-pan" style={{ top: '-15%', bottom: '-15%', left: '-6%', right: '-6%' }}>
-            <svg
-              viewBox="-900 -420 3000 1800"
-              preserveAspectRatio="xMidYMid slice"
+            {/* Real ABQ street map, CSS-filtered to warm terra tone */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/abq-map-bg.svg"
+              alt=""
               aria-hidden="true"
-              className="absolute inset-0 w-full h-full"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              {/* Sandia — outline only, no fill, so it doesn't dominate */}
-              <path
-                d="M 1080,900 L 1108,792 L 1130,682 L 1152,572 L 1170,468 L 1188,372
-                   L 1206,288 L 1222,218 L 1240,160"
-                fill="none" stroke="#9a442d" strokeWidth="1.5" strokeOpacity="0.16"
-              />
-              <text
-                x="1295" y="420" fill="#9a442d" fillOpacity="0.18"
-                fontSize="13" letterSpacing="3" textAnchor="middle"
-                transform="rotate(-78 1295 420)"
-                style={{ fontFamily: 'ui-monospace, monospace', fontWeight: 700 }}
-              >
-                SANDIA MOUNTAINS
-              </text>
-
-              {/* Rio Grande */}
-              <path
-                d="M 162,0 C 158,80 168,155 160,235 C 153,308 165,380 158,458
-                   C 151,528 163,608 157,685 C 151,755 162,830 158,900"
-                fill="none" stroke="#9a442d" strokeWidth="3.5" strokeOpacity="0.22"
-              />
-              <text
-                x="148" y="465" fill="#9a442d" fillOpacity="0.22"
-                fontSize="7" letterSpacing="1.8" textAnchor="middle"
-                transform="rotate(-90 148 465)"
-                style={{ fontFamily: 'ui-monospace, monospace' }}
-              >
-                RIO GRANDE
-              </text>
-
-              {/* I-25 */}
-              <path
-                d="M 322,0 L 334,180 L 352,340 L 370,450 L 388,620 L 405,800 L 415,900"
-                fill="none" stroke="#9a442d" strokeWidth="2.5" strokeOpacity="0.22"
-              />
-              {/* I-40 */}
-              <path
-                d="M 0,452 L 370,450 L 1040,452"
-                fill="none" stroke="#9a442d" strokeWidth="2.5" strokeOpacity="0.22"
-              />
-
-              {/* Central Avenue — brightest line, the city's spine */}
-              <path
-                d="M 55,491 L 1068,491"
-                fill="none" stroke="#9a442d" strokeWidth="2.8" strokeOpacity="0.55"
-              />
-              <text
-                x="580" y="482" fill="#9a442d" fillOpacity="0.52"
-                fontSize="7" letterSpacing="2.2" textAnchor="middle"
-                style={{ fontFamily: 'ui-monospace, monospace', fontWeight: 600 }}
-              >
-                CENTRAL AVE  ·  ROUTE 66
-              </text>
-
-              {/* E-W secondary streets */}
-              <line x1="80" y1="142" x2="1048" y2="142" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.11" />
-              <line x1="80" y1="218" x2="1048" y2="218" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.11" />
-              <line x1="80" y1="298" x2="1048" y2="298" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.11" />
-              <line x1="80" y1="355" x2="1048" y2="355" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.10" />
-              <line x1="80" y1="404" x2="1048" y2="404" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.09" />
-              <line x1="80" y1="430" x2="1048" y2="430" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.09" />
-              <line x1="80" y1="515" x2="900"  y2="515" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.09" />
-              <line x1="80" y1="560" x2="920"  y2="560" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.11" />
-              <line x1="80" y1="628" x2="800"  y2="628" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.09" />
-
-              {/* N-S secondary streets */}
-              <line x1="96"  y1="0"  x2="96"  y2="900" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.10" />
-              <line x1="200" y1="50" x2="200" y2="900" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.09" />
-              <line x1="232" y1="0"  x2="232" y2="900" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.11" />
-              <line x1="264" y1="60" x2="264" y2="900" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.09" />
-              <line x1="295" y1="80" x2="295" y2="900" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.09" />
-              <line x1="432" y1="0"  x2="432" y2="900" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.11" />
-              <line x1="480" y1="0"  x2="480" y2="750" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.09" />
-              <line x1="560" y1="0"  x2="560" y2="900" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.11" />
-              <line x1="648" y1="0"  x2="648" y2="900" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.11" />
-              <line x1="728" y1="0"  x2="728" y2="850" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.09" />
-              <line x1="802" y1="0"  x2="802" y2="900" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.11" />
-              <line x1="880" y1="0"  x2="880" y2="900" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.11" />
-
-              {/* Landmark dots */}
-              <circle cx="370" cy="450" r="5"   fill="#9a442d" fillOpacity="0.22" />
-              <circle cx="370" cy="450" r="9"   fill="none" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.12" />
-              <circle cx="232" cy="464" r="3.5" fill="#9a442d" fillOpacity="0.16" />
-              <circle cx="332" cy="468" r="3.5" fill="#9a442d" fillOpacity="0.16" />
-              <circle cx="455" cy="502" r="3"   fill="#9a442d" fillOpacity="0.14" />
-              <circle cx="538" cy="491" r="3"   fill="#9a442d" fillOpacity="0.45" />
-
-              {/* Map labels */}
-              <text
-                x="370" y="438" fill="#9a442d" fillOpacity="0.28"
-                fontSize="7" letterSpacing="0.8" textAnchor="middle"
-                style={{ fontFamily: 'ui-monospace, monospace', fontWeight: 700 }}
-              >
-                THE BIG I
-              </text>
-              <text
-                x="232" y="479" fill="#9a442d" fillOpacity="0.22"
-                fontSize="6" letterSpacing="0.5" textAnchor="middle"
-                style={{ fontFamily: 'ui-monospace, monospace' }}
-              >
-                OLD TOWN
-              </text>
-              <text
-                x="343" y="214" fill="#9a442d" fillOpacity="0.18"
-                fontSize="5.5" letterSpacing="0.4" textAnchor="middle"
-                style={{ fontFamily: 'ui-monospace, monospace' }}
-              >
-                BALLOON FIESTA
-              </text>
-            </svg>
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{
+                filter: 'grayscale(1) sepia(0.55) hue-rotate(350deg) saturate(1.4) brightness(0.78)',
+                opacity: 0.32,
+              }}
+            />
           </div>
 
-          {/* Animated route — draws a random A→B path on every load */}
+          {/* Animated route — draws a random A→B path on every load, aligned to the real map */}
           <HeroMapRoute />
         </div>
 
         {/* Hero content */}
         <div className="relative z-10 max-w-6xl mx-auto px-4 pt-7 pb-5">
-          {/* Geographic identifier */}
-          <p
-            className="text-[10px] font-semibold tracking-[0.25em] uppercase mb-3"
-            style={{ color: 'rgba(26,22,20,.38)' }}
-          >
-            Albuquerque, New Mexico
-          </p>
 
-          {/* The identity mark */}
-          <h2
-            className="font-black leading-[0.88] mb-2 animate-hero-kern"
+          {/* Brand mark — compact, terra, above the headline */}
+          <p
+            className="font-black mb-2 animate-fade-in"
             style={{
               fontFamily: 'var(--font-epilogue)',
-              fontSize: 'clamp(52px, 8vw, 96px)',
-              color: '#1a1614',
-              letterSpacing: '-1.5px',
+              fontSize: 'clamp(13px, 1.6vw, 19px)',
+              color: '#9a442d',
+              letterSpacing: '0.06em',
             }}
           >
             The 505.
-          </h2>
+          </p>
 
-          {/* Hourly saying — rotates every hour, server-side */}
-          <p
-            className="font-bold mb-5 animate-hero-text"
+          {/* Functional headline — clear user intent */}
+          <h2
+            className="font-black leading-[0.92] mb-3 animate-hero-kern"
             style={{
               fontFamily: 'var(--font-epilogue)',
-              fontSize: 'clamp(15px, 2.3vw, 26px)',
+              fontSize: 'clamp(30px, 5.5vw, 62px)',
+              color: '#1a1614',
+              letterSpacing: '-0.5px',
+              maxWidth: '640px',
+            }}
+          >
+            Find something to do in Albuquerque.
+          </h2>
+
+          {/* Rotating personality line — hourly, server-side */}
+          <p
+            className="font-semibold mb-5 animate-hero-text"
+            style={{
+              fontFamily: 'var(--font-epilogue)',
+              fontSize: 'clamp(13px, 1.8vw, 19px)',
               color: '#9a442d',
-              letterSpacing: '-0.2px',
+              letterSpacing: '-0.1px',
             }}
           >
             {heroSaying}
