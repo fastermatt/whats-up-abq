@@ -10,7 +10,24 @@ import SurpriseButton from '@/app/components/SurpriseButton'
 
 
 import { ScrollHintManager } from '@/app/components/ScrollHintManager'
+import { HeroMapRoute } from '@/app/components/HeroMapRoute'
 import { getFeaturedPlaces, PLACE_CATEGORIES, type Place } from '@/data/places'
+
+// Rotates hourly (server-side, ISR updates within 60s of the hour turning)
+const HERO_SAYINGS = [
+  'A small town pretending to be a city.',
+  'Sun 300 days a year. We still eat inside.',
+  'The Sandias turn pink at dusk. Every single night.',
+  'Green chile on everything. That’s the whole philosophy.',
+  'An hour from Santa Fe. Light years from pretentious.',
+  'One balloon festival a year. The whole city loses it.',
+  'Where the Rio Grande runs through the backyard.',
+  'Good shows in smaller rooms than you’d expect.',
+  'Old Town for tourists. Nob Hill for everyone else.',
+  'Named after a duke. Still eats at the truck by the road.',
+  '505 area code. One city. Zero confusion.',
+  'There’s always something on Central.',
+]
 
 export const revalidate = 60
 
@@ -94,6 +111,7 @@ export default async function DiscoverPage() {
   )
   const greeting =
     abqHour < 12 ? 'Good morning' : abqHour < 17 ? 'Good afternoon' : 'Good evening'
+  const heroSaying = HERO_SAYINGS[abqHour % HERO_SAYINGS.length]
 
   return (
     <main id="main" className="min-h-dvh bg-[--bg]">
@@ -248,6 +266,9 @@ export default async function DiscoverPage() {
               </text>
             </svg>
           </div>
+
+          {/* Animated route — draws a random A→B path on every load */}
+          <HeroMapRoute />
         </div>
 
         {/* Hero content */}
@@ -273,7 +294,7 @@ export default async function DiscoverPage() {
             The 505.
           </h2>
 
-          {/* The self-description — a Burqueño's honest line */}
+          {/* Hourly saying — rotates every hour, server-side */}
           <p
             className="font-bold mb-5 animate-hero-text"
             style={{
@@ -283,7 +304,7 @@ export default async function DiscoverPage() {
               letterSpacing: '-0.2px',
             }}
           >
-            A small town pretending to be a city.
+            {heroSaying}
           </p>
 
           {/* Search + surprise */}

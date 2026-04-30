@@ -317,6 +317,14 @@ html.scroll-hint-done .scroll-hint-inner {
   will-change: transform; /* GPU-composited — no layout/paint cost per frame */
 }
 
+/* ─── Hero route trace — HeroMapRoute component ─────────────────────── */
+@keyframes drawRoute {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes routeDotIn {
+  to { opacity: 1; }
+}
+
 /* ─── Pulse glow — used on primary CTAs (Surprise Me button) ─────────── */
 /* A subtle ring that expands and fades, drawing the eye to the button.   */
 @keyframes pulse-glow {
