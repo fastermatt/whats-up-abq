@@ -157,105 +157,317 @@ const poster: Template = {
   },
 }
 
-// ── 2. Mesa (terracotta block — no photo required) ───────────────────────
+// ── 2. Broadside (cream, letterpress type-only) ───────────────────────────
 
-const mesa: Template = {
-  id: 'mesa',
-  name: 'Mesa',
-  description: 'Solid terracotta with cream sans-serif. Works without a photo.',
+const broadside: Template = {
+  id: 'broadside',
+  name: 'Broadside',
+  description: 'Letterpress type poster — no photo needed. Maximum typographic punch.',
   build: (ctx) => {
     const { w, h } = CANVAS_DIMS['4:5']
+    const title = ctx.title ?? 'Your Event'
+    const titleSize = title.length < 15 ? 200 : title.length < 25 ? 170 : title.length < 40 ? 145 : 120
+    const dateLine = [formatDate(ctx.date, ctx.time), ctx.venue].filter(Boolean).join('\n')
+    const layers: Layer[] = [
+      shape({ shape: 'rect', x: 80, y: 90, width: 180, height: 5, fill: BRAND_COLORS.terra }),
+      textLayer({
+        name: 'Masthead', text: 'ABQ UNPLUGGED',
+        x: 80, y: 122, width: w - 160,
+        fontFamily: font('DM Mono'), fontSize: 28, fontWeight: 500,
+        fill: BRAND_COLORS.terra, letterSpacing: 4,
+      }),
+      shape({ shape: 'rect', x: 80, y: 188, width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.2 }),
+      textLayer({
+        name: 'Title', text: title,
+        x: 80, y: 230, width: w - 160,
+        fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 900,
+        fill: BRAND_COLORS.ink, lineHeight: 0.88, letterSpacing: -2,
+      }),
+      shape({ shape: 'rect', x: 80, y: 1010, width: w - 160, height: 4, fill: BRAND_COLORS.terra }),
+    ]
+    if (dateLine) {
+      layers.push(textLayer({
+        name: 'Date & Venue', text: dateLine,
+        x: 80, y: 1042, width: w - 160,
+        fontFamily: font('Inter'), fontSize: 40, fontWeight: 600,
+        fill: BRAND_COLORS.ink, lineHeight: 1.3,
+      }))
+    }
+    layers.push(textLayer({
+      name: 'CTA', text: ctx.cta ?? 'abqunplugged.com',
+      x: 80, y: h - 95, width: w - 160,
+      fontFamily: font('DM Mono'), fontSize: 26, fontWeight: 500,
+      fill: BRAND_COLORS.terra, letterSpacing: 3, opacity: 0.85,
+    }))
     return {
-      id: uid(), name: ctx.title ?? 'Mesa post', format: '4:5',
-      slides: [{
-        id: uid(),
-        background: { type: 'color', color: BRAND_COLORS.terra },
-        layers: [
-          shape({ shape: 'rect', x: 80, y: 80, width: 180, height: 10, fill: BRAND_COLORS.sandstone }),
-          textLayer({
-            name: 'Eyebrow', text: (ctx.category ?? 'EVENT').toUpperCase(),
-            x: 80, y: 120, width: w - 160,
-            fontFamily: font('Inter'), fontSize: 36, fontWeight: 700,
-            fill: BRAND_COLORS.sandstone, opacity: 0.85, letterSpacing: 6,
-          }),
-          textLayer({
-            name: 'Title', text: ctx.title ?? 'Your Title Here',
-            x: 80, y: 260, width: w - 160,
-            fontFamily: font('Epilogue'), fontSize: 150, fontWeight: 900,
-            fill: BRAND_COLORS.cream, lineHeight: 0.95,
-          }),
-          textLayer({
-            name: 'Tagline', text: ctx.tagline ?? ctx.venue ?? 'Albuquerque, NM',
-            x: 80, y: h - 340, width: w - 160,
-            fontFamily: font('Fraunces'), fontSize: 60, fontWeight: 400,
-            fontStyle: 'italic',
-            fill: BRAND_COLORS.sandstone, lineHeight: 1.25,
-          }),
-          textLayer({
-            name: 'Date',
-            text: formatDate(ctx.date, ctx.time),
-            x: 80, y: h - 180, width: w - 160,
-            fontFamily: font('DM Mono'), fontSize: 32, fontWeight: 500,
-            fill: BRAND_COLORS.cream, opacity: 0.8, letterSpacing: 2,
-          }),
-          textLayer({
-            name: 'CTA', text: 'abqunplugged.com',
-            x: 80, y: h - 110, width: w - 160,
-            fontFamily: font('DM Mono'), fontSize: 26, fontWeight: 500,
-            fill: BRAND_COLORS.cream, opacity: 0.6, letterSpacing: 3,
-          }),
-        ],
-      }],
+      id: uid(), name: ctx.title ?? 'Broadside post', format: '4:5',
+      slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.cream }, layers }],
       createdAt: Date.now(), updatedAt: Date.now(),
     }
   },
 }
 
-// ── 3. Editorial (cream magazine cover with serif) ────────────────────────
+// ── 3. Marquee (near-black theater marquee) ───────────────────────────────
 
-const editorial: Template = {
-  id: 'editorial',
-  name: 'Editorial',
-  description: 'Magazine-cover serif on cream. Best for spotlights and hidden gems.',
+const marquee: Template = {
+  id: 'marquee',
+  name: 'Marquee',
+  description: 'Theater marquee on near-black. Bold all-caps centered type — no photo needed.',
   build: (ctx) => {
     const { w, h } = CANVAS_DIMS['4:5']
+    const title = (ctx.title ?? 'Your Event').toUpperCase()
+    const titleSize = title.length < 15 ? 220 : title.length < 20 ? 190 : title.length < 30 ? 160 : 130
+    const ruleY = ctx.category ? 248 : 200
+    const titleY = ruleY + 32
+    const layers: Layer[] = []
+    if (ctx.category) {
+      layers.push(textLayer({
+        name: 'Category', text: ctx.category.toUpperCase(),
+        x: 80, y: 180, width: w - 160,
+        fontFamily: font('Inter'), fontSize: 36, fontWeight: 700,
+        fill: BRAND_COLORS.terra, letterSpacing: 6, align: 'center',
+      }))
+    }
+    layers.push(
+      shape({ shape: 'rect', x: 280, y: ruleY, width: 520, height: 2, fill: BRAND_COLORS.terra, opacity: 0.7 }),
+      textLayer({
+        name: 'Title', text: title,
+        x: 80, y: titleY, width: w - 160,
+        fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 900,
+        fill: BRAND_COLORS.cream, lineHeight: 0.88, align: 'center',
+      }),
+      shape({ shape: 'rect', x: 280, y: 950, width: 520, height: 2, fill: BRAND_COLORS.terra, opacity: 0.7 }),
+      textLayer({
+        name: 'Date', text: formatDate(ctx.date, ctx.time),
+        x: 80, y: 980, width: w - 160,
+        fontFamily: font('Inter'), fontSize: 38, fontWeight: 500,
+        fill: BRAND_COLORS.cream, opacity: 0.5, align: 'center',
+      }),
+    )
+    if (ctx.venue) {
+      layers.push(textLayer({
+        name: 'Venue', text: ctx.venue,
+        x: 80, y: 1055, width: w - 160,
+        fontFamily: font('Inter'), fontSize: 34, fontWeight: 400,
+        fill: BRAND_COLORS.cream, opacity: 0.35, align: 'center',
+      }))
+    }
+    layers.push(textLayer({
+      name: 'CTA', text: ctx.cta ?? 'abqunplugged.com',
+      x: 80, y: h - 100, width: w - 160,
+      fontFamily: font('DM Mono'), fontSize: 26, fontWeight: 500,
+      fill: BRAND_COLORS.cream, opacity: 0.25, align: 'center', letterSpacing: 2,
+    }))
+    return {
+      id: uid(), name: ctx.title ?? 'Marquee post', format: '4:5',
+      slides: [{ id: uid(), background: { type: 'color', color: '#0c0b0a' }, layers }],
+      createdAt: Date.now(), updatedAt: Date.now(),
+    }
+  },
+}
+
+// ── 4. Split (photo top half, cream text bottom) ──────────────────────────
+
+const split: Template = {
+  id: 'split',
+  name: 'Split',
+  description: 'Photo top half, cream text bottom. Strongest with a vivid event photo.',
+  build: (ctx) => {
+    const { w, h } = CANVAS_DIMS['4:5']
+    const splitY = Math.round(h * 0.52) // 702
+    const title = ctx.title ?? 'Your Event'
+    const titleSize = title.length < 20 ? 110 : title.length < 35 ? 95 : 80
+    const layers: Layer[] = []
+    if (ctx.imageUrl) {
+      layers.push(imageLayer({ src: ctx.imageUrl, x: 0, y: 0, width: w, height: splitY }))
+    } else {
+      layers.push(shape({ shape: 'rect', x: 0, y: 0, width: w, height: splitY, fill: BRAND_COLORS.terra }))
+      if (ctx.category) {
+        layers.push(textLayer({
+          name: 'Category Block', text: ctx.category,
+          x: 80, y: Math.round(splitY / 2) - 60, width: w - 160,
+          fontFamily: font('Inter'), fontSize: 72, fontWeight: 700,
+          fill: BRAND_COLORS.cream, opacity: 0.85, align: 'center',
+        }))
+      }
+    }
+    layers.push(shape({ shape: 'rect', x: 0, y: splitY, width: w, height: 5, fill: BRAND_COLORS.terra }))
+    const textBaseY = splitY + 50
+    if (ctx.category) {
+      layers.push(textLayer({
+        name: 'Category', text: ctx.category.toUpperCase(),
+        x: 80, y: textBaseY, width: w - 160,
+        fontFamily: font('Inter'), fontSize: 32, fontWeight: 700,
+        fill: BRAND_COLORS.terra, letterSpacing: 5,
+      }))
+    }
+    layers.push(textLayer({
+      name: 'Title', text: title,
+      x: 80, y: textBaseY + (ctx.category ? 58 : 0), width: w - 160,
+      fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 900,
+      fill: BRAND_COLORS.ink, lineHeight: 0.95,
+    }))
+    const dateStr = formatDate(ctx.date, ctx.time)
+    if (dateStr) {
+      layers.push(textLayer({
+        name: 'Date', text: dateStr,
+        x: 80, y: 1158, width: w - 160,
+        fontFamily: font('Inter'), fontSize: 36, fontWeight: 500,
+        fill: BRAND_COLORS.ink, opacity: 0.6,
+      }))
+    }
+    if (ctx.venue) {
+      layers.push(textLayer({
+        name: 'Venue', text: ctx.venue,
+        x: 80, y: 1215, width: w - 160,
+        fontFamily: font('Inter'), fontSize: 32, fontWeight: 400,
+        fill: BRAND_COLORS.ink, opacity: 0.45,
+      }))
+    }
+    layers.push(textLayer({
+      name: 'CTA', text: ctx.cta ?? 'abqunplugged.com',
+      x: 80, y: h - 80, width: w - 160,
+      fontFamily: font('DM Mono'), fontSize: 26, fontWeight: 500,
+      fill: BRAND_COLORS.terra, opacity: 0.7, letterSpacing: 2,
+    }))
+    return {
+      id: uid(), name: ctx.title ?? 'Split post', format: '4:5',
+      slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.cream }, layers }],
+      createdAt: Date.now(), updatedAt: Date.now(),
+    }
+  },
+}
+
+// ── 5. Dispatch (newspaper front page) ────────────────────────────────────
+
+const dispatch: Template = {
+  id: 'dispatch',
+  name: 'Dispatch',
+  description: 'Newspaper front-page aesthetic. Dramatic editorial feel, works with or without a photo.',
+  build: (ctx) => {
+    const { w, h } = CANVAS_DIMS['4:5']
+    const title = ctx.title ?? 'Event of the Year'
+    const titleSize = title.length < 15 ? 155 : title.length < 25 ? 135 : title.length < 40 ? 110 : 90
+    const dateLine = formatDate(ctx.date, ctx.time) ||
+      new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+    const metaText = [ctx.venue, ctx.category].filter(Boolean).join(' · ') || 'Albuquerque, NM'
     const layers: Layer[] = [
       textLayer({
-        name: 'Kicker', text: 'ABQ UNPLUGGED · EDITORIAL',
-        x: 80, y: 90, width: w - 160,
-        fontFamily: font('DM Mono'), fontSize: 26, fontWeight: 500,
-        fill: BRAND_COLORS.terra, letterSpacing: 3,
+        name: 'Masthead', text: 'ABQ DISPATCH',
+        x: 80, y: 80, width: w - 160,
+        fontFamily: font('DM Mono'), fontSize: 28, fontWeight: 500,
+        fill: BRAND_COLORS.terra, letterSpacing: 6, align: 'center',
       }),
-      shape({ shape: 'rect', x: 80, y: 160, width: w - 160, height: 2, fill: BRAND_COLORS.terra, opacity: 0.4 }),
+      shape({ shape: 'rect', x: 80, y: 142, width: w - 160, height: 4, fill: BRAND_COLORS.ink }),
+      shape({ shape: 'rect', x: 80, y: 154, width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.4 }),
       textLayer({
-        name: 'Title', text: ctx.title ?? 'Your Headline',
-        x: 80, y: 220, width: w - 160,
-        fontFamily: font('Fraunces'), fontSize: 140, fontWeight: 900,
-        fill: BRAND_COLORS.ink, lineHeight: 0.95,
+        name: 'Date Line', text: dateLine,
+        x: 80, y: 176, width: w - 160,
+        fontFamily: font('DM Mono'), fontSize: 24, fontWeight: 500,
+        fill: BRAND_COLORS.ink, opacity: 0.45, align: 'center',
+      }),
+      shape({ shape: 'rect', x: 80, y: 222, width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.25 }),
+      textLayer({
+        name: 'Title', text: title,
+        x: 80, y: 258, width: w - 160,
+        fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 900,
+        fill: BRAND_COLORS.ink, lineHeight: 0.9, letterSpacing: -1,
       }),
     ]
     if (ctx.imageUrl) {
-      layers.push(imageLayer({ src: ctx.imageUrl, x: 80, y: h - 720, width: w - 160, height: 460, cornerRadius: 6 }))
+      layers.push(imageLayer({ src: ctx.imageUrl, x: 80, y: 840, width: w - 160, height: 350, cornerRadius: 4 }))
     }
     layers.push(
+      shape({ shape: 'rect', x: 80, y: 1210, width: w - 160, height: 2, fill: BRAND_COLORS.ink, opacity: 0.25 }),
       textLayer({
-        name: 'Caption', text: ctx.tagline ?? ctx.venue ?? '',
-        x: 80, y: h - 230, width: w - 160,
-        fontFamily: font('Fraunces'), fontSize: 38, fontStyle: 'italic', fontWeight: 400,
-        fill: BRAND_COLORS.ink, opacity: 0.7, lineHeight: 1.35,
+        name: 'Meta', text: metaText,
+        x: 80, y: 1228, width: w - 160,
+        fontFamily: font('Inter'), fontSize: 32, fontWeight: 400,
+        fill: BRAND_COLORS.ink, opacity: 0.55,
       }),
       textLayer({
-        name: 'Date', text: formatDate(ctx.date, ctx.time),
-        x: 80, y: h - 130, width: w - 160,
-        fontFamily: font('DM Mono'), fontSize: 28, fontWeight: 500,
-        fill: BRAND_COLORS.terra, letterSpacing: 2,
+        name: 'CTA', text: `Find tickets: ${ctx.cta ?? 'abqunplugged.com'}`,
+        x: 80, y: h - 90, width: w - 160,
+        fontFamily: font('DM Mono'), fontSize: 24, fontWeight: 500,
+        fill: BRAND_COLORS.terra, letterSpacing: 1,
       }),
     )
     return {
-      id: uid(), name: ctx.title ?? 'Editorial post', format: '4:5',
+      id: uid(), name: ctx.title ?? 'Dispatch post', format: '4:5',
+      slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.cream }, layers }],
+      createdAt: Date.now(), updatedAt: Date.now(),
+    }
+  },
+}
+
+// ── 6. Golden Hour (sunset gradient, optional photo) ──────────────────────
+
+const goldenHour: Template = {
+  id: 'golden-hour',
+  name: 'Golden Hour',
+  description: 'Warm sunset gradient. Atmospheric and inviting — works with or without a photo.',
+  build: (ctx) => {
+    const { w, h } = CANVAS_DIMS['4:5']
+    const title = ctx.title ?? 'Your Event'
+    const titleSize = title.length < 15 ? 130 : title.length < 25 ? 110 : 90
+    const titleY = ctx.imageUrl
+      ? (ctx.category ? 888 : 864)
+      : (ctx.category ? 450 : 420)
+    const layers: Layer[] = []
+    if (ctx.category) {
+      layers.push(textLayer({
+        name: 'Category', text: ctx.category.toUpperCase(),
+        x: 80, y: 160, width: w - 160,
+        fontFamily: font('Inter'), fontSize: 34, fontWeight: 700,
+        fill: BRAND_COLORS.sandstone, opacity: 0.75, letterSpacing: 5, align: 'center',
+      }))
+    }
+    layers.push(shape({
+      shape: 'rect', x: 300, y: ctx.category ? 222 : 200, width: 480, height: 1,
+      fill: BRAND_COLORS.sandstone, opacity: 0.45,
+    }))
+    if (ctx.imageUrl) {
+      const photoY = ctx.category ? 255 : 230
+      layers.push(imageLayer({ src: ctx.imageUrl, x: 90, y: photoY, width: w - 180, height: 560, cornerRadius: 6 }))
+      layers.push(shape({ shape: 'rect', x: 90, y: photoY, width: w - 180, height: 560, fill: BRAND_COLORS.terra, opacity: 0.35, cornerRadius: 6 }))
+    }
+    layers.push(textLayer({
+      name: 'Title', text: title,
+      x: 80, y: titleY, width: w - 160,
+      fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 900,
+      fill: BRAND_COLORS.cream, lineHeight: 0.95, align: 'center',
+      shadow: { enabled: true, color: 'rgba(0,0,0,0.45)', blur: 20, offsetX: 0, offsetY: 3 },
+    }))
+    // Centered skyGold accent bar
+    layers.push(shape({ shape: 'rect', x: Math.round((w - 80) / 2), y: 1185, width: 80, height: 4, fill: BRAND_COLORS.skyGold }))
+    const dateStr = formatDate(ctx.date, ctx.time)
+    if (dateStr) {
+      layers.push(textLayer({
+        name: 'Date', text: dateStr,
+        x: 80, y: 1215, width: w - 160,
+        fontFamily: font('Inter'), fontSize: 36, fontWeight: 500,
+        fill: BRAND_COLORS.sandstone, align: 'center',
+      }))
+    }
+    if (ctx.venue) {
+      layers.push(textLayer({
+        name: 'Venue', text: ctx.venue,
+        x: 80, y: dateStr ? 1272 : 1215, width: w - 160,
+        fontFamily: font('Inter'), fontSize: 34, fontWeight: 500,
+        fill: BRAND_COLORS.cream, opacity: 0.65, align: 'center',
+      }))
+    }
+    layers.push(textLayer({
+      name: 'CTA', text: ctx.cta ?? 'abqunplugged.com',
+      x: 80, y: h - 90, width: w - 160,
+      fontFamily: font('DM Mono'), fontSize: 26, fontWeight: 500,
+      fill: BRAND_COLORS.cream, opacity: 0.35, align: 'center', letterSpacing: 2,
+    }))
+    return {
+      id: uid(), name: ctx.title ?? 'Golden Hour post', format: '4:5',
       slides: [{
         id: uid(),
-        background: { type: 'color', color: BRAND_COLORS.cream },
+        background: { type: 'gradient', from: BRAND_COLORS.skyGold, to: BRAND_COLORS.night, angle: 155 },
         layers,
       }],
       createdAt: Date.now(), updatedAt: Date.now(),
@@ -263,103 +475,7 @@ const editorial: Template = {
   },
 }
 
-// ── 4. Story (9:16 for Instagram Stories) ─────────────────────────────────
-
-const story: Template = {
-  id: 'story',
-  name: 'Story',
-  description: '9:16 vertical for Instagram Stories. Safe-zone aware.',
-  build: (ctx) => {
-    const { w, h } = CANVAS_DIMS['9:16']
-    return {
-      id: uid(), name: ctx.title ?? 'Story post', format: '9:16',
-      slides: [{
-        id: uid(),
-        background: ctx.imageUrl
-          ? { type: 'image', src: ctx.imageUrl, fit: 'cover', overlayColor: '#000000', overlayOpacity: 0.45 }
-          : { type: 'gradient', from: BRAND_COLORS.night, to: BRAND_COLORS.terra, angle: 180 },
-        layers: [
-          // Safe zone reminder: top 15% (288px) + bottom 22% (422px) have UI overlays
-          textLayer({
-            name: 'Tonight', text: 'TONIGHT IN ABQ',
-            x: 80, y: 340, width: w - 160,
-            fontFamily: font('Inter'), fontSize: 38, fontWeight: 700,
-            fill: BRAND_COLORS.sandstone, letterSpacing: 6, align: 'center',
-          }),
-          textLayer({
-            name: 'Title', text: ctx.title ?? 'Your Event',
-            x: 80, y: 520, width: w - 160,
-            fontFamily: font('Epilogue'), fontSize: 140, fontWeight: 900,
-            fill: BRAND_COLORS.white, lineHeight: 0.95, align: 'center',
-            shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', blur: 30, offsetX: 0, offsetY: 4 },
-          }),
-          textLayer({
-            name: 'Meta', text: `${formatDate(ctx.date, ctx.time)}${ctx.venue ? `\n${ctx.venue}` : ''}`,
-            x: 80, y: h - 700, width: w - 160,
-            fontFamily: font('Inter'), fontSize: 44, fontWeight: 500,
-            fill: BRAND_COLORS.white, lineHeight: 1.3, align: 'center', opacity: 0.95,
-          }),
-          textLayer({
-            name: 'CTA', text: '→ abqunplugged.com',
-            x: 80, y: h - 480, width: w - 160,
-            fontFamily: font('DM Mono'), fontSize: 32, fontWeight: 500,
-            fill: BRAND_COLORS.white, letterSpacing: 2, align: 'center', opacity: 0.8,
-          }),
-        ],
-      }],
-      createdAt: Date.now(), updatedAt: Date.now(),
-    }
-  },
-}
-
-// ── 5. Square feed (1:1 classic) ──────────────────────────────────────────
-
-const square: Template = {
-  id: 'square',
-  name: 'Square',
-  description: '1:1 classic feed post. Dense layout.',
-  build: (ctx) => {
-    const { w, h } = CANVAS_DIMS['1:1']
-    return {
-      id: uid(), name: ctx.title ?? 'Square post', format: '1:1',
-      slides: [{
-        id: uid(),
-        background: ctx.imageUrl
-          ? { type: 'image', src: ctx.imageUrl, fit: 'cover', overlayColor: '#000000', overlayOpacity: 0.5 }
-          : { type: 'color', color: BRAND_COLORS.terra },
-        layers: [
-          textLayer({
-            name: 'Eyebrow', text: (ctx.category ?? 'ABQ').toUpperCase(),
-            x: 60, y: 90, width: w - 120,
-            fontFamily: font('Inter'), fontSize: 30, fontWeight: 700,
-            fill: BRAND_COLORS.white, letterSpacing: 4, opacity: 0.85,
-          }),
-          textLayer({
-            name: 'Title', text: ctx.title ?? 'Your Title',
-            x: 60, y: h - 380, width: w - 120,
-            fontFamily: font('Epilogue'), fontSize: 100, fontWeight: 900,
-            fill: BRAND_COLORS.white, lineHeight: 1.0,
-          }),
-          textLayer({
-            name: 'Meta', text: `${formatDate(ctx.date, ctx.time)}${ctx.venue ? ` · ${ctx.venue}` : ''}`,
-            x: 60, y: h - 160, width: w - 120,
-            fontFamily: font('Inter'), fontSize: 30, fontWeight: 500,
-            fill: BRAND_COLORS.white, opacity: 0.9,
-          }),
-          textLayer({
-            name: 'CTA', text: 'abqunplugged.com',
-            x: 60, y: h - 100, width: w - 120,
-            fontFamily: font('DM Mono'), fontSize: 22, fontWeight: 500,
-            fill: BRAND_COLORS.white, letterSpacing: 2, opacity: 0.6,
-          }),
-        ],
-      }],
-      createdAt: Date.now(), updatedAt: Date.now(),
-    }
-  },
-}
-
-// ── 6. Blank (start from scratch) ─────────────────────────────────────────
+// ── 7. Blank (start from scratch) ─────────────────────────────────────────
 
 const blank: Template = {
   id: 'blank',
@@ -531,9 +647,9 @@ const hiddenGem: Template = {
 }
 
 export const TEMPLATES: Template[] = [
-  poster, mesa, editorial, square, story, blank,
+  poster, broadside, marquee, split, dispatch, goldenHour, blank,
   tonightDrop, weekendList, hiddenGem,
 ]
 
-export const EVENT_TEMPLATES = [poster, mesa, editorial, square, story]
+export const EVENT_TEMPLATES = [poster, broadside, marquee, split, dispatch, goldenHour]
 export const PROMO_TEMPLATES = [tonightDrop, weekendList, hiddenGem, blank]
