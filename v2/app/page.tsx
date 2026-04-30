@@ -8,7 +8,7 @@ import { AnimateIn } from '@/app/components/AnimateIn'
 import MoodChips from '@/app/components/MoodChips'
 import SurpriseButton from '@/app/components/SurpriseButton'
 import { ConnectionQuote } from '@/app/components/ConnectionQuote'
-import { ABQMapSVG } from '@/app/components/ABQMapSVG'
+
 import { ScrollHintManager } from '@/app/components/ScrollHintManager'
 import { getFeaturedPlaces, PLACE_CATEGORIES, type Place } from '@/data/places'
 
@@ -106,35 +106,214 @@ export default async function DiscoverPage() {
       <h1 className="sr-only">Events in Albuquerque, NM — Things to Do in ABQ</h1>
 
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden text-white">
-        {/* Layered desert atmosphere — matches mockup exactly */}
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 120% 60% at 50% 130%, rgba(154,68,45,.55) 0%, transparent 70%), radial-gradient(ellipse 80% 50% at 80% 80%, rgba(79,98,73,.3) 0%, transparent 60%), linear-gradient(165deg, #0f0b09 0%, #1a1008 40%, #221508 100%)' }} />
-        {/* ABQ street map — line drawing of Albuquerque's streets */}
-        <ABQMapSVG />
+      <section className="relative overflow-hidden" style={{ background: '#fbf7f1' }}>
+
+        {/* Sandstone floor: warm tint rises from the bottom, grounding the hero */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: 'linear-gradient(to bottom, transparent 45%, rgba(232,214,183,.38) 100%)' }}
+        />
+
+        {/* Light map — ink strokes on cream, reveals right-to-left, Central Ave in terra */}
+        <div
+          className="absolute inset-0 pointer-events-none overflow-hidden"
+          style={{
+            maskImage:
+              'linear-gradient(to right, transparent 0%, rgba(0,0,0,.22) 22%, rgba(0,0,0,.62) 50%, black 70%), ' +
+              'linear-gradient(to bottom, transparent 0%, black 8%, black 90%, transparent 100%)',
+            maskComposite: 'intersect',
+            WebkitMaskImage:
+              'linear-gradient(to right, transparent 0%, rgba(0,0,0,.22) 22%, rgba(0,0,0,.62) 50%, black 70%), ' +
+              'linear-gradient(to bottom, transparent 0%, black 8%, black 90%, transparent 100%)',
+            WebkitMaskComposite: 'source-in',
+          }}
+        >
+          <div className="absolute animate-map-pan" style={{ top: '-15%', bottom: '-15%', left: '-6%', right: '-6%' }}>
+            <svg
+              viewBox="-900 -420 3000 1800"
+              preserveAspectRatio="xMidYMid slice"
+              aria-hidden="true"
+              className="absolute inset-0 w-full h-full"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              {/* Sandia silhouette — warm mesa tone on cream */}
+              <path
+                d="M 1080,900 L 1108,792 L 1130,682 L 1152,572 L 1170,468 L 1188,372
+                   L 1206,288 L 1222,218 L 1240,160 L 1258,112 L 1276,78 L 1292,58
+                   L 1308,52 L 1326,62 L 1344,86 L 1362,124 L 1382,174 L 1402,240
+                   L 1422,322 L 1440,412 L 1456,506 L 1468,604 L 1478,704
+                   L 1486,802 L 1492,900 Z"
+                fill="rgba(107,58,34,0.07)"
+              />
+              <path
+                d="M 1080,900 L 1108,792 L 1130,682 L 1152,572 L 1170,468 L 1188,372
+                   L 1206,288 L 1222,218 L 1240,160"
+                fill="none" stroke="#6b3a22" strokeWidth="1.8" strokeOpacity="0.20"
+              />
+              <text
+                x="1295" y="420" fill="#6b3a22" fillOpacity="0.25"
+                fontSize="13" letterSpacing="3" textAnchor="middle"
+                transform="rotate(-78 1295 420)"
+                style={{ fontFamily: 'ui-monospace, monospace', fontWeight: 700 }}
+              >
+                SANDIA MOUNTAINS
+              </text>
+
+              {/* Rio Grande — turquoise on cream */}
+              <path
+                d="M 162,0 C 158,80 168,155 160,235 C 153,308 165,380 158,458
+                   C 151,528 163,608 157,685 C 151,755 162,830 158,900"
+                fill="none" stroke="#006a62" strokeWidth="4.5" strokeOpacity="0.26"
+              />
+              <path
+                d="M 158,0 C 154,80 164,155 156,235 C 149,308 161,380 154,458
+                   C 147,528 159,608 153,685 C 147,755 158,830 154,900
+                   L 176,900 C 176,830 168,755 172,685 C 178,608 164,528 172,458
+                   C 179,380 167,308 174,235 C 180,155 170,80 174,0 Z"
+                fill="rgba(0,106,98,0.07)"
+              />
+              <text
+                x="148" y="465" fill="#006a62" fillOpacity="0.26"
+                fontSize="7" letterSpacing="1.8" textAnchor="middle"
+                transform="rotate(-90 148 465)"
+                style={{ fontFamily: 'ui-monospace, monospace' }}
+              >
+                RIO GRANDE
+              </text>
+
+              {/* I-25 */}
+              <path
+                d="M 322,0 L 334,180 L 352,340 L 370,450 L 388,620 L 405,800 L 415,900"
+                fill="none" stroke="#1a1614" strokeWidth="2.5" strokeOpacity="0.16"
+              />
+              {/* I-40 */}
+              <path
+                d="M 0,452 L 370,450 L 1040,452"
+                fill="none" stroke="#1a1614" strokeWidth="2.5" strokeOpacity="0.16"
+              />
+
+              {/* Central Avenue — terra, the city's spine */}
+              <path
+                d="M 55,491 L 1068,491"
+                fill="none" stroke="#9a442d" strokeWidth="2.8" strokeOpacity="0.52"
+              />
+              <text
+                x="620" y="482" fill="#9a442d" fillOpacity="0.55"
+                fontSize="7" letterSpacing="2.2" textAnchor="middle"
+                style={{ fontFamily: 'ui-monospace, monospace', fontWeight: 600 }}
+              >
+                CENTRAL AVE  ·  ROUTE 66
+              </text>
+
+              {/* E-W secondary streets */}
+              <line x1="80" y1="142" x2="1048" y2="142" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.09" />
+              <line x1="80" y1="218" x2="1048" y2="218" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.09" />
+              <line x1="80" y1="298" x2="1048" y2="298" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.09" />
+              <line x1="80" y1="355" x2="1048" y2="355" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.08" />
+              <line x1="80" y1="404" x2="1048" y2="404" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.07" />
+              <line x1="80" y1="430" x2="1048" y2="430" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.07" />
+              <line x1="80" y1="515" x2="900"  y2="515" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.07" />
+              <line x1="80" y1="560" x2="920"  y2="560" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.09" />
+              <line x1="80" y1="628" x2="800"  y2="628" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.07" />
+
+              {/* N-S secondary streets */}
+              <line x1="96"  y1="0"  x2="96"  y2="900" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.08" />
+              <line x1="200" y1="50" x2="200" y2="900" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.07" />
+              <line x1="232" y1="0"  x2="232" y2="900" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.09" />
+              <line x1="264" y1="60" x2="264" y2="900" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.07" />
+              <line x1="295" y1="80" x2="295" y2="900" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.07" />
+              <line x1="432" y1="0"  x2="432" y2="900" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.09" />
+              <line x1="480" y1="0"  x2="480" y2="750" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.07" />
+              <line x1="560" y1="0"  x2="560" y2="900" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.09" />
+              <line x1="648" y1="0"  x2="648" y2="900" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.09" />
+              <line x1="728" y1="0"  x2="728" y2="850" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.07" />
+              <line x1="802" y1="0"  x2="802" y2="900" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.09" />
+              <line x1="880" y1="0"  x2="880" y2="900" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.09" />
+
+              {/* Landmark dots */}
+              <circle cx="370" cy="450" r="5"   fill="#1a1614" fillOpacity="0.20" />
+              <circle cx="370" cy="450" r="9"   fill="none" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.09" />
+              <circle cx="232" cy="464" r="3.5" fill="#1a1614" fillOpacity="0.14" />
+              <circle cx="332" cy="468" r="3.5" fill="#1a1614" fillOpacity="0.14" />
+              <circle cx="455" cy="502" r="3"   fill="#1a1614" fillOpacity="0.11" />
+              <circle cx="538" cy="491" r="3"   fill="#9a442d" fillOpacity="0.42" />
+
+              {/* Map labels */}
+              <text
+                x="370" y="438" fill="#1a1614" fillOpacity="0.22"
+                fontSize="7" letterSpacing="0.8" textAnchor="middle"
+                style={{ fontFamily: 'ui-monospace, monospace', fontWeight: 700 }}
+              >
+                THE BIG I
+              </text>
+              <text
+                x="232" y="479" fill="#1a1614" fillOpacity="0.18"
+                fontSize="6" letterSpacing="0.5" textAnchor="middle"
+                style={{ fontFamily: 'ui-monospace, monospace' }}
+              >
+                OLD TOWN
+              </text>
+              <text
+                x="343" y="214" fill="#1a1614" fillOpacity="0.15"
+                fontSize="5.5" letterSpacing="0.4" textAnchor="middle"
+                style={{ fontFamily: 'ui-monospace, monospace' }}
+              >
+                BALLOON FIESTA
+              </text>
+            </svg>
+          </div>
+        </div>
 
         {/* Hero content */}
-        <div className="relative z-10 max-w-6xl mx-auto px-4 pt-5 pb-4">
-          <h2
-            className="font-black leading-none mb-3 animate-hero-kern"
-            style={{ fontFamily: 'var(--font-epilogue)', fontSize: 'clamp(28px, 5.5vw, 60px)', letterSpacing: '-1.5px' }}
+        <div className="relative z-10 max-w-6xl mx-auto px-4 pt-7 pb-5">
+          {/* Geographic identifier */}
+          <p
+            className="text-[10px] font-semibold tracking-[0.25em] uppercase mb-3"
+            style={{ color: 'rgba(26,22,20,.38)' }}
           >
-            Burque&rsquo;s got{' '}
-            <span style={{ color: 'transparent', WebkitTextStroke: '1.5px rgba(255,255,255,.4)' }}>
-              something going on.
-            </span>
+            Albuquerque, New Mexico
+          </p>
+
+          {/* The identity mark */}
+          <h2
+            className="font-black leading-[0.88] mb-2 animate-hero-kern"
+            style={{
+              fontFamily: 'var(--font-epilogue)',
+              fontSize: 'clamp(52px, 8vw, 96px)',
+              color: '#1a1614',
+              letterSpacing: '-1.5px',
+            }}
+          >
+            The 505.
           </h2>
+
+          {/* The self-description — a Burqueño's honest line */}
+          <p
+            className="font-bold mb-5 animate-hero-text"
+            style={{
+              fontFamily: 'var(--font-epilogue)',
+              fontSize: 'clamp(15px, 2.3vw, 26px)',
+              color: '#9a442d',
+              letterSpacing: '-0.2px',
+            }}
+          >
+            A small town pretending to be a city.
+          </p>
+
+          {/* Search + surprise */}
           <div className="flex items-center gap-3 animate-hero-row">
             <form
               action="/events"
               method="get"
-              className="flex flex-1 max-w-[460px] rounded-xl overflow-hidden"
-              style={{ boxShadow: '0 6px 28px rgba(0,0,0,.4)' }}
+              className="flex flex-1 max-w-[460px] rounded-xl overflow-hidden border border-[#d4b896]"
+              style={{ boxShadow: '0 4px 20px rgba(26,22,20,.09)' }}
             >
               <input
                 name="q"
                 type="text"
                 placeholder="Search events, venues, neighborhoods…"
-                className="flex-1 bg-white text-[#1a1614] text-sm px-4 py-3 outline-none placeholder:text-[#8a7a74]"
+                className="flex-1 bg-white text-[#1a1614] text-sm px-4 py-3 outline-none placeholder:text-[#a8958a]"
                 aria-label="Search events"
               />
               <button
@@ -145,15 +324,18 @@ export default async function DiscoverPage() {
                 Search
               </button>
             </form>
-            <span className="text-white/35 text-xs hidden sm:block whitespace-nowrap">
+            <span className="text-[11px] text-[#8a7a74] hidden sm:block whitespace-nowrap">
               {allUpcoming.total.toLocaleString()} events
             </span>
             <SurpriseButton />
           </div>
         </div>
 
-        {/* Stat tabs strip */}
-        <div className="relative z-10 mt-8" style={{ background: 'rgba(255,255,255,.06)', borderTop: '1px solid rgba(255,255,255,.08)', backdropFilter: 'blur(8px)' }}>
+        {/* Stat strip — ink palette on cream */}
+        <div
+          className="relative z-10 mt-5"
+          style={{ background: 'rgba(26,22,20,.04)', borderTop: '1px solid rgba(26,22,20,.08)' }}
+        >
           <div className="max-w-6xl mx-auto grid grid-cols-3">
             {[
               { label: 'Tonight',      count: tonight.total,     href: '/events?time=tonight',      accent: true },
@@ -163,16 +345,18 @@ export default async function DiscoverPage() {
               <Link
                 key={tab.label}
                 href={tab.href}
-                className="py-3.5 flex flex-col items-center transition-colors hover:bg-white/5"
-                style={i < 2 ? { borderRight: '1px solid rgba(255,255,255,.08)' } : {}}
+                className="py-3.5 flex flex-col items-center transition-colors hover:bg-black/[0.04]"
+                style={i < 2 ? { borderRight: '1px solid rgba(26,22,20,.08)' } : {}}
               >
                 <span
                   className="font-black text-xl sm:text-2xl leading-none"
-                  style={{ fontFamily: 'var(--font-epilogue)', color: tab.accent ? '#f5c842' : 'white' }}
+                  style={{ fontFamily: 'var(--font-epilogue)', color: tab.accent ? '#9a442d' : '#1a1614' }}
                 >
                   {tab.count.toLocaleString()}
                 </span>
-                <span className="text-[10px] sm:text-[11px] text-white/45 mt-0.5">{tab.label}</span>
+                <span className="text-[10px] sm:text-[11px] mt-0.5" style={{ color: '#8a7a74' }}>
+                  {tab.label}
+                </span>
               </Link>
             ))}
           </div>
