@@ -216,7 +216,8 @@ const marquee: Template = {
   build: (ctx) => {
     const { w, h } = CANVAS_DIMS['4:5']
     const title = (ctx.title ?? 'Your Event').toUpperCase()
-    const titleSize = title.length < 15 ? 220 : title.length < 20 ? 190 : title.length < 30 ? 160 : 130
+    // Uppercase Epilogue 900 is very wide — conservative sizes to avoid mid-word line-breaks
+    const titleSize = title.length < 8 ? 220 : title.length < 14 ? 190 : title.length < 22 ? 160 : title.length < 32 ? 130 : 110
     const ruleY = ctx.category ? 248 : 200
     const titleY = ruleY + 32
     const layers: Layer[] = []
