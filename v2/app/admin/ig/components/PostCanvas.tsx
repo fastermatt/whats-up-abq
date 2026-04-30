@@ -205,6 +205,17 @@ export interface PostCanvasHandle {
   exportAllSlides: () => Promise<string[]>
 }
 
+// Preload all fonts needed for canvas rendering.
+// Canvas 2D does NOT support CSS variables — fonts must be loaded under their plain name.
+const CANVAS_FONTS = [
+  '900 10px Epilogue', '700 10px Epilogue', '400 10px Epilogue',
+  '800 10px Inter', '600 10px Inter', '400 10px Inter',
+  '700 10px "Space Grotesk"', '400 10px "Space Grotesk"',
+  '900 10px Fraunces', '400 10px Fraunces',
+  '400 10px "Bebas Neue"',
+  '500 10px "DM Mono"', '400 10px "DM Mono"',
+]
+
 export function PostCanvas({ onExportRef }: { onExportRef?: (h: PostCanvasHandle) => void }) {
   const { design, activeSlideIndex, selectedLayerId, selectLayer, updateLayer } = useEditor()
   const slide = design.slides[activeSlideIndex]
@@ -214,6 +225,11 @@ export function PostCanvas({ onExportRef }: { onExportRef?: (h: PostCanvasHandle
   const stageRef     = useRef<Konva.Stage>(null)
   const trRef        = useRef<Konva.Transformer>(null)
   const [scale, setScale] = useState(1)
+
+  // Preload all brand fonts so they're available in canvas context on first paint
+  useEffect(() => {
+    Promise.allSettled(CANVAS_FONTS.map(f => document.fonts.load(f))).catch(() => {/* best-effort */})
+  }, [])
 
   // Responsive scaling — fit canvas in container
   const fitToContainer = useCallback(() => {

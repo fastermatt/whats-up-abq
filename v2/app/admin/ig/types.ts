@@ -100,12 +100,14 @@ export const BRAND_COLORS = {
 }
 
 export const BRAND_FONTS = [
-  { name: 'Epilogue',    stack: 'var(--font-epilogue), Epilogue, sans-serif',       weights: [400, 700, 900] },
-  { name: 'Inter',       stack: 'var(--font-inter), Inter, sans-serif',             weights: [400, 600, 800] },
-  { name: 'Fraunces',    stack: '"Fraunces", Georgia, serif',                       weights: [400, 600, 900] },
-  { name: 'Bebas Neue',  stack: '"Bebas Neue", Impact, sans-serif',                 weights: [400] },
-  { name: 'DM Mono',     stack: '"DM Mono", "IBM Plex Mono", monospace',            weights: [400, 500] },
-  { name: 'Space Grotesk', stack: 'var(--font-space-grotesk), "Space Grotesk", sans-serif', weights: [400, 600, 700] },
+  // NOTE: Canvas 2D does not support CSS custom properties (var(--font-*)).
+  // Use plain font names only — Next.js registers fonts under their real names ("Epilogue" etc).
+  { name: 'Epilogue',    stack: 'Epilogue, sans-serif',             weights: [400, 700, 900] },
+  { name: 'Inter',       stack: 'Inter, sans-serif',                weights: [400, 600, 800] },
+  { name: 'Fraunces',    stack: '"Fraunces", Georgia, serif',       weights: [400, 600, 900] },
+  { name: 'Bebas Neue',  stack: '"Bebas Neue", Impact, sans-serif', weights: [400] },
+  { name: 'DM Mono',     stack: '"DM Mono", "IBM Plex Mono", monospace', weights: [400, 500] },
+  { name: 'Space Grotesk', stack: '"Space Grotesk", sans-serif',   weights: [400, 600, 700] },
 ] as const
 
 export type BrandFontName = (typeof BRAND_FONTS)[number]['name']
