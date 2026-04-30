@@ -30,7 +30,7 @@ export default function DesktopNav() {
       {/* Logo */}
       <Link href="/" className="flex items-center hover:opacity-85 transition-opacity flex-shrink-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo-black.svg" alt="ABQ Unplugged" className="h-8 w-auto" />
+        <img src="/logo-terra.svg" alt="ABQ Unplugged" className="h-8 w-auto" />
       </Link>
 
       {/* Nav links */}

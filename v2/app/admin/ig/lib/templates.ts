@@ -107,6 +107,14 @@ function shape(partial: { shape: 'rect'|'circle'|'line'; x: number; y: number; w
   }
 }
 
+// Logo image helpers — SVG viewBox is 1907×1032, so width = height × (1907/1032)
+const LOGO_R = 1907 / 1032
+const LOGO_W = '/logo-white.svg'  // white paths — for dark canvas backgrounds
+const LOGO_T = '/logo-terra.svg'  // terra paths — for cream/light backgrounds
+function logo(src: string, x: number, y: number, h: number): Layer {
+  return imageLayer({ src, x, y, width: Math.round(h * LOGO_R), height: h })
+}
+
 const formatDate = (iso?: string, time?: string) => {
   if (!iso) return ''
   try {
@@ -145,9 +153,10 @@ const poster: Template = {
         ? { type: 'image', src: ctx.imageUrl, fit: 'cover', overlayColor: '#000000', overlayOpacity: 0.55 }
         : { type: 'gradient', from: BRAND_COLORS.terra, to: BRAND_COLORS.mesaBrown, angle: 135 },
       layers: [
+        logo(LOGO_W, 80, 52, 52),
         ctx.category ? textLayer({
           name: 'Category', text: (ctx.category ?? '').toUpperCase(),
-          x: 80, y: 120, width: w - 160,
+          x: 80, y: 126, width: w - 160,
           fontFamily: font('Inter'), fontSize: 34, fontWeight: 700,
           fill: BRAND_COLORS.white, opacity: 0.85, letterSpacing: 4,
         }) : null,
@@ -204,13 +213,8 @@ const broadside: Template = {
     const titleSize = title.length < 15 ? 200 : title.length < 25 ? 170 : title.length < 40 ? 145 : 120
     const dateLine = [formatDate(ctx.date, ctx.time), ctx.venue].filter(Boolean).join('\n')
     const layers: Layer[] = [
-      shape({ shape: 'rect', x: 80, y: 90, width: 180, height: 5, fill: BRAND_COLORS.terra }),
-      textLayer({
-        name: 'Masthead', text: 'ABQ UNPLUGGED',
-        x: 80, y: 122, width: w - 160,
-        fontFamily: font('DM Mono'), fontSize: 28, fontWeight: 500,
-        fill: BRAND_COLORS.terra, letterSpacing: 4,
-      }),
+      shape({ shape: 'rect', x: 80, y: 78, width: 180, height: 4, fill: BRAND_COLORS.terra }),
+      logo(LOGO_T, 80, 96, 76),
       shape({ shape: 'rect', x: 80, y: 188, width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.2 }),
       textLayer({
         name: 'Title', text: title,
@@ -266,7 +270,7 @@ const marquee: Template = {
     const titleSize = title.length < 8 ? 220 : title.length < 14 ? 190 : title.length < 22 ? 160 : title.length < 32 ? 130 : 110
     const ruleY = ctx.category ? 248 : 200
     const titleY = ruleY + 32
-    const layers: Layer[] = []
+    const layers: Layer[] = [logo(LOGO_W, Math.round((w - Math.round(52 * LOGO_R)) / 2), 52, 52)]
     if (ctx.category) {
       layers.push(textLayer({
         name: 'Category', text: ctx.category.toUpperCase(),
@@ -382,12 +386,7 @@ const split: Template = {
         fill: BRAND_COLORS.ink, opacity: 0.55,
       }))
     }
-    layers.push(textLayer({
-      name: 'CTA', text: ctx.cta ?? 'abqunplugged.com',
-      x: 80, y: h - 80, width: w - 160,
-      fontFamily: font('DM Mono'), fontSize: 30, fontWeight: 500,
-      fill: BRAND_COLORS.terra, letterSpacing: 2,
-    }))
+    layers.push(logo(LOGO_T, 80, h - 92, 52))
     return {
       id: uid(), name: ctx.title ?? 'Split post', format: '4:5',
       slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.cream }, layers }],
@@ -459,12 +458,7 @@ const dispatch: Template = {
         fontFamily: font('Inter'), fontSize: 42, fontWeight: 400,
         fill: BRAND_COLORS.ink, opacity: 0.7,
       }),
-      textLayer({
-        name: 'CTA', text: `Find tickets: ${ctx.cta ?? 'abqunplugged.com'}`,
-        x: 80, y: h - 85, width: w - 160,
-        fontFamily: font('DM Mono'), fontSize: 28, fontWeight: 500,
-        fill: BRAND_COLORS.terra, letterSpacing: 1,
-      }),
+      logo(LOGO_T, 80, h - 98, 60),
     )
     return {
       id: uid(), name: ctx.title ?? 'Dispatch post', format: '4:5',
@@ -544,12 +538,7 @@ const goldenHour: Template = {
         fill: BRAND_COLORS.sandstone, align: 'center', opacity: 0.9,
       }))
     }
-    layers.push(textLayer({
-      name: 'CTA', text: ctx.cta ?? 'abqunplugged.com',
-      x: 80, y: h - 78, width: w - 160,
-      fontFamily: font('DM Mono'), fontSize: 30, fontWeight: 500,
-      fill: BRAND_COLORS.cream, opacity: 0.45, align: 'center', letterSpacing: 2,
-    }))
+    layers.push(logo(LOGO_W, Math.round((w - Math.round(60 * LOGO_R)) / 2), h - 100, 60))
     return {
       id: uid(), name: ctx.title ?? 'Golden Hour post', format: '4:5',
       slides: [{
@@ -588,13 +577,8 @@ const statement: Template = {
   build: () => {
     const { w, h } = CANVAS_DIMS['4:5']
     const layers: Layer[] = [
-      shape({ shape: 'rect', x: 80, y: 90, width: 220, height: 5, fill: BRAND_COLORS.terra }),
-      textLayer({
-        name: 'Masthead', text: 'ABQ UNPLUGGED',
-        x: 80, y: 122, width: w - 160,
-        fontFamily: font('DM Mono'), fontSize: 28, fontWeight: 500,
-        fill: BRAND_COLORS.terra, letterSpacing: 4,
-      }),
+      shape({ shape: 'rect', x: 80, y: 78, width: 220, height: 4, fill: BRAND_COLORS.terra }),
+      logo(LOGO_T, 80, 96, 76),
       shape({ shape: 'rect', x: 80, y: 188, width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.15 }),
       textLayer({
         name: 'Statement', text: 'Find it before\neveryone else does.',
@@ -603,12 +587,7 @@ const statement: Template = {
         fill: BRAND_COLORS.ink, lineHeight: 0.88, letterSpacing: -2,
       }),
       shape({ shape: 'rect', x: 80, y: h - 120, width: w - 160, height: 4, fill: BRAND_COLORS.terra }),
-      textLayer({
-        name: 'CTA', text: 'abqunplugged.com',
-        x: 80, y: h - 88, width: w - 160,
-        fontFamily: font('DM Mono'), fontSize: 30, fontWeight: 500,
-        fill: BRAND_COLORS.terra, letterSpacing: 3, align: 'center',
-      }),
+      logo(LOGO_T, Math.round((w - Math.round(60 * LOGO_R)) / 2), h - 100, 60),
     ]
     return {
       id: uid(), name: 'Statement post', format: '4:5',
@@ -660,12 +639,7 @@ const categorySpotlight: Template = {
         fontFamily: font('Fraunces'), fontSize: 52, fontStyle: 'italic', fontWeight: 400,
         fill: BRAND_COLORS.cream, opacity: 0.85, align: 'center', lineHeight: 1.2,
       }),
-      textLayer({
-        name: 'CTA', text: `→ abqunplugged.com`,
-        x: 80, y: h - 95, width: w - 160,
-        fontFamily: font('DM Mono'), fontSize: 30, fontWeight: 500,
-        fill: BRAND_COLORS.cream, opacity: 0.65, align: 'center', letterSpacing: 2,
-      }),
+      logo(LOGO_W, Math.round((w - Math.round(60 * LOGO_R)) / 2), h - 100, 60),
     ]
     return {
       id: uid(), name: `${category} spotlight`, format: '4:5',
@@ -712,13 +686,8 @@ const weekendPreview: Template = {
     const weekendRange = `${fmt(sat)} – ${fmt(sun)}`
 
     const layers: Layer[] = [
-      textLayer({
-        name: 'Masthead', text: 'ABQ UNPLUGGED',
-        x: 80, y: 80, width: w - 160,
-        fontFamily: font('DM Mono'), fontSize: 28, fontWeight: 500,
-        fill: BRAND_COLORS.terra, letterSpacing: 4,
-      }),
-      shape({ shape: 'rect', x: 80, y: 140, width: w - 160, height: 4, fill: BRAND_COLORS.ink }),
+      logo(LOGO_T, 80, 64, 76),
+      shape({ shape: 'rect', x: 80, y: 152, width: w - 160, height: 4, fill: BRAND_COLORS.ink }),
       shape({ shape: 'rect', x: 80, y: 152, width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.35 }),
       textLayer({
         name: 'Date Range', text: weekendRange,
@@ -775,13 +744,8 @@ const weekendPreview: Template = {
         fontFamily: font('Fraunces'), fontSize: 52, fontStyle: 'italic', fontWeight: 400,
         fill: BRAND_COLORS.ink, lineHeight: 1.1,
       }),
-      shape({ shape: 'rect', x: 80, y: 1010, width: w - 160, height: 3, fill: BRAND_COLORS.terra }),
-      textLayer({
-        name: 'CTA', text: 'abqunplugged.com',
-        x: 80, y: h - 88, width: w - 160,
-        fontFamily: font('DM Mono'), fontSize: 30, fontWeight: 500,
-        fill: BRAND_COLORS.terra, letterSpacing: 3,
-      }),
+      shape({ shape: 'rect', x: 80, y: 1022, width: w - 160, height: 3, fill: BRAND_COLORS.terra }),
+      logo(LOGO_T, 80, h - 98, 60),
     ]
     return {
       id: uid(), name: 'Weekend preview', format: '4:5',
@@ -831,12 +795,7 @@ const mesa: Template = {
         fontFamily: font('Inter'), fontSize: 46, fontWeight: 500,
         fill: BRAND_COLORS.cream, opacity: 0.7, align: 'center', lineHeight: 1.3,
       }),
-      textLayer({
-        name: 'CTA', text: 'abqunplugged.com',
-        x: 80, y: h - 90, width: w - 160,
-        fontFamily: font('DM Mono'), fontSize: 30, fontWeight: 500,
-        fill: BRAND_COLORS.sandstone, opacity: 0.6, align: 'center', letterSpacing: 3,
-      }),
+      logo(LOGO_W, Math.round((w - Math.round(60 * LOGO_R)) / 2), h - 100, 60),
     ]
     return {
       id: uid(), name: 'Mesa post', format: '4:5',
@@ -894,12 +853,7 @@ const tonightDrop: Template = {
             fill: BRAND_COLORS.white, opacity: 0.85, align: 'center',
           }),
           shape({ shape: 'rect', x: Math.round((w - 120) / 2), y: 680, width: 120, height: 3, fill: BRAND_COLORS.sandstone, opacity: 0.5 }),
-          textLayer({
-            name: 'CTA', text: '→ abqunplugged.com/tonight',
-            x: 80, y: h - 165, width: w - 160,
-            fontFamily: font('DM Mono'), fontSize: 32, fontWeight: 500,
-            fill: BRAND_COLORS.sandstone, align: 'center', letterSpacing: 2,
-          }),
+          logo(LOGO_W, Math.round((w - Math.round(60 * LOGO_R)) / 2), h - 115, 60),
         ],
       }],
       createdAt: Date.now(), updatedAt: Date.now(),
@@ -951,12 +905,7 @@ const hiddenGem: Template = {
             fontFamily: font('Inter'), fontSize: 38, fontWeight: 500,
             fill: BRAND_COLORS.cream, align: 'center', opacity: 0.9, lineHeight: 1.4,
           }),
-          textLayer({
-            name: 'CTA', text: '@abqunplugged',
-            x: 80, y: h - 130, width: w - 160,
-            fontFamily: font('DM Mono'), fontSize: 28, fontWeight: 500,
-            fill: BRAND_COLORS.sandstone, align: 'center', letterSpacing: 2, opacity: 0.7,
-          }),
+          logo(LOGO_W, Math.round((w - Math.round(60 * LOGO_R)) / 2), h - 110, 60),
         ],
       }],
       createdAt: Date.now(), updatedAt: Date.now(),

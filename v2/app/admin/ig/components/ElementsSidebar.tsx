@@ -30,7 +30,10 @@ export function ElementsSidebar() {
   const addRect = () => addLayer(makeShapeLayer({ shape: 'rect', x: w / 2 - 200, y: h / 2 - 100, width: 400, height: 200, fill: BRAND_COLORS.terra, cornerRadius: 12 }))
   const addCircle = () => addLayer(makeShapeLayer({ shape: 'circle', x: w / 2 - 150, y: h / 2 - 150, width: 300, height: 300, fill: BRAND_COLORS.turquoise }))
   const addLine = () => addLayer(makeShapeLayer({ shape: 'line', x: w / 2 - 300, y: h / 2, width: 600, height: 4, fill: BRAND_COLORS.ink }))
-  const addLogo = () => addLayer(makeImageLayer({ src: '/logo-icon.svg', x: 60, y: 60, width: 180, height: 180 }))
+  // Logo aspect ratio: 1907 × 1032 → width = height × (1907/1032)
+  const LOGO_R = 1907 / 1032
+  const addLogoWhite = () => addLayer(makeImageLayer({ src: '/logo-white.svg', x: Math.round(w / 2 - 111), y: Math.round(h / 2 - 30), width: Math.round(60 * LOGO_R), height: 60 }))
+  const addLogoTerra = () => addLayer(makeImageLayer({ src: '/logo-terra.svg', x: Math.round(w / 2 - 111), y: Math.round(h / 2 - 30), width: Math.round(60 * LOGO_R), height: 60 }))
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -58,8 +61,15 @@ export function ElementsSidebar() {
           <LeftIcon label="Circle" onClick={addCircle}><CircleIcon size={18} /></LeftIcon>
           <LeftIcon label="Line"   onClick={addLine}>  <Minus size={18} /></LeftIcon>
         </div>
-        <div className="grid grid-cols-1 gap-1 mt-1">
-          <LeftIcon label="ABQ Logo" onClick={addLogo}><span className="text-base">🌵</span></LeftIcon>
+        <div className="grid grid-cols-2 gap-1 mt-1">
+          <LeftIcon label="Logo (dark)" onClick={addLogoWhite}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo-white.svg" alt="" className="h-4 w-auto opacity-80" />
+          </LeftIcon>
+          <LeftIcon label="Logo (light)" onClick={addLogoTerra}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo-terra.svg" alt="" className="h-4 w-auto opacity-80" />
+          </LeftIcon>
         </div>
       </div>
 
