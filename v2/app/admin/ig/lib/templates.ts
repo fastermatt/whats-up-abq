@@ -153,7 +153,7 @@ const poster: Template = {
         ? { type: 'image', src: ctx.imageUrl, fit: 'cover', overlayColor: '#000000', overlayOpacity: 0.55 }
         : { type: 'gradient', from: BRAND_COLORS.terra, to: BRAND_COLORS.mesaBrown, angle: 135 },
       layers: [
-        logo(LOGO_W, 80, 52, 52),
+        logo(LOGO_W, 80, 46, 60),
         ctx.category ? textLayer({
           name: 'Category', text: (ctx.category ?? '').toUpperCase(),
           x: 80, y: 126, width: w - 160,
@@ -270,7 +270,7 @@ const marquee: Template = {
     const titleSize = title.length < 8 ? 220 : title.length < 14 ? 190 : title.length < 22 ? 160 : title.length < 32 ? 130 : 110
     const ruleY = ctx.category ? 248 : 200
     const titleY = ruleY + 32
-    const layers: Layer[] = [logo(LOGO_W, Math.round((w - Math.round(52 * LOGO_R)) / 2), 52, 52)]
+    const layers: Layer[] = [logo(LOGO_W, Math.round((w - Math.round(70 * LOGO_R)) / 2), 46, 70)]
     if (ctx.category) {
       layers.push(textLayer({
         name: 'Category', text: ctx.category.toUpperCase(),
@@ -303,12 +303,6 @@ const marquee: Template = {
         fill: BRAND_COLORS.cream, opacity: 0.55, align: 'center',
       }))
     }
-    layers.push(textLayer({
-      name: 'CTA', text: ctx.cta ?? 'abqunplugged.com',
-      x: 80, y: h - 95, width: w - 160,
-      fontFamily: font('DM Mono'), fontSize: 30, fontWeight: 500,
-      fill: BRAND_COLORS.cream, opacity: 0.4, align: 'center', letterSpacing: 2,
-    }))
     return {
       id: uid(), name: ctx.title ?? 'Marquee post', format: '4:5',
       slides: [{ id: uid(), background: { type: 'color', color: '#0c0b0a' }, layers }],
@@ -386,7 +380,7 @@ const split: Template = {
         fill: BRAND_COLORS.ink, opacity: 0.55,
       }))
     }
-    layers.push(logo(LOGO_T, 80, h - 92, 52))
+    layers.push(logo(LOGO_T, 80, h - 96, 60))
     return {
       id: uid(), name: ctx.title ?? 'Split post', format: '4:5',
       slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.cream }, layers }],
@@ -451,14 +445,14 @@ const dispatch: Template = {
       layers.push(imageLayer({ src: ctx.imageUrl, x: 80, y: 840, width: w - 160, height: 350, cornerRadius: 4 }))
     }
     layers.push(
-      shape({ shape: 'rect', x: 80, y: 1210, width: w - 160, height: 2, fill: BRAND_COLORS.ink, opacity: 0.25 }),
+      shape({ shape: 'rect', x: 80, y: 1198, width: w - 160, height: 2, fill: BRAND_COLORS.ink, opacity: 0.25 }),
       textLayer({
         name: 'Meta', text: metaText,
-        x: 80, y: 1228, width: w - 160,
+        x: 80, y: 1215, width: w - 160,
         fontFamily: font('Inter'), fontSize: 42, fontWeight: 400,
         fill: BRAND_COLORS.ink, opacity: 0.7,
       }),
-      logo(LOGO_T, 80, h - 98, 60),
+      logo(LOGO_T, 80, h - 65, 52),
     )
     return {
       id: uid(), name: ctx.title ?? 'Dispatch post', format: '4:5',
@@ -519,12 +513,12 @@ const goldenHour: Template = {
       fill: BRAND_COLORS.cream, lineHeight: 0.92, align: 'center',
       shadow: { enabled: true, color: 'rgba(0,0,0,0.6)', blur: 24, offsetX: 0, offsetY: 4 },
     }))
-    layers.push(shape({ shape: 'rect', x: Math.round((w - 100) / 2), y: 1160, width: 100, height: 4, fill: BRAND_COLORS.skyGold }))
+    layers.push(shape({ shape: 'rect', x: Math.round((w - 100) / 2), y: 1135, width: 100, height: 4, fill: BRAND_COLORS.skyGold }))
     const dateStr = formatDate(ctx.date, ctx.time)
     if (dateStr) {
       layers.push(textLayer({
         name: 'Date', text: dateStr,
-        x: 80, y: 1188, width: w - 160,
+        x: 80, y: 1160, width: w - 160,
         fontFamily: font('Inter'), fontSize: 48, fontWeight: 600,
         fill: BRAND_COLORS.cream, align: 'center',
         shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', blur: 12, offsetX: 0, offsetY: 2 },
@@ -533,12 +527,12 @@ const goldenHour: Template = {
     if (ctx.venue) {
       layers.push(textLayer({
         name: 'Venue', text: ctx.venue,
-        x: 80, y: dateStr ? 1252 : 1188, width: w - 160,
+        x: 80, y: dateStr ? 1220 : 1160, width: w - 160,
         fontFamily: font('Inter'), fontSize: 42, fontWeight: 400,
         fill: BRAND_COLORS.sandstone, align: 'center', opacity: 0.9,
       }))
     }
-    layers.push(logo(LOGO_W, Math.round((w - Math.round(60 * LOGO_R)) / 2), h - 100, 60))
+    layers.push(logo(LOGO_W, Math.round((w - Math.round(60 * LOGO_R)) / 2), h - 65, 60))
     return {
       id: uid(), name: ctx.title ?? 'Golden Hour post', format: '4:5',
       slides: [{
@@ -745,7 +739,8 @@ const weekendPreview: Template = {
         fill: BRAND_COLORS.ink, lineHeight: 1.1,
       }),
       shape({ shape: 'rect', x: 80, y: 1022, width: w - 160, height: 3, fill: BRAND_COLORS.terra }),
-      logo(LOGO_T, 80, h - 98, 60),
+      // Large centered logo sits in the footer zone (y=1025–1350) for brand presence
+      logo(LOGO_T, Math.round((w - Math.round(80 * LOGO_R)) / 2), 1120, 80),
     ]
     return {
       id: uid(), name: 'Weekend preview', format: '4:5',
