@@ -7,7 +7,7 @@ import { MapPin, ArrowRight, ExternalLink } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
 import MoodChips from '@/app/components/MoodChips'
 import SurpriseButton from '@/app/components/SurpriseButton'
-import { ConnectionQuote } from '@/app/components/ConnectionQuote'
+
 
 import { ScrollHintManager } from '@/app/components/ScrollHintManager'
 import { getFeaturedPlaces, PLACE_CATEGORIES, type Place } from '@/data/places'
@@ -106,24 +106,24 @@ export default async function DiscoverPage() {
       <h1 className="sr-only">Events in Albuquerque, NM — Things to Do in ABQ</h1>
 
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden" style={{ background: '#fbf7f1' }}>
+      <section className="relative overflow-hidden" style={{ background: '#eedcd0' }}>
 
-        {/* Sandstone floor: warm tint rises from the bottom, grounding the hero */}
+        {/* Sandstone floor: deepen toward the base */}
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{ background: 'linear-gradient(to bottom, transparent 45%, rgba(232,214,183,.38) 100%)' }}
+          style={{ background: 'linear-gradient(to bottom, transparent 40%, rgba(195,155,115,.22) 100%)' }}
         />
 
-        {/* Light map — ink strokes on cream, reveals right-to-left, Central Ave in terra */}
+        {/* Terra map — visible across the center, fades at both edges */}
         <div
           className="absolute inset-0 pointer-events-none overflow-hidden"
           style={{
             maskImage:
-              'linear-gradient(to right, transparent 0%, rgba(0,0,0,.22) 22%, rgba(0,0,0,.62) 50%, black 70%), ' +
+              'linear-gradient(to right, transparent 0%, rgba(0,0,0,.5) 15%, black 35%, black 72%, rgba(0,0,0,.2) 90%, transparent 100%), ' +
               'linear-gradient(to bottom, transparent 0%, black 8%, black 90%, transparent 100%)',
             maskComposite: 'intersect',
             WebkitMaskImage:
-              'linear-gradient(to right, transparent 0%, rgba(0,0,0,.22) 22%, rgba(0,0,0,.62) 50%, black 70%), ' +
+              'linear-gradient(to right, transparent 0%, rgba(0,0,0,.5) 15%, black 35%, black 72%, rgba(0,0,0,.2) 90%, transparent 100%), ' +
               'linear-gradient(to bottom, transparent 0%, black 8%, black 90%, transparent 100%)',
             WebkitMaskComposite: 'source-in',
           }}
@@ -137,22 +137,14 @@ export default async function DiscoverPage() {
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              {/* Sandia silhouette — warm mesa tone on cream */}
-              <path
-                d="M 1080,900 L 1108,792 L 1130,682 L 1152,572 L 1170,468 L 1188,372
-                   L 1206,288 L 1222,218 L 1240,160 L 1258,112 L 1276,78 L 1292,58
-                   L 1308,52 L 1326,62 L 1344,86 L 1362,124 L 1382,174 L 1402,240
-                   L 1422,322 L 1440,412 L 1456,506 L 1468,604 L 1478,704
-                   L 1486,802 L 1492,900 Z"
-                fill="rgba(107,58,34,0.07)"
-              />
+              {/* Sandia — outline only, no fill, so it doesn't dominate */}
               <path
                 d="M 1080,900 L 1108,792 L 1130,682 L 1152,572 L 1170,468 L 1188,372
                    L 1206,288 L 1222,218 L 1240,160"
-                fill="none" stroke="#6b3a22" strokeWidth="1.8" strokeOpacity="0.20"
+                fill="none" stroke="#9a442d" strokeWidth="1.5" strokeOpacity="0.16"
               />
               <text
-                x="1295" y="420" fill="#6b3a22" fillOpacity="0.25"
+                x="1295" y="420" fill="#9a442d" fillOpacity="0.18"
                 fontSize="13" letterSpacing="3" textAnchor="middle"
                 transform="rotate(-78 1295 420)"
                 style={{ fontFamily: 'ui-monospace, monospace', fontWeight: 700 }}
@@ -160,21 +152,14 @@ export default async function DiscoverPage() {
                 SANDIA MOUNTAINS
               </text>
 
-              {/* Rio Grande — turquoise on cream */}
+              {/* Rio Grande */}
               <path
                 d="M 162,0 C 158,80 168,155 160,235 C 153,308 165,380 158,458
                    C 151,528 163,608 157,685 C 151,755 162,830 158,900"
-                fill="none" stroke="#006a62" strokeWidth="4.5" strokeOpacity="0.26"
-              />
-              <path
-                d="M 158,0 C 154,80 164,155 156,235 C 149,308 161,380 154,458
-                   C 147,528 159,608 153,685 C 147,755 158,830 154,900
-                   L 176,900 C 176,830 168,755 172,685 C 178,608 164,528 172,458
-                   C 179,380 167,308 174,235 C 180,155 170,80 174,0 Z"
-                fill="rgba(0,106,98,0.07)"
+                fill="none" stroke="#9a442d" strokeWidth="3.5" strokeOpacity="0.22"
               />
               <text
-                x="148" y="465" fill="#006a62" fillOpacity="0.26"
+                x="148" y="465" fill="#9a442d" fillOpacity="0.22"
                 fontSize="7" letterSpacing="1.8" textAnchor="middle"
                 transform="rotate(-90 148 465)"
                 style={{ fontFamily: 'ui-monospace, monospace' }}
@@ -185,21 +170,21 @@ export default async function DiscoverPage() {
               {/* I-25 */}
               <path
                 d="M 322,0 L 334,180 L 352,340 L 370,450 L 388,620 L 405,800 L 415,900"
-                fill="none" stroke="#1a1614" strokeWidth="2.5" strokeOpacity="0.16"
+                fill="none" stroke="#9a442d" strokeWidth="2.5" strokeOpacity="0.22"
               />
               {/* I-40 */}
               <path
                 d="M 0,452 L 370,450 L 1040,452"
-                fill="none" stroke="#1a1614" strokeWidth="2.5" strokeOpacity="0.16"
+                fill="none" stroke="#9a442d" strokeWidth="2.5" strokeOpacity="0.22"
               />
 
-              {/* Central Avenue — terra, the city's spine */}
+              {/* Central Avenue — brightest line, the city's spine */}
               <path
                 d="M 55,491 L 1068,491"
-                fill="none" stroke="#9a442d" strokeWidth="2.8" strokeOpacity="0.52"
+                fill="none" stroke="#9a442d" strokeWidth="2.8" strokeOpacity="0.55"
               />
               <text
-                x="620" y="482" fill="#9a442d" fillOpacity="0.55"
+                x="580" y="482" fill="#9a442d" fillOpacity="0.52"
                 fontSize="7" letterSpacing="2.2" textAnchor="middle"
                 style={{ fontFamily: 'ui-monospace, monospace', fontWeight: 600 }}
               >
@@ -207,55 +192,55 @@ export default async function DiscoverPage() {
               </text>
 
               {/* E-W secondary streets */}
-              <line x1="80" y1="142" x2="1048" y2="142" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.09" />
-              <line x1="80" y1="218" x2="1048" y2="218" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.09" />
-              <line x1="80" y1="298" x2="1048" y2="298" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.09" />
-              <line x1="80" y1="355" x2="1048" y2="355" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.08" />
-              <line x1="80" y1="404" x2="1048" y2="404" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.07" />
-              <line x1="80" y1="430" x2="1048" y2="430" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.07" />
-              <line x1="80" y1="515" x2="900"  y2="515" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.07" />
-              <line x1="80" y1="560" x2="920"  y2="560" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.09" />
-              <line x1="80" y1="628" x2="800"  y2="628" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.07" />
+              <line x1="80" y1="142" x2="1048" y2="142" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.11" />
+              <line x1="80" y1="218" x2="1048" y2="218" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.11" />
+              <line x1="80" y1="298" x2="1048" y2="298" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.11" />
+              <line x1="80" y1="355" x2="1048" y2="355" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.10" />
+              <line x1="80" y1="404" x2="1048" y2="404" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.09" />
+              <line x1="80" y1="430" x2="1048" y2="430" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.09" />
+              <line x1="80" y1="515" x2="900"  y2="515" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.09" />
+              <line x1="80" y1="560" x2="920"  y2="560" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.11" />
+              <line x1="80" y1="628" x2="800"  y2="628" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.09" />
 
               {/* N-S secondary streets */}
-              <line x1="96"  y1="0"  x2="96"  y2="900" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.08" />
-              <line x1="200" y1="50" x2="200" y2="900" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.07" />
-              <line x1="232" y1="0"  x2="232" y2="900" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.09" />
-              <line x1="264" y1="60" x2="264" y2="900" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.07" />
-              <line x1="295" y1="80" x2="295" y2="900" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.07" />
-              <line x1="432" y1="0"  x2="432" y2="900" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.09" />
-              <line x1="480" y1="0"  x2="480" y2="750" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.07" />
-              <line x1="560" y1="0"  x2="560" y2="900" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.09" />
-              <line x1="648" y1="0"  x2="648" y2="900" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.09" />
-              <line x1="728" y1="0"  x2="728" y2="850" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.07" />
-              <line x1="802" y1="0"  x2="802" y2="900" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.09" />
-              <line x1="880" y1="0"  x2="880" y2="900" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.09" />
+              <line x1="96"  y1="0"  x2="96"  y2="900" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.10" />
+              <line x1="200" y1="50" x2="200" y2="900" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.09" />
+              <line x1="232" y1="0"  x2="232" y2="900" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.11" />
+              <line x1="264" y1="60" x2="264" y2="900" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.09" />
+              <line x1="295" y1="80" x2="295" y2="900" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.09" />
+              <line x1="432" y1="0"  x2="432" y2="900" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.11" />
+              <line x1="480" y1="0"  x2="480" y2="750" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.09" />
+              <line x1="560" y1="0"  x2="560" y2="900" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.11" />
+              <line x1="648" y1="0"  x2="648" y2="900" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.11" />
+              <line x1="728" y1="0"  x2="728" y2="850" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.09" />
+              <line x1="802" y1="0"  x2="802" y2="900" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.11" />
+              <line x1="880" y1="0"  x2="880" y2="900" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.11" />
 
               {/* Landmark dots */}
-              <circle cx="370" cy="450" r="5"   fill="#1a1614" fillOpacity="0.20" />
-              <circle cx="370" cy="450" r="9"   fill="none" stroke="#1a1614" strokeWidth="1" strokeOpacity="0.09" />
-              <circle cx="232" cy="464" r="3.5" fill="#1a1614" fillOpacity="0.14" />
-              <circle cx="332" cy="468" r="3.5" fill="#1a1614" fillOpacity="0.14" />
-              <circle cx="455" cy="502" r="3"   fill="#1a1614" fillOpacity="0.11" />
-              <circle cx="538" cy="491" r="3"   fill="#9a442d" fillOpacity="0.42" />
+              <circle cx="370" cy="450" r="5"   fill="#9a442d" fillOpacity="0.22" />
+              <circle cx="370" cy="450" r="9"   fill="none" stroke="#9a442d" strokeWidth="1" strokeOpacity="0.12" />
+              <circle cx="232" cy="464" r="3.5" fill="#9a442d" fillOpacity="0.16" />
+              <circle cx="332" cy="468" r="3.5" fill="#9a442d" fillOpacity="0.16" />
+              <circle cx="455" cy="502" r="3"   fill="#9a442d" fillOpacity="0.14" />
+              <circle cx="538" cy="491" r="3"   fill="#9a442d" fillOpacity="0.45" />
 
               {/* Map labels */}
               <text
-                x="370" y="438" fill="#1a1614" fillOpacity="0.22"
+                x="370" y="438" fill="#9a442d" fillOpacity="0.28"
                 fontSize="7" letterSpacing="0.8" textAnchor="middle"
                 style={{ fontFamily: 'ui-monospace, monospace', fontWeight: 700 }}
               >
                 THE BIG I
               </text>
               <text
-                x="232" y="479" fill="#1a1614" fillOpacity="0.18"
+                x="232" y="479" fill="#9a442d" fillOpacity="0.22"
                 fontSize="6" letterSpacing="0.5" textAnchor="middle"
                 style={{ fontFamily: 'ui-monospace, monospace' }}
               >
                 OLD TOWN
               </text>
               <text
-                x="343" y="214" fill="#1a1614" fillOpacity="0.15"
+                x="343" y="214" fill="#9a442d" fillOpacity="0.18"
                 fontSize="5.5" letterSpacing="0.4" textAnchor="middle"
                 style={{ fontFamily: 'ui-monospace, monospace' }}
               >
@@ -363,10 +348,7 @@ export default async function DiscoverPage() {
         </div>
       </section>
 
-      {/* ── Ambient daily quote — soft, unpressured ── */}
-      <div className="max-w-6xl mx-auto px-4 py-3 text-center">
-        <ConnectionQuote size="sm" />
-      </div>
+
 
       {/* ── Category quick links ── */}
       <section className="py-4 border-b border-[#f0e4cc]/60 animate-fade-in">
