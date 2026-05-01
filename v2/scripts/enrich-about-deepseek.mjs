@@ -342,11 +342,18 @@ async function fetchEvents() {
     .order('event_date', { ascending: true })
     .limit(LIMIT)
 
-  // Incremental: skip events that already have the about field populated.
-  // This correctly catches events that have mood data but no about (ai_enrichment NOT NULL
-  // but about IS NULL) — the old `is('ai_enrichment', null)` check missed 445 such events.
+  // Incremental: skip events that already have the about field populated OR where
+  // DeepSeek previously returned null (no description available — won't change).
+  //
+  // Key distinction in PostgreSQL:
+  //   ai_enrichment->>'about' IS NULL  → TRUE when key missing OR value is JSON null
+  //   ai_enrichment->'about'  IS NULL  → TRUE ONLY when key missing (JSON null ≠ SQL NULL)
+  //
+  // Using single-arrow (->) means we won't re-process the ~377 sports/sparse events
+  // where DeepSeek correctly returned {"about": null} — they've been attempted and
+  // will never have a description to write from. Use --force to override.
   if (!FORCE) {
-    q = q.or('ai_enrichment.is.null,ai_enrichment->>about.is.null')
+    q = q.or('ai_enrichment.is.null,ai_enrichment->about.is.null')
   }
   if (SOURCE)    q = q.eq('source', SOURCE)
   if (SINGLE_ID) q = q.eq('id', SINGLE_ID)
