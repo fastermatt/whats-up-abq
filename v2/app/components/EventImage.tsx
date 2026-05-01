@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 /**
  * Event image with graceful fallback. Some community events have
@@ -53,10 +53,17 @@ export function EventImage({
 }) {
   const [currentSrc, setCurrentSrc] = useState(() => proxyIfNeeded(src))
   const [loaded, setLoaded] = useState(false)
+  const imgRef = useRef<HTMLImageElement>(null)
+
+  // Cached images load before onLoad fires — check .complete on mount
+  useEffect(() => {
+    if (imgRef.current?.complete) setLoaded(true)
+  }, [])
 
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
+      ref={imgRef}
       src={currentSrc}
       alt={alt}
       loading={loading}

@@ -319,7 +319,7 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
             src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
             fallback={getCategoryFallback(event.category ?? undefined, event.id)}
             alt={event.title}
-            loading={index < 5 ? 'eager' : 'lazy'}
+            loading="lazy"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
           />
 
