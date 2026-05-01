@@ -95,24 +95,9 @@ const VENUES = {
     neighborhood: 'downtown',
     address: '618 Central Ave SW, Albuquerque, NM 87102',
   },
-  'high-and-drying': {
-    name: 'High and Drying Brewing',
-    url: 'https://highanddryingbrewing.com/',
-    neighborhood: 'nob-hill',
-    address: '3222 Silver Ave SE, Albuquerque, NM 87106',
-  },
-  'bosque-brewing-nob-hill': {
-    name: 'Bosque Brewing Nob Hill',
-    url: 'https://bosquebrewing.com/events/',
-    neighborhood: 'nob-hill',
-    address: '106 Girard Blvd SE, Albuquerque, NM 87106',
-  },
-  'tractor-brewing-nob-hill': {
-    name: 'Tractor Brewing Nob Hill',
-    url: 'https://tractorbrewing.com/events/',
-    neighborhood: 'nob-hill',
-    address: '118 Tulane Dr SE, Albuquerque, NM 87106',
-  },
+  // high-and-drying: domain offline (no DNS as of 2026-05)
+  // bosque-brewing-nob-hill: domain offline (no DNS as of 2026-05)
+  // tractor-brewing-nob-hill: domain flagged by SafeBrowse (abandoned/dangerous as of 2026-05)
   'outpost-performance-space': {
     name: 'Outpost Performance Space',
     url: 'https://outpostspace.org/',
@@ -121,15 +106,16 @@ const VENUES = {
   },
   'hops-and-dough': {
     name: 'Hops & Dough Taproom',
-    url: 'https://hopsanddoughabq.com/',
+    url: 'https://hopsndough.com/events/',
     neighborhood: 'los-ranchos',
     address: '3128 Coors Blvd NW, Albuquerque, NM 87120',
   },
-  'dirty-bourbon': {
-    name: 'Dirty Bourbon Dance Hall & Saloon',
-    url: 'https://dirtybourbon.com/events/',
-    neighborhood: 'northeast-heights',
-    address: '9800 Montgomery Blvd NE, Albuquerque, NM 87111',
+  // dirty-bourbon: 403 Cloudflare block on all programmatic requests (as of 2026-05)
+  'holiday-bowl': {
+    name: "Skidmore's Holiday Bowl",
+    url: 'https://holidaybowlabq.com/',
+    neighborhood: 'nob-hill',
+    address: '3628 Central Ave SE, Albuquerque, NM 87106',
   },
   'mineshaft-tavern': {
     name: 'Mineshaft Tavern',
@@ -139,7 +125,7 @@ const VENUES = {
   },
   'el-pinto': {
     name: 'El Pinto Restaurant & Cantina',
-    url: 'https://elpinto.com/events/',
+    url: 'https://elpinto.com/calendar/',
     neighborhood: 'north-valley',
     address: '10500 4th St NW, Albuquerque, NM 87114',
   },
