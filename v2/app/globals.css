@@ -317,12 +317,32 @@ html.scroll-hint-done .scroll-hint-inner {
   will-change: transform; /* GPU-composited — no layout/paint cost per frame */
 }
 
-/* ─── Hero route trace — HeroMapRoute component ─────────────────────── */
-@keyframes drawRoute {
+/* ─── Hero magnifier — HeroMapRoute component ────────────────────────── */
+/* Lens draws itself (stroke-dashoffset), handle follows, then the whole   */
+/* glass slowly pans across the map as if searching for events.            */
+@keyframes drawMagnifierLens {
   to { stroke-dashoffset: 0; }
 }
-@keyframes routeDotIn {
-  to { opacity: 1; }
+@keyframes drawMagnifierHandle {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes magnifierFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes magnifierSearch {
+  /* Scans west → east across ABQ, drifting north/south like a human hand */
+  0%   { transform: translate(0px,    0px); }
+  22%  { transform: translate(175px, -28px); }
+  45%  { transform: translate(395px,  34px); }
+  68%  { transform: translate(540px, -18px); }
+  85%  { transform: translate(375px,  44px); }
+  100% { transform: translate(0px,    0px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Skip the search pan; still show the fully-drawn glass statically */
+  .hero-magnifier-group { animation: none !important; }
 }
 
 /* ─── Pulse glow — used on primary CTAs (Surprise Me button) ─────────── */
