@@ -370,9 +370,101 @@ export default async function DiscoverPage() {
         </AnimateIn>
       )}
 
-      {/* ── Community CTA ── */}
+      {/* ── Explore ABQ — places + neighborhoods unified ── */}
       <AnimateIn animation="fade-up" delay={160}>
-        <section className="py-12 border-t border-[#f0e4cc]/60">
+        <section className="py-10 bg-gradient-to-b from-[#f5ece3] to-[#fbf7f1] border-y border-[#e8d5c0]/70">
+
+          {/* Section header */}
+          <div className="max-w-6xl mx-auto px-4 mb-6">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] mb-0.5 font-semibold">Beyond tonight</p>
+            <h2
+              className="text-xl font-black text-[#1a1614]"
+              style={{ fontFamily: 'var(--font-epilogue)' }}
+            >
+              Explore Albuquerque
+            </h2>
+          </div>
+
+          {/* Places row */}
+          <div className="mb-8">
+            <div className="max-w-6xl mx-auto px-4 flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold text-[#006a62]">📍 Places &amp; things to do</p>
+              <Link
+                href="/things-to-do"
+                className="text-xs font-semibold text-[#006a62] hover:underline flex-shrink-0 flex items-center gap-1 group"
+              >
+                See all
+                <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
+            <div className="overflow-x-auto scrollbar-hide">
+              <div
+                className="flex gap-3 px-4 pb-2 snap-x"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {featuredPlaces.map((place, i) => (
+                  <PlaceTeaseCard key={place.id} place={place} index={i} />
+                ))}
+                <Link
+                  href="/things-to-do"
+                  className="flex-shrink-0 w-[160px] snap-start flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#006a62]/30 text-[#006a62] hover:border-[#006a62] hover:bg-[#006a62]/5 transition-all gap-2 aspect-[4/3]"
+                >
+                  <ArrowRight className="w-5 h-5" />
+                  <span className="text-xs font-semibold">See all places</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Neighborhoods — grid layout breaks the horizontal-scroll monotony */}
+          {neighborhoodCounts.length > 0 && (
+            <div>
+              <div className="max-w-6xl mx-auto px-4 flex items-center justify-between mb-3">
+                <p className="text-[10px] uppercase tracking-[0.15em] text-[#6b5d57] font-semibold">By neighborhood</p>
+                <Link
+                  href="/neighborhoods"
+                  className="text-xs font-semibold text-[#9a442d] hover:underline flex-shrink-0 flex items-center gap-1 group"
+                >
+                  See all
+                  <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+              </div>
+              <div className="max-w-6xl mx-auto px-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                  {neighborhoodCounts.slice(0, 12).map(({ neighborhood, count, slug }) => (
+                    <Link
+                      key={slug}
+                      href={`/neighborhoods/${slug}`}
+                      className="flex flex-col items-start px-3 py-2.5 rounded-xl bg-white border border-[#ede4d3] hover:border-[#9a442d] hover:shadow-sm transition-all group"
+                    >
+                      <span
+                        className="font-black text-[13px] text-[#1a1614] group-hover:text-[#9a442d] transition-colors leading-tight mb-0.5"
+                        style={{ fontFamily: 'var(--font-epilogue)' }}
+                      >
+                        {neighborhood}
+                      </span>
+                      <span className="text-[10px] text-[#6b5d57] leading-snug line-clamp-1">
+                        {NEIGHBORHOOD_TAGLINES[slug] ?? 'Events & local spots'}
+                      </span>
+                      <span className="mt-1.5 flex items-center gap-1 text-[11px] font-bold text-[#9a442d]">
+                        <span className="w-[4px] h-[4px] rounded-full bg-[#9a442d] flex-shrink-0" />
+                        {count} event{count !== 1 ? 's' : ''}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
+      </AnimateIn>
+
+      {/* ── Page close: community invitation + browse all ── */}
+      <AnimateIn animation="fade-up" delay={200}>
+        <section
+          className="py-14"
+          style={{ background: '#eedcd0', borderTop: '1px solid rgba(200,170,140,.35)' }}
+        >
           <div className="max-w-xl mx-auto px-4 text-center">
             <p className="text-[11px] uppercase tracking-[0.18em] text-[#9a442d] mb-3 font-semibold">
               ABQ Unplugged community
@@ -386,7 +478,7 @@ export default async function DiscoverPage() {
             <p className="text-sm text-[#4a3f3a] mb-6 leading-relaxed">
               Track events, save favorites, and see what other ABQ locals are into. Free to join, no spam, no noise.
             </p>
-            <div className="flex flex-wrap gap-3 justify-center">
+            <div className="flex flex-wrap gap-3 justify-center mb-7">
               <Link
                 href="/login"
                 className="inline-flex items-center gap-2 bg-[#9a442d] text-white font-bold text-sm px-5 py-2.5 rounded-full hover:bg-[#7d3725] transition-colors"
@@ -396,129 +488,20 @@ export default async function DiscoverPage() {
               </Link>
               <Link
                 href="/leaderboard"
-                className="inline-flex items-center gap-2 text-[#4a3f3a] font-semibold text-sm px-5 py-2.5 rounded-full border border-[#ddc9a3] hover:border-[#9a442d] hover:text-[#9a442d] transition-all"
+                className="inline-flex items-center gap-2 text-[#4a3f3a] font-semibold text-sm px-5 py-2.5 rounded-full border border-[#c8aa8c] hover:border-[#9a442d] hover:text-[#9a442d] transition-all"
               >
                 See leaderboard
               </Link>
             </div>
-          </div>
-        </section>
-      </AnimateIn>
-
-      {/* ── Things To Do ── */}
-      <AnimateIn animation="fade-up" delay={175}>
-        <section className="py-6 border-t border-[#f0e4cc]/60">
-          <div className="max-w-6xl mx-auto px-4 flex items-end justify-between mb-4">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.15em] text-[#006a62] mb-0.5 font-semibold">
-                Anytime
-              </p>
-              <h2
-                className="text-xl font-black text-[#1a1614]"
-                style={{ fontFamily: 'var(--font-epilogue)' }}
-              >
-                Things To Do in ABQ
-              </h2>
-            </div>
+            {/* Browse all — quiet contextual link, not a domineering button */}
             <Link
-              href="/things-to-do"
-              className="text-xs font-semibold text-[#006a62] hover:underline flex-shrink-0 flex items-center gap-1 group"
+              href="/events"
+              className="inline-flex items-center gap-1.5 text-xs text-[#6b5d57] hover:text-[#9a442d] transition-colors group"
             >
-              See all
+              Browse all {allUpcoming.total.toLocaleString()} events
               <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
-
-          {/* Category chips — only show categories that have places */}
-          <div
-            className="flex gap-2 overflow-x-auto px-4 pb-3 mb-1"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            {PLACE_CATEGORIES.filter(cat => featuredPlaces.some(p => p.category === cat.slug)).map(cat => (
-              <Link
-                key={cat.slug}
-                href={`/things-to-do?category=${cat.slug}`}
-                className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#006a62]/10 text-[#006a62] text-[11px] font-semibold hover:bg-[#006a62] hover:text-white transition-all whitespace-nowrap"
-              >
-                <span>{cat.emoji}</span>
-                {cat.label}
-              </Link>
-            ))}
-          </div>
-
-          {/* Horizontal scroll cards */}
-          <div className="overflow-x-auto scrollbar-hide">
-            <div
-              className="flex gap-3 px-4 pb-2 snap-x"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-              {featuredPlaces.map((place, i) => (
-                <PlaceTeaseCard key={place.id} place={place} index={i} />
-              ))}
-              {/* See-all card */}
-              <Link
-                href="/things-to-do"
-                className="flex-shrink-0 w-[160px] snap-start flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#006a62]/30 text-[#006a62] hover:border-[#006a62] hover:bg-[#006a62]/5 transition-all gap-2 aspect-[4/3]"
-              >
-                <ArrowRight className="w-5 h-5" />
-                <span className="text-xs font-semibold">See all places</span>
-              </Link>
-            </div>
-          </div>
-        </section>
-      </AnimateIn>
-
-      {/* ── Explore by Neighborhood ── */}
-      {neighborhoodCounts.length > 0 && (
-        <AnimateIn animation="fade-up" delay={200}>
-          <section className="py-6 border-t border-[#f0e4cc]/60">
-            <div className="max-w-6xl mx-auto px-4 mb-3">
-              <p className="text-[10px] uppercase tracking-[0.15em] text-[#6b5d57] mb-0.5">Browse by area</p>
-              <h2
-                className="text-xl font-black text-[#1a1614]"
-                style={{ fontFamily: 'var(--font-epilogue)' }}
-              >
-                Explore by Neighborhood
-              </h2>
-            </div>
-            <div
-              className="flex gap-2 overflow-x-auto px-4 pb-2"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-              {neighborhoodCounts.slice(0, 14).map(({ neighborhood, count, slug }, i) => (
-                <AnimateIn key={slug} animation="fade-up" delay={Math.min(i * 50, 300)} className="flex-shrink-0">
-                  <Link
-                    href={`/neighborhoods/${slug}`}
-                    className="flex flex-col items-start px-4 py-3 rounded-xl bg-white border-[1.5px] border-[#ede4d3] hover:border-[#9a442d] hover:shadow-md transition-all group"
-                    style={{ minWidth: '140px' }}
-                  >
-                    <span className="font-black text-[13.5px] text-[#1a1614] group-hover:text-[#9a442d] transition-colors whitespace-nowrap mb-0.5" style={{ fontFamily: 'var(--font-epilogue)' }}>
-                      {neighborhood}
-                    </span>
-                    <span className="text-[11px] text-[#6b5d57]">{NEIGHBORHOOD_TAGLINES[slug] ?? 'Events & local spots'}</span>
-                    <span className="mt-2 flex items-center gap-1 text-[11px] font-bold text-[#9a442d]">
-                      <span className="w-[5px] h-[5px] rounded-full bg-[#9a442d] flex-shrink-0" />
-                      {count} event{count !== 1 ? 's' : ''}
-                    </span>
-                  </Link>
-                </AnimateIn>
-              ))}
-            </div>
-          </section>
-        </AnimateIn>
-      )}
-
-      {/* ── Browse All CTA ── */}
-      <AnimateIn animation="scale" delay={50}>
-        <section className="max-w-6xl mx-auto px-4 py-8">
-          <Link
-            href="/events"
-            className="group flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-[#9a442d] text-white font-semibold hover:bg-[#7d3725] transition-all duration-300 text-sm hover:shadow-lg hover:shadow-[#9a442d]/20"
-            style={{ fontFamily: 'var(--font-epilogue)' }}
-          >
-            Browse All {allUpcoming.total.toLocaleString()} Events
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </Link>
         </section>
       </AnimateIn>
 
