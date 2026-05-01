@@ -539,7 +539,7 @@ async function main() {
     step('Enriching (neighborhoods, moods)')
     const enrichScripts = [
       { name: 'tag-neighborhoods',  script: 'tag-neighborhoods.mjs' },
-      { name: 'enrich-moods-rules', script: 'enrich-moods-rules.mjs', args: ['--limit=5000'] },
+      { name: 'enrich-moods-rules', script: 'enrich-deepseek.mjs', args: ['--limit=5000'] },
     ]
     for (const e of enrichScripts) {
       const r = await runScript(e.script, e.args || [])
@@ -547,37 +547,22 @@ async function main() {
       else fail(`${e.name} failed (exit=${r.exitCode})`)
     }
 
-    // LM Studio LLM enrichment — optional, runs only if LM Studio is reachable.
-    // Generates richer data: about/highlights/venue_tips/local_tips via Gemma.
-    // Skips if LM_STUDIO_URL is unreachable (rules-based enrichment above is
-    // the hard-required baseline). 2026-04-19: verified working end-to-end.
-    const lmUrl = process.env.LM_STUDIO_URL || 'http://localhost:1234'
-    try {
-      const ping = await fetch(`${lmUrl}/v1/models`, { signal: AbortSignal.timeout(3000) })
-      if (ping.ok) {
-        step('LM Studio enrichment (Gemma — about/highlights/tips)')
-        // enrich-events-lm.cjs lives at the repo root, not v2/scripts
-        const repoRoot = path.join(__dirname, '..', '..')
-        const llmScript = path.join(repoRoot, 'scripts', 'enrich-events-lm.cjs')
-        if (fs.existsSync(llmScript)) {
-          const r = await new Promise((resolve) => {
-            const start = Date.now()
-            const child = spawn('node', [llmScript, '--limit=50'], {
-              stdio: QUIET ? 'ignore' : 'inherit',
-              env: { ...process.env, SUPABASE_URL: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY: SUPABASE_KEY, LM_MODEL: process.env.LM_MODEL || 'google/gemma-4-e4b' },
-            })
-            child.on('close', (code) => resolve({ ok: code === 0, exitCode: code, durationMs: Date.now() - start }))
-            child.on('error', () => resolve({ ok: false, durationMs: Date.now() - start }))
-          })
-          if (r.ok) ok(`LM Studio enrichment (${(r.durationMs/1000).toFixed(1)}s)`)
-          else warn(`LM Studio enrichment returned non-zero — rules-based baseline still in place`)
-        }
-      } else {
-        warn('LM Studio unreachable — skipping LLM enrichment (rules-based covers the baseline)')
-      }
-    } catch {
-      warn('LM Studio unreachable — skipping LLM enrichment (rules-based covers the baseline)')
-    }
+    // DeepSeek about/highlights enrichment — replaces LM Studio / Gemma step.
+    // 5× concurrent calls → 100 events in ~60s. Skips events where about is already set.
+    // Now correctly catches events with mood-only ai_enrichment (missing about).
+    // Cost: ~$0.10 per 100 events. 2026-05-01: switched from Gemma.
+    step('DeepSeek enrichment (about/highlights/venue_tips)')
+    const dsRes = await runScript('enrich-about-deepseek.mjs', ['--limit=100'])
+    if (dsRes.ok) ok(`DeepSeek enrichment (${(dsRes.durationMs/1000).toFixed(1)}s)`)
+    else warn(`DeepSeek enrichment returned non-zero — continuing, rules-based baseline still in place`)
+
+    // Category accuracy audit — auto-fixes wrong categories using DeepSeek.
+    // Runs after enrichment so new events are already in DB.
+    // Limit 200 per run (batches of 30 = ~7 calls). ~$0.01/run. Cheap insurance.
+    step('Category accuracy audit (DeepSeek auto-fix)')
+    const auditRes = await runScript('audit-accuracy.mjs', ['--limit=200'])
+    if (auditRes.ok) ok(`category audit (${(auditRes.durationMs/1000).toFixed(1)}s)`)
+    else warn(`category audit returned non-zero — manual review may be needed`)
 
   } else {
     warn('Skipped enrichment (--skip-enrich)')

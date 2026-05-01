@@ -60,8 +60,13 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 // ── Category mapping ──────────────────────────────────────────────────────────
 
 const TYPE_TO_CATEGORY = {
+  // Music
   'concert':              'Music',
   'music_festival':       'Music',
+  'band':                 'Music',
+  'classical_orchestral_instrumental': 'Music',
+  'theater_classical_orchestral_instrumental': 'Music',
+  // Sports
   'minor_league_baseball':'Sports',
   'major_league_baseball':'Sports',
   'nba':                  'Sports',
@@ -75,30 +80,48 @@ const TYPE_TO_CATEGORY = {
   'ncaa_baseball':        'Sports',
   'ncaa_soccer':          'Sports',
   'soccer':               'Sports',
+  'football':             'Sports',
   'boxing_mma':           'Sports',
   'wrestling':            'Sports',
   'rodeo':                'Sports',
   'golf':                 'Sports',
   'tennis':               'Sports',
   'marathon':             'Sports',
+  // Comedy
   'comedy':               'Comedy',
+  'theater_comedy':       'Comedy',
+  // Arts & Theater — all theater/* variants SeatGeek uses
   'theater':              'Arts & Theater',
-  'broadway_tickets_national':'Arts & Theater',
+  'theater_broadway_national_tours': 'Arts & Theater',
+  'broadway_tickets_national': 'Arts & Theater',
+  'theater_classical':    'Arts & Theater',
+  'theater_dance_performance_tour': 'Arts & Theater',
   'classical':            'Arts & Theater',
-  'dance_performance_tour':'Arts & Theater',
+  'dance':                'Arts & Theater',
+  'dance_performance_tour': 'Arts & Theater',
   'opera':                'Arts & Theater',
-  'film':                 'Film',
+  'ballet':               'Arts & Theater',
+  'circus':               'Arts & Theater',
+  // Family
+  'theater_family':       'Family',
   'cirque_du_soleil':     'Family',
   'family':               'Family',
+  // Other
+  'film':                 'Film',
   'festival':             'Festivals',
   'food':                 'Food & Drink',
 }
 
 // Title-based overrides for events whose SG type doesn't map cleanly
 const TITLE_OVERRIDES = [
-  { pattern: /new mexico united/i,     category: 'Sports' },
-  { pattern: /albuquerque isotopes/i,  category: 'Sports' },
-  { pattern: /\bUSL\b/i,              category: 'Sports' },
+  { pattern: /new mexico united/i,        category: 'Sports' },
+  { pattern: /albuquerque isotopes/i,     category: 'Sports' },
+  { pattern: /chupacabras/i,              category: 'Sports' },
+  { pattern: /\bUSL\b/i,                 category: 'Sports' },
+  { pattern: /philharmonic/i,             category: 'Music' },
+  { pattern: /symphony|orchestra/i,       category: 'Music' },
+  { pattern: /ballet|nutcracker/i,        category: 'Arts & Theater' },
+  { pattern: /\bmusical\b|\bbroadway\b/i, category: 'Arts & Theater' },
 ]
 
 function mapType(type, title = '') {
