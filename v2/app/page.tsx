@@ -367,13 +367,103 @@ export default async function DiscoverPage() {
             events={weekend.events.slice(0, 10)}
             seeAllHref="/events?time=this-weekend"
             sectionLabel="This Weekend"
+            sectionBg="#f0e8dc"
           />
         </AnimateIn>
       )}
 
+      {/* ── Explore ABQ — places + neighborhoods unified ── */}
+      <AnimateIn animation="fade-up" delay={130}>
+        <section className="py-10 bg-gradient-to-b from-[#f5ece3] to-[#fbf7f1] border-y border-[#e8d5c0]/70">
+
+          {/* Section header */}
+          <div className="max-w-6xl mx-auto px-4 mb-6">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] mb-0.5 font-semibold">Beyond tonight</p>
+            <h2
+              className="text-xl font-black text-[#1a1614]"
+              style={{ fontFamily: 'var(--font-epilogue)' }}
+            >
+              Explore Albuquerque
+            </h2>
+          </div>
+
+          {/* Places row */}
+          <div className="mb-8">
+            <div className="max-w-6xl mx-auto px-4 flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold text-[#9a442d]">📍 Places &amp; things to do</p>
+              <Link
+                href="/things-to-do"
+                className="text-xs font-semibold text-[#9a442d] hover:underline flex-shrink-0 flex items-center gap-1 group"
+              >
+                See all
+                <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
+            <div className="overflow-x-auto scrollbar-hide">
+              <div
+                className="flex gap-3 px-4 pb-2 snap-x"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {featuredPlaces.map((place, i) => (
+                  <PlaceTeaseCard key={place.id} place={place} index={i} />
+                ))}
+                <Link
+                  href="/things-to-do"
+                  className="flex-shrink-0 w-[160px] snap-start flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#9a442d]/30 text-[#9a442d] hover:border-[#9a442d] hover:bg-[#9a442d]/5 transition-all gap-2 aspect-[4/3]"
+                >
+                  <ArrowRight className="w-5 h-5" />
+                  <span className="text-xs font-semibold">See all places</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Neighborhoods — grid layout breaks the horizontal-scroll monotony */}
+          {neighborhoodCounts.length > 0 && (
+            <div>
+              <div className="max-w-6xl mx-auto px-4 flex items-center justify-between mb-3">
+                <p className="text-[10px] uppercase tracking-[0.15em] text-[#6b5d57] font-semibold">By neighborhood</p>
+                <Link
+                  href="/neighborhoods"
+                  className="text-xs font-semibold text-[#9a442d] hover:underline flex-shrink-0 flex items-center gap-1 group"
+                >
+                  See all
+                  <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+              </div>
+              <div className="max-w-6xl mx-auto px-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                  {neighborhoodCounts.slice(0, 12).map(({ neighborhood, count, slug }) => (
+                    <Link
+                      key={slug}
+                      href={`/neighborhoods/${slug}`}
+                      className="flex flex-col items-start px-3 py-2.5 rounded-xl bg-white border border-[#ede4d3] hover:border-[#9a442d] hover:shadow-sm transition-all group"
+                    >
+                      <span
+                        className="font-black text-[13px] text-[#1a1614] group-hover:text-[#9a442d] transition-colors leading-tight mb-0.5"
+                        style={{ fontFamily: 'var(--font-epilogue)' }}
+                      >
+                        {neighborhood}
+                      </span>
+                      <span className="text-[10px] text-[#6b5d57] leading-snug line-clamp-1">
+                        {NEIGHBORHOOD_TAGLINES[slug] ?? 'Events & local spots'}
+                      </span>
+                      <span className="mt-1.5 flex items-center gap-1 text-[11px] font-bold text-[#9a442d]">
+                        <span className="w-[4px] h-[4px] rounded-full bg-[#9a442d] flex-shrink-0" />
+                        {count} event{count !== 1 ? 's' : ''}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
+      </AnimateIn>
+
       {/* ── Now at the movies ── */}
       {movies.length > 0 && (
-        <AnimateIn animation="fade-up" delay={130}>
+        <AnimateIn animation="fade-up" delay={160}>
           <section className="py-6" style={{ background: '#1a1614' }}>
             <div className="max-w-6xl mx-auto px-4 flex items-end justify-between mb-3">
               <div>
@@ -432,95 +522,6 @@ export default async function DiscoverPage() {
         </AnimateIn>
       )}
 
-      {/* ── Explore ABQ — places + neighborhoods unified ── */}
-      <AnimateIn animation="fade-up" delay={160}>
-        <section className="py-10 bg-gradient-to-b from-[#f5ece3] to-[#fbf7f1] border-y border-[#e8d5c0]/70">
-
-          {/* Section header */}
-          <div className="max-w-6xl mx-auto px-4 mb-6">
-            <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] mb-0.5 font-semibold">Beyond tonight</p>
-            <h2
-              className="text-xl font-black text-[#1a1614]"
-              style={{ fontFamily: 'var(--font-epilogue)' }}
-            >
-              Explore Albuquerque
-            </h2>
-          </div>
-
-          {/* Places row */}
-          <div className="mb-8">
-            <div className="max-w-6xl mx-auto px-4 flex items-center justify-between mb-3">
-              <p className="text-xs font-semibold text-[#006a62]">📍 Places &amp; things to do</p>
-              <Link
-                href="/things-to-do"
-                className="text-xs font-semibold text-[#006a62] hover:underline flex-shrink-0 flex items-center gap-1 group"
-              >
-                See all
-                <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
-            </div>
-            <div className="overflow-x-auto scrollbar-hide">
-              <div
-                className="flex gap-3 px-4 pb-2 snap-x"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-              >
-                {featuredPlaces.map((place, i) => (
-                  <PlaceTeaseCard key={place.id} place={place} index={i} />
-                ))}
-                <Link
-                  href="/things-to-do"
-                  className="flex-shrink-0 w-[160px] snap-start flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#006a62]/30 text-[#006a62] hover:border-[#006a62] hover:bg-[#006a62]/5 transition-all gap-2 aspect-[4/3]"
-                >
-                  <ArrowRight className="w-5 h-5" />
-                  <span className="text-xs font-semibold">See all places</span>
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          {/* Neighborhoods — grid layout breaks the horizontal-scroll monotony */}
-          {neighborhoodCounts.length > 0 && (
-            <div>
-              <div className="max-w-6xl mx-auto px-4 flex items-center justify-between mb-3">
-                <p className="text-[10px] uppercase tracking-[0.15em] text-[#6b5d57] font-semibold">By neighborhood</p>
-                <Link
-                  href="/neighborhoods"
-                  className="text-xs font-semibold text-[#9a442d] hover:underline flex-shrink-0 flex items-center gap-1 group"
-                >
-                  See all
-                  <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
-              </div>
-              <div className="max-w-6xl mx-auto px-4">
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-                  {neighborhoodCounts.slice(0, 12).map(({ neighborhood, count, slug }) => (
-                    <Link
-                      key={slug}
-                      href={`/neighborhoods/${slug}`}
-                      className="flex flex-col items-start px-3 py-2.5 rounded-xl bg-white border border-[#ede4d3] hover:border-[#9a442d] hover:shadow-sm transition-all group"
-                    >
-                      <span
-                        className="font-black text-[13px] text-[#1a1614] group-hover:text-[#9a442d] transition-colors leading-tight mb-0.5"
-                        style={{ fontFamily: 'var(--font-epilogue)' }}
-                      >
-                        {neighborhood}
-                      </span>
-                      <span className="text-[10px] text-[#6b5d57] leading-snug line-clamp-1">
-                        {NEIGHBORHOOD_TAGLINES[slug] ?? 'Events & local spots'}
-                      </span>
-                      <span className="mt-1.5 flex items-center gap-1 text-[11px] font-bold text-[#9a442d]">
-                        <span className="w-[4px] h-[4px] rounded-full bg-[#9a442d] flex-shrink-0" />
-                        {count} event{count !== 1 ? 's' : ''}
-                      </span>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-        </section>
-      </AnimateIn>
-
       {/* ── Page close: community invitation + browse all ── */}
       <AnimateIn animation="fade-up" delay={200}>
         <section
@@ -567,47 +568,6 @@ export default async function DiscoverPage() {
         </section>
       </AnimateIn>
 
-      {/* ── Footer ── */}
-      <footer className="border-t border-[#f0e4cc] py-8">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <p
-            className="text-sm font-bold text-[#1a1614] mb-1"
-            style={{ fontFamily: 'var(--font-epilogue)' }}
-          >
-            ABQ Unplugged
-          </p>
-          <p className="text-xs text-[#6b5d57] mb-4">Every event in Albuquerque, one place</p>
-          {/* Submit CTA — stands out above the footer nav */}
-          <Link
-            href="/submit"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#9a442d] text-white text-sm font-bold hover:bg-[#7d3725] transition-colors mb-5 shadow-md shadow-[#9a442d]/20"
-          >
-            ✦ Submit your event
-          </Link>
-
-          <nav className="flex items-center justify-center gap-4 flex-wrap">
-            {[
-              { href: '/events',               label: 'All Events' },
-              { href: '/events?time=tonight',  label: 'Tonight' },
-              { href: '/events?time=this-weekend', label: 'This Weekend' },
-              { href: '/things-to-do',         label: 'Things To Do' },
-              { href: '/neighborhoods',        label: 'Neighborhoods' },
-              { href: '/feedback',             label: 'Feedback' },
-              { href: '/why',                  label: 'Why we built this' },
-              { href: '/about',                label: 'About' },
-            ].map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                className="text-xs text-[#6b5d57] hover:text-[#9a442d] transition-colors"
-              >
-                {label}
-              </Link>
-            ))}
-          </nav>
-          <p className="text-[10px] text-[#6b5d57]/60 mt-5">© {new Date().getFullYear()} ABQ Unplugged · Albuquerque, NM</p>
-        </div>
-      </footer>
     </main>
   )
 }
@@ -710,19 +670,19 @@ function PlaceTeaseCard({ place, index }: { place: Place; index: number }) {
           {catMeta?.emoji} {catMeta?.label}
         </div>
         {place.free && (
-          <div className="absolute top-1.5 right-1.5 text-[10px] font-bold bg-[#006a62]/90 text-white px-1.5 py-0.5 rounded-full">
+          <div className="absolute top-1.5 right-1.5 text-[10px] font-bold bg-[#9a442d]/90 text-white px-1.5 py-0.5 rounded-full">
             Free
           </div>
         )}
         {/* Hover: external link hint */}
         <div className="absolute bottom-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <div className="bg-white/95 rounded-full p-1 shadow-sm">
-            <ExternalLink className="w-2.5 h-2.5 text-[#006a62]" />
+            <ExternalLink className="w-2.5 h-2.5 text-[#9a442d]" />
           </div>
         </div>
       </div>
       <h3
-        className="font-bold text-[#1a1614] text-xs leading-tight line-clamp-2 mb-0.5 group-hover:text-[#006a62] transition-colors"
+        className="font-bold text-[#1a1614] text-xs leading-tight line-clamp-2 mb-0.5 group-hover:text-[#9a442d] transition-colors"
         style={{ fontFamily: 'var(--font-epilogue)' }}
       >
         {place.name}
@@ -747,17 +707,19 @@ function EventSection({
   events,
   seeAllHref,
   sectionLabel,
+  sectionBg,
 }: {
   title: string
   subtitle: string
   events: NormalizedEvent[]
   seeAllHref: string
   sectionLabel: string
+  sectionBg?: string
 }) {
   const accentColor = SECTION_ACCENTS[sectionLabel] ?? '#8a7a74'
 
   return (
-    <section className="py-6">
+    <section className="py-6" style={sectionBg ? { background: sectionBg } : undefined}>
       <div className="max-w-6xl mx-auto px-4 flex items-end justify-between mb-3">
         <div>
           <p

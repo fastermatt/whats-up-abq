@@ -8,7 +8,6 @@ import { FirstVisitBanner } from './components/FirstVisitBanner'
 import { PWAManager } from './components/PWAManager'
 import { AuthCallbackCatcher } from './components/AuthCallbackCatcher'
 import { NewsletterBar } from './components/NewsletterBar'
-import { SupportBar } from './components/SupportBar'
 import { KoFiFloat } from './components/KoFiFloat'
 import { AnalyticsTracker } from './components/AnalyticsTracker'
 import { OG_IMAGE } from '@/lib/fallback-images'
@@ -136,9 +135,6 @@ export default function RootLayout({
 
             {/* ── Newsletter signup ── */}
             <NewsletterBar />
-
-            {/* ── Ko-Fi support ── */}
-            <SupportBar />
 
             {/* ── Site footer ── */}
             <footer className="mt-8 pb-6 w-full flex flex-col items-center gap-3 select-none" aria-label="Site footer">
