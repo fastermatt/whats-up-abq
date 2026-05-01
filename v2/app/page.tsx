@@ -3,11 +3,11 @@ import type { Metadata } from 'next'
 import { fetchEvents, fetchFeaturedEvents, fetchNeighborhoodCounts, NormalizedEvent } from '@/lib/events'
 import { getCategoryFallback, OG_IMAGE } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
-import { MapPin, ArrowRight, ExternalLink } from 'lucide-react'
+import { MapPin, ArrowRight, ExternalLink, Star } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
 import MoodChips from '@/app/components/MoodChips'
 import SurpriseButton from '@/app/components/SurpriseButton'
-
+import { fetchNowPlayingMovies, type Movie } from '@/lib/movies'
 
 import { ScrollHintManager } from '@/app/components/ScrollHintManager'
 import { HeroMapRoute } from '@/app/components/HeroMapRoute'
@@ -74,12 +74,13 @@ const websiteJsonLd = {
 export default async function DiscoverPage() {
   const featuredPlaces = getFeaturedPlaces(8)
 
-  const [tonight, weekend, allUpcoming, featured, neighborhoodCounts] = await Promise.all([
+  const [tonight, weekend, allUpcoming, featured, neighborhoodCounts, movies] = await Promise.all([
     fetchEvents({ timeFilter: 'tonight', limit: 10 }),
     fetchEvents({ timeFilter: 'this-weekend', limit: 10 }),
     fetchEvents({ timeFilter: 'upcoming', limit: 1 }),
     fetchFeaturedEvents(6),
     fetchNeighborhoodCounts(),
+    fetchNowPlayingMovies(10),
   ])
 
   const now = new Date()
@@ -370,6 +371,67 @@ export default async function DiscoverPage() {
         </AnimateIn>
       )}
 
+      {/* ── Now at the movies ── */}
+      {movies.length > 0 && (
+        <AnimateIn animation="fade-up" delay={130}>
+          <section className="py-6" style={{ background: '#1a1614' }}>
+            <div className="max-w-6xl mx-auto px-4 flex items-end justify-between mb-3">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.15em] mb-0.5 font-semibold text-[#c8aa8c]">
+                  In theaters now
+                </p>
+                <h2
+                  className="text-xl font-black text-white"
+                  style={{ fontFamily: 'var(--font-epilogue)' }}
+                >
+                  Now at the movies
+                </h2>
+              </div>
+              <Link
+                href="/movies"
+                className="text-xs font-semibold text-[#c8aa8c] hover:text-white flex-shrink-0 flex items-center gap-1 group transition-colors"
+              >
+                See all
+                <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
+
+            <div className="overflow-x-auto scrollbar-hide">
+              <div
+                className="flex gap-3 px-4 pb-2 snap-x snap-mandatory"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {movies.map((movie) => (
+                  <MovieCard key={movie.id} movie={movie} />
+                ))}
+                {/* See all card */}
+                <Link
+                  href="/movies"
+                  className="flex-shrink-0 w-[120px] snap-start flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-white/20 text-white/50 hover:border-white/50 hover:text-white/80 transition-all gap-2"
+                  style={{ aspectRatio: '2/3' }}
+                >
+                  <ArrowRight className="w-5 h-5" />
+                  <span className="text-[11px] font-semibold text-center px-2">All movies</span>
+                </Link>
+              </div>
+            </div>
+
+            <p className="text-center text-[10px] text-white/30 mt-3">
+              Movie data from{' '}
+              <a
+                href="https://www.themoviedb.org"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-white/60 transition-colors"
+              >
+                TMDb
+              </a>
+              {' '}· Showtimes via Fandango
+            </p>
+          </section>
+        </AnimateIn>
+      )}
+
       {/* ── Explore ABQ — places + neighborhoods unified ── */}
       <AnimateIn animation="fade-up" delay={160}>
         <section className="py-10 bg-gradient-to-b from-[#f5ece3] to-[#fbf7f1] border-y border-[#e8d5c0]/70">
@@ -547,6 +609,65 @@ export default async function DiscoverPage() {
         </div>
       </footer>
     </main>
+  )
+}
+
+// ─── Movie Poster Card — portrait 2:3 card for the dark movies rail ─────────
+
+function MovieCard({ movie }: { movie: Movie }) {
+  const ratingDisplay = movie.voteAverage > 0 ? movie.voteAverage.toFixed(1) : null
+
+  return (
+    <a
+      href={movie.fandangoUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group flex-shrink-0 w-[120px] snap-start"
+      aria-label={`${movie.title} — get showtimes`}
+    >
+      {/* Poster — 2:3 */}
+      <div
+        className="relative rounded-xl overflow-hidden mb-1.5 shadow-md group-hover:shadow-xl transition-shadow duration-300 bg-[#2d201c]"
+        style={{ aspectRatio: '2/3' }}
+      >
+        {movie.posterUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={movie.posterUrl}
+            alt={`${movie.title} poster`}
+            loading="lazy"
+            className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center opacity-40">
+            <span className="text-3xl">🎬</span>
+          </div>
+        )}
+
+        {/* Rating */}
+        {ratingDisplay && (
+          <div className="absolute top-1.5 right-1.5 flex items-center gap-0.5 bg-black/70 backdrop-blur-sm text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+            <Star className="w-2 h-2 fill-[#f5c518] text-[#f5c518] flex-shrink-0" />
+            {ratingDisplay}
+          </div>
+        )}
+
+        {/* Hover: CTA strip */}
+        <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[#9a442d] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-1.5">
+          <span className="text-[9px] font-bold text-white flex items-center gap-0.5">
+            <ExternalLink className="w-2.5 h-2.5" />
+            Showtimes
+          </span>
+        </div>
+      </div>
+
+      <h3
+        className="font-bold text-white text-[11px] leading-tight line-clamp-2 group-hover:text-[#c8aa8c] transition-colors"
+        style={{ fontFamily: 'var(--font-epilogue)' }}
+      >
+        {movie.title}
+      </h3>
+    </a>
   )
 }
 
