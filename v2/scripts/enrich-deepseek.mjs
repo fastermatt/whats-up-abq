@@ -32,6 +32,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 for (const envFile of [
   path.join(__dirname, '.env'),
   path.join(__dirname, '..', 'scripts', '.env'),
+  path.join(__dirname, '..', '..', 'scripts', '.env'),  // repo root scripts/.env
+  path.join(__dirname, '..', '.env.local'),             // v2/.env.local
 ]) {
   if (fs.existsSync(envFile)) {
     fs.readFileSync(envFile, 'utf8').split('\n').forEach(line => {
