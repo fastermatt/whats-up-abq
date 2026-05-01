@@ -214,16 +214,24 @@ async function fetchRows() {
   let rows = []
 
   if (fixAll) {
-    // Re-classify everything
-    const { data, error } = await supabase
-      .from('events')
-      .select('id, venue_name, raw, ai_enrichment, event_date')
-      .eq('hidden', false)
-      .gte('event_date', today)
-      .order('event_date', { ascending: true })
-      .limit(MAX_EVENTS)
-    if (error) { console.error(error.message); process.exit(1) }
-    rows = data || []
+    // Re-classify everything — paginate past Supabase's 1000-row cap
+    let offset = 0
+    const PAGE = 1000
+    while (rows.length < MAX_EVENTS) {
+      const { data, error } = await supabase
+        .from('events')
+        .select('id, venue_name, raw, ai_enrichment, event_date')
+        .eq('hidden', false)
+        .gte('event_date', today)
+        .order('event_date', { ascending: true })
+        .range(offset, offset + PAGE - 1)
+      if (error) { console.error(error.message); process.exit(1) }
+      if (!data || data.length === 0) break
+      rows = rows.concat(data)
+      if (data.length < PAGE) break
+      offset += PAGE
+    }
+    rows = rows.slice(0, MAX_EVENTS)
   } else {
     // 1. Events with no mood at all
     const { data: noMood } = await supabase

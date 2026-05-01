@@ -180,29 +180,22 @@ function delay(ms) { return new Promise(r => setTimeout(r, ms)) }
 
 // ── Fetch rows ────────────────────────────────────────────────────────────────
 async function fetchRows() {
-  if (fixAll) {
-    const { data, error } = await supabase
-      .from('events')
-      .select('id, venue_name, raw, ai_enrichment, event_date, category')
-      .eq('hidden', false)
-      .gte('event_date', today)
-      .order('event_date', { ascending: true })
-      .limit(MAX)
-    if (error) { console.error(error.message); process.exit(1) }
-    return data || []
-  }
+  const query = fixAll
+    ? supabase.from('events').select('id, venue_name, raw, ai_enrichment, event_date, category').eq('hidden', false).gte('event_date', today).order('event_date', { ascending: true })
+    : supabase.from('events').select('id, venue_name, raw, ai_enrichment, event_date, category').eq('hidden', false).gte('event_date', today).is('ai_enrichment->about', null).order('event_date', { ascending: true })
 
-  // Only events where about is null/empty
-  const { data, error } = await supabase
-    .from('events')
-    .select('id, venue_name, raw, ai_enrichment, event_date, category')
-    .eq('hidden', false)
-    .gte('event_date', today)
-    .is('ai_enrichment->about', null)
-    .order('event_date', { ascending: true })
-    .limit(MAX)
-  if (error) { console.error(error.message); process.exit(1) }
-  return data || []
+  // Paginate past Supabase's 1000-row cap
+  let rows = [], offset = 0
+  const PAGE = 1000
+  while (rows.length < MAX) {
+    const { data, error } = await query.range(offset, offset + PAGE - 1)
+    if (error) { console.error(error.message); process.exit(1) }
+    if (!data || data.length === 0) break
+    rows = rows.concat(data)
+    if (data.length < PAGE) break
+    offset += PAGE
+  }
+  return rows.slice(0, MAX)
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
