@@ -337,6 +337,13 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
             </div>
           )}
 
+          {/* Local venue badge — bottom left */}
+          {event.source === 'local-venue' && (
+            <div className="absolute bottom-1.5 left-1.5 bg-[#9a442d]/90 backdrop-blur-sm text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+              🎸 Local Live
+            </div>
+          )}
+
           {/* Price badge — bottom right */}
           {event.price && (
             <div className="absolute bottom-1.5 right-1.5 bg-[#006a62]/90 backdrop-blur-sm text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">

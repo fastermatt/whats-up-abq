@@ -820,6 +820,7 @@ function normalizeRow(row: RawEventRow): NormalizedEvent | null {
       case 'local':        evt = normalizeLocal(row); break
       case 'volunteer':    evt = normalizeLocal(row); break  // volunteer events are always free
       case 'nhcc':         evt = normalizeLocal(row); break  // NHCC community events
+      case 'local-venue':  evt = normalizeLocalVenue(row); break  // brewery/bar direct scrapes
       default:             evt = normalizeGeneric(row)
     }
     // Pass through DB columns
@@ -1151,6 +1152,34 @@ function normalizeLocal(row: RawEventRow): NormalizedEvent {
     ticketUrl: (r.url as string | undefined) ?? (r.ticket_url as string | undefined) ?? null,
     source: row.source,
     isFeatured: row.featured ?? false,
+    neighborhood: null, venueSlug: null, submitterHandle: null,
+    about: null, highlights: [], venueTips: null, localTips: null,
+  }
+}
+
+function normalizeLocalVenue(row: RawEventRow): NormalizedEvent {
+  const r = row.raw as Record<string, unknown>
+  const localStartObj = (r.dates as Record<string, unknown> | undefined)?.start as Record<string, unknown> | undefined
+  const localStartDate = localStartObj?.localDate as string | undefined
+  const localStartTime = localStartObj?.localTime as string | undefined
+  const title = decodeHtml((r.title as string) ?? (r.name as string)) || 'Live Music'
+  return {
+    id: row.id,
+    title,
+    date: row.event_date ?? localStartDate ?? '',
+    time: (localStartDate && localStartTime)
+      ? formatTime(`${localStartDate}T${localStartTime}`)
+      : row.event_date ? (formatTime(row.event_date) || null) : null,
+    venue: decodeHtml((r.venue_name as string) ?? (r.venue as string) ?? null) || null,
+    address: decodeHtml((r.address as string | undefined) ?? null) || null,
+    city: (r.city as string | undefined) ?? 'Albuquerque',
+    ...mapCategory((r.category as string | undefined), title),
+    description: (r.notes as string | undefined) ?? null,
+    price: null,  // local venue events scraped from website — no ticket price
+    imageUrl: null,  // no image for direct venue scrapes; EventCard uses venue fallback
+    ticketUrl: (r.source_url as string | undefined) ?? null,
+    source: row.source,
+    isFeatured: false,
     neighborhood: null, venueSlug: null, submitterHandle: null,
     about: null, highlights: [], venueTips: null, localTips: null,
   }
