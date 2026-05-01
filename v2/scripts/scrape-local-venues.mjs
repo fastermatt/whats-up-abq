@@ -47,7 +47,7 @@ for (const envFile of [
 const SUPABASE_URL     = process.env.SUPABASE_URL || 'https://bsmvfutebmbkjvlrhiyq.supabase.co'
 const SUPABASE_KEY     = process.env.SUPABASE_SERVICE_ROLE_KEY
 const ANTHROPIC_KEY    = process.env.ANTHROPIC_API_KEY
-const DEEPSEEK_KEY     = process.env.DEEPSEEK_API_KEY || 'REDACTED_DEEPSEEK_KEY'
+const DEEPSEEK_KEY     = process.env.DEEPSEEK_API_KEY
 const HAIKU_MODEL      = 'claude-haiku-4-5'
 const DEEPSEEK_MODEL   = 'deepseek-chat'
 const USER_AGENT       = 'ABQUnplugged/2.0 (community events; 4mattcarlson@gmail.com)'

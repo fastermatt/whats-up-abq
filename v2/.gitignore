@@ -26,3 +26,7 @@ Thumbs.db
 deno.lock
 # Phase 0 secrets: Upstash/R2/Umami added 2026-04-15
 # Supabase anon key + service_role added 2026-04-15
+
+# Scripts env — contains API keys, never commit
+v2/scripts/.env
+scripts/.env

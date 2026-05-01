@@ -35,7 +35,7 @@ for (const envFile of [
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://bsmvfutebmbkjvlrhiyq.supabase.co'
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
-const DEEPSEEK_KEY = process.env.DEEPSEEK_API_KEY || 'REDACTED_DEEPSEEK_KEY'
+const DEEPSEEK_KEY = process.env.DEEPSEEK_API_KEY
 const DEEPSEEK_URL = 'https://api.deepseek.com/chat/completions'
 
 if (!SUPABASE_KEY) {

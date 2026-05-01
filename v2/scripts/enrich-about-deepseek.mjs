@@ -49,7 +49,7 @@ loadEnv()
 
 const SUPABASE_URL  = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_KEY  = process.env.SUPABASE_SERVICE_ROLE_KEY
-const DEEPSEEK_KEY  = process.env.DEEPSEEK_API_KEY ?? 'REDACTED_DEEPSEEK_KEY'
+const DEEPSEEK_KEY  = process.env.DEEPSEEK_API_KEY
 
 if (!SUPABASE_URL || !SUPABASE_KEY) { console.error('Missing Supabase credentials'); process.exit(1) }
 

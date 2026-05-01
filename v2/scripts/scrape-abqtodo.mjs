@@ -40,7 +40,7 @@ for (const f of [join(__dir, '.env'), join(__dir, '../.env.local')]) {
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bsmvfutebmbkjvlrhiyq.supabase.co'
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
-const DEEPSEEK_KEY = process.env.DEEPSEEK_API_KEY ?? 'REDACTED_DEEPSEEK_KEY'
+const DEEPSEEK_KEY = process.env.DEEPSEEK_API_KEY
 
 if (!SUPABASE_KEY) { console.error('Missing SUPABASE_SERVICE_ROLE_KEY'); process.exit(1) }
 
