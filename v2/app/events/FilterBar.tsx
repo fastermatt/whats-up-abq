@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { ChevronDown, ChevronUp, X, MapPin } from 'lucide-react'
 import type { CategoryCount } from '@/lib/events'
 
@@ -104,63 +104,123 @@ export function FilterBar({
   const countMap = Object.fromEntries(categoryCounts.map((c) => [c.category, c.count]))
   const router = useRouter()
   const searchParams = useSearchParams()
+  const [, startTransition] = useTransition()
+
+  // ── Optimistic filter state ─────────────────────────────────────────────────
+  // These update immediately on click so buttons feel instant.
+  // They're cleared when the server props catch up after navigation completes.
+  const [optTime, setOptTime] = useState<string | null>(null)
+  const [optCategory, setOptCategory] = useState<string | null>(null)
+  const [optPrice, setOptPrice] = useState<string | null>(null)
+  const [optNeighborhood, setOptNeighborhood] = useState<string | null>(null)
+
+  // Track previous server props so we can detect when navigation completes
+  const prevTime = useRef(currentTime)
+  const prevCategory = useRef(currentCategory)
+  const prevPrice = useRef(priceFilter)
+  const prevNeighborhood = useRef(currentNeighborhood)
+
+  useEffect(() => {
+    if (currentTime !== prevTime.current) { prevTime.current = currentTime; setOptTime(null) }
+    if (currentCategory !== prevCategory.current) { prevCategory.current = currentCategory; setOptCategory(null) }
+    if (priceFilter !== prevPrice.current) { prevPrice.current = priceFilter; setOptPrice(null) }
+    if (currentNeighborhood !== prevNeighborhood.current) { prevNeighborhood.current = currentNeighborhood; setOptNeighborhood(null) }
+  }, [currentTime, currentCategory, priceFilter, currentNeighborhood])
+
+  // Effective values: optimistic state takes priority while navigation is in flight
+  const effectiveTime = optTime ?? currentTime
+  const effectiveCategory = optCategory ?? currentCategory
+  const effectivePrice = optPrice ?? priceFilter
+  const effectiveNeighborhood = optNeighborhood ?? currentNeighborhood
+
   const [sportsExpanded, setSportsExpanded] = useState(currentCategory.startsWith('Sports'))
   const [musicExpanded, setMusicExpanded] = useState(currentCategory.startsWith('Music'))
   const [areaExpanded, setAreaExpanded] = useState(!!currentNeighborhood)
 
   const setFilter = useCallback(
     (key: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString())
-      if (value === '' || (key === 'time' && value === 'upcoming')) {
-        params.delete(key)
-      } else {
-        params.set(key, value)
-      }
-      params.delete('page')
-      router.push(`/events?${params.toString()}`, { scroll: false })
+      // Optimistic update — instant visual feedback
+      if (key === 'time') setOptTime(value === 'upcoming' || value === '' ? '' : value)
+      if (key === 'category') setOptCategory(value)
+
+      startTransition(() => {
+        const params = new URLSearchParams(searchParams.toString())
+        if (value === '' || (key === 'time' && value === 'upcoming')) {
+          params.delete(key)
+        } else {
+          params.set(key, value)
+        }
+        params.delete('page')
+        router.push(`/events?${params.toString()}`, { scroll: false })
+      })
     },
-    [router, searchParams]
+    [router, searchParams, startTransition]
   )
 
   const setPrice = useCallback((value: string) => {
-    const params = new URLSearchParams(searchParams.toString())
-    if (priceFilter === value) {
-      params.delete('price')
-    } else {
-      params.set('price', value)
-    }
-    params.delete('free')
-    params.delete('page')
-    router.push(`/events?${params.toString()}`, { scroll: false })
-  }, [router, searchParams, priceFilter])
+    // Optimistic update
+    setOptPrice(effectivePrice === value ? null : value)
+
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams.toString())
+      if (priceFilter === value) {
+        params.delete('price')
+      } else {
+        params.set('price', value)
+      }
+      params.delete('free')
+      params.delete('page')
+      router.push(`/events?${params.toString()}`, { scroll: false })
+    })
+  }, [router, searchParams, priceFilter, effectivePrice, startTransition])
 
   /** Set a vibe — replaces category/time/price with the vibe's preset */
   const setVibe = useCallback((vibeParams: Record<string, string>) => {
-    const params = new URLSearchParams()
-    // Clear existing category/time/price filters, apply vibe's preset
-    if (vibeParams.category) params.set('category', vibeParams.category)
-    if (vibeParams.time) params.set('time', vibeParams.time)
-    if (vibeParams.price) params.set('price', vibeParams.price)
-    router.push(`/events?${params.toString()}`, { scroll: false })
-  }, [router])
+    // Optimistic update
+    setOptCategory(vibeParams.category ?? '')
+    setOptTime(vibeParams.time ?? '')
+    setOptPrice(vibeParams.price ?? null)
+
+    startTransition(() => {
+      const params = new URLSearchParams()
+      if (vibeParams.category) params.set('category', vibeParams.category)
+      if (vibeParams.time) params.set('time', vibeParams.time)
+      if (vibeParams.price) params.set('price', vibeParams.price)
+      router.push(`/events?${params.toString()}`, { scroll: false })
+    })
+  }, [router, startTransition])
 
   const setNeighborhood = useCallback((slug: string) => {
-    const params = new URLSearchParams(searchParams.toString())
-    if (slug === '' || currentNeighborhood === slug) {
-      params.delete('neighborhood')
-    } else {
-      params.set('neighborhood', slug)
-    }
-    params.delete('page')
-    router.push(`/events?${params.toString()}`, { scroll: false })
-  }, [router, searchParams, currentNeighborhood])
+    // Optimistic update
+    setOptNeighborhood(slug === '' || effectiveNeighborhood === slug ? '' : slug)
+
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams.toString())
+      if (slug === '' || currentNeighborhood === slug) {
+        params.delete('neighborhood')
+      } else {
+        params.set('neighborhood', slug)
+      }
+      params.delete('page')
+      router.push(`/events?${params.toString()}`, { scroll: false })
+    })
+  }, [router, searchParams, currentNeighborhood, effectiveNeighborhood, startTransition])
 
   const handleSportsClick = () => {
-    if (currentCategory === 'Sports' || currentCategory.startsWith('Sports > ')) {
+    if (effectiveCategory === 'Sports' || effectiveCategory.startsWith('Sports > ')) {
       setSportsExpanded(!sportsExpanded)
     } else {
       setFilter('category', 'Sports')
       setSportsExpanded(true)
+    }
+  }
+
+  const handleMusicClick = () => {
+    if (effectiveCategory === 'Music' || effectiveCategory.startsWith('Music > ')) {
+      setMusicExpanded(!musicExpanded)
+    } else {
+      setFilter('category', 'Music')
+      setMusicExpanded(true)
     }
   }
 
@@ -203,35 +263,41 @@ export function FilterBar({
   /** A vibe is "active" when ALL of its preset params currently match the URL.
    *  This gives users visual confirmation that a vibe filter is applied. */
   const isVibeActive = (vibeParams: Record<string, string>): boolean => {
-    if (vibeParams.category && currentCategory !== vibeParams.category) return false
-    if (vibeParams.time && currentTime !== vibeParams.time) return false
-    if (vibeParams.price && priceFilter !== vibeParams.price) return false
+    if (vibeParams.category && effectiveCategory !== vibeParams.category) return false
+    if (vibeParams.time && effectiveTime !== vibeParams.time) return false
+    if (vibeParams.price && effectivePrice !== vibeParams.price) return false
     // Must have at least one param matching to count as active (not just empty default)
     return !!(vibeParams.category || vibeParams.time || vibeParams.price)
   }
 
-  // Active filter badges
-  const activeTimeFilter = TIME_FILTERS.find(f => f.value === currentTime && currentTime && currentTime !== 'upcoming')
-  const activePriceFilter = PRICE_FILTERS.find(f => f.value === priceFilter)
-  const activeNeighborhood = NEIGHBORHOODS.find(n => n.slug === currentNeighborhood)
-  const hasActiveFilters = !!(activeTimeFilter || currentCategory || activePriceFilter || activeNeighborhood)
+  // Active filter badges (use effective values for instant feedback)
+  const activeTimeFilter = TIME_FILTERS.find(f => f.value === effectiveTime && effectiveTime && effectiveTime !== 'upcoming')
+  const activePriceFilter = PRICE_FILTERS.find(f => f.value === effectivePrice)
+  const activeNeighborhood = NEIGHBORHOODS.find(n => n.slug === effectiveNeighborhood)
+  const hasActiveFilters = !!(activeTimeFilter || effectiveCategory || activePriceFilter || activeNeighborhood)
 
-  const clearCategory = () => { setFilter('category', ''); setSportsExpanded(false); setMusicExpanded(false) }
+  const clearCategory = () => { setOptCategory(''); setFilter('category', ''); setSportsExpanded(false); setMusicExpanded(false) }
   const clearPrice = () => {
-    const params = new URLSearchParams(searchParams.toString())
-    params.delete('price'); params.delete('free'); params.delete('page')
-    router.push(`/events?${params.toString()}`, { scroll: false })
+    setOptPrice(null)
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams.toString())
+      params.delete('price'); params.delete('free'); params.delete('page')
+      router.push(`/events?${params.toString()}`, { scroll: false })
+    })
   }
-  const clearNeighborhood = () => { setNeighborhood(''); setAreaExpanded(false) }
+  const clearNeighborhood = () => { setOptNeighborhood(''); setNeighborhood(''); setAreaExpanded(false) }
   const clearAll = () => {
-    const params = new URLSearchParams(searchParams.toString())
-    params.delete('time'); params.delete('category'); params.delete('price')
-    params.delete('free'); params.delete('neighborhood'); params.delete('page')
+    setOptTime(''); setOptCategory(''); setOptPrice(null); setOptNeighborhood('')
     setSportsExpanded(false); setMusicExpanded(false); setAreaExpanded(false)
-    router.push(`/events?${params.toString()}`, { scroll: false })
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams.toString())
+      params.delete('time'); params.delete('category'); params.delete('price')
+      params.delete('free'); params.delete('neighborhood'); params.delete('page')
+      router.push(`/events?${params.toString()}`, { scroll: false })
+    })
   }
 
-  const activeCount = [activeTimeFilter, currentCategory, activePriceFilter, activeNeighborhood].filter(Boolean).length
+  const activeCount = [activeTimeFilter, effectiveCategory, activePriceFilter, activeNeighborhood].filter(Boolean).length
 
   return (
     <div className="space-y-2">
@@ -241,19 +307,19 @@ export function FilterBar({
         <div className="flex flex-wrap items-center gap-1.5 animate-fade-in">
           {activeTimeFilter && (
             <button
-              onClick={() => setFilter('time', 'upcoming')}
+              onClick={() => { setOptTime(''); startTransition(() => setFilter('time', 'upcoming')) }}
               className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#9a442d] text-white shadow-sm hover:bg-[#7d3725] transition-colors"
             >
               {activeTimeFilter.label}
               <X className="w-3 h-3 opacity-80" />
             </button>
           )}
-          {currentCategory && (
+          {effectiveCategory && (
             <button
               onClick={clearCategory}
               className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#006a62] text-white shadow-sm hover:bg-[#004d47] transition-colors"
             >
-              {currentCategory.replace(' > ', ' › ')}
+              {effectiveCategory.replace(' > ', ' › ')}
               <X className="w-3 h-3 opacity-80" />
             </button>
           )}
@@ -290,7 +356,7 @@ export function FilterBar({
       {/* Row 1: Time + Price */}
       <ScrollRow>
         {TIME_FILTERS.map(({ value, label }) => {
-          const isActive = currentTime === value || (value === 'upcoming' && !currentTime)
+          const isActive = effectiveTime === value || (value === 'upcoming' && !effectiveTime)
           return (
             <button key={value} onClick={() => setFilter('time', value)} className={timePill(isActive)}>
               {label}
@@ -302,7 +368,7 @@ export function FilterBar({
         <div className="flex-none self-center w-px h-4 bg-[#ddc9a3] mx-0.5" />
 
         {PRICE_FILTERS.map(({ value, label }) => (
-          <button key={value} onClick={() => setPrice(value)} className={pricePill(priceFilter === value)}>
+          <button key={value} onClick={() => setPrice(value)} className={pricePill(effectivePrice === value)}>
             {label}
           </button>
         ))}
@@ -313,8 +379,8 @@ export function FilterBar({
       {/* Row 2: Categories + Area toggle */}
       <ScrollRow>
         <button
-          onClick={() => { setFilter('category', ''); setSportsExpanded(false); setMusicExpanded(false) }}
-          className={catPill(!currentCategory && !currentNeighborhood)}
+          onClick={() => { setOptCategory(''); setFilter('category', ''); setSportsExpanded(false); setMusicExpanded(false) }}
+          className={catPill(!effectiveCategory && !effectiveNeighborhood)}
         >
           All
         </button>
@@ -323,23 +389,15 @@ export function FilterBar({
           const isSports = cat === 'Sports'
           const isMusic  = cat === 'Music'
           const isActive = isSports
-            ? currentCategory === 'Sports' || currentCategory.startsWith('Sports > ')
+            ? effectiveCategory === 'Sports' || effectiveCategory.startsWith('Sports > ')
             : isMusic
-            ? currentCategory === 'Music' || currentCategory.startsWith('Music > ')
-            : currentCategory === cat
+            ? effectiveCategory === 'Music' || effectiveCategory.startsWith('Music > ')
+            : effectiveCategory === cat
           const count = countMap[cat]
 
           const handleClick = () => {
             if (isSports) return handleSportsClick()
-            if (isMusic) {
-              if (currentCategory === 'Music' || currentCategory.startsWith('Music > ')) {
-                setMusicExpanded(!musicExpanded)
-              } else {
-                setFilter('category', 'Music')
-                setMusicExpanded(true)
-              }
-              return
-            }
+            if (isMusic) return handleMusicClick()
             setFilter('category', cat)
           }
 
@@ -360,11 +418,11 @@ export function FilterBar({
         {/* Area (neighborhood) expandable chip */}
         <button
           onClick={() => setAreaExpanded(!areaExpanded)}
-          className={catPill(!!currentNeighborhood)}
+          className={catPill(!!effectiveNeighborhood)}
         >
           <MapPin className="w-3 h-3" />
-          {currentNeighborhood
-            ? (NEIGHBORHOODS.find(n => n.slug === currentNeighborhood)?.label ?? 'Area')
+          {effectiveNeighborhood
+            ? (NEIGHBORHOODS.find(n => n.slug === effectiveNeighborhood)?.label ?? 'Area')
             : 'Area'}
           {areaExpanded ? <ChevronUp className="w-2.5 h-2.5" /> : <ChevronDown className="w-2.5 h-2.5" />}
         </button>
@@ -375,14 +433,14 @@ export function FilterBar({
       {/* Row 3 (conditional): Music subcategories */}
       {musicExpanded && (
         <ScrollRow className="animate-fade-in">
-          <button onClick={() => setFilter('category', 'Music')} className={subPill(currentCategory === 'Music')}>
+          <button onClick={() => setFilter('category', 'Music')} className={subPill(effectiveCategory === 'Music')}>
             All Music
           </button>
           {MUSIC_SUBS.map((sub) => (
             <button
               key={sub}
               onClick={() => setFilter('category', `Music > ${sub}`)}
-              className={subPill(currentCategory === `Music > ${sub}`)}
+              className={subPill(effectiveCategory === `Music > ${sub}`)}
             >
               {sub}
             </button>
@@ -394,14 +452,14 @@ export function FilterBar({
       {/* Row 3 (conditional): Sports subcategories */}
       {sportsExpanded && (
         <ScrollRow className="animate-fade-in">
-          <button onClick={() => setFilter('category', 'Sports')} className={subPill(currentCategory === 'Sports')}>
+          <button onClick={() => setFilter('category', 'Sports')} className={subPill(effectiveCategory === 'Sports')}>
             All Sports
           </button>
           {SPORTS_SUBS.map((sub) => (
             <button
               key={sub}
               onClick={() => setFilter('category', `Sports > ${sub}`)}
-              className={subPill(currentCategory === `Sports > ${sub}`)}
+              className={subPill(effectiveCategory === `Sports > ${sub}`)}
             >
               {sub}
             </button>
@@ -417,7 +475,7 @@ export function FilterBar({
             <button
               key={n.slug}
               onClick={() => setNeighborhood(n.slug)}
-              className={subPill(currentNeighborhood === n.slug)}
+              className={subPill(effectiveNeighborhood === n.slug)}
             >
               {n.label}
             </button>
