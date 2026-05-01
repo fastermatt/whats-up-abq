@@ -45,7 +45,7 @@ export function ElementsSidebar() {
   }
 
   return (
-    <div className="w-[220px] shrink-0 bg-[#0d0d0d] border border-white/[0.07] rounded-xl flex flex-col max-h-[calc(100vh-180px)]">
+    <div className="lg:w-[220px] shrink-0 bg-[#0d0d0d] border border-white/[0.07] rounded-xl flex flex-col lg:max-h-[calc(100vh-180px)]">
       {/* Add elements */}
       <div className="p-2 border-b border-white/[0.06]">
         <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 px-2 mb-1.5">Add</p>

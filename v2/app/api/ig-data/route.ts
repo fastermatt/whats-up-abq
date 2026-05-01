@@ -75,6 +75,9 @@ export async function GET(req: NextRequest) {
     about,
     bullets,
     tip,
+    // Computed date label — "Tonight in ABQ", "Tomorrow in ABQ", "Friday in ABQ", etc.
+    // Reflects the event's actual date vs today so the editor shows the right context.
+    whenLabel: computeWhenLabel(event.date),
     // Use the event's own image, or fall back to the same category image
     // the IG card pages show — so the editor always matches what the user sees
     // on the event page. getCategoryFallback returns a same-origin /fallbacks/ path.
@@ -100,6 +103,33 @@ function formatDate(dateStr: string): string {
     })
   } catch {
     return dateStr
+  }
+}
+
+/** Returns a context-aware label like "Tonight in ABQ", "Tomorrow in ABQ", "Friday in ABQ". */
+function computeWhenLabel(dateStr: string): string {
+  try {
+    const iso = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00'
+    const d = new Date(iso)
+    if (isNaN(d.getTime())) return 'Tonight in ABQ'
+    const now = new Date()
+    // Compare calendar days in Mountain Time (ABQ)
+    const toMDT = (date: Date) =>
+      new Date(date.toLocaleString('en-US', { timeZone: 'America/Denver' }))
+    const todayMDT = toMDT(now)
+    const eventMDT = toMDT(d)
+    todayMDT.setHours(0, 0, 0, 0)
+    eventMDT.setHours(0, 0, 0, 0)
+    const diff = Math.round((eventMDT.getTime() - todayMDT.getTime()) / 864e5)
+    if (diff <= 0) return 'Tonight in ABQ'
+    if (diff === 1) return 'Tomorrow in ABQ'
+    if (diff < 7) {
+      const day = eventMDT.toLocaleDateString('en-US', { weekday: 'long' })
+      return `${day} in ABQ`
+    }
+    return 'Coming Up in ABQ'
+  } catch {
+    return 'Tonight in ABQ'
   }
 }
 

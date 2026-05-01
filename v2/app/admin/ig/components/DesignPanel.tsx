@@ -24,7 +24,7 @@ function NumInput({ value, onChange, min, max, step }: { value: number; onChange
       value={Math.round(value)}
       onChange={e => onChange(parseFloat(e.target.value) || 0)}
       min={min} max={max} step={step ?? 1}
-      className="w-full bg-black/40 border border-white/10 rounded px-2 py-1 text-xs text-white/90 focus:outline-none focus:border-[#9a442d]"
+      className="w-full bg-black/40 border border-white/10 rounded px-2 py-2 sm:py-1 text-xs text-white/90 focus:outline-none focus:border-[#9a442d]"
     />
   )
 }
@@ -59,7 +59,7 @@ function ColorInput({ value, onChange }: { value: string; onChange: (c: string) 
 function Btn({ active, onClick, children, title }: { active?: boolean; onClick: () => void; children: React.ReactNode; title?: string }) {
   return (
     <button onClick={onClick} title={title}
-      className={`px-2 py-1 text-xs rounded border transition-colors ${
+      className={`px-3 py-2 sm:px-2 sm:py-1 text-xs rounded border transition-colors touch-manipulation min-h-[36px] sm:min-h-0 ${
         active
           ? 'bg-[#9a442d] border-[#9a442d] text-white'
           : 'bg-black/30 border-white/10 text-white/70 hover:bg-black/50 hover:text-white'
@@ -318,7 +318,7 @@ export function DesignPanel() {
   const selected = getSelectedLayer()
 
   return (
-    <div className="w-[320px] shrink-0 bg-[#0d0d0d] border border-white/[0.07] rounded-xl overflow-y-auto max-h-[calc(100vh-180px)]">
+    <div className="lg:w-[320px] shrink-0 bg-[#0d0d0d] border border-white/[0.07] rounded-xl overflow-y-auto lg:max-h-[calc(100vh-180px)]">
       {selected ? (
         <>
           <div className="px-4 pt-3 pb-2 border-b border-white/[0.06]">

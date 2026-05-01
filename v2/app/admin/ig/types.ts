@@ -105,7 +105,7 @@ export const BRAND_FONTS = [
   // Use plain font names only — Next.js registers fonts under their real names ("Epilogue" etc).
   { name: 'Epilogue',    stack: 'Epilogue, sans-serif',             weights: [400, 700, 900] },
   { name: 'Inter',       stack: 'Inter, sans-serif',                weights: [400, 600, 800] },
-  { name: 'Fraunces',    stack: '"Fraunces", Georgia, serif',       weights: [400, 600, 900] },
+  { name: 'Fraunces',    stack: '"Fraunces", Georgia, serif',       weights: [400, 600, 800, 900] },
   { name: 'Bebas Neue',  stack: '"Bebas Neue", Impact, sans-serif', weights: [400] },
   { name: 'DM Mono',     stack: '"DM Mono", "IBM Plex Mono", monospace', weights: [400, 500] },
   { name: 'Space Grotesk', stack: '"Space Grotesk", sans-serif',   weights: [400, 600, 700] },

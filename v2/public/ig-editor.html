@@ -530,6 +530,8 @@
   <input id="tagline" type="text" value="Honky-tonk, line dances, singalongs.">
   <div class="label-row"><label>Date</label><button class="copy-btn" onclick="copyField('date')">⎘ copy</button></div>
   <input id="date" type="text" value="Wed, April 22, 2026">
+  <div class="label-row"><label>When label <span style="font-weight:400;opacity:.6">(editorial kicker)</span></label><button class="copy-btn" onclick="copyField('when-label')">⎘ copy</button></div>
+  <input id="when-label" type="text" value="Tonight in ABQ" placeholder="Tonight in ABQ">
   <div class="label-row"><label>Time</label><button class="copy-btn" onclick="copyField('time')">⎘ copy</button></div>
   <input id="time" type="text" value="8:15 PM">
   <div class="label-row"><label>Venue</label><button class="copy-btn" onclick="copyField('venue')">⎘ copy</button></div>
@@ -684,6 +686,7 @@ const state = {
   title:'Ole 60',
   tagline:'Honky-tonk, line dances, singalongs.',
   date:'Wed, April 22, 2026',
+  whenLabel:'Tonight in ABQ', // shown in editorial kicker — auto-set from date on load, editable
   time:'8:15 PM',
   venue:'Revel Entertainment Center',
   address:'4720 Alexander Blvd NE, North Valley',
@@ -723,6 +726,30 @@ const FORMATS = {
 /* ===================== RENDER TEMPLATES ===================== */
 
 function escHtml(s){return String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+
+/** Returns "Tonight in ABQ", "Tomorrow in ABQ", "Friday in ABQ", or "Coming Up in ABQ"
+    based on the event date string (ISO or formatted like "Wed, April 30, 2026"). */
+function computeWhenLabel(dateStr){
+  if(!dateStr) return 'Tonight in ABQ';
+  try{
+    // Strip leading weekday ("Wed, ") so Date constructor can parse "April 30, 2026"
+    const clean = dateStr.replace(/^[A-Za-z]+,?\s*/,'');
+    const d = new Date(clean);
+    if(isNaN(d.getTime())) return 'Tonight in ABQ';
+    const now = new Date();
+    const todayMDT = new Date(now.toLocaleString('en-US',{timeZone:'America/Denver'}));
+    const eventMDT = new Date(d.toLocaleString('en-US',{timeZone:'America/Denver'}));
+    todayMDT.setHours(0,0,0,0); eventMDT.setHours(0,0,0,0);
+    const diff = Math.round((eventMDT-todayMDT)/864e5);
+    if(diff<=0) return 'Tonight in ABQ';
+    if(diff===1) return 'Tomorrow in ABQ';
+    if(diff<7){
+      const day = eventMDT.toLocaleDateString('en-US',{weekday:'long'});
+      return day+' in ABQ';
+    }
+    return 'Coming Up in ABQ';
+  }catch(e){ return 'Tonight in ABQ'; }
+}
 
 /* ── Logo preloading ────────────────────────────────────────────────────────
    SVG <img> tags are unreliable in html2canvas — it silently skips them.
@@ -814,7 +841,7 @@ function _renderCoverInner(tmpl, s){
           <div class="issue">${escHtml((s.date.split(',')[1]||s.date).trim())}</div>
         </div>
         <div class="rule"></div>
-        <div class="kicker"><span>${escHtml(s.category)}</span><span>Tonight in ABQ</span></div>
+        <div class="kicker"><span>${escHtml(s.category)}</span><span>${escHtml(s.whenLabel||'Tonight in ABQ')}</span></div>
         <h1 class="drag" data-drag="title">${escHtml(s.title)}.</h1>
         <div class="dek drag" data-drag="dek">${escHtml(s.tagline)}</div>
         <div class="img drag" data-drag="img" data-img-pan="1" style="background-image:url('${s.imageUrl}')"></div>
@@ -1428,11 +1455,17 @@ function renderTmplThumbs(){
 function bindInputs(){
   const map = {
     category:'category',title:'title',tagline:'tagline',date:'date',time:'time',
-    venue:'venue',address:'address',about:'about',tip:'tip'
+    venue:'venue',address:'address',about:'about',tip:'tip',whenLabel:'when-label'
   };
   Object.entries(map).forEach(([k,id])=>{
     const el = document.getElementById(id);
     el.addEventListener('input', ()=>{ state[k] = el.value; render(); });
+  });
+  // When date changes, suggest a new whenLabel based on the new date
+  document.getElementById('date').addEventListener('change', ()=>{
+    const suggested = computeWhenLabel(state.date);
+    const wl = document.getElementById('when-label');
+    if(wl){ wl.value = suggested; state.whenLabel = suggested; }
   });
   document.getElementById('bullets').addEventListener('input', e=>{
     state.bullets = e.target.value.split('\n').map(l=>l.replace(/^[\s•\-*]+/,'').trim()).filter(Boolean);
@@ -1514,6 +1547,11 @@ async function fetchFromUrl(){
     ['category','title','tagline','date','time','venue','address','about','tip'].forEach(k=>{
       const el = document.getElementById(k); if (el && data[k]!=null) el.value = data[k];
     });
+    // Set whenLabel — use API value if provided, otherwise compute from the date
+    const resolvedLabel = data.whenLabel || computeWhenLabel(data.date || '');
+    state.whenLabel = resolvedLabel;
+    const wlEl = document.getElementById('when-label');
+    if(wlEl) wlEl.value = resolvedLabel;
     if (newBullets) document.getElementById('bullets').value = newBullets.join('\n');
 
     // Only proxy domains that CAPTCHA-block direct browser requests.

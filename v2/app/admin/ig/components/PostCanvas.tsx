@@ -262,10 +262,16 @@ const CANVAS_FONTS = [
   '900 10px Epilogue', '700 10px Epilogue', '400 10px Epilogue',
   '800 10px Inter', '600 10px Inter', '400 10px Inter',
   '700 10px "Space Grotesk"', '400 10px "Space Grotesk"',
-  '900 10px Fraunces', '400 10px Fraunces',
+  '900 10px Fraunces', '800 10px Fraunces', '600 10px Fraunces', '400 10px Fraunces',
+  'italic 900 10px Fraunces', 'italic 800 10px Fraunces', 'italic 400 10px Fraunces',
   '400 10px "Bebas Neue"',
   '500 10px "DM Mono"', '400 10px "DM Mono"',
 ]
+
+// Google Fonts stylesheet for canvas-only fonts (not in the root Next.js layout).
+// Injected lazily so it only loads when the canvas editor is visited.
+const CANVAS_FONT_HREF =
+  'https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;0,9..144,900;1,9..144,400;1,9..144,600&family=Bebas+Neue&family=DM+Mono:wght@400;500&display=block'
 
 export function PostCanvas({ onExportRef }: { onExportRef?: (h: PostCanvasHandle) => void }) {
   const { design, activeSlideIndex, selectedLayerId, selectLayer, updateLayer } = useEditor()
@@ -278,9 +284,21 @@ export function PostCanvas({ onExportRef }: { onExportRef?: (h: PostCanvasHandle
   const trRef        = useRef<Konva.Transformer>(null)
   const [scale, setScale] = useState(1)
 
-  // Preload all brand fonts so they're available in canvas context on first paint
+  // Inject Google Fonts stylesheet for Fraunces/Bebas Neue/DM Mono (not in root layout),
+  // then preload all brand fonts so they're available in canvas context on first paint.
   useEffect(() => {
-    Promise.allSettled(CANVAS_FONTS.map(f => document.fonts.load(f))).catch(() => {/* best-effort */})
+    const loadFonts = () => Promise.allSettled(CANVAS_FONTS.map(f => document.fonts.load(f))).catch(() => {})
+    const LINK_ID = 'canvas-editor-fonts'
+    if (!document.getElementById(LINK_ID)) {
+      const link = document.createElement('link')
+      link.id = LINK_ID
+      link.rel = 'stylesheet'
+      link.href = CANVAS_FONT_HREF
+      link.onload = loadFonts
+      document.head.appendChild(link)
+    } else {
+      loadFonts()
+    }
   }, [])
 
   // Responsive scaling — fit canvas in container

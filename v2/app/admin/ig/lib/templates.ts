@@ -173,16 +173,16 @@ const poster: Template = {
         }) : null,
         textLayer({
           name: 'Title', text: ctx.title ?? 'Your Title Here',
-          x: 80, y: h - 560, width: w - 160,
-          fontFamily: font('Epilogue'), fontSize: 120, fontWeight: 900,
-          fill: BRAND_COLORS.white, lineHeight: 1.0,
+          x: 80, y: h - 580, width: w - 160,
+          fontFamily: font('Fraunces'), fontSize: 130, fontWeight: 800,
+          fill: BRAND_COLORS.white, lineHeight: 0.96,
           shadow: { enabled: true, color: 'rgba(0,0,0,0.4)', blur: 24, offsetX: 0, offsetY: 4 },
         }),
         textLayer({
           name: 'Date & Venue',
           text: `${formatDate(ctx.date, ctx.time)}${ctx.venue ? `\n${ctx.venue}` : ''}`,
-          x: 80, y: h - 260, width: w - 160,
-          fontFamily: font('Inter'), fontSize: 42, fontWeight: 500,
+          x: 80, y: h - 250, width: w - 160,
+          fontFamily: font('Fraunces'), fontSize: 44, fontWeight: 400, fontStyle: 'italic',
           fill: BRAND_COLORS.white, opacity: 0.92, lineHeight: 1.3,
         }),
         textLayer({
@@ -279,8 +279,8 @@ const marquee: Template = {
     const { w, h } = CANVAS_DIMS[format ?? '4:5']
     const sy = (y: number) => Math.round(y * h / 1350)
     const title = (ctx.title ?? 'Your Event').toUpperCase()
-    // Uppercase Epilogue 900 is very wide — conservative sizes to avoid mid-word line-breaks
-    const titleSize = title.length < 8 ? 220 : title.length < 14 ? 190 : title.length < 22 ? 160 : title.length < 32 ? 130 : 110
+    // Bebas Neue is condensed — can run larger than Epilogue at the same character count
+    const titleSize = title.length < 8 ? 260 : title.length < 14 ? 220 : title.length < 22 ? 185 : title.length < 32 ? 150 : 120
     const ruleY = sy(ctx.category ? 248 : 200)
     const titleY = ruleY + 32
     const layers: Layer[] = [logo(LOGO_W, Math.round((w - Math.round(70 * LOGO_R)) / 2), sy(46), 70)]
@@ -288,8 +288,8 @@ const marquee: Template = {
       layers.push(textLayer({
         name: 'Category', text: ctx.category.toUpperCase(),
         x: 80, y: sy(180), width: w - 160,
-        fontFamily: font('Inter'), fontSize: 36, fontWeight: 700,
-        fill: BRAND_COLORS.terra, letterSpacing: 6, align: 'center',
+        fontFamily: font('DM Mono'), fontSize: 28, fontWeight: 500,
+        fill: BRAND_COLORS.terra, letterSpacing: 8, align: 'center',
       }))
     }
     layers.push(
@@ -297,23 +297,24 @@ const marquee: Template = {
       textLayer({
         name: 'Title', text: title,
         x: 80, y: titleY, width: w - 160,
-        fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 900,
-        fill: BRAND_COLORS.cream, lineHeight: 0.88, align: 'center',
+        fontFamily: font('Bebas Neue'), fontSize: titleSize, fontWeight: 400,
+        fill: BRAND_COLORS.cream, lineHeight: 0.88, align: 'center', letterSpacing: 2,
       }),
       shape({ shape: 'rect', x: 280, y: h - 400, width: 520, height: 2, fill: BRAND_COLORS.terra, opacity: 0.7 }),
       textLayer({
         name: 'Date', text: formatDate(ctx.date, ctx.time),
         x: 80, y: h - 370, width: w - 160,
-        fontFamily: font('Inter'), fontSize: 48, fontWeight: 500,
-        fill: BRAND_COLORS.cream, opacity: 0.75, align: 'center',
+        fontFamily: font('Fraunces'), fontSize: 48, fontWeight: 400, fontStyle: 'italic',
+        fill: BRAND_COLORS.cream, opacity: 0.85, align: 'center',
       }),
     )
     if (ctx.venue) {
       layers.push(textLayer({
         name: 'Venue', text: ctx.venue,
         x: 80, y: h - 290, width: w - 160,
-        fontFamily: font('Inter'), fontSize: 42, fontWeight: 400,
-        fill: BRAND_COLORS.cream, opacity: 0.55, align: 'center',
+        fontFamily: font('DM Mono'), fontSize: 30, fontWeight: 500,
+        fill: BRAND_COLORS.cream, opacity: 0.55, align: 'center', letterSpacing: 3,
+        uppercase: true,
       }))
     }
     return {
@@ -374,7 +375,7 @@ const split: Template = {
     layers.push(textLayer({
       name: 'Title', text: title,
       x: 80, y: textBaseY + (ctx.category ? 66 : 0), width: w - 160,
-      fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 900,
+      fontFamily: font('Fraunces'), fontSize: titleSize, fontWeight: 800,
       fill: BRAND_COLORS.ink, lineHeight: 0.92,
     }))
     const dateStr = formatDate(ctx.date, ctx.time)
@@ -452,7 +453,7 @@ const dispatch: Template = {
       textLayer({
         name: 'Title', text: title,
         x: 80, y: sy(258), width: w - 160,
-        fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 900,
+        fontFamily: font('Fraunces'), fontSize: titleSize, fontWeight: 800,
         fill: BRAND_COLORS.ink, lineHeight: 0.9, letterSpacing: -1,
       }),
     ]
@@ -526,7 +527,7 @@ const goldenHour: Template = {
     layers.push(textLayer({
       name: 'Title', text: title,
       x: 80, y: titleY, width: w - 160,
-      fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 900,
+      fontFamily: font('Fraunces'), fontSize: titleSize, fontWeight: 800,
       fill: BRAND_COLORS.cream, lineHeight: 0.92, align: 'center',
       shadow: { enabled: true, color: 'rgba(0,0,0,0.6)', blur: 24, offsetX: 0, offsetY: 4 },
     }))

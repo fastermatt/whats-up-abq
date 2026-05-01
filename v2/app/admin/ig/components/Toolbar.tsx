@@ -131,14 +131,14 @@ function TemplateGallery({
           <button
             key={t.id}
             onClick={() => onApply(t)}
-            className="group bg-[#111] hover:bg-white/[0.05] transition-colors p-2.5 flex flex-col items-center gap-2 text-left"
+            className="group bg-[#111] hover:bg-white/[0.05] active:bg-white/[0.08] transition-colors p-3 sm:p-2.5 flex flex-col items-center gap-2 text-left touch-manipulation"
           >
             <div className="rounded overflow-hidden ring-1 ring-white/[0.08] group-hover:ring-[#9a442d]/60 transition-all group-hover:scale-[1.03]">
               <TemplateSwatch thumb={t.thumb} id={t.id} />
             </div>
             <div className="w-full">
               <p className="text-[11px] font-bold text-white/90 truncate leading-tight">{t.name}</p>
-              <p className="text-[10px] text-white/40 leading-snug mt-0.5 line-clamp-2">{t.description}</p>
+              <p className="text-[10px] text-white/40 leading-snug mt-0.5 line-clamp-2 hidden sm:block">{t.description}</p>
             </div>
           </button>
         ))}
@@ -228,95 +228,104 @@ export function Toolbar({ mode, onModeChange, canvasRef, event, image }: Toolbar
   return (
     <div ref={galleryRef} className="space-y-2">
       {/* Control row */}
-      <div className="bg-[#0d0d0d] border border-white/[0.07] rounded-xl p-3 flex items-center gap-3 flex-wrap">
+      <div className="bg-[#0d0d0d] border border-white/[0.07] rounded-xl p-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 sm:flex-wrap">
 
-        {/* Mode toggle */}
-        <div className="flex bg-black/30 rounded-lg p-0.5">
+        {/* Top row on mobile: mode toggle + templates + download */}
+        <div className="flex items-center gap-2 sm:contents">
+
+          {/* Mode toggle */}
+          <div className="flex bg-black/30 rounded-lg p-0.5 touch-manipulation">
+            <button
+              onClick={() => onModeChange('event')}
+              className={`px-3 py-2 sm:py-1.5 text-xs font-bold rounded transition-colors touch-manipulation ${
+                mode === 'event' ? 'bg-[#9a442d] text-white' : 'text-white/60 hover:text-white'
+              }`}
+            >Event</button>
+            <button
+              onClick={() => onModeChange('generic')}
+              className={`px-3 py-2 sm:py-1.5 text-xs font-bold rounded transition-colors touch-manipulation ${
+                mode === 'generic' ? 'bg-[#9a442d] text-white' : 'text-white/60 hover:text-white'
+              }`}
+            >Brand</button>
+          </div>
+
+          {/* Templates toggle */}
           <button
-            onClick={() => onModeChange('event')}
-            className={`px-3 py-1.5 text-xs font-bold rounded transition-colors ${
-              mode === 'event' ? 'bg-[#9a442d] text-white' : 'text-white/60 hover:text-white'
+            onClick={() => setShowGallery(v => !v)}
+            className={`flex items-center gap-1.5 px-3 py-2 sm:py-1.5 border rounded text-xs font-semibold transition-colors touch-manipulation ${
+              showGallery
+                ? 'bg-[#9a442d]/20 border-[#9a442d]/50 text-[#9a442d]'
+                : 'bg-white/[0.06] hover:bg-white/[0.1] border-white/[0.1] text-white/80'
             }`}
-          >Event</button>
-          <button
-            onClick={() => onModeChange('generic')}
-            className={`px-3 py-1.5 text-xs font-bold rounded transition-colors ${
-              mode === 'generic' ? 'bg-[#9a442d] text-white' : 'text-white/60 hover:text-white'
-            }`}
-          >Brand</button>
+          >
+            Templates {showGallery ? '↑' : '↓'}
+          </button>
+
+          {/* Download — always visible, prominent on mobile */}
+          <div className="flex-1 sm:flex-none flex justify-end sm:order-last">
+            {design.slides.length > 1 ? (
+              <button
+                onClick={exportAllSlides}
+                className="flex items-center gap-1.5 px-4 py-2 sm:px-3 sm:py-1.5 bg-[#9a442d] hover:bg-[#b85535] rounded text-xs font-bold text-white touch-manipulation"
+              >
+                <LayersIcon size={13} /> Export ZIP
+              </button>
+            ) : (
+              <button
+                onClick={exportPng}
+                className="flex items-center gap-1.5 px-4 py-2 sm:px-3 sm:py-1.5 bg-[#9a442d] hover:bg-[#b85535] rounded text-xs font-bold text-white touch-manipulation"
+              >
+                <Download size={13} /> Download
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Design name */}
-        <input
-          value={design.name}
-          onChange={e => renameDesign(e.target.value)}
-          placeholder="Design name"
-          className="bg-black/30 border border-white/10 rounded px-2 py-1.5 text-xs text-white/90 focus:outline-none focus:border-[#9a442d] w-36"
-        />
+        {/* Second row on mobile: design name + undo/redo + save + slide info */}
+        <div className="flex items-center gap-2 sm:contents">
 
-        {/* Templates toggle */}
-        <button
-          onClick={() => setShowGallery(v => !v)}
-          className={`flex items-center gap-1.5 px-3 py-1.5 border rounded text-xs font-semibold transition-colors ${
-            showGallery
-              ? 'bg-[#9a442d]/20 border-[#9a442d]/50 text-[#9a442d]'
-              : 'bg-white/[0.06] hover:bg-white/[0.1] border-white/[0.1] text-white/80'
-          }`}
-        >
-          Templates {showGallery ? '↑' : '↓'}
-        </button>
+          {/* Design name */}
+          <input
+            value={design.name}
+            onChange={e => renameDesign(e.target.value)}
+            placeholder="Design name"
+            className="bg-black/30 border border-white/10 rounded px-2 py-2 sm:py-1.5 text-xs text-white/90 focus:outline-none focus:border-[#9a442d] flex-1 sm:w-36 sm:flex-none"
+          />
 
-        {/* Undo / Redo */}
-        <div className="flex gap-1">
+          {/* Undo / Redo */}
+          <div className="flex gap-1">
+            <button
+              onClick={undo}
+              disabled={!canUndo()}
+              title="Undo (⌘Z)"
+              className="flex items-center justify-center w-9 h-9 sm:w-8 sm:h-8 rounded bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] text-white/70 disabled:opacity-30 disabled:cursor-not-allowed transition-colors touch-manipulation"
+            >
+              <RotateCcw size={13} />
+            </button>
+            <button
+              onClick={redo}
+              disabled={!canRedo()}
+              title="Redo (⌘⇧Z)"
+              className="flex items-center justify-center w-9 h-9 sm:w-8 sm:h-8 rounded bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] text-white/70 disabled:opacity-30 disabled:cursor-not-allowed transition-colors touch-manipulation"
+            >
+              <RotateCw size={13} />
+            </button>
+          </div>
+
+          {/* Save */}
           <button
-            onClick={undo}
-            disabled={!canUndo()}
-            title="Undo (⌘Z)"
-            className="flex items-center justify-center w-8 h-8 rounded bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] text-white/70 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            onClick={doSave}
+            disabled={saveState === 'saving'}
+            className="flex items-center gap-1.5 px-3 py-2 sm:py-1.5 bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] rounded text-xs font-semibold text-white/80 disabled:opacity-50 touch-manipulation"
           >
-            <RotateCcw size={13} />
+            <Save size={13} />
+            {saveState === 'saving' ? 'Saving…' : saveState === 'saved' ? '✓' : 'Save'}
           </button>
-          <button
-            onClick={redo}
-            disabled={!canRedo()}
-            title="Redo (⌘⇧Z)"
-            className="flex items-center justify-center w-8 h-8 rounded bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] text-white/70 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          >
-            <RotateCw size={13} />
-          </button>
+
+          <span className="text-[11px] text-white/40 hidden sm:inline">
+            {design.slides.length} slide{design.slides.length > 1 ? 's' : ''} · {design.format}
+          </span>
         </div>
-
-        <span className="text-[11px] text-white/40">
-          {design.slides.length} slide{design.slides.length > 1 ? 's' : ''} · {design.format}
-        </span>
-        <span className="flex-1" />
-
-        {/* Save */}
-        <button
-          onClick={doSave}
-          disabled={saveState === 'saving'}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] rounded text-xs font-semibold text-white/80 disabled:opacity-50"
-        >
-          <Save size={13} />
-          {saveState === 'saving' ? 'Saving…' : saveState === 'saved' ? 'Saved ✓' : 'Save'}
-        </button>
-
-        {/* Download — single button, adapts to carousel */}
-        {design.slides.length > 1 ? (
-          <button
-            onClick={exportAllSlides}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#9a442d] hover:bg-[#b85535] rounded text-xs font-bold text-white"
-          >
-            <LayersIcon size={13} /> Export ZIP
-          </button>
-        ) : (
-          <button
-            onClick={exportPng}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#9a442d] hover:bg-[#b85535] rounded text-xs font-bold text-white"
-          >
-            <Download size={13} /> Download
-          </button>
-        )}
       </div>
 
       {/* Template gallery */}

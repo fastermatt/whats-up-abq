@@ -30,6 +30,7 @@ export function IGEditor({ event, image }: Props) {
   const { loadDesign, design } = useEditor()
   const [mode, setMode] = useState<EditorMode>(event ? 'event' : 'generic')
   const canvasRef = useRef<PostCanvasHandle | null>(null)
+  const [showSidebar, setShowSidebar] = useState(false)
 
   // Tracks the last event ID we auto-loaded, so we don't clobber in-progress work
   const lastEventIdRef = useRef<string | null>(null)
@@ -125,15 +126,36 @@ export function IGEditor({ event, image }: Props) {
       {/* Toolbar */}
       <Toolbar mode={mode} onModeChange={setMode} canvasRef={canvasRef} event={event} image={image} />
 
+      {/* Mobile sidebar toggle — desktop always shows sidebar in its column */}
+      <button
+        onClick={() => setShowSidebar(v => !v)}
+        className={`lg:hidden flex items-center justify-center gap-2 w-full py-2.5 rounded-lg border text-xs font-bold tracking-wide transition-colors touch-manipulation ${
+          showSidebar
+            ? 'bg-white/[0.1] border-white/20 text-white'
+            : 'bg-white/[0.04] border-white/[0.08] text-white/50'
+        }`}
+      >
+        {showSidebar ? '↑ Hide Layers & Elements' : '↓ Layers & Elements'}
+      </button>
+
       {/* 3-column editor: elements | canvas | design */}
       <div className="flex flex-col lg:flex-row gap-4">
-        <ElementsSidebar />
+        {/* Sidebar — hidden by default on mobile, always visible on desktop */}
+        <div className={showSidebar ? 'block' : 'hidden lg:block'}>
+          <ElementsSidebar />
+        </div>
+
+        {/* Canvas — first in DOM on desktop, rendered first on mobile */}
         <div className="flex-1 min-w-0 flex flex-col gap-3">
           <PostCanvas onExportRef={h => { canvasRef.current = h }} />
-          <p className="text-[11px] text-white/30 text-center">
+          <p className="text-[11px] text-white/30 text-center hidden sm:block">
             Click to select · drag to move · corner handles to resize/rotate · Delete key removes selected · ⌘Z undo
           </p>
+          <p className="text-[11px] text-white/30 text-center sm:hidden">
+            Tap to select · drag to move · handles to resize
+          </p>
         </div>
+
         <DesignPanel />
       </div>
 
