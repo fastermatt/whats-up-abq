@@ -52,6 +52,7 @@ export function EventImage({
   loading?: 'lazy' | 'eager'
 }) {
   const [currentSrc, setCurrentSrc] = useState(() => proxyIfNeeded(src))
+  const [loaded, setLoaded] = useState(false)
 
   return (
     // eslint-disable-next-line @next/next/no-img-element
@@ -59,9 +60,14 @@ export function EventImage({
       src={currentSrc}
       alt={alt}
       loading={loading}
-      className={className}
+      decoding="async"
+      className={`${className ?? ''} transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+      onLoad={() => setLoaded(true)}
       onError={() => {
-        if (currentSrc !== fallback) setCurrentSrc(fallback)
+        if (currentSrc !== fallback) {
+          setLoaded(false)
+          setCurrentSrc(fallback)
+        }
       }}
     />
   )
