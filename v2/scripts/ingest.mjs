@@ -539,7 +539,7 @@ async function main() {
     step('Enriching (neighborhoods, moods)')
     const enrichScripts = [
       { name: 'tag-neighborhoods',  script: 'tag-neighborhoods.mjs' },
-      { name: 'enrich-moods-rules', script: 'enrich-deepseek.mjs', args: ['--limit=5000'] },
+      { name: 'enrich-deepseek-moods', script: 'enrich-deepseek.mjs', args: ['--limit=5000'] },
     ]
     for (const e of enrichScripts) {
       const r = await runScript(e.script, e.args || [])
