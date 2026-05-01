@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default async function MoviesPage() {
   const movies = await fetchNowPlayingMovies(20)
   const hasMovies = movies.length > 0
-  const hasKey = !!process.env.TMDB_API_KEY
+  const hasKey = !!process.env.TMDB_READ_ACCESS_TOKEN
 
   return (
     <main id="main" className="min-h-dvh bg-[#fbf7f1]">
@@ -52,7 +52,7 @@ export default async function MoviesPage() {
       {/* ── Movie grid ── */}
       <section className="max-w-6xl mx-auto px-4 py-8">
         {!hasKey ? (
-          /* Admin notice — only shows when TMDB_API_KEY is not set */
+          /* Admin notice — only shows when TMDB_READ_ACCESS_TOKEN is not set */
           <div className="rounded-xl border border-[#f0e4cc] bg-white p-8 text-center">
             <p className="text-2xl mb-3">🎬</p>
             <h2 className="font-bold text-[#1a1614] text-lg mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
@@ -68,7 +68,7 @@ export default async function MoviesPage() {
               >
                 themoviedb.org/settings/api
               </a>
-              {' '}then add <code className="bg-[#f5ece3] px-1 rounded">TMDB_API_KEY=your_key</code> to{' '}
+              {' '}then add <code className="bg-[#f5ece3] px-1 rounded">TMDB_READ_ACCESS_TOKEN=your_token</code> to{' '}
               <code className="bg-[#f5ece3] px-1 rounded">.env.local</code> and Netlify.
             </p>
           </div>

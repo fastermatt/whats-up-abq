@@ -1,10 +1,10 @@
 /**
  * TMDb "Now Playing" movie fetcher.
  *
- * Requires TMDB_API_KEY in the environment.
- * Get a free key at: https://www.themoviedb.org/settings/api
+ * Requires TMDB_READ_ACCESS_TOKEN in the environment (the JWT bearer token
+ * from https://www.themoviedb.org/settings/api → "API Read Access Token").
  *
- * If the key is absent, all functions return [] / null — the UI degrades gracefully.
+ * If the token is absent, all functions return [] — the UI degrades gracefully.
  */
 
 export interface Movie {
@@ -63,17 +63,20 @@ function shapeMovie(m: TmdbMovie): Movie {
  * Fetch movies currently playing in US theaters from TMDb.
  *
  * @param limit  Max results (default 20). TMDb pages at 20 per page.
- * @returns      Sorted by popularity desc. Empty array if API key missing.
+ * @returns      Sorted by popularity desc. Empty array if token missing.
  */
 export async function fetchNowPlayingMovies(limit = 20): Promise<Movie[]> {
-  const key = process.env.TMDB_API_KEY
-  if (!key) return []
+  const token = process.env.TMDB_READ_ACCESS_TOKEN
+  if (!token) return []
 
   try {
-    const url = `${TMDB_BASE}/movie/now_playing?api_key=${key}&language=en-US&page=1&region=US`
+    const url = `${TMDB_BASE}/movie/now_playing?language=en-US&page=1&region=US`
     const res = await fetch(url, {
-      next: { revalidate: 3600 }, // cache 1hr
-      headers: { Accept: 'application/json' },
+      next: { revalidate: 3600 }, // cache 1hr — movies change weekly
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
     })
 
     if (!res.ok) {
@@ -83,7 +86,7 @@ export async function fetchNowPlayingMovies(limit = 20): Promise<Movie[]> {
 
     const data: TmdbNowPlayingResponse = await res.json()
     return data.results
-      .filter(m => m.vote_count > 10)          // drop brand-new titles with no votes yet
+      .filter(m => m.vote_count > 10)  // skip brand-new titles with no votes yet
       .slice(0, limit)
       .map(shapeMovie)
   } catch (err) {
