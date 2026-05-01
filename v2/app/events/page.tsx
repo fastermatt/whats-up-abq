@@ -330,17 +330,23 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
             </div>
           )}
 
+          {/* Local venue — warm amber tint + bottom gradient so the badge reads clearly */}
+          {event.source === 'local-venue' && (
+            <>
+              {/* Always-visible warm tint: signals "intimate local show", not a ticketed big venue */}
+              <div className="absolute inset-0 bg-[#9a442d]/20 mix-blend-multiply pointer-events-none" />
+              {/* Bottom gradient for badge legibility */}
+              <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[#6b2e1a]/70 to-transparent pointer-events-none" />
+              <div className="absolute bottom-1.5 left-1.5 flex items-center gap-0.5 text-white text-[10px] font-semibold">
+                🎸 <span>Local Live</span>
+              </div>
+            </>
+          )}
+
           {/* Community badge — bottom left */}
           {event.source === 'community' && (
             <div className="absolute bottom-1.5 left-1.5 bg-[#006a62]/90 backdrop-blur-sm text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
               👥 Community
-            </div>
-          )}
-
-          {/* Local venue badge — bottom left */}
-          {event.source === 'local-venue' && (
-            <div className="absolute bottom-1.5 left-1.5 bg-[#9a442d]/90 backdrop-blur-sm text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
-              🎸 Local Live
             </div>
           )}
 
@@ -351,8 +357,10 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
             </div>
           )}
 
-          {/* Hover overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          {/* Hover overlay (non-local-venue cards only — local-venue has its own permanent tint) */}
+          {event.source !== 'local-venue' && (
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          )}
         </div>
 
         {/* Info section — title + date only (venue is rendered as separate link below) */}

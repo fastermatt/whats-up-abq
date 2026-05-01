@@ -56,9 +56,10 @@ if (!SUPABASE_KEY) {
   console.error('❌ SUPABASE_SERVICE_ROLE_KEY not set in scripts/.env')
   process.exit(1)
 }
-if (!ANTHROPIC_KEY) {
-  console.error('❌ ANTHROPIC_API_KEY not set in scripts/.env')
-  process.exit(1)
+// Haiku is optional — falls back to DeepSeek for extraction when key not set
+const USE_HAIKU = !!ANTHROPIC_KEY
+if (!USE_HAIKU) {
+  console.log('ℹ️  No ANTHROPIC_API_KEY — using DeepSeek for extraction (add key to scripts/.env for Haiku)')
 }
 
 const isDryRun   = process.argv.includes('--dry-run')
@@ -226,6 +227,33 @@ Today's date is ${new Date().toISOString().slice(0, 10)}.`,
   return data.content?.[0]?.text?.trim() ?? ''
 }
 
+/** DeepSeek fallback: extract raw event text when no Anthropic key is available */
+async function extractWithDeepSeek(venueText, venueName) {
+  const res = await fetch('https://api.deepseek.com/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${DEEPSEEK_KEY}`,
+    },
+    body: JSON.stringify({
+      model: DEEPSEEK_MODEL,
+      messages: [{
+        role: 'user',
+        content: `Extract ONLY upcoming events from the ${venueName} website text below. Return a plain-text list, one event per line with date, performer name, and time if available. Skip past events. If none found, respond with "NO_EVENTS". Today is ${new Date().toISOString().slice(0, 10)}.\n\n${venueText}`,
+      }],
+      temperature: 0.1,
+      max_tokens: 1024,
+    }),
+    signal: AbortSignal.timeout(30_000),
+  })
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`DeepSeek extract error ${res.status}: ${body.slice(0, 200)}`)
+  }
+  const data = await res.json()
+  return data.choices?.[0]?.message?.content?.trim() ?? ''
+}
+
 /** Call DeepSeek to normalize extracted text into a structured JSON array */
 async function normalizeWithDeepSeek(rawText, venueName) {
   const today = new Date().toISOString().slice(0, 10)
@@ -299,17 +327,16 @@ function buildId(venueSlug, date, title) {
   return `local-venue-${venueSlug}-${date}-${titleSlug}`
 }
 
-/** Classify event into site categories based on title keywords */
+/** Classify event into site categories based on title keywords.
+ *  Values must match DB check constraint (title-cased). */
 function classify(title) {
   const t = title.toLowerCase()
-  if (/open mic|open-mic/.test(t)) return 'music'
-  if (/jazz|blues|soul|r&b/.test(t)) return 'music'
-  if (/rock|metal|punk|indie|folk|country|bluegrass|acoustic|band|trio|quartet|duo/.test(t)) return 'music'
-  if (/comedy|stand.?up|improv/.test(t)) return 'comedy'
-  if (/trivia|quiz/.test(t)) return 'food-drink'
-  if (/karaoke/.test(t)) return 'music'
-  if (/bingo/.test(t)) return 'food-drink'
-  return 'music' // live music is the default for local venue events
+  if (/comedy|stand.?up|improv|bard/.test(t)) return 'Comedy'
+  if (/trivia|quiz|bingo|book.?club|book.?swap|craft|bedazzl|run.?club|yoga/.test(t)) return 'Food & Drink'
+  if (/record.?fair|story.?slam|art/.test(t)) return 'Arts & Theater'
+  if (/adoption|charity|benefit|walk|run|5k/.test(t)) return 'Community'
+  if (/festival|fest/.test(t)) return 'Festivals'
+  return 'Music' // live music is the default for local venue events
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -355,16 +382,21 @@ async function main() {
     }
     if (verbose) console.log(`   HTML: ${html.length.toLocaleString()} chars`)
 
-    // 2. Strip + extract with Haiku
+    // 2. Strip + extract with Haiku (or DeepSeek if no Anthropic key)
     const strippedText = roughStripHtml(html)
     if (verbose) console.log(`   Stripped: ${strippedText.length.toLocaleString()} chars`)
 
     let rawEventText
     try {
-      rawEventText = await extractWithHaiku(strippedText, venue.name)
-      if (verbose) console.log('   Haiku output:', rawEventText.slice(0, 300))
+      if (USE_HAIKU) {
+        rawEventText = await extractWithHaiku(strippedText, venue.name)
+        if (verbose) console.log('   Haiku output:', rawEventText.slice(0, 300))
+      } else {
+        rawEventText = await extractWithDeepSeek(strippedText, venue.name)
+        if (verbose) console.log('   DeepSeek extract output:', rawEventText.slice(0, 300))
+      }
     } catch (err) {
-      console.log(`   ❌ Haiku failed: ${err.message}`)
+      console.log(`   ❌ Extraction failed: ${err.message}`)
       venuesFailed++
       continue
     }
@@ -456,7 +488,7 @@ async function main() {
         hidden: false,
         category,
         venue_name: venue.name,
-        neighborhood_slug: venue.neighborhood ?? null,
+        neighborhood: venue.neighborhood ?? null,
       }
 
       const isNew = !existingIds.has(id)
