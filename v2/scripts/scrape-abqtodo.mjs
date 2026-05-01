@@ -319,10 +319,17 @@ async function main() {
 
     // Host image to Supabase Storage
     const prior = existingById.get(id)
-    const imageRejected = prior?.image_status === 'rejected'
-    let hostedUrl = prior?.cached_photo_url ?? null
+    // Only preserve ADMIN rejections (flagged via the admin UI reject button).
+    // Old pipeline rejections (from host-event-images.mjs) can be overridden
+    // by the new scraper since DeepSeek finds the correct og:image.
+    const adminRejected = prior?.image_status === 'rejected' && prior?.ai_enrichment?.admin_rejected === true
+    let hostedUrl = adminRejected ? (prior?.cached_photo_url ?? null) : null
+    // Keep existing Supabase-hosted image if we have one and DeepSeek found no new image
+    if (!hostedUrl && prior?.cached_photo_url?.includes('supabase') && !extracted.imageUrl) {
+      hostedUrl = prior.cached_photo_url
+    }
 
-    if (!imageRejected && extracted.imageUrl) {
+    if (!adminRejected && extracted.imageUrl) {
       const needsNewImage = !hostedUrl || !hostedUrl.includes('supabase')
       if (needsNewImage) {
         const url = await hostImage(id, extracted.imageUrl)
@@ -372,8 +379,8 @@ async function main() {
       source: 'local',
       raw,
       event_date: eventDatetime,
-      cached_photo_url: imageRejected ? (prior?.cached_photo_url ?? null) : (hostedUrl ?? null),
-      image_status: imageRejected ? 'rejected' : (hostedUrl ? 'verified' : null),
+      cached_photo_url: adminRejected ? (prior?.cached_photo_url ?? null) : (hostedUrl ?? null),
+      image_status: adminRejected ? 'rejected' : (hostedUrl ? 'verified' : null),
       featured: false,
       hidden: false,
       category: extracted.category,
