@@ -8,6 +8,7 @@ import { FirstVisitBanner } from './components/FirstVisitBanner'
 import { PWAManager } from './components/PWAManager'
 import { AuthCallbackCatcher } from './components/AuthCallbackCatcher'
 import { NewsletterBar } from './components/NewsletterBar'
+import { SupportBar } from './components/SupportBar'
 import { AnalyticsTracker } from './components/AnalyticsTracker'
 import { OG_IMAGE } from '@/lib/fallback-images'
 import './globals.css'
@@ -135,8 +136,11 @@ export default function RootLayout({
             {/* ── Newsletter signup ── */}
             <NewsletterBar />
 
+            {/* ── Ko-Fi support ── */}
+            <SupportBar />
+
             {/* ── Site footer ── */}
-            <footer className="mt-16 pb-6 w-full flex flex-col items-center gap-4 select-none" aria-label="Site footer">
+            <footer className="mt-8 pb-6 w-full flex flex-col items-center gap-3 select-none" aria-label="Site footer">
               {/* Ornamental rule — left line shorter so dot sits above the ♥ */}
               <div className="flex items-center gap-3">
                 <div className="w-[77px] h-px bg-gradient-to-r from-transparent via-[#c8b4a4] to-[#c8b4a4]" />
@@ -156,6 +160,16 @@ export default function RootLayout({
                 </span>
                 <span>for Albuquerque</span>
               </p>
+
+              {/* Ko-Fi micro-link */}
+              <a
+                href="https://ko-fi.com/stopscrolling"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[10px] text-[#b8a89e] hover:text-[#9a442d] transition-colors tracking-wide"
+              >
+                ☕ ko-fi.com/stopscrolling
+              </a>
             </footer>
           </div>
           <BottomNav />
