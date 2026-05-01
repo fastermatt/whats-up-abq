@@ -83,12 +83,12 @@ export default async function NeighborhoodsPage() {
             <AnimateIn key={n.slug} animation="fade-up" delay={Math.min(i * 30, 300)}>
               <Link
                 href={`/neighborhoods/${n.slug}`}
-                className="group bg-white rounded-xl border border-[#f0e4cc] px-4 py-3.5 shadow-sm hover:shadow-md hover:border-[#006a62]/30 transition-all"
+                className="group bg-white rounded-xl border border-[#ede4d3] px-4 py-3.5 shadow-sm hover:shadow-md hover:border-[#9a442d]/40 transition-all"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <h2
-                      className="font-bold text-sm text-[#1a1614] group-hover:text-[#006a62] transition-colors leading-tight mb-0.5"
+                      className="font-bold text-sm text-[#1a1614] group-hover:text-[#9a442d] transition-colors leading-tight mb-0.5"
                       style={{ fontFamily: 'var(--font-epilogue)' }}
                     >
                       {n.neighborhood}
