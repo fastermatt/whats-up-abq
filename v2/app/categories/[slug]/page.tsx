@@ -6,6 +6,7 @@ import { buildBreadcrumbs } from '@/lib/seo'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
 import { MapPin, Calendar, ArrowLeft, ExternalLink, Tag } from 'lucide-react'
+import categoryDescriptions from '@/lib/category-descriptions.json'
 
 export const revalidate = 3600
 
@@ -26,18 +27,11 @@ const CATEGORY_MAP: Record<string, string> = {
   'outdoor':      'Outdoor',
 }
 
-const CATEGORY_DESCRIPTIONS: Record<string, string> = {
-  'music':        'Live concerts, local bands, national tours, and music events across Albuquerque.',
-  'sports':       'Isotopes baseball, NM United soccer, UNM Lobos, fighting sports, and more.',
-  'arts-theater': 'Theater, dance performances, gallery openings, and film screenings in ABQ.',
-  'comedy':       'Stand-up comedy, improv shows, and open mics in Albuquerque.',
-  'family':       'Family-friendly events, story times, museum days, and kid-friendly activities.',
-  'food-drink':   'Brewery events, tastings, farmers markets, and food festivals in Albuquerque.',
-  'film':         'Film screenings, cinema events, and movie premieres in Albuquerque.',
-  'community':    'Volunteer opportunities, civic events, workshops, and community gatherings.',
-  'festivals':    'Festivals, fairs, carnivals, and seasonal celebrations across ABQ.',
-  'outdoor':      'Hiking events, cycling rides, hot air balloons, and outdoor adventures near Albuquerque.',
-}
+// Richer descriptions from AI enrichment — fall back to short inline strings
+const CATEGORY_DESCRIPTIONS: Record<string, string> = Object.fromEntries(
+  Object.entries(categoryDescriptions as Record<string, { description: string }>)
+    .map(([slug, v]) => [slug, v.description])
+)
 
 const CATEGORY_EMOJIS: Record<string, string> = {
   'music': '🎵', 'sports': '⚽', 'arts-theater': '🎭', 'comedy': '😂',
@@ -49,14 +43,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params
   const category = CATEGORY_MAP[slug]
   if (!category) return { title: 'Category Not Found' }
-  const desc = CATEGORY_DESCRIPTIONS[slug] ?? ''
+  const catData = (categoryDescriptions as Record<string, { description: string; meta: string }>)[slug]
+  const metaDesc = catData?.meta ?? `${CATEGORY_DESCRIPTIONS[slug] ?? ''} Find tickets and event details on ABQ Unplugged.`
   return {
     title: `${category} Events in Albuquerque, NM`,
-    description: `${desc} Find tickets and event details on ABQ Unplugged.`,
+    description: metaDesc,
     alternates: { canonical: `https://abqunplugged.com/categories/${slug}` },
     openGraph: {
       title: `${category} Events in Albuquerque`,
-      description: desc,
+      description: metaDesc,
       url: `https://abqunplugged.com/categories/${slug}`,
     },
   }

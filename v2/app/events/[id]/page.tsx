@@ -34,18 +34,26 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const dateStr = formatDateLong(event.date)
   const venueStr = event.venue ?? 'Albuquerque, NM'
+  // Prefer AI-generated about (clean, local voice) over raw description (may contain HTML entities).
+  // Fall back to a useful generic if neither exists.
   const description = (
-    event.description
-    ?? `${event.title} at ${venueStr} — ${dateStr}. Find tickets and event details on ABQ Unplugged.`
+    event.about
+    ?? event.description
+    ?? `${event.title} at ${venueStr} on ${dateStr}. Find tickets and full event details on ABQ Unplugged.`
   ).slice(0, 160)
 
   const canonicalUrl = `https://abqunplugged.com/events/${id}`
 
+  // SEO title: include venue for specificity on tail searches like "Hamilton Popejoy Hall"
+  const seoTitle = event.venue
+    ? `${event.title} at ${event.venue} — ${dateStr}`
+    : `${event.title} — ${dateStr} — Albuquerque`
+
   return {
-    title: `${event.title} — ${dateStr}`,
+    title: seoTitle,
     description,
     openGraph: {
-      title: `${event.title} — ${dateStr}`,
+      title: seoTitle,
       description,
       url: canonicalUrl,
       type: 'website',

@@ -7,6 +7,7 @@ import { getCategoryFallback } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
 import { MapPin, Calendar, ArrowLeft, ExternalLink, Ticket } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
+import venueDescriptions from '@/lib/venue-descriptions.json'
 
 export const revalidate = 3600
 
@@ -99,12 +100,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const canonicalUrl = `https://abqunplugged.com/venues/${slug}`
   const ogImage = events[0].imageUrl || getCategoryFallback(events[0].category ?? undefined, events[0].id)
 
+  const venueData = (venueDescriptions as Record<string, { meta?: string; tagline?: string }>)[slug]
+  const metaDesc = venueData?.meta
+    ?? `Upcoming events at ${venue} in Albuquerque, NM. Find tickets, dates, and details on ABQ Unplugged — every ticket source in one place.`
+
   return {
     title: `Events at ${venue} — Albuquerque, NM`,
-    description: `Upcoming events at ${venue} in Albuquerque, NM. Find tickets, dates, and details on ABQ Unplugged — every ticket source in one place.`,
+    description: metaDesc,
     openGraph: {
       title: `Events at ${venue} — Albuquerque, NM`,
-      description: `Upcoming events at ${venue} in Albuquerque, NM. Find tickets on ABQ Unplugged.`,
+      description: metaDesc,
       url: canonicalUrl,
       images: [{ url: ogImage, width: 1200, height: 630, alt: `Events at ${venue}` }],
     },
@@ -127,6 +132,9 @@ export default async function VenuePage({ params }: PageProps) {
   const city = events[0].city ?? 'Albuquerque'
   const neighborhood = events[0].neighborhood ?? null
   const neighborhoodSlug = neighborhood ? neighborhoodToSlug(neighborhood) : null
+
+  // AI-generated venue copy (tagline + description)
+  const venueInfo = (venueDescriptions as Record<string, { tagline?: string; description?: string }>)[slug] ?? null
 
   // Best venue image — first event photo, else category fallback
   const venueImage = events[0].imageUrl || getCategoryFallback(events[0].category ?? undefined, events[0].id)
@@ -247,6 +255,13 @@ export default async function VenuePage({ params }: PageProps) {
             </>
           )}
         </div>
+
+        {/* ── Venue description ── */}
+        {venueInfo?.description && (
+          <p className="text-sm text-[#3d2e28] leading-relaxed">
+            {venueInfo.description}
+          </p>
+        )}
 
         {/* ── Category distribution ── */}
         {categoryList.length > 0 && (

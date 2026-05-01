@@ -1,0 +1,92 @@
+{
+  "downtown": {
+    "slug": "downtown",
+    "name": "Downtown Albuquerque",
+    "description": "Downtown Albuquerque is the city's urban core, buzzing with a mix of historic architecture, modern lofts, and a vibrant nightlife scene centered around Central Avenue. Known for its art galleries, the KiMo Theatre, and a growing roster of craft breweries and farm-to-table restaurants, it pulses with energy during First Fridays and after-hours events.",
+    "meta": "Explore Downtown Albuquerque events: live music, art walks, and nightlife at historic venues like KiMo Theatre. Your guide to the city's urban core."
+  },
+  "nob-hill": {
+    "slug": "nob-hill",
+    "name": "Nob Hill",
+    "description": "Nob Hill is a hip, walkable stretch of Central Avenue known for its retro neon signs, indie boutiques, and a lively mix of coffee shops, bars, and eateries. This historic Route 66 corridor draws a young, creative crowd with its vintage charm and regular block parties.",
+    "meta": "Discover Nob Hill Albuquerque events: Route 66 vibes, indie shops, and nightlife. Find concerts, art shows, and local happenings here."
+  },
+  "unm-campus": {
+    "slug": "unm-campus",
+    "name": "UNM Campus Area",
+    "description": "The UNM Campus Area centers around the University of New Mexico, featuring Pueblo Revival architecture, the Maxwell Museum, and a constant flow of student life. It's a hub for college sports, academic lectures, and affordable eats along Central and Yale.",
+    "meta": "Find UNM Campus Area Albuquerque events: Lobo sports, museum exhibits, and student activities. Your guide to university neighborhood happenings."
+  },
+  "old-town": {
+    "slug": "old-town",
+    "name": "Old Town",
+    "description": "Old Town Albuquerque is the historic heart of the city, centered on the San Felipe de Neri Church and a plaza lined with art galleries and souvenir shops. It offers a quieter, tourist-friendly vibe with frequent cultural festivals and traditional New Mexican cuisine.",
+    "meta": "Visit Old Town Albuquerque events: historic plaza, art markets, and cultural festivals. Discover local traditions and family-friendly activities."
+  },
+  "uptown-midtown": {
+    "slug": "uptown-midtown",
+    "name": "Uptown / Midtown",
+    "description": "Uptown / Midtown is a commercial and residential corridor anchored by Coronado Center and the ABQ Uptown shopping district. It blends chain retailers with local dining spots, and hosts community events at the nearby Expo New Mexico grounds.",
+    "meta": "Check Uptown Midtown Albuquerque events: shopping, dining, and community gatherings near Coronado Center. Local happenings and more."
+  },
+  "north-valley": {
+    "slug": "north-valley",
+    "name": "North Valley",
+    "description": "The North Valley is a lush, agricultural area along the Rio Grande, known for its acequias, horse properties, and the Los Poblanos lavender farm. It offers a serene escape with farm-to-table dining, art studios, and seasonal harvest festivals.",
+    "meta": "Experience North Valley Albuquerque events: farm tours, art walks, and nature outings along the Rio Grande. Local guide to this green oasis."
+  },
+  "state-fairgrounds-midtown": {
+    "slug": "state-fairgrounds-midtown",
+    "name": "State Fairgrounds / Midtown",
+    "description": "State Fairgrounds / Midtown is the site of Expo New Mexico, hosting the annual State Fair, rodeos, and large-scale concerts. This area buzzes with activity during events, offering a mix of carnival rides, livestock shows, and live entertainment.",
+    "meta": "See State Fairgrounds Midtown Albuquerque events: concerts, rodeos, and the New Mexico State Fair. Your guide to Expo New Mexico happenings."
+  },
+  "northeast-heights": {
+    "slug": "northeast-heights",
+    "name": "Northeast Heights",
+    "description": "The Northeast Heights is a sprawling residential area with sweeping views of the Sandia Mountains, known for its suburban parks, golf courses, and family-friendly strip malls. It's a quiet base for hiking trails and local community center events.",
+    "meta": "Find Northeast Heights Albuquerque events: family activities, park concerts, and local sports. Explore this suburban neighborhood's scene."
+  },
+  "west-side": {
+    "slug": "west-side",
+    "name": "West Side",
+    "description": "The West Side stretches across the Rio Grande into the volcanic mesa, offering stunning sunsets and access to Petroglyph National Monument. It's a growing area with new developments, local breweries, and a laid-back, outdoor-oriented vibe.",
+    "meta": "Discover West Side Albuquerque events: hiking, petroglyph tours, and neighborhood festivals. Your guide to this scenic mesa community."
+  },
+  "south-valley": {
+    "slug": "south-valley",
+    "name": "South Valley",
+    "description": "The South Valley is a rural, culturally rich area along the Rio Grande, known for its small farms, acequias, and the National Hispanic Cultural Center. It hosts traditional fiestas, farmers markets, and art events rooted in Chicano heritage.",
+    "meta": "Explore South Valley Albuquerque events: Hispanic Cultural Center, farm markets, and community fiestas. Local traditions and gatherings."
+  },
+  "barelas-south-downtown": {
+    "slug": "barelas-south-downtown",
+    "name": "Barelas / South Downtown",
+    "description": "Barelas / South Downtown is a historic, working-class neighborhood just south of downtown, famous for its traditional New Mexican restaurants like the Barelas Coffee House. It's a tight-knit community with a strong Chicano identity, hosting lowrider shows and cultural events at the Barelas Community Center.",
+    "meta": "Visit Barelas South Downtown Albuquerque events: lowrider shows, community fiestas, and local eateries. Discover this historic neighborhood."
+  },
+  "international-district": {
+    "slug": "international-district",
+    "name": "International District",
+    "description": "The International District, formerly known as the War Zone, is a vibrant, multicultural hub east of downtown with a dense mix of Vietnamese, African, and Latino businesses. It's known for its pho shops, taquerias, and the annual International District Street Festival celebrating diversity.",
+    "meta": "Experience International District Albuquerque events: ethnic food, street festivals, and cultural celebrations. Your guide to this diverse area."
+  },
+  "far-northeast-sandia-foothills": {
+    "slug": "far-northeast-sandia-foothills",
+    "name": "Far Northeast / Sandia Foothills",
+    "description": "The Far Northeast / Sandia Foothills is a high-desert neighborhood hugging the base of the Sandia Mountains, offering direct access to hiking and biking trails like the Pino Trail. It's a quieter, nature-focused area with sweeping city views and a handful of local cafes.",
+    "meta": "Explore Far Northeast Sandia Foothills Albuquerque events: trail runs, nature walks, and mountain views. Outdoor activities and local gatherings."
+  },
+  "south-i-25-university-se": {
+    "slug": "south-i-25-university-se",
+    "name": "University SE / South I-25",
+    "description": "University SE / South I-25 is a mixed-use corridor near the University of New Mexico and I-25, known for its auto shops, strip malls, and the South Broadway Cultural Center. It hosts community theater, local markets, and neighborhood block parties with a down-to-earth feel.",
+    "meta": "Find University SE South I-25 Albuquerque events: community theater, markets, and block parties. Local happenings in this diverse corridor."
+  },
+  "east-mountains": {
+    "slug": "east-mountains",
+    "name": "East Mountains",
+    "description": "The East Mountains encompass the small towns and forested slopes east of Albuquerque, like Cedar Crest and Tijeras, known for hiking, camping, and the Sandia Crest. This area offers a rustic, mountain-town vibe with art galleries, diners, and seasonal snow play.",
+    "meta": "Discover East Mountains Albuquerque events: hiking, art galleries, and mountain festivals. Your guide to this scenic alpine community."
+  }
+}

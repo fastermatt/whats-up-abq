@@ -1,0 +1,52 @@
+{
+  "music": {
+    "slug": "music",
+    "description": "Discover live concerts in Albuquerque featuring everything from indie rock at Sister Bar to classical performances at Popejoy Hall. The city's music scene thrives at venues like the historic KiMo Theatre and outdoor spaces like the ABQ BioPark. Find your next show and experience the sounds of the Duke City.",
+    "meta": "Find live concerts in Albuquerque at venues like Sister Bar and Popejoy Hall. Explore the Duke City music scene with ABQ Unplugged."
+  },
+  "sports": {
+    "slug": "sports",
+    "description": "Catch thrilling sports events in Albuquerque from Isotopes baseball at Rio Grande Credit Union Field to Lobo basketball at The Pit. The city also hosts road races and cycling events against a backdrop of Sandia Mountains. Stay updated on game schedules and athletic competitions.",
+    "meta": "Find sports events in Albuquerque including Isotopes baseball and Lobo basketball. Get game schedules and athletic events with ABQ Unplugged."
+  },
+  "arts-theater": {
+    "slug": "arts-theater",
+    "description": "Explore arts and theater in Albuquerque with performances at the KiMo Theatre, Albuquerque Little Theatre, and local galleries. The city's creative scene includes contemporary exhibits at the Albuquerque Museum and live plays in Old Town. Discover cultural events that showcase local and national talent.",
+    "meta": "Discover arts and theater in Albuquerque at KiMo Theatre and local galleries. Find cultural events and performances with ABQ Unplugged."
+  },
+  "comedy": {
+    "slug": "comedy",
+    "description": "Laugh out loud at comedy shows in Albuquerque featuring stand up at Laffs Comedy Caffe and improv at The Box Performance Space. The Duke City hosts touring comedians and local open mics for a night of humor. Find your next comedy event and enjoy live entertainment.",
+    "meta": "Find comedy shows in Albuquerque at Laffs Comedy Caffe and The Box. Enjoy stand up and improv events with ABQ Unplugged."
+  },
+  "family": {
+    "slug": "family",
+    "description": "Enjoy family events in Albuquerque from hands on activities at Explora Science Center to seasonal fun at the ABQ BioPark. The city offers storytimes at local libraries and outdoor adventures at the Petroglyph National Monument. Plan quality time with events for all ages.",
+    "meta": "Find family events in Albuquerque at Explora and the ABQ BioPark. Plan kid friendly activities and outings with ABQ Unplugged."
+  },
+  "food-drink": {
+    "slug": "food-drink",
+    "description": "Savor food and drink events in Albuquerque including the New Mexico Wine Festival and local farmers markets. The city's culinary scene features green chile inspired dishes at events like the Albuquerque International Balloon Fiesta food booths. Discover tastings, brewery tours, and chef showcases.",
+    "meta": "Find food and drink events in Albuquerque from wine festivals to farmers markets. Explore culinary events and tastings with ABQ Unplugged."
+  },
+  "film": {
+    "slug": "film",
+    "description": "Experience film events in Albuquerque from screenings at the Guild Cinema to the Albuquerque Film and Music Experience. The city's venues showcase indie films, documentaries, and classic movies in historic theaters. Stay updated on film festivals and special showings.",
+    "meta": "Find film events in Albuquerque at the Guild Cinema and film festivals. Discover movie screenings and cinema events with ABQ Unplugged."
+  },
+  "community": {
+    "slug": "community",
+    "description": "Participate in community events in Albuquerque including neighborhood cleanups at the North Valley and cultural celebrations at Civic Plaza. The city hosts volunteer opportunities and public meetings that bring residents together. Find ways to connect and engage locally.",
+    "meta": "Find community events in Albuquerque from cleanups to cultural celebrations. Connect with local gatherings and volunteer opportunities with ABQ Unplugged."
+  },
+  "festivals": {
+    "slug": "festivals",
+    "description": "Celebrate at festivals in Albuquerque like the iconic International Balloon Fiesta and the New Mexico State Fair at Expo New Mexico. The city also hosts cultural festivals such as the Gathering of Nations Powwow and the Albuquerque Wine Festival. Explore seasonal events that define the Duke City.",
+    "meta": "Find festivals in Albuquerque including the Balloon Fiesta and State Fair. Explore cultural celebrations and seasonal events with ABQ Unplugged."
+  },
+  "outdoor": {
+    "slug": "outdoor",
+    "description": "Explore outdoor events in Albuquerque from guided hikes in the Sandia Mountains to river cleanups along the Rio Grande. The city's parks like the Petroglyph National Monument host nature walks and star gazing nights. Discover events that celebrate the high desert landscape.",
+    "meta": "Find outdoor events in Albuquerque from Sandia hikes to park activities. Explore nature events and outdoor adventures with ABQ Unplugged."
+  }
+}

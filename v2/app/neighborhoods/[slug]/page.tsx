@@ -5,6 +5,7 @@ import { fetchEventsByNeighborhood, neighborhoodToSlug } from '@/lib/events'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
 import { MapPin, Calendar, ArrowLeft, ExternalLink, Map } from 'lucide-react'
+import neighborhoodDescriptions from '@/lib/neighborhood-descriptions.json'
 
 export const revalidate = 3600
 
@@ -36,13 +37,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (events.length === 0) return { title: 'Neighborhood Not Found' }
 
   const neighborhood = events[0].neighborhood ?? slug
+  const hoodData = (neighborhoodDescriptions as Record<string, { meta?: string }>)[slug]
+  const metaDesc = hoodData?.meta
+    ?? `Upcoming events in ${neighborhood}, Albuquerque NM. Find concerts, comedy, arts, sports, and more on ABQ Unplugged.`
   return {
     title: `Things to Do in ${neighborhood}, Albuquerque`,
-    description: `Upcoming events in ${neighborhood}, Albuquerque NM. Find concerts, comedy, arts, sports, and more on ABQ Unplugged.`,
+    description: metaDesc,
     alternates: { canonical: `https://abqunplugged.com/neighborhoods/${slug}` },
     openGraph: {
       title: `Events in ${neighborhood}`,
-      description: `Discover upcoming events in ${neighborhood}, Albuquerque NM.`,
+      description: metaDesc,
       url: `https://abqunplugged.com/neighborhoods/${slug}`,
     },
   }
@@ -63,6 +67,9 @@ export default async function NeighborhoodPage({ params }: PageProps) {
 
   // Use the actual neighborhood name from the first event
   const neighborhood = events[0].neighborhood ?? slug
+
+  // AI-generated neighborhood copy
+  const hoodInfo = (neighborhoodDescriptions as Record<string, { description?: string; name?: string }>)[slug] ?? null
 
   // Category distribution for the neighborhood
   const catCounts: Record<string, number> = {}
@@ -265,9 +272,11 @@ export default async function NeighborhoodPage({ params }: PageProps) {
         {/* ── SEO footer ── */}
         <div className="mt-8 pt-6 border-t border-[#f0e4cc]">
           <p className="text-xs text-[#6b5d57] leading-relaxed">
-            Find upcoming concerts, comedy shows, arts events, sports, food &amp; drink festivals,
-            and more in the {neighborhood} area of Albuquerque, NM.
-            ABQ Unplugged aggregates events from Ticketmaster, Eventbrite, SeatGeek, and local sources.
+            {hoodInfo?.description
+              ? hoodInfo.description
+              : `Find upcoming concerts, comedy shows, arts events, sports, food & drink festivals,
+                and more in the ${neighborhood} area of Albuquerque, NM.
+                ABQ Unplugged aggregates events from Ticketmaster, Eventbrite, SeatGeek, and local sources.`}
           </p>
           <Link
             href="/events"
