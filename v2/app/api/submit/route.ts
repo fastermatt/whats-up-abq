@@ -47,19 +47,42 @@ export async function POST(request: NextRequest) {
       ticket_url, price_min_cents, price_max_cents, is_free,
     } = body
 
-    if (!title?.trim() || title.trim().length > 200) {
-      return NextResponse.json({ error: 'Title is required (max 200 chars)' }, { status: 400 })
-    }
-    if (!event_date) {
-      return NextResponse.json({ error: 'Event date is required' }, { status: 400 })
-    }
-    if (!venue_name?.trim() || venue_name.trim().length > 200) {
-      return NextResponse.json({ error: 'Venue name is required (max 200 chars)' }, { status: 400 })
-    }
-    // Date sanity: must be today or future
-    if (event_date < new Date().toISOString().slice(0, 10)) {
+    // ── Server-side validation — mirrors client rules, can't be bypassed ──
+    const VALID_CATEGORIES = [
+      'Music', 'Sports', 'Arts & Theater', 'Comedy', 'Family',
+      'Food & Drink', 'Film', 'Community', 'Festivals', 'Outdoor',
+    ]
+
+    if (!title?.trim() || title.trim().length > 200)
+      return NextResponse.json({ error: 'Event name is required (max 200 chars)' }, { status: 400 })
+
+    if (!description?.trim() || description.trim().length < 30)
+      return NextResponse.json({ error: 'Description must be at least 30 characters' }, { status: 400 })
+
+    if (!event_date || !/^\d{4}-\d{2}-\d{2}$/.test(event_date))
+      return NextResponse.json({ error: 'Event date is required (YYYY-MM-DD)' }, { status: 400 })
+
+    // Date must be today or future
+    if (event_date < new Date().toISOString().slice(0, 10))
       return NextResponse.json({ error: 'Event date must be today or in the future' }, { status: 400 })
-    }
+
+    if (!start_time)
+      return NextResponse.json({ error: 'Start time is required' }, { status: 400 })
+
+    if (!category || !VALID_CATEGORIES.includes(category))
+      return NextResponse.json({ error: `Category must be one of: ${VALID_CATEGORIES.join(', ')}` }, { status: 400 })
+
+    if (!venue_name?.trim() || venue_name.trim().length > 200)
+      return NextResponse.json({ error: 'Venue name is required (max 200 chars)' }, { status: 400 })
+
+    if (!venue_address?.trim())
+      return NextResponse.json({ error: 'Venue address is required' }, { status: 400 })
+
+    if (!photo_url)
+      return NextResponse.json({ error: 'An event photo is required' }, { status: 400 })
+
+    if (!is_free && !ticket_url?.trim())
+      return NextResponse.json({ error: 'Provide a ticket URL or mark the event as free' }, { status: 400 })
 
     // ── Metadata for fraud review ──
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null

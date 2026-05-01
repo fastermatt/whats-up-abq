@@ -820,6 +820,7 @@ function normalizeRow(row: RawEventRow): NormalizedEvent | null {
       case 'local':        evt = normalizeLocal(row); break
       case 'volunteer':    evt = normalizeLocal(row); break  // volunteer events are always free
       case 'nhcc':         evt = normalizeLocal(row); break  // NHCC community events
+      case 'submitted':    evt = normalizeLocal(row); break  // community-submitted, admin-approved
       case 'local-venue':  evt = normalizeLocalVenue(row); break  // brewery/bar direct scrapes
       default:             evt = normalizeGeneric(row)
     }

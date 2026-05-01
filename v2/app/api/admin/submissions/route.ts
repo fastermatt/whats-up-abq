@@ -58,33 +58,41 @@ export async function POST(request: NextRequest) {
 
   // Generate event id (community prefix + short nanoid-ish)
   const shortId = Math.random().toString(36).slice(2, 10)
-  const eventId = `community_${shortId}`
+  const eventId = `submitted_${shortId}`
 
-  // Build a `raw` JSON blob that normalizeLocal() in lib/events.ts can consume
+  // Build a `raw` JSON blob in the format normalizeLocal() in lib/events.ts expects:
+  // - title/name for the event title
+  // - dates.start.localDate/localTime for time (same as TM-compat local format)
+  // - venue_name (string) + address (string) — NOT nested venue object
+  // - url for ticket URL
+  // - isFree boolean
+  // - priceRanges array for price display
   const rawBlob = {
-    name:        sub.title,
     title:       sub.title,
+    name:        sub.title,
     description: sub.description,
     url:         sub.ticket_url,
-    start:       sub.start_time ? `${sub.event_date}T${sub.start_time}` : sub.event_date,
-    end:         sub.end_time   ? `${sub.event_date}T${sub.end_time}`   : null,
-    venue:       { name: sub.venue_name, address: sub.venue_address },
-    is_free:     sub.is_free,
-    price: {
-      min_cents: sub.price_min_cents,
-      max_cents: sub.price_max_cents,
-    },
-    photo_url:   sub.photo_url,
-    submitter_id: sub.submitted_by,
+    venue_name:  sub.venue_name,
+    address:     sub.venue_address,
+    isFree:      sub.is_free,
+    // Price in TM-compat priceRanges format so normalizeLocal() renders it
+    priceRanges: (sub.price_min_cents !== null || sub.price_max_cents !== null) ? [{
+      min: (sub.price_min_cents ?? sub.price_max_cents ?? 0) / 100,
+      max: (sub.price_max_cents ?? sub.price_min_cents ?? 0) / 100,
+    }] : [],
+    // Time in TM-compat dates.start format
+    dates: sub.start_time ? {
+      start: { localDate: sub.event_date, localTime: sub.start_time },
+    } : null,
   }
 
-  // Insert into public.events
+  // Insert into public.events with source='submitted' (matches DB constraint)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error: insertErr } = await (supabase as any)
     .schema('public').from('events')
     .insert({
       id:                eventId,
-      source:            'community',
+      source:            'submitted',
       event_date:        sub.event_date,
       venue_name:        sub.venue_name,
       category:          sub.category,
