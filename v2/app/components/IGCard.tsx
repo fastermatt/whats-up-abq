@@ -397,7 +397,9 @@ export function IGCardClient({ event, image, initialFormat = 'portrait', embedde
               ...(titlePos === 'bottom'
                 ? { bottom: 0, padding: isStory ? '0 1.2rem 14%' : '0 1rem 1rem' }
                 : titlePos === 'top'
-                ? { top: 0, padding: isStory ? '14% 1.2rem 0' : '3.5rem 1rem 0' }
+                // Story: push text below the logo bar (14% safe + ~3rem for logo row + gap).
+                // Feed: 3.5rem clears the 1.2rem logo + padding with room to breathe.
+                ? { top: 0, padding: isStory ? 'calc(14% + 3.2rem) 1.2rem 0' : '3.5rem 1rem 0' }
                 : { top: '50%', transform: 'translateY(-50%)', padding: '0 1.2rem' }
               ),
             }}

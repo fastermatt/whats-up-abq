@@ -156,45 +156,70 @@ const poster: Template = {
     ],
   },
   build: (ctx, format) => {
-    const { w, h } = CANVAS_DIMS[format ?? '4:5']
-    const sy = (y: number) => Math.round(y * h / 1350)
+    const fmt = format ?? '4:5'
+    const { w, h } = CANVAS_DIMS[fmt]
+    const isStory = fmt === '9:16'
+
+    // ── Safe zone margins per format ──────────────────────────────────────
+    // Instagram overlays profile/timer at top (~12% of stories) and the reply
+    // bar at bottom (~15% of stories). Feed posts only need a small margin.
+    const topSafe = isStory ? Math.round(h * 0.12) : 46  // px from top edge
+    const botSafe = isStory ? Math.round(h * 0.15) : 80  // px from bottom edge
+
+    // ── Title sizing — responsive to avoid multi-line overflow ────────────
+    // At w=1080, usable width is 920px. Fraunces avg char width ≈ 65% of fontSize.
+    // Sizing keeps the title to ≤2 lines comfortably, leaving headroom for Date/Venue.
+    const title = ctx.title ?? 'Your Title Here'
+    const titleSize = title.length < 10 ? 130
+                    : title.length < 20 ? 110
+                    : title.length < 35 ? 90
+                    : 70
+
+    // ── Bottom cluster: CTA → Date/Venue → [gap] → Title ─────────────────
+    // All positions are anchored relative to the bottom safe margin so they
+    // automatically adapt to every format without separate sy() scaling.
+    const ctaY   = h - botSafe - 50   // DM Mono 28px + 22px breathing room
+    const dateY  = h - botSafe - 170  // ~120px for 2-line Date/Venue block above CTA gap
+    const titleY = h - botSafe - 505  // big gap above Date; same relative position as h-580 on 4:5
+
     const slide: Slide = {
       id: uid(),
       background: ctx.imageUrl
         ? { type: 'image', src: ctx.imageUrl, fit: 'cover', overlayColor: '#000000', overlayOpacity: 0.55 }
         : { type: 'gradient', from: BRAND_COLORS.terra, to: BRAND_COLORS.mesaBrown, angle: 135 },
       layers: [
-        logo(LOGO_W, 80, sy(46), 60),
+        // Logo at top safe boundary (safe for all formats including Story)
+        logo(LOGO_W, 80, topSafe, 60),
         ctx.category ? textLayer({
           name: 'Category', text: (ctx.category ?? '').toUpperCase(),
-          x: 80, y: sy(126), width: w - 160,
+          x: 80, y: topSafe + 74, width: w - 160,
           fontFamily: font('Inter'), fontSize: 34, fontWeight: 700,
           fill: BRAND_COLORS.white, opacity: 0.85, letterSpacing: 4,
         }) : null,
         textLayer({
-          name: 'Title', text: ctx.title ?? 'Your Title Here',
-          x: 80, y: h - 580, width: w - 160,
-          fontFamily: font('Fraunces'), fontSize: 130, fontWeight: 800,
+          name: 'Title', text: title,
+          x: 80, y: titleY, width: w - 160,
+          fontFamily: font('Fraunces'), fontSize: titleSize, fontWeight: 800,
           fill: BRAND_COLORS.white, lineHeight: 0.96,
           shadow: { enabled: true, color: 'rgba(0,0,0,0.4)', blur: 24, offsetX: 0, offsetY: 4 },
         }),
         textLayer({
           name: 'Date & Venue',
           text: `${formatDate(ctx.date, ctx.time)}${ctx.venue ? `\n${ctx.venue}` : ''}`,
-          x: 80, y: h - 250, width: w - 160,
+          x: 80, y: dateY, width: w - 160,
           fontFamily: font('Fraunces'), fontSize: 44, fontWeight: 400, fontStyle: 'italic',
           fill: BRAND_COLORS.white, opacity: 0.92, lineHeight: 1.3,
         }),
         textLayer({
           name: 'CTA', text: ctx.cta ?? 'abqunplugged.com',
-          x: 80, y: h - 110, width: w - 160,
+          x: 80, y: ctaY, width: w - 160,
           fontFamily: font('DM Mono'), fontSize: 28, fontWeight: 500,
           fill: BRAND_COLORS.white, opacity: 0.7, letterSpacing: 2,
         }),
       ].filter(Boolean) as Layer[],
     }
     return {
-      id: uid(), name: ctx.title ?? 'Poster post', format: format ?? '4:5',
+      id: uid(), name: ctx.title ?? 'Poster post', format: fmt,
       slides: [slide], createdAt: Date.now(), updatedAt: Date.now(),
     }
   },

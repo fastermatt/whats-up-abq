@@ -1,6 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
+// Fire-and-forget admin notification via Resend
+async function notifyAdmin(title: string, submittedBy: string, submissionId: string) {
+  const key = process.env.RESEND_API_KEY
+  if (!key) return
+  try {
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+      body: JSON.stringify({
+        from: 'ABQ Unplugged <noreply@abqunplugged.com>',
+        to: ['4mattcarlson@gmail.com'],
+        subject: `New event submission: "${title}"`,
+        html: `
+          <p>A new community event was submitted and is awaiting review.</p>
+          <p><strong>Event:</strong> ${title}<br>
+          <strong>Submitted by:</strong> ${submittedBy}<br>
+          <strong>Submission ID:</strong> ${submissionId}</p>
+          <p><a href="https://abqunplugged.com/admin/submissions">Review in admin →</a></p>
+        `,
+      }),
+    })
+  } catch { /* ignore — notification is best-effort */ }
+}
+
 /**
  * POST /api/submit
  *
@@ -126,6 +150,9 @@ export async function POST(request: NextRequest) {
       .schema('public')
       .rpc('increment_profile_counter', { p_user_id: user.id, p_column: 'events_submitted' })
       .then(() => {}, () => {}) // ignore if RPC doesn't exist
+
+    // Notify admin — fire and forget, never blocks the response
+    notifyAdmin(title.trim(), user.email ?? user.id, data?.id ?? '?')
 
     return NextResponse.json({ success: true, id: data?.id })
   } catch (e) {

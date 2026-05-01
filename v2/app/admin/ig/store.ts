@@ -32,6 +32,7 @@ interface EditorState {
   selectedLayerId: string | null
   past: Design[]
   future: Design[]
+  showSafeZone: boolean
 
   // ── Design actions
   newDesign: (format?: CanvasFormat) => void
@@ -59,6 +60,9 @@ interface EditorState {
   reorderLayer: (id: string, direction: 'up' | 'down' | 'top' | 'bottom') => void
   selectLayer: (id: string | null) => void
 
+  // ── UI state
+  toggleSafeZone: () => void
+
   // ── Helpers
   getSelectedLayer: () => Layer | null
   getActiveSlide: () => Slide
@@ -74,6 +78,7 @@ export const useEditor = create<EditorState>((set, get) => ({
   selectedLayerId: null,
   past: [],
   future: [],
+  showSafeZone: false,
 
   // ── History ──────────────────────────────────────────────────────────────
 
@@ -265,6 +270,10 @@ export const useEditor = create<EditorState>((set, get) => ({
     }),
 
   selectLayer: (id) => set({ selectedLayerId: id }),
+
+  // ── UI state ──────────────────────────────────────────────────────────────
+
+  toggleSafeZone: () => set(state => ({ showSafeZone: !state.showSafeZone })),
 
   getSelectedLayer: () => {
     const s = get()

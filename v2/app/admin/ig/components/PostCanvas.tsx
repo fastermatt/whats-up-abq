@@ -249,6 +249,46 @@ function ShapeNode({ layer, onSelect, onChange }: {
   return <Line ref={ref as React.RefObject<Konva.Line>} {...common} points={[0, 0, layer.width, 0]} strokeWidth={Math.max(1, layer.height)} stroke={layer.fill} />
 }
 
+// ── Safe zone overlay ────────────────────────────────────────────────────
+// Shows the areas that Instagram's UI overlays (not exported — hidden before toDataURL).
+//
+// Safe zones by format:
+//   4:5 / 1:1 feed: 8% top & bottom, 5% sides
+//   9:16 story:    12% top, 15% bottom, 5% sides
+
+function SafeZoneOverlay({ format, w, h }: { format: CanvasFormat; w: number; h: number }) {
+  const isStory = format === '9:16'
+  const topUnsafe  = isStory ? Math.round(h * 0.12) : Math.round(h * 0.08)
+  const botUnsafe  = isStory ? Math.round(h * 0.15) : Math.round(h * 0.08)
+  const sideUnsafe = Math.round(w * 0.05)
+  const YELLOW = 'rgba(250,204,21,0.65)'
+  const FILL   = 'rgba(250,204,21,0.09)'
+  const DASH: number[] = [14, 8]
+
+  return (
+    <Group listening={false}>
+      {/* Unsafe top zone */}
+      <Rect x={0} y={0} width={w} height={topUnsafe} fill={FILL} listening={false} />
+      <Line points={[0, topUnsafe, w, topUnsafe]} stroke={YELLOW} strokeWidth={2} dash={DASH} listening={false} />
+      {/* Unsafe bottom zone */}
+      <Rect x={0} y={h - botUnsafe} width={w} height={botUnsafe} fill={FILL} listening={false} />
+      <Line points={[0, h - botUnsafe, w, h - botUnsafe]} stroke={YELLOW} strokeWidth={2} dash={DASH} listening={false} />
+      {/* Side margins */}
+      <Rect x={0} y={0} width={sideUnsafe} height={h} fill="rgba(250,204,21,0.04)" listening={false} />
+      <Rect x={w - sideUnsafe} y={0} width={sideUnsafe} height={h} fill="rgba(250,204,21,0.04)" listening={false} />
+      {/* Label */}
+      <Text
+        text={isStory ? 'SAFE ZONE  (12% top · 15% bottom · 5% sides)' : 'SAFE ZONE  (8% top & bottom · 5% sides)'}
+        x={0} y={topUnsafe + 10}
+        width={w} align="center"
+        fill="rgba(250,204,21,0.75)"
+        fontSize={22} fontFamily="Inter, sans-serif"
+        listening={false}
+      />
+    </Group>
+  )
+}
+
 // ── Main canvas ─────────────────────────────────────────────────────────
 
 export interface PostCanvasHandle {
@@ -274,7 +314,7 @@ const CANVAS_FONT_HREF =
   'https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;0,9..144,900;1,9..144,400;1,9..144,600&family=Bebas+Neue&family=DM+Mono:wght@400;500&display=block'
 
 export function PostCanvas({ onExportRef }: { onExportRef?: (h: PostCanvasHandle) => void }) {
-  const { design, activeSlideIndex, selectedLayerId, selectLayer, updateLayer } = useEditor()
+  const { design, activeSlideIndex, selectedLayerId, selectLayer, updateLayer, showSafeZone } = useEditor()
   useCanvasKeyboard()
   const slide = design.slides[activeSlideIndex]
   const { w: cW, h: cH } = CANVAS_DIMS[design.format]
@@ -342,6 +382,9 @@ export function PostCanvas({ onExportRef }: { onExportRef?: (h: PostCanvasHandle
     else      { tr.nodes([]) }
   }, [selectedLayerId, activeSlideIndex, design])
 
+  // Ref for the safe-zone overlay layer so we can hide it during export
+  const safeZoneLayerRef = useRef<Konva.Layer>(null)
+
   // Expose export handle (export by temporarily restoring full scale)
   useEffect(() => {
     if (!onExportRef) return
@@ -349,12 +392,14 @@ export function PostCanvas({ onExportRef }: { onExportRef?: (h: PostCanvasHandle
       exportPng: async () => {
         const stage = stageRef.current
         if (!stage) return ''
-        // Hide transformer during export
+        // Hide transformer + safe zone overlay during export
         trRef.current?.visible(false)
-        trRef.current?.getLayer()?.batchDraw()
+        safeZoneLayerRef.current?.visible(false)
+        stage.batchDraw()
         const url = stage.toDataURL({ pixelRatio: 1 / scale, mimeType: 'image/png' })
         trRef.current?.visible(true)
-        trRef.current?.getLayer()?.batchDraw()
+        safeZoneLayerRef.current?.visible(true)
+        stage.batchDraw()
         return url
       },
       exportAllSlides: async () => {
@@ -363,6 +408,7 @@ export function PostCanvas({ onExportRef }: { onExportRef?: (h: PostCanvasHandle
         const state = useEditor.getState()
         const original = state.activeSlideIndex
         trRef.current?.visible(false)
+        safeZoneLayerRef.current?.visible(false)
         for (let i = 0; i < state.design.slides.length; i++) {
           useEditor.setState({ activeSlideIndex: i, selectedLayerId: null })
           // wait a frame for React to render + Konva to draw
@@ -373,6 +419,7 @@ export function PostCanvas({ onExportRef }: { onExportRef?: (h: PostCanvasHandle
         }
         useEditor.setState({ activeSlideIndex: original })
         trRef.current?.visible(true)
+        safeZoneLayerRef.current?.visible(true)
         return results
       },
     })
@@ -425,6 +472,11 @@ export function PostCanvas({ onExportRef }: { onExportRef?: (h: PostCanvasHandle
               ignoreStroke
               boundBoxFunc={(_oldBox, newBox) => newBox.width < 20 || newBox.height < 20 ? _oldBox : newBox}
             />
+          </KLayer>
+
+          {/* Safe zone overlay — separate layer so it can be hidden during export */}
+          <KLayer ref={safeZoneLayerRef} visible={showSafeZone} listening={false}>
+            <SafeZoneOverlay format={design.format} w={cW} h={cH} />
           </KLayer>
         </Stage>
       </div>

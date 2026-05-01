@@ -150,7 +150,7 @@ function TemplateGallery({
 // ── Main toolbar ──────────────────────────────────────────────────────────
 
 export function Toolbar({ mode, onModeChange, canvasRef, event, image }: ToolbarProps) {
-  const { design, loadDesign, renameDesign, undo, redo, canUndo, canRedo } = useEditor()
+  const { design, loadDesign, renameDesign, undo, redo, canUndo, canRedo, showSafeZone, toggleSafeZone } = useEditor()
   const [showGallery, setShowGallery] = useState(false)
   // galleryTab defaults from mode but can be overridden by user clicking the tabs
   const [galleryTabOverride, setGalleryTabOverride] = useState<'event' | 'brand' | null>(null)
@@ -320,6 +320,19 @@ export function Toolbar({ mode, onModeChange, canvasRef, event, image }: Toolbar
           >
             <Save size={13} />
             {saveState === 'saving' ? 'Saving…' : saveState === 'saved' ? '✓' : 'Save'}
+          </button>
+
+          {/* Safe zone toggle */}
+          <button
+            onClick={toggleSafeZone}
+            title="Toggle safe zone guides (not exported)"
+            className={`flex items-center gap-1.5 px-3 py-2 sm:py-1.5 border rounded text-xs font-semibold transition-colors touch-manipulation ${
+              showSafeZone
+                ? 'bg-yellow-500/20 border-yellow-500/50 text-yellow-300'
+                : 'bg-white/[0.04] border-white/[0.08] text-white/45 hover:text-white/75 hover:bg-white/[0.07]'
+            }`}
+          >
+            Safe Zone
           </button>
 
           <span className="text-[11px] text-white/40 hidden sm:inline">
