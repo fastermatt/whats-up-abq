@@ -20,6 +20,15 @@ import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
+/** Returns true if this browser has opted out of being counted in analytics. */
+function isSelfExcluded(): boolean {
+  try {
+    return localStorage.getItem('_abq_no_track') === '1'
+  } catch {
+    return false
+  }
+}
+
 function getOrCreateSessionId(): string {
   try {
     let sid = localStorage.getItem('_abq_sid')
@@ -65,6 +74,9 @@ export function AnalyticsTracker() {
 
   // Initialize session ID once on mount
   useEffect(() => {
+    // Bail out entirely if this browser has been opted out (e.g. the site owner)
+    if (isSelfExcluded()) return
+
     sessionIdRef.current = getOrCreateSessionId()
 
     // Track session_start once per browser session
@@ -84,6 +96,7 @@ export function AnalyticsTracker() {
   // Track pageview on every pathname change
   useEffect(() => {
     if (!sessionIdRef.current) return
+    if (isSelfExcluded()) return
     track('pageview', sessionIdRef.current, {
       path: pathname,
       title: document.title,

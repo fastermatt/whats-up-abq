@@ -1,6 +1,31 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { ArrowLeft, Users, MousePointer, Search, Heart, TrendingUp, Smartphone, Monitor, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Users, MousePointer, Search, Heart, TrendingUp, Smartphone, Monitor, AlertTriangle, Globe } from 'lucide-react'
+import { ExcludeVisits } from './ExcludeVisits'
+
+// ── Referrer categorisation ────────────────────────────────────────────────
+function categorizeReferrer(referrer: string | null | undefined): string | null {
+  if (!referrer) return 'Direct'
+  try {
+    const host = new URL(referrer).hostname.replace(/^www\./, '')
+    // Filter internal self-referrals — not an acquisition source
+    if (host === 'abqunplugged.com' || host === 'localhost' || host === '127.0.0.1') return null
+    if (/google\./i.test(host))                        return 'Google'
+    if (/bing\.com/i.test(host))                       return 'Bing'
+    if (/yahoo\.com/i.test(host))                      return 'Yahoo'
+    if (/duckduckgo\.com/i.test(host))                 return 'DuckDuckGo'
+    if (/facebook\.com|fb\.me|fb\.com/i.test(host))   return 'Facebook'
+    if (/instagram\.com/i.test(host))                  return 'Instagram'
+    if (/twitter\.com|x\.com|t\.co/i.test(host))      return 'Twitter / X'
+    if (/reddit\.com/i.test(host))                     return 'Reddit'
+    if (/nextdoor\.com/i.test(host))                   return 'Nextdoor'
+    if (/linkedin\.com/i.test(host))                   return 'LinkedIn'
+    if (/tiktok\.com/i.test(host))                     return 'TikTok'
+    return host  // show raw domain for everything else
+  } catch {
+    return 'Direct'
+  }
+}
 
 export const revalidate = 0
 
@@ -28,9 +53,9 @@ export default async function AnalyticsPage() {
   ] = await (async () => {
     try {
       return await Promise.all([
-        // 30-day daily sessions
+        // 30-day daily sessions (data includes referrer for traffic sources)
         supabase.from('analytics')
-          .select('created_at, session_id, device')
+          .select('created_at, session_id, device, data')
           .eq('event_type', 'session_start')
           .gte('created_at', ago30 + 'T00:00:00'),
         // Hourly distribution
@@ -73,6 +98,8 @@ export default async function AnalyticsPage() {
 
   // ── Daily sessions chart ───────────────────────────────────────────────────
   const byDay: Record<string, { sessions: Set<string>; mobile: number; desktop: number }> = {}
+  const refCounts: Record<string, Set<string>> = {}  // source → unique session IDs
+
   for (const row of raw30 ?? []) {
     const day = new Date(row.created_at)
       .toLocaleDateString('en-CA', { timeZone: 'America/Denver' })
@@ -80,7 +107,20 @@ export default async function AnalyticsPage() {
     byDay[day].sessions.add(row.session_id)
     if (row.device === 'mobile') byDay[day].mobile++
     else if (row.device === 'desktop') byDay[day].desktop++
+
+    // Traffic source — parse referrer from session_start data
+    const referrer = (row.data as Record<string, string | null> | null)?.referrer
+    const source = categorizeReferrer(referrer)
+    if (source !== null) {  // null = internal navigation, skip
+      if (!refCounts[source]) refCounts[source] = new Set()
+      refCounts[source].add(row.session_id)
+    }
   }
+
+  const trafficSources = Object.entries(refCounts)
+    .map(([source, sessions]) => ({ source, sessions: sessions.size }))
+    .sort((a, b) => b.sessions - a.sessions)
+  const maxRefSessions = Math.max(...trafficSources.map(s => s.sessions), 1)
   const dailyData = Object.entries(byDay)
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([day, d]) => ({ day, count: d.sessions.size, mobile: d.mobile, desktop: d.desktop }))
@@ -189,10 +229,11 @@ export default async function AnalyticsPage() {
         <Link href="/admin" className="text-white/40 hover:text-white/70 transition-colors">
           <ArrowLeft className="w-4 h-4" />
         </Link>
-        <div>
+        <div className="flex-1">
           <h1 className="text-3xl font-black" style={{ fontFamily: 'var(--font-epilogue)' }}>Analytics</h1>
           <p className="text-white/40 text-sm">Last 30 days · America/Denver · unique sessions per visitor</p>
         </div>
+        <ExcludeVisits />
       </div>
 
       {/* ── Staleness warning ── */}
@@ -228,6 +269,58 @@ export default async function AnalyticsPage() {
           </div>
         ))}
       </div>
+
+      {/* ── Traffic Sources ── */}
+      <section className="bg-white/5 rounded-2xl p-5">
+        <div className="flex items-center gap-2 mb-1">
+          <Globe className="w-3.5 h-3.5 text-[#7cc4bf]" />
+          <h2 className="text-xs uppercase tracking-widest text-white/30">Where Traffic Comes From</h2>
+        </div>
+        <p className="text-white/20 text-[10px] mb-4">
+          Sessions by acquisition source · last 30 days · internal navigation excluded
+        </p>
+        {trafficSources.length === 0 ? (
+          <p className="text-white/20 text-sm py-4 text-center">No referrer data yet — data builds from new sessions.</p>
+        ) : (
+          <div className="space-y-2">
+            {trafficSources.map(({ source, sessions }) => {
+              const pct = Math.round((sessions / maxRefSessions) * 100)
+              const isTop = sessions === maxRefSessions
+              const emoji =
+                source === 'Direct'       ? '🔗' :
+                source === 'Google'       ? '🔍' :
+                source === 'Bing'         ? '🔍' :
+                source === 'Yahoo'        ? '🔍' :
+                source === 'DuckDuckGo'   ? '🔍' :
+                source === 'Facebook'     ? '📘' :
+                source === 'Instagram'    ? '📸' :
+                source === 'Twitter / X'  ? '𝕏' :
+                source === 'Reddit'       ? '🤖' :
+                source === 'Nextdoor'     ? '🏘️' :
+                source === 'LinkedIn'     ? '💼' :
+                source === 'TikTok'       ? '🎵' : '🔗'
+              return (
+                <div key={source} className="flex items-center gap-3">
+                  <span className="text-sm w-4 text-center shrink-0">{emoji}</span>
+                  <span className="text-white/60 text-xs w-32 truncate shrink-0" title={source}>{source}</span>
+                  <div className="flex-1 h-2.5 bg-white/10 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${isTop ? 'bg-[#7cc4bf]' : 'bg-white/25'}`}
+                      style={{ width: `${Math.max(pct, 2)}%` }}
+                    />
+                  </div>
+                  <span className="text-white/40 text-xs tabular-nums w-16 text-right shrink-0">
+                    {sessions} {sessions === 1 ? 'session' : 'sessions'}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        )}
+        <p className="text-white/15 text-[10px] mt-4">
+          Direct = no referrer (typed URL, bookmarks, email links without UTM, most iOS share sheets)
+        </p>
+      </section>
 
       {/* ── 30-Day Traffic Chart ── */}
       <section className="bg-white/5 rounded-2xl p-5">
