@@ -27,7 +27,7 @@ const HERO_SAYINGS = [
   "Get out there, eh.",
 ]
 
-export const revalidate = 60
+export const dynamic = 'force-dynamic' // always SSR — env var must be read at runtime
 
 export const metadata: Metadata = {
   title: 'ABQ Unplugged — Things to Do in Albuquerque, NM',

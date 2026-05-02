@@ -5,7 +5,7 @@ import { ExternalLink, Star } from 'lucide-react'
 import { buildBreadcrumbs } from '@/lib/seo'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 3600 // refresh hourly
+export const dynamic = 'force-dynamic' // always SSR — env var must be read at runtime
 
 export const metadata: Metadata = {
   title: 'Movies Now Playing in Albuquerque — ABQ Unplugged',
