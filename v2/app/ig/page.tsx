@@ -3,8 +3,8 @@ import type { Metadata } from 'next'
 import { fetchEvents, fetchRecentlyAdded, fetchFeaturedEvents } from '@/lib/events'
 import { getCategoryFallback, getHeroImage } from '@/lib/fallback-images'
 import {
-  Calendar, Sparkles, MapPin, Bookmark, Mail, Info, ArrowRight,
-  Heart, Flame,
+  Sparkles, MapPin, Bookmark, Mail, Info, ArrowRight,
+  Flame,
 } from 'lucide-react'
 import { ConnectionQuote } from '@/app/components/ConnectionQuote'
 import { EventImage } from '@/app/components/EventImage'
@@ -42,137 +42,139 @@ export default async function IgLandingPage() {
   const utm = '?utm_source=instagram&utm_medium=bio&utm_campaign=link_in_bio'
   const utmAmp = '&utm_source=instagram&utm_medium=bio&utm_campaign=link_in_bio'
 
-  // The hero gets a vintage-poster landscape, but short (~170px mobile)
   const heroSrc = getHeroImage()
+  const weekTotal = tonight.total + tomorrow.total + weekend.total
 
   const categoryChips: { label: string; emoji: string; cat?: string; price?: string }[] = [
-    { label: 'Tonight', emoji: '🌙', cat: undefined, price: undefined }, // handled specially
-    { label: 'Music',        emoji: '🎵', cat: 'Music' },
-    { label: 'Comedy',       emoji: '😂', cat: 'Comedy' },
-    { label: 'Arts',         emoji: '🎭', cat: 'Arts & Theater' },
-    { label: 'Sports',       emoji: '🏟️', cat: 'Sports' },
-    { label: 'Food',         emoji: '🍽️', cat: 'Food & Drink' },
-    { label: 'Family',       emoji: '👨‍👩‍👧', cat: 'Family' },
-    { label: 'Free',         emoji: '✨', price: 'free' },
+    { label: 'Tonight', emoji: '🌙' },
+    { label: 'Music',   emoji: '🎵', cat: 'Music' },
+    { label: 'Comedy',  emoji: '😂', cat: 'Comedy' },
+    { label: 'Arts',    emoji: '🎭', cat: 'Arts & Theater' },
+    { label: 'Sports',  emoji: '🏟️', cat: 'Sports' },
+    { label: 'Food',    emoji: '🍽️', cat: 'Food & Drink' },
+    { label: 'Family',  emoji: '👨‍👩‍👧', cat: 'Family' },
+    { label: 'Free',    emoji: '✨', price: 'free' },
   ]
 
   return (
-    <main className="min-h-dvh bg-[--bg]">
-      {/* ── Compact hero with real landscape image ── */}
-      <section className="relative overflow-hidden text-white h-[170px] sm:h-[190px]">
+    <main className="min-h-dvh bg-[#fbf7f1]">
+
+      {/* ── Hero — full-bleed poster ── */}
+      <section className="relative overflow-hidden text-white h-[280px] sm:h-[310px]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={heroSrc}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover object-center"
         />
-        {/* Directional overlay — darker at top, image bleeds through at bottom */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#7d3725]/80 via-[#9a442d]/60 to-[#5a2416]/40" />
-        <div className="relative max-w-md mx-auto px-5 pt-5 pb-4">
-          <p className="text-[10px] uppercase tracking-[0.25em] text-[#e8a898] font-semibold mb-1.5">
-            abqunplugged.com
-          </p>
-          <h1
-            className="text-3xl font-black leading-[1.05]"
-            style={{ fontFamily: 'var(--font-epilogue)' }}
-          >
-            Every event in<br />Albuquerque
-          </h1>
-          <p className="text-xs text-white/70 mt-1.5">{dayStr} · {tonight.total + tomorrow.total + weekend.total}+ events this week</p>
-        </div>
-      </section>
+        {/* Gradient: heavy at top so wordmark reads, warm at bottom to anchor headline */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/35 to-[#7d3725]/85" />
 
-      {/* ── "Hey Instagram" welcome card — special for IG traffic only ── */}
-      <section className="max-w-md mx-auto px-5 -mt-6 relative z-10">
-        <div className="bg-white border border-[#ddc9a3] rounded-2xl p-4 shadow-lg">
-          <div className="flex items-center gap-2 mb-1.5">
-            <Heart className="w-4 h-4 text-[#9a442d] fill-[#9a442d]" />
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[#9a442d] font-bold">
-              Hey Instagram
-            </p>
+        <div className="relative flex flex-col justify-between h-full max-w-md mx-auto px-5 pt-6 pb-6">
+          {/* Wordmark */}
+          <p className="text-[10px] font-black tracking-[0.28em] uppercase text-white/65">
+            ABQ UNPLUGGED
+          </p>
+
+          {/* Headline + live count badge */}
+          <div>
+            <h1
+              className="text-[2.6rem] font-black leading-[0.92] tracking-tight"
+              style={{ fontFamily: 'var(--font-epilogue)' }}
+            >
+              Every event<br />in Albuquerque.
+            </h1>
+            <div className="mt-3.5 flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 bg-white/18 text-white text-[11px] font-bold px-3 py-1.5 rounded-full border border-white/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#e8b89a] flex-shrink-0" />
+                {weekTotal}+ events this week
+              </span>
+              <span className="text-white/45 text-[10px]">{dayStr}</span>
+            </div>
           </div>
-          <p className="text-sm text-[#1a1614] leading-relaxed">
-            You came from the gram 👋 — welcome. This is the whole site, compressed
-            into one page. Tap anything below to jump in.
-          </p>
-          <Link
-            href={`/why${utm}`}
-            className="inline-block mt-2 text-[11px] font-semibold text-[#006a62] hover:underline"
-          >
-            Why we built this →
-          </Link>
         </div>
       </section>
 
-      {/* ── Primary CTA row: the "do something now" buttons ── */}
-      <section className="max-w-md mx-auto px-5 pt-5 space-y-2.5">
-        {/* Tonight — the biggest CTA */}
+      {/* ── Primary CTAs ── */}
+      <section className="max-w-md mx-auto px-5 pt-4 space-y-2.5">
+
+        {/* Tonight — the hero CTA, count-led */}
         <Link
           href={`/events?time=tonight${utmAmp}`}
-          className="flex items-center gap-4 bg-[#9a442d] text-white rounded-2xl p-4 shadow-md active:scale-[0.98] transition-transform"
+          className="group flex items-center gap-4 bg-[#9a442d] text-white rounded-2xl px-5 py-5 shadow-md active:scale-[0.98] transition-transform"
         >
-          <div className="w-11 h-11 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
-            <Flame className="w-5 h-5" />
+          <div className="flex-shrink-0 flex items-baseline gap-1">
+            <span
+              className="text-[2.8rem] font-black leading-none tabular-nums"
+              style={{ fontFamily: 'var(--font-epilogue)' }}
+            >
+              {tonight.total}
+            </span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] uppercase tracking-[0.15em] text-white/60 font-semibold">Tonight</p>
-            <p className="text-base font-black leading-tight" style={{ fontFamily: 'var(--font-epilogue)' }}>
-              {tonight.total} {tonight.total === 1 ? 'thing' : 'things'} happening
+            <p className="text-[10px] uppercase tracking-[0.18em] text-white/50 font-bold flex items-center gap-1">
+              <Flame className="w-3 h-3 inline-block" />
+              Tonight
             </p>
-            <p className="text-[11px] text-white/70">See what&apos;s on →</p>
+            <p className="text-sm font-semibold text-white/85">
+              {tonight.total === 1 ? 'thing' : 'things'} happening now →
+            </p>
           </div>
-          <ArrowRight className="w-5 h-5 flex-shrink-0" />
+          <ArrowRight className="w-5 h-5 flex-shrink-0 text-white/30 group-hover:text-white/70 transition-colors" />
         </Link>
 
         {/* Surprise Me */}
         <Link
           href={`/api/surprise${utm}`}
-          className="flex items-center gap-4 bg-[#006a62] text-white rounded-2xl p-4 shadow-md active:scale-[0.98] transition-transform"
+          className="group flex items-center gap-4 bg-[#006a62] text-white rounded-2xl px-5 py-4 shadow-md active:scale-[0.98] transition-transform"
         >
-          <div className="w-11 h-11 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
             <Sparkles className="w-5 h-5" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] uppercase tracking-[0.15em] text-white/60 font-semibold">Surprise me</p>
-            <p className="text-base font-black leading-tight" style={{ fontFamily: 'var(--font-epilogue)' }}>
-              Send me somewhere random
+            <p className="text-[10px] uppercase tracking-[0.18em] text-white/50 font-bold">Feeling lucky?</p>
+            <p className="text-sm font-black leading-tight" style={{ fontFamily: 'var(--font-epilogue)' }}>
+              Surprise me
             </p>
-            <p className="text-[11px] text-white/70">One click → one event →</p>
           </div>
-          <ArrowRight className="w-5 h-5 flex-shrink-0" />
+          <ArrowRight className="w-5 h-5 flex-shrink-0 text-white/30 group-hover:text-white/70 transition-colors" />
         </Link>
 
-        {/* Weekend + Tomorrow — side by side, smaller */}
+        {/* Weekend + Tomorrow — count cards */}
         <div className="grid grid-cols-2 gap-2.5">
           <Link
             href={`/events?time=this-weekend${utmAmp}`}
-            className="bg-white border border-[#ddc9a3] rounded-2xl p-3 shadow-sm active:scale-[0.98] transition-transform"
+            className="bg-white border border-[#e2ccad] rounded-2xl p-4 shadow-sm active:scale-[0.98] transition-transform"
           >
-            <p className="text-[9px] uppercase tracking-wider text-[#4f6249] font-semibold">Weekend</p>
-            <p className="text-xl font-black text-[#1a1614] leading-tight tabular-nums mt-0.5"
-               style={{ fontFamily: 'var(--font-epilogue)' }}>
+            <p className="text-[9px] uppercase tracking-wider text-[#4f6249] font-bold mb-1">Weekend</p>
+            <p
+              className="text-[2rem] font-black text-[#1a1614] leading-none tabular-nums"
+              style={{ fontFamily: 'var(--font-epilogue)' }}
+            >
               {weekend.total}
             </p>
-            <p className="text-[10px] text-[#6b5d57]">events Fri–Sun</p>
+            <p className="text-[10px] text-[#6b5d57] mt-1.5">events Fri–Sun</p>
           </Link>
           <Link
             href={`/events?time=tomorrow${utmAmp}`}
-            className="bg-white border border-[#ddc9a3] rounded-2xl p-3 shadow-sm active:scale-[0.98] transition-transform"
+            className="bg-white border border-[#e2ccad] rounded-2xl p-4 shadow-sm active:scale-[0.98] transition-transform"
           >
-            <p className="text-[9px] uppercase tracking-wider text-[#6b5d57] font-semibold">Tomorrow</p>
-            <p className="text-xl font-black text-[#1a1614] leading-tight tabular-nums mt-0.5"
-               style={{ fontFamily: 'var(--font-epilogue)' }}>
+            <p className="text-[9px] uppercase tracking-wider text-[#6b5d57] font-bold mb-1">Tomorrow</p>
+            <p
+              className="text-[2rem] font-black text-[#1a1614] leading-none tabular-nums"
+              style={{ fontFamily: 'var(--font-epilogue)' }}
+            >
               {tomorrow.total}
             </p>
-            <p className="text-[10px] text-[#6b5d57]">events</p>
+            <p className="text-[10px] text-[#6b5d57] mt-1.5">events</p>
           </Link>
         </div>
       </section>
 
-      {/* ── Category chips — like the homepage, horizontal scroll ── */}
-      <section className="pt-5">
-        <p className="max-w-md mx-auto px-5 text-[10px] uppercase tracking-[0.2em] text-[#9a442d] mb-2.5 font-semibold">
-          Pick a vibe
+      {/* ── Category chips ── */}
+      <section className="pt-6">
+        <p className="max-w-md mx-auto px-5 text-[10px] uppercase tracking-[0.22em] text-[#9a442d] mb-3 font-bold">
+          What&apos;s your vibe?
         </p>
         <div className="overflow-x-auto scrollbar-hide">
           <div className="flex gap-2 px-5 pb-1" style={{ scrollbarWidth: 'none' }}>
@@ -186,7 +188,7 @@ export default async function IgLandingPage() {
                 <Link
                   key={label}
                   href={href}
-                  className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white border border-[#ddc9a3] text-xs font-semibold text-[#4a3f3a] whitespace-nowrap active:scale-[0.97] transition-transform"
+                  className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white border border-[#ddc9a3] text-xs font-semibold text-[#4a3f3a] whitespace-nowrap active:scale-[0.97] transition-transform shadow-sm"
                 >
                   <span>{emoji}</span>
                   {label}
@@ -197,12 +199,12 @@ export default async function IgLandingPage() {
         </div>
       </section>
 
-      {/* ── Editor's picks carousel ── */}
+      {/* ── Editor's picks ── */}
       {featured.length > 0 && (
-        <section className="max-w-md mx-auto px-5 pt-5">
-          <div className="flex items-baseline justify-between mb-2.5">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[#9a442d] font-semibold flex items-center gap-1">
-              <span>★</span> Editor&apos;s picks
+        <section className="max-w-md mx-auto px-5 pt-7">
+          <div className="flex items-baseline justify-between mb-3">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-[#9a442d] font-bold">
+              ★ Don&apos;t miss
             </p>
             <Link
               href={`/events${utm}`}
@@ -224,9 +226,9 @@ export default async function IgLandingPage() {
                 <Link
                   key={event.id}
                   href={`/events/${event.id}${utm}`}
-                  className="flex gap-3 bg-white rounded-2xl border border-[#f0e4cc] p-2.5 shadow-sm active:scale-[0.98] transition-transform"
+                  className="flex gap-3 bg-white rounded-2xl border border-[#f0e4cc] p-3 shadow-sm active:scale-[0.98] transition-transform"
                 >
-                  <div className="w-[72px] h-[72px] rounded-xl overflow-hidden flex-shrink-0 bg-[#f0e4cc]">
+                  <div className="w-[76px] h-[76px] rounded-xl overflow-hidden flex-shrink-0 bg-[#f0e4cc]">
                     <EventImage
                       src={primary}
                       fallback={fallback}
@@ -240,11 +242,13 @@ export default async function IgLandingPage() {
                         {event.category}
                       </p>
                     )}
-                    <h3 className="text-sm font-bold text-[#1a1614] leading-tight line-clamp-2"
-                        style={{ fontFamily: 'var(--font-epilogue)' }}>
+                    <h3
+                      className="text-sm font-bold text-[#1a1614] leading-tight line-clamp-2"
+                      style={{ fontFamily: 'var(--font-epilogue)' }}
+                    >
                       {event.title}
                     </h3>
-                    <p className="text-[10px] text-[#6b5d57] mt-0.5 line-clamp-1">
+                    <p className="text-[10px] text-[#6b5d57] mt-1 line-clamp-1">
                       {dateStr}{event.venue ? ` · ${event.venue}` : ''}
                     </p>
                   </div>
@@ -255,11 +259,11 @@ export default async function IgLandingPage() {
         </section>
       )}
 
-      {/* ── Just added — IG users love "new" ── */}
+      {/* ── Just Added ── */}
       {justAdded.length > 0 && (
-        <section className="max-w-md mx-auto px-5 pt-6">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-[#006a62] mb-2.5 font-semibold flex items-center gap-1">
-            <Sparkles className="w-3 h-3" /> Just added
+        <section className="max-w-md mx-auto px-5 pt-7">
+          <p className="text-[10px] uppercase tracking-[0.22em] text-[#006a62] mb-3 font-bold flex items-center gap-1.5">
+            <Sparkles className="w-3 h-3" /> Fresh on the calendar
           </p>
           <div className="overflow-x-auto scrollbar-hide -mx-5 px-5">
             <div className="flex gap-2.5" style={{ scrollbarWidth: 'none' }}>
@@ -286,8 +290,10 @@ export default async function IgLandingPage() {
                       />
                     </div>
                     <div className="p-2">
-                      <h4 className="text-[11px] font-bold text-[#1a1614] leading-tight line-clamp-2"
-                          style={{ fontFamily: 'var(--font-epilogue)' }}>
+                      <h4
+                        className="text-[11px] font-bold text-[#1a1614] leading-tight line-clamp-2"
+                        style={{ fontFamily: 'var(--font-epilogue)' }}
+                      >
                         {event.title}
                       </h4>
                       {dateStr && (
@@ -302,61 +308,58 @@ export default async function IgLandingPage() {
         </section>
       )}
 
-      {/* ── Secondary links (compact grid) ── */}
-      <section className="max-w-md mx-auto px-5 pt-6">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-[#6b5d57] mb-2.5 font-semibold">
-          More of the site
+      {/* ── Secondary links ── */}
+      <section className="max-w-md mx-auto px-5 pt-7">
+        <p className="text-[10px] uppercase tracking-[0.22em] text-[#6b5d57] mb-2.5 font-bold">
+          Explore more
         </p>
         <div className="grid grid-cols-2 gap-2">
           <Link
             href={`/saved${utm}`}
-            className="flex items-center gap-2 bg-white border border-[#ddc9a3] rounded-xl p-3 text-xs font-semibold text-[#4a3f3a] active:scale-[0.98] transition-transform"
+            className="flex items-center gap-2.5 bg-white border border-[#ddc9a3] rounded-xl p-3 text-xs font-semibold text-[#4a3f3a] active:scale-[0.98] transition-transform shadow-sm"
           >
             <Bookmark className="w-3.5 h-3.5 text-[#9a442d] flex-shrink-0" />
-            <span className="flex-1">Save events</span>
+            <span>Save events</span>
           </Link>
           <Link
             href={`/neighborhoods${utm}`}
-            className="flex items-center gap-2 bg-white border border-[#ddc9a3] rounded-xl p-3 text-xs font-semibold text-[#4a3f3a] active:scale-[0.98] transition-transform"
+            className="flex items-center gap-2.5 bg-white border border-[#ddc9a3] rounded-xl p-3 text-xs font-semibold text-[#4a3f3a] active:scale-[0.98] transition-transform shadow-sm"
           >
             <MapPin className="w-3.5 h-3.5 text-[#006a62] flex-shrink-0" />
-            <span className="flex-1">By neighborhood</span>
+            <span>By neighborhood</span>
           </Link>
           <Link
             href={`/submit${utm}`}
-            className="flex items-center gap-2 bg-white border border-[#ddc9a3] rounded-xl p-3 text-xs font-semibold text-[#4a3f3a] active:scale-[0.98] transition-transform"
+            className="flex items-center gap-2.5 bg-white border border-[#ddc9a3] rounded-xl p-3 text-xs font-semibold text-[#4a3f3a] active:scale-[0.98] transition-transform shadow-sm"
           >
             <Mail className="w-3.5 h-3.5 text-[#4f6249] flex-shrink-0" />
-            <span className="flex-1">Share an event</span>
+            <span>Share an event</span>
           </Link>
           <Link
             href={`/about${utm}`}
-            className="flex items-center gap-2 bg-white border border-[#ddc9a3] rounded-xl p-3 text-xs font-semibold text-[#4a3f3a] active:scale-[0.98] transition-transform"
+            className="flex items-center gap-2.5 bg-white border border-[#ddc9a3] rounded-xl p-3 text-xs font-semibold text-[#4a3f3a] active:scale-[0.98] transition-transform shadow-sm"
           >
             <Info className="w-3.5 h-3.5 text-[#6b5d57] flex-shrink-0" />
-            <span className="flex-1">About the site</span>
+            <span>About the site</span>
           </Link>
         </div>
       </section>
 
-      {/* ── Daily quote + footer ── */}
-      <section className="max-w-md mx-auto px-5 pt-7 pb-10 text-center">
-        <div className="py-4 border-t border-[#ddc9a3]/60">
+      {/* ── Footer ── */}
+      <section className="max-w-md mx-auto px-5 pt-8 pb-10 text-center">
+        <div className="pt-5 border-t border-[#ddc9a3]/60">
           <ConnectionQuote size="sm" />
         </div>
         <Link
           href={`/${utm}`}
-          className="inline-block mt-5 text-[11px] font-bold text-[#9a442d] hover:underline"
+          className="inline-block mt-6 text-[11px] font-bold text-[#9a442d] hover:underline"
         >
           See the full site →
         </Link>
-        <p className="text-[10px] text-[#6b5d57] mt-3">
-          abqunplugged.com · Greater Albuquerque
-        </p>
-        <p className="text-[10px] text-[#ddc9a3] mt-0.5">
-          Built by one person with a spreadsheet and too much coffee.
-        </p>
+        <p className="text-[10px] text-[#6b5d57] mt-3">abqunplugged.com · Albuquerque, NM</p>
+        <p className="text-[10px] text-[#c8b89a] mt-0.5">Built with love for one city.</p>
       </section>
+
     </main>
   )
 }

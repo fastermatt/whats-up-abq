@@ -30,3 +30,6 @@ deploy-*.zip
 *.sln
 *.sw?
 .parcel-cache
+
+# Local Netlify folder
+.netlify
