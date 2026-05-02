@@ -25,6 +25,21 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://abqunplugged.com/family-friendly' },
 }
 
+const FAMILY_FAQS = [
+  {
+    q: 'What are the top indoor attractions for kids in Albuquerque?',
+    a: 'Explora Science Center offers hands-on exhibits for all ages, while the New Mexico Museum of Natural History features dinosaur skeletons and a planetarium. The Albuquerque Museum also has family-friendly art activities and interactive spaces.',
+  },
+  {
+    q: 'Are there free or low-cost kids activities in the city?',
+    a: 'Yes, many public library branches host free story times for young children throughout the week. Balloon Fiesta Park is free to explore when no events are scheduled, offering wide open spaces for picnics and kite flying.',
+  },
+  {
+    q: 'What outdoor activities are best for families with children?',
+    a: "The ABQ BioPark includes a zoo, aquarium, and botanic garden with train rides. Cliff's Amusement Park offers thrill rides and a water park section for older kids, while Balloon Fiesta Park is great for biking or flying kites.",
+  },
+]
+
 export default async function FamilyFriendlyPage() {
   const { events } = await fetchEvents({ category: 'Family', limit: 200 })
 
@@ -41,11 +56,16 @@ export default async function FamilyFriendlyPage() {
           'branch, kids classes at the BioPark, hands-on workshops at Explora and the ' +
           'New Mexico Museum of Natural History, family days at the Albuquerque Museum, ' +
           'and free outdoor festivals at the city parks. Many events are free or ' +
-          'low-cost, and they’re sorted by category so it’s easy to find something for ' +
-          'your kid’s age and interests. Updated daily.',
+          "low-cost, and they're sorted by category so it's easy to find something for " +
+          "your kid's age and interests. Updated daily.",
+        introExtra:
+          'Let kids marvel at Explora Science Center in Old Town, then explore the ABQ BioPark ' +
+          'where the zoo, aquarium, and botanical garden all await. When summer heat arrives, ' +
+          "cool off with classic rides at Cliff's Amusement Park.",
         emptyHeading: 'No family events listed right now',
         emptyBody: 'New family events are added daily — check back tomorrow.',
         breadcrumbLabel: 'Family-Friendly',
+        faqs: FAMILY_FAQS,
       }}
     />
   )
