@@ -36,8 +36,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const events = await fetchEventsByNeighborhood(slug, 1)
   if (events.length === 0) return { title: 'Neighborhood Not Found' }
 
-  const neighborhood = events[0].neighborhood ?? slug
-  const hoodData = (neighborhoodDescriptions as Record<string, { meta?: string }>)[slug]
+  const hoodData = (neighborhoodDescriptions as Record<string, { meta?: string; name?: string }>)[slug]
+  const prettifySlug = (s: string) =>
+    s.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+  const neighborhood = hoodData?.name ?? events[0].neighborhood ?? prettifySlug(slug)
   const metaDesc = hoodData?.meta
     ?? `Upcoming events in ${neighborhood}, Albuquerque NM. Find concerts, comedy, arts, sports, and more on ABQ Unplugged.`
   return {
@@ -65,11 +67,16 @@ export default async function NeighborhoodPage({ params }: PageProps) {
 
   if (events.length === 0) notFound()
 
-  // Use the actual neighborhood name from the first event
-  const neighborhood = events[0].neighborhood ?? slug
-
-  // AI-generated neighborhood copy
+  // AI-generated neighborhood copy (used for hero headline + description fallback)
   const hoodInfo = (neighborhoodDescriptions as Record<string, { description?: string; name?: string }>)[slug] ?? null
+
+  // Pretty display name — never show the raw slug. Priority:
+  //   1. Curated `name` from neighborhoodDescriptions (e.g. "Nob Hill")
+  //   2. Event row's `neighborhood` field (already pretty)
+  //   3. Title-cased slug fallback (e.g. "nob-hill" → "Nob Hill")
+  const prettifySlug = (s: string) =>
+    s.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+  const neighborhood = hoodInfo?.name ?? events[0].neighborhood ?? prettifySlug(slug)
 
   // Category distribution for the neighborhood
   const catCounts: Record<string, number> = {}
