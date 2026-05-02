@@ -24,6 +24,26 @@ function slugify(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 48)
 }
 
+/** Scale a PNG data-URL down to maxWidth px, returns a JPEG thumbnail. */
+async function scaledThumbnail(dataUrl: string, maxWidth: number): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => {
+      const ratio = Math.min(1, maxWidth / img.width)
+      const w = Math.round(img.width * ratio)
+      const h = Math.round(img.height * ratio)
+      const c = document.createElement('canvas')
+      c.width = w; c.height = h
+      const ctx = c.getContext('2d')
+      if (!ctx) { resolve(dataUrl); return }
+      ctx.drawImage(img, 0, 0, w, h)
+      resolve(c.toDataURL('image/jpeg', 0.82))
+    }
+    img.onerror = reject
+    img.src = dataUrl
+  })
+}
+
 async function dataUrlToBlob(dataUrl: string): Promise<Blob> {
   const r = await fetch(dataUrl)
   return r.blob()
@@ -196,7 +216,13 @@ export function Toolbar({ mode, onModeChange, canvasRef, event, image }: Toolbar
   const doSave = async () => {
     setSaveState('saving')
     try {
-      const thumb = canvasRef.current ? await canvasRef.current.exportPng() : undefined
+      let thumb: string | undefined
+      if (canvasRef.current) {
+        // Export full-res, then scale down to a thumbnail (~300px wide) so
+        // localStorage doesn't hit the 5 MB quota with full-resolution PNGs.
+        const fullUrl = await canvasRef.current.exportPng()
+        thumb = await scaledThumbnail(fullUrl, 300)
+      }
       saveDesign(design, thumb)
       setSaveState('saved')
       setTimeout(() => setSaveState('idle'), 2000)
