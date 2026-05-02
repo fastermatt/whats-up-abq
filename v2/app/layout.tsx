@@ -51,10 +51,11 @@ export const metadata: Metadata = {
     locale:      'en_US',
     images: [
       {
-        url: OG_IMAGE,
-        width: 1200,
+        url:    OG_IMAGE,   // JPEG 1200×630 — universal platform support
+        width:  1200,
         height: 630,
-        alt: 'ABQ Unplugged — Events in Albuquerque, NM',
+        alt:    'ABQ Unplugged — Events in Albuquerque, NM',
+        type:   'image/jpeg',
       },
     ],
   },

@@ -232,8 +232,10 @@ const HERO_IMAGES: string[] = (() => {
 })()
 
 // ── OG Share Image ──────────────────────────────────────────────────────────
-// Self-hosted on Netlify CDN — never depends on Midjourney hotlink availability.
-export const OG_IMAGE = 'https://abqunplugged.com/hero/hero-4.webp'
+// JPEG at 1200×630 — universal format support (iMessage, Facebook, Slack).
+// The homepage uses app/opengraph-image.tsx (PNG, branded). This JPEG fallback
+// serves secondary pages and the root layout metadata default.
+export const OG_IMAGE = 'https://abqunplugged.com/og-image.jpg'
 
 /**
  * Returns the starting index for the hero carousel based on time of day.
