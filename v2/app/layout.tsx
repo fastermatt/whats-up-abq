@@ -98,6 +98,26 @@ export const viewport: Viewport = {
   colorScheme:        'light',
 }
 
+const organizationLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'ABQ Unplugged',
+  url: 'https://abqunplugged.com',
+  logo: 'https://abqunplugged.com/icon-512.png',
+  description:
+    'Albuquerque\'s event aggregator — concerts, comedy, arts, sports, food and more from every ticket source in one place.',
+  areaServed: {
+    '@type': 'City',
+    name: 'Albuquerque',
+    containedInPlace: { '@type': 'State', name: 'New Mexico', identifier: 'NM' },
+  },
+  contactPoint: {
+    '@type': 'ContactPoint',
+    contactType: 'customer support',
+    url: 'https://abqunplugged.com',
+  },
+}
+
 export default async function RootLayout({
   children,
 }: {
@@ -134,6 +154,7 @@ export default async function RootLayout({
         </a>
         {/* overflow-x-clip — clips overflow without creating a scroll container,
             so position:sticky still works inside pages */}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }} />
         <AuthCallbackCatcher />
         <div className="w-full overflow-x-clip">
           <DesktopNav />

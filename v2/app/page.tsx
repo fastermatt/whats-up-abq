@@ -71,6 +71,39 @@ const websiteJsonLd = {
   },
 }
 
+const HOMEPAGE_FAQS = [
+  {
+    q: 'What is happening in Albuquerque tonight?',
+    a: 'ABQ Unplugged shows you everything happening in Albuquerque tonight — from live music at Sister Bar to comedy at Laffs Comedy Caffe and sports at Isotopes Park. Filter by Tonight to see the full list across every category and neighborhood.',
+  },
+  {
+    q: 'What are free things to do in Albuquerque this weekend?',
+    a: 'Albuquerque has dozens of free events most weekends including outdoor concerts, gallery walks, farmers markets, and community festivals. ABQ Unplugged aggregates free events from Ticketmaster, Eventbrite, SeatGeek, and local sources so you can filter by price.',
+  },
+  {
+    q: 'What is ABQ Unplugged?',
+    a: "ABQ Unplugged is Albuquerque's event aggregator, pulling together concerts, sports, arts, comedy, family events, and more from Ticketmaster, Eventbrite, SeatGeek, and dozens of local sources into one place. It is free to use and updated daily.",
+  },
+  {
+    q: 'How do I find events in Albuquerque?',
+    a: 'ABQ Unplugged makes it easy to discover events by category, neighborhood, mood, price, and time. Browse by Tonight, This Weekend, or search for something specific across all ticket sources and local calendars in one place.',
+  },
+  {
+    q: 'What are the best things to do in Albuquerque?',
+    a: 'Albuquerque offers world-class events year-round — from the International Balloon Fiesta and the New Mexico State Fair to live music at KiMo Theatre and outdoor adventures in the Sandia Mountains. ABQ Unplugged tracks over 1,000 upcoming events so there is always something worth doing.',
+  },
+]
+
+const homepageFaqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: HOMEPAGE_FAQS.map(({ q, a }) => ({
+    '@type': 'Question',
+    name: q,
+    acceptedAnswer: { '@type': 'Answer', text: a },
+  })),
+}
+
 export default async function DiscoverPage() {
   const featuredPlaces = getFeaturedPlaces(8)
 
@@ -113,10 +146,8 @@ export default async function DiscoverPage() {
   return (
     <main id="main" className="min-h-dvh bg-[--bg]">
       <ScrollHintManager />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageFaqLd) }} />
       {/* SEO h1 — visually hidden, provides primary keyword signal */}
       <h1 className="sr-only">Events in Albuquerque, NM — Things to Do in ABQ</h1>
 
@@ -529,6 +560,34 @@ export default async function DiscoverPage() {
           </section>
         </AnimateIn>
       )}
+
+      {/* ── FAQ section — targets AI search / voice queries ── */}
+      <AnimateIn animation="fade-up" delay={190}>
+        <section className="py-10 border-t border-[#f0e4cc]/60">
+          <div className="max-w-3xl mx-auto px-4">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] mb-1 font-semibold">Quick answers</p>
+            <h2
+              className="text-xl font-black text-[#1a1614] mb-6"
+              style={{ fontFamily: 'var(--font-epilogue)' }}
+            >
+              Albuquerque events — FAQ
+            </h2>
+            <div className="space-y-3">
+              {HOMEPAGE_FAQS.map(({ q, a }, i) => (
+                <div key={i} className="bg-white rounded-xl border border-[#f0e4cc] p-4 shadow-sm">
+                  <h3
+                    className="text-sm font-bold text-[#1a1614] mb-1.5"
+                    style={{ fontFamily: 'var(--font-epilogue)' }}
+                  >
+                    {q}
+                  </h3>
+                  <p className="text-xs text-[#6b5d57] leading-relaxed">{a}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </AnimateIn>
 
       {/* ── Page close: community invitation + browse all ── */}
       <AnimateIn animation="fade-up" delay={200}>

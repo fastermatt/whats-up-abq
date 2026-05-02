@@ -7,6 +7,7 @@ import { getCategoryFallback } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
 import { MapPin, Calendar, ArrowLeft, ExternalLink, Tag } from 'lucide-react'
 import categoryDescriptions from '@/lib/category-descriptions.json'
+import categoryFaqs from '@/lib/category-faqs.json'
 
 export const revalidate = 3600
 
@@ -45,12 +46,25 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!category) return { title: 'Category Not Found' }
   const catData = (categoryDescriptions as Record<string, { description: string; meta: string }>)[slug]
   const metaDesc = catData?.meta ?? `${CATEGORY_DESCRIPTIONS[slug] ?? ''} Find tickets and event details on ABQ Unplugged.`
+  const titleModifier: Record<string, string> = {
+    'music':        'Concerts, Shows & Live Music',
+    'sports':       'Games, Races & Athletic Events',
+    'arts-theater': 'Performances, Galleries & Shows',
+    'comedy':       'Stand-Up, Improv & Open Mics',
+    'family':       'Kid-Friendly & Family Fun',
+    'food-drink':   'Tastings, Markets & Food Festivals',
+    'film':         'Screenings, Festivals & Cinema',
+    'community':    'Volunteering, Fairs & Local Gatherings',
+    'festivals':    'Fairs, Fiestas & Cultural Events',
+    'outdoor':      'Hikes, Races & Outdoor Adventures',
+  }
+  const modifier = titleModifier[slug] ?? `Things to Do in Albuquerque`
   return {
-    title: `${category} Events in Albuquerque, NM`,
+    title: `${category} Events in Albuquerque, NM | ${modifier}`,
     description: metaDesc,
     alternates: { canonical: `https://abqunplugged.com/categories/${slug}` },
     openGraph: {
-      title: `${category} Events in Albuquerque`,
+      title: `${category} Events in Albuquerque, NM`,
       description: metaDesc,
       url: `https://abqunplugged.com/categories/${slug}`,
     },
@@ -88,6 +102,17 @@ export default async function CategoryPage({ params }: PageProps) {
     numberOfItems: total,
   }
 
+  const faqs = (categoryFaqs as Record<string, { q: string; a: string }[]>)[slug] ?? []
+  const faqLd = faqs.length > 0 ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a },
+    })),
+  } : null
+
   const breadcrumbLd = buildBreadcrumbs([
     { name: 'Home', url: 'https://abqunplugged.com' },
     { name: 'Events', url: 'https://abqunplugged.com/events' },
@@ -98,6 +123,7 @@ export default async function CategoryPage({ params }: PageProps) {
     <main className="min-h-dvh bg-[--bg]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
       <header className="sticky top-0 z-20 bg-[--bg]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
@@ -219,6 +245,22 @@ export default async function CategoryPage({ params }: PageProps) {
             ))}
           </div>
         </div>
+
+        {faqs.length > 0 && (
+          <div className="mt-8 pt-6 border-t border-[#f0e4cc]">
+            <h2 className="text-sm font-bold text-[#1a1614] uppercase tracking-wider mb-4" style={{ fontFamily: 'var(--font-epilogue)' }}>
+              Frequently Asked Questions
+            </h2>
+            <div className="space-y-4">
+              {faqs.map(({ q, a }, i) => (
+                <div key={i} className="bg-white rounded-xl border border-[#f0e4cc] p-4">
+                  <h3 className="text-sm font-bold text-[#1a1614] mb-1.5" style={{ fontFamily: 'var(--font-epilogue)' }}>{q}</h3>
+                  <p className="text-xs text-[#6b5d57] leading-relaxed">{a}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </main>
   )

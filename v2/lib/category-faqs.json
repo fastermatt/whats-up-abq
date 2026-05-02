@@ -1,0 +1,142 @@
+{
+  "music": [
+    {
+      "q": "What are the best live music venues in Albuquerque?",
+      "a": "Albuquerque's top music venues include Sister Bar for indie and local acts, Popejoy Hall for classical and Broadway shows, the historic KiMo Theatre, Sunshine Theater, and El Rey Theater. Larger outdoor concerts happen at Balloon Fiesta Park and Isleta Amphitheater."
+    },
+    {
+      "q": "Are there free concerts in Albuquerque?",
+      "a": "Yes — Albuquerque hosts free outdoor concerts at Civic Plaza, Tingley Beach, and neighborhood parks throughout summer. ABQ Unplugged tracks all free live music events; filter by price to find no-cost shows any week."
+    },
+    {
+      "q": "How do I find live music in Albuquerque this weekend?",
+      "a": "ABQ Unplugged aggregates concerts from Ticketmaster, SeatGeek, Eventbrite, and local venue calendars in one place. Use the This Weekend filter on the Music page to see every upcoming show."
+    }
+  ],
+  "sports": [
+    {
+      "q": "What sports events are happening in Albuquerque?",
+      "a": "Albuquerque is home to the Isotopes (Triple-A baseball) at Isotopes Park and UNM Lobos basketball at The Pit arena. The city also hosts road races, cycling events, wrestling, and mixed martial arts throughout the year."
+    },
+    {
+      "q": "Are there free sports events in Albuquerque?",
+      "a": "UNM hosts many free or low-cost youth sports events, and city parks run free recreational leagues. ABQ Unplugged lists all local sports events including free admission options."
+    },
+    {
+      "q": "Where can I watch live sports in Albuquerque tonight?",
+      "a": "Check ABQ Unplugged for tonight's Isotopes games at Isotopes Park or Lobos games at The Pit. Filter by Sports and Tonight to see every event on any given evening."
+    }
+  ],
+  "arts-theater": [
+    {
+      "q": "What are the best arts and theater venues in Albuquerque?",
+      "a": "Top venues include the KiMo Theatre (a stunning 1920s Pueblo Deco landmark), Popejoy Hall at UNM, Albuquerque Little Theatre, and the Albuquerque Museum. Old Town galleries and Nob Hill studios also host rotating exhibitions."
+    },
+    {
+      "q": "Are there free art events in Albuquerque?",
+      "a": "Albuquerque has a strong free arts scene including First Fridays gallery walks in Nob Hill and Downtown, free exhibitions at the Albuquerque Museum on select days, and public murals throughout the city. ABQ Unplugged lists all free arts events."
+    },
+    {
+      "q": "What theater shows are playing in Albuquerque this weekend?",
+      "a": "ABQ Unplugged tracks performances at KiMo Theatre, Popejoy Hall, Albuquerque Little Theatre, and independent performance spaces. Filter by Arts and Theater and select This Weekend for current showtimes."
+    }
+  ],
+  "comedy": [
+    {
+      "q": "Where can I see stand-up comedy in Albuquerque?",
+      "a": "Laffs Comedy Caffe is Albuquerque's dedicated stand-up club, hosting touring national acts and local open mics. The Box Performance Space hosts improv and sketch comedy, and several bars feature comedy nights throughout the week."
+    },
+    {
+      "q": "Are there free comedy shows in Albuquerque?",
+      "a": "Several ABQ bars host free open mic comedy nights weekly. ABQ Unplugged flags free events so you can filter for no-cost shows in the Comedy category."
+    },
+    {
+      "q": "What comedy shows are in Albuquerque this weekend?",
+      "a": "Check the ABQ Unplugged Comedy page and filter by This Weekend to see touring headliners at Laffs Comedy Caffe and other local venues."
+    }
+  ],
+  "family": [
+    {
+      "q": "What are the best family events in Albuquerque?",
+      "a": "Families love events at Explora Science Center, the ABQ BioPark (zoo, aquarium, and botanical garden), Petroglyph National Monument, and the New Mexico Museum of Natural History. Seasonal events like the Balloon Fiesta and State Fair are perennial favorites."
+    },
+    {
+      "q": "What free family activities are in Albuquerque?",
+      "a": "The Rio Grande Nature Center, many city parks, and free library storytimes are great no-cost options. ABQ Unplugged filters free family events so you can find kid-friendly activities without spending a dime."
+    },
+    {
+      "q": "What kid-friendly events are happening in Albuquerque this weekend?",
+      "a": "ABQ Unplugged aggregates family events from all sources in one place. Filter by Family and This Weekend to find activities at Explora, the BioPark, local libraries, and parks happening right now."
+    }
+  ],
+  "food-drink": [
+    {
+      "q": "What food and drink events are in Albuquerque?",
+      "a": "Albuquerque hosts farmers markets, the New Mexico Wine Festival, craft brewery tours, green chile cook-offs, and themed tasting events year-round. The Rail Yards Market on weekends is a community favorite with local food vendors."
+    },
+    {
+      "q": "Are there free food events in Albuquerque?",
+      "a": "The Rail Yards Market and many neighborhood farmers markets are free to attend. Some brewery tap room events and tasting nights are also free. ABQ Unplugged lists free food and drink events in the Food and Drink category."
+    },
+    {
+      "q": "What food festivals are happening in Albuquerque this weekend?",
+      "a": "ABQ Unplugged tracks farmers markets, pop-up dinners, brewery events, and food festivals across the city. Filter by Food and Drink and This Weekend to see what is on near you."
+    }
+  ],
+  "film": [
+    {
+      "q": "Where can I see indie and art-house films in Albuquerque?",
+      "a": "The Guild Cinema is Albuquerque's beloved independent movie theater, featuring indie films, documentaries, and cult classics. Larger chains like Regal and AMC are also located throughout the city for mainstream releases."
+    },
+    {
+      "q": "Are there free movie screenings in Albuquerque?",
+      "a": "Albuquerque hosts free outdoor movie nights at parks during summer, and community screenings happen regularly at libraries and public spaces. ABQ Unplugged lists free film events in the Film category."
+    },
+    {
+      "q": "What films are screening in Albuquerque this weekend?",
+      "a": "ABQ Unplugged tracks events at the Guild Cinema and film festivals like the Albuquerque Film and Music Experience. Filter by Film and This Weekend for current showtimes and special screenings."
+    }
+  ],
+  "community": [
+    {
+      "q": "What community events are happening in Albuquerque?",
+      "a": "Albuquerque has a vibrant community event scene including neighborhood cleanups, cultural celebrations at Civic Plaza, volunteer fairs, and public gatherings. The International District and South Valley host culturally rich community events regularly."
+    },
+    {
+      "q": "Are there free community events in Albuquerque?",
+      "a": "Most community events, volunteer opportunities, and public celebrations in Albuquerque are free to attend. ABQ Unplugged lists free community events across all neighborhoods."
+    },
+    {
+      "q": "How do I find volunteer and community events in Albuquerque?",
+      "a": "ABQ Unplugged aggregates community events from local organizations and nonprofits alongside ticketed events. Browse the Community category to find ways to connect with your neighborhood."
+    }
+  ],
+  "festivals": [
+    {
+      "q": "What are the biggest festivals in Albuquerque?",
+      "a": "The Albuquerque International Balloon Fiesta in October is the world's largest hot air balloon event. Other major festivals include the New Mexico State Fair at Expo New Mexico, the Gathering of Nations Powwow, and the New Mexico Wine Festival."
+    },
+    {
+      "q": "Are there free festivals in Albuquerque?",
+      "a": "Many Albuquerque festivals are free to attend, including cultural street fairs, neighborhood fiestas, and seasonal outdoor events at Civic Plaza. ABQ Unplugged marks free festivals so you can plan without the cost."
+    },
+    {
+      "q": "What festivals are happening in Albuquerque this weekend?",
+      "a": "ABQ Unplugged tracks all festivals in the Albuquerque area from major ticketed events to free neighborhood celebrations. Filter by Festivals and This Weekend to see what is coming up."
+    }
+  ],
+  "outdoor": [
+    {
+      "q": "What outdoor events are happening in Albuquerque?",
+      "a": "Albuquerque offers guided hikes in the Sandia Mountains, river cleanups along the Rio Grande, cycling events on the Paseo del Bosque trail, and stargazing nights at Petroglyph National Monument. The high desert setting makes outdoor events accessible year-round."
+    },
+    {
+      "q": "Are there free outdoor activities and events in Albuquerque?",
+      "a": "Most trails, parks, and natural areas in Albuquerque are free to access. Free guided hikes, nature walks, and river cleanup events are listed on ABQ Unplugged in the Outdoor category."
+    },
+    {
+      "q": "What outdoor events are near me in Albuquerque this weekend?",
+      "a": "ABQ Unplugged lists outdoor events across all Albuquerque neighborhoods. Filter by Outdoor and This Weekend to find guided hikes, cycling events, and outdoor festivals near you."
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import { getCategoryFallback } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
 import { MapPin, Calendar, ArrowLeft, ExternalLink, Map } from 'lucide-react'
 import neighborhoodDescriptions from '@/lib/neighborhood-descriptions.json'
+import { buildBreadcrumbs } from '@/lib/seo'
 
 export const revalidate = 3600
 
@@ -43,11 +44,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const metaDesc = hoodData?.meta
     ?? `Upcoming events in ${neighborhood}, Albuquerque NM. Find concerts, comedy, arts, sports, and more on ABQ Unplugged.`
   return {
-    title: `Things to Do in ${neighborhood}, Albuquerque`,
+    title: `Things to Do in ${neighborhood}, Albuquerque NM | Events & Activities`,
     description: metaDesc,
     alternates: { canonical: `https://abqunplugged.com/neighborhoods/${slug}` },
     openGraph: {
-      title: `Events in ${neighborhood}`,
+      title: `Things to Do in ${neighborhood}, Albuquerque`,
       description: metaDesc,
       url: `https://abqunplugged.com/neighborhoods/${slug}`,
     },
@@ -93,8 +94,27 @@ export default async function NeighborhoodPage({ params }: PageProps) {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
 
-  // Structured data for local business/neighborhood
-  const jsonLd = {
+  // Structured data — Place (Neighborhood) + ItemList + BreadcrumbList + FAQ
+  const placeLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Place',
+    name: `${neighborhood}, Albuquerque`,
+    description: hoodInfo?.description ?? `The ${neighborhood} neighborhood of Albuquerque, NM`,
+    url: `https://abqunplugged.com/neighborhoods/${slug}`,
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Albuquerque',
+      addressRegion: 'NM',
+      addressCountry: 'US',
+    },
+    containedInPlace: {
+      '@type': 'City',
+      name: 'Albuquerque',
+      containedInPlace: { '@type': 'State', name: 'New Mexico' },
+    },
+  }
+
+  const itemListLd = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: `Events in ${neighborhood}, Albuquerque`,
@@ -103,12 +123,43 @@ export default async function NeighborhoodPage({ params }: PageProps) {
     numberOfItems: events.length,
   }
 
+  const breadcrumbLd = buildBreadcrumbs([
+    { name: 'Home', url: 'https://abqunplugged.com' },
+    { name: 'Events', url: 'https://abqunplugged.com/events' },
+    { name: neighborhood, url: `https://abqunplugged.com/neighborhoods/${slug}` },
+  ])
+
+  const neighborhoodFaqs = [
+    {
+      q: `What is ${neighborhood} known for in Albuquerque?`,
+      a: hoodInfo?.description ?? `${neighborhood} is one of Albuquerque's active neighborhoods with a range of upcoming events. Browse ABQ Unplugged to see concerts, arts, community events, and more in this area.`,
+    },
+    {
+      q: `What events are happening in ${neighborhood} this weekend?`,
+      a: `ABQ Unplugged aggregates events from Ticketmaster, Eventbrite, SeatGeek, and local sources for ${neighborhood} and all Albuquerque neighborhoods. Filter by This Weekend to see every upcoming event near you.`,
+    },
+    {
+      q: `Are there free things to do in ${neighborhood}, Albuquerque?`,
+      a: `Many community events, outdoor activities, and cultural gatherings in ${neighborhood} are free to attend. ABQ Unplugged lets you filter by price to find no-cost events in this neighborhood.`,
+    },
+  ]
+
+  const faqLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: neighborhoodFaqs.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a },
+    })),
+  }
+
   return (
     <main className="min-h-dvh bg-[--bg]">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(placeLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
 
       {/* ── Header ── */}
       <header className="sticky top-0 z-20 bg-[--bg]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
@@ -291,6 +342,21 @@ export default async function NeighborhoodPage({ params }: PageProps) {
           >
             Browse all Albuquerque events →
           </Link>
+        </div>
+
+        {/* ── FAQ section ── */}
+        <div className="mt-8 pt-6 border-t border-[#f0e4cc]">
+          <h2 className="text-sm font-bold text-[#1a1614] uppercase tracking-wider mb-4" style={{ fontFamily: 'var(--font-epilogue)' }}>
+            Frequently Asked Questions
+          </h2>
+          <div className="space-y-4">
+            {neighborhoodFaqs.map(({ q, a }, i) => (
+              <div key={i} className="bg-white rounded-xl border border-[#f0e4cc] p-4">
+                <h3 className="text-sm font-bold text-[#1a1614] mb-1.5" style={{ fontFamily: 'var(--font-epilogue)' }}>{q}</h3>
+                <p className="text-xs text-[#6b5d57] leading-relaxed">{a}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </main>
