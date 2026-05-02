@@ -79,6 +79,7 @@ export function IGCardClient({ event, image, initialFormat = 'portrait', embedde
   const [overlayPct, setOverlayPct]     = useState(55)
   const [downloading, setDownloading]   = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
+  const imgRef  = useRef<HTMLImageElement>(null)
 
   // All images are routed through /api/image-proxy so:
   //   1. html-to-image can fetch them as same-origin (no CORS issues → no blank download)
@@ -94,11 +95,20 @@ export function IGCardClient({ event, image, initialFormat = 'portrait', embedde
     setImageLoaded(false)
   }, [image])
 
-  // Route all absolute-URL images through the proxy for reliable html-to-image capture.
-  // Relative paths (local /fallbacks/...) are same-origin and don't need proxying.
+  // Handle cached images: React's onLoad fires only when the browser fetches the image
+  // AFTER the listener is attached. If the image is already in the browser cache,
+  // the load event fires synchronously before React wires it up — onLoad is missed and
+  // imageLoaded stays false forever. Check img.complete after every src change to catch
+  // this race condition.
   const proxiedSrc = imgSrc.startsWith('http')
     ? `/api/image-proxy?url=${encodeURIComponent(imgSrc)}`
     : imgSrc
+  useEffect(() => {
+    const el = imgRef.current
+    if (el?.complete && el.naturalWidth > 0) {
+      setImageLoaded(true)
+    }
+  }, [proxiedSrc])
 
   // Admin "Reject image" state
   const [rejecting, setRejecting] = useState(false)
@@ -283,6 +293,7 @@ export function IGCardClient({ event, image, initialFormat = 'portrait', embedde
               onError → swap to category fallback so the card never shows a broken image. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
+            ref={imgRef}
             src={proxiedSrc}
             alt=""
             className="absolute inset-0 w-full h-full object-cover"
