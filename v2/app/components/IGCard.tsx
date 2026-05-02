@@ -295,11 +295,6 @@ export function IGCardClient({ event, image, initialFormat = 'portrait', embedde
             }}
           />
 
-          {/* Image loading shimmer — visible while image fetches */}
-          {!imageLoaded && (
-            <div className="absolute inset-0 bg-[#1a1210] animate-pulse" />
-          )}
-
           {/* Gradient overlay — sole darkness mechanism (brightness filter removed from img
               because filter:brightness prevents html-to-image canvas capture).
               Slightly stronger formula to compensate: mid-stop boosted from 0.08→0.18. */}
@@ -318,6 +313,14 @@ export function IGCardClient({ event, image, initialFormat = 'portrait', embedde
                     rgba(0,0,0,${Math.min(baseAlpha * 0.97, 0.97).toFixed(2)}) 100%)`,
             }}
           />
+
+          {/* Image loading shimmer — sits above gradient so it fully blocks the image
+              while loading. No animate-pulse: opacity cycling caused a blink where the
+              partially-loaded image bled through the transparent gradient top area.
+              Removed when onLoad fires; proxy streaming means this clears quickly. */}
+          {!imageLoaded && (
+            <div className="absolute inset-0 z-10 bg-[#1a1210]" />
+          )}
 
           {/* ── Top bar: logo + category ── */}
           {/* Story safe zone: Instagram overlays profile/timer in top 13% (250/1920px).
