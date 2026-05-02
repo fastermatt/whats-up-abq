@@ -80,24 +80,23 @@ export function IGCardClient({ event, image, initialFormat = 'portrait', embedde
   const [downloading, setDownloading]   = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
 
-  // Image with onError fallback to category image — matches EventImage behavior so
-  // the IG card and the public event page never diverge when an image 404s.
-  // (Added 2026-04-19 as part of image-system overhaul — before this, IGCard
-  // would just show a broken image when the source URL failed.)
-  //
-  // Our own Supabase Storage and R2 URLs are public + CORS-enabled, so they
-  // DON'T need the /api/image-proxy round-trip. Proxying adds latency and
-  // risks serving a stale Netlify edge cache. Only third-party sources go
-  // through the proxy (for CAPTCHA bypass + html-to-image CORS).
+  // All images are routed through /api/image-proxy so:
+  //   1. html-to-image can fetch them as same-origin (no CORS issues → no blank download)
+  //   2. Third-party CAPTCHA/hotlink blocks are bypassed server-side
+  //   3. Midjourney CDN, Supabase, R2, Ticketmaster, SeatGeek, Eventbrite all allowed
+  // Local relative paths (Pixabay fallbacks at /fallbacks/pixabay/...) are served
+  // directly — they're same-origin already, no proxy needed.
   const categoryFallback = getCategoryFallback(event.category ?? undefined, event.id)
   const [imgSrc, setImgSrc] = useState(image)
-  useEffect(() => { setImgSrc(image) }, [image])
+  const [imageLoaded, setImageLoaded] = useState(false)
+  useEffect(() => {
+    setImgSrc(image)
+    setImageLoaded(false)
+  }, [image])
 
-  const isOurHostedImage = typeof imgSrc === 'string' && (
-    imgSrc.includes('supabase.co/storage') ||
-    imgSrc.includes('pub-9b12296957cd4149ac1833b591cdc0ff.r2.dev')
-  )
-  const proxiedSrc = imgSrc.startsWith('http') && !isOurHostedImage
+  // Route all absolute-URL images through the proxy for reliable html-to-image capture.
+  // Relative paths (local /fallbacks/...) are same-origin and don't need proxying.
+  const proxiedSrc = imgSrc.startsWith('http')
     ? `/api/image-proxy?url=${encodeURIComponent(imgSrc)}`
     : imgSrc
 
@@ -113,11 +112,11 @@ export function IGCardClient({ event, image, initialFormat = 'portrait', embedde
   const category  = event.category ?? ''
   const venue     = event.venue ?? 'Albuquerque, NM'
 
-  // Title font size — smaller for long titles
+  // Title font size — step down more aggressively for long titles to prevent overflow
   const titleLen  = event.title.length
   const titleSize = isStory
-    ? (titleLen > 50 ? '1.8rem' : titleLen > 30 ? '2.4rem' : '3rem')
-    : (titleLen > 50 ? '1.2rem' : titleLen > 30 ? '1.5rem' : '1.9rem')
+    ? (titleLen > 60 ? '1.55rem' : titleLen > 45 ? '1.8rem' : titleLen > 30 ? '2.4rem' : '3rem')
+    : (titleLen > 60 ? '1.05rem' : titleLen > 45 ? '1.2rem' : titleLen > 30 ? '1.5rem' : '1.9rem')
 
   // Dynamic overlay values from slider
   const baseAlpha = overlayPct / 100
@@ -234,18 +233,21 @@ export function IGCardClient({ event, image, initialFormat = 'portrait', embedde
           </button>
         )}
 
-        {/* Download */}
+        {/* Download — disabled while image is still loading or download is in progress */}
         <button
           onClick={handleDownload}
-          disabled={downloading}
-          className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-[#9a442d] text-white text-sm font-semibold hover:bg-[#b5502f] active:scale-95 transition-all disabled:opacity-50 shrink-0"
+          disabled={downloading || !imageLoaded}
+          title={!imageLoaded ? 'Waiting for image to load…' : undefined}
+          className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-[#9a442d] text-white text-sm font-semibold hover:bg-[#b5502f] active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
         >
           {downloading
             ? <Loader2 size={15} className="animate-spin" />
+            : !imageLoaded
+            ? <Loader2 size={15} className="animate-spin opacity-60" />
             : <Download size={15} />
           }
           <span className="hidden sm:inline">
-            {downloading ? 'Generating…' : 'Download PNG'}
+            {downloading ? 'Generating…' : !imageLoaded ? 'Loading…' : 'Download PNG'}
           </span>
         </button>
       </div>
@@ -274,33 +276,45 @@ export function IGCardClient({ event, image, initialFormat = 'portrait', embedde
             height: 'auto',
           }}
         >
-          {/* Background image — always routed through same-origin proxy for reliable loading.
-              No crossOrigin attr needed (proxy is same-origin, no CORS preflight).
+          {/* Background image — routed through same-origin proxy for CORS compatibility.
+              IMPORTANT: No CSS filter here — filter:brightness() prevents html-to-image
+              from capturing the image to canvas (renders blank). Darkness is handled
+              entirely by the gradient overlay div below.
               onError → swap to category fallback so the card never shows a broken image. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={proxiedSrc}
             alt=""
             className="absolute inset-0 w-full h-full object-cover"
-            style={{ filter: `brightness(${Math.max(0.35, 1 - overlayPct * 0.0032)})` }}
+            onLoad={() => setImageLoaded(true)}
             onError={() => {
-              if (imgSrc !== categoryFallback) setImgSrc(categoryFallback)
+              if (imgSrc !== categoryFallback) {
+                setImgSrc(categoryFallback)
+                setImageLoaded(false)
+              }
             }}
           />
 
-          {/* Gradient overlay — intensity driven by slider */}
+          {/* Image loading shimmer — visible while image fetches */}
+          {!imageLoaded && (
+            <div className="absolute inset-0 bg-[#1a1210] animate-pulse" />
+          )}
+
+          {/* Gradient overlay — sole darkness mechanism (brightness filter removed from img
+              because filter:brightness prevents html-to-image canvas capture).
+              Slightly stronger formula to compensate: mid-stop boosted from 0.08→0.18. */}
           <div
             className="absolute inset-0"
             style={{
               background: isStory
                 ? `linear-gradient(to bottom,
-                    rgba(0,0,0,${(baseAlpha * 0.28).toFixed(2)}) 0%,
-                    rgba(0,0,0,${(baseAlpha * 0.08).toFixed(2)}) 28%,
-                    rgba(0,0,0,${(baseAlpha * 0.80).toFixed(2)}) 68%,
+                    rgba(0,0,0,${(baseAlpha * 0.35).toFixed(2)}) 0%,
+                    rgba(0,0,0,${(baseAlpha * 0.10).toFixed(2)}) 28%,
+                    rgba(0,0,0,${(baseAlpha * 0.85).toFixed(2)}) 68%,
                     rgba(0,0,0,${Math.min(baseAlpha * 0.97, 0.97).toFixed(2)}) 100%)`
                 : `linear-gradient(to bottom,
-                    rgba(0,0,0,${(baseAlpha * 0.08).toFixed(2)}) 0%,
-                    rgba(0,0,0,${(baseAlpha * 0.12).toFixed(2)}) 38%,
+                    rgba(0,0,0,${(baseAlpha * 0.18).toFixed(2)}) 0%,
+                    rgba(0,0,0,${(baseAlpha * 0.22).toFixed(2)}) 38%,
                     rgba(0,0,0,${Math.min(baseAlpha * 0.97, 0.97).toFixed(2)}) 100%)`,
             }}
           />
@@ -404,28 +418,32 @@ export function IGCardClient({ event, image, initialFormat = 'portrait', embedde
               ),
             }}
           >
-            {/* Title */}
+            {/* Title — clamped to 3 lines max so it never pushes date/venue off the card */}
             <h1
-              className="text-white font-black leading-tight"
+              className="text-white font-black"
               style={{
                 fontSize: titleSize,
-                lineHeight: 1.05,
+                lineHeight: 1.1,
                 textShadow: '0 2px 14px rgba(0,0,0,0.65)',
                 marginBottom: (showDateTime || showVenue) ? (isStory ? '0.75rem' : '0.5rem') : 0,
+                display: '-webkit-box',
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
               }}
             >
               {event.title}
             </h1>
 
-            {/* Date + time */}
+            {/* Date + time — single line, truncated if too long */}
             {showDateTime && (
-              <div className="flex items-center gap-1.5 text-white/90" style={{ marginBottom: showVenue ? '0.35rem' : 0 }}>
+              <div className="flex items-center gap-1.5 text-white/90 min-w-0" style={{ marginBottom: showVenue ? '0.35rem' : 0 }}>
                 <Clock
                   className="flex-shrink-0 text-[#e8a898]"
                   style={{ width: isStory ? '1rem' : '0.78rem', height: isStory ? '1rem' : '0.78rem' }}
                 />
                 <span
-                  className="font-semibold"
+                  className="font-semibold truncate"
                   style={{ fontSize: isStory ? '0.92rem' : '0.75rem' }}
                 >
                   {timeStr ? `${dateStr} · ${timeStr}` : dateStr}
@@ -433,14 +451,14 @@ export function IGCardClient({ event, image, initialFormat = 'portrait', embedde
               </div>
             )}
 
-            {/* Venue */}
+            {/* Venue — single line, truncated */}
             {showVenue && (
-              <div className="flex items-center gap-1.5 text-white/70" style={{ marginBottom: showCTA ? (isStory ? '0.75rem' : '0.45rem') : 0 }}>
+              <div className="flex items-center gap-1.5 text-white/70 min-w-0" style={{ marginBottom: showCTA ? (isStory ? '0.75rem' : '0.45rem') : 0 }}>
                 <MapPin
                   className="flex-shrink-0 text-[#e8a898]"
                   style={{ width: isStory ? '1rem' : '0.78rem', height: isStory ? '1rem' : '0.78rem' }}
                 />
-                <span style={{ fontSize: isStory ? '0.88rem' : '0.72rem' }}>
+                <span className="truncate" style={{ fontSize: isStory ? '0.88rem' : '0.72rem' }}>
                   {venue}
                 </span>
               </div>

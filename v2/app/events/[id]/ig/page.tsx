@@ -15,5 +15,5 @@ export default async function IGSquarePage({ params }: PageProps) {
   if (!event) notFound()
 
   const image = event.imageUrl || getCategoryFallback(event.category ?? undefined, id)
-  return <IGCardClient event={event} image={image} initialFormat="portrait" />
+  return <IGCardClient event={event} image={image} initialFormat="square" />
 }
