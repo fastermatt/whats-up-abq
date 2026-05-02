@@ -271,15 +271,16 @@ export default async function IGCaptionsPage() {
   // Pre-compute all spotlight data server-side so the client component is pure display
   const rawSpotlights = upcomingEvents.filter(e => e.title && e.date).slice(0, 40)
   const spotlightItems: SpotlightItem[] = rawSpotlights.map(event => ({
-    id:        event.id,
-    title:     event.title,
-    category:  event.category,
-    dateLabel: event.date ? friendlyDate(event.date) : null,
-    time:      event.time,
-    venue:     event.venue,
-    price:     event.price,
-    imageUrl:  event.imageUrl,
-    emoji:     catEmoji(event.category),
+    id:          event.id,
+    title:       event.title,
+    category:    event.category,
+    dateLabel:   event.date ? friendlyDate(event.date) : null,
+    time:        event.time,
+    venue:       event.venue,
+    price:       event.price,
+    imageUrl:    event.imageUrl,
+    description: event.description ? event.description.slice(0, 400) : null,
+    emoji:       catEmoji(event.category),
     metaLine:  [
       event.date ? friendlyDate(event.date) : null,
       event.time,

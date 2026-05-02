@@ -10,6 +10,7 @@ import { useState, useMemo } from 'react'
 import { Search, X } from 'lucide-react'
 import { EventSpotlightCard } from './EventSpotlightCard'
 import { CaptionCard } from './CaptionCard'
+import { AICaptionGenerator } from './AICaptionGenerator'
 
 export interface SpotlightItem {
   id: string
@@ -20,6 +21,7 @@ export interface SpotlightItem {
   venue: string | null
   price: string | null
   imageUrl: string | null
+  description: string | null
   emoji: string
   metaLine: string
   captions: {
@@ -129,19 +131,38 @@ export function EventSpotlightsList({ events }: { events: SpotlightItem[] }) {
                 />
               </div>
 
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] uppercase tracking-[0.14em] text-white/25 font-semibold mb-3">
-                  Caption Options
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {CAPTION_STYLES.map(({ key, label, sub }) => (
-                    <CaptionCard
-                      key={key}
-                      label={label}
-                      sublabel={sub}
-                      caption={event.captions[key]}
-                    />
-                  ))}
+              <div className="flex-1 min-w-0 space-y-5">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-white/25 font-semibold mb-3">
+                    Template Captions
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {CAPTION_STYLES.map(({ key, label, sub }) => (
+                      <CaptionCard
+                        key={key}
+                        label={label}
+                        sublabel={sub}
+                        caption={event.captions[key]}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* AI caption generator — lazy, per-event */}
+                <div className="border-t border-white/[0.05] pt-4">
+                  <AICaptionGenerator
+                    event={{
+                      id:          event.id,
+                      title:       event.title,
+                      category:    event.category,
+                      dateLabel:   event.dateLabel,
+                      time:        event.time,
+                      venue:       event.venue,
+                      price:       event.price,
+                      description: event.description,
+                      emoji:       event.emoji,
+                    }}
+                  />
                 </div>
               </div>
             </div>
