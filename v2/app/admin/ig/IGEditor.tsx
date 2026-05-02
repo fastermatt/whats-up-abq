@@ -99,6 +99,30 @@ export function IGEditor({ event, image }: Props) {
       {/* Event loader */}
       <QuickPostInput />
 
+      {/* Loaded event badge */}
+      {event && (
+        <div className="flex items-center gap-3 bg-white/[0.04] border border-white/[0.07] rounded-xl px-4 py-2.5">
+          <div className="w-2 h-2 rounded-full bg-[#9a442d] flex-shrink-0" />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-white truncate">{event.title}</p>
+            <p className="text-[11px] text-white/40 truncate mt-0.5">
+              {event.category && (
+                <span className="text-[#9a442d]/90 font-semibold mr-2">{event.category}</span>
+              )}
+              {event.date && (() => {
+                try {
+                  const base = /^\d{4}-\d{2}-\d{2}$/.test(event.date!) ? event.date + 'T12:00:00' : event.date!
+                  const d = new Date(base)
+                  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'America/Denver' })
+                } catch { return event.date }
+              })()}
+              {event.time && ` · ${event.time}`}
+              {event.venue && ` · ${event.venue}`}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Pending load confirmation */}
       {pendingLoad && (
         <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 flex items-center gap-3 flex-wrap">

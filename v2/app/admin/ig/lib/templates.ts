@@ -185,16 +185,16 @@ const poster: Template = {
     const slide: Slide = {
       id: uid(),
       background: ctx.imageUrl
-        ? { type: 'image', src: ctx.imageUrl, fit: 'cover', overlayColor: '#000000', overlayOpacity: 0.55 }
+        ? { type: 'image', src: ctx.imageUrl, fit: 'cover', overlayColor: '#000000', overlayOpacity: 0.48 }
         : { type: 'gradient', from: BRAND_COLORS.terra, to: BRAND_COLORS.mesaBrown, angle: 135 },
       layers: [
         // Logo at top safe boundary (safe for all formats including Story)
         logo(LOGO_W, 80, topSafe, 60),
         ctx.category ? textLayer({
           name: 'Category', text: (ctx.category ?? '').toUpperCase(),
-          x: 80, y: topSafe + 74, width: w - 160,
-          fontFamily: font('Inter'), fontSize: 34, fontWeight: 700,
-          fill: BRAND_COLORS.white, opacity: 0.85, letterSpacing: 4,
+          x: 80, y: topSafe + 70, width: w - 160,
+          fontFamily: font('Inter'), fontSize: 30, fontWeight: 700,
+          fill: BRAND_COLORS.white, opacity: 0.65, letterSpacing: 6,
         }) : null,
         textLayer({
           name: 'Title', text: title,
