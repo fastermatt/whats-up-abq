@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { fetchNowPlayingMovies, type Movie } from '@/lib/movies'
 import { ExternalLink, Star } from 'lucide-react'
+import { buildBreadcrumbs } from '@/lib/seo'
 
 export const revalidate = 3600 // refresh hourly
 
@@ -19,8 +20,33 @@ export default async function MoviesPage() {
   const hasMovies = movies.length > 0
   const hasKey = !!process.env.TMDB_READ_ACCESS_TOKEN
 
+  const breadcrumbLd = buildBreadcrumbs([
+    { name: 'Home', url: 'https://abqunplugged.com' },
+    { name: 'Events', url: 'https://abqunplugged.com/events' },
+    { name: 'Movies', url: 'https://abqunplugged.com/movies' },
+  ])
+  const itemListLd = hasMovies ? {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Movies Now Playing in Albuquerque',
+    description: 'Currently showing films in Albuquerque theaters with showtimes on Fandango.',
+    url: 'https://abqunplugged.com/movies',
+    itemListElement: movies.slice(0, 10).map((m: Movie, i: number) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'Movie',
+        name: m.title,
+        ...(m.overview ? { description: m.overview } : {}),
+        ...(m.posterUrl ? { image: m.posterUrl } : {}),
+      },
+    })),
+  } : null
+
   return (
     <main id="main" className="min-h-dvh bg-[#fbf7f1]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      {itemListLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />}
       {/* ── Page header ── */}
       <section
         className="py-10 px-4"

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { ExternalLink, MapPin, ArrowLeft, ArrowRight } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
+import { buildBreadcrumbs } from '@/lib/seo'
 import {
   PLACES,
   PLACE_CATEGORIES,
@@ -34,8 +35,27 @@ export default async function ThingsToDoPage({
   const places = getPlaces(activeCategory)
   const freeCount = places.filter(p => p.free).length
 
+  const breadcrumbLd = buildBreadcrumbs([
+    { name: 'Home', url: 'https://abqunplugged.com' },
+    { name: 'Things To Do in Albuquerque', url: 'https://abqunplugged.com/things-to-do' },
+  ])
+  const collectionLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Things To Do in Albuquerque',
+    description: 'Outdoor adventures, skate parks, pools, golf, museums, arts, and historic sites in Albuquerque, NM.',
+    url: 'https://abqunplugged.com/things-to-do',
+    hasPart: places.slice(0, 20).map(p => ({
+      '@type': 'Place',
+      name: p.name,
+      description: p.description,
+    })),
+  }
+
   return (
     <main id="main" className="min-h-dvh bg-[#fbf7f1]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionLd) }} />
 
       {/* ── Header ── */}
       <section className="relative overflow-hidden bg-gradient-to-br from-[#3d1a0e] via-[#7d3725] to-[#a0522d] text-white">
