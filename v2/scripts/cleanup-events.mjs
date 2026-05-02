@@ -153,8 +153,8 @@ async function main() {
 
   // 5. Cross-source + intra-source duplicates.
   //    Key: (title, date, venue_name, localTime5). Keep highest-scoring row per key.
-  //    Scoring: has-time > TM-canonical-G5vzZ prefix > TM > SG > photo present.
-  //    Also: timeless listings are hidden when a timed sibling exists.
+  //    Scoring: TM (1000) >> has-time (100) >> TM G5vzZ prefix (+50) >> SG (10) >> EB (5) >> photo (5).
+  //    TM wins over SG/EB even when TM lacks a start time — TM has better photos.
   {
     const { data: live } = await supabase.schema('public').from('events')
       .select('id, source, raw, event_date, venue_name, cached_photo_url')
@@ -162,15 +162,20 @@ async function main() {
       .gte('event_date', today)
     let hidden = 0
     if (live) {
-      // Build scoring
+      // Build scoring.
+      // Source priority: TM (1000) >> time bonus (100) >> SG (10) >> EB (5) >> photo (5).
+      // TM score is intentionally much higher than the time bonus so that a
+      // timeless TM listing beats a timed SG/EB listing — TM has better event
+      // photos and is the canonical source for major venues.
       const scored = live.map(e => {
         const title = typeof e.raw?.name === 'string' ? e.raw.name : (e.raw?.name?.text || e.raw?.title || '')
         const lt    = e.raw?.dates?.start?.localTime ?? null
         const lt5   = typeof lt === 'string' ? lt.slice(0, 5) : ''
         const score = (lt ? 100 : 0)
+                    + (e.source === 'ticketmaster' ? 1000 : 0)
                     + (e.source === 'ticketmaster' && String(e.id).startsWith('ticketmaster_G5vzZ') ? 50 : 0)
-                    + (e.source === 'ticketmaster' ? 20 : 0)
                     + (e.source === 'seatgeek'     ? 10 : 0)
+                    + (e.source === 'eventbrite'   ? 5 : 0)
                     + (e.cached_photo_url ? 5 : 0)
         return { id: e.id, title: String(title).trim(), date: e.event_date, venue: (e.venue_name || '').trim(), lt5, score }
       }).filter(x => x.title && x.venue)
@@ -193,16 +198,38 @@ async function main() {
           if (!byTime.has(t)) byTime.set(t, [])
           byTime.get(t).push(s)
         }
-        // Same time → keep highest score
-        for (const [t, group] of byTime) {
-          if (t === '__none__' || group.length < 2) continue
+        // Within each time bucket (including timeless '__none__'), keep highest score.
+        // Note: '__none__' is no longer skipped — TM timeless beats SG timeless here.
+        for (const [, group] of byTime) {
+          if (group.length < 2) continue
           group.sort((a, b) => b.score - a.score || a.id.localeCompare(b.id))
           for (let i = 1; i < group.length; i++) toHide.add(group[i].id)
         }
-        // Timeless listings that have a timed sibling → hide
+        // Cross-bucket: timeless row(s) vs timed row(s).
+        // Previously: always hide timeless when any timed sibling exists.
+        // Now: compare best-scoring survivor in each camp — higher score wins.
+        // This means TM-timeless (score 1000+) beats SG-timed (score 110).
         const hasTimed = [...byTime.keys()].some(k => k !== '__none__')
         if (hasTimed && byTime.has('__none__')) {
-          for (const s of byTime.get('__none__')) toHide.add(s.id)
+          const noneGroup = byTime.get('__none__').filter(s => !toHide.has(s.id))
+          if (noneGroup.length > 0) {
+            const bestNone  = noneGroup[0] // already sorted by score above
+            const bestTimed = [...byTime.entries()]
+              .filter(([t]) => t !== '__none__')
+              .flatMap(([, g]) => g.filter(s => !toHide.has(s.id)))
+              .sort((a, b) => b.score - a.score)[0]
+            if (bestTimed) {
+              if (bestNone.score >= bestTimed.score) {
+                // Timeless winner (e.g. TM) beats the best timed row — hide all timed survivors
+                for (const [t, g] of byTime) {
+                  if (t !== '__none__') for (const s of g) if (!toHide.has(s.id)) toHide.add(s.id)
+                }
+              } else {
+                // Timed winner — hide all timeless survivors
+                for (const s of noneGroup) toHide.add(s.id)
+              }
+            }
+          }
         }
       }
 
