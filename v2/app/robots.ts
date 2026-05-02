@@ -7,8 +7,14 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: ['/', '/events', '/events/', '/about'],
-        disallow: ['/api/', '/_next/'],
+        // Allow the entire site — all event, category, neighborhood,
+        // venue, and editorial pages should be crawlable.
+        allow: ['/'],
+        disallow: [
+          '/api/',      // API routes — no need to crawl
+          '/_next/',    // Next.js internals
+          '/admin/',    // Admin section — private
+        ],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
