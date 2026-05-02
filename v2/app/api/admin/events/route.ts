@@ -19,7 +19,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   const body = await request.json()
-  const { id, category, subcategory, hidden, featured, title_override, admin_notes } = body
+  const { id, category, subcategory, hidden, featured, pinned_last, title_override, admin_notes } = body
 
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
   if (category && !VALID_CATEGORIES.includes(category)) {
@@ -36,6 +36,7 @@ export async function PATCH(request: NextRequest) {
 
   if (typeof hidden === 'boolean') updates.hidden = hidden
   if (typeof featured === 'boolean') updates.featured = featured
+  if (typeof pinned_last === 'boolean') updates.pinned_last = pinned_last
 
   if (category !== undefined || subcategory !== undefined || title_override !== undefined || admin_notes !== undefined) {
     const ai = (existing?.ai_enrichment as Record<string, unknown>) ?? {}

@@ -106,6 +106,7 @@ interface RawEventRow {
   ai_enrichment: Record<string, unknown> | null
   featured: boolean | null
   hidden: boolean | null
+  pinned_last: boolean | null
   neighborhood: string | null
   venue_slug: string | null
   // Denormalized columns added 2026-04-16 for egress reduction
@@ -151,7 +152,7 @@ export async function fetchCategoryCounts(): Promise<CategoryCount[]> {
 // ─── Main fetch function ──────────────────────────────────────────────────────
 
 // Columns for queries that need full normalisation (includes raw JSONB)
-const COLS = 'id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, neighborhood, venue_slug, category, venue_name, submitted_by, image_status'
+const COLS = 'id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, pinned_last, neighborhood, venue_slug, category, venue_name, submitted_by, image_status'
 
 /** Normalize URL-safe category slug forms to canonical DB values.
  *  DB categories: Music, Comedy, Sports, Arts & Theater, Family, Festivals,
@@ -241,6 +242,7 @@ export async function fetchEvents({
       .from('events')
       .select(COLS, { count: 'exact' })
       .eq('hidden', false)
+      .order('pinned_last', { ascending: true })
       .order('event_date', { ascending: true })
 
     // date overrides timeFilter — exact day match
@@ -659,6 +661,7 @@ export async function fetchTonightRanked(limit = 60): Promise<NormalizedEvent[]>
     .eq('hidden', false)
     .eq('event_date', todayDenver)
     .order('featured',    { ascending: false })
+    .order('pinned_last', { ascending: true })
     .order('event_date',  { ascending: true })
     .limit(limit * 4) // fetch extra to sort in JS for photo + priority
 

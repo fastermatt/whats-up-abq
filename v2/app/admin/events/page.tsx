@@ -3,6 +3,7 @@ import { decodeHtml } from '@/lib/events'
 import Link from 'next/link'
 import { QuickHideButton } from './QuickHideButton'
 import { QuickFeaturedButton } from './QuickFeaturedButton'
+import { QuickPinnedLastButton } from './QuickPinnedLastButton'
 import { EventsFilterForm } from './EventsFilterForm'
 import { BulkActions } from './BulkActions'
 
@@ -29,7 +30,7 @@ export default async function AdminEventsPage({ searchParams }: PageProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let q = (supabase as any)
     .schema('public').from('events')
-    .select('id, source, event_date, hidden, featured, ai_enrichment, raw', { count: 'exact' })
+    .select('id, source, event_date, hidden, featured, pinned_last, ai_enrichment, raw', { count: 'exact' })
     .gte('event_date', today)
     .order('event_date', { ascending: true })
     .range(offset, offset + limit - 1)
@@ -61,6 +62,7 @@ export default async function AdminEventsPage({ searchParams }: PageProps) {
     event_date: string
     hidden: boolean
     featured: boolean
+    pinned_last: boolean
     title: string
     category: string | null
   }
@@ -85,6 +87,7 @@ export default async function AdminEventsPage({ searchParams }: PageProps) {
       event_date: r.event_date as string,
       hidden: r.hidden as boolean,
       featured: r.featured as boolean,
+      pinned_last: (r.pinned_last as boolean) ?? false,
       title,
       category,
     }
@@ -154,7 +157,7 @@ export default async function AdminEventsPage({ searchParams }: PageProps) {
       {/* Events table */}
       <div className="space-y-1" id="events-list">
         {events.map(event => (
-          <div key={event.id} className="flex items-center gap-3 bg-white/5 hover:bg-white/[0.08] rounded-xl px-4 py-2.5 group">
+          <div key={event.id} className={`flex items-center gap-3 rounded-xl px-4 py-2.5 group ${event.pinned_last ? 'bg-orange-500/5 hover:bg-orange-500/10' : 'bg-white/5 hover:bg-white/[0.08]'}`}>
             {/* Bulk checkbox */}
             <input
               type="checkbox"
@@ -169,6 +172,9 @@ export default async function AdminEventsPage({ searchParams }: PageProps) {
                 {event.featured && (
                   <span className="text-xs text-yellow-400 flex-shrink-0">★</span>
                 )}
+                {event.pinned_last && (
+                  <span className="text-xs text-orange-400 flex-shrink-0" title="Pinned to end of listings">↓</span>
+                )}
               </div>
               <p className="text-xs text-white/40">
                 {event.event_date} · {event.source}
@@ -178,6 +184,7 @@ export default async function AdminEventsPage({ searchParams }: PageProps) {
 
             <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
               <QuickFeaturedButton eventId={event.id} featured={event.featured} />
+              <QuickPinnedLastButton eventId={event.id} pinnedLast={event.pinned_last} />
               <QuickHideButton eventId={event.id} hidden={event.hidden} />
               <Link
                 href={`/admin/ig?id=${event.id}`}
