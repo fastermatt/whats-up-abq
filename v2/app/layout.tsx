@@ -11,6 +11,7 @@ import { AuthCallbackCatcher } from './components/AuthCallbackCatcher'
 import { NewsletterBar } from './components/NewsletterBar'
 import { KoFiFloat } from './components/KoFiFloat'
 import { AnalyticsTracker } from './components/AnalyticsTracker'
+import { WebVitals } from './components/WebVitals'
 import { OG_IMAGE } from '@/lib/fallback-images'
 import './globals.css'
 
@@ -201,6 +202,7 @@ export default async function RootLayout({
         </div>
         {!isAdmin && <KoFiFloat />}
         {!isAdmin && <AnalyticsTracker />}
+        {!isAdmin && <WebVitals />}
         <PWAManager />
         <InstallPrompt />
         <FirstVisitBanner />

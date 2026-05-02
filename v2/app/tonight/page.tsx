@@ -5,6 +5,7 @@ import { fetchTonightRanked, NormalizedEvent } from '@/lib/events'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
 import { QuickSaveButton } from '@/app/components/QuickSaveButton'
+import { buildBreadcrumbs } from '@/lib/seo'
 
 export const revalidate = 60
 
@@ -28,6 +29,23 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: { canonical: 'https://abqunplugged.com/tonight' },
   }
 }
+
+// ─── FAQs ─────────────────────────────────────────────────────────────────────
+
+const TONIGHT_FAQS = [
+  {
+    q: "What's open tonight in Albuquerque?",
+    a: "Many downtown venues host evening events every night. Sister Bar, Launchpad, and Nob Hill bars are typically open, and Laffs Comedy Caffe runs shows several nights a week. Check ABQ Unplugged's tonight page for what's actually happening this evening.",
+  },
+  {
+    q: 'What are last-minute things to do in Albuquerque tonight?',
+    a: "Head to Nob Hill for dinner and then catch a film at the Guild Cinema, or look for a show at KiMo Theatre or Popejoy Hall. The Rail Yards and Civic Plaza occasionally host evening events too. ABQ Unplugged's tonight feed updates throughout the day.",
+  },
+  {
+    q: 'Is there live music in Albuquerque tonight?',
+    a: 'Yes — Sister Bar, Launchpad, and El Rey Theater are the main live music spots. Civic Plaza hosts free outdoor concerts in warmer months. Browse ABQ Unplugged tonight and filter by Music to see every show.',
+  },
+]
 
 // ─── Category ordering for editorial groupings ────────────────────────────────
 
@@ -74,8 +92,25 @@ export default async function TonightPage() {
     return ai - bi
   })
 
+  const breadcrumbsLd = buildBreadcrumbs([
+    { name: 'Home', url: 'https://abqunplugged.com' },
+    { name: 'Events', url: 'https://abqunplugged.com/events' },
+    { name: 'Tonight', url: 'https://abqunplugged.com/tonight' },
+  ])
+  const faqLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: TONIGHT_FAQS.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a },
+    })),
+  }
+
   return (
     <main id="main" className="min-h-dvh bg-[--bg] pb-24 md:pb-8">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-8">
         {/* ── Header ── */}
         <div className="animate-fade-in">
@@ -127,6 +162,29 @@ export default async function TonightPage() {
             ))}
           </div>
         )}
+
+        {/* ── FAQ section ── */}
+        <div className="mt-10 pt-8 border-t border-[#f0e4cc]">
+          <h2
+            className="text-base font-black text-[#1a1614] mb-4 uppercase tracking-wider"
+            style={{ fontFamily: 'var(--font-epilogue)' }}
+          >
+            Frequently Asked Questions
+          </h2>
+          <div className="space-y-3 max-w-3xl">
+            {TONIGHT_FAQS.map(({ q, a }, i) => (
+              <div key={i} className="bg-white rounded-xl border border-[#f0e4cc] p-4 shadow-sm">
+                <h3
+                  className="text-sm font-bold text-[#1a1614] mb-1.5"
+                  style={{ fontFamily: 'var(--font-epilogue)' }}
+                >
+                  {q}
+                </h3>
+                <p className="text-xs text-[#6b5d57] leading-relaxed">{a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </main>
   )

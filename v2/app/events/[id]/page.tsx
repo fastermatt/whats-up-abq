@@ -49,6 +49,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     ? `${event.title} at ${event.venue} — ${dateStr}`
     : `${event.title} — ${dateStr} — Albuquerque`
 
+  const ogImage = event.imageUrl || getCategoryFallback(event.category ?? undefined, id)
+
   return {
     title: seoTitle,
     description,
@@ -57,6 +59,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description,
       url: canonicalUrl,
       type: 'website',
+      images: ogImage ? [{ url: ogImage, width: 1200, height: 630, alt: event.title }] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: seoTitle,
+      description,
+      images: ogImage ? [ogImage] : undefined,
     },
     alternates: {
       canonical: canonicalUrl,

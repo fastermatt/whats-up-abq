@@ -14,6 +14,7 @@ import { MapPin, Clock } from 'lucide-react'
 import { QuickSaveButton } from '@/app/components/QuickSaveButton'
 import { createClient } from '@/lib/supabase/server'
 import type { UserPreferences } from '@/app/components/PreferencesPicker'
+import { buildBreadcrumbs } from '@/lib/seo'
 
 // Note: reading cookies for user preferences makes this route dynamic for
 // logged-in users. The revalidate hint is still used as a fallback for
@@ -203,8 +204,33 @@ export default async function EventsPage({ searchParams }: PageProps) {
     timeLabel = TIME_LABELS[timeFilter] ?? 'Events'
   }
 
+  // Only emit rich schema on the unfiltered default view (no search/category/mood params)
+  const isDefaultView = !category && !mood && !neighborhood && !search && page === 1 && !selectedDate
+  const breadcrumbsLd = buildBreadcrumbs([
+    { name: 'Home', url: 'https://abqunplugged.com' },
+    { name: 'Events', url: 'https://abqunplugged.com/events' },
+  ])
+  const collectionLd = isDefaultView ? {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Events in Albuquerque, NM',
+    description: 'Browse all upcoming events in Albuquerque, NM — concerts, comedy, sports, arts, food festivals, and more.',
+    url: 'https://abqunplugged.com/events',
+    hasPart: events.slice(0, 20).map(e => ({
+      '@type': 'Event',
+      name: e.title,
+      url: `https://abqunplugged.com/events/${e.id}`,
+      startDate: e.date,
+      ...(e.venue ? { location: { '@type': 'Place', name: e.venue } } : {}),
+    })),
+  } : null
+
   return (
     <main id="main" className="min-h-dvh bg-[--bg]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsLd) }} />
+      {collectionLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionLd) }} />
+      )}
       <div className="max-w-6xl mx-auto px-4 py-5 space-y-4">
         {/* ── Title row + Calendar toggle ── */}
         <div className="flex items-center justify-between animate-fade-in">

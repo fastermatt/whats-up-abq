@@ -61,19 +61,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     )
 
   // ── Assemble sitemap ──────────────────────────────────────────────────────
+  // All 10 event category pages
+  const CATEGORY_SLUGS = [
+    'music', 'sports', 'arts-theater', 'comedy', 'family',
+    'food-drink', 'film', 'community', 'festivals', 'outdoor',
+  ]
+
   const staticPages: MetadataRoute.Sitemap = [
     { url: baseUrl,                     lastModified: new Date(), changeFrequency: 'daily',   priority: 1.0 },
     { url: `${baseUrl}/events`,         lastModified: new Date(), changeFrequency: 'hourly',  priority: 0.9 },
-    { url: `${baseUrl}/tonight`,        lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
-    { url: `${baseUrl}/weekend`,        lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
+    { url: `${baseUrl}/tonight`,        lastModified: new Date(), changeFrequency: 'daily',   priority: 0.85 },
+    { url: `${baseUrl}/weekend`,        lastModified: new Date(), changeFrequency: 'daily',   priority: 0.85 },
     { url: `${baseUrl}/this-week`,      lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
-    { url: `${baseUrl}/free`,           lastModified: new Date(), changeFrequency: 'daily',   priority: 0.75 },
-    { url: `${baseUrl}/family-friendly`,lastModified: new Date(), changeFrequency: 'daily',   priority: 0.75 },
-    { url: `${baseUrl}/date-night`,     lastModified: new Date(), changeFrequency: 'daily',   priority: 0.75 },
-    { url: `${baseUrl}/venues`,         lastModified: new Date(), changeFrequency: 'daily',   priority: 0.7 },
-    { url: `${baseUrl}/neighborhoods`,  lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.7 },
+    { url: `${baseUrl}/free`,           lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
+    { url: `${baseUrl}/family-friendly`,lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
+    { url: `${baseUrl}/date-night`,     lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
+    { url: `${baseUrl}/things-to-do`,   lastModified: new Date(), changeFrequency: 'daily',   priority: 0.75 },
+    { url: `${baseUrl}/movies`,         lastModified: new Date(), changeFrequency: 'daily',   priority: 0.75 },
+    { url: `${baseUrl}/venues`,         lastModified: new Date(), changeFrequency: 'daily',   priority: 0.75 },
+    { url: `${baseUrl}/neighborhoods`,  lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.75 },
     { url: `${baseUrl}/welcome`,        lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${baseUrl}/about`,          lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
+    { url: `${baseUrl}/about`,          lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
+    // Category pages — high SEO value
+    ...CATEGORY_SLUGS.map(slug => ({
+      url: `${baseUrl}/categories/${slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 0.8,
+    })),
   ]
 
   const eventPages: MetadataRoute.Sitemap = (events ?? []).map(

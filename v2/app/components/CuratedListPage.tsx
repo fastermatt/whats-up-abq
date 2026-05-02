@@ -16,6 +16,11 @@ const CATEGORY_ORDER = [
   'Sports', 'Film', 'Community', 'Festivals', 'Outdoor',
 ]
 
+export interface CuratedFaq {
+  q: string
+  a: string
+}
+
 export interface CuratedListConfig {
   /** URL slug, e.g. "free" or "date-night" */
   slug: string
@@ -25,12 +30,16 @@ export interface CuratedListConfig {
   lede: string
   /** Body intro paragraph for SEO content (150+ words is ideal) */
   intro: string
+  /** Optional second intro paragraph for additional SEO depth */
+  introExtra?: string
   /** Empty state heading */
   emptyHeading: string
   /** Empty state body */
   emptyBody: string
   /** Breadcrumb leaf label */
   breadcrumbLabel: string
+  /** Optional FAQ pairs — rendered as FAQPage schema + visible accordion */
+  faqs?: CuratedFaq[]
 }
 
 export function curatedJsonLd(events: NormalizedEvent[], config: CuratedListConfig) {
@@ -54,7 +63,21 @@ export function curatedJsonLd(events: NormalizedEvent[], config: CuratedListConf
     { name: 'Events', url: 'https://abqunplugged.com/events' },
     { name: config.breadcrumbLabel, url },
   ])
-  return [itemList, breadcrumbs]
+  const nodes: object[] = [itemList, breadcrumbs]
+
+  if (config.faqs && config.faqs.length > 0) {
+    nodes.push({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: config.faqs.map(({ q, a }) => ({
+        '@type': 'Question',
+        name: q,
+        acceptedAnswer: { '@type': 'Answer', text: a },
+      })),
+    })
+  }
+
+  return nodes
 }
 
 export function CuratedListPage({
@@ -105,6 +128,11 @@ export function CuratedListPage({
           <p className="text-sm text-[#4a3f3a] mt-4 max-w-3xl leading-relaxed">
             {config.intro}
           </p>
+          {config.introExtra && (
+            <p className="text-sm text-[#4a3f3a] mt-3 max-w-3xl leading-relaxed">
+              {config.introExtra}
+            </p>
+          )}
         </div>
 
         {events.length === 0 ? (
@@ -143,6 +171,31 @@ export function CuratedListPage({
                 </div>
               </section>
             ))}
+          </div>
+        )}
+
+        {/* ── FAQ section — FAQPage schema is already emitted; this is the visible counterpart ── */}
+        {config.faqs && config.faqs.length > 0 && (
+          <div className="mt-10 pt-8 border-t border-[#f0e4cc]">
+            <h2
+              className="text-base font-black text-[#1a1614] mb-4 uppercase tracking-wider"
+              style={{ fontFamily: 'var(--font-epilogue)' }}
+            >
+              Frequently Asked Questions
+            </h2>
+            <div className="space-y-3 max-w-3xl">
+              {config.faqs.map(({ q, a }, i) => (
+                <div key={i} className="bg-white rounded-xl border border-[#f0e4cc] p-4 shadow-sm">
+                  <h3
+                    className="text-sm font-bold text-[#1a1614] mb-1.5"
+                    style={{ fontFamily: 'var(--font-epilogue)' }}
+                  >
+                    {q}
+                  </h3>
+                  <p className="text-xs text-[#6b5d57] leading-relaxed">{a}</p>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

@@ -5,6 +5,7 @@ import { fetchWeekendRanked, getWeekendDates, NormalizedEvent } from '@/lib/even
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
 import { QuickSaveButton } from '@/app/components/QuickSaveButton'
+import { buildBreadcrumbs } from '@/lib/seo'
 
 export const revalidate = 60
 
@@ -24,6 +25,23 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: { canonical: 'https://abqunplugged.com/weekend' },
   }
 }
+
+// ─── FAQs ─────────────────────────────────────────────────────────────────────
+
+const WEEKEND_FAQS = [
+  {
+    q: 'What are the best things to do in Albuquerque this weekend?',
+    a: "Visit the Rail Yards Market on Sunday mornings, explore Old Town's galleries and patios, hike the Sandia Mountains, check out the ABQ BioPark, or catch a show at Popejoy Hall or KiMo Theatre. ABQ Unplugged lists every event happening across the metro.",
+  },
+  {
+    q: 'What weekend events are happening in Albuquerque?',
+    a: 'ABQ Unplugged curates concerts, art walks, comedy shows, family festivals, brewery events, and outdoor activities every weekend. The weekend page organizes everything by day so you can plan Friday, Saturday, and Sunday separately.',
+  },
+  {
+    q: 'Are there free events in Albuquerque this weekend?',
+    a: 'Most weekends feature free options: live music at Civic Plaza, the Rail Yards Market, gallery openings in Old Town and Nob Hill, and neighborhood festivals. Filter by free on the events page or check the /free page for a dedicated list.',
+  },
+]
 
 // ─── Category ordering ────────────────────────────────────────────────────────
 
@@ -68,8 +86,25 @@ export default async function WeekendPage() {
 
   const sortedDays = Object.keys(byDay).sort()
 
+  const breadcrumbsLd = buildBreadcrumbs([
+    { name: 'Home', url: 'https://abqunplugged.com' },
+    { name: 'Events', url: 'https://abqunplugged.com/events' },
+    { name: 'This Weekend', url: 'https://abqunplugged.com/weekend' },
+  ])
+  const faqLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: WEEKEND_FAQS.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a },
+    })),
+  }
+
   return (
     <main id="main" className="min-h-dvh bg-[--bg] pb-24 md:pb-8">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-8">
         {/* ── Header ── */}
         <div className="animate-fade-in">
@@ -169,6 +204,29 @@ export default async function WeekendPage() {
             </Link>
           </div>
         )}
+
+        {/* ── FAQ section ── */}
+        <div className="mt-10 pt-8 border-t border-[#f0e4cc]">
+          <h2
+            className="text-base font-black text-[#1a1614] mb-4 uppercase tracking-wider"
+            style={{ fontFamily: 'var(--font-epilogue)' }}
+          >
+            Frequently Asked Questions
+          </h2>
+          <div className="space-y-3 max-w-3xl">
+            {WEEKEND_FAQS.map(({ q, a }, i) => (
+              <div key={i} className="bg-white rounded-xl border border-[#f0e4cc] p-4 shadow-sm">
+                <h3
+                  className="text-sm font-bold text-[#1a1614] mb-1.5"
+                  style={{ fontFamily: 'var(--font-epilogue)' }}
+                >
+                  {q}
+                </h3>
+                <p className="text-xs text-[#6b5d57] leading-relaxed">{a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </main>
   )

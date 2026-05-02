@@ -275,7 +275,7 @@ export default async function NeighborhoodPage({ params }: PageProps) {
                   <EventImage
                     src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
                     fallback={getCategoryFallback(event.category ?? undefined, event.id)}
-                    alt=""
+                    alt={event.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
