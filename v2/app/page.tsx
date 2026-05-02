@@ -164,7 +164,15 @@ export default async function DiscoverPage() {
         </div>
 
         {/* Hero content */}
-        <div className="relative z-10 max-w-6xl mx-auto px-4 pt-7 pb-5">
+        <div className="relative z-10 max-w-6xl mx-auto px-4 pt-5 md:pt-7 pb-5">
+
+          {/* Mobile-only wordmark — desktop has the logo in the sticky DesktopNav */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo-terra.svg"
+            alt="ABQ Unplugged"
+            className="md:hidden h-8 w-auto mb-3 animate-fade-in"
+          />
 
           {/* Brand mark — compact, terra, above the headline */}
           <p
