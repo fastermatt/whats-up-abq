@@ -85,6 +85,19 @@ export default async function CategoryPage({ params }: PageProps) {
   }
   const topVenues = Object.entries(venueCounts).sort((a, b) => b[1] - a[1]).slice(0, 6)
 
+  // Neighborhood cross-links: derive from the current events' neighborhood slugs
+  const neighborhoodCounts: Record<string, number> = {}
+  for (const e of events) {
+    if (e.neighborhood) neighborhoodCounts[e.neighborhood] = (neighborhoodCounts[e.neighborhood] ?? 0) + 1
+  }
+  const topNeighborhoods = Object.entries(neighborhoodCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([slug]) => ({
+      slug,
+      label: slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+    }))
+
   const subCounts: Record<string, number> = {}
   for (const e of events) {
     if (e.subcategory) subCounts[e.subcategory] = (subCounts[e.subcategory] ?? 0) + 1
@@ -245,6 +258,26 @@ export default async function CategoryPage({ params }: PageProps) {
             ))}
           </div>
         </div>
+
+        {topNeighborhoods.length > 0 && (
+          <div className="mt-6 pt-5 border-t border-[#f0e4cc]">
+            <h2 className="text-xs font-bold text-[#6b5d57] uppercase tracking-wider mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
+              {category} Events by Neighborhood
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {topNeighborhoods.map(({ slug: nSlug, label }) => (
+                <Link
+                  key={nSlug}
+                  href={`/neighborhoods/${nSlug}`}
+                  className="inline-flex items-center gap-1 text-xs bg-white border border-[#ddc9a3] text-[#4a3f3a] px-2.5 py-1 rounded-full hover:border-[#9a442d] hover:text-[#9a442d] transition-colors"
+                >
+                  <MapPin className="w-2.5 h-2.5 text-[#9a442d]" />
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {faqs.length > 0 && (
           <div className="mt-8 pt-6 border-t border-[#f0e4cc]">
