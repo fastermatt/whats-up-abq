@@ -3,6 +3,8 @@ import type { Metadata } from 'next'
 import { fetchNeighborhoodCounts } from '@/lib/events'
 import { MapPin, ArrowLeft } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
+import { buildBreadcrumbs } from '@/lib/seo'
+import type { NeighborhoodCount } from '@/lib/events'
 
 export const revalidate = 3600
 
@@ -43,8 +45,28 @@ const NEIGHBORHOOD_DESC: Record<string, string> = {
 export default async function NeighborhoodsPage() {
   const neighborhoods = await fetchNeighborhoodCounts()
 
+  const breadcrumbLd = buildBreadcrumbs([
+    { name: 'Home', url: 'https://abqunplugged.com' },
+    { name: 'Neighborhoods', url: 'https://abqunplugged.com/neighborhoods' },
+  ])
+  const itemListLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Albuquerque Neighborhoods with Events',
+    description: 'Explore upcoming events in every Albuquerque neighborhood on ABQ Unplugged.',
+    url: 'https://abqunplugged.com/neighborhoods',
+    itemListElement: neighborhoods.slice(0, 20).map((n: NeighborhoodCount, i: number) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: n.neighborhood,
+      url: `https://abqunplugged.com/neighborhoods/${n.slug}`,
+    })),
+  }
+
   return (
     <main className="min-h-dvh bg-[#fbf7f1]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
       {/* ── Header ── */}
       <header className="sticky top-0 z-20 bg-[#fbf7f1]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-3">

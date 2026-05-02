@@ -59,6 +59,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     'outdoor':      'Hikes, Races & Outdoor Adventures',
   }
   const modifier = titleModifier[slug] ?? `Things to Do in Albuquerque`
+  const ogImagePath = getCategoryFallback(CATEGORY_MAP[slug])
+  const ogImage = ogImagePath ? `https://abqunplugged.com${ogImagePath}` : 'https://abqunplugged.com/hero/hero-4.webp'
   return {
     title: `${category} Events in Albuquerque, NM | ${modifier}`,
     description: metaDesc,
@@ -67,6 +69,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: `${category} Events in Albuquerque, NM`,
       description: metaDesc,
       url: `https://abqunplugged.com/categories/${slug}`,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: `${category} Events in Albuquerque` }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      images: [ogImage],
     },
   }
 }

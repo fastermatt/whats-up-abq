@@ -6,6 +6,7 @@
 import type { Metadata } from 'next'
 import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
+import { OG_IMAGE } from '@/lib/fallback-images'
 
 export const revalidate = 3600
 
@@ -21,7 +22,9 @@ export const metadata: Metadata = {
     title: `${SEO_TITLE} — ABQ Unplugged`,
     description: SEO_DESC,
     url: 'https://abqunplugged.com/family-friendly',
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: SEO_TITLE }],
   },
+  twitter: { card: 'summary_large_image', images: [OG_IMAGE] },
   alternates: { canonical: 'https://abqunplugged.com/family-friendly' },
 }
 

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { fetchNowPlayingMovies, type Movie } from '@/lib/movies'
 import { ExternalLink, Star } from 'lucide-react'
 import { buildBreadcrumbs } from '@/lib/seo'
+import { OG_IMAGE } from '@/lib/fallback-images'
 
 export const revalidate = 3600 // refresh hourly
 
@@ -10,6 +11,13 @@ export const metadata: Metadata = {
   title: 'Movies Now Playing in Albuquerque — ABQ Unplugged',
   description:
     'See what movies are playing in Albuquerque theaters right now. Click to get showtimes on Fandango.',
+  openGraph: {
+    title: 'Movies Now Playing in Albuquerque',
+    description: 'What\'s showing at Albuquerque theaters this week — click any film for showtimes on Fandango.',
+    url: 'https://abqunplugged.com/movies',
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: 'Movies playing in Albuquerque, NM' }],
+  },
+  twitter: { card: 'summary_large_image', images: [OG_IMAGE] },
   alternates: {
     canonical: 'https://abqunplugged.com/movies',
   },
