@@ -339,17 +339,20 @@ if (toReview.length) {
 
 // ── Auto-hide ─────────────────────────────────────────────────────────────────
 if (toHide.length && !DRY_RUN) {
-  const ids = toHide.map(({ event }) => event.id)
-  const { error } = await supabase
-    .schema('public')
-    .from('events')
-    .update({ hidden: true })
-    .in('id', ids)
-  if (error) {
-    console.error('\nDB update failed:', error.message)
-  } else {
-    console.log(`\n✅ Hid ${ids.length} events in DB.`)
+  const hiddenAt = new Date().toISOString()
+  for (const { event, analysis } of toHide) {
+    const { data: row } = await supabase.schema('public').from('events').select('ai_enrichment').eq('id', event.id).single()
+    const merged = {
+      ...(row?.ai_enrichment ?? {}),
+      hide_reason: 'browser_audit',
+      hidden_at: hiddenAt,
+      browser_audit_issues: analysis?.issues ?? [],
+    }
+    const { error } = await supabase.schema('public').from('events').update({ hidden: true, ai_enrichment: merged }).eq('id', event.id)
+    if (error) console.error(`  ✗ ${event.id}: ${error.message}`)
+    else console.log(`  ✅ ${event.id}`)
   }
+  console.log(`\nHid ${toHide.length} events in DB.`)
 } else if (toHide.length && DRY_RUN) {
   console.log(`\n[DRY RUN] Would hide ${toHide.length} events.`)
 }

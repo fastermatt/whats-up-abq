@@ -177,17 +177,16 @@ if (errors.length) {
 // ── Auto-hide 404s ────────────────────────────────────────────────────────────
 if (broken.length && !DRY_RUN) {
   console.log(`\nHiding ${broken.length} events with confirmed 404 URLs…`)
-  const ids = broken.map(e => e.id)
-  const { error } = await supabase
-    .schema('public')
-    .from('events')
-    .update({ hidden: true })
-    .in('id', ids)
-  if (error) {
-    console.error('DB update failed:', error.message)
-  } else {
-    console.log(`✅ Hid ${ids.length} events.`)
-    ids.forEach(id => console.log(`  • ${id}`))
+  const hiddenAt = new Date().toISOString()
+  for (const ev of broken) {
+    // Fetch existing ai_enrichment so we can merge rather than overwrite
+    const { data: row } = await supabase.schema('public').from('events')
+      .select('ai_enrichment').eq('id', ev.id).single()
+    const merged = { ...(row?.ai_enrichment ?? {}), hide_reason: 'broken_url_404', hidden_at: hiddenAt }
+    const { error } = await supabase.schema('public').from('events')
+      .update({ hidden: true, ai_enrichment: merged }).eq('id', ev.id)
+    if (error) console.error(`  ✗ ${ev.id}: ${error.message}`)
+    else console.log(`  ✅ ${ev.id}`)
   }
 } else if (broken.length && DRY_RUN) {
   console.log(`\n[DRY RUN] Would hide ${broken.length} events — run without --dry-run to apply.`)

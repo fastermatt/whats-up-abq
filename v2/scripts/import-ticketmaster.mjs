@@ -154,11 +154,19 @@ async function fetchAll() {
 async function main() {
   const apiEvents = await fetchAll()
 
-  // Filter shell/test events
+  // Filter shell/test/junk events that Ticketmaster leaks into the API
   const real = apiEvents.filter(ev => {
     const title = (ev.name || '').toLowerCase()
     if (/non.manifested shell/i.test(title)) return false
     if (/test event/i.test(title)) return false
+    // Parking upsell packages — "PSS VIP Parking" suffix pattern
+    if (/pss vip parking/i.test(ev.name || '')) return false
+    // Season-level placeholder events (not individual shows)
+    if (/\b(season|series)\b.{0,30}\d{4}/i.test(title) && /amphitheater|amp\b/i.test(title)) return false
+    // Deposit / season ticket placeholders
+    if (/deposits\b/i.test(title) && /season|goatheads/i.test(title)) return false
+    // Merchandise add-on rows (photo packages, wooden souvenirs, etc.)
+    if (/magical christmas ballets.*(photo|wooden)/i.test(title)) return false
     return true
   })
   console.log(`  ${real.length} events after filtering shell/test events\n`)

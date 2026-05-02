@@ -188,8 +188,14 @@ if (APPLY && findings.length) {
   } else {
     const ids = [...new Set(blockable.map(b => b.id))]
     console.log(`\nApplying: hiding ${ids.length} events with venue or reschedule flags…`)
-    const { error: updateErr } = await sb.from('events').update({ hidden: true }).in('id', ids)
-    if (updateErr) console.error('Update error:', updateErr.message)
-    else console.log(`Hidden ${ids.length} events.`)
+    const hiddenAt = new Date().toISOString()
+    for (const finding of blockable) {
+      const reason = finding.rescheduled ? 'audit_rescheduled' : 'audit_venue_mismatch'
+      const { data: row } = await sb.from('events').select('ai_enrichment').eq('id', finding.id).single()
+      const merged = { ...(row?.ai_enrichment ?? {}), hide_reason: reason, hidden_at: hiddenAt }
+      const { error: updateErr } = await sb.from('events').update({ hidden: true, ai_enrichment: merged }).eq('id', finding.id)
+      if (updateErr) console.error(`  ✗ ${finding.id}: ${updateErr.message}`)
+      else console.log(`  ✅ ${finding.id} (${reason})`)
+    }
   }
 }
