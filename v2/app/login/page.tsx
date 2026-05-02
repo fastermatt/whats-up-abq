@@ -163,9 +163,13 @@ export default function LoginPage() {
 
           {/* Logo */}
           <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#9a442d] text-white text-2xl font-black mb-3" style={{ fontFamily: 'var(--font-epilogue)' }}>
-              A
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo-terra.svg"
+              alt="ABQ Unplugged"
+              className="mx-auto mb-4"
+              style={{ width: '168px', height: 'auto' }}
+            />
             <p className="text-sm text-[#6b5d57]">Save events · Check in · Earn badges</p>
           </div>
 

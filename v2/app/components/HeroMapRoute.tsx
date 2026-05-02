@@ -19,20 +19,20 @@ import { useState, useEffect } from 'react'
 // ── Lens geometry ───────────────────────────────────────────────────────────
 const CX = 215                        // lens centre x — North Valley / Rio Grande area
 const CY = 192                        // lens centre y
-const R  = 66                         // lens radius (viewBox units)
-const CIRCUM = 2 * Math.PI * R        // ≈ 414.7 — full lens circumference
+const R  = 46                         // lens radius (viewBox units) — intentionally modest
+const CIRCUM = 2 * Math.PI * R        // ≈ 289.0 — full lens circumference
 
-// Handle: emerges from the SE quadrant of the lens rim, extends 58 units at 45°
+// Handle: emerges from the SE quadrant of the lens rim, extends 40 units at 45°
 const COS45 = Math.cos(Math.PI / 4)   // 0.7071
 const SIN45 = Math.sin(Math.PI / 4)   // 0.7071
-const HX1 = CX + R * COS45           // ≈ 261.7 — handle start (on lens rim)
-const HY1 = CY + R * SIN45           // ≈ 238.7
-const H_LEN = 58                      // handle length; SVG path length = H_LEN at 45°
-const HX2 = HX1 + H_LEN * COS45      // ≈ 302.7 — handle end
-const HY2 = HY1 + H_LEN * SIN45      // ≈ 279.7
+const HX1 = CX + R * COS45           // handle start (on lens rim)
+const HY1 = CY + R * SIN45
+const H_LEN = 40                      // handle length (scaled with R)
+const HX2 = HX1 + H_LEN * COS45      // handle end
+const HY2 = HY1 + H_LEN * SIN45
 
 // Crosshair endpoints (stop short of lens rim so they look inset)
-const INSET = 14
+const INSET = 10
 const CH_X1 = CX - R + INSET;  const CH_X2 = CX + R - INSET   // horizontal
 const CH_Y1 = CY - R + INSET;  const CH_Y2 = CY + R - INSET   // vertical
 
@@ -55,7 +55,7 @@ export function HeroMapRoute() {
           Outer group — handles the slow search pan after draw-in completes.
           The 2.0s delay lets the draw-in animations finish before movement begins.
         */}
-        <g style={{ animation: 'magnifierSearch 15s ease-in-out 2.0s infinite' }}>
+        <g style={{ opacity: 0.5, animation: 'magnifierSearch 15s ease-in-out 2.0s infinite' }}>
 
           {/* Lens fill — very subtle terra tint, fades in after draw */}
           <circle
