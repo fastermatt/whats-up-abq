@@ -239,13 +239,14 @@ export default async function AnalyticsPage() {
           <p className="text-white/20 text-sm py-8 text-center">No session data yet — tracker just reactivated.</p>
         ) : (
           <>
-            <div className="flex items-end gap-[2px] h-32">
+            {/* items-stretch (default) so wrappers fill h-32 and percentage heights resolve */}
+            <div className="flex gap-[2px] h-32">
               {dailyData.map(({ day, count }) => {
                 const isToday = day === today
                 const pct     = Math.round((count / maxDay) * 100)
                 const label   = new Date(day + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                 return (
-                  <div key={day} className="flex-1 flex flex-col items-center gap-1 group relative" title={`${label}: ${count} sessions`}>
+                  <div key={day} className="flex-1 flex flex-col justify-end items-center group relative" title={`${label}: ${count} sessions`}>
                     <div
                       className={`w-full rounded-t transition-all ${isToday ? 'bg-[#9a442d]' : 'bg-white/20 group-hover:bg-white/35'}`}
                       style={{ height: `${Math.max(pct, 2)}%` }}
@@ -295,20 +296,21 @@ export default async function AnalyticsPage() {
         <section className="bg-white/5 rounded-2xl p-5">
           <h2 className="text-xs uppercase tracking-widest text-white/30 mb-1">Busiest Days</h2>
           <p className="text-white/20 text-[10px] mb-4">Total sessions per weekday over 30 days</p>
-          <div className="flex items-end gap-2 h-40">
+          {/* items-stretch (default) so wrappers fill h-40 and flex-1 inner div gets definite height */}
+          <div className="flex gap-2 h-40">
             {dowData.map(({ label, count }) => {
               const pct    = Math.round((count / maxDow) * 100)
               const isTop  = count === maxDow && count > 0
               return (
                 <div key={label} className="flex-1 flex flex-col items-center gap-1.5">
-                  <span className="text-white/30 text-[10px] tabular-nums">{count}</span>
-                  <div className="w-full flex-1 flex items-end">
+                  <span className="text-white/30 text-[10px] tabular-nums shrink-0">{count}</span>
+                  <div className="w-full flex-1 flex flex-col justify-end">
                     <div
                       className={`w-full rounded-t transition-all ${isTop ? 'bg-[#9a442d]' : 'bg-white/20'}`}
                       style={{ height: `${Math.max(pct, count > 0 ? 4 : 0)}%` }}
                     />
                   </div>
-                  <span className="text-white/40 text-[10px] font-semibold">{label}</span>
+                  <span className="text-white/40 text-[10px] font-semibold shrink-0">{label}</span>
                 </div>
               )
             })}
