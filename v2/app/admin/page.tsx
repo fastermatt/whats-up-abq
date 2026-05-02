@@ -29,7 +29,7 @@ export default async function AdminDashboard() {
     supabase.from('events').select('*', { count: 'exact', head: true }).eq('hidden', false).gte('event_date', today),
     supabase.from('events').select('*', { count: 'exact', head: true }).eq('hidden', true),
     supabase.from('events').select('*', { count: 'exact', head: true }).eq('featured', true).eq('hidden', false),
-    supabase.from('events').select('*', { count: 'exact', head: true }).not('ai_enrichment', 'is', null),
+    supabase.from('events').select('*', { count: 'exact', head: true }).not('ai_enrichment', 'is', null).eq('hidden', false).gte('event_date', today),
     supabase.from('profiles').select('*', { count: 'exact', head: true }),
     supabase.from('check_ins').select('*', { count: 'exact', head: true }),
     supabase.from('user_events').select('*', { count: 'exact', head: true }).eq('state', 'saved'),
@@ -66,9 +66,13 @@ export default async function AdminDashboard() {
   // V1 errors reference Vite bundle paths (/assets/index-*.js) or old Netlify
   // preview URLs — they're cached bundles in returning users' browsers, not
   // V2 bugs. See session notes 2026-04-17.
+  // Internal event types that shouldn't surface in the admin analytics tiles
+  const INTERNAL_EVENT_TYPES = new Set(['system_purge'])
+
   const analyticsTypes: Record<string, number> = {}
   let v1ErrorsFiltered = 0
   for (const ev of recentAnalytics ?? []) {
+    if (INTERNAL_EVENT_TYPES.has(ev.event_type)) continue
     if (ev.event_type === 'client_error') {
       const data = ev.data as Record<string, unknown> | null
       const src = (data?.source as string | undefined) ?? ''

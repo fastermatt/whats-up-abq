@@ -60,7 +60,29 @@ export default async function AdminSubmissionsPage({ searchParams }: PageProps) 
     .order('created_at', { ascending: false })
     .limit(100)
   if (status !== 'all') q = q.eq('status', status)
-  const { data: subs } = await q
+
+  // Fetch main list + per-tab counts in parallel
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sb = supabase as any
+  const [
+    { data: subs },
+    { count: cPending },
+    { count: cApproved },
+    { count: cRejected },
+    { count: cNeedsInfo },
+    { count: cAll },
+  ] = await Promise.all([
+    q,
+    sb.schema('public').from('event_submissions').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+    sb.schema('public').from('event_submissions').select('*', { count: 'exact', head: true }).eq('status', 'approved'),
+    sb.schema('public').from('event_submissions').select('*', { count: 'exact', head: true }).eq('status', 'rejected'),
+    sb.schema('public').from('event_submissions').select('*', { count: 'exact', head: true }).eq('status', 'needs_info'),
+    sb.schema('public').from('event_submissions').select('*', { count: 'exact', head: true }),
+  ])
+  const TAB_COUNTS: Record<string, number> = {
+    pending: cPending ?? 0, approved: cApproved ?? 0,
+    rejected: cRejected ?? 0, needs_info: cNeedsInfo ?? 0, all: cAll ?? 0,
+  }
 
   // Join submitter profiles
   const userIds = Array.from(new Set((subs ?? []).map((s: SubmissionRow) => s.submitted_by).filter(Boolean)))
@@ -116,14 +138,28 @@ export default async function AdminSubmissionsPage({ searchParams }: PageProps) 
             }`}
           >
             {tab.label}
+            {TAB_COUNTS[tab.value] > 0 && (
+              <span className={`ml-1.5 text-[10px] tabular-nums px-1.5 py-0.5 rounded-full ${
+                status === tab.value ? 'bg-white/20 text-white' : 'bg-white/10 text-white/40'
+              }`}>
+                {TAB_COUNTS[tab.value]}
+              </span>
+            )}
           </Link>
         ))}
       </div>
 
       {rows.length === 0 ? (
-        <p className="text-white/40 text-sm py-12 text-center">
-          No {status === 'all' ? '' : status} submissions.
-        </p>
+        <div className="py-12 text-center space-y-2">
+          <p className="text-white/40 text-sm">
+            No {status === 'all' ? '' : status.replace(/_/g, ' ')} submissions.
+          </p>
+          {status !== 'all' && TAB_COUNTS.all > 0 && (
+            <Link href="/admin/submissions?status=all" className="text-xs text-[#9a442d] hover:underline">
+              View all {TAB_COUNTS.all} submission{TAB_COUNTS.all !== 1 ? 's' : ''} →
+            </Link>
+          )}
+        </div>
       ) : (
         <div className="space-y-4">
           {rows.map((s) => (

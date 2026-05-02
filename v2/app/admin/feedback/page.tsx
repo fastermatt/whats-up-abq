@@ -63,7 +63,8 @@ export default async function AdminFeedbackPage({ searchParams }: PageProps) {
   const supabase = await createServiceClient()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let q = (supabase as any)
+  const sb = supabase as any
+  let q = sb
     .schema('public').from('feedback')
     .select('id, category, subject, message, email, contact_email, submitted_by, event_id, status, admin_notes, page, device, created_at')
     .order('created_at', { ascending: false })
@@ -71,7 +72,28 @@ export default async function AdminFeedbackPage({ searchParams }: PageProps) {
   if (status !== 'all')  q = q.eq('status', status)
   if (category)          q = q.eq('category', category)
 
-  const { data: rows } = await q
+  // Fetch main list + per-tab counts in parallel
+  const [
+    { data: rows },
+    { count: cNew },
+    { count: cInProgress },
+    { count: cResolved },
+    { count: cWontfix },
+    { count: cSpam },
+    { count: cAll },
+  ] = await Promise.all([
+    q,
+    sb.schema('public').from('feedback').select('*', { count: 'exact', head: true }).eq('status', 'new'),
+    sb.schema('public').from('feedback').select('*', { count: 'exact', head: true }).eq('status', 'in_progress'),
+    sb.schema('public').from('feedback').select('*', { count: 'exact', head: true }).eq('status', 'resolved'),
+    sb.schema('public').from('feedback').select('*', { count: 'exact', head: true }).eq('status', 'wontfix'),
+    sb.schema('public').from('feedback').select('*', { count: 'exact', head: true }).eq('status', 'spam'),
+    sb.schema('public').from('feedback').select('*', { count: 'exact', head: true }),
+  ])
+  const TAB_COUNTS: Record<string, number> = {
+    new: cNew ?? 0, in_progress: cInProgress ?? 0, resolved: cResolved ?? 0,
+    wontfix: cWontfix ?? 0, spam: cSpam ?? 0, all: cAll ?? 0,
+  }
   const feedback: FeedbackRow[] = rows ?? []
 
   return (
@@ -95,6 +117,13 @@ export default async function AdminFeedbackPage({ searchParams }: PageProps) {
             }`}
           >
             {tab.label}
+            {TAB_COUNTS[tab.value] > 0 && (
+              <span className={`ml-1.5 text-[10px] tabular-nums px-1.5 py-0.5 rounded-full ${
+                status === tab.value ? 'bg-white/20 text-white' : 'bg-white/10 text-white/40'
+              }`}>
+                {TAB_COUNTS[tab.value]}
+              </span>
+            )}
           </Link>
         ))}
       </div>
@@ -115,7 +144,14 @@ export default async function AdminFeedbackPage({ searchParams }: PageProps) {
       </div>
 
       {feedback.length === 0 ? (
-        <p className="text-white/40 text-sm py-12 text-center">No {status === 'all' ? '' : status} feedback.</p>
+        <div className="py-12 text-center space-y-2">
+          <p className="text-white/40 text-sm">No {status === 'all' ? '' : status.replace(/_/g, ' ')} feedback.</p>
+          {status !== 'all' && TAB_COUNTS.all > 0 && (
+            <Link href={`/admin/feedback?status=all${category ? '&category='+category : ''}`} className="text-xs text-[#9a442d] hover:underline">
+              View all {TAB_COUNTS.all} item{TAB_COUNTS.all !== 1 ? 's' : ''} →
+            </Link>
+          )}
+        </div>
       ) : (
         <div className="space-y-3">
           {feedback.map((f) => (

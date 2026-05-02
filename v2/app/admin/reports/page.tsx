@@ -21,7 +21,8 @@ export default async function AdminReportsPage({ searchParams }: PageProps) {
   const supabase = await createServiceClient()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let q = (supabase as any)
+  const sb = supabase as any
+  let q = sb
     .schema('public').from('event_reports')
     .select('id, event_id, event_title, report_type, message, user_email, status, admin_notes, created_at')
     .order('created_at', { ascending: false })
@@ -29,7 +30,23 @@ export default async function AdminReportsPage({ searchParams }: PageProps) {
 
   if (status !== 'all') q = q.eq('status', status)
 
-  const { data: reports } = await q
+  const [
+    { data: reports },
+    { count: cPending },
+    { count: cResolved },
+    { count: cDismissed },
+    { count: cAll },
+  ] = await Promise.all([
+    q,
+    sb.schema('public').from('event_reports').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+    sb.schema('public').from('event_reports').select('*', { count: 'exact', head: true }).eq('status', 'resolved'),
+    sb.schema('public').from('event_reports').select('*', { count: 'exact', head: true }).eq('status', 'dismissed'),
+    sb.schema('public').from('event_reports').select('*', { count: 'exact', head: true }),
+  ])
+  const TAB_COUNTS: Record<string, number> = {
+    pending: cPending ?? 0, resolved: cResolved ?? 0,
+    dismissed: cDismissed ?? 0, all: cAll ?? 0,
+  }
 
   const TABS = [
     { label: 'Pending', value: 'pending' },
@@ -56,12 +73,26 @@ export default async function AdminReportsPage({ searchParams }: PageProps) {
             }`}
           >
             {tab.label}
+            {TAB_COUNTS[tab.value] > 0 && (
+              <span className={`ml-1.5 text-[10px] tabular-nums px-1.5 py-0.5 rounded-full ${
+                status === tab.value ? 'bg-white/20 text-white' : 'bg-white/10 text-white/40'
+              }`}>
+                {TAB_COUNTS[tab.value]}
+              </span>
+            )}
           </Link>
         ))}
       </div>
 
       {!reports?.length ? (
-        <p className="text-white/40 text-sm py-8 text-center">No {status} reports.</p>
+        <div className="py-12 text-center space-y-2">
+          <p className="text-white/40 text-sm">No {status} reports.</p>
+          {status !== 'all' && TAB_COUNTS.all > 0 && (
+            <Link href="/admin/reports?status=all" className="text-xs text-[#9a442d] hover:underline">
+              View all {TAB_COUNTS.all} report{TAB_COUNTS.all !== 1 ? 's' : ''} →
+            </Link>
+          )}
+        </div>
       ) : (
         <div className="space-y-3">
           {reports.map((r: Record<string, string>) => (

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Epilogue, Inter, Space_Grotesk } from 'next/font/google'
 import Script from 'next/script'
+import { headers } from 'next/headers'
 import BottomNav from './components/BottomNav'
 import DesktopNav from './components/DesktopNav'
 import { InstallPrompt } from './components/InstallPrompt'
@@ -97,13 +98,19 @@ export const viewport: Viewport = {
   colorScheme:        'light',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   const umamiId  = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID
   const umamiSrc = process.env.NEXT_PUBLIC_UMAMI_SRC ?? 'https://cloud.umami.is/script.js'
+
+  // Suppress public-site widgets when inside the admin section so they don't
+  // bleed through below the admin layout container when scrolled to the bottom.
+  // x-pathname is set by middleware.ts on every request.
+  const pathname = (await headers()).get('x-pathname') ?? ''
+  const isAdmin  = pathname.startsWith('/admin')
 
   return (
     <html
@@ -133,11 +140,11 @@ export default function RootLayout({
           <div className="pb-20 md:pb-0">
             {children}
 
-            {/* ── Newsletter signup ── */}
-            <NewsletterBar />
+            {/* ── Newsletter signup — hidden in admin ── */}
+            {!isAdmin && <NewsletterBar />}
 
-            {/* ── Site footer ── */}
-            <footer className="mt-8 pb-6 w-full flex flex-col items-center gap-3 select-none" aria-label="Site footer">
+            {/* ── Site footer — hidden in admin ── */}
+            {!isAdmin && <footer className="mt-8 pb-6 w-full flex flex-col items-center gap-3 select-none" aria-label="Site footer">
               {/* Ornamental rule — left line shorter so dot sits above the ♥ */}
               <div className="flex items-center gap-3">
                 <div className="w-[77px] h-px bg-gradient-to-r from-transparent via-[#c8b4a4] to-[#c8b4a4]" />
@@ -167,12 +174,12 @@ export default function RootLayout({
               >
                 ☕ ko-fi.com/stopscrolling
               </a>
-            </footer>
+            </footer>}
           </div>
           <BottomNav />
         </div>
-        <KoFiFloat />
-        <AnalyticsTracker />
+        {!isAdmin && <KoFiFloat />}
+        {!isAdmin && <AnalyticsTracker />}
         <PWAManager />
         <InstallPrompt />
         <FirstVisitBanner />
