@@ -36,6 +36,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
             Admin
           </span>
           <Link href="/admin"             className="text-sm text-white/60 hover:text-white transition-colors shrink-0">Dashboard</Link>
+          <Link href="/admin/tools"       className="text-sm text-white/60 hover:text-white transition-colors shrink-0 font-semibold">🛠️ Tools</Link>
           <Link href="/admin/ig"          className="text-sm text-white/60 hover:text-white transition-colors shrink-0 font-semibold">📸 Instagram</Link>
           <Link href="/admin/events"      className="text-sm text-white/60 hover:text-white transition-colors shrink-0">Events</Link>
           <Link href="/admin/submissions" className="text-sm text-white/60 hover:text-white transition-colors shrink-0">Submissions</Link>
