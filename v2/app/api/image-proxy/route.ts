@@ -79,10 +79,9 @@ export async function GET(request: Request) {
       return new Response('Image unavailable', { status: 404 })
     }
 
-    // Stream the body directly — don't buffer the entire image on the server.
-    // Buffering caused 10–20s delays for large SeatGeek "huge" images before
-    // the browser's onLoad event fired, breaking the IG card download button.
-    return new Response(res.body, {
+    const buffer = await res.arrayBuffer()
+
+    return new Response(buffer, {
       headers: {
         'Content-Type': contentType || 'image/jpeg',
         'Access-Control-Allow-Origin': '*',
