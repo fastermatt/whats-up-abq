@@ -9,7 +9,7 @@ import { EventImage } from '@/app/components/EventImage'
 import { createClient } from '@/lib/supabase/server'
 import {
   MapPin, Clock, Calendar, Ticket, ArrowLeft, ExternalLink,
-  Users, Flag, Share2, ChevronDown,
+  Users, Flag, Share2,
 } from 'lucide-react'
 import ShareButton from './ShareButton'
 import AddToCalendar from './AddToCalendar'
@@ -650,39 +650,28 @@ export default async function EventDetailPage({ params }: PageProps) {
           {/* ── Reviews ── */}
           <ReviewSection eventId={event.id} />
 
-          {/* ── Instagram share graphics — collapsible, for power users ── */}
-          <details className="group mt-8 pt-6 border-t border-[#eee0cc]">
-            <summary className="flex items-center gap-2 text-[11px] font-semibold text-[#6b5d57] uppercase tracking-wide cursor-pointer select-none hover:text-[#4a3f3a] transition-colors list-none">
-              <span className="text-base leading-none">📸</span>
-              Create share graphic
-              <ChevronDown className="w-3.5 h-3.5 ml-auto transition-transform duration-200 group-open:rotate-180" />
-            </summary>
-            <div className="flex flex-wrap gap-2 mt-3">
+          {/* ── Instagram share graphics ── */}
+          <div className="mt-8 pt-6 border-t border-[#eee0cc]">
+            <p className="text-[11px] font-semibold text-[#6b5d57] uppercase tracking-wide mb-3">Share to Instagram</p>
+            <div className="flex flex-wrap gap-2">
               {[
-                { href: `/events/${event.id}/ig`,  label: '1:1 Square',   desc: 'Feed' },
-                { href: `/events/${event.id}/ig2`, label: '4:5 Portrait', desc: 'Feed' },
-                { href: `/events/${event.id}/ig3`, label: '9:16 Story',   desc: 'Story / Reel' },
+                { href: `/events/${event.id}/ig2`, label: '4:5', desc: 'Feed' },
+                { href: `/events/${event.id}/ig3`, label: '9:16', desc: 'Story' },
+                { href: `/events/${event.id}/ig`,  label: '1:1',  desc: 'Square' },
               ].map(({ href, label, desc }) => (
                 <Link
                   key={href}
                   href={href}
-                  className="inline-flex flex-col items-center px-4 py-2 rounded-lg border border-[#e8d9bf] bg-[#fdf9f4] text-center hover:border-[#9a442d]/50 hover:shadow-sm transition-all"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#9a442d] text-white font-semibold text-sm hover:bg-[#7d3725] transition-all active:scale-[0.98]"
+                  style={{ fontFamily: 'var(--font-epilogue)' }}
                 >
-                  <span className="text-xs font-semibold text-[#1a1614]">{label}</span>
-                  <span className="text-[10px] text-[#6b5d57]">{desc}</span>
+                  <span className="text-base leading-none">📸</span>
+                  <span>{label} <span className="font-normal opacity-75">{desc}</span></span>
                 </Link>
               ))}
-              <a
-                href={`/ig-editor.html?url=/events/${event.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex flex-col items-center px-4 py-2 rounded-lg border border-[#9a442d]/30 bg-[#9a442d]/5 text-center hover:border-[#9a442d] hover:bg-[#9a442d]/10 transition-all"
-              >
-                <span className="text-xs font-semibold text-[#9a442d]">✦ IG Editor</span>
-                <span className="text-[10px] text-[#6b5d57]">6 templates</span>
-              </a>
             </div>
-          </details>
+            <p className="text-[10px] text-[#8a7a74] mt-2">Switch between portrait, story &amp; square inside the editor</p>
+          </div>
 
           <div className="h-8" />
         </div>

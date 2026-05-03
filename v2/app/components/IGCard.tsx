@@ -184,8 +184,8 @@ function SafeZone({ format }: { format: IGFormat }) {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function TemplateBroadside({
-  title, category, dateStr, timeStr, venue, price, imgSrc, format, fontCss, showLogo,
-  showCategory, showDateTime, showVenue, showCTA, showSafeZone,
+  title, category, dateStr, timeStr, venue, price, imgSrc, format, fontCss, titleWeight, titleItalic,
+  showLogo, showCategory, showDateTime, showVenue, showCTA, showSafeZone,
 }: CardContentProps) {
   const isStory = format === 'story'
   const isSquare = format === 'square'
@@ -218,7 +218,7 @@ function TemplateBroadside({
       }}>
         {/* Logo + category — pinned to top, never shrinks */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexShrink: 0 }}>
-          {showLogo && <Logo dark={false} size={isStory ? 22 : 18} />}
+          {showLogo && <Logo dark={false} size={isStory ? 33 : 27} />}
           {showCategory && category && (
             <div style={{
               background: TERRA, color: '#fff',
@@ -252,7 +252,7 @@ function TemplateBroadside({
             </div>
           )}
           <p style={{
-            fontFamily: fontCss, fontWeight: 900,
+            fontFamily: fontCss, fontWeight: titleWeight, fontStyle: titleItalic ? 'italic' : 'normal',
             fontSize: pxText, lineHeight: 1.05,
             letterSpacing: titleTracking(pxText),
             color: INK,
@@ -303,12 +303,12 @@ function TemplateBroadside({
       </div>
 
       {/* ── PHOTO PANEL (bottom) ── */}
-      <div style={{ flex: `0 0 ${photoPct}%`, position: 'relative', overflow: 'hidden' }}>
+      <div style={{ flex: `0 0 ${photoPct}%`, position: 'relative', overflow: 'hidden', background: '#111' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={imgSrc}
           alt=""
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 25%' }}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center center' }}
         />
         {/* Subtle vignette at top to merge with cream panel */}
         <div style={{
@@ -345,8 +345,8 @@ function TemplateBroadside({
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function TemplateStub({
-  title, category, dateStr, timeStr, venue, price, imgSrc, format, fontCss, showLogo,
-  showCategory, showDateTime, showVenue, showCTA, showSafeZone,
+  title, category, dateStr, timeStr, venue, price, imgSrc, format, fontCss, titleWeight, titleItalic,
+  showLogo, showCategory, showDateTime, showVenue, showCTA, showSafeZone,
 }: CardContentProps) {
   const isStory = format === 'story'
   const dateParts = formatMonthDay(dateStr || '')
@@ -367,7 +367,7 @@ function TemplateStub({
         }}>
           {showLogo && (
             <div style={{ position: 'absolute', top: '13%', left: '2rem' }}>
-              <Logo dark size={20} />
+              <Logo dark size={30} />
             </div>
           )}
           {showCategory && category && (
@@ -382,7 +382,7 @@ function TemplateStub({
             </div>
           )}
           <p style={{
-            fontFamily: fontCss, fontWeight: 900,
+            fontFamily: fontCss, fontWeight: titleWeight, fontStyle: titleItalic ? 'italic' : 'normal',
             fontSize: pxText, lineHeight: 1.05,
             letterSpacing: titleTracking(pxText), color: CREAM,
             display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden',
@@ -393,9 +393,9 @@ function TemplateStub({
         <div style={{ flex: '0 0 3px', background: TERRA, zIndex: 5 }} />
 
         {/* Photo panel */}
-        <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+        <div style={{ flex: 1, position: 'relative', overflow: 'hidden', background: INK }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }} />
           {/* Bottom meta overlay (venue/date on dark strip at bottom) */}
           {(showDateTime || showVenue || showCTA) && (
             <div style={{
@@ -446,7 +446,7 @@ function TemplateStub({
         padding: '1.75rem 1.5rem 1.5rem',
         position: 'relative', zIndex: 2,
       }}>
-        {showLogo && <Logo dark size={18} />}
+        {showLogo && <Logo dark size={27} />}
         {showCategory && category && (
           <div style={{
             display: 'inline-flex', marginTop: '1.25rem',
@@ -461,9 +461,9 @@ function TemplateStub({
 
         {/* Big title */}
         <p style={{
-          fontFamily: fontCss, fontWeight: 900,
+          fontFamily: fontCss, fontWeight: titleWeight, fontStyle: titleItalic ? 'italic' : 'normal',
           fontSize: pxText, lineHeight: 1.05,
-          letterSpacing: '-0.02em', color: CREAM,
+          letterSpacing: titleTracking(pxText), color: CREAM,
           marginTop: showCategory ? '0.75rem' : '1.25rem',
           display: '-webkit-box', WebkitLineClamp: 5, WebkitBoxOrient: 'vertical', overflow: 'hidden',
           flexGrow: 1,
@@ -501,9 +501,9 @@ function TemplateStub({
       <div style={{ flex: '0 0 3px', background: TERRA, zIndex: 5 }} />
 
       {/* Right: photo panel */}
-      <div style={{ flex: `0 0 calc(${rightPct}% - 3px)`, position: 'relative', overflow: 'hidden' }}>
+      <div style={{ flex: `0 0 calc(${rightPct}% - 3px)`, position: 'relative', overflow: 'hidden', background: INK }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+        <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }} />
       </div>
 
       <GrainOverlay opacity={0.5} />
@@ -519,8 +519,8 @@ function TemplateStub({
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function TemplateDarkFrame({
-  title, category, dateStr, timeStr, venue, price, imgSrc, format, fontCss, showLogo,
-  showCategory, showDateTime, showVenue, showCTA, showSafeZone,
+  title, category, dateStr, timeStr, venue, price, imgSrc, format, fontCss, titleWeight, titleItalic,
+  showLogo, showCategory, showDateTime, showVenue, showCTA, showSafeZone,
 }: CardContentProps) {
   const isStory  = format === 'story'
   const isSquare = format === 'square'
@@ -546,7 +546,7 @@ function TemplateDarkFrame({
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         zIndex: 3,
       }}>
-        {showLogo && <Logo dark size={isStory ? 22 : 18} />}
+        {showLogo && <Logo dark size={isStory ? 33 : 27} />}
         {showCategory && category && (
           <div style={{
             background: TERRA, color: '#fff',
@@ -576,7 +576,7 @@ function TemplateDarkFrame({
           </div>
         )}
         <p style={{
-          fontFamily: fontCss, fontWeight: 900,
+          fontFamily: fontCss, fontWeight: titleWeight, fontStyle: titleItalic ? 'italic' : 'normal',
           fontSize: pxText, lineHeight: 1.05,
           letterSpacing: titleTracking(pxText), color: CREAM,
           display: '-webkit-box',
@@ -602,7 +602,7 @@ function TemplateDarkFrame({
         border: `2px solid rgba(255,255,255,0.07)`,
       }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={imgSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <img src={imgSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', background: INK }} />
       </div>
 
       {/* ── Date + venue (below photo) ── */}
@@ -663,6 +663,8 @@ interface CardContentProps {
   imgSrc:       string
   format:       IGFormat
   fontCss:      string
+  titleWeight:  number
+  titleItalic:  boolean
   showLogo:     boolean
   showCategory: boolean
   showDateTime: boolean
@@ -693,11 +695,13 @@ export function IGCardClient({
   const [format,       setFormat]       = useState<IGFormat>(initialFormat)
   const [template,     setTemplate]     = useState<IGTemplate>(initialTemplate)
   const [fontKey,      setFontKey]      = useState<IGFont>('epilogue')
+  const [titleWeight,  setTitleWeight]  = useState<number>(900)
+  const [titleItalic,  setTitleItalic]  = useState<boolean>(false)
   const [showLogo,     setShowLogo]     = useState(true)
   const [showCategory, setShowCategory] = useState(true)
   const [showDateTime, setShowDateTime] = useState(true)
   const [showVenue,    setShowVenue]    = useState(true)
-  const [showCTA,      setShowCTA]      = useState(false)
+  const [showCTA,      setShowCTA]      = useState(true)
   const [showSafeZone, setShowSafeZone] = useState(false)
   const [downloading,  setDownloading]  = useState(false)
   const [imgSrc,       setImgSrc]       = useState(image)
@@ -791,6 +795,8 @@ export function IGCardClient({
     imgSrc:       proxiedSrc,
     format,
     fontCss:      font.css,
+    titleWeight,
+    titleItalic,
     showLogo,
     showCategory,
     showDateTime,
@@ -928,6 +934,25 @@ export function IGCardClient({
               </button>
             ))}
           </div>
+          {/* Weight + italic */}
+          <div className="flex items-center gap-2 pt-0.5">
+            <div className="flex gap-1">
+              {([{ w: 900, label: 'Black' }, { w: 700, label: 'Bold' }, { w: 400, label: 'Light' }] as { w: number; label: string }[]).map(({ w, label }) => (
+                <button key={w} onClick={() => setTitleWeight(w)}
+                  className={`px-2.5 py-1 rounded-md text-[11px] transition-all ${
+                    titleWeight === w ? 'bg-white/20 text-white' : 'bg-white/[0.05] text-white/30 hover:text-white/55 hover:bg-white/[0.08]'
+                  }`}>
+                  {label}
+                </button>
+              ))}
+            </div>
+            <button onClick={() => setTitleItalic(v => !v)}
+              className={`px-2.5 py-1 rounded-md text-[11px] italic transition-all ${
+                titleItalic ? 'bg-white/20 text-white' : 'bg-white/[0.05] text-white/30 hover:text-white/55 hover:bg-white/[0.08]'
+              }`}>
+              Italic
+            </button>
+          </div>
         </div>
 
         {/* Toggle chips */}
@@ -958,7 +983,7 @@ export function IGCardClient({
         </div>
 
         <p className="text-white/15 text-[10px]">
-          Toggle CTA off for cleaner cards · Safe Zone shows Instagram&apos;s content boundaries
+          Safe Zone shows Instagram&apos;s content boundaries
         </p>
       </div>
     </div>
