@@ -189,6 +189,10 @@ export default async function NeighborhoodPage({ params }: PageProps) {
             Things to Do in {neighborhood}
           </h1>
 
+          {hoodInfo?.description && (
+            <p className="text-sm text-[#4a3f3a] leading-relaxed mb-4 max-w-prose">{hoodInfo.description}</p>
+          )}
+
           <div className="flex flex-wrap items-center gap-3 text-sm text-[#6b5d57]">
             <span className="flex items-center gap-1.5">
               <MapPin className="w-4 h-4 text-[#9a442d]" />

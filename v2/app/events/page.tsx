@@ -438,8 +438,17 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
 // ─── Empty State ───────────────────────────────────────────────────────────────
 
 function EmptyState({ timeLabel }: { timeLabel: string }) {
+  const SUGGESTION_PILLS = [
+    { label: 'Music',         href: '/events?category=Music' },
+    { label: 'Comedy',        href: '/events?category=Comedy' },
+    { label: 'Arts & Theater',href: '/events?category=Arts+%26+Theater' },
+    { label: 'Free events',   href: '/events?price=free' },
+    { label: 'Sports',        href: '/events?category=Sports' },
+    { label: 'Food & Drink',  href: '/events?category=Food+%26+Drink' },
+  ]
+
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
+    <div className="flex flex-col items-center justify-center py-16 text-center animate-fade-in">
       <div className="text-5xl mb-3">🌵</div>
       <h2
         className="text-lg font-bold text-[#1a1614] mb-1"
@@ -447,12 +456,26 @@ function EmptyState({ timeLabel }: { timeLabel: string }) {
       >
         No events found
       </h2>
-      <p className="text-[#6b5d57] text-xs max-w-xs">
-        No {timeLabel.toLowerCase()} events right now. Try a different time range.
+      <p className="text-[#6b5d57] text-xs max-w-xs mb-5">
+        No {timeLabel.toLowerCase()} events right now. Try a different time range or browse by category.
       </p>
+
+      {/* Smart suggestion pills */}
+      <div className="flex flex-wrap justify-center gap-2 max-w-sm mb-5">
+        {SUGGESTION_PILLS.map(({ label, href }) => (
+          <Link
+            key={label}
+            href={href}
+            className="px-3 py-1.5 rounded-full bg-white border border-[#ddc9a3] text-xs font-semibold text-[#4a3f3a] hover:border-[#9a442d] hover:text-[#9a442d] transition-all"
+          >
+            {label}
+          </Link>
+        ))}
+      </div>
+
       <Link
         href="/events"
-        className="mt-4 px-4 py-1.5 rounded-full bg-[#9a442d] text-white text-xs font-medium hover:bg-[#7d3725] transition-colors"
+        className="px-4 py-1.5 rounded-full bg-[#9a442d] text-white text-xs font-medium hover:bg-[#7d3725] transition-colors"
       >
         View All Upcoming
       </Link>

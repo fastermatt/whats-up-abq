@@ -2,14 +2,12 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Mail, Lock, ArrowLeft, Loader2, CheckCircle, Eye, EyeOff } from 'lucide-react'
 
 type Tab = 'signin' | 'signup'
 
 export default function LoginPage() {
-  const router = useRouter()
   const [tab, setTab]           = useState<Tab>('signin')
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
@@ -43,8 +41,9 @@ export default function LoginPage() {
         ? 'Wrong email or password. Try again, or use "Forgot password".'
         : err.message)
     } else {
-      router.push('/profile')
-      router.refresh()
+      // Hard redirect so the browser sends the new Supabase session cookie
+      // with the next request. router.push() soft-nav can race with cookie writes.
+      window.location.href = '/profile'
     }
   }
 
@@ -70,8 +69,7 @@ export default function LoginPage() {
       setError(err.message)
     } else if (data.session) {
       // Email confirmations disabled — user is instantly logged in
-      router.push('/profile')
-      router.refresh()
+      window.location.href = '/profile'
     } else {
       // Email confirmation required
       setDone('signup-confirm')

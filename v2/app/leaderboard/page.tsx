@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { Trophy, MapPin, ArrowLeft, Medal } from 'lucide-react'
+import { ShareRankButton } from './ShareRankButton'
 
 export const metadata: Metadata = {
   title: 'Leaderboard | ABQ Unplugged',
@@ -61,9 +62,12 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
           </h2>
           <p className="text-white/60 text-sm mt-1">Who&apos;s actually out there living it up</p>
           {user && myRank >= 0 && (
-            <div className="mt-3 inline-flex items-center gap-2 bg-white/10 rounded-full px-3 py-1.5 text-sm">
-              <Medal className="w-4 h-4" />
-              You&apos;re ranked #{myRank + 1} {isWeekly ? 'this week' : 'overall'}
+            <div className="mt-3 flex flex-col items-center gap-2">
+              <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-3 py-1.5 text-sm">
+                <Medal className="w-4 h-4" />
+                You&apos;re ranked #{myRank + 1} {isWeekly ? 'this week' : 'overall'}
+              </div>
+              <ShareRankButton rank={myRank + 1} />
             </div>
           )}
           {user && myRank < 0 && (

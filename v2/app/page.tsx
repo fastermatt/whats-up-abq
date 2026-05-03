@@ -245,6 +245,20 @@ export default async function DiscoverPage() {
             {heroSaying}
           </p>
 
+          {/* Tonight pill — primary CTA */}
+          {tonight.total > 0 && (
+            <div className="mb-4 animate-hero-text">
+              <Link
+                href="/events?time=tonight"
+                className="inline-flex items-center gap-2 bg-[#9a442d] text-white font-bold text-sm px-4 py-2 rounded-full hover:bg-[#7d3725] transition-colors shadow-sm"
+                style={{ fontFamily: 'var(--font-epilogue)' }}
+              >
+                <span className="w-2 h-2 rounded-full bg-white/80 animate-pulse flex-shrink-0" />
+                {tonight.total.toLocaleString()} events tonight →
+              </Link>
+            </div>
+          )}
+
           {/* Search + surprise */}
           <div className="flex items-center gap-3 animate-hero-row">
             <form

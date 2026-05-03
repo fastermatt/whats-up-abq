@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-04-29T00:00:00Z",
+  "title": "Design System: ABQ Unplugged",
+  "extensions": {
+    "colorMeta": {
+      "terra": {
+        "role": "primary",
+        "displayName": "Fired Terra",
+        "canonical": "oklch(42% 0.12 30)",
+        "tonalRamp": ["#2d0a05", "#4d1610", "#6e2518", "#9a442d", "#c4614a", "#e08070", "#f0b0a8", "#fae6e2"]
+      },
+      "terra-hover": {
+        "role": "primary",
+        "displayName": "Deep Rust",
+        "canonical": "oklch(36% 0.11 30)",
+        "tonalRamp": ["#220805", "#3d1210", "#5a1e18", "#7d3725", "#9a5040", "#c07870", "#dfa8a0", "#f8e4e2"]
+      },
+      "terra-mid": {
+        "role": "primary",
+        "displayName": "Terra Mid",
+        "canonical": "oklch(55% 0.10 30)",
+        "tonalRamp": ["#2d0a05", "#4d1610", "#6e2518", "#9a442d", "#c4614a", "#d8806e", "#eeaaa0", "#fce8e4"]
+      },
+      "terra-light": {
+        "role": "primary",
+        "displayName": "Peach Glow",
+        "canonical": "oklch(76% 0.07 30)",
+        "tonalRamp": ["#2d0a05", "#4d1610", "#6e2518", "#a0503a", "#c47060", "#e8a898", "#f5d0c8", "#fef0ec"]
+      },
+      "sage": {
+        "role": "secondary",
+        "displayName": "Desert Sage",
+        "canonical": "oklch(39% 0.05 145)",
+        "tonalRamp": ["#0f1f12", "#1d3020", "#2d4030", "#4f6249", "#6f8469", "#96ad96", "#b8c8b8", "#e0ece0"]
+      },
+      "turquoise": {
+        "role": "tertiary",
+        "displayName": "Rio Turquoise",
+        "canonical": "oklch(37% 0.09 195)",
+        "tonalRamp": ["#001f1c", "#003530", "#004d46", "#006a62", "#2a8f87", "#5eb0a8", "#95cac6", "#d4eceb"]
+      },
+      "cream": {
+        "role": "neutral",
+        "displayName": "Warm Cream",
+        "canonical": "oklch(97% 0.006 70)",
+        "tonalRamp": ["#3d3530", "#5e534d", "#8a7a74", "#b0a09a", "#cec0b8", "#e0d5ce", "#eeebe6", "#fbf7f1"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Press Ink",
+        "canonical": "oklch(14% 0.008 30)",
+        "tonalRamp": ["#1a1614", "#2a2220", "#3d3530", "#4a3f3a", "#6b5d57", "#8a7a74", "#b0a09a", "#d8cdc8"]
+      },
+      "sand-border": {
+        "role": "neutral",
+        "displayName": "Adobe Border",
+        "canonical": "oklch(82% 0.04 75)",
+        "tonalRamp": ["#3d3020", "#5e4a30", "#7d6448", "#a08060", "#c4a97d", "#ddc9a3", "#eee0c0", "#faf4e6"]
+      },
+      "sand-fill": {
+        "role": "neutral",
+        "displayName": "Sand Fill",
+        "canonical": "oklch(90% 0.03 75)",
+        "tonalRamp": ["#3d3020", "#5e4a30", "#7d6448", "#a08060", "#c4a97d", "#ddc9a3", "#f0e4cc", "#fdf8f0"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Hero Display", "purpose": "Hero headlines only. Clamp-based fluid sizing. Tight tracking and near-1.0 line-height create mass." },
+      "headline": { "displayName": "Section Headline", "purpose": "Page and section headings, featured event titles." },
+      "title": { "displayName": "Card Title", "purpose": "Card headings, sub-page titles, dialog headings." },
+      "body": { "displayName": "Body", "purpose": "All prose content. Max 65–75ch line length." },
+      "label": { "displayName": "Eyebrow Label", "purpose": "Category markers, eyebrow text, nav tabs. Always uppercase with wide tracking." },
+      "mono": { "displayName": "Data Mono", "purpose": "Ticket counts, event totals, date/time, leaderboard numbers." }
+    },
+    "shadows": [
+      { "name": "card-resting",  "value": "0 1px 3px rgba(26,22,20,0.04)",  "purpose": "Event cards at rest. Nearly invisible — separates white card from cream canvas without hard contrast." },
+      { "name": "card-hover",    "value": "0 8px 24px rgba(26,22,20,0.12)", "purpose": "Event cards on hover, paired with translateY(-1px). Signals interactivity." },
+      { "name": "ambient-sm",    "value": "0 1px 2px rgba(0,0,0,0.05)",     "purpose": "Chips, small action buttons, minor floating elements at rest." },
+      { "name": "cta-glow",      "value": "0 4px 12px rgba(154,68,45,0.20)","purpose": "Primary CTAs on hover. Terra-tinted glow reinforces the brand color in the elevation layer." },
+      { "name": "dialog-float",  "value": "0 10px 40px rgba(0,0,0,0.12)",   "purpose": "Floating panels (calendar picker, tooltips). Never on inline content." }
+    ],
+    "motion": [
+      { "name": "spring",         "value": "cubic-bezier(0.34, 1.56, 0.64, 1)", "duration": "0.5s", "purpose": "Card entrances. Slight overshoot gives cards physical weight. Use only on transform, never on layout properties." },
+      { "name": "expo-reveal",    "value": "cubic-bezier(0.16, 1, 0.3, 1)",     "duration": "0.8s", "purpose": "Hero text reveal, large section entrances." },
+      { "name": "standard-ease",  "value": "ease-out",                           "duration": "0.2s", "purpose": "Hover state transitions (background, border, shadow). Fast and responsive." },
+      { "name": "scroll-driven",  "value": "animation-timeline: view()",         "duration": "linear", "purpose": "Scroll-reveal on event cards. CSS-native, GPU-accelerated. Graceful fallback for unsupported browsers." },
+      { "name": "heartbeat",      "value": "cubic-bezier(0.4, 0, 0.6, 1)",      "duration": "1.8s", "purpose": "Footer heartbeat mark (lub-DUB double-beat pattern). Use only on the ♥ motif." }
+    ],
+    "breakpoints": [
+      { "name": "md", "value": "768px",  "note": "Desktop nav appears; bottom nav hidden. Primary layout breakpoint." },
+      { "name": "lg", "value": "1024px", "note": "Full 3-col card grids; additional nav items (Tonight, Weekend) appear." },
+      { "name": "sm", "value": "640px",  "note": "Minimal layout changes; mainly used for form layouts." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Terra pill — the system's primary call to action. Rarity is the point; don't overuse.",
+      "html": "<button class=\"ds-btn-primary\">Find Events</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: #9a442d; color: #fbf7f1; border: none; border-radius: 9999px; font-family: Inter, system-ui, sans-serif; font-size: 14px; font-weight: 600; line-height: 1; cursor: pointer; transition: background 0.2s ease-out, box-shadow 0.2s ease-out, transform 0.2s ease-out; } .ds-btn-primary:hover { background: #7d3725; box-shadow: 0 4px 12px rgba(154,68,45,0.20); } .ds-btn-primary:active { transform: scale(0.95); } .ds-btn-primary:focus-visible { outline: 2px solid #006a62; outline-offset: 2px; border-radius: 9999px; } .ds-btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Outline pill for secondary actions. Adobe border at rest; terra on hover.",
+      "html": "<button class=\"ds-btn-ghost\">Clear filters</button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; background: transparent; color: #4a3f3a; border: 1px solid #ddc9a3; border-radius: 9999px; font-family: Inter, system-ui, sans-serif; font-size: 13px; font-weight: 500; line-height: 1; cursor: pointer; transition: color 0.2s ease-out, border-color 0.2s ease-out; } .ds-btn-ghost:hover { color: #9a442d; border-color: #9a442d; } .ds-btn-ghost:focus-visible { outline: 2px solid #006a62; outline-offset: 2px; border-radius: 9999px; }"
+    },
+    {
+      "name": "Filter Chip",
+      "kind": "chip",
+      "refersTo": "chip-unselected",
+      "description": "Mood and category filter chips. Terra tint unselected; terra fill selected.",
+      "html": "<button class=\"ds-chip\" aria-pressed=\"false\">🎵 Live Music</button>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; padding: 8px 14px; background: rgba(154,68,45,0.10); color: #9a442d; border: 1px solid rgba(154,68,45,0.20); border-radius: 9999px; font-family: Inter, system-ui, sans-serif; font-size: 13px; font-weight: 500; line-height: 1; cursor: pointer; white-space: nowrap; transition: background 0.15s ease-out, color 0.15s ease-out, border-color 0.15s ease-out; } .ds-chip:hover, .ds-chip[aria-pressed=\"true\"] { background: #9a442d; color: #fbf7f1; border-color: #9a442d; } .ds-chip:focus-visible { outline: 2px solid #006a62; outline-offset: 2px; }"
+    },
+    {
+      "name": "Event Card",
+      "kind": "card",
+      "refersTo": "card-event",
+      "description": "The primary list component. White card on cream canvas. Spring entrance on load; lifts on hover.",
+      "html": "<article class=\"ds-event-card\"><div class=\"ds-event-card__image\"><img src=\"\" alt=\"\" /><span class=\"ds-event-card__category\">Music</span></div><div class=\"ds-event-card__body\"><p class=\"ds-event-card__venue\">Sunshine Theater · Nob Hill</p><h3 class=\"ds-event-card__title\">Calexico & Iron &amp; Wine</h3><p class=\"ds-event-card__meta\">Fri May 9 · 8:00 PM · From $35</p></div></article>",
+      "css": ".ds-event-card { position: relative; background: #ffffff; border: 1px solid rgba(240,228,204,0.80); border-radius: 12px; overflow: hidden; cursor: pointer; box-shadow: 0 1px 3px rgba(26,22,20,0.04); transition: box-shadow 0.3s ease-out, transform 0.3s ease-out; } .ds-event-card:hover { box-shadow: 0 8px 24px rgba(26,22,20,0.12); transform: translateY(-1px); } .ds-event-card__image { position: relative; aspect-ratio: 16/10; overflow: hidden; background: linear-gradient(135deg, #f0e4cc 0%, #ddc9a3 100%); } .ds-event-card__image img { width: 100%; height: 100%; object-fit: cover; } .ds-event-card__category { position: absolute; top: 6px; left: 6px; background: rgba(154,68,45,0.90); color: #fbf7f1; font-family: Inter, system-ui, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 9999px; backdrop-filter: blur(4px); } .ds-event-card__body { padding: 10px 12px; } .ds-event-card__venue { font-family: Inter, system-ui, sans-serif; font-size: 11px; font-weight: 600; color: #9a442d; letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 3px; } .ds-event-card__title { font-family: Epilogue, system-ui, sans-serif; font-size: 15px; font-weight: 800; color: #1a1614; letter-spacing: -0.2px; line-height: 1.25; margin: 0 0 4px; } .ds-event-card__meta { font-family: Space Grotesk, system-ui, sans-serif; font-size: 12px; font-weight: 500; color: #4a3f3a; margin: 0; }"
+    },
+    {
+      "name": "Search Input",
+      "kind": "input",
+      "refersTo": null,
+      "description": "Full-width search field with left icon and clear button. Terra border on focus.",
+      "html": "<div class=\"ds-search\"><svg class=\"ds-search__icon\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.35-4.35\"/></svg><input class=\"ds-search__input\" type=\"search\" placeholder=\"Search events, venues…\" /></div>",
+      "css": ".ds-search { position: relative; display: flex; align-items: center; } .ds-search__icon { position: absolute; left: 12px; color: #8a7a74; pointer-events: none; flex-shrink: 0; } .ds-search__input { width: 100%; padding: 10px 36px 10px 38px; background: #ffffff; border: 1px solid #e8ddd0; border-radius: 12px; font-family: Inter, system-ui, sans-serif; font-size: 14px; color: #1a1614; transition: border-color 0.15s ease-out, box-shadow 0.15s ease-out; } .ds-search__input::placeholder { color: #b0a69e; } .ds-search__input:focus { outline: none; border-color: #9a442d; box-shadow: 0 0 0 3px rgba(154,68,45,0.12); }"
+    },
+    {
+      "name": "Desktop Nav",
+      "kind": "nav",
+      "refersTo": null,
+      "description": "Sticky top nav with logo and pill-style links. Active: terra fill. Backdrop blur over content.",
+      "html": "<header class=\"ds-nav\"><a href=\"/\" class=\"ds-nav__logo\">ABQ Unplugged</a><nav class=\"ds-nav__links\"><a href=\"/\" class=\"ds-nav__link ds-nav__link--active\">Discover</a><a href=\"/events\" class=\"ds-nav__link\">Events</a><a href=\"/tonight\" class=\"ds-nav__link\">Tonight</a></nav></header>",
+      "css": ".ds-nav { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 24px; height: 56px; background: rgba(251,247,241,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid #f0e4cc; } .ds-nav__logo { font-family: Epilogue, system-ui, sans-serif; font-size: 16px; font-weight: 900; color: #1a1614; text-decoration: none; letter-spacing: -0.3px; } .ds-nav__links { display: flex; align-items: center; gap: 2px; } .ds-nav__link { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 9999px; font-family: Inter, system-ui, sans-serif; font-size: 14px; font-weight: 500; color: #4a3f3a; text-decoration: none; transition: background 0.15s ease-out, color 0.15s ease-out; white-space: nowrap; } .ds-nav__link:hover { background: #f0e4cc; color: #1a1614; } .ds-nav__link--active { background: #9a442d; color: #fbf7f1; } .ds-nav__link--active:hover { background: #7d3725; }"
+    },
+    {
+      "name": "Category Badge",
+      "kind": "chip",
+      "refersTo": null,
+      "description": "Small absolute-positioned pill on event card images. Comes in terra, sage, and turquoise variants.",
+      "html": "<span class=\"ds-badge ds-badge--terra\">Music</span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 9999px; font-family: Inter, system-ui, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; backdrop-filter: blur(4px); } .ds-badge--terra { background: rgba(154,68,45,0.90); color: #fbf7f1; } .ds-badge--sage { background: rgba(79,98,73,0.90); color: #fbf7f1; } .ds-badge--turquoise { background: rgba(0,106,98,0.90); color: #fbf7f1; } .ds-badge--free { background: rgba(79,98,73,0.90); color: #fbf7f1; }"
+    },
+    {
+      "name": "Eyebrow Label",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Small uppercase label in terra — used above section headings, on venue names in cards.",
+      "html": "<p class=\"ds-eyebrow\">This Weekend · Nob Hill</p>",
+      "css": ".ds-eyebrow { font-family: Inter, system-ui, sans-serif; font-size: 11px; font-weight: 600; color: #9a442d; letter-spacing: 0.20em; text-transform: uppercase; margin: 0 0 6px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Burque Broadside",
+    "overview": "ABQ Unplugged is a city's printed bulletin board, digitized with intention. The aesthetic owes more to a well-made alternative weekly than a tech product: warm cream paper stock, terra-cotta ink that feels sun-baked and local, headings that assert themselves without shouting. The tone is a Burqueño who has been to the show — confident, slightly playful, never corporate.\n\nThe system is light-mode only, and that choice is load-bearing. A warm cream base (#fbf7f1) with ink (#1a1614) text reads like a page held in golden-hour light. The city this site serves runs on sunlight, adobe, and big sky.\n\nDensity is deliberately moderate: not sparse like a marketing landing page, not crammed like a ticketing dashboard. The grid breathes; sections have rhythm.",
+    "keyCharacteristics": [
+      "Warm cream-and-terra palette rooted in New Mexico materials",
+      "Three-weight typography hierarchy (Epilogue headings, Inter body, Space Grotesk data)",
+      "Mostly flat elevation, with lift reserved for interactive states",
+      "Pill-heavy component shapes — soft, readable, not sharp-edged",
+      "Spring-physics card entrances; scroll-driven reveals; no gratuitous motion",
+      "Voice: the insider, not the algorithm"
+    ],
+    "rules": [
+      { "name": "The Terra Economy Rule",    "body": "Terra (#9a442d) appears on ≤15% of any given screen at rest. It is the brand's voice, not wallpaper. When everything is terra, nothing is.", "section": "colors" },
+      { "name": "The No-Pure-Black Rule",    "body": "#000000 and #ffffff are forbidden. Every neutral is tinted toward the brand hue.", "section": "colors" },
+      { "name": "The No-Muted-On-Small-Text Rule", "body": "#8a7a74 (ink-muted) fails WCAG AA at small sizes. Use it only on labels 14px or larger.", "section": "colors" },
+      { "name": "The Weight Contrast Rule",  "body": "Epilogue 900 next to Inter 400 creates the system's core tension. Never mix Epilogue 700/800 with Inter 500/600 — the contrast collapses.", "section": "typography" },
+      { "name": "The Negative-Tracking Rule","body": "Epilogue at display size gets -1.5px tracking. At headline size, -0.4 to -0.5px. Never apply positive tracking to Epilogue.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule",  "body": "Surfaces are flat at rest. Shadows appear only as a response to state (hover, lift, focus) or structural depth (floating dialogs). Decorative shadows are prohibited.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use #9a442d terra as the primary accent — on buttons, active states, headlines over cream, and category chips. Its rarity is the point; protect it.",
+      "Do use Epilogue 900 for all headings. Never Epilogue 400–600.",
+      "Do keep card borders warm (#f0e4cc or #ddc9a3) — cold grey borders read as a different product.",
+      "Do animate card entrances with spring physics (cubic-bezier(0.34, 1.56, 0.64, 1), 0.5s).",
+      "Do use scroll-driven CSS animations (animation-timeline: view()) with graceful fallback.",
+      "Do label category context with the terra eyebrow label style: Inter 600, 11px, UPPERCASE, 0.20em tracking.",
+      "Do use #006a62 turquoise for the global focus ring.",
+      "Do use Space Grotesk for all numeric data: event counts, ticket prices, times.",
+      "Do write copy in the Burqueño voice: 'Tonight', 'Worth knowing', 'If you only do one thing'."
+    ],
+    "donts": [
+      "Don't use pure black #000000 or pure white #ffffff on the main canvas.",
+      "Don't use #8a7a74 (ink-muted) for body copy or interactive labels at small sizes — WCAG AA fail.",
+      "Don't use saturated blues, purples, or hot pinks — off-brand.",
+      "Don't add left-stripe borders (border-left > 1px as a colored accent) to cards, alerts, or list items.",
+      "Don't use gradient text (background-clip: text). Headlines are solid-color.",
+      "Don't use glassmorphism decoratively. Glass surfaces are limited to sticky nav, bottom nav, and absolute image badges.",
+      "Don't write SaaS copy: 'Discover', 'Unleash', 'amazing', 'epic', 'elevate', 'let's [verb]'.",
+      "Don't claim 'the only' or 'the best'. The brand is 'the easiest way' or 'all in one place'.",
+      "Don't use Western/Southwest-clichéd fonts.",
+      "Don't add motion to layout properties (width, height, top, left). Animate only transform and opacity.",
+      "Don't use bounce or elastic easing — expo ease-out or spring curve only.",
+      "Don't render identical card grids — mix card sizes, use horizontal scroll rows, vary the rhythm.",
+      "Don't over-emoji. One per social caption; zero in UI elements except Mood Chips."
+    ]
+  }
+}

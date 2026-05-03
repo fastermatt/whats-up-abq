@@ -213,19 +213,19 @@ export default async function EventDetailPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
 
-      {/* ── Sticky nav ── */}
-      <header className="sticky top-0 z-20 bg-[#fbf7f1]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+      {/* ── Nav — cream bar above image on all sizes ── */}
+      <header className="sticky top-0 z-20 bg-[#fbf7f1]/95 backdrop-blur-md border-b border-[#ddc9a3]/60">
+        <div className="max-w-3xl mx-auto px-4 py-2.5 flex items-center justify-between">
           <Link
             href="/events"
-            className="flex items-center gap-1.5 text-sm text-[#4a3f3a] hover:text-[#9a442d] transition-colors"
+            className="flex items-center gap-1.5 text-sm font-medium text-[#4a3f3a] hover:text-[#9a442d] transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span className="font-medium">Events</span>
+            <span>Events</span>
           </Link>
           <Link
             href="/"
-            className="font-black text-lg text-[#1a1614] tracking-tight hover:text-[#9a442d] transition-colors"
+            className="font-black text-lg tracking-tight text-[#1a1614] hover:text-[#9a442d] transition-colors"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             ABQ Unplugged
@@ -234,38 +234,113 @@ export default async function EventDetailPage({ params }: PageProps) {
       </header>
 
       <article className="max-w-3xl mx-auto animate-fade-up">
-        {/* ── Hero image ── full-bleed on mobile, padded + rounded on desktop */}
-        <div className="relative aspect-[16/9] sm:aspect-[2/1] sm:mx-4 sm:mt-4 sm:rounded-2xl overflow-hidden shadow-md">
+        {/* ── Poster hero — full-width on mobile, sits below cream nav (no pull-up) ── */}
+        <div className="relative h-[420px] sm:h-auto sm:aspect-[2/1]
+          sm:mt-4 sm:mx-4 sm:rounded-2xl overflow-hidden">
           <EventImage
             src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
             fallback={getCategoryFallback(event.category ?? undefined, event.id)}
             alt={event.title}
             className="w-full h-full object-cover"
           />
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+          {/* Gradient: heavy at bottom for title + logistics legibility, clear at top */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+
+          {/* Film grain — softens low-res images, mobile only */}
+          <div
+            className="absolute inset-0 pointer-events-none sm:hidden"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E")`,
+              opacity: 0.75,
+              mixBlendMode: 'overlay',
+            }}
+          />
         </div>
 
         {/* ── Content ── */}
         <div className="px-4 pt-6">
 
-          {/* Category label */}
-          {event.category && (
-            <p className="text-[11px] uppercase tracking-[0.15em] text-[#9a442d] font-bold mb-2">
-              {event.subcategory ? `${event.category} · ${event.subcategory}` : event.category}
-            </p>
-          )}
+          <div>
+            {event.category && (
+              <p className="text-[11px] uppercase tracking-[0.15em] text-[#9a442d] font-bold mb-2">
+                {event.subcategory ? `${event.category} · ${event.subcategory}` : event.category}
+              </p>
+            )}
+            <h1
+              className="text-3xl sm:text-4xl font-black text-[#1a1614] leading-[1.1] mb-5"
+              style={{ fontFamily: 'var(--font-epilogue)', letterSpacing: '-0.5px' }}
+            >
+              {event.title}
+            </h1>
+          </div>
 
-          {/* Title — dominant */}
-          <h1
-            className="text-3xl sm:text-4xl font-black text-[#1a1614] leading-[1.1] mb-5"
-            style={{ fontFamily: 'var(--font-epilogue)', letterSpacing: '-0.5px' }}
-          >
-            {event.title}
-          </h1>
+          {/* Mobile: graphic date/venue block — larger type, poster-weight hierarchy */}
+          <div className="sm:hidden pt-5 mb-6">
+            {/* Date — display size */}
+            {dateStr && (
+              <div className="mb-2">
+                <p
+                  className="text-[1.35rem] font-black text-[#1a1614] leading-tight"
+                  style={{ fontFamily: 'var(--font-epilogue)', letterSpacing: '-0.3px' }}
+                >
+                  {dateStr}
+                </p>
+                {timeStr && (
+                  <p className="text-base font-semibold text-[#9a442d] mt-0.5">{timeStr}</p>
+                )}
+                {!timeStr && timesVary && <p className="text-sm text-[#4f6249] font-medium mt-0.5">Times vary — see host site</p>}
+                {!timeStr && !timesVary && <p className="text-sm text-[#6b5d57] italic mt-0.5">Time TBA</p>}
+              </div>
+            )}
 
+            {/* Divider */}
+            <div className="w-8 h-[2px] bg-[#ddc9a3] my-3" />
+
+            {/* Venue */}
+            {event.venue && (
+              <div className="mb-3">
+                <Link
+                  href={`/venues/${venueToSlug(event.venue)}`}
+                  className="text-[1.1rem] font-bold text-[#4a3f3a] hover:text-[#9a442d] transition-colors block leading-tight"
+                  style={{ fontFamily: 'var(--font-epilogue)' }}
+                >
+                  {event.venue}
+                </Link>
+                {event.address && <p className="text-xs text-[#6b5d57] mt-1">{event.address}</p>}
+                {event.neighborhood && (
+                  <Link href={`/neighborhoods/${neighborhoodToSlug(event.neighborhood)}`} className="block text-xs text-[#006a62] hover:text-[#9a442d] transition-colors mt-0.5">
+                    {event.neighborhood}
+                  </Link>
+                )}
+                <a href={mapsUrl} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[11px] text-[#006a62] hover:text-[#9a442d] transition-colors mt-1.5">
+                  <MapPin className="w-2.5 h-2.5" /> Open in Maps
+                </a>
+              </div>
+            )}
+            {!event.venue && event.address && (
+              <div className="mb-3">
+                <p className="text-[1.1rem] font-bold text-[#4a3f3a]" style={{ fontFamily: 'var(--font-epilogue)' }}>{event.address}</p>
+                <a href={mapsUrl} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[11px] text-[#006a62] hover:text-[#9a442d] transition-colors mt-1.5">
+                  <MapPin className="w-2.5 h-2.5" /> Open in Maps
+                </a>
+              </div>
+            )}
+
+            {/* Price badge */}
+            {event.price && (
+              <span className={`inline-block text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full ${
+                isFree ? 'bg-[#4f6249]/12 text-[#4f6249]' : 'bg-[#9a442d]/10 text-[#9a442d]'
+              }`}>
+                {isFree ? '✓ Free' : event.price}
+              </span>
+            )}
+          </div>
+
+          {/* Desktop: full meta block */}
           {/* ── Meta info — clean icon list ── */}
-          <div className="space-y-3 mb-7 text-sm">
+          <div className="hidden sm:block space-y-3 mb-7 text-sm">
 
             {/* Date + time */}
             {dateStr && (
@@ -371,7 +446,7 @@ export default async function EventDetailPage({ params }: PageProps) {
               </div>
             </div>
 
-          </div>
+          </div>{/* end desktop meta block */}
 
           {/* ── Primary CTA — anchor for sticky bar IntersectionObserver ── */}
           <div id="main-cta" className="flex flex-wrap gap-3 mb-8">
