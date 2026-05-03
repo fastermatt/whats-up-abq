@@ -204,8 +204,8 @@ function CategoryBadge({
   showCategory: boolean
 }) {
   if (!showCategory || !category) return null
-  // Safe zone: story=13%/5%, portrait=6%/5% — badge sits 5px inside each edge
-  const topPct  = format === 'story' ? 13 : 6
+  // Story: badge bleeds into top safe zone (3%); portrait: just inside 6% safe zone
+  const topPct  = format === 'story' ? 3 : 6
   const sidePct = 5
   return (
     <div style={{
@@ -268,7 +268,8 @@ function TemplateBroadside({
   const textPct  = isStory ? 47 : isSquare ? 50 : 47
   const photoPct = 100 - textPct
   const emoji    = CAT_EMOJI[category ?? ''] ?? '📍'
-  const topSafe  = isStory ? '13%' : '1.25rem'
+  // Story: header bleeds into top safe zone (3%), portrait/square: normal padding
+  const topPad   = isStory ? '3%' : '1.25rem'
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative', background: CREAM, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
@@ -278,7 +279,7 @@ function TemplateBroadside({
         flex: `0 0 ${textPct}%`,
         background: CREAM,
         display: 'flex', flexDirection: 'column',
-        padding: isStory ? `${topSafe} 2rem 1.25rem` : '1.5rem 1.75rem 1.25rem',
+        padding: isStory ? `${topPad} 2rem 1.25rem` : '1.5rem 1.75rem 1.25rem',
         position: 'relative', zIndex: 2,
         overflow: 'hidden',
       }}>
@@ -347,16 +348,17 @@ function TemplateBroadside({
               fontFamily: 'var(--font-inter), system-ui', fontWeight: 500,
               fontSize: isStory ? 13 : 12, color: INK_MID,
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-              margin: '0 0 5px',
+              margin: 0,
             }}>
               {venue}
             </p>
           )}
-          {showCTA && (
+          {/* Portrait/square only — story URL is pinned to bottom safe zone below */}
+          {!isStory && showCTA && (
             <p style={{
               fontFamily: 'var(--font-inter), system-ui', fontWeight: 700,
-              fontSize: isStory ? 12 : 11, color: TERRA, letterSpacing: '0.08em',
-              margin: 0,
+              fontSize: 11, color: TERRA, letterSpacing: '0.08em',
+              margin: '5px 0 0',
             }}>
               abqunplugged.com
             </p>
@@ -397,6 +399,19 @@ function TemplateBroadside({
         background: TERRA, zIndex: 5,
       }} />
 
+      {/* Story: URL pinned inside bottom safe zone */}
+      {isStory && showCTA && (
+        <div style={{
+          position: 'absolute', bottom: '3%', left: 0, right: 0,
+          textAlign: 'center', zIndex: 10, pointerEvents: 'none',
+        }}>
+          <span style={{
+            fontFamily: 'var(--font-inter), system-ui', fontWeight: 700,
+            fontSize: 11, color: 'rgba(255,255,255,0.75)', letterSpacing: '0.08em',
+          }}>abqunplugged.com</span>
+        </div>
+      )}
+
       <GrainOverlay opacity={0.5} />
       {showSafeZone && <SafeZone format={format} />}
     </div>
@@ -422,10 +437,10 @@ function TemplateStub({
     // Story: vertical split — dark top 40%, photo bottom 60%
     return (
       <div style={{ width: '100%', height: '100%', position: 'relative', background: INK, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        {/* Text panel */}
+        {/* Text panel — logo/category bleed into top safe zone (3%) */}
         <div style={{
           flex: '0 0 40%', background: INK,
-          padding: '13% 2rem 1rem',
+          padding: '3% 2rem 1rem',
           display: 'flex', flexDirection: 'column',
           position: 'relative', zIndex: 2, overflow: 'hidden',
         }}>
@@ -470,12 +485,12 @@ function TemplateStub({
           <img src={imgSrc} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(28px) brightness(0.75)', transform: 'scale(1.15)', transformOrigin: 'center' }} />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }} />
-          {/* Bottom meta overlay */}
-          {(showDateTime || showVenue || showCTA) && (
+          {/* Bottom meta overlay — date + venue only (URL is pinned to bottom safe zone) */}
+          {(showDateTime || showVenue) && (
             <div style={{
               position: 'absolute', bottom: 0, left: 0, right: 0,
               background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.60) 40%, transparent 100%)',
-              padding: '3rem 2rem 13%',
+              padding: '3rem 2rem 16%',
               display: 'flex', flexDirection: 'column', gap: 6,
             }}>
               {showDateTime && dateParts.day && (
@@ -489,15 +504,22 @@ function TemplateStub({
                   {venue}
                 </p>
               )}
-              {showCTA && (
-                <p style={{ fontFamily: 'var(--font-inter), system-ui', fontWeight: 700, fontSize: 11,
-                  color: '#e8a898', letterSpacing: '0.08em', margin: 0 }}>
-                  abqunplugged.com
-                </p>
-              )}
             </div>
           )}
         </div>
+
+        {/* URL pinned inside bottom safe zone */}
+        {showCTA && (
+          <div style={{
+            position: 'absolute', bottom: '3%', left: 0, right: 0,
+            textAlign: 'center', zIndex: 10, pointerEvents: 'none',
+          }}>
+            <span style={{
+              fontFamily: 'var(--font-inter), system-ui', fontWeight: 700,
+              fontSize: 11, color: '#e8a898', letterSpacing: '0.08em',
+            }}>abqunplugged.com</span>
+          </div>
+        )}
 
         <GrainOverlay opacity={0.5} />
         {showSafeZone && <SafeZone format={format} />}
@@ -614,8 +636,8 @@ function TemplateDarkFrame({
   const photoHeight = isStory ? 34 : isSquare ? 38 : 35
   const photoSideGap = 7 // % from each side
 
-  // Adjust story to respect safe zones
-  const topContentStart = isStory ? '14%' : '1.5rem'
+  // Story: logo/badge bleed into top safe zone (3%); portrait: normal margin
+  const topContentStart = isStory ? '3%' : '1.5rem'
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative', background: INK, overflow: 'hidden' }}>
@@ -630,10 +652,10 @@ function TemplateDarkFrame({
         {showLogo && <Logo dark size={isStory ? 33 : 27} />}
       </div>
 
-      {/* ── Title (above photo) — bounded container for fit-text ── */}
+      {/* ── Title (above photo) — in live area starting at 14% ── */}
       <div ref={containerRef} style={{
         position: 'absolute', left: '1.75rem', right: '1.75rem',
-        top: isStory ? `calc(14% + 2.5rem)` : '3.5rem',
+        top: isStory ? '14%' : '3.5rem',
         bottom: `${100 - photoTop + 1}%`, // hard boundary at photo top
         overflow: 'hidden',
         zIndex: 3, display: 'flex', flexDirection: 'column',
@@ -680,11 +702,11 @@ function TemplateDarkFrame({
         <img src={imgSrc} alt="" style={{ position: 'relative', width: '100%', height: '100%', objectFit: 'contain' }} />
       </div>
 
-      {/* ── Date + venue (below photo) ── */}
+      {/* ── Date + venue (below photo) — URL moved to bottom safe zone ── */}
       <div style={{
         position: 'absolute',
         top: `${photoTop + photoHeight + 2}%`,
-        bottom: isStory ? '14%' : '1.5rem',
+        bottom: isStory ? '18%' : '1.5rem',
         left: '1.75rem', right: '1.75rem',
         display: 'flex', flexDirection: 'column', justifyContent: 'flex-start',
         gap: 6, zIndex: 3,
@@ -712,15 +734,29 @@ function TemplateDarkFrame({
             {venue}
           </p>
         )}
-        {showCTA && (
+        {/* Portrait only — story URL is pinned to bottom safe zone */}
+        {!isStory && showCTA && (
           <p style={{ fontFamily: 'var(--font-inter), system-ui', fontWeight: 700,
-            fontSize: isStory ? 12 : 9, color: '#e8a898', letterSpacing: '0.08em', margin: 0 }}>
+            fontSize: 9, color: '#e8a898', letterSpacing: '0.08em', margin: 0 }}>
             abqunplugged.com
           </p>
         )}
       </div>
 
-      {/* Category badge — absolute, just inside safe zone top-left */}
+      {/* Story: URL pinned inside bottom safe zone */}
+      {isStory && showCTA && (
+        <div style={{
+          position: 'absolute', bottom: '3%', left: 0, right: 0,
+          textAlign: 'center', zIndex: 10, pointerEvents: 'none',
+        }}>
+          <span style={{
+            fontFamily: 'var(--font-inter), system-ui', fontWeight: 700,
+            fontSize: 11, color: '#e8a898', letterSpacing: '0.08em',
+          }}>abqunplugged.com</span>
+        </div>
+      )}
+
+      {/* Category badge — absolute, bleeds into top safe zone (story) */}
       <CategoryBadge category={category} emoji={emoji} format={format} showCategory={showCategory} />
       <GrainOverlay opacity={0.45} />
       {showSafeZone && <SafeZone format={format} />}
