@@ -264,13 +264,108 @@ function TemplateBroadside({
   const dateParts = formatMonthDay(dateStr || '')
   const { containerRef, titleRef, fittedSize } = useFitTitle(title, isStory, fontCss, titleWeight, titleItalic)
 
-  // Panel split
-  const textPct  = isStory ? 47 : isSquare ? 50 : 47
+  // Panel split (portrait/square only — story uses absolute layout below)
+  const textPct  = isSquare ? 50 : 47
   const photoPct = 100 - textPct
   const emoji    = CAT_EMOJI[category ?? ''] ?? '📍'
-  // Story: header bleeds into top safe zone (3%), portrait/square: normal padding
-  const topPad   = isStory ? '3%' : '1.25rem'
 
+  // ── STORY: absolute layout — text rides 13% safe zone line, photo gets the rest ──
+  if (isStory) {
+    // Photo runs from split to bottom safe zone
+    const splitPct = 46 // % where text ends and photo begins
+    return (
+      <div style={{ width: '100%', height: '100%', position: 'relative', background: CREAM, overflow: 'hidden' }}>
+
+        {/* Logo + category — bleed into top safe zone at 3% */}
+        <div style={{
+          position: 'absolute', top: '3%', left: '2rem', right: '2rem',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          zIndex: 5,
+        }}>
+          {showCategory && category ? (
+            <div style={{
+              display: 'inline-flex', alignItems: 'center',
+              background: TERRA, color: '#fff',
+              fontFamily: INTER, fontWeight: 600, fontSize: 7,
+              letterSpacing: '0.18em', textTransform: 'uppercase',
+              padding: '3px 8px', borderRadius: 100,
+            }}>
+              {emoji}&nbsp;{category}
+            </div>
+          ) : <div />}
+          {showLogo && <Logo dark={false} size={33} />}
+        </div>
+
+        {/* Text section — starts AT the 13% safe zone line */}
+        <div style={{
+          position: 'absolute',
+          top: '13%', bottom: `${100 - splitPct}%`,
+          left: '2rem', right: '2rem',
+          display: 'flex', flexDirection: 'column',
+          overflow: 'hidden',
+        }}>
+          {/* Title fit-text — fills space, anchored to bottom */}
+          <div ref={containerRef} style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div style={{ flex: 1 }} />
+            {price && (
+              <div style={{ color: price.toLowerCase().includes('free') ? '#4f6249' : TERRA, fontFamily: INTER, fontWeight: 700, fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 8, flexShrink: 0 }}>
+                {price.toLowerCase().includes('free') ? '✓ Free' : price}
+              </div>
+            )}
+            <p ref={titleRef} style={{ fontFamily: fontCss, fontWeight: titleWeight, fontStyle: titleItalic ? 'italic' : 'normal', fontSize: fittedSize, lineHeight: 1.05, letterSpacing: titleTracking(fittedSize), color: INK, margin: 0, flexShrink: 0 }}>
+              {title}
+            </p>
+          </div>
+
+          {/* Date / Venue at bottom of text section */}
+          <div style={{ flexShrink: 0, paddingTop: '0.6rem', marginTop: '0.6rem', borderTop: `1.5px solid ${SAND}` }}>
+            {showDateTime && dateParts.day && (
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 2 }}>
+                <span style={{ fontFamily: fontCss, fontWeight: 900, fontSize: 22, color: TERRA, lineHeight: 1 }}>{dateParts.day}</span>
+                <span style={{ fontFamily: 'var(--font-inter), system-ui', fontWeight: 600, fontSize: 12, color: INK_MID, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{dateParts.month}{timeStr ? ` · ${timeStr}` : ''}</span>
+              </div>
+            )}
+            {showVenue && venue && (
+              <p style={{ fontFamily: 'var(--font-inter), system-ui', fontWeight: 500, fontSize: 12, color: INK_MID, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: 0 }}>
+                {venue}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Terra divider at split */}
+        <div style={{ position: 'absolute', top: `${splitPct}%`, left: 0, right: 0, height: 3, background: TERRA, zIndex: 5 }} />
+
+        {/* Photo inset — from split to bottom safe zone, sides inset */}
+        <div style={{
+          position: 'absolute',
+          top: `calc(${splitPct}% + 3px)`,
+          bottom: '13%',
+          left: '5%', right: '5%',
+          borderRadius: 8, overflow: 'hidden', zIndex: 2,
+        }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={imgSrc} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(28px) brightness(0.75)', transform: 'scale(1.15)', transformOrigin: 'center' }} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }} />
+          {/* Soft vignette merging with cream at top */}
+          <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to bottom, ${CREAM} 0%, transparent 10%)`, pointerEvents: 'none' }} />
+        </div>
+
+        {/* URL in bottom safe zone — terra on cream background */}
+        {showCTA && (
+          <div style={{ position: 'absolute', bottom: '3%', left: 0, right: 0, textAlign: 'center', zIndex: 10, pointerEvents: 'none' }}>
+            <span style={{ fontFamily: 'var(--font-inter), system-ui', fontWeight: 700, fontSize: 11, color: TERRA, letterSpacing: '0.08em' }}>abqunplugged.com</span>
+          </div>
+        )}
+
+        <GrainOverlay opacity={0.5} />
+        {showSafeZone && <SafeZone format={format} />}
+      </div>
+    )
+  }
+
+  // ── PORTRAIT / SQUARE: flex layout ───────────────────────────────────────
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative', background: CREAM, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
@@ -279,7 +374,7 @@ function TemplateBroadside({
         flex: `0 0 ${textPct}%`,
         background: CREAM,
         display: 'flex', flexDirection: 'column',
-        padding: isStory ? `${topPad} 2rem 1.25rem` : '1.5rem 1.75rem 1.25rem',
+        padding: '1.5rem 1.75rem 1.25rem',
         position: 'relative', zIndex: 2,
         overflow: 'hidden',
       }}>
@@ -296,70 +391,37 @@ function TemplateBroadside({
               {emoji}&nbsp;{category}
             </div>
           ) : <div />}
-          {showLogo && <Logo dark={false} size={isStory ? 33 : 27} />}
+          {showLogo && <Logo dark={false} size={27} />}
         </div>
 
         {/* Title body — containerRef bounds the fit-text measurement */}
-        <div ref={containerRef} style={{
-          flex: 1, minHeight: 0,
-          display: 'flex', flexDirection: 'column',
-          overflow: 'hidden',
-          paddingTop: '0.25rem',
-        }}>
-          {/* Spacer anchors title near the footer */}
+        <div ref={containerRef} style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', paddingTop: '0.25rem' }}>
           <div style={{ flex: 1 }} />
           {price && (
-            <div style={{
-              color: price.toLowerCase().includes('free') ? '#4f6249' : TERRA,
-              fontFamily: INTER, fontWeight: 700, fontSize: isStory ? 11 : 9,
-              letterSpacing: '0.2em', textTransform: 'uppercase',
-              marginBottom: isStory ? 8 : 6, flexShrink: 0,
-            }}>
+            <div style={{ color: price.toLowerCase().includes('free') ? '#4f6249' : TERRA, fontFamily: INTER, fontWeight: 700, fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 6, flexShrink: 0 }}>
               {price.toLowerCase().includes('free') ? '✓ Free' : price}
             </div>
           )}
-          <p ref={titleRef} style={{
-            fontFamily: fontCss, fontWeight: titleWeight, fontStyle: titleItalic ? 'italic' : 'normal',
-            fontSize: fittedSize, lineHeight: 1.05,
-            letterSpacing: titleTracking(fittedSize),
-            color: INK, margin: 0, flexShrink: 0,
-            overflow: 'hidden',
-          }}>
+          <p ref={titleRef} style={{ fontFamily: fontCss, fontWeight: titleWeight, fontStyle: titleItalic ? 'italic' : 'normal', fontSize: fittedSize, lineHeight: 1.05, letterSpacing: titleTracking(fittedSize), color: INK, margin: 0, flexShrink: 0, overflow: 'hidden' }}>
             {title}
           </p>
         </div>
 
-        {/* Date / Venue strip — bigger for Instagram readability */}
+        {/* Date / Venue strip */}
         <div style={{ flexShrink: 0, marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: `1.5px solid ${SAND}` }}>
           {showDateTime && dateParts.day && (
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 3 }}>
-              <span style={{
-                fontFamily: fontCss, fontWeight: 900,
-                fontSize: isStory ? 24 : 20, color: TERRA, lineHeight: 1,
-              }}>{dateParts.day}</span>
-              <span style={{
-                fontFamily: 'var(--font-inter), system-ui', fontWeight: 600,
-                fontSize: isStory ? 13 : 12, color: INK_MID, letterSpacing: '0.08em', textTransform: 'uppercase',
-              }}>{dateParts.month}{timeStr ? ` · ${timeStr}` : ''}</span>
+              <span style={{ fontFamily: fontCss, fontWeight: 900, fontSize: 20, color: TERRA, lineHeight: 1 }}>{dateParts.day}</span>
+              <span style={{ fontFamily: 'var(--font-inter), system-ui', fontWeight: 600, fontSize: 12, color: INK_MID, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{dateParts.month}{timeStr ? ` · ${timeStr}` : ''}</span>
             </div>
           )}
           {showVenue && venue && (
-            <p style={{
-              fontFamily: 'var(--font-inter), system-ui', fontWeight: 500,
-              fontSize: isStory ? 13 : 12, color: INK_MID,
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-              margin: 0,
-            }}>
+            <p style={{ fontFamily: 'var(--font-inter), system-ui', fontWeight: 500, fontSize: 12, color: INK_MID, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: 0 }}>
               {venue}
             </p>
           )}
-          {/* Portrait/square only — story URL is pinned to bottom safe zone below */}
-          {!isStory && showCTA && (
-            <p style={{
-              fontFamily: 'var(--font-inter), system-ui', fontWeight: 700,
-              fontSize: 11, color: TERRA, letterSpacing: '0.08em',
-              margin: '5px 0 0',
-            }}>
+          {showCTA && (
+            <p style={{ fontFamily: 'var(--font-inter), system-ui', fontWeight: 700, fontSize: 11, color: TERRA, letterSpacing: '0.08em', margin: '5px 0 0' }}>
               abqunplugged.com
             </p>
           )}
@@ -368,49 +430,15 @@ function TemplateBroadside({
 
       {/* ── PHOTO PANEL (bottom) ── */}
       <div style={{ flex: `0 0 ${photoPct}%`, position: 'relative', overflow: 'hidden' }}>
-        {/* Blurred backdrop — fills any letterbox area with image color instead of black */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={imgSrc} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(28px) brightness(0.75)', transform: 'scale(1.15)', transformOrigin: 'center' }} />
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={imgSrc}
-          alt=""
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center center' }}
-        />
-        {/* Subtle vignette at top to merge with cream panel */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: `linear-gradient(to bottom, ${CREAM} 0%, transparent 14%)`,
-          pointerEvents: 'none',
-        }} />
-        {/* Story: bottom safe zone bump */}
-        {isStory && (
-          <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0,
-            height: '14%', background: `linear-gradient(to top, rgba(0,0,0,0.55), transparent)`,
-          }} />
-        )}
+        <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center center' }} />
+        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to bottom, ${CREAM} 0%, transparent 14%)`, pointerEvents: 'none' }} />
       </div>
 
       {/* Terra thin divider line */}
-      <div style={{
-        position: 'absolute', left: 0, right: 0,
-        top: `${textPct}%`, height: 3,
-        background: TERRA, zIndex: 5,
-      }} />
-
-      {/* Story: URL pinned inside bottom safe zone */}
-      {isStory && showCTA && (
-        <div style={{
-          position: 'absolute', bottom: '3%', left: 0, right: 0,
-          textAlign: 'center', zIndex: 10, pointerEvents: 'none',
-        }}>
-          <span style={{
-            fontFamily: 'var(--font-inter), system-ui', fontWeight: 700,
-            fontSize: 11, color: 'rgba(255,255,255,0.75)', letterSpacing: '0.08em',
-          }}>abqunplugged.com</span>
-        </div>
-      )}
+      <div style={{ position: 'absolute', left: 0, right: 0, top: `${textPct}%`, height: 3, background: TERRA, zIndex: 5 }} />
 
       <GrainOverlay opacity={0.5} />
       {showSafeZone && <SafeZone format={format} />}
@@ -434,73 +462,78 @@ function TemplateStub({
   const { containerRef, titleRef, fittedSize } = useFitTitle(title, isStory, fontCss, titleWeight, titleItalic)
 
   if (isStory) {
-    // Story: vertical split — dark top 40%, photo bottom 60%
+    // Text from safe zone line (13%) to split; photo from split to bottom safe zone (87%)
+    const splitPct = 44
     return (
-      <div style={{ width: '100%', height: '100%', position: 'relative', background: INK, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        {/* Text panel — logo/category bleed into top safe zone (3%) */}
+      <div style={{ width: '100%', height: '100%', position: 'relative', background: INK, overflow: 'hidden' }}>
+
+        {/* Logo + category — bleed into top safe zone at 3% */}
         <div style={{
-          flex: '0 0 40%', background: INK,
-          padding: '3% 2rem 1rem',
-          display: 'flex', flexDirection: 'column',
-          position: 'relative', zIndex: 2, overflow: 'hidden',
+          position: 'absolute', top: '3%', left: '2rem', right: '2rem',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          zIndex: 5,
         }}>
-          {/* Header row: category LEFT (small), logo RIGHT */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, marginBottom: 6 }}>
-            {showCategory && category ? (
-              <div style={{
-                display: 'inline-flex', alignItems: 'center',
-                background: TERRA, color: '#fff',
-                fontFamily: INTER, fontWeight: 600, fontSize: 7,
-                letterSpacing: '0.18em', textTransform: 'uppercase',
-                padding: '3px 8px', borderRadius: 100,
-              }}>
-                {emoji}&nbsp;{category}
-              </div>
-            ) : <div />}
-            {showLogo && <Logo dark size={28} />}
-          </div>
-          {/* Title container — fills remaining height, title at bottom */}
-          <div ref={containerRef} style={{
-            flex: 1, minHeight: 0, overflow: 'hidden',
-            display: 'flex', flexDirection: 'column',
-          }}>
-            {/* Spacer pushes title toward bottom; shrinks to 0 if content too tall,
-                which lets tRect.bottom exceed cRect.bottom so useFitTitle can detect overflow */}
-            <div style={{ flex: 1 }} />
-            <p ref={titleRef} style={{
-              fontFamily: fontCss, fontWeight: titleWeight, fontStyle: titleItalic ? 'italic' : 'normal',
-              fontSize: fittedSize, lineHeight: 1.05,
-              letterSpacing: titleTracking(fittedSize), color: CREAM,
-              margin: 0, flexShrink: 0,
-            }}>{title}</p>
-          </div>
+          {showCategory && category ? (
+            <div style={{
+              display: 'inline-flex', alignItems: 'center',
+              background: TERRA, color: '#fff',
+              fontFamily: INTER, fontWeight: 600, fontSize: 7,
+              letterSpacing: '0.18em', textTransform: 'uppercase',
+              padding: '3px 8px', borderRadius: 100,
+            }}>
+              {emoji}&nbsp;{category}
+            </div>
+          ) : <div />}
+          {showLogo && <Logo dark size={28} />}
         </div>
 
-        {/* Divider */}
-        <div style={{ flex: '0 0 3px', background: TERRA, zIndex: 5 }} />
+        {/* Title — rides the 13% safe zone line */}
+        <div ref={containerRef} style={{
+          position: 'absolute',
+          top: '13%', bottom: `${100 - splitPct}%`,
+          left: '2rem', right: '2rem',
+          overflow: 'hidden',
+          display: 'flex', flexDirection: 'column',
+        }}>
+          <div style={{ flex: 1 }} />
+          <p ref={titleRef} style={{
+            fontFamily: fontCss, fontWeight: titleWeight, fontStyle: titleItalic ? 'italic' : 'normal',
+            fontSize: fittedSize, lineHeight: 1.05,
+            letterSpacing: titleTracking(fittedSize), color: CREAM,
+            margin: 0, flexShrink: 0,
+          }}>{title}</p>
+        </div>
 
-        {/* Photo panel */}
-        <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+        {/* Terra divider at split */}
+        <div style={{ position: 'absolute', top: `${splitPct}%`, left: 0, right: 0, height: 3, background: TERRA, zIndex: 5 }} />
+
+        {/* Photo inset — from split to bottom safe zone, sides inset */}
+        <div style={{
+          position: 'absolute',
+          top: `calc(${splitPct}% + 3px)`,
+          bottom: '13%',
+          left: '5%', right: '5%',
+          borderRadius: 8, overflow: 'hidden', zIndex: 2,
+        }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={imgSrc} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(28px) brightness(0.75)', transform: 'scale(1.15)', transformOrigin: 'center' }} />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }} />
-          {/* Bottom meta overlay — date + venue only (URL is pinned to bottom safe zone) */}
+          {/* Date + venue overlay at bottom of photo */}
           {(showDateTime || showVenue) && (
             <div style={{
               position: 'absolute', bottom: 0, left: 0, right: 0,
-              background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.60) 40%, transparent 100%)',
-              padding: '3rem 2rem 16%',
-              display: 'flex', flexDirection: 'column', gap: 6,
+              background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)',
+              padding: '2.5rem 1.5rem 1rem',
+              display: 'flex', flexDirection: 'column', gap: 5,
             }}>
               {showDateTime && dateParts.day && (
-                <p style={{ fontFamily: INTER, fontWeight: 700, fontSize: 14, color: 'rgba(255,255,255,0.9)', margin: 0, letterSpacing: '0.04em' }}>
+                <p style={{ fontFamily: INTER, fontWeight: 700, fontSize: 13, color: 'rgba(255,255,255,0.9)', margin: 0, letterSpacing: '0.04em' }}>
                   {dateParts.weekday} {dateParts.month} {dateParts.day}{timeStr ? ` · ${timeStr}` : ''}
                 </p>
               )}
               {showVenue && venue && (
-                <p style={{ fontFamily: 'var(--font-inter), system-ui', fontSize: 13, color: 'rgba(255,255,255,0.65)', margin: 0,
-                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <p style={{ fontFamily: 'var(--font-inter), system-ui', fontSize: 12, color: 'rgba(255,255,255,0.65)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {venue}
                 </p>
               )}
@@ -508,16 +541,10 @@ function TemplateStub({
           )}
         </div>
 
-        {/* URL pinned inside bottom safe zone */}
+        {/* URL in bottom safe zone */}
         {showCTA && (
-          <div style={{
-            position: 'absolute', bottom: '3%', left: 0, right: 0,
-            textAlign: 'center', zIndex: 10, pointerEvents: 'none',
-          }}>
-            <span style={{
-              fontFamily: 'var(--font-inter), system-ui', fontWeight: 700,
-              fontSize: 11, color: '#e8a898', letterSpacing: '0.08em',
-            }}>abqunplugged.com</span>
+          <div style={{ position: 'absolute', bottom: '3%', left: 0, right: 0, textAlign: 'center', zIndex: 10, pointerEvents: 'none' }}>
+            <span style={{ fontFamily: 'var(--font-inter), system-ui', fontWeight: 700, fontSize: 11, color: '#e8a898', letterSpacing: '0.08em' }}>abqunplugged.com</span>
           </div>
         )}
 
