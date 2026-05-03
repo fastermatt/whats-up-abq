@@ -92,9 +92,38 @@ function formatMonthDay(iso: string): { month: string; day: string; weekday: str
 // ─── Title font sizing ────────────────────────────────────────────────────────
 
 function titlePx(len: number, isStory: boolean): number {
-  if (isStory) return len > 60 ? 36 : len > 45 ? 44 : len > 30 ? 52 : 60
-  return len > 60 ? 22 : len > 45 ? 28 : len > 30 ? 36 : 44
+  // Calibrated for story 47% panel (~284px), portrait 47% panel (~224px), ~340/380px card widths
+  // Body ≈ panel - 44px safe zone - 20px padding - 28px header - 62px footer - 24px gaps = ~106px story
+  // 3-line target for 38-60 chars: 26px × 3 = 78px (fits in ~78px body after price label)
+  if (isStory) {
+    if (len > 60) return 20
+    if (len > 50) return 23
+    if (len > 38) return 26  // "Free Sunday Mornings at Albuquerque Museum" → 26px, 3 lines
+    if (len > 25) return 34
+    if (len > 15) return 46
+    return 56
+  }
+  // Portrait / square — slightly wider panel, no safe-zone eating
+  if (len > 60) return 17
+  if (len > 50) return 20
+  if (len > 38) return 24
+  if (len > 25) return 31
+  if (len > 15) return 42
+  return 52
 }
+
+/**
+ * Letter spacing anchored to DESIGN.md display spec: -1.5px at 34-58px.
+ * Pass the computed font-size in px for accurate mechanical tracking.
+ */
+function titleTracking(pxSize: number): string {
+  if (pxSize >= 48) return '-2px'
+  if (pxSize >= 34) return '-1.4px'
+  if (pxSize >= 26) return '-1px'
+  return '-0.6px'
+}
+
+const INTER = 'var(--font-inter), Inter, system-ui, sans-serif'
 
 // ─── Grain overlay ────────────────────────────────────────────────────────────
 
@@ -163,7 +192,8 @@ function TemplateBroadside({
   const dateParts = formatMonthDay(dateStr || '')
 
   // Panel split — how much goes to text vs photo
-  const textPct  = isStory ? 42 : isSquare ? 48 : 45
+  // Story needs 47% because 13% safe-zone padding (CSS % = card width) consumes ~44px of the 254px panel
+  const textPct  = isStory ? 47 : isSquare ? 50 : 47
   const photoPct = 100 - textPct
 
   const pxText = titlePx(title.length, isStory)
@@ -184,40 +214,51 @@ function TemplateBroadside({
         padding: isStory ? `${topSafe} 2rem 1.25rem` : '1.5rem 1.75rem 1.25rem',
         position: 'relative',
         zIndex: 2,
+        overflow: 'hidden', // prevents content from bleeding past panel & crossing the terra line
       }}>
-        {/* Logo + category row */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 'auto' }}>
+        {/* Logo + category — pinned to top, never shrinks */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexShrink: 0 }}>
           {showLogo && <Logo dark={false} size={isStory ? 22 : 18} />}
           {showCategory && category && (
             <div style={{
               background: TERRA, color: '#fff',
-              fontFamily: fontCss, fontWeight: 700, fontSize: isStory ? 11 : 9,
-              letterSpacing: '0.18em', textTransform: 'uppercase',
-              padding: isStory ? '5px 14px' : '4px 11px', borderRadius: 100,
+              fontFamily: INTER, fontWeight: 600, fontSize: isStory ? 10 : 8,
+              letterSpacing: '0.20em', textTransform: 'uppercase',
+              padding: isStory ? '5px 13px' : '4px 10px', borderRadius: 100,
             }}>
               {emoji} {category}
             </div>
           )}
         </div>
 
-        {/* Title */}
-        <div style={{ marginTop: isStory ? '1.5rem' : '1rem' }}>
+        {/* Title body — grows to fill space; spacer pushes price+title toward footer */}
+        <div style={{
+          flex: 1, minHeight: 0,
+          display: 'flex', flexDirection: 'column',
+          overflow: 'hidden',
+          paddingTop: '0.25rem',
+        }}>
+          {/* Spacer: absorbs leftover space, anchoring title block near the footer */}
+          <div style={{ flex: 1 }} />
+
           {price && (
             <div style={{
               color: price.toLowerCase().includes('free') ? '#4f6249' : TERRA,
-              fontFamily: fontCss, fontWeight: 700, fontSize: isStory ? 12 : 10,
-              letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: isStory ? 10 : 8,
+              fontFamily: INTER, fontWeight: 700, fontSize: isStory ? 11 : 9,
+              letterSpacing: '0.2em', textTransform: 'uppercase',
+              marginBottom: isStory ? 8 : 6, flexShrink: 0,
             }}>
-              {price.toLowerCase().includes('free') ? '✓ Free admission' : price}
+              {price.toLowerCase().includes('free') ? '✓ Free' : price}
             </div>
           )}
           <p style={{
             fontFamily: fontCss, fontWeight: 900,
-            fontSize: pxText, lineHeight: 1.0,
-            letterSpacing: '-0.02em',
+            fontSize: pxText, lineHeight: 1.05,
+            letterSpacing: titleTracking(pxText),
             color: INK,
+            margin: 0, flexShrink: 0,
             display: '-webkit-box',
-            WebkitLineClamp: isStory ? 4 : 3,
+            WebkitLineClamp: isStory ? 5 : 4,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
           }}>
@@ -225,8 +266,8 @@ function TemplateBroadside({
           </p>
         </div>
 
-        {/* Date / Venue strip at bottom of text panel */}
-        <div style={{ marginTop: 'auto', paddingTop: '0.75rem', borderTop: `1.5px solid ${SAND}` }}>
+        {/* Date / Venue strip — pinned to bottom, never shrinks */}
+        <div style={{ flexShrink: 0, marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: `1.5px solid ${SAND}` }}>
           {showDateTime && dateParts.day && (
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 3 }}>
               <span style={{
@@ -244,6 +285,7 @@ function TemplateBroadside({
               fontFamily: 'var(--font-inter), system-ui', fontWeight: 500,
               fontSize: isStory ? 12 : 10, color: INK_MID,
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              margin: 0,
             }}>
               {venue}
             </p>
@@ -252,7 +294,7 @@ function TemplateBroadside({
             <p style={{
               fontFamily: 'var(--font-inter), system-ui', fontWeight: 700,
               fontSize: isStory ? 11 : 9, color: TERRA, letterSpacing: '0.08em',
-              marginTop: 4,
+              marginTop: 4, marginBottom: 0,
             }}>
               abqunplugged.com
             </p>
@@ -332,8 +374,8 @@ function TemplateStub({
             <div style={{
               display: 'inline-flex', alignItems: 'center',
               background: TERRA, color: '#fff',
-              fontFamily: fontCss, fontWeight: 700, fontSize: 10,
-              letterSpacing: '0.18em', textTransform: 'uppercase',
+              fontFamily: INTER, fontWeight: 600, fontSize: 9,
+              letterSpacing: '0.20em', textTransform: 'uppercase',
               padding: '4px 12px', borderRadius: 100, marginBottom: 10, alignSelf: 'flex-start',
             }}>
               {emoji} {category}
@@ -342,7 +384,7 @@ function TemplateStub({
           <p style={{
             fontFamily: fontCss, fontWeight: 900,
             fontSize: pxText, lineHeight: 1.05,
-            letterSpacing: '-0.02em', color: CREAM,
+            letterSpacing: titleTracking(pxText), color: CREAM,
             display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden',
           }}>{title}</p>
         </div>
@@ -363,7 +405,7 @@ function TemplateStub({
               display: 'flex', flexDirection: 'column', gap: 3,
             }}>
               {showDateTime && dateParts.day && (
-                <p style={{ fontFamily: fontCss, fontWeight: 700, fontSize: 14, color: 'rgba(255,255,255,0.9)', margin: 0 }}>
+                <p style={{ fontFamily: INTER, fontWeight: 700, fontSize: 13, color: 'rgba(255,255,255,0.9)', margin: 0, letterSpacing: '0.04em' }}>
                   {dateParts.weekday} {dateParts.month} {dateParts.day}{timeStr ? ` · ${timeStr}` : ''}
                 </p>
               )}
@@ -409,8 +451,8 @@ function TemplateStub({
           <div style={{
             display: 'inline-flex', marginTop: '1.25rem',
             background: TERRA, color: '#fff',
-            fontFamily: fontCss, fontWeight: 700, fontSize: 9,
-            letterSpacing: '0.18em', textTransform: 'uppercase',
+            fontFamily: INTER, fontWeight: 600, fontSize: 8,
+            letterSpacing: '0.20em', textTransform: 'uppercase',
             padding: '4px 10px', borderRadius: 100, alignSelf: 'flex-start',
           }}>
             {emoji} {category}
@@ -508,8 +550,8 @@ function TemplateDarkFrame({
         {showCategory && category && (
           <div style={{
             background: TERRA, color: '#fff',
-            fontFamily: fontCss, fontWeight: 700, fontSize: isStory ? 11 : 9,
-            letterSpacing: '0.18em', textTransform: 'uppercase',
+            fontFamily: INTER, fontWeight: 600, fontSize: isStory ? 10 : 8,
+            letterSpacing: '0.20em', textTransform: 'uppercase',
             padding: isStory ? '5px 14px' : '4px 11px', borderRadius: 100,
           }}>
             {emoji} {category}
@@ -526,7 +568,7 @@ function TemplateDarkFrame({
         {price && (
           <div style={{
             color: price.toLowerCase().includes('free') ? '#4f6249' : '#e8a898',
-            fontFamily: 'var(--font-inter), system-ui', fontWeight: 700,
+            fontFamily: INTER, fontWeight: 700,
             fontSize: isStory ? 11 : 9, letterSpacing: '0.2em', textTransform: 'uppercase',
             marginBottom: 8,
           }}>
@@ -536,7 +578,7 @@ function TemplateDarkFrame({
         <p style={{
           fontFamily: fontCss, fontWeight: 900,
           fontSize: pxText, lineHeight: 1.05,
-          letterSpacing: '-0.02em', color: CREAM,
+          letterSpacing: titleTracking(pxText), color: CREAM,
           display: '-webkit-box',
           WebkitLineClamp: isStory ? 3 : 2,
           WebkitBoxOrient: 'vertical',
