@@ -163,6 +163,29 @@ function useFitTitle(
   return { containerRef, titleRef, fittedSize }
 }
 
+/**
+ * Returns the natural width/height ratio of an image src. Null while loading.
+ * Used to size story photo insets so the image fits without cropping.
+ */
+function useImageRatio(src: string): number | null {
+  const [ratio, setRatio] = useState<number | null>(null)
+  useEffect(() => {
+    if (!src) { setRatio(null); return }
+    const img = new window.Image()
+    img.onload = () => {
+      if (img.naturalWidth && img.naturalHeight) setRatio(img.naturalWidth / img.naturalHeight)
+    }
+    img.onerror = () => setRatio(null)
+    img.src = src
+  }, [src])
+  return ratio
+}
+
+// 9:16 story: photo inset is 90% of card width.
+// As a fraction of card height: 0.90 × (9/16) = 0.50625
+// photo_height_pct = 50.625 / imgRatio
+const STORY_PHOTO_W_FRAC = 0.90 * (9 / 16)
+
 const INTER = 'var(--font-inter), Inter, system-ui, sans-serif'
 
 // ─── Grain overlay ────────────────────────────────────────────────────────────
@@ -263,16 +286,22 @@ function TemplateBroadside({
   const isSquare = format === 'square'
   const dateParts = formatMonthDay(dateStr || '')
   const { containerRef, titleRef, fittedSize } = useFitTitle(title, isStory, fontCss, titleWeight, titleItalic)
+  const imgRatio = useImageRatio(imgSrc)
 
   // Panel split (portrait/square only — story uses absolute layout below)
   const textPct  = isSquare ? 50 : 47
   const photoPct = 100 - textPct
   const emoji    = CAT_EMOJI[category ?? ''] ?? '📍'
 
-  // ── STORY: absolute layout — text rides 13% safe zone line, photo gets the rest ──
+  // ── STORY: photo full-width between text and date/venue sections ──
   if (isStory) {
-    // Photo runs from split to bottom safe zone
-    const splitPct = 46 // % where text ends and photo begins
+    const splitPct = 46 // % where title section ends and photo begins
+    // Full-width photo: width = 100% of card = (9/16) of card height
+    const fullWFrac = 9 / 16
+    const maxPhotoBotPct = 78  // leave at least 9% for date/venue above safe zone
+    const photoH   = imgRatio ? Math.min((fullWFrac / imgRatio) * 100, maxPhotoBotPct - splitPct) : maxPhotoBotPct - splitPct
+    const photoBot = splitPct + photoH
+    const imgFit   = photoH < (maxPhotoBotPct - splitPct) ? 'contain' : 'cover'
     return (
       <div style={{ width: '100%', height: '100%', position: 'relative', background: CREAM, overflow: 'hidden' }}>
 
@@ -296,66 +325,67 @@ function TemplateBroadside({
           {showLogo && <Logo dark={false} size={33} />}
         </div>
 
-        {/* Text section — starts AT the 13% safe zone line */}
-        <div style={{
+        {/* Title section — 13% to split, anchors to top */}
+        <div ref={containerRef} style={{
           position: 'absolute',
           top: '13%', bottom: `${100 - splitPct}%`,
           left: '2rem', right: '2rem',
           display: 'flex', flexDirection: 'column',
           overflow: 'hidden',
         }}>
-          {/* Title fit-text — fills space, anchored to bottom */}
-          <div ref={containerRef} style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            <div style={{ flex: 1 }} />
-            {price && (
-              <div style={{ color: price.toLowerCase().includes('free') ? '#4f6249' : TERRA, fontFamily: INTER, fontWeight: 700, fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 8, flexShrink: 0 }}>
-                {price.toLowerCase().includes('free') ? '✓ Free' : price}
-              </div>
-            )}
-            <p ref={titleRef} style={{ fontFamily: fontCss, fontWeight: titleWeight, fontStyle: titleItalic ? 'italic' : 'normal', fontSize: fittedSize, lineHeight: 1.05, letterSpacing: titleTracking(fittedSize), color: INK, margin: 0, flexShrink: 0 }}>
-              {title}
-            </p>
-          </div>
+          {price && (
+            <div style={{ color: price.toLowerCase().includes('free') ? '#4f6249' : TERRA, fontFamily: INTER, fontWeight: 700, fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 8, flexShrink: 0 }}>
+              {price.toLowerCase().includes('free') ? '✓ Free' : price}
+            </div>
+          )}
+          <p ref={titleRef} style={{ fontFamily: fontCss, fontWeight: titleWeight, fontStyle: titleItalic ? 'italic' : 'normal', fontSize: fittedSize, lineHeight: 1.05, letterSpacing: titleTracking(fittedSize), color: INK, margin: 0, flexShrink: 0 }}>
+            {title}
+          </p>
+        </div>
 
-          {/* Date / Venue at bottom of text section */}
-          <div style={{ flexShrink: 0, paddingTop: '0.6rem', marginTop: '0.6rem', borderTop: `1.5px solid ${SAND}` }}>
+        {/* Terra divider — full width at split */}
+        <div style={{ position: 'absolute', top: `${splitPct}%`, left: 0, right: 0, height: 3, background: TERRA, zIndex: 5 }} />
+
+        {/* Photo — full width, sized to image natural ratio */}
+        <div style={{
+          position: 'absolute',
+          top: `calc(${splitPct}% + 3px)`,
+          bottom: `${100 - photoBot}%`,
+          left: 0, right: 0,
+          overflow: 'hidden', zIndex: 2,
+        }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: imgFit, objectPosition: 'center' }} />
+        </div>
+
+        {/* Date + venue — below photo on cream, above safe zone */}
+        {(showDateTime || showVenue) && (
+          <div style={{
+            position: 'absolute',
+            top: `${photoBot + 1}%`,
+            bottom: '13%',
+            left: '2rem', right: '2rem',
+            display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 3,
+            zIndex: 3,
+          }}>
             {showDateTime && dateParts.day && (
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 2 }}>
-                <span style={{ fontFamily: fontCss, fontWeight: 900, fontSize: 22, color: TERRA, lineHeight: 1 }}>{dateParts.day}</span>
-                <span style={{ fontFamily: 'var(--font-inter), system-ui', fontWeight: 600, fontSize: 12, color: INK_MID, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{dateParts.month}{timeStr ? ` · ${timeStr}` : ''}</span>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                <span style={{ fontFamily: fontCss, fontWeight: 900, fontSize: 26, color: TERRA, lineHeight: 1 }}>{dateParts.day}</span>
+                <span style={{ fontFamily: INTER, fontWeight: 600, fontSize: 13, color: INK_MID, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{dateParts.month}{timeStr ? ` · ${timeStr}` : ''}</span>
               </div>
             )}
             {showVenue && venue && (
-              <p style={{ fontFamily: 'var(--font-inter), system-ui', fontWeight: 500, fontSize: 12, color: INK_MID, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: 0 }}>
+              <p style={{ fontFamily: INTER, fontWeight: 500, fontSize: 12, color: INK_MID, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {venue}
               </p>
             )}
           </div>
-        </div>
+        )}
 
-        {/* Terra divider at split */}
-        <div style={{ position: 'absolute', top: `${splitPct}%`, left: 0, right: 0, height: 3, background: TERRA, zIndex: 5 }} />
-
-        {/* Photo inset — from split to bottom safe zone, sides inset */}
-        <div style={{
-          position: 'absolute',
-          top: `calc(${splitPct}% + 3px)`,
-          bottom: '13%',
-          left: '5%', right: '5%',
-          borderRadius: 8, overflow: 'hidden', zIndex: 2,
-        }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={imgSrc} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(28px) brightness(0.75)', transform: 'scale(1.15)', transformOrigin: 'center' }} />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }} />
-          {/* Soft vignette merging with cream at top */}
-          <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to bottom, ${CREAM} 0%, transparent 10%)`, pointerEvents: 'none' }} />
-        </div>
-
-        {/* URL in bottom safe zone — terra on cream background */}
+        {/* URL in bottom safe zone */}
         {showCTA && (
           <div style={{ position: 'absolute', bottom: '3%', left: 0, right: 0, textAlign: 'center', zIndex: 10, pointerEvents: 'none' }}>
-            <span style={{ fontFamily: 'var(--font-inter), system-ui', fontWeight: 700, fontSize: 11, color: TERRA, letterSpacing: '0.08em' }}>abqunplugged.com</span>
+            <span style={{ fontFamily: INTER, fontWeight: 700, fontSize: 11, color: TERRA, letterSpacing: '0.08em' }}>abqunplugged.com</span>
           </div>
         )}
 
@@ -428,13 +458,10 @@ function TemplateBroadside({
         </div>
       </div>
 
-      {/* ── PHOTO PANEL (bottom) ── */}
+      {/* ── PHOTO PANEL (bottom) — full bleed cover ── */}
       <div style={{ flex: `0 0 ${photoPct}%`, position: 'relative', overflow: 'hidden' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={imgSrc} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(28px) brightness(0.75)', transform: 'scale(1.15)', transformOrigin: 'center' }} />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center center' }} />
-        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to bottom, ${CREAM} 0%, transparent 14%)`, pointerEvents: 'none' }} />
+        <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
       </div>
 
       {/* Terra thin divider line */}
@@ -460,10 +487,15 @@ function TemplateStub({
   const dateParts = formatMonthDay(dateStr || '')
   const emoji    = CAT_EMOJI[category ?? ''] ?? '📍'
   const { containerRef, titleRef, fittedSize } = useFitTitle(title, isStory, fontCss, titleWeight, titleItalic)
+  const imgRatio = useImageRatio(imgSrc)
 
   if (isStory) {
-    // Text from safe zone line (13%) to split; photo from split to bottom safe zone (87%)
     const splitPct = 44
+    // Photo height sized to fit image naturally. Cap at 76% to leave room for date/venue below.
+    const maxPhotoH = 76 - splitPct
+    const photoH    = imgRatio ? Math.min((STORY_PHOTO_W_FRAC / imgRatio) * 100, maxPhotoH) : maxPhotoH
+    const photoBot  = splitPct + photoH
+    const imgFit    = photoH < maxPhotoH ? 'contain' : 'cover'
     return (
       <div style={{ width: '100%', height: '100%', position: 'relative', background: INK, overflow: 'hidden' }}>
 
@@ -507,39 +539,39 @@ function TemplateStub({
         {/* Terra divider at split */}
         <div style={{ position: 'absolute', top: `${splitPct}%`, left: 0, right: 0, height: 3, background: TERRA, zIndex: 5 }} />
 
-        {/* Photo inset — from split to bottom safe zone, sides inset */}
+        {/* Photo inset — sized to fit image naturally, no text overlay */}
         <div style={{
           position: 'absolute',
           top: `calc(${splitPct}% + 3px)`,
-          bottom: '13%',
+          bottom: `${100 - photoBot}%`,
           left: '5%', right: '5%',
           borderRadius: 8, overflow: 'hidden', zIndex: 2,
         }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={imgSrc} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(28px) brightness(0.75)', transform: 'scale(1.15)', transformOrigin: 'center' }} />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }} />
-          {/* Date + venue overlay at bottom of photo */}
-          {(showDateTime || showVenue) && (
-            <div style={{
-              position: 'absolute', bottom: 0, left: 0, right: 0,
-              background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)',
-              padding: '2.5rem 1.5rem 1rem',
-              display: 'flex', flexDirection: 'column', gap: 5,
-            }}>
-              {showDateTime && dateParts.day && (
-                <p style={{ fontFamily: INTER, fontWeight: 700, fontSize: 13, color: 'rgba(255,255,255,0.9)', margin: 0, letterSpacing: '0.04em' }}>
-                  {dateParts.weekday} {dateParts.month} {dateParts.day}{timeStr ? ` · ${timeStr}` : ''}
-                </p>
-              )}
-              {showVenue && venue && (
-                <p style={{ fontFamily: 'var(--font-inter), system-ui', fontSize: 12, color: 'rgba(255,255,255,0.65)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {venue}
-                </p>
-              )}
-            </div>
-          )}
+          <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: imgFit, objectPosition: 'center' }} />
         </div>
+
+        {/* Date + venue — below the photo, never overlaid */}
+        {(showDateTime || showVenue) && (
+          <div style={{
+            position: 'absolute',
+            top: `${photoBot + 1}%`,
+            bottom: '13%',
+            left: '2rem', right: '2rem',
+            display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 4, zIndex: 3,
+          }}>
+            {showDateTime && dateParts.day && (
+              <p style={{ fontFamily: INTER, fontWeight: 700, fontSize: 13, color: CREAM, margin: 0, letterSpacing: '0.04em' }}>
+                {dateParts.weekday} {dateParts.month} {dateParts.day}{timeStr ? ` · ${timeStr}` : ''}
+              </p>
+            )}
+            {showVenue && venue && (
+              <p style={{ fontFamily: INTER, fontSize: 12, color: 'rgba(255,255,255,0.55)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {venue}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* URL in bottom safe zone */}
         {showCTA && (
@@ -628,12 +660,10 @@ function TemplateStub({
       {/* Terra divider */}
       <div style={{ flex: '0 0 3px', background: TERRA, zIndex: 5 }} />
 
-      {/* Right: photo panel */}
+      {/* Right: photo panel — full bleed cover */}
       <div style={{ flex: `0 0 calc(${rightPct}% - 3px)`, position: 'relative', overflow: 'hidden' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={imgSrc} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(28px) brightness(0.75)', transform: 'scale(1.15)', transformOrigin: 'center' }} />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }} />
+        <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
       </div>
 
       <GrainOverlay opacity={0.5} />
@@ -657,11 +687,33 @@ function TemplateDarkFrame({
   const emoji    = CAT_EMOJI[category ?? ''] ?? '📍'
   const dateParts = formatMonthDay(dateStr || '')
   const { containerRef, titleRef, fittedSize } = useFitTitle(title, isStory, fontCss, titleWeight, titleItalic)
+  const imgRatio = useImageRatio(imgSrc)
 
-  // Photo inset dimensions (% of card)
-  const photoTop    = isStory ? 38 : isSquare ? 34 : 40
-  const photoHeight = isStory ? 34 : isSquare ? 38 : 35
-  const photoSideGap = 7 // % from each side
+  // Photo inset — where the photo zone starts (% from top)
+  const photoTop     = isStory ? 38 : isSquare ? 34 : 40
+  // For story: fixed height + cover. For portrait/square: dynamically sized to image ratio.
+  const photoHeight  = isStory ? 34 : isSquare ? 41 : 37  // vertical slot reserved
+  const maxPhotoW    = 86  // % of card (7% gap each side)
+
+  // Compute exact display dimensions so image fills frame with no bars, no crop
+  let displayW: number, displayH: number
+  if (!isStory && imgRatio) {
+    const hIfFillW = maxPhotoW / imgRatio
+    if (hIfFillW <= photoHeight) {
+      // Wide image — constrained by width
+      displayW = maxPhotoW
+      displayH = hIfFillW
+    } else {
+      // Tall image — constrained by height
+      displayH = photoHeight
+      displayW = photoHeight * imgRatio
+    }
+  } else {
+    displayW = maxPhotoW
+    displayH = photoHeight
+  }
+  const photoLeftPct = (100 - displayW) / 2
+  const photoTopPct  = photoTop + (photoHeight - displayH) / 2
 
   // Story: logo/badge bleed into top safe zone (3%); portrait: normal margin
   const topContentStart = isStory ? '3%' : '1.5rem'
@@ -679,7 +731,7 @@ function TemplateDarkFrame({
         {showLogo && <Logo dark size={isStory ? 33 : 27} />}
       </div>
 
-      {/* ── Title (above photo) — in live area starting at 14% ── */}
+      {/* ── Title (above photo) — anchors to top so useFitTitle detects bottom overflow ── */}
       <div ref={containerRef} style={{
         position: 'absolute', left: '1.75rem', right: '1.75rem',
         top: isStory ? '14%' : '3.5rem',
@@ -687,8 +739,6 @@ function TemplateDarkFrame({
         overflow: 'hidden',
         zIndex: 3, display: 'flex', flexDirection: 'column',
       }}>
-        {/* Spacer — shrinks to 0 if content overflows, letting useFitTitle detect it */}
-        <div style={{ flex: 1 }} />
         {price && (
           <div style={{
             color: price.toLowerCase().includes('free') ? '#4f6249' : '#e8a898',
@@ -709,37 +759,34 @@ function TemplateDarkFrame({
         </p>
       </div>
 
-      {/* ── Photo inset ── */}
+      {/* ── Photo inset — exact size of image, no bars, no crop ── */}
       <div style={{
         position: 'absolute',
-        top: `${photoTop}%`,
-        height: `${photoHeight}%`,
-        left: `${photoSideGap}%`,
-        right: `${photoSideGap}%`,
+        top: `${photoTopPct}%`,
+        height: `${displayH}%`,
+        left: `${photoLeftPct}%`,
+        width: `${displayW}%`,
         borderRadius: 8,
         overflow: 'hidden',
         boxShadow: '0 8px 40px rgba(0,0,0,0.7)',
         zIndex: 2,
         border: `2px solid rgba(255,255,255,0.07)`,
       }}>
-        {/* Blurred backdrop — fills letterbox area with image color */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={imgSrc} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(28px) brightness(0.75)', transform: 'scale(1.15)', transformOrigin: 'center' }} />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={imgSrc} alt="" style={{ position: 'relative', width: '100%', height: '100%', objectFit: 'contain' }} />
+        <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
       </div>
 
       {/* ── Date + venue (below photo) — URL moved to bottom safe zone ── */}
       <div style={{
         position: 'absolute',
-        top: `${photoTop + photoHeight + 2}%`,
-        bottom: isStory ? '18%' : '1.5rem',
+        top: `${photoTop + photoHeight + 2}%`,  // slot bottom, not display bottom
+        bottom: isStory ? '13%' : '1.5rem',
         left: '1.75rem', right: '1.75rem',
         display: 'flex', flexDirection: 'column', justifyContent: 'flex-start',
-        gap: 6, zIndex: 3,
+        gap: 6, zIndex: 3, overflow: 'visible',
       }}>
         {/* Terra rule */}
-        <div style={{ width: 32, height: 2.5, background: TERRA, borderRadius: 2 }} />
+        <div style={{ width: isStory ? 56 : 40, height: 2.5, background: TERRA, borderRadius: 2 }} />
 
         {showDateTime && dateParts.day && (
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
