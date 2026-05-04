@@ -979,12 +979,269 @@ const blank: Template = {
 }
 
 // ════════════════════════════════════════════════════════════════════════
+//   STORY TEMPLATES (9:16 native)
+// ════════════════════════════════════════════════════════════════════════
+
+// ── 14. Story: Full Bleed ─────────────────────────────────────────────
+
+const storyFullBleed: Template = {
+  id: 'story-fullbleed',
+  name: 'Story: Full Bleed',
+  description: 'Full bleed photo with dark overlay, bold title, date, venue, and CTA. Best for 9:16.',
+  category: 'event',
+  thumb: {
+    bg: '#000',
+    blocks: [
+      { x: 0, y: 0, w: 60, h: 125, c: '#555', o: 0.5 },
+      { x: 5, y: 10, w: 50, h: 8, c: '#fff' },
+      { x: 5, y: 75, w: 25, h: 4, c: '#9a442d' },
+      { x: 5, y: 82, w: 35, h: 3, c: '#fff' },
+      { x: 5, y: 88, w: 40, h: 3, c: '#c99b3b' },
+    ],
+  },
+  build: (ctx, format) => {
+    const fmt = format ?? '9:16'
+    const { w, h } = CANVAS_DIMS[fmt]
+    const title = ctx.title ?? 'Event Title'
+    const date = ctx.date ?? 'Date'
+    const time = ctx.time ? ` · ${ctx.time}` : ''
+    const venue = ctx.venue ?? 'Albuquerque, NM'
+    const cta = ctx.cta ?? 'abqunplugged.com'
+    const isStory = fmt === '9:16'
+    const topSafe = isStory ? Math.round(h * 0.12) : Math.round(h * 0.08)
+    const botSafe  = isStory ? Math.round(h * 0.15) : Math.round(h * 0.08)
+
+    const titleFontSize = title.length > 20 ? 80 : title.length > 12 ? 100 : 130
+
+    const layers: Layer[] = []
+
+    // Full bleed photo background (via image layer if imageUrl provided)
+    if (ctx.imageUrl) {
+      layers.push(imageLayer({ src: ctx.imageUrl, x: 0, y: 0, width: w, height: h, fit: 'cover' }))
+    }
+
+    // Dark overlay
+    layers.push(shape({ shape: 'rect', x: 0, y: 0, width: w, height: h, fill: '#000', opacity: 0.55 }))
+
+    // Title
+    layers.push(textLayer({
+      name: 'title', text: title,
+      x: 60, y: topSafe, width: w - 120,
+      fontFamily: font('Epilogue'), fontSize: titleFontSize, fontWeight: 900,
+      fill: '#fff', align: 'left', lineHeight: 1.1,
+      shadow: { enabled: true, color: 'rgba(0,0,0,0.6)', blur: 15, offsetX: 0, offsetY: 4 },
+    }))
+
+    // Date + Time
+    layers.push(textLayer({
+      name: 'dateTime', text: `${date}${time}`,
+      x: 60, y: h - botSafe - 400, width: w - 120,
+      fontFamily: font('Bebas Neue'), fontSize: 60, fontWeight: 400,
+      fill: '#9a442d', align: 'left', letterSpacing: 3, uppercase: true,
+    }))
+
+    // Venue
+    layers.push(textLayer({
+      name: 'venue', text: venue,
+      x: 60, y: h - botSafe - 300, width: w - 120,
+      fontFamily: font('Inter'), fontSize: 36, fontWeight: 400,
+      fill: '#fff', align: 'left', letterSpacing: 0.5,
+    }))
+
+    // CTA
+    layers.push(textLayer({
+      name: 'cta', text: cta,
+      x: 60, y: h - botSafe - 160, width: w - 120,
+      fontFamily: font('DM Mono'), fontSize: 28, fontWeight: 400,
+      fill: '#c99b3b', align: 'left', letterSpacing: 2, uppercase: true,
+    }))
+
+    return {
+      id: uid(), name: 'Story: Full Bleed', format: fmt,
+      slides: [{ id: uid(), background: { type: 'color', color: '#000' }, layers }],
+      createdAt: Date.now(), updatedAt: Date.now(),
+    }
+  },
+}
+
+// ── 15. Story: Split ─────────────────────────────────────────────────
+
+const storySplit: Template = {
+  id: 'story-split',
+  name: 'Story: Split',
+  description: 'Top-half photo, cream bottom with title, date, time, venue, and CTA.',
+  category: 'event',
+  thumb: {
+    bg: '#fbf7f1',
+    blocks: [
+      { x: 0, y: 0, w: 60, h: 55, c: '#555', o: 0.8 },
+      { x: 3, y: 57, w: 4, h: 50, c: '#9a442d' },
+      { x: 12, y: 60, w: 45, h: 8, c: '#1a1614' },
+      { x: 12, y: 72, w: 30, h: 4, c: '#9a442d' },
+      { x: 12, y: 79, w: 35, h: 3, c: '#1a1614' },
+      { x: 12, y: 90, w: 40, h: 3, c: '#c99b3b' },
+    ],
+  },
+  build: (ctx, format) => {
+    const fmt = format ?? '9:16'
+    const { w, h } = CANVAS_DIMS[fmt]
+    const title = ctx.title ?? 'Event Title'
+    const date = ctx.date ?? 'Date'
+    const time = ctx.time ?? ''
+    const venue = ctx.venue ?? 'Albuquerque, NM'
+    const cta = ctx.cta ?? 'abqunplugged.com'
+    const isStory = fmt === '9:16'
+    const botSafe  = isStory ? Math.round(h * 0.15) : Math.round(h * 0.08)
+    const halfH = Math.round(h / 2)
+
+    const layers: Layer[] = []
+
+    // Top-half photo
+    if (ctx.imageUrl) {
+      layers.push(imageLayer({ src: ctx.imageUrl, x: 0, y: 0, width: w, height: halfH, fit: 'cover' }))
+    }
+
+    // Accent bar
+    layers.push(shape({ shape: 'rect', x: 60, y: halfH + 40, width: 6, height: 360, fill: '#9a442d' }))
+
+    // Title
+    layers.push(textLayer({
+      name: 'title', text: title,
+      x: 90, y: halfH + 60, width: w - 150,
+      fontFamily: font('Fraunces'), fontSize: 100, fontWeight: 900,
+      fill: '#1a1614', align: 'left', letterSpacing: -0.5, lineHeight: 1.0,
+    }))
+
+    // Date
+    layers.push(textLayer({
+      name: 'date', text: date,
+      x: 90, y: halfH + 260, width: w - 150,
+      fontFamily: font('Bebas Neue'), fontSize: 48, fontWeight: 400,
+      fill: '#9a442d', align: 'left', letterSpacing: 3, uppercase: true,
+    }))
+
+    // Time + Venue
+    layers.push(textLayer({
+      name: 'timeVenue', text: time ? `${time} · ${venue}` : venue,
+      x: 90, y: halfH + 340, width: w - 150,
+      fontFamily: font('Inter'), fontSize: 28, fontWeight: 400,
+      fill: '#1a1614', align: 'left', letterSpacing: 0.5,
+    }))
+
+    // CTA
+    layers.push(textLayer({
+      name: 'cta', text: cta,
+      x: 90, y: h - botSafe - 120, width: w - 150,
+      fontFamily: font('DM Mono'), fontSize: 24, fontWeight: 400,
+      fill: '#c99b3b', align: 'left', letterSpacing: 2, uppercase: true,
+    }))
+
+    return {
+      id: uid(), name: 'Story: Split', format: fmt,
+      slides: [{ id: uid(), background: { type: 'color', color: '#fbf7f1' }, layers }],
+      createdAt: Date.now(), updatedAt: Date.now(),
+    }
+  },
+}
+
+// ── 16. Story: Type Only ─────────────────────────────────────────────
+
+const storyTypeOnly: Template = {
+  id: 'story-type',
+  name: 'Story: Type Only',
+  description: 'Dark night background, large centered title, category pill, date, and branding.',
+  category: 'event',
+  thumb: {
+    bg: '#11141f',
+    blocks: [
+      { x: 5, y: 5, w: 50, h: 4, c: '#c99b3b' },
+      { x: 10, y: 30, w: 40, h: 14, c: '#fff' },
+      { x: 20, y: 48, w: 20, h: 6, c: '#9a442d', r: 10 },
+      { x: 15, y: 58, w: 30, h: 4, c: '#fff' },
+      { x: 20, y: 70, w: 20, h: 3, c: '#c99b3b' },
+    ],
+  },
+  build: (ctx, format) => {
+    const fmt = format ?? '9:16'
+    const { w, h } = CANVAS_DIMS[fmt]
+    const title = ctx.title ?? 'Event Title'
+    const date = ctx.date ?? 'Date'
+    const time = ctx.time ? ` · ${ctx.time}` : ''
+    const category = ctx.category ?? 'Event'
+    const cta = ctx.cta ?? 'abqunplugged.com'
+    const isStory = fmt === '9:16'
+    const topSafe = isStory ? Math.round(h * 0.12) : Math.round(h * 0.08)
+    const botSafe  = isStory ? Math.round(h * 0.15) : Math.round(h * 0.08)
+
+    const titleFontSize = title.length > 20 ? 100 : title.length > 12 ? 130 : 150
+    const centerY = Math.round(h * 0.42)  // visual center for title block
+    const pillWidth = 320
+    const pillHeight = 64
+    const pillX = Math.round((w - pillWidth) / 2)
+    const pillY = centerY + titleFontSize + 40
+
+    const layers: Layer[] = []
+
+    // Branding header
+    layers.push(textLayer({
+      name: 'branding', text: 'ABQ UNPLUGGED',
+      x: 60, y: topSafe + 20, width: w - 120,
+      fontFamily: font('Bebas Neue'), fontSize: 36, fontWeight: 400,
+      fill: '#c99b3b', align: 'center', letterSpacing: 6, uppercase: true,
+    }))
+
+    // Large title
+    layers.push(textLayer({
+      name: 'title', text: title,
+      x: 60, y: centerY, width: w - 120,
+      fontFamily: font('Space Grotesk'), fontSize: titleFontSize, fontWeight: 700,
+      fill: '#fff', align: 'center', letterSpacing: -1, lineHeight: 1.1,
+    }))
+
+    // Category pill background
+    layers.push(shape({ shape: 'rect', x: pillX, y: pillY, width: pillWidth, height: pillHeight, fill: '#9a442d', cornerRadius: 32 }))
+
+    // Category pill text
+    layers.push(textLayer({
+      name: 'category', text: category,
+      x: pillX, y: pillY + 16, width: pillWidth,
+      fontFamily: font('Inter'), fontSize: 30, fontWeight: 700,
+      fill: '#fff', align: 'center', letterSpacing: 2, uppercase: true,
+    }))
+
+    // Date + Time
+    layers.push(textLayer({
+      name: 'dateTime', text: `${date}${time}`,
+      x: 60, y: pillY + pillHeight + 60, width: w - 120,
+      fontFamily: font('DM Mono'), fontSize: 32, fontWeight: 400,
+      fill: '#fff', align: 'center', letterSpacing: 2,
+    }))
+
+    // CTA
+    layers.push(textLayer({
+      name: 'cta', text: cta,
+      x: 60, y: h - botSafe - 80, width: w - 120,
+      fontFamily: font('Epilogue'), fontSize: 22, fontWeight: 400,
+      fill: '#c99b3b', align: 'center', letterSpacing: 3, uppercase: true,
+      opacity: 0.7,
+    }))
+
+    return {
+      id: uid(), name: 'Story: Type Only', format: fmt,
+      slides: [{ id: uid(), background: { type: 'color', color: '#11141f' }, layers }],
+      createdAt: Date.now(), updatedAt: Date.now(),
+    }
+  },
+}
+
+// ════════════════════════════════════════════════════════════════════════
 //   EXPORTS
 // ════════════════════════════════════════════════════════════════════════
 
 export const TEMPLATES: Template[] = [
-  // Event templates (6)
+  // Event templates (6 feed + 3 story)
   poster, broadside, marquee, split, dispatch, goldenHour,
+  storyFullBleed, storySplit, storyTypeOnly,
   // Brand templates (7)
   statement, categorySpotlight, weekendPreview, mesa, tonightDrop, hiddenGem, blank,
 ]

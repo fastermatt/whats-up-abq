@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useEditor } from '../store'
 import type { TextLayer, ImageLayer, ShapeLayer, CanvasFormat, Layer } from '../types'
 import { BRAND_COLORS, BRAND_FONTS } from '../types'
@@ -82,6 +83,7 @@ function CanvasControls() {
   const { design, setFormat, getActiveSlide, setBackground, addSlide, removeSlide, activeSlideIndex, setActiveSlide } = useEditor()
   const slide = getActiveSlide()
   const bg = slide.background
+  const [showPosZoom, setShowPosZoom] = useState(false)
 
   return (
     <>
@@ -152,6 +154,25 @@ function CanvasControls() {
                 <Btn active={bg.fit === 'contain'} onClick={() => setBackground({ ...bg, fit: 'contain' })}>Contain</Btn>
               </div>
             </div>
+            {/* Position & Zoom */}
+            <div>
+              <Btn active={showPosZoom} onClick={() => setShowPosZoom(s => !s)}>
+                {showPosZoom ? 'Hide' : 'Show'} Position &amp; Zoom
+              </Btn>
+            </div>
+            {showPosZoom && (
+              <div className="space-y-2.5 pl-1 border-l-2 border-white/10">
+                <div className="grid grid-cols-2 gap-2">
+                  <div><Label>Offset X</Label><NumInput value={bg.offsetX ?? 0} onChange={v => setBackground({ ...bg, offsetX: v })} min={-1080} max={1080} step={10} /></div>
+                  <div><Label>Offset Y</Label><NumInput value={bg.offsetY ?? 0} onChange={v => setBackground({ ...bg, offsetY: v })} min={-1920} max={1920} step={10} /></div>
+                </div>
+                <div>
+                  <Label>Scale ({(bg.scale ?? 1).toFixed(2)}×)</Label>
+                  <Slider value={bg.scale ?? 1} onChange={v => setBackground({ ...bg, scale: v })} min={0.5} max={3} step={0.05} />
+                </div>
+                <Btn onClick={() => setBackground({ ...bg, offsetX: 0, offsetY: 0, scale: 1 })}>Reset</Btn>
+              </div>
+            )}
             <div><Label>Overlay color</Label><ColorInput value={bg.overlayColor} onChange={c => setBackground({ ...bg, overlayColor: c })} /></div>
             <div>
               <Label>Overlay opacity ({Math.round(bg.overlayOpacity * 100)}%)</Label>

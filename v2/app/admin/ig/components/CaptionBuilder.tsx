@@ -1,7 +1,8 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { Copy, Check, Send, Loader2, ExternalLink } from 'lucide-react'
+import { Copy, Check, Send, Loader2, ExternalLink, Sparkles, Calendar, Clock } from 'lucide-react'
+import { useEditor } from '../store'
 import type { NormalizedEvent } from '@/lib/events'
 import type { PostCanvasHandle } from './PostCanvas'
 
@@ -51,7 +52,7 @@ export function buildCaptions(event: NormalizedEvent) {
   ]
 }
 
-// ── PNG → JPEG conversion (client-side, no server dep) ───────────────────
+// ── PNG → JPEG conversion ─────────────────────────────────────────────────
 
 async function pngToJpeg(pngDataUrl: string, quality = 0.93): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -75,7 +76,9 @@ async function pngToJpeg(pngDataUrl: string, quality = 0.93): Promise<string> {
 // ── Component ─────────────────────────────────────────────────────────────
 
 type PostState = 'idle' | 'exporting' | 'posting' | 'done' | 'error'
-type MediaType = 'FEED' | 'STORIES'
+type MediaType = 'FEED' | 'STORIES' | 'CAROUSEL'
+
+interface Caption { id: string; label: string; sublabel: string; text: string }
 
 interface Props {
   event: NormalizedEvent
@@ -83,15 +86,32 @@ interface Props {
 }
 
 export function CaptionBuilder({ event, canvasRef }: Props) {
-  const captions = buildCaptions(event)
+  const { design } = useEditor()
+  const isCarousel = design.slides.length > 1
+
+  const staticCaptions = buildCaptions(event)
+  const [captions, setCaptions] = useState<Caption[]>(staticCaptions)
   const [activeId, setActiveId] = useState('standard')
-  const [text, setText] = useState(captions[0].text)
+  const [text, setText] = useState(staticCaptions[0].text)
   const [copied, setCopied] = useState(false)
   const [postState, setPostState] = useState<PostState>('idle')
   const [postId, setPostId] = useState<string | null>(null)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [mediaType, setMediaType] = useState<MediaType>('FEED')
+
+  // AI caption state
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState<string | null>(null)
+
+  // Schedule state
+  const [showSchedule, setShowSchedule] = useState(false)
+  const [scheduleDateTime, setScheduleDateTime] = useState('')
+  const [scheduleState, setScheduleState] = useState<'idle' | 'submitting' | 'done' | 'error'>('idle')
+  const [scheduleError, setScheduleError] = useState<string | null>(null)
+
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  const effectiveMediaType: MediaType = isCarousel ? 'CAROUSEL' : mediaType
 
   const selectStyle = (id: string) => {
     const c = captions.find(c => c.id === id)
@@ -111,13 +131,53 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
     } catch {}
   }
 
+  // ── AI caption generation ──────────────────────────────────────────
+  const generateAICaptions = async () => {
+    setAiLoading(true)
+    setAiError(null)
+    try {
+      const res = await fetch('/api/admin/ai/caption', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: {
+            title: event.title,
+            date: event.date ? formatDate(event.date) : undefined,
+            time: event.time,
+            venue: event.venue,
+            category: event.category,
+            about: event.about ?? undefined,
+            price: event.price,
+          },
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok || data.error) {
+        setAiError(data.error ?? 'AI generation failed')
+        return
+      }
+      const newCaptions: Caption[] = data.captions
+      setCaptions(newCaptions)
+      const first = newCaptions[0]
+      if (first) {
+        setActiveId(first.id)
+        setText(first.text)
+      }
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : 'Unknown error')
+    } finally {
+      setAiLoading(false)
+    }
+  }
+
+  // ── Publish to Instagram ───────────────────────────────────────────
   const postToInstagram = async () => {
     if (!canvasRef.current) {
-      setErrorMsg('Canvas not ready — wait for it to load.')
+      setErrorMsg('Canvas not ready.')
       setPostState('error')
       return
     }
-    if (mediaType === 'FEED' && !text.trim()) {
+    if (effectiveMediaType === 'FEED' && !text.trim()) {
       setErrorMsg('Caption is empty.')
       setPostState('error')
       return
@@ -128,22 +188,25 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
     setPostId(null)
 
     try {
-      // 1. Export canvas as PNG (2× resolution from Konva)
-      const pngDataUrl = await canvasRef.current.exportPng()
+      let payload: Record<string, unknown>
 
-      // 2. Convert PNG → JPEG client-side (Instagram requires JPEG)
-      const jpegDataUrl = await pngToJpeg(pngDataUrl)
+      if (isCarousel) {
+        const pngs = await canvasRef.current.exportAllSlides()
+        const jpegs = await Promise.all(pngs.map(p => pngToJpeg(p)))
+        payload = { imageDataUrls: jpegs, caption: text, mediaType: 'CAROUSEL', eventId: event.id }
+      } else {
+        const png = await canvasRef.current.exportPng()
+        const jpeg = await pngToJpeg(png)
+        payload = { imageDataUrl: jpeg, caption: text, mediaType, eventId: event.id }
+      }
 
-      // 3. Send to server API route
       setPostState('posting')
       const res = await fetch('/api/admin/ig/publish', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageDataUrl: jpegDataUrl, caption: text, mediaType }),
+        body: JSON.stringify(payload),
       })
-
       const data = await res.json()
-
       if (!res.ok || data.error) {
         setErrorMsg(data.error ?? `Server error ${res.status}`)
         setPostState('error')
@@ -158,7 +221,48 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
     }
   }
 
+  // ── Schedule post ──────────────────────────────────────────────────
+  const schedulePost = async () => {
+    if (!canvasRef.current || !scheduleDateTime) return
+    setScheduleState('submitting')
+    setScheduleError(null)
+    try {
+      let imageDataUrls: string[]
+      if (isCarousel) {
+        const pngs = await canvasRef.current.exportAllSlides()
+        imageDataUrls = await Promise.all(pngs.map(p => pngToJpeg(p)))
+      } else {
+        const png = await canvasRef.current.exportPng()
+        imageDataUrls = [await pngToJpeg(png)]
+      }
+
+      const res = await fetch('/api/admin/ig/schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageDataUrls,
+          caption: text,
+          mediaType: effectiveMediaType,
+          scheduledFor: new Date(scheduleDateTime).toISOString(),
+          eventId: event.id,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok || data.error) {
+        setScheduleError(data.error ?? 'Schedule failed')
+        setScheduleState('error')
+        return
+      }
+      setScheduleState('done')
+      setShowSchedule(false)
+    } catch (err) {
+      setScheduleError(err instanceof Error ? err.message : 'Unknown error')
+      setScheduleState('error')
+    }
+  }
+
   const isPosting = postState === 'exporting' || postState === 'posting'
+  const isScheduling = scheduleState === 'submitting'
 
   return (
     <div className="bg-[#0d0d0d] border border-white/[0.07] rounded-xl p-4 space-y-3">
@@ -166,36 +270,49 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-widest text-white/60">Caption & Post</p>
-          <p className="text-[10px] text-white/30 mt-0.5">Edit your caption, then post directly to @abqunplugged.</p>
+          <p className="text-[10px] text-white/30 mt-0.5">
+            {isCarousel
+              ? `${design.slides.length} slides → carousel post`
+              : 'Edit your caption, then post directly to @abqunplugged.'}
+          </p>
         </div>
 
-        {/* Feed / Story toggle */}
-        <div className="flex rounded-lg overflow-hidden border border-white/[0.1] flex-shrink-0">
-          {(['FEED', 'STORIES'] as const).map(type => (
-            <button
-              key={type}
-              onClick={() => { setMediaType(type); setPostState('idle'); setErrorMsg(null); setPostId(null) }}
-              className={`px-3 py-1.5 text-[11px] font-bold transition-colors ${
-                mediaType === type
-                  ? 'bg-white/[0.12] text-white'
-                  : 'bg-transparent text-white/40 hover:text-white/70'
-              }`}
-            >
-              {type === 'FEED' ? 'Feed' : 'Story'}
-            </button>
-          ))}
-        </div>
+        {/* Feed / Story toggle (hidden for carousel) */}
+        {!isCarousel && (
+          <div className="flex rounded-lg overflow-hidden border border-white/[0.1] flex-shrink-0">
+            {(['FEED', 'STORIES'] as const).map(type => (
+              <button
+                key={type}
+                onClick={() => { setMediaType(type); setPostState('idle'); setErrorMsg(null); setPostId(null) }}
+                className={`px-3 py-1.5 text-[11px] font-bold transition-colors ${
+                  mediaType === type
+                    ? 'bg-white/[0.12] text-white'
+                    : 'bg-transparent text-white/40 hover:text-white/70'
+                }`}
+              >
+                {type === 'FEED' ? 'Feed' : 'Story'}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Story notice */}
-      {mediaType === 'STORIES' && (
-        <div className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-[11px] text-white/50">
-          Stories don&apos;t show captions — use the 9:16 canvas format for best results. The caption below is saved for your reference only.
+      {/* Carousel notice */}
+      {isCarousel && (
+        <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg px-3 py-2 text-[11px] text-purple-300">
+          Multi-slide design detected — will publish as a Carousel post ({design.slides.length} images).
         </div>
       )}
 
-      {/* Style picker */}
-      <div className="flex gap-1.5 flex-wrap">
+      {/* Story notice */}
+      {!isCarousel && mediaType === 'STORIES' && (
+        <div className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-[11px] text-white/50">
+          Stories don&apos;t show captions — use the 9:16 canvas format for best results.
+        </div>
+      )}
+
+      {/* Style picker + AI button */}
+      <div className="flex gap-1.5 flex-wrap items-center">
         {captions.map(c => (
           <button
             key={c.id}
@@ -210,7 +327,21 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
             <span className="hidden sm:inline text-[10px] font-normal opacity-60 ml-1">· {c.sublabel}</span>
           </button>
         ))}
+        <div className="flex-1" />
+        <button
+          onClick={generateAICaptions}
+          disabled={aiLoading}
+          title="Generate captions with AI"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 disabled:opacity-40 transition-colors touch-manipulation"
+        >
+          {aiLoading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+          {aiLoading ? 'Generating…' : 'AI'}
+        </button>
       </div>
+
+      {aiError && (
+        <div className="bg-red-500/10 border border-red-500/30 rounded px-2 py-1.5 text-[11px] text-red-300">{aiError}</div>
+      )}
 
       {/* Editable caption textarea */}
       <textarea
@@ -220,7 +351,7 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
         rows={10}
         className="w-full bg-black/30 border border-white/[0.1] rounded-lg px-3 py-2.5 text-white/85 text-[12px] leading-relaxed font-mono resize-y focus:outline-none focus:border-[#9a442d]/60 transition-colors"
         placeholder="Your caption…"
-        disabled={isPosting}
+        disabled={isPosting || isScheduling}
       />
 
       {/* Char count */}
@@ -228,20 +359,61 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
         {text.length} / 2,200 chars
       </p>
 
+      {/* Schedule panel */}
+      {showSchedule && (
+        <div className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-3 space-y-2">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-white/60">Schedule Post</p>
+          <input
+            type="datetime-local"
+            value={scheduleDateTime}
+            onChange={e => setScheduleDateTime(e.target.value)}
+            min={new Date().toISOString().slice(0, 16)}
+            className="w-full bg-black/40 border border-white/10 rounded px-2 py-1.5 text-xs text-white/90 focus:outline-none focus:border-[#9a442d]"
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={schedulePost}
+              disabled={!scheduleDateTime || isScheduling}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#9a442d] hover:opacity-90 disabled:opacity-40 rounded text-xs font-bold text-white transition-opacity"
+            >
+              {isScheduling ? <><Loader2 size={12} className="animate-spin" /> Scheduling…</> : <><Clock size={12} /> Confirm Schedule</>}
+            </button>
+            <button onClick={() => { setShowSchedule(false); setScheduleState('idle'); setScheduleError(null) }}
+              className="text-xs text-white/40 hover:text-white/60">Cancel</button>
+          </div>
+          {scheduleState === 'error' && scheduleError && (
+            <p className="text-[11px] text-red-300">{scheduleError}</p>
+          )}
+        </div>
+      )}
+
       {/* Action row */}
       <div className="flex items-center gap-2 flex-wrap">
-
-        {/* Copy */}
         <button
           onClick={copy}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold transition-colors ${
-            copied
-              ? 'bg-green-500/20 text-green-400'
-              : 'bg-white/[0.06] text-white/60 hover:bg-white/[0.1] hover:text-white'
+            copied ? 'bg-green-500/20 text-green-400' : 'bg-white/[0.06] text-white/60 hover:bg-white/[0.1] hover:text-white'
           }`}
         >
           {copied ? <><Check size={12} /> Copied</> : <><Copy size={12} /> Copy</>}
         </button>
+
+        {/* Schedule toggle */}
+        {!showSchedule && scheduleState !== 'done' && (
+          <button
+            onClick={() => setShowSchedule(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold bg-white/[0.06] text-white/60 hover:bg-white/[0.1] hover:text-white transition-colors"
+          >
+            <Calendar size={12} /> Schedule
+          </button>
+        )}
+
+        {scheduleState === 'done' && (
+          <span className="text-xs text-green-400 font-semibold flex items-center gap-1.5">
+            <Check size={12} /> Scheduled!
+            <button onClick={() => setScheduleState('idle')} className="text-white/40 hover:text-white/60 ml-1">×</button>
+          </span>
+        )}
 
         <div className="flex-1" />
 
@@ -249,7 +421,7 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
         {postState !== 'done' && (
           <button
             onClick={postToInstagram}
-            disabled={isPosting || (mediaType === 'FEED' && !text.trim())}
+            disabled={isPosting || (effectiveMediaType === 'FEED' && !text.trim())}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] hover:opacity-90 active:opacity-75 disabled:opacity-40 rounded-lg text-xs font-bold text-white transition-opacity touch-manipulation"
           >
             {isPosting ? (
@@ -260,7 +432,9 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
             ) : (
               <>
                 <Send size={13} />
-                {mediaType === 'STORIES' ? 'Post Story' : 'Post to Instagram'}
+                {effectiveMediaType === 'CAROUSEL' ? 'Post Carousel'
+                  : effectiveMediaType === 'STORIES' ? 'Post Story'
+                  : 'Post to Instagram'}
               </>
             )}
           </button>
@@ -270,31 +444,23 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
         {postState === 'done' && postId && (
           <div className="flex items-center gap-2">
             <span className="text-xs text-green-400 font-semibold">
-              {mediaType === 'STORIES' ? '✓ Story posted!' : '✓ Posted!'}
+              {effectiveMediaType === 'STORIES' ? '✓ Story posted!'
+                : effectiveMediaType === 'CAROUSEL' ? '✓ Carousel posted!'
+                : '✓ Posted!'}
             </span>
-            {mediaType === 'STORIES' ? (
-              <a
-                href="https://www.instagram.com/stories/abqunplugged/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 px-3 py-1.5 bg-white/[0.07] hover:bg-white/[0.12] rounded text-xs text-white/70 hover:text-white transition-colors"
-              >
+            {effectiveMediaType === 'STORIES' ? (
+              <a href="https://www.instagram.com/stories/abqunplugged/" target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1 px-3 py-1.5 bg-white/[0.07] hover:bg-white/[0.12] rounded text-xs text-white/70 hover:text-white transition-colors">
                 <ExternalLink size={11} /> View Stories
               </a>
             ) : (
-              <a
-                href={`https://www.instagram.com/p/${postId}/`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 px-3 py-1.5 bg-white/[0.07] hover:bg-white/[0.12] rounded text-xs text-white/70 hover:text-white transition-colors"
-              >
+              <a href={`https://www.instagram.com/p/${postId}/`} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1 px-3 py-1.5 bg-white/[0.07] hover:bg-white/[0.12] rounded text-xs text-white/70 hover:text-white transition-colors">
                 <ExternalLink size={11} /> View on IG
               </a>
             )}
-            <button
-              onClick={() => { setPostState('idle'); setPostId(null) }}
-              className="text-xs text-white/40 hover:text-white/60 transition-colors"
-            >
+            <button onClick={() => { setPostState('idle'); setPostId(null) }}
+              className="text-xs text-white/40 hover:text-white/60 transition-colors">
               Post another
             </button>
           </div>
