@@ -22,7 +22,8 @@ Thumbs.db
 # Misc
 *.tsbuildinfo
 .vercel
-.netlify/
+.netlify/*
+!.netlify/state.json
 deno.lock
 # Phase 0 secrets: Upstash/R2/Umami added 2026-04-15
 # Supabase anon key + service_role added 2026-04-15

@@ -31,5 +31,6 @@ deploy-*.zip
 *.sw?
 .parcel-cache
 
-# Local Netlify folder
-.netlify
+# Local Netlify folder — ignore contents but track state.json (pins the site ID)
+.netlify/*
+!.netlify/state.json
