@@ -130,11 +130,12 @@ function titleTracking(pxSize: number): string {
  */
 function useFitTitle(
   title: string,
-  isStory: boolean,
+  format: IGFormat,
   fontCss: string,
   titleWeight: number,
   titleItalic: boolean,
 ) {
+  const isStory = format === 'story'
   const containerRef = useRef<HTMLDivElement>(null)
   const titleRef     = useRef<HTMLParagraphElement>(null)
   const maxPx = isStory ? 60 : 56
@@ -158,7 +159,7 @@ function useFitTitle(
     }
     setFittedSize(s)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [title, isStory, fontCss, titleWeight, titleItalic, maxPx])
+  }, [title, format, fontCss, titleWeight, titleItalic, maxPx])
 
   return { containerRef, titleRef, fittedSize }
 }
@@ -285,7 +286,7 @@ function TemplateBroadside({
   const isStory  = format === 'story'
   const isSquare = format === 'square'
   const dateParts = formatMonthDay(dateStr || '')
-  const { containerRef, titleRef, fittedSize } = useFitTitle(title, isStory, fontCss, titleWeight, titleItalic)
+  const { containerRef, titleRef, fittedSize } = useFitTitle(title, format, fontCss, titleWeight, titleItalic)
   const imgRatio = useImageRatio(imgSrc)
 
   // Panel split (portrait/square only — story uses absolute layout below)
@@ -486,7 +487,7 @@ function TemplateStub({
   const isStory  = format === 'story'
   const dateParts = formatMonthDay(dateStr || '')
   const emoji    = CAT_EMOJI[category ?? ''] ?? '📍'
-  const { containerRef, titleRef, fittedSize } = useFitTitle(title, isStory, fontCss, titleWeight, titleItalic)
+  const { containerRef, titleRef, fittedSize } = useFitTitle(title, format, fontCss, titleWeight, titleItalic)
   const imgRatio = useImageRatio(imgSrc)
 
   if (isStory) {
@@ -686,7 +687,7 @@ function TemplateDarkFrame({
   const isSquare = format === 'square'
   const emoji    = CAT_EMOJI[category ?? ''] ?? '📍'
   const dateParts = formatMonthDay(dateStr || '')
-  const { containerRef, titleRef, fittedSize } = useFitTitle(title, isStory, fontCss, titleWeight, titleItalic)
+  const { containerRef, titleRef, fittedSize } = useFitTitle(title, format, fontCss, titleWeight, titleItalic)
   const imgRatio = useImageRatio(imgSrc)
 
   // Photo inset — where the photo zone starts (% from top)
@@ -695,18 +696,24 @@ function TemplateDarkFrame({
   const photoHeight  = isStory ? 34 : isSquare ? 41 : 37  // vertical slot reserved
   const maxPhotoW    = 86  // % of card (7% gap each side)
 
-  // Compute exact display dimensions so image fills frame with no bars, no crop
+  // Card aspect ratio (width / height) — needed to convert % widths ↔ % heights correctly.
+  // On a non-square card, 1% width ≠ 1% height in pixels, so naive imgRatio math crops.
+  const cardAspect = isStory ? (9 / 16) : isSquare ? 1 : (4 / 5)
+
+  // Compute exact display dimensions so image fills frame with no bars, no crop.
+  // hIfFillW = height (as % of card height) that the image would need if we fill maxPhotoW.
+  // We multiply by cardAspect to convert from "% of width" space to "% of height" space.
   let displayW: number, displayH: number
   if (!isStory && imgRatio) {
-    const hIfFillW = maxPhotoW / imgRatio
+    const hIfFillW = (maxPhotoW * cardAspect) / imgRatio
     if (hIfFillW <= photoHeight) {
       // Wide image — constrained by width
       displayW = maxPhotoW
       displayH = hIfFillW
     } else {
-      // Tall image — constrained by height
+      // Tall image — constrained by height; invert the ratio conversion for width
       displayH = photoHeight
-      displayW = photoHeight * imgRatio
+      displayW = (photoHeight * imgRatio) / cardAspect
     }
   } else {
     displayW = maxPhotoW
