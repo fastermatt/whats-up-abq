@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Epilogue, Inter, Space_Grotesk } from 'next/font/google'
+import { Epilogue, Inter } from 'next/font/google'
 import Script from 'next/script'
 import { headers } from 'next/headers'
 import BottomNav from './components/BottomNav'
@@ -18,7 +18,7 @@ import './globals.css'
 const epilogue = Epilogue({
   variable: '--font-epilogue',
   subsets:  ['latin'],
-  weight:   ['400', '600', '700', '800', '900'],
+  weight:   ['600', '700', '900'],  // only weights actually used in the app
   display:  'swap',
 })
 
@@ -26,13 +26,6 @@ const inter = Inter({
   variable: '--font-inter',
   subsets:  ['latin'],
   weight:   ['400', '500', '600'],
-  display:  'swap',
-})
-
-const spaceGrotesk = Space_Grotesk({
-  variable: '--font-space-grotesk',
-  subsets:  ['latin'],
-  weight:   ['400', '500'],
   display:  'swap',
 })
 
@@ -137,14 +130,19 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${epilogue.variable} ${inter.variable} ${spaceGrotesk.variable} h-full`}
+      className={`${epilogue.variable} ${inter.variable} h-full`}
     >
       <head>
-        {/* Flaticon Uicons — CSS icon font, color-adjustable via CSS `color` */}
-        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-        <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css" />
-        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-        <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-solid-rounded/css/uicons-solid-rounded.css" />
+        {/* Preconnect to Flaticon CDN so the TCP handshake is done before the async CSS loads */}
+        <link rel="preconnect" href="https://cdn-uicons.flaticon.com" />
+        {/* Flaticon Uicons — loaded async to avoid render-blocking. Icons appear ~200ms after
+            page paint. noscript fallback ensures they still load without JS. */}
+        <noscript>
+          {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+          <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css" />
+          {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+          <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-solid-rounded/css/uicons-solid-rounded.css" />
+        </noscript>
       </head>
       <body className="bg-[#fbf7f1] text-[#1a1614] min-h-full flex flex-col">
         {/* Skip to main content — for keyboard/screen-reader users */}
@@ -207,6 +205,17 @@ export default async function RootLayout({
         <PWAManager />
         <InstallPrompt />
         <FirstVisitBanner />
+
+        {/* Flaticon Uicons — async CSS inject, avoids render-blocking */}
+        <Script id="flaticon-css" strategy="afterInteractive">{`
+          [
+            'https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css',
+            'https://cdn-uicons.flaticon.com/2.6.0/uicons-solid-rounded/css/uicons-solid-rounded.css'
+          ].forEach(function(href){
+            var l=document.createElement('link');l.rel='stylesheet';l.href=href;
+            document.head.appendChild(l);
+          });
+        `}</Script>
 
         {/* Umami analytics — loads after page is interactive, privacy-first */}
         {umamiId && (

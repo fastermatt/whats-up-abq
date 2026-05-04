@@ -30,16 +30,16 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const WEEKEND_FAQS = [
   {
-    q: 'What are the best things to do in Albuquerque this weekend?',
-    a: "Visit the Rail Yards Market on Sunday mornings, explore Old Town's galleries and patios, hike the Sandia Mountains, check out the ABQ BioPark, or catch a show at Popejoy Hall or KiMo Theatre. ABQ Unplugged lists every event happening across the metro.",
+    q: 'How do I find out what is happening this weekend in Albuquerque?',
+    a: "The listings above update hourly. Also check venue Instagram pages — Sister Bar, Launchpad, Tractor Brewing all post their weekend schedules. And the Downtown Growers Market is worth making part of any Saturday morning.",
   },
   {
-    q: 'What weekend events are happening in Albuquerque?',
-    a: 'ABQ Unplugged curates concerts, art walks, comedy shows, family festivals, brewery events, and outdoor activities every weekend. The weekend page organizes everything by day so you can plan Friday, Saturday, and Sunday separately.',
+    q: 'Should I buy tickets in advance for weekend events?',
+    a: "For big concerts at Tingley or Isleta, yes — buy early. For most other things, wait. Small venue shows rarely sell out. Farmers markets, art walks, and community events are walk-in. Save the planning energy for the events that actually need it.",
   },
   {
-    q: 'Are there free events in Albuquerque this weekend?',
-    a: 'Most weekends feature free options: live music at Civic Plaza, the Rail Yards Market, gallery openings in Old Town and Nob Hill, and neighborhood festivals. Filter by free on the events page or check the /free page for a dedicated list.',
+    q: 'What is a good Saturday itinerary in Albuquerque?',
+    a: "Start at the Downtown Growers Market (8am-12pm). Then hike the Pino Trail or walk the Bosque. Late lunch at a brewery. Then check what is happening on Central in the evening. There is almost always a band, a comedy show, or something you did not expect.",
   },
 ]
 

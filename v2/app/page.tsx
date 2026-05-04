@@ -183,6 +183,7 @@ export default async function DiscoverPage() {
               alt=""
               aria-hidden="true"
               className="absolute inset-0 w-full h-full object-cover"
+              fetchPriority="low"
               style={{
                 filter: 'grayscale(1) sepia(0.55) hue-rotate(350deg) saturate(1.4) brightness(0.78)',
                 opacity: 0.32,
@@ -203,6 +204,7 @@ export default async function DiscoverPage() {
             src="/logo-terra.svg"
             alt="ABQ Unplugged"
             className="md:hidden h-8 w-auto mb-3 animate-fade-in"
+            fetchPriority="high"
           />
 
           {/* Brand mark — compact, terra, above the headline */}
@@ -331,20 +333,20 @@ export default async function DiscoverPage() {
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {[
-              { label: 'Music',        icon: 'fi-rr-music-note', cat: 'Music' },
-              { label: 'Comedy',       icon: 'fi-rr-smile',      cat: 'Comedy' },
-              { label: 'Arts',         icon: 'fi-rr-palette',    cat: 'Arts & Theater' },
-              { label: 'Sports',       icon: 'fi-rr-ball',       cat: 'Sports' },
-              { label: 'Food & Drink', icon: 'fi-rr-utensils',   cat: 'Food & Drink' },
-              { label: 'Family',       icon: 'fi-rr-users',      cat: 'Family' },
-              { label: 'Festivals',    icon: 'fi-rr-star',       cat: 'Festivals' },
-              { label: 'Film',         icon: 'fi-rr-film',       cat: 'Film' },
-              { label: 'Outdoor',      icon: 'fi-rr-leaf',       cat: 'Outdoor' },
-              { label: 'Free',         icon: 'fi-rr-ticket',     cat: null, price: 'free' },
-            ].map(({ label, icon, cat, price }) => (
+              { label: 'Live Music',   icon: 'fi-rr-music-note', href: '/live-music' },
+              { label: 'Comedy',       icon: 'fi-rr-smile',      href: '/comedy' },
+              { label: 'Arts',         icon: 'fi-rr-palette',    href: '/arts' },
+              { label: 'Sports',       icon: 'fi-rr-ball',       href: '/sports-events' },
+              { label: 'Nightlife',    icon: 'fi-rr-cocktail',   href: '/nightlife' },
+              { label: 'Food & Drink', icon: 'fi-rr-utensils',   href: '/food-drink-events' },
+              { label: 'Family',       icon: 'fi-rr-users',      href: '/events?category=Family' },
+              { label: 'Outdoor',      icon: 'fi-rr-leaf',       href: '/outdoor-activities' },
+              { label: 'Film',         icon: 'fi-rr-film',       href: '/events?category=Film' },
+              { label: 'Free',         icon: 'fi-rr-ticket',     href: '/free' },
+            ].map(({ label, icon, href }) => (
               <Link
                 key={label}
-                href={cat ? `/events?category=${encodeURIComponent(cat)}` : `/events?price=${price}`}
+                href={href}
                 className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full bg-white border border-[#ddc9a3] text-xs font-semibold text-[#4a3f3a] hover:border-[#9a442d] hover:text-[#9a442d] transition-all whitespace-nowrap group"
               >
                 <i className={`fi ${icon} text-[13px] text-[#9a442d] group-hover:text-[#9a442d]`} aria-hidden="true" />

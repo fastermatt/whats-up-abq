@@ -34,16 +34,16 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const TONIGHT_FAQS = [
   {
-    q: "What's open tonight in Albuquerque?",
-    a: "Many downtown venues host evening events every night. Sister Bar, Launchpad, and Nob Hill bars are typically open, and Laffs Comedy Caffe runs shows several nights a week. Check ABQ Unplugged's tonight page for what's actually happening this evening.",
+    q: 'Where can I find last-minute events tonight in Albuquerque?',
+    a: "Check Instagram stories from @sisterabq, @launchpadabq, @tractorbrewing. The ABQ Unplugged tonight feed updates throughout the day. But honestly? Walk to Nob Hill and look at the marquees. That still works.",
   },
   {
-    q: 'What are last-minute things to do in Albuquerque tonight?',
-    a: "Head to Nob Hill for dinner and then catch a film at the Guild Cinema, or look for a show at KiMo Theatre or Popejoy Hall. The Rail Yards and Civic Plaza occasionally host evening events too. ABQ Unplugged's tonight feed updates throughout the day.",
+    q: "What if I don't want to go out but I'm bored?",
+    a: "Go anyway. Even a walk down Central Avenue at night is interesting. Get a coffee at The Shop. Sit on a patio. The point is leaving the house. You can always come back.",
   },
   {
-    q: 'Is there live music in Albuquerque tonight?',
-    a: 'Yes — Sister Bar, Launchpad, and El Rey Theater are the main live music spots. Civic Plaza hosts free outdoor concerts in warmer months. Browse ABQ Unplugged tonight and filter by Music to see every show.',
+    q: 'Are there free things to do in Albuquerque tonight?',
+    a: "Often yes. Civic Plaza hosts free concerts in summer. Some bar open mics are free with a drink. The Bosque trail is free and surprisingly nice in the evening. Check the listings above and look for events marked free.",
   },
 ]
 

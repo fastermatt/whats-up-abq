@@ -11,7 +11,7 @@
  * Constraint: NO text overlaid on the event photo. Works for any image quality.
  *
  * Formats: 4:5 portrait, 9:16 story, 1:1 square
- * Fonts:   Epilogue 900 (default) | Space Grotesk 700 | Inter 700
+ * Fonts:   Epilogue 900 (default) | Inter (Grotesk option) | Inter 700
  * Export:  html-to-image → 1080px PNG download
  */
 
@@ -44,7 +44,7 @@ const TEMPLATES: { key: IGTemplate; label: string; desc: string }[] = [
 
 const FONTS: { key: IGFont; label: string; css: string }[] = [
   { key: 'epilogue',      label: 'Epilogue',    css: 'var(--font-epilogue), Epilogue, Georgia, serif'     },
-  { key: 'space-grotesk', label: 'Grotesk',     css: 'var(--font-space-grotesk), "Space Grotesk", system-ui, sans-serif' },
+  { key: 'space-grotesk', label: 'Grotesk',     css: 'var(--font-inter), system-ui, sans-serif' },
   { key: 'inter',         label: 'Inter',       css: 'var(--font-inter), Inter, system-ui, sans-serif'   },
 ]
 

@@ -50,7 +50,7 @@ export default function BottomNav() {
 
               <span
                 className="text-[10px] font-bold tracking-wider uppercase"
-                style={{ fontFamily: 'var(--font-space-grotesk)' }}
+                style={{ fontFamily: 'var(--font-inter)' }}
               >
                 {label}
               </span>

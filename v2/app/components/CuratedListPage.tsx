@@ -40,6 +40,9 @@ export interface CuratedListConfig {
   breadcrumbLabel: string
   /** Optional FAQ pairs — rendered as FAQPage schema + visible accordion */
   faqs?: CuratedFaq[]
+  /** External trust links — "Around Albuquerque" section at page bottom.
+   *  Linking out to authoritative local sources builds topical trust with Google. */
+  relatedLinks?: { name: string; url: string; description: string }[]
 }
 
 export function curatedJsonLd(events: NormalizedEvent[], config: CuratedListConfig) {
@@ -194,6 +197,38 @@ export function CuratedListPage({
                   </h3>
                   <p className="text-xs text-[#6b5d57] leading-relaxed">{a}</p>
                 </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Around Albuquerque — external trust links ── */}
+        {config.relatedLinks && config.relatedLinks.length > 0 && (
+          <div className="mt-10 pt-8 border-t border-[#f0e4cc]">
+            <h2
+              className="text-base font-black text-[#1a1614] mb-1 uppercase tracking-wider"
+              style={{ fontFamily: 'var(--font-epilogue)' }}
+            >
+              Around Albuquerque
+            </h2>
+            <p className="text-xs text-[#6b5d57] mb-4">Other places to look.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-3xl">
+              {config.relatedLinks.map(({ name, url, description }) => (
+                <a
+                  key={url}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col gap-0.5 bg-white rounded-xl border border-[#f0e4cc] p-3.5 shadow-sm hover:border-[#9a442d] hover:shadow-md transition-all group"
+                >
+                  <span
+                    className="text-sm font-bold text-[#9a442d] group-hover:underline leading-tight"
+                    style={{ fontFamily: 'var(--font-epilogue)' }}
+                  >
+                    {name} ↗
+                  </span>
+                  <span className="text-[11px] text-[#6b5d57] leading-snug">{description}</span>
+                </a>
               ))}
             </div>
           </div>
