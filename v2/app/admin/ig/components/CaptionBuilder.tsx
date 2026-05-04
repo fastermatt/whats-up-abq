@@ -75,6 +75,7 @@ async function pngToJpeg(pngDataUrl: string, quality = 0.93): Promise<string> {
 // ── Component ─────────────────────────────────────────────────────────────
 
 type PostState = 'idle' | 'exporting' | 'posting' | 'done' | 'error'
+type MediaType = 'FEED' | 'STORIES'
 
 interface Props {
   event: NormalizedEvent
@@ -89,6 +90,7 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
   const [postState, setPostState] = useState<PostState>('idle')
   const [postId, setPostId] = useState<string | null>(null)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [mediaType, setMediaType] = useState<MediaType>('FEED')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const selectStyle = (id: string) => {
@@ -115,7 +117,7 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
       setPostState('error')
       return
     }
-    if (!text.trim()) {
+    if (mediaType === 'FEED' && !text.trim()) {
       setErrorMsg('Caption is empty.')
       setPostState('error')
       return
@@ -137,7 +139,7 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
       const res = await fetch('/api/admin/ig/publish', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageDataUrl: jpegDataUrl, caption: text }),
+        body: JSON.stringify({ imageDataUrl: jpegDataUrl, caption: text, mediaType }),
       })
 
       const data = await res.json()
@@ -161,10 +163,36 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
   return (
     <div className="bg-[#0d0d0d] border border-white/[0.07] rounded-xl p-4 space-y-3">
       {/* Header */}
-      <div>
-        <p className="text-[11px] font-bold uppercase tracking-widest text-white/60">Caption & Post</p>
-        <p className="text-[10px] text-white/30 mt-0.5">Edit your caption, then post directly to @abqunplugged.</p>
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-white/60">Caption & Post</p>
+          <p className="text-[10px] text-white/30 mt-0.5">Edit your caption, then post directly to @abqunplugged.</p>
+        </div>
+
+        {/* Feed / Story toggle */}
+        <div className="flex rounded-lg overflow-hidden border border-white/[0.1] flex-shrink-0">
+          {(['FEED', 'STORIES'] as const).map(type => (
+            <button
+              key={type}
+              onClick={() => { setMediaType(type); setPostState('idle'); setErrorMsg(null); setPostId(null) }}
+              className={`px-3 py-1.5 text-[11px] font-bold transition-colors ${
+                mediaType === type
+                  ? 'bg-white/[0.12] text-white'
+                  : 'bg-transparent text-white/40 hover:text-white/70'
+              }`}
+            >
+              {type === 'FEED' ? 'Feed' : 'Story'}
+            </button>
+          ))}
+        </div>
       </div>
+
+      {/* Story notice */}
+      {mediaType === 'STORIES' && (
+        <div className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-[11px] text-white/50">
+          Stories don&apos;t show captions — use the 9:16 canvas format for best results. The caption below is saved for your reference only.
+        </div>
+      )}
 
       {/* Style picker */}
       <div className="flex gap-1.5 flex-wrap">
@@ -221,7 +249,7 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
         {postState !== 'done' && (
           <button
             onClick={postToInstagram}
-            disabled={isPosting || !text.trim()}
+            disabled={isPosting || (mediaType === 'FEED' && !text.trim())}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] hover:opacity-90 active:opacity-75 disabled:opacity-40 rounded-lg text-xs font-bold text-white transition-opacity touch-manipulation"
           >
             {isPosting ? (
@@ -232,7 +260,7 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
             ) : (
               <>
                 <Send size={13} />
-                Post to Instagram
+                {mediaType === 'STORIES' ? 'Post Story' : 'Post to Instagram'}
               </>
             )}
           </button>
@@ -241,15 +269,28 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
         {/* Success state */}
         {postState === 'done' && postId && (
           <div className="flex items-center gap-2">
-            <span className="text-xs text-green-400 font-semibold">✓ Posted!</span>
-            <a
-              href={`https://www.instagram.com/p/${postId}/`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 px-3 py-1.5 bg-white/[0.07] hover:bg-white/[0.12] rounded text-xs text-white/70 hover:text-white transition-colors"
-            >
-              <ExternalLink size={11} /> View on IG
-            </a>
+            <span className="text-xs text-green-400 font-semibold">
+              {mediaType === 'STORIES' ? '✓ Story posted!' : '✓ Posted!'}
+            </span>
+            {mediaType === 'STORIES' ? (
+              <a
+                href="https://www.instagram.com/stories/abqunplugged/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 px-3 py-1.5 bg-white/[0.07] hover:bg-white/[0.12] rounded text-xs text-white/70 hover:text-white transition-colors"
+              >
+                <ExternalLink size={11} /> View Stories
+              </a>
+            ) : (
+              <a
+                href={`https://www.instagram.com/p/${postId}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 px-3 py-1.5 bg-white/[0.07] hover:bg-white/[0.12] rounded text-xs text-white/70 hover:text-white transition-colors"
+              >
+                <ExternalLink size={11} /> View on IG
+              </a>
+            )}
             <button
               onClick={() => { setPostState('idle'); setPostId(null) }}
               className="text-xs text-white/40 hover:text-white/60 transition-colors"

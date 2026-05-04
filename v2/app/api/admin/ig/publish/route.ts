@@ -1,15 +1,17 @@
 /**
  * POST /api/admin/ig/publish
  *
- * Publishes a post to @abqunplugged Instagram from the IG Editor.
+ * Publishes a feed post or Story to @abqunplugged Instagram from the IG Editor.
  *
- * Body: { imageDataUrl: string (JPEG base64), caption: string }
- * Returns: { postId: string, imageUrl: string }
+ * Body: { imageDataUrl: string (JPEG base64), caption: string, mediaType?: 'FEED' | 'STORIES' }
+ * Returns: { postId: string, imageUrl: string, mediaType: 'FEED' | 'STORIES' }
  *
  * Flow:
  *  1. Decode JPEG data URL → buffer
  *  2. Upload to Supabase Storage (event-photos/ig-posts/)
  *  3. Create Instagram media container via Graph API
+ *     - Feed: image_url + caption
+ *     - Story: image_url + media_type=STORIES (no caption — Instagram ignores it)
  *  4. Poll container status until FINISHED (up to 60s)
  *  5. Publish container → get post ID
  */
@@ -41,16 +43,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  let body: { imageDataUrl?: string; caption?: string }
+  let body: { imageDataUrl?: string; caption?: string; mediaType?: 'FEED' | 'STORIES' }
   try {
     body = await request.json()
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const { imageDataUrl, caption } = body
-  if (!imageDataUrl || !caption?.trim()) {
-    return NextResponse.json({ error: 'imageDataUrl and caption are required' }, { status: 400 })
+  const { imageDataUrl, caption, mediaType = 'FEED' } = body
+  const isStory = mediaType === 'STORIES'
+
+  if (!imageDataUrl) {
+    return NextResponse.json({ error: 'imageDataUrl is required' }, { status: 400 })
+  }
+  if (!isStory && !caption?.trim()) {
+    return NextResponse.json({ error: 'caption is required for feed posts' }, { status: 400 })
   }
 
   const igToken = process.env.INSTAGRAM_ACCESS_TOKEN
@@ -65,7 +72,7 @@ export async function POST(request: NextRequest) {
 
   // 2. Upload to Supabase Storage
   const supabase = await createServiceClient()
-  const filename = `ig-posts/post_${Date.now()}.jpg`
+  const filename = `ig-posts/${isStory ? 'story' : 'post'}_${Date.now()}.jpg`
 
   const { error: uploadError } = await supabase.storage
     .from('event-photos')
@@ -80,9 +87,13 @@ export async function POST(request: NextRequest) {
   // 3. Create Instagram media container
   const containerParams = new URLSearchParams({
     image_url: imageUrl,
-    caption,
     access_token: igToken,
   })
+  if (isStory) {
+    containerParams.set('media_type', 'STORIES')
+  } else {
+    containerParams.set('caption', caption!)
+  }
 
   const containerRes = await fetch(
     `https://graph.facebook.com/v19.0/${igUserId}/media`,
@@ -122,5 +133,5 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  return NextResponse.json({ postId: publish.id, imageUrl })
+  return NextResponse.json({ postId: publish.id, imageUrl, mediaType })
 }
