@@ -186,8 +186,8 @@ export function IGEditor({ event, image }: Props) {
       {/* Saved designs gallery */}
       <SavedDesigns />
 
-      {/* Captions (only when an event is loaded) */}
-      {event && <CaptionBuilder event={event} />}
+      {/* Caption editor + Instagram publisher (only when an event is loaded) */}
+      {event && <CaptionBuilder event={event} canvasRef={canvasRef} />}
 
       {/* Footer hint */}
       <p className="text-[10px] text-white/25 text-center pt-4">

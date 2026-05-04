@@ -9,6 +9,13 @@ remote_images = ["^(?:https:\\/\\/cdn\\.abqunplugged\\.com(?:\\/(?!\\.)(?:(?:(?!
 [functions."*"]
 
 [[plugins]]
+origin = "ui"
+package = "@netlify/plugin-lighthouse"
+pinned_version = "6"
+
+[plugins.inputs]
+
+[[plugins]]
 origin = "config"
 package = "@netlify/plugin-nextjs"
 
@@ -16,7 +23,9 @@ package = "@netlify/plugin-nextjs"
 
 [build]
 publish = ".next"
-command = "npm run build"
+publishOrigin = "config"
+commandOrigin = "config"
+command = "npm install --legacy-peer-deps && npm run build"
 
 [build.environment]
 NODE_VERSION = "22"
@@ -69,6 +78,36 @@ for = "/"
 
 [headers.values]
 Cache-Control = "public, s-maxage=60, stale-while-revalidate=600"
+
+[[headers]]
+for = "/*.svg"
+
+[headers.values]
+Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/*.png"
+
+[headers.values]
+Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/*.jpg"
+
+[headers.values]
+Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/*.ico"
+
+[headers.values]
+Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/manifest.json"
+
+[headers.values]
+Cache-Control = "public, max-age=86400"
 
 [[headers]]
 for = "/admin/*"
