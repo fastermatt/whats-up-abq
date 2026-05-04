@@ -268,7 +268,7 @@ function CuratedCard({ event, index }: { event: NormalizedEvent; index: number }
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
           />
           {event.category && (
-            <div className="absolute top-1.5 right-1.5 bg-black/50 backdrop-blur-sm text-white text-[10px] px-1.5 py-0.5 rounded-full">
+            <div className="absolute top-1.5 right-1.5 bg-[#1a1614]/60 backdrop-blur-sm text-white text-[10px] px-1.5 py-0.5 rounded-full">
               {event.subcategory ? `${event.category} · ${event.subcategory}` : event.category}
             </div>
           )}
@@ -286,7 +286,7 @@ function CuratedCard({ event, index }: { event: NormalizedEvent; index: number }
             {event.title}
           </h3>
           {(dayLabel || timeStr) && (
-            <p className="text-[10px] text-[#9a442d] font-medium flex items-center gap-1">
+            <p className="text-[11px] text-[#9a442d] font-medium flex items-center gap-1">
               <Clock className="w-2.5 h-2.5 flex-shrink-0" />
               <span>
                 {dayLabel}{dayLabel && timeStr ? ' · ' : ''}{timeStr}
@@ -299,7 +299,7 @@ function CuratedCard({ event, index }: { event: NormalizedEvent; index: number }
       {event.venue && (
         <Link
           href={`/venues/${venueToSlug(event.venue)}`}
-          className="block px-2 pb-2 text-[10px] text-[#6b5d57] hover:text-[#9a442d] hover:underline line-clamp-1 flex items-center gap-1 transition-colors"
+          className="block px-2 pb-2 text-[11px] text-[#4a3f3a] hover:text-[#9a442d] hover:underline line-clamp-1 flex items-center gap-1 transition-colors"
           aria-label={`See all events at ${event.venue}`}
         >
           <MapPin className="w-2.5 h-2.5 flex-shrink-0" />

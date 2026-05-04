@@ -137,10 +137,10 @@ export default async function TonightPage() {
               Nothing listed for tonight just yet — check back later or see what&apos;s coming up this weekend.
             </p>
             <Link
-              href="/weekend"
+              href="/things-to-do-this-weekend"
               className="px-5 py-2 rounded-full bg-[#9a442d] text-white text-sm font-medium hover:bg-[#7d3725] transition-colors"
             >
-              Check the weekend →
+              See the weekend →
             </Link>
           </div>
         ) : (
@@ -210,7 +210,7 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
           />
           {event.category && (
-            <div className="absolute top-1.5 right-1.5 bg-black/50 backdrop-blur-sm text-white text-[10px] px-1.5 py-0.5 rounded-full">
+            <div className="absolute top-1.5 right-1.5 bg-[#1a1614]/60 backdrop-blur-sm text-white text-[10px] px-1.5 py-0.5 rounded-full">
               {event.subcategory ? `${event.category} · ${event.subcategory}` : event.category}
             </div>
           )}
