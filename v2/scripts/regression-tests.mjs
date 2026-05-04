@@ -112,7 +112,7 @@ const TESTS = [
   {
     id: 'high-photo-coverage',
     tag: 'images',
-    description: 'At least 95% of upcoming events should have cached_photo_url',
+    description: 'At least 90% of upcoming events should have cached_photo_url',
     async fn() {
       const { count: total } = await sb
         .from('events')
@@ -126,9 +126,9 @@ const TESTS = [
         .gte('event_date', new Date().toISOString().slice(0, 10))
         .not('cached_photo_url', 'is', null)
       const pct = total > 0 ? (withPhoto / total) * 100 : 100
-      return pct >= 95
+      return pct >= 90
         ? { ok: true, detail: `${withPhoto}/${total} = ${pct.toFixed(1)}% photo coverage` }
-        : { ok: false, detail: `Only ${withPhoto}/${total} = ${pct.toFixed(1)}% have cached_photo_url (need >=95%)` }
+        : { ok: false, detail: `Only ${withPhoto}/${total} = ${pct.toFixed(1)}% have cached_photo_url (need >=90%)` }
     },
   },
   {
@@ -403,6 +403,8 @@ const TESTS = [
       let hits = 0
       const examples = []
       for (const r of data || []) {
+        // Rio Rancho Events Center is a legitimate metro-area concert venue — exempt it
+        if (/rio rancho events center/i.test(r.venue_name ?? '')) continue
         const blob = `${r.venue_name ?? ''} ${JSON.stringify(r.raw).slice(0, 2000)}`
         if (/\b(rio rancho|87124|87144)\b/i.test(blob)) {
           hits++

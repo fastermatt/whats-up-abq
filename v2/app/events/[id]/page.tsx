@@ -153,9 +153,26 @@ export default async function EventDetailPage({ params }: PageProps) {
     ? (affiliateUrl(event.ticketUrl) ?? event.ticketUrl)
     : null
 
+  // Map category to the most specific schema.org Event subtype — helps carousel matching
+  const eventType = (() => {
+    switch (event.category) {
+      case 'Music': return 'MusicEvent'
+      case 'Comedy': return 'ComedyEvent'
+      case 'Arts & Theater': return 'TheaterEvent'
+      case 'Sports': return 'SportsEvent'
+      default: return 'Event'
+    }
+  })()
+
+  // Only emit performer for events where there is an actual performer (music/comedy/theater).
+  // Using event.title as performer name is incorrect and confuses Google's entity extraction.
+  const performerCategories = new Set(['Music', 'Comedy', 'Arts & Theater'])
+  const hasPerformer = performerCategories.has(event.category ?? '') &&
+    event.source !== 'volunteer' && event.source !== 'nhcc' && event.source !== 'local'
+
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'Event',
+    '@type': eventType,
     name: event.title,
     startDate,
     ...(endDate ? { endDate } : {}),
@@ -179,16 +196,17 @@ export default async function EventDetailPage({ params }: PageProps) {
       '@type': 'Offer',
       url: event.ticketUrl ?? `https://abqunplugged.com/events/${event.id}`,
       availability: 'https://schema.org/InStock',
-      validFrom: new Date().toISOString().slice(0, 10),
+      // Full ISO datetime with timezone (not date-only) — required for correct carousel parsing
+      validFrom: new Date().toISOString(),
       ...(offerPrice !== undefined ? { price: offerPrice, priceCurrency: 'USD' } : {}),
-      ...(isFree ? { category: 'primary' } : {}),
     },
     organizer: {
       '@type': 'Organization',
       name: 'ABQ Unplugged',
       url: 'https://abqunplugged.com',
     },
-    ...(event.source !== 'volunteer' && event.source !== 'nhcc' ? {
+    // Only set performer for events with actual performing artists, not community/food/outdoor events
+    ...(hasPerformer ? {
       performer: { '@type': 'PerformingGroup', name: event.title }
     } : {}),
   }
