@@ -251,7 +251,7 @@ export default async function DiscoverPage() {
           {tonight.total > 0 && (
             <div className="mb-4 animate-hero-text">
               <Link
-                href="/events?time=tonight"
+                href="/tonight"
                 className="inline-flex items-center gap-2 bg-[#9a442d] text-white font-bold text-sm px-4 py-2 rounded-full hover:bg-[#7d3725] transition-colors shadow-sm"
                 style={{ fontFamily: 'var(--font-epilogue)' }}
               >
@@ -298,8 +298,8 @@ export default async function DiscoverPage() {
         >
           <div className="max-w-6xl mx-auto grid grid-cols-3">
             {[
-              { label: 'Tonight',      count: tonight.total,     href: '/events?time=tonight',      accent: true },
-              { label: 'This Weekend', count: weekend.total,     href: '/events?time=this-weekend', accent: false },
+              { label: 'Tonight',      count: tonight.total,     href: '/tonight',  accent: true },
+              { label: 'This Weekend', count: weekend.total,     href: '/weekend',  accent: false },
               { label: 'All Upcoming', count: allUpcoming.total, href: '/events',                   accent: false },
             ].map((tab, i) => (
               <Link
@@ -407,7 +407,7 @@ export default async function DiscoverPage() {
             title="Doors are open"
             subtitle="Opening today"
             events={tonight.events}
-            seeAllHref="/events?time=tonight"
+            seeAllHref="/tonight"
             sectionLabel="Tonight"
           />
         </AnimateIn>
@@ -420,7 +420,7 @@ export default async function DiscoverPage() {
             title="This weekend"
             subtitle="Don't miss out"
             events={weekend.events.slice(0, 10)}
-            seeAllHref="/events?time=this-weekend"
+            seeAllHref="/weekend"
             sectionLabel="This Weekend"
             sectionBg="#f0e8dc"
           />
