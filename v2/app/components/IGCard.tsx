@@ -688,39 +688,12 @@ function TemplateDarkFrame({
   const emoji    = CAT_EMOJI[category ?? ''] ?? '📍'
   const dateParts = formatMonthDay(dateStr || '')
   const { containerRef, titleRef, fittedSize } = useFitTitle(title, format, fontCss, titleWeight, titleItalic)
-  const imgRatio = useImageRatio(imgSrc)
-
-  // Photo inset — where the photo zone starts (% from top)
-  const photoTop     = isStory ? 38 : isSquare ? 34 : 40
-  // For story: fixed height + cover. For portrait/square: dynamically sized to image ratio.
-  const photoHeight  = isStory ? 34 : isSquare ? 41 : 37  // vertical slot reserved
-  const maxPhotoW    = 86  // % of card (7% gap each side)
-
-  // Card aspect ratio (width / height) — needed to convert % widths ↔ % heights correctly.
-  // On a non-square card, 1% width ≠ 1% height in pixels, so naive imgRatio math crops.
-  const cardAspect = isStory ? (9 / 16) : isSquare ? 1 : (4 / 5)
-
-  // Compute exact display dimensions so image fills frame with no bars, no crop.
-  // hIfFillW = height (as % of card height) that the image would need if we fill maxPhotoW.
-  // We multiply by cardAspect to convert from "% of width" space to "% of height" space.
-  let displayW: number, displayH: number
-  if (!isStory && imgRatio) {
-    const hIfFillW = (maxPhotoW * cardAspect) / imgRatio
-    if (hIfFillW <= photoHeight) {
-      // Wide image — constrained by width
-      displayW = maxPhotoW
-      displayH = hIfFillW
-    } else {
-      // Tall image — constrained by height; invert the ratio conversion for width
-      displayH = photoHeight
-      displayW = (photoHeight * imgRatio) / cardAspect
-    }
-  } else {
-    displayW = maxPhotoW
-    displayH = photoHeight
-  }
-  const photoLeftPct = (100 - displayW) / 2
-  const photoTopPct  = photoTop + (photoHeight - displayH) / 2
+  // Photo inset slot — fixed dimensions, objectFit: contain shows full image.
+  // "Bars" (if any) are invisible — they're INK colour on an INK card.
+  const photoTop    = isStory ? 38 : isSquare ? 34 : 40
+  const photoHeight = isStory ? 34 : isSquare ? 41 : 37
+  const maxPhotoW   = 86  // % of card width (7% gap each side)
+  const photoLeft   = (100 - maxPhotoW) / 2
 
   // Story: logo/badge bleed into top safe zone (3%); portrait: normal margin
   const topContentStart = isStory ? '3%' : '1.5rem'
@@ -766,13 +739,13 @@ function TemplateDarkFrame({
         </p>
       </div>
 
-      {/* ── Photo inset — exact size of image, no bars, no crop ── */}
+      {/* ── Photo inset — full slot, contain so full image shows; bars invisible on dark card ── */}
       <div style={{
         position: 'absolute',
-        top: `${photoTopPct}%`,
-        height: `${displayH}%`,
-        left: `${photoLeftPct}%`,
-        width: `${displayW}%`,
+        top: `${photoTop}%`,
+        height: `${photoHeight}%`,
+        left: `${photoLeft}%`,
+        width: `${maxPhotoW}%`,
         borderRadius: 8,
         overflow: 'hidden',
         boxShadow: '0 8px 40px rgba(0,0,0,0.7)',
@@ -780,7 +753,7 @@ function TemplateDarkFrame({
         border: `2px solid rgba(255,255,255,0.07)`,
       }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
+        <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }} />
       </div>
 
       {/* ── Date + venue (below photo) — URL moved to bottom safe zone ── */}
