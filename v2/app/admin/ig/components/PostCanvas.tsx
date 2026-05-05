@@ -69,6 +69,35 @@ function BackgroundImage({ slide, w, h }: { slide: Slide; w: number; h: number }
   const bg = slide.background as Extract<Slide['background'], { type: 'image' }>
   const { setBackground, selectLayer } = useEditor()
   const [img] = useImage(proxyIfNeeded(bg.src), 'anonymous')
+  const imageRef = useRef<Konva.Image>(null)
+
+  const brightness = bg.brightness ?? 0
+  const contrast   = bg.contrast   ?? 0
+  const saturation = bg.saturation ?? 0
+  const blur       = bg.blur       ?? 0
+
+  // Re-cache image when source changes — cache is the pixel buffer filters operate on
+  useEffect(() => {
+    const node = imageRef.current
+    if (!node || !img) return
+    node.cache()
+    node.filters([Konva.Filters.Brighten, Konva.Filters.Contrast, Konva.Filters.HSL, Konva.Filters.Blur])
+    node.getLayer()?.batchDraw()
+  }, [img])
+
+  // Apply filter values on every slider change (cheap — no re-cache)
+  useEffect(() => {
+    const node = imageRef.current
+    if (!node) return
+    // Konva filter attrs are dynamic — use base Node.setAttr to bypass typed ImageConfig
+    const n = node as Konva.Node
+    n.setAttr('brighten', brightness / 100)
+    n.setAttr('contrast', contrast)
+    n.setAttr('saturation', saturation / 100)
+    n.setAttr('blurRadius', blur)
+    node.getLayer()?.batchDraw()
+  }, [brightness, contrast, saturation, blur])
+
   if (!img) return <Rect x={0} y={0} width={w} height={h} fill="#222" listening={false} />
 
   const ar = img.width / img.height
@@ -119,7 +148,7 @@ function BackgroundImage({ slide, w, h }: { slide: Slide; w: number; h: number }
         onDragStart={e => { const s = e.target.getStage(); if (s) s.container().style.cursor = 'grabbing' }}
         onMouseLeave={e => { const s = e.target.getStage(); if (s) s.container().style.cursor = 'default' }}
       >
-        <KImage image={img} x={dx} y={dy} width={dw} height={dh} />
+        <KImage ref={imageRef} image={img} x={dx} y={dy} width={dw} height={dh} />
       </Group>
       {/* Overlay stays fixed over the full canvas — not part of the draggable group */}
       <Rect x={0} y={0} width={w} height={h} fill={bg.overlayColor} opacity={bg.overlayOpacity} listening={false} />

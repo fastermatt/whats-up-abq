@@ -15,7 +15,7 @@ export const CANVAS_DIMS: Record<CanvasFormat, { w: number; h: number }> = {
 export type BackgroundFill =
   | { type: 'color';    color: string }
   | { type: 'gradient'; from: string; to: string; angle: number }
-  | { type: 'image';    src: string; fit: 'cover' | 'contain'; overlayColor: string; overlayOpacity: number; offsetX?: number; offsetY?: number; scale?: number }
+  | { type: 'image';    src: string; fit: 'cover' | 'contain'; overlayColor: string; overlayOpacity: number; offsetX?: number; offsetY?: number; scale?: number; brightness?: number; contrast?: number; saturation?: number; blur?: number }
 
 export interface BaseLayer {
   id: string

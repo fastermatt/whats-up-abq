@@ -147,6 +147,43 @@ function CanvasControls() {
               onPick={url => setBackground({ ...bg, src: url })}
               label="Upload / paste URL"
             />
+            {/* ── Photo filters ───────────────────────────────────────── */}
+            <div className="space-y-1.5">
+              <Label>Photo Filters</Label>
+              <div>
+                <div className="flex justify-between text-[10px] text-white/40 mb-0.5">
+                  <span>Brightness</span><span>{bg.brightness ?? 0}</span>
+                </div>
+                <Slider value={bg.brightness ?? 0} onChange={v => setBackground({ ...bg, brightness: v })} min={-100} max={100} />
+              </div>
+              <div>
+                <div className="flex justify-between text-[10px] text-white/40 mb-0.5">
+                  <span>Contrast</span><span>{bg.contrast ?? 0}</span>
+                </div>
+                <Slider value={bg.contrast ?? 0} onChange={v => setBackground({ ...bg, contrast: v })} min={-100} max={100} />
+              </div>
+              <div>
+                <div className="flex justify-between text-[10px] text-white/40 mb-0.5">
+                  <span>Saturation</span><span>{bg.saturation ?? 0}</span>
+                </div>
+                <Slider value={bg.saturation ?? 0} onChange={v => setBackground({ ...bg, saturation: v })} min={-100} max={100} />
+              </div>
+              <div>
+                <div className="flex justify-between text-[10px] text-white/40 mb-0.5">
+                  <span>Blur</span><span>{bg.blur ?? 0}px</span>
+                </div>
+                <Slider value={bg.blur ?? 0} onChange={v => setBackground({ ...bg, blur: v })} min={0} max={20} step={0.5} />
+              </div>
+              {/* Reset all filters */}
+              {((bg.brightness ?? 0) !== 0 || (bg.contrast ?? 0) !== 0 || (bg.saturation ?? 0) !== 0 || (bg.blur ?? 0) !== 0) && (
+                <button
+                  onClick={() => setBackground({ ...bg, brightness: 0, contrast: 0, saturation: 0, blur: 0 })}
+                  className="text-[10px] text-[#9a442d] hover:text-white/60 transition-colors"
+                >
+                  Reset filters
+                </button>
+              )}
+            </div>
             <div>
               <Label>Fit</Label>
               <div className="flex gap-1.5">

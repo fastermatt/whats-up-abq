@@ -98,6 +98,15 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
   const [captions, setCaptions] = useState<Caption[]>(staticCaptions)
   const [activeId, setActiveId] = useState('standard')
   const [text, setText] = useState(staticCaptions[0].text)
+
+  // Reset captions + text whenever a new event is picked
+  useEffect(() => {
+    const fresh = buildCaptions(event)
+    setCaptions(fresh)
+    setActiveId('standard')
+    setText(fresh[0].text)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [event.id])
   const [copied, setCopied] = useState(false)
   const [postState, setPostState] = useState<PostState>('idle')
   const [postId, setPostId] = useState<string | null>(null)
