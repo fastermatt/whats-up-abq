@@ -274,26 +274,30 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
     setScheduleState('submitting')
     setScheduleError(null)
     try {
-      let imageDataUrls: string[]
+      const scheduledFor = new Date(scheduleDateTime).toISOString()
+      let schedulePayload: Record<string, unknown>
+
       if (isCarousel) {
         const pngs = await canvasRef.current.exportAllSlides()
-        imageDataUrls = await Promise.all(pngs.map(p => pngToJpeg(p)))
+        const jpegs = await Promise.all(pngs.map(p => pngToJpeg(p)))
+        schedulePayload = {
+          imageDataUrls: jpegs, caption: text, mediaType: 'CAROUSEL',
+          scheduledFor, eventId: event.id,
+        }
       } else {
-        const png = await canvasRef.current.exportPng()
-        imageDataUrls = [await pngToJpeg(png)]
+        const png  = await canvasRef.current.exportPng()
+        const jpeg = await pngToJpeg(png)
+        schedulePayload = {
+          imageDataUrl: jpeg, caption: text, mediaType: 'FEED',
+          scheduledFor, eventId: event.id,
+          ...(venueId ? { location_id: venueId } : {}),
+        }
       }
 
       const res = await fetch('/api/admin/ig/schedule', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          imageDataUrls,
-          caption: text,
-          mediaType: effectiveMediaType,
-          scheduledFor: new Date(scheduleDateTime).toISOString(),
-          eventId: event.id,
-          ...(venueId && effectiveMediaType === 'FEED' ? { location_id: venueId } : {}),
-        }),
+        body: JSON.stringify(schedulePayload),
       })
       const data = await res.json()
       if (!res.ok || data.error) {
