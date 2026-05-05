@@ -23,9 +23,11 @@ const TMDB_BASE  = 'https://api.themoviedb.org/3'
 const IMG_BASE_W = 'https://image.tmdb.org/t/p/w500'
 const IMG_BASE_B = 'https://image.tmdb.org/t/p/w1280'
 
-/** Build a Fandango movie-times search URL for a given title in Albuquerque. */
+/** Build a Google showtimes search URL for a given title in Albuquerque.
+ *  Google's Knowledge Panel aggregates all local theaters — more reliable
+ *  than Fandango's direct-link format which changes frequently. */
 function fandangoUrl(title: string): string {
-  return `https://www.fandango.com/movie-times?q=${encodeURIComponent(title)}&location=Albuquerque%2CNM`
+  return `https://www.google.com/search?q=${encodeURIComponent(title + ' showtimes Albuquerque NM')}`
 }
 
 interface TmdbMovie {

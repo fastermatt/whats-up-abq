@@ -10,10 +10,10 @@ export const dynamic = 'force-dynamic' // always SSR — env var must be read at
 export const metadata: Metadata = {
   title: 'Movies Now Playing in Albuquerque — ABQ Unplugged',
   description:
-    'See what movies are playing in Albuquerque theaters right now. Click to get showtimes on Fandango.',
+    'See what movies are playing in Albuquerque theaters right now. Click to get showtimes.',
   openGraph: {
     title: 'Movies Now Playing in Albuquerque',
-    description: 'What\'s showing at Albuquerque theaters this week — click any film for showtimes on Fandango.',
+    description: 'What\'s showing at Albuquerque theaters this week — click any film for showtimes.',
     url: 'https://abqunplugged.com/movies',
     images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: 'Movies playing in Albuquerque, NM' }],
   },
@@ -37,7 +37,7 @@ export default async function MoviesPage() {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: 'Movies Now Playing in Albuquerque',
-    description: 'Currently showing films in Albuquerque theaters with showtimes on Fandango.',
+    description: 'Currently showing films in Albuquerque theaters with showtimes.',
     url: 'https://abqunplugged.com/movies',
     itemListElement: movies.slice(0, 10).map((m: Movie, i: number) => ({
       '@type': 'ListItem',
@@ -78,7 +78,7 @@ export default async function MoviesPage() {
             Now at the movies
           </h1>
           <p className="text-[#c8aa8c] text-sm">
-            Playing in Albuquerque theaters this week · Click any film for showtimes on Fandango
+            Playing in Albuquerque theaters this week · Click any film for showtimes
           </p>
         </div>
       </section>
@@ -151,7 +151,7 @@ function MovieCard({ movie, priority }: { movie: Movie; priority?: boolean }) {
       target="_blank"
       rel="noopener noreferrer"
       className="group block"
-      aria-label={`${movie.title} — get showtimes on Fandango`}
+      aria-label={`${movie.title} — get showtimes`}
     >
       {/* Poster — 2:3 ratio */}
       <div

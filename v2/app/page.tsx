@@ -342,6 +342,7 @@ export default async function DiscoverPage() {
               { label: 'Family',       icon: 'fi-rr-users',      href: '/events?category=Family' },
               { label: 'Outdoor',      icon: 'fi-rr-leaf',       href: '/outdoor-activities' },
               { label: 'Movies',       icon: 'fi-rr-film',       href: '/movies' },
+              { label: 'Film Events',  icon: 'fi-rr-clapperboard', href: '/events?category=Film' },
               { label: 'Free',         icon: 'fi-rr-ticket',     href: '/free' },
             ].map(({ label, icon, href }) => (
               <Link
@@ -664,7 +665,7 @@ function MovieCard({ movie }: { movie: Movie }) {
       target="_blank"
       rel="noopener noreferrer"
       className="group flex-shrink-0 w-[120px] snap-start"
-      aria-label={`${movie.title} — get showtimes`}
+      aria-label={`${movie.title} — showtimes near Albuquerque`}
     >
       {/* Poster — 2:3 */}
       <div
