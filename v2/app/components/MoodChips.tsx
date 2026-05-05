@@ -38,7 +38,7 @@ function buildHref(query: { category?: string; free?: string; time?: string }): 
 export default function MoodChips() {
   return (
     <section aria-label="Browse by mood" className="py-4 border-b border-[#f0e4cc]/60">
-      <div className="px-4 mb-2">
+      <div className="max-w-6xl mx-auto px-4 mb-2">
         <p className="text-[10px] uppercase tracking-[0.15em] text-[#6b5d57] font-semibold">
           What&apos;s your vibe?
         </p>

@@ -77,6 +77,220 @@ async function pngToJpeg(pngDataUrl: string, quality = 0.93): Promise<string> {
   })
 }
 
+// ── Schedule helpers ──────────────────────────────────────────────────────
+
+/** Pad a number to two digits */
+function pad2(n: number) { return String(n).padStart(2, '0') }
+
+/** Format a local YYYY-MM-DD to a date object at noon Mountain time */
+function localDateAtTime(dateStr: string, hour: number, minute = 0) {
+  const d = new Date(`${dateStr}T${pad2(hour)}:${pad2(minute)}:00`)
+  return isNaN(d.getTime()) ? null : d
+}
+
+/** Produce YYYY-MM-DD from a Date */
+function toDateInput(d: Date) {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
+}
+
+/** Produce HH:MM from a Date */
+function toTimeInput(d: Date) {
+  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`
+}
+
+interface SchedulePreset { label: string; date: string; time: string }
+
+function getSchedulePresets(event: NormalizedEvent): SchedulePreset[] {
+  const now     = new Date()
+  const today   = toDateInput(now)
+  const presets: SchedulePreset[] = []
+
+  // Tomorrow shortcuts
+  const tomorrow = new Date(now)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  const tomorrowStr = toDateInput(tomorrow)
+  presets.push({ label: 'Tomorrow 9am',  date: tomorrowStr, time: '09:00' })
+  presets.push({ label: 'Tomorrow noon', date: tomorrowStr, time: '12:00' })
+  presets.push({ label: 'Tomorrow 6pm',  date: tomorrowStr, time: '18:00' })
+
+  // Day before the event (if event is in the future)
+  const eventDateStr = /^\d{4}-\d{2}-\d{2}/.test(event.date ?? '')
+    ? event.date!.slice(0, 10)
+    : null
+  if (eventDateStr && eventDateStr > today) {
+    const eventDate = new Date(eventDateStr + 'T12:00:00')
+    const dayBefore = new Date(eventDate)
+    dayBefore.setDate(dayBefore.getDate() - 1)
+    const dayBeforeStr = toDateInput(dayBefore)
+    if (dayBeforeStr > today) {
+      presets.push({ label: 'Day before · noon', date: dayBeforeStr, time: '12:00' })
+      presets.push({ label: 'Day before · 6pm',  date: dayBeforeStr, time: '18:00' })
+    }
+    // Event day morning
+    if (eventDateStr > tomorrowStr) {
+      presets.push({ label: 'Event day · 9am', date: eventDateStr, time: '09:00' })
+    }
+  }
+
+  // Upcoming Friday / Saturday (skip if already today or tomorrow)
+  for (let offset = 2; offset <= 8; offset++) {
+    const d = new Date(now)
+    d.setDate(d.getDate() + offset)
+    const dow = d.getDay()
+    if (dow === 5) {
+      presets.push({ label: 'Fri 6pm', date: toDateInput(d), time: '18:00' })
+      break
+    }
+  }
+  for (let offset = 2; offset <= 9; offset++) {
+    const d = new Date(now)
+    d.setDate(d.getDate() + offset)
+    if (d.getDay() === 6) {
+      presets.push({ label: 'Sat noon', date: toDateInput(d), time: '12:00' })
+      break
+    }
+  }
+
+  // Deduplicate by date+time, remove past presets
+  const now16 = `${today}T${pad2(now.getHours())}:${pad2(now.getMinutes())}`
+  return presets.filter((p, i, arr) => {
+    const val = `${p.date}T${p.time}`
+    return val > now16 && arr.findIndex(q => q.date === p.date && q.time === p.time) === i
+  })
+}
+
+function formatScheduledFor(dateStr: string, timeStr: string): string {
+  if (!dateStr) return ''
+  try {
+    const d = new Date(`${dateStr}T${timeStr}:00`)
+    return d.toLocaleDateString('en-US', {
+      weekday: 'short', month: 'short', day: 'numeric',
+      hour: 'numeric', minute: '2-digit',
+    })
+  } catch { return '' }
+}
+
+// ── SchedulePanel component ──────────────────────────────────────────────────
+
+interface SchedulePanelProps {
+  event: NormalizedEvent
+  scheduleDate: string
+  scheduleTime: string
+  scheduleDateTime: string
+  scheduleState: 'idle' | 'submitting' | 'done' | 'error'
+  scheduleError: string | null
+  isScheduling: boolean
+  onDateChange: (v: string) => void
+  onTimeChange: (v: string) => void
+  onConfirm: () => void
+  onCancel: () => void
+}
+
+function SchedulePanel({
+  event, scheduleDate, scheduleTime, scheduleDateTime,
+  scheduleState, scheduleError, isScheduling,
+  onDateChange, onTimeChange, onConfirm, onCancel,
+}: SchedulePanelProps) {
+  const presets       = getSchedulePresets(event)
+  const todayStr      = toDateInput(new Date())
+  const humanReadable = formatScheduledFor(scheduleDate, scheduleTime)
+
+  const applyPreset = (p: SchedulePreset) => {
+    onDateChange(p.date)
+    onTimeChange(p.time)
+  }
+
+  const isPresetActive = (p: SchedulePreset) => scheduleDate === p.date && scheduleTime === p.time
+
+  return (
+    <div className="bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-3 space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-white/60">Schedule Post</p>
+        <button
+          onClick={onCancel}
+          className="text-[10px] text-white/30 hover:text-white/60 transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
+
+      {/* Quick presets */}
+      {presets.length > 0 && (
+        <div className="space-y-1.5">
+          <p className="text-[10px] text-white/30 uppercase tracking-wider">Quick pick</p>
+          <div className="flex flex-wrap gap-1.5">
+            {presets.map(p => (
+              <button
+                key={`${p.date}-${p.time}`}
+                onClick={() => applyPreset(p)}
+                className={`px-2.5 py-1 text-[10px] font-semibold rounded-md transition-colors ${
+                  isPresetActive(p)
+                    ? 'bg-[#9a442d] text-white'
+                    : 'bg-white/[0.07] text-white/60 hover:bg-white/[0.12] hover:text-white'
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Date + time inputs */}
+      <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-1">
+          <label className="text-[10px] text-white/40 uppercase tracking-wider font-semibold block">Date</label>
+          <input
+            type="date"
+            value={scheduleDate}
+            onChange={e => onDateChange(e.target.value)}
+            min={todayStr}
+            className="w-full bg-black/40 border border-white/10 rounded-lg px-2.5 py-2 text-xs text-white/90
+              focus:outline-none focus:border-[#9a442d]/60 transition-colors
+              [color-scheme:dark]"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-[10px] text-white/40 uppercase tracking-wider font-semibold block">Time</label>
+          <input
+            type="time"
+            value={scheduleTime}
+            onChange={e => onTimeChange(e.target.value)}
+            className="w-full bg-black/40 border border-white/10 rounded-lg px-2.5 py-2 text-xs text-white/90
+              focus:outline-none focus:border-[#9a442d]/60 transition-colors
+              [color-scheme:dark]"
+          />
+        </div>
+      </div>
+
+      {/* Human-readable preview */}
+      {humanReadable && (
+        <p className="text-[11px] text-[#9a442d]/80 font-semibold flex items-center gap-1.5">
+          <Calendar size={11} />
+          {humanReadable}
+        </p>
+      )}
+
+      {/* Confirm + error */}
+      <div className="flex items-center gap-2 pt-0.5">
+        <button
+          onClick={onConfirm}
+          disabled={!scheduleDateTime || isScheduling}
+          className="flex items-center gap-1.5 px-4 py-2 bg-[#9a442d] hover:opacity-90 disabled:opacity-40 rounded-lg text-xs font-bold text-white transition-opacity"
+        >
+          {isScheduling
+            ? <><Loader2 size={12} className="animate-spin" /> Scheduling…</>
+            : <><Clock size={12} /> Confirm Schedule</>}
+        </button>
+      </div>
+
+      {scheduleState === 'error' && scheduleError && (
+        <p className="text-[11px] text-red-300 bg-red-500/10 border border-red-500/20 rounded px-2 py-1.5">{scheduleError}</p>
+      )}
+    </div>
+  )
+}
+
 // ── Component ─────────────────────────────────────────────────────────────
 
 type PostState = 'idle' | 'exporting' | 'posting' | 'done' | 'error'
@@ -149,9 +363,13 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
 
   // Schedule state
   const [showSchedule, setShowSchedule] = useState(false)
-  const [scheduleDateTime, setScheduleDateTime] = useState('')
+  const [scheduleDate, setScheduleDate] = useState('')
+  const [scheduleTime, setScheduleTime] = useState('12:00')
   const [scheduleState, setScheduleState] = useState<'idle' | 'submitting' | 'done' | 'error'>('idle')
   const [scheduleError, setScheduleError] = useState<string | null>(null)
+
+  // Combined ISO string from separate date + time inputs
+  const scheduleDateTime = scheduleDate ? `${scheduleDate}T${scheduleTime}` : ''
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -476,30 +694,19 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
 
       {/* Schedule panel */}
       {showSchedule && (
-        <div className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-3 space-y-2">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-white/60">Schedule Post</p>
-          <input
-            type="datetime-local"
-            value={scheduleDateTime}
-            onChange={e => setScheduleDateTime(e.target.value)}
-            min={new Date().toISOString().slice(0, 16)}
-            className="w-full bg-black/40 border border-white/10 rounded px-2 py-1.5 text-xs text-white/90 focus:outline-none focus:border-[#9a442d]"
-          />
-          <div className="flex gap-2">
-            <button
-              onClick={schedulePost}
-              disabled={!scheduleDateTime || isScheduling}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#9a442d] hover:opacity-90 disabled:opacity-40 rounded text-xs font-bold text-white transition-opacity"
-            >
-              {isScheduling ? <><Loader2 size={12} className="animate-spin" /> Scheduling…</> : <><Clock size={12} /> Confirm Schedule</>}
-            </button>
-            <button onClick={() => { setShowSchedule(false); setScheduleState('idle'); setScheduleError(null) }}
-              className="text-xs text-white/40 hover:text-white/60">Cancel</button>
-          </div>
-          {scheduleState === 'error' && scheduleError && (
-            <p className="text-[11px] text-red-300">{scheduleError}</p>
-          )}
-        </div>
+        <SchedulePanel
+          event={event}
+          scheduleDate={scheduleDate}
+          scheduleTime={scheduleTime}
+          scheduleDateTime={scheduleDateTime}
+          scheduleState={scheduleState}
+          scheduleError={scheduleError}
+          isScheduling={isScheduling}
+          onDateChange={setScheduleDate}
+          onTimeChange={setScheduleTime}
+          onConfirm={schedulePost}
+          onCancel={() => { setShowSchedule(false); setScheduleState('idle'); setScheduleError(null) }}
+        />
       )}
 
       {/* Action row */}

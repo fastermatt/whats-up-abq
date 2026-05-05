@@ -26,35 +26,38 @@ export default function DesktopNav() {
   if (pathname.startsWith('/admin')) return null
 
   return (
-    <header className="hidden md:flex sticky top-0 z-40 items-center justify-between gap-4 px-6 h-14 bg-[#fbf7f1]/95 backdrop-blur-md border-b border-[#f0e4cc]">
-      {/* Logo */}
-      <Link href="/" className="flex items-center hover:opacity-85 transition-opacity flex-shrink-0">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo-terra.svg" alt="ABQ Unplugged" className="h-8 w-auto" />
-      </Link>
+    <header className="hidden md:block sticky top-0 z-40 h-14 bg-[#fbf7f1]/95 backdrop-blur-md border-b border-[#f0e4cc]">
+      {/* Inner wrapper aligns logo+nav with page content on wide viewports */}
+      <div className="flex items-center justify-between gap-4 h-full max-w-6xl mx-auto px-4">
+        {/* Logo */}
+        <Link href="/" className="flex items-center hover:opacity-85 transition-opacity flex-shrink-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-terra.svg" alt="ABQ Unplugged" className="h-8 w-auto" />
+        </Link>
 
-      {/* Nav links */}
-      <nav className="flex items-center gap-0.5">
-        {NAV_ITEMS.map(({ href, label, Icon, primary }) => {
-          const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href)
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                !primary ? 'hidden lg:inline-flex' : ''
-              } ${
-                isActive
-                  ? 'bg-[#9a442d] text-white'
-                  : 'text-[#4a3f3a] hover:bg-[#f0e4cc] hover:text-[#1a1614]'
-              }`}
-            >
-              <Icon className="w-3.5 h-3.5 flex-shrink-0" />
-              {label}
-            </Link>
-          )
-        })}
-      </nav>
+        {/* Nav links */}
+        <nav className="flex items-center gap-0.5">
+          {NAV_ITEMS.map(({ href, label, Icon, primary }) => {
+            const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href)
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                  !primary ? 'hidden lg:inline-flex' : ''
+                } ${
+                  isActive
+                    ? 'bg-[#9a442d] text-white'
+                    : 'text-[#4a3f3a] hover:bg-[#f0e4cc] hover:text-[#1a1614]'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5 flex-shrink-0" />
+                {label}
+              </Link>
+            )
+          })}
+        </nav>
+      </div>
     </header>
   )
 }
