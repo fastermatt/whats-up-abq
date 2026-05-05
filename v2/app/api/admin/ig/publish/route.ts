@@ -87,6 +87,7 @@ export async function POST(request: NextRequest) {
     caption?: string
     mediaType?: 'FEED' | 'STORIES' | 'CAROUSEL'
     eventId?: string
+    location_id?: string
   }
   try {
     body = await request.json()
@@ -94,7 +95,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const { imageDataUrl, imageDataUrls, caption, mediaType = 'FEED', eventId } = body
+  const { imageDataUrl, imageDataUrls, caption, mediaType = 'FEED', eventId, location_id } = body
 
   const igToken = process.env.INSTAGRAM_ACCESS_TOKEN
   const igUserId = process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID
@@ -187,6 +188,8 @@ export async function POST(request: NextRequest) {
       containerParams.media_type = 'STORIES'
     } else {
       containerParams.caption = caption!
+      // Optional Instagram location tag (Facebook Place ID from Places search API)
+      if (location_id) containerParams.location_id = location_id
     }
 
     const containerId = await createContainer(igUserId, igToken, containerParams)

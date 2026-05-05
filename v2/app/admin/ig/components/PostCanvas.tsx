@@ -67,8 +67,10 @@ function Background({ slide, w, h }: { slide: Slide; w: number; h: number }) {
 
 function BackgroundImage({ slide, w, h }: { slide: Slide; w: number; h: number }) {
   const bg = slide.background as Extract<Slide['background'], { type: 'image' }>
+  const { setBackground, selectLayer } = useEditor()
   const [img] = useImage(proxyIfNeeded(bg.src), 'anonymous')
   if (!img) return <Rect x={0} y={0} width={w} height={h} fill="#222" listening={false} />
+
   const ar = img.width / img.height
   const target = w / h
   let dw = w, dh = h, dx = 0, dy = 0
@@ -79,10 +81,48 @@ function BackgroundImage({ slide, w, h }: { slide: Slide; w: number; h: number }
     if (ar > target) { dw = w; dh = w / ar; dy = (h - dh) / 2 }
     else             { dh = h; dw = h * ar; dx = (w - dw) / 2 }
   }
+
+  // Apply zoom from center of the computed image rect
+  const sc = bg.scale ?? 1
+  if (sc !== 1) {
+    const cx = dx + dw / 2
+    const cy = dy + dh / 2
+    dw *= sc; dh *= sc
+    dx = cx - dw / 2
+    dy = cy - dh / 2
+  }
+
+  // Apply pan offset accumulated from drags
+  dx += bg.offsetX ?? 0
+  dy += bg.offsetY ?? 0
+
   return (
-    <Group listening={false}>
-      <KImage image={img} x={dx} y={dy} width={dw} height={dh} />
-      <Rect x={0} y={0} width={w} height={h} fill={bg.overlayColor} opacity={bg.overlayOpacity} />
+    <Group>
+      {/*
+        Draggable image group. x/y are explicit so react-konva resets the group
+        position back to (0,0) on each re-render — this avoids a flicker on dragEnd
+        because the image's dx/dy already include the new offset from the store update.
+      */}
+      <Group
+        x={0} y={0}
+        draggable
+        onDragEnd={e => {
+          const gx = e.target.x()
+          const gy = e.target.y()
+          const stage = e.target.getStage()
+          if (stage) stage.container().style.cursor = 'grab'
+          setBackground({ ...bg, offsetX: (bg.offsetX ?? 0) + gx, offsetY: (bg.offsetY ?? 0) + gy })
+        }}
+        onClick={() => selectLayer(null)}
+        onTap={() => selectLayer(null)}
+        onMouseEnter={e => { const s = e.target.getStage(); if (s) s.container().style.cursor = 'grab' }}
+        onDragStart={e => { const s = e.target.getStage(); if (s) s.container().style.cursor = 'grabbing' }}
+        onMouseLeave={e => { const s = e.target.getStage(); if (s) s.container().style.cursor = 'default' }}
+      >
+        <KImage image={img} x={dx} y={dy} width={dw} height={dh} />
+      </Group>
+      {/* Overlay stays fixed over the full canvas — not part of the draggable group */}
+      <Rect x={0} y={0} width={w} height={h} fill={bg.overlayColor} opacity={bg.overlayOpacity} listening={false} />
     </Group>
   )
 }

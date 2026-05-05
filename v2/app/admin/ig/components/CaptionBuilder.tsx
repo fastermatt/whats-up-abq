@@ -1,7 +1,7 @@
 'use client'
 
-import { useRef, useState } from 'react'
-import { Copy, Check, Send, Loader2, ExternalLink, Sparkles, Calendar, Clock } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Copy, Check, Send, Loader2, ExternalLink, Sparkles, Calendar, Clock, MapPin, Search, X } from 'lucide-react'
 import { useEditor } from '../store'
 import type { NormalizedEvent } from '@/lib/events'
 import type { PostCanvasHandle } from './PostCanvas'
@@ -79,6 +79,7 @@ type PostState = 'idle' | 'exporting' | 'posting' | 'done' | 'error'
 type MediaType = 'FEED' | 'STORIES' | 'CAROUSEL'
 
 interface Caption { id: string; label: string; sublabel: string; text: string }
+interface VenueResult { id: string; name: string; address: string }
 
 interface Props {
   event: NormalizedEvent
@@ -102,6 +103,36 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
   // AI caption state
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState<string | null>(null)
+
+  // Venue / location-tag state
+  const [venueQuery, setVenueQuery]     = useState('')
+  const [venueResults, setVenueResults] = useState<VenueResult[]>([])
+  const [venueLoading, setVenueLoading] = useState(false)
+  const [venueId, setVenueId]           = useState<string | null>(null)
+  const [venueName, setVenueName]       = useState('')
+  const venueTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    if (venueTimerRef.current) clearTimeout(venueTimerRef.current)
+    const q = venueQuery.trim()
+    if (!q || q.length < 2) { setVenueResults([]); return }
+    venueTimerRef.current = setTimeout(async () => {
+      setVenueLoading(true)
+      try {
+        const res = await fetch(`/api/admin/ig/venues?q=${encodeURIComponent(q)}`)
+        const data = await res.json()
+        setVenueResults(Array.isArray(data) ? data : [])
+      } catch { setVenueResults([]) }
+      finally { setVenueLoading(false) }
+    }, 400)
+    return () => { if (venueTimerRef.current) clearTimeout(venueTimerRef.current) }
+  }, [venueQuery])
+
+  const clearVenue = () => { setVenueId(null); setVenueName(''); setVenueQuery(''); setVenueResults([]) }
+  const selectVenue = (v: VenueResult) => {
+    setVenueId(v.id); setVenueName(v.name)
+    setVenueQuery(''); setVenueResults([])
+  }
 
   // Schedule state
   const [showSchedule, setShowSchedule] = useState(false)
@@ -197,7 +228,10 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
       } else {
         const png = await canvasRef.current.exportPng()
         const jpeg = await pngToJpeg(png)
-        payload = { imageDataUrl: jpeg, caption: text, mediaType, eventId: event.id }
+        payload = {
+          imageDataUrl: jpeg, caption: text, mediaType, eventId: event.id,
+          ...(venueId ? { location_id: venueId } : {}),
+        }
       }
 
       setPostState('posting')
@@ -245,6 +279,7 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
           mediaType: effectiveMediaType,
           scheduledFor: new Date(scheduleDateTime).toISOString(),
           eventId: event.id,
+          ...(venueId && effectiveMediaType === 'FEED' ? { location_id: venueId } : {}),
         }),
       })
       const data = await res.json()
@@ -308,6 +343,60 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
       {!isCarousel && mediaType === 'STORIES' && (
         <div className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-[11px] text-white/50">
           Stories don&apos;t show captions — use the 9:16 canvas format for best results.
+        </div>
+      )}
+
+      {/* Venue / location tag — feed posts only */}
+      {!isCarousel && mediaType !== 'STORIES' && (
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40 flex items-center gap-1.5">
+              <MapPin size={10} />Location Tag <span className="font-normal normal-case tracking-normal opacity-60">(optional)</span>
+            </p>
+            {venueId && (
+              <button onClick={clearVenue} className="text-[10px] text-white/30 hover:text-white/60 transition-colors">Clear</button>
+            )}
+          </div>
+          {venueId ? (
+            <div className="flex items-center gap-2 bg-white/[0.06] border border-[#9a442d]/25 rounded-lg px-3 py-2">
+              <MapPin size={11} className="text-[#9a442d] shrink-0" />
+              <span className="text-xs text-white/80 flex-1 truncate">{venueName}</span>
+              <button onClick={clearVenue} className="text-white/30 hover:text-white/70 transition-colors ml-1">
+                <X size={12} />
+              </button>
+            </div>
+          ) : (
+            <div className="relative">
+              <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none">
+                {venueLoading ? <Loader2 size={11} className="animate-spin" /> : <Search size={11} />}
+              </div>
+              <input
+                value={venueQuery}
+                onChange={e => setVenueQuery(e.target.value)}
+                placeholder="Search venues to tag…"
+                disabled={isPosting || isScheduling}
+                className="w-full bg-white/[0.05] border border-white/[0.08] rounded-lg pl-8 pr-3 py-2 text-xs text-white
+                  placeholder:text-white/25 focus:outline-none focus:border-[#9a442d]/50 focus:bg-white/[0.07]
+                  transition-all disabled:opacity-40"
+              />
+              {venueResults.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-[#1a1614] border border-white/[0.1] rounded-lg overflow-hidden z-20 shadow-2xl">
+                  {venueResults.map((v, i) => (
+                    <button
+                      key={v.id}
+                      onClick={() => selectVenue(v)}
+                      className={`w-full flex flex-col text-left px-3 py-2.5 hover:bg-white/[0.06] active:bg-[#9a442d]/10 transition-colors ${
+                        i > 0 ? 'border-t border-white/[0.04]' : ''
+                      }`}
+                    >
+                      <span className="text-xs font-semibold text-white/85">{v.name}</span>
+                      {v.address && <span className="text-[10px] text-white/40 mt-0.5">{v.address}</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
