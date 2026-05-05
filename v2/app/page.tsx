@@ -341,7 +341,7 @@ export default async function DiscoverPage() {
               { label: 'Food & Drink', icon: 'fi-rr-utensils',   href: '/food-drink-events' },
               { label: 'Family',       icon: 'fi-rr-users',      href: '/events?category=Family' },
               { label: 'Outdoor',      icon: 'fi-rr-leaf',       href: '/outdoor-activities' },
-              { label: 'Film',         icon: 'fi-rr-film',       href: '/events?category=Film' },
+              { label: 'Movies',       icon: 'fi-rr-film',       href: '/movies' },
               { label: 'Free',         icon: 'fi-rr-ticket',     href: '/free' },
             ].map(({ label, icon, href }) => (
               <Link
@@ -579,26 +579,24 @@ export default async function DiscoverPage() {
 
       {/* ── FAQ section — targets AI search / voice queries ── */}
       <AnimateIn animation="fade-up" delay={190}>
-        <section className="py-10 border-t border-[#f0e4cc]/60">
+        <section className="py-5 border-t border-[#f0e4cc]/60">
           <div className="max-w-3xl mx-auto px-4">
-            <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] mb-1 font-semibold">Quick answers</p>
-            <h2
-              className="text-xl font-black text-[#1a1614] mb-6"
-              style={{ fontFamily: 'var(--font-epilogue)' }}
-            >
-              Albuquerque events — FAQ
-            </h2>
-            <div className="space-y-3">
+            <div className="divide-y divide-[#f0e4cc]">
               {HOMEPAGE_FAQS.map(({ q, a }, i) => (
-                <div key={i} className="bg-white rounded-xl border border-[#f0e4cc] p-4 shadow-sm">
-                  <h3
-                    className="text-sm font-bold text-[#1a1614] mb-1.5"
-                    style={{ fontFamily: 'var(--font-epilogue)' }}
-                  >
-                    {q}
-                  </h3>
-                  <p className="text-xs text-[#6b5d57] leading-relaxed">{a}</p>
-                </div>
+                <details key={i} className="group py-3 first:pt-0 last:pb-0">
+                  <summary className="flex items-center justify-between gap-3 cursor-pointer list-none select-none">
+                    <h3
+                      className="text-sm font-bold text-[#1a1614] group-open:text-[#9a442d] transition-colors"
+                      style={{ fontFamily: 'var(--font-epilogue)' }}
+                    >
+                      {q}
+                    </h3>
+                    <span className="flex-shrink-0 text-[#9a442d]/60 group-open:rotate-180 transition-transform duration-200 text-[10px]">
+                      ▾
+                    </span>
+                  </summary>
+                  <p className="text-xs text-[#6b5d57] leading-relaxed mt-2 pr-6">{a}</p>
+                </details>
               ))}
             </div>
           </div>
