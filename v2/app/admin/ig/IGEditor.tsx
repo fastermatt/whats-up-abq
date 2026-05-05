@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import type { NormalizedEvent } from '@/lib/events'
-import { QuickPostInput } from '@/app/admin/ig-captions/QuickPostInput'
+import { EventSearch } from './components/EventSearch'
 import { Toolbar, type EditorMode } from './components/Toolbar'
 import { DesignPanel } from './components/DesignPanel'
 import { ElementsSidebar } from './components/ElementsSidebar'
@@ -96,8 +96,8 @@ export function IGEditor({ event, image }: Props) {
         </p>
       </div>
 
-      {/* Event loader */}
-      <QuickPostInput />
+      {/* Event search / loader */}
+      <EventSearch />
 
       {/* Loaded event badge */}
       {event && (
