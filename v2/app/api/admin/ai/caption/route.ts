@@ -1,9 +1,8 @@
 /**
  * POST /api/admin/ai/caption
  *
- * Generates 4 Instagram captions via DeepSeek using a carefully tuned
- * copywriting persona — reads like a knowledgeable local friend, not a
- * corporate announcement.
+ * Generates 4 Instagram captions via DeepSeek.
+ * Optimized for @abqunplugged — local events guide for Albuquerque, NM.
  *
  * Body: { event: { title, date?, time?, venue?, category?, about?, price? } }
  * Returns: { captions: [{ id, label, sublabel, text }] }
@@ -13,45 +12,42 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
-// ── System prompt ────────────────────────────────────────────────────────────
-// Designed by DeepSeek to produce distinct, human-sounding styles.
-// Anti-patterns are explicitly enumerated so the model doesn't drift.
+const SYSTEM_PROMPT = `You are an expert Instagram copywriter for ABQ Unplugged (@abqunplugged), Albuquerque's go-to local events guide. You write captions that feel like they came from a well-connected local who genuinely loves the city — not a marketing department.
 
-const SYSTEM_PROMPT = `You are a social media copywriter for ABQ Unplugged, the go-to events guide for Albuquerque, NM. Your persona is a knowledgeable, enthusiastic local friend who knows the city's best spots, supports the arts, and shares events with genuine excitement — not corporate noise.
+Your captions perform well because they:
+- Lead with something specific and interesting, never generic
+- Use the event's actual description/about text to add real detail
+- Sound like a person talking, not a press release
+- Give people a concrete reason to care right now
+- Include a clear next step (link in bio) without being pushy
+- Tag venues with @ when the venue name is provided
 
-TONE & STYLE RULES (apply to all captions):
-- Write in lowercase except proper nouns, event names, and the very first word of a caption. Lowercase feels less corporate.
-- Use @ mentions for venues and artists when provided (e.g. @launchpadrocks, @kimoabq).
-- Incorporate Albuquerque-specific language naturally: "Burque", "ABQ", "the 505".
-- Never list fields mechanically. Weave the date, time, venue, price into natural sentences.
-- Use the "about" field heavily — it contains the real story of the event. Don't ignore it.
-- End every caption (except minimal) with a CTA containing "link in bio" — framed as a discovery platform ("find more ABQ events at the link in bio"), not a direct ticket link.
-- No hashtags in the caption body (they go in the first comment).
+CAPTION STYLE GUIDE:
 
-STYLE SPECS:
-- standard: Clean, warm, informative. 2–4 lines. Blend the key details (date, time, venue, price) into conversational sentences. Ends with a clear CTA.
-- hype: High energy, FOMO-driven. Opens with a punchy statement. Short bursts. 2–3 emojis max. Direct address sparingly. NO fake sell-out warnings unless the event explicitly says limited capacity.
-- spotlight: Editorial / magazine tone. Opens with a vivid scene, sensory detail, or local hook — not the event title. Adds context about why this event matters to ABQ. 3–5 lines. Ends with practical info + CTA.
-- minimal: Ultra-short. 1 sentence or even just artist + date + venue. No emojis. No CTA (implied). Punchy and confident.
+Standard — Your workhorse caption. Conversational and informative. Covers what, when, where, and why it's worth going. 3-5 lines. Ends with "🔗 link in bio" CTA. No more than 2 emojis total. Normal capitalization and grammar.
 
-ABSOLUTE ANTI-PATTERNS — never use these:
-- Clichés: "nestled in the heart of", "hidden gem", "vibrant scene", "unforgettable night", "epic experience", "don't miss out", "fun for the whole family", "limited time", "hurry"
-- More than 3 emojis per caption (0 for minimal)
-- Robotic field lists ("Title: … Date: …")
-- Fake urgency or invented details not in the event data
-- Four captions that are minor variations of each other — each style must be distinctly different in structure and angle
-- Generic phrases like "great music", "amazing performers", "a wonderful evening" — be specific using the about field
+Hype — Punchy. Energy. Makes people feel like they'll regret missing this. Short sentences. All caps for key details like the event name or date is fine. 2-3 emojis max. Ends with "link in bio." Should feel urgent without being fake.
+
+Spotlight — Editorial tone, like a culture writer covering the scene. Opens with a hook or observation about the city/venue/artist — not the event title. Gives context about why this event matters locally. 4-6 lines. One emoji max. Ends with practical info + "link in bio."
+
+Minimal — Just the essentials. One or two lines max. Date, event, venue. Maybe a single emoji. No hashtags, no CTA. Reads like a headline.
+
+RULES FOR ALL STYLES:
+- Proper capitalization and correct grammar throughout
+- Albuquerque references when natural: ABQ, Burque, the 505, Old Town, Central Ave, etc.
+- No hashtags in the caption (those go in the first comment)
+- Never make up details not in the event data
+- Never use: "unforgettable," "epic," "hidden gem," "vibrant," "nestled," "don't miss out," "fun for the whole family," "a night you won't forget"
+- The link in bio points to abqunplugged.com — a discovery platform for ALL ABQ events, not a direct event page. Frame CTAs as "see what else is happening" / "find more events" not "get your tickets"
 
 OUTPUT FORMAT:
-Return a JSON array of exactly 4 objects. Each object must have:
-- id: one of exactly: standard, hype, spotlight, minimal
-- label: display name (e.g. "Standard", "Hype", "Spotlight", "Minimal")
-- sublabel: 2–4 word tone description (e.g. "Clean & informative", "High energy, FOMO", "Editorial tone", "Short & punchy")
-- text: the caption text with \\n for line breaks
+Return a JSON array of exactly 4 objects, each with:
+- id: one of: standard, hype, spotlight, minimal
+- label: "Standard", "Hype", "Spotlight", or "Minimal"
+- sublabel: brief 3-word tone descriptor (e.g. "Clean & informative")
+- text: the caption with actual line breaks as \\n
 
-Respond with valid JSON only — no markdown fences, no extra text.`
-
-// ── Route handler ────────────────────────────────────────────────────────────
+Return only the JSON array. No markdown, no code fences, no explanation.`
 
 interface EventInput {
   title: string
@@ -64,13 +60,11 @@ interface EventInput {
 }
 
 export async function POST(request: NextRequest) {
-  // Auth
   const adminToken = request.cookies.get('admin_token')?.value
   if (!adminToken || adminToken !== process.env.ADMIN_SECRET) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Parse body
   let body: { event: EventInput }
   try {
     body = await request.json()
@@ -88,22 +82,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'DEEPSEEK_API_KEY not configured' }, { status: 500 })
   }
 
-  // Build user prompt — include every non-empty field
-  const fields = [
-    `Title: ${event.title}`,
+  // Build the event brief — only include fields that actually have data
+  const lines = [
+    `Event: ${event.title}`,
+    event.category && `Category: ${event.category}`,
     event.date     && `Date: ${event.date}`,
     event.time     && `Time: ${event.time}`,
     event.venue    && `Venue: ${event.venue}`,
-    event.category && `Category: ${event.category}`,
-    event.about    && `About: ${event.about}`,
     event.price    && `Price: ${event.price}`,
-  ].filter(Boolean).join('\n')
+    event.about    && `Description: ${event.about}`,
+  ].filter(Boolean)
 
-  const userPrompt = `Generate 4 Instagram captions for this ABQ Unplugged event:
+  const userPrompt = `Write 4 Instagram captions for this ABQ Unplugged event:
 
-${fields}
+${lines.join('\n')}
 
-The link in bio points to abqunplugged.com — a discovery platform for ALL ABQ events, not a page for this specific event. Frame every CTA as "find more events" / "discover what's on", not "get tickets for this event".`
+The link in bio goes to abqunplugged.com — an events discovery site for all of Albuquerque, not a page for this specific event. Frame any CTA around discovering more events, not getting tickets directly.`
 
   try {
     const dsRes = await fetch('https://api.deepseek.com/chat/completions', {
@@ -114,7 +108,7 @@ The link in bio points to abqunplugged.com — a discovery platform for ALL ABQ 
       },
       body: JSON.stringify({
         model: 'deepseek-v4-flash',
-        temperature: 0.85,
+        temperature: 0.9,
         max_tokens: 2000,
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
@@ -135,10 +129,12 @@ The link in bio points to abqunplugged.com — a discovery platform for ALL ABQ 
       return NextResponse.json({ error: 'DeepSeek returned no content' }, { status: 502 })
     }
 
-    // Strip markdown fences if the model added them anyway
+    // Strip markdown fences if present
     let cleaned = content.trim()
     const fence = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
     if (fence) cleaned = fence[1].trim()
+    // Also strip a leading/trailing bare ``` if no language tag
+    cleaned = cleaned.replace(/^```\s*/, '').replace(/\s*```$/, '').trim()
 
     let captions: unknown
     try {
@@ -149,7 +145,7 @@ The link in bio points to abqunplugged.com — a discovery platform for ALL ABQ 
     }
 
     if (!Array.isArray(captions) || captions.length === 0) {
-      return NextResponse.json({ error: 'Parsed captions is not a non-empty array' }, { status: 502 })
+      return NextResponse.json({ error: 'Captions is not a non-empty array' }, { status: 502 })
     }
 
     return NextResponse.json({ captions })
