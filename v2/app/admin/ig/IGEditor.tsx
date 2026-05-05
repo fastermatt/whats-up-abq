@@ -45,7 +45,7 @@ export function IGEditor({ event, image }: Props) {
     category: evt.category ?? undefined,
     imageUrl: img || undefined,
     tagline: evt.about ?? undefined,
-    cta: 'abqunplugged.com',
+    cta: 'link in bio',
   })
 
   const doLoadEvent = (evt: NormalizedEvent, img: string) => {
@@ -66,7 +66,6 @@ export function IGEditor({ event, image }: Props) {
     const isFirstLoad = lastEventIdRef.current === null
 
     if (hasWork && !isFirstLoad) {
-      // Canvas has content from a previous session — confirm before replacing
       setPendingLoad({ event, image })
     } else {
       lastEventIdRef.current = event.id
@@ -82,46 +81,13 @@ export function IGEditor({ event, image }: Props) {
     setPendingLoad(null)
   }
 
+  const hasLayers = design.slides.some(s => s.layers.length > 0)
+
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-black text-white" style={{ fontFamily: 'var(--font-epilogue)' }}>
-          Instagram Post Studio
-        </h1>
-        <p className="text-white/40 text-sm mt-1">
-          {mode === 'event'
-            ? 'Canvas-based editor with full customization, layers, and carousel export.'
-            : 'Design any promo post from scratch — brand templates, fonts, colors, and graphics.'}
-        </p>
-      </div>
+    <div className="space-y-3">
 
-      {/* Event search / loader */}
-      <EventSearch />
-
-      {/* Loaded event badge */}
-      {event && (
-        <div className="flex items-center gap-3 bg-white/[0.04] border border-white/[0.07] rounded-xl px-4 py-2.5">
-          <div className="w-2 h-2 rounded-full bg-[#9a442d] flex-shrink-0" />
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-white truncate">{event.title}</p>
-            <p className="text-[11px] text-white/40 truncate mt-0.5">
-              {event.category && (
-                <span className="text-[#9a442d]/90 font-semibold mr-2">{event.category}</span>
-              )}
-              {event.date && (() => {
-                try {
-                  const base = /^\d{4}-\d{2}-\d{2}$/.test(event.date!) ? event.date + 'T12:00:00' : event.date!
-                  const d = new Date(base)
-                  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'America/Denver' })
-                } catch { return event.date }
-              })()}
-              {event.time && ` · ${event.time}`}
-              {event.venue && ` · ${event.venue}`}
-            </p>
-          </div>
-        </div>
-      )}
+      {/* Event picker — collapses to a single line after event is selected */}
+      <EventSearch event={event} />
 
       {/* Pending load confirmation */}
       {pendingLoad && (
@@ -150,7 +116,7 @@ export function IGEditor({ event, image }: Props) {
       {/* Toolbar */}
       <Toolbar mode={mode} onModeChange={setMode} canvasRef={canvasRef} event={event} image={image} />
 
-      {/* Mobile sidebar toggle — desktop always shows sidebar in its column */}
+      {/* Mobile sidebar toggle */}
       <button
         onClick={() => setShowSidebar(v => !v)}
         className={`lg:hidden flex items-center justify-center gap-2 w-full py-2.5 rounded-lg border text-xs font-bold tracking-wide transition-colors touch-manipulation ${
@@ -164,18 +130,31 @@ export function IGEditor({ event, image }: Props) {
 
       {/* 3-column editor: elements | canvas | design */}
       <div className="flex flex-col lg:flex-row gap-4">
-        {/* Sidebar — hidden by default on mobile, always visible on desktop */}
+        {/* Elements sidebar — hidden by default on mobile */}
         <div className={showSidebar ? 'block' : 'hidden lg:block'}>
           <ElementsSidebar />
         </div>
 
-        {/* Canvas — first in DOM on desktop, rendered first on mobile */}
+        {/* Canvas */}
         <div className="flex-1 min-w-0 flex flex-col gap-3">
-          <PostCanvas onExportRef={h => { canvasRef.current = h }} />
-          <p className="text-[11px] text-white/30 text-center hidden sm:block">
+          <div className="relative">
+            <PostCanvas onExportRef={h => { canvasRef.current = h }} />
+
+            {/* Empty state overlay — shown when canvas has no layers and no event is being built */}
+            {!hasLayers && !event && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none rounded-xl">
+                <div className="text-center space-y-2 px-8">
+                  <p className="text-white/20 text-sm font-semibold">Start with an event or a template</p>
+                  <p className="text-white/12 text-xs">Pick an event above to auto-fill the Poster, or open Templates ↑ to choose a layout</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <p className="text-[11px] text-white/25 text-center hidden sm:block">
             Click to select · drag to move · corner handles to resize/rotate · Delete key removes selected · ⌘Z undo
           </p>
-          <p className="text-[11px] text-white/30 text-center sm:hidden">
+          <p className="text-[11px] text-white/25 text-center sm:hidden">
             Tap to select · drag to move · handles to resize
           </p>
         </div>
@@ -186,15 +165,15 @@ export function IGEditor({ event, image }: Props) {
       {/* Saved designs gallery */}
       <SavedDesigns />
 
-      {/* Caption editor + Instagram publisher (only when an event is loaded) */}
+      {/* Caption + publish (only when an event is loaded) */}
       {event && <CaptionBuilder event={event} canvasRef={canvasRef} />}
 
-      {/* Footer hint */}
-      <p className="text-[10px] text-white/25 text-center pt-4">
-        {design.slides.length > 1
-          ? `Carousel: ${design.slides.length} slides · use Export ZIP to download all slides`
-          : 'Use Save to store this design · Download for a single PNG'}
-      </p>
+      {/* Footer */}
+      {design.slides.length > 1 && (
+        <p className="text-[10px] text-white/20 text-center pt-2">
+          Carousel: {design.slides.length} slides · use Export ZIP to download all
+        </p>
+      )}
     </div>
   )
 }

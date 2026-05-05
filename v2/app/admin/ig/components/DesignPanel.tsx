@@ -291,10 +291,47 @@ function TextPanel({ layer, update }: { layer: TextLayer; update: (p: Partial<Te
   )
 }
 
+// Logo SVG variants — switching the src file changes the path fill color.
+const LOGO_VARIANTS: { src: string; label: string; canvasBg: string; dotStyle: React.CSSProperties }[] = [
+  { src: '/logo-white.svg', label: 'White', canvasBg: '#1a1614', dotStyle: { background: '#ffffff' } },
+  { src: '/logo-terra.svg', label: 'Terra', canvasBg: '#fbf7f1', dotStyle: { background: '#9a442d' } },
+  { src: '/logo-black.svg', label: 'Black', canvasBg: '#fbf7f1', dotStyle: { background: '#1a1614' } },
+  { src: '/logo-color.svg', label: 'Color', canvasBg: '#fbf7f1', dotStyle: { backgroundImage: 'linear-gradient(135deg,#9a442d 50%,#4f6249 50%)' } },
+]
+
 function ImagePanel({ layer, update }: { layer: ImageLayer; update: (p: Partial<ImageLayer>) => void }) {
+  const isLogo = /\/logo(-\w+)?\.svg$/.test(layer.src)
   return (
     <Section title="Image">
       <UploadRow current={layer.src} onPick={u => update({ src: u })} label="Replace" />
+      {isLogo && (
+        <div>
+          <Label>Logo color</Label>
+          <div className="flex gap-2 flex-wrap">
+            {LOGO_VARIANTS.map(v => (
+              <button
+                key={v.src}
+                onClick={() => update({ src: v.src })}
+                title={v.label}
+                className={`flex flex-col items-center gap-1 px-2.5 py-1.5 rounded-lg border text-[10px] font-semibold transition-all ${
+                  layer.src === v.src
+                    ? 'border-[#9a442d] bg-[#9a442d]/15 text-white'
+                    : 'border-white/10 bg-white/[0.04] text-white/50 hover:border-white/25 hover:text-white/70'
+                }`}
+              >
+                {/* Mini preview: canvas swatch with logo color dot */}
+                <span
+                  className="w-10 h-5 rounded flex items-center justify-center"
+                  style={{ background: v.canvasBg }}
+                >
+                  <span className="w-6 h-2 rounded-sm" style={v.dotStyle} />
+                </span>
+                {v.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       <div><Label>Corner radius</Label><NumInput value={layer.cornerRadius} onChange={v => update({ cornerRadius: Math.max(0, v) })} /></div>
     </Section>
   )

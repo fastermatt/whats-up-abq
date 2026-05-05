@@ -253,78 +253,57 @@ export function Toolbar({ mode, onModeChange, canvasRef, event, image }: Toolbar
 
   return (
     <div ref={galleryRef} className="space-y-2">
-      {/* Control row */}
-      <div className="bg-[#0d0d0d] border border-white/[0.07] rounded-xl p-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 sm:flex-wrap">
+      {/* Control row — 3 logical groups separated by dividers */}
+      <div className="bg-[#0d0d0d] border border-white/[0.07] rounded-xl px-3 py-2.5 flex flex-col sm:flex-row sm:items-center gap-2">
 
-        {/* Top row on mobile: mode toggle + templates + download */}
-        <div className="flex items-center gap-2 sm:contents">
-
-          {/* Mode toggle */}
-          <div className="flex bg-black/30 rounded-lg p-0.5 touch-manipulation">
+        {/* Group 1: Mode + Templates (context controls) */}
+        <div className="flex items-center gap-2">
+          <div className="flex bg-[#0a0807]/60 rounded-lg p-0.5 touch-manipulation">
             <button
               onClick={() => onModeChange('event')}
-              className={`px-3 py-2 sm:py-1.5 text-xs font-bold rounded transition-colors touch-manipulation ${
-                mode === 'event' ? 'bg-[#9a442d] text-white' : 'text-white/60 hover:text-white'
+              className={`px-3 py-1.5 text-xs font-bold rounded transition-colors touch-manipulation ${
+                mode === 'event' ? 'bg-[#9a442d] text-white' : 'text-white/50 hover:text-white/80'
               }`}
             >Event</button>
             <button
               onClick={() => onModeChange('generic')}
-              className={`px-3 py-2 sm:py-1.5 text-xs font-bold rounded transition-colors touch-manipulation ${
-                mode === 'generic' ? 'bg-[#9a442d] text-white' : 'text-white/60 hover:text-white'
+              className={`px-3 py-1.5 text-xs font-bold rounded transition-colors touch-manipulation ${
+                mode === 'generic' ? 'bg-[#9a442d] text-white' : 'text-white/50 hover:text-white/80'
               }`}
             >Brand</button>
           </div>
 
-          {/* Templates toggle */}
           <button
             onClick={() => setShowGallery(v => !v)}
-            className={`flex items-center gap-1.5 px-3 py-2 sm:py-1.5 border rounded text-xs font-semibold transition-colors touch-manipulation ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 border rounded text-xs font-semibold transition-colors touch-manipulation ${
               showGallery
                 ? 'bg-[#9a442d]/20 border-[#9a442d]/50 text-[#9a442d]'
-                : 'bg-white/[0.06] hover:bg-white/[0.1] border-white/[0.1] text-white/80'
+                : 'bg-white/[0.05] hover:bg-white/[0.09] border-white/[0.09] text-white/70'
             }`}
           >
             Templates {showGallery ? '↑' : '↓'}
           </button>
-
-          {/* Download — always visible, prominent on mobile */}
-          <div className="flex-1 sm:flex-none flex justify-end sm:order-last">
-            {design.slides.length > 1 ? (
-              <button
-                onClick={exportAllSlides}
-                className="flex items-center gap-1.5 px-4 py-2 sm:px-3 sm:py-1.5 bg-[#9a442d] hover:bg-[#b85535] rounded text-xs font-bold text-white touch-manipulation"
-              >
-                <LayersIcon size={13} /> Export ZIP
-              </button>
-            ) : (
-              <button
-                onClick={exportPng}
-                className="flex items-center gap-1.5 px-4 py-2 sm:px-3 sm:py-1.5 bg-[#9a442d] hover:bg-[#b85535] rounded text-xs font-bold text-white touch-manipulation"
-              >
-                <Download size={13} /> Download
-              </button>
-            )}
-          </div>
         </div>
 
-        {/* Second row on mobile: design name + undo/redo + save + slide info */}
-        <div className="flex items-center gap-2 sm:contents">
+        {/* Divider */}
+        <div className="hidden sm:block w-px h-5 bg-white/[0.08] mx-1" />
 
-          {/* Design name */}
+        {/* Group 2: Name + Undo/Redo (edit history) */}
+        <div className="flex items-center gap-2 flex-1 sm:flex-none">
           <input
             value={design.name}
             onChange={e => renameDesign(e.target.value)}
-            placeholder="Design name"
-            className="bg-black/30 border border-white/10 rounded px-2 py-2 sm:py-1.5 text-xs text-white/90 focus:outline-none focus:border-[#9a442d] flex-1 sm:w-36 sm:flex-none"
+            placeholder="Untitled"
+            aria-label="Design name"
+            className="bg-[#0a0807]/50 border border-white/[0.08] rounded px-2 py-1.5 text-xs text-white/90 focus:outline-none focus:ring-1 focus:ring-[#9a442d]/50 focus:border-[#9a442d]/60 w-32 sm:w-28"
           />
-
-          {/* Undo / Redo */}
           <div className="flex gap-1">
             <button
               onClick={undo}
               disabled={!canUndo()}
               title="Undo (⌘Z)"
-              className="flex items-center justify-center w-9 h-9 sm:w-8 sm:h-8 rounded bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] text-white/70 disabled:opacity-30 disabled:cursor-not-allowed transition-colors touch-manipulation"
+              aria-label="Undo"
+              className="flex items-center justify-center w-8 h-8 rounded bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.09] text-white/60 disabled:opacity-25 disabled:cursor-not-allowed transition-colors touch-manipulation"
             >
               <RotateCcw size={13} />
             </button>
@@ -332,38 +311,59 @@ export function Toolbar({ mode, onModeChange, canvasRef, event, image }: Toolbar
               onClick={redo}
               disabled={!canRedo()}
               title="Redo (⌘⇧Z)"
-              className="flex items-center justify-center w-9 h-9 sm:w-8 sm:h-8 rounded bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] text-white/70 disabled:opacity-30 disabled:cursor-not-allowed transition-colors touch-manipulation"
+              aria-label="Redo"
+              className="flex items-center justify-center w-8 h-8 rounded bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.09] text-white/60 disabled:opacity-25 disabled:cursor-not-allowed transition-colors touch-manipulation"
             >
               <RotateCw size={13} />
             </button>
           </div>
+        </div>
 
-          {/* Save */}
-          <button
-            onClick={doSave}
-            disabled={saveState === 'saving'}
-            className="flex items-center gap-1.5 px-3 py-2 sm:py-1.5 bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] rounded text-xs font-semibold text-white/80 disabled:opacity-50 touch-manipulation"
-          >
-            <Save size={13} />
-            {saveState === 'saving' ? 'Saving…' : saveState === 'saved' ? '✓' : 'Save'}
-          </button>
+        {/* Divider */}
+        <div className="hidden sm:block w-px h-5 bg-white/[0.08] mx-1" />
 
-          {/* Safe zone toggle */}
+        {/* Group 3: Save + Safe Zone + slide info + Download (output) */}
+        <div className="flex items-center gap-2 sm:ml-auto">
+          <span className="text-[11px] text-white/30 hidden md:inline tabular-nums">
+            {design.slides.length}s · {design.format}
+          </span>
+
           <button
             onClick={toggleSafeZone}
-            title="Toggle safe zone guides (not exported)"
-            className={`flex items-center gap-1.5 px-3 py-2 sm:py-1.5 border rounded text-xs font-semibold transition-colors touch-manipulation ${
+            title="Toggle safe zone guides"
+            className={`px-2.5 py-1.5 border rounded text-xs font-semibold transition-colors touch-manipulation hidden sm:flex items-center gap-1 ${
               showSafeZone
-                ? 'bg-yellow-500/20 border-yellow-500/50 text-yellow-300'
-                : 'bg-white/[0.04] border-white/[0.08] text-white/45 hover:text-white/75 hover:bg-white/[0.07]'
+                ? 'bg-yellow-500/15 border-yellow-500/40 text-yellow-300'
+                : 'bg-white/[0.04] border-white/[0.07] text-white/35 hover:text-white/60 hover:bg-white/[0.07]'
             }`}
           >
             Safe Zone
           </button>
 
-          <span className="text-[11px] text-white/40 hidden sm:inline">
-            {design.slides.length} slide{design.slides.length > 1 ? 's' : ''} · {design.format}
-          </span>
+          <button
+            onClick={doSave}
+            disabled={saveState === 'saving'}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] rounded text-xs font-semibold text-white/75 disabled:opacity-40 touch-manipulation"
+          >
+            <Save size={12} />
+            {saveState === 'saving' ? 'Saving…' : saveState === 'saved' ? 'Saved ✓' : 'Save'}
+          </button>
+
+          {design.slides.length > 1 ? (
+            <button
+              onClick={exportAllSlides}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#9a442d] hover:bg-[#b85535] rounded text-xs font-bold text-white touch-manipulation"
+            >
+              <LayersIcon size={12} /> Export ZIP
+            </button>
+          ) : (
+            <button
+              onClick={exportPng}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#9a442d] hover:bg-[#b85535] rounded text-xs font-bold text-white touch-manipulation"
+            >
+              <Download size={12} /> Download
+            </button>
+          )}
         </div>
       </div>
 

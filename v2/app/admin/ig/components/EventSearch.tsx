@@ -2,26 +2,48 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, Search, Loader2, Calendar, MapPin } from 'lucide-react'
+import { ArrowRight, Search, Loader2, Calendar, MapPin, X, ChevronDown } from 'lucide-react'
 import type { EventSearchResult } from '@/app/api/admin/ig/search/route'
+import type { NormalizedEvent } from '@/lib/events'
+
+// ─── Types ──────────────────────────────────────────────────────────────────
+
+type TimeFilter = 'today' | 'tonight' | 'tomorrow' | 'this-weekend' | 'this-week' | 'upcoming'
+
+const TIME_PILLS: { label: string; value: TimeFilter }[] = [
+  { label: 'Today',    value: 'today' },
+  { label: 'Tonight',  value: 'tonight' },
+  { label: 'Tomorrow', value: 'tomorrow' },
+  { label: 'Weekend',  value: 'this-weekend' },
+  { label: 'This Week',value: 'this-week' },
+  { label: 'All',      value: 'upcoming' },
+]
+
+const CATEGORIES = [
+  'Music', 'Comedy', 'Sports', 'Arts & Theater',
+  'Family', 'Film', 'Food & Drink', 'Festivals', 'Outdoor', 'Community',
+]
 
 const CAT_COLORS: Record<string, string> = {
-  'Music':         'text-purple-300 bg-purple-400/10',
-  'Arts & Theater':'text-pink-300   bg-pink-400/10',
-  'Comedy':        'text-yellow-300 bg-yellow-400/10',
-  'Sports':        'text-blue-300   bg-blue-400/10',
-  'Food & Drink':  'text-orange-300 bg-orange-400/10',
-  'Family':        'text-green-300  bg-green-400/10',
-  'Outdoor':       'text-emerald-300 bg-emerald-400/10',
-  'Festivals':     'text-rose-300   bg-rose-400/10',
-  'Film':          'text-cyan-300   bg-cyan-400/10',
-  'Community':     'text-amber-300  bg-amber-400/10',
+  'Music':          'text-purple-300 bg-purple-400/10 border-purple-400/20',
+  'Arts & Theater': 'text-pink-300   bg-pink-400/10   border-pink-400/20',
+  'Comedy':         'text-yellow-300 bg-yellow-400/10 border-yellow-400/20',
+  'Sports':         'text-blue-300   bg-blue-400/10   border-blue-400/20',
+  'Food & Drink':   'text-orange-300 bg-orange-400/10 border-orange-400/20',
+  'Family':         'text-green-300  bg-green-400/10  border-green-400/20',
+  'Outdoor':        'text-emerald-300 bg-emerald-400/10 border-emerald-400/20',
+  'Festivals':      'text-rose-300   bg-rose-400/10   border-rose-400/20',
+  'Film':           'text-cyan-300   bg-cyan-400/10   border-cyan-400/20',
+  'Community':      'text-amber-300  bg-amber-400/10  border-amber-400/20',
 }
 
 function fmtDate(iso: string) {
   try {
     const d = new Date(iso + 'T12:00:00')
-    return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'America/Denver' })
+    return d.toLocaleDateString('en-US', {
+      weekday: 'short', month: 'short', day: 'numeric',
+      timeZone: 'America/Denver',
+    })
   } catch { return iso }
 }
 
@@ -30,180 +52,277 @@ function extractId(raw: string): string | null {
   if (!t) return null
   const m = t.match(/\/events\/([^/?#\s]+)/)
   if (m) return m[1]
-  if (!t.includes('/') && !t.includes(' ')) return t
+  if (!t.includes('/') && !t.includes(' ') && t.length > 6) return t
   return null
 }
 
-export function EventSearch() {
+function categoryEmoji(cat: string | null) {
+  const map: Record<string, string> = {
+    'Music': '🎵', 'Comedy': '😂', 'Sports': '🏟️', 'Arts & Theater': '🎭',
+    'Food & Drink': '🍻', 'Family': '🎡', 'Film': '🎬', 'Outdoor': '🌄',
+    'Festivals': '🎪', 'Community': '🌵',
+  }
+  return map[cat ?? ''] ?? '📍'
+}
+
+// ─── Component ───────────────────────────────────────────────────────────────
+
+interface EventSearchProps {
+  event?: NormalizedEvent | null
+}
+
+function fmtDateShort(iso: string) {
+  try {
+    const base = /^\d{4}-\d{2}-\d{2}$/.test(iso) ? iso + 'T12:00:00' : iso
+    const d = new Date(base)
+    return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'America/Denver' })
+  } catch { return iso }
+}
+
+export function EventSearch({ event }: EventSearchProps) {
   const router = useRouter()
-  const [query, setQuery] = useState('')
-  const [results, setResults] = useState<EventSearchResult[]>([])
-  const [loading, setLoading] = useState(false)
-  const [open, setOpen] = useState(false)
-  const [activeIdx, setActiveIdx] = useState(-1)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const listRef = useRef<HTMLUListElement>(null)
+  const [query, setQuery]       = useState('')
+  const [time, setTime]         = useState<TimeFilter>('upcoming')
+  const [category, setCategory] = useState('')
+  const [results, setResults]   = useState<EventSearchResult[]>([])
+  const [loading, setLoading]   = useState(false)
+  const [expanded, setExpanded] = useState(!event)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Check if input looks like a URL/ID — skip search, go directly
-  const looksLikeId = Boolean(query.trim() && extractId(query))
+  // Auto-collapse when event loads for the first time
+  useEffect(() => {
+    if (event) setExpanded(false)
+  }, [event?.id])
 
-  const runSearch = useCallback(async (q: string) => {
-    if (!q.trim() || looksLikeId) {
-      setResults([])
-      setOpen(false)
-      return
-    }
+  // Check if input looks like a URL or bare event ID
+  const looksLikeId = Boolean(query.trim() && extractId(query) && !query.includes(' '))
+
+  const fetchResults = useCallback(async (q: string, t: TimeFilter, cat: string) => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/admin/ig/search?q=${encodeURIComponent(q)}&limit=10`)
+      const params = new URLSearchParams({ time: t, limit: '16' })
+      if (q.trim()) params.set('q', q.trim())
+      if (cat) params.set('category', cat)
+      const res = await fetch(`/api/admin/ig/search?${params}`)
       const data = await res.json()
       setResults(Array.isArray(data) ? data : [])
-      setOpen(true)
-      setActiveIdx(-1)
     } catch {
       setResults([])
     } finally {
       setLoading(false)
     }
-  }, [looksLikeId])
+  }, [])
 
+  // Load on mount and whenever filters change
   useEffect(() => {
+    if (looksLikeId) return
     if (timerRef.current) clearTimeout(timerRef.current)
-    if (!query.trim() || looksLikeId) {
-      setResults([])
-      setOpen(false)
-      setLoading(false)
-      return
-    }
-    setLoading(true)
-    timerRef.current = setTimeout(() => runSearch(query), 300)
+    const delay = query.trim() ? 300 : 0
+    timerRef.current = setTimeout(() => fetchResults(query, time, category), delay)
     return () => { if (timerRef.current) clearTimeout(timerRef.current) }
-  }, [query, looksLikeId, runSearch])
+  }, [query, time, category, looksLikeId, fetchResults])
 
   const navigate = (id: string) => {
-    setOpen(false)
-    setQuery('')
     router.push(`/admin/ig?id=${id}`)
   }
 
   const handleGo = () => {
     const id = extractId(query)
     if (id) { navigate(id); return }
-    if (results.length > 0) {
-      const idx = activeIdx >= 0 ? activeIdx : 0
-      navigate(results[idx]?.id ?? results[0].id)
-    }
+    if (results.length > 0) navigate(results[0].id)
   }
 
   const handleKey = (e: React.KeyboardEvent) => {
-    if (!open || results.length === 0) {
-      if (e.key === 'Enter') handleGo()
-      return
-    }
-    if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      setActiveIdx(i => Math.min(i + 1, results.length - 1))
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      setActiveIdx(i => Math.max(i - 1, -1))
-    } else if (e.key === 'Enter') {
-      e.preventDefault()
-      const idx = activeIdx >= 0 ? activeIdx : 0
-      navigate(results[idx].id)
-    } else if (e.key === 'Escape') {
-      setOpen(false)
-      setActiveIdx(-1)
-    }
+    if (e.key === 'Enter') handleGo()
   }
 
-  // Close on outside click
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (!inputRef.current?.closest('.event-search-root')?.contains(e.target as Node)) {
-        setOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [])
+  const clearQuery = () => setQuery('')
 
-  // Scroll active item into view
-  useEffect(() => {
-    if (activeIdx >= 0 && listRef.current) {
-      listRef.current.children[activeIdx]?.scrollIntoView({ block: 'nearest' })
-    }
-  }, [activeIdx])
+  const hasFilters = category !== '' || time !== 'upcoming'
+
+  // ── Collapsed state (event loaded) ──────────────────────────────────────────
+  if (event && !expanded) {
+    return (
+      <div className="flex items-center gap-3 bg-[#151210] border border-[#9a442d]/25 rounded-xl px-4 py-2.5">
+        <div className="w-1.5 h-1.5 rounded-full bg-[#9a442d] flex-shrink-0" />
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-white truncate leading-tight">{event.title}</p>
+          <p className="text-[11px] text-white/40 mt-0.5 truncate">
+            {event.category && (
+              <span className="text-[#9a442d]/80 font-semibold mr-2">{event.category}</span>
+            )}
+            {event.date && fmtDateShort(event.date)}
+            {event.time && ` · ${event.time}`}
+            {event.venue && ` · ${event.venue}`}
+          </p>
+        </div>
+        <button
+          onClick={() => setExpanded(true)}
+          className="flex items-center gap-1 text-[11px] text-white/40 hover:text-white/70 transition-colors shrink-0 py-1 px-2 rounded hover:bg-white/[0.06]"
+        >
+          Change <ChevronDown size={11} />
+        </button>
+      </div>
+    )
+  }
 
   return (
-    <div className="event-search-root bg-[#201c1a] border border-[#9a442d]/40 rounded-2xl p-5 space-y-3">
-      <div>
-        <p className="text-xs font-bold text-[#e8a898] uppercase tracking-[0.14em] mb-1">
-          ⚡ Quick Post
-        </p>
-        <p className="text-xs text-white/35">
-          Search by event name, or paste a URL / event ID
-        </p>
+    <div className="bg-[#151210] border border-white/[0.07] rounded-2xl overflow-hidden">
+      {/* Header */}
+      <div className="px-5 pt-4 pb-3 flex items-center justify-between">
+        <div>
+          <p className="text-xs font-bold text-[#e8a898] uppercase tracking-[0.14em] mb-0.5">
+            ⚡ Load Event
+          </p>
+          <p className="text-[11px] text-white/30">
+            Pick an event to pre-fill the Poster template
+          </p>
+        </div>
+        {event && (
+          <button
+            onClick={() => setExpanded(false)}
+            className="text-[11px] text-white/30 hover:text-white/60 transition-colors flex items-center gap-1"
+          >
+            Collapse <X size={11} />
+          </button>
+        )}
       </div>
 
-      {/* Search input row */}
-      <div className="relative">
-        <div className="flex gap-2">
-          {/* Icon */}
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none">
+      {/* Filters bar */}
+      <div className="px-5 space-y-2.5 pb-3">
+        {/* Time pills */}
+        <div className="flex gap-1.5 flex-wrap">
+          {TIME_PILLS.map(pill => (
+            <button
+              key={pill.value}
+              onClick={() => setTime(pill.value)}
+              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all border ${
+                time === pill.value
+                  ? 'bg-[#9a442d] border-[#9a442d] text-white'
+                  : 'bg-white/[0.04] border-white/[0.08] text-white/50 hover:bg-white/[0.07] hover:text-white/70'
+              }`}
+            >
+              {pill.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Category pills — horizontally scrollable */}
+        <div className="flex gap-1.5 overflow-x-auto pb-0.5 -mx-1 px-1 scrollbar-none">
+          {CATEGORIES.map(cat => {
+            const active = category === cat
+            const colors = CAT_COLORS[cat] ?? 'text-white/50 bg-white/[0.06] border-white/10'
+            return (
+              <button
+                key={cat}
+                onClick={() => setCategory(active ? '' : cat)}
+                className={`shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all border ${
+                  active
+                    ? colors + ' opacity-100 ring-1 ring-white/20'
+                    : 'bg-white/[0.04] border-white/[0.06] text-white/40 hover:text-white/60 hover:bg-white/[0.07]'
+                }`}
+              >
+                {cat}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Search input */}
+        <div className="relative flex gap-2">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none z-10">
             {loading
-              ? <Loader2 size={15} className="animate-spin" />
-              : <Search size={15} />
+              ? <Loader2 size={14} className="animate-spin" />
+              : <Search size={14} />
             }
           </div>
 
           <input
-            ref={inputRef}
             type="text"
             value={query}
             onChange={e => setQuery(e.target.value)}
-            onFocus={() => { if (results.length > 0) setOpen(true) }}
             onKeyDown={handleKey}
-            placeholder="Search events… or paste URL / ID"
-            className="flex-1 bg-white/[0.06] border border-white/[0.1] rounded-xl pl-9 pr-3 py-2.5
+            placeholder="Search by name, or paste URL / ID…"
+            className="flex-1 bg-white/[0.05] border border-white/[0.08] rounded-xl pl-9 pr-8 py-2
               text-white text-sm placeholder:text-white/20 focus:outline-none
-              focus:border-[#9a442d]/60 focus:bg-white/[0.08] transition-all"
+              focus:border-[#9a442d]/50 focus:bg-white/[0.07] transition-all"
             autoComplete="off"
             spellCheck={false}
           />
 
+          {query && (
+            <button
+              onClick={clearQuery}
+              className="absolute right-[3.75rem] top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+            >
+              <X size={13} />
+            </button>
+          )}
+
           <button
             onClick={handleGo}
-            disabled={!query.trim()}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#9a442d] text-white
+            disabled={!query.trim() && results.length === 0}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#9a442d] text-white
               text-sm font-semibold hover:bg-[#b5502f] active:scale-95 transition-all
-              disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+              disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
           >
-            <ArrowRight size={15} />
-            <span className="hidden sm:inline">Open</span>
+            <ArrowRight size={14} />
+            <span className="hidden sm:inline text-xs">Open</span>
           </button>
         </div>
 
-        {/* Results dropdown */}
-        {open && results.length > 0 && (
-          <ul
-            ref={listRef}
-            className="absolute z-50 top-full left-0 right-12 mt-1.5 bg-[#1a1614] border border-white/[0.1] rounded-xl overflow-hidden shadow-2xl max-h-[340px] overflow-y-auto"
-          >
+        {/* Active filter summary + clear */}
+        {hasFilters && (
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] text-white/30">
+              {[time !== 'upcoming' && TIME_PILLS.find(p => p.value === time)?.label, category].filter(Boolean).join(' · ')}
+            </p>
+            <button
+              onClick={() => { setCategory(''); setTime('upcoming') }}
+              className="text-[10px] text-white/30 hover:text-white/60 transition-colors underline underline-offset-2"
+            >
+              Clear filters
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Results list */}
+      <div className="border-t border-white/[0.06] max-h-[380px] overflow-y-auto">
+        {looksLikeId ? (
+          <div className="px-5 py-4 flex items-center justify-between">
+            <p className="text-sm text-white/50">Looks like an event ID or URL</p>
+            <button
+              onClick={() => { const id = extractId(query); if (id) navigate(id) }}
+              className="flex items-center gap-1.5 text-xs text-[#e8a898] hover:text-white font-semibold transition-colors"
+            >
+              Open it <ArrowRight size={12} />
+            </button>
+          </div>
+        ) : loading && results.length === 0 ? (
+          <div className="flex items-center justify-center py-8 gap-2 text-white/30 text-sm">
+            <Loader2 size={14} className="animate-spin" />
+            Loading…
+          </div>
+        ) : results.length === 0 ? (
+          <div className="px-5 py-6 text-center">
+            <p className="text-sm text-white/30">No events found</p>
+            {(query || hasFilters) && (
+              <p className="text-[11px] text-white/20 mt-1">Try adjusting the filters or search term</p>
+            )}
+          </div>
+        ) : (
+          <ul>
             {results.map((evt, i) => {
-              const catStyle = CAT_COLORS[evt.category ?? ''] ?? 'text-white/50 bg-white/[0.06]'
-              const isActive = i === activeIdx
+              const catStyle = CAT_COLORS[evt.category ?? ''] ?? 'text-white/50 bg-white/[0.06] border-white/10'
               return (
-                <li key={evt.id}>
+                <li key={evt.id} className={i > 0 ? 'border-t border-white/[0.04]' : ''}>
                   <button
-                    onMouseDown={e => { e.preventDefault(); navigate(evt.id) }}
-                    onMouseEnter={() => setActiveIdx(i)}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors ${
-                      isActive ? 'bg-[#9a442d]/30' : 'hover:bg-white/[0.05]'
-                    }`}
+                    onClick={() => navigate(evt.id)}
+                    className="w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-white/[0.04] active:bg-[#9a442d]/10 transition-colors group"
                   >
                     {/* Thumbnail */}
-                    <div className="shrink-0 w-10 h-10 rounded-lg overflow-hidden bg-white/[0.06] flex items-center justify-center">
+                    <div className="shrink-0 w-11 h-11 rounded-lg overflow-hidden bg-white/[0.06] flex items-center justify-center">
                       {evt.imageUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -219,52 +338,43 @@ export function EventSearch() {
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-white font-semibold truncate leading-tight">{evt.title}</p>
+                      <p className="text-sm text-white font-semibold truncate leading-tight group-hover:text-[#e8a898] transition-colors">
+                        {evt.title}
+                      </p>
                       <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                         {evt.category && (
-                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${catStyle}`}>
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${catStyle}`}>
                             {evt.category}
                           </span>
                         )}
-                        <span className="flex items-center gap-1 text-[11px] text-white/40">
-                          <Calendar size={10} />{fmtDate(evt.date)}
+                        <span className="flex items-center gap-1 text-[11px] text-white/35">
+                          <Calendar size={9} />{fmtDate(evt.date)}
                         </span>
                         {evt.venue && (
-                          <span className="flex items-center gap-1 text-[11px] text-white/30 truncate max-w-[180px]">
-                            <MapPin size={10} />{evt.venue}
+                          <span className="flex items-center gap-1 text-[11px] text-white/25 truncate max-w-[160px]">
+                            <MapPin size={9} />{evt.venue}
                           </span>
                         )}
                       </div>
                     </div>
 
-                    <ArrowRight size={13} className="shrink-0 text-white/20" />
+                    <ArrowRight size={13} className="shrink-0 text-white/20 group-hover:text-white/50 transition-colors" />
                   </button>
                 </li>
               )
             })}
           </ul>
         )}
-
-        {/* No results */}
-        {open && !loading && query.trim() && !looksLikeId && results.length === 0 && (
-          <div className="absolute z-50 top-full left-0 right-12 mt-1.5 bg-[#1a1614] border border-white/[0.1] rounded-xl px-4 py-3">
-            <p className="text-sm text-white/40">No upcoming events matching &ldquo;{query}&rdquo;</p>
-          </div>
-        )}
       </div>
 
-      <p className="text-[10px] text-white/20">
-        Opens the Poster template pre-filled with event data · swap template in the toolbar
-      </p>
+      {/* Footer */}
+      <div className="px-5 py-2.5 border-t border-white/[0.04]">
+        <p className="text-[10px] text-white/20">
+          {results.length > 0 ? `${results.length} event${results.length !== 1 ? 's' : ''}` : ''}
+          {results.length > 0 ? ' · ' : ''}
+          Click to open in Poster template
+        </p>
+      </div>
     </div>
   )
-}
-
-function categoryEmoji(cat: string | null) {
-  const map: Record<string, string> = {
-    'Music': '🎵', 'Comedy': '😂', 'Sports': '🏟️', 'Arts & Theater': '🎭',
-    'Food & Drink': '🍻', 'Family': '🎡', 'Film': '🎬', 'Outdoor': '🌄',
-    'Festivals': '🎪', 'Community': '🌵',
-  }
-  return map[cat ?? ''] ?? '📍'
 }

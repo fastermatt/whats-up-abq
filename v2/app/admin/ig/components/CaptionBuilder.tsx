@@ -17,6 +17,10 @@ const CAT_TAGS: Record<string, string> = {
   'Family': '#ABQKids #AlbuquerqueFamilies',
   'Outdoor': '#ABQOutdoors #NewMexicoOutdoors',
 }
+
+// The site link goes to the homepage (not a specific event), so captions should
+// frame it as a discovery tool — "find more events" — rather than a direct link.
+const LINK_IN_BIO_CTA = '🔗 Tickets + full details → link in bio\nDiscover every ABQ event at abqunplugged.com'
 const CAT_EMOJI: Record<string, string> = {
   'Music': '🎵', 'Comedy': '😂', 'Sports': '🏟️', 'Arts & Theater': '🎭',
   'Food & Drink': '🍻', 'Family': '🎡', 'Film': '🎬', 'Outdoor': '🌄',
@@ -39,10 +43,10 @@ export function buildCaptions(event: NormalizedEvent) {
   const timeStr = event.time ? ` · ${event.time}` : ''
   const dateLabel = formatDate(event.date)
 
-  const standard = `${emoji} ${event.title}\n\n📅 ${dateLabel}${timeStr}\n📍 ${venue}${priceStr}\n\nFind tickets and full details at abqunplugged.com ↗\n\n${tags}`
-  const hype = `🔥 DON'T MISS THIS ${(event.category ?? 'EVENT').toUpperCase()} 🔥\n\n${event.title.toUpperCase()}\n\n${dateLabel}${timeStr}\n${venue}${priceStr}\n\nGet your tickets NOW → abqunplugged.com\n\n${tags}`
-  const spotlight = `✨ Event Spotlight\n\n${event.title}\n\n${emoji} ${event.category ?? 'Local Event'}\n📅 ${dateLabel}${timeStr}\n📍 ${venue}${priceStr}\n\nTap the link in bio for tickets and details.\n\n${tags}`
-  const minimal = `${event.title}\n${dateLabel} · ${venue}\nabqunplugged.com\n\n${tags}`
+  const standard = `${emoji} ${event.title}\n\n📅 ${dateLabel}${timeStr}\n📍 ${venue}${priceStr}\n\n${LINK_IN_BIO_CTA}\n\n${tags}`
+  const hype = `🔥 DON'T MISS THIS ${(event.category ?? 'EVENT').toUpperCase()} 🔥\n\n${event.title.toUpperCase()}\n\n${dateLabel}${timeStr}\n${venue}${priceStr}\n\n🎟 GET TICKETS → link in bio\nWhat else is on? Find out at abqunplugged.com\n\n${tags}`
+  const spotlight = `✨ Event Spotlight\n\n${event.title}\n\n${emoji} ${event.category ?? 'Local Event'}\n📅 ${dateLabel}${timeStr}\n📍 ${venue}${priceStr}\n\nTap the link in bio for tickets and details.\nYour ABQ event guide → abqunplugged.com\n\n${tags}`
+  const minimal = `${event.title}\n${dateLabel} · ${venue}\n🔗 link in bio\n\n${tags}`
 
   return [
     { id: 'standard',  label: 'Standard',  sublabel: 'Clean & informative', text: standard },
@@ -443,10 +447,15 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
         disabled={isPosting || isScheduling}
       />
 
-      {/* Char count */}
-      <p className={`text-[10px] text-right -mt-1 ${text.length > 2200 ? 'text-red-400' : 'text-white/30'}`}>
-        {text.length} / 2,200 chars
-      </p>
+      {/* Char count + @mention tip */}
+      <div className="flex items-center justify-between -mt-1">
+        <p className="text-[10px] text-white/25">
+          Tip: use <span className="font-mono">@username</span> to tag accounts · <span className="font-mono">#hashtag</span> to add topics
+        </p>
+        <p className={`text-[10px] ${text.length > 2200 ? 'text-red-400' : 'text-white/30'}`}>
+          {text.length} / 2,200
+        </p>
+      </div>
 
       {/* Schedule panel */}
       {showSchedule && (
