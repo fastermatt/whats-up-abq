@@ -338,6 +338,20 @@ async function main() {
       }
     }
 
+    // Final photo URL: Supabase-hosted > extracted URL > prior DB URL (never wipe a good image)
+    // abqtodo.com URLs work through EventImage's /api/image-proxy — storing them directly is fine
+    const finalPhotoUrl = adminRejected
+      ? (prior?.cached_photo_url ?? null)
+      : (hostedUrl ?? extracted.imageUrl ?? prior?.cached_photo_url ?? null)
+
+    const finalImageStatus = adminRejected
+      ? 'rejected'
+      : hostedUrl
+        ? 'verified'
+        : finalPhotoUrl
+          ? 'unverified'
+          : null
+
     // Build raw payload
     const raw = {
       id,
@@ -379,8 +393,8 @@ async function main() {
       source: 'local',
       raw,
       event_date: eventDatetime,
-      cached_photo_url: adminRejected ? (prior?.cached_photo_url ?? null) : (hostedUrl ?? null),
-      image_status: adminRejected ? 'rejected' : (hostedUrl ? 'verified' : null),
+      cached_photo_url: finalPhotoUrl,
+      image_status: finalImageStatus,
       featured: false,
       hidden: false,
       category: extracted.category,

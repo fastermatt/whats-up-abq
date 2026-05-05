@@ -298,6 +298,8 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(schedulePayload),
+        // Safety timeout — prevents infinite spinner if Supabase upload hangs
+        signal: AbortSignal.timeout(90_000),
       })
       const data = await res.json()
       if (!res.ok || data.error) {
@@ -307,6 +309,8 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
       }
       setScheduleState('done')
       setShowSchedule(false)
+      // Auto-clear the success badge after 4s so the Schedule button comes back
+      setTimeout(() => setScheduleState('idle'), 4000)
     } catch (err) {
       setScheduleError(err instanceof Error ? err.message : 'Unknown error')
       setScheduleState('error')
@@ -521,8 +525,7 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
 
         {scheduleState === 'done' && (
           <span className="text-xs text-green-400 font-semibold flex items-center gap-1.5">
-            <Check size={12} /> Scheduled!
-            <button onClick={() => setScheduleState('idle')} className="text-white/40 hover:text-white/60 ml-1">×</button>
+            <Check size={12} /> Queued!
           </span>
         )}
 

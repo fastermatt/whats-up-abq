@@ -454,6 +454,12 @@ export function PostCanvas({ onExportRef }: { onExportRef?: (h: PostCanvasHandle
   // Ref for the safe-zone overlay layer so we can hide it during export
   const safeZoneLayerRef = useRef<Konva.Layer>(null)
 
+  // Keep a ref to the current showSafeZone so exports restore the right state.
+  // Without this, exportPng always called visible(true) regardless of toggle state,
+  // causing the overlay to reappear after every export even when turned off.
+  const showSafeZoneRef = useRef(showSafeZone)
+  useEffect(() => { showSafeZoneRef.current = showSafeZone }, [showSafeZone])
+
   // Expose export handle (export by temporarily restoring full scale)
   useEffect(() => {
     if (!onExportRef) return
@@ -467,7 +473,8 @@ export function PostCanvas({ onExportRef }: { onExportRef?: (h: PostCanvasHandle
         stage.batchDraw()
         const url = stage.toDataURL({ pixelRatio: 1 / scale, mimeType: 'image/png' })
         trRef.current?.visible(true)
-        safeZoneLayerRef.current?.visible(true)
+        // Restore to whatever the toggle state actually is, not always-true
+        safeZoneLayerRef.current?.visible(showSafeZoneRef.current)
         stage.batchDraw()
         return url
       },
@@ -488,7 +495,8 @@ export function PostCanvas({ onExportRef }: { onExportRef?: (h: PostCanvasHandle
         }
         useEditor.setState({ activeSlideIndex: original })
         trRef.current?.visible(true)
-        safeZoneLayerRef.current?.visible(true)
+        // Restore to actual toggle state
+        safeZoneLayerRef.current?.visible(showSafeZoneRef.current)
         return results
       },
     })
