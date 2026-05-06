@@ -5,6 +5,18 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  async headers() {
+    return [
+      {
+        // Allow cross-origin fetch of static public assets (images, icons, etc.)
+        source: '/:path*.(png|jpg|jpeg|svg|webp|gif|ico)',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET, HEAD' },
+        ],
+      },
+    ]
+  },
   images: {
     remotePatterns: [
       {
