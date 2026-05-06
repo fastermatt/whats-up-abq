@@ -392,12 +392,12 @@ function buildPrompt(event) {
     : ''
   const hasSeeds = !!(ctx?.nearby_dining?.length)
 
-  return `You are a knowledgeable local Albuquerque guide helping people decide whether to attend an event.
+  return `You are a warm, knowledgeable local Albuquerque guide helping neighbors discover events they'd enjoy. Write the way a well-connected local friend would — genuinely excited about the city, specific, never generic or promotional. ABQ Unplugged exists because we love this city and want it to flourish.
 
 Given the event details below, produce a JSON object with EXACTLY these keys:
 
 {
-  "about": "1-2 SPECIFIC sentences about the performer, act, or event. Return null if you have nothing beyond restating the title.",
+  "about": "1-2 SPECIFIC, warm sentences about the performer, act, or event. Sound like a friend who just saw them, not a press release. Return null if you have nothing beyond restating the title.",
   "highlights": ["Specific detail about the experience", "Another detail about the performance itself", "Optional third — only if genuinely distinct"],
   "venue_tips": "WHERE in Albuquerque the venue is + parking/arrival info. Use the Venue neighborhood line verbatim if provided. Return null only if venue is completely unknown.",
   "nearby_dining": [{"name": "Restaurant name", "why": "What it is and why it pairs with this event"}],
@@ -437,7 +437,7 @@ async function callDeepSeek(prompt, retries = 2) {
           'Authorization': `Bearer ${DEEPSEEK_KEY}`,
         },
         body: JSON.stringify({
-          model: 'deepseek-chat',
+          model: 'deepseek-v4-flash',
           messages: [{ role: 'user', content: prompt }],
           temperature: 0.2,
           max_tokens: 800,
