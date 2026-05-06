@@ -115,17 +115,6 @@ async function pngToJpeg(pngDataUrl: string, quality = 0.93): Promise<string> {
   })
 }
 
-// ── Data URL → Blob (for FB photo upload) ────────────────────────────────
-
-function dataUrlToBlob(dataUrl: string): Blob {
-  const [header, b64] = dataUrl.split(',')
-  const mime = header.match(/:(.*?);/)![1]
-  const binary = atob(b64)
-  const bytes = new Uint8Array(binary.length)
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
-  return new Blob([bytes], { type: mime })
-}
-
 // ── Schedule helpers ──────────────────────────────────────────────────────
 
 /** Pad a number to two digits */
@@ -533,10 +522,6 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
       setPostId(data.postId)
       setPostState('done')
 
-      // Auto cross-post to Facebook for Feed posts
-      if (fbCrosspost && fbPageToken && effectiveMediaType === 'FEED' && capturedJpeg && data.postId) {
-        await postToFacebook(capturedJpeg, data.postId)
-      }
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'Unknown error')
       setPostState('error')
@@ -589,53 +574,6 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
     } catch (err) {
       setScheduleError(err instanceof Error ? err.message : 'Unknown error')
       setScheduleState('error')
-    }
-  }
-
-  // Facebook cross-posting state
-  const [fbCrosspost, setFbCrosspost]     = useState(false)
-  const [fbPageToken, setFbPageToken]     = useState('')
-  const [showFbSettings, setShowFbSettings] = useState(false)
-  const [fbPostState, setFbPostState]     = useState<'idle' | 'posting' | 'done' | 'error'>('idle')
-  const [fbError, setFbError]             = useState<string | null>(null)
-  const [fbTokenDraft, setFbTokenDraft]   = useState('')
-
-  // Load FB prefs from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem('fbPageToken') ?? ''
-    const enabled = localStorage.getItem('fbCrosspost') === 'true'
-    setFbPageToken(saved)
-    setFbTokenDraft(saved)
-    setFbCrosspost(enabled)
-  }, [])
-
-  // ── Post to Facebook Page ──────────────────────────────────────────
-  const postToFacebook = async (jpegDataUrl: string, igPostId: string) => {
-    if (!fbPageToken) return
-    setFbPostState('posting')
-    setFbError(null)
-    try {
-      const blob = dataUrlToBlob(jpegDataUrl)
-      const fd = new FormData()
-      fd.append('source', blob, 'post.jpg')
-      // Append IG link as a suffix so FB audiences can find the full post
-      fd.append('message', `${text}\n\nhttps://www.instagram.com/p/${igPostId}/`)
-      fd.append('access_token', fbPageToken)
-
-      const res = await fetch(
-        'https://graph.facebook.com/v21.0/1107608825774752/photos',
-        { method: 'POST', body: fd }
-      )
-      const json = await res.json()
-      if (!res.ok || json.error) {
-        setFbError(json.error?.message ?? `Facebook error ${res.status}`)
-        setFbPostState('error')
-      } else {
-        setFbPostState('done')
-      }
-    } catch (err) {
-      setFbError(err instanceof Error ? err.message : 'Unknown error')
-      setFbPostState('error')
     }
   }
 
@@ -884,7 +822,7 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
                 <ExternalLink size={11} /> View on IG
               </a>
             )}
-            <button onClick={() => { setPostState('idle'); setPostId(null); setFbPostState('idle'); setFbError(null) }}
+            <button onClick={() => { setPostState('idle'); setPostId(null) }}
               className="text-xs text-white/40 hover:text-white/60 transition-colors">
               Post another
             </button>
@@ -899,116 +837,6 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
         </div>
       )}
 
-      {/* ── Facebook cross-posting ───────────────────────────────────── */}
-      <div className="border-t border-white/[0.05] pt-3 space-y-2">
-        {/* Toggle row */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {/* Facebook "f" mark */}
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" className="text-[#1877F2] shrink-0">
-              <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.514c-1.491 0-1.956.93-1.956 1.886v2.268h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
-            </svg>
-            <span className="text-[11px] font-bold uppercase tracking-widest text-white/50">Facebook Page</span>
-            {effectiveMediaType !== 'FEED' && (
-              <span className="text-[9px] text-white/20 font-normal normal-case tracking-normal">(feed posts only)</span>
-            )}
-          </div>
-          <div className="flex items-center gap-3">
-            {fbPageToken && (
-              <button
-                onClick={() => setShowFbSettings(v => !v)}
-                className="text-[10px] text-white/30 hover:text-white/60 transition-colors"
-              >
-                {showFbSettings ? 'Done' : 'Change token'}
-              </button>
-            )}
-            {/* Toggle switch */}
-            <button
-              onClick={() => {
-                const next = !fbCrosspost
-                setFbCrosspost(next)
-                localStorage.setItem('fbCrosspost', String(next))
-                if (next && !fbPageToken) setShowFbSettings(true)
-              }}
-              className={`relative w-9 h-5 rounded-full transition-colors ${
-                fbCrosspost && effectiveMediaType === 'FEED' ? 'bg-[#1877F2]'
-                  : fbCrosspost ? 'bg-[#1877F2]/40'
-                  : 'bg-white/[0.1]'
-              }`}
-              title={fbCrosspost ? 'Disable Facebook cross-posting' : 'Enable Facebook cross-posting'}
-            >
-              <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${
-                fbCrosspost ? 'left-[calc(100%-1.125rem)]' : 'left-0.5'
-              }`} />
-            </button>
-          </div>
-        </div>
-
-        {/* Token setup panel */}
-        {(showFbSettings || (fbCrosspost && !fbPageToken)) && (
-          <div className="space-y-2 bg-white/[0.03] border border-white/[0.07] rounded-xl px-3 py-3">
-            {!fbPageToken && (
-              <div className="text-[11px] text-blue-300/80 space-y-1 pb-1">
-                <p className="font-semibold text-blue-300">Setup required</p>
-                <p>Get a Page token with <code className="text-blue-200 bg-blue-900/30 px-1 rounded">pages_manage_posts</code> permission:</p>
-                <ol className="list-decimal ml-4 space-y-0.5 text-blue-300/70">
-                  <li>Open <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-200">Graph API Explorer</a></li>
-                  <li>App: <strong className="text-blue-200">ABQ Unplugged-IG</strong></li>
-                  <li>Add permission: <code className="bg-blue-900/30 px-0.5 rounded">pages_manage_posts</code></li>
-                  <li>Click <strong className="text-blue-200">Generate Access Token</strong> → select the ABQ Unplugged page</li>
-                  <li>Paste the token below</li>
-                </ol>
-                <p className="text-blue-400/50 text-[10px] pt-0.5">Note: Explorer tokens expire after ~2 hrs. Paste a fresh one each session.</p>
-              </div>
-            )}
-            <div className="flex gap-2">
-              <input
-                type="password"
-                value={fbTokenDraft}
-                onChange={e => setFbTokenDraft(e.target.value)}
-                placeholder="EAAxxxxxx… (Facebook Page Access Token)"
-                className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white/85
-                  placeholder:text-white/20 focus:outline-none focus:border-[#1877F2]/50 transition-colors font-mono"
-              />
-              <button
-                onClick={() => {
-                  const t = fbTokenDraft.trim()
-                  setFbPageToken(t)
-                  localStorage.setItem('fbPageToken', t)
-                  setShowFbSettings(false)
-                  if (t && !fbCrosspost) {
-                    setFbCrosspost(true)
-                    localStorage.setItem('fbCrosspost', 'true')
-                  }
-                }}
-                disabled={!fbTokenDraft.trim()}
-                className="px-3 py-2 bg-[#1877F2]/80 hover:bg-[#1877F2] disabled:opacity-40 rounded-lg text-xs font-bold text-white transition-colors whitespace-nowrap"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* FB post status */}
-        {fbPostState === 'posting' && (
-          <div className="flex items-center gap-2 text-[11px] text-blue-400">
-            <Loader2 size={11} className="animate-spin" />
-            Posting to Facebook…
-          </div>
-        )}
-        {fbPostState === 'done' && (
-          <div className="flex items-center gap-1.5 text-[11px] text-green-400">
-            <Check size={11} />
-            Also posted to Facebook!
-          </div>
-        )}
-        {fbPostState === 'error' && fbError && (
-          <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-2.5 py-1.5 text-[11px] text-red-300">
-            <span className="font-semibold">Facebook:</span> {fbError}
-          </div>
-        )}
-      </div>
     </div>
   )
 }
