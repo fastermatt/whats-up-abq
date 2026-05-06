@@ -7,20 +7,47 @@ import type { NormalizedEvent } from '@/lib/events'
 import type { PostCanvasHandle } from './PostCanvas'
 
 // ── Caption generation ────────────────────────────────────────────────────
+//
+// Hashtag strategy (DeepSeek v4 pro, 2026-05-06):
+//   Niche/local discovery  → #ABQEvents #ABQWeekend #ThingsToDo505 #BurqueLife #DukeCity
+//   Mid-size community     → varies by category (music, food, arts etc.)
+//   Brand anchors          → #ABQUnplugged #Albuquerque #ABQ #NewMexico #505
+//
+// Caption strategy: open with personality/hook, then facts, then CTA.
+// Event-card captions get zero engagement when they lead with the event name.
+// The one post that worked led with a human feeling, not a title.
 
 const BASE_TAGS = '#ABQUnplugged #Albuquerque #ABQ #NewMexico #505'
+const DISCOVERY_TAGS = '#ABQEvents #ABQWeekend #ThingsToDo505 #BurqueLife #DukeCity'
+
 const CAT_TAGS: Record<string, string> = {
-  'Music': '#ABQMusic #LiveMusicABQ',
-  'Arts & Theater': '#ABQArts #AlbuquerqueArts',
-  'Sports': '#ABQSports #AlbuquerqueSports',
-  'Food & Drink': '#ABQFood #AlbuquerqueEats',
-  'Family': '#ABQKids #AlbuquerqueFamilies',
-  'Outdoor': '#ABQOutdoors #NewMexicoOutdoors',
+  'Music':         '#ABQMusic #LiveMusicABQ #505Insta',
+  'Arts & Theater':'#ABQArts #AlbuquerqueArts #SupportLocalABQ',
+  'Sports':        '#ABQSports #AlbuquerqueSports #505Insta',
+  'Food & Drink':  '#ABQFood #ABQFoodie #SupportLocalABQ',
+  'Family':        '#ABQKids #AlbuquerqueFamilies #505Insta',
+  'Outdoor':       '#ABQOutdoors #NewMexicoOutdoors #NewMexicoTrue',
+  'Comedy':        '#ABQComedy #LiveComedy #505Insta',
+  'Film':          '#ABQFilm #IndieFilm #505Insta',
+  'Festivals':     '#ABQFestivals #BurqueLife #505Insta',
+  'Community':     '#SupportLocalABQ #ABQCommunity #BurqueLife',
 }
 
-// The site link goes to the homepage (not a specific event), so captions should
-// frame it as a discovery tool — "find more events" — rather than a direct link.
-const LINK_IN_BIO_CTA = '🔗 Tickets + full details → link in bio\nDiscover every ABQ event at abqunplugged.com'
+// Personality hooks by category — lead with feeling, not the event name.
+// These run before the title so the first line stops the scroll.
+const CAT_HOOKS: Record<string, string> = {
+  'Music':         'This is your sign to go live.\n\n',
+  'Sports':        'Get loud, Burque.\n\n',
+  'Arts & Theater':'High culture. No pretense. Classic 505.\n\n',
+  'Food & Drink':  'Your weekend just got a lot tastier.\n\n',
+  'Comedy':        'Burque deserves a night of actual laughing.\n\n',
+  'Community':     'This is what the 505 is about.\n\n',
+  'Family':        'The kids will talk about this one.\n\n',
+  'Outdoor':       'New Mexico was made for this.\n\n',
+  'Film':          'Cinema worth leaving the couch for.\n\n',
+  'Festivals':     'Clear your schedule. All of it.\n\n',
+}
+
 const CAT_EMOJI: Record<string, string> = {
   'Music': '🎵', 'Comedy': '😂', 'Sports': '🏟️', 'Arts & Theater': '🎭',
   'Food & Drink': '🍻', 'Family': '🎡', 'Film': '🎬', 'Outdoor': '🌄',
@@ -37,22 +64,31 @@ function formatDate(dateStr: string) {
 export function buildCaptions(event: NormalizedEvent) {
   const emoji = CAT_EMOJI[event.category ?? ''] ?? '📍'
   const catTag = CAT_TAGS[event.category ?? ''] ?? ''
-  const tags = catTag ? `${catTag} ${BASE_TAGS}` : BASE_TAGS
+  const hook = CAT_HOOKS[event.category ?? ''] ?? ''
+  // Full tag block: category mid-size → discovery/niche → brand anchors
+  const tags = [catTag, DISCOVERY_TAGS, BASE_TAGS].filter(Boolean).join(' ')
   const venue = event.venue ?? 'Albuquerque, NM'
   const priceStr = event.price ? ` · ${event.price}` : ''
   const timeStr = event.time ? ` · ${event.time}` : ''
   const dateLabel = formatDate(event.date)
 
-  const standard = `${emoji} ${event.title}\n\n📅 ${dateLabel}${timeStr}\n📍 ${venue}${priceStr}\n\n${LINK_IN_BIO_CTA}\n\n${tags}`
-  const hype = `🔥 DON'T MISS THIS ${(event.category ?? 'EVENT').toUpperCase()} 🔥\n\n${event.title.toUpperCase()}\n\n${dateLabel}${timeStr}\n${venue}${priceStr}\n\n🎟 GET TICKETS → link in bio\nWhat else is on? Find out at abqunplugged.com\n\n${tags}`
-  const spotlight = `✨ Event Spotlight\n\n${event.title}\n\n${emoji} ${event.category ?? 'Local Event'}\n📅 ${dateLabel}${timeStr}\n📍 ${venue}${priceStr}\n\nTap the link in bio for tickets and details.\nYour ABQ event guide → abqunplugged.com\n\n${tags}`
-  const minimal = `${event.title}\n${dateLabel} · ${venue}\n🔗 link in bio\n\n${tags}`
+  // Standard: hook → title → logistics → CTA → tags
+  const standard = `${hook}${event.title}\n${venue}\n\n📅 ${dateLabel}${timeStr}${priceStr}\n\n🎟️ Tickets + details in bio.\n\n${tags}`
+
+  // Punchy: tight, FOMO, voice-first — good for Reels covers and Stories
+  const punchy = `${event.title} is happening ${dateLabel.split(',')[0].toLowerCase()} night in Burque.\n\n📍 ${venue}${timeStr}${priceStr}\n🎟️ Link in bio — don't be the one watching highlights tomorrow.\n\n${tags}`
+
+  // Editorial: story-first spotlight, good for the "deep cut" mid-week post
+  const editorial = `${emoji} This week's pick.\n\n${event.title} comes to ${venue} ${dateLabel.split(',')[0].toLowerCase()}. ${event.category ? `${event.category} in the 505 doesn't get enough credit.` : 'Add it to your week.'}\n\n📅 ${dateLabel}${timeStr}${priceStr}\n🔗 Full details + tickets → link in bio.\n\n${tags}`
+
+  // Minimal: just the facts, works as caption under a strong visual
+  const minimal = `${event.title}\n${dateLabel}${timeStr} · ${venue}${priceStr}\n\n🔗 link in bio\n\n${BASE_TAGS}`
 
   return [
-    { id: 'standard',  label: 'Standard',  sublabel: 'Clean & informative', text: standard },
-    { id: 'hype',      label: 'Hype',      sublabel: 'High energy, FOMO',   text: hype },
-    { id: 'spotlight', label: 'Spotlight', sublabel: 'Editorial tone',      text: spotlight },
-    { id: 'minimal',   label: 'Minimal',   sublabel: 'Short & punchy',      text: minimal },
+    { id: 'standard',  label: 'Standard',  sublabel: 'Hook + info + CTA',    text: standard },
+    { id: 'punchy',    label: 'Punchy',    sublabel: 'FOMO, voice-first',     text: punchy },
+    { id: 'editorial', label: 'Editorial', sublabel: 'Deep cut spotlight',    text: editorial },
+    { id: 'minimal',   label: 'Minimal',   sublabel: 'Caption under visuals', text: minimal },
   ]
 }
 
