@@ -75,11 +75,11 @@ export function buildCaptions(event: NormalizedEvent) {
   // Standard: hook → title → logistics → CTA → tags
   const standard = `${hook}${event.title}\n${venue}\n\n📅 ${dateLabel}${timeStr}${priceStr}\n\n🎟️ Tickets + details in bio.\n\n${tags}`
 
-  // Punchy: tight, FOMO, voice-first — good for Reels covers and Stories
-  const punchy = `${event.title} is happening ${dateLabel.split(',')[0].toLowerCase()} night in Burque.\n\n📍 ${venue}${timeStr}${priceStr}\n🎟️ Link in bio — don't be the one watching highlights tomorrow.\n\n${tags}`
+  // Punchy: tight, warm urgency — good for Reels covers and Stories
+  const punchy = `${event.title} is happening ${dateLabel.split(',')[0].toLowerCase()} in Burque — and it's worth showing up for.\n\n📍 ${venue}${timeStr}${priceStr}\n🎟️ Full details + tickets in bio.\n\n${tags}`
 
   // Editorial: story-first spotlight, good for the "deep cut" mid-week post
-  const editorial = `${emoji} This week's pick.\n\n${event.title} comes to ${venue} ${dateLabel.split(',')[0].toLowerCase()}. ${event.category ? `${event.category} in the 505 doesn't get enough credit.` : 'Add it to your week.'}\n\n📅 ${dateLabel}${timeStr}${priceStr}\n🔗 Full details + tickets → link in bio.\n\n${tags}`
+  const editorial = `${emoji} This week's pick.\n\n${event.title} at ${venue} — ${event.category ? `a great ${event.category.toLowerCase()} night out in the 505.` : 'one to put on the calendar.'}\n\n📅 ${dateLabel}${timeStr}${priceStr}\n🔗 Full details + tickets → link in bio.\n\n${tags}`
 
   // Minimal: just the facts, works as caption under a strong visual
   const minimal = `${event.title}\n${dateLabel}${timeStr} · ${venue}${priceStr}\n\n🔗 link in bio\n\n${BASE_TAGS}`
