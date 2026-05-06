@@ -44,8 +44,8 @@ const CAT_OPENERS: Record<string, string> = {
   'Comedy':        'A wonderful night of laughs in the 505.',
   'Community':     'Your Albuquerque community coming together.',
   'Family':        'A great family outing in the 505.',
-  'Outdoor':       'Enjoy the beauty of New Mexico this weekend.',
-  'Film':          'Great cinema in Albuquerque this week.',
+  'Outdoor':       'A wonderful chance to get outside in New Mexico.',
+  'Film':          'Good cinema in Albuquerque.',
   'Festivals':     'A wonderful event coming to ABQ.',
 }
 
@@ -81,7 +81,7 @@ export function buildCaptions(event: NormalizedEvent) {
   const friendly = `${emoji} ${event.title}\n\n📅 ${dateLabel}${timeStr}\n📍 ${venue}${priceStr}\n\nFind tickets and details → link in bio\n\n${tags}`
 
   // Spotlight: a warm weekly pick — celebrates the event without pressure
-  const spotlight = `${dayOfWeek}'s pick for Albuquerque.\n\n${event.title} at ${venue} — a lovely way to spend an evening in the 505.\n\n📅 ${dateLabel}${timeStr}${priceStr}\n🔗 Full details and tickets → link in bio\n\n${tags}`
+  const spotlight = `${dayOfWeek}'s pick for Albuquerque.\n\n${event.title} at ${venue} — a lovely way to spend time in the 505.\n\n📅 ${dateLabel}${timeStr}${priceStr}\n🔗 Full details and tickets → link in bio\n\n${tags}`
 
   // Minimal: just the essentials, clean under a strong visual
   const minimal = `${event.title}\n${dateLabel}${timeStr} · ${venue}${priceStr}\n\n🔗 link in bio\n\n${BASE_TAGS}`
