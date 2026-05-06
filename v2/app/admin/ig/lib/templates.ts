@@ -588,6 +588,167 @@ const goldenHour: Template = {
   },
 }
 
+// ── Paper ────────────────────────────────────────────────────────────────────
+//   Ink-on-white editorial. Horizontal rules frame a photo, one bold headline
+//   leads the eye, a single 3 px terra accent is the only color. Like a
+//   well-made zine or weekend newspaper arts section.
+
+const paper: Template = {
+  id: 'paper',
+  name: 'Paper',
+  description: 'Ink-on-white editorial — rules frame the photo, headline leads. Minimal color.',
+  category: 'event',
+  thumb: {
+    bg: '#F9F7F4',
+    blocks: [
+      { x: 7,  y: 8,    w: 86, h: 0.6, c: '#111111' },            // top rule
+      { x: 7,  y: 10.5, w: 36, h: 2.5, c: '#111111', o: 0.85 },   // masthead logo placeholder
+      { x: 50, y: 11,   w: 30, h: 1.8, c: '#111111', o: 0.28 },   // category label
+      { x: 7,  y: 15,   w: 86, h: 0.5, c: '#111111', o: 0.16 },   // separator rule
+      { x: 7,  y: 16,   w: 86, h: 32,  c: '#ddd6ce' },            // photo zone
+      { x: 7,  y: 48,   w: 86, h: 0.6, c: '#111111' },            // photo bottom rule
+      { x: 7,  y: 53,   w: 82, h: 10,  c: '#111111', o: 0.95 },   // headline
+      { x: 7,  y: 65,   w: 20, h: 1.2, c: '#9a442d' },            // terra accent
+      { x: 7,  y: 68.5, w: 58, h: 2.2, c: '#111111', o: 0.55 },   // date
+      { x: 7,  y: 73,   w: 42, h: 1.8, c: '#111111', o: 0.38 },   // venue
+      { x: 7,  y: 90,   w: 86, h: 0.5, c: '#111111', o: 0.16 },   // bottom rule
+      { x: 50, y: 92,   w: 36, h: 1.8, c: '#111111', o: 0.26 },   // CTA right
+    ],
+  },
+  build: (ctx, format) => {
+    const fmt = format ?? '4:5'
+    const { w, h } = CANVAS_DIMS[fmt]
+    const isStory = fmt === '9:16'
+    const topSafe = isStory ? Math.round(h * 0.12) : 46
+    const botSafe = isStory ? Math.round(h * 0.15) : 80
+    const mx = 72  // side margins
+
+    // Scale helper — positions calibrated to 4:5 (h=1350)
+    const sy = (y: number) => Math.round(y * h / 1350)
+
+    const title = ctx.title ?? 'Event Title'
+    const titleSize = title.length < 12 ? 118
+                    : title.length < 26 ? 96
+                    : title.length < 42 ? 74
+                    : 58
+
+    // Estimate title block height for downstream stacking
+    const charsPerLine = Math.floor((w - mx * 2) / (titleSize * 0.52))
+    const titleLines   = Math.min(Math.ceil(title.length / Math.max(charsPerLine, 1)), 4)
+    const titleH       = titleLines * titleSize * 1.06
+
+    // ── Vertical rhythm ──────────────────────────────────────────────────────
+    const ruleTopY = topSafe
+    const logoY    = ruleTopY + 14
+    const rule2Y   = logoY + (isStory ? 58 : 50)      // clears the logo
+    const photoY   = rule2Y + 4
+    const photoH   = isStory ? Math.round(h * 0.36) : sy(490)
+    const rule3Y   = photoY + photoH + 2
+    const titleY   = rule3Y + 40
+    const accentY  = titleY + titleH + 26
+    const dateY    = accentY + 20
+    const venueY   = dateY + sy(54)
+    const ruleBotY = h - botSafe - 48
+    const ctaY     = h - botSafe - 36
+
+    const INK   = '#111111'
+    const PAPER = '#F9F7F4'
+    const LINEN = '#E2D9CF'   // placeholder when no event image
+
+    const slide: Slide = {
+      id: uid(),
+      background: { type: 'color', color: PAPER },
+      layers: ([
+        // Top rule
+        shape({ shape: 'rect', x: mx, y: ruleTopY, width: w - mx * 2, height: 2, fill: INK }),
+
+        // Logo — terra keeps the masthead warm
+        logo(LOGO_T, mx, logoY, isStory ? 42 : 34),
+
+        // Category — right-aligned, ghosted, monospace
+        ctx.category ? textLayer({
+          name: 'Category',
+          text: ctx.category.toUpperCase(),
+          x: mx, y: logoY + (isStory ? 6 : 4),
+          width: w - mx * 2,
+          fontFamily: font('DM Mono'),
+          fontSize: isStory ? 28 : 22,
+          fontWeight: 500,
+          fill: INK, opacity: 0.34,
+          letterSpacing: 4, align: 'right',
+        }) : null,
+
+        // Separator rule (faint)
+        shape({ shape: 'rect', x: mx, y: rule2Y, width: w - mx * 2, height: 1, fill: INK, opacity: 0.15 }),
+
+        // Photo (or linen placeholder)
+        ctx.imageUrl
+          ? imageLayer({ src: ctx.imageUrl, x: mx, y: photoY, width: w - mx * 2, height: photoH, fit: 'cover' })
+          : shape({ shape: 'rect', x: mx, y: photoY, width: w - mx * 2, height: photoH, fill: LINEN }),
+
+        // Rule below photo
+        shape({ shape: 'rect', x: mx, y: rule3Y, width: w - mx * 2, height: 2, fill: INK }),
+
+        // Headline
+        textLayer({
+          name: 'Title',
+          text: title,
+          x: mx, y: titleY,
+          width: w - mx * 2,
+          fontFamily: font('Epilogue'),
+          fontSize: titleSize, fontWeight: 900,
+          fill: INK, lineHeight: 0.97, letterSpacing: -1,
+        }),
+
+        // Terra accent — the sole color touch
+        shape({ shape: 'rect', x: mx, y: accentY, width: 72, height: 3, fill: BRAND_COLORS.terra }),
+
+        // Date
+        textLayer({
+          name: 'Date',
+          text: formatDate(ctx.date, ctx.time),
+          x: mx, y: dateY,
+          width: w - mx * 2,
+          fontFamily: font('Inter'),
+          fontSize: isStory ? 40 : 34, fontWeight: 500,
+          fill: INK, opacity: 0.62, lineHeight: 1.2,
+        }),
+
+        // Venue
+        ctx.venue ? textLayer({
+          name: 'Venue',
+          text: ctx.venue,
+          x: mx, y: venueY,
+          width: w - mx * 2,
+          fontFamily: font('Inter'),
+          fontSize: isStory ? 34 : 28, fontWeight: 400,
+          fill: INK, opacity: 0.42, lineHeight: 1.2,
+        }) : null,
+
+        // Bottom rule
+        shape({ shape: 'rect', x: mx, y: ruleBotY, width: w - mx * 2, height: 1, fill: INK, opacity: 0.15 }),
+
+        // CTA — right-aligned, monospace, ghosted
+        textLayer({
+          name: 'CTA',
+          text: ctx.cta ?? 'abqunplugged.com',
+          x: mx, y: ctaY,
+          width: w - mx * 2,
+          fontFamily: font('DM Mono'),
+          fontSize: isStory ? 26 : 21, fontWeight: 400,
+          fill: INK, opacity: 0.27,
+          letterSpacing: 2, align: 'right',
+        }),
+      ] as (Layer | null)[]).filter((l): l is Layer => l !== null),
+    }
+
+    return {
+      id: uid(), name: ctx.title ?? 'Paper post', format: fmt,
+      slides: [slide], createdAt: Date.now(), updatedAt: Date.now(),
+    }
+  },
+}
+
 // ════════════════════════════════════════════════════════════════════════
 //   BRAND TEMPLATES (7)
 // ════════════════════════════════════════════════════════════════════════
@@ -1239,8 +1400,8 @@ const storyTypeOnly: Template = {
 // ════════════════════════════════════════════════════════════════════════
 
 export const TEMPLATES: Template[] = [
-  // Event templates (6 feed + 3 story)
-  poster, broadside, marquee, split, dispatch, goldenHour,
+  // Event templates (7 feed + 3 story)
+  poster, broadside, marquee, split, dispatch, goldenHour, paper,
   storyFullBleed, storySplit, storyTypeOnly,
   // Brand templates (7)
   statement, categorySpotlight, weekendPreview, mesa, tonightDrop, hiddenGem, blank,
