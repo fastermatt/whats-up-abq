@@ -4,34 +4,40 @@ Ready-to-send copy. Post/send as-is or adjust tone to taste.
 
 ---
 
-## 1. r/Albuquerque Reddit Post
+## 1. Reddit — r/Albuquerque
 
-**Best time to post:** Thursday or Friday morning, 8–10am MST
+**A standalone post got removed by filters.** The fix: comment on existing threads instead. Comments almost never get filtered, and they get more clicks because the audience is already asking the exact question.
+
+### Option A: Reply to existing threads (BEST — do this first)
+
+Search r/Albuquerque for: `"this weekend"`, `"things to do"`, `"bored"`, `"date night"`
+
+Reply naturally:
+
+```
+There's also abqunplugged.com — pulls from Ticketmaster/Eventbrite/SeatGeek + local venues like Babydoll's into one calendar. Has a neighborhood filter if you're looking for stuff near Nob Hill or Downtown specifically.
+```
+
+### Option B: New post (URL in comment, not body — bypasses filter)
 
 **Title:**
 ```
-I built a free local events site for ABQ — pulls from Ticketmaster, SeatGeek, Eventbrite, and local venues all in one place
+I've been frustrated by ABQ event search — curious what locals actually use
 ```
 
-**Body:**
+**Body (NO URL — put it in the first comment):**
 ```
-Hey r/ABQ — I've been frustrated by the usual "what's happening this weekend" search returning the same three ticketing sites with different results, nothing local, and a bunch of spam.
+Every weekend I end up doing the same thing: check Ticketmaster, check Eventbrite, google "things to do in ABQ this weekend," get 8 different sites with half-overlapping results, and give up.
 
-So I built abqunplugged.com — a free events aggregator that pulls from Ticketmaster, SeatGeek, Eventbrite, and a bunch of local venues/orgs into one searchable calendar.
-
-Some things that are different:
-- Neighborhood filter (Nob Hill, Downtown, Old Town, etc.)
-- Free events filter
-- Family-friendly filter
-- Local community stuff alongside big ticketed shows
-- No ads, no paywalls
-
-Right now it has ~1,000 upcoming events. I add local venues manually when I find gaps — most recently added Babydoll's House of Jazz which doesn't show up anywhere else.
-
-If you run an event or know of venues I should add, there's a "Submit Event" button on the site.
-
-Feedback welcome — what would make this actually useful to you?
+Been working on something that aggregates them. But genuinely curious — how do other people find out what's happening in this city? Instagram? The Journal? Word of mouth?
 ```
+
+**Then immediately post this as the first comment:**
+```
+For what it's worth, what I've been working on is abqunplugged.com — still early but it has ~1,000 upcoming events with a neighborhood filter. Happy to hear what it's missing.
+```
+
+**Best time:** Thursday or Friday morning, 8–10am MST
 
 ---
 
