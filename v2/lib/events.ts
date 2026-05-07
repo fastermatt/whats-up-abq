@@ -1132,7 +1132,12 @@ function normalizeLocal(row: RawEventRow): NormalizedEvent {
     date: row.event_date ?? localStartDate ?? (r.date as string) ?? (r.start_date as string) ?? '',
     time: (localStartDate && localStartTime)
       ? formatTime(`${localStartDate}T${localStartTime}`)
-      : row.event_date ? (formatTime(row.event_date) || null) : null,
+      : (() => {
+          // r.time may be a plain human-readable string (e.g. "4:00 PM – 9:00 PM") set by manual importers
+          const rawTime = r.time as string | undefined
+          if (rawTime) return rawTime
+          return row.event_date ? (formatTime(row.event_date) || null) : null
+        })(),
     venue: decodeHtml(
       typeof r.venue === 'string' ? r.venue
       : (r.venue_name as string | undefined)
