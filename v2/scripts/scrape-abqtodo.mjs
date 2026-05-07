@@ -4,13 +4,14 @@
  *
  * DeepSeek does the heavy lifting:
  *   ✅ Reads each event page's HTML and extracts ALL fields intelligently
- *   ✅ Finds the correct image URL from the page (not the broken API image)
  *   ✅ Parses dates and times correctly from the actual page content
  *   ✅ Classifies the category with full context
  *   ✅ Cleans up venue names (strips embedded addresses)
  *
- * The Tribe REST API is used only to get the list of event URLs.
- * Everything else comes from DeepSeek reading the real page HTML.
+ * The Tribe REST API provides: event URL list + direct image URLs.
+ * The API returns ev.image.url / ev.image.sizes.large.url for each event —
+ * these are used as the primary image source (no DeepSeek og:image extraction needed).
+ * DeepSeek imageUrl is kept as a fallback for events the API returns without an image.
  *
  * Usage:
  *   node scripts/scrape-abqtodo.mjs                # full run
@@ -295,7 +296,14 @@ async function main() {
       continue
     }
 
-    // DeepSeek extracts everything
+    // Tribe API provides image directly — prefer large size, fall back to full URL
+    // This is more reliable than asking DeepSeek to find og:image in HTML.
+    const apiImageUrl = apiEv.image?.sizes?.large?.url
+      ?? apiEv.image?.sizes?.medium?.url
+      ?? apiEv.image?.url
+      ?? null
+
+    // DeepSeek extracts everything else
     process.stdout.write('DeepSeek… ')
     const extracted = await deepseekExtract(eventUrl, pageRes.text)
 
@@ -307,11 +315,14 @@ async function main() {
       continue
     }
 
-    console.log(`${extracted.date}${extracted.time ? ' '+extracted.time : ''} | ${extracted.category} | img:${extracted.imageUrl ? '✓' : '✗'}`)
+    // Candidate image: API image first, DeepSeek extraction as fallback
+    const candidateImageUrl = apiImageUrl ?? extracted.imageUrl ?? null
+
+    console.log(`${extracted.date}${extracted.time ? ' '+extracted.time : ''} | ${extracted.category} | img:${candidateImageUrl ? (apiImageUrl ? '✓api' : '✓ds') : '✗'}`)
 
     if (DRY_RUN) {
       console.log(`    → ${extracted.title} @ ${extracted.venue}`)
-      console.log(`    → ${extracted.price} | ${extracted.imageUrl?.slice(0, 60) ?? 'no image'}`)
+      console.log(`    → ${extracted.price} | ${candidateImageUrl?.slice(0, 70) ?? 'no image'}`)
       if (existingById.has(id)) { updated++ } else { inserted++ }
       await new Promise(r => setTimeout(r, 200))
       continue
@@ -320,29 +331,28 @@ async function main() {
     // Host image to Supabase Storage
     const prior = existingById.get(id)
     // Only preserve ADMIN rejections (flagged via the admin UI reject button).
-    // Old pipeline rejections (from host-event-images.mjs) can be overridden
-    // by the new scraper since DeepSeek finds the correct og:image.
+    // Old pipeline rejections (from host-event-images.mjs) can be overridden.
     const adminRejected = prior?.image_status === 'rejected' && prior?.ai_enrichment?.admin_rejected === true
     let hostedUrl = adminRejected ? (prior?.cached_photo_url ?? null) : null
-    // Keep existing Supabase-hosted image if we have one and DeepSeek found no new image
-    if (!hostedUrl && prior?.cached_photo_url?.includes('supabase') && !extracted.imageUrl) {
+    // Keep existing Supabase-hosted image if we already have one and found no new candidate
+    if (!hostedUrl && prior?.cached_photo_url?.includes('supabase') && !candidateImageUrl) {
       hostedUrl = prior.cached_photo_url
     }
 
-    if (!adminRejected && extracted.imageUrl) {
+    if (!adminRejected && candidateImageUrl) {
       const needsNewImage = !hostedUrl || !hostedUrl.includes('supabase')
       if (needsNewImage) {
-        const url = await hostImage(id, extracted.imageUrl)
+        const url = await hostImage(id, candidateImageUrl)
         if (url) { hostedUrl = url; imagesHosted++ }
         await new Promise(r => setTimeout(r, 200))
       }
     }
 
-    // Final photo URL: Supabase-hosted > extracted URL > prior DB URL (never wipe a good image)
+    // Final photo URL: Supabase-hosted > Tribe API/DeepSeek URL > prior DB URL (never wipe)
     // abqtodo.com URLs work through EventImage's /api/image-proxy — storing them directly is fine
     const finalPhotoUrl = adminRejected
       ? (prior?.cached_photo_url ?? null)
-      : (hostedUrl ?? extracted.imageUrl ?? prior?.cached_photo_url ?? null)
+      : (hostedUrl ?? candidateImageUrl ?? prior?.cached_photo_url ?? null)
 
     const finalImageStatus = adminRejected
       ? 'rejected'
@@ -359,8 +369,9 @@ async function main() {
       name: extracted.title,
       description: extracted.description,
       info: extracted.description,
-      image: extracted.imageUrl || null,
-      images: extracted.imageUrl ? [{ url: extracted.imageUrl }] : [],
+      image: candidateImageUrl || null,
+      images: candidateImageUrl ? [{ url: candidateImageUrl }] : [],
+      api_image: apiImageUrl || null,    // raw Tribe API image URL for reference
       dates: {
         start: {
           localDate: extracted.date,
@@ -381,7 +392,7 @@ async function main() {
       abqtodo_id:   apiEv.id,
       abqtodo_slug: apiEv.slug,
       scraped_at:   new Date().toISOString(),
-      scraped_by:   'deepseek-v3',
+      scraped_by:   'deepseek-v3-tribe-img',
     }
 
     const eventDatetime = (extracted.time && extracted.time !== '00:00')

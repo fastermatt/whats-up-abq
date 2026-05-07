@@ -27,7 +27,8 @@ const ALLOWED_DOMAINS = [
   'supabase.co',
   'r2.dev',           // Cloudflare R2 public buckets (pub-*.r2.dev) — used for cached_photo_url
   'bsmvfutebmbkjvlrhiyq.supabase.co', // Supabase Storage CDN (place photos, etc.)
-  'cdn.midjourney.com', // Midjourney category fallback images
+  'cdn.midjourney.com',       // Midjourney category fallback images
+  'imagedelivery.net',        // Cloudflare Images CDN (Babydoll's House of Jazz, Sociavore sites)
 ]
 
 const BROWSER_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'

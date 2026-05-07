@@ -289,6 +289,22 @@ export async function fetchEvents({
   if (mood) q = q.eq('ai_enrichment->>mood', mood)
   if (neighborhood) q = q.eq('neighborhood_slug', neighborhood)
 
+  // Search pre-filter: push each term down to DB as ilike on title + venue columns.
+  // This dramatically reduces rows fetched (avoids full-table JSONB scan).
+  // The JS layer below still applies the full AND+word-boundary logic — this is
+  // just a fast pre-filter, not a replacement. Filters on terms ≥ 3 chars only.
+  if (search) {
+    const searchTerms = search.toLowerCase().split(/\s+/).filter(t => t.length >= 3)
+    if (searchTerms.length > 0) {
+      // OR across all terms × both columns — returns anything matching any term,
+      // JS layer refines to strict AND. Acceptable: some over-fetch, zero under-fetch.
+      const orParts = searchTerms.flatMap(t =>
+        [`venue_name.ilike.%${t}%`, `raw->>name.ilike.%${t}%`]
+      ).join(',')
+      q = q.or(orParts)
+    }
+  }
+
   const { data, error } = await q
   if (error) {
     console.error('[fetchEvents] Supabase error:', error.message)

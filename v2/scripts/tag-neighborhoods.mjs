@@ -124,7 +124,7 @@ const RULES = [
 
   // Uptown / Midtown (San Mateo, Louisiana, Wyoming, Pan American Freeway NE corridors)
   // Horn YMCA is 7840 Pan American Freeway NE (zip 87109) — NOT Northeast Heights
-  [/\b(uptown|louisiana blvd|coronado center|san mateo blvd|albuquerque marriott|wyoming.*menaul|san mateo pl|san mateo place|pan american freeway|horn ymca|hb.*ymca|hb &amp;.*ymca)\b/i, 'Uptown / Midtown'],
+  [/\b(uptown|louisiana blvd|coronado center|san mateo blvd|albuquerque marriott|wyoming.*menaul|san mateo pl|san mateo place|pan american freeway|horn ymca|hb.*ymca|hb &amp;.*ymca|americas pkwy|americas parkway|babydoll)\b/i, 'Uptown / Midtown'],
 
   // Far Northeast / Sandia Foothills
   [/\b(sandia foothills|tramway blvd|elena gallegos|balloon fiesta|fiesta pkwy|foothills|far northeast|high desert|tony hillerman library|roadrunner food bank|office blvd|sandia casino|sandia amphitheater)\b/i, 'Far Northeast / Sandia Foothills'],

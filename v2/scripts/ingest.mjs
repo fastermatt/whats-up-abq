@@ -110,7 +110,8 @@ const SOURCES = [
 // scrapers that aren't tied to a ticket API). No drop/count gates — they're
 // additive. If they fail, the pipeline warns but doesn't fail.
 const EXTRA_IMPORTERS = [
-  { key: 'abqtodo', script: 'scrape-abqtodo.mjs', requires: [] },
+  { key: 'abqtodo',    script: 'scrape-abqtodo.mjs',    requires: [] },
+  { key: 'babydolls', script: 'scrape-babydolls.mjs',   requires: ['DEEPSEEK_API_KEY'] },
 ]
 
 // ── Helpers ────────────────────────────────────────────────────────────────
