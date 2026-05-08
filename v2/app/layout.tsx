@@ -19,17 +19,14 @@ const epilogue = Epilogue({
   variable: '--font-epilogue',
   subsets:  ['latin'],
   weight:   ['600', '700', '900'],  // only weights actually used in the app
-  // 'optional': 100ms block, no swap period. adjustFontFallback (default true)
-  // makes Arial size-match Epilogue so fallback looks nearly identical.
-  // Eliminates the font-swap LCP update that was pushing LCP from 1.7s → 3.4s.
-  display:  'optional',
+  display:  'swap',
 })
 
 const inter = Inter({
   variable: '--font-inter',
   subsets:  ['latin'],
   weight:   ['400', '500', '600'],
-  display:  'optional',
+  display:  'swap',
 })
 
 export const metadata: Metadata = {
