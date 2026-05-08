@@ -176,8 +176,21 @@ export default async function DiscoverPage() {
   )
   const heroSaying = HERO_SAYINGS[abqHour % HERO_SAYINGS.length]
 
+  // Preload the first featured event's image so the browser fetches it during HTML
+  // parsing — before the <img> element is encountered. This directly reduces LCP.
+  const firstFeaturedImg = featured[0]?.imageUrl
+    || (featured[0] ? getCategoryFallback(featured[0].category ?? undefined, featured[0].id) : null)
+  const lcpPreloadHref = firstFeaturedImg && !firstFeaturedImg.startsWith('data:')
+    && !firstFeaturedImg.startsWith('/api/image-proxy')
+    ? `/.netlify/images?url=${encodeURIComponent(firstFeaturedImg)}&w=600&q=75&fm=avif`
+    : null
+
   return (
     <main id="main" className="min-h-dvh bg-[--bg]">
+      {/* LCP image preload — React 19 + Next.js App Router hoist <link> tags to <head> */}
+      {lcpPreloadHref && (
+        <link rel="preload" as="image" href={lcpPreloadHref} fetchPriority="high" />
+      )}
       <ScrollHintManager />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageFaqLd) }} />

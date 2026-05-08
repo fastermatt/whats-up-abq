@@ -90,7 +90,7 @@ export function EventImage({
       loading={loading}
       // eslint-disable-next-line react/no-unknown-property
       fetchPriority={fetchPriority}
-      decoding={fetchPriority === 'high' ? 'sync' : 'async'}
+      decoding="async"
       className={`${className ?? ''} transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
       onLoad={() => setLoaded(true)}
       onError={() => {
