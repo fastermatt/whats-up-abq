@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Epilogue, Inter } from 'next/font/google'
 import Script from 'next/script'
-import { headers } from 'next/headers'
 import BottomNav from './components/BottomNav'
 import DesktopNav from './components/DesktopNav'
 import { InstallPrompt } from './components/InstallPrompt'
@@ -12,6 +11,7 @@ import { NewsletterBar } from './components/NewsletterBar'
 import { KoFiFloat } from './components/KoFiFloat'
 import { AnalyticsTracker } from './components/AnalyticsTracker'
 import { WebVitals } from './components/WebVitals'
+import { AdminGate } from './components/AdminGate'
 import { OG_IMAGE } from '@/lib/fallback-images'
 import './globals.css'
 
@@ -113,19 +113,13 @@ const organizationLd = {
   },
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   const umamiId  = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID
   const umamiSrc = process.env.NEXT_PUBLIC_UMAMI_SRC ?? 'https://cloud.umami.is/script.js'
-
-  // Suppress public-site widgets when inside the admin section so they don't
-  // bleed through below the admin layout container when scrolled to the bottom.
-  // x-pathname is set by middleware.ts on every request.
-  const pathname = (await headers()).get('x-pathname') ?? ''
-  const isAdmin  = pathname.startsWith('/admin')
 
   return (
     <html
@@ -166,46 +160,48 @@ export default async function RootLayout({
             {children}
 
             {/* ── Newsletter signup — hidden in admin ── */}
-            {!isAdmin && <NewsletterBar />}
+            <AdminGate><NewsletterBar /></AdminGate>
 
             {/* ── Site footer — hidden in admin ── */}
-            {!isAdmin && <footer className="mt-8 pb-6 w-full flex flex-col items-center gap-3 select-none" aria-label="Site footer">
-              {/* Ornamental rule — left line shorter so dot sits above the ♥ */}
-              <div className="flex items-center gap-3">
-                <div className="w-[77px] h-px bg-gradient-to-r from-transparent via-[#c8b4a4] to-[#c8b4a4]" />
-                <div className="w-1 h-1 rounded-full bg-[#9a442d]/50" />
-                <div className="w-[135px] h-px bg-gradient-to-l from-transparent via-[#c8b4a4] to-[#c8b4a4]" />
-              </div>
+            <AdminGate>
+              <footer className="mt-8 pb-6 w-full flex flex-col items-center gap-3 select-none" aria-label="Site footer">
+                {/* Ornamental rule — left line shorter so dot sits above the ♥ */}
+                <div className="flex items-center gap-3">
+                  <div className="w-[77px] h-px bg-gradient-to-r from-transparent via-[#c8b4a4] to-[#c8b4a4]" />
+                  <div className="w-1 h-1 rounded-full bg-[#9a442d]/50" />
+                  <div className="w-[135px] h-px bg-gradient-to-l from-transparent via-[#c8b4a4] to-[#c8b4a4]" />
+                </div>
 
-              {/* The line */}
-              <p className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.22em] uppercase text-[#9a8880]">
-                <span>Built with</span>
-                <span
-                  className="animate-heartbeat-word inline-flex items-center gap-0.5 text-[#9a442d]"
-                  aria-label="love"
+                {/* The line */}
+                <p className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.22em] uppercase text-[#9a8880]">
+                  <span>Built with</span>
+                  <span
+                    className="animate-heartbeat-word inline-flex items-center gap-0.5 text-[#9a442d]"
+                    aria-label="love"
+                  >
+                    <span style={{ fontSize: '0.95rem', lineHeight: 1 }} aria-hidden="true">♥</span>
+                    <span>Love</span>
+                  </span>
+                  <span>for Albuquerque</span>
+                </p>
+
+                {/* Ko-Fi micro-link */}
+                <a
+                  href="https://ko-fi.com/stopscrolling"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[10px] text-[#b8a89e] hover:text-[#9a442d] transition-colors tracking-wide"
                 >
-                  <span style={{ fontSize: '0.95rem', lineHeight: 1 }} aria-hidden="true">♥</span>
-                  <span>Love</span>
-                </span>
-                <span>for Albuquerque</span>
-              </p>
-
-              {/* Ko-Fi micro-link */}
-              <a
-                href="https://ko-fi.com/stopscrolling"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[10px] text-[#b8a89e] hover:text-[#9a442d] transition-colors tracking-wide"
-              >
-                ☕ ko-fi.com/stopscrolling
-              </a>
-            </footer>}
+                  ☕ ko-fi.com/stopscrolling
+                </a>
+              </footer>
+            </AdminGate>
           </div>
           <BottomNav />
         </div>
-        {!isAdmin && <KoFiFloat />}
-        {!isAdmin && <AnalyticsTracker />}
-        {!isAdmin && <WebVitals />}
+        <AdminGate><KoFiFloat /></AdminGate>
+        <AdminGate><AnalyticsTracker /></AdminGate>
+        <AdminGate><WebVitals /></AdminGate>
         <PWAManager />
         <InstallPrompt />
         <FirstVisitBanner />

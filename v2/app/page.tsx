@@ -27,7 +27,9 @@ const HERO_SAYINGS = [
   "Get out there, eh.",
 ]
 
-export const dynamic = 'force-dynamic' // always SSR — env var must be read at runtime
+// ISR: regenerate every 5 min — keeps tonight/weekend lists fresh while
+// letting Netlify CDN serve cached HTML for most requests (fast TTFB).
+export const revalidate = 300
 
 export const metadata: Metadata = {
   title: 'ABQ Unplugged — Things to Do in Albuquerque, NM',
