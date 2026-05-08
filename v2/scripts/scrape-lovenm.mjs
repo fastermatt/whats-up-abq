@@ -111,13 +111,15 @@ Return ONLY a JSON object (no markdown, no explanation):
   "date": "YYYY-MM-DD",
   "time": "human-readable time string or null (e.g. '6–7:30 pm', 'Evening', '4:00 PM – 9:00 PM', null)",
   "venue": "venue name or null",
-  "address": "street address or null"
+  "address": "street address or null",
+  "description": "clean 1-3 sentence summary of what the event is, max 350 chars, plain text"
 }
 
 Rules:
 - date is REQUIRED. Infer the year from context (all dates are future).
 - time: use human-readable range if available (e.g. '6–7:30 pm'); use null if no time mentioned; use 'All day' for all-day events.
 - venue/address: extract if mentioned in text, else null.
+- description: plain text, no HTML, no nav boilerplate, describe the actual event.
 
 Return only the JSON object:`
 
@@ -241,10 +243,14 @@ async function main() {
       continue
     }
 
-    // Description: prefer og:description, fall back to body text excerpt
-    const description = meta.description
-      ? meta.description.slice(0, 400)
-      : bodyText.slice(0, 300)
+    // Description: use body text — og:description on lovenm.org is cached/wrong on some pages
+    // Strip nav boilerplate (everything before the first real paragraph)
+    const bodyClean = bodyText
+      .replace(/^[\s\S]*?(Facebook|Share)\n/m, '')   // strip nav/share bar at top
+      .replace(/\nFacebook[\s\S]*$/m, '')            // strip share bar at bottom
+      .replace(/^(About|Events|Get Involved|Promote|Serve|Contact Us|Give)\n/gm, '')
+      .trim()
+    const description = (extracted.description ?? bodyClean.slice(0, 400))
 
     // Build raw payload — compatible with normalizeLocal()
     // time stored as r.time (human-readable), read by normalizeLocal() r.time fallback
