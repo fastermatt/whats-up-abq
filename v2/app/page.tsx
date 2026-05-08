@@ -203,7 +203,7 @@ export default async function DiscoverPage() {
               alt=""
               aria-hidden="true"
               className="absolute inset-0 w-full h-full object-cover"
-              fetchPriority="low"
+              fetchPriority="high"
               style={{
                 filter: 'grayscale(1) sepia(0.55) hue-rotate(350deg) saturate(1.4) brightness(0.78)',
                 opacity: 0.32,
