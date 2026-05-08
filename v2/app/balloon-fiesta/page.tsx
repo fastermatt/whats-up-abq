@@ -28,15 +28,27 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: 'When is the 2026 Albuquerque International Balloon Fiesta?',
-    a: 'It runs for nine days in early October. Exact dates are announced by the official Balloon Fiesta site around March. Typically it\'s the first full week of October.',
+    a: 'It runs for nine days in early October. Exact dates are announced by the official Balloon Fiesta site around March. Historically it runs from the first Saturday of October through the following Sunday — nine days total.',
   },
   {
     q: 'Do I need tickets for Balloon Fiesta?',
-    a: 'General admission to the launch field is free. Some special events like the Evening Glow or the Music Fiesta require tickets. Check the official schedule — they sell out fast.',
+    a: 'General admission to the launch field requires a ticket — it\'s not free. Adult tickets run around $15–20 per day. Some special events like the Evening Glow or the Music Fiesta require separate tickets and sell out fast. Buy in advance at balloonfiesta.com.',
   },
   {
-    q: 'What\'s the best day to go?',
-    a: 'Weekday mornings are less crowded. Saturday and Sunday are packed but the energy is incredible. If you can swing a Tuesday or Wednesday, you\'ll thank me.',
+    q: 'Where do I park for Balloon Fiesta?',
+    a: 'Official parking is at Balloon Fiesta Park (8401 Balloon Museum Dr NE). A better option: take the park-and-ride buses from designated lots around the city — they run before dawn for the mass ascensions and drop you at the entrance. The city posts the park-and-ride locations each year at cabq.gov. Lots fill before 5am on peak days, so plan accordingly.',
+  },
+  {
+    q: 'What are the best viewing spots for Balloon Fiesta?',
+    a: 'Inside the field is the real experience — you\'re walking among hundreds of balloons inflating at ground level. But free viewing from the west mesa gives you a spectacular skyline shot with the Sandia Mountains behind the balloons. Paseo del Norte along the Rio Grande is popular. For the evening glow, being inside the field is worth the ticket — balloons lit from within against a dark sky is something you have to see.',
+  },
+  {
+    q: 'What should I wear and bring to Balloon Fiesta?',
+    a: 'October mornings in Albuquerque are cold — 35–45°F at launch time. Layer up: base layer, fleece, windbreaker. Wear comfortable walking shoes since the field is large and partly grass/dirt. Bring cash for food vendors. Earplugs for the propane burners (surprisingly loud). A light rain layer just in case. Leave large bags at home — security lines move slowly. And bring a camera — obvious, but necessary.',
+  },
+  {
+    q: 'What\'s the best day to go to Balloon Fiesta?',
+    a: 'Weekday mornings (Tuesday through Thursday) are less crowded and the mass ascensions happen regardless of day. Saturday and Sunday are packed but the energy is at its peak. If you can only go once, the first Saturday opening day is electric — but arrive by 4:30am if you want to park. The Special Shapes Rodeo (usually Wednesday and Saturday) is a fan favorite.',
   },
 ]
 

@@ -28,15 +28,23 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: 'How much are Isotopes tickets?',
-    a: 'You can get in for twelve bucks on some nights. Parking is extra, but there\'s a lot across the street. Check the website for deals – they do Thirsty Thursdays, half-price beers.',
+    a: 'General admission starts around $10–15. Reserved seats run $15–25. Saturday fireworks nights sell out — buy ahead. Thirsty Thursdays have discounted beers and are a great value. Season usually runs April through September.',
   },
   {
     q: 'Where do New Mexico United play?',
-    a: 'At the stadium on the state fairgrounds. It\'s called Isotopes Park actually? No, United plays at the University of New Mexico\'s soccer stadium? Wait, no, they used to play at Isotopes Park but now it\'s at the UNM soccer complex? I\'m confusing myself. Just Google it. It\'s near the football stadium.',
+    a: 'New Mexico United plays at Rio Grande Credit Union Field at Isotopes Park, 1601 Avenida Cesar Chavez SE. The same stadium as the Isotopes — it doubles as an MLS Next Pro soccer venue. Capacity around 13,500. Parking is on-site and in the surrounding lots.',
+  },
+  {
+    q: 'When do the Albuquerque Isotopes play in 2026?',
+    a: 'The Isotopes are the Triple-A affiliate of the Colorado Rockies in the Pacific Coast League. The 2026 season runs from late March through mid-September, with home games typically Tuesday through Sunday. Check the official MiLB site for the current schedule.',
   },
   {
     q: 'What\'s the best sports experience in Albuquerque?',
-    a: 'Lobo basketball at The Pit is iconic. The place is underground, the noise is deafening. But for pure fun, I\'d say an Isotopes game on a Saturday night with fireworks. You can\'t beat that.',
+    a: 'Lobo basketball at The Pit is iconic — the arena is underground, the noise is deafening, and a sold-out Pit is one of the loudest venues in college basketball. For pure summer fun, an Isotopes game on a Saturday with fireworks after is hard to beat. New Mexico United soccer draws a passionate crowd with drum sections and flags.',
+  },
+  {
+    q: 'Is The Pit a good basketball venue?',
+    a: 'Yes — The Pit (WisePies Arena) at UNM is consistently ranked among the best college basketball venues in the country. It seats 15,000 and sits partially below ground level, creating an intense atmosphere. Lobo home games are a genuine Albuquerque experience.',
   },
 ]
 
