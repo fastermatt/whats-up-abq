@@ -12,6 +12,11 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    # Allow the job to open GitHub Issues on failure
+    permissions:
+      contents: read
+      issues: write
+
     # ── Env vars at job level so ALL steps (build + deploy) have them ──────────
     env:
       NEXT_PUBLIC_SUPABASE_URL: https://bsmvfutebmbkjvlrhiyq.supabase.co
