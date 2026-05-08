@@ -82,7 +82,27 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Forward pathname so AdminLayout can detect /admin/login and skip auth check
+  // Admin guard: protect /admin/* pages and /api/admin/* routes
+  // Edge runtime can't compare env secrets reliably, so we check cookie presence only.
+  // The actual secret comparison happens in AdminLayout (Node.js) and each /api/admin route.
+  const ADMIN_PUBLIC_PAGES = ['/admin/login', '/admin/verify']
+  const ADMIN_PUBLIC_APIS  = ['/api/admin/login', '/api/admin/verify', '/api/admin/verify-session']
+  const isAdminPage = pathname.startsWith('/admin') && !ADMIN_PUBLIC_PAGES.includes(pathname)
+  const isAdminApi  = pathname.startsWith('/api/admin') && !ADMIN_PUBLIC_APIS.includes(pathname)
+
+  // ── Public routes: return immediately, NO cookie ops ──────────────────────
+  // supabase.auth.getUser() sets Set-Cookie on the response when a session
+  // needs refresh. That header makes every CDN (Netlify, Cloudflare, etc.)
+  // mark the response private/no-cache, which kills ISR caching for public pages.
+  // Public pages never need an auth session, so we skip auth entirely.
+  if (!isAdminPage && !isAdminApi) {
+    // Forward pathname header so server components can read it if needed
+    const requestHeaders = new Headers(request.headers)
+    requestHeaders.set('x-pathname', pathname)
+    return NextResponse.next({ request: { headers: requestHeaders } })
+  }
+
+  // ── Admin routes: full auth + session refresh ──────────────────────────────
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set('x-pathname', pathname)
 
@@ -109,14 +129,6 @@ export async function middleware(request: NextRequest) {
 
   // Non-blocking — we don't await this for speed, but it sets cookies if needed
   await supabase.auth.getUser()
-
-  // Admin guard: protect /admin/* pages and /api/admin/* routes
-  // Edge runtime can't compare env secrets reliably, so we check cookie presence only.
-  // The actual secret comparison happens in AdminLayout (Node.js) and each /api/admin route.
-  const ADMIN_PUBLIC_PAGES = ['/admin/login', '/admin/verify']
-  const ADMIN_PUBLIC_APIS  = ['/api/admin/login', '/api/admin/verify', '/api/admin/verify-session']
-  const isAdminPage = pathname.startsWith('/admin') && !ADMIN_PUBLIC_PAGES.includes(pathname)
-  const isAdminApi  = pathname.startsWith('/api/admin') && !ADMIN_PUBLIC_APIS.includes(pathname)
 
   if (isAdminPage || isAdminApi) {
     const token = request.cookies.get('admin_token')?.value

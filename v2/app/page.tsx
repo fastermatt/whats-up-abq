@@ -30,7 +30,11 @@ const HERO_SAYINGS = [
 
 // ISR: regenerate every 5 min — keeps tonight/weekend lists fresh while
 // letting Netlify CDN serve cached HTML for most requests (fast TTFB).
+// force-static: @upstash/redis uses fetch({cache:'no-store'}) internally,
+// which Next.js misreads as "dynamic". Override so the route is prerendered
+// and ISR-cached. No cookies()/headers() calls in this import chain.
 export const revalidate = 300
+export const dynamic = 'force-static'
 
 export const metadata: Metadata = {
   title: 'ABQ Unplugged — Things to Do in Albuquerque, NM',

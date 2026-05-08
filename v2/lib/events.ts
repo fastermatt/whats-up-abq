@@ -5,7 +5,7 @@
  * v2.events is intentionally empty until Phase 2 ingestion is wired up.
  */
 import { TZDate } from '@date-fns/tz'
-import { createClient } from '@/lib/supabase/server'
+import { createStaticClient } from '@/lib/supabase/static'
 import { getTimeRange, TimeFilter, ABQ_TZ } from '@/lib/utils/dates'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -68,7 +68,7 @@ export async function fetchEventCountsByDate(
   startDate: string,
   endDate: string,
 ): Promise<DateCount[]> {
-  const supabase = await createClient()
+  const supabase = createStaticClient()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any)
@@ -127,7 +127,7 @@ export interface CategoryCount {
 /** Returns event counts per top-level category for the upcoming time range.
  *  Uses the denormalized `category` column — no raw JSONB fetched. */
 export async function fetchCategoryCounts(): Promise<CategoryCount[]> {
-  const supabase = await createClient()
+  const supabase = createStaticClient()
   const today = new Date().toISOString().slice(0, 10)
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -211,7 +211,7 @@ export async function fetchEvents({
   limit = 24,
   offset = 0,
 }: FetchEventsOptions = {}): Promise<FetchEventsResult> {
-  const supabase = await createClient()
+  const supabase = createStaticClient()
   const { gte, lte } = getTimeRange(timeFilter)
 
   // Normalize URL slug category names to canonical DB values
@@ -396,7 +396,7 @@ export async function fetchEvents({
  *  This keeps the homepage interesting even when no events are manually featured.
  */
 export async function fetchFeaturedEvents(limit = 6): Promise<NormalizedEvent[]> {
-  const supabase = await createClient()
+  const supabase = createStaticClient()
   const today = new Date().toISOString().slice(0, 10)
   const in14 = new Date(Date.now() + 14 * 86400_000).toISOString().slice(0, 10)
 
@@ -484,7 +484,7 @@ export function venueToSlug(name: string): string {
 /** Fetch upcoming events in a specific neighborhood by slug.
  *  Uses the generated `neighborhood_slug` DB column — no in-memory filter needed. */
 export async function fetchEventsByNeighborhood(slug: string, limit = 30): Promise<NormalizedEvent[]> {
-  const supabase = await createClient()
+  const supabase = createStaticClient()
   const today = new Date().toISOString().slice(0, 10)
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -510,7 +510,7 @@ export async function fetchEventsByNeighborhood(slug: string, limit = 30): Promi
 
 /** Fetch neighborhood event counts — used for the homepage neighborhood section */
 export async function fetchNeighborhoodCounts(): Promise<NeighborhoodCount[]> {
-  const supabase = await createClient()
+  const supabase = createStaticClient()
   const today = new Date().toISOString().slice(0, 10)
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -542,7 +542,7 @@ export async function fetchNeighborhoodCounts(): Promise<NeighborhoodCount[]> {
 /** Fetch upcoming events at a specific venue (case-insensitive partial match on venue name).
  *  Uses the denormalized `venue_name` DB column — no in-memory scan needed. */
 export async function fetchEventsByVenue(venueName: string, limit = 20): Promise<NormalizedEvent[]> {
-  const supabase = await createClient()
+  const supabase = createStaticClient()
   const today = new Date().toISOString().slice(0, 10)
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -622,7 +622,7 @@ export async function fetchTopVenues(limit = 60): Promise<{ venueName: string; c
 
 /** Fetch recently added upcoming events (newest ingestion first). */
 export async function fetchRecentlyAdded(limit = 10): Promise<NormalizedEvent[]> {
-  const supabase = await createClient()
+  const supabase = createStaticClient()
   const today = new Date().toISOString().slice(0, 10)
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -665,7 +665,7 @@ function sourcePriority(source: string): number {
  *  featured DESC → has_photo DESC → source_priority DESC → event_date ASC.
  *  Returns up to 60. */
 export async function fetchTonightRanked(limit = 60): Promise<NormalizedEvent[]> {
-  const supabase = await createClient()
+  const supabase = createStaticClient()
   // Compute today's date in Denver timezone
   const todayDenver = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Denver' }) // YYYY-MM-DD
 
@@ -712,7 +712,7 @@ export async function fetchTonightRanked(limit = 60): Promise<NormalizedEvent[]>
  *  If today is Fri/Sat/Sun: uses the current weekend.
  *  Returns up to 100. */
 export async function fetchWeekendRanked(limit = 100): Promise<NormalizedEvent[]> {
-  const supabase = await createClient()
+  const supabase = createStaticClient()
 
   // Compute day-of-week in Denver timezone (0=Sun … 6=Sat)
   const nowDenver = new Date().toLocaleString('en-US', { timeZone: 'America/Denver', weekday: 'short' })
@@ -798,7 +798,7 @@ export function getWeekendDates(): { fri: string; sat: string; sun: string } {
 }
 
 export async function fetchEventById(id: string): Promise<NormalizedEvent | null> {
-  const supabase = await createClient()
+  const supabase = createStaticClient()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase as any)
