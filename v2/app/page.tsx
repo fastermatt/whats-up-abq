@@ -197,15 +197,16 @@ export default async function DiscoverPage() {
           {/* Panning container — map drifts slowly east→west */}
           <div className="absolute animate-map-pan" style={{ top: '-15%', bottom: '-15%', left: '-6%', right: '-6%' }}>
             {/* Real ABQ street map, CSS-filtered to warm terra tone.
-                Rendered as a <div> background (not <img>) so it is never
-                an LCP candidate — the hero headline becomes LCP instead. */}
-            <div
+                fetchPriority="high" + the <link rel="preload"> in layout.tsx give
+                the browser maximum signal to fetch this before layout completes. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/abq-map-bg.svg"
+              alt=""
               aria-hidden="true"
-              className="absolute inset-0"
+              fetchPriority="high"
+              className="absolute inset-0 w-full h-full object-cover"
               style={{
-                backgroundImage: 'url(/abq-map-bg.svg)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
                 filter: 'grayscale(1) sepia(0.55) hue-rotate(350deg) saturate(1.4) brightness(0.78)',
                 opacity: 0.32,
               }}
