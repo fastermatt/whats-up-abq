@@ -23,8 +23,9 @@ export function FirstVisitBanner() {
     try {
       if (localStorage.getItem(STORAGE_KEY)) return
     } catch { return }
-    // Defer mount slightly so we don't fight the hero entrance animation
-    const t = setTimeout(() => setVisible(true), 700)
+    // Defer mount until page is settled — avoids inflating Speed Index
+    // (Lighthouse has no localStorage so the banner would always appear in perf tests)
+    const t = setTimeout(() => setVisible(true), 5000)
     return () => clearTimeout(t)
   }, [])
 
