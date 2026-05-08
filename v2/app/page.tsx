@@ -11,7 +11,6 @@ import { fetchNowPlayingMovies, type Movie } from '@/lib/movies'
 import { cachedFetch } from '@/lib/cache/redis'
 
 import { ScrollHintManager } from '@/app/components/ScrollHintManager'
-import { HeroMapRoute } from '@/app/components/HeroMapRoute'
 import { getFeaturedPlaces, PLACE_CATEGORIES, type Place } from '@/data/places'
 
 // Rotates hourly (server-side, ISR updates within 60s of the hour turning)
@@ -217,8 +216,6 @@ export default async function DiscoverPage() {
                 preserve the visual character without an external image fetch. */}
           </div>
 
-          {/* Animated route — draws a random A→B path on every load, aligned to the real map */}
-          <HeroMapRoute />
         </div>
 
         {/* Hero content */}
@@ -247,7 +244,7 @@ export default async function DiscoverPage() {
 
           {/* Functional headline — clear user intent */}
           <h2
-            className="font-black leading-[0.92] mb-3 animate-hero-kern"
+            className="font-black leading-[0.92] mb-3"
             style={{
               fontFamily: 'var(--font-epilogue)',
               fontSize: 'clamp(30px, 5.5vw, 62px)',
