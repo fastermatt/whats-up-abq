@@ -1,4 +1,9 @@
-name: Deploy v2 to Netlify
+name: CI — smoke tests after Netlify deploy
+
+# Netlify's GitHub App auto-deploys every push to `v2` independently.
+# This workflow's job is to wait for that deploy, then run smoke tests.
+# We no longer run netlify-cli here — it calls the Extensions API which
+# returns 403 for personal access tokens (netlify-cli ≥25.x regression).
 
 on:
   push:
@@ -9,34 +14,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  smoke-test:
     runs-on: ubuntu-latest
 
-    # Allow the job to open GitHub Issues on failure
     permissions:
       contents: read
       issues: write
 
-    # ── Env vars at job level so ALL steps (build + deploy) have them ──────────
     env:
-      NEXT_PUBLIC_SUPABASE_URL: https://bsmvfutebmbkjvlrhiyq.supabase.co
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
-      UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
-      CLOUDFLARE_R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
-      CLOUDFLARE_R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
-      CLOUDFLARE_R2_BUCKET_NAME: abq-unplugged-images
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      NEXT_PUBLIC_CDN_BASE_URL: https://cdn.abqunplugged.com
-      TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
-      SEATGEEK_CLIENT_ID: ${{ secrets.SEATGEEK_CLIENT_ID }}
-      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${{ secrets.NEXT_PUBLIC_UMAMI_WEBSITE_ID }}
-      NEXT_PUBLIC_UMAMI_SRC: https://cloud.umami.is/script.js
-      NEXT_PUBLIC_SITE_URL: https://abqunplugged.com
-      NEXT_PUBLIC_SITE_NAME: ABQ Unplugged
-      NOMINATIM_USER_AGENT: ${{ secrets.NOMINATIM_USER_AGENT }}
-      BEEHIIV_API_KEY: ${{ secrets.BEEHIIV_API_KEY }}
       NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
       NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
 
@@ -47,48 +32,56 @@ jobs:
         with:
           node-version: '22'
 
-      # Pin to 25.6.2 — last stable before 26.x which added an extensions
-      # API call that returns 403 with personal access tokens.
-      - name: Install Netlify CLI
-        run: npm install -g netlify-cli@25.6.2
-
-      - name: Remove root package-lock.json (avoid Turbopack lockfile confusion)
-        run: rm -f package-lock.json
-
-      - name: Install dependencies
-        working-directory: v2
-        run: npm install --legacy-peer-deps
-
-      - name: Build Next.js app
-        working-directory: v2
-        run: npm run build
-
-      # netlify-cli 26.x requires state.json even when --site is passed.
-      # Create it at runtime so the CLI can "find" the project immediately.
-      - name: Link Netlify site (write state.json)
-        working-directory: v2
+      # ── Wait for Netlify's own build pipeline to finish ──────────────────────
+      # Netlify's GitHub App watches the v2 branch and builds/deploys on every
+      # push. We poll the Netlify Deploys API until we see the deploy for this
+      # exact commit SHA in state=ready (or error out on failure).
+      # On workflow_dispatch we skip this — just smoke-test whatever is live.
+      - name: Wait for Netlify deploy (${{ github.sha }})
+        if: github.event_name == 'push'
         run: |
-          mkdir -p .netlify
-          printf '{"siteId":"%s"}\n' "$NETLIFY_SITE_ID" > .netlify/state.json
+          SHA="${{ github.sha }}"
+          echo "Polling Netlify for deploy of commit ${SHA:0:7}..."
+          for i in $(seq 1 40); do
+            RESPONSE=$(curl -sf \
+              -H "Authorization: Bearer $NETLIFY_AUTH_TOKEN" \
+              "https://api.netlify.com/api/v1/sites/$NETLIFY_SITE_ID/deploys?per_page=20") || {
+              echo "  Netlify API unreachable, retrying in 15s..."
+              sleep 15
+              continue
+            }
+            STATE=$(echo "$RESPONSE" | jq -r \
+              --arg sha "$SHA" \
+              '[.[] | select(.commit_ref == $sha)] | first | .state // "not_found"')
+            echo "  [$i/40] state=$STATE"
+            case "$STATE" in
+              ready)
+                echo "✅ Deploy is live!"
+                exit 0
+                ;;
+              error)
+                echo "❌ Netlify build failed for $SHA"
+                exit 1
+                ;;
+              not_found|null)
+                echo "  Deploy not yet queued — waiting 30s..."
+                ;;
+              *)
+                echo "  Build in progress ($STATE) — waiting 30s..."
+                ;;
+            esac
+            sleep 30
+          done
+          echo "⏰ Timed out waiting for Netlify deploy (20 min)"
+          exit 1
 
-      - name: Deploy to Netlify
-        working-directory: v2
-        run: |
-          netlify deploy \
-            --site $NETLIFY_SITE_ID \
-            --auth $NETLIFY_AUTH_TOKEN \
-            --dir .next \
-            --functions .netlify/functions-internal \
-            --prod \
-            --message "Deploy ${{ github.sha }}"
-
-      # ── Post-deploy smoke tests — verify critical URL-level redirects ──────────
+      # ── Post-deploy smoke tests — verify critical URL-level redirects ────────
       # These tests catch regressions in middleware (category slugs, venue slugs,
-      # /search redirect, etc.) — the things that broke this session and would
-      # have been silently shipped without a smoke test.
-      # We sleep first so Netlify has time to clear edge cache and propagate.
-      - name: Wait for deploy to propagate
-        run: sleep 30
+      # /search redirect, etc.). We install only what the test script needs
+      # (--ignore-scripts skips postinstall hooks to keep this fast).
+      - name: Install test dependencies
+        working-directory: v2
+        run: npm install --legacy-peer-deps --ignore-scripts
 
       - name: Post-deploy smoke tests
         working-directory: v2
@@ -96,16 +89,14 @@ jobs:
           SUPABASE_URL: https://bsmvfutebmbkjvlrhiyq.supabase.co
           SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: |
-          echo "Running live URL smoke tests..."
-          # Only run the live (URL-hitting) tests — data-shape tests run on schedule
+          echo "Running live URL smoke tests against https://abqunplugged.com..."
           node scripts/regression-tests.mjs --site=https://abqunplugged.com --tag=live || {
             echo "::warning::Post-deploy smoke tests failed — middleware or routing regression"
-            echo "smoke_failed=true" >> $GITHUB_ENV
-            # Don't fail the deploy itself — but flag it so we know to investigate
+            # Don't fail the workflow — but the warning flags it for investigation
             exit 0
           }
 
-      # ── On failure: open a GitHub Issue instead of emailing Matt ──────────────
+      # ── On failure: open a GitHub Issue ─────────────────────────────────────
       - name: Open issue on failure
         if: failure()
         uses: actions/github-script@v7
@@ -117,7 +108,6 @@ jobs:
               labels: 'ci-failure',
               state: 'open',
             });
-            // Don't duplicate — skip if an open issue already exists for this workflow
             const title = `🚨 CI failed: ${context.workflow}`;
             const existing = issues.find(i => i.title === title);
             if (!existing) {
