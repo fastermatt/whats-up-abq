@@ -38,6 +38,24 @@ function proxyIfNeeded(url: string): string {
   return url
 }
 
+/**
+ * Route external image URLs through Netlify Image CDN for automatic WebP/AVIF
+ * conversion and resizing. Skips:
+ *  - data: URIs (inline images)
+ *  - URLs already going through /.netlify/ (avoid double-proxying)
+ *  - URLs already going through /api/image-proxy (handled by proxyIfNeeded)
+ */
+function netlifyImageUrl(url: string): string {
+  if (
+    url.startsWith('data:') ||
+    url.startsWith('/.netlify/') ||
+    url.startsWith('/api/image-proxy')
+  ) {
+    return url
+  }
+  return `/.netlify/images?url=${encodeURIComponent(url)}&w=600&q=75&fm=avif`
+}
+
 export function EventImage({
   src,
   fallback,
@@ -51,7 +69,7 @@ export function EventImage({
   className?: string
   loading?: 'lazy' | 'eager'
 }) {
-  const [currentSrc, setCurrentSrc] = useState(() => proxyIfNeeded(src))
+  const [currentSrc, setCurrentSrc] = useState(() => netlifyImageUrl(proxyIfNeeded(src)))
   const [loaded, setLoaded] = useState(false)
   const imgRef = useRef<HTMLImageElement>(null)
 
