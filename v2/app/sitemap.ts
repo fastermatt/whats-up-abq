@@ -93,6 +93,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/festivals`,               lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8  },
     { url: `${baseUrl}/kids-activities`,         lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8  },
     { url: `${baseUrl}/things-to-do-this-weekend`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8  },
+    // Tonight pages — high-intent, time-sensitive keyword targets
+    { url: `${baseUrl}/live-music-tonight`,         lastModified: new Date(), changeFrequency: 'daily',   priority: 0.85 },
+    { url: `${baseUrl}/comedy-tonight`,             lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8  },
+    // Free events guide — evergreen high-volume keyword
+    { url: `${baseUrl}/free-events-albuquerque`,    lastModified: new Date(), changeFrequency: 'daily',   priority: 0.85 },
     { url: `${baseUrl}/welcome`,        lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     { url: `${baseUrl}/about`,          lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
     // Category pages — high SEO value
