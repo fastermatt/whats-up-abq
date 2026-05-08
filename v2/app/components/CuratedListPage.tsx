@@ -161,12 +161,16 @@ export function CuratedListPage({
           <div className="space-y-10 animate-fade-in">
             {sortedCats.map((cat) => (
               <section key={cat}>
-                <h2
-                  className="text-lg font-black text-[#1a1614] mb-3 border-b border-[#f0e4cc] pb-1"
-                  style={{ fontFamily: 'var(--font-epilogue)' }}
-                >
-                  {cat}
-                </h2>
+                {/* Only render the category heading when multiple categories exist — avoids redundant
+                    "Music" heading on pages that are already scoped to a single category */}
+                {sortedCats.length > 1 && (
+                  <h2
+                    className="text-lg font-black text-[#1a1614] mb-3 border-b border-[#f0e4cc] pb-1"
+                    style={{ fontFamily: 'var(--font-epilogue)' }}
+                  >
+                    {cat}
+                  </h2>
+                )}
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
                   {grouped[cat].map((event, i) => (
                     <CuratedCard key={event.id} event={event} index={i} />
@@ -299,7 +303,7 @@ function CuratedCard({ event, index }: { event: NormalizedEvent; index: number }
       {event.venue && (
         <Link
           href={`/venues/${venueToSlug(event.venue)}`}
-          className="block px-2 pb-2 text-[11px] text-[#4a3f3a] hover:text-[#9a442d] hover:underline line-clamp-1 flex items-center gap-1 transition-colors"
+          className="flex items-center gap-1 px-2 pb-2 text-[11px] text-[#4a3f3a] hover:text-[#9a442d] hover:underline line-clamp-1 transition-colors"
           aria-label={`See all events at ${event.venue}`}
         >
           <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
