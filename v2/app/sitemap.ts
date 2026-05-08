@@ -98,6 +98,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/comedy-tonight`,             lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8  },
     // Today page — "things to do in albuquerque today" (~1,500/mo)
     { url: `${baseUrl}/things-to-do-today`,         lastModified: new Date(), changeFrequency: 'daily',   priority: 0.85 },
+    // Date night ideas guide — "albuquerque date night ideas" (~1,600/mo)
+    { url: `${baseUrl}/albuquerque-date-night-ideas`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
     // Free events guide — evergreen high-volume keyword
     { url: `${baseUrl}/free-events-albuquerque`,    lastModified: new Date(), changeFrequency: 'daily',   priority: 0.85 },
     { url: `${baseUrl}/welcome`,        lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
