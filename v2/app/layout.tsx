@@ -18,7 +18,7 @@ import './globals.css'
 const epilogue = Epilogue({
   variable: '--font-epilogue',
   subsets:  ['latin'],
-  weight:   ['600', '700', '900'],  // only weights actually used in the app
+  weight:   ['600', '700'],         // 900 is base64-inlined in <head> to prevent font-swap LCP
   display:  'swap',
 })
 
