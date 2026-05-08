@@ -207,24 +207,24 @@ export default async function DiscoverPage() {
         >
           {/* Panning container — map drifts slowly east→west */}
           <div className="absolute animate-map-pan" style={{ top: '-15%', bottom: '-15%', left: '-6%', right: '-6%' }}>
-            {/* Real ABQ street map — WebP (227KB) decodes ~50ms vs SVG XML parsing
-                ~820ms on slow mobile. SVG fallback for the ~2% without WebP support.
-                preload hint in layout.tsx ensures the WebP fetch starts immediately. */}
-            <picture>
-              <source srcSet="/abq-map-bg.webp" type="image/webp" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/abq-map-bg.svg"
-                alt=""
-                aria-hidden="true"
-                fetchPriority="high"
-                className="absolute inset-0 w-full h-full object-cover"
-                style={{
-                  filter: 'grayscale(1) sepia(0.55) hue-rotate(350deg) saturate(1.4) brightness(0.78)',
-                  opacity: 0.32,
-                }}
-              />
-            </picture>
+            {/* Real ABQ street map — 49KB WebP (400px, q1) at 32% opacity.
+                Heavy CSS filters make quality imperceptible. Direct <img> avoids
+                <picture>/<source> preload-matching ambiguity — Chrome sometimes
+                fires a second fetch for <source srcSet> even when the preload
+                already fetched the URL. SVG fallback omitted: WebP is 98%+ coverage.
+                preload hint in layout.tsx ensures fetch starts immediately. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/abq-map-bg.webp"
+              alt=""
+              aria-hidden="true"
+              fetchPriority="high"
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{
+                filter: 'grayscale(1) sepia(0.55) hue-rotate(350deg) saturate(1.4) brightness(0.78)',
+                opacity: 0.32,
+              }}
+            />
           </div>
 
           {/* Animated route — draws a random A→B path on every load, aligned to the real map */}
@@ -240,7 +240,6 @@ export default async function DiscoverPage() {
             src="/logo-terra.svg"
             alt="ABQ Unplugged"
             className="md:hidden h-8 w-auto mb-3 animate-fade-in"
-            fetchPriority="high"
           />
 
           {/* Brand mark — compact, terra, above the headline */}

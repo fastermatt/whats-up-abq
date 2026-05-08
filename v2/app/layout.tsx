@@ -127,11 +127,9 @@ export default function RootLayout({
       className={`${epilogue.variable} ${inter.variable} h-full`}
     >
       <head>
-        {/* Preload the hero map background — CSS background-image is NOT auto-detected by the
-            preload scanner (unlike <img src>), so we must hint it explicitly. This reduces
-            the "LCP request discovery" delay for the largest visible element. */}
-        {/* Preload the WebP hero map — browsers that support WebP (98%+) skip the SVG.
-            WebP decodes in ~50ms vs 820ms for SVG XML parsing on slow mobile CPUs. */}
+        {/* Preload the hero map — 49KB WebP (q1, 400px) — LCP element on the homepage.
+            type="image/webp" suppresses the preload on the ~2% of browsers without WebP
+            support (they'll just see the sandstone background; decorative-only). */}
         <link rel="preload" href="/abq-map-bg.webp" as="image" type="image/webp" fetchPriority="high" />
         {/* Preconnect to Flaticon CDN so the TCP handshake is done before the async CSS loads */}
         <link rel="preconnect" href="https://cdn-uicons.flaticon.com" />
