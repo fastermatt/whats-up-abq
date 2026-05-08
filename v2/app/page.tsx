@@ -212,10 +212,11 @@ export default async function DiscoverPage() {
           {/* Panning container — map drifts slowly east→west */}
           <div className="absolute animate-map-pan" style={{ top: '-15%', bottom: '-15%', left: '-6%', right: '-6%' }}>
             {/* Real ABQ street map — 49KB WebP (400px, q1) at 32% opacity.
-                Heavy CSS filters make quality imperceptible. Direct <img> avoids
-                <picture>/<source> preload-matching ambiguity — Chrome sometimes
-                fires a second fetch for <source srcSet> even when the preload
-                already fetched the URL. SVG fallback omitted: WebP is 98%+ coverage.
+                Filter effects (grayscale→sepia→brightness) are pre-baked into the
+                image via sharp — eliminates 1-2s GPU filter computation on mobile
+                (was causing 1,830ms element render delay in LCP). Only opacity
+                remains in CSS, which is cheap GPU compositing.
+                Direct <img> avoids <picture>/<source> preload-matching ambiguity.
                 preload hint in layout.tsx ensures fetch starts immediately. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -224,10 +225,7 @@ export default async function DiscoverPage() {
               aria-hidden="true"
               fetchPriority="high"
               className="absolute inset-0 w-full h-full object-cover"
-              style={{
-                filter: 'grayscale(1) sepia(0.55) hue-rotate(350deg) saturate(1.4) brightness(0.78)',
-                opacity: 0.32,
-              }}
+              style={{ opacity: 0.32 }}
             />
           </div>
 
