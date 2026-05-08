@@ -104,6 +104,25 @@ const homepageFaqLd = {
   })),
 }
 
+// Organization schema — helps Google resolve ABQ Unplugged as a named entity
+// and associate the Instagram profile as a verified same-as reference.
+const organizationLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'ABQ Unplugged',
+  url: 'https://abqunplugged.com',
+  logo: 'https://abqunplugged.com/icon-512.png',
+  description: 'Albuquerque\'s event aggregator — concerts, comedy, arts, sports, food and drink festivals in one place.',
+  areaServed: {
+    '@type': 'City',
+    name: 'Albuquerque',
+    sameAs: 'https://www.wikidata.org/wiki/Q34804',
+  },
+  sameAs: [
+    'https://www.instagram.com/abqunplugged/',
+  ],
+}
+
 export default async function DiscoverPage() {
   const featuredPlaces = getFeaturedPlaces(8)
 
@@ -148,6 +167,7 @@ export default async function DiscoverPage() {
       <ScrollHintManager />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageFaqLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }} />
       {/* SEO h1 — visually hidden, provides primary keyword signal */}
       <h1 className="sr-only">Events in Albuquerque, NM — Things to Do in ABQ</h1>
 
