@@ -86,14 +86,6 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Hero headline: letter-spacing opens from tight to final as it fades in */
-.animate-hero-kern {
-  animation: heroKern 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-@keyframes heroKern {
-  from { letter-spacing: -3px; opacity: 0.5; }
-  to   { letter-spacing: -1.5px; opacity: 1; }
-}
 
 /* Hero supporting row: rises up after headline */
 .animate-hero-row {
@@ -437,7 +429,6 @@ html.scroll-hint-done .scroll-hint-inner {
   .animate-fade-up-delay,
   .animate-slide-down,
   .animate-hero-text,
-  .animate-hero-kern,
   .animate-hero-row,
   .animate-section-in,
   .animate-pulse-glow,
