@@ -8,6 +8,7 @@ import { AnimateIn } from '@/app/components/AnimateIn'
 import MoodChips from '@/app/components/MoodChips'
 import SurpriseButton from '@/app/components/SurpriseButton'
 import { fetchNowPlayingMovies, type Movie } from '@/lib/movies'
+import { cachedFetch } from '@/lib/cache/redis'
 
 import { ScrollHintManager } from '@/app/components/ScrollHintManager'
 import { HeroMapRoute } from '@/app/components/HeroMapRoute'
@@ -125,16 +126,24 @@ const organizationLd = {
   ],
 }
 
+/** Redis-cache wrapper with Supabase fallback. Silently degrades if Redis is down. */
+async function rc<T>(key: string, fn: () => Promise<T>, ttl = 300): Promise<T> {
+  try { return await cachedFetch(key, fn, ttl) }
+  catch { return fn() }
+}
+
 export default async function DiscoverPage() {
   const featuredPlaces = getFeaturedPlaces(8)
 
+  // Redis caches each data source globally (Upstash is multi-region) so even
+  // Lighthouse/PSI cold-start requests get fast data after the first warm-up.
   const [tonight, weekend, allUpcoming, featured, neighborhoodCounts, movies] = await Promise.all([
-    fetchEvents({ timeFilter: 'tonight', limit: 10 }),
-    fetchEvents({ timeFilter: 'this-weekend', limit: 10 }),
-    fetchEvents({ timeFilter: 'upcoming', limit: 1 }),
-    fetchFeaturedEvents(6),
-    fetchNeighborhoodCounts(),
-    fetchNowPlayingMovies(10),
+    rc('hp:tonight',     () => fetchEvents({ timeFilter: 'tonight', limit: 10 }),     300),
+    rc('hp:weekend',     () => fetchEvents({ timeFilter: 'this-weekend', limit: 10 }), 900),
+    rc('hp:upcoming',    () => fetchEvents({ timeFilter: 'upcoming', limit: 1 }),      600),
+    rc('hp:featured',    () => fetchFeaturedEvents(6),                                 900),
+    rc('hp:hoods',       () => fetchNeighborhoodCounts(),                              3600),
+    rc('hp:movies',      () => fetchNowPlayingMovies(10),                              3600),
   ])
 
   const now = new Date()
@@ -198,21 +207,24 @@ export default async function DiscoverPage() {
         >
           {/* Panning container — map drifts slowly east→west */}
           <div className="absolute animate-map-pan" style={{ top: '-15%', bottom: '-15%', left: '-6%', right: '-6%' }}>
-            {/* Real ABQ street map, CSS-filtered to warm terra tone.
-                fetchPriority="high" + the <link rel="preload"> in layout.tsx give
-                the browser maximum signal to fetch this before layout completes. */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/abq-map-bg.svg"
-              alt=""
-              aria-hidden="true"
-              fetchPriority="high"
-              className="absolute inset-0 w-full h-full object-cover"
-              style={{
-                filter: 'grayscale(1) sepia(0.55) hue-rotate(350deg) saturate(1.4) brightness(0.78)',
-                opacity: 0.32,
-              }}
-            />
+            {/* Real ABQ street map — WebP (227KB) decodes ~50ms vs SVG XML parsing
+                ~820ms on slow mobile. SVG fallback for the ~2% without WebP support.
+                preload hint in layout.tsx ensures the WebP fetch starts immediately. */}
+            <picture>
+              <source srcSet="/abq-map-bg.webp" type="image/webp" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/abq-map-bg.svg"
+                alt=""
+                aria-hidden="true"
+                fetchPriority="high"
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{
+                  filter: 'grayscale(1) sepia(0.55) hue-rotate(350deg) saturate(1.4) brightness(0.78)',
+                  opacity: 0.32,
+                }}
+              />
+            </picture>
           </div>
 
           {/* Animated route — draws a random A→B path on every load, aligned to the real map */}
