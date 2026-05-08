@@ -15,7 +15,7 @@ const SEO_DESC =
   "Find live music happening in Albuquerque tonight. From Sister Bar and Launchpad to Sunshine Theater — tonight's shows, times, and tickets in one place."
 
 export const metadata: Metadata = {
-  title: SEO_TITLE,
+  title: { absolute: SEO_TITLE },
   description: SEO_DESC,
   openGraph: {
     title: SEO_TITLE,

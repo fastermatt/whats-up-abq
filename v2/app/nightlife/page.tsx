@@ -13,7 +13,7 @@ const SEO_TITLE = 'Albuquerque Nightlife — Bars, Clubs & Things to Do at Night
 const SEO_DESC = 'Explore Albuquerque nightlife: bars in Nob Hill and Downtown, live music at Sister Bar, comedy shows, and late-night eats.'
 
 export const metadata: Metadata = {
-  title: SEO_TITLE,
+  title: { absolute: SEO_TITLE },
   description: SEO_DESC,
   openGraph: {
     title: SEO_TITLE,

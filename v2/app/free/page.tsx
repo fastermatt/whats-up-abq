@@ -13,7 +13,7 @@ const SEO_TITLE = 'Free Things to Do in Albuquerque, NM | ABQ Unplugged'
 const SEO_DESC = 'Free events in Albuquerque, NM — concerts, family activities, museum days, gallery openings, and more. Updated daily.'
 
 export const metadata: Metadata = {
-  title: SEO_TITLE,
+  title: { absolute: SEO_TITLE },
   description: SEO_DESC,
   openGraph: {
     title: SEO_TITLE,

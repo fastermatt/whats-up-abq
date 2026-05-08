@@ -13,7 +13,7 @@ const SEO_TITLE = 'Date Night Ideas in Albuquerque, NM | ABQ Unplugged'
 const SEO_DESC = 'Date-night-perfect events in Albuquerque — concerts, comedy, wine tastings, theater, and more. Updated daily.'
 
 export const metadata: Metadata = {
-  title: SEO_TITLE,
+  title: { absolute: SEO_TITLE },
   description: SEO_DESC,
   openGraph: {
     title: SEO_TITLE,

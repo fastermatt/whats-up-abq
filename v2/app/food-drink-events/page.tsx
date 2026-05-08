@@ -13,7 +13,7 @@ const SEO_TITLE = 'Food & Drink Events in Albuquerque, NM | ABQ Unplugged'
 const SEO_DESC = 'Wine festivals, food trucks, farmers markets, beer fests — find food and drink events in Albuquerque. Updated daily.'
 
 export const metadata: Metadata = {
-  title: SEO_TITLE,
+  title: { absolute: SEO_TITLE },
   description: SEO_DESC,
   openGraph: {
     title: SEO_TITLE,

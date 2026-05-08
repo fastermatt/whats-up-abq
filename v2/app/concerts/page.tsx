@@ -13,7 +13,7 @@ const SEO_TITLE = 'Concerts in Albuquerque 2026 — Live Music at Tingley, Islet
 const SEO_DESC = 'Find real concerts in Albuquerque — not bar shows. Tingley Coliseum, Isleta Amphitheater, Popejoy Hall. Tickets, dates, and insider tips.'
 
 export const metadata: Metadata = {
-  title: SEO_TITLE,
+  title: { absolute: SEO_TITLE },
   description: SEO_DESC,
   openGraph: {
     title: SEO_TITLE,

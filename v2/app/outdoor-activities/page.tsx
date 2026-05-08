@@ -13,7 +13,7 @@ const SEO_TITLE = 'Outdoor Activities in Albuquerque, NM | ABQ Unplugged'
 const SEO_DESC = 'Hiking, biking, the Bosque trail, Petroglyph National Monument — find outdoor events and activities in Albuquerque. Updated daily.'
 
 export const metadata: Metadata = {
-  title: SEO_TITLE,
+  title: { absolute: SEO_TITLE },
   description: SEO_DESC,
   openGraph: {
     title: SEO_TITLE,

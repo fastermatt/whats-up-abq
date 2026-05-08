@@ -13,7 +13,7 @@ const SEO_TITLE = 'Live Music in Albuquerque, NM — Concerts & Shows | ABQ Unpl
 const SEO_DESC = 'Find live music in Albuquerque — from intimate sets at Sister Bar to headliners at Sunshine Theater. Your local gig guide.'
 
 export const metadata: Metadata = {
-  title: SEO_TITLE,
+  title: { absolute: SEO_TITLE },
   description: SEO_DESC,
   openGraph: {
     title: SEO_TITLE,

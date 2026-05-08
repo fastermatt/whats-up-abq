@@ -13,7 +13,7 @@ const SEO_TITLE = 'Sports Events in Albuquerque, NM | ABQ Unplugged'
 const SEO_DESC = 'Find Isotopes games, New Mexico United soccer, Lobo basketball, and more sports events in Albuquerque. Cheap tickets, great times.'
 
 export const metadata: Metadata = {
-  title: SEO_TITLE,
+  title: { absolute: SEO_TITLE },
   description: SEO_DESC,
   openGraph: {
     title: SEO_TITLE,

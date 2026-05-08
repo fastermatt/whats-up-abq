@@ -13,7 +13,7 @@ const SEO_TITLE = 'Comedy Shows in Albuquerque, NM | ABQ Unplugged'
 const SEO_DESC = 'Find comedy shows and open mics in Albuquerque — from Laff\'s national headliners to basement open mics. Your local laugh guide.'
 
 export const metadata: Metadata = {
-  title: SEO_TITLE,
+  title: { absolute: SEO_TITLE },
   description: SEO_DESC,
   openGraph: {
     title: SEO_TITLE,

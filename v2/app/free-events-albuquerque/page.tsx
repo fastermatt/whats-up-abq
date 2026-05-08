@@ -15,7 +15,7 @@ const SEO_DESC =
   'Find free events in Albuquerque — concerts, festivals, farmers markets, museum free days, outdoor activities, and community events. No cover, no ticket price.'
 
 export const metadata: Metadata = {
-  title: SEO_TITLE,
+  title: { absolute: SEO_TITLE },
   description: SEO_DESC,
   openGraph: {
     title: SEO_TITLE,

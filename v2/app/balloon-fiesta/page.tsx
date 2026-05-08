@@ -13,7 +13,7 @@ const SEO_TITLE = 'Albuquerque Balloon Fiesta 2026 — Events, Schedule & What t
 const SEO_DESC = 'Find Balloon Fiesta 2026 events, schedules, and insider tips. Mass ascensions, glows, concerts — don\'t just say you\'ll go. Actually go.'
 
 export const metadata: Metadata = {
-  title: SEO_TITLE,
+  title: { absolute: SEO_TITLE },
   description: SEO_DESC,
   openGraph: {
     title: SEO_TITLE,

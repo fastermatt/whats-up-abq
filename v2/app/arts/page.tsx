@@ -13,7 +13,7 @@ const SEO_TITLE = 'Arts & Theater in Albuquerque, NM | ABQ Unplugged'
 const SEO_DESC = 'Find art walks, gallery openings, theater, and cultural events in Albuquerque. A real arts scene — updated daily.'
 
 export const metadata: Metadata = {
-  title: SEO_TITLE,
+  title: { absolute: SEO_TITLE },
   description: SEO_DESC,
   openGraph: {
     title: SEO_TITLE,

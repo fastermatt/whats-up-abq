@@ -13,7 +13,7 @@ const SEO_TITLE = 'Things to Do with Kids in Albuquerque, NM | ABQ Unplugged'
 const SEO_DESC = 'Find family-friendly events in Albuquerque — BioPark, Explora, outdoor activities, and events that keep kids AND parents happy.'
 
 export const metadata: Metadata = {
-  title: SEO_TITLE,
+  title: { absolute: SEO_TITLE },
   description: SEO_DESC,
   openGraph: {
     title: SEO_TITLE,

@@ -13,7 +13,7 @@ const SEO_TITLE = 'Albuquerque Festivals 2026 — Your Year-Round Guide to Local
 const SEO_DESC = 'Albuquerque has way more festivals than Balloon Fiesta. State Fair, Lavender Festival, wine fests, Green Chile Festival — find them all here.'
 
 export const metadata: Metadata = {
-  title: SEO_TITLE,
+  title: { absolute: SEO_TITLE },
   description: SEO_DESC,
   openGraph: {
     title: SEO_TITLE,

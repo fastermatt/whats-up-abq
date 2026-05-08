@@ -15,7 +15,7 @@ const SEO_DESC =
   'sports, food and drink, family events. Updated daily on ABQ Unplugged.'
 
 export const metadata: Metadata = {
-  title: SEO_TITLE,
+  title: { absolute: SEO_TITLE },
   description: SEO_DESC,
   openGraph: {
     title: `${SEO_TITLE} — ABQ Unplugged`,

@@ -13,7 +13,7 @@ const SEO_TITLE = 'Kids Activities in Albuquerque — Things to Do with Kids | A
 const SEO_DESC = 'Find real things to do with kids in Albuquerque. BioPark, Explora, hidden playgrounds, and family events that aren\'t boring.'
 
 export const metadata: Metadata = {
-  title: SEO_TITLE,
+  title: { absolute: SEO_TITLE },
   description: SEO_DESC,
   openGraph: {
     title: SEO_TITLE,

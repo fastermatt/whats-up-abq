@@ -14,7 +14,7 @@ const SEO_DESC =
   "Find comedy shows happening in Albuquerque tonight. Stand-up at Hyena's and Laffs, improv at The Box, open mics — all of tonight's laughs in one place."
 
 export const metadata: Metadata = {
-  title: SEO_TITLE,
+  title: { absolute: SEO_TITLE },
   description: SEO_DESC,
   openGraph: {
     title: SEO_TITLE,

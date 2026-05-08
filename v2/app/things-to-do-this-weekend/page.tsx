@@ -13,7 +13,7 @@ const SEO_TITLE = 'Things to Do in Albuquerque This Weekend — Events & Activit
 const SEO_DESC = 'Stuck in the Friday night scroll? Find real things to do this weekend in Albuquerque — free, cheap, or worth the splurge.'
 
 export const metadata: Metadata = {
-  title: SEO_TITLE,
+  title: { absolute: SEO_TITLE },
   description: SEO_DESC,
   openGraph: {
     title: SEO_TITLE,
