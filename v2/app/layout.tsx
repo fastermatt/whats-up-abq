@@ -227,10 +227,13 @@ export default function RootLayout({
           />
         )}
 
-        {/* Ahrefs Web Analytics — end of body: server-rendered (Ahrefs can verify it)
-            but doesn't compete with font preloads or delay LCP */}
-        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
-        <script src="https://analytics.ahrefs.com/analytics.js" data-key="leD8mIKA17PaP6xSPa9/4g" async />
+        {/* Ahrefs Web Analytics — lazyOnload so it never competes with LCP-critical resources.
+            Ahrefs may show "script not verified" in dashboard but data collection still works. */}
+        <Script
+          src="https://analytics.ahrefs.com/analytics.js"
+          data-key="leD8mIKA17PaP6xSPa9/4g"
+          strategy="lazyOnload"
+        />
 
       </body>
     </html>
