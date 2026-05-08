@@ -24,7 +24,7 @@ const HERO_SAYINGS = [
   "Go make tonight happen.",
   "Red, green, or something to do?",
   "This hour looks good on ABQ.",
-  "Get out there, eh.",
+  "Get out there, Burque.",
 ]
 
 // ISR: regenerate every 5 min — keeps tonight/weekend lists fresh while
@@ -441,7 +441,7 @@ export default async function DiscoverPage() {
         <AnimateIn animation="fade-up" delay={100}>
           <EventSection
             title="This weekend"
-            subtitle="Don't miss out"
+            subtitle="This Sat + Sun"
             events={weekend.events.slice(0, 10)}
             seeAllHref="/weekend"
             sectionLabel="This Weekend"
@@ -643,7 +643,7 @@ export default async function DiscoverPage() {
               Albuquerque showing<br />up for itself
             </h2>
             <p className="text-sm text-[#4a3f3a] mb-6 leading-relaxed">
-              Track events, save favorites, and see what other ABQ locals are into. Free to join, no spam, no noise.
+              Track events, save favorites, and find what ABQ locals are actually doing. Free.
             </p>
             <div className="flex flex-wrap gap-3 justify-center mb-7">
               <Link
