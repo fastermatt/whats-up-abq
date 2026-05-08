@@ -11,9 +11,14 @@ export default function robots(): MetadataRoute.Robots {
         // venue, and editorial pages should be crawlable.
         allow: ['/'],
         disallow: [
-          '/api/',      // API routes — no need to crawl
-          '/_next/',    // Next.js internals
-          '/admin/',    // Admin section — private
+          '/api/',          // API routes — no need to crawl
+          '/_next/',        // Next.js internals
+          '/admin/',        // Admin section — private
+          '/ig',            // IG post designer tool
+          '/events/*/ig',   // Event IG card (square)
+          '/events/*/ig2',  // Event IG card (portrait)
+          '/events/*/ig3',  // Event IG card (story)
+          '/feedback',      // Utility form — noindex, not useful in search
         ],
       },
     ],

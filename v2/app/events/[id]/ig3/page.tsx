@@ -2,7 +2,12 @@
  * Instagram Card — Story 9:16 (/events/[id]/ig3)
  * Server Component: fetches event, passes to client design tool.
  */
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 import { fetchEventById } from '@/lib/events'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { IGCardClient } from '@/app/components/IGCard'

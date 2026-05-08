@@ -2,7 +2,12 @@
  * Instagram Card — Square 1:1 (/events/[id]/ig)
  * Server Component: fetches event, passes to client design tool.
  */
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 import { fetchEventById } from '@/lib/events'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { IGCardClient } from '@/app/components/IGCard'
