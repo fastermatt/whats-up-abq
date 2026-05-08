@@ -96,6 +96,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Tonight pages — high-intent, time-sensitive keyword targets
     { url: `${baseUrl}/live-music-tonight`,         lastModified: new Date(), changeFrequency: 'daily',   priority: 0.85 },
     { url: `${baseUrl}/comedy-tonight`,             lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8  },
+    // Today page — "things to do in albuquerque today" (~1,500/mo)
+    { url: `${baseUrl}/things-to-do-today`,         lastModified: new Date(), changeFrequency: 'daily',   priority: 0.85 },
     // Free events guide — evergreen high-volume keyword
     { url: `${baseUrl}/free-events-albuquerque`,    lastModified: new Date(), changeFrequency: 'daily',   priority: 0.85 },
     { url: `${baseUrl}/welcome`,        lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
