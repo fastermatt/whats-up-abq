@@ -211,22 +211,10 @@ export default async function DiscoverPage() {
         >
           {/* Panning container — map drifts slowly east→west */}
           <div className="absolute animate-map-pan" style={{ top: '-15%', bottom: '-15%', left: '-6%', right: '-6%' }}>
-            {/* Real ABQ street map — 49KB WebP (400px, q1) at 32% opacity.
-                Filter effects (grayscale→sepia→brightness) are pre-baked into the
-                image via sharp — eliminates 1-2s GPU filter computation on mobile
-                (was causing 1,830ms element render delay in LCP). Only opacity
-                remains in CSS, which is cheap GPU compositing.
-                Direct <img> avoids <picture>/<source> preload-matching ambiguity.
-                preload hint in layout.tsx ensures fetch starts immediately. */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/abq-map-bg.webp"
-              alt=""
-              aria-hidden="true"
-              fetchPriority="high"
-              className="absolute inset-0 w-full h-full object-cover"
-              style={{ opacity: 0.32 }}
-            />
+            {/* Map removed from <img> to eliminate image LCP candidacy.
+                Heading text is now the LCP element (zero resource-load delay).
+                The sandstone background (#eedcd0) + gradient + HeroMapRoute SVG
+                preserve the visual character without an external image fetch. */}
           </div>
 
           {/* Animated route — draws a random A→B path on every load, aligned to the real map */}

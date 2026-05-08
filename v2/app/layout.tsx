@@ -127,10 +127,8 @@ export default function RootLayout({
       className={`${epilogue.variable} ${inter.variable} h-full`}
     >
       <head>
-        {/* Preload the hero map — 49KB WebP (q1, 400px) — LCP element on the homepage.
-            type="image/webp" suppresses the preload on the ~2% of browsers without WebP
-            support (they'll just see the sandstone background; decorative-only). */}
-        <link rel="preload" href="/abq-map-bg.webp" as="image" type="image/webp" fetchPriority="high" />
+        {/* Hero map image removed — heading text is now the LCP element.
+            No preload needed; heading renders from HTML+CSS with no external resource. */}
         {/* Preconnect to Flaticon CDN so the TCP handshake is done before the async CSS loads */}
         <link rel="preconnect" href="https://cdn-uicons.flaticon.com" />
         {/* Flaticon Uicons — loaded async to avoid render-blocking. Icons appear ~200ms after
