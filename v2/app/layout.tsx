@@ -226,6 +226,13 @@ export default function RootLayout({
             strategy="afterInteractive"
           />
         )}
+
+        {/* Ahrefs Web Analytics */}
+        <Script
+          src="https://analytics.ahrefs.com/analytics.js"
+          data-key="leD8mIKA17PaP6xSPa9/4g"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   )
