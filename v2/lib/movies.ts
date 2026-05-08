@@ -20,7 +20,8 @@ export interface Movie {
 }
 
 const TMDB_BASE  = 'https://api.themoviedb.org/3'
-const IMG_BASE_W = 'https://image.tmdb.org/t/p/w500'
+// w342 matches our display size (210px wide on mobile) — was w500 (oversized, wasting ~176 KiB/poster)
+const IMG_BASE_W = 'https://image.tmdb.org/t/p/w342'
 const IMG_BASE_B = 'https://image.tmdb.org/t/p/w1280'
 
 /** Build a Google showtimes search URL for a given title in Albuquerque.

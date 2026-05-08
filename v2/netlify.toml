@@ -44,6 +44,12 @@
   [headers.values]
     Cache-Control = "public, s-maxage=60, stale-while-revalidate=600"
 
+# Next.js build output — fingerprinted filenames, safe to cache forever
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
 # Static assets — long-lived immutable cache (SVGs, PNGs, fonts, manifest)
 # Next.js fingerprints /_next/static/* automatically; these cover /public assets
 [[headers]]

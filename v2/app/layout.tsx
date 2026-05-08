@@ -133,8 +133,6 @@ export default async function RootLayout({
       className={`${epilogue.variable} ${inter.variable} h-full`}
     >
       <head>
-        {/* Preload the LCP resource (homepage map background) so the browser discovers it early */}
-        <link rel="preload" href="/abq-map-bg.svg" as="image" type="image/svg+xml" fetchPriority="high" />
         {/* Preconnect to Flaticon CDN so the TCP handshake is done before the async CSS loads */}
         <link rel="preconnect" href="https://cdn-uicons.flaticon.com" />
         {/* Flaticon Uicons — loaded async to avoid render-blocking. Icons appear ~200ms after
