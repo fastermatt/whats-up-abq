@@ -414,8 +414,8 @@ export default async function DiscoverPage() {
                 className="flex gap-4 px-4 pb-2 snap-x snap-mandatory scroll-hint-inner"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
-                {featured.map((event) => (
-                  <FeaturedCard key={event.id} event={event} />
+                {featured.map((event, i) => (
+                  <FeaturedCard key={event.id} event={event} index={i} />
                 ))}
               </div>
             </div>
@@ -432,6 +432,7 @@ export default async function DiscoverPage() {
             events={tonight.events}
             seeAllHref="/tonight"
             sectionLabel="Tonight"
+            prioritizeFirst
           />
         </AnimateIn>
       )}
@@ -812,6 +813,7 @@ function EventSection({
   seeAllHref,
   sectionLabel,
   sectionBg,
+  prioritizeFirst = false,
 }: {
   title: string
   subtitle: string
@@ -819,6 +821,7 @@ function EventSection({
   seeAllHref: string
   sectionLabel: string
   sectionBg?: string
+  prioritizeFirst?: boolean
 }) {
   const accentColor = SECTION_ACCENTS[sectionLabel] ?? '#8a7a74'
 
@@ -853,8 +856,8 @@ function EventSection({
           className="flex gap-3 px-4 pb-2 snap-x snap-mandatory scroll-hint-inner"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {events.map((event) => (
-            <HorizontalCard key={event.id} event={event} sectionLabel={sectionLabel} />
+          {events.map((event, i) => (
+            <HorizontalCard key={event.id} event={event} sectionLabel={sectionLabel} index={i} prioritizeFirst={prioritizeFirst} />
           ))}
         </div>
       </div>
@@ -867,11 +870,16 @@ function EventSection({
 function HorizontalCard({
   event,
   sectionLabel,
+  index = 0,
+  prioritizeFirst = false,
 }: {
   event: NormalizedEvent
   sectionLabel: string
+  index?: number
+  prioritizeFirst?: boolean
 }) {
   const timeStr = event.time ?? ''
+  const isLCPCandidate = prioritizeFirst && index === 0
 
   return (
     <Link
@@ -884,7 +892,8 @@ function HorizontalCard({
           src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
           fallback={getCategoryFallback(event.category ?? undefined, event.id)}
           alt={event.title}
-          loading="lazy"
+          loading={isLCPCandidate ? 'eager' : 'lazy'}
+          fetchPriority={isLCPCandidate ? 'high' : undefined}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
         />
 
@@ -932,7 +941,7 @@ function HorizontalCard({
 
 // ─── Featured Card — Wide landscape card, larger than standard HorizontalCard ─
 
-function FeaturedCard({ event }: { event: NormalizedEvent }) {
+function FeaturedCard({ event, index = 0 }: { event: NormalizedEvent; index?: number }) {
   const dateStr = event.date
     ? new Date(event.date + 'T12:00:00').toLocaleDateString('en-US', {
         weekday: 'short', month: 'short', day: 'numeric',
@@ -950,7 +959,8 @@ function FeaturedCard({ event }: { event: NormalizedEvent }) {
           src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
           fallback={getCategoryFallback(event.category ?? undefined, event.id)}
           alt={event.title}
-          loading="lazy"
+          loading={index === 0 ? 'eager' : 'lazy'}
+          fetchPriority={index === 0 ? 'high' : undefined}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
         />
         {/* ★ Featured badge */}

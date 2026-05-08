@@ -62,15 +62,18 @@ export function EventImage({
   alt,
   className,
   loading = 'lazy',
+  fetchPriority,
 }: {
   src: string
   fallback: string
   alt: string
   className?: string
   loading?: 'lazy' | 'eager'
+  fetchPriority?: 'high' | 'auto' | 'low'
 }) {
   const [currentSrc, setCurrentSrc] = useState(() => netlifyImageUrl(proxyIfNeeded(src)))
-  const [loaded, setLoaded] = useState(false)
+  // Priority images skip the fade-in so they're immediately visible for LCP measurement
+  const [loaded, setLoaded] = useState(fetchPriority === 'high')
   const imgRef = useRef<HTMLImageElement>(null)
 
   // Cached images load before onLoad fires — check .complete on mount
@@ -85,7 +88,9 @@ export function EventImage({
       src={currentSrc}
       alt={alt}
       loading={loading}
-      decoding="async"
+      // eslint-disable-next-line react/no-unknown-property
+      fetchPriority={fetchPriority}
+      decoding={fetchPriority === 'high' ? 'sync' : 'async'}
       className={`${className ?? ''} transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
       onLoad={() => setLoaded(true)}
       onError={() => {
