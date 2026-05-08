@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { proxyIfNeeded, netlifyImageUrl } from '@/lib/image-url'
 
 /**
  * Event image with graceful fallback. Some community events have
@@ -11,50 +12,13 @@ import { useEffect, useRef, useState } from 'react'
  *
  * Server components should compute `fallback` via `getCategoryFallback()` and
  * pass it in. This component just handles the swap.
+ *
+ * URL resolution order:
+ *   1. proxyIfNeeded(src)   — route CAPTCHA-blocked domains through /api/image-proxy
+ *   2. netlifyImageUrl(...)  — wrap remainder in Netlify Image CDN for AVIF conversion
+ * The same logic lives in lib/image-url.ts so server components can compute
+ * matching preload URLs without duplicating code.
  */
-
-/** Domains that CAPTCHA/hotlink-block direct browser loads, OR get blocked by
- *  common ad-blockers / corporate firewalls. Routing through our proxy makes
- *  the image load reliably from Netlify's IP regardless of the user's network. */
-const PROXY_DOMAINS = [
-  'abqtodo.com',
-  'nhccnm.org',
-  'do505.com',
-  'lovenm.org',
-  'seatgeekimages.com',   // ad-blockers sometimes flag SeatGeek's image CDN
-  's1.ticketm.net',       // Ticketmaster CDN
-  'media.ticketmaster.com',
-]
-
-function proxyIfNeeded(url: string): string {
-  try {
-    const host = new URL(url).hostname
-    if (PROXY_DOMAINS.some(d => host === d || host.endsWith('.' + d))) {
-      return `/api/image-proxy?url=${encodeURIComponent(url)}`
-    }
-  } catch {
-    // malformed URL — return as-is
-  }
-  return url
-}
-
-/**
- * Route external image URLs through Netlify Image CDN for automatic WebP/AVIF
- * conversion and resizing. Skips:
- *  - data: URIs (inline images)
- *  - URLs already going through /.netlify/ (avoid double-proxying)
- *  - URLs already going through /api/image-proxy (handled by proxyIfNeeded)
- */
-function netlifyImageUrl(url: string): string {
-  if (
-    url.startsWith('data:') ||
-    url.startsWith('/.netlify/') ||
-    url.startsWith('/api/image-proxy')
-  ) {
-    return url
-  }
-  return `/.netlify/images?url=${encodeURIComponent(url)}&w=600&q=75&fm=avif`
-}
 
 export function EventImage({
   src,

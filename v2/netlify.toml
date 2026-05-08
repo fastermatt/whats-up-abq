@@ -2,6 +2,19 @@
   command = "npm install --legacy-peer-deps && npm run build"
   publish = ".next"
 
+# ─── Netlify Image CDN — allowed remote domains ────────────────────────────────
+# Supabase Storage (event photos uploaded/cached by the ingest pipeline) and
+# Eventbrite's CDN are NOT in the proxy list (EventImage routes them through
+# Netlify Image CDN for AVIF conversion). Without this, Netlify returns 400.
+[images]
+  remote_images = [
+    "https://bsmvfutebmbkjvlrhiyq.supabase.co/*",
+    "https://img.evbuc.com/*",
+    "https://images.universe.com/*",
+    "https://imagedelivery.net/*",
+    "https://cdn.abqunplugged.com/*",
+  ]
+
 [build.environment]
   NODE_VERSION = "22"
   NPM_FLAGS    = "--legacy-peer-deps"

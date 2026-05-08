@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { fetchEvents, fetchFeaturedEvents, fetchNeighborhoodCounts, NormalizedEvent } from '@/lib/events'
+import { eventImageSrc } from '@/lib/image-url'
 import { getCategoryFallback, OG_IMAGE } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
 import { MapPin, ArrowRight, ExternalLink, Star } from 'lucide-react'
@@ -178,11 +179,12 @@ export default async function DiscoverPage() {
 
   // Preload the first featured event's image so the browser fetches it during HTML
   // parsing — before the <img> element is encountered. This directly reduces LCP.
+  // Uses eventImageSrc() to compute the *exact* URL that EventImage will render,
+  // ensuring the preload cache is actually used (no mismatch → no wasted request).
   const firstFeaturedImg = featured[0]?.imageUrl
     || (featured[0] ? getCategoryFallback(featured[0].category ?? undefined, featured[0].id) : null)
   const lcpPreloadHref = firstFeaturedImg && !firstFeaturedImg.startsWith('data:')
-    && !firstFeaturedImg.startsWith('/api/image-proxy')
-    ? `/.netlify/images?url=${encodeURIComponent(firstFeaturedImg)}&w=600&q=75&fm=avif`
+    ? eventImageSrc(firstFeaturedImg)
     : null
 
   return (
