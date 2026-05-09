@@ -158,12 +158,23 @@ function BackgroundImage({ slide, w, h }: { slide: Slide; w: number; h: number }
 
 // ── Text layer ──────────────────────────────────────────────────────────
 
-function TextNode({ layer, onSelect, onChange }: {
+function TextNode({ layer, isEditing, onSelect, onChange, onBeginEdit }: {
   layer: TextLayer
+  isEditing: boolean
   onSelect: () => void
   onChange: (patch: Partial<TextLayer>) => void
+  onBeginEdit: () => void
 }) {
   const ref = useRef<Konva.Text>(null)
+  // Long-press timer for mobile inline-edit (touch & hold ≈ 500ms).
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const longPressFired = useRef(false)
+  const clearLongPress = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current)
+      longPressTimer.current = null
+    }
+  }
   return (
     <Text
       ref={ref}
@@ -174,7 +185,8 @@ function TextNode({ layer, onSelect, onChange }: {
       width={layer.width}
       rotation={layer.rotation}
       opacity={layer.opacity}
-      visible={layer.visible}
+      // Hidden while inline-editing; the contenteditable overlay shows the live text.
+      visible={layer.visible && !isEditing}
       text={layer.uppercase ? layer.text.toUpperCase() : layer.text}
       fontFamily={layer.fontFamily}
       fontSize={layer.fontSize}
@@ -193,7 +205,40 @@ function TextNode({ layer, onSelect, onChange }: {
       fillAfterStrokeEnabled={layer.stroke.enabled}
       draggable={!layer.locked}
       onClick={onSelect}
-      onTap={onSelect}
+      onTap={(e) => {
+        // If the long-press already opened inline edit, swallow the trailing tap.
+        if (longPressFired.current) {
+          longPressFired.current = false
+          e.cancelBubble = true
+          return
+        }
+        onSelect()
+      }}
+      onDblClick={(e) => {
+        if (layer.locked) return
+        e.cancelBubble = true
+        onSelect()
+        onBeginEdit()
+      }}
+      onDblTap={(e) => {
+        if (layer.locked) return
+        e.cancelBubble = true
+        onSelect()
+        onBeginEdit()
+      }}
+      onTouchStart={() => {
+        if (layer.locked) return
+        longPressFired.current = false
+        clearLongPress()
+        longPressTimer.current = setTimeout(() => {
+          longPressFired.current = true
+          onSelect()
+          onBeginEdit()
+        }, 500)
+      }}
+      onTouchEnd={clearLongPress}
+      onTouchMove={clearLongPress}
+      onDragStart={clearLongPress}
       onDragEnd={e => onChange({ x: e.target.x(), y: e.target.y() })}
       onTransformEnd={() => {
         const node = ref.current
@@ -209,6 +254,109 @@ function TextNode({ layer, onSelect, onChange }: {
         })
       }}
     />
+  )
+}
+
+// Contenteditable overlay positioned over a Konva Text node for inline editing.
+// Mirrors the Konva Text's font / color / alignment so the in-place experience
+// looks identical to the rendered canvas. Blur saves; Escape cancels.
+function InlineTextEditor({
+  layer, scale, onCommit, onCancel,
+}: {
+  layer: TextLayer
+  scale: number
+  onCommit: (text: string) => void
+  onCancel: () => void
+}) {
+  const editorRef = useRef<HTMLDivElement>(null)
+  const initialTextRef = useRef(layer.text)
+  const cancelledRef = useRef(false)
+
+  // Mount: focus + select all so the user can start typing immediately.
+  useEffect(() => {
+    const el = editorRef.current
+    if (!el) return
+    el.focus()
+    const sel = window.getSelection()
+    const range = document.createRange()
+    range.selectNodeContents(el)
+    sel?.removeAllRanges()
+    sel?.addRange(range)
+  }, [])
+
+  const commit = () => {
+    if (cancelledRef.current) return
+    const el = editorRef.current
+    if (!el) return
+    // innerText preserves visible newlines; trim trailing newline added by contentEditable.
+    const next = el.innerText.replace(/\n$/, '')
+    if (next === initialTextRef.current) {
+      onCancel()
+    } else {
+      onCommit(next)
+    }
+  }
+
+  const cancel = () => {
+    cancelledRef.current = true
+    onCancel()
+  }
+
+  return (
+    <div
+      ref={editorRef}
+      contentEditable
+      suppressContentEditableWarning
+      role="textbox"
+      aria-label="Edit text"
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') {
+          e.preventDefault()
+          cancel()
+        }
+        // Allow Enter for newlines (titles wrap). Cmd/Ctrl+Enter commits early.
+        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+          e.preventDefault()
+          ;(e.target as HTMLElement).blur()
+        }
+        // Stop the canvas keyboard handler from snatching Backspace/Delete
+        // (it would delete the layer otherwise — same reason inputs are skipped).
+        e.stopPropagation()
+      }}
+      style={{
+        position: 'absolute',
+        // Konva layer x/y are in canvas coords — multiply by scale for screen px.
+        left: layer.x * scale,
+        top: layer.y * scale,
+        width: layer.width * scale,
+        // Match Konva text rendering as closely as possible.
+        transformOrigin: 'top left',
+        transform: layer.rotation ? `rotate(${layer.rotation}deg)` : undefined,
+        fontFamily: layer.fontFamily,
+        fontSize: layer.fontSize * scale,
+        fontWeight: layer.fontWeight,
+        fontStyle: layer.fontStyle,
+        color: layer.fill,
+        textAlign: layer.align,
+        letterSpacing: `${layer.letterSpacing}px`,
+        lineHeight: layer.lineHeight,
+        textTransform: layer.uppercase ? 'uppercase' : 'none',
+        // Keep the box visually distinct so it's obvious editing is active.
+        outline: '2px solid #9a442d',
+        outlineOffset: '2px',
+        background: 'rgba(255,255,255,0.04)',
+        padding: 0,
+        margin: 0,
+        whiteSpace: 'pre-wrap',
+        wordBreak: 'break-word',
+        cursor: 'text',
+        zIndex: 50,
+        // Don't show the browser caret-color override; default looks fine.
+      }}
+    >
+      {initialTextRef.current}
+    </div>
   )
 }
 
@@ -388,6 +536,14 @@ export function PostCanvas({ onExportRef }: { onExportRef?: (h: PostCanvasHandle
   const slide = design.slides[activeSlideIndex]
   const { w: cW, h: cH } = CANVAS_DIMS[design.format]
 
+  // Inline text editor state — id of the text layer currently being edited.
+  // Cleared when the editor commits or cancels, or when the active slide changes.
+  const [inlineEditId, setInlineEditId] = useState<string | null>(null)
+  useEffect(() => { setInlineEditId(null) }, [activeSlideIndex])
+  const editingLayer = inlineEditId
+    ? (slide.layers.find(l => l.id === inlineEditId && l.type === 'text') as TextLayer | undefined)
+    : undefined
+
   const containerRef = useRef<HTMLDivElement>(null)
   const stageRef     = useRef<Konva.Stage>(null)
   const trRef        = useRef<Konva.Transformer>(null)
@@ -440,16 +596,17 @@ export function PostCanvas({ onExportRef }: { onExportRef?: (h: PostCanvasHandle
     return () => ro.disconnect()
   }, [fitToContainer])
 
-  // Transformer follows selected node
+  // Transformer follows selected node — but never attaches while inline-editing,
+  // so the resize handles don't sit on top of the contenteditable overlay.
   useEffect(() => {
     const stage = stageRef.current
     const tr = trRef.current
     if (!stage || !tr) return
-    if (!selectedLayerId) { tr.nodes([]); tr.getLayer()?.batchDraw(); return }
+    if (!selectedLayerId || inlineEditId) { tr.nodes([]); tr.getLayer()?.batchDraw(); return }
     const node = stage.findOne(`#${selectedLayerId}`)
     if (node) { tr.nodes([node]); tr.getLayer()?.batchDraw() }
     else      { tr.nodes([]) }
-  }, [selectedLayerId, activeSlideIndex, design])
+  }, [selectedLayerId, activeSlideIndex, design, inlineEditId])
 
   // Ref for the safe-zone overlay layer so we can hide it during export
   const safeZoneLayerRef = useRef<Konva.Layer>(null)
@@ -510,6 +667,8 @@ export function PostCanvas({ onExportRef }: { onExportRef?: (h: PostCanvasHandle
     <div ref={containerRef} className="flex-1 min-h-[420px] flex items-center justify-center bg-[#0a0a0a] rounded-xl overflow-hidden">
       <div
         style={{
+          // `position: relative` so the inline editor overlay can pin to the stage origin.
+          position: 'relative',
           width: cW * scale,
           height: cH * scale,
           boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
@@ -532,7 +691,16 @@ export function PostCanvas({ onExportRef }: { onExportRef?: (h: PostCanvasHandle
             {slide.layers.map(layer => {
               const onSelect = () => selectLayer(layer.id)
               const onChange = (patch: Partial<Layer>) => updateLayer(layer.id, patch as Partial<Layer>)
-              if (layer.type === 'text')  return <TextNode  key={layer.id} layer={layer} onSelect={onSelect} onChange={onChange as (p: Partial<TextLayer>) => void} />
+              if (layer.type === 'text')  return (
+                <TextNode
+                  key={layer.id}
+                  layer={layer}
+                  isEditing={inlineEditId === layer.id}
+                  onSelect={onSelect}
+                  onChange={onChange as (p: Partial<TextLayer>) => void}
+                  onBeginEdit={() => setInlineEditId(layer.id)}
+                />
+              )
               if (layer.type === 'image') return <ImageNode key={layer.id} layer={layer} onSelect={onSelect} onChange={onChange as (p: Partial<ImageLayer>) => void} />
               return <ShapeNode key={layer.id} layer={layer} onSelect={onSelect} onChange={onChange as (p: Partial<ShapeLayer>) => void} />
             })}
@@ -556,6 +724,16 @@ export function PostCanvas({ onExportRef }: { onExportRef?: (h: PostCanvasHandle
             <SafeZoneOverlay format={design.format} w={cW} h={cH} />
           </KLayer>
         </Stage>
+
+        {/* Inline text editor overlay — positioned over the hidden Konva text node. */}
+        {editingLayer && (
+          <InlineTextEditor
+            layer={editingLayer}
+            scale={scale}
+            onCommit={(text) => { updateLayer(editingLayer.id, { text }); setInlineEditId(null) }}
+            onCancel={() => setInlineEditId(null)}
+          />
+        )}
       </div>
     </div>
   )

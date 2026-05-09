@@ -33,10 +33,15 @@ interface EditorState {
   past: Design[]
   future: Design[]
   showSafeZone: boolean
+  // Last template the user applied (id + clean baseline). Used to power "Reset
+  // to template" — visible only after the user has diverged from the baseline.
+  lastTemplateId: string | null
+  lastTemplateBaseline: Design | null
 
   // ── Design actions
   newDesign: (format?: CanvasFormat) => void
   loadDesign: (d: Design) => void
+  applyTemplateDesign: (templateId: string, d: Design) => void
   renameDesign: (name: string) => void
   setFormat: (format: CanvasFormat) => void
 
@@ -79,6 +84,8 @@ export const useEditor = create<EditorState>((set, get) => ({
   past: [],
   future: [],
   showSafeZone: false,
+  lastTemplateId: null,
+  lastTemplateBaseline: null,
 
   // ── History ──────────────────────────────────────────────────────────────
 
@@ -127,6 +134,22 @@ export const useEditor = create<EditorState>((set, get) => ({
       design: { ...d, updatedAt: Date.now() },
       activeSlideIndex: 0,
       selectedLayerId: null,
+      // Loading an arbitrary design clears any tracked template baseline.
+      lastTemplateId: null,
+      lastTemplateBaseline: null,
+    })),
+
+  // Template application: same as loadDesign, but also records the baseline
+  // so the "Reset to template" button can offer a one-click revert.
+  applyTemplateDesign: (templateId, d) =>
+    set(state => ({
+      past: pushHistory(state.design, state.past),
+      future: [],
+      design: { ...d, updatedAt: Date.now() },
+      activeSlideIndex: 0,
+      selectedLayerId: null,
+      lastTemplateId: templateId,
+      lastTemplateBaseline: d,
     })),
 
   // renameDesign is NOT undoable — it's an administrative action

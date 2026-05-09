@@ -2,8 +2,164 @@
 
 import { useState } from 'react'
 import { useEditor } from '../store'
-import type { TextLayer, ImageLayer, ShapeLayer, CanvasFormat, Layer } from '../types'
+import type { TextLayer, ImageLayer, ShapeLayer, CanvasFormat, Layer, Slide, BackgroundFill } from '../types'
 import { BRAND_COLORS, BRAND_FONTS } from '../types'
+
+// ── Color schemes ────────────────────────────────────────────────────────
+// A scheme defines bg/accent/text. Swapping a scheme walks every layer in
+// every slide and replaces colors that match the OLD scheme's bg/accent/text
+// with the NEW scheme's equivalents. Solid backgrounds and matching gradient
+// stops also swap. Photo backgrounds are left alone.
+//
+// Hex compare is case-insensitive and trimmed; alpha-suffixed colors are
+// matched on their leading 6 hex chars so e.g. "#9a442d" equals "#9a442dCC".
+
+interface ColorScheme {
+  id: string
+  name: string
+  bg: string
+  accent: string
+  text: string
+}
+
+const COLOR_SCHEMES: ColorScheme[] = [
+  { id: 'cream-terra',     name: 'Cream / Terra',     bg: '#fbf7f1', accent: '#9a442d', text: '#1a1614' },
+  { id: 'cream-sage',      name: 'Cream / Sage',      bg: '#fbf7f1', accent: '#4f6249', text: '#1a1614' },
+  { id: 'cream-turquoise', name: 'Cream / Turquoise', bg: '#fbf7f1', accent: '#006a62', text: '#1a1614' },
+  { id: 'night-cream',     name: 'Night / Cream',     bg: '#1a1614', accent: '#fbf7f1', text: '#fbf7f1' },
+  { id: 'sandstone-terra', name: 'Sandstone / Terra', bg: '#eedcd0', accent: '#9a442d', text: '#1a1614' },
+]
+
+function normHex(c: string): string {
+  if (!c) return ''
+  const m = c.trim().toLowerCase()
+  if (m.startsWith('#')) return m.slice(0, 7) // #rrggbb (drop alpha)
+  return m
+}
+
+function buildColorMap(from: ColorScheme, to: ColorScheme): Record<string, string> {
+  return {
+    [normHex(from.bg)]:     to.bg,
+    [normHex(from.accent)]: to.accent,
+    [normHex(from.text)]:   to.text,
+  }
+}
+
+function swap(c: string | undefined, map: Record<string, string>): string | undefined {
+  if (!c) return c
+  const key = normHex(c)
+  if (key in map) {
+    // Preserve any alpha suffix the original color carried.
+    const original = c.trim()
+    if (original.length > 7 && original.startsWith('#')) {
+      return map[key] + original.slice(7)
+    }
+    return map[key]
+  }
+  return c
+}
+
+function swapBackground(bg: BackgroundFill, map: Record<string, string>): BackgroundFill {
+  if (bg.type === 'color') {
+    return { ...bg, color: swap(bg.color, map) ?? bg.color }
+  }
+  if (bg.type === 'gradient') {
+    return { ...bg, from: swap(bg.from, map) ?? bg.from, to: swap(bg.to, map) ?? bg.to }
+  }
+  // Photo background — only its overlay color is swappable; leave the photo alone.
+  return { ...bg, overlayColor: swap(bg.overlayColor, map) ?? bg.overlayColor }
+}
+
+function swapLayerColors(layer: Layer, map: Record<string, string>): Layer {
+  if (layer.type === 'text') {
+    const next: TextLayer = {
+      ...layer,
+      fill: swap(layer.fill, map) ?? layer.fill,
+      // Don't touch shadow color (usually rgba black) or stroke unless it matches.
+      stroke: { ...layer.stroke, color: swap(layer.stroke.color, map) ?? layer.stroke.color },
+    }
+    return next
+  }
+  if (layer.type === 'shape') {
+    const next: ShapeLayer = {
+      ...layer,
+      fill: swap(layer.fill, map) ?? layer.fill,
+      stroke: layer.stroke === 'transparent' ? layer.stroke : (swap(layer.stroke, map) ?? layer.stroke),
+    }
+    return next
+  }
+  return layer
+}
+
+function ColorSchemePicker() {
+  const { design, loadDesign } = useEditor()
+  const [open, setOpen] = useState(false)
+  const [activeScheme, setActiveScheme] = useState<string>('cream-terra')
+
+  const apply = (toId: string) => {
+    if (toId === activeScheme) { setOpen(false); return }
+    const from = COLOR_SCHEMES.find(s => s.id === activeScheme) ?? COLOR_SCHEMES[0]
+    const to = COLOR_SCHEMES.find(s => s.id === toId)
+    if (!to) return
+    const map = buildColorMap(from, to)
+    const slides: Slide[] = design.slides.map(s => ({
+      ...s,
+      background: swapBackground(s.background, map),
+      layers: s.layers.map(l => swapLayerColors(l, map)),
+    }))
+    loadDesign({ ...design, slides })
+    setActiveScheme(toId)
+    setOpen(false)
+  }
+
+  const active = COLOR_SCHEMES.find(s => s.id === activeScheme) ?? COLOR_SCHEMES[0]
+
+  return (
+    <div>
+      <Label>Color Scheme</Label>
+      <div className="relative">
+        <button
+          onClick={() => setOpen(o => !o)}
+          className="w-full flex items-center justify-between gap-2 bg-black/40 border border-white/10 rounded px-2 py-2 sm:py-1.5 text-xs text-white/85 hover:border-white/25 transition-colors"
+        >
+          <span className="flex items-center gap-1.5">
+            <SchemeDots scheme={active} />
+            <span className="truncate">{active.name}</span>
+          </span>
+          <span className="text-white/40 text-[10px]">{open ? '▴' : '▾'}</span>
+        </button>
+        {open && (
+          <div className="absolute z-30 mt-1 w-full bg-[#0d0d0d] border border-white/15 rounded shadow-lg overflow-hidden">
+            {COLOR_SCHEMES.map(s => (
+              <button
+                key={s.id}
+                onClick={() => apply(s.id)}
+                className={`w-full flex items-center gap-2 px-2 py-2 text-left text-xs transition-colors ${
+                  s.id === activeScheme
+                    ? 'bg-[#9a442d]/25 text-white'
+                    : 'text-white/75 hover:bg-white/[0.06] hover:text-white'
+                }`}
+              >
+                <SchemeDots scheme={s} />
+                <span className="truncate">{s.name}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function SchemeDots({ scheme }: { scheme: ColorScheme }) {
+  return (
+    <span className="flex gap-0.5 flex-shrink-0">
+      <span className="w-3 h-3 rounded-full border border-white/20" style={{ background: scheme.bg }} />
+      <span className="w-3 h-3 rounded-full border border-white/20" style={{ background: scheme.accent }} />
+      <span className="w-3 h-3 rounded-full border border-white/20" style={{ background: scheme.text }} />
+    </span>
+  )
+}
 
 // ── Small UI primitives ─────────────────────────────────────────────────
 
@@ -115,6 +271,13 @@ function CanvasControls() {
             )}
           </div>
         </div>
+      </Section>
+
+      <Section title="Color Scheme">
+        <ColorSchemePicker />
+        <p className="text-[10px] text-white/35 leading-snug">
+          Swaps every layer's color in one click. Photos and gradients keep their structure.
+        </p>
       </Section>
 
       <Section title="Background">

@@ -27,7 +27,7 @@ interface Props {
 }
 
 export function IGEditor({ event, image }: Props) {
-  const { loadDesign, design } = useEditor()
+  const { applyTemplateDesign, design } = useEditor()
   const [mode, setMode] = useState<EditorMode>(event ? 'event' : 'generic')
   const canvasRef = useRef<PostCanvasHandle | null>(null)
   const [showSidebar, setShowSidebar] = useState(false)
@@ -51,7 +51,9 @@ export function IGEditor({ event, image }: Props) {
   const doLoadEvent = (evt: NormalizedEvent, img: string) => {
     const poster = TEMPLATES.find(t => t.id === 'poster')
     if (poster) {
-      loadDesign(poster.build(buildEventCtx(evt, img)))
+      // Track this as the active template baseline so "Reset to template"
+      // works after the user starts tweaking the auto-loaded poster.
+      applyTemplateDesign(poster.id, poster.build(buildEventCtx(evt, img)))
       setMode('event')
     }
   }
