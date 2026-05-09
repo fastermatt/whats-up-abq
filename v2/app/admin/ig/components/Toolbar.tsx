@@ -380,17 +380,21 @@ export function Toolbar({ mode, onModeChange, canvasRef, event, image }: Toolbar
 
         {/* Group 1: Mode + Templates (context controls) */}
         <div className="flex items-center gap-2">
-          <div className="flex bg-[#0a0807]/60 rounded-lg p-0.5 touch-manipulation">
+          <div className="flex bg-[#0a0807]/60 rounded-lg p-0.5 touch-manipulation" role="radiogroup" aria-label="Editor mode">
             <button
               onClick={() => onModeChange('event')}
-              className={`px-3 py-1.5 text-xs font-bold rounded transition-colors touch-manipulation ${
-                mode === 'event' ? 'bg-[#9a442d] text-white' : 'text-white/50 hover:text-white/80'
+              role="radio"
+              aria-checked={mode === 'event'}
+              className={`min-h-[40px] px-3.5 text-xs font-bold rounded transition-colors touch-manipulation ${
+                mode === 'event' ? 'bg-[#9a442d] text-white' : 'text-white/65 hover:text-white'
               }`}
             >Event</button>
             <button
               onClick={() => onModeChange('generic')}
-              className={`px-3 py-1.5 text-xs font-bold rounded transition-colors touch-manipulation ${
-                mode === 'generic' ? 'bg-[#9a442d] text-white' : 'text-white/50 hover:text-white/80'
+              role="radio"
+              aria-checked={mode === 'generic'}
+              className={`min-h-[40px] px-3.5 text-xs font-bold rounded transition-colors touch-manipulation ${
+                mode === 'generic' ? 'bg-[#9a442d] text-white' : 'text-white/65 hover:text-white'
               }`}
             >Brand</button>
           </div>

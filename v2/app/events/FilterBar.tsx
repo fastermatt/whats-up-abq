@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { ChevronDown, ChevronUp, X, MapPin } from 'lucide-react'
 import type { CategoryCount } from '@/lib/events'
+import { MOODS } from '@/lib/moods'
 
 const TIME_FILTERS = [
   { value: 'today',        label: 'Today' },
@@ -61,17 +62,18 @@ const NEIGHBORHOODS = [
   { label: 'Old Town',           slug: 'old-town' },
 ]
 
-/** Vibe shortcuts — emoji + label that set category/time/price combos */
-const VIBES = [
-  { slug: 'date-night',    label: '❤️ Date Night',    params: { category: 'Arts & Theater', time: 'tonight' } },
-  { slug: 'family-fun',    label: '👶 With Kids',      params: { category: 'Family' } },
-  { slug: 'live-music',    label: '🎵 Live Music',     params: { category: 'Music', time: 'this-weekend' } },
-  { slug: 'free-tonight',  label: '✨ Free Tonight',   params: { price: 'free', time: 'tonight' } },
-  { slug: 'chill',         label: '☕ Low-key',         params: { category: 'Community' } },
-  { slug: 'nightlife',     label: '🌙 Out Late',        params: { category: 'Music', time: 'tonight' } },
-  { slug: 'foodie',        label: '🍽️ Foodie',          params: { category: 'Food & Drink' } },
-  { slug: 'outdoors',      label: '🌲 Outdoors',        params: { category: 'Outdoor' } },
-] as const
+/**
+ * Vibe shortcuts — derived from the shared MOODS table in lib/moods.ts so
+ * the homepage MoodChips and the FilterBar pills stay in lockstep. Round-2
+ * critique #7: previously had a copy-pasted VIBES table here that drifted
+ * from MOODS, leading to "Date Night" appearing in two places with
+ * different filter params.
+ */
+const VIBES = MOODS.map(m => ({
+  slug: m.slug,
+  label: `${m.emoji} ${m.label}`,
+  params: m.query as Record<string, string>,
+}))
 
 interface FilterBarProps {
   currentTime: string
