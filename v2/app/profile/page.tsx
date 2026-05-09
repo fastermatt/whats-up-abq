@@ -80,32 +80,37 @@ export default async function ProfilePage() {
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-6 animate-fade-up">
 
-        {/* Hero card */}
-        <div className="bg-gradient-to-br from-[#9a442d] to-[#7d3725] rounded-2xl p-5 text-white">
+        {/* Hero card — flat cream + terra avatar (round-4 #9). DESIGN.md
+            Flat-By-Default Rule says decorative gradient backgrounds on
+            internal product surfaces are SaaS reflexes. The avatar stays
+            terra-filled to carry brand presence without a hero gradient. */}
+        <div className="bg-white border border-[#f0e4cc] rounded-2xl p-5">
           <div className="flex items-start gap-4">
-            {/* Avatar */}
-            <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-2xl font-black flex-shrink-0"
-              style={{ fontFamily: 'var(--font-epilogue)' }}>
+            {/* Avatar — terra-filled, the single brand moment in the block */}
+            <div
+              className="w-16 h-16 rounded-full bg-[#9a442d] text-white flex items-center justify-center text-2xl font-black flex-shrink-0"
+              style={{ fontFamily: 'var(--font-epilogue)' }}
+            >
               {displayName.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-xl font-black truncate" style={{ fontFamily: 'var(--font-epilogue)' }}>
+              <h1 className="text-xl font-black text-[#1a1614] truncate" style={{ fontFamily: 'var(--font-epilogue)' }}>
                 {displayName}
               </h1>
-              <p className="text-white/70 text-sm">{handle}</p>
+              <p className="text-[#6b5d57] text-sm">{handle}</p>
               {profile?.neighborhood && (
-                <p className="text-white/60 text-xs flex items-center gap-1 mt-0.5">
+                <p className="text-[#6b5d57] text-xs flex items-center gap-1 mt-0.5">
                   <MapPin className="w-3 h-3" />
                   {profile.neighborhood}
                 </p>
               )}
-              <p className="text-white/50 text-xs mt-1">
+              <p className="text-[#8a7a74] text-xs mt-1">
                 Member since {new Date(profile?.joined_at ?? user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
               </p>
             </div>
           </div>
 
-          {/* Stats row */}
+          {/* Stats row — sandstone tiles for warmth without a gradient */}
           <div className="grid grid-cols-4 gap-2 mt-4">
             {[
               { n: totalCheckins, label: 'Check-ins' },
@@ -113,9 +118,9 @@ export default async function ProfilePage() {
               { n: profile?.streak_weeks ?? 0, label: 'Streak' },
               { n: reviewCount,   label: 'Reviews' },
             ].map(({ n, label }) => (
-              <div key={label} className="bg-white/10 rounded-xl p-2.5 text-center">
-                <p className="text-xl font-black" style={{ fontFamily: 'var(--font-epilogue)' }}>{n}</p>
-                <p className="text-[10px] text-white/60 uppercase tracking-wide">{label}</p>
+              <div key={label} className="bg-[#fbf7f1] border border-[#f0e4cc] rounded-xl p-2.5 text-center">
+                <p className="text-xl font-black text-[#9a442d]" style={{ fontFamily: 'var(--font-epilogue)' }}>{n}</p>
+                <p className="text-[10px] text-[#6b5d57] uppercase tracking-wide">{label}</p>
               </div>
             ))}
           </div>

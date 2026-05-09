@@ -54,16 +54,20 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-4 animate-fade-up">
 
-        {/* Hero */}
-        <div className="bg-gradient-to-br from-[#006a62] to-[#004f49] rounded-2xl p-5 text-white text-center">
-          <Trophy className="w-10 h-10 mx-auto mb-2 text-[#7cc4bf]" />
-          <h2 className="text-xl font-black" style={{ fontFamily: 'var(--font-epilogue)' }}>
+        {/* Hero — flat cream + terra accent (round-4 #8). DESIGN.md reserves
+            turquoise for ticket/info color, not hero gradients. Matches the
+            editorial-flat treatment of the rest of the public site. */}
+        <div className="rounded-2xl p-5 text-center bg-white border border-[#f0e4cc]">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#9a442d]/10 mb-3">
+            <Trophy className="w-7 h-7 text-[#9a442d]" />
+          </div>
+          <h2 className="text-xl font-black text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
             Top ABQ Event-Goers
           </h2>
-          <p className="text-white/60 text-sm mt-1">Who&apos;s actually out there living it up</p>
+          <p className="text-[#6b5d57] text-sm mt-1">Who&apos;s actually out there living it up</p>
           {user && myRank >= 0 && (
             <div className="mt-3 flex flex-col items-center gap-2">
-              <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-3 py-1.5 text-sm">
+              <div className="inline-flex items-center gap-2 bg-[#9a442d]/10 text-[#7d3725] rounded-full px-3 py-1.5 text-sm font-semibold">
                 <Medal className="w-4 h-4" />
                 You&apos;re ranked #{myRank + 1} {isWeekly ? 'this week' : 'overall'}
               </div>
@@ -71,7 +75,7 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
             </div>
           )}
           {user && myRank < 0 && (
-            <div className="mt-3 inline-flex items-center gap-2 bg-white/10 rounded-full px-3 py-1.5 text-sm text-white/60">
+            <div className="mt-3 inline-flex items-center gap-2 bg-[#fbf7f1] border border-[#f0e4cc] rounded-full px-3 py-1.5 text-sm text-[#6b5d57]">
               Check in at events to get on the board
             </div>
           )}

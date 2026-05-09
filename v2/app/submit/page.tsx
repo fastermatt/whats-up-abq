@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import {
   ArrowLeft, Send, CheckCircle, Calendar, MapPin, Tag, DollarSign,
-  Image as ImageIcon, X, Loader2, Info, Upload, Star, AlertCircle,
+  Image as ImageIcon, X, Loader2, Info, Upload, AlertCircle,
 } from 'lucide-react'
 
 const CATEGORIES = [
@@ -277,26 +277,26 @@ export default function SubmitEventPage() {
         </div>
       </header>
 
-      {/* ── Hero banner ── */}
-      <div className="bg-gradient-to-br from-[#3d1a0e] via-[#7d3725] to-[#a0522d] text-white">
-        <div className="max-w-2xl mx-auto px-4 pt-6 pb-7">
-          <div className="flex items-center gap-2 mb-2">
-            <Star className="w-4 h-4 text-[#f5c9a0] fill-[#f5c9a0]" />
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[#f5c9a0] font-semibold">
-              Community submissions
-            </p>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black leading-tight mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
+      {/* ── Hero banner — flat cream + terra eyebrow (round-4 #10).
+          Earn-the-dark-hero principle: dark gradients are for identity
+          moments, not internal product surfaces. The submit page is a form;
+          treating it like a campaign created brand dissonance. */}
+      <div className="bg-[#fbf7f1] border-b border-[#f0e4cc]">
+        <div className="max-w-2xl mx-auto px-4 pt-7 pb-6">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-[#9a442d] font-semibold mb-2">
+            Community submissions
+          </p>
+          <h1 className="text-2xl sm:text-3xl font-black leading-tight mb-2 text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
             Submit your event
           </h1>
-          <p className="text-sm text-white/70 leading-relaxed max-w-md">
+          <p className="text-sm text-[#4a3f3a] leading-relaxed max-w-md">
             Know about something happening in ABQ that isn&apos;t on the site?
             Fill out every field below and we&apos;ll review it within 24 hours.
           </p>
-          <div className="mt-4 flex items-center gap-2 bg-white/10 rounded-xl px-3.5 py-2.5 w-fit">
-            <Info className="w-3.5 h-3.5 text-[#f5c9a0] flex-shrink-0" />
-            <p className="text-[11px] text-white/80 leading-relaxed">
-              Approved events show a <span className="font-semibold text-white">Community</span> badge and credit you as the submitter.
+          <div className="mt-4 flex items-center gap-2 bg-white border border-[#f0e4cc] rounded-xl px-3.5 py-2.5 w-fit">
+            <Info className="w-3.5 h-3.5 text-[#9a442d] flex-shrink-0" aria-hidden="true" />
+            <p className="text-[11px] text-[#4a3f3a] leading-relaxed">
+              Approved events show a <span className="font-semibold text-[#1a1614]">Community</span> badge and credit you as the submitter.
             </p>
           </div>
         </div>

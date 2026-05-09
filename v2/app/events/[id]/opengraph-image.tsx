@@ -35,6 +35,11 @@ export default async function OG({ params }: Props) {
   const dateLabel = formatDate(event?.date ?? null)
   const time = event?.time ?? ''
   const category = event?.category ?? ''
+  // Track whether we're using a real event photo vs the category-fallback
+  // illustration. When the bg IS the fallback, the category pill becomes
+  // redundant (the fallback is *literally* the category). Suppressing the
+  // pill in that case avoids the "MUSIC fallback photo with MUSIC label" tautology.
+  const realImage = Boolean(event?.imageUrl)
   const bg = event?.imageUrl ?? getCategoryFallback(event?.category ?? undefined, id)
 
   // Brand tokens (cream / terra / sage / dark)
@@ -103,7 +108,10 @@ export default async function OG({ params }: Props) {
           ABQ Unplugged
         </div>
 
-        {category ? (
+        {/* Category pill — only when we have a real event photo. With the
+            category-fallback illustration, the pill restates what the visual
+            already says. */}
+        {category && realImage ? (
           <div
             style={{
               position: 'absolute',

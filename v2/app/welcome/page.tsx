@@ -159,22 +159,41 @@ export default async function WelcomePage() {
           We aggregate. We don&apos;t take a cut. The site exists to help you find one thing
           worth doing tonight, and to help local venues fill their rooms.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {benefits.map((b, i) => (
+        {/* Round-4 #5: replaced 6-card identical grid with varied rhythm —
+            one featured tile (the headline benefit) + a 2-column row + a
+            full-width row. Same content, different sizes break the impeccable
+            "identical card grids" anti-pattern. */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Featured: spans 2 cols on desktop, top of stack on mobile */}
+          <div className="lg:col-span-2 lg:row-span-2 bg-gradient-to-br from-[#fdf9f4] to-[#f8eddf] border border-[#e8d9bf] rounded-2xl p-7 flex flex-col justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center mb-4 shadow-sm">
+              <Calendar className="w-6 h-6 text-[#9a442d]" strokeWidth={2.2} />
+            </div>
+            <h3
+              className="font-black text-[#1a1614] text-xl mb-2"
+              style={{ fontFamily: 'var(--font-epilogue)' }}
+            >
+              {benefits[0].title}
+            </h3>
+            <p className="text-base text-[#4a3f3a] leading-relaxed max-w-md">{benefits[0].body}</p>
+          </div>
+
+          {/* Compact tiles — the rest of the benefits */}
+          {benefits.slice(1).map((b, i) => (
             <div
               key={i}
               className="bg-white border border-[#f0e4cc] rounded-2xl p-5 hover:border-[#ddc9a3] hover:shadow-md transition-all"
             >
-              <div className="w-10 h-10 rounded-xl bg-[#fbf7f1] flex items-center justify-center mb-3">
-                <b.icon className="w-5 h-5 text-[#9a442d]" strokeWidth={2.2} />
+              <div className="w-9 h-9 rounded-xl bg-[#fbf7f1] flex items-center justify-center mb-2.5">
+                <b.icon className="w-4 h-4 text-[#9a442d]" strokeWidth={2.2} />
               </div>
               <h3
-                className="font-black text-[#1a1614] mb-1.5"
+                className="font-black text-[#1a1614] text-sm mb-1"
                 style={{ fontFamily: 'var(--font-epilogue)' }}
               >
                 {b.title}
               </h3>
-              <p className="text-sm text-[#4a3f3a] leading-relaxed">{b.body}</p>
+              <p className="text-xs text-[#4a3f3a] leading-relaxed">{b.body}</p>
             </div>
           ))}
         </div>

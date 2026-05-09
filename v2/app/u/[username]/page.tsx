@@ -127,12 +127,13 @@ export default async function PublicProfilePage({ params }: PageProps) {
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-6 animate-fade-up">
 
-        {/* Profile card */}
-        <div className="bg-gradient-to-br from-[#9a442d] to-[#7d3725] rounded-2xl p-5 text-white">
+        {/* Profile card — flat cream + terra avatar to match /profile
+            (round-4 #9). Public profiles read as "person", not "dashboard". */}
+        <div className="bg-white border border-[#f0e4cc] rounded-2xl p-5">
           <div className="flex items-start gap-4">
-            {/* Avatar */}
+            {/* Avatar — terra-filled, the brand moment */}
             <div
-              className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-2xl font-black flex-shrink-0"
+              className="w-16 h-16 rounded-full bg-[#9a442d] text-white flex items-center justify-center text-2xl font-black flex-shrink-0"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               {displayName.charAt(0).toUpperCase()}
@@ -140,12 +141,12 @@ export default async function PublicProfilePage({ params }: PageProps) {
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <h1 className="text-xl font-black truncate" style={{ fontFamily: 'var(--font-epilogue)' }}>
+                  <h1 className="text-xl font-black text-[#1a1614] truncate" style={{ fontFamily: 'var(--font-epilogue)' }}>
                     {displayName}
                   </h1>
-                  <p className="text-white/70 text-sm">{handle}</p>
+                  <p className="text-[#6b5d57] text-sm">{handle}</p>
                   {profile.neighborhood && (
-                    <p className="text-white/60 text-xs flex items-center gap-1 mt-0.5">
+                    <p className="text-[#6b5d57] text-xs flex items-center gap-1 mt-0.5">
                       <MapPin className="w-3 h-3" />
                       {profile.neighborhood}
                     </p>
@@ -159,21 +160,21 @@ export default async function PublicProfilePage({ params }: PageProps) {
                 )}
               </div>
               {profile.bio && (
-                <p className="text-white/70 text-xs mt-2 leading-relaxed">{profile.bio}</p>
+                <p className="text-[#4a3f3a] text-xs mt-2 leading-relaxed">{profile.bio}</p>
               )}
             </div>
           </div>
 
-          {/* Stats row */}
+          {/* Stats row — sandstone tiles for warmth */}
           <div className="grid grid-cols-3 gap-2 mt-4">
             {[
               { n: totalCheckIns, label: 'Check-ins' },
               { n: followerCount ?? 0, label: 'Followers' },
               { n: followingCount ?? 0, label: 'Following' },
             ].map(({ n, label }) => (
-              <div key={label} className="bg-white/10 rounded-xl p-2.5 text-center">
-                <p className="text-xl font-black" style={{ fontFamily: 'var(--font-epilogue)' }}>{n}</p>
-                <p className="text-[10px] text-white/60 uppercase tracking-wide">{label}</p>
+              <div key={label} className="bg-[#fbf7f1] border border-[#f0e4cc] rounded-xl p-2.5 text-center">
+                <p className="text-xl font-black text-[#9a442d]" style={{ fontFamily: 'var(--font-epilogue)' }}>{n}</p>
+                <p className="text-[10px] text-[#6b5d57] uppercase tracking-wide">{label}</p>
               </div>
             ))}
           </div>
