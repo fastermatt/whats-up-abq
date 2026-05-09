@@ -305,7 +305,7 @@ export function EventSearch({ event }: EventSearchProps) {
               <p className="text-[10px] font-bold uppercase tracking-wider text-white/40">
                 {fmtDayHeader(day)}
               </p>
-              <span className="text-[10px] text-white/20 ml-auto">Top {dayEvents.length}</span>
+              <span className="text-[10px] text-white/45 ml-auto">Top {dayEvents.length}</span>
             </div>
             {dayEvents.map(evt => (
               <EventRow key={evt.id} evt={evt} onClick={() => navigate(evt.id)} showScore />
@@ -344,7 +344,7 @@ export function EventSearch({ event }: EventSearchProps) {
         <div className="px-5 py-6 text-center">
           <p className="text-sm text-white/30">No events found</p>
           {(query || hasFilters) && (
-            <p className="text-[11px] text-white/20 mt-1">Try adjusting the filters or search term</p>
+            <p className="text-[11px] text-white/45 mt-1">Try adjusting the filters or search term</p>
           )}
         </div>
       )
@@ -418,10 +418,11 @@ export function EventSearch({ event }: EventSearchProps) {
               <button
                 key={pill.value}
                 onClick={() => setTime(pill.value)}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all border ${
+                aria-pressed={time === pill.value}
+                className={`min-h-[40px] px-3 rounded-lg text-xs font-semibold transition-all border ${
                   time === pill.value
                     ? 'bg-[#9a442d] border-[#9a442d] text-white'
-                    : 'bg-white/[0.04] border-white/[0.08] text-white/50 hover:bg-white/[0.07] hover:text-white/70'
+                    : 'bg-white/[0.04] border-white/[0.08] text-white/65 hover:bg-white/[0.07] hover:text-white'
                 }`}
               >
                 {pill.label}
@@ -433,15 +434,16 @@ export function EventSearch({ event }: EventSearchProps) {
           <div className="flex gap-1.5 overflow-x-auto pb-0.5 -mx-1 px-1 scrollbar-none">
             {CATEGORIES.map(cat => {
               const active = category === cat
-              const colors = CAT_COLORS[cat] ?? 'text-white/50 bg-white/[0.06] border-white/10'
+              const colors = CAT_COLORS[cat] ?? 'text-white/65 bg-white/[0.06] border-white/10'
               return (
                 <button
                   key={cat}
                   onClick={() => setCategory(active ? '' : cat)}
-                  className={`shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all border ${
+                  aria-pressed={active}
+                  className={`shrink-0 min-h-[40px] px-3 rounded-lg text-[11px] font-bold transition-all border ${
                     active
                       ? colors + ' opacity-100 ring-1 ring-white/20'
-                      : 'bg-white/[0.04] border-white/[0.06] text-white/40 hover:text-white/60 hover:bg-white/[0.07]'
+                      : 'bg-white/[0.04] border-white/[0.06] text-white/55 hover:text-white hover:bg-white/[0.07]'
                   }`}
                 >
                   {cat}
@@ -451,37 +453,40 @@ export function EventSearch({ event }: EventSearchProps) {
           </div>
 
           {/* Search input */}
-          <div className="relative flex gap-2">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none z-10">
-              {loading
-                ? <Loader2 size={14} className="animate-spin" />
-                : <Search size={14} />
-              }
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/45 pointer-events-none">
+                {loading
+                  ? <Loader2 size={14} className="animate-spin" />
+                  : <Search size={14} />
+                }
+              </div>
+              <input
+                type="text"
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                onKeyDown={handleKey}
+                placeholder="Search by name, or paste URL / ID…"
+                className="w-full bg-white/[0.05] border border-white/[0.08] rounded-xl pl-9 pr-9 py-2 min-h-[40px]
+                  text-white text-sm placeholder:text-white/45 focus:outline-none
+                  focus:border-[#9a442d]/50 focus:bg-white/[0.07] transition-all"
+                autoComplete="off"
+                spellCheck={false}
+              />
+              {query && (
+                <button
+                  onClick={clearQuery}
+                  aria-label="Clear search"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-white/45 hover:text-white/85 transition-colors p-1"
+                >
+                  <X size={14} />
+                </button>
+              )}
             </div>
-            <input
-              type="text"
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              onKeyDown={handleKey}
-              placeholder="Search by name, or paste URL / ID…"
-              className="flex-1 bg-white/[0.05] border border-white/[0.08] rounded-xl pl-9 pr-8 py-2
-                text-white text-sm placeholder:text-white/20 focus:outline-none
-                focus:border-[#9a442d]/50 focus:bg-white/[0.07] transition-all"
-              autoComplete="off"
-              spellCheck={false}
-            />
-            {query && (
-              <button
-                onClick={clearQuery}
-                className="absolute right-[3.75rem] top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
-              >
-                <X size={13} />
-              </button>
-            )}
             <button
               onClick={handleGo}
               disabled={!query.trim() && results.length === 0}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#9a442d] text-white
+              className="flex items-center gap-1.5 px-3.5 min-h-[40px] rounded-xl bg-[#9a442d] text-white
                 text-sm font-semibold hover:bg-[#b5502f] active:scale-95 transition-all
                 disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
             >
@@ -522,12 +527,12 @@ export function EventSearch({ event }: EventSearchProps) {
 
       {/* Footer */}
       <div className="px-5 py-2.5 border-t border-white/[0.04] flex items-center justify-between">
-        <p className="text-[10px] text-white/20">
+        <p className="text-[10px] text-white/55">
           {results.length > 0 ? `${results.length} event${results.length !== 1 ? 's' : ''}` : ''}
           {results.length > 0 && viewMode === 'browse' ? ' · Click to open in Poster template' : ''}
         </p>
         {viewMode === 'top-picks' && (
-          <p className="text-[10px] text-white/20">Scores update as you run the scoring script</p>
+          <p className="text-[10px] text-white/55">Scores update as you run the scoring script</p>
         )}
       </div>
     </div>

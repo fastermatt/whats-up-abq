@@ -149,8 +149,8 @@ export function IGEditor({ event, image }: Props) {
             {!hasLayers && !event && (
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none rounded-xl">
                 <div className="text-center space-y-2 px-8">
-                  <p className="text-white/20 text-sm font-semibold">Start with an event or a template</p>
-                  <p className="text-white/12 text-xs">Pick an event above to auto-fill the Poster, or open Templates ↑ to choose a layout</p>
+                  <p className="text-white/55 text-sm font-semibold">Start with an event or a template</p>
+                  <p className="text-white/35 text-xs">Pick an event above to auto-fill the Poster, or open Templates to choose a layout</p>
                 </div>
               </div>
             )}
