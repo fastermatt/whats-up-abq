@@ -509,18 +509,21 @@ export default async function EventDetailPage({ params }: PageProps) {
                 </div>
               )}
 
-              {/* Plan your night — verified nearby restaurants + paired local rec */}
+              {/* Plan your night — verified nearby restaurants + paired local rec.
+                  Warm sandstone tint differentiates from the cream About/Highlights
+                  block above and the sage Venue/Local Tips block below — all
+                  inside the brand palette (no purple/lavender outliers). */}
               {(event.nearbyDining.length > 0 || event.localRec) && (
-                <div className="rounded-xl px-4 py-3.5 border border-[#d4d2e8] bg-[#f7f6fb] space-y-3">
-                  <p className="text-[11px] font-bold text-[#5b4a8a] uppercase tracking-wider">Plan your night</p>
+                <div className="rounded-xl px-4 py-3.5 border border-[#e8d0b5] bg-[#fdf3e9] space-y-3">
+                  <p className="text-[11px] font-bold text-[#7d3725] uppercase tracking-wider">Plan your night</p>
                   {event.nearbyDining.length > 0 && (
                     <div>
-                      <p className="text-[10px] font-semibold text-[#7a6ba8] uppercase tracking-wider mb-1.5">Eat nearby</p>
+                      <p className="text-[10px] font-semibold text-[#9a442d] uppercase tracking-wider mb-1.5">Eat nearby</p>
                       <ul className="flex flex-wrap gap-1.5">
                         {event.nearbyDining.map((spot, i) => (
                           <li
                             key={i}
-                            className="text-xs text-[#4a3f3a] bg-white border border-[#d4d2e8] rounded-full px-2.5 py-1 inline-flex items-baseline gap-1"
+                            className="text-xs text-[#4a3f3a] bg-white border border-[#e8d0b5] rounded-full px-2.5 py-1 inline-flex items-baseline gap-1"
                             title={spot.note}
                           >
                             <span className="font-semibold">{spot.name}</span>
@@ -532,7 +535,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                   )}
                   {event.localRec && (
                     <div>
-                      <p className="text-[10px] font-semibold text-[#7a6ba8] uppercase tracking-wider mb-1">Make a night of it</p>
+                      <p className="text-[10px] font-semibold text-[#9a442d] uppercase tracking-wider mb-1">Make a night of it</p>
                       <p className="text-sm text-[#4a3f3a] leading-relaxed">{event.localRec}</p>
                     </div>
                   )}

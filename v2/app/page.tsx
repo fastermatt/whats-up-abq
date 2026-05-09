@@ -341,8 +341,6 @@ export default async function DiscoverPage() {
         </div>
       </section>
 
-
-
       {/* ── Category quick links ── */}
       <section className="py-4 border-b border-[#f0e4cc]/60 animate-fade-in">
         <div className="overflow-x-auto scrollbar-hide">
