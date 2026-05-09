@@ -61,7 +61,7 @@ export default async function OnboardingPage() {
           </h1>
           <p className="text-[15px] text-[#4a3f3a] leading-relaxed max-w-md">
             30 seconds. We&apos;ll use this to filter your For You feed and skip events
-            that aren&apos;t for you — like showing kids&apos; events to someone without kids.
+            that aren&apos;t for you (like showing kids&apos; events to someone without kids).
           </p>
         </div>
 

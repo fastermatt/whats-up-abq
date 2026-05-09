@@ -17,13 +17,13 @@ import { OG_IMAGE } from '@/lib/fallback-images'
 export const revalidate = 3600
 
 export const metadata: Metadata = {
-  title: 'Welcome to ABQ Unplugged — The Best Way to Find Things to Do in Albuquerque',
+  title: 'Welcome to ABQ Unplugged: The Best Way to Find Things to Do in Albuquerque',
   description:
     'ABQ Unplugged pulls together every concert, comedy show, art opening, sports game, ' +
-    'family event, and free thing to do in Albuquerque — from Ticketmaster to local ' +
-    'community calendars — into one searchable place. Join free.',
+    'family event, and free thing to do in Albuquerque, from Ticketmaster to local ' +
+    'community calendars, into one searchable place. Join free.',
   openGraph: {
-    title: 'ABQ Unplugged — Albuquerque Events, All in One Place',
+    title: 'ABQ Unplugged: Albuquerque Events, All in One Place',
     description:
       'Every concert, comedy show, art opening, and free event in Albuquerque. ' +
       'Filtered by neighborhood, mood, category, and date.',
@@ -37,12 +37,12 @@ const benefits = [
   {
     icon: Calendar,
     title: 'Every event, one place',
-    body: 'Pulled from Ticketmaster, SeatGeek, Eventbrite, NHCC, the Alibi, abqtodo.com, and 80+ local venues. Updated daily — no more switching between five tabs.',
+    body: 'Pulled from Ticketmaster, SeatGeek, Eventbrite, NHCC, the Alibi, abqtodo.com, and 80+ local venues. Updated daily, so no more switching between five tabs.',
   },
   {
     icon: Compass,
     title: 'Filter by neighborhood',
-    body: 'Browse Nob Hill, Old Town, Downtown, North Valley, Westside, Northeast Heights — see only what’s near you, with a Google Maps link on every venue.',
+    body: 'Browse Nob Hill, Old Town, Downtown, North Valley, Westside, Northeast Heights. See only what\'s near you, with a Google Maps link on every venue.',
   },
   {
     icon: Sparkles,
@@ -62,7 +62,7 @@ const benefits = [
   {
     icon: Users,
     title: 'See who’s going',
-    body: 'Public profiles for users who opt in — find out which events your friends are checking out and who else in ABQ is going.',
+    body: 'Public profiles for users who opt in. Find out which events your friends are checking out and who else in ABQ is going.',
   },
 ]
 
@@ -101,7 +101,7 @@ export default async function WelcomePage() {
             There’s more happening<br />in ABQ than you think.
           </h1>
           <p className="text-lg sm:text-xl text-white/90 max-w-2xl leading-relaxed mb-6">
-            ABQ Unplugged is the easiest way to find things to do in Albuquerque —
+            ABQ Unplugged is the easiest way to find things to do in Albuquerque:
             <span className="font-semibold"> {total.toLocaleString()} upcoming events</span>{' '}
             from every ticket source, gallery, brewery, library, and community calendar in town.
           </p>
@@ -156,8 +156,8 @@ export default async function WelcomePage() {
           Built for finding things, not selling tickets.
         </h2>
         <p className="text-[#6b5d57] mb-8 max-w-2xl">
-          We aggregate. We don’t take a cut. The site exists to help you find one thing
-          worth doing tonight — and to help local venues fill their rooms.
+          We aggregate. We don&apos;t take a cut. The site exists to help you find one thing
+          worth doing tonight, and to help local venues fill their rooms.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {benefits.map((b, i) => (
@@ -231,8 +231,8 @@ export default async function WelcomePage() {
           Make ABQ feel smaller.
         </h2>
         <p className="text-lg text-[#4a3f3a] mb-6 max-w-xl mx-auto leading-relaxed">
-          Save your favorite events, get smart reminders, and see what your friends are going to —
-          all free, no ads in your inbox.
+          Save your favorite events, get smart reminders, and see what your friends are going to.
+          All free, no ads in your inbox.
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
           <Link

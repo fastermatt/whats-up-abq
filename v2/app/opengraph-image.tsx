@@ -185,7 +185,7 @@ export default async function OG() {
               maxWidth:      660,
             }}
           >
-            Concerts, comedy, arts, food, sports — what&apos;s happening in Burque tonight.
+            Concerts, comedy, arts, food, sports. What&apos;s happening in Burque tonight.
           </div>
 
           {/* Category pills — show breadth */}

@@ -199,7 +199,7 @@ export default async function ForYouPage() {
               </p>
               <p className="text-xs text-[#6b5d57] leading-relaxed">
                 Tell us who&apos;s coming and what you&apos;re into. We&apos;ll stop showing you
-                events that don&apos;t fit — and surface the ones that do.
+                events that don&apos;t fit, and surface the ones that do.
               </p>
             </div>
             <Link
@@ -261,7 +261,7 @@ export default async function ForYouPage() {
           <div className="rounded-2xl p-7 border border-[#e8d9bf] bg-[#fdf9f4] text-center">
             <p className="text-base font-bold text-[#1a1614] mb-1">Nothing matched yet</p>
             <p className="text-sm text-[#4a3f3a] mb-4 max-w-sm mx-auto">
-              The matcher runs daily — check back tomorrow, or broaden your picks.
+              The matcher runs daily. Check back tomorrow, or broaden your picks.
             </p>
             <Link
               href="/profile#preferences"

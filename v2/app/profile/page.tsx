@@ -287,7 +287,7 @@ export default async function ProfilePage() {
               {
                 icon: <Heart className="w-4 h-4 text-[#9a442d]" />,
                 title: 'Save events instantly',
-                desc: 'Tap the heart ♥ on any event card to save it without opening the full page. Hearts on card listings, hearts on detail pages — both work.',
+                desc: 'Tap the heart ♥ on any event card to save it without opening the full page. Hearts on card listings, hearts on detail pages: both work.',
               },
               {
                 icon: <Search className="w-4 h-4 text-[#006a62]" />,
@@ -312,7 +312,7 @@ export default async function ProfilePage() {
               {
                 icon: <Trophy className="w-4 h-4 text-[#006a62]" />,
                 title: 'Earn badges',
-                desc: 'Badges unlock automatically — first check-in, 5 check-ins, music events, comedy shows, outdoor events. See them on your profile and others\' profiles.',
+                desc: 'Badges unlock automatically: first check-in, 5 check-ins, music events, comedy shows, outdoor events. See them on your profile and others\' profiles.',
               },
               {
                 icon: <Zap className="w-4 h-4 text-[#9a442d]" />,

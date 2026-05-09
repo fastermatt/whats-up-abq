@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import {
   ArrowLeft, Send, CheckCircle, Calendar, MapPin, Tag, DollarSign,
-  Image as ImageIcon, X, Loader2, Info, Upload, Star,
+  Image as ImageIcon, X, Loader2, Info, Upload, Star, AlertCircle,
 } from 'lucide-react'
 
 const CATEGORIES = [
@@ -182,8 +182,18 @@ export default function SubmitEventPage() {
 
       const data = await res.json()
       if (!res.ok) {
-        setErrorMsg(data.error ?? 'Something went wrong')
+        const msg = data.error ?? 'Something went wrong'
+        setErrorMsg(msg)
         setStatus('error')
+        // If the server flagged a non-metro venue address, also mark the
+        // venue_address field so the user knows where to fix.
+        if (/greater Albuquerque|metro/i.test(msg)) {
+          setFieldErrors(prev => ({ ...prev, venue_address: 'Address must be in the greater ABQ metro' }))
+        }
+        // Scroll the prominent error banner into view
+        setTimeout(() => {
+          document.querySelector('[data-submit-error]')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }, 50)
         return
       }
       setStatus('success')
@@ -569,11 +579,21 @@ export default function SubmitEventPage() {
             )}
           </section>
 
-          {/* Global error */}
+          {/* Global error — prominent banner so server-side rejection
+              messages (e.g. greater-ABQ guard) actually get noticed. */}
           {errorMsg && (
-            <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2.5">
-              {errorMsg}
-            </p>
+            <div
+              data-submit-error
+              role="alert"
+              aria-live="assertive"
+              className="flex items-start gap-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3.5"
+            >
+              <AlertCircle className="w-5 h-5 mt-0.5 shrink-0 text-red-500" aria-hidden="true" />
+              <div className="space-y-1">
+                <p className="font-bold leading-tight">Couldn&apos;t submit your event</p>
+                <p className="text-red-600 leading-relaxed">{errorMsg}</p>
+              </div>
+            </div>
           )}
 
           <button

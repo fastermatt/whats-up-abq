@@ -80,7 +80,7 @@ export default function FeedbackPage() {
         <div className="max-w-md w-full text-center animate-fade-up">
           <CheckCircle className="w-16 h-16 text-[#4f6249] mx-auto mb-4" />
           <h1 className="text-2xl font-black text-[#1a1614] mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
-            Thanks — we got it
+            Thanks. We got it.
           </h1>
           <p className="text-sm text-[#6b5d57] mb-6 leading-relaxed">
             Your feedback is in the inbox. If you gave us an email, we&apos;ll follow up if there&apos;s anything to share.
@@ -119,7 +119,7 @@ export default function FeedbackPage() {
             Tell us what you think
           </h1>
           <p className="text-sm text-[#6b5d57]">
-            Every message lands in our inbox and gets read. Bugs, ideas, event reports — all welcome.
+            Every message lands in our inbox and gets read. Bugs, ideas, event reports: all welcome.
           </p>
           {presetEventId && (
             <div className="mt-3 flex items-center gap-2 bg-[#9a442d]/8 border border-[#9a442d]/20 rounded-xl px-3 py-2">
