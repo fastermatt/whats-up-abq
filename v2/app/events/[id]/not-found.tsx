@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 export default function EventNotFound() {
   return (
-    <main className="min-h-dvh bg-[--bg] flex items-center justify-center">
+    <main id="main" className="min-h-dvh bg-[--bg] flex items-center justify-center">
       <div className="text-center animate-fade-up">
         <div className="text-5xl mb-4">🌵</div>
         <h1

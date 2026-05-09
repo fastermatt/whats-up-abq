@@ -14,19 +14,19 @@ export default function RootError({
   }, [error])
 
   return (
-    <main className="min-h-dvh bg-[#fbf7f1] flex items-center justify-center px-4">
+    <main id="main" className="min-h-dvh bg-[#fbf7f1] flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center space-y-6">
         {/* Heading */}
         <h1
           className="text-3xl font-black text-[#1a1614]"
           style={{ fontFamily: 'var(--font-epilogue)' }}
         >
-          Something went wrong
+          Something broke
         </h1>
 
         {/* Subtitle */}
         <p className="text-[#6b5d57]">
-          We couldn&apos;t load the page. This is usually temporary.
+          The page didn&apos;t load. Usually a refresh fixes it.
         </p>
 
         {/* Action buttons */}
@@ -36,7 +36,7 @@ export default function RootError({
             className="w-full bg-[#9a442d] text-white rounded-2xl px-6 py-3 font-semibold hover:bg-[#7d3725] transition-colors duration-300"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
-            Try Again
+            Try again
           </button>
 
           <a
@@ -44,7 +44,7 @@ export default function RootError({
             className="block w-full bg-[#e8ddd0] text-[#1a1614] rounded-2xl px-6 py-3 font-semibold hover:bg-[#ddc9a3] transition-colors duration-300"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
-            Go Home
+            Back to home
           </a>
         </div>
       </div>

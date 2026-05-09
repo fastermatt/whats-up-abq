@@ -14,19 +14,19 @@ export default function EventsError({
   }, [error])
 
   return (
-    <main className="min-h-dvh bg-[#fbf7f1] flex items-center justify-center px-4">
+    <main id="main" className="min-h-dvh bg-[#fbf7f1] flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center space-y-6">
         {/* Heading */}
         <h1
           className="text-3xl font-black text-[#1a1614]"
           style={{ fontFamily: 'var(--font-epilogue)' }}
         >
-          Couldn&apos;t load events
+          Events couldn&apos;t load
         </h1>
 
         {/* Subtitle */}
         <p className="text-[#6b5d57]">
-          The event data source may be temporarily unavailable.
+          The event data source is having a moment. Try again, or come back in a few.
         </p>
 
         {/* Action buttons */}
@@ -36,7 +36,7 @@ export default function EventsError({
             className="w-full bg-[#9a442d] text-white rounded-2xl px-6 py-3 font-semibold hover:bg-[#7d3725] transition-colors duration-300"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
-            Try Again
+            Try again
           </button>
 
           <a
@@ -44,7 +44,7 @@ export default function EventsError({
             className="block w-full bg-[#e8ddd0] text-[#1a1614] rounded-2xl px-6 py-3 font-semibold hover:bg-[#ddc9a3] transition-colors duration-300"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
-            Go Home
+            Back to home
           </a>
         </div>
       </div>
