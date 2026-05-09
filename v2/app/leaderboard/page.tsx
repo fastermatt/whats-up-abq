@@ -208,7 +208,7 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
             </li>
             <li className="flex items-center gap-2">
               <span className="w-4 h-4 rounded-full bg-[#9a442d]/10 flex items-center justify-center text-[9px]">3</span>
-              Earn points, badges, and weekly ranking glory
+              Earn points, badges, and a spot on the weekly board
             </li>
           </ul>
         </div>

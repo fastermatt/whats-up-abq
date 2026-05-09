@@ -285,7 +285,7 @@ export default async function ProfilePage() {
         <section>
           <h2 className="text-base font-black text-[#1a1614] mb-3 flex items-center gap-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
             <HelpCircle className="w-4 h-4 text-[#9a442d]" />
-            Tips & Tricks
+            Worth knowing
           </h2>
           <div className="bg-white rounded-xl border border-[#f0e4cc] divide-y divide-[#f0e4cc]">
             {[
