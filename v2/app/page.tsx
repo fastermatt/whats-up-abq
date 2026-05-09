@@ -216,7 +216,8 @@ export default function DiscoverPage() {
       <MoodChips />
 
       {/* ── Featured + Tonight + Weekend — all stream after Redis resolves ── */}
-      <Suspense fallback={null}>
+      {/* min-h fallback prevents CLS from sections appearing below the fold */}
+      <Suspense fallback={<div className="min-h-[600px]" aria-hidden="true" />}>
         <EventDataSections />
       </Suspense>
 
