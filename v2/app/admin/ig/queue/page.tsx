@@ -75,10 +75,17 @@ export default function QueuePage() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
       <div className="max-w-3xl mx-auto px-4 py-8">
+        {/* IG admin sub-nav */}
+        <nav className="flex items-center gap-1 text-[11px] text-white/40 mb-3">
+          <Link href="/admin/ig"         className="px-2 py-1 rounded hover:bg-white/[0.05] hover:text-white/80 transition-colors">Editor</Link>
+          <Link href="/admin/ig/week"    className="px-2 py-1 rounded hover:bg-white/[0.05] hover:text-white/80 transition-colors">Week Planner</Link>
+          <span                            className="px-2 py-1 rounded bg-white/[0.07] text-white font-bold">Queue</span>
+          <Link href="/admin/ig/history" className="px-2 py-1 rounded hover:bg-white/[0.05] hover:text-white/80 transition-colors">History</Link>
+        </nav>
+
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <Link href="/admin/ig" className="text-[11px] text-white/40 hover:text-white/70 uppercase tracking-widest mb-1 block">← Back to Editor</Link>
             <h1 className="text-xl font-bold">Post Queue</h1>
             <p className="text-sm text-white/40 mt-0.5">Scheduled Instagram posts — publishes every 15 min</p>
           </div>

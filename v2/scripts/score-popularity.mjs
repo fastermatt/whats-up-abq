@@ -190,6 +190,23 @@ async function main() {
    Scored   : ${scored}
    Skipped  : ${skipped}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`)
+
+  // Auto-feature: any upcoming event with score >= 8.5 gets featured = true.
+  // Past-date events naturally drop out of "featured rails" via the
+  // event_date >= today filter on the homepage queries, so we don't need to
+  // unfeature them here.
+  if (!DRY_RUN) {
+    process.stdout.write('Promoting top-scored events to featured… ')
+    const { error: featErr, count: featCount } = await supabase
+      .from('events')
+      .update({ featured: true }, { count: 'exact' })
+      .eq('hidden', false)
+      .gte('event_date', new Date().toISOString().slice(0, 10))
+      .gte('popularity_score', 8.5)
+      .or('featured.is.null,featured.eq.false')
+    if (featErr) console.log(`failed: ${featErr.message}`)
+    else         console.log(`✅ promoted ${featCount ?? 0} new event(s)`)
+  }
 }
 
 main().catch(e => { console.error('Fatal:', e); process.exit(1) })
