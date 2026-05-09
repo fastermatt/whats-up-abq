@@ -273,7 +273,7 @@ export default async function ProfilePage() {
                 <Bell className="w-4 h-4 text-[#4f6249] mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm font-semibold text-[#1a1614]">What to hear about</p>
-                  <p className="text-[10px] text-[#6b5d57] mt-0.5">Categories, venues, artists, neighborhoods — only get notified about stuff you care about</p>
+                  <p className="text-[10px] text-[#6b5d57] mt-0.5">Categories, venues, artists, neighborhoods. Only get notified about stuff you care about.</p>
                 </div>
               </div>
               <span className="text-[#9a442d] text-lg">›</span>

@@ -160,7 +160,7 @@ export default async function ForYouPage() {
   const showNudge = !hasTastePrefs
 
   return (
-    <main className="min-h-dvh bg-[#fbf7f1]">
+    <main id="main" className="min-h-dvh bg-[#fbf7f1]">
       {/* Nav */}
       <header className="border-b border-[#ddc9a3]/60 bg-[#fbf7f1]/80 backdrop-blur-md sticky top-0 z-20">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -185,7 +185,7 @@ export default async function ForYouPage() {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 py-6" id="main">
+      <div className="max-w-6xl mx-auto px-4 py-6">
 
         {/* ── Preferences nudge — shown when taste profile is empty ── */}
         {showNudge && (

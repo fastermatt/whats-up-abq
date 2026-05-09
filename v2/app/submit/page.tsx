@@ -511,7 +511,7 @@ export default function SubmitEventPage() {
                 {/* Card-style overlay showing how it'll look */}
                 <div className="absolute inset-0 rounded-xl ring-2 ring-[#4f6249]/30 pointer-events-none" />
                 <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-sm text-white text-[9px] px-2 py-0.5 rounded-full">
-                  Preview — how it appears on the site
+                  Preview · how it appears on the site
                 </div>
                 <button
                   type="button" onClick={() => { setPhoto(null); setFieldErrors(e => ({ ...e, photo: undefined })) }}

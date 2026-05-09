@@ -37,12 +37,12 @@ const benefits = [
   {
     icon: Calendar,
     title: 'Every event, one place',
-    body: 'Pulled from Ticketmaster, SeatGeek, Eventbrite, NHCC, the Alibi, abqtodo.com, and 80+ local venues. Updated daily, so no more switching between five tabs.\''
+    body: 'Pulled from Ticketmaster, SeatGeek, Eventbrite, NHCC, the Alibi, abqtodo.com, and 80+ local venues. Updated daily, so no more switching between five tabs.',
   },
   {
     icon: Compass,
     title: 'Filter by neighborhood',
-    body: 'Browse Nob Hill, Old Town, Downtown, North Valley, Westside, Northeast Heights. See only what\'s near you, with a Google Maps link on every venue.\''
+    body: "Browse Nob Hill, Old Town, Downtown, North Valley, Westside, Northeast Heights. See only what's near you, with a Google Maps link on every venue.",
   },
   {
     icon: Sparkles,

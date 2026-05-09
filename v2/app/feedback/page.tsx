@@ -195,7 +195,7 @@ export default function FeedbackPage() {
                 {!userEmail && (
                   <div>
                     <label htmlFor="contact-email" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">
-                      Email <span className="text-[#6b5d57] font-normal">(optional — only if you want a reply)</span>
+                      Email <span className="text-[#6b5d57] font-normal">(optional, only if you want a reply)</span>
                     </label>
                     <input id="contact-email" type="email" maxLength={200} value={email}
                       onChange={e => setEmail(e.target.value)}
