@@ -876,12 +876,15 @@ function HorizontalCard({
     >
       {/* Landscape image */}
       <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] mb-1.5 shadow-sm group-hover:shadow-md transition-shadow duration-300">
+        {/* No fetchPriority="high" — Next/React would auto-inject a
+            <link rel="preload" as="image" fetchPriority="high"> at the
+            top of HTML, stealing bandwidth from the h2 LCP element.
+            `loading="eager"` is enough for the first card. */}
         <EventImage
           src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
           fallback={getCategoryFallback(event.category ?? undefined, event.id)}
           alt={event.title}
           loading={isLCPCandidate ? 'eager' : 'lazy'}
-          fetchPriority={isLCPCandidate ? 'high' : undefined}
           width={440}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
         />
@@ -944,12 +947,13 @@ function FeaturedCard({ event, index = 0 }: { event: NormalizedEvent; index?: nu
     >
       {/* Landscape 16:10 — matches every other card on the site */}
       <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] mb-2 shadow-md group-hover:shadow-lg transition-shadow duration-300">
+        {/* No fetchPriority="high" on the first card — auto-injected
+            preload competes with the h2 LCP element's render path. */}
         <EventImage
           src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
           fallback={getCategoryFallback(event.category ?? undefined, event.id)}
           alt={event.title}
           loading={index === 0 ? 'eager' : 'lazy'}
-          fetchPriority={index === 0 ? 'high' : undefined}
           width={540}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
         />

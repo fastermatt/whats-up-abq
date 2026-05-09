@@ -96,6 +96,10 @@ export const viewport: Viewport = {
   initialScale:       1,
   themeColor:         '#fbf7f1',
   colorScheme:        'light',
+  // viewportFit: 'cover' lets the page extend into iPhone notched-device
+  // safe areas. The bottom nav already honors env(safe-area-inset-bottom)
+  // so content never gets covered by the home indicator.
+  viewportFit:        'cover',
 }
 
 // NOTE: Organization JSON-LD is emitted per-page (not in this root layout) to

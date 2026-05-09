@@ -57,6 +57,16 @@
   [headers.values]
     Cache-Control = "public, s-maxage=300, stale-while-revalidate=86400"
 
+# Service worker — never cache aggressively. Browsers re-fetch sw.js on every
+# page load to detect updates; if we let the CDN cache it for hours, users
+# get stuck on stale SWs and never receive bugfixes. max-age=0 + must-revalidate
+# is the standard pattern.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Service-Worker-Allowed = "/"
+
 # Next.js build output — fingerprinted filenames, safe to cache forever
 [[headers]]
   for = "/_next/static/*"

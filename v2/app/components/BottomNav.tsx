@@ -17,6 +17,7 @@ export default function BottomNav() {
 
   return (
     <nav
+      aria-label="Main navigation"
       className="fixed bottom-0 inset-x-0 z-50 bg-white/92 backdrop-blur-xl border-t border-[#f0e4cc] md:hidden"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >

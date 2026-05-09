@@ -13,8 +13,13 @@ export function InstallPrompt() {
   const [dismissed, setDismissed] = useState(false)
 
   useEffect(() => {
-    // Check if already dismissed in this session
-    if (sessionStorage.getItem('pwa-dismissed')) {
+    // Check if user dismissed the prompt within the last 30 days. Stored
+    // as a timestamp in localStorage so the suppression survives across
+    // tabs and reloads (sessionStorage re-prompted on every new tab,
+    // which got annoying fast).
+    const RE_PROMPT_AFTER_MS = 30 * 24 * 60 * 60 * 1000  // 30 days
+    const dismissedAt = parseInt(localStorage.getItem('pwa-dismissed-at') ?? '0', 10)
+    if (dismissedAt && Date.now() - dismissedAt < RE_PROMPT_AFTER_MS) {
       setDismissed(true)
       return
     }
@@ -44,7 +49,8 @@ export function InstallPrompt() {
   }
 
   function handleDismiss() {
-    sessionStorage.setItem('pwa-dismissed', '1')
+    // Re-prompt eligible after 30 days (see useEffect above).
+    localStorage.setItem('pwa-dismissed-at', String(Date.now()))
     setDismissed(true)
   }
 

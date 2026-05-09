@@ -1,18 +1,74 @@
 /**
  * ABQ Unplugged — Service Worker
  *
- * Minimal SW that handles:
+ * Handles:
  * 1. Web Push notifications (receive + show)
  * 2. Notification clicks (open/focus app)
+ * 3. Offline fallback for installed PWA — serves /offline when the
+ *    network is fully unavailable. Does NOT cache HTML/event data
+ *    (would show stale content); only caches the offline shell + icons.
  *
- * No caching strategy — this is a dynamic events site.
- * The browser handles its own HTTP caching; a SW cache
- * would show stale event data and confuse users.
+ * Cache strategy is intentionally minimal: precache the offline page
+ * and brand icons so the installed PWA never shows a browser-default
+ * connection-error chrome. Everything else goes network-first.
  */
 
 const APP_NAME = 'ABQ Unplugged'
 const DEFAULT_ICON = '/icon-192.png'
 const DEFAULT_URL  = '/'
+
+// Cache version — bump to force clients to re-precache.
+// Increment when the offline page or precached assets change.
+const CACHE_VERSION = 'abq-shell-v1'
+const PRECACHE_URLS = [
+  '/offline',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/logo-terra.svg',
+  '/manifest.json',
+]
+
+// ── Install: precache the offline shell ──────────────────────────────────────
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_VERSION).then((cache) =>
+      cache.addAll(PRECACHE_URLS).catch(() => {
+        // If any single asset fails (e.g. dev environment), don't block install.
+      })
+    )
+  )
+  self.skipWaiting()
+})
+
+// ── Activate: drop stale cache versions ──────────────────────────────────────
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  )
+})
+
+// ── Fetch: network-first, fall back to /offline for navigations ─────────────
+// Only intercepts top-level navigation requests so dynamic data + APIs always
+// hit the network. When the network is fully unavailable AND the request is
+// a navigation, serve the precached /offline page instead of the browser
+// default connection-error chrome.
+self.addEventListener('fetch', (event) => {
+  const { request } = event
+  // Only handle GETs
+  if (request.method !== 'GET') return
+  // Only intercept navigations (top-level page loads)
+  if (request.mode !== 'navigate') return
+
+  event.respondWith(
+    fetch(request).catch(async () => {
+      const cache = await caches.open(CACHE_VERSION)
+      const offlineRes = await cache.match('/offline')
+      return offlineRes ?? new Response('Offline', { status: 503, statusText: 'Offline' })
+    })
+  )
+})
 
 // ── Push event ────────────────────────────────────────────────────────────────
 // Fired when the server sends a push message via Web Push Protocol.
