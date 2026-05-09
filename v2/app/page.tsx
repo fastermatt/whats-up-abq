@@ -447,7 +447,6 @@ export default async function DiscoverPage() {
             events={tonight.events}
             seeAllHref="/tonight"
             sectionLabel="Tonight"
-            prioritizeFirst
           />
         </AnimateIn>
       )}
