@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { fetchEvents, fetchFeaturedEvents, fetchNeighborhoodCounts, NormalizedEvent } from '@/lib/events'
-import { eventImageSrc } from '@/lib/image-url'
 import { getCategoryFallback, OG_IMAGE } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
 import { MapPin, ArrowRight, ExternalLink, Star } from 'lucide-react'
@@ -177,22 +176,15 @@ export default async function DiscoverPage() {
   )
   const heroSaying = HERO_SAYINGS[abqHour % HERO_SAYINGS.length]
 
-  // Preload the first featured event's image so the browser fetches it during HTML
-  // parsing — before the <img> element is encountered. This directly reduces LCP.
-  // Uses eventImageSrc() to compute the *exact* URL that EventImage will render,
-  // ensuring the preload cache is actually used (no mismatch → no wasted request).
-  const firstFeaturedImg = featured[0]?.imageUrl
-    || (featured[0] ? getCategoryFallback(featured[0].category ?? undefined, featured[0].id) : null)
-  const lcpPreloadHref = firstFeaturedImg && !firstFeaturedImg.startsWith('data:')
-    ? eventImageSrc(firstFeaturedImg)
-    : null
+  // Note: we no longer preload the first featured image at fetchPriority="high".
+  // The hero h2 ("Find something to do in Albuquerque.") is the LCP element on
+  // mobile per PSI — preloading a below-fold image at high priority steals
+  // bandwidth from the h2's render path (CSS + font), making LCP worse, not
+  // better. The image still has fetchPriority="high" + eager loading on its
+  // own <img> tag, which is enough.
 
   return (
     <main id="main" className="min-h-dvh bg-[--bg]">
-      {/* LCP image preload — React 19 + Next.js App Router hoist <link> tags to <head> */}
-      {lcpPreloadHref && (
-        <link rel="preload" as="image" href={lcpPreloadHref} fetchPriority="high" />
-      )}
       <ScrollHintManager />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageFaqLd) }} />
@@ -890,6 +882,7 @@ function HorizontalCard({
           alt={event.title}
           loading={isLCPCandidate ? 'eager' : 'lazy'}
           fetchPriority={isLCPCandidate ? 'high' : undefined}
+          width={440}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
         />
 
@@ -957,6 +950,7 @@ function FeaturedCard({ event, index = 0 }: { event: NormalizedEvent; index?: nu
           alt={event.title}
           loading={index === 0 ? 'eager' : 'lazy'}
           fetchPriority={index === 0 ? 'high' : undefined}
+          width={540}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
         />
         {/* ★ Featured badge */}

@@ -35,8 +35,12 @@ export function proxyIfNeeded(url: string): string {
  *  - data: URIs (inline images)
  *  - URLs already going through /.netlify/ (avoid double-proxying)
  *  - URLs already going through /api/image-proxy (handled by proxyIfNeeded)
+ *
+ * `width` is the target width in CSS pixels. Pass the actual rendered
+ * card width (not 2x) — Netlify already serves AVIF which scales well
+ * on hi-DPI screens. Defaults to 600 for back-compat.
  */
-export function netlifyImageUrl(url: string): string {
+export function netlifyImageUrl(url: string, width = 600): string {
   if (
     url.startsWith('data:') ||
     url.startsWith('/.netlify/') ||
@@ -44,7 +48,7 @@ export function netlifyImageUrl(url: string): string {
   ) {
     return url
   }
-  return `/.netlify/images?url=${encodeURIComponent(url)}&w=600&q=75&fm=avif`
+  return `/.netlify/images?url=${encodeURIComponent(url)}&w=${width}&q=70&fm=avif`
 }
 
 /**
@@ -52,6 +56,6 @@ export function netlifyImageUrl(url: string): string {
  * will be in the <img src> attribute. Use this for preload <link> hrefs
  * so the browser can match them correctly.
  */
-export function eventImageSrc(rawUrl: string): string {
-  return netlifyImageUrl(proxyIfNeeded(rawUrl))
+export function eventImageSrc(rawUrl: string, width = 600): string {
+  return netlifyImageUrl(proxyIfNeeded(rawUrl), width)
 }

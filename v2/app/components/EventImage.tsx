@@ -27,6 +27,7 @@ export function EventImage({
   className,
   loading = 'lazy',
   fetchPriority,
+  width = 600,
 }: {
   src: string
   fallback: string
@@ -34,8 +35,11 @@ export function EventImage({
   className?: string
   loading?: 'lazy' | 'eager'
   fetchPriority?: 'high' | 'auto' | 'low'
+  /** Target width in CSS pixels. Smaller widths cut bytes proportionally —
+   *  pass card-rendered width, not 2x. Defaults to 600. */
+  width?: number
 }) {
-  const [currentSrc, setCurrentSrc] = useState(() => netlifyImageUrl(proxyIfNeeded(src)))
+  const [currentSrc, setCurrentSrc] = useState(() => netlifyImageUrl(proxyIfNeeded(src), width))
   // Priority images skip the fade-in so they're immediately visible for LCP measurement
   const [loaded, setLoaded] = useState(fetchPriority === 'high')
   const imgRef = useRef<HTMLImageElement>(null)
