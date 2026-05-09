@@ -134,63 +134,70 @@ export default function FeedbackPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Category picker */}
           <div className="space-y-2">
-            <p className="text-xs font-semibold text-[#4a3f3a] mb-2">What are you telling us about?</p>
-            {OPTIONS.map(({ value, label, icon: Icon, blurb }) => {
-              const isActive = category === value
-              return (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setCategory(value)}
-                  className={`w-full flex items-start gap-3 p-3.5 rounded-xl border-2 transition-all text-left ${
-                    isActive
-                      ? 'border-[#9a442d] bg-[#9a442d]/5'
-                      : 'border-[#f0e4cc] bg-white hover:border-[#ddc9a3]'
-                  }`}
-                >
-                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                    isActive ? 'bg-[#9a442d] text-white' : 'bg-[#f0e4cc] text-[#9a442d]'
-                  }`}>
-                    <Icon className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-sm text-[#1a1614]">{label}</p>
-                    <p className="text-xs text-[#6b5d57] mt-0.5">{blurb}</p>
-                  </div>
-                </button>
-              )
-            })}
+            <p id="feedback-category-label" className="text-xs font-semibold text-[#4a3f3a] mb-2">What are you telling us about?</p>
+            <div role="radiogroup" aria-labelledby="feedback-category-label" className="space-y-2">
+              {OPTIONS.map(({ value, label, icon: Icon, blurb }) => {
+                const isActive = category === value
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    role="radio"
+                    aria-checked={isActive}
+                    onClick={() => setCategory(value)}
+                    className={`w-full flex items-start gap-3 p-3.5 rounded-xl border-2 transition-all text-left ${
+                      isActive
+                        ? 'border-[#9a442d] bg-[#9a442d]/5'
+                        : 'border-[#f0e4cc] bg-white hover:border-[#ddc9a3]'
+                    }`}
+                  >
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                      isActive ? 'bg-[#9a442d] text-white' : 'bg-[#f0e4cc] text-[#9a442d]'
+                    }`}>
+                      <Icon className="w-4 h-4" aria-hidden="true" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-sm text-[#1a1614]">{label}</p>
+                      <p className="text-xs text-[#6b5d57] mt-0.5">{blurb}</p>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
           </div>
 
           {category && (
             <>
               <div className="bg-white rounded-2xl border border-[#f0e4cc] p-5 space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">
+                  <label htmlFor="subject" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">
                     Subject <span className="text-[#6b5d57] font-normal">(optional)</span>
                   </label>
-                  <input type="text" maxLength={200} value={subject}
+                  <input id="subject" type="text" maxLength={200} value={subject}
                     onChange={e => setSubject(e.target.value)}
                     placeholder="One-line summary" className={inputClass} />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">
-                    Message <span className="text-[#9a442d]">*</span>
+                  <label htmlFor="message" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">
+                    Message <span className="text-[#9a442d]" aria-hidden="true">*</span>
                   </label>
-                  <textarea rows={6} maxLength={5000} required value={message}
+                  <textarea id="message" rows={6} maxLength={5000} required value={message}
                     onChange={e => setMessage(e.target.value)}
                     placeholder="The more detail the better..."
+                    aria-required="true"
+                    aria-invalid={!!errorMsg && !message.trim()}
+                    aria-describedby="message-counter"
                     className={inputClass + ' resize-none'} />
-                  <p className="text-[10px] text-[#6b5d57] mt-1">{message.length}/5000</p>
+                  <p id="message-counter" className="text-[10px] text-[#6b5d57] mt-1">{message.length}/5000</p>
                 </div>
 
                 {!userEmail && (
                   <div>
-                    <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">
+                    <label htmlFor="contact-email" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">
                       Email <span className="text-[#6b5d57] font-normal">(optional — only if you want a reply)</span>
                     </label>
-                    <input type="email" maxLength={200} value={email}
+                    <input id="contact-email" type="email" maxLength={200} value={email}
                       onChange={e => setEmail(e.target.value)}
                       placeholder="you@example.com" className={inputClass} />
                   </div>
@@ -202,7 +209,7 @@ export default function FeedbackPage() {
               </div>
 
               {errorMsg && (
-                <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2">{errorMsg}</p>
+                <p role="alert" className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2">{errorMsg}</p>
               )}
 
               <button type="submit" disabled={status === 'submitting'}

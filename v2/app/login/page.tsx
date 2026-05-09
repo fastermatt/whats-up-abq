@@ -195,12 +195,16 @@ export default function LoginPage() {
 
               {/* Email */}
               <div>
-                <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">Email</label>
+                <label htmlFor="email" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">Email</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" aria-hidden="true" />
                   <input
+                    id="email"
                     type="email" value={email} onChange={e => setEmail(e.target.value)}
                     placeholder="you@example.com" required autoComplete="email"
+                    aria-required="true"
+                    aria-invalid={!!error}
+                    aria-describedby={error ? 'login-error' : undefined}
                     className="w-full pl-9 pr-4 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#6b5d57] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
                   />
                 </div>
@@ -208,15 +212,19 @@ export default function LoginPage() {
 
               {/* Password */}
               <div>
-                <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">Password</label>
+                <label htmlFor="password" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">Password</label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" aria-hidden="true" />
                   <input
+                    id="password"
                     type={showPw ? 'text' : 'password'} value={password}
                     onChange={e => setPassword(e.target.value)}
                     placeholder={tab === 'signup' ? 'At least 6 characters' : '••••••••'}
                     required minLength={6}
                     autoComplete={tab === 'signin' ? 'current-password' : 'new-password'}
+                    aria-required="true"
+                    aria-invalid={!!error}
+                    aria-describedby={error ? 'login-error' : undefined}
                     className="w-full pl-9 pr-10 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#6b5d57] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
                   />
                   <button
@@ -232,14 +240,18 @@ export default function LoginPage() {
               {/* Confirm password (signup only) */}
               {tab === 'signup' && (
                 <div>
-                  <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">Confirm password</label>
+                  <label htmlFor="confirm-password" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">Confirm password</label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" aria-hidden="true" />
                     <input
+                      id="confirm-password"
                       type={showPw ? 'text' : 'password'} value={confirm}
                       onChange={e => setConfirm(e.target.value)}
                       placeholder="Same password again"
                       required autoComplete="new-password"
+                      aria-required="true"
+                      aria-invalid={!!error}
+                      aria-describedby={error ? 'login-error' : undefined}
                       className="w-full pl-9 pr-4 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#6b5d57] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
                     />
                   </div>
@@ -261,7 +273,7 @@ export default function LoginPage() {
 
               {/* Error */}
               {error && (
-                <p className="text-xs text-red-600 bg-red-50 border border-red-100 px-3 py-2 rounded-lg">{error}</p>
+                <p id="login-error" role="alert" className="text-xs text-red-600 bg-red-50 border border-red-100 px-3 py-2 rounded-lg">{error}</p>
               )}
 
               {/* Submit */}
@@ -280,18 +292,22 @@ export default function LoginPage() {
           {showMagic && (
             <form onSubmit={handleMagic} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">Email</label>
+                <label htmlFor="magic-email" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">Email</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" aria-hidden="true" />
                   <input
+                    id="magic-email"
                     type="email" value={email} onChange={e => setEmail(e.target.value)}
                     placeholder="you@example.com" required autoComplete="email"
+                    aria-required="true"
+                    aria-invalid={!!error}
+                    aria-describedby={error ? 'magic-error' : undefined}
                     className="w-full pl-9 pr-4 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#6b5d57] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
                   />
                 </div>
               </div>
               {error && (
-                <p className="text-xs text-red-600 bg-red-50 border border-red-100 px-3 py-2 rounded-lg">{error}</p>
+                <p id="magic-error" role="alert" className="text-xs text-red-600 bg-red-50 border border-red-100 px-3 py-2 rounded-lg">{error}</p>
               )}
               <button
                 type="submit" disabled={loading || !email.trim()}

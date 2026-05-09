@@ -182,17 +182,20 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
 
       {/* KEYWORDS */}
       <section className="bg-white rounded-2xl p-5 border border-[#f0e4cc]">
-        <h3 className="text-sm font-black text-[#1a1614] uppercase tracking-wide mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
+        <h3 id="keywords-label" className="text-sm font-black text-[#1a1614] uppercase tracking-wide mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
           Artists, teams, or keywords
         </h3>
-        <p className="text-xs text-[#6b5d57] mb-3">e.g. &ldquo;john mulaney&rdquo;, &ldquo;nm united&rdquo;, &ldquo;balloon fiesta&rdquo;. Case-insensitive.</p>
+        <p id="keywords-hint" className="text-xs text-[#6b5d57] mb-3">e.g. &ldquo;john mulaney&rdquo;, &ldquo;nm united&rdquo;, &ldquo;balloon fiesta&rdquo;. Case-insensitive.</p>
+        <label htmlFor="keyword-input" className="sr-only">Add a keyword</label>
         <div className="flex gap-2">
           <input
+            id="keyword-input"
             type="text"
             value={keywordInput}
             onChange={e => setKeywordInput(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addKeyword() } }}
             placeholder="Add a keyword and press Enter"
+            aria-describedby="keywords-hint"
             className="flex-1 px-3 py-2 rounded-lg border border-[#f0e4cc] text-sm text-[#1a1614] bg-[#fbf7f1] focus:outline-none focus:border-[#9a442d]"
           />
           <button type="button" onClick={addKeyword} className="px-4 py-2 rounded-lg bg-[#1a1614] text-white text-sm font-semibold hover:bg-[#4a3f3a]">
@@ -216,7 +219,7 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
         <h3 className="text-sm font-black text-[#1a1614] uppercase tracking-wide mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
           Favorite venues
         </h3>
-        <p className="text-xs text-[#6b5d57] mb-3">Tap a venue to favorite it, or type a custom one.</p>
+        <p id="venues-hint" className="text-xs text-[#6b5d57] mb-3">Tap a venue to favorite it, or type a custom one.</p>
         <div className="flex flex-wrap gap-1.5 mb-3">
           {topVenues.slice(0, 20).map(v => {
             const on = state.venues.includes(v.name)
@@ -225,6 +228,7 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
                 type="button"
                 key={v.name}
                 onClick={() => toggleArr('venues', v.name)}
+                aria-pressed={on}
                 className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all ${
                   on ? 'bg-[#4f6249] text-white border-[#4f6249]' : 'bg-white text-[#1a1614] border-[#f0e4cc] hover:border-[#4f6249]/40'
                 }`}
@@ -234,13 +238,16 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
             )
           })}
         </div>
+        <label htmlFor="venue-input" className="sr-only">Add a venue not listed above</label>
         <div className="flex gap-2">
           <input
+            id="venue-input"
             type="text"
             value={venueInput}
             onChange={e => setVenueInput(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addVenue() } }}
             placeholder="Add a venue not listed above"
+            aria-describedby="venues-hint"
             className="flex-1 px-3 py-2 rounded-lg border border-[#f0e4cc] text-sm text-[#1a1614] bg-[#fbf7f1] focus:outline-none focus:border-[#4f6249]"
           />
           <button type="button" onClick={addVenue} className="px-4 py-2 rounded-lg bg-[#1a1614] text-white text-sm font-semibold hover:bg-[#4a3f3a]">
@@ -303,8 +310,9 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
           Only family-friendly events
         </label>
         <div className="flex items-center gap-2 text-sm text-[#1a1614]">
-          <span>Max ticket price $</span>
+          <label htmlFor="price-max">Max ticket price $</label>
           <input
+            id="price-max"
             type="number"
             min="0"
             step="5"
@@ -314,9 +322,10 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
               setState(s => ({ ...s, price_max_cents: v === '' ? null : Math.max(0, parseInt(v, 10)) * 100 }))
             }}
             placeholder="Any"
+            aria-describedby="price-max-hint"
             className="w-24 px-2 py-1 rounded-lg border border-[#f0e4cc] bg-[#fbf7f1] focus:outline-none focus:border-[#9a442d]"
           />
-          <span className="text-xs text-[#6b5d57]">(leave blank for any)</span>
+          <span id="price-max-hint" className="text-xs text-[#6b5d57]">(leave blank for any)</span>
         </div>
       </section>
 
@@ -355,8 +364,9 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <p className="text-xs text-[#4a3f3a] mb-1.5 font-semibold">Digest day</p>
+            <label htmlFor="digest-day" className="text-xs text-[#4a3f3a] mb-1.5 font-semibold block">Digest day</label>
             <select
+              id="digest-day"
               value={state.digest_day}
               onChange={e => setState(s => ({ ...s, digest_day: parseInt(e.target.value, 10) }))}
               className="w-full px-3 py-2 rounded-lg border border-[#f0e4cc] bg-[#fbf7f1] text-sm focus:outline-none focus:border-[#9a442d]"
@@ -365,8 +375,9 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
             </select>
           </div>
           <div>
-            <p className="text-xs text-[#4a3f3a] mb-1.5 font-semibold">Digest hour</p>
+            <label htmlFor="digest-hour" className="text-xs text-[#4a3f3a] mb-1.5 font-semibold block">Digest hour</label>
             <select
+              id="digest-hour"
               value={state.digest_hour}
               onChange={e => setState(s => ({ ...s, digest_hour: parseInt(e.target.value, 10) }))}
               className="w-full px-3 py-2 rounded-lg border border-[#f0e4cc] bg-[#fbf7f1] text-sm focus:outline-none focus:border-[#9a442d]"
@@ -379,16 +390,18 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
         </div>
 
         <div>
-          <p className="text-xs text-[#4a3f3a] mb-1.5 font-semibold">Look ahead</p>
+          <label htmlFor="days-ahead" className="text-xs text-[#4a3f3a] mb-1.5 font-semibold block">Look ahead</label>
           <input
+            id="days-ahead"
             type="range"
             min="3"
             max="60"
             value={state.days_ahead}
             onChange={e => setState(s => ({ ...s, days_ahead: parseInt(e.target.value, 10) }))}
+            aria-describedby="days-ahead-hint"
             className="w-full accent-[#9a442d]"
           />
-          <p className="text-[11px] text-[#6b5d57] text-center">Notify me about events happening in the next <strong>{state.days_ahead}</strong> days</p>
+          <p id="days-ahead-hint" className="text-[11px] text-[#6b5d57] text-center">Notify me about events happening in the next <strong>{state.days_ahead}</strong> days</p>
         </div>
       </section>
 
@@ -403,8 +416,8 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
           >
             {saving ? 'Saving…' : 'Save preferences'}
           </button>
-          {saved && <span className="text-sm text-[#4f6249] font-semibold">✓ Saved</span>}
-          {error && <span className="text-sm text-[#9a442d] font-semibold">{error}</span>}
+          {saved && <span role="status" className="text-sm text-[#4f6249] font-semibold">✓ Saved</span>}
+          {error && <span role="alert" className="text-sm text-[#9a442d] font-semibold">{error}</span>}
         </div>
       </div>
     </form>

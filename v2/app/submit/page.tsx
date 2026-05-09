@@ -212,8 +212,13 @@ export default function SubmitEventPage() {
 
   const FieldError = ({ name }: { name: keyof typeof fieldErrors }) =>
     fieldErrors[name] ? (
-      <p data-field-error className="text-[11px] text-red-600 mt-1 flex items-center gap-1">
-        <span>↑</span> {fieldErrors[name]}
+      <p
+        id={`${name}-error`}
+        role="alert"
+        data-field-error
+        className="text-[11px] text-red-600 mt-1 flex items-center gap-1"
+      >
+        <span aria-hidden="true">↑</span> {fieldErrors[name]}
       </p>
     ) : null
 
@@ -305,65 +310,82 @@ export default function SubmitEventPage() {
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
 
           {/* ── Event core ── */}
-          <section className="bg-white rounded-2xl border border-[#f0e4cc] p-5 space-y-4">
-            <h2 className="text-xs font-bold text-[#9a442d] uppercase tracking-wider"><span className="text-[#9a442d]/55">Step 1 of 4 ·</span> The event</h2>
+          <section aria-labelledby="submit-section-event" className="bg-white rounded-2xl border border-[#f0e4cc] p-5 space-y-4">
+            <h2 id="submit-section-event" className="text-xs font-bold text-[#9a442d] uppercase tracking-wider"><span className="text-[#9a442d]/55">Step 1 of 4 ·</span> The event</h2>
 
             <div>
-              <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">
+              <label htmlFor="title" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">
                 Event name <Req />
               </label>
               <input
+                id="title"
                 type="text" required maxLength={200} value={form.title}
                 onChange={e => update('title', e.target.value)}
                 placeholder="e.g. Mariachi Night at Nob Hill"
+                aria-required="true"
+                aria-invalid={!!fieldErrors.title}
+                aria-describedby={fieldErrors.title ? 'title-error' : undefined}
                 className={inputClass(!!fieldErrors.title)}
               />
               <FieldError name="title" />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">
+              <label htmlFor="description" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">
                 Description <Req />
               </label>
               <textarea
+                id="description"
                 rows={4} maxLength={2000} required value={form.description}
                 onChange={e => update('description', e.target.value)}
                 placeholder="What makes this event special? Who's playing / speaking / performing? What should people know before they go?"
+                aria-required="true"
+                aria-invalid={!!fieldErrors.description}
+                aria-describedby={fieldErrors.description ? 'description-error' : 'description-counter'}
                 className={inputClass(!!fieldErrors.description) + ' resize-none'}
               />
               <div className="flex items-center justify-between mt-1">
                 <FieldError name="description" />
-                <p className="text-[10px] text-[#6b5d57] ml-auto">{form.description.length}/2000</p>
+                <p id="description-counter" className="text-[10px] text-[#6b5d57] ml-auto">{form.description.length}/2000</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5 flex items-center gap-1">
+                <label htmlFor="event_date" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5 flex items-center gap-1">
                   <Calendar className="w-3 h-3" /> Date <Req />
                 </label>
                 <input
+                  id="event_date"
                   type="date" required value={form.event_date}
                   min={new Date().toISOString().slice(0,10)}
                   onChange={e => update('event_date', e.target.value)}
+                  aria-required="true"
+                  aria-invalid={!!fieldErrors.event_date}
+                  aria-describedby={fieldErrors.event_date ? 'event_date-error' : undefined}
                   className={inputClass(!!fieldErrors.event_date)}
                 />
                 <FieldError name="event_date" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">
+                <label htmlFor="start_time" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">
                   Start time <Req />
                 </label>
                 <input
+                  id="start_time"
                   type="time" required value={form.start_time}
                   onChange={e => update('start_time', e.target.value)}
+                  aria-required="true"
+                  aria-invalid={!!fieldErrors.start_time}
+                  aria-describedby={fieldErrors.start_time ? 'start_time-error' : undefined}
                   className={inputClass(!!fieldErrors.start_time)}
                 />
                 <FieldError name="start_time" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">End time</label>
+                <label htmlFor="end_time" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">End time</label>
                 <input
+                  id="end_time"
                   type="time" value={form.end_time}
                   onChange={e => update('end_time', e.target.value)}
                   className={inputClass()}
@@ -372,12 +394,16 @@ export default function SubmitEventPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5 flex items-center gap-1">
+              <label htmlFor="category" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5 flex items-center gap-1">
                 <Tag className="w-3 h-3" /> Category <Req />
               </label>
               <select
+                id="category"
                 required value={form.category}
                 onChange={e => update('category', e.target.value)}
+                aria-required="true"
+                aria-invalid={!!fieldErrors.category}
+                aria-describedby={fieldErrors.category ? 'category-error' : undefined}
                 className={inputClass(!!fieldErrors.category)}
               >
                 <option value="">Pick a category…</option>
@@ -388,28 +414,36 @@ export default function SubmitEventPage() {
           </section>
 
           {/* ── Venue ── */}
-          <section className="bg-white rounded-2xl border border-[#f0e4cc] p-5 space-y-4">
-            <h2 className="text-xs font-bold text-[#9a442d] uppercase tracking-wider"><span className="text-[#9a442d]/55">Step 2 of 4 ·</span> Venue</h2>
+          <section aria-labelledby="submit-section-venue" className="bg-white rounded-2xl border border-[#f0e4cc] p-5 space-y-4">
+            <h2 id="submit-section-venue" className="text-xs font-bold text-[#9a442d] uppercase tracking-wider"><span className="text-[#9a442d]/55">Step 2 of 4 ·</span> Venue</h2>
             <div>
-              <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5 flex items-center gap-1">
+              <label htmlFor="venue_name" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5 flex items-center gap-1">
                 <MapPin className="w-3 h-3" /> Venue name <Req />
               </label>
               <input
+                id="venue_name"
                 type="text" required maxLength={200} value={form.venue_name}
                 onChange={e => update('venue_name', e.target.value)}
                 placeholder="e.g. Sunshine Theater"
+                aria-required="true"
+                aria-invalid={!!fieldErrors.venue_name}
+                aria-describedby={fieldErrors.venue_name ? 'venue_name-error' : undefined}
                 className={inputClass(!!fieldErrors.venue_name)}
               />
               <FieldError name="venue_name" />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">
+              <label htmlFor="venue_address" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">
                 Address <Req />
               </label>
               <input
+                id="venue_address"
                 type="text" required maxLength={300} value={form.venue_address}
                 onChange={e => update('venue_address', e.target.value)}
                 placeholder="e.g. 120 Central Ave SW, Albuquerque, NM 87102"
+                aria-required="true"
+                aria-invalid={!!fieldErrors.venue_address}
+                aria-describedby={fieldErrors.venue_address ? 'venue_address-error' : undefined}
                 className={inputClass(!!fieldErrors.venue_address)}
               />
               <FieldError name="venue_address" />
@@ -417,7 +451,7 @@ export default function SubmitEventPage() {
           </section>
 
           {/* ── Photo — most prominent section ── */}
-          <section className={`rounded-2xl p-5 space-y-4 border-2 transition-colors ${
+          <section aria-labelledby="submit-section-photo" className={`rounded-2xl p-5 space-y-4 border-2 transition-colors ${
             fieldErrors.photo
               ? 'bg-red-50 border-red-300'
               : photoFile
@@ -429,7 +463,7 @@ export default function SubmitEventPage() {
                 <p className="text-[10px] font-bold text-[#9a442d]/55 uppercase tracking-wider mb-1">Step 3 of 4</p>
                 <div className="flex items-center gap-2 mb-0.5">
                   <ImageIcon className="w-4 h-4 text-[#9a442d]" />
-                  <h2 className="text-sm font-black text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
+                  <h2 id="submit-section-photo" className="text-sm font-black text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
                     Event Photo <Req />
                   </h2>
                 </div>
@@ -488,7 +522,7 @@ export default function SubmitEventPage() {
                 </button>
               </div>
             ) : (
-              <label className={`flex flex-col items-center justify-center w-full aspect-[16/10] border-2 border-dashed rounded-xl cursor-pointer transition-all hover:scale-[1.01] ${
+              <label htmlFor="photo" className={`flex flex-col items-center justify-center w-full aspect-[16/10] border-2 border-dashed rounded-xl cursor-pointer transition-all hover:scale-[1.01] ${
                 fieldErrors.photo ? 'border-red-300 bg-red-50/50' : 'border-[#9a442d]/30 bg-white/60 hover:bg-white/90 hover:border-[#9a442d]/60'
               }`}>
                 <div className="flex flex-col items-center gap-2 text-center p-4">
@@ -501,7 +535,11 @@ export default function SubmitEventPage() {
                   </div>
                 </div>
                 <input
+                  id="photo"
                   type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
+                  aria-required="true"
+                  aria-invalid={!!fieldErrors.photo}
+                  aria-describedby={fieldErrors.photo ? 'photo-error' : undefined}
                   onChange={e => {
                     const f = e.target.files?.[0]
                     if (!f) return
@@ -512,8 +550,8 @@ export default function SubmitEventPage() {
             )}
 
             {fieldErrors.photo && (
-              <p data-field-error className="text-[11px] text-red-600 flex items-center gap-1">
-                <span>↑</span> {fieldErrors.photo}
+              <p id="photo-error" role="alert" data-field-error className="text-[11px] text-red-600 flex items-center gap-1">
+                <span aria-hidden="true">↑</span> {fieldErrors.photo}
               </p>
             )}
 
@@ -528,11 +566,12 @@ export default function SubmitEventPage() {
           </section>
 
           {/* ── Tickets & price ── */}
-          <section className="bg-white rounded-2xl border border-[#f0e4cc] p-5 space-y-4">
-            <h2 className="text-xs font-bold text-[#9a442d] uppercase tracking-wider"><span className="text-[#9a442d]/55">Step 4 of 4 ·</span> Tickets &amp; price <Req /></h2>
+          <section aria-labelledby="submit-section-tickets" className="bg-white rounded-2xl border border-[#f0e4cc] p-5 space-y-4">
+            <h2 id="submit-section-tickets" className="text-xs font-bold text-[#9a442d] uppercase tracking-wider"><span className="text-[#9a442d]/55">Step 4 of 4 ·</span> Tickets &amp; price <Req /></h2>
 
-            <label className="flex items-center gap-2.5 text-sm text-[#4a3f3a] cursor-pointer select-none">
+            <label htmlFor="is_free" className="flex items-center gap-2.5 text-sm text-[#4a3f3a] cursor-pointer select-none">
               <input
+                id="is_free"
                 type="checkbox" checked={form.is_free}
                 onChange={e => {
                   update('is_free', e.target.checked)
@@ -546,36 +585,42 @@ export default function SubmitEventPage() {
             {!form.is_free && (
               <>
                 <div>
-                  <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">
+                  <label htmlFor="ticket_url" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">
                     Ticket URL <Req />
                   </label>
                   <input
+                    id="ticket_url"
                     type="url" maxLength={500} value={form.ticket_url}
                     onChange={e => { update('ticket_url', e.target.value); setFieldErrors(fe => ({ ...fe, ticket: undefined })) }}
                     placeholder="https://ticketmaster.com/… or https://eventbrite.com/…"
+                    aria-required="true"
+                    aria-invalid={!!fieldErrors.ticket}
+                    aria-describedby={fieldErrors.ticket ? 'ticket-error' : undefined}
                     className={inputClass(!!fieldErrors.ticket)}
                   />
                   {fieldErrors.ticket && (
-                    <p data-field-error className="text-[11px] text-red-600 mt-1 flex items-center gap-1">
-                      <span>↑</span> {fieldErrors.ticket}
+                    <p id="ticket-error" role="alert" data-field-error className="text-[11px] text-red-600 mt-1 flex items-center gap-1">
+                      <span aria-hidden="true">↑</span> {fieldErrors.ticket}
                     </p>
                   )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5 flex items-center gap-1">
+                    <label htmlFor="price_min" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5 flex items-center gap-1">
                       <DollarSign className="w-3 h-3" /> Min price
                     </label>
                     <input
+                      id="price_min"
                       type="number" min="0" step="0.01" value={form.price_min}
                       onChange={e => update('price_min', e.target.value)}
                       placeholder="10.00" className={inputClass()}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">Max price</label>
+                    <label htmlFor="price_max" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">Max price</label>
                     <input
+                      id="price_max"
                       type="number" min="0" step="0.01" value={form.price_max}
                       onChange={e => update('price_max', e.target.value)}
                       placeholder="25.00" className={inputClass()}

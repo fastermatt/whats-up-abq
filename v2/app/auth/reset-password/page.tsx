@@ -74,14 +74,18 @@ export default function ResetPasswordPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">New password</label>
+              <label htmlFor="new-password" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">New password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" aria-hidden="true" />
                 <input
+                  id="new-password"
                   type={showPw ? 'text' : 'password'}
                   value={password} onChange={e => setPassword(e.target.value)}
                   placeholder="At least 6 characters" required minLength={6}
                   autoComplete="new-password"
+                  aria-required="true"
+                  aria-invalid={!!error}
+                  aria-describedby={error ? 'reset-error' : undefined}
                   className="w-full pl-9 pr-10 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#6b5d57] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
                 />
                 <button
@@ -95,21 +99,25 @@ export default function ResetPasswordPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">Confirm password</label>
+              <label htmlFor="confirm-password" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">Confirm password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" aria-hidden="true" />
                 <input
+                  id="confirm-password"
                   type={showPw ? 'text' : 'password'}
                   value={confirm} onChange={e => setConfirm(e.target.value)}
                   placeholder="Same password again" required
                   autoComplete="new-password"
+                  aria-required="true"
+                  aria-invalid={!!error}
+                  aria-describedby={error ? 'reset-error' : undefined}
                   className="w-full pl-9 pr-4 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#6b5d57] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
                 />
               </div>
             </div>
 
             {error && (
-              <p className="text-xs text-red-600 bg-red-50 border border-red-100 px-3 py-2 rounded-lg">{error}</p>
+              <p id="reset-error" role="alert" className="text-xs text-red-600 bg-red-50 border border-red-100 px-3 py-2 rounded-lg">{error}</p>
             )}
 
             <button
