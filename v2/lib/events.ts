@@ -36,6 +36,10 @@ export interface NormalizedEvent {
   highlights: string[]
   venueTips: string | null
   localTips: string | null
+  /** Real ABQ restaurants near the venue, with short descriptors. Verified during enrichment. */
+  nearbyDining: { name: string; note?: string }[]
+  /** A single sentence pairing the event with a real nearby thing (related venue / shop / bar). */
+  localRec: string | null
   // Community submissions
   submitterHandle: string | null
 }
@@ -876,6 +880,24 @@ function normalizeRow(row: RawEventRow): NormalizedEvent | null {
       }
       if (typeof ai.venue_tips === 'string')  evt.venueTips  = ai.venue_tips
       if (typeof ai.local_tips === 'string')  evt.localTips  = ai.local_tips
+      if (typeof ai.local_rec === 'string')   evt.localRec   = ai.local_rec
+      if (Array.isArray(ai.nearby_dining)) {
+        // Accept either string entries or {name, note} objects
+        evt.nearbyDining = (ai.nearby_dining as unknown[])
+          .map(item => {
+            if (typeof item === 'string') return { name: item }
+            if (item && typeof item === 'object') {
+              const obj = item as Record<string, unknown>
+              const name = typeof obj.name === 'string' ? obj.name : null
+              if (!name) return null
+              const note = typeof obj.note === 'string' ? obj.note : undefined
+              return { name, note }
+            }
+            return null
+          })
+          .filter((x): x is { name: string; note?: string } => x !== null)
+          .slice(0, 4)
+      }
     }
     return evt
   } catch {
@@ -943,7 +965,7 @@ function normalizeTM(row: RawEventRow): NormalizedEvent {
     source: 'ticketmaster',
     isFeatured: row.featured ?? false,
     neighborhood: null, venueSlug: null, submitterHandle: null,
-    about: null, highlights: [], venueTips: null, localTips: null,
+    about: null, highlights: [], venueTips: null, localTips: null, nearbyDining: [], localRec: null,
   }
 }
 
@@ -1019,7 +1041,7 @@ function normalizeEB(row: RawEventRow): NormalizedEvent {
     source: 'eventbrite',
     isFeatured: row.featured ?? false,
     neighborhood: null, venueSlug: null, submitterHandle: null,
-    about: null, highlights: [], venueTips: null, localTips: null,
+    about: null, highlights: [], venueTips: null, localTips: null, nearbyDining: [], localRec: null,
   }
 }
 
@@ -1081,7 +1103,7 @@ function normalizeSG(row: RawEventRow): NormalizedEvent {
     source: 'seatgeek',
     isFeatured: row.featured ?? false,
     neighborhood: null, venueSlug: null, submitterHandle: null,
-    about: null, highlights: [], venueTips: null, localTips: null,
+    about: null, highlights: [], venueTips: null, localTips: null, nearbyDining: [], localRec: null,
   }
 }
 
@@ -1110,7 +1132,7 @@ function normalizeBIT(row: RawEventRow): NormalizedEvent {
     source: 'bandsintown',
     isFeatured: row.featured ?? false,
     neighborhood: null, venueSlug: null, submitterHandle: null,
-    about: null, highlights: [], venueTips: null, localTips: null,
+    about: null, highlights: [], venueTips: null, localTips: null, nearbyDining: [], localRec: null,
   }
 }
 
@@ -1178,7 +1200,7 @@ function normalizeLocal(row: RawEventRow): NormalizedEvent {
     source: row.source,
     isFeatured: row.featured ?? false,
     neighborhood: null, venueSlug: null, submitterHandle: null,
-    about: null, highlights: [], venueTips: null, localTips: null,
+    about: null, highlights: [], venueTips: null, localTips: null, nearbyDining: [], localRec: null,
   }
 }
 
@@ -1206,7 +1228,7 @@ function normalizeLocalVenue(row: RawEventRow): NormalizedEvent {
     source: row.source,
     isFeatured: false,
     neighborhood: null, venueSlug: null, submitterHandle: null,
-    about: null, highlights: [], venueTips: null, localTips: null,
+    about: null, highlights: [], venueTips: null, localTips: null, nearbyDining: [], localRec: null,
   }
 }
 
@@ -1229,7 +1251,7 @@ function normalizeGeneric(row: RawEventRow): NormalizedEvent {
     source: row.source,
     isFeatured: row.featured ?? false,
     neighborhood: null, venueSlug: null, submitterHandle: null,
-    about: null, highlights: [], venueTips: null, localTips: null,
+    about: null, highlights: [], venueTips: null, localTips: null, nearbyDining: [], localRec: null,
   }
 }
 
