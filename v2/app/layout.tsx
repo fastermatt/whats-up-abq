@@ -3,15 +3,9 @@ import { Epilogue, Inter } from 'next/font/google'
 import Script from 'next/script'
 import BottomNav from './components/BottomNav'
 import DesktopNav from './components/DesktopNav'
-import { InstallPrompt } from './components/InstallPrompt'
-import { FirstVisitBanner } from './components/FirstVisitBanner'
-import { PWAManager } from './components/PWAManager'
-import { AuthCallbackCatcher } from './components/AuthCallbackCatcher'
-import { NewsletterBar } from './components/NewsletterBar'
-import { KoFiFloat } from './components/KoFiFloat'
-import { AnalyticsTracker } from './components/AnalyticsTracker'
-import { WebVitals } from './components/WebVitals'
+import { ClientChrome } from './components/ClientChrome'
 import { AdminGate } from './components/AdminGate'
+import { LazyNewsletterBar } from './components/LazyNewsletterBar'
 import { OG_IMAGE } from '@/lib/fallback-images'
 import './globals.css'
 
@@ -144,14 +138,13 @@ export default function RootLayout({
         </a>
         {/* overflow-x-clip — clips overflow without creating a scroll container,
             so position:sticky still works inside pages */}
-        <AuthCallbackCatcher />
         <div className="w-full overflow-x-clip">
           <DesktopNav />
           <div className="pb-20 md:pb-0">
             {children}
 
             {/* ── Newsletter signup — hidden in admin ── */}
-            <AdminGate><NewsletterBar /></AdminGate>
+            <AdminGate><LazyNewsletterBar /></AdminGate>
 
             {/* ── Site footer — hidden in admin ── */}
             <AdminGate>
@@ -190,12 +183,7 @@ export default function RootLayout({
           </div>
           <BottomNav />
         </div>
-        <AdminGate><KoFiFloat /></AdminGate>
-        <AdminGate><AnalyticsTracker /></AdminGate>
-        <AdminGate><WebVitals /></AdminGate>
-        <PWAManager />
-        <InstallPrompt />
-        <FirstVisitBanner />
+        <ClientChrome />
 
         {/* Flaticon Uicons — async CSS inject, avoids render-blocking */}
         <Script id="flaticon-css" strategy="afterInteractive">{`

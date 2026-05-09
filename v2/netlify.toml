@@ -7,12 +7,22 @@
 # Eventbrite's CDN are NOT in the proxy list (EventImage routes them through
 # Netlify Image CDN for AVIF conversion). Without this, Netlify returns 400.
 [images]
+  # Allowlist for Netlify Image CDN — adds AVIF/WebP conversion + resize for
+  # any external image URL passed through /.netlify/images?url=...
   remote_images = [
     "https://bsmvfutebmbkjvlrhiyq.supabase.co/*",
     "https://img.evbuc.com/*",
     "https://images.universe.com/*",
     "https://imagedelivery.net/*",
     "https://cdn.abqunplugged.com/*",
+    # Ticketmaster + SeatGeek CDNs — direct browser fetches USED to get a
+    # 403 hotlink-block, so events were routed through /api/image-proxy.
+    # That serves originals (no AVIF, no resize) at ~510 KB each, making
+    # them the LCP bottleneck. Direct fetches now succeed; let Netlify
+    # CDN handle them so cards get a proper 30 KB AVIF instead.
+    "https://s1.ticketm.net/*",
+    "https://media.ticketmaster.com/*",
+    "https://seatgeekimages.com/*",
   ]
 
 [build.environment]

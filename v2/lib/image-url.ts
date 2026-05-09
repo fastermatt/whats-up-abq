@@ -5,15 +5,20 @@
  */
 
 /** Domains that CAPTCHA/hotlink-block direct browser loads.
- *  Routing through /api/image-proxy fetches server-side from Netlify's IP. */
+ *  Routing through /api/image-proxy fetches server-side from Netlify's IP.
+ *
+ *  Removed 2026-05-09 (Lighthouse caught a regression):
+ *    - s1.ticketm.net, media.ticketmaster.com, seatgeekimages.com
+ *  Direct fetches to TM/SG CDNs now succeed (verified 200 OK with browser UA).
+ *  Routing them through Netlify Image CDN instead gives AVIF + resize, cutting
+ *  per-card image bytes from ~510 KB original JPEG to ~30 KB AVIF. They're in
+ *  netlify.toml's remote_images allowlist now. Keep the abqtodo / nhccnm /
+ *  do505 / lovenm domains — they still hotlink-block. */
 export const PROXY_DOMAINS = [
   'abqtodo.com',
   'nhccnm.org',
   'do505.com',
   'lovenm.org',
-  'seatgeekimages.com',   // ad-blockers sometimes flag SeatGeek's image CDN
-  's1.ticketm.net',       // Ticketmaster CDN
-  'media.ticketmaster.com',
 ]
 
 /** Route through /api/image-proxy if the domain is in PROXY_DOMAINS. */
