@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Download, Save, Layers as LayersIcon, RotateCcw, RotateCw, X, RefreshCw } from 'lucide-react'
+import { Download, Save, Layers as LayersIcon, RotateCcw, RotateCw, X, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react'
 import { useEditor } from '../store'
 import { EVENT_TEMPLATES, PROMO_TEMPLATES, TEMPLATES } from '../lib/templates'
 import type { Template, TemplateContext, TemplateThumbnail } from '../lib/templates'
@@ -395,15 +395,20 @@ export function Toolbar({ mode, onModeChange, canvasRef, event, image }: Toolbar
             >Brand</button>
           </div>
 
+          {/* Templates is the most-used control once an event is loaded —
+              promoted to a primary terra-filled action so visual weight
+              matches frequency-of-use (round-2 critique #1). */}
           <button
             onClick={() => setShowGallery(v => !v)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 border rounded text-xs font-semibold transition-colors touch-manipulation ${
+            aria-expanded={showGallery}
+            className={`flex items-center gap-1.5 min-h-[40px] px-3.5 rounded-lg text-xs font-bold transition-colors touch-manipulation ${
               showGallery
-                ? 'bg-[#9a442d]/20 border-[#9a442d]/50 text-[#9a442d]'
-                : 'bg-white/[0.05] hover:bg-white/[0.09] border-white/[0.09] text-white/70'
+                ? 'bg-[#9a442d]/25 border border-[#9a442d]/60 text-[#e8a898]'
+                : 'bg-[#9a442d] hover:bg-[#b5502f] text-white border border-[#9a442d]'
             }`}
           >
-            Templates {showGallery ? '↑' : '↓'}
+            <LayersIcon size={13} /> Templates
+            {showGallery ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
           </button>
 
           {/* Reset to template — only visible after the user has diverged
@@ -466,14 +471,22 @@ export function Toolbar({ mode, onModeChange, canvasRef, event, image }: Toolbar
 
           <button
             onClick={toggleSafeZone}
-            title="Toggle safe zone guides"
-            className={`px-2.5 py-1.5 border rounded text-xs font-semibold transition-colors touch-manipulation hidden sm:flex items-center gap-1 ${
+            title={showSafeZone ? 'Hide safe-zone guides' : 'Show safe-zone guides'}
+            aria-label="Toggle safe zone guides"
+            aria-pressed={showSafeZone}
+            className={`min-h-[40px] min-w-[40px] flex items-center justify-center rounded border text-xs font-semibold transition-colors touch-manipulation ${
               showSafeZone
                 ? 'bg-yellow-500/15 border-yellow-500/40 text-yellow-300'
-                : 'bg-white/[0.04] border-white/[0.07] text-white/35 hover:text-white/60 hover:bg-white/[0.07]'
+                : 'bg-white/[0.04] border-white/[0.07] text-white/55 hover:text-white hover:bg-white/[0.07]'
             }`}
           >
-            Safe Zone
+            {/* Square-with-corners glyph as the affordance — much less visual
+                noise than a "Safe Zone" pill that drew the eye away from
+                Templates and Download. */}
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+              <path d="M2 5V3a1 1 0 0 1 1-1h2M11 2h2a1 1 0 0 1 1 1v2M14 11v2a1 1 0 0 1-1 1h-2M5 14H3a1 1 0 0 1-1-1v-2"/>
+              <rect x="5" y="5" width="6" height="6" rx="1" strokeDasharray="1 1.5"/>
+            </svg>
           </button>
 
           {/* Save group: tickbox + button. Tickbox lets the user opt-in to

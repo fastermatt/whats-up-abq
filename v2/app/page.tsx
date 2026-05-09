@@ -233,29 +233,21 @@ export default async function DiscoverPage() {
 
         </div>
 
-        {/* Hero content */}
-        <div className="relative z-10 max-w-6xl mx-auto px-4 pt-5 md:pt-7 pb-5">
+        {/* Hero content — round-2 critique #4: trimmed from 7 stacked elements
+            to 4 (mobile logo, headline, rotating saying, search). The "The 505."
+            brand mark moved out (DesktopNav has the logo + the footer/about pages
+            cover identity). The tonight CTA was redundant with the stat strip
+            below; folded into it. Bigger search + surprise gets the breathing
+            room previously spent on duplicated affordances. */}
+        <div className="relative z-10 max-w-6xl mx-auto px-4 pt-6 md:pt-9 pb-6">
 
           {/* Mobile-only wordmark — desktop has the logo in the sticky DesktopNav */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/logo-terra.svg"
             alt="ABQ Unplugged"
-            className="md:hidden h-8 w-auto mb-3 animate-fade-in"
+            className="md:hidden h-8 w-auto mb-4 animate-fade-in"
           />
-
-          {/* Brand mark — compact, terra, above the headline */}
-          <p
-            className="font-black mb-2 animate-fade-in"
-            style={{
-              fontFamily: 'var(--font-epilogue)',
-              fontSize: 'clamp(13px, 1.6vw, 19px)',
-              color: '#9a442d',
-              letterSpacing: '0.06em',
-            }}
-          >
-            The 505.
-          </p>
 
           {/* Functional headline — clear user intent */}
           <h2
@@ -284,75 +276,64 @@ export default async function DiscoverPage() {
             {heroSaying}
           </p>
 
-          {/* Tonight pill — primary CTA */}
-          {tonight.total > 0 && (
-            <div className="mb-4 animate-hero-text">
-              <Link
-                href="/tonight"
-                className="inline-flex items-center gap-2 bg-[#9a442d] text-white font-bold text-sm px-4 py-2 rounded-full hover:bg-[#7d3725] transition-colors shadow-sm"
-                style={{ fontFamily: 'var(--font-epilogue)' }}
-              >
-                <span className="w-2 h-2 rounded-full bg-white/80 animate-pulse flex-shrink-0" />
-                {tonight.total.toLocaleString()} events tonight →
-              </Link>
-            </div>
-          )}
-
-          {/* Search + surprise */}
+          {/* Search + surprise — bigger, more prominent now that we've
+              cleared 3 elements above. Min-h-[48px] meets WCAG 2.5.5 AAA. */}
           <div className="flex items-center gap-3 animate-hero-row">
             <form
               action="/events"
               method="get"
-              className="flex flex-1 max-w-[460px] rounded-xl overflow-hidden border border-[#d4b896]"
+              className="flex flex-1 max-w-[480px] rounded-xl overflow-hidden border border-[#d4b896]"
               style={{ boxShadow: '0 4px 20px rgba(26,22,20,.09)' }}
             >
               <input
                 name="q"
                 type="text"
                 placeholder="Search events, venues, neighborhoods…"
-                className="flex-1 bg-white text-[#1a1614] text-sm px-4 py-3 outline-none placeholder:text-[#a8958a]"
+                className="flex-1 min-h-[48px] bg-white text-[#1a1614] text-sm px-4 outline-none placeholder:text-[#a8958a]"
                 aria-label="Search events"
               />
               <button
                 type="submit"
-                className="bg-[#9a442d] text-white font-bold text-sm px-5 hover:bg-[#7d3725] transition-colors flex items-center gap-1.5 whitespace-nowrap"
+                className="bg-[#9a442d] text-white font-bold text-sm px-5 min-h-[48px] hover:bg-[#7d3725] transition-colors flex items-center gap-1.5 whitespace-nowrap"
               >
                 <i className="fi fi-rr-search text-[12px]" aria-hidden="true" />
                 Search
               </button>
             </form>
-            <span className="text-[11px] text-[#8a7a74] hidden sm:block whitespace-nowrap">
-              {allUpcoming.total.toLocaleString()} events
-            </span>
             <SurpriseButton />
           </div>
         </div>
 
-        {/* Stat strip — ink palette on cream */}
+        {/* Stat strip — sentence-style links so the LABEL leads
+            (round-2 critique: tiny labels under big numbers force a
+            beat of parsing; pulling the label first reads instantly). */}
         <div
           className="relative z-10 mt-5"
           style={{ background: 'rgba(26,22,20,.04)', borderTop: '1px solid rgba(26,22,20,.08)' }}
         >
           <div className="max-w-6xl mx-auto grid grid-cols-3">
             {[
-              { label: 'Tonight',      count: tonight.total,     href: '/tonight',  accent: true },
-              { label: 'This Weekend', count: weekend.total,     href: '/weekend',  accent: false },
-              { label: 'All Upcoming', count: allUpcoming.total, href: '/events',                   accent: false },
+              { label: 'Tonight',  count: tonight.total,     href: '/tonight',  accent: true  },
+              { label: 'Weekend',  count: weekend.total,     href: '/weekend',  accent: false },
+              { label: 'Upcoming', count: allUpcoming.total, href: '/events',   accent: false },
             ].map((tab, i) => (
               <Link
                 key={tab.label}
                 href={tab.href}
-                className="py-3.5 flex flex-col items-center transition-colors hover:bg-black/[0.04]"
+                className="py-3 sm:py-3.5 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 transition-colors hover:bg-black/[0.04] group"
                 style={i < 2 ? { borderRight: '1px solid rgba(26,22,20,.08)' } : {}}
               >
                 <span
-                  className="font-black text-xl sm:text-2xl leading-none"
+                  className="text-[11px] sm:text-sm font-bold tracking-wide"
+                  style={{ fontFamily: 'var(--font-epilogue)', color: tab.accent ? '#9a442d' : '#1a1614' }}
+                >
+                  {tab.label}
+                </span>
+                <span
+                  className="font-black text-lg sm:text-xl leading-none"
                   style={{ fontFamily: 'var(--font-epilogue)', color: tab.accent ? '#9a442d' : '#1a1614' }}
                 >
                   {tab.count.toLocaleString()}
-                </span>
-                <span className="text-[10px] sm:text-[11px] mt-0.5" style={{ color: '#8a7a74' }}>
-                  {tab.label}
                 </span>
               </Link>
             ))}

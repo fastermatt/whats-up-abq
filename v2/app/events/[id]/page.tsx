@@ -704,27 +704,38 @@ export default async function EventDetailPage({ params }: PageProps) {
           {/* ── Reviews ── */}
           <ReviewSection eventId={event.id} />
 
-          {/* ── Instagram share graphics ── */}
+          {/* ── Instagram share — round-2 critique #5: one CTA, then a
+              thin row of size shortcuts. Most users want "share this event"
+              not "pick a Konva canvas aspect ratio". The default leads to
+              the Feed-format (4:5) view; the small chips let power users
+              jump straight to Story or Square. */}
           <div className="mt-8 pt-6 border-t border-[#eee0cc]">
-            <p className="text-[11px] font-semibold text-[#6b5d57] uppercase tracking-wide mb-3">Share to Instagram</p>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { href: `/events/${event.id}/ig2`, label: '4:5', desc: 'Feed' },
-                { href: `/events/${event.id}/ig3`, label: '9:16', desc: 'Story' },
-                { href: `/events/${event.id}/ig`,  label: '1:1',  desc: 'Square' },
-              ].map(({ href, label, desc }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#9a442d] text-white font-semibold text-sm hover:bg-[#7d3725] transition-all active:scale-[0.98]"
-                  style={{ fontFamily: 'var(--font-epilogue)' }}
-                >
-                  <span className="text-base leading-none">📸</span>
-                  <span>{label} <span className="font-normal opacity-75">{desc}</span></span>
-                </Link>
-              ))}
+            <div className="flex items-center justify-between gap-3 flex-wrap mb-2">
+              <p className="text-[11px] font-semibold text-[#6b5d57] uppercase tracking-wide">Share to Instagram</p>
+              <div className="flex gap-1 text-[11px]">
+                {[
+                  { href: `/events/${event.id}/ig3`, label: 'Story' },
+                  { href: `/events/${event.id}/ig`,  label: 'Square' },
+                ].map(({ href, label }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    className="px-2 py-1 rounded-md text-[#9a442d] hover:bg-[#9a442d]/10 transition-colors font-semibold"
+                  >
+                    {label}
+                  </Link>
+                ))}
+              </div>
             </div>
-            <p className="text-[10px] text-[#8a7a74] mt-2">Switch between portrait, story &amp; square inside the editor</p>
+            <Link
+              href={`/events/${event.id}/ig2`}
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#9a442d] text-white font-bold text-sm hover:bg-[#7d3725] transition-all active:scale-[0.98]"
+              style={{ fontFamily: 'var(--font-epilogue)' }}
+            >
+              <span className="text-base leading-none">📸</span>
+              Share to Instagram
+            </Link>
+            <p className="text-[10px] text-[#8a7a74] mt-2">Opens a feed-ready 4:5 graphic. Use Story or Square above for other formats.</p>
           </div>
 
           <div className="h-8" />

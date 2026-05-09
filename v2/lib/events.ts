@@ -364,24 +364,13 @@ export async function fetchEvents({
   }
 
   // Tonight-specific: drop events whose start time is known to be before 5 PM MDT.
-  // The DB query used a bare date string as gte (to catch date-only event_date rows),
-  // so morning events are in the result set — this JS pass removes them.
-  // Events with date-only event_date (no time info) are kept: they might be evening shows.
+  // See isEvening() for the parsing logic — handles both full-ISO timestamps
+  // on event.date AND date-only events whose time lives in event.time.
+  // Bug fixed 2026-05-09: previously, any event with a date-only event_date
+  // was kept regardless of event.time, leaking morning events (e.g. 10 AM
+  // Mother's Day Tea) into the Tonight feed.
   if (timeFilter === 'tonight') {
-    const cutoff = (() => {
-      const d = new TZDate(new Date(), ABQ_TZ)
-      d.setHours(17, 0, 0, 0)
-      return d.getTime()
-    })()
-    allNormalized = allNormalized.filter((event) => {
-      // 'YYYY-MM-DD' → date-only, time unknown → include
-      if (/^\d{4}-\d{2}-\d{2}$/.test(event.date)) return true
-      try {
-        return new TZDate(new Date(event.date), ABQ_TZ).getTime() >= cutoff
-      } catch {
-        return true // parse failure → include rather than silently drop
-      }
-    })
+    allNormalized = allNormalized.filter(isEvening)
   }
 
   return {
@@ -665,9 +654,13 @@ function sourcePriority(source: string): number {
   }
 }
 
-/** Tonight's events (today in Denver time), ranked:
+/** Tonight's events (today in Denver time, evening only), ranked:
  *  featured DESC → has_photo DESC → source_priority DESC → event_date ASC.
- *  Returns up to 60. */
+ *  Returns up to 60.
+ *
+ *  "Evening" = start time at or after 5 PM MDT. Events with truly unknown
+ *  times are kept (might be evening shows). Morning/afternoon events with a
+ *  known start time are dropped. */
 export async function fetchTonightRanked(limit = 60): Promise<NormalizedEvent[]> {
   const supabase = createStaticClient()
   // Compute today's date in Denver timezone
@@ -693,6 +686,7 @@ export async function fetchTonightRanked(limit = 60): Promise<NormalizedEvent[]>
   return ((data ?? []) as RawEventRow[])
     .map(normalizeRow)
     .filter((e): e is NormalizedEvent => e !== null)
+    .filter(isEvening)
     .sort((a, b) => {
       // featured DESC
       if ((b.isFeatured ? 1 : 0) !== (a.isFeatured ? 1 : 0))
@@ -709,6 +703,32 @@ export async function fetchTonightRanked(limit = 60): Promise<NormalizedEvent[]>
       return a.date.localeCompare(b.date)
     })
     .slice(0, limit)
+}
+
+/**
+ * Predicate: is this event happening in the evening (≥5 PM MDT)?
+ * Used by the Tonight ranked feed and the Tonight time filter to keep
+ * morning events out of "tonight" sections. Events with an unknown time
+ * are kept since they might be evening shows.
+ */
+function isEvening(event: NormalizedEvent): boolean {
+  const EVENING_HOUR = 17
+  // Full ISO timestamp on event.date — compare directly
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(event.date)) {
+    try {
+      return new TZDate(new Date(event.date), ABQ_TZ).getHours() >= EVENING_HOUR
+    } catch { return true }
+  }
+  // Date-only: parse the separate event.time string ("10:00 AM" / "19:30")
+  const t = event.time?.trim()
+  if (!t) return true // unknown — keep
+  const m = t.match(/^(\d{1,2}):(\d{2})\s*([AaPp][Mm])?$/)
+  if (!m) return true
+  let hr = parseInt(m[1], 10)
+  const meridian = m[3]?.toUpperCase()
+  if (meridian === 'PM' && hr < 12) hr += 12
+  if (meridian === 'AM' && hr === 12) hr = 0
+  return hr >= EVENING_HOUR
 }
 
 /** Weekend events (Fri/Sat/Sun), ranked same as tonight.

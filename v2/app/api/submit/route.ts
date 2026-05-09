@@ -102,6 +102,27 @@ export async function POST(request: NextRequest) {
     if (!venue_address?.trim())
       return NextResponse.json({ error: 'Venue address is required' }, { status: 400 })
 
+    // ── Greater Albuquerque metro guard ──
+    // Belt + suspenders: ingestion scripts (TM 40-mi radius, SG city=ABQ,
+    // EB bbox + zip allowlist) keep commercial sources clean. Community
+    // submissions are the one path where bad geo can enter, so reject any
+    // address that explicitly names an out-of-metro NM city. Allowlist of
+    // metro cities means anything else triggers a soft warning that the
+    // venue must be in the ABQ metro.
+    const lowerAddr = venue_address.toLowerCase()
+    const NON_METRO = [
+      'santa fe', 'taos', 'las cruces', 'roswell', 'farmington', 'gallup',
+      'silver city', 'los alamos', 'raton', 'carlsbad', 'hobbs',
+      'alamogordo', 'deming', 'grants', 'espanola', 'truth or consequences',
+      'ruidoso', 'angel fire', 'red river', 'chama',
+    ]
+    const offending = NON_METRO.find(c => lowerAddr.includes(c))
+    if (offending) {
+      return NextResponse.json({
+        error: `ABQ Unplugged covers the greater Albuquerque metro only. The address looks like ${offending.replace(/\b\w/g, l => l.toUpperCase())} — please submit only events in Albuquerque, Rio Rancho, Bernalillo, Corrales, Los Lunas, Belen, the East Mountains, or surrounding metro areas.`,
+      }, { status: 400 })
+    }
+
     if (!photo_url)
       return NextResponse.json({ error: 'An event photo is required' }, { status: 400 })
 
