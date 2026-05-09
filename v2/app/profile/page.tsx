@@ -64,7 +64,7 @@ export default async function ProfilePage() {
   const handle      = profile?.handle || `@${user.email?.split('@')[0]}`
 
   return (
-    <main className="min-h-dvh bg-[--bg]">
+    <main id="main" className="min-h-dvh bg-[--bg]">
       {/* Nav */}
       <header className="sticky top-0 z-20 bg-[--bg]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">

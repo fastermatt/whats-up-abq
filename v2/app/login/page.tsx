@@ -132,7 +132,7 @@ export default function LoginPage() {
     }[done]
 
     return (
-      <main className="min-h-dvh bg-[--bg] flex flex-col">
+      <main id="main" className="min-h-dvh bg-[--bg] flex flex-col">
         <Header />
         <div className="flex-1 flex items-center justify-center px-4 py-12">
           <div className="w-full max-w-sm text-center animate-fade-up">
@@ -153,7 +153,7 @@ export default function LoginPage() {
 
   // ── Main form ───────────────────────────────────────────────────────────────
   return (
-    <main className="min-h-dvh bg-[--bg] flex flex-col">
+    <main id="main" className="min-h-dvh bg-[--bg] flex flex-col">
       <Header />
 
       <div className="flex-1 flex items-center justify-center px-4 py-12">
@@ -314,21 +314,12 @@ export default function LoginPage() {
             </button>
           </div>
 
-          {/* Social proof */}
-          <div className="mt-8 grid grid-cols-3 gap-3 text-center">
-            {[
-              { n: '1,000+', label: 'Events' },
-              { n: 'Free',   label: 'Always' },
-              { n: 'ABQ',    label: 'Only' },
-            ].map(({ n, label }) => (
-              <div key={label} className="bg-white rounded-xl p-3 border border-[#f0e4cc]">
-                <p className="text-sm font-black text-[#9a442d]" style={{ fontFamily: 'var(--font-epilogue)' }}>{n}</p>
-                <p className="text-[10px] text-[#6b5d57]">{label}</p>
-              </div>
-            ))}
-          </div>
+          {/* No social-proof stat strip (round-4 #7) — three-stat tile rows
+              are the canonical SaaS hero-metric template impeccable bans.
+              The "Save events · Check in · Earn badges" subhead at the top
+              of the page already does the social-proof job. */}
 
-          <p className="text-center text-[10px] text-[#6b5d57] mt-4">
+          <p className="text-center text-[10px] text-[#6b5d57] mt-8">
             No spam. Just Albuquerque.
           </p>
         </div>

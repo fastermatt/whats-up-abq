@@ -53,7 +53,7 @@ export default async function SavedPage({ searchParams }: PageProps) {
 
   if (!user) {
     return (
-      <main className="min-h-dvh bg-[--bg] flex flex-col items-center justify-center px-4 py-12 text-center">
+      <main id="main" className="min-h-dvh bg-[--bg] flex flex-col items-center justify-center px-4 py-12 text-center">
         <Bookmark className="w-12 h-12 text-[#ddc9a3] mx-auto mb-4" />
         <h1 className="text-2xl font-black text-[#1a1614] mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
           Saved Events
@@ -136,7 +136,7 @@ export default async function SavedPage({ searchParams }: PageProps) {
   const TABS = [...BASE_TABS, { key: 'friends' as TabKey, label: 'Friends' }]
 
   return (
-    <main className="min-h-dvh bg-[--bg]">
+    <main id="main" className="min-h-dvh bg-[--bg]">
       <header className="sticky top-0 z-20 bg-[--bg]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link href="/" className="text-[#4a3f3a] hover:text-[#9a442d] transition-colors">
@@ -169,7 +169,9 @@ export default async function SavedPage({ searchParams }: PageProps) {
                 {label}
                 {count > 0 && (
                   <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
-                    activeTab === key ? 'bg-white/20 text-white' : 'bg-[#f0e4cc] text-[#9a442d]'
+                    activeTab === key
+                      ? 'bg-white text-[#9a442d]'  // active: solid white pill, terra text — passes WCAG on terra bg
+                      : 'bg-[#f0e4cc] text-[#9a442d]'
                   }`}>{count}</span>
                 )}
               </Link>

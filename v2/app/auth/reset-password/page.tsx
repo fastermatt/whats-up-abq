@@ -36,7 +36,7 @@ export default function ResetPasswordPage() {
 
   if (done) {
     return (
-      <main className="min-h-dvh bg-[--bg] flex flex-col">
+      <main id="main" className="min-h-dvh bg-[--bg] flex flex-col">
         <Header />
         <div className="flex-1 flex items-center justify-center px-4">
           <div className="text-center animate-fade-up">
@@ -52,15 +52,20 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <main className="min-h-dvh bg-[--bg] flex flex-col">
+    <main id="main" className="min-h-dvh bg-[--bg] flex flex-col">
       <Header />
 
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm animate-fade-up">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#9a442d] text-white text-2xl font-black mb-3" style={{ fontFamily: 'var(--font-epilogue)' }}>
-              A
-            </div>
+            {/* Use the same wordmark as /login for brand continuity (round-4 #15) */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo-terra.svg"
+              alt="ABQ Unplugged"
+              className="mx-auto mb-4"
+              style={{ width: '140px', height: 'auto' }}
+            />
             <h1 className="text-2xl font-black text-[#1a1614] mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
               Set new password
             </h1>

@@ -76,7 +76,7 @@ export default function FeedbackPage() {
 
   if (status === 'success') {
     return (
-      <main className="min-h-dvh bg-[#fbf7f1] flex items-center justify-center px-4">
+      <main id="main" className="min-h-dvh bg-[#fbf7f1] flex items-center justify-center px-4">
         <div className="max-w-md w-full text-center animate-fade-up">
           <CheckCircle className="w-16 h-16 text-[#4f6249] mx-auto mb-4" />
           <h1 className="text-2xl font-black text-[#1a1614] mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
@@ -102,7 +102,7 @@ export default function FeedbackPage() {
   }
 
   return (
-    <main className="min-h-dvh bg-[#fbf7f1]">
+    <main id="main" className="min-h-dvh bg-[#fbf7f1]">
       <header className="sticky top-0 z-20 bg-[#fbf7f1]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
           <Link href="/" className="flex items-center gap-1.5 text-sm text-[#4a3f3a] hover:text-[#9a442d] transition-colors">

@@ -221,7 +221,7 @@ export default function SubmitEventPage() {
 
   if (!authChecked) {
     return (
-      <main className="min-h-dvh bg-[#fbf7f1] flex items-center justify-center">
+      <main id="main" className="min-h-dvh bg-[#fbf7f1] flex items-center justify-center">
         <Loader2 className="w-6 h-6 text-[#9a442d] animate-spin" />
       </main>
     )
@@ -229,25 +229,31 @@ export default function SubmitEventPage() {
 
   if (status === 'success') {
     return (
-      <main className="min-h-dvh bg-[#fbf7f1] flex items-center justify-center px-4">
+      <main id="main" className="min-h-dvh bg-[#fbf7f1] flex items-center justify-center px-4">
         <div className="max-w-md w-full text-center animate-fade-up">
           <CheckCircle className="w-16 h-16 text-[#4f6249] mx-auto mb-4" />
           <h1 className="text-2xl font-black text-[#1a1614] mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
             Event submitted!
           </h1>
           <p className="text-sm text-[#6b5d57] mb-6 leading-relaxed">
-            Thanks for contributing to ABQ Unplugged. We review every submission before it goes live — usually within 24 hours.
+            Thanks for contributing to ABQ Unplugged. We review every submission before it goes live, usually within 24 hours.
             You&apos;ll see the event appear on the site once approved.
           </p>
-          <div className="flex justify-center gap-3 flex-wrap">
-            <Link href="/events" className="px-4 py-2 rounded-full bg-[#9a442d] text-white text-sm font-semibold hover:bg-[#7d3725] transition-colors">
+          {/* Primary action gets visual weight; "Submit another" is rare so it
+              demotes to a tertiary text link below (round-4 critique #20). */}
+          <div className="flex flex-col items-center gap-3">
+            <Link
+              href="/events"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[#9a442d] text-white text-base font-bold hover:bg-[#7d3725] transition-colors min-w-[220px]"
+              style={{ fontFamily: 'var(--font-epilogue)' }}
+            >
               Browse events
             </Link>
             <button
               onClick={() => { setStatus('idle'); setForm(EMPTY_FORM); setPhoto(null); setFieldErrors({}) }}
-              className="px-4 py-2 rounded-full border border-[#ddc9a3] text-sm text-[#4a3f3a] hover:border-[#9a442d] transition-colors"
+              className="text-xs text-[#6b5d57] hover:text-[#9a442d] transition-colors underline underline-offset-2"
             >
-              Submit another
+              Submit another event
             </button>
           </div>
         </div>
@@ -256,7 +262,7 @@ export default function SubmitEventPage() {
   }
 
   return (
-    <main className="min-h-dvh bg-[#fbf7f1]">
+    <main id="main" className="min-h-dvh bg-[#fbf7f1]">
       <header className="sticky top-0 z-20 bg-[#fbf7f1]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
           <Link href="/events" className="flex items-center gap-1.5 text-sm text-[#4a3f3a] hover:text-[#9a442d] transition-colors">
@@ -300,7 +306,7 @@ export default function SubmitEventPage() {
 
           {/* ── Event core ── */}
           <section className="bg-white rounded-2xl border border-[#f0e4cc] p-5 space-y-4">
-            <h2 className="text-xs font-bold text-[#9a442d] uppercase tracking-wider">The event</h2>
+            <h2 className="text-xs font-bold text-[#9a442d] uppercase tracking-wider"><span className="text-[#9a442d]/55">Step 1 of 4 ·</span> The event</h2>
 
             <div>
               <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">
@@ -383,7 +389,7 @@ export default function SubmitEventPage() {
 
           {/* ── Venue ── */}
           <section className="bg-white rounded-2xl border border-[#f0e4cc] p-5 space-y-4">
-            <h2 className="text-xs font-bold text-[#9a442d] uppercase tracking-wider">Venue</h2>
+            <h2 className="text-xs font-bold text-[#9a442d] uppercase tracking-wider"><span className="text-[#9a442d]/55">Step 2 of 4 ·</span> Venue</h2>
             <div>
               <label className="block text-xs font-semibold text-[#4a3f3a] mb-1.5 flex items-center gap-1">
                 <MapPin className="w-3 h-3" /> Venue name <Req />
@@ -420,6 +426,7 @@ export default function SubmitEventPage() {
           }`}>
             <div className="flex items-start justify-between">
               <div>
+                <p className="text-[10px] font-bold text-[#9a442d]/55 uppercase tracking-wider mb-1">Step 3 of 4</p>
                 <div className="flex items-center gap-2 mb-0.5">
                   <ImageIcon className="w-4 h-4 text-[#9a442d]" />
                   <h2 className="text-sm font-black text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
@@ -427,7 +434,7 @@ export default function SubmitEventPage() {
                   </h2>
                 </div>
                 <p className="text-[11px] text-[#6a5a54]">
-                  Required — this is how people discover your event.
+                  Required. This is how people find your event.
                 </p>
               </div>
               {!photoFile && (
@@ -522,7 +529,7 @@ export default function SubmitEventPage() {
 
           {/* ── Tickets & price ── */}
           <section className="bg-white rounded-2xl border border-[#f0e4cc] p-5 space-y-4">
-            <h2 className="text-xs font-bold text-[#9a442d] uppercase tracking-wider">Tickets &amp; price <Req /></h2>
+            <h2 className="text-xs font-bold text-[#9a442d] uppercase tracking-wider"><span className="text-[#9a442d]/55">Step 4 of 4 ·</span> Tickets &amp; price <Req /></h2>
 
             <label className="flex items-center gap-2.5 text-sm text-[#4a3f3a] cursor-pointer select-none">
               <input
@@ -533,7 +540,7 @@ export default function SubmitEventPage() {
                 }}
                 className="w-4 h-4 accent-[#9a442d]"
               />
-              <span>This is a <strong>free</strong> event — no tickets needed</span>
+              <span>This is a <strong>free</strong> event (no tickets needed)</span>
             </label>
 
             {!form.is_free && (

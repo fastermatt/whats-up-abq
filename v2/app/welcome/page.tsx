@@ -9,7 +9,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import {
   Sparkles, Calendar, MapPin, Heart, Bell, Users, Compass,
-  Music2, Palette, Drama, UtensilsCrossed, ArrowRight, Star,
+  Music2, Palette, Drama, UtensilsCrossed, ArrowRight,
 } from 'lucide-react'
 import { fetchEvents } from '@/lib/events'
 import { OG_IMAGE } from '@/lib/fallback-images'
@@ -37,31 +37,31 @@ const benefits = [
   {
     icon: Calendar,
     title: 'Every event, one place',
-    body: 'Pulled from Ticketmaster, SeatGeek, Eventbrite, NHCC, the Alibi, abqtodo.com, and 80+ local venues. Updated daily, so no more switching between five tabs.',
+    body: 'Pulled from Ticketmaster, SeatGeek, Eventbrite, NHCC, the Alibi, abqtodo.com, and 80+ local venues. Updated daily, so no more switching between five tabs.\''
   },
   {
     icon: Compass,
     title: 'Filter by neighborhood',
-    body: 'Browse Nob Hill, Old Town, Downtown, North Valley, Westside, Northeast Heights. See only what\'s near you, with a Google Maps link on every venue.',
+    body: 'Browse Nob Hill, Old Town, Downtown, North Valley, Westside, Northeast Heights. See only what\'s near you, with a Google Maps link on every venue.\''
   },
   {
     icon: Sparkles,
     title: 'Surprise Me',
-    body: 'Don’t know what to do tonight? One tap and we’ll send you to a random event you might not have found yourself.',
+    body: "Don't know what to do tonight? One tap and we'll send you to a random event you might not have found yourself.",
   },
   {
     icon: Heart,
     title: 'Save what you love',
-    body: 'Bookmark events you’re thinking about, mark yourself going, and see who else is going from your friends list.',
+    body: "Bookmark events you're thinking about, mark yourself going, and see who else is going from your friends list.",
   },
   {
     icon: Bell,
     title: 'Smart reminders',
-    body: 'Set up your taste profile (date night, family, free, music, comedy…) and get a heads-up when something matches.',
+    body: 'Set up your taste profile (date night, family, free, music, comedy) and get a heads-up when something matches.',
   },
   {
     icon: Users,
-    title: 'See who’s going',
+    title: "See who's going",
     body: 'Public profiles for users who opt in. Find out which events your friends are checking out and who else in ABQ is going.',
   },
 ]
@@ -98,7 +98,7 @@ export default async function WelcomePage() {
             className="text-4xl sm:text-6xl font-black leading-[1.05] tracking-tight mb-5"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
-            There’s more happening<br />in ABQ than you think.
+            There&apos;s more happening<br />in ABQ than you think.
           </h1>
           <p className="text-lg sm:text-xl text-white/90 max-w-2xl leading-relaxed mb-6">
             ABQ Unplugged is the easiest way to find things to do in Albuquerque:
@@ -221,9 +221,12 @@ export default async function WelcomePage() {
 
       {/* ── Final CTA — sign up ── */}
       <section className="max-w-3xl mx-auto px-6 py-14 text-center">
-        <div className="inline-flex items-center gap-1.5 mb-3">
-          {[0,1,2,3,4].map(i => <Star key={i} className="w-4 h-4 fill-[#9a442d] text-[#9a442d]" />)}
-        </div>
+        {/* Round-4 #6: removed the 5-star widget. Five stars not tied to any
+            review system reads as fake social proof. The trust signal is
+            already carried by the body copy + the actual product. */}
+        <p className="text-[10px] uppercase tracking-[0.22em] text-[#9a442d] font-semibold mb-3">
+          Built in Albuquerque, used by Burqueños
+        </p>
         <h2
           className="text-3xl sm:text-4xl font-black text-[#1a1614] tracking-tight mb-3"
           style={{ fontFamily: 'var(--font-epilogue)' }}

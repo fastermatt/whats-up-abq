@@ -47,12 +47,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return {
     // Use absolute to prevent the root layout's title template from appending "| ABQ Unplugged" again
-    title: { absolute: `${displayName} (${handle}) — ABQ Unplugged` },
+    title: { absolute: `${displayName} (${handle}) · ABQ Unplugged` },
     openGraph: {
-      title: `${displayName} (${handle}) — ABQ Unplugged`,
+      title: `${displayName} (${handle}) · ABQ Unplugged`,
       description: bio
-        ? `${bio} — See what ${displayName} is up to on ABQ Unplugged.`
-        : `Check out ${displayName}'s events and check-ins on ABQ Unplugged — Albuquerque's event guide.`,
+        ? `${bio}. See what ${displayName} is up to on ABQ Unplugged.`
+        : `Check out ${displayName}'s events and check-ins on ABQ Unplugged, Albuquerque's event guide.`,
     },
   }
 }
@@ -112,7 +112,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
   const totalCheckIns = profile.total_check_ins ?? 0
 
   return (
-    <main className="min-h-dvh bg-[#fbf7f1]">
+    <main id="main" className="min-h-dvh bg-[#fbf7f1]">
       {/* Header */}
       <header className="sticky top-0 z-20 bg-[#fbf7f1]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
@@ -187,7 +187,8 @@ export default async function PublicProfilePage({ params }: PageProps) {
           {(goingEvents?.length ?? 0) === 0 ? (
             <div className="text-center py-8 bg-white rounded-2xl border border-[#f0e4cc]">
               <Calendar className="w-8 h-8 text-[#ddc9a3] mx-auto mb-2" />
-              <p className="text-sm text-[#6b5d57]">No upcoming events</p>
+              <p className="text-sm font-semibold text-[#1a1614]">{displayName} hasn&apos;t picked their next move yet.</p>
+              <p className="text-xs text-[#6b5d57] mt-1">Check back soon.</p>
             </div>
           ) : (
             <div className="space-y-2">

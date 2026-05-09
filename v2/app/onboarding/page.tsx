@@ -36,7 +36,7 @@ export default async function OnboardingPage() {
   const existing = (profile?.preferences ?? {}) as UserPreferences
 
   return (
-    <main className="min-h-dvh bg-[#fbf7f1] flex flex-col">
+    <main id="main" className="min-h-dvh bg-[#fbf7f1] flex flex-col">
       {/* Minimal header — just the wordmark */}
       <header className="px-6 py-5 border-b border-[#ddc9a3]/40">
         <span
@@ -50,8 +50,10 @@ export default async function OnboardingPage() {
       <div className="flex-1 max-w-2xl mx-auto w-full px-4 py-10">
         {/* Heading */}
         <div className="mb-8">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-[#9a442d] font-bold mb-2">
-            Quick setup
+          <p className="text-[11px] uppercase tracking-[0.18em] text-[#9a442d] font-bold mb-2 flex items-center gap-2">
+            <span>Quick setup</span>
+            <span className="text-[#9a442d]/50" aria-hidden="true">·</span>
+            <span className="font-semibold text-[#9a442d]/70">Almost done</span>
           </p>
           <h1
             className="text-3xl sm:text-4xl font-black text-[#1a1614] leading-tight mb-3"

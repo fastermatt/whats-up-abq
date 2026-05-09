@@ -40,7 +40,7 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
   ]
 
   return (
-    <main className="min-h-dvh bg-[--bg]">
+    <main id="main" className="min-h-dvh bg-[--bg]">
       <header className="sticky top-0 z-20 bg-[--bg]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
           <Link href="/profile" className="text-[#4a3f3a] hover:text-[#9a442d] transition-colors">
