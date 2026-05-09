@@ -246,7 +246,7 @@ function SchedulePanel({
         <p className="text-[11px] font-bold uppercase tracking-widest text-white/60">Schedule Post</p>
         <button
           onClick={onCancel}
-          className="text-[10px] text-white/30 hover:text-white/60 transition-colors"
+          className="text-[10px] text-white/55 hover:text-white/60 transition-colors"
         >
           Cancel
         </button>
@@ -255,7 +255,7 @@ function SchedulePanel({
       {/* Quick presets */}
       {presets.length > 0 && (
         <div className="space-y-1.5">
-          <p className="text-[10px] text-white/30 uppercase tracking-wider">Quick pick</p>
+          <p className="text-[10px] text-white/55 uppercase tracking-wider">Quick pick</p>
           <div className="flex flex-wrap gap-1.5">
             {presets.map(p => (
               <button
@@ -586,7 +586,7 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-widest text-white/60">Caption & Post</p>
-          <p className="text-[10px] text-white/30 mt-0.5">
+          <p className="text-[10px] text-white/55 mt-0.5">
             {isCarousel
               ? `${design.slides.length} slides → carousel post`
               : 'Edit your caption, then post directly to @abqunplugged.'}
@@ -635,20 +635,20 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
               <MapPin size={10} />Location Tag <span className="font-normal normal-case tracking-normal opacity-60">(optional)</span>
             </p>
             {venueId && (
-              <button onClick={clearVenue} className="text-[10px] text-white/30 hover:text-white/60 transition-colors">Clear</button>
+              <button onClick={clearVenue} className="text-[10px] text-white/55 hover:text-white/60 transition-colors">Clear</button>
             )}
           </div>
           {venueId ? (
             <div className="flex items-center gap-2 bg-white/[0.06] border border-[#9a442d]/25 rounded-lg px-3 py-2">
               <MapPin size={11} className="text-[#9a442d] shrink-0" />
               <span className="text-xs text-white/80 flex-1 truncate">{venueName}</span>
-              <button onClick={clearVenue} className="text-white/30 hover:text-white/70 transition-colors ml-1">
+              <button onClick={clearVenue} className="text-white/55 hover:text-white/70 transition-colors ml-1">
                 <X size={12} />
               </button>
             </div>
           ) : (
             <div className="relative">
-              <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none">
+              <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/55 pointer-events-none">
                 {venueLoading ? <Loader2 size={11} className="animate-spin" /> : <Search size={11} />}
               </div>
               <input
@@ -729,7 +729,7 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
         <p className="text-[10px] text-white/25">
           Tip: use <span className="font-mono">@username</span> to tag accounts · <span className="font-mono">#hashtag</span> to add topics
         </p>
-        <p className={`text-[10px] ${text.length > 2200 ? 'text-red-400' : 'text-white/30'}`}>
+        <p className={`text-[10px] ${text.length > 2200 ? 'text-red-400' : 'text-white/55'}`}>
           {text.length} / 2,200
         </p>
       </div>

@@ -313,7 +313,7 @@ export default async function IGCaptionsPage() {
         <p className="text-white/50 text-sm mb-3">
           Find an event below → download the card → copy a caption → paste into Instagram.
         </p>
-        <div className="flex flex-wrap gap-4 text-xs text-white/30 mb-4">
+        <div className="flex flex-wrap gap-4 text-xs text-white/55 mb-4">
           <span>📊 {total} upcoming events</span>
           <span>🌙 {tonightEvents.length} tonight</span>
           <span>🎴 {spotlightItems.length} event cards ready</span>
@@ -353,7 +353,7 @@ export default async function IGCaptionsPage() {
           >
             Event Spotlights
           </h2>
-          <p className="text-xs text-white/30">
+          <p className="text-xs text-white/55">
             {spotlightItems.length} upcoming events · 4:5 portrait or 1:1 square · 4 caption styles · search to jump to any event.
           </p>
         </div>
@@ -369,7 +369,7 @@ export default async function IGCaptionsPage() {
           >
             Round-Up Posts
           </h2>
-          <p className="text-xs text-white/30">
+          <p className="text-xs text-white/55">
             Tonight&apos;s picks update in real time. Use these daily or weekly.
           </p>
         </div>
@@ -377,7 +377,7 @@ export default async function IGCaptionsPage() {
         <div className="space-y-8">
           {tonightRoundup && (
             <div className="bg-[#201c1a] border border-white/[0.07] rounded-2xl p-5 space-y-5">
-              <p className="text-xs text-white/30">
+              <p className="text-xs text-white/55">
                 🌙 Tonight&apos;s picks — image + caption ready to paste into Instagram
               </p>
               <div className="flex flex-col lg:flex-row gap-6">
@@ -401,7 +401,7 @@ export default async function IGCaptionsPage() {
 
           {weeklyRoundup && (
             <div className="bg-[#201c1a] border border-white/[0.07] rounded-2xl p-5 space-y-5">
-              <p className="text-xs text-white/30">
+              <p className="text-xs text-white/55">
                 📅 Weekly round-up — image + caption ready to paste into Instagram
               </p>
               <div className="flex flex-col lg:flex-row gap-6">
@@ -426,7 +426,7 @@ export default async function IGCaptionsPage() {
           )}
 
           {!tonightRoundup && !weeklyRoundup && (
-            <p className="text-white/30 text-sm">No upcoming events found.</p>
+            <p className="text-white/55 text-sm">No upcoming events found.</p>
           )}
         </div>
       </section>
@@ -440,7 +440,7 @@ export default async function IGCaptionsPage() {
           >
             Site Promo Posts
           </h2>
-          <p className="text-xs text-white/30">
+          <p className="text-xs text-white/55">
             6 distinct designs — mix these throughout the week to build the brand.
           </p>
         </div>
@@ -452,10 +452,10 @@ export default async function IGCaptionsPage() {
               className="bg-[#201c1a] border border-white/[0.07] rounded-2xl p-5 space-y-5"
             >
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-white/20 bg-white/[0.04] rounded px-2 py-0.5">
+                <span className="text-xs font-bold text-white/45 bg-white/[0.04] rounded px-2 py-0.5">
                   Design {variant + 1} of 6
                 </span>
-                <span className="text-xs text-white/30">{description}</span>
+                <span className="text-xs text-white/55">{description}</span>
               </div>
 
               <div className="flex flex-col lg:flex-row gap-6">

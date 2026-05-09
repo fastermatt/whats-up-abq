@@ -35,10 +35,10 @@ export default async function AdminDashboard() {
     supabase.from('user_events').select('*', { count: 'exact', head: true }).eq('state', 'saved'),
     supabase.from('user_events').select('*', { count: 'exact', head: true }).eq('state', 'going'),
     supabase.from('check_ins').select('*', { count: 'exact', head: true }).gte('checked_in_at', weekAgo),
-    supabase.from('event_reports').select('id,event_id,event_title,report_type,message,created_at,status').order('created_at', { ascending: false }).limit(5),
+    supabase.from('event_reports').select('id, event_id, event_title, report_type, message, created_at, status').order('created_at', { ascending: false }).limit(5),
     // Most-saved events
     supabase.from('user_events').select('event_id, event_name').limit(500),
-    // Category breakdown — read the actual category column, not ai_enrichment
+    // Category breakdown, read the actual category column, not ai_enrichment
     supabase.from('events').select('category').eq('hidden', false).gte('event_date', today),
     // Analytics events in last 7 days (pulls `data` so we can filter out V1 noise)
     supabase.from('analytics').select('event_type, data, created_at').gte('created_at', weekAgo + 'T00:00:00').order('created_at', { ascending: false }).limit(500),
@@ -62,9 +62,9 @@ export default async function AdminDashboard() {
   }
   const topSaved = Object.values(savesByEvent).sort((a, b) => b.count - a.count).slice(0, 5)
 
-  // Analytics breakdown — filter out V1 (abandoned Vite SPA) error noise.
+  // Analytics breakdown, filter out V1 (abandoned Vite SPA) error noise.
   // V1 errors reference Vite bundle paths (/assets/index-*.js) or old Netlify
-  // preview URLs — they're cached bundles in returning users' browsers, not
+  // preview URLs, they're cached bundles in returning users' browsers, not
   // V2 bugs. See session notes 2026-04-17.
   // Internal event types that shouldn't surface in the admin analytics tiles
   const INTERNAL_EVENT_TYPES = new Set(['system_purge'])
@@ -92,26 +92,26 @@ export default async function AdminDashboard() {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-black mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>Dashboard</h1>
-        <p className="text-white/40 text-sm">ABQ Unplugged — site management & analytics</p>
+        <p className="text-white/40 text-sm">ABQ Unplugged, site management & analytics</p>
       </div>
 
       {/* ── Help banner ── */}
       <section className="bg-white/5 border border-white/10 rounded-2xl p-4 text-sm text-white/50 leading-relaxed space-y-1">
         <p className="text-white/70 font-semibold text-xs uppercase tracking-widest mb-2">How this works</p>
-        <p><span className="text-white/70">Live Events</span> — Visible on the public site right now (today or future, not hidden).</p>
-        <p><span className="text-white/70">Hidden</span> — Filtered out: past events, cross-source duplicates, non-ABQ listings, cancelled shows, Eventbrite spam. Click to review and unhide anything that shouldn&apos;t be hidden.</p>
-        <p><span className="text-white/70">Featured</span> — Pinned to the top of the homepage &quot;Featured&quot; section. Use sparingly — 3–6 events max.</p>
-        <p><span className="text-white/70">Pending Reports</span> — Users flagged these events as wrong/inappropriate. Review and resolve in Reports.</p>
-        <p><span className="text-white/70">AI Enrichment</span> — Events that have been enriched with descriptions, highlights, venue tips, and mood tags by the AI pipeline. Run <code className="text-[#9a442d] text-xs">node scripts/enrich-moods-lm.mjs</code> to enrich more.</p>
-        <p><span className="text-white/70">Submissions</span> — Community-submitted events awaiting your approval before going live.</p>
+        <p><span className="text-white/70">Live Events</span>, Visible on the public site right now (today or future, not hidden).</p>
+        <p><span className="text-white/70">Hidden</span>, Filtered out: past events, cross-source duplicates, non-ABQ listings, cancelled shows, Eventbrite spam. Click to review and unhide anything that shouldn&apos;t be hidden.</p>
+        <p><span className="text-white/70">Featured</span>, Pinned to the top of the homepage &quot;Featured&quot; section. Use sparingly, 3–6 events max.</p>
+        <p><span className="text-white/70">Pending Reports</span>, Users flagged these events as wrong/inappropriate. Review and resolve in Reports.</p>
+        <p><span className="text-white/70">AI Enrichment</span>, Events that have been enriched with descriptions, highlights, venue tips, and mood tags by the AI pipeline. Run <code className="text-[#9a442d] text-xs">node scripts/enrich-moods-lm.mjs</code> to enrich more.</p>
+        <p><span className="text-white/70">Submissions</span>, Community-submitted events awaiting your approval before going live.</p>
       </section>
 
       {/* ── Events stats ── */}
       <section>
-        <h2 className="text-xs uppercase tracking-widest text-white/30 mb-3">Events</h2>
+        <h2 className="text-xs uppercase tracking-widest text-white/55 mb-3">Events</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <StatCard label="Live Events"      value={totalEvents ?? 0}   href="/admin/events"            tip="Upcoming events visible to the public" />
-          <StatCard label="Hidden"           value={hiddenCount ?? 0}   href="/admin/events?hidden=1"   color="yellow" tip="Filtered out — click to review" />
+          <StatCard label="Hidden"           value={hiddenCount ?? 0}   href="/admin/events?hidden=1"   color="yellow" tip="Filtered out, click to review" />
           <StatCard label="Featured"         value={featuredCount ?? 0} href="/admin/events?featured=1" color="blue"   tip="Pinned to the homepage hero" />
           <StatCard label="Pending Reports"  value={pendingCount ?? 0}  href="/admin/reports"           color={pendingCount ? 'red' : 'green'} tip="User-flagged events needing review" />
         </div>
@@ -119,7 +119,7 @@ export default async function AdminDashboard() {
 
       {/* ── User / social stats ── */}
       <section>
-        <h2 className="text-xs uppercase tracking-widest text-white/30 mb-3">Users & Social</h2>
+        <h2 className="text-xs uppercase tracking-widest text-white/55 mb-3">Users & Social</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="bg-white/5 rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-2">
@@ -134,7 +134,7 @@ export default async function AdminDashboard() {
               <p className="text-white/40 text-xs uppercase tracking-wider">Check-ins</p>
             </div>
             <p className="text-3xl font-black tabular-nums" style={{ fontFamily: 'var(--font-epilogue)' }}>{(checkInCount ?? 0).toLocaleString()}</p>
-            <p className="text-white/30 text-[10px] mt-1">+{weekCheckIns ?? 0} this week</p>
+            <p className="text-white/55 text-[10px] mt-1">+{weekCheckIns ?? 0} this week</p>
           </div>
           <div className="bg-white/5 rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-2">
@@ -167,7 +167,7 @@ export default async function AdminDashboard() {
           <div className="h-2 bg-white/10 rounded-full mb-2">
             <div className="h-full bg-[#9a442d] rounded-full transition-all" style={{ width: `${enrichmentPct}%` }} />
           </div>
-          <p className="text-white/30 text-xs">{(enrichedCount ?? 0).toLocaleString()} of {(totalEvents ?? 0).toLocaleString()} live events enriched</p>
+          <p className="text-white/55 text-xs">{(enrichedCount ?? 0).toLocaleString()} of {(totalEvents ?? 0).toLocaleString()} live events enriched</p>
         </div>
 
         {/* Categories */}
@@ -177,7 +177,7 @@ export default async function AdminDashboard() {
             <p className="text-white/40 text-xs uppercase tracking-wider">Events by Category</p>
           </div>
           {sortedCats.length === 0 ? (
-            <p className="text-white/30 text-xs">No data</p>
+            <p className="text-white/55 text-xs">No data</p>
           ) : (
             <div className="space-y-1.5">
               {sortedCats.slice(0, 7).map(([cat, cnt]) => (
@@ -186,10 +186,10 @@ export default async function AdminDashboard() {
                   <div className="flex-1 h-1.5 bg-white/10 rounded-full">
                     <div className="h-full bg-[#9a442d] rounded-full" style={{ width: `${Math.round((cnt / (totalEvents ?? 1)) * 100)}%` }} />
                   </div>
-                  <span className="text-white/30 text-xs w-6 text-right">{cnt}</span>
+                  <span className="text-white/55 text-xs w-6 text-right">{cnt}</span>
                 </div>
               ))}
-              {uncategorized > 0 && <p className="text-white/20 text-xs pt-1">+ {uncategorized} uncategorized</p>}
+              {uncategorized > 0 && <p className="text-white/45 text-xs pt-1">+ {uncategorized} uncategorized</p>}
             </div>
           )}
         </div>
@@ -198,7 +198,7 @@ export default async function AdminDashboard() {
       {/* ── Top saved events ── */}
       {topSaved.length > 0 && (
         <section>
-          <h2 className="text-xs uppercase tracking-widest text-white/30 mb-3">Most Saved Events</h2>
+          <h2 className="text-xs uppercase tracking-widest text-white/55 mb-3">Most Saved Events</h2>
           <div className="space-y-2">
             {topSaved.map((ev, i) => (
               <div key={i} className="bg-white/5 rounded-xl px-4 py-2.5 flex items-center justify-between">
@@ -213,11 +213,11 @@ export default async function AdminDashboard() {
       {/* ── Site analytics (last 7 days) ── */}
       {Object.keys(analyticsTypes).length > 0 && (
         <section>
-          <h2 className="text-xs uppercase tracking-widest text-white/30 mb-3">Analytics (Last 7 Days)</h2>
+          <h2 className="text-xs uppercase tracking-widest text-white/55 mb-3">Analytics (Last 7 Days)</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {Object.entries(analyticsTypes).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([type, cnt]) => (
               <div key={type} className="bg-white/5 rounded-xl p-3">
-                <p className="text-white/30 text-[10px] uppercase tracking-wide mb-1 truncate">{type.replace(/_/g, ' ')}</p>
+                <p className="text-white/55 text-[10px] uppercase tracking-wide mb-1 truncate">{type.replace(/_/g, ' ')}</p>
                 <p className="text-xl font-black text-white tabular-nums" style={{ fontFamily: 'var(--font-epilogue)' }}>{cnt}</p>
               </div>
             ))}
@@ -228,11 +228,11 @@ export default async function AdminDashboard() {
       {/* ── Recent reports ── */}
       <section>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xs uppercase tracking-widest text-white/30">Recent Reports</h2>
+          <h2 className="text-xs uppercase tracking-widest text-white/55">Recent Reports</h2>
           <Link href="/admin/reports" className="text-xs text-[#9a442d] hover:underline">View all →</Link>
         </div>
         {!recentReports?.length ? (
-          <p className="text-white/30 text-sm">No reports yet.</p>
+          <p className="text-white/55 text-sm">No reports yet.</p>
         ) : (
           <div className="space-y-2">
             {recentReports.map((r: Record<string, string>) => (
@@ -253,7 +253,7 @@ export default async function AdminDashboard() {
 
       {/* ── Quick actions ── */}
       <section>
-        <h2 className="text-xs uppercase tracking-widest text-white/30 mb-3">Quick Actions</h2>
+        <h2 className="text-xs uppercase tracking-widest text-white/55 mb-3">Quick Actions</h2>
         <div className="flex flex-wrap gap-2">
           {[
             { href: '/admin/analytics',         label: '📊 Analytics' },
@@ -285,7 +285,7 @@ function StatCard({ label, value, href, color, tip }: { label: string; value: nu
       <p className={`text-4xl font-black tabular-nums ${colors[color ?? ''] ?? 'text-white'}`} style={{ fontFamily: 'var(--font-epilogue)' }}>
         {value.toLocaleString()}
       </p>
-      {tip && <p className="text-white/20 text-[10px] mt-1.5 leading-tight">{tip}</p>}
+      {tip && <p className="text-white/45 text-[10px] mt-1.5 leading-tight">{tip}</p>}
     </Link>
   )
 }

@@ -8,7 +8,7 @@ function categorizeReferrer(referrer: string | null | undefined): string | null 
   if (!referrer) return 'Direct'
   try {
     const host = new URL(referrer).hostname.replace(/^www\./, '')
-    // Filter internal self-referrals — not an acquisition source
+    // Filter internal self-referrals, not an acquisition source
     if (host === 'abqunplugged.com' || host === 'localhost' || host === '127.0.0.1') return null
     if (/google\./i.test(host))                        return 'Google'
     if (/bing\.com/i.test(host))                       return 'Bing'
@@ -29,7 +29,7 @@ function categorizeReferrer(referrer: string | null | undefined): string | null 
 
 export const revalidate = 0
 
-// V1 path patterns — hash-router SPA, filter these out for V2 clarity
+// V1 path patterns, hash-router SPA, filter these out for V2 clarity
 const V1_PATH = /^#(events|discover|places|plan|profile|event\/|place\/)/
 
 export default async function AnalyticsPage() {
@@ -38,7 +38,7 @@ export default async function AnalyticsPage() {
   const now   = new Date()
   // Use toLocaleDateString (date-only) so the result is a clean 'YYYY-MM-DD' string.
   // toLocaleString (with time) returns a locale-formatted string that new Date() can't
-  // reliably parse — it produced Invalid Date and crashed the page with RangeError.
+  // reliably parse, it produced Invalid Date and crashed the page with RangeError.
   const today = now.toLocaleDateString('en-CA', { timeZone: 'America/Denver' })
   const ago7  = new Date(Date.now() - 7  * 86400000).toISOString().slice(0, 10)
   const ago30 = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)
@@ -108,7 +108,7 @@ export default async function AnalyticsPage() {
     if (row.device === 'mobile') byDay[day].mobile++
     else if (row.device === 'desktop') byDay[day].desktop++
 
-    // Traffic source — parse referrer from session_start data
+    // Traffic source, parse referrer from session_start data
     const referrer = (row.data as Record<string, string | null> | null)?.referrer
     const source = categorizeReferrer(referrer)
     if (source !== null) {  // null = internal navigation, skip
@@ -173,7 +173,7 @@ export default async function AnalyticsPage() {
   }
   const dowData    = DOW_LABELS.map((label, i) => ({ label, count: dowCounts[i].size }))
   const maxDow     = Math.max(...dowData.map(d => d.count), 1)
-  // Stable copies for peak/slowest — don't mutate dowData used in the chart
+  // Stable copies for peak/slowest, don't mutate dowData used in the chart
   const peakDay    = [...dowData].sort((a, b) => b.count - a.count)[0]?.label ?? '—'
   const slowestDay = [...dowData].sort((a, b) => a.count - b.count)[0]?.label ?? '—'
 
@@ -243,7 +243,7 @@ export default async function AnalyticsPage() {
           <div>
             <p className="text-yellow-300 text-sm font-semibold">Data is {daysSilent} days old</p>
             <p className="text-yellow-400/70 text-xs mt-0.5">
-              Last session recorded on {lastSession}. The analytics tracker is now active — new visits will appear here.
+              Last session recorded on {lastSession}. The analytics tracker is now active, new visits will appear here.
             </p>
           </div>
         </div>
@@ -265,7 +265,7 @@ export default async function AnalyticsPage() {
             <p className={`text-3xl font-black tabular-nums ${color}`} style={{ fontFamily: 'var(--font-epilogue)' }}>
               {typeof value === 'number' ? fmt(value) : value}
             </p>
-            <p className="text-white/20 text-[10px] mt-1">{tip}</p>
+            <p className="text-white/45 text-[10px] mt-1">{tip}</p>
           </div>
         ))}
       </div>
@@ -274,13 +274,13 @@ export default async function AnalyticsPage() {
       <section className="bg-white/5 rounded-2xl p-5">
         <div className="flex items-center gap-2 mb-1">
           <Globe className="w-3.5 h-3.5 text-[#7cc4bf]" />
-          <h2 className="text-xs uppercase tracking-widest text-white/30">Where Traffic Comes From</h2>
+          <h2 className="text-xs uppercase tracking-widest text-white/55">Where Traffic Comes From</h2>
         </div>
-        <p className="text-white/20 text-[10px] mb-4">
+        <p className="text-white/45 text-[10px] mb-4">
           Sessions by acquisition source · last 30 days · internal navigation excluded
         </p>
         {trafficSources.length === 0 ? (
-          <p className="text-white/20 text-sm py-4 text-center">No referrer data yet — data builds from new sessions.</p>
+          <p className="text-white/45 text-sm py-4 text-center">No referrer data yet, data builds from new sessions.</p>
         ) : (
           <div className="space-y-2">
             {trafficSources.map(({ source, sessions }) => {
@@ -317,7 +317,7 @@ export default async function AnalyticsPage() {
             })}
           </div>
         )}
-        <p className="text-white/15 text-[10px] mt-4">
+        <p className="text-white/45 text-[10px] mt-4">
           Direct = no referrer (typed URL, bookmarks, email links without UTM, most iOS share sheets)
         </p>
       </section>
@@ -325,14 +325,14 @@ export default async function AnalyticsPage() {
       {/* ── 30-Day Traffic Chart ── */}
       <section className="bg-white/5 rounded-2xl p-5">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xs uppercase tracking-widest text-white/30">Daily Visitors — Last 30 Days</h2>
-          <span className="text-white/20 text-[10px] tabular-nums">{dailyData.length} days with data</span>
+          <h2 className="text-xs uppercase tracking-widest text-white/55">Daily Visitors, Last 30 Days</h2>
+          <span className="text-white/45 text-[10px] tabular-nums">{dailyData.length} days with data</span>
         </div>
         {dailyData.length === 0 ? (
-          <p className="text-white/20 text-sm py-8 text-center">No session data yet — tracker just reactivated.</p>
+          <p className="text-white/45 text-sm py-8 text-center">No session data yet, tracker just reactivated.</p>
         ) : (
           <>
-            {/* Use absolute positioning + pixel heights — percentage heights are unreliable
+            {/* Use absolute positioning + pixel heights, percentage heights are unreliable
                 inside flex-1 children whose computed height comes from the flex algorithm */}
             <div className="flex gap-[2px] h-32">
               {dailyData.map(({ day, count }) => {
@@ -353,8 +353,8 @@ export default async function AnalyticsPage() {
               })}
             </div>
             <div className="flex justify-between mt-2">
-              <span className="text-white/20 text-[10px]">{dailyData[0]?.day ?? ''}</span>
-              <span className="text-white/20 text-[10px]">{today} (today)</span>
+              <span className="text-white/45 text-[10px]">{dailyData[0]?.day ?? ''}</span>
+              <span className="text-white/45 text-[10px]">{today} (today)</span>
             </div>
           </>
         )}
@@ -364,22 +364,22 @@ export default async function AnalyticsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Hourly heatmap */}
         <section className="bg-white/5 rounded-2xl p-5">
-          <h2 className="text-xs uppercase tracking-widest text-white/30 mb-1">Busiest Hours</h2>
-          <p className="text-white/20 text-[10px] mb-4">When visitors are on the site (Denver time)</p>
+          <h2 className="text-xs uppercase tracking-widest text-white/55 mb-1">Busiest Hours</h2>
+          <p className="text-white/45 text-[10px] mb-4">When visitors are on the site (Denver time)</p>
           <div className="space-y-1">
             {hourlyData.map(({ hour, count }) => {
               const pct   = Math.round((count / maxHour) * 100)
               const isTop = count === maxHour && count > 0
               return (
                 <div key={hour} className="flex items-center gap-2">
-                  <span className="text-white/30 text-[10px] w-8 text-right tabular-nums">{HOUR_LABEL(hour)}</span>
+                  <span className="text-white/55 text-[10px] w-8 text-right tabular-nums">{HOUR_LABEL(hour)}</span>
                   <div className="flex-1 h-3 bg-white/10 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${isTop ? 'bg-[#9a442d]' : 'bg-white/30'}`}
                       style={{ width: `${Math.max(pct, count > 0 ? 2 : 0)}%` }}
                     />
                   </div>
-                  <span className="text-white/30 text-[10px] w-5 tabular-nums">{count}</span>
+                  <span className="text-white/55 text-[10px] w-5 tabular-nums">{count}</span>
                 </div>
               )
             })}
@@ -388,16 +388,16 @@ export default async function AnalyticsPage() {
 
         {/* Day of week */}
         <section className="bg-white/5 rounded-2xl p-5">
-          <h2 className="text-xs uppercase tracking-widest text-white/30 mb-1">Busiest Days</h2>
-          <p className="text-white/20 text-[10px] mb-4">Total sessions per weekday over 30 days</p>
-          {/* Explicit pixel bar heights inside a relative container — fully reliable */}
+          <h2 className="text-xs uppercase tracking-widest text-white/55 mb-1">Busiest Days</h2>
+          <p className="text-white/45 text-[10px] mb-4">Total sessions per weekday over 30 days</p>
+          {/* Explicit pixel bar heights inside a relative container, fully reliable */}
           <div className="flex gap-2">
             {dowData.map(({ label, count }) => {
               const pxH   = Math.max(Math.round(count / maxDow * 112), count > 0 ? 4 : 0)
               const isTop = count === maxDow && count > 0
               return (
                 <div key={label} className="flex-1 flex flex-col items-center">
-                  <span className="text-white/30 text-[10px] tabular-nums leading-none mb-1 shrink-0">{count}</span>
+                  <span className="text-white/55 text-[10px] tabular-nums leading-none mb-1 shrink-0">{count}</span>
                   <div className="w-full relative shrink-0" style={{ height: '112px' }}>
                     <div
                       className={`absolute bottom-0 inset-x-0 rounded-t transition-all ${isTop ? 'bg-[#9a442d]' : 'bg-white/20'}`}
@@ -409,7 +409,7 @@ export default async function AnalyticsPage() {
               )
             })}
           </div>
-          <p className="text-white/20 text-[10px] mt-2">
+          <p className="text-white/45 text-[10px] mt-2">
             Peak: {peakDay} · Slowest: {slowestDay}
           </p>
         </section>
@@ -417,13 +417,13 @@ export default async function AnalyticsPage() {
 
       {/* ── Device breakdown ── */}
       <section className="bg-white/5 rounded-2xl p-5">
-        <h2 className="text-xs uppercase tracking-widest text-white/30 mb-4">Device Breakdown</h2>
+        <h2 className="text-xs uppercase tracking-widest text-white/55 mb-4">Device Breakdown</h2>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <Smartphone className="w-4 h-4 text-[#7cc4bf]" />
             <div>
               <p className="text-2xl font-black tabular-nums text-[#7cc4bf]" style={{ fontFamily: 'var(--font-epilogue)' }}>{mobileShare}%</p>
-              <p className="text-white/30 text-xs">Mobile ({fmt(totalMobile)} sessions)</p>
+              <p className="text-white/55 text-xs">Mobile ({fmt(totalMobile)} sessions)</p>
             </div>
           </div>
           <div className="flex-1 h-4 bg-white/10 rounded-full overflow-hidden">
@@ -433,20 +433,20 @@ export default async function AnalyticsPage() {
             <Monitor className="w-4 h-4 text-white/50" />
             <div>
               <p className="text-2xl font-black tabular-nums" style={{ fontFamily: 'var(--font-epilogue)' }}>{100 - mobileShare}%</p>
-              <p className="text-white/30 text-xs">Desktop ({fmt(totalDesktop)} sessions)</p>
+              <p className="text-white/55 text-xs">Desktop ({fmt(totalDesktop)} sessions)</p>
             </div>
           </div>
         </div>
-        <p className="text-white/20 text-[10px] mt-3">
-          Most ABQ Unplugged visitors are on {mobileShare > 50 ? 'mobile' : 'desktop'} — {mobileShare > 50 ? 'prioritize mobile UX' : 'desktop UX matters here'}.
+        <p className="text-white/45 text-[10px] mt-3">
+          Most ABQ Unplugged visitors are on {mobileShare > 50 ? 'mobile' : 'desktop'}, {mobileShare > 50 ? 'prioritize mobile UX' : 'desktop UX matters here'}.
         </p>
       </section>
 
       {/* ── Top Pages ── */}
       {topPages.length > 0 && (
         <section className="bg-white/5 rounded-2xl p-5">
-          <h2 className="text-xs uppercase tracking-widest text-white/30 mb-1">Top Pages (V2)</h2>
-          <p className="text-white/20 text-[10px] mb-4">Most-visited pages in the last 30 days</p>
+          <h2 className="text-xs uppercase tracking-widest text-white/55 mb-1">Top Pages (V2)</h2>
+          <p className="text-white/45 text-[10px] mb-4">Most-visited pages in the last 30 days</p>
           <div className="space-y-2">
             {topPages.map(({ path, views, unique }) => {
               const maxViews = topPages[0]?.views ?? 1
@@ -458,7 +458,7 @@ export default async function AnalyticsPage() {
                     <div className="h-full bg-[#9a442d] rounded-full" style={{ width: `${pct}%` }} />
                   </div>
                   <span className="text-white/40 text-xs tabular-nums w-12 text-right">{views}</span>
-                  <span className="text-white/20 text-[10px] w-16 text-right">{unique} uniq</span>
+                  <span className="text-white/45 text-[10px] w-16 text-right">{unique} uniq</span>
                 </div>
               )
             })}
@@ -468,8 +468,8 @@ export default async function AnalyticsPage() {
 
       {/* ── Engagement ── */}
       <section className="bg-white/5 rounded-2xl p-5">
-        <h2 className="text-xs uppercase tracking-widest text-white/30 mb-1">User Engagement</h2>
-        <p className="text-white/20 text-[10px] mb-4">Actions taken in the last 30 days</p>
+        <h2 className="text-xs uppercase tracking-widest text-white/55 mb-1">User Engagement</h2>
+        <p className="text-white/45 text-[10px] mb-4">Actions taken in the last 30 days</p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             { key: 'event_click',    label: 'Event Clicks',   icon: MousePointer, color: 'text-[#9a442d]',  tip: 'Tapped through to an event detail page' },
@@ -487,7 +487,7 @@ export default async function AnalyticsPage() {
                 <p className={`text-2xl font-black tabular-nums ${color}`} style={{ fontFamily: 'var(--font-epilogue)' }}>
                   {fmt(d?.total ?? 0)}
                 </p>
-                <p className="text-white/20 text-[10px] mt-0.5">{d?.unique.size ?? 0} visitors</p>
+                <p className="text-white/45 text-[10px] mt-0.5">{d?.unique.size ?? 0} visitors</p>
               </div>
             )
           })}
@@ -497,8 +497,8 @@ export default async function AnalyticsPage() {
       {/* ── Top clicked events ── */}
       {topClickedEvents.length > 0 && (
         <section className="bg-white/5 rounded-2xl p-5">
-          <h2 className="text-xs uppercase tracking-widest text-white/30 mb-1">Top Clicked Events</h2>
-          <p className="text-white/20 text-[10px] mb-4">Events users opened most in the last 30 days</p>
+          <h2 className="text-xs uppercase tracking-widest text-white/55 mb-1">Top Clicked Events</h2>
+          <p className="text-white/45 text-[10px] mb-4">Events users opened most in the last 30 days</p>
           <div className="space-y-2">
             {topClickedEvents.map((ev, i) => {
               const title = (ev as Record<string, unknown>).title as string ?? ev.id
@@ -506,14 +506,14 @@ export default async function AnalyticsPage() {
               const pct   = Math.round((ev.count / maxCt) * 100)
               return (
                 <div key={ev.id} className="flex items-center gap-3">
-                  <span className="text-white/20 text-[10px] w-4 tabular-nums text-right">{i + 1}</span>
+                  <span className="text-white/45 text-[10px] w-4 tabular-nums text-right">{i + 1}</span>
                   <Link href={`/events/${ev.id}`} target="_blank" className="text-white/60 text-xs truncate w-48 hover:text-white transition-colors" title={title}>
                     {title}
                   </Link>
                   <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
                     <div className="h-full bg-[#7cc4bf] rounded-full" style={{ width: `${pct}%` }} />
                   </div>
-                  <span className="text-white/30 text-xs tabular-nums w-10 text-right">{ev.count}×</span>
+                  <span className="text-white/55 text-xs tabular-nums w-10 text-right">{ev.count}×</span>
                 </div>
               )
             })}
@@ -522,10 +522,10 @@ export default async function AnalyticsPage() {
       )}
 
       {/* ── Notes ── */}
-      <section className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-white/30 text-xs leading-relaxed space-y-1">
+      <section className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-white/55 text-xs leading-relaxed space-y-1">
         <p className="text-white/50 font-semibold text-[10px] uppercase tracking-widest mb-2">How to read this</p>
         <p><span className="text-white/50">Sessions</span> = one visit per device per day. If someone uses the site twice in a day, that&apos;s 2 sessions.</p>
-        <p><span className="text-white/50">Unique visitors</span> = distinct session IDs — a proxy for individual people.</p>
+        <p><span className="text-white/50">Unique visitors</span> = distinct session IDs, a proxy for individual people.</p>
         <p><span className="text-white/50">Hourly/day charts</span> = 30-day aggregate. Use this to know the best times to post social, add new events, or send push notifications.</p>
         <p><span className="text-white/50">Top pages</span> = V2 app routes only. V1 hash-route traffic (#events, #discover) is filtered out.</p>
         <p>Analytics auto-purge after 30 days to stay lean.</p>

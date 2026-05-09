@@ -3,11 +3,11 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — ABQ Unplugged',
+  title: 'Privacy Policy, ABQ Unplugged',
   description:
-    'Privacy policy for ABQ Unplugged, a free community events aggregator for Albuquerque, NM. We don\'t sell your data — we just help you find things to do.',
+    'Privacy policy for ABQ Unplugged, a free community events aggregator for Albuquerque, NM. We don\'t sell your data, we just help you find things to do.',
   openGraph: {
-    title: 'Privacy Policy — ABQ Unplugged',
+    title: 'Privacy Policy, ABQ Unplugged',
     description:
       'Privacy policy for ABQ Unplugged, a free community events aggregator for Albuquerque, NM.',
     url: 'https://abqunplugged.com/privacy',
@@ -51,7 +51,7 @@ export default function PrivacyPage() {
         {/* Intro */}
         <p className="text-base md:text-lg leading-relaxed mb-10 text-[#4a3f3a]">
           ABQ Unplugged is a free community tool. Our whole purpose is to make it
-          easy to find events happening in Albuquerque and get you to them — not to
+          easy to find events happening in Albuquerque and get you to them, not to
           collect your data, profile your interests, or sell anything about you to
           anyone. This policy is short because there isn&apos;t much to say.
         </p>
@@ -71,7 +71,7 @@ export default function PrivacyPage() {
               ABQ Unplugged is an event aggregator. We pull upcoming event listings
               from sources like Ticketmaster, SeatGeek, Eventbrite, Bandsintown,
               the National Hispanic Cultural Centre, and local Albuquerque venues
-              and organizations — then display them in one place so you don&apos;t
+              and organizations, then display them in one place so you don&apos;t
               have to hunt across a dozen different sites. We don&apos;t host events
               ourselves, and every listing links directly to the original source so
               you can get tickets or learn more there.
@@ -89,7 +89,7 @@ export default function PrivacyPage() {
             <p className="text-base leading-relaxed text-[#4a3f3a]">
               Most websites are built to keep you on them as long as possible.
               We&apos;re doing the opposite. ABQ Unplugged exists to push traffic
-              to event organizers, venues, and ticket sellers — not to accumulate
+              to event organizers, venues, and ticket sellers, not to accumulate
               it. Every event card has a link out to the source. That&apos;s the
               goal: you find something you&apos;re excited about, you click
               through, and you show up.
@@ -134,7 +134,7 @@ export default function PrivacyPage() {
                   which events and categories people find useful. Umami does not
                   track individuals, does not use cookies for analytics, and does
                   not share data with advertisers. It helps us know whether to
-                  aggregate more music events or more food festivals — nothing
+                  aggregate more music events or more food festivals, nothing
                   more personal than that.
                 </span>
               </li>
@@ -150,7 +150,7 @@ export default function PrivacyPage() {
               Cookies
             </h2>
             <p className="text-base leading-relaxed text-[#4a3f3a]">
-              We use session cookies for basic site functionality — for example,
+              We use session cookies for basic site functionality, for example,
               keeping you signed in if you have an account. We do not use
               advertising cookies, tracking pixels, or third-party behavioral
               targeting. We do not sell or share any cookie data with advertisers
@@ -167,7 +167,7 @@ export default function PrivacyPage() {
               Third-party links
             </h2>
             <p className="text-base leading-relaxed text-[#4a3f3a]">
-              Every event on ABQ Unplugged links to an external site — Ticketmaster,
+              Every event on ABQ Unplugged links to an external site, Ticketmaster,
               Eventbrite, SeatGeek, a venue&apos;s website, or another ticket
               platform. Once you click through to one of those sites, their own
               privacy policies apply. We encourage you to review the privacy
@@ -185,7 +185,7 @@ export default function PrivacyPage() {
               Children
             </h2>
             <p className="text-base leading-relaxed text-[#4a3f3a]">
-              ABQ Unplugged is appropriate for all ages — we list family-friendly
+              ABQ Unplugged is appropriate for all ages, we list family-friendly
               events alongside everything else. We do not knowingly collect personal
               information from children under 13. If a child has created an account
               and you&apos;d like it removed, contact us at the address below.
@@ -226,7 +226,7 @@ export default function PrivacyPage() {
             <p className="text-base leading-relaxed text-[#4a3f3a]">
               If we change this policy in a meaningful way, we&apos;ll update the
               date at the top of this page. We don&apos;t anticipate many changes
-              — the site&apos;s privacy stance is pretty baked into what it is.
+             , the site&apos;s privacy stance is pretty baked into what it is.
             </p>
           </section>
 

@@ -175,7 +175,7 @@ export function IGEditor({ event, image }: Props) {
 
       {/* Footer */}
       {design.slides.length > 1 && (
-        <p className="text-[10px] text-white/20 text-center pt-2">
+        <p className="text-[10px] text-white/45 text-center pt-2">
           Carousel: {design.slides.length} slides · use Export ZIP to download all
         </p>
       )}

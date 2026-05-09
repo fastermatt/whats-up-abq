@@ -207,7 +207,7 @@ function TemplateGallery({
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={d.thumbnail} alt={d.name} className="w-full h-full object-contain" />
                   ) : (
-                    <span className="text-white/30 text-[9px]">No preview</span>
+                    <span className="text-white/55 text-[9px]">No preview</span>
                   )}
                 </div>
                 <div className="w-full">
@@ -469,7 +469,7 @@ export function Toolbar({ mode, onModeChange, canvasRef, event, image }: Toolbar
 
         {/* Group 3: Save + Safe Zone + slide info + Download (output) */}
         <div className="flex items-center gap-2 sm:ml-auto">
-          <span className="text-[11px] text-white/30 hidden md:inline tabular-nums">
+          <span className="text-[11px] text-white/55 hidden md:inline tabular-nums">
             {design.slides.length}s · {design.format}
           </span>
 

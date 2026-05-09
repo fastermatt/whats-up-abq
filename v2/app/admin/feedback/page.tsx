@@ -162,7 +162,7 @@ export default async function AdminFeedbackPage({ searchParams }: PageProps) {
                     <span className="text-xs bg-white/10 px-2 py-0.5 rounded-full text-white/60">
                       {CATEGORY_LABEL[f.category] ?? f.category}
                     </span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_COLORS[f.status] ?? 'bg-white/10 text-white/30'}`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_COLORS[f.status] ?? 'bg-white/10 text-white/55'}`}>
                       {f.status.replace('_', ' ')}
                     </span>
                   </div>

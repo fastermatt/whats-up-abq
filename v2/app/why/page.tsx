@@ -5,7 +5,7 @@ import { AnimateIn } from '@/app/components/AnimateIn'
 import { ConnectionQuote } from '@/app/components/ConnectionQuote'
 
 export const metadata: Metadata = {
-  title: 'Why we built this — ABQ Unplugged',
+  title: 'Why we built this, ABQ Unplugged',
   description:
     'We built ABQ Unplugged because scrolling doesn\u2019t count. The point is to show up somewhere, with someone.',
   alternates: { canonical: 'https://abqunplugged.com/why' },
@@ -15,7 +15,7 @@ export const revalidate = false
 
 export default function WhyPage() {
   return (
-    <main className="min-h-dvh bg-[#fbf7f1]">
+    <main id="main" className="min-h-dvh bg-[#fbf7f1]">
       {/* Header */}
       <header className="sticky top-0 z-20 bg-[#fbf7f1]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
@@ -51,7 +51,7 @@ export default function WhyPage() {
           </p>
 
           <p className="text-base text-[#4a3f3a] leading-relaxed mb-8">
-            We made this site to help push you out the door &mdash; with someone if
+            We made this site to help push you out the door ,  with someone if
             you can, but out the door either way.
           </p>
         </AnimateIn>
@@ -78,7 +78,7 @@ export default function WhyPage() {
               <p className="text-sm font-bold text-[#9a442d] mb-1">Americans spend 20 minutes a day with friends.</p>
               <p className="text-sm text-[#4a3f3a] leading-relaxed">
                 Two decades ago it was an hour. The US Surgeon General called
-                loneliness a public-health crisis in 2023 &mdash; comparable, in mortality
+                loneliness a public-health crisis in 2023 ,  comparable, in mortality
                 terms, to smoking 15 cigarettes a day.
               </p>
             </div>
@@ -87,10 +87,10 @@ export default function WhyPage() {
               <p className="text-sm font-bold text-[#9a442d] mb-1">Weak ties matter more than we think.</p>
               <p className="text-sm text-[#4a3f3a] leading-relaxed">
                 The barista, the regular at the trivia night, the person you see every
-                Saturday at the same coffee shop &mdash; these brief, friendly exchanges
+                Saturday at the same coffee shop ,  these brief, friendly exchanges
                 measurably lift mood and are how most of life&rsquo;s serendipity sneaks in.
                 Most cities have fewer of these moments than they did in 1990. Third
-                places &mdash; cafes, parks, plazas, bars &mdash; are where they happen.
+                places ,  cafes, parks, plazas, bars ,  are where they happen.
               </p>
             </div>
 
@@ -130,7 +130,7 @@ export default function WhyPage() {
             </li>
             <li className="text-sm text-[#4a3f3a] leading-relaxed">
               <span className="text-[#9a442d] font-bold mr-2">&middot;</span>
-              A &ldquo;Who would love this?&rdquo; nudge on every event page &mdash; one
+              A &ldquo;Who would love this?&rdquo; nudge on every event page ,  one
               tap to send a ready-written invite to a friend.
             </li>
             <li className="text-sm text-[#4a3f3a] leading-relaxed">
@@ -139,12 +139,12 @@ export default function WhyPage() {
             </li>
             <li className="text-sm text-[#4a3f3a] leading-relaxed">
               <span className="text-[#9a442d] font-bold mr-2">&middot;</span>
-              Venue pages that frame places as rooms that belong to the regulars &mdash;
+              Venue pages that frame places as rooms that belong to the regulars , 
               because they do.
             </li>
             <li className="text-sm text-[#4a3f3a] leading-relaxed">
               <span className="text-[#9a442d] font-bold mr-2">&middot;</span>
-              A daily line of ambient wisdom at the top of the page &mdash; something small,
+              A daily line of ambient wisdom at the top of the page ,  something small,
               the same for everyone in the city that day.
             </li>
           </ul>
@@ -154,7 +154,7 @@ export default function WhyPage() {
           <div className="border-t border-[#f0e4cc] pt-6 mt-10 mb-8">
             <p className="text-base text-[#4a3f3a] leading-relaxed mb-3">
               We&rsquo;re not asking anyone to call their mom. We&rsquo;re asking
-              you to pick a night, pick a thing, and &mdash; ideally &mdash; pick a person.
+              you to pick a night, pick a thing, and ,  ideally ,  pick a person.
               The city is out there. It&rsquo;s more fun when you&rsquo;re in it.
             </p>
             <p className="text-sm text-[#6b5d57] italic">

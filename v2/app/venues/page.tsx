@@ -8,11 +8,11 @@ import { AnimateIn } from '@/app/components/AnimateIn'
 export const revalidate = 3600
 
 export const metadata: Metadata = {
-  title: 'Venues in Albuquerque, NM — Find Events Near You',
+  title: 'Venues in Albuquerque, NM, Find Events Near You',
   description:
-    'Browse the top event venues in Albuquerque, NM — concert halls, comedy clubs, sports arenas, theaters, and more. Find upcoming events at each venue on ABQ Unplugged.',
+    'Browse the top event venues in Albuquerque, NM, concert halls, comedy clubs, sports arenas, theaters, and more. Find upcoming events at each venue on ABQ Unplugged.',
   openGraph: {
-    title: 'Venues in Albuquerque, NM — Find Events Near You',
+    title: 'Venues in Albuquerque, NM, Find Events Near You',
     description: 'Browse top event venues in Albuquerque and find upcoming events at each location.',
     url: 'https://abqunplugged.com/venues',
   },
@@ -36,7 +36,7 @@ export default async function VenuesPage() {
   const venues = await fetchTopVenues(80)
 
   return (
-    <main className="min-h-dvh bg-[#fbf7f1]">
+    <main id="main" className="min-h-dvh bg-[#fbf7f1]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd(venues)) }}
@@ -69,7 +69,7 @@ export default async function VenuesPage() {
               Event Venues
             </h1>
             <p className="text-sm text-[#6b5d57]">
-              {venues.length} venues with upcoming events — concerts, comedy, arts, sports, and more.
+              {venues.length} venues with upcoming events, concerts, comedy, arts, sports, and more.
             </p>
           </div>
         </AnimateIn>

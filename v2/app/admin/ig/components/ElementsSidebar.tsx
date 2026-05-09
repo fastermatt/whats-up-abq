@@ -109,7 +109,7 @@ export function ElementsSidebar() {
             )
           })}
           {slide.layers.length === 0 && (
-            <p className="text-[11px] text-white/30 italic px-2 py-3">No layers yet — use Add above.</p>
+            <p className="text-[11px] text-white/55 italic px-2 py-3">No layers yet — use Add above.</p>
           )}
         </div>
       </div>

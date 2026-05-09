@@ -9,9 +9,9 @@ import type { NeighborhoodCount } from '@/lib/events'
 export const revalidate = 3600
 
 export const metadata: Metadata = {
-  title: 'Albuquerque Events by Neighborhood — ABQ Unplugged',
+  title: 'Albuquerque Events by Neighborhood, ABQ Unplugged',
   description:
-    'Explore upcoming events in every Albuquerque neighborhood — Downtown, Nob Hill, Old Town, UNM, Uptown, and more. Find local events near you on ABQ Unplugged.',
+    'Explore upcoming events in every Albuquerque neighborhood, Downtown, Nob Hill, Old Town, UNM, Uptown, and more. Find local events near you on ABQ Unplugged.',
   openGraph: {
     title: 'Albuquerque Events by Neighborhood',
     description: 'Explore upcoming events in every neighborhood across Albuquerque, NM.',
@@ -22,10 +22,10 @@ export const metadata: Metadata = {
 
 // Friendly descriptions for each neighborhood
 const NEIGHBORHOOD_DESC: Record<string, string> = {
-  'downtown':                    'The heart of ABQ — arts district, theaters, restaurants',
-  'unm-campus':                  'University of New Mexico campus events — Popejoy, Keller Hall',
-  'unm-south-campus':            'South of UNM — The Pit, Isotopes Park, ticketed venues',
-  'state-fairgrounds-midtown':   'Expo NM, Tingley Coliseum, Isotopes Park — big shows',
+  'downtown':                    'The heart of ABQ, arts district, theaters, restaurants',
+  'unm-campus':                  'University of New Mexico campus events, Popejoy, Keller Hall',
+  'unm-south-campus':            'South of UNM, The Pit, Isotopes Park, ticketed venues',
+  'state-fairgrounds-midtown':   'Expo NM, Tingley Coliseum, Isotopes Park, big shows',
   'west-side':                   'Journal Pavilion, Revel Entertainment, far west ABQ',
   'uptown-midtown':              'Shopping, restaurants, mid-city entertainment hubs',
   'far-northeast-sandia-foothills': 'Sandia Casino, Balloon Fiesta Park, foothills venues',
@@ -35,9 +35,9 @@ const NEIGHBORHOOD_DESC: Record<string, string> = {
   'old-town':                    'Museums, biopark, Indian Pueblo Cultural Center',
   'rio-rancho':                  'Rio Rancho Events Center, Sandoval County shows',
   'south-i-25-university-se':    'Central Ave corridor, Outpost Performance Space',
-  'downtown-edo':                'East Downtown — bars, live music, emerging arts scene',
-  'unm-nob-hill':                'Nob Hill — Lobo Theater, Tractor Brewery, Anodyne',
-  'north-valley':                'Los Ranchos, Corrales, Alameda — community events',
+  'downtown-edo':                'East Downtown, bars, live music, emerging arts scene',
+  'unm-nob-hill':                'Nob Hill, Lobo Theater, Tractor Brewery, Anodyne',
+  'north-valley':                'Los Ranchos, Corrales, Alameda, community events',
   'international-district':      'Diverse southeast community events and festivals',
   'nob-hill':                    'Nob Hill shopping, dining, and cultural events',
 }
@@ -64,7 +64,7 @@ export default async function NeighborhoodsPage() {
   }
 
   return (
-    <main className="min-h-dvh bg-[#fbf7f1]">
+    <main id="main" className="min-h-dvh bg-[#fbf7f1]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
       {/* ── Header ── */}

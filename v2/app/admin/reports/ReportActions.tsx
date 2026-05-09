@@ -82,7 +82,7 @@ export function ReportActions({ reportId, currentStatus, initialNotes }: Props) 
         <button
           type="button"
           onClick={() => setShowNotes(v => !v)}
-          className="text-xs px-3 py-1.5 bg-white/5 text-white/30 rounded-lg hover:bg-white/10 hover:text-white/60 transition-colors ml-auto"
+          className="text-xs px-3 py-1.5 bg-white/5 text-white/55 rounded-lg hover:bg-white/10 hover:text-white/60 transition-colors ml-auto"
         >
           {showNotes ? 'Hide notes' : (notes ? 'Edit notes' : '+ Note')}
         </button>

@@ -61,7 +61,7 @@ export function QuickPostInput() {
           onKeyDown={e => e.key === 'Enter' && handleGo()}
           placeholder="https://abqunplugged.com/events/... or bare event ID"
           className="flex-1 bg-white/[0.06] border border-white/[0.1] rounded-xl px-3 py-2.5
-            text-white text-sm placeholder:text-white/20 focus:outline-none
+            text-white text-sm placeholder:text-white/45 focus:outline-none
             focus:border-[#9a442d]/60 focus:bg-white/[0.08] transition-all"
           autoComplete="off"
           spellCheck={false}
@@ -82,7 +82,7 @@ export function QuickPostInput() {
         <p className="text-xs text-red-400">{error}</p>
       )}
 
-      <p className="text-[10px] text-white/20">
+      <p className="text-[10px] text-white/45">
         Opens the 4:5 portrait card designer · toggle to 9:16 story or 1:1 square in the tool
       </p>
     </div>

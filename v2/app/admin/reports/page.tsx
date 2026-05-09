@@ -106,7 +106,7 @@ export default async function AdminReportsPage({ searchParams }: PageProps) {
                     <span className={`text-xs px-2 py-0.5 rounded-full ${
                       r.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
                       r.status === 'resolved' ? 'bg-green-500/20 text-green-400' :
-                      'bg-white/10 text-white/30'
+                      'bg-white/10 text-white/55'
                     }`}>
                       {r.status}
                     </span>
@@ -117,7 +117,7 @@ export default async function AdminReportsPage({ searchParams }: PageProps) {
                   {r.admin_notes && (
                     <p className="text-xs text-[#9a442d]/80 mt-1 italic">Note: {r.admin_notes}</p>
                   )}
-                  <p className="text-xs text-white/30 mt-1">{new Date(r.created_at).toLocaleString()}</p>
+                  <p className="text-xs text-white/55 mt-1">{new Date(r.created_at).toLocaleString()}</p>
                 </div>
                 <div className="flex flex-col gap-1.5 items-end flex-shrink-0">
                   <Link

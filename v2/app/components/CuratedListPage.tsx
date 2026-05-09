@@ -127,14 +127,20 @@ export function CuratedListPage({
           </h1>
           <p className="text-[#6b5d57] text-sm mt-1">{config.lede}</p>
 
-          {/* SEO body copy — keeps the page above the threshold for crawlable text */}
-          <p className="text-sm text-[#4a3f3a] mt-4 max-w-3xl leading-relaxed">
-            {config.intro}
-          </p>
+          {/* SEO body copy keeps the page above the threshold for crawlable text.
+              Split on \n\n so authors can break long intros into real paragraphs
+              without HTML in the data; each chunk renders as its own <p>. */}
+          <div className="mt-4 max-w-3xl space-y-3">
+            {config.intro.split(/\n\n+/).map((para, i) => (
+              <p key={i} className="text-sm text-[#4a3f3a] leading-relaxed">{para}</p>
+            ))}
+          </div>
           {config.introExtra && (
-            <p className="text-sm text-[#4a3f3a] mt-3 max-w-3xl leading-relaxed">
-              {config.introExtra}
-            </p>
+            <div className="mt-3 max-w-3xl space-y-3">
+              {config.introExtra.split(/\n\n+/).map((para, i) => (
+                <p key={i} className="text-sm text-[#4a3f3a] leading-relaxed">{para}</p>
+              ))}
+            </div>
           )}
         </div>
 

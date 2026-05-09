@@ -14,17 +14,17 @@ import {
 export const metadata: Metadata = {
   title: 'Things To Do in Albuquerque | ABQ Unplugged',
   description:
-    'Explore the best things to do in Albuquerque — outdoor adventures, skate parks, public pools, golf courses, arts & culture, museums, and historic sites. Direct links to every venue.',
+    'Explore the best things to do in Albuquerque, outdoor adventures, skate parks, public pools, golf courses, arts & culture, museums, and historic sites. Direct links to every venue.',
   openGraph: {
     title: 'Things To Do in Albuquerque',
     description:
-      'The best outdoor adventures, skate parks, pools, golf courses, museums, arts & culture, and historic sites in ABQ — all linking straight to the source.',
+      'The best outdoor adventures, skate parks, pools, golf courses, museums, arts & culture, and historic sites in ABQ, all linking straight to the source.',
     url: 'https://abqunplugged.com/things-to-do',
   },
   alternates: { canonical: 'https://abqunplugged.com/things-to-do' },
 }
 
-// searchParams is a Promise in Next.js 15 — must be awaited
+// searchParams is a Promise in Next.js 15, must be awaited
 export default async function ThingsToDoPage({
   searchParams,
 }: {
@@ -57,33 +57,34 @@ export default async function ThingsToDoPage({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionLd) }} />
 
-      {/* ── Header ── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#3d1a0e] via-[#7d3725] to-[#a0522d] text-white">
-        <div className="absolute inset-0 opacity-[0.07] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMS41IiBmaWxsPSIjZmZmIi8+PC9zdmc+')]" />
-        <div className="max-w-6xl mx-auto px-4 pt-5 pb-6 relative">
+      {/* ── Header — flat per round-6 (gradient hero was the round-4
+          anti-pattern that survived; now killed). Mirrors the
+          /neighborhoods page treatment which round-6 scored 8.0. */}
+      <section className="bg-[#fbf7f1] border-b border-[#f0e4cc]">
+        <div className="max-w-6xl mx-auto px-4 pt-5 pb-6">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-white/60 hover:text-white text-xs mb-4 transition-colors"
+            className="inline-flex items-center gap-1.5 text-[#6b5d57] hover:text-[#9a442d] text-xs mb-4 transition-colors"
           >
             <ArrowLeft className="w-3 h-3" />
             Back
           </Link>
-          <p className="text-[11px] uppercase tracking-[0.2em] text-[#f5c9a0] mb-1.5 font-semibold">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-[#9a442d] mb-1.5 font-semibold">
             Albuquerque
           </p>
           <h1
-            className="text-2xl sm:text-3xl font-black leading-tight mb-1.5"
+            className="text-2xl sm:text-3xl font-black leading-tight mb-1.5 text-[#1a1614]"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             Things To Do
           </h1>
-          <p className="text-xs text-white/60 max-w-lg">
-            Parks, skate parks, pools, golf courses, museums, arts & culture, and historic sites — all public, all Albuquerque. Every link goes straight to the venue.
+          <p className="text-xs text-[#6b5d57] max-w-lg">
+            Parks, skate parks, pools, golf courses, museums, arts &amp; culture, and historic sites, all public, all Albuquerque. Every link goes straight to the venue.
           </p>
           <div className="flex gap-4 mt-4 text-xs">
-            <span className="text-white/50"><span className="text-white font-bold">{PLACES.length}</span> places</span>
-            <span className="text-white/50"><span className="text-white font-bold">{PLACE_CATEGORIES.filter(c => PLACES.some(p => p.category === c.slug)).length}</span> categories</span>
-            <span className="text-white/50"><span className="text-white font-bold">{PLACES.filter(p => p.free).length}</span> free</span>
+            <span className="text-[#6b5d57]"><span className="text-[#1a1614] font-bold">{PLACES.length}</span> places</span>
+            <span className="text-[#6b5d57]"><span className="text-[#1a1614] font-bold">{PLACE_CATEGORIES.filter(c => PLACES.some(p => p.category === c.slug)).length}</span> categories</span>
+            <span className="text-[#6b5d57]"><span className="text-[#1a1614] font-bold">{PLACES.filter(p => p.free).length}</span> free</span>
           </div>
         </div>
       </section>
@@ -169,7 +170,7 @@ export default async function ThingsToDoPage({
 
       {/* ── Events CTA ── */}
       <section className="max-w-6xl mx-auto px-4 pb-10">
-        <div className="rounded-2xl bg-gradient-to-r from-[#f5ece3] to-[#fbf7f1] border border-[#e8d5c0] p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="rounded-2xl bg-[#fdf9f4] border border-[#e8d5c0] p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] mb-0.5 font-semibold">
               Looking for something tonight?
@@ -178,7 +179,7 @@ export default async function ThingsToDoPage({
               Check the event calendar
             </p>
             <p className="text-xs text-[#6b5d57] mt-0.5">
-              Concerts, shows, sports — updated daily
+              Concerts, shows, sports, updated daily
             </p>
           </div>
           <Link
@@ -221,7 +222,7 @@ function PlaceCard({ place }: { place: Place }) {
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
           </>
         ) : (
-          /* Emoji + category color gradient — intentional, never misleading */
+          /* Emoji + category color gradient, intentional, never misleading */
           <div
             className={`w-full h-full bg-gradient-to-br ${catMeta?.gradientFrom} ${catMeta?.gradientTo} flex items-center justify-center`}
           >

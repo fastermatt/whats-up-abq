@@ -4,13 +4,13 @@ import { ArrowLeft, Music2, Users, MapPin, Trophy, Star, Zap } from 'lucide-reac
 import { AnimateIn } from '@/app/components/AnimateIn'
 
 export const metadata: Metadata = {
-  title: 'About ABQ Unplugged — Albuquerque Event Discovery',
+  title: 'About ABQ Unplugged, Albuquerque Event Discovery',
   description:
-    'ABQ Unplugged aggregates every event in the greater Albuquerque, NM area — concerts, comedy, sports, arts, and food festivals — from Ticketmaster, Eventbrite, SeatGeek, and local listings.',
+    'ABQ Unplugged aggregates every event in the greater Albuquerque, NM area, concerts, comedy, sports, arts, and food festivals, from Ticketmaster, Eventbrite, SeatGeek, and local listings.',
   openGraph: {
-    title: 'About ABQ Unplugged — Albuquerque Event Discovery',
+    title: 'About ABQ Unplugged, Albuquerque Event Discovery',
     description:
-      'ABQ Unplugged aggregates every event in the greater Albuquerque, NM area — concerts, comedy, sports, arts, and food festivals — from Ticketmaster, Eventbrite, SeatGeek, and local listings.',
+      'ABQ Unplugged aggregates every event in the greater Albuquerque, NM area, concerts, comedy, sports, arts, and food festivals, from Ticketmaster, Eventbrite, SeatGeek, and local listings.',
     url: 'https://abqunplugged.com/about',
   },
   alternates: {
@@ -24,7 +24,7 @@ const FEATURES = [
   {
     icon: Zap,
     title: 'Every event, one place',
-    desc: 'Ticketmaster, Eventbrite, SeatGeek, Bandsintown, and local sources — aggregated and deduplicated daily so you never miss something.',
+    desc: 'Ticketmaster, Eventbrite, SeatGeek, Bandsintown, and local sources, aggregated and deduplicated daily so you never miss something.',
   },
   {
     icon: Star,
@@ -44,7 +44,7 @@ const FEATURES = [
   {
     icon: Trophy,
     title: 'Earn badges',
-    desc: 'Check into events to earn badges — First Check-in, Music Lover, Burqueño, 3-Week Streak, and more.',
+    desc: 'Check into events to earn badges, First Check-in, Music Lover, Burqueño, 3-Week Streak, and more.',
   },
   {
     icon: Music2,
@@ -88,7 +88,7 @@ export default function AboutPage() {
           <p className="text-base md:text-lg leading-relaxed mb-10 text-[#4a3f3a]">
             Albuquerque has more going on than most people realize. Music at the Launchpad.
             Comedy at Hyena&apos;s. NM United at Isotopes Park. Art walks and food festivals every
-            weekend. ABQ Unplugged puts all of it in one place — so getting out and meeting people
+            weekend. ABQ Unplugged puts all of it in one place, so getting out and meeting people
             is as easy as opening your phone.
           </p>
         </AnimateIn>
@@ -102,8 +102,27 @@ export default function AboutPage() {
             >
               What makes it different
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {FEATURES.map(({ icon: Icon, title, desc }) => (
+            {/* Round-6 #10: 6 identical cards → 1 featured tile + 5
+                compact tiles. Same content, varied rhythm — same fix
+                applied to /welcome in round 4. */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {FEATURES.slice(0, 1).map(({ icon: Icon, title, desc }) => (
+                <div
+                  key={title}
+                  className="sm:col-span-3 bg-gradient-to-br from-[#fdf9f4] to-[#f8eddf] rounded-xl p-5 border border-[#e8d9bf] flex gap-4 items-start"
+                >
+                  <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <Icon className="w-5 h-5 text-[#9a442d]" />
+                  </div>
+                  <div>
+                    <p className="text-base font-black text-[#1a1614] mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
+                      {title}
+                    </p>
+                    <p className="text-sm text-[#4a3f3a] leading-relaxed">{desc}</p>
+                  </div>
+                </div>
+              ))}
+              {FEATURES.slice(1).map(({ icon: Icon, title, desc }) => (
                 <div
                   key={title}
                   className="bg-white rounded-xl p-4 border border-[#f0e4cc] shadow-sm"

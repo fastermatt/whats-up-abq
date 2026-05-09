@@ -1,7 +1,7 @@
 /**
  * SEO landing page: Albuquerque Date Night Ideas
- * Targets "albuquerque date night ideas" (~1,600/mo) — a guide, not just a filtered list.
- * Different from /date-night (filtered event list) — this is a curated recommendation page.
+ * Targets "albuquerque date night ideas" (~1,600/mo), a guide, not just a filtered list.
+ * Different from /date-night (filtered event list), this is a curated recommendation page.
  */
 import type { Metadata } from 'next'
 import { fetchEvents } from '@/lib/events'
@@ -10,9 +10,9 @@ import { OG_IMAGE } from '@/lib/fallback-images'
 
 export const revalidate = 3600
 
-const SEO_TITLE = 'Albuquerque Date Night Ideas — Romantic Things to Do in ABQ | ABQ Unplugged'
+const SEO_TITLE = 'Albuquerque Date Night Ideas, Romantic Things to Do in ABQ | ABQ Unplugged'
 const SEO_DESC =
-  'The best date night ideas in Albuquerque — live music at Sister Bar, dinner in Nob Hill, concerts at El Rey, Old Town walks, rooftop views. Real ideas from an ABQ local.'
+  'The best date night ideas in Albuquerque, live music at Sister Bar, dinner in Nob Hill, concerts at El Rey, Old Town walks, rooftop views. Real ideas from an ABQ local.'
 
 export const metadata: Metadata = {
   title: { absolute: SEO_TITLE },
@@ -42,19 +42,19 @@ const FAQS = [
   },
   {
     q: "Where is the most romantic spot in Albuquerque?",
-    a: "The Sandia Peak Tramway at sunset is hard to beat — the Sandias turn watermelon pink and the city lights up below. Old Town at night with the adobe architecture and string lights is genuinely romantic. The rooftop at Hotel Chaco in Old Town has exceptional views. The Bosque at golden hour during cottonwood fall (October) is one of the most beautiful things in New Mexico.",
+    a: "The Sandia Peak Tramway at sunset is hard to beat, the Sandias turn watermelon pink and the city lights up below. Old Town at night with the adobe architecture and string lights is genuinely romantic. The rooftop at Hotel Chaco in Old Town has exceptional views. The Bosque at golden hour during cottonwood fall (October) is one of the most beautiful things in New Mexico.",
   },
   {
     q: "What restaurants are good for a date in Albuquerque?",
-    a: "For a special occasion: Los Poblanos Historic Inn (farm-to-table in a lavender field — book early), Frenchish in Nob Hill (French-influenced, excellent wine list), Vernon's Jazz Club (dinner with live jazz), Juniper in Nob Hill (New American, intimate room), or Antiquity Restaurant in Old Town (white tablecloths, romantic basement dining since 1972). For something more casual but still great: Duran's Central Pharmacy has incredible homestyle New Mexican food.",
+    a: "For a special occasion: Los Poblanos Historic Inn (farm-to-table in a lavender field, book early), Frenchish in Nob Hill (French-influenced, excellent wine list), Vernon's Jazz Club (dinner with live jazz), Juniper in Nob Hill (New American, intimate room), or Antiquity Restaurant in Old Town (white tablecloths, romantic basement dining since 1972). For something more casual but still great: Duran's Central Pharmacy has incredible homestyle New Mexican food.",
   },
 ]
 
 const RELATED_LINKS = [
   { name: 'Date Night Events Filter', url: 'https://abqunplugged.com/date-night', description: 'Browse upcoming date-worthy events in Albuquerque.' },
-  { name: 'Live Music in Albuquerque', url: 'https://abqunplugged.com/live-music', description: 'Full live music calendar — great for date nights.' },
-  { name: 'Comedy Shows in ABQ', url: 'https://abqunplugged.com/comedy', description: "Comedy shows make great dates — check Hyena's and Laffs." },
-  { name: 'Sandia Peak Tramway', url: 'https://sandiapeak.com', description: 'The world\'s longest aerial tramway — sunset rides are unforgettable.' },
+  { name: 'Live Music in Albuquerque', url: 'https://abqunplugged.com/live-music', description: 'Full live music calendar, great for date nights.' },
+  { name: 'Comedy Shows in ABQ', url: 'https://abqunplugged.com/comedy', description: "Comedy shows make great dates, check Hyena's and Laffs." },
+  { name: 'Sandia Peak Tramway', url: 'https://sandiapeak.com', description: 'The world\'s longest aerial tramway, sunset rides are unforgettable.' },
   { name: 'Visit ABQ: Date Night Guide', url: 'https://www.visitalbuquerque.org/things-to-do/date-night/', description: 'Tourism board recommendations for romantic activities in ABQ.' },
 ]
 
@@ -78,11 +78,11 @@ export default async function Page() {
       config={{
         slug: 'albuquerque-date-night-ideas',
         heading: 'Albuquerque Date Night Ideas',
-        lede: `${count} upcoming events worth putting on date night — music, arts, comedy, and food in ABQ.`,
+        lede: `${count} upcoming events worth putting on date night, music, arts, comedy, and food in ABQ.`,
         intro:
-          "Albuquerque date nights have a certain flavor. It's not New York or LA. You're not fighting for a reservation three weeks out or spending eighty bucks a head just to feel like you went somewhere. ABQ has a different register. You pick a show at the El Rey — an intimate venue where the sound actually reaches you and the sightlines are excellent from anywhere. You get dinner on Central in Nob Hill beforehand, nothing fancy, maybe Frenchish if you want to try. Walk back to the car afterward, see the Sandia Mountains lit pink, say something about how you should do this more often. That's the date night formula here. The trick is knowing what's worth going to. The calendar above is everything we know about: live music at Sister Bar, comedy at Hyena's, theater at Popejoy, art openings on First Fridays, Isotopes games on a warm summer evening. Real venues, real shows, with the prices and times. Filter by what you're into. If you need a restaurant recommendation, the FAQ section has that covered. The main thing is: go somewhere. ABQ has more going on than most people realize. Use it.",
+          "Albuquerque date nights have a certain flavor. It's not New York or LA. You're not fighting for a reservation three weeks out or spending eighty bucks a head just to feel like you went somewhere. ABQ has a different register.\n\nYou pick a show at the El Rey, an intimate venue where the sound actually reaches you and the sightlines are excellent from anywhere. You get dinner on Central in Nob Hill beforehand, nothing fancy, maybe Frenchish if you want to try. Walk back to the car afterward, see the Sandia Mountains lit pink, say something about how you should do this more often.\n\nThat's the date night formula here. The trick is knowing what's worth going to. The calendar above is everything we know about: live music at Sister Bar, comedy at Hyena's, theater at Popejoy, art openings on First Fridays, Isotopes games on a warm summer evening. Real venues, real shows, with the prices and times.\n\nFilter by what you're into. If you need a restaurant recommendation, the FAQ section has that covered. The main thing is: go somewhere. ABQ has more going on than most people realize. Use it.",
         introExtra:
-          "A note on the date-night restaurant question: everyone asks where to eat. Los Poblanos is the answer for special occasions — it's a farm, a lavender field, and a restaurant all in one. Book weeks out. For something more spontaneous, the Nob Hill stretch of Central has Frenchish, Vernon's for jazz and dinner, and Juniper. Old Town has Antiquity, which has been a date restaurant for fifty years and hasn't needed to change. For green chile — because you're in New Mexico and you should eat green chile — go to Casa de Benavidez on Fourth Street. It's not a romantic setting but the food is the point.",
+          "A note on the date-night restaurant question: everyone asks where to eat. Los Poblanos is the answer for special occasions, it's a farm, a lavender field, and a restaurant all in one. Book weeks out. For something more spontaneous, the Nob Hill stretch of Central has Frenchish, Vernon's for jazz and dinner, and Juniper. Old Town has Antiquity, which has been a date restaurant for fifty years and hasn't needed to change. For green chile, because you're in New Mexico and you should eat green chile, go to Casa de Benavidez on Fourth Street. It's not a romantic setting but the food is the point.",
         emptyHeading: 'No upcoming events right now',
         emptyBody: 'New events get added daily. Browse the full events calendar or check back tomorrow.',
         breadcrumbLabel: 'Albuquerque Date Night Ideas',

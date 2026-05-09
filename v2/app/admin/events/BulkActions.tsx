@@ -119,7 +119,7 @@ export function BulkActions({ eventIds }: Props) {
           <button
             type="button"
             onClick={() => setSelected(new Set())}
-            className="text-xs text-white/30 hover:text-white/60 transition-colors ml-1"
+            className="text-xs text-white/55 hover:text-white/60 transition-colors ml-1"
           >
             Clear
           </button>

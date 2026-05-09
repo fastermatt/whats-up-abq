@@ -123,7 +123,7 @@ function EventRow({
     >
       {/* Rank badge for top-picks */}
       {showScore && evt.rank && (
-        <div className="shrink-0 w-5 text-center text-[11px] font-bold text-white/30">
+        <div className="shrink-0 w-5 text-center text-[11px] font-bold text-white/55">
           {evt.rank}
         </div>
       )}
@@ -172,7 +172,7 @@ function EventRow({
         <ScoreBadge score={evt.popularityScore} rank={evt.rank} />
       )}
 
-      <ArrowRight size={13} className="shrink-0 text-white/20 group-hover:text-white/50 transition-colors" />
+      <ArrowRight size={13} className="shrink-0 text-white/45 group-hover:text-white/50 transition-colors" />
     </button>
   )
 }
@@ -280,7 +280,7 @@ export function EventSearch({ event }: EventSearchProps) {
   const topPicksContent = () => {
     if (loading && results.length === 0) {
       return (
-        <div className="flex items-center justify-center py-10 gap-2 text-white/30 text-sm">
+        <div className="flex items-center justify-center py-10 gap-2 text-white/55 text-sm">
           <Loader2 size={14} className="animate-spin" />
           Ranking events…
         </div>
@@ -289,7 +289,7 @@ export function EventSearch({ event }: EventSearchProps) {
     if (results.length === 0) {
       return (
         <div className="px-5 py-8 text-center">
-          <p className="text-sm text-white/30">No upcoming events found</p>
+          <p className="text-sm text-white/55">No upcoming events found</p>
         </div>
       )
     }
@@ -301,7 +301,7 @@ export function EventSearch({ event }: EventSearchProps) {
           <div key={day}>
             {/* Day header */}
             <div className="px-5 py-2 bg-white/[0.03] border-t border-white/[0.06] flex items-center gap-2">
-              <Calendar size={10} className="text-white/30" />
+              <Calendar size={10} className="text-white/55" />
               <p className="text-[10px] font-bold uppercase tracking-wider text-white/40">
                 {fmtDayHeader(day)}
               </p>
@@ -333,7 +333,7 @@ export function EventSearch({ event }: EventSearchProps) {
     }
     if (loading && results.length === 0) {
       return (
-        <div className="flex items-center justify-center py-8 gap-2 text-white/30 text-sm">
+        <div className="flex items-center justify-center py-8 gap-2 text-white/55 text-sm">
           <Loader2 size={14} className="animate-spin" />
           Loading…
         </div>
@@ -342,7 +342,7 @@ export function EventSearch({ event }: EventSearchProps) {
     if (results.length === 0) {
       return (
         <div className="px-5 py-6 text-center">
-          <p className="text-sm text-white/30">No events found</p>
+          <p className="text-sm text-white/55">No events found</p>
           {(query || hasFilters) && (
             <p className="text-[11px] text-white/45 mt-1">Try adjusting the filters or search term</p>
           )}
@@ -368,14 +368,14 @@ export function EventSearch({ event }: EventSearchProps) {
           <p className="text-xs font-bold text-[#e8a898] uppercase tracking-[0.14em] mb-0.5">
             ⚡ Load Event
           </p>
-          <p className="text-[11px] text-white/30">
+          <p className="text-[11px] text-white/55">
             Pick an event to pre-fill the Poster template
           </p>
         </div>
         {event && (
           <button
             onClick={() => setExpanded(false)}
-            className="text-[11px] text-white/30 hover:text-white/60 transition-colors flex items-center gap-1"
+            className="text-[11px] text-white/55 hover:text-white/60 transition-colors flex items-center gap-1"
           >
             Collapse <X size={11} />
           </button>
@@ -497,12 +497,12 @@ export function EventSearch({ event }: EventSearchProps) {
 
           {hasFilters && (
             <div className="flex items-center justify-between">
-              <p className="text-[10px] text-white/30">
+              <p className="text-[10px] text-white/55">
                 {[time !== 'upcoming' && TIME_PILLS.find(p => p.value === time)?.label, category].filter(Boolean).join(' · ')}
               </p>
               <button
                 onClick={() => { setCategory(''); setTime('upcoming') }}
-                className="text-[10px] text-white/30 hover:text-white/60 transition-colors underline underline-offset-2"
+                className="text-[10px] text-white/55 hover:text-white/60 transition-colors underline underline-offset-2"
               >
                 Clear filters
               </button>
@@ -514,7 +514,7 @@ export function EventSearch({ event }: EventSearchProps) {
       {/* Top picks description */}
       {viewMode === 'top-picks' && (
         <div className="px-5 pb-3">
-          <p className="text-[11px] text-white/30">
+          <p className="text-[11px] text-white/55">
             Top 3 events per day for the next 2 weeks, ranked by AI popularity score.
           </p>
         </div>

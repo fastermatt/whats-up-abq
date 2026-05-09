@@ -216,7 +216,7 @@ export function AICaptionGenerator({ event }: { event: EventData }) {
         <button
           onClick={generate}
           className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium
-            text-white/30 hover:text-[#a07ae0] hover:bg-[#6c42c0]/10 transition-all"
+            text-white/55 hover:text-[#a07ae0] hover:bg-[#6c42c0]/10 transition-all"
         >
           <RefreshCw size={11} />
           Regenerate

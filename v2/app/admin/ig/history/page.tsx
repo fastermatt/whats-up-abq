@@ -97,7 +97,7 @@ export default function HistoryPage() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={post.image_url} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <ImageIcon size={20} className="text-white/20" />
+                    <ImageIcon size={20} className="text-white/45" />
                   )}
                 </div>
 
@@ -124,7 +124,7 @@ export default function HistoryPage() {
                 {/* Link */}
                 {post.media_type !== 'STORIES' && (
                   <a href={`https://www.instagram.com/p/${post.post_id}/`} target="_blank" rel="noopener noreferrer"
-                    className="shrink-0 p-2 text-white/30 hover:text-white transition-colors" title="View on Instagram">
+                    className="shrink-0 p-2 text-white/55 hover:text-white transition-colors" title="View on Instagram">
                     <ExternalLink size={14} />
                   </a>
                 )}
@@ -145,7 +145,7 @@ export default function HistoryPage() {
         )}
 
         {!loading && posts.length === 0 && (
-          <div className="text-center py-16 text-white/30">
+          <div className="text-center py-16 text-white/55">
             <ImageIcon size={32} className="mx-auto mb-3 opacity-30" />
             <p className="text-sm">No posts yet.</p>
             <Link href="/admin/ig" className="text-[#9a442d] hover:underline text-sm mt-1 inline-block">Open the editor →</Link>

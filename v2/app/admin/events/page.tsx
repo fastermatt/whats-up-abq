@@ -158,11 +158,14 @@ export default async function AdminEventsPage({ searchParams }: PageProps) {
       <div className="space-y-1" id="events-list">
         {events.map(event => (
           <div key={event.id} className={`flex items-center gap-3 rounded-xl px-4 py-2.5 group ${event.pinned_last ? 'bg-orange-500/5 hover:bg-orange-500/10' : 'bg-white/5 hover:bg-white/[0.08]'}`}>
-            {/* Bulk checkbox */}
+            {/* Bulk checkbox — always visible at low opacity so touch users
+                can see what's selectable; full opacity on hover/focus for
+                desktop pointer feedback. Round-6 fix: prior `opacity-0
+                group-hover` left the checkbox invisible on touch devices. */}
             <input
               type="checkbox"
               data-event-id={event.id}
-              className="event-bulk-check w-4 h-4 accent-[#9a442d] flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+              className="event-bulk-check w-4 h-4 accent-[#9a442d] flex-shrink-0 opacity-50 group-hover:opacity-100 focus:opacity-100 transition-opacity cursor-pointer"
               aria-label={`Select ${event.title}`}
             />
 

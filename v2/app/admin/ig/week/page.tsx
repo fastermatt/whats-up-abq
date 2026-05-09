@@ -594,12 +594,12 @@ export default function WeekSchedulerPage() {
           {days.map(day => (
             <div key={day.date}>
               <div className="flex items-center gap-2 mb-2 px-1">
-                <Calendar size={11} className="text-white/30" />
+                <Calendar size={11} className="text-white/55" />
                 <p className="text-[11px] font-bold uppercase tracking-widest text-white/50">
                   {fmtDayHeader(day.date)}
                 </p>
                 {day.events.length === 0 && (
-                  <span className="text-[10px] text-white/30 ml-2">No events</span>
+                  <span className="text-[10px] text-white/55 ml-2">No events</span>
                 )}
               </div>
               {day.events.map(evt => {

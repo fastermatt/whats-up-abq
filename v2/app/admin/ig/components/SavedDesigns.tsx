@@ -57,7 +57,7 @@ export function SavedDesigns() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={d.thumbnail} alt={d.name} className="w-full h-full object-contain" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-white/30 text-xs">No preview</div>
+                  <div className="w-full h-full flex items-center justify-center text-white/55 text-xs">No preview</div>
                 )}
               </div>
               <div className="p-2 text-left">

@@ -1,8 +1,8 @@
 /**
- * Admin — Tools & Pipeline Reference
+ * Admin, Tools & Pipeline Reference
  *
  * Everything you need to run the site: GitHub Actions workflows,
- * terminal scripts, and admin pages — organized by when and why to use them.
+ * terminal scripts, and admin pages, organized by when and why to use them.
  */
 import Link from 'next/link'
 import {
@@ -37,7 +37,7 @@ function CommandBlock({ cmd, flags }: { cmd: string; flags?: { flag: string; des
   return (
     <div className="mt-3 space-y-1.5">
       <div className="flex items-center gap-2 bg-[#111] rounded-lg px-3 py-2">
-        <span className="text-white/20 text-xs font-mono shrink-0">$</span>
+        <span className="text-white/45 text-xs font-mono shrink-0">$</span>
         <code className="text-[#e8c99a] text-xs font-mono flex-1 min-w-0 break-all">{cmd}</code>
         <CopyButton text={cmd} />
       </div>
@@ -110,7 +110,7 @@ function WorkflowCard({
       <p className="text-sm text-white/65 leading-relaxed mb-2">{description}</p>
 
       <div className="flex items-start gap-2 mt-3">
-        <Clock size={12} className="text-white/30 mt-0.5 shrink-0" />
+        <Clock size={12} className="text-white/55 mt-0.5 shrink-0" />
         <p className="text-xs text-white/40">{when}</p>
       </div>
 
@@ -156,7 +156,7 @@ function AdminPageLink({ href, icon, label, sub }: { href: string; icon: React.R
         <p className="text-sm font-semibold text-white group-hover:text-white">{label}</p>
         <p className="text-xs text-white/35 truncate">{sub}</p>
       </div>
-      <ChevronRight size={14} className="text-white/20 group-hover:text-white/50 transition-colors shrink-0" />
+      <ChevronRight size={14} className="text-white/45 group-hover:text-white/50 transition-colors shrink-0" />
     </Link>
   )
 }
@@ -246,9 +246,9 @@ export default function ToolsPage() {
         />
 
         <div className="mb-4 flex items-center gap-2 bg-[#111]/60 border border-white/[0.06] rounded-xl px-4 py-3">
-          <Terminal size={13} className="text-white/30 shrink-0" />
+          <Terminal size={13} className="text-white/55 shrink-0" />
           <p className="text-xs text-white/40">
-            All workflows run on GitHub&apos;s servers — no local setup needed. Click &quot;Open in GitHub&quot; then hit the blue &quot;Run workflow&quot; button on the right side of the page.
+            All workflows run on GitHub&apos;s servers, no local setup needed. Click &quot;Open in GitHub&quot; then hit the blue &quot;Run workflow&quot; button on the right side of the page.
           </p>
         </div>
 
@@ -259,7 +259,7 @@ export default function ToolsPage() {
             badge="Run this weekly"
             badgeColor="green"
             description="The main pipeline. Imports events from Ticketmaster, SeatGeek, Eventbrite, NHCC, and abqtodo.com. Then runs deduplication, neighborhood tagging, and smoke tests. If it exits 0, the site is healthy."
-            when="Every Tuesday morning, or whenever events seem stale. The automatic schedule is currently paused — trigger manually."
+            when="Every Tuesday morning, or whenever events seem stale. The automatic schedule is currently paused, trigger manually."
             note="Automatic cron is paused (disabled 2026-04-20). You must trigger this manually each week."
           />
           <WorkflowCard
@@ -315,12 +315,12 @@ export default function ToolsPage() {
         <div className="mb-4 bg-[#111]/60 border border-white/[0.06] rounded-xl p-4 space-y-2">
           <p className="text-xs font-semibold text-white/50">Before running any script:</p>
           <div className="flex items-center gap-2 bg-[#0d0d0d] rounded-lg px-3 py-2">
-            <span className="text-white/20 text-xs font-mono shrink-0">$</span>
+            <span className="text-white/45 text-xs font-mono shrink-0">$</span>
             <code className="text-[#e8c99a] text-xs font-mono flex-1">cd /path/to/repo/v2</code>
             <CopyButton text="cd /path/to/repo/v2" />
           </div>
-          <p className="text-[11px] text-white/30">
-            Credentials are read from <code className="text-white/50">v2/scripts/.env</code> — must have SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY.
+          <p className="text-[11px] text-white/55">
+            Credentials are read from <code className="text-white/50">v2/scripts/.env</code>, must have SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY.
             DeepSeek scripts also need DEEPSEEK_API_KEY in that file.
           </p>
         </div>
@@ -331,7 +331,7 @@ export default function ToolsPage() {
           <div className="space-y-5">
             <ScriptRow
               name="Full Ingest (all sources)"
-              desc="Imports TM, SG, EB, NHCC, abqtodo.com. Runs dedup, neighborhood tagging, smoke tests, and invariant checks. The definitive pipeline — this is what the GitHub Action runs."
+              desc="Imports TM, SG, EB, NHCC, abqtodo.com. Runs dedup, neighborhood tagging, smoke tests, and invariant checks. The definitive pipeline, this is what the GitHub Action runs."
               cmd="node scripts/ingest.mjs"
               flags={[
                 { flag: '--dry-run', desc: 'Show what would happen, no writes' },
@@ -364,7 +364,7 @@ export default function ToolsPage() {
 
         {/* Per-Source Import */}
         <div className="bg-[#201c1a] border border-white/[0.07] rounded-2xl p-5 mb-4">
-          <p className="text-xs font-bold text-white/30 uppercase tracking-widest mb-4">Import — Individual Sources</p>
+          <p className="text-xs font-bold text-white/55 uppercase tracking-widest mb-4">Import, Individual Sources</p>
           <div className="space-y-5">
             <ScriptRow
               name="Ticketmaster"
@@ -414,7 +414,7 @@ export default function ToolsPage() {
         {/* AI Enrichment */}
         <div className="bg-[#201c1a] border border-white/[0.07] rounded-2xl p-5 mb-4">
           <div className="flex items-center gap-2 mb-4">
-            <p className="text-xs font-bold text-white/30 uppercase tracking-widest">AI Enrichment</p>
+            <p className="text-xs font-bold text-white/55 uppercase tracking-widest">AI Enrichment</p>
             <span className="text-[10px] text-white/25 border border-white/10 rounded px-1.5 py-0.5">
               Requires DEEPSEEK_API_KEY in v2/scripts/.env
             </span>
@@ -452,7 +452,7 @@ export default function ToolsPage() {
 
         {/* Data Quality */}
         <div className="bg-[#201c1a] border border-white/[0.07] rounded-2xl p-5 mb-4">
-          <p className="text-xs font-bold text-white/30 uppercase tracking-widest mb-4">Data Quality & Auditing</p>
+          <p className="text-xs font-bold text-white/55 uppercase tracking-widest mb-4">Data Quality & Auditing</p>
           <div className="space-y-5">
             <ScriptRow
               name="Accuracy Audit"
@@ -494,7 +494,7 @@ export default function ToolsPage() {
             />
             <ScriptRow
               name="Cleanup Events"
-              desc="Hides past events, cancelled events, and other stale data. Non-destructive — hidden events can always be unhidden."
+              desc="Hides past events, cancelled events, and other stale data. Non-destructive, hidden events can always be unhidden."
               cmd="node scripts/cleanup-events.mjs"
               flags={[{ flag: '--dry-run', desc: 'Preview without hiding' }]}
             />
@@ -509,7 +509,7 @@ export default function ToolsPage() {
 
         {/* Images */}
         <div className="bg-[#201c1a] border border-white/[0.07] rounded-2xl p-5 mb-4">
-          <p className="text-xs font-bold text-white/30 uppercase tracking-widest mb-4">Images</p>
+          <p className="text-xs font-bold text-white/55 uppercase tracking-widest mb-4">Images</p>
           <div className="space-y-5">
             <ScriptRow
               name="Cache Local Event Images"
@@ -541,11 +541,11 @@ export default function ToolsPage() {
 
         {/* Notifications */}
         <div className="bg-[#201c1a] border border-white/[0.07] rounded-2xl p-5">
-          <p className="text-xs font-bold text-white/30 uppercase tracking-widest mb-4">Notifications & Email</p>
+          <p className="text-xs font-bold text-white/55 uppercase tracking-widest mb-4">Notifications & Email</p>
           <div className="space-y-5">
             <ScriptRow
               name="Send Digest Email"
-              desc="Sends the newsletter digest to all subscribers (or a specific user). Has a 6-day throttle. The GitHub Action calls this daily — use manually to test or force-send."
+              desc="Sends the newsletter digest to all subscribers (or a specific user). Has a 6-day throttle. The GitHub Action calls this daily, use manually to test or force-send."
               cmd="node scripts/send-digest.mjs"
               flags={[{ flag: '--user=UUID', desc: 'Send only to one user for testing' }]}
             />
@@ -560,7 +560,7 @@ export default function ToolsPage() {
             />
             <ScriptRow
               name="Match Notifications"
-              desc="Matches events to user preferences for the 'For You' page. The nightly GitHub Action calls this — run manually after a big import to refresh scores immediately."
+              desc="Matches events to user preferences for the 'For You' page. The nightly GitHub Action calls this, run manually after a big import to refresh scores immediately."
               cmd="node scripts/match-notifications.mjs"
               flags={[{ flag: '--user=UUID', desc: 'Match only one user' }]}
             />
@@ -673,7 +673,7 @@ export default function ToolsPage() {
               <p className="text-sm font-semibold text-white mb-1">🔴 {problem}</p>
               <p className="text-xs text-white/50 mb-2">{fix}</p>
               <div className="flex items-center gap-2 bg-[#111] rounded-lg px-3 py-1.5">
-                <span className="text-white/20 text-xs font-mono shrink-0">$</span>
+                <span className="text-white/45 text-xs font-mono shrink-0">$</span>
                 <code className="text-[#e8c99a] text-xs font-mono flex-1 min-w-0 break-all">{cmd}</code>
                 <CopyButton text={cmd} />
               </div>
@@ -684,7 +684,7 @@ export default function ToolsPage() {
 
       {/* ── External Links ─────────────────────────────────────────────────────── */}
       <section>
-        <p className="text-xs font-bold text-white/30 uppercase tracking-widest mb-3">External Tools</p>
+        <p className="text-xs font-bold text-white/55 uppercase tracking-widest mb-3">External Tools</p>
         <div className="flex flex-wrap gap-2">
           {[
             { href: `https://github.com/${REPO}/actions`, label: '⚡ GitHub Actions' },

@@ -59,7 +59,7 @@ export function EventSpotlightsList({ events }: { events: SpotlightItem[] }) {
       <div className="relative">
         <Search
           size={14}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-white/55 pointer-events-none"
         />
         <input
           type="text"
@@ -67,14 +67,14 @@ export function EventSpotlightsList({ events }: { events: SpotlightItem[] }) {
           onChange={e => setSearch(e.target.value)}
           placeholder="Search by title, venue, category, date…"
           className="w-full pl-9 pr-9 py-2.5 bg-white/[0.06] border border-white/[0.1] rounded-xl
-            text-white text-sm placeholder:text-white/20 focus:outline-none
+            text-white text-sm placeholder:text-white/45 focus:outline-none
             focus:border-[#9a442d]/60 focus:bg-white/[0.08] transition-all"
         />
         {search && (
           <button
             onClick={() => setSearch('')}
             aria-label="Clear search"
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/55 hover:text-white/70 transition-colors"
           >
             <X size={13} />
           </button>
@@ -90,7 +90,7 @@ export function EventSpotlightsList({ events }: { events: SpotlightItem[] }) {
 
       {/* Empty state */}
       {filtered.length === 0 && (
-        <p className="text-white/30 text-sm text-center py-10">
+        <p className="text-white/55 text-sm text-center py-10">
           No events match &ldquo;{search}&rdquo;
         </p>
       )}
@@ -113,7 +113,7 @@ export function EventSpotlightsList({ events }: { events: SpotlightItem[] }) {
                   <p className="text-xs text-white/40">{event.metaLine}</p>
                 )}
               </div>
-              <span className="shrink-0 text-[10px] text-white/15 mt-1 tabular-nums">#{i + 1}</span>
+              <span className="shrink-0 text-[10px] text-white/45 mt-1 tabular-nums">#{i + 1}</span>
             </div>
 
             {/* Image card + captions side by side */}

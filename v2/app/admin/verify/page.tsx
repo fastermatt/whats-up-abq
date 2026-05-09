@@ -84,7 +84,7 @@ export default function AdminVerifyPage() {
   }, [router])
 
   return (
-    <main className="min-h-dvh bg-[#1a1614] flex items-center justify-center px-4">
+    <main id="main" className="min-h-dvh bg-[#1a1614] flex items-center justify-center px-4">
       <div className="w-full max-w-sm text-center">
         {status === 'verifying' && (
           <>

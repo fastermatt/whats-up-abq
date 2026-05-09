@@ -26,7 +26,7 @@ export function QuickPinnedLastButton({ eventId, pinnedLast }: { eventId: string
       className={`text-xs px-3 py-1 rounded-lg transition-colors disabled:opacity-50 ${
         pinnedLast
           ? 'bg-orange-500/20 text-orange-400 hover:bg-orange-500/30'
-          : 'bg-white/10 text-white/30 hover:text-orange-400 hover:bg-orange-500/10'
+          : 'bg-white/10 text-white/55 hover:text-orange-400 hover:bg-orange-500/10'
       }`}
     >
       {pinnedLast ? '↓ Last' : '↓'}

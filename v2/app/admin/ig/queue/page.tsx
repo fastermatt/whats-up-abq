@@ -142,7 +142,7 @@ export default function QueuePage() {
         )}
 
         {!loading && posts.length === 0 && (
-          <div className="text-center py-16 text-white/30">
+          <div className="text-center py-16 text-white/55">
             <Calendar size={32} className="mx-auto mb-3 opacity-30" />
             <p className="text-sm">No scheduled posts yet.</p>
             <Link href="/admin/ig" className="text-[#9a442d] hover:underline text-sm mt-1 inline-block">Open the editor →</Link>
@@ -162,7 +162,7 @@ function PostCard({ post, onCancel, cancelling }: { post: ScheduledPost; onCance
           // eslint-disable-next-line @next/next/no-img-element
           <img src={post.image_urls[0]} alt="" className="w-full h-full object-cover" />
         ) : (
-          <ImageIcon size={20} className="text-white/20" />
+          <ImageIcon size={20} className="text-white/45" />
         )}
       </div>
 
@@ -200,7 +200,7 @@ function PostCard({ post, onCancel, cancelling }: { post: ScheduledPost; onCance
       {/* Actions */}
       {post.status === 'pending' && (
         <button onClick={() => onCancel(post.id)} disabled={cancelling}
-          className="shrink-0 p-2 text-white/30 hover:text-red-400 disabled:opacity-40 transition-colors" title="Cancel post">
+          className="shrink-0 p-2 text-white/55 hover:text-red-400 disabled:opacity-40 transition-colors" title="Cancel post">
           {cancelling ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
         </button>
       )}

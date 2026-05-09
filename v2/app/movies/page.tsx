@@ -5,15 +5,15 @@ import { ExternalLink, Star } from 'lucide-react'
 import { buildBreadcrumbs } from '@/lib/seo'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const dynamic = 'force-dynamic' // always SSR — env var must be read at runtime
+export const dynamic = 'force-dynamic' // always SSR, env var must be read at runtime
 
 export const metadata: Metadata = {
-  title: 'Movies Now Playing in Albuquerque — ABQ Unplugged',
+  title: 'Movies Now Playing in Albuquerque, ABQ Unplugged',
   description:
     'See what movies are playing in Albuquerque theaters right now. Click to get showtimes.',
   openGraph: {
     title: 'Movies Now Playing in Albuquerque',
-    description: 'What\'s showing at Albuquerque theaters this week — click any film for showtimes.',
+    description: 'What\'s showing at Albuquerque theaters this week, click any film for showtimes.',
     url: 'https://abqunplugged.com/movies',
     images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: 'Movies playing in Albuquerque, NM' }],
   },
@@ -55,11 +55,11 @@ export default async function MoviesPage() {
     <main id="main" className="min-h-dvh bg-[#fbf7f1]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {itemListLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />}
-      {/* ── Page header ── */}
-      <section
-        className="py-10 px-4"
-        style={{ background: 'linear-gradient(to bottom, #1a1614 0%, #2d201c 60%, #fbf7f1 100%)' }}
-      >
+      {/* ── Page header — solid dark (thematic: movies show in dark
+          theaters, posters look right on a dark canvas). Round-6 flagged
+          the prior gradient-to-cream fade as an awkward theme break;
+          this version is intentional, not accidental. */}
+      <section className="py-10 px-4 bg-[#1a1614]">
         <div className="max-w-6xl mx-auto">
           <Link
             href="/"
@@ -86,7 +86,7 @@ export default async function MoviesPage() {
       {/* ── Movie grid ── */}
       <section className="max-w-6xl mx-auto px-4 py-8">
         {!hasKey ? (
-          /* Admin notice — only shows when TMDB_READ_ACCESS_TOKEN is not set */
+          /* Admin notice, only shows when TMDB_READ_ACCESS_TOKEN is not set */
           <div className="rounded-xl border border-[#f0e4cc] bg-white p-8 text-center">
             <p className="text-2xl mb-3">🎬</p>
             <h2 className="font-bold text-[#1a1614] text-lg mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
@@ -118,7 +118,7 @@ export default async function MoviesPage() {
               ))}
             </div>
 
-            {/* TMDb attribution — required by their API ToS */}
+            {/* TMDb attribution, required by their API ToS */}
             <p className="mt-8 text-center text-[11px] text-[#8a7a74] flex items-center justify-center gap-2">
               <span>Movie data provided by</span>
               <a
@@ -151,9 +151,9 @@ function MovieCard({ movie, priority }: { movie: Movie; priority?: boolean }) {
       target="_blank"
       rel="noopener noreferrer"
       className="group block"
-      aria-label={`${movie.title} — get showtimes`}
+      aria-label={`${movie.title}, get showtimes`}
     >
-      {/* Poster — 2:3 ratio */}
+      {/* Poster, 2:3 ratio */}
       <div
         className="relative overflow-hidden rounded-xl mb-2 shadow-md group-hover:shadow-xl transition-shadow duration-300"
         style={{ aspectRatio: '2/3', background: fallbackBg }}

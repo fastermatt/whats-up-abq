@@ -1,7 +1,7 @@
 /**
  * SEO landing page: Free Events in Albuquerque
- * Targets "free things to do in Albuquerque today/this weekend" — high volume.
- * Different from /free (filtered event list) — this is a richer guide.
+ * Targets "free things to do in Albuquerque today/this weekend", high volume.
+ * Different from /free (filtered event list), this is a richer guide.
  */
 import type { Metadata } from 'next'
 import { fetchEvents } from '@/lib/events'
@@ -10,9 +10,9 @@ import { OG_IMAGE } from '@/lib/fallback-images'
 
 export const revalidate = 3600
 
-const SEO_TITLE = 'Free Events in Albuquerque — Things to Do for Free | ABQ Unplugged'
+const SEO_TITLE = 'Free Events in Albuquerque, Things to Do for Free | ABQ Unplugged'
 const SEO_DESC =
-  'Find free events in Albuquerque — concerts, festivals, farmers markets, museum free days, outdoor activities, and community events. No cover, no ticket price.'
+  'Find free events in Albuquerque, concerts, festivals, farmers markets, museum free days, outdoor activities, and community events. No cover, no ticket price.'
 
 export const metadata: Metadata = {
   title: { absolute: SEO_TITLE },
@@ -34,7 +34,7 @@ const FAQS = [
   },
   {
     q: "Are there free events in Albuquerque this weekend?",
-    a: "Yes — most weekends in Albuquerque include free outdoor events, farmers markets, art walks, and community festivals. First Fridays in the Downtown and Nob Hill arts district features free gallery openings. The South Valley Growers Market is free to attend. Browse the upcoming free events above for this weekend's specific listings.",
+    a: "Yes, most weekends in Albuquerque include free outdoor events, farmers markets, art walks, and community festivals. First Fridays in the Downtown and Nob Hill arts district features free gallery openings. The South Valley Growers Market is free to attend. Browse the upcoming free events above for this weekend's specific listings.",
   },
   {
     q: "What is free at the Albuquerque Museum?",
@@ -42,7 +42,7 @@ const FAQS = [
   },
   {
     q: "Are Albuquerque library events free?",
-    a: "Yes — all Bernalillo County and City of Albuquerque library events are free and open to the public. Libraries host concerts, art shows, lectures, film screenings, storytime sessions, and workshops. ABQ Unplugged pulls these into the listings above automatically.",
+    a: "Yes, all Bernalillo County and City of Albuquerque library events are free and open to the public. Libraries host concerts, art shows, lectures, film screenings, storytime sessions, and workshops. ABQ Unplugged pulls these into the listings above automatically.",
   },
   {
     q: "Where are free outdoor concerts in Albuquerque?",
@@ -71,11 +71,11 @@ export default async function Page() {
       config={{
         slug: 'free-events-albuquerque',
         heading: 'Free Events in Albuquerque',
-        lede: `${events.length} upcoming free events in Albuquerque — concerts, festivals, markets, and more. No ticket price required.`,
+        lede: `${events.length} upcoming free events in Albuquerque, concerts, festivals, markets, and more. No ticket price required.`,
         intro:
-          "The best things in Albuquerque don't cost anything. The Petroglyph National Monument is free to walk. The Bosque trail is free. The library jazz series is free. The Albuquerque Museum gives away Sunday mornings for free. First Fridays in Nob Hill is a gallery walk where you can spend the whole evening on free wine and free art if you time it right. This city has a deep tradition of public life — outdoor concerts at Civic Plaza, fiestas in Old Town, community markets in the South Valley. None of it requires a ticket. ABQ Unplugged pulls free events from every source we track: Ticketmaster (yes, free events show up there), Eventbrite, SeatGeek, local libraries, community centers, and volunteer organizations. The list above is everything free that we know about, sorted by date. Filter by category or neighborhood to find what's near you. No upsells. No sponsored listings. Just the actual free stuff.",
+          "The best things in Albuquerque don't cost anything. The Petroglyph National Monument is free to walk. The Bosque trail is free. The library jazz series is free. The Albuquerque Museum gives away Sunday mornings for free. First Fridays in Nob Hill is a gallery walk where you can spend the whole evening on free wine and free art if you time it right. This city has a deep tradition of public life, outdoor concerts at Civic Plaza, fiestas in Old Town, community markets in the South Valley. None of it requires a ticket. ABQ Unplugged pulls free events from every source we track: Ticketmaster (yes, free events show up there), Eventbrite, SeatGeek, local libraries, community centers, and volunteer organizations. The list above is everything free that we know about, sorted by date. Filter by category or neighborhood to find what's near you. No upsells. No sponsored listings. Just the actual free stuff.",
         emptyHeading: "No free events listed right now",
-        emptyBody: "Our sources update daily — check back soon. You can also browse all upcoming events and filter by price.",
+        emptyBody: "Our sources update daily, check back soon. You can also browse all upcoming events and filter by price.",
         breadcrumbLabel: 'Free Events in Albuquerque',
         faqs: FAQS,
         relatedLinks: RELATED_LINKS,
