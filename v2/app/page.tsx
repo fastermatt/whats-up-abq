@@ -320,11 +320,14 @@ export default async function DiscoverPage() {
               <Link
                 key={tab.label}
                 href={tab.href}
-                className="py-3 sm:py-3.5 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 transition-colors hover:bg-black/[0.04] group"
+                // Label-first on every viewport — horizontal on tablet+, stacked
+                // on phones (label above number) so reading order matches
+                // ("Tonight: 147"). Round-3 critique fix.
+                className="py-3 sm:py-3.5 flex flex-col sm:flex-row items-center justify-center gap-0 sm:gap-2 transition-colors hover:bg-black/[0.04] group"
                 style={i < 2 ? { borderRight: '1px solid rgba(26,22,20,.08)' } : {}}
               >
                 <span
-                  className="text-[11px] sm:text-sm font-bold tracking-wide"
+                  className="text-[11px] sm:text-sm font-bold tracking-wide leading-tight"
                   style={{ fontFamily: 'var(--font-epilogue)', color: tab.accent ? '#9a442d' : '#1a1614' }}
                 >
                   {tab.label}

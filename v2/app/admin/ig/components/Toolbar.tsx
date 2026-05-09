@@ -440,7 +440,7 @@ export function Toolbar({ mode, onModeChange, canvasRef, event, image }: Toolbar
             onChange={e => renameDesign(e.target.value)}
             placeholder="Untitled"
             aria-label="Design name"
-            className="bg-[#0a0807]/50 border border-white/[0.08] rounded px-2 py-1.5 text-xs text-white/90 focus:outline-none focus:ring-1 focus:ring-[#9a442d]/50 focus:border-[#9a442d]/60 w-32 sm:w-28"
+            className="bg-[#0a0807]/50 border border-white/[0.08] rounded px-2.5 min-h-[40px] text-xs text-white/90 focus:outline-none focus:ring-1 focus:ring-[#9a442d]/50 focus:border-[#9a442d]/60 w-32 sm:w-28"
           />
           <div className="flex gap-1">
             <button
@@ -448,18 +448,18 @@ export function Toolbar({ mode, onModeChange, canvasRef, event, image }: Toolbar
               disabled={!canUndo()}
               title="Undo (⌘Z)"
               aria-label="Undo"
-              className="flex items-center justify-center w-8 h-8 rounded bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.09] text-white/60 disabled:opacity-25 disabled:cursor-not-allowed transition-colors touch-manipulation"
+              className="flex items-center justify-center min-h-[40px] min-w-[40px] rounded bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.09] text-white/65 disabled:opacity-25 disabled:cursor-not-allowed transition-colors touch-manipulation"
             >
-              <RotateCcw size={13} />
+              <RotateCcw size={14} />
             </button>
             <button
               onClick={redo}
               disabled={!canRedo()}
               title="Redo (⌘⇧Z)"
               aria-label="Redo"
-              className="flex items-center justify-center w-8 h-8 rounded bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.09] text-white/60 disabled:opacity-25 disabled:cursor-not-allowed transition-colors touch-manipulation"
+              className="flex items-center justify-center min-h-[40px] min-w-[40px] rounded bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.09] text-white/65 disabled:opacity-25 disabled:cursor-not-allowed transition-colors touch-manipulation"
             >
-              <RotateCw size={13} />
+              <RotateCw size={14} />
             </button>
           </div>
         </div>
@@ -513,25 +513,25 @@ export function Toolbar({ mode, onModeChange, canvasRef, event, image }: Toolbar
           <button
             onClick={doSave}
             disabled={saveState === 'saving'}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] rounded text-xs font-semibold text-white/75 disabled:opacity-40 touch-manipulation"
+            className="flex items-center gap-1.5 min-h-[40px] px-3 bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] rounded text-xs font-semibold text-white/85 disabled:opacity-40 touch-manipulation"
           >
-            <Save size={12} />
+            <Save size={13} />
             {saveState === 'saving' ? 'Saving…' : saveState === 'saved' ? (saveAsTemplate ? 'Saved + Template ✓' : 'Saved ✓') : 'Save'}
           </button>
 
           {design.slides.length > 1 ? (
             <button
               onClick={exportAllSlides}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#9a442d] hover:bg-[#b85535] rounded text-xs font-bold text-white touch-manipulation"
+              className="flex items-center gap-1.5 min-h-[40px] px-3.5 bg-[#9a442d] hover:bg-[#b85535] rounded text-xs font-bold text-white touch-manipulation"
             >
-              <LayersIcon size={12} /> Export ZIP
+              <LayersIcon size={13} /> Export ZIP
             </button>
           ) : (
             <button
               onClick={exportPng}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#9a442d] hover:bg-[#b85535] rounded text-xs font-bold text-white touch-manipulation"
+              className="flex items-center gap-1.5 min-h-[40px] px-3.5 bg-[#9a442d] hover:bg-[#b85535] rounded text-xs font-bold text-white touch-manipulation"
             >
-              <Download size={12} /> Download
+              <Download size={13} /> Download
             </button>
           )}
         </div>
