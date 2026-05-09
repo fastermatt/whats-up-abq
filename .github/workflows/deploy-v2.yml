@@ -68,19 +68,18 @@ jobs:
         run: npm run build
 
       # ── Deploy ────────────────────────────────────────────────────────────────
-      # Write state.json so netlify-cli can find the site without an interactive
-      # link step (required even when --site flag is passed, since 25.x).
-      - name: Link Netlify site (write state.json)
+      # Use netlify link --id with the full UUID (not the short form from
+      # NETLIFY_SITE_ID secret which may be truncated). The UUID is not a
+      # secret — it identifies the project but grants no access without a token.
+      - name: Link Netlify site
         working-directory: v2
         run: |
-          mkdir -p .netlify
-          printf '{"siteId":"%s"}\n' "$NETLIFY_SITE_ID" > .netlify/state.json
+          netlify link --id a0ff66c2-b959-4438-b184-509597d248e2
 
       - name: Deploy to Netlify
         working-directory: v2
         run: |
           netlify deploy \
-            --site $NETLIFY_SITE_ID \
             --auth $NETLIFY_AUTH_TOKEN \
             --dir .next \
             --functions .netlify/functions-internal \
