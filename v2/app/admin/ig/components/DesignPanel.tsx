@@ -97,7 +97,9 @@ function ColorSchemePicker() {
   const [activeScheme, setActiveScheme] = useState<string>('cream-terra')
 
   const apply = (toId: string) => {
-    if (toId === activeScheme) { setOpen(false); return }
+    // No early-return on same id — re-applying the active scheme is a
+    // useful "snap back" action when the user has tweaked a few colors
+    // by hand and wants to reset to scheme defaults.
     const from = COLOR_SCHEMES.find(s => s.id === activeScheme) ?? COLOR_SCHEMES[0]
     const to = COLOR_SCHEMES.find(s => s.id === toId)
     if (!to) return

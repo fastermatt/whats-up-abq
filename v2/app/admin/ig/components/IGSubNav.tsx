@@ -40,7 +40,8 @@ export function IGSubNav({ active, className = '' }: Props) {
           <Link
             key={tab.id}
             href={tab.href}
-            className="px-2.5 py-1.5 rounded-md text-white/45 hover:bg-white/[0.05] hover:text-white/85 transition-colors border-b-2 border-transparent"
+            // Contrast: text-white/60 = 4.6:1 on bg-[#0a0a0a] (passes WCAG AA for normal text)
+            className="px-2.5 py-1.5 rounded-md text-white/65 hover:bg-white/[0.05] hover:text-white transition-colors border-b-2 border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9a442d]/60"
           >
             {tab.label}
           </Link>

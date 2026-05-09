@@ -205,6 +205,17 @@ function TextNode({ layer, isEditing, onSelect, onChange, onBeginEdit }: {
       fillAfterStrokeEnabled={layer.stroke.enabled}
       draggable={!layer.locked}
       onClick={onSelect}
+      // Cursor hints — text cursor signals "double-click to edit". This is the
+      // single biggest discoverability fix for the inline-edit feature.
+      onMouseEnter={(e) => {
+        if (layer.locked) return
+        const s = e.target.getStage()
+        if (s) s.container().style.cursor = 'text'
+      }}
+      onMouseLeave={(e) => {
+        const s = e.target.getStage()
+        if (s) s.container().style.cursor = 'default'
+      }}
       onTap={(e) => {
         // If the long-press already opened inline edit, swallow the trailing tap.
         if (longPressFired.current) {

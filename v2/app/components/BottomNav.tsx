@@ -7,7 +7,7 @@ import { Compass, CalendarDays, MapPin, Bookmark, User } from 'lucide-react'
 const NAV_ITEMS = [
   { href: '/',              label: 'Discover', Icon: Compass      },
   { href: '/events',        label: 'Events',   Icon: CalendarDays },
-  { href: '/things-to-do', label: 'Venues',   Icon: MapPin       },
+  { href: '/things-to-do', label: 'Places',   Icon: MapPin       },
   { href: '/saved',         label: 'Saved',    Icon: Bookmark     },
   { href: '/profile',       label: 'Profile',  Icon: User         },
 ] as const

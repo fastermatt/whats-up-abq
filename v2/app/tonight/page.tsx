@@ -121,6 +121,13 @@ export default async function TonightPage() {
             Tonight in Albuquerque
           </h1>
           <p className="text-[#6b5d57] text-sm mt-1">{todayLabel}</p>
+          {events.length > 0 && (
+            <p className="text-[#4a3f3a] text-base mt-3 leading-relaxed">
+              {events.length === 1
+                ? 'One event happening tonight. Pick it.'
+                : <>Tonight, <strong className="font-bold">{events.length}</strong> events across the 505. Pick something.</>}
+            </p>
+          )}
         </div>
 
         {/* ── Empty state ── */}

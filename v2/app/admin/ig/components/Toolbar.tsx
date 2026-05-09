@@ -342,6 +342,9 @@ export function Toolbar({ mode, onModeChange, canvasRef, event, image }: Toolbar
       if (saveAsTemplate) {
         saveUserTemplate(design, thumb)
         setUserTemplates(listUserTemplates())
+        // Reset the checkbox so the next Save doesn't accidentally create
+        // another template (sticky checkbox would lead to template proliferation).
+        setSaveAsTemplate(false)
       }
       setSaveState('saved')
       setTimeout(() => setSaveState('idle'), 2000)

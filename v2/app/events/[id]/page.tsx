@@ -494,7 +494,12 @@ export default async function EventDetailPage({ params }: PageProps) {
             </div>
           )}
 
-          {/* ── AI Enrichment ── */}
+          {/* ── AI Enrichment ──
+              Order matches user-utility, not random/historical:
+              1. About — what is this thing?
+              2. Plan your night — most-actionable: where do I go after?
+              3. What to Expect — expectation set
+              4. Venue + Local Tips — only-if-going specifics */}
           {(event.about || event.highlights.length > 0 || event.venueTips || event.localTips || event.nearbyDining.length > 0 || event.localRec) && (
             <div className="space-y-3 mb-7">
               {event.about && (
@@ -503,6 +508,37 @@ export default async function EventDetailPage({ params }: PageProps) {
                   <p className="text-sm text-[#4a3f3a] leading-relaxed">{event.about}</p>
                 </div>
               )}
+
+              {/* Plan your night — verified nearby restaurants + paired local rec */}
+              {(event.nearbyDining.length > 0 || event.localRec) && (
+                <div className="rounded-xl px-4 py-3.5 border border-[#d4d2e8] bg-[#f7f6fb] space-y-3">
+                  <p className="text-[11px] font-bold text-[#5b4a8a] uppercase tracking-wider">Plan your night</p>
+                  {event.nearbyDining.length > 0 && (
+                    <div>
+                      <p className="text-[10px] font-semibold text-[#7a6ba8] uppercase tracking-wider mb-1.5">Eat nearby</p>
+                      <ul className="flex flex-wrap gap-1.5">
+                        {event.nearbyDining.map((spot, i) => (
+                          <li
+                            key={i}
+                            className="text-xs text-[#4a3f3a] bg-white border border-[#d4d2e8] rounded-full px-2.5 py-1 inline-flex items-baseline gap-1"
+                            title={spot.note}
+                          >
+                            <span className="font-semibold">{spot.name}</span>
+                            {spot.note && <span className="text-[#8a7a74]">· {spot.note}</span>}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {event.localRec && (
+                    <div>
+                      <p className="text-[10px] font-semibold text-[#7a6ba8] uppercase tracking-wider mb-1">Make a night of it</p>
+                      <p className="text-sm text-[#4a3f3a] leading-relaxed">{event.localRec}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {event.highlights.length > 0 && (
                 <div className="rounded-xl px-4 py-3.5 border border-[#e8d9bf] bg-[#fdf9f4]">
                   <p className="text-[11px] font-bold text-[#9a442d] uppercase tracking-wider mb-2">What to Expect</p>
@@ -528,36 +564,6 @@ export default async function EventDetailPage({ params }: PageProps) {
                     <div>
                       <p className="text-[11px] font-bold text-[#006a62] uppercase tracking-wider mb-1">Local Tips</p>
                       <p className="text-sm text-[#4a3f3a] leading-relaxed">{event.localTips}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* ── Plan your night — verified nearby restaurants + paired local rec ── */}
-              {(event.nearbyDining.length > 0 || event.localRec) && (
-                <div className="rounded-xl px-4 py-3.5 border border-[#d4d2e8] bg-[#f7f6fb] space-y-3">
-                  <p className="text-[11px] font-bold text-[#5b4a8a] uppercase tracking-wider">Plan your night</p>
-                  {event.nearbyDining.length > 0 && (
-                    <div>
-                      <p className="text-[10px] font-semibold text-[#7a6ba8] uppercase tracking-wider mb-1.5">Eat nearby</p>
-                      <ul className="flex flex-wrap gap-1.5">
-                        {event.nearbyDining.map((spot, i) => (
-                          <li
-                            key={i}
-                            className="text-xs text-[#4a3f3a] bg-white border border-[#d4d2e8] rounded-full px-2.5 py-1 inline-flex items-baseline gap-1"
-                            title={spot.note}
-                          >
-                            <span className="font-semibold">{spot.name}</span>
-                            {spot.note && <span className="text-[#8a7a74]">· {spot.note}</span>}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {event.localRec && (
-                    <div>
-                      <p className="text-[10px] font-semibold text-[#7a6ba8] uppercase tracking-wider mb-1">Make a night of it</p>
-                      <p className="text-sm text-[#4a3f3a] leading-relaxed">{event.localRec}</p>
                     </div>
                   )}
                 </div>
