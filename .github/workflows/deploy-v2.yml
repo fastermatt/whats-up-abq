@@ -50,9 +50,12 @@ jobs:
               sleep 15
               continue
             }
+            # Netlify sets commit_ref=null for GitHub App deploys;
+            # the commit SHA is embedded in .title as "Deploy {sha}".
+            # We match on both fields for resilience.
             STATE=$(echo "$RESPONSE" | jq -r \
               --arg sha "$SHA" \
-              '[.[] | select(.commit_ref == $sha)] | first | .state // "not_found"')
+              '[.[] | select(.commit_ref == $sha or .title == ("Deploy " + $sha))] | first | .state // "not_found"')
             echo "  [$i/40] state=$STATE"
             case "$STATE" in
               ready)
