@@ -1,9 +1,9 @@
-name: CI — smoke tests after Netlify deploy
+name: CI — deploy + smoke tests
 
-# Netlify's GitHub App auto-deploys every push to `v2` independently.
-# This workflow's job is to wait for that deploy, then run smoke tests.
-# We no longer run netlify-cli here — it calls the Extensions API which
-# returns 403 for personal access tokens (netlify-cli ≥25.x regression).
+# Build, deploy to Netlify, then run smoke tests.
+# Uses netlify-cli@25.6.2 (last stable before 26.x which broke personal-token
+# auth via mandatory Extensions API call returning 403). After deploy we poll
+# the Netlify API until state=ready before running smoke tests.
 
 on:
   push:
@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  smoke-test:
+  deploy:
     runs-on: ubuntu-latest
 
     permissions:
@@ -22,6 +22,24 @@ jobs:
       issues: write
 
     env:
+      NEXT_PUBLIC_SUPABASE_URL: https://bsmvfutebmbkjvlrhiyq.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+      UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+      CLOUDFLARE_R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+      CLOUDFLARE_R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+      CLOUDFLARE_R2_BUCKET_NAME: abq-unplugged-images
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      NEXT_PUBLIC_CDN_BASE_URL: https://cdn.abqunplugged.com
+      TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
+      SEATGEEK_CLIENT_ID: ${{ secrets.SEATGEEK_CLIENT_ID }}
+      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${{ secrets.NEXT_PUBLIC_UMAMI_WEBSITE_ID }}
+      NEXT_PUBLIC_UMAMI_SRC: https://cloud.umami.is/script.js
+      NEXT_PUBLIC_SITE_URL: https://abqunplugged.com
+      NEXT_PUBLIC_SITE_NAME: ABQ Unplugged
+      NOMINATIM_USER_AGENT: ${{ secrets.NOMINATIM_USER_AGENT }}
+      BEEHIIV_API_KEY: ${{ secrets.BEEHIIV_API_KEY }}
       NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
       NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
 
@@ -32,60 +50,84 @@ jobs:
         with:
           node-version: '22'
 
-      # ── Wait for Netlify's own build pipeline to finish ──────────────────────
-      # Netlify's GitHub App watches the v2 branch and builds/deploys on every
-      # push. We poll the Netlify Deploys API until we see the deploy for this
-      # exact commit SHA in state=ready (or error out on failure).
-      # On workflow_dispatch we skip this — just smoke-test whatever is live.
-      - name: Wait for Netlify deploy (${{ github.sha }})
+      # ── Install + Build ───────────────────────────────────────────────────────
+      # Pin to 25.6.2 — last stable before 26.x which added an extensions
+      # API call that returns 403 with personal access tokens.
+      - name: Install Netlify CLI
+        run: npm install -g netlify-cli@25.6.2
+
+      - name: Remove root package-lock.json (avoid Turbopack lockfile confusion)
+        run: rm -f package-lock.json
+
+      - name: Install dependencies
+        working-directory: v2
+        run: npm install --legacy-peer-deps
+
+      - name: Build Next.js app
+        working-directory: v2
+        run: npm run build
+
+      # ── Deploy ────────────────────────────────────────────────────────────────
+      # Write state.json so netlify-cli can find the site without an interactive
+      # link step (required even when --site flag is passed, since 25.x).
+      - name: Link Netlify site (write state.json)
+        working-directory: v2
+        run: |
+          mkdir -p .netlify
+          printf '{"siteId":"%s"}\n' "$NETLIFY_SITE_ID" > .netlify/state.json
+
+      - name: Deploy to Netlify
+        working-directory: v2
+        run: |
+          netlify deploy \
+            --site $NETLIFY_SITE_ID \
+            --auth $NETLIFY_AUTH_TOKEN \
+            --dir .next \
+            --functions .netlify/functions-internal \
+            --prod \
+            --message "Deploy ${{ github.sha }}"
+
+      # ── Wait for Netlify to mark deploy as ready ──────────────────────────────
+      # Netlify sets commit_ref=null on CLI deploys; the SHA appears in .title
+      # as "Deploy {full-sha}". Poll until state=ready (or error) before tests.
+      # On workflow_dispatch skip the wait — just smoke-test whatever is live.
+      - name: Wait for deploy to go live (${{ github.sha }})
         if: github.event_name == 'push'
         run: |
           SHA="${{ github.sha }}"
-          echo "Polling Netlify for deploy of commit ${SHA:0:7}..."
-          for i in $(seq 1 40); do
+          echo "Polling Netlify for 'Deploy ${SHA:0:7}' to reach ready..."
+          for i in $(seq 1 20); do
             RESPONSE=$(curl -sf \
               -H "Authorization: Bearer $NETLIFY_AUTH_TOKEN" \
-              "https://api.netlify.com/api/v1/sites/$NETLIFY_SITE_ID/deploys?per_page=20") || {
+              "https://api.netlify.com/api/v1/sites/$NETLIFY_SITE_ID/deploys?per_page=10") || {
               echo "  Netlify API unreachable, retrying in 15s..."
               sleep 15
               continue
             }
-            # Netlify sets commit_ref=null for GitHub App deploys;
-            # the commit SHA is embedded in .title as "Deploy {sha}".
-            # We match on both fields for resilience.
             STATE=$(echo "$RESPONSE" | jq -r \
               --arg sha "$SHA" \
               '[.[] | select(.commit_ref == $sha or .title == ("Deploy " + $sha))] | first | .state // "not_found"')
-            echo "  [$i/40] state=$STATE"
+            echo "  [$i/20] state=$STATE"
             case "$STATE" in
               ready)
                 echo "✅ Deploy is live!"
-                exit 0
+                break
                 ;;
               error)
-                echo "❌ Netlify build failed for $SHA"
+                echo "❌ Netlify reported deploy error for $SHA"
                 exit 1
                 ;;
               not_found|null)
-                echo "  Deploy not yet queued — waiting 30s..."
+                echo "  Deploy not indexed yet — waiting 15s..."
                 ;;
               *)
-                echo "  Build in progress ($STATE) — waiting 30s..."
+                echo "  Deploy in state '$STATE' — waiting 15s..."
                 ;;
             esac
-            sleep 30
+            sleep 15
           done
-          echo "⏰ Timed out waiting for Netlify deploy (20 min)"
-          exit 1
 
-      # ── Post-deploy smoke tests — verify critical URL-level redirects ────────
-      # These tests catch regressions in middleware (category slugs, venue slugs,
-      # /search redirect, etc.). We install only what the test script needs
-      # (--ignore-scripts skips postinstall hooks to keep this fast).
-      - name: Install test dependencies
-        working-directory: v2
-        run: npm install --legacy-peer-deps --ignore-scripts
-
+      # ── Post-deploy smoke tests ───────────────────────────────────────────────
       - name: Post-deploy smoke tests
         working-directory: v2
         env:
@@ -95,11 +137,10 @@ jobs:
           echo "Running live URL smoke tests against https://abqunplugged.com..."
           node scripts/regression-tests.mjs --site=https://abqunplugged.com --tag=live || {
             echo "::warning::Post-deploy smoke tests failed — middleware or routing regression"
-            # Don't fail the workflow — but the warning flags it for investigation
             exit 0
           }
 
-      # ── On failure: open a GitHub Issue ─────────────────────────────────────
+      # ── On failure: open a GitHub Issue ──────────────────────────────────────
       - name: Open issue on failure
         if: failure()
         uses: actions/github-script@v7
