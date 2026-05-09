@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { Loader2, RefreshCw, ExternalLink, Image } from 'lucide-react'
+import { Loader2, RefreshCw, ExternalLink, Image as ImageIcon } from 'lucide-react'
 import Link from 'next/link'
+import { IGSubNav } from '../components/IGSubNav'
 
 interface PostLog {
   id: string
@@ -62,10 +63,10 @@ export default function HistoryPage() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
       <div className="max-w-3xl mx-auto px-4 py-8">
+        <IGSubNav active="history" />
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <Link href="/admin/ig" className="text-[11px] text-white/40 hover:text-white/70 uppercase tracking-widest mb-1 block">← Back to Editor</Link>
             <h1 className="text-xl font-bold">Post History</h1>
             <p className="text-sm text-white/40 mt-0.5">All posts published via the IG Editor</p>
           </div>
@@ -96,7 +97,7 @@ export default function HistoryPage() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={post.image_url} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <Image size={20} className="text-white/20" />
+                    <ImageIcon size={20} className="text-white/20" />
                   )}
                 </div>
 
@@ -145,7 +146,7 @@ export default function HistoryPage() {
 
         {!loading && posts.length === 0 && (
           <div className="text-center py-16 text-white/30">
-            <Image size={32} className="mx-auto mb-3 opacity-30" />
+            <ImageIcon size={32} className="mx-auto mb-3 opacity-30" />
             <p className="text-sm">No posts yet.</p>
             <Link href="/admin/ig" className="text-[#9a442d] hover:underline text-sm mt-1 inline-block">Open the editor →</Link>
           </div>

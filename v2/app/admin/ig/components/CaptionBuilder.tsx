@@ -701,11 +701,11 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
         <button
           onClick={generateAICaptions}
           disabled={aiLoading}
-          title="Generate captions with AI"
+          title="Regenerate all 4 captions using AI. This replaces any unsaved edits to the active caption."
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 disabled:opacity-40 transition-colors touch-manipulation"
         >
           {aiLoading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-          {aiLoading ? 'Generating…' : 'AI'}
+          {aiLoading ? 'Generating…' : 'Regenerate'}
         </button>
       </div>
 

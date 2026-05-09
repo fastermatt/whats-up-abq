@@ -9,6 +9,7 @@ import { DesignPanel } from './components/DesignPanel'
 import { ElementsSidebar } from './components/ElementsSidebar'
 import { SavedDesigns } from './components/SavedDesigns'
 import { CaptionBuilder } from './components/CaptionBuilder'
+import { IGSubNav } from './components/IGSubNav'
 import type { PostCanvasHandle } from './components/PostCanvas'
 import { useEditor } from './store'
 import { TEMPLATES } from './lib/templates'
@@ -88,13 +89,7 @@ export function IGEditor({ event, image }: Props) {
   return (
     <div className="space-y-3">
 
-      {/* IG admin sub-nav: Editor (here) · Week Planner · Queue · History */}
-      <nav className="flex items-center gap-1 text-[11px] text-white/40 -mb-1">
-        <span className="px-2 py-1 rounded bg-white/[0.07] text-white font-bold">Editor</span>
-        <a href="/admin/ig/week"    className="px-2 py-1 rounded hover:bg-white/[0.05] hover:text-white/80 transition-colors">Week Planner</a>
-        <a href="/admin/ig/queue"   className="px-2 py-1 rounded hover:bg-white/[0.05] hover:text-white/80 transition-colors">Queue</a>
-        <a href="/admin/ig/history" className="px-2 py-1 rounded hover:bg-white/[0.05] hover:text-white/80 transition-colors">History</a>
-      </nav>
+      <IGSubNav active="editor" />
 
       {/* Event picker — collapses to a single line after event is selected */}
       <EventSearch event={event} />

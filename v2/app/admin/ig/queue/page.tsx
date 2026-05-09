@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { Loader2, Trash2, RefreshCw, Calendar, Clock, Image } from 'lucide-react'
+import { Loader2, Trash2, RefreshCw, Calendar, Clock, Image as ImageIcon } from 'lucide-react'
 import Link from 'next/link'
+import { IGSubNav } from '../components/IGSubNav'
 
 interface ScheduledPost {
   id: string
@@ -75,13 +76,7 @@ export default function QueuePage() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
       <div className="max-w-3xl mx-auto px-4 py-8">
-        {/* IG admin sub-nav */}
-        <nav className="flex items-center gap-1 text-[11px] text-white/40 mb-3">
-          <Link href="/admin/ig"         className="px-2 py-1 rounded hover:bg-white/[0.05] hover:text-white/80 transition-colors">Editor</Link>
-          <Link href="/admin/ig/week"    className="px-2 py-1 rounded hover:bg-white/[0.05] hover:text-white/80 transition-colors">Week Planner</Link>
-          <span                            className="px-2 py-1 rounded bg-white/[0.07] text-white font-bold">Queue</span>
-          <Link href="/admin/ig/history" className="px-2 py-1 rounded hover:bg-white/[0.05] hover:text-white/80 transition-colors">History</Link>
-        </nav>
+        <IGSubNav active="queue" />
 
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -167,7 +162,7 @@ function PostCard({ post, onCancel, cancelling }: { post: ScheduledPost; onCance
           // eslint-disable-next-line @next/next/no-img-element
           <img src={post.image_urls[0]} alt="" className="w-full h-full object-cover" />
         ) : (
-          <Image size={20} className="text-white/20" />
+          <ImageIcon size={20} className="text-white/20" />
         )}
       </div>
 

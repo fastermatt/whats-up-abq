@@ -361,7 +361,7 @@ function CanvasControls() {
               </Btn>
             </div>
             {showPosZoom && (
-              <div className="space-y-2.5 pl-1 border-l-2 border-white/10">
+              <div className="space-y-2.5 rounded-lg p-2.5 bg-white/[0.04] border border-white/[0.08]">
                 <div className="grid grid-cols-2 gap-2">
                   <div><Label>Offset X</Label><NumInput value={bg.offsetX ?? 0} onChange={v => setBackground({ ...bg, offsetX: v })} min={-1080} max={1080} step={10} /></div>
                   <div><Label>Offset Y</Label><NumInput value={bg.offsetY ?? 0} onChange={v => setBackground({ ...bg, offsetY: v })} min={-1920} max={1920} step={10} /></div>
