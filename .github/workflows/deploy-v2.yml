@@ -4,6 +4,11 @@ name: CI — deploy + smoke tests
 # Uses netlify-cli@25.6.2 (last stable before 26.x which broke personal-token
 # auth via mandatory Extensions API call returning 403). After deploy we poll
 # the Netlify API until state=ready before running smoke tests.
+#
+# 25.6.2 itself still calls the /extensions and /blobs APIs during build —
+# both are intermittently flaky on the Netlify side (clustered 401/403 errors
+# observed 2026-05-09 with ~40% failure rate over a 30-min window). The deploy
+# step below retries up to 3x on those specific infrastructure errors.
 
 on:
   push:
@@ -76,15 +81,48 @@ jobs:
         run: |
           netlify link --id a0ff66c2-b959-4438-b184-509597d248e2
 
+      # Retry the deploy step on transient Netlify infrastructure errors. Today
+      # (2026-05-09) we saw a 40% failure rate from intermittent 401/403 responses
+      # on Netlify's /extensions and /blobs endpoints, which @netlify/build calls
+      # synchronously with no retry. The errors are cluster-correlated (Netlify-side
+      # flakiness, not our token) and resolve on a re-run within seconds. Retry up
+      # to 3 times with exponential backoff (15s, 45s) before failing the job.
       - name: Deploy to Netlify
         working-directory: v2
         run: |
-          netlify deploy \
-            --auth $NETLIFY_AUTH_TOKEN \
-            --dir .next \
-            --functions .netlify/functions-internal \
-            --prod \
-            --message "Deploy ${{ github.sha }}"
+          set +e
+          for attempt in 1 2 3; do
+            echo "::group::Deploy attempt $attempt of 3"
+            netlify deploy \
+              --auth "$NETLIFY_AUTH_TOKEN" \
+              --dir .next \
+              --functions .netlify/functions-internal \
+              --prod \
+              --message "Deploy ${{ github.sha }}" \
+              2>&1 | tee /tmp/deploy-output.log
+            EXIT_CODE=${PIPESTATUS[0]}
+            echo "::endgroup::"
+            if [ "$EXIT_CODE" -eq 0 ]; then
+              echo "Deploy succeeded on attempt $attempt"
+              exit 0
+            fi
+            # Only retry on transient Netlify infrastructure errors. Real build
+            # errors (TypeScript, missing modules, plugin crashes from our code)
+            # should fail fast.
+            if grep -qE "Failed retrieving extensions|Netlify Blobs has generated|Unexpected status code (401|403|429|500|502|503|504)|fetch failed|ECONNRESET|ETIMEDOUT" /tmp/deploy-output.log; then
+              if [ "$attempt" -lt 3 ]; then
+                BACKOFF=$((attempt * 30))
+                echo "::warning::Transient Netlify error on attempt $attempt — retrying in ${BACKOFF}s"
+                sleep $BACKOFF
+                continue
+              fi
+              echo "::error::Deploy failed after 3 attempts due to transient Netlify error"
+              exit 1
+            fi
+            echo "::error::Deploy failed with non-retryable error"
+            exit "$EXIT_CODE"
+          done
+          exit 1
 
       # ── Wait for Netlify to mark deploy as ready ──────────────────────────────
       # Netlify sets commit_ref=null on CLI deploys; the SHA appears in .title
