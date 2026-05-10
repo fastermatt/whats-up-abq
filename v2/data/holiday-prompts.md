@@ -1,13 +1,26 @@
 # Holiday Hero Image Prompts — Midjourney
 
-Works in **midjourney.com** (the web app) AND Discord — same prompt syntax. Tuned to ABQ Unplugged's brand:
+Works in **midjourney.com** (the web app) AND Discord — same prompt syntax.
 
-- **Cream `#fbf7f1` body**, **terra `#9a442d` accent**, **sage `#4f6249`**, **turquoise `#006a62`**
-- **Editorial photography aesthetic** (NOT illustration, NOT digital art). Looks like a magazine cover.
-- **Albuquerque-grounded** — desert light, adobe walls, Sandia silhouettes, southwest flora — but never cliché-southwestern.
+## Visual style — locked 2026-05-09
+
+After the first batch (Mother's Day), the look that works best is **linocut / hand-drawn screen-print** in the brand palette — NOT photo-realism. Photos clash with the photo cards on the rest of the site; an illustrated style sets the holiday rail apart visually and is forgiving of MJ's rough edges (no faces to mess up, no fingers to count).
+
+Use this style frame on every prompt:
+
+> linocut hand-drawn screen-print imagery in **terra orange, deep teal, cream beige, and white**, textured ink with rough overprint feel, no text or words
+
+Then add the holiday subject. The shorter and more verb-driven the prompt, the better — MJ web rewards clarity over a wall of adjectives.
+
+## Brand palette
+
+`#fbf7f1` cream · `#9a442d` terra · `#4f6249` sage · `#006a62` turquoise
+
+## Constraints
+
+- **NO TEXT EVER.** MJ can't spell. Every prompt ends with `--no text, words, letters, typography`. If MJ slips text in (especially common on signs, banners, books), regenerate or pick a different variant.
 - **Composition leaves room for text overlay** on either side or center (banner is 21:9-ish).
-- **No people's faces close up**. Hands, silhouettes, or environment shots only — keeps reuse safe and dodges AI-face slop.
-- **NO TEXT EVER.** MJ can't spell. Every prompt below ends with an aggressive `--no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers` block. Don't remove it. If you DO see text in the output (especially common on signs, banners, books, posters), regenerate with `--no` even more aggressive.
+- The linocut style makes faces safe at a stylized distance (see the shipped Mother's Day image — woman + child rendered in screen-print).
 
 For each holiday you'll generate **TWO** images:
 - `bgImage` (banner): aspect `--ar 21:9`, ~2400×1029. Goes behind the top sliver banner.
@@ -47,49 +60,49 @@ For each holiday you'll generate **TWO** images:
 ## Prompts
 
 ### Mother's Day · `mothers-day-bg.avif` + `mothers-day-hero.avif`
-> Editorial photograph of a hand placing a small bouquet of native New Mexico wildflowers (Indian paintbrush, chocolate flower, blue flax) on a worn cream linen tablecloth in soft morning light, terracotta clay vase to the side, blurred adobe wall in background warm peach tone, shallow depth of field, fine grain, magazine cover aesthetic, color palette warm cream and terra and dusty sage, --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers, books, posters, banners with text --ar 21:9 --style raw --v 6
+> linocut hand-drawn screen-print imagery in terra orange, deep teal, cream beige, and white, textured ink with rough overprint feel, happy mother's day celebration, mother and child embracing surrounded by wildflowers --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers --ar 21:9 --style raw --v 6
 
 ### Father's Day · `fathers-day-bg.avif` + `fathers-day-hero.avif`
-> Editorial photograph of an aged leather mitt and a baseball resting on a weathered cedar picnic table at golden hour, a pint glass of amber craft beer beside them, blurred Sandia mountain silhouette in distant background, warm cream and terra tones, shallow depth of field, magazine cover aesthetic, fine grain, --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers, books, posters, banners with text --ar 21:9 --style raw --v 6
+> linocut hand-drawn screen-print imagery in terra orange, deep teal, cream beige, and white, textured ink with rough overprint feel, happy father's day celebration, father and child silhouettes with mountain horizon --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers --ar 21:9 --style raw --v 6
 
 ### Cinco de Mayo · `cinco-de-mayo-bg.avif` + `cinco-de-mayo-hero.avif`
-> Editorial photograph of strands of colorful papel picado fluttering against a deep adobe wall under bright New Mexico sun, sharp shadow lines on cream stucco, single string of warm festival lights, color palette terra red and turquoise and warm cream, magazine cover aesthetic, fine grain, --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers, books, posters, banners with text --ar 21:9 --style raw --v 6
+> linocut hand-drawn screen-print imagery in terra orange, deep teal, cream beige, and white, textured ink with rough overprint feel, cinco de mayo celebration, papel picado banners and adobe wall under bright sun --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers --ar 21:9 --style raw --v 6
 
 ### Valentine's Day · `valentines-day-bg.avif` + `valentines-day-hero.avif`
-> Editorial photograph of two small ceramic mugs of mulled wine on a sun-warmed adobe sill, single dried rose with terracotta petals beside them, evening Sandia sunset glow on the wall, warm terra and cream and dusty pink palette, shallow depth of field, magazine cover aesthetic, fine grain, --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers, books, posters, banners with text --ar 21:9 --style raw --v 6
+> linocut hand-drawn screen-print imagery in terra orange, deep teal, cream beige, and white, textured ink with rough overprint feel, valentine's day celebration, two hearts intertwined with desert blooms --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers --ar 21:9 --style raw --v 6
 
 ### St. Patrick's Day · `st-patricks-day-bg.avif` + `st-patricks-day-hero.avif`
-> Editorial photograph of a pint of dark stout on a worn wooden bar, single sprig of green clover beside it, warm string lights softly blurred behind, adobe wall textures, palette of dusty sage green and warm cream and terra wood tones, shallow depth of field, magazine cover aesthetic, fine grain, --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers, books, posters, banners with text --ar 21:9 --style raw --v 6
+> linocut hand-drawn screen-print imagery in terra orange, deep teal, cream beige, and white, textured ink with rough overprint feel, st patrick's day celebration, clovers and pint glass with celtic knot border --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers --ar 21:9 --style raw --v 6
 
 ### Memorial Day · `memorial-day-bg.avif` + `memorial-day-hero.avif`
-> Editorial photograph of a folded American flag resting on a sun-bleached wooden bench in a quiet New Mexico cemetery at dawn, soft golden hour light, distant cottonwoods and Sandia mountain silhouette, palette of muted cream sage and dusty terra, contemplative quiet mood, magazine cover aesthetic, fine grain, --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers, books, posters, banners with text --ar 21:9 --style raw --v 6
+> linocut hand-drawn screen-print imagery in terra orange, deep teal, cream beige, and white, textured ink with rough overprint feel, memorial day remembrance, folded flag on cottonwood bench at dawn --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers --ar 21:9 --style raw --v 6
 
 ### Juneteenth · `juneteenth-bg.avif` + `juneteenth-hero.avif`
-> Editorial photograph of strung warm festival lights crossing a wide community plaza at sunset, adobe walls glowing terra and gold, percussion drums softly visible in the foreground out of focus, palette of warm cream terra and rich red, celebratory uplifting mood, magazine cover aesthetic, fine grain, --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers, books, posters, banners with text --ar 21:9 --style raw --v 6
+> linocut hand-drawn screen-print imagery in terra orange, deep teal, cream beige, and white, textured ink with rough overprint feel, juneteenth celebration, raised hands and freedom drums with sunburst --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers --ar 21:9 --style raw --v 6
 
 ### 4th of July · `fourth-of-july-bg.avif` + `fourth-of-july-hero.avif`
-> Editorial photograph of small fireworks bursting above a darkened Sandia mountain ridgeline at dusk, foreground silhouette of cottonwoods and adobe rooftops, warm cream and terra and deep navy palette, single sparkler trail of warm light, magazine cover aesthetic, fine grain, --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers, books, posters, banners with text --ar 21:9 --style raw --v 6
+> linocut hand-drawn screen-print imagery in terra orange, deep teal, cream beige, and white, textured ink with rough overprint feel, fourth of july celebration, fireworks above sandia mountain silhouette --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers --ar 21:9 --style raw --v 6
 
 ### Labor Day · `labor-day-bg.avif` + `labor-day-hero.avif`
-> Editorial photograph of a worn enamel cooler open on a cottonwood-shaded picnic table in the South Valley, ice and craft beer cans inside, warm late summer afternoon light, blurred green chile field in background, palette of cream sage and warm terra, magazine cover aesthetic, fine grain, --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers, books, posters, banners with text --ar 21:9 --style raw --v 6
+> linocut hand-drawn screen-print imagery in terra orange, deep teal, cream beige, and white, textured ink with rough overprint feel, labor day end of summer, picnic basket and string lights over a long table --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers --ar 21:9 --style raw --v 6
 
 ### Balloon Fiesta · `balloon-fiesta-bg.avif` + `balloon-fiesta-hero.avif`
-> Editorial photograph of a single hot air balloon ascending into a cool dawn sky over the Albuquerque West Mesa, warm balloon glowing terra and gold against pre-dawn lavender sky, distant Sandia mountains catching first light, foreground sage brush, palette warm cream gold terra and soft lavender, magazine cover aesthetic, fine grain, --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers, books, posters, banners with text --ar 21:9 --style raw --v 6
+> linocut hand-drawn screen-print imagery in terra orange, deep teal, cream beige, and white, textured ink with rough overprint feel, albuquerque balloon fiesta, single hot air balloon ascending over mesa at dawn --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers --ar 21:9 --style raw --v 6
 
 ### Halloween · `halloween-bg.avif` + `halloween-hero.avif`
-> Editorial photograph of a single carved jack-o-lantern on a worn adobe doorstep, warm candlelight glow, single dried sunflower beside it, deep autumn shadows, palette of warm terra and burnt orange and deep cream, slightly eerie but cozy mood, magazine cover aesthetic, fine grain, --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers, books, posters, banners with text --ar 21:9 --style raw --v 6
+> linocut hand-drawn screen-print imagery in terra orange, deep teal, cream beige, and white, textured ink with rough overprint feel, halloween night, glowing jack-o-lantern on adobe doorstep with crescent moon --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers --ar 21:9 --style raw --v 6
 
 ### Día de los Muertos · `dia-de-los-muertos-bg.avif` + `dia-de-los-muertos-hero.avif`
-> Editorial photograph of a small ofrenda altar at dusk, marigolds and warm candle flames, framed sepia photograph blurred in background, terracotta clay vessels, palette of warm marigold orange and terra and cream and deep cobalt accents, reverent celebratory mood, magazine cover aesthetic, fine grain, respectful tone, --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers, books, posters, banners with text --ar 21:9 --style raw --v 6
+> linocut hand-drawn screen-print imagery in terra orange, deep teal, cream beige, and white, textured ink with rough overprint feel, día de los muertos altar, marigolds and candles around a sugar skull --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers --ar 21:9 --style raw --v 6
 
 ### Thanksgiving · `thanksgiving-bg.avif` + `thanksgiving-hero.avif`
-> Editorial photograph of a long worn wooden farm table set with terracotta plates and ceramic bowls of roasted squash and red chile, single warm candle glowing in the center, blurred adobe kitchen behind, palette of warm cream terra and burnt sienna, slow late autumn afternoon light, magazine cover aesthetic, fine grain, --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers, books, posters, banners with text --ar 21:9 --style raw --v 6
+> linocut hand-drawn screen-print imagery in terra orange, deep teal, cream beige, and white, textured ink with rough overprint feel, thanksgiving feast, harvest table with squash, corn, and red chile ristras --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers --ar 21:9 --style raw --v 6
 
 ### Christmas · `christmas-bg.avif` + `christmas-hero.avif`
-> Editorial photograph of warm luminarias glowing along a snow-dusted adobe wall at blue hour in Old Town Albuquerque, soft snowfall, single juniper branch with red berries in the foreground, palette of warm cream gold terra and deep cobalt blue, magical reverent mood, magazine cover aesthetic, fine grain, --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers, books, posters, banners with text --ar 21:9 --style raw --v 6
+> linocut hand-drawn screen-print imagery in terra orange, deep teal, cream beige, and white, textured ink with rough overprint feel, christmas in old town albuquerque, luminarias along an adobe wall with snow --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers --ar 21:9 --style raw --v 6
 
 ### New Year's Eve · `new-years-eve-bg.avif` + `new-years-eve-hero.avif`
-> Editorial photograph of a single coupe glass of sparkling wine catching warm light on a high adobe rooftop bar, blurred string lights crossing toward the Sandia mountain silhouette at dusk, palette of warm gold cream terra and deep midnight blue, celebratory anticipatory mood, magazine cover aesthetic, fine grain, --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers, books, posters, banners with text --ar 21:9 --style raw --v 6
+> linocut hand-drawn screen-print imagery in terra orange, deep teal, cream beige, and white, textured ink with rough overprint feel, new year's eve celebration, sparkling coupe glasses raised against city lights --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers --ar 21:9 --style raw --v 6
 ---
 
 ## Tips for prompt tweaking
@@ -106,7 +119,7 @@ For each holiday you'll generate **TWO** images:
 
 | Holiday | bgImage | heroImage | ogImage |
 |---|---|---|---|
-| Mother's Day | ⏳ | ⏳ | ⏳ |
+| Mother's Day | ✅ | ✅ | — |
 | Father's Day | ⏳ | ⏳ | ⏳ |
 | Cinco de Mayo | ⏳ | ⏳ | ⏳ |
 | Valentine's Day | ⏳ | ⏳ | ⏳ |

@@ -181,6 +181,8 @@ export const HOLIDAYS: Holiday[] = [
     tagline: "Happy Mother's Day weekend, Burque",
     subtitle: "Brunches, flowers, and family events to make her morning.",
     emoji: '💐',
+    bgImage:   'https://bsmvfutebmbkjvlrhiyq.supabase.co/storage/v1/object/public/event-photos/holiday-images/mothers-day-bg.webp',
+    heroImage: 'https://bsmvfutebmbkjvlrhiyq.supabase.co/storage/v1/object/public/event-photos/holiday-images/mothers-day-hero.webp',
     keywords: ["mother's day", "mothers day", "mom and me", "moms ", "mama and ", "matriarch"],
     preferredCategories: ['Food & Drink', 'Family'],
     eventWindow: 2,
