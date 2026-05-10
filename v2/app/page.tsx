@@ -14,6 +14,8 @@ import { cachedFetch } from '@/lib/cache/redis'
 
 import { ScrollHintManager } from '@/app/components/ScrollHintManager'
 import { getFeaturedPlaces, PLACE_CATEGORIES, type Place } from '@/data/places'
+import { getActiveHoliday } from '@/data/holidays'
+import { fetchHolidayEventsCached } from '@/lib/holidays'
 
 // Rotates hourly (server-side, ISR updates within 60s of the hour turning)
 const HERO_SAYINGS = [
@@ -140,15 +142,22 @@ async function rc<T>(key: string, fn: () => Promise<T>, ttl = 300): Promise<T> {
 export default async function DiscoverPage() {
   const featuredPlaces = getFeaturedPlaces(8)
 
+  // Holiday window check — if active, fetch holiday-tagged events too.
+  // Resolves to null outside any window, so the rail just doesn't render.
+  const activeHoliday = getActiveHoliday()
+
   // Redis caches each data source globally (Upstash is multi-region) so even
   // Lighthouse/PSI cold-start requests get fast data after the first warm-up.
-  const [tonight, weekend, allUpcoming, featuredRaw, neighborhoodCounts, movies] = await Promise.all([
+  const [tonight, weekend, allUpcoming, featuredRaw, neighborhoodCounts, movies, holidayEvents] = await Promise.all([
     rc('hp:tonight',     () => fetchEvents({ timeFilter: 'tonight', limit: 10 }),     300),
     rc('hp:weekend',     () => fetchEvents({ timeFilter: 'this-weekend', limit: 10 }), 900),
     rc('hp:upcoming',    () => fetchEvents({ timeFilter: 'upcoming', limit: 1 }),      600),
     rc('hp:featured',    () => fetchFeaturedEvents(6),                                 900),
     rc('hp:hoods',       () => fetchNeighborhoodCounts(),                              3600),
     rc('hp:movies',      () => fetchNowPlayingMovies(10),                              3600),
+    activeHoliday
+      ? fetchHolidayEventsCached(activeHoliday.holiday, activeHoliday.date, 8)
+      : Promise.resolve([]),
   ])
 
   // Rebalance homepage rails by category demand. Click analytics show users
@@ -413,6 +422,52 @@ export default async function DiscoverPage() {
 
       {/* ── Mood chips ── */}
       <MoodChips />
+
+      {/* ── Holiday rail (only renders within an active holiday window) ──
+          Picks events whose title or description matches the holiday's
+          keywords AND whose date is within ±eventWindow days. Anchored at
+          #holiday-rail so the banner's "scroll to events" link lands here. */}
+      {activeHoliday && holidayEvents.length > 0 && (
+        <AnimateIn animation="fade-up">
+          <section
+            id="holiday-rail"
+            className="py-6 bg-gradient-to-b from-[#fbf2ec] to-[#fbf7f1] border-y border-[#9a442d]/15"
+          >
+            <div className="max-w-6xl mx-auto px-4 flex items-end justify-between mb-4">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] mb-0.5 font-semibold flex items-center gap-1.5">
+                  <span aria-hidden="true">{activeHoliday.holiday.emoji}</span>
+                  <span>{activeHoliday.holiday.name}</span>
+                </p>
+                <h2
+                  className="text-xl font-black text-[#1a1614] leading-tight"
+                  style={{ fontFamily: 'var(--font-epilogue)' }}
+                >
+                  {activeHoliday.daysUntil === 0
+                    ? `Today, ${activeHoliday.holiday.name}`
+                    : activeHoliday.daysUntil === 1
+                    ? `Tomorrow, ${activeHoliday.holiday.name}`
+                    : `${activeHoliday.holiday.name} picks`}
+                </h2>
+                {activeHoliday.holiday.subtitle && (
+                  <p className="text-xs text-[#4a3f3a] mt-1">{activeHoliday.holiday.subtitle}</p>
+                )}
+              </div>
+            </div>
+            <div className="max-w-6xl mx-auto px-4 flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2">
+              {holidayEvents.map((event, i) => (
+                <HorizontalCard
+                  key={event.id}
+                  event={event}
+                  sectionLabel={activeHoliday.holiday.name}
+                  index={i}
+                  prioritizeFirst={false}
+                />
+              ))}
+            </div>
+          </section>
+        </AnimateIn>
+      )}
 
       {/* ── Editor's Picks — Featured Events ── */}
       {featured.length > 0 && (

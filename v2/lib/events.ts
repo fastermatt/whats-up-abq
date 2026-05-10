@@ -912,7 +912,7 @@ export async function fetchEventById(id: string): Promise<NormalizedEvent | null
 
 // ─── Row → NormalizedEvent ────────────────────────────────────────────────────
 
-function normalizeRow(row: RawEventRow): NormalizedEvent | null {
+export function normalizeRow(row: RawEventRow): NormalizedEvent | null {
   try {
     let evt: NormalizedEvent | null
     switch (row.source) {

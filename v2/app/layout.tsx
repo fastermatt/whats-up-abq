@@ -6,7 +6,9 @@ import DesktopNav from './components/DesktopNav'
 import { ClientChrome } from './components/ClientChrome'
 import { AdminGate } from './components/AdminGate'
 import { LazyNewsletterBar } from './components/LazyNewsletterBar'
+import { HolidayBanner } from './components/HolidayBanner'
 import { OG_IMAGE } from '@/lib/fallback-images'
+import { getActiveHoliday } from '@/data/holidays'
 import './globals.css'
 
 const epilogue = Epilogue({
@@ -109,6 +111,24 @@ export default function RootLayout({
   const umamiId  = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID
   const umamiSrc = process.env.NEXT_PUBLIC_UMAMI_SRC ?? 'https://cloud.umami.is/script.js'
 
+  // Server-side resolved active holiday — drives the contextual banner.
+  // Recomputes on every render. Layouts in App Router are server components
+  // so this runs at request time (or ISR rebuild time). The Holiday object
+  // contains a function (date), so we strip to a serializable subset before
+  // passing to the client banner component.
+  const active = getActiveHoliday()
+  const banner = active ? {
+    holidayKey: active.holiday.key,
+    name:       active.holiday.name,
+    tagline:    active.holiday.tagline,
+    subtitle:   active.holiday.subtitle,
+    emoji:      active.holiday.emoji,
+    bgClass:    active.holiday.bgClass,
+    textClass:  active.holiday.textClass,
+    date:       active.date,
+    daysUntil:  active.daysUntil,
+  } : null
+
   return (
     <html
       lang="en"
@@ -139,6 +159,15 @@ export default function RootLayout({
         {/* overflow-x-clip — clips overflow without creating a scroll container,
             so position:sticky still works inside pages */}
         <div className="w-full overflow-x-clip">
+          {/* Holiday banner — shown only when getActiveHoliday() returns a
+              hit (within preDays/postDays of a calendar entry). Hidden in
+              admin to avoid distracting the dashboard. Sits ABOVE the nav
+              so it pushes the nav down rather than overlapping. */}
+          {banner && (
+            <AdminGate>
+              <HolidayBanner {...banner} />
+            </AdminGate>
+          )}
           <DesktopNav />
           {/* pb-[100px] clears the 65px BottomNav with ~35px breathing
               room. Mobile audit (2026-05-09) caught the footer "Built with
