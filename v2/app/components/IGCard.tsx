@@ -356,7 +356,7 @@ function TemplateBroadside({
           overflow: 'hidden', zIndex: 2,
         }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: imgFit, objectPosition: 'center' }} />
+          <img src={imgSrc} alt="" crossOrigin="anonymous" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: imgFit, objectPosition: 'center' }} />
         </div>
 
         {/* Date + venue — below photo on cream, above safe zone */}
@@ -462,7 +462,7 @@ function TemplateBroadside({
       {/* ── PHOTO PANEL (bottom) — full bleed cover ── */}
       <div style={{ flex: `0 0 ${photoPct}%`, position: 'relative', overflow: 'hidden' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
+        <img src={imgSrc} alt="" crossOrigin="anonymous" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
       </div>
 
       {/* Terra thin divider line */}
@@ -549,7 +549,7 @@ function TemplateStub({
           borderRadius: 8, overflow: 'hidden', zIndex: 2,
         }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: imgFit, objectPosition: 'center' }} />
+          <img src={imgSrc} alt="" crossOrigin="anonymous" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: imgFit, objectPosition: 'center' }} />
         </div>
 
         {/* Date + venue — below the photo, never overlaid */}
@@ -664,7 +664,7 @@ function TemplateStub({
       {/* Right: photo panel — full bleed cover */}
       <div style={{ flex: `0 0 calc(${rightPct}% - 3px)`, position: 'relative', overflow: 'hidden' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
+        <img src={imgSrc} alt="" crossOrigin="anonymous" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
       </div>
 
       <GrainOverlay opacity={0.5} />
@@ -753,7 +753,7 @@ function TemplateDarkFrame({
         border: `2px solid rgba(255,255,255,0.07)`,
       }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={imgSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }} />
+        <img src={imgSrc} alt="" crossOrigin="anonymous" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }} />
       </div>
 
       {/* ── Date + venue (below photo) — URL moved to bottom safe zone ── */}
@@ -905,6 +905,25 @@ export function IGCardClient({
     setDownloading(true)
     try {
       const node = cardRef.current
+      // Wait for every <img> inside the card to fully decode before capture.
+      // Without this, mobile Safari starts toBlob mid-stream and the photo
+      // panel comes back empty (the bug Matt screenshotted 2026-05-10 —
+      // text + chrome captured fine, photo area blank). decode() resolves
+      // when the image is decoded into pixel data ready to draw to canvas.
+      const imgs = Array.from(node.querySelectorAll('img'))
+      await Promise.all(
+        imgs.map(img =>
+          (img.complete && img.naturalWidth > 0)
+            ? img.decode().catch(() => undefined)
+            : new Promise<void>(resolve => {
+                const done = () => resolve()
+                img.addEventListener('load', done, { once: true })
+                img.addEventListener('error', done, { once: true })
+                // Hard cap so a stuck image doesn't lock the download forever
+                setTimeout(done, 4000)
+              }).then(() => img.decode().catch(() => undefined))
+        )
+      )
       const naturalRatio = OUTPUT_WIDTH[format] / node.offsetWidth
       const pixelRatio = Math.min(naturalRatio, 3)
       const blob = await toBlob(node, { pixelRatio, cacheBust: false })
@@ -1040,9 +1059,11 @@ export function IGCardClient({
         ? 'flex items-center justify-center p-4'
         : 'flex-1 flex items-center justify-center p-5 sm:p-8 overflow-auto'
       }>
-        {/* Hidden image to track load state */}
+        {/* Hidden image to track load state. crossOrigin must match the
+            visible img's setting — otherwise the browser can fetch the
+            same URL twice (once tainted, once not). */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img ref={imgRef} src={proxiedSrc} alt="" className="absolute opacity-0 pointer-events-none w-0 h-0"
+        <img ref={imgRef} src={proxiedSrc} alt="" crossOrigin="anonymous" className="absolute opacity-0 pointer-events-none w-0 h-0"
           onLoad={() => setImageLoaded(true)}
           onError={() => { if (imgSrc !== categoryFallback) { setImgSrc(categoryFallback); setImageLoaded(false) } }} />
 
