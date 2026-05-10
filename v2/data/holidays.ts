@@ -54,6 +54,44 @@ function lastWeekdayOfMonth(month: number, dow: number) {
   }
 }
 
+/**
+ * Compute Easter Sunday (Western, Gregorian) using the Anonymous algorithm.
+ * Returns 'YYYY-MM-DD'. Verified for 2026 (Apr 5), 2027 (Mar 28), 2028 (Apr 16).
+ */
+function easterDate(year: number) {
+  const a = year % 19
+  const b = Math.floor(year / 100)
+  const c = year % 100
+  const d = Math.floor(b / 4)
+  const e = b % 4
+  const f = Math.floor((b + 8) / 25)
+  const g = Math.floor((b - f + 1) / 3)
+  const h = (19 * a + b - d - g + 15) % 30
+  const i = Math.floor(c / 4)
+  const k = c % 4
+  const l = (32 + 2 * e + 2 * i - h - k) % 7
+  const m = Math.floor((a + 11 * h + 22 * l) / 451)
+  const month = Math.floor((h + l - 7 * m + 114) / 31)
+  const day = ((h + l - 7 * m + 114) % 31) + 1
+  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+}
+
+/**
+ * NM State Fair — opens the Wednesday after Labor Day and runs ~11 days.
+ * Returns the opening date. The window in HOLIDAYS uses preDays for "fair
+ * is coming" + postDays to span the entire run.
+ */
+function nmStateFairOpening(year: number) {
+  // Labor Day = 1st Monday of Sept
+  const sept1 = new Date(Date.UTC(year, 8, 1))
+  const dow = sept1.getUTCDay() // 0=Sun, 1=Mon...
+  const offsetToMon = (1 - dow + 7) % 7
+  const laborDay = 1 + offsetToMon
+  const fairOpens = laborDay + 2 // Wed after Labor Day
+  return `${year}-09-${String(fairOpens).padStart(2, '0')}`
+}
+
+
 // ─── Holiday definitions ──────────────────────────────────────────
 
 export interface Holiday {
@@ -129,6 +167,20 @@ export const HOLIDAYS: Holiday[] = [
     keywords: ["new year's eve", 'new years eve', 'nye ', 'countdown', 'midnight'],
     preferredCategories: ['Music', 'Comedy', 'Food & Drink'],
   },
+  {
+    key: 'mlk-day',
+    name: 'MLK Day',
+    // 3rd Monday of January
+    date: nthWeekdayOfMonth(1, 1, 3),
+    preDays: 5,
+    postDays: 0,
+    tagline: "Honoring Dr. King in Albuquerque",
+    subtitle: "Marches, civic events, and family programming honoring his legacy.",
+    emoji: '🕊️',
+    keywords: ['mlk', 'martin luther king', 'civil rights', 'day of service'],
+    preferredCategories: ['Community', 'Family'],
+    eventWindow: 3,
+  },
 
   // ── February ───────────────────────────────────────────────────
   {
@@ -156,6 +208,21 @@ export const HOLIDAYS: Holiday[] = [
     emoji: '🍀',
     keywords: ["st. patrick", "st patrick", "saint patrick", "irish", "paddy", "celtic"],
     preferredCategories: ['Food & Drink', 'Music'],
+  },
+
+  // ── March / April (moveable feast — Easter falls late March to late April) ──
+  {
+    key: 'easter',
+    name: 'Easter',
+    date: easterDate,
+    preDays: 7,
+    postDays: 0,
+    tagline: "Happy Easter, Burque",
+    subtitle: "Egg hunts, brunches, sunrise services, and family gatherings.",
+    emoji: '🐣',
+    keywords: ['easter', 'egg hunt', 'sunrise service', 'easter brunch', 'palm sunday', 'good friday'],
+    preferredCategories: ['Family', 'Food & Drink', 'Community'],
+    eventWindow: 4,
   },
 
   // ── May ────────────────────────────────────────────────────────
@@ -264,6 +331,21 @@ export const HOLIDAYS: Holiday[] = [
     eventWindow: 4,
   },
 
+  {
+    key: 'nm-state-fair',
+    name: 'New Mexico State Fair',
+    // Opens the Wednesday after Labor Day. Runs ~11 days.
+    date: nmStateFairOpening,
+    preDays: 7,
+    postDays: 11, // covers the entire run
+    tagline: "The State Fair is in town",
+    subtitle: "Rides, livestock, green chile cheeseburgers, and the rodeo. Bring the kids.",
+    emoji: '🎡',
+    keywords: ['state fair', 'expo new mexico', 'fair grounds', 'rodeo de albuquerque'],
+    preferredCategories: ['Family', 'Festivals', 'Food & Drink'],
+    eventWindow: 11,
+  },
+
   // ── October ────────────────────────────────────────────────────
   {
     key: 'balloon-fiesta',
@@ -322,6 +404,22 @@ export const HOLIDAYS: Holiday[] = [
   },
 
   // ── December ───────────────────────────────────────────────────
+  {
+    key: 'las-posadas',
+    name: 'Las Posadas',
+    // Nine-night procession Dec 16-24 — a quintessentially New Mexican
+    // Catholic Christmas tradition. We anchor on Dec 16 and let the long
+    // postDays carry the banner through every night of the procession.
+    date: fixedDate(12, 16),
+    preDays: 5,
+    postDays: 8, // through Dec 24
+    tagline: "Las Posadas, Burque",
+    subtitle: "Nine nights of processions, music, and biscochitos in Old Town and beyond.",
+    emoji: '🕯️',
+    keywords: ['posada', 'posadas', 'procession', 'old town christmas', 'nochebuena'],
+    preferredCategories: ['Community', 'Family', 'Festivals'],
+    eventWindow: 9,
+  },
   {
     key: 'christmas',
     name: 'Christmas',

@@ -113,6 +113,22 @@ For each holiday you'll generate **TWO** images:
 - Want more abstract / less photo: swap "Editorial photograph" → "Soft impressionist painting in oil" + change `--style raw` to `--style scenic`. But test ONE first — illustrations clash with the rest of the site's photo cards.
 - For the OG share image (1200×630), re-run with `--ar 1200:630` and crop tighter — the OG composition needs the subject more centered since it gets cropped on different platforms.
 
+
+### MLK Day · `mlk-day-bg.avif` + `mlk-day-hero.avif`
+> linocut hand-drawn screen-print imagery in terra orange, deep teal, cream beige, and white, textured ink with rough overprint feel, honoring martin luther king jr, raised hands and dove of peace silhouette over a crowd --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers --ar 21:9 --style raw --v 6
+
+
+### Easter · `easter-bg.avif` + `easter-hero.avif`
+> linocut hand-drawn screen-print imagery in terra orange, deep teal, cream beige, and white, textured ink with rough overprint feel, easter morning celebration, lilies and decorated eggs in a basket beside an open church door --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers --ar 21:9 --style raw --v 6
+
+
+### New Mexico State Fair · `nm-state-fair-bg.avif` + `nm-state-fair-hero.avif`
+> linocut hand-drawn screen-print imagery in terra orange, deep teal, cream beige, and white, textured ink with rough overprint feel, new mexico state fair, ferris wheel and rodeo silhouette under sunset sky with green chile ristras in foreground --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers --ar 21:9 --style raw --v 6
+
+
+### Las Posadas · `las-posadas-bg.avif` + `las-posadas-hero.avif`
+> linocut hand-drawn screen-print imagery in terra orange, deep teal, cream beige, and white, textured ink with rough overprint feel, las posadas procession, candlelit walk through old town adobe arches with stars overhead --no text, words, letters, typography, signage, captions, watermark, lettering, writing, characters, signs, numbers --ar 21:9 --style raw --v 6
+
 ---
 
 ## Status — current state of holiday images
@@ -134,5 +150,9 @@ For each holiday you'll generate **TWO** images:
 | Thanksgiving | ⏳ | ⏳ | ⏳ |
 | Christmas | ⏳ | ⏳ | ⏳ |
 | New Year's Eve | ⏳ | ⏳ | ⏳ |
+| MLK Day | ⏳ | ⏳ | ⏳ |
+| Easter | ⏳ | ⏳ | ⏳ |
+| New Mexico State Fair | ⏳ | ⏳ | ⏳ |
+| Las Posadas | ⏳ | ⏳ | ⏳ |
 
 Update to ✅ as you upload each. The site renders gracefully with no image (terra solid banner, text-only rail header), so you can do them gradually — start with whichever holiday is coming up next.
