@@ -120,11 +120,11 @@ For each holiday you'll generate **TWO** images:
 | Holiday | bgImage | heroImage | ogImage |
 |---|---|---|---|
 | Mother's Day | ✅ | ✅ | — |
-| Father's Day | ⏳ | ⏳ | ⏳ |
+| Father's Day | ✅ | ✅ | — |
 | Cinco de Mayo | ⏳ | ⏳ | ⏳ |
 | Valentine's Day | ⏳ | ⏳ | ⏳ |
 | St. Patrick's Day | ⏳ | ⏳ | ⏳ |
-| Memorial Day | ⏳ | ⏳ | ⏳ |
+| Memorial Day | ✅ | ✅ | — |
 | Juneteenth | ⏳ | ⏳ | ⏳ |
 | 4th of July | ⏳ | ⏳ | ⏳ |
 | Labor Day | ⏳ | ⏳ | ⏳ |
