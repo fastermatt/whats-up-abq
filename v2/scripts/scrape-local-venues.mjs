@@ -26,6 +26,7 @@ import { createClient } from '@supabase/supabase-js'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { extractBestImage, extractAllCandidates } from './lib/image-extractor.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -313,6 +314,45 @@ function buildId(venueSlug, date, title) {
   return `local-venue-${venueSlug}-${date}-${titleSlug}`
 }
 
+/** Slugify a title for fuzzy matching against image filenames/alt text. */
+function slugifyForMatch(s) {
+  return (s || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(t => t.length >= 3) // drop tiny tokens
+}
+
+/**
+ * Pick the best image for an event from a list of candidate URLs scraped
+ * from the venue page. Prefers URLs whose path contains tokens from the
+ * event title (e.g. "Iron-Chiwawa-5-30.png" matches title "Iron Chiwawa").
+ * Falls back to the venue page's primary image (og:image).
+ */
+function pickEventImage(eventTitle, candidates, venueFallback) {
+  if (!candidates || candidates.length === 0) return venueFallback ?? null
+  const tokens = slugifyForMatch(eventTitle)
+  if (tokens.length === 0) return venueFallback ?? candidates[0] ?? null
+
+  let bestUrl = null
+  let bestScore = 0
+  for (const url of candidates) {
+    const lower = url.toLowerCase()
+    let score = 0
+    for (const t of tokens) {
+      if (lower.includes(t)) score += t.length // longer matches weighted more
+    }
+    if (score > bestScore) {
+      bestScore = score
+      bestUrl = url
+    }
+  }
+  // Require at least one decent token hit (≥4 chars) to count as a real match
+  if (bestScore >= 4) return bestUrl
+  return venueFallback ?? candidates[0] ?? null
+}
+
 /** Classify event into site categories based on title keywords.
  *  Values must match DB check constraint (title-cased). */
 function classify(title) {
@@ -341,13 +381,14 @@ async function main() {
     process.exit(1)
   }
 
-  // Load existing local-venue IDs to detect new vs updated
+  // Load existing local-venue rows (incl. image_status to preserve admin rejections)
   const { data: existingRows } = await supabase
     .schema('public')
     .from('events')
-    .select('id')
+    .select('id, image_status, cached_photo_url')
     .eq('source', 'local-venue')
   const existingIds = new Set((existingRows ?? []).map(r => r.id))
+  const existingById = new Map((existingRows ?? []).map(r => [r.id, r]))
 
   let totalInserted = 0
   let totalUpdated  = 0
@@ -367,6 +408,16 @@ async function main() {
       continue
     }
     if (verbose) console.log(`   HTML: ${html.length.toLocaleString()} chars`)
+
+    // 1b. Extract image candidates from venue page once.
+    //     - venueFallbackImage = best single image (og:image, then top <img>)
+    //     - imageCandidates    = ordered list, used for per-event title matching
+    const imageCandidates    = extractAllCandidates(html, venue.url)
+    const venueFallbackImage = extractBestImage(html, venue.url)
+    if (verbose) {
+      console.log(`   Image candidates: ${imageCandidates.length}`)
+      if (venueFallbackImage) console.log(`   Venue fallback img: ${venueFallbackImage.slice(0, 90)}`)
+    }
 
     // 2. Strip + extract with Haiku (or DeepSeek if no Anthropic key)
     const strippedText = roughStripHtml(html)
@@ -443,6 +494,16 @@ async function main() {
         ? `${ev.date}T${ev.time}:00-07:00`
         : ev.date
 
+      // Pick best image: prefer one whose URL contains tokens from the event title,
+      // fall back to the venue page's og:image. Better than null in every case.
+      // Preserve admin-rejected images — never overwrite them.
+      const prior = existingById.get(buildId(slug, ev.date, ev.title))
+      const adminRejected = prior?.image_status === 'rejected'
+      const candidateImage = pickEventImage(ev.title, imageCandidates, venueFallbackImage)
+      const eventImage = adminRejected
+        ? (prior?.cached_photo_url ?? null)
+        : candidateImage
+
       const raw = {
         title: ev.title,
         venue: venue.name,
@@ -455,6 +516,8 @@ async function main() {
         source_url: venue.url,
         // Store scraped time separately for display
         start_time: ev.time ?? null,
+        image: eventImage ?? null,
+        images: eventImage ? [{ url: eventImage }] : [],
         // TM-compat format for normalizeLocal
         dates: {
           start: {
@@ -469,7 +532,8 @@ async function main() {
         source: 'local-venue',
         raw,
         event_date: eventDate,
-        cached_photo_url: null,
+        cached_photo_url: eventImage,
+        image_status: adminRejected ? 'rejected' : (eventImage ? 'unverified' : null),
         featured: false,
         hidden: false,
         category,
@@ -480,6 +544,8 @@ async function main() {
       const isNew = !existingIds.has(id)
       console.log(`   ${isNew ? '➕' : '🔄'} ${ev.date}  ${ev.title}`)
       if (ev.notes) console.log(`      ${ev.notes}`)
+      if ((verbose || isDryRun) && eventImage) console.log(`      🖼  ${eventImage.slice(0, 90)}`)
+      else if ((verbose || isDryRun) && !eventImage) console.log(`      🖼  (no image found)`)
 
       if (isDryRun) {
         if (isNew) totalInserted++

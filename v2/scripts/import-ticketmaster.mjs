@@ -219,12 +219,31 @@ async function main() {
     const genre   = cls.genre?.name   || ''
     const category = mapTMCategory(segment, genre)
 
-    // Best image (16:9, non-fallback, widest)
-    const images = (ev.images || []).filter(i => !i.fallback && i.ratio === '16_9')
-    images.sort((a, b) => (b.width || 0) - (a.width || 0))
-    const imageUrl = images[0]?.url
-      ?? ev.images?.find(i => !i.fallback)?.url
-      ?? null
+    // Best image — Ticketmaster supplies many crops per event. Preference:
+    //   1. RETINA_PORTRAIT_3_2     (highest-quality portrait, ~1080x1440)
+    //   2. RETINA_LANDSCAPE_16_9   (highest landscape)
+    //   3. LANDSCAPE_LARGE_16_9
+    //   4. Widest 16:9 non-fallback
+    //   5. Any non-fallback
+    // Each candidate must NOT be a fallback (TM's generic placeholder).
+    const allImages = (ev.images || []).filter(i => !i.fallback)
+    const byUrlKeyword = (kw) => allImages.find(i => i.url?.includes(kw))
+    const widestRatio = (ratio) => {
+      const filtered = allImages.filter(i => i.ratio === ratio)
+      filtered.sort((a, b) => (b.width || 0) - (a.width || 0))
+      return filtered[0]
+    }
+    const widestAny = () => {
+      const sorted = [...allImages].sort((a, b) => (b.width || 0) - (a.width || 0))
+      return sorted[0]
+    }
+    const pickedImage =
+         byUrlKeyword('RETINA_PORTRAIT_3_2')
+      ?? byUrlKeyword('RETINA_LANDSCAPE_16_9')
+      ?? byUrlKeyword('LANDSCAPE_LARGE_16_9')
+      ?? widestRatio('16_9')
+      ?? widestAny()
+    const imageUrl = pickedImage?.url ?? null
 
     const venueName = ev._embedded?.venues?.[0]?.name || null
 
