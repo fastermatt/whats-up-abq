@@ -18,7 +18,7 @@
 import { useState, useRef, useCallback, useEffect, useLayoutEffect } from 'react'
 import Link from 'next/link'
 import { toBlob } from 'html-to-image'
-import { Download, ChevronLeft, Loader2 } from 'lucide-react'
+import { Download, ChevronLeft, Loader2, Share2 } from 'lucide-react'
 import type { NormalizedEvent } from '@/lib/events'
 import { getCategoryFallback } from '@/lib/fallback-images'
 
@@ -900,48 +900,104 @@ export function IGCardClient({
 
   // ── Download ──────────────────────────────────────────────────────────────
 
+  /**
+   * Compose the card's PNG blob. Shared by Download and Share so the
+   * "wait for every image to decode before toBlob" fix applies to both
+   * paths. Without the decode-await, mobile Safari starts toBlob mid-stream
+   * and the photo panel comes back empty (the bug Matt screenshotted on
+   * 2026-05-10 — text + chrome captured fine, photo area blank).
+   */
+  const composeBlob = useCallback(async (): Promise<Blob | null> => {
+    if (!cardRef.current) return null
+    const node = cardRef.current
+    const imgs = Array.from(node.querySelectorAll('img'))
+    await Promise.all(
+      imgs.map(img =>
+        (img.complete && img.naturalWidth > 0)
+          ? img.decode().catch(() => undefined)
+          : new Promise<void>(resolve => {
+              const done = () => resolve()
+              img.addEventListener('load', done, { once: true })
+              img.addEventListener('error', done, { once: true })
+              // Hard cap so a stuck image doesn't lock the action forever
+              setTimeout(done, 4000)
+            }).then(() => img.decode().catch(() => undefined))
+      )
+    )
+    const naturalRatio = OUTPUT_WIDTH[format] / node.offsetWidth
+    const pixelRatio = Math.min(naturalRatio, 3)
+    return toBlob(node, { pixelRatio, cacheBust: false })
+  }, [cardRef, format])
+
+  const filename = useCallback(() => {
+    const slug = event.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40)
+    return `abq-${slug}-${template}-${format}.png`
+  }, [event.title, template, format])
+
   const handleDownload = useCallback(async () => {
     if (!cardRef.current || downloading) return
     setDownloading(true)
     try {
-      const node = cardRef.current
-      // Wait for every <img> inside the card to fully decode before capture.
-      // Without this, mobile Safari starts toBlob mid-stream and the photo
-      // panel comes back empty (the bug Matt screenshotted 2026-05-10 —
-      // text + chrome captured fine, photo area blank). decode() resolves
-      // when the image is decoded into pixel data ready to draw to canvas.
-      const imgs = Array.from(node.querySelectorAll('img'))
-      await Promise.all(
-        imgs.map(img =>
-          (img.complete && img.naturalWidth > 0)
-            ? img.decode().catch(() => undefined)
-            : new Promise<void>(resolve => {
-                const done = () => resolve()
-                img.addEventListener('load', done, { once: true })
-                img.addEventListener('error', done, { once: true })
-                // Hard cap so a stuck image doesn't lock the download forever
-                setTimeout(done, 4000)
-              }).then(() => img.decode().catch(() => undefined))
-        )
-      )
-      const naturalRatio = OUTPUT_WIDTH[format] / node.offsetWidth
-      const pixelRatio = Math.min(naturalRatio, 3)
-      const blob = await toBlob(node, { pixelRatio, cacheBust: false })
+      const blob = await composeBlob()
       if (!blob) throw new Error('toBlob returned null')
       const objectUrl = URL.createObjectURL(blob)
       const a = document.createElement('a')
-      const slug = event.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40)
-      a.download = `abq-${slug}-${template}-${format}.png`
+      a.download = filename()
       a.href = objectUrl
       a.click()
       setTimeout(() => URL.revokeObjectURL(objectUrl), 5000)
     } catch (err) {
       console.error('[IGCard] download failed:', err)
-      alert('Download failed — try screenshotting the card instead.')
+      alert('Download failed — try the Share button or screenshot the card.')
     } finally {
       setDownloading(false)
     }
-  }, [cardRef, format, template, event.title, downloading])
+  }, [cardRef, composeBlob, filename, downloading])
+
+  /**
+   * iOS-friendly share. navigator.share() with a File opens the system
+   * share sheet which has "Save Image" → goes straight to Photos. Long-
+   * pressing the live preview only saves the underlying <img> element
+   * (just the photo, not the composed card) — this gives mobile users
+   * the entire card.
+   *
+   * Falls back to download flow on browsers without share support.
+   */
+  const handleShare = useCallback(async () => {
+    if (!cardRef.current || downloading) return
+    setDownloading(true)
+    try {
+      const blob = await composeBlob()
+      if (!blob) throw new Error('toBlob returned null')
+      const file = new File([blob], filename(), { type: 'image/png' })
+      // canShare returns false if the browser can't share files of this type
+      const canShareFile = typeof navigator !== 'undefined'
+        && typeof navigator.canShare === 'function'
+        && navigator.canShare({ files: [file] })
+      if (canShareFile && typeof navigator.share === 'function') {
+        await navigator.share({
+          files: [file],
+          title: event.title,
+          text: `${event.title} — ABQ Unplugged`,
+        })
+      } else {
+        // Desktop / unsupported — fall through to download
+        const objectUrl = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.download = filename()
+        a.href = objectUrl
+        a.click()
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 5000)
+      }
+    } catch (err) {
+      // AbortError = user dismissed the share sheet — not a failure
+      if ((err as Error).name === 'AbortError') return
+      console.error('[IGCard] share failed:', err)
+      alert('Share failed — try Download instead.')
+    } finally {
+      setDownloading(false)
+    }
+  }, [cardRef, composeBlob, filename, downloading, event.title])
 
   // ── Admin reject ─────────────────────────────────────────────────────────
 
@@ -1041,17 +1097,33 @@ export function IGCardClient({
           </button>
         )}
 
-        {/* Download */}
-        <button onClick={handleDownload} disabled={downloading || !imageLoaded}
-          title={!imageLoaded ? 'Waiting for image…' : undefined}
-          className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-[#9a442d] text-white text-sm font-semibold hover:bg-[#b5502f] active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0">
-          {downloading ? <Loader2 size={15} className="animate-spin" />
-            : !imageLoaded ? <Loader2 size={15} className="animate-spin opacity-60" />
-            : <Download size={15} />}
-          <span className="hidden sm:inline">
-            {downloading ? 'Generating…' : !imageLoaded ? 'Loading…' : 'Download PNG'}
-          </span>
-        </button>
+        {/* Share — mobile-first. iOS share sheet has "Save Image" → Photos
+            directly, which is what most mobile users actually want. Falls
+            back to Download on desktop. Cap at sm: hide-Download/show-Share
+            for mobile-only experience could be cleaner but keeping both
+            visible avoids confusion. */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button onClick={handleShare} disabled={downloading || !imageLoaded}
+            title={!imageLoaded ? 'Waiting for image…' : 'Share or save to Photos'}
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-[#006a62] text-white text-sm font-semibold hover:bg-[#008176] active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+            {downloading ? <Loader2 size={15} className="animate-spin" />
+              : !imageLoaded ? <Loader2 size={15} className="animate-spin opacity-60" />
+              : <Share2 size={15} />}
+            <span className="hidden sm:inline">
+              {!imageLoaded ? 'Loading…' : 'Share'}
+            </span>
+          </button>
+          <button onClick={handleDownload} disabled={downloading || !imageLoaded}
+            title={!imageLoaded ? 'Waiting for image…' : 'Download PNG'}
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-[#9a442d] text-white text-sm font-semibold hover:bg-[#b5502f] active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+            {downloading ? <Loader2 size={15} className="animate-spin" />
+              : !imageLoaded ? <Loader2 size={15} className="animate-spin opacity-60" />
+              : <Download size={15} />}
+            <span className="hidden sm:inline">
+              {downloading ? 'Generating…' : !imageLoaded ? 'Loading…' : 'Download PNG'}
+            </span>
+          </button>
+        </div>
       </div>
 
       {/* ── Card preview ── */}
