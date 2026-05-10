@@ -140,7 +140,12 @@ export default function RootLayout({
             so position:sticky still works inside pages */}
         <div className="w-full overflow-x-clip">
           <DesktopNav />
-          <div className="pb-20 md:pb-0">
+          {/* pb-[100px] clears the 65px BottomNav with ~35px breathing
+              room. Mobile audit (2026-05-09) caught the footer "Built with
+              love" tagline being cropped by the nav at scroll-bottom on
+              iPhone 14 Pro. The previous pb-20 (80px) wasn't enough once
+              you account for the NewsletterBar's own bottom border. */}
+          <div className="pb-[100px] md:pb-0">
             {children}
 
             {/* ── Newsletter signup — hidden in admin ── */}

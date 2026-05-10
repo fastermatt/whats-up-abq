@@ -103,8 +103,10 @@ export function NewsletterBar() {
         {status === 'error' && (
           <p style={{ color: '#f87171', fontSize: 11, marginTop: 8 }}>Something went wrong — try again.</p>
         )}
-        {/* Always-visible IG link in the footer dark band. Tiny so it stays
-            secondary to the email signup, but persistent across every page. */}
+        {/* Always-visible IG link in the footer dark band. Padded to a
+            44×44 minimum tap target — mobile audit caught the prior 105×17
+            pill failing accessibility. Still visually secondary to the
+            email signup; sits in its own bordered chip below the form. */}
         <a
           href="https://instagram.com/abqunplugged"
           target="_blank"
@@ -112,19 +114,33 @@ export function NewsletterBar() {
           data-umami-event="instagram-follow"
           data-umami-event-position="newsletter-footer"
           style={{
-            color: 'rgba(251,247,241,0.55)',
-            fontSize: 11,
+            color: 'rgba(251,247,241,0.65)',
+            fontSize: 12,
+            fontWeight: 600,
             marginTop: 14,
             display: 'inline-flex',
             alignItems: 'center',
-            gap: 6,
+            gap: 8,
+            padding: '10px 14px',
+            minHeight: 44,
+            borderRadius: 8,
+            background: 'rgba(251,247,241,0.05)',
+            border: '1px solid rgba(251,247,241,0.10)',
             textDecoration: 'none',
-            transition: 'color 150ms',
+            transition: 'color 150ms, background 150ms, border-color 150ms',
           }}
-          onMouseEnter={e => (e.currentTarget.style.color = '#fbf7f1')}
-          onMouseLeave={e => (e.currentTarget.style.color = 'rgba(251,247,241,0.55)')}
+          onMouseEnter={e => {
+            e.currentTarget.style.color = '#fbf7f1'
+            e.currentTarget.style.background = 'rgba(251,247,241,0.10)'
+            e.currentTarget.style.borderColor = 'rgba(251,247,241,0.20)'
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.color = 'rgba(251,247,241,0.65)'
+            e.currentTarget.style.background = 'rgba(251,247,241,0.05)'
+            e.currentTarget.style.borderColor = 'rgba(251,247,241,0.10)'
+          }}
         >
-          <InstagramIcon size={13} />
+          <InstagramIcon size={14} />
           @abqunplugged
         </a>
       </div>

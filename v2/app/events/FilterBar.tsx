@@ -228,21 +228,21 @@ export function FilterBar({
 
   // Pill style helpers
   const timePill = (isActive: boolean) =>
-    `flex-none px-3 py-1 rounded-full text-xs font-semibold transition-colors whitespace-nowrap ${
+    `flex-none px-3.5 py-2 min-h-[36px] rounded-full text-xs font-semibold transition-colors whitespace-nowrap inline-flex items-center ${
       isActive
         ? 'bg-[#9a442d] text-white'
         : 'bg-white border border-[#ddc9a3] text-[#4a3f3a] hover:border-[#9a442d] hover:text-[#9a442d]'
     }`
 
   const pricePill = (isActive: boolean) =>
-    `flex-none px-3 py-1 rounded-full text-xs font-semibold transition-colors whitespace-nowrap ${
+    `flex-none px-3.5 py-2 min-h-[36px] rounded-full text-xs font-semibold transition-colors whitespace-nowrap inline-flex items-center ${
       isActive
         ? 'bg-[#4f6249] text-white'
         : 'bg-white border border-[#ddc9a3] text-[#4a3f3a] hover:border-[#4f6249] hover:text-[#4f6249]'
     }`
 
   const catPill = (isActive: boolean) =>
-    `flex-none px-3 py-1 rounded-full text-xs font-semibold transition-colors whitespace-nowrap inline-flex items-center gap-1 ${
+    `flex-none px-3.5 py-2 min-h-[36px] rounded-full text-xs font-semibold transition-colors whitespace-nowrap inline-flex items-center gap-1 ${
       isActive
         ? 'bg-[#006a62] text-white'
         : 'bg-white border border-[#ddc9a3] text-[#4a3f3a] hover:border-[#006a62] hover:text-[#006a62]'

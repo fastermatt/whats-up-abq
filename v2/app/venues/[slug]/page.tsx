@@ -6,6 +6,8 @@ import { buildBreadcrumbs } from '@/lib/seo'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
 import { MapPin, Calendar, ArrowLeft, ExternalLink, Ticket } from 'lucide-react'
+import { InstagramIcon } from '@/app/components/InstagramIcon'
+import { venueInstagram } from '@/data/venue-instagram'
 import { AnimateIn } from '@/app/components/AnimateIn'
 import venueDescriptions from '@/lib/venue-descriptions.json'
 
@@ -237,7 +239,7 @@ export default async function VenuePage({ params }: PageProps) {
           {thirdPlaceLine(topCategory, events.length)}
         </p>
 
-        {/* ── Stats + Neighborhood ── */}
+        {/* ── Stats + Neighborhood + Venue Instagram ── */}
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-sm font-bold text-[#1a1614]">
             {events.length} upcoming event{events.length !== 1 ? 's' : ''}
@@ -254,6 +256,27 @@ export default async function VenuePage({ params }: PageProps) {
               </Link>
             </>
           )}
+          {(() => {
+            const venueIg = venueInstagram(venue)
+            return venueIg ? (
+              <>
+                <span className="text-[#ddc9a3]">·</span>
+                <a
+                  href={`https://instagram.com/${venueIg.handle}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-umami-event="venue-instagram"
+                  data-umami-event-handle={venueIg.handle}
+                  data-umami-event-venue={venue}
+                  data-umami-event-position="venue-page-hero"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#9a442d] hover:underline px-2 py-2 -my-1 rounded"
+                >
+                  <InstagramIcon size={12} />
+                  @{venueIg.display ?? venueIg.handle}
+                </a>
+              </>
+            ) : null
+          })()}
         </div>
 
         {/* ── Venue description ── */}

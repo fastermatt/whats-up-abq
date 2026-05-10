@@ -98,12 +98,52 @@ const VENUES = {
   },
   // high-and-drying: domain offline (no DNS as of 2026-05)
   // bosque-brewing-nob-hill: domain offline (no DNS as of 2026-05)
-  // tractor-brewing-nob-hill: domain flagged by SafeBrowse (abandoned/dangerous as of 2026-05)
   'outpost-performance-space': {
     name: 'Outpost Performance Space',
-    url: 'https://outpostspace.org/',
+    // Homepage only teases 3 events; /schedule has the full ~22-event listing.
+    url: 'https://outpostspace.org/schedule',
     neighborhood: 'nob-hill',
     address: '210 Yale Blvd SE, Albuquerque, NM 87106',
+  },
+  // ── Tractor Brewing taprooms (formerly tractorbrewery.com — site moved to
+  //    getplowed.com). Each taproom has its own /<location>/ page with an
+  //    "Upcoming Events" list. The shared /events/ archive is empty, and the
+  //    Westside taproom currently has no events ("Please Check Back").
+  'tractor-brewing-wells-park': {
+    name: 'Tractor Brewing Wells Park',
+    url: 'https://getplowed.com/wells-park/',
+    neighborhood: 'wells-park',
+    address: '1800 4th St NW, Albuquerque, NM 87102',
+  },
+  'tractor-brewing-nob-hill': {
+    name: 'Tractor Brewing Nob Hill',
+    url: 'https://getplowed.com/nob-hill/',
+    neighborhood: 'nob-hill',
+    address: '118 Tulane Dr SE, Albuquerque, NM 87106',
+  },
+  'tractor-brewing-westside': {
+    name: 'Tractor Brewing Westside',
+    url: 'https://getplowed.com/westside/',
+    neighborhood: 'westside',
+    address: '5720 McMahon Blvd NW, Albuquerque, NM 87114',
+  },
+  'marble-brewery-ne-heights': {
+    name: 'Marble Brewery NE Heights',
+    url: 'https://marblebrewery.com/locations/ne-heights/',
+    neighborhood: 'ne-heights',
+    address: '9904 Montgomery Blvd NE, Albuquerque, NM 87111',
+  },
+  'sunshine-theater': {
+    name: 'Sunshine Theater',
+    url: 'https://www.sunshinetheaterlive.com/',
+    neighborhood: 'downtown',
+    address: '120 Central Ave SW, Albuquerque, NM 87102',
+  },
+  'kimo-theatre': {
+    name: 'KiMo Theatre',
+    url: 'https://www.cabq.gov/artsculture/kimo/events',
+    neighborhood: 'downtown',
+    address: '423 Central Ave NW, Albuquerque, NM 87102',
   },
   'hops-and-dough': {
     name: 'Hops & Dough Taproom',
@@ -175,8 +215,9 @@ function roughStripHtml(html) {
     .replace(/[ \t]+/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
-    // Cap at 12,000 chars to stay well within Haiku context
-    .slice(0, 12_000)
+    // Cap at 24,000 chars — Haiku/DeepSeek both handle 24k easily, and several
+    // venue calendars (Outpost schedule, Marble NE Heights) blew past 12k.
+    .slice(0, 24_000)
 }
 
 /** Call Claude Haiku to extract raw event text from stripped HTML */
@@ -190,10 +231,11 @@ async function extractWithHaiku(venueText, venueName) {
     },
     body: JSON.stringify({
       model: HAIKU_MODEL,
-      max_tokens: 1024,
+      max_tokens: 4096,
       system: `You are a data extraction assistant. Extract ONLY upcoming event information from venue website text.
 Return a plain-text list, one event per line. Include the date, performer/act name, and time if available.
-Skip past events (before today's date). Skip generic filler text.
+Skip past events (before today's date). Skip generic filler text, hours-of-operation, daily food trucks, and recurring promo nights ("$5 pints every Monday") unless they're a real performance.
+If a time is NOT given for an event, omit the time entirely — DO NOT default to "12:00 AM" or "00:00".
 If no events are found, respond with "NO_EVENTS".
 Today's date is ${new Date().toISOString().slice(0, 10)}.`,
       messages: [
@@ -226,10 +268,10 @@ async function extractWithDeepSeek(venueText, venueName) {
       model: DEEPSEEK_MODEL,
       messages: [{
         role: 'user',
-        content: `Extract ONLY upcoming events from the ${venueName} website text below. Return a plain-text list, one event per line with date, performer name, and time if available. Skip past events. If none found, respond with "NO_EVENTS". Today is ${new Date().toISOString().slice(0, 10)}.\n\n${venueText}`,
+        content: `Extract ONLY upcoming events from the ${venueName} website text below. Return a plain-text list, one event per line with date, performer name, and time if available. Skip past events, hours-of-operation, daily food trucks, and recurring promo nights ("$5 pints every Monday") unless they're a real performance. If a time is NOT given, omit it — DO NOT default to "12:00 AM" or "00:00". If none found, respond with "NO_EVENTS". Today is ${new Date().toISOString().slice(0, 10)}.\n\n${venueText}`,
       }],
       temperature: 0.1,
-      max_tokens: 1024,
+      max_tokens: 4096,
     }),
     signal: AbortSignal.timeout(30_000),
   })
@@ -254,17 +296,19 @@ Each event object must have exactly these fields:
 {
   "title": "Performer or event name (string)",
   "date": "YYYY-MM-DD (string, required)",
-  "time": "HH:MM in 24h format or null if unknown",
+  "time": "HH:MM in 24h format, or null if NO time is given on the source",
   "notes": "Any extra detail like cover charge or open mic signup time, or null"
 }
 
 Rules:
 - Use the current year (${new Date().getFullYear()}) unless the date implies next year
 - If only a month/day is given (e.g. "May 3") infer year as ${new Date().getFullYear()} or ${new Date().getFullYear() + 1} based on whether that date has passed
-- If time is like "7pm" convert to "19:00"
-- "doors at X" → use that as time
+- If time is like "7pm" convert to "19:00"; "7:30pm" → "19:30"; "noon" → "12:00"; "midnight" → "00:00"
+- "doors at X / show at Y" → use the SHOW time, not doors
 - If the venue says events run a default time (e.g. "7-9 PM unless noted") apply it when no specific time is given
+- If NO time is mentioned at all for an event, set "time": null. NEVER default a missing time to "00:00".
 - Deduplicate obvious repeats
+- Skip pure recurring weekly promos (e.g. "$5 pints all day Monday", "Happy Hour 2-5pm", "Free live music 7-9pm Friday") — only include named, dated events.
 
 Input:
 ${rawText}
@@ -280,7 +324,7 @@ ${rawText}
       model: DEEPSEEK_MODEL,
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.1,
-      max_tokens: 2048,
+      max_tokens: 4096,
     }),
     signal: AbortSignal.timeout(30_000),
   })

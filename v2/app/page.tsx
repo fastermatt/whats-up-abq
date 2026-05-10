@@ -695,7 +695,7 @@ export default async function DiscoverPage() {
               rel="noopener noreferrer"
               data-umami-event="instagram-follow"
               data-umami-event-position="community-section"
-              className="group inline-flex items-center gap-2 mb-5 px-4 py-2 rounded-full bg-white/60 hover:bg-white text-[#4a3f3a] hover:text-[#9a442d] text-sm font-semibold border border-[#c8aa8c]/60 hover:border-[#9a442d] transition-all"
+              className="group inline-flex items-center gap-2 mb-5 px-5 py-3 min-h-[44px] rounded-full bg-white/60 hover:bg-white text-[#4a3f3a] hover:text-[#9a442d] text-sm font-semibold border border-[#c8aa8c]/60 hover:border-[#9a442d] transition-all"
             >
               <InstagramIcon className="w-4 h-4" />
               Follow <span className="text-[#9a442d] group-hover:underline">@abqunplugged</span>

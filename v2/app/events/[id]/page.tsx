@@ -6,6 +6,8 @@ import { buildBreadcrumbs } from '@/lib/seo'
 import { venueToSlug } from '@/app/venues/[slug]/page'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
+import { InstagramIcon } from '@/app/components/InstagramIcon'
+import { venueInstagram } from '@/data/venue-instagram'
 import { createClient } from '@/lib/supabase/server'
 import {
   MapPin, Clock, Calendar, Ticket, ArrowLeft, ExternalLink,
@@ -314,8 +316,10 @@ export default async function EventDetailPage({ params }: PageProps) {
             {/* Divider */}
             <div className="w-8 h-[2px] bg-[#ddc9a3] my-3" />
 
-            {/* Venue */}
-            {event.venue && (
+            {/* Venue (mobile-specific block) */}
+            {event.venue && (() => {
+              const venueIg = venueInstagram(event.venue)
+              return (
               <div className="mb-3">
                 <Link
                   href={`/venues/${venueToSlug(event.venue)}`}
@@ -330,17 +334,34 @@ export default async function EventDetailPage({ params }: PageProps) {
                     {event.neighborhood}
                   </Link>
                 )}
-                <a href={mapsUrl} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[11px] text-[#006a62] hover:text-[#9a442d] transition-colors mt-1.5">
-                  <MapPin className="w-2.5 h-2.5" /> Open in Maps
-                </a>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
+                  <a href={mapsUrl} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#006a62] hover:text-[#9a442d] hover:bg-[#006a62]/5 transition-colors px-2.5 py-2 -mx-1 rounded min-h-[32px]">
+                    <MapPin className="w-2.5 h-2.5" /> Open in Maps
+                  </a>
+                  {venueIg && (
+                    <a
+                      href={`https://instagram.com/${venueIg.handle}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      data-umami-event="venue-instagram"
+                      data-umami-event-handle={venueIg.handle}
+                      data-umami-event-venue={event.venue}
+                      className="inline-flex items-center gap-1 text-[11px] text-[#9a442d] hover:underline transition-colors"
+                    >
+                      <InstagramIcon size={11} />
+                      @{venueIg.display ?? venueIg.handle}
+                    </a>
+                  )}
+                </div>
               </div>
-            )}
+              )
+            })()}
             {!event.venue && event.address && (
               <div className="mb-3">
                 <p className="text-[1.1rem] font-bold text-[#4a3f3a]" style={{ fontFamily: 'var(--font-epilogue)' }}>{event.address}</p>
                 <a href={mapsUrl} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[11px] text-[#006a62] hover:text-[#9a442d] transition-colors mt-1.5">
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#006a62] hover:text-[#9a442d] hover:bg-[#006a62]/5 transition-colors px-2.5 py-2 -mx-1 rounded min-h-[32px] mt-1">
                   <MapPin className="w-2.5 h-2.5" /> Open in Maps
                 </a>
               </div>
@@ -379,8 +400,10 @@ export default async function EventDetailPage({ params }: PageProps) {
               </div>
             )}
 
-            {/* Venue + address + neighborhood + maps link */}
-            {event.venue && (
+            {/* Venue + address + neighborhood + maps link + venue Instagram */}
+            {event.venue && (() => {
+              const venueIg = venueInstagram(event.venue)
+              return (
               <div className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 text-[#006a62] mt-0.5 flex-shrink-0" />
                 <div className="leading-snug space-y-0.5">
@@ -401,18 +424,39 @@ export default async function EventDetailPage({ params }: PageProps) {
                       {event.neighborhood}
                     </Link>
                   )}
-                  <a
-                    href={mapsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-[11px] text-[#006a62] hover:text-[#9a442d] transition-colors mt-0.5"
-                  >
-                    <MapPin className="w-2.5 h-2.5" />
-                    Open in Maps
-                  </a>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5">
+                    <a
+                      href={mapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#006a62] hover:text-[#9a442d] hover:bg-[#006a62]/5 transition-colors px-2.5 py-2 -mx-1 rounded min-h-[32px]"
+                    >
+                      <MapPin className="w-2.5 h-2.5" />
+                      Open in Maps
+                    </a>
+                    {/* Venue's Instagram — only when curated handle exists.
+                        Builds community by sending users to the venue's own
+                        IG, and (if they tag us back) creates reciprocal
+                        discovery. Curated map lives in data/venue-instagram.ts. */}
+                    {venueIg && (
+                      <a
+                        href={`https://instagram.com/${venueIg.handle}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        data-umami-event="venue-instagram"
+                        data-umami-event-handle={venueIg.handle}
+                        data-umami-event-venue={event.venue}
+                        className="inline-flex items-center gap-1 text-[11px] text-[#9a442d] hover:underline transition-colors"
+                      >
+                        <InstagramIcon size={11} />
+                        @{venueIg.display ?? venueIg.handle}
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
-            )}
+              )
+            })()}
 
             {/* Address-only (no venue name) */}
             {!event.venue && event.address && (
@@ -424,7 +468,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                     href={mapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-[11px] text-[#006a62] hover:text-[#9a442d] transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#006a62] hover:text-[#9a442d] hover:bg-[#006a62]/5 transition-colors px-2.5 py-2 -mx-1 rounded min-h-[32px]"
                   >
                     <MapPin className="w-2.5 h-2.5" />
                     Open in Maps
