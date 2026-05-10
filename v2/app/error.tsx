@@ -1,6 +1,42 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+
+/**
+ * Detect Next.js chunk-load errors from after-deploy stale tabs.
+ * When a tab has been open across a deploy, the build IDs in its bundle
+ * no longer match what the server has, so any client-side navigation
+ * fails with "Loading chunk N failed" or "Failed to fetch dynamically
+ * imported module". Hard-reload picks up the new chunks.
+ */
+function isChunkLoadError(err: Error): boolean {
+  const msg = (err.message || '').toLowerCase()
+  const name = (err.name || '').toLowerCase()
+  return (
+    name.includes('chunkloaderror') ||
+    msg.includes('loading chunk') ||
+    msg.includes('failed to fetch dynamically imported module') ||
+    msg.includes('importing a module script failed')
+  )
+}
+
+/** Clear all caches the SW or browser might be holding stale entries in. */
+async function nukeCachesAndReload() {
+  try {
+    if ('caches' in window) {
+      const keys = await caches.keys()
+      await Promise.all(keys.map(k => caches.delete(k)))
+    }
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations()
+      await Promise.all(regs.map(r => r.unregister()))
+    }
+  } catch {
+    // best-effort; reload anyway
+  }
+  // bypass-cache reload
+  window.location.reload()
+}
 
 export default function RootError({
   error,
@@ -9,9 +45,31 @@ export default function RootError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const [autoReloading, setAutoReloading] = useState(false)
+
   useEffect(() => {
-    console.error(error.message)
+    console.error('[RootError]', error.name, error.message, error.digest)
+    // Auto-recover from chunk-load errors caused by stale tabs across a
+    // deploy. Use sessionStorage as a circuit breaker so we don't infinite
+    // loop if the reload itself triggers the same error.
+    if (typeof window !== 'undefined' && isChunkLoadError(error)) {
+      const guardKey = 'chunk-error-reload-attempted'
+      if (!sessionStorage.getItem(guardKey)) {
+        sessionStorage.setItem(guardKey, '1')
+        setAutoReloading(true)
+        // Tiny delay so the error UI flashes briefly, then reload
+        setTimeout(() => window.location.reload(), 250)
+      }
+    }
   }, [error])
+
+  if (autoReloading) {
+    return (
+      <main id="main" className="min-h-dvh bg-[#fbf7f1] flex items-center justify-center px-4">
+        <p className="text-sm text-[#6b5d57]">Reloading to pick up the latest version…</p>
+      </main>
+    )
+  }
 
   return (
     <main id="main" className="min-h-dvh bg-[#fbf7f1] flex items-center justify-center px-4">
@@ -39,14 +97,33 @@ export default function RootError({
             Try again
           </button>
 
-          <a
-            href="/"
+          <button
+            onClick={() => nukeCachesAndReload()}
             className="block w-full bg-[#e8ddd0] text-[#1a1614] rounded-2xl px-6 py-3 font-semibold hover:bg-[#ddc9a3] transition-colors duration-300"
             style={{ fontFamily: 'var(--font-epilogue)' }}
+          >
+            Hard refresh
+          </button>
+
+          <a
+            href="/"
+            className="block w-full text-[#6b5d57] rounded-2xl px-6 py-2 text-sm hover:text-[#9a442d] transition-colors duration-300"
           >
             Back to home
           </a>
         </div>
+
+        {/* Debug detail — collapsed but inspectable. Always visible when a
+            digest is present (production with a real server-side error). */}
+        {error.digest || error.message ? (
+          <details className="text-left text-xs text-[#9a8880]">
+            <summary className="cursor-pointer text-center">Technical details</summary>
+            <pre className="mt-2 p-3 bg-[#f0e4cc]/40 rounded overflow-auto whitespace-pre-wrap break-all">
+              {error.name}: {error.message}
+              {error.digest ? `\n\ndigest: ${error.digest}` : ''}
+            </pre>
+          </details>
+        ) : null}
       </div>
     </main>
   )
