@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { Mail, Lock, ArrowLeft, Loader2, CheckCircle, Eye, EyeOff } from 'lucide-react'
+import { Mail, Lock, ArrowLeft, Loader2, CheckCircle, Eye, EyeOff, Clock, AlertCircle } from 'lucide-react'
 
 type Tab = 'signin' | 'signup'
+type LinkAlert = { kind: 'expired' | 'generic'; title: string; body: string }
 
 export default function LoginPage() {
   const [tab, setTab]           = useState<Tab>('signin')
@@ -17,10 +18,63 @@ export default function LoginPage() {
   const [done, setDone]         = useState<'signup-confirm' | 'magic-sent' | 'reset-sent' | null>(null)
   const [error, setError]       = useState('')
   const [showMagic, setShowMagic] = useState(false)
+  const [linkAlert, setLinkAlert] = useState<LinkAlert | null>(null)
+
+  // ── Detect Supabase auth errors arriving in the URL hash or query string ────
+  // Expired magic links land here as:
+  //   /login#error=access_denied&error_code=otp_expired&error_description=...
+  // Hashes are client-only (servers never see them), so we have to parse on mount.
+  // We also pre-fill the email field if Supabase included one, and clear the
+  // hash so a refresh does not re-show the alert.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const hash = window.location.hash.startsWith('#')
+      ? window.location.hash.slice(1)
+      : window.location.hash
+    const search = window.location.search.startsWith('?')
+      ? window.location.search.slice(1)
+      : window.location.search
+
+    const hashParams = new URLSearchParams(hash)
+    const queryParams = new URLSearchParams(search)
+    const pick = (key: string) => hashParams.get(key) ?? queryParams.get(key)
+
+    const errorParam = pick('error')
+    const errorCode = pick('error_code')
+    const queryError = queryParams.get('error') // legacy /login?error=auth_failed
+    const emailParam = pick('email')
+
+    if (emailParam) setEmail(emailParam)
+
+    if (errorCode === 'otp_expired') {
+      setShowMagic(true)
+      setLinkAlert({
+        kind: 'expired',
+        title: 'This sign-in link expired.',
+        body: 'Magic links work for 1 hour after we send them. Request a new one below.',
+      })
+    } else if (errorParam || queryError === 'auth_failed') {
+      setLinkAlert({
+        kind: 'generic',
+        title: 'Sign-in failed.',
+        body: 'That link is no longer valid. Please try again.',
+      })
+    }
+
+    // Clear the hash so refreshes do not keep re-showing the alert.
+    if (hash || queryError === 'auth_failed') {
+      window.history.replaceState(null, '', window.location.pathname)
+    }
+  }, [])
 
   function reset() {
     setError('')
     setDone(null)
+  }
+
+  function dismissLinkAlert() {
+    setLinkAlert(null)
   }
 
   // ── Sign in with password ───────────────────────────────────────────────────
@@ -170,6 +224,37 @@ export default function LoginPage() {
             />
             <p className="text-sm text-[#6b5d57]">Save events · Check in · Earn badges</p>
           </div>
+
+          {/* Expired / failed magic-link alert */}
+          {linkAlert && (
+            <div
+              role="alert"
+              aria-live="polite"
+              className="mb-5 rounded-xl border border-[#9a442d]/25 bg-[#9a442d]/10 px-4 py-3 flex gap-3 items-start animate-fade-up"
+            >
+              <div className="shrink-0 mt-0.5 text-[#9a442d]">
+                {linkAlert.kind === 'expired'
+                  ? <Clock className="w-5 h-5" aria-hidden="true" />
+                  : <AlertCircle className="w-5 h-5" aria-hidden="true" />}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-[#9a442d]" style={{ fontFamily: 'var(--font-epilogue)' }}>
+                  {linkAlert.title}
+                </p>
+                <p className="text-xs text-[#4a3f3a] mt-0.5 leading-relaxed">
+                  {linkAlert.body}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={dismissLinkAlert}
+                className="shrink-0 text-xs text-[#6b5d57] hover:text-[#9a442d] transition-colors px-1"
+                aria-label="Dismiss alert"
+              >
+                ×
+              </button>
+            </div>
+          )}
 
           {/* Tabs */}
           <div className="flex rounded-xl bg-[#f0e4cc] p-1 mb-6">

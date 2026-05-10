@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { fetchEvents, fetchFeaturedEvents, fetchNeighborhoodCounts, NormalizedEvent } from '@/lib/events'
+import { fetchEvents, fetchFeaturedEvents, fetchNeighborhoodCounts, rankByCategoryDemand, NormalizedEvent } from '@/lib/events'
 import { getCategoryFallback, OG_IMAGE } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
+import { eventImageSrc } from '@/lib/image-url'
 import { MapPin, ArrowRight, ExternalLink, Star } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
 import MoodChips from '@/app/components/MoodChips'
@@ -140,7 +141,7 @@ export default async function DiscoverPage() {
 
   // Redis caches each data source globally (Upstash is multi-region) so even
   // Lighthouse/PSI cold-start requests get fast data after the first warm-up.
-  const [tonight, weekend, allUpcoming, featured, neighborhoodCounts, movies] = await Promise.all([
+  const [tonight, weekend, allUpcoming, featuredRaw, neighborhoodCounts, movies] = await Promise.all([
     rc('hp:tonight',     () => fetchEvents({ timeFilter: 'tonight', limit: 10 }),     300),
     rc('hp:weekend',     () => fetchEvents({ timeFilter: 'this-weekend', limit: 10 }), 900),
     rc('hp:upcoming',    () => fetchEvents({ timeFilter: 'upcoming', limit: 1 }),      600),
@@ -148,6 +149,16 @@ export default async function DiscoverPage() {
     rc('hp:hoods',       () => fetchNeighborhoodCounts(),                              3600),
     rc('hp:movies',      () => fetchNowPlayingMovies(10),                              3600),
   ])
+
+  // Rebalance homepage rails by category demand. Click analytics show users
+  // overwhelmingly tap Music / Comedy / Sports while the upcoming pool is
+  // 37% Community — so without this, low-demand categories fill the rails.
+  // We don't HIDE anything; rankByCategoryDemand() just bubbles high-demand
+  // categories to the top within each rail. Applied to homepage rails only;
+  // /events listing keeps its native sort so user filters work as expected.
+  tonight.events = rankByCategoryDemand(tonight.events)
+  weekend.events = rankByCategoryDemand(weekend.events)
+  const featured = rankByCategoryDemand(featuredRaw)
 
   const now = new Date()
 
@@ -176,19 +187,44 @@ export default async function DiscoverPage() {
   )
   const heroSaying = HERO_SAYINGS[abqHour % HERO_SAYINGS.length]
 
-  // Note: we no longer preload the first featured image at fetchPriority="high".
-  // The hero h2 ("Find something to do in Albuquerque.") is the LCP element on
-  // mobile per PSI — preloading a below-fold image at high priority steals
-  // bandwidth from the h2's render path (CSS + font), making LCP worse, not
-  // better. The image still has fetchPriority="high" + eager loading on its
-  // own <img> tag, which is enough.
+  // LCP preload — Lighthouse identified the first event card image as the LCP
+  // element (NOT the hero h2). The <img> already carries fetchPriority="high"
+  // + loading="eager", but the browser's preload scanner only discovers the
+  // tag once HTML parsing reaches <body>. Emitting a manual <link rel="preload">
+  // here (Next.js App Router hoists <link> tags to <head>) gives the browser
+  // the URL ~30–100ms sooner. The href is computed via eventImageSrc() so it
+  // matches the rendered <img src> byte-for-byte and the browser can de-dupe.
+  // Width must match the rendered card: 540 for FeaturedCard, 440 for HorizontalCard.
+  const lcpEvent = featured[0] ?? tonight.events[0] ?? null
+  const lcpWidth = featured.length > 0 ? 540 : 440
+  const lcpPreloadHref = lcpEvent?.imageUrl
+    ? eventImageSrc(lcpEvent.imageUrl, lcpWidth)
+    : null
 
   return (
     <main id="main" className="min-h-dvh bg-[--bg]">
+      {/* Same-origin preconnect — cheap belt-and-braces hint. The image is
+          served from /.netlify/images on the same origin so the document's
+          existing connection is reused, but emitting this hint is harmless
+          and protects against any future origin split for the image CDN. */}
+      <link rel="preconnect" href="https://abqunplugged.com" crossOrigin="anonymous" />
+      {/* LCP image preload — fetchPriority high so it ranks above other
+          render-blocking resources. as="image" + type="image/avif" lets the
+          browser narrow eligible candidates without parsing the response. */}
+      {lcpPreloadHref && (
+        <link
+          rel="preload"
+          as="image"
+          href={lcpPreloadHref}
+          type="image/avif"
+          fetchPriority="high"
+        />
+      )}
       <ScrollHintManager />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageFaqLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }} />
+
       {/* SEO h1 — visually hidden, provides primary keyword signal */}
       <h1 className="sr-only">Events in Albuquerque, NM — Things to Do in ABQ</h1>
 
@@ -286,6 +322,7 @@ export default async function DiscoverPage() {
               />
               <button
                 type="submit"
+                data-umami-event="hero-search-submit"
                 className="bg-[#9a442d] text-white font-bold text-sm px-5 min-h-[48px] hover:bg-[#7d3725] transition-colors flex items-center gap-1.5 whitespace-nowrap"
               >
                 <i className="fi fi-rr-search text-[12px]" aria-hidden="true" />
@@ -312,6 +349,8 @@ export default async function DiscoverPage() {
               <Link
                 key={tab.label}
                 href={tab.href}
+                data-umami-event="hero-stat-tab"
+                data-umami-event-tab={tab.label}
                 // Label-first on every viewport — horizontal on tablet+, stacked
                 // on phones (label above number) so reading order matches
                 // ("Tonight: 147"). Round-3 critique fix.
@@ -359,6 +398,8 @@ export default async function DiscoverPage() {
               <Link
                 key={label}
                 href={href}
+                data-umami-event="category-chip"
+                data-umami-event-category={label}
                 className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full bg-white border border-[#ddc9a3] text-xs font-semibold text-[#4a3f3a] hover:border-[#9a442d] hover:text-[#9a442d] transition-all whitespace-nowrap group"
               >
                 <i className={`fi ${icon} text-[13px] text-[#9a442d] group-hover:text-[#9a442d]`} aria-hidden="true" />
@@ -391,6 +432,7 @@ export default async function DiscoverPage() {
               </div>
               <Link
                 href="/events?featured=1"
+                data-umami-event="nav-see-all-featured"
                 className="text-xs font-semibold text-[#9a442d] hover:underline flex-shrink-0 flex items-center gap-1 group"
               >
                 See all
@@ -460,6 +502,8 @@ export default async function DiscoverPage() {
               <p className="text-xs font-semibold text-[#9a442d]">📍 Places &amp; things to do</p>
               <Link
                 href="/things-to-do"
+                data-umami-event="things-to-do-cta"
+                data-umami-event-position="section-header"
                 className="text-xs font-semibold text-[#9a442d] hover:underline flex-shrink-0 flex items-center gap-1 group"
               >
                 See all
@@ -476,6 +520,8 @@ export default async function DiscoverPage() {
                 ))}
                 <Link
                   href="/things-to-do"
+                  data-umami-event="things-to-do-cta"
+                  data-umami-event-position="row-end-card"
                   className="flex-shrink-0 w-[160px] snap-start flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#9a442d]/30 text-[#9a442d] hover:border-[#9a442d] hover:bg-[#9a442d]/5 transition-all gap-2 aspect-[4/3]"
                 >
                   <ArrowRight className="w-5 h-5" />
@@ -492,6 +538,7 @@ export default async function DiscoverPage() {
                 <p className="text-[10px] uppercase tracking-[0.15em] text-[#6b5d57] font-semibold">By neighborhood</p>
                 <Link
                   href="/neighborhoods"
+                  data-umami-event="nav-see-all-neighborhoods"
                   className="text-xs font-semibold text-[#9a442d] hover:underline flex-shrink-0 flex items-center gap-1 group"
                 >
                   See all
@@ -504,6 +551,8 @@ export default async function DiscoverPage() {
                     <Link
                       key={slug}
                       href={`/neighborhoods/${slug}`}
+                      data-umami-event="neighborhood-click"
+                      data-umami-event-neighborhood={slug}
                       className="flex flex-col items-start px-3 py-2.5 rounded-xl bg-white border border-[#ede4d3] hover:border-[#9a442d] hover:shadow-sm transition-all group"
                     >
                       <span
@@ -546,6 +595,7 @@ export default async function DiscoverPage() {
               </div>
               <Link
                 href="/movies"
+                data-umami-event="nav-see-all-movies"
                 className="text-xs font-semibold text-[#c8aa8c] hover:text-white flex-shrink-0 flex items-center gap-1 group transition-colors"
               >
                 See all
@@ -637,6 +687,7 @@ export default async function DiscoverPage() {
             <div className="flex flex-wrap gap-3 justify-center mb-7">
               <Link
                 href="/login"
+                data-umami-event="join-community-cta"
                 className="inline-flex items-center gap-2 bg-[#9a442d] text-white font-bold text-sm px-5 py-2.5 rounded-full hover:bg-[#7d3725] transition-colors"
               >
                 Join the community
@@ -644,6 +695,7 @@ export default async function DiscoverPage() {
               </Link>
               <Link
                 href="/leaderboard"
+                data-umami-event="see-leaderboard-cta"
                 className="inline-flex items-center gap-2 text-[#4a3f3a] font-semibold text-sm px-5 py-2.5 rounded-full border border-[#c8aa8c] hover:border-[#9a442d] hover:text-[#9a442d] transition-all"
               >
                 See leaderboard
@@ -652,6 +704,7 @@ export default async function DiscoverPage() {
             {/* Browse all — quiet contextual link, not a domineering button */}
             <Link
               href="/events"
+              data-umami-event="browse-all-events-cta"
               className="inline-flex items-center gap-1.5 text-xs text-[#6b5d57] hover:text-[#9a442d] transition-colors group"
             >
               Browse all {allUpcoming.total.toLocaleString()} events
@@ -832,6 +885,8 @@ function EventSection({
         </div>
         <Link
           href={seeAllHref}
+          data-umami-event="nav-see-all"
+          data-umami-event-section={sectionLabel}
           className="text-xs font-semibold text-[#9a442d] hover:underline flex-shrink-0 flex items-center gap-1 group"
         >
           See all

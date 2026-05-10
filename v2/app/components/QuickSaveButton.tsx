@@ -77,6 +77,10 @@ export function QuickSaveButton({
       onClick={handleClick}
       disabled={loading}
       aria-label={saved ? 'Remove from saved' : 'Save event'}
+      data-umami-event="save-event"
+      data-umami-event-event-id={eventId}
+      data-umami-event-source="quick-save"
+      data-umami-event-action={saved ? 'unsave' : 'save'}
       className={`relative flex items-center justify-center w-8 h-8 rounded-full
         transition-all duration-200 select-none
         ${saved

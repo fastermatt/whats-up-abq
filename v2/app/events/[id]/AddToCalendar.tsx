@@ -100,6 +100,9 @@ export default function AddToCalendar({
       <a
         href={`/api/events/${id}/ics`}
         download
+        data-umami-event="add-to-calendar"
+        data-umami-event-format="ics"
+        data-umami-event-event-id={id}
         className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#9a442d] text-[#9a442d] text-xs font-semibold hover:bg-[#9a442d]/8 transition-colors"
         aria-label="Download ICS file for Apple Calendar or Outlook"
       >
@@ -110,6 +113,9 @@ export default function AddToCalendar({
         href={gcalUrl.toString()}
         target="_blank"
         rel="noopener noreferrer"
+        data-umami-event="add-to-calendar"
+        data-umami-event-format="google"
+        data-umami-event-event-id={id}
         className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#9a442d] text-[#9a442d] text-xs font-semibold hover:bg-[#9a442d]/8 transition-colors"
         aria-label="Add to Google Calendar"
       >

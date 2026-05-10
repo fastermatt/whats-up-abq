@@ -53,6 +53,8 @@ export default function MoodChips() {
             <Link
               key={mood.slug}
               href={buildHref(mood.query)}
+              data-umami-event="mood-chip"
+              data-umami-event-mood={mood.slug}
               className={[
                 'flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full',
                 'bg-[#9a442d]/10 border border-[#9a442d]/20 text-[#9a442d]',

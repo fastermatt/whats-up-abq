@@ -32,6 +32,8 @@ export default function BottomNav() {
             <Link
               key={href}
               href={href}
+              data-umami-event="bottom-nav"
+              data-umami-event-target={href}
               className={`
                 flex flex-col items-center justify-center gap-1 relative
                 transition-colors duration-150

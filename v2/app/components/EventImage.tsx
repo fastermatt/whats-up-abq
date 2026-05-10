@@ -28,6 +28,8 @@ export function EventImage({
   loading = 'lazy',
   fetchPriority,
   width = 600,
+  sizes,
+  decoding,
 }: {
   src: string
   fallback: string
@@ -38,6 +40,12 @@ export function EventImage({
   /** Target width in CSS pixels. Smaller widths cut bytes proportionally —
    *  pass card-rendered width, not 2x. Defaults to 600. */
   width?: number
+  /** Optional `sizes` attribute. Currently unused (single-resolution AVIF) but
+   *  forwarded so callers can opt in to responsive selection later. */
+  sizes?: string
+  /** Decoding hint. Defaults to 'sync' for the LCP candidate (fetchPriority='high')
+   *  so paint isn't deferred behind background decode work, and 'async' otherwise. */
+  decoding?: 'sync' | 'async' | 'auto'
 }) {
   const [currentSrc, setCurrentSrc] = useState(() => netlifyImageUrl(proxyIfNeeded(src), width))
   // Priority images skip the fade-in so they're immediately visible for LCP measurement
@@ -49,6 +57,8 @@ export function EventImage({
     if (imgRef.current?.complete) setLoaded(true)
   }, [])
 
+  const resolvedDecoding = decoding ?? (fetchPriority === 'high' ? 'sync' : 'async')
+
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
@@ -56,9 +66,10 @@ export function EventImage({
       src={currentSrc}
       alt={alt}
       loading={loading}
+      sizes={sizes}
       // eslint-disable-next-line react/no-unknown-property
       fetchPriority={fetchPriority}
-      decoding="async"
+      decoding={resolvedDecoding}
       className={`${className ?? ''} transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
       onLoad={() => setLoaded(true)}
       onError={() => {

@@ -654,6 +654,63 @@ function sourcePriority(source: string): number {
   }
 }
 
+// ─── Category demand scoring (homepage rails only) ────────────────────────────
+
+/**
+ * Category demand-score map — derived from internal click analytics.
+ *
+ * Demand signal: top-clicked categories on the homepage are Music (Concerts),
+ * Comedy, Sports, and Free events. Top searches are music acts and the
+ * Isotopes (sports). Meanwhile the upcoming-30-day supply is 37% Community,
+ * 22% Music — i.e. Community is heavily over-represented vs what users
+ * actually click on.
+ *
+ * Lower score = surfaced earlier. We deprioritize Community without hiding
+ * it (it stays in the pool, just ranks below the high-demand categories).
+ *
+ * Apply via `rankByCategoryDemand()` on homepage rails ONLY (Tonight,
+ * Weekend, Featured). The /events listing must keep its native sort so
+ * the user-facing filter UI works as expected.
+ */
+const CATEGORY_DEMAND_SCORE: Record<string, number> = {
+  'Music':          0,
+  'Comedy':         0,
+  'Sports':         0,
+  'Arts & Theater': 1,
+  'Festivals':      1,
+  'Food & Drink':   2,
+  'Family':         2,
+  'Community':      3,
+}
+
+function categoryDemandRank(category: string | null): number {
+  if (!category) return 3
+  return CATEGORY_DEMAND_SCORE[category] ?? 2
+}
+
+/**
+ * Re-rank an event list by category demand, then preserve the input order
+ * as a stable tiebreaker (so date/featured/photo ordering from the caller
+ * survives within each demand tier).
+ *
+ * Pure function — returns a new array, does not mutate input.
+ *
+ * Use ONLY on homepage editorial rails (Tonight, Weekend, Featured). Do not
+ * apply to the /events listing page — users expect their filters to drive
+ * sort there, not opaque demand weighting.
+ */
+export function rankByCategoryDemand<T extends { category: string | null }>(events: T[]): T[] {
+  return events
+    .map((event, idx) => ({ event, idx }))
+    .sort((a, b) => {
+      const ra = categoryDemandRank(a.event.category)
+      const rb = categoryDemandRank(b.event.category)
+      if (ra !== rb) return ra - rb
+      return a.idx - b.idx
+    })
+    .map(({ event }) => event)
+}
+
 /** Tonight's events (today in Denver time, evening only), ranked:
  *  featured DESC → has_photo DESC → source_priority DESC → event_date ASC.
  *  Returns up to 60.

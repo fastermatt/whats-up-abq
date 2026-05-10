@@ -43,6 +43,8 @@ export default function DesktopNav() {
               <Link
                 key={href}
                 href={href}
+                data-umami-event="desktop-nav"
+                data-umami-event-target={href}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                   !primary ? 'hidden lg:inline-flex' : ''
                 } ${

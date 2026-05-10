@@ -89,6 +89,9 @@ export function SaveEventButton({ eventId, eventName, eventDate, venueName, cate
       <button
         onClick={handleSave}
         disabled={loading}
+        data-umami-event="save-event"
+        data-umami-event-event-id={eventId}
+        data-umami-event-action={state === 'saved' ? 'unsave' : 'save'}
         className={`group flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${
           state === 'saved'
             ? 'bg-[#9a442d]/10 border-[#9a442d]/30 text-[#9a442d]'
@@ -105,6 +108,9 @@ export function SaveEventButton({ eventId, eventName, eventDate, venueName, cate
       <button
         onClick={handleGoing}
         disabled={loading}
+        data-umami-event="going-event"
+        data-umami-event-event-id={eventId}
+        data-umami-event-action={state === 'going' ? 'ungoing' : 'going'}
         className={`group flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${
           state === 'going'
             ? 'bg-[#4f6249] border-[#4f6249] text-white'

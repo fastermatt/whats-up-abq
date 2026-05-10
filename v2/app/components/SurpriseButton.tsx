@@ -32,6 +32,7 @@ export default function SurpriseButton() {
       disabled={loading}
       aria-label="Show me a random event"
       title="Surprise Me"
+      data-umami-event="surprise-click"
       className={[
         'flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0',
         'bg-[#9a442d] text-white',
