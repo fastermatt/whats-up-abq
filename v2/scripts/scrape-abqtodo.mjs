@@ -383,9 +383,15 @@ async function main() {
       _embedded: {
         venues: [{
           name: extracted.venue || 'Albuquerque',
-          city:  { name: extracted.city || 'Albuquerque' },
-          state: { name: 'NM' },
-          address: { line1: extracted.address || '' },
+          // Prefer Tribe API venue fields when present (real street addresses)
+          // over DeepSeek's HTML extraction, which often returns empty strings
+          // for the address even when Tribe has the data. This was the root
+          // cause of the local-events-have-street-addresses regression where
+          // 305 of 376 local events lacked addresses (2026-05-09 fix).
+          city:  { name: apiEv.venue?.city  || extracted.city || 'Albuquerque' },
+          state: { name: apiEv.venue?.state || 'NM' },
+          address: { line1: apiEv.venue?.address || extracted.address || '' },
+          postalCode: apiEv.venue?.zip || '',
         }],
       },
       ticketLinks: [{ url: eventUrl }],

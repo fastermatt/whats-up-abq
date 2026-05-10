@@ -337,9 +337,12 @@ export async function fetchEvents({
         // For terms ≥ 4 chars, require whole-word match to prevent "taco" matching "Tacoma",
         // "spring" matching "Springfield", etc. Short terms (< 4) use substring for
         // abbreviations like "abq", "nm", "kmo".
+        // Both leading AND trailing \b are required — leading-only would let
+        // "taco" still match "Tacoma" because the leading boundary fires after
+        // "T". Trailing s? allows plural matches ("concert" → "concerts").
         if (t.length >= 4) {
           const escaped = t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-          return new RegExp(`\\b${escaped}`, 'i').test(haystack)
+          return new RegExp(`\\b${escaped}s?\\b`, 'i').test(haystack)
         }
         return haystack.includes(t)
       })
