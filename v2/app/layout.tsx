@@ -125,6 +125,7 @@ export default function RootLayout({
     emoji:      active.holiday.emoji,
     bgClass:    active.holiday.bgClass,
     textClass:  active.holiday.textClass,
+    bgImage:    active.holiday.bgImage,
     date:       active.date,
     daysUntil:  active.daysUntil,
   } : null

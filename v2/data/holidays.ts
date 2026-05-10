@@ -73,10 +73,30 @@ export interface Holiday {
   subtitle?: string
   /** Single emoji to prefix the banner */
   emoji: string
-  /** Tailwind background color class for the banner. Defaults to terra. */
+  /** Tailwind background color class for the banner. Defaults to terra.
+      Ignored when bgImage is set (image takes over). */
   bgClass?: string
   /** Tailwind text color class. Defaults to cream. */
   textClass?: string
+  /**
+   * Banner background image URL. When set, renders as a 21:9-ish photo
+   * strip with a dark terra gradient overlay for text legibility.
+   * Source these from Midjourney using the prompts in `holiday-prompts.md`,
+   * upload to Supabase Storage `holiday-images/` bucket, paste URL here.
+   * Recommended size: 2400x600 (banner) — Netlify Image CDN will resize.
+   */
+  bgImage?: string
+  /**
+   * Hero image for the homepage holiday rail header card. Rendered as a
+   * compact 16:10 thumbnail next to the section title. Recommended size:
+   * 1200x750. Same source flow as bgImage.
+   */
+  heroImage?: string
+  /**
+   * 1200x630 OG image for when the day's landing page (or homepage on the
+   * day-of) gets shared. Optional — falls back to default OG_IMAGE.
+   */
+  ogImage?: string
   /**
    * Keywords for SQL ILIKE matching against title + description.
    * OR'd together. Be specific — "mother" matches "Motherboard Repair Class".

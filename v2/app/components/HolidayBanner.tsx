@@ -21,6 +21,7 @@ export interface HolidayBannerProps {
   emoji: string
   bgClass?: string
   textClass?: string
+  bgImage?: string  // when set, photo background with terra gradient overlay
   date: string  // 'YYYY-MM-DD'
   daysUntil: number
 }
@@ -51,11 +52,25 @@ export function HolidayBanner(props: HolidayBannerProps) {
     : props.daysUntil === 1 ? 'Tomorrow'
     : `In ${props.daysUntil} days`
 
+  // Background style: photo with terra gradient overlay (when image set)
+  // OR solid terra (default). The gradient ensures text stays legible
+  // regardless of how busy the image is.
+  const bgStyle: React.CSSProperties | undefined = props.bgImage
+    ? {
+        backgroundImage:
+          'linear-gradient(to right, rgba(154,68,45,0.92), rgba(154,68,45,0.55), rgba(154,68,45,0.92)),' +
+          ` url(${JSON.stringify(props.bgImage)})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }
+    : undefined
+
   return (
     <div
       role="region"
       aria-label={`${props.name} highlight`}
-      className={`${bg} ${text} text-center py-2 px-3 sm:px-4 text-xs sm:text-sm font-semibold tracking-tight relative`}
+      className={`${props.bgImage ? '' : bg} ${text} text-center py-2 px-3 sm:px-4 text-xs sm:text-sm font-semibold tracking-tight relative`}
+      style={bgStyle}
     >
       <a
         href="#holiday-rail"

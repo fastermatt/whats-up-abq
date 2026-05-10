@@ -426,15 +426,30 @@ export default async function DiscoverPage() {
       {/* ── Holiday rail (only renders within an active holiday window) ──
           Picks events whose title or description matches the holiday's
           keywords AND whose date is within ±eventWindow days. Anchored at
-          #holiday-rail so the banner's "scroll to events" link lands here. */}
+          #holiday-rail so the banner's "scroll to events" link lands here.
+          When holiday.heroImage is set, renders a 16:10 image card next
+          to the title for editorial weight. Falls back to text-only when
+          no image yet. */}
       {activeHoliday && holidayEvents.length > 0 && (
         <AnimateIn animation="fade-up">
           <section
             id="holiday-rail"
             className="py-6 bg-gradient-to-b from-[#fbf2ec] to-[#fbf7f1] border-y border-[#9a442d]/15"
           >
-            <div className="max-w-6xl mx-auto px-4 flex items-end justify-between mb-4">
-              <div>
+            <div className="max-w-6xl mx-auto px-4 flex items-end gap-4 mb-4">
+              {activeHoliday.holiday.heroImage && (
+                <div className="hidden sm:block flex-shrink-0 w-[200px] h-[125px] rounded-xl overflow-hidden shadow-md">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={eventImageSrc(activeHoliday.holiday.heroImage, 400)}
+                    alt={`${activeHoliday.holiday.name} hero illustration`}
+                    width={400}
+                    height={250}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              <div className="flex-1">
                 <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] mb-0.5 font-semibold flex items-center gap-1.5">
                   <span aria-hidden="true">{activeHoliday.holiday.emoji}</span>
                   <span>{activeHoliday.holiday.name}</span>
