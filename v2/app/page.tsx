@@ -5,6 +5,7 @@ import { getCategoryFallback, OG_IMAGE } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
 import { eventImageSrc } from '@/lib/image-url'
 import { MapPin, ArrowRight, ExternalLink, Star } from 'lucide-react'
+import { InstagramIcon } from '@/app/components/InstagramIcon'
 import { AnimateIn } from '@/app/components/AnimateIn'
 import MoodChips from '@/app/components/MoodChips'
 import SurpriseButton from '@/app/components/SurpriseButton'
@@ -684,6 +685,24 @@ export default async function DiscoverPage() {
             <p className="text-sm text-[#4a3f3a] mb-6 leading-relaxed">
               Track events, save favorites, and find what ABQ locals are actually doing. Free.
             </p>
+            {/* Instagram follow pill — visually quieter than the primary CTAs
+                so it doesn't compete with "Join the community" but still gets
+                a discoverable spot in the highest-attention block on the page.
+                Outbound to instagram.com so target=_blank + rel set per a11y. */}
+            <a
+              href="https://instagram.com/abqunplugged"
+              target="_blank"
+              rel="noopener noreferrer"
+              data-umami-event="instagram-follow"
+              data-umami-event-position="community-section"
+              className="group inline-flex items-center gap-2 mb-5 px-4 py-2 rounded-full bg-white/60 hover:bg-white text-[#4a3f3a] hover:text-[#9a442d] text-sm font-semibold border border-[#c8aa8c]/60 hover:border-[#9a442d] transition-all"
+            >
+              <InstagramIcon className="w-4 h-4" />
+              Follow <span className="text-[#9a442d] group-hover:underline">@abqunplugged</span>
+              <span className="text-[11px] text-[#6b5d57] group-hover:text-[#9a442d]/80 font-normal hidden sm:inline">
+                · daily picks
+              </span>
+            </a>
             <div className="flex flex-wrap gap-3 justify-center mb-7">
               <Link
                 href="/login"

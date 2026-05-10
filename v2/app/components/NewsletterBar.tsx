@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { InstagramIcon } from './InstagramIcon'
 
 export function NewsletterBar() {
   const [email, setValue] = useState('')
@@ -30,7 +31,20 @@ export function NewsletterBar() {
   if (status === 'success') {
     return (
       <div className="bg-[#9a442d] text-white text-center py-3 px-4">
-        <p className="text-sm font-semibold">You&apos;re subscribed ✦ Weekend picks hit your inbox every Friday.</p>
+        <p className="text-sm font-semibold mb-1.5">You&apos;re subscribed ✦ Weekend picks hit your inbox every Friday.</p>
+        {/* Convert the success moment — they just opted in once, so a follow
+            ask here is the warmest possible context for the second action. */}
+        <a
+          href="https://instagram.com/abqunplugged"
+          target="_blank"
+          rel="noopener noreferrer"
+          data-umami-event="instagram-follow"
+          data-umami-event-position="newsletter-success"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold underline-offset-2 hover:underline"
+        >
+          <InstagramIcon size={14} />
+          Follow @abqunplugged for daily picks
+        </a>
       </div>
     )
   }
@@ -89,6 +103,30 @@ export function NewsletterBar() {
         {status === 'error' && (
           <p style={{ color: '#f87171', fontSize: 11, marginTop: 8 }}>Something went wrong — try again.</p>
         )}
+        {/* Always-visible IG link in the footer dark band. Tiny so it stays
+            secondary to the email signup, but persistent across every page. */}
+        <a
+          href="https://instagram.com/abqunplugged"
+          target="_blank"
+          rel="noopener noreferrer"
+          data-umami-event="instagram-follow"
+          data-umami-event-position="newsletter-footer"
+          style={{
+            color: 'rgba(251,247,241,0.55)',
+            fontSize: 11,
+            marginTop: 14,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            textDecoration: 'none',
+            transition: 'color 150ms',
+          }}
+          onMouseEnter={e => (e.currentTarget.style.color = '#fbf7f1')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'rgba(251,247,241,0.55)')}
+        >
+          <InstagramIcon size={13} />
+          @abqunplugged
+        </a>
       </div>
     </div>
   )
