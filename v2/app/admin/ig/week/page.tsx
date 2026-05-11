@@ -36,6 +36,42 @@ interface RowState {
   postId:      string | null  // schedule-row id, not IG post id
   /** 300px JPEG thumbnail of the rendered Poster — generated on demand. */
   previewUrl:  string | null
+  /** Per-row template override (default 'poster' when unset) — populated
+   *  from the quick-edit drawer. Persists in localStorage. */
+  templateId?: string
+  /** Per-row image override — paste a URL or upload a file in the quick-
+   *  edit drawer. When set, overrides evt.imageUrl for rendering. */
+  customImageUrl?: string
+}
+
+// ─── localStorage persistence for per-row overrides ─────────────────────
+const OVERRIDES_KEY = 'ig-week-overrides-v1'
+interface RowOverrides {
+  templateId?: string
+  customImageUrl?: string
+}
+function loadOverrides(): Record<string, RowOverrides> {
+  if (typeof window === 'undefined') return {}
+  try {
+    const raw = localStorage.getItem(OVERRIDES_KEY)
+    return raw ? JSON.parse(raw) : {}
+  } catch { return {} }
+}
+function saveOverrides(map: Record<string, RowOverrides>) {
+  if (typeof window === 'undefined') return
+  try { localStorage.setItem(OVERRIDES_KEY, JSON.stringify(map)) }
+  catch { /* quota — ignore */ }
+}
+function persistRowOverride(key: string, patch: RowOverrides) {
+  const map = loadOverrides()
+  // Strip undefined / empty fields so the stored map stays small
+  const merged = { ...map[key], ...patch }
+  const cleaned: RowOverrides = {}
+  if (merged.templateId)     cleaned.templateId = merged.templateId
+  if (merged.customImageUrl) cleaned.customImageUrl = merged.customImageUrl
+  if (Object.keys(cleaned).length === 0) delete map[key]
+  else map[key] = cleaned
+  saveOverrides(map)
 }
 
 // Smart default time slots, rotating across the week so we don't always post
@@ -89,6 +125,11 @@ function plusDays(iso: string, days: number): string {
   d.setDate(d.getDate() + days)
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
 }
+
+/** The 7 event-category templates exposed in the quick-edit picker.
+ *  Brand/story templates are hidden — they don't make sense for the
+ *  poster-style scheduled-feed flow. */
+const QUICK_EDIT_TEMPLATE_IDS = ['poster', 'broadside', 'marquee', 'split', 'dispatch', 'golden-hour', 'paper'] as const
 
 const CAT_EMOJI: Record<string, string> = {
   'Music': '🎵', 'Comedy': '😂', 'Sports': '🏟️', 'Arts & Theater': '🎭',
@@ -224,7 +265,9 @@ export default function WeekSchedulerPage() {
       setDays(data)
 
       // Initialize row state from the response, preserving any existing
-      // edits / scheduled rows that match by key.
+      // edits / scheduled rows that match by key. Hydrate overrides from
+      // localStorage so quick-edits survive reloads.
+      const overrides = loadOverrides()
       setRows(prev => {
         const next: Record<string, RowState> = {}
         for (const day of data as WeekDay[]) {
@@ -232,6 +275,7 @@ export default function WeekSchedulerPage() {
             const key = rowKey(day.date, evt.id)
             if (prev[key]) { next[key] = prev[key]; continue }
             const cap = buildCaptions(toNormalized(evt))[0]?.text ?? ''
+            const ov = overrides[key] ?? {}
             next[key] = {
               date:           day.date,
               time:           defaultTimeFor(day.date),
@@ -241,6 +285,8 @@ export default function WeekSchedulerPage() {
               errorMsg:       null,
               postId:         null,
               previewUrl:     null,
+              templateId:     ov.templateId,
+              customImageUrl: ov.customImageUrl,
             }
           }
         }
@@ -256,11 +302,15 @@ export default function WeekSchedulerPage() {
   useEffect(() => { fetchWeek(start, perDay) }, [start, perDay, fetchWeek])
 
   /**
-   * Render a single event's Poster on the shared hidden canvas and return
-   * the exported PNG. Serializes via renderLockRef so concurrent callers
-   * (preview + schedule) don't clobber each other's design state.
+   * Render a single event's design on the shared hidden canvas and return
+   * the exported PNG. Honors per-row overrides (templateId, customImageUrl)
+   * from the quick-edit drawer when present. Serializes via renderLockRef
+   * so concurrent callers (preview + schedule) don't clobber each other.
    */
-  const renderEventPoster = useCallback(async (evt: WeekEvent): Promise<string> => {
+  const renderEventPoster = useCallback(async (
+    evt: WeekEvent,
+    overrides?: RowOverrides,
+  ): Promise<string> => {
     // Wait for any in-flight render to finish, then take the lock.
     let release: () => void = () => {}
     const myTurn = new Promise<void>(r => { release = r })
@@ -269,9 +319,12 @@ export default function WeekSchedulerPage() {
     await prevTurn
 
     try {
-      const poster = TEMPLATES.find(t => t.id === 'poster')
-      if (!poster) throw new Error('Poster template missing')
-      const design = poster.build(buildPosterContext(evt))
+      const templateId = overrides?.templateId ?? 'poster'
+      const tmpl = TEMPLATES.find(t => t.id === templateId) ?? TEMPLATES.find(t => t.id === 'poster')
+      if (!tmpl) throw new Error(`Template ${templateId} missing and no Poster fallback`)
+      const ctx = buildPosterContext(evt)
+      if (overrides?.customImageUrl) ctx.imageUrl = overrides.customImageUrl
+      const design = tmpl.build(ctx)
       loadDesign(design)
 
       // Wait two paint frames so the Konva stage rerenders the new design
@@ -286,18 +339,25 @@ export default function WeekSchedulerPage() {
     }
   }, [loadDesign])
 
-  /** Generate (or refresh) the per-row preview thumbnail. */
+  /** Generate (or refresh) the per-row preview thumbnail. Reads current
+   *  overrides off the row state at render time so quick-edits apply. */
   const renderPreview = useCallback(async (evt: WeekEvent) => {
     const key = rowKey(evt.date, evt.id)
     setRows(prev => ({ ...prev, [key]: { ...prev[key], status: 'previewing', errorMsg: null } }))
     try {
-      const png   = await renderEventPoster(evt)
+      // Snapshot the current row state so the renderer sees the right overrides
+      const current = rows[key]
+      const overrides: RowOverrides = {
+        templateId:     current?.templateId,
+        customImageUrl: current?.customImageUrl,
+      }
+      const png   = await renderEventPoster(evt, overrides)
       const thumb = await pngToThumbnail(png, 360)
       setRows(prev => ({ ...prev, [key]: { ...prev[key], status: 'idle', previewUrl: thumb } }))
     } catch (e) {
       setRows(prev => ({ ...prev, [key]: { ...prev[key], status: 'failed', errorMsg: e instanceof Error ? e.message : 'Preview failed' } }))
     }
-  }, [renderEventPoster])
+  }, [renderEventPoster, rows])
 
   // ── Single-row scheduling ─────────────────────────────────────────────
   const scheduleRow = useCallback(async (evt: WeekEvent): Promise<boolean> => {
@@ -308,8 +368,13 @@ export default function WeekSchedulerPage() {
     setRows(prev => ({ ...prev, [key]: { ...prev[key], status: 'rendering', errorMsg: null } }))
 
     try {
-      // Render Poster + capture preview for the row UI
-      const png   = await renderEventPoster(evt)
+      // Render Poster + capture preview for the row UI. Use any per-row
+      // template/image overrides set in the quick-edit drawer.
+      const overrides: RowOverrides = {
+        templateId:     row.templateId,
+        customImageUrl: row.customImageUrl,
+      }
+      const png   = await renderEventPoster(evt, overrides)
       const jpeg  = await pngToJpeg(png)
       const thumb = await pngToThumbnail(png, 360)
       setRows(prev => ({ ...prev, [key]: { ...prev[key], status: 'uploading', previewUrl: thumb } }))
@@ -797,6 +862,15 @@ function DayRow({
         />
       )}
 
+      {/* Quick design editor — template swap + image swap inline */}
+      <DesignQuickEdit
+        evt={evt}
+        row={row}
+        disabled={isBusy || disabled || isScheduled}
+        onUpdate={onUpdate}
+        onApply={onPreview}
+      />
+
       {/* Action row */}
       <div className="mt-3 flex items-center gap-2 flex-wrap">
         <Link
@@ -847,6 +921,192 @@ function DayRow({
           </button>
         )}
       </div>
+    </div>
+  )
+}
+
+// ─── DesignQuickEdit ─────────────────────────────────────────────────────
+// Inline (collapsible) panel that lets the user swap template + image for
+// a single week row, then click Apply to re-render the preview. Saves the
+// overrides to localStorage so they survive reloads. Designed for batch
+// "scroll the week, tweak each one, schedule all" workflows where popping
+// into the full Konva editor for every event is too slow.
+
+function DesignQuickEdit({
+  evt, row, disabled, onUpdate, onApply,
+}: {
+  evt: WeekEvent
+  row: RowState
+  disabled: boolean
+  onUpdate: (patch: Partial<RowState>) => void
+  onApply: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  // Local draft so the user can edit without re-rendering on every keystroke
+  const [draftTemplate, setDraftTemplate] = useState<string>(row.templateId ?? 'poster')
+  const [draftImageUrl, setDraftImageUrl] = useState<string>(row.customImageUrl ?? '')
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+
+  // Re-sync drafts when the row's persisted overrides change (e.g. after reload)
+  useEffect(() => {
+    setDraftTemplate(row.templateId ?? 'poster')
+    setDraftImageUrl(row.customImageUrl ?? '')
+  }, [row.templateId, row.customImageUrl])
+
+  const key = `${row.date}::${evt.id}`
+  const hasOverride = Boolean(row.templateId || row.customImageUrl)
+  const currentTemplate = row.templateId ?? 'poster'
+
+  function applyAndRender() {
+    const cleanedUrl = draftImageUrl.trim() || undefined
+    const cleanedTpl = draftTemplate === 'poster' ? undefined : draftTemplate
+    onUpdate({ templateId: cleanedTpl, customImageUrl: cleanedUrl, previewUrl: null })
+    persistRowOverride(key, { templateId: cleanedTpl, customImageUrl: cleanedUrl })
+    // Trigger preview re-render with the new overrides
+    setTimeout(() => onApply(), 50)
+    setOpen(false)
+  }
+
+  function reset() {
+    setDraftTemplate('poster')
+    setDraftImageUrl('')
+    onUpdate({ templateId: undefined, customImageUrl: undefined, previewUrl: null })
+    persistRowOverride(key, { templateId: undefined, customImageUrl: undefined })
+    setTimeout(() => onApply(), 50)
+  }
+
+  async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    // Read as data URL — fits straight into the <img> src that Konva templates use
+    const reader = new FileReader()
+    reader.onload = () => {
+      if (typeof reader.result === 'string') setDraftImageUrl(reader.result)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  return (
+    <div className="mt-2 flex gap-2 items-start">
+      <button
+        onClick={() => setOpen(v => !v)}
+        disabled={disabled}
+        className={`shrink-0 flex items-center gap-1 px-2 py-1 rounded text-[10px] font-semibold transition-colors ${
+          hasOverride
+            ? 'bg-[#9a442d]/20 text-[#e8a898] hover:bg-[#9a442d]/30'
+            : 'bg-white/[0.05] text-white/55 hover:bg-white/[0.1] hover:text-white'
+        }`}
+        aria-expanded={open}
+        title={hasOverride ? `Override active: ${currentTemplate}${row.customImageUrl ? ' + custom image' : ''}` : 'Swap template or image for this row'}
+      >
+        <Sparkles size={10} />
+        {open ? 'Hide design' : hasOverride ? 'Edit design ✱' : 'Edit design'}
+      </button>
+      {!open && hasOverride && (
+        <p className="text-[10px] text-white/55 truncate">
+          Using <span className="text-white/85">{currentTemplate}</span>
+          {row.customImageUrl ? ' · custom image' : ''}
+        </p>
+      )}
+
+      {open && (
+        <div className="flex-1 min-w-0 bg-black/30 border border-white/[0.1] rounded-lg p-3 space-y-3">
+          {/* Template grid — 7 event templates */}
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-white/45 mb-2 font-semibold">Template</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+              {QUICK_EDIT_TEMPLATE_IDS.map(tid => {
+                const isActive = draftTemplate === tid
+                return (
+                  <button
+                    key={tid}
+                    onClick={() => setDraftTemplate(tid)}
+                    disabled={disabled}
+                    className={`min-h-[36px] px-2.5 rounded-md text-[11px] font-semibold capitalize transition-colors ${
+                      isActive
+                        ? 'bg-[#9a442d] text-white'
+                        : 'bg-white/[0.06] text-white/65 hover:bg-white/[0.12] hover:text-white'
+                    }`}
+                  >
+                    {tid.replace(/-/g, ' ')}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Image swap — URL or file upload */}
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-white/45 mb-2 font-semibold">Image override</p>
+            <div className="flex gap-2 items-center">
+              <input
+                type="url"
+                value={draftImageUrl.startsWith('data:') ? '' : draftImageUrl}
+                onChange={e => setDraftImageUrl(e.target.value)}
+                placeholder={draftImageUrl.startsWith('data:') ? '(uploaded file)' : 'Paste image URL, or upload →'}
+                disabled={disabled}
+                className="flex-1 min-w-0 bg-black/40 border border-white/[0.1] rounded px-2 py-1.5 text-[11px] text-white/85 placeholder-white/30 focus:outline-none focus:border-[#9a442d]/60 disabled:opacity-50"
+              />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={onFile}
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={disabled}
+                className="shrink-0 px-2.5 py-1.5 rounded bg-white/[0.06] text-white/75 hover:bg-white/[0.12] hover:text-white text-[10px] font-semibold transition-colors disabled:opacity-50"
+              >
+                Upload
+              </button>
+              {draftImageUrl && (
+                <button
+                  onClick={() => setDraftImageUrl('')}
+                  disabled={disabled}
+                  className="shrink-0 px-2 py-1.5 rounded text-white/45 hover:text-white text-[10px] transition-colors"
+                  aria-label="Clear image"
+                  title="Clear image override"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+            <p className="text-[10px] text-white/35 mt-1">
+              Default: event&apos;s photo from the site. Override to use a different image for the post only.
+            </p>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-2 pt-1">
+            <button
+              onClick={applyAndRender}
+              disabled={disabled}
+              className="min-h-[36px] px-4 rounded-lg text-[11px] font-bold text-white bg-[#9a442d] hover:bg-[#b5502f] disabled:opacity-40 transition-colors flex items-center gap-1.5"
+            >
+              <Check size={11} /> Apply &amp; re-render
+            </button>
+            {hasOverride && (
+              <button
+                onClick={reset}
+                disabled={disabled}
+                className="min-h-[36px] px-3 rounded-lg text-[11px] font-semibold text-white/65 hover:text-white bg-white/[0.06] hover:bg-white/[0.12] transition-colors"
+                title="Clear all overrides"
+              >
+                Reset
+              </button>
+            )}
+            <div className="flex-1" />
+            <button
+              onClick={() => setOpen(false)}
+              className="text-[11px] text-white/55 hover:text-white px-2 py-1"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
