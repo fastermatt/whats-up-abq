@@ -49,6 +49,33 @@ export default function RootError({
 
   useEffect(() => {
     console.error('[RootError]', error.name, error.message, error.digest)
+
+    // Report to the admin error log so we have a central record of every
+    // boundary trip. Fire-and-forget; failure here must not affect the
+    // recovery flow below. Chunk-load errors are still reported (helps us
+    // see how often they actually trip).
+    if (typeof window !== 'undefined') {
+      try {
+        fetch('/api/admin/error-log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          keepalive: true,
+          body: JSON.stringify({
+            source: 'client-boundary',
+            severity: 'error',
+            message: `${error.name}: ${error.message}`.slice(0, 2000),
+            location: window.location.pathname,
+            context: {
+              url:       window.location.href,
+              userAgent: navigator.userAgent,
+              digest:    error.digest ?? null,
+              isChunkLoadError: isChunkLoadError(error),
+            },
+          }),
+        }).catch(() => {})
+      } catch { /* never block the UI on logging */ }
+    }
+
     // Auto-recover from chunk-load errors caused by stale tabs across a
     // deploy. Use sessionStorage as a circuit breaker so we don't infinite
     // loop if the reload itself triggers the same error.

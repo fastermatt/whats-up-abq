@@ -10,7 +10,29 @@ export default function EventsError({
   reset: () => void
 }) {
   useEffect(() => {
-    console.error(error.message)
+    console.error('[EventsError]', error.name, error.message, error.digest)
+    // Fire-and-forget audit log entry; never block the UI on logging.
+    if (typeof window !== 'undefined') {
+      try {
+        fetch('/api/admin/error-log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          keepalive: true,
+          body: JSON.stringify({
+            source:   'client-boundary',
+            severity: 'error',
+            message:  `${error.name}: ${error.message}`.slice(0, 2000),
+            location: window.location.pathname,
+            context:  {
+              url:       window.location.href,
+              userAgent: navigator.userAgent,
+              digest:    error.digest ?? null,
+              boundary:  'events',
+            },
+          }),
+        }).catch(() => {})
+      } catch { /* never block the UI on logging */ }
+    }
   }, [error])
 
   return (

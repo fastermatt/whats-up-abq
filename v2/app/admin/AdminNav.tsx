@@ -20,6 +20,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/admin/feedback',    label: 'Feedback',    prefix: '/admin/feedback' },
   { href: '/admin/reports',     label: 'Reports',     prefix: '/admin/reports' },
   { href: '/admin/analytics',   label: 'Analytics',   prefix: '/admin/analytics' },
+  { href: '/admin/errors',      label: 'Errors',      prefix: '/admin/errors' },
 ]
 
 /**
