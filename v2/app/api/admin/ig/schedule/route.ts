@@ -133,9 +133,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const supabase = await createServiceClient()
+  // The Queue page (app/admin/ig/queue/page.tsx) expects this exact shape:
+  //   { id, created_at, scheduled_for, media_type, image_urls, caption,
+  //     event_id, status, post_id, error_msg, published_at }
+  // Earlier this select renamed image_urls → slide_count and dropped
+  // created_at / event_id / published_at, so the page showed blank
+  // thumbnails and missing "Published <date>" labels.
   const { data, error } = await supabase
     .from('ig_scheduled_posts')
-    .select('id, scheduled_for, media_type, caption, status, post_id, error_msg, slide_count:image_urls')
+    .select('id, created_at, scheduled_for, media_type, image_urls, caption, event_id, status, post_id, error_msg, published_at')
     .neq('status', 'cancelled')
     .order('scheduled_for', { ascending: true })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
