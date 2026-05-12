@@ -382,21 +382,41 @@ function ImageNode({ layer, onSelect, onChange }: {
   const [img] = useImage(proxyIfNeeded(layer.src), 'anonymous')
 
   // Cover crop: compute which portion of the source image to show so it fills
-  // the layer rect without stretching, cropping to center (same math as BackgroundImage).
+  // the layer rect without stretching, cropping to center (same math as
+  // BackgroundImage). cropOffsetX/Y (normalized -1..1) shifts the window from
+  // center toward an edge — lets users pan a face into view without resizing
+  // the mask.
   let coverCrop: { x: number; y: number; width: number; height: number } | undefined
   if (img && layer.fit === 'cover') {
     const imgAr  = img.width / img.height
     const layerAr = layer.width / layer.height
+    const ox = layer.cropOffsetX ?? 0
+    const oy = layer.cropOffsetY ?? 0
     if (imgAr > layerAr) {
       // image is wider than the box — crop left/right, keep full height
       const cropH = img.height
       const cropW = img.height * layerAr
-      coverCrop = { x: (img.width - cropW) / 2, y: 0, width: cropW, height: cropH }
+      const slackX = img.width - cropW
+      // ox -1 → x=0 (leftmost), ox 0 → x=slackX/2 (center), ox +1 → x=slackX
+      const x = slackX / 2 + (ox * slackX / 2)
+      coverCrop = {
+        x: Math.max(0, Math.min(slackX, x)),
+        y: 0,
+        width: cropW,
+        height: cropH,
+      }
     } else {
       // image is taller than the box — crop top/bottom, keep full width
       const cropW = img.width
       const cropH = img.width / layerAr
-      coverCrop = { x: 0, y: (img.height - cropH) / 2, width: cropW, height: cropH }
+      const slackY = img.height - cropH
+      const y = slackY / 2 + (oy * slackY / 2)
+      coverCrop = {
+        x: 0,
+        y: Math.max(0, Math.min(slackY, y)),
+        width: cropW,
+        height: cropH,
+      }
     }
   }
 

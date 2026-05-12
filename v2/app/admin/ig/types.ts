@@ -52,6 +52,14 @@ export interface ImageLayer extends BaseLayer {
   height: number
   cornerRadius: number
   fit?: 'cover' | 'contain' | 'stretch'
+  /** Crop position offset within the source image when fit='cover'.
+   *  Normalized to -1..1, where 0 = default center crop.
+   *  -1 = shift crop window all the way to the left/top edge of source
+   *  +1 = shift crop window all the way to the right/bottom edge of source
+   *  Used to pan the visible portion of an event photo within its mask
+   *  without resizing the photo or the mask. Default 0 = current behavior. */
+  cropOffsetX?: number
+  cropOffsetY?: number
 }
 
 export interface ShapeLayer extends BaseLayer {

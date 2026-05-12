@@ -503,6 +503,7 @@ const LOGO_VARIANTS: { src: string; label: string; canvasBg: string; dotStyle: R
 
 function ImagePanel({ layer, update }: { layer: ImageLayer; update: (p: Partial<ImageLayer>) => void }) {
   const isLogo = /\/logo(-\w+)?\.svg$/.test(layer.src)
+  const isCover = (layer.fit ?? 'cover') === 'cover'
   return (
     <Section title="Image">
       <UploadRow current={layer.src} onPick={u => update({ src: u })} label="Replace" />
@@ -535,6 +536,62 @@ function ImagePanel({ layer, update }: { layer: ImageLayer; update: (p: Partial<
         </div>
       )}
       <div><Label>Corner radius</Label><NumInput value={layer.cornerRadius} onChange={v => update({ cornerRadius: Math.max(0, v) })} /></div>
+
+      {/* Crop positioning — pan the photo within its mask. Only meaningful
+          when fit='cover' (image is larger than the box so there's slack to
+          shift). Defaults to 0/0 (center crop, identical to the prior
+          behavior). Drag the slider to bring a subject's face into the
+          frame without resizing the mask. */}
+      {isCover && (
+        <>
+          <div>
+            <div className="flex items-center justify-between">
+              <Label>Crop · horizontal</Label>
+              <button
+                onClick={() => update({ cropOffsetX: 0 })}
+                disabled={(layer.cropOffsetX ?? 0) === 0}
+                className="text-[10px] text-white/45 hover:text-white disabled:opacity-30 disabled:cursor-default"
+                title="Reset to center"
+              >
+                Reset
+              </button>
+            </div>
+            <Slider
+              value={layer.cropOffsetX ?? 0}
+              onChange={v => update({ cropOffsetX: v })}
+              min={-1}
+              max={1}
+              step={0.02}
+            />
+            <div className="flex justify-between text-[9px] text-white/35 mt-0.5 px-0.5">
+              <span>← left</span><span>center</span><span>right →</span>
+            </div>
+          </div>
+          <div>
+            <div className="flex items-center justify-between">
+              <Label>Crop · vertical</Label>
+              <button
+                onClick={() => update({ cropOffsetY: 0 })}
+                disabled={(layer.cropOffsetY ?? 0) === 0}
+                className="text-[10px] text-white/45 hover:text-white disabled:opacity-30 disabled:cursor-default"
+                title="Reset to center"
+              >
+                Reset
+              </button>
+            </div>
+            <Slider
+              value={layer.cropOffsetY ?? 0}
+              onChange={v => update({ cropOffsetY: v })}
+              min={-1}
+              max={1}
+              step={0.02}
+            />
+            <div className="flex justify-between text-[9px] text-white/35 mt-0.5 px-0.5">
+              <span>↑ top</span><span>center</span><span>bottom ↓</span>
+            </div>
+          </div>
+        </>
+      )}
     </Section>
   )
 }

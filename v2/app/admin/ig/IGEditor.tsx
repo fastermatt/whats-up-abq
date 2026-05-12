@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
+import { useRouter } from 'next/navigation'
+import { ArrowLeft } from 'lucide-react'
 import type { NormalizedEvent } from '@/lib/events'
 import { EventSearch } from './components/EventSearch'
 import { Toolbar, type EditorMode } from './components/Toolbar'
@@ -25,13 +27,20 @@ interface Props {
   event: NormalizedEvent | null
   image: string
   eventId: string | null
+  /** When set, the editor was opened from /admin/ig/week to edit a specific
+   *  row. Shows a sticky "Save & return to week" button that exports the
+   *  current design state to sessionStorage and navigates back. */
+  returnTo?: string | null
+  rowKey?: string | null
 }
 
-export function IGEditor({ event, image }: Props) {
+export function IGEditor({ event, image, returnTo, rowKey }: Props) {
+  const router = useRouter()
   const { applyTemplateDesign, design } = useEditor()
   const [mode, setMode] = useState<EditorMode>(event ? 'event' : 'generic')
   const canvasRef = useRef<PostCanvasHandle | null>(null)
   const [showSidebar, setShowSidebar] = useState(false)
+  const [savingReturn, setSavingReturn] = useState(false)
 
   // Tracks the last event ID we auto-loaded, so we don't clobber in-progress work
   const lastEventIdRef = useRef<string | null>(null)
@@ -85,9 +94,50 @@ export function IGEditor({ event, image }: Props) {
   }
 
   const hasLayers = design.slides.some(s => s.layers.length > 0)
+  const isReturnMode = returnTo === 'week' && Boolean(rowKey)
+
+  function saveAndReturn() {
+    if (!rowKey) return
+    setSavingReturn(true)
+    try {
+      // Bridge the current design state to the week page via sessionStorage.
+      // Larger than localStorage's reasonable budget for some designs (carousel
+      // slides, big base64 images), and only needed for the one navigation hop.
+      sessionStorage.setItem(`ig-week-design:${rowKey}`, JSON.stringify(design))
+      router.push('/admin/ig/week')
+    } catch (e) {
+      console.error('[IGEditor] save & return failed:', e)
+      alert('Could not save the design back to the week. Try again or use Save as design.')
+      setSavingReturn(false)
+    }
+  }
 
   return (
     <div className="space-y-3">
+
+      {/* Return-to-week sticky banner — only when launched from a week row */}
+      {isReturnMode && (
+        <div className="sticky top-0 z-30 bg-[#9a442d] border-b border-[#7d3725] -mx-3 sm:-mx-6 px-3 sm:px-6 py-2 flex items-center gap-3 flex-wrap">
+          <button
+            onClick={() => router.push('/admin/ig/week')}
+            className="flex items-center gap-1.5 text-xs text-white/85 hover:text-white font-semibold"
+          >
+            <ArrowLeft size={14} />
+            Back to week (discard)
+          </button>
+          <span className="text-xs text-white/65 hidden sm:inline">
+            Editing design for week row {event?.title ? `"${event.title.slice(0, 40)}"` : ''}
+          </span>
+          <div className="flex-1" />
+          <button
+            onClick={saveAndReturn}
+            disabled={savingReturn || !hasLayers}
+            className="px-4 py-1.5 rounded-lg bg-white text-[#9a442d] text-xs font-bold hover:bg-white/90 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {savingReturn ? 'Saving…' : 'Apply to week row →'}
+          </button>
+        </div>
+      )}
 
       <IGSubNav active="editor" />
 

@@ -42,6 +42,10 @@ interface RowState {
   /** Per-row image override — paste a URL or upload a file in the quick-
    *  edit drawer. When set, overrides evt.imageUrl for rendering. */
   customImageUrl?: string
+  /** Per-row full Design override — set when the user opens the full editor
+   *  via "Edit fully", makes changes, and clicks "Apply to week row".
+   *  Supersedes templateId + customImageUrl when present. */
+  customDesign?: import('../types').Design
 }
 
 // ─── localStorage persistence for per-row overrides ─────────────────────
@@ -49,6 +53,7 @@ const OVERRIDES_KEY = 'ig-week-overrides-v1'
 interface RowOverrides {
   templateId?: string
   customImageUrl?: string
+  customDesign?: import('../types').Design
 }
 function loadOverrides(): Record<string, RowOverrides> {
   if (typeof window === 'undefined') return {}
@@ -69,6 +74,7 @@ function persistRowOverride(key: string, patch: RowOverrides) {
   const cleaned: RowOverrides = {}
   if (merged.templateId)     cleaned.templateId = merged.templateId
   if (merged.customImageUrl) cleaned.customImageUrl = merged.customImageUrl
+  if (merged.customDesign)   cleaned.customDesign = merged.customDesign
   if (Object.keys(cleaned).length === 0) delete map[key]
   else map[key] = cleaned
   saveOverrides(map)
@@ -268,12 +274,38 @@ export default function WeekSchedulerPage() {
       // edits / scheduled rows that match by key. Hydrate overrides from
       // localStorage so quick-edits survive reloads.
       const overrides = loadOverrides()
+
+      // Also pick up any designs handed off from the full editor's
+      // "Apply to week row" button (sessionStorage bridge). Apply them to
+      // the matching rows, persist to localStorage, and clear the temp keys.
+      const sessionDesignKeys = typeof window !== 'undefined'
+        ? Object.keys(sessionStorage).filter(k => k.startsWith('ig-week-design:'))
+        : []
+      for (const sk of sessionDesignKeys) {
+        try {
+          const designJson = sessionStorage.getItem(sk)
+          if (!designJson) continue
+          const design = JSON.parse(designJson)
+          const key = sk.replace('ig-week-design:', '')
+          overrides[key] = { ...(overrides[key] ?? {}), customDesign: design }
+          persistRowOverride(key, { customDesign: design })
+          sessionStorage.removeItem(sk)
+        } catch { /* ignore corrupt entries */ }
+      }
+
       setRows(prev => {
         const next: Record<string, RowState> = {}
         for (const day of data as WeekDay[]) {
           for (const evt of day.events) {
             const key = rowKey(day.date, evt.id)
-            if (prev[key]) { next[key] = prev[key]; continue }
+            if (prev[key]) {
+              // Even for preserved rows, layer in any freshly arrived overrides
+              const ov = overrides[key] ?? {}
+              next[key] = ov.customDesign
+                ? { ...prev[key], customDesign: ov.customDesign, previewUrl: null }
+                : prev[key]
+              continue
+            }
             const cap = buildCaptions(toNormalized(evt))[0]?.text ?? ''
             const ov = overrides[key] ?? {}
             next[key] = {
@@ -287,6 +319,7 @@ export default function WeekSchedulerPage() {
               previewUrl:     null,
               templateId:     ov.templateId,
               customImageUrl: ov.customImageUrl,
+              customDesign:   ov.customDesign,
             }
           }
         }
@@ -319,13 +352,19 @@ export default function WeekSchedulerPage() {
     await prevTurn
 
     try {
-      const templateId = overrides?.templateId ?? 'poster'
-      const tmpl = TEMPLATES.find(t => t.id === templateId) ?? TEMPLATES.find(t => t.id === 'poster')
-      if (!tmpl) throw new Error(`Template ${templateId} missing and no Poster fallback`)
-      const ctx = buildPosterContext(evt)
-      if (overrides?.customImageUrl) ctx.imageUrl = overrides.customImageUrl
-      const design = tmpl.build(ctx)
-      loadDesign(design)
+      // Full design override wins — set when the user clicked "Apply to
+      // week row" in the full editor. Skip the template build entirely.
+      if (overrides?.customDesign) {
+        loadDesign(overrides.customDesign)
+      } else {
+        const templateId = overrides?.templateId ?? 'poster'
+        const tmpl = TEMPLATES.find(t => t.id === templateId) ?? TEMPLATES.find(t => t.id === 'poster')
+        if (!tmpl) throw new Error(`Template ${templateId} missing and no Poster fallback`)
+        const ctx = buildPosterContext(evt)
+        if (overrides?.customImageUrl) ctx.imageUrl = overrides.customImageUrl
+        const design = tmpl.build(ctx)
+        loadDesign(design)
+      }
 
       // Wait two paint frames so the Konva stage rerenders the new design
       await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())))
@@ -350,6 +389,7 @@ export default function WeekSchedulerPage() {
       const overrides: RowOverrides = {
         templateId:     current?.templateId,
         customImageUrl: current?.customImageUrl,
+        customDesign:   current?.customDesign,
       }
       const png   = await renderEventPoster(evt, overrides)
       const thumb = await pngToThumbnail(png, 360)
@@ -369,10 +409,12 @@ export default function WeekSchedulerPage() {
 
     try {
       // Render Poster + capture preview for the row UI. Use any per-row
-      // template/image overrides set in the quick-edit drawer.
+      // template/image overrides set in the quick-edit drawer, or the
+      // full Design captured via "Apply to week row".
       const overrides: RowOverrides = {
         templateId:     row.templateId,
         customImageUrl: row.customImageUrl,
+        customDesign:   row.customDesign,
       }
       const png   = await renderEventPoster(evt, overrides)
       const jpeg  = await pngToJpeg(png)
@@ -874,10 +916,11 @@ function DayRow({
       {/* Action row */}
       <div className="mt-3 flex items-center gap-2 flex-wrap">
         <Link
-          href={`/admin/ig?id=${evt.id}`}
+          href={`/admin/ig?id=${evt.id}&returnTo=week&rowKey=${encodeURIComponent(`${row.date}::${evt.id}`)}`}
           className="text-[11px] text-white/55 hover:text-white transition-colors flex items-center gap-1"
+          title="Open the full editor for this row, then click 'Apply to week row' to return"
         >
-          Open in editor →
+          {row.customDesign ? 'Edit design (✱ custom)' : 'Edit in full editor'} →
         </Link>
         <div className="flex-1" />
 
@@ -954,14 +997,17 @@ function DesignQuickEdit({
   }, [row.templateId, row.customImageUrl])
 
   const key = `${row.date}::${evt.id}`
-  const hasOverride = Boolean(row.templateId || row.customImageUrl)
+  const hasOverride = Boolean(row.templateId || row.customImageUrl || row.customDesign)
   const currentTemplate = row.templateId ?? 'poster'
+  const hasCustomDesign = Boolean(row.customDesign)
 
   function applyAndRender() {
     const cleanedUrl = draftImageUrl.trim() || undefined
     const cleanedTpl = draftTemplate === 'poster' ? undefined : draftTemplate
-    onUpdate({ templateId: cleanedTpl, customImageUrl: cleanedUrl, previewUrl: null })
-    persistRowOverride(key, { templateId: cleanedTpl, customImageUrl: cleanedUrl })
+    // Quick-edit overrides supersede the full-design override — switching
+    // template via the picker should not preserve a stale customDesign.
+    onUpdate({ templateId: cleanedTpl, customImageUrl: cleanedUrl, customDesign: undefined, previewUrl: null })
+    persistRowOverride(key, { templateId: cleanedTpl, customImageUrl: cleanedUrl, customDesign: undefined })
     // Trigger preview re-render with the new overrides
     setTimeout(() => onApply(), 50)
     setOpen(false)
@@ -970,8 +1016,8 @@ function DesignQuickEdit({
   function reset() {
     setDraftTemplate('poster')
     setDraftImageUrl('')
-    onUpdate({ templateId: undefined, customImageUrl: undefined, previewUrl: null })
-    persistRowOverride(key, { templateId: undefined, customImageUrl: undefined })
+    onUpdate({ templateId: undefined, customImageUrl: undefined, customDesign: undefined, previewUrl: null })
+    persistRowOverride(key, { templateId: undefined, customImageUrl: undefined, customDesign: undefined })
     setTimeout(() => onApply(), 50)
   }
 
@@ -1004,8 +1050,12 @@ function DesignQuickEdit({
       </button>
       {!open && hasOverride && (
         <p className="text-[10px] text-white/55 truncate">
-          Using <span className="text-white/85">{currentTemplate}</span>
-          {row.customImageUrl ? ' · custom image' : ''}
+          {hasCustomDesign ? (
+            <>Using <span className="text-white/85">custom design</span> from full editor</>
+          ) : (
+            <>Using <span className="text-white/85">{currentTemplate}</span>
+            {row.customImageUrl ? ' · custom image' : ''}</>
+          )}
         </p>
       )}
 

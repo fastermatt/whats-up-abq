@@ -5,11 +5,11 @@ import { IGEditor } from './IGEditor'
 export const dynamic = 'force-dynamic'
 
 interface PageProps {
-  searchParams: Promise<{ id?: string }>
+  searchParams: Promise<{ id?: string; returnTo?: string; rowKey?: string }>
 }
 
 export default async function IGAdminPage({ searchParams }: PageProps) {
-  const { id } = await searchParams
+  const { id, returnTo, rowKey } = await searchParams
 
   let event = null
   let image = ''
@@ -21,5 +21,13 @@ export default async function IGAdminPage({ searchParams }: PageProps) {
     }
   }
 
-  return <IGEditor event={event} image={image} eventId={id ?? null} />
+  return (
+    <IGEditor
+      event={event}
+      image={image}
+      eventId={id ?? null}
+      returnTo={returnTo ?? null}
+      rowKey={rowKey ?? null}
+    />
+  )
 }
