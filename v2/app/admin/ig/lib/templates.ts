@@ -749,6 +749,357 @@ const paper: Template = {
   },
 }
 
+// ── 8. Signal ────────────────────────────────────────────────────────────
+//   Philosophy: "Geometric Silence" — strict vertical grid, photo on the
+//   left as a dedicated visual column, editorial type on near-black right.
+//   Swiss formalism. Photo never competes with text — they coexist in
+//   clearly bounded spatial zones.
+
+const signal: Template = {
+  id: 'signal',
+  name: 'Signal',
+  description: 'Left photo column + dark editorial type column. Grid precision, zero overlap.',
+  category: 'event',
+  thumb: {
+    bg: '#0f0e0d',
+    blocks: [
+      { x: 0,  y: 0,  w: 38,  h: 100, c: '#4a2e1a', o: 0.85 }, // photo zone
+      { x: 38, y: 0,  w: 1.8, h: 100, c: BRAND_COLORS.terra },  // rule
+      { x: 43, y: 10, w: 22,  h: 2.2, c: BRAND_COLORS.cream, o: 0.65 }, // logo
+      { x: 43, y: 32, w: 50,  h: 10,  c: BRAND_COLORS.cream },           // title
+      { x: 43, y: 44, w: 50,  h: 8,   c: BRAND_COLORS.cream, o: 0.85 }, // title line 2
+      { x: 43, y: 57, w: 10,  h: 1,   c: BRAND_COLORS.terra },           // accent rule
+      { x: 43, y: 61, w: 45,  h: 2.5, c: BRAND_COLORS.cream, o: 0.65 }, // date
+      { x: 43, y: 67, w: 32,  h: 2,   c: BRAND_COLORS.cream, o: 0.4 },  // venue
+      { x: 43, y: 92, w: 42,  h: 1.5, c: BRAND_COLORS.cream, o: 0.25 }, // CTA
+    ],
+  },
+  build: (ctx, format) => {
+    const fmt = format ?? '4:5'
+    const { w, h } = CANVAS_DIMS[fmt]
+    const isStory = fmt === '9:16'
+    const topSafe = isStory ? Math.round(h * 0.12) : 46
+    const botSafe = isStory ? Math.round(h * 0.15) : 80
+    const sy = (y: number) => Math.round(y * h / 1350)
+
+    // Column geometry
+    const photoW   = Math.round(w * 0.40)       // 40% left
+    const ruleW    = 5
+    const textX    = photoW + ruleW + 44         // padding inside right column
+    const textW    = w - textX - 44
+
+    const DARK     = '#0f0e0d'
+    const title    = ctx.title ?? 'Your Event'
+    const titleSize = title.length < 12 ? 130
+                    : title.length < 22 ? 108
+                    : title.length < 36 ? 88
+                    : 70
+
+    // Estimate title block height for downstream stacking
+    const charsPerLine = Math.floor(textW / (titleSize * 0.52))
+    const titleLines   = Math.min(Math.ceil(title.length / Math.max(charsPerLine, 1)), 4)
+    const titleH       = titleLines * titleSize * 1.06
+
+    // Vertical rhythm — title floats in the upper-middle of the right column
+    const titleY   = Math.max(topSafe + 80, Math.round(h * 0.22))
+    const accentY  = titleY + titleH + 32
+    const dateY    = accentY + 22
+    const venueY   = dateY + sy(60)
+    const ctaY     = h - botSafe - 36
+
+    const layers: Layer[] = [
+      // Right-column dark background
+      shape({ shape: 'rect', x: photoW, y: 0, width: w - photoW, height: h, fill: DARK }),
+
+      // Photo column (or terra gradient if no photo)
+      ctx.imageUrl
+        ? imageLayer({ src: ctx.imageUrl, x: 0, y: 0, width: photoW, height: h, fit: 'cover' })
+        : shape({ shape: 'rect', x: 0, y: 0, width: photoW, height: h, fill: BRAND_COLORS.mesaBrown }),
+
+      // Terra rule — the only color touch on the right side
+      shape({ shape: 'rect', x: photoW, y: 0, width: ruleW, height: h, fill: BRAND_COLORS.terra }),
+
+      // Logo — small, top of right column
+      logo(LOGO_W, textX, topSafe, isStory ? 42 : 34),
+
+      // Category — DM Mono, terra, below logo
+      ...(ctx.category ? [textLayer({
+        name: 'Category', text: ctx.category.toUpperCase(),
+        x: textX, y: topSafe + (isStory ? 58 : 50), width: textW,
+        fontFamily: font('DM Mono'), fontSize: 24, fontWeight: 500,
+        fill: BRAND_COLORS.terra, letterSpacing: 5,
+      })] : []),
+
+      // Title — the dominant element on the right column
+      textLayer({
+        name: 'Title', text: title,
+        x: textX, y: titleY, width: textW,
+        fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 900,
+        fill: BRAND_COLORS.cream, lineHeight: 0.92, letterSpacing: -1,
+      }),
+
+      // Accent rule under title
+      shape({ shape: 'rect', x: textX, y: accentY, width: 56, height: 3, fill: BRAND_COLORS.terra }),
+
+      // Date
+      ...(formatDate(ctx.date, ctx.time) ? [textLayer({
+        name: 'Date', text: formatDate(ctx.date, ctx.time),
+        x: textX, y: dateY, width: textW,
+        fontFamily: font('Inter'), fontSize: isStory ? 38 : 34, fontWeight: 600,
+        fill: BRAND_COLORS.cream, opacity: 0.75, lineHeight: 1.25,
+      })] : []),
+
+      // Venue
+      ...(ctx.venue ? [textLayer({
+        name: 'Venue', text: ctx.venue,
+        x: textX, y: venueY, width: textW,
+        fontFamily: font('Inter'), fontSize: isStory ? 32 : 28, fontWeight: 400,
+        fill: BRAND_COLORS.cream, opacity: 0.5, lineHeight: 1.2,
+      })] : []),
+
+      // CTA — bottom of right column, ghosted
+      textLayer({
+        name: 'CTA', text: ctx.cta ?? 'abqunplugged.com',
+        x: textX, y: ctaY, width: textW,
+        fontFamily: font('DM Mono'), fontSize: 20, fontWeight: 400,
+        fill: BRAND_COLORS.cream, opacity: 0.3, letterSpacing: 2,
+      }),
+    ]
+
+    return {
+      id: uid(), name: ctx.title ?? 'Signal post', format: fmt,
+      slides: [{ id: uid(), background: { type: 'color', color: DARK }, layers }],
+      createdAt: Date.now(), updatedAt: Date.now(),
+    }
+  },
+}
+
+// ── 9. Stencil ────────────────────────────────────────────────────────────
+//   Philosophy: "Concrete Poetry" — type as pure visual mass. The event
+//   title IS the artwork. Monumental letterforms fill the frame from edge
+//   to edge. Photo, when present, dissolves behind the type as ghosted
+//   texture — felt, not seen. Every word a sculpture.
+
+const stencil: Template = {
+  id: 'stencil',
+  name: 'Stencil',
+  description: 'Monumental type fills the frame. Photo becomes texture behind the words.',
+  category: 'event',
+  thumb: {
+    gradient: { from: '#0f0e0d', to: '#1a1614', angle: 160 },
+    blocks: [
+      { x: 5,  y: 8,  w: 18, h: 1.8, c: BRAND_COLORS.terra, o: 0.85 }, // category
+      { x: 5,  y: 16, w: 90, h: 22,  c: BRAND_COLORS.cream, o: 0.95 }, // massive title L1
+      { x: 5,  y: 40, w: 72, h: 22,  c: BRAND_COLORS.cream, o: 0.9  }, // massive title L2
+      { x: 5,  y: 64, w: 55, h: 14,  c: BRAND_COLORS.cream, o: 0.8  }, // massive title L3
+      { x: 5,  y: 83, w: 8,  h: 0.8, c: BRAND_COLORS.terra },           // terra rule
+      { x: 5,  y: 87, w: 44, h: 2,   c: BRAND_COLORS.cream, o: 0.4  }, // date
+      { x: 58, y: 91, w: 37, h: 1.8, c: BRAND_COLORS.cream, o: 0.3  }, // logo right
+    ],
+  },
+  build: (ctx, format) => {
+    const fmt = format ?? '4:5'
+    const { w, h } = CANVAS_DIMS[fmt]
+    const isStory = fmt === '9:16'
+    const topSafe = isStory ? Math.round(h * 0.12) : 46
+    const botSafe = isStory ? Math.round(h * 0.15) : 80
+    const sy = (y: number) => Math.round(y * h / 1350)
+
+    const mx    = 60
+    const title = ctx.title ?? 'Your Event'
+
+    // Monumental sizing — title length drives font size
+    const titleSize = title.length < 6  ? 340
+                    : title.length < 12 ? 270
+                    : title.length < 20 ? 210
+                    : title.length < 30 ? 170
+                    : 138
+
+    // Anchor the type block just below safe zone — it flows DOWN from there,
+    // covering as much canvas as it needs. The visual weight IS the design.
+    const titleY = topSafe + (ctx.category ? sy(80) : sy(48))
+
+    // Bottom strip: small terra rule, then date + logo
+    const ruleY  = h - botSafe - 80
+    const dateY  = ruleY + 18
+    const logoX  = w - mx - Math.round(42 * LOGO_R)
+
+    const layers: Layer[] = [
+      // Photo as ghost texture — the image is always subordinate to the type
+      ...(ctx.imageUrl ? [imageLayer({
+        src: ctx.imageUrl, x: 0, y: 0, width: w, height: h, fit: 'cover',
+      })] : []),
+      // Photo scrim — heavy, keeps type legible over any image
+      ...(ctx.imageUrl ? [shape({
+        shape: 'rect', x: 0, y: 0, width: w, height: h,
+        fill: '#0f0e0d', opacity: 0.82,
+      })] : []),
+
+      // Category label — terra, tiny, precise
+      ...(ctx.category ? [textLayer({
+        name: 'Category', text: ctx.category.toUpperCase(),
+        x: mx, y: topSafe + 6, width: w - mx * 2,
+        fontFamily: font('DM Mono'), fontSize: 22, fontWeight: 500,
+        fill: BRAND_COLORS.terra, letterSpacing: 7,
+      })] : []),
+
+      // THE TITLE — monumental, filling the canvas with letterform mass
+      textLayer({
+        name: 'Title', text: title,
+        x: mx, y: titleY, width: w - mx * 2,
+        fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 900,
+        fill: BRAND_COLORS.cream, lineHeight: 0.82, letterSpacing: -3,
+      }),
+
+      // Terra accent — sole color element below the type
+      shape({ shape: 'rect', x: mx, y: ruleY, width: 48, height: 3, fill: BRAND_COLORS.terra }),
+
+      // Date — clinical, monospace, small
+      ...(formatDate(ctx.date, ctx.time) ? [textLayer({
+        name: 'Date', text: formatDate(ctx.date, ctx.time),
+        x: mx, y: dateY, width: w - mx * 2 - 200,
+        fontFamily: font('DM Mono'), fontSize: 22, fontWeight: 400,
+        fill: BRAND_COLORS.cream, opacity: 0.5, letterSpacing: 1,
+      })] : []),
+
+      // Logo — right-aligned, small, ghosted
+      logo(LOGO_W, logoX, dateY - 2, 36),
+    ]
+
+    return {
+      id: uid(), name: ctx.title ?? 'Stencil post', format: fmt,
+      slides: [{
+        id: uid(),
+        background: { type: 'gradient', from: '#0f0e0d', to: '#1a1614', angle: 160 },
+        layers,
+      }],
+      createdAt: Date.now(), updatedAt: Date.now(),
+    }
+  },
+}
+
+// ── 10. Terra ─────────────────────────────────────────────────────────────
+//   Philosophy: "Committed" color strategy. The brand's terra cotta owns
+//   100% of the surface. Everything else — type, photo frame, logo — is
+//   cream against the warm field. Unmistakable in any feed. The photo, when
+//   present, sits as a carefully framed inset: a window, not a bleed.
+
+const terra: Template = {
+  id: 'terra',
+  name: 'Terra',
+  description: 'Full terra background — the brand color owns the canvas. High feed contrast.',
+  category: 'event',
+  thumb: {
+    bg: BRAND_COLORS.terra,
+    blocks: [
+      { x: 7,  y: 7,  w: 30,  h: 2.2, c: BRAND_COLORS.cream, o: 0.7 },  // logo
+      { x: 7,  y: 16, w: 86,  h: 40,  c: BRAND_COLORS.cream, o: 0.12, r: 2 }, // photo frame
+      { x: 7,  y: 60, w: 86,  h: 12,  c: BRAND_COLORS.cream, o: 0.95 }, // title
+      { x: 7,  y: 75, w: 86,  h: 0.8, c: BRAND_COLORS.cream, o: 0.25 }, // rule
+      { x: 7,  y: 79, w: 62,  h: 2.5, c: BRAND_COLORS.cream, o: 0.7 },  // date
+      { x: 7,  y: 85, w: 42,  h: 2,   c: BRAND_COLORS.cream, o: 0.5 },  // venue
+      { x: 7,  y: 92, w: 36,  h: 1.5, c: BRAND_COLORS.cream, o: 0.3 },  // CTA
+    ],
+  },
+  build: (ctx, format) => {
+    const fmt = format ?? '4:5'
+    const { w, h } = CANVAS_DIMS[fmt]
+    const isStory = fmt === '9:16'
+    const topSafe = isStory ? Math.round(h * 0.12) : 46
+    const botSafe = isStory ? Math.round(h * 0.15) : 80
+    const sy = (y: number) => Math.round(y * h / 1350)
+
+    const mx     = 80
+    const title  = ctx.title ?? 'Your Event'
+    const titleSize = title.length < 12 ? 155
+                    : title.length < 24 ? 130
+                    : title.length < 38 ? 105
+                    : 85
+
+    // ── Photo zone — framed inset ──────────────────────────────────────────
+    // When a photo exists: cream border rect behind the image gives a
+    // "framed print" effect. The frame is 8px on all sides.
+    const photoMx    = mx
+    const photoW     = w - photoMx * 2
+    const photoH     = isStory ? Math.round(h * 0.38) : sy(520)
+    const photoTopY  = topSafe + sy(100) // logo clears the top
+
+    // ── Text zone ─────────────────────────────────────────────────────────
+    // If photo present: text cluster starts ~32px below photo + frame
+    // If no photo: title sits higher, dominating the cream-free terra field
+    const textTopY   = ctx.imageUrl
+      ? photoTopY + photoH + 48
+      : topSafe + sy(200)
+
+    const charsPerLine = Math.floor((w - mx * 2) / (titleSize * 0.52))
+    const titleLines   = Math.min(Math.ceil(title.length / Math.max(charsPerLine, 1)), 4)
+    const titleH       = titleLines * titleSize * 1.06
+    const ruleY        = textTopY + titleH + 28
+    const dateY        = ruleY + 18
+    const venueY       = dateY + sy(60)
+    const ctaY         = h - botSafe - 36
+
+    const layers: Layer[] = [
+      // Logo — cream on terra, top left
+      logo(LOGO_W, mx, topSafe, isStory ? 46 : 36),
+
+      // Photo frame (cream border effect) + photo
+      ...(ctx.imageUrl ? [
+        shape({
+          shape: 'rect', x: photoMx - 8, y: photoTopY - 8,
+          width: photoW + 16, height: photoH + 16,
+          fill: BRAND_COLORS.cream, opacity: 0.18, cornerRadius: 10,
+        }),
+        imageLayer({
+          src: ctx.imageUrl, x: photoMx, y: photoTopY,
+          width: photoW, height: photoH, cornerRadius: 6, fit: 'cover',
+        }),
+      ] : []),
+
+      // Title — Fraunces italic for warmth; cream on terra
+      textLayer({
+        name: 'Title', text: title,
+        x: mx, y: textTopY, width: w - mx * 2,
+        fontFamily: font('Fraunces'), fontSize: titleSize, fontWeight: 800,
+        fill: BRAND_COLORS.cream, lineHeight: 0.94, letterSpacing: -1,
+      }),
+
+      // Thin cream rule — sole structural separator
+      shape({ shape: 'rect', x: mx, y: ruleY, width: w - mx * 2, height: 1, fill: BRAND_COLORS.cream, opacity: 0.3 }),
+
+      // Date
+      ...(formatDate(ctx.date, ctx.time) ? [textLayer({
+        name: 'Date', text: formatDate(ctx.date, ctx.time),
+        x: mx, y: dateY, width: w - mx * 2,
+        fontFamily: font('Inter'), fontSize: isStory ? 40 : 36, fontWeight: 600,
+        fill: BRAND_COLORS.cream, opacity: 0.82, lineHeight: 1.25,
+      })] : []),
+
+      // Venue
+      ...(ctx.venue ? [textLayer({
+        name: 'Venue', text: ctx.venue,
+        x: mx, y: venueY, width: w - mx * 2,
+        fontFamily: font('Inter'), fontSize: isStory ? 34 : 30, fontWeight: 400,
+        fill: BRAND_COLORS.cream, opacity: 0.58, lineHeight: 1.2,
+      })] : []),
+
+      // CTA — bottom, ghosted
+      textLayer({
+        name: 'CTA', text: ctx.cta ?? 'abqunplugged.com',
+        x: mx, y: ctaY, width: w - mx * 2,
+        fontFamily: font('DM Mono'), fontSize: 22, fontWeight: 400,
+        fill: BRAND_COLORS.cream, opacity: 0.38, letterSpacing: 2,
+      }),
+    ]
+
+    return {
+      id: uid(), name: ctx.title ?? 'Terra post', format: fmt,
+      slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.terra }, layers }],
+      createdAt: Date.now(), updatedAt: Date.now(),
+    }
+  },
+}
+
 // ════════════════════════════════════════════════════════════════════════
 //   BRAND TEMPLATES (7)
 // ════════════════════════════════════════════════════════════════════════
@@ -1400,8 +1751,9 @@ const storyTypeOnly: Template = {
 // ════════════════════════════════════════════════════════════════════════
 
 export const TEMPLATES: Template[] = [
-  // Event templates (7 feed + 3 story)
+  // Event templates (10 feed + 3 story)
   poster, broadside, marquee, split, dispatch, goldenHour, paper,
+  signal, stencil, terra,
   storyFullBleed, storySplit, storyTypeOnly,
   // Brand templates (7)
   statement, categorySpotlight, weekendPreview, mesa, tonightDrop, hiddenGem, blank,

@@ -137,7 +137,7 @@ function plusDays(iso: string, days: number): string {
 /** The 7 event-category templates exposed in the quick-edit picker.
  *  Brand/story templates are hidden — they don't make sense for the
  *  poster-style scheduled-feed flow. */
-const QUICK_EDIT_TEMPLATE_IDS = ['poster', 'broadside', 'marquee', 'split', 'dispatch', 'golden-hour', 'paper'] as const
+const QUICK_EDIT_TEMPLATE_IDS = ['poster', 'broadside', 'marquee', 'split', 'dispatch', 'golden-hour', 'paper', 'signal', 'stencil', 'terra'] as const
 
 const CAT_EMOJI: Record<string, string> = {
   'Music': '🎵', 'Comedy': '😂', 'Sports': '🏟️', 'Arts & Theater': '🎭',
