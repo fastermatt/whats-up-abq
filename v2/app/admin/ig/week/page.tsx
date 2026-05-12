@@ -46,6 +46,8 @@ interface RowState {
    *  via "Edit fully", makes changes, and clicks "Apply to week row".
    *  Supersedes templateId + customImageUrl when present. */
   customDesign?: import('../types').Design
+  /** Whether this row is checked for bulk scheduling. */
+  selected: boolean
 }
 
 // ─── localStorage persistence for per-row overrides ─────────────────────
@@ -317,6 +319,7 @@ export default function WeekSchedulerPage() {
               errorMsg:       null,
               postId:         null,
               previewUrl:     null,
+              selected:       false,
               templateId:     ov.templateId,
               customImageUrl: ov.customImageUrl,
               customDesign:   ov.customDesign,
@@ -508,6 +511,76 @@ export default function WeekSchedulerPage() {
     setTimeout(() => setBatchProgress(null), 4000)
   }, [batchRunning, days, rows, scheduleRow])
 
+  // ── Selection helpers ─────────────────────────────────────────────────
+
+  const selectAll = useCallback(() => {
+    setRows(prev => {
+      const next = { ...prev }
+      for (const key of Object.keys(next)) {
+        if (next[key].status !== 'scheduled') {
+          next[key] = { ...next[key], selected: true }
+        }
+      }
+      return next
+    })
+  }, [])
+
+  const deselectAll = useCallback(() => {
+    setRows(prev => {
+      const next = { ...prev }
+      for (const key of Object.keys(next)) {
+        next[key] = { ...next[key], selected: false }
+      }
+      return next
+    })
+  }, [])
+
+  const selectDay = useCallback((dateStr: string, select: boolean) => {
+    setRows(prev => {
+      const next = { ...prev }
+      const dayEvts = days.find(d => d.date === dateStr)?.events ?? []
+      for (const evt of dayEvts) {
+        const key = rowKey(dateStr, evt.id)
+        if (next[key] && next[key].status !== 'scheduled') {
+          next[key] = { ...next[key], selected: select }
+        }
+      }
+      return next
+    })
+  }, [days])
+
+  /** Schedule only the checked rows, in day order. */
+  const scheduleSelected = useCallback(async () => {
+    if (batchRunning) return
+    const queued = days.flatMap(d =>
+      d.events
+        .map(evt => ({ d, evt }))
+        .filter(({ evt }) => {
+          const r = rows[rowKey(evt.date, evt.id)]
+          return r?.selected && r.status !== 'scheduled'
+        })
+    )
+    if (queued.length === 0) return
+    setBatchRunning(true)
+    setBatchProgress({ done: 0, total: queued.length })
+    let done = 0
+    for (const { evt } of queued) {
+      await scheduleRow(evt)
+      done += 1
+      setBatchProgress({ done, total: queued.length })
+    }
+    setBatchRunning(false)
+    // Deselect all rows once batch finishes
+    setRows(prev => {
+      const next = { ...prev }
+      for (const key of Object.keys(next)) {
+        next[key] = { ...next[key], selected: false }
+      }
+      return next
+    })
+    setTimeout(() => setBatchProgress(null), 4000)
+  }, [batchRunning, days, rows, scheduleRow])
+
   /**
    * Real cancel — hits DELETE /api/admin/ig/schedule?id=… so the post is
    * actually removed from the queue, not just hidden in the UI.
@@ -533,6 +606,21 @@ export default function WeekSchedulerPage() {
   const updateRow = (key: string, patch: Partial<RowState>) =>
     setRows(prev => ({ ...prev, [key]: { ...prev[key], ...patch } }))
 
+  // ── Selection state ───────────────────────────────────────────────────
+  const selectionCount = useMemo(
+    () => Object.values(rows).filter(r => r.selected).length,
+    [rows]
+  )
+  const schedulableCount = useMemo(
+    () => Object.values(rows).filter(r => r.status !== 'scheduled').length,
+    [rows]
+  )
+  const globalSelectState: 'none' | 'some' | 'all' = useMemo(() => {
+    if (selectionCount === 0) return 'none'
+    if (selectionCount === schedulableCount && schedulableCount > 0) return 'all'
+    return 'some'
+  }, [selectionCount, schedulableCount])
+
   // ── Stats for header ──────────────────────────────────────────────────
   const stats = useMemo(() => {
     const all = Object.values(rows)
@@ -549,7 +637,7 @@ export default function WeekSchedulerPage() {
   const allPreviewed = days.every(d => d.events.every(evt => Boolean(rows[rowKey(evt.date, evt.id)]?.previewUrl)))
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-[#0a0a0a] text-white pb-24">
       <div className="max-w-4xl mx-auto px-4 py-8">
 
         <IGSubNav active="week" />
@@ -591,23 +679,34 @@ export default function WeekSchedulerPage() {
             Next <ChevronRight size={14} />
           </button>
 
-          <div className="flex items-center gap-1 ml-auto">
-            <span className="text-[10px] uppercase tracking-wider text-white/40 font-semibold mr-1">Per day</span>
-            {([1, 2, 3] as const).map(n => (
+          <div className="flex items-center gap-3 ml-auto">
+            {days.length > 0 && (
               <button
-                key={n}
-                onClick={() => setPerDay(n)}
-                className={`min-h-[40px] min-w-[40px] px-3 rounded-lg text-sm font-bold transition-colors ${
-                  perDay === n
-                    ? 'bg-[#9a442d] text-white'
-                    : 'bg-white/[0.05] text-white/60 hover:bg-white/[0.1] hover:text-white'
-                }`}
-                aria-pressed={perDay === n}
-                title={`${n} event${n === 1 ? '' : 's'} per day`}
+                onClick={globalSelectState === 'none' ? selectAll : deselectAll}
+                disabled={batchRunning}
+                className="text-[10px] font-semibold text-white/55 hover:text-white transition-colors shrink-0 disabled:opacity-40"
               >
-                {n}
+                {globalSelectState === 'none' ? 'Select all' : `Deselect all${selectionCount > 0 ? ` (${selectionCount})` : ''}`}
               </button>
-            ))}
+            )}
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] uppercase tracking-wider text-white/40 font-semibold mr-1">Per day</span>
+              {([1, 2, 3] as const).map(n => (
+                <button
+                  key={n}
+                  onClick={() => setPerDay(n)}
+                  className={`min-h-[40px] min-w-[40px] px-3 rounded-lg text-sm font-bold transition-colors ${
+                    perDay === n
+                      ? 'bg-[#9a442d] text-white'
+                      : 'bg-white/[0.05] text-white/60 hover:bg-white/[0.1] hover:text-white'
+                  }`}
+                  aria-pressed={perDay === n}
+                  title={`${n} event${n === 1 ? '' : 's'} per day`}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -701,6 +800,20 @@ export default function WeekSchedulerPage() {
           {days.map(day => (
             <div key={day.date}>
               <div className="flex items-center gap-2 mb-2 px-1">
+                {day.events.length > 0 && (() => {
+                  const daySelectedCount = day.events.filter(e => rows[rowKey(day.date, e.id)]?.selected).length
+                  const daySelState = daySelectedCount === 0 ? 'none' : daySelectedCount === day.events.length ? 'all' : 'some'
+                  return (
+                    <IndeterminateCheckbox
+                      checked={daySelState === 'all'}
+                      indeterminate={daySelState === 'some'}
+                      onChange={checked => selectDay(day.date, checked)}
+                      disabled={batchRunning}
+                      aria-label={`Select all events on ${fmtDayHeader(day.date)}`}
+                      className="w-3.5 h-3.5 accent-[#9a442d] cursor-pointer disabled:opacity-40 shrink-0"
+                    />
+                  )
+                })()}
                 <Calendar size={11} className="text-white/55" />
                 <p className="text-[11px] font-bold uppercase tracking-widest text-white/50">
                   {fmtDayHeader(day.date)}
@@ -722,6 +835,7 @@ export default function WeekSchedulerPage() {
                     onSchedule={() => scheduleRow(evt)}
                     onPreview={() => renderPreview(evt)}
                     onCancel={() => cancelRow(key)}
+                    onSelect={v => updateRow(key, { selected: v })}
                     disabled={batchRunning}
                   />
                 )
@@ -758,6 +872,15 @@ export default function WeekSchedulerPage() {
         </div>
 
       </div>
+
+      {/* Bulk-scheduling footer — slides up when rows are selected */}
+      <BatchSelectionFooter
+        count={selectionCount}
+        batchRunning={batchRunning}
+        batchProgress={batchProgress}
+        onSchedule={scheduleSelected}
+        onDeselectAll={deselectAll}
+      />
     </div>
   )
 }
@@ -765,7 +888,7 @@ export default function WeekSchedulerPage() {
 // ─── DayRow ──────────────────────────────────────────────────────────────
 
 function DayRow({
-  evt, row, onUpdate, onSchedule, onPreview, onCancel, disabled,
+  evt, row, onUpdate, onSchedule, onPreview, onCancel, onSelect, disabled,
 }: {
   evt: WeekEvent
   row: RowState
@@ -773,6 +896,7 @@ function DayRow({
   onSchedule:  () => void
   onPreview:   () => void
   onCancel:    () => void
+  onSelect:    (checked: boolean) => void
   disabled:    boolean
 }) {
   const [editingCaption, setEditingCaption] = useState(false)
@@ -798,12 +922,25 @@ function DayRow({
           : 'Schedule'
 
   return (
-    <div className={`bg-[#111] border rounded-xl p-3 mb-2 ${
+    <div className={`bg-[#111] border rounded-xl p-3 mb-2 transition-colors ${
       isScheduled ? 'border-green-500/30 bg-green-500/[0.04]'
         : isFailed ? 'border-red-500/40'
+        : row.selected ? 'border-[#9a442d]/40 bg-[#9a442d]/[0.05]'
         : 'border-white/[0.07]'
     }`}>
       <div className="flex gap-3 items-start">
+        {/* Row checkbox */}
+        {!isScheduled && (
+          <input
+            type="checkbox"
+            checked={row.selected}
+            onChange={e => onSelect(e.target.checked)}
+            disabled={disabled}
+            aria-label={`Select ${evt.title}`}
+            className="mt-1 w-4 h-4 accent-[#9a442d] cursor-pointer disabled:opacity-40 shrink-0"
+          />
+        )}
+
         {/* Thumbnail — preview if rendered, else source photo, else emoji */}
         <button
           onClick={onPreview}
@@ -963,6 +1100,121 @@ function DayRow({
             {ctaLabel}
           </button>
         )}
+      </div>
+    </div>
+  )
+}
+
+// ─── IndeterminateCheckbox ───────────────────────────────────────────────
+// Standard checkbox but supports the indeterminate state (some-but-not-all)
+// which React doesn't expose as a prop — requires a ref.
+
+function IndeterminateCheckbox({
+  checked,
+  indeterminate,
+  onChange,
+  disabled,
+  className,
+  'aria-label': ariaLabel,
+}: {
+  checked: boolean
+  indeterminate: boolean
+  onChange: (checked: boolean) => void
+  disabled?: boolean
+  className?: string
+  'aria-label'?: string
+}) {
+  const ref = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    if (ref.current) ref.current.indeterminate = indeterminate
+  }, [indeterminate])
+  return (
+    <input
+      ref={ref}
+      type="checkbox"
+      checked={checked}
+      onChange={e => onChange(e.target.checked)}
+      disabled={disabled}
+      className={className}
+      aria-label={ariaLabel}
+    />
+  )
+}
+
+// ─── BatchSelectionFooter ────────────────────────────────────────────────
+// Sticky bottom bar that slides up when rows are selected. Shows count +
+// a "Schedule N posts" CTA. During a run it morphs into a progress bar.
+
+function BatchSelectionFooter({
+  count,
+  batchRunning,
+  batchProgress,
+  onSchedule,
+  onDeselectAll,
+}: {
+  count: number
+  batchRunning: boolean
+  batchProgress: { done: number; total: number } | null
+  onSchedule: () => void
+  onDeselectAll: () => void
+}) {
+  const visible = count > 0 || batchRunning
+  const progressPct = batchProgress ? (batchProgress.done / batchProgress.total) * 100 : 0
+
+  return (
+    <div
+      aria-live="polite"
+      className={`fixed bottom-0 left-0 right-0 z-50 transition-transform duration-[220ms] ${
+        visible ? 'translate-y-0' : 'translate-y-full'
+      }`}
+      style={{ transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
+    >
+      <div className="max-w-4xl mx-auto px-4 pb-4">
+        <div className="bg-[#1c1513] border border-[#9a442d]/45 rounded-2xl px-5 py-3.5 flex items-center gap-4 shadow-[0_-4px_32px_rgba(0,0,0,0.6)]">
+          {batchRunning && batchProgress ? (
+            /* Running state — progress bar */
+            <>
+              <Loader2 size={16} className="animate-spin text-[#9a442d] shrink-0" />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-sm font-semibold text-white/90">Scheduling posts…</span>
+                  <span className="text-sm text-white/50 tabular-nums">
+                    {batchProgress.done} / {batchProgress.total}
+                  </span>
+                </div>
+                <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-[#9a442d] rounded-full transition-all duration-300 ease-out"
+                    style={{ width: `${progressPct}%` }}
+                  />
+                </div>
+              </div>
+            </>
+          ) : (
+            /* Idle state — count + actions */
+            <>
+              <p className="text-sm shrink-0 text-white/60">
+                <span className="text-[#e8a898] font-bold">{count}</span>
+                {' '}event{count === 1 ? '' : 's'} selected
+              </p>
+              <button
+                onClick={onDeselectAll}
+                className="text-[11px] text-white/40 hover:text-white transition-colors shrink-0"
+              >
+                Clear
+              </button>
+              <div className="flex-1" />
+              <button
+                onClick={onSchedule}
+                disabled={count === 0}
+                className="flex items-center gap-2 min-h-[40px] px-5 bg-[#9a442d] hover:bg-[#b5502f] disabled:opacity-40 disabled:cursor-not-allowed rounded-xl text-sm font-bold transition-colors"
+              >
+                <Send size={14} />
+                Schedule {count} post{count === 1 ? '' : 's'} →
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </div>
   )
