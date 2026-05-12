@@ -102,6 +102,42 @@ const HOMEPAGE_FAQS = [
     q: 'What are the best things to do in Albuquerque?',
     a: 'Albuquerque offers world-class events year-round — from the International Balloon Fiesta and the New Mexico State Fair to live music at KiMo Theatre and outdoor adventures in the Sandia Mountains. ABQ Unplugged tracks over 1,000 upcoming events so there is always something worth doing.',
   },
+  {
+    q: 'What is there to do in Nob Hill Albuquerque?',
+    a: 'Nob Hill is Albuquerque\'s most walkable entertainment district along Central Avenue. It hosts live music at bars and clubs, gallery walks, indie restaurants, and pop-up events most weekends. ABQ Unplugged lists every upcoming event in Nob Hill so you can plan your night.',
+  },
+  {
+    q: 'What events are happening in Downtown Albuquerque?',
+    a: 'Downtown Albuquerque is the cultural heart of the city, home to KiMo Theatre, Kiva Auditorium, Civic Plaza concerts, and dozens of bars and restaurants. ABQ Unplugged tracks all Downtown events including concerts, comedy, arts performances, and community gatherings.',
+  },
+  {
+    q: 'What are fun things to do in Albuquerque with kids?',
+    a: 'Albuquerque has great family-friendly options including Explora Science Center, the Rio Grande Nature Center, the New Mexico Museum of Natural History, and the ABQ BioPark. ABQ Unplugged lists kid-friendly events and family activities updated daily across the city.',
+  },
+  {
+    q: 'Where can I find live music in Albuquerque?',
+    a: "Albuquerque's live music scene spans Sister Bar, Launchpad, Sunshine Theater, Historic El Rey Theater, Popejoy Hall, and KiMo Theatre. ABQ Unplugged aggregates shows from all local venues and national ticket platforms so you never miss a show.",
+  },
+  {
+    q: 'What concerts are coming to Albuquerque?',
+    a: 'ABQ Unplugged pulls concert listings from Ticketmaster, SeatGeek, Eventbrite, and local venues — updated daily. You can browse upcoming shows by date, genre, or venue on the Music category page.',
+  },
+  {
+    q: 'Are there things to do in Albuquerque at night?',
+    a: "Albuquerque's nightlife includes live music at Nob Hill bars and Central Avenue clubs, comedy at Laffs Comedy Caffe, late-night food tours, and seasonal outdoor events. ABQ Unplugged shows tonight's events filtered by time so you can plan your evening.",
+  },
+  {
+    q: 'What is the International Balloon Fiesta?',
+    a: 'The Albuquerque International Balloon Fiesta is the world\'s largest hot-air balloon festival, held every October at Balloon Fiesta Park. It draws over 800 balloons and 900,000 attendees. ABQ Unplugged lists Balloon Fiesta events and related activities during the festival week.',
+  },
+  {
+    q: 'What are the best outdoor activities in Albuquerque?',
+    a: 'Albuquerque offers exceptional outdoor activities year-round: hiking in the Sandia Mountains, biking along the Rio Grande Bosque trail, the Sandia Peak Tramway, and numerous road races and cycling events. ABQ Unplugged tracks all outdoor events and activities in the greater Albuquerque area.',
+  },
+  {
+    q: 'Is there a comedy club in Albuquerque?',
+    a: "Yes — Laffs Comedy Caffe on Menaul is Albuquerque's dedicated stand-up comedy club, hosting touring national acts and local open-mic nights weekly. The Box Performance Space also hosts improv and sketch comedy. ABQ Unplugged lists all upcoming comedy shows in the city.",
+  },
 ]
 
 const homepageFaqLd = {
@@ -114,22 +150,46 @@ const homepageFaqLd = {
   })),
 }
 
-// Organization schema — helps Google resolve ABQ Unplugged as a named entity
-// and associate the Instagram profile as a verified same-as reference.
+// Organization + LocalBusiness schema — co-typing signals to Google that this
+// is both an organization and a local business serving Albuquerque.
+// The address and areaServed help with local pack rankings.
 const organizationLd = {
   '@context': 'https://schema.org',
-  '@type': 'Organization',
+  '@type': ['Organization', 'LocalBusiness'],
   name: 'ABQ Unplugged',
   url: 'https://abqunplugged.com',
-  logo: 'https://abqunplugged.com/icon-512.png',
-  description: 'Albuquerque\'s event aggregator — concerts, comedy, arts, sports, food and drink festivals in one place.',
+  logo: {
+    '@type': 'ImageObject',
+    url: 'https://abqunplugged.com/icon-512.png',
+    width: 512,
+    height: 512,
+  },
+  image: 'https://abqunplugged.com/og-image.jpg',
+  description: 'Albuquerque\'s event aggregator — concerts, comedy, arts, sports, food and drink festivals in one place. Updated daily from Ticketmaster, Eventbrite, SeatGeek, and local sources.',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Albuquerque',
+    addressRegion: 'NM',
+    addressCountry: 'US',
+    postalCode: '87102',
+  },
   areaServed: {
     '@type': 'City',
     name: 'Albuquerque',
     sameAs: 'https://www.wikidata.org/wiki/Q34804',
   },
+  knowsAbout: [
+    'Events in Albuquerque',
+    'Live music in Albuquerque',
+    'Comedy shows in Albuquerque',
+    'Sports events in Albuquerque',
+    'Arts and theater in Albuquerque',
+    'Things to do in Albuquerque',
+  ],
+  foundingDate: '2024',
   sameAs: [
     'https://www.instagram.com/abqunplugged/',
+    'https://www.facebook.com/abqunplugged',
   ],
 }
 

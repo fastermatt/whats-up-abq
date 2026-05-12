@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowLeft, Music2, Users, MapPin, Trophy, Star, Zap } from 'lucide-react'
+import { ArrowLeft, Music2, Users, MapPin, Trophy, Star, Zap, Mail } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
 
 export const metadata: Metadata = {
@@ -183,6 +183,57 @@ export default function AboutPage() {
               Built to make it easier for Albuquerqueans to get off the couch and experience
               what makes this city great.
             </p>
+          </section>
+        </AnimateIn>
+
+        {/* Press & Media */}
+        <AnimateIn animation="fade-up" delay={100}>
+          <section className="mb-10" id="press">
+            <h2
+              className="text-2xl font-bold mb-3 text-[#1a1614]"
+              style={{ fontFamily: 'var(--font-epilogue)' }}
+            >
+              Press &amp; Media
+            </h2>
+            <p className="text-sm text-[#6b5d57] mb-5">
+              ABQ Unplugged is Albuquerque&apos;s independent, free event discovery platform — built and run locally.
+              We&apos;re happy to talk to local press and media about Albuquerque&apos;s events scene.
+            </p>
+
+            {/* Key stats */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+              {[
+                { stat: '1,000+', label: 'Events tracked' },
+                { stat: '10+',    label: 'Event sources' },
+                { stat: 'Daily',  label: 'Data refresh' },
+                { stat: 'Free',   label: 'Always free' },
+              ].map(({ stat, label }) => (
+                <div
+                  key={label}
+                  className="bg-white rounded-xl p-3 border border-[#f0e4cc] text-center"
+                >
+                  <p className="text-xl font-black text-[#9a442d]" style={{ fontFamily: 'var(--font-epilogue)' }}>{stat}</p>
+                  <p className="text-[11px] text-[#6b5d57] mt-0.5">{label}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Contact */}
+            <div className="flex items-start gap-3 bg-[#fdf9f4] border border-[#e8d9bf] rounded-xl px-4 py-4">
+              <Mail className="w-4 h-4 text-[#9a442d] mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-[#1a1614] mb-0.5">Media inquiries</p>
+                <a
+                  href="mailto:hello@abqunplugged.com"
+                  className="text-sm text-[#9a442d] hover:underline"
+                >
+                  hello@abqunplugged.com
+                </a>
+                <p className="text-xs text-[#6b5d57] mt-1">
+                  For interview requests, data questions, or coverage of the Albuquerque events scene.
+                </p>
+              </div>
+            </div>
           </section>
         </AnimateIn>
 
