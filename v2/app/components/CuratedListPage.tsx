@@ -43,6 +43,10 @@ export interface CuratedListConfig {
   /** External trust links — "Around Albuquerque" section at page bottom.
    *  Linking out to authoritative local sources builds topical trust with Google. */
   relatedLinks?: { name: string; url: string; description: string }[]
+  /** If set, renders a "Submit an event" CTA strip linking to this URL */
+  submitUrl?: string
+  /** Label for the submit CTA (default: "Submit an event we're missing") */
+  submitLabel?: string
 }
 
 export function curatedJsonLd(events: NormalizedEvent[], config: CuratedListConfig) {
@@ -184,6 +188,31 @@ export function CuratedListPage({
                 </div>
               </section>
             ))}
+          </div>
+        )}
+
+        {/* ── Submit CTA ── */}
+        {config.submitUrl && (
+          <div className="mt-10 pt-8 border-t border-[#f0e4cc]">
+            <div className="bg-[#fdf5ec] border border-[#f0e4cc] rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 max-w-3xl">
+              <div className="flex-1">
+                <p
+                  className="text-sm font-bold text-[#1a1614]"
+                  style={{ fontFamily: 'var(--font-epilogue)' }}
+                >
+                  Know of an event we&apos;re missing?
+                </p>
+                <p className="text-xs text-[#6b5d57] mt-0.5">
+                  {config.submitLabel ?? "We update daily, but we don't catch everything. Submit it and we'll add it."}
+                </p>
+              </div>
+              <Link
+                href={config.submitUrl}
+                className="shrink-0 px-5 py-2.5 rounded-full bg-[#9a442d] text-white text-sm font-semibold hover:bg-[#7d3725] transition-colors whitespace-nowrap"
+              >
+                Submit an event →
+              </Link>
+            </div>
           </div>
         )}
 

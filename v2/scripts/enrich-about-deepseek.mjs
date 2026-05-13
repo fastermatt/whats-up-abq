@@ -60,7 +60,7 @@ const FORCE     = argv.includes('--force')
 const LIMIT     = parseInt(argv.find(a => a.startsWith('--limit='))?.split('=')[1] ?? '500')
 const SOURCE    = argv.find(a => a.startsWith('--source='))?.split('=')[1] ?? null
 const SINGLE_ID = argv.find(a => a.startsWith('--id='))?.split('=')[1] ?? null
-const CONCURRENCY = 5   // parallel DeepSeek calls
+const CONCURRENCY = 3   // parallel DeepSeek calls (lower = fewer empty-response rate-limit hits)
 
 // ── Venue knowledge base ──────────────────────────────────────────────────────
 // Pre-seeded neighborhood + parking + dining data for known ABQ venues.
@@ -366,9 +366,11 @@ async function fetchEvents() {
 // ── Prompt ────────────────────────────────────────────────────────────────────
 function buildPrompt(event) {
   const raw     = event.raw ?? {}
-  const name    = raw.name ?? raw.title ?? raw.summary ?? 'Unknown Event'
-  const info    = (raw.description ?? raw.summary ?? (typeof raw.description === 'object' ? raw.description?.text : '') ?? '')
-    .replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').slice(0, 500)
+  const name    = decodeHtmlEntities(raw.name ?? raw.title ?? raw.summary ?? 'Unknown Event')
+  const info    = decodeHtmlEntities(
+    (raw.description ?? raw.summary ?? (typeof raw.description === 'object' ? raw.description?.text : '') ?? '')
+      .replace(/<[^>]*>/g, '').slice(0, 500)
+  )
 
   const tmVenue = raw._embedded?.venues?.[0]
   const ebVenue = raw.venue
@@ -440,7 +442,7 @@ async function callDeepSeek(prompt, retries = 2) {
           model: 'deepseek-v4-flash',
           messages: [{ role: 'user', content: prompt }],
           temperature: 0.2,
-          max_tokens: 800,
+          max_tokens: 1200,
         }),
       })
       if (!res.ok) {
@@ -460,15 +462,36 @@ async function callDeepSeek(prompt, retries = 2) {
   }
 }
 
+function decodeHtmlEntities(str) {
+  if (!str) return str
+  return str
+    .replace(/&#8220;/g, '"').replace(/&#8221;/g, '"')
+    .replace(/&#8216;/g, "'").replace(/&#8217;/g, "'")
+    .replace(/&#8211;/g, '–').replace(/&#8212;/g, '—')
+    .replace(/&#038;/g, '&').replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&nbsp;/g, ' ').replace(/&#(\d+);/g, (_, n) => String.fromCharCode(n))
+}
+
 function parseResult(text) {
-  const jsonMatch = text.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) throw new Error('No JSON in response')
+  // Strip markdown code fences if present
+  const stripped = text.replace(/^```json?\n?/i, '').replace(/\n?```$/i, '').trim()
+  const jsonMatch = stripped.match(/\{[\s\S]*\}/)
+  if (!jsonMatch) {
+    // Log a snippet so we can diagnose without drowning in output
+    const snippet = text.slice(0, 120).replace(/\n/g, '↵')
+    throw new Error(`No JSON in response: "${snippet}"`)
+  }
   return JSON.parse(jsonMatch[0])
 }
 
+// Sentinel written after all retries are exhausted — marks event as "attempted,
+// nothing to enrich" so incremental runs skip it and don't loop forever.
+const EMPTY_ENRICHMENT = { about: null, highlights: [], venue_tips: null, nearby_dining: [], local_rec: null }
+
 // ── Worker ────────────────────────────────────────────────────────────────────
 async function enrichEvent(event, idx, total) {
-  const label = `[${idx + 1}/${total}] ${(event.raw?.name ?? event.raw?.title ?? event.id).slice(0, 60)}`
+  const label = `[${idx + 1}/${total}] ${decodeHtmlEntities(event.raw?.name ?? event.raw?.title ?? event.id).slice(0, 60)}`
   try {
     const prompt  = buildPrompt(event)
     if (DRY_RUN) {
@@ -476,11 +499,37 @@ async function enrichEvent(event, idx, total) {
       console.log(prompt.slice(0, 800))
       return
     }
-    const raw     = await callDeepSeek(prompt)
-    const parsed  = parseResult(raw)
+
+    // Retry loop: retries=2 handles HTTP errors inside callDeepSeek; here we
+    // add a second layer that retries on parse failures (intermittent API
+    // responses that lack a JSON object or get truncated under concurrent load).
+    let parsed = null
+    const MAX_PARSE_RETRIES = 3
+    for (let attempt = 0; attempt <= MAX_PARSE_RETRIES; attempt++) {
+      try {
+        const rawText = await callDeepSeek(prompt)
+        if (!rawText) throw new Error('Empty response from API')
+        parsed = parseResult(rawText)
+        break  // success
+      } catch (parseErr) {
+        if (attempt < MAX_PARSE_RETRIES) {
+          // Exponential backoff with jitter to avoid thundering herd
+          const delay = 1500 * Math.pow(2, attempt) + Math.random() * 500
+          await new Promise(r => setTimeout(r, delay))
+        } else {
+          // All retries exhausted — write sentinel so this event is skipped on
+          // future incremental runs rather than looping forever.
+          console.log(`  ✗  ${label} — ${parseErr.message} (writing sentinel)`)
+          const existing = event.ai_enrichment ?? {}
+          await supabase.schema('public').from('events')
+            .update({ ai_enrichment: { ...existing, ...EMPTY_ENRICHMENT } })
+            .eq('id', event.id)
+          return
+        }
+      }
+    }
 
     // Merge with existing ai_enrichment (mood/mood_confidence may already be set).
-    // Use jsonb_set approach: spread existing data, then overlay our new fields.
     const existing = event.ai_enrichment ?? {}
     const merged = { ...existing, ...parsed }
 
