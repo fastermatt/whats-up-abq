@@ -23,6 +23,8 @@
     "https://s1.ticketm.net/*",
     "https://media.ticketmaster.com/*",
     "https://seatgeekimages.com/*",
+    # Freedom Celebration (lovenm.org partner event) — hosted on its own domain
+    "https://freedomabq.com/*",
   ]
 
 [build.environment]
