@@ -3,11 +3,10 @@
  * that don't have their own opengraph-image.tsx.
  *
  * Outputs PNG via ImageResponse (Satori). PNG has universal support across
- * iMessage, Facebook, Twitter/X, Slack, Discord, and WhatsApp — unlike the
- * WebP hero images which break on Apple's link-preview crawler.
+ * iMessage, Facebook, Twitter/X, Slack, Discord, and WhatsApp.
  *
- * Loads Epilogue 900 from Google Fonts at request time (edge-cached after
- * the first hit). Falls back to system sans-serif if the fetch fails.
+ * Design reflects the current site: cream/terra/dark brand palette, full event
+ * breadth (music, comedy, arts, food, family, free, neighborhoods, and more).
  */
 
 import { ImageResponse } from 'next/og'
@@ -18,19 +17,21 @@ export const size        = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
 // ── Brand tokens ─────────────────────────────────────────────────────────────
-const TERRA      = '#9a442d'
-const CREAM      = '#fbf7f1'
-const DARK       = '#1a1614'
-const TERRA_PALE = 'rgba(228,170,152,0.88)' // peach for category pills on dark
+const TERRA   = '#9a442d'
+const CREAM   = '#fbf7f1'
+const DARK    = '#1a1614'
+const SAGE    = '#4f6249'
+const MUTED   = 'rgba(251,247,241,0.55)'
+const PILL_BG = 'rgba(154,68,45,0.14)'
+const PILL_BD = 'rgba(154,68,45,0.28)'
+const PILL_TX = 'rgba(228,170,152,0.9)'
 
-// Hero image used as background texture. Served from our own Netlify CDN so
-// it's always accessible from the edge function at request time.
+// Hero image — right-side visual zone
 const BG_IMAGE = 'https://abqunplugged.com/hero/hero-4.png'
 
 // ── Font loader ───────────────────────────────────────────────────────────────
 async function loadEpilogueFont(): Promise<ArrayBuffer | null> {
   try {
-    // Ask for the woff2 variant — use a modern desktop UA
     const css = await fetch(
       'https://fonts.googleapis.com/css2?family=Epilogue:wght@900&display=swap',
       {
@@ -40,15 +41,35 @@ async function loadEpilogueFont(): Promise<ArrayBuffer | null> {
         },
       }
     ).then(r => r.text())
-
-    // Pull the woff2 URL out of the CSS response
     const match = css.match(/url\((https:\/\/fonts\.gstatic\.com[^)]+\.woff2)\)/)
     if (!match) return null
-
     return fetch(match[1]).then(r => r.arrayBuffer())
   } catch {
-    return null // fall back to system sans-serif silently
+    return null
   }
+}
+
+// ── Chip component ────────────────────────────────────────────────────────────
+function Chip({ label }: { label: string }) {
+  return (
+    <div
+      style={{
+        display:       'flex',
+        padding:       '5px 13px',
+        background:    PILL_BG,
+        borderRadius:  999,
+        border:        `1px solid ${PILL_BD}`,
+        color:         PILL_TX,
+        fontSize:      13,
+        fontWeight:    600,
+        letterSpacing: '0.03em',
+        fontFamily:    'sans-serif',
+        whiteSpace:    'nowrap',
+      }}
+    >
+      {label}
+    </div>
+  )
 }
 
 // ── OG image ─────────────────────────────────────────────────────────────────
@@ -58,16 +79,7 @@ export default async function OG() {
   const options = {
     ...size,
     ...(fontData
-      ? {
-          fonts: [
-            {
-              name:   'Epilogue',
-              data:   fontData,
-              weight: 900 as const,
-              style:  'normal' as const,
-            },
-          ],
-        }
+      ? { fonts: [{ name: 'Epilogue', data: fontData, weight: 900 as const, style: 'normal' as const }] }
       : {}),
   }
 
@@ -77,15 +89,15 @@ export default async function OG() {
     (
       <div
         style={{
-          width:    '100%',
-          height:   '100%',
-          display:  'flex',
-          position: 'relative',
+          width:      '100%',
+          height:     '100%',
+          display:    'flex',
           background: DARK,
-          overflow: 'hidden',
+          overflow:   'hidden',
+          position:   'relative',
         }}
       >
-        {/* ── Background: hero illustration at low opacity ── */}
+        {/* ── Right-side hero image ── */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={BG_IMAGE}
@@ -98,141 +110,171 @@ export default async function OG() {
             width:     '100%',
             height:    '100%',
             objectFit: 'cover',
-            opacity:   0.20,
+            opacity:   0.18,
           }}
         />
 
-        {/* ── Gradient: heavier left → text legible; lighter right → art shows ── */}
+        {/* ── Gradient: fully opaque left, fades right to reveal image texture ── */}
         <div
           style={{
             position:   'absolute',
             inset:      0,
             display:    'flex',
-            background: 'linear-gradient(110deg, rgba(26,22,20,0.97) 0%, rgba(26,22,20,0.88) 52%, rgba(26,22,20,0.55) 100%)',
+            background: `linear-gradient(105deg, ${DARK} 0%, ${DARK} 42%, rgba(26,22,20,0.82) 62%, rgba(26,22,20,0.45) 100%)`,
           }}
         />
 
-        {/* ── Content column ── */}
+        {/* ── Terra accent bar — left edge ── */}
         <div
           style={{
-            position:      'absolute',
-            inset:         0,
-            display:       'flex',
-            flexDirection: 'column',
-            justifyContent:'center',
-            padding:       '0 80px',
+            position:   'absolute',
+            left:       0,
+            top:        0,
+            bottom:     0,
+            width:      5,
+            background: TERRA,
+            display:    'flex',
+          }}
+        />
+
+        {/* ── Main content ── */}
+        <div
+          style={{
+            position:       'absolute',
+            inset:          0,
+            display:        'flex',
+            flexDirection:  'column',
+            justifyContent: 'center',
+            padding:        '0 72px 0 80px',
           }}
         >
-          {/* Eyebrow — location lock */}
+          {/* Eyebrow */}
           <div
             style={{
-              display:        'flex',
-              alignItems:     'center',
-              gap:            10,
-              marginBottom:   28,
+              display:     'flex',
+              alignItems:  'center',
+              gap:         10,
+              marginBottom: 22,
             }}
           >
             <div
               style={{
-                width:        8,
-                height:       8,
+                width:        7,
+                height:       7,
                 borderRadius: '50%',
                 background:   TERRA,
-                display:      'flex',
                 flexShrink:   0,
+                display:      'flex',
               }}
             />
             <span
               style={{
-                color:          TERRA,
-                fontSize:       15,
-                fontWeight:     700,
-                letterSpacing:  '0.28em',
-                textTransform:  'uppercase',
-                fontFamily:     'sans-serif',
+                color:         TERRA,
+                fontSize:      13,
+                fontWeight:    700,
+                letterSpacing: '0.3em',
+                textTransform: 'uppercase',
+                fontFamily:    'sans-serif',
               }}
             >
-              ALBUQUERQUE, NM
+              ALBUQUERQUE, NEW MEXICO
             </span>
           </div>
 
-          {/* Brand name — the whole card */}
+          {/* Brand name — "ABQ" cream, "Unplugged" terra */}
           <div
             style={{
               display:       'flex',
-              color:         CREAM,
-              fontSize:      88,
-              fontWeight:    900,
+              alignItems:    'baseline',
+              gap:           0,
               lineHeight:    1.0,
-              letterSpacing: '-2.5px',
-              marginBottom:  28,
+              marginBottom:  20,
               fontFamily:    heading,
+              fontWeight:    900,
+              letterSpacing: '-2px',
             }}
           >
-            ABQ Unplugged
+            <span style={{ color: CREAM, fontSize: 92 }}>ABQ</span>
+            <span style={{ color: TERRA, fontSize: 92, marginLeft: 16 }}>Unplugged</span>
           </div>
 
-          {/* Tagline — what the site does */}
+          {/* Tagline */}
           <div
             style={{
               display:       'flex',
-              color:         'rgba(251,247,241,0.62)',
-              fontSize:      24,
+              color:         MUTED,
+              fontSize:      22,
               fontWeight:    400,
-              lineHeight:    1.4,
-              marginBottom:  44,
+              lineHeight:    1.45,
+              marginBottom:  36,
               fontFamily:    'sans-serif',
-              maxWidth:      660,
+              maxWidth:      620,
             }}
           >
-            Concerts, comedy, arts, food, sports. What&apos;s happening in Burque tonight.
+            Live music, comedy, arts, food, family events & more — your daily guide to what&apos;s happening in Burque.
           </div>
 
-          {/* Category pills — show breadth */}
-          <div
-            style={{
-              display:    'flex',
-              gap:        8,
-              alignItems: 'center',
-            }}
-          >
-            {['Concerts', 'Comedy', 'Arts & Theater', 'Food & Drink', 'Sports', 'More'].map(cat => (
-              <div
-                key={cat}
-                style={{
-                  display:      'flex',
-                  padding:      '6px 14px',
-                  background:   'rgba(154,68,45,0.16)',
-                  borderRadius: 999,
-                  border:       '1px solid rgba(154,68,45,0.32)',
-                  color:        TERRA_PALE,
-                  fontSize:     13,
-                  fontWeight:   600,
-                  letterSpacing:'0.04em',
-                  fontFamily:   'sans-serif',
-                }}
-              >
-                {cat}
-              </div>
-            ))}
+          {/* Category chips — two rows showing full breadth */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 7, flexWrap: 'nowrap' }}>
+              {['Tonight', 'Free Events', 'Live Music', 'Comedy', 'Family'].map(c => (
+                <Chip key={c} label={c} />
+              ))}
+            </div>
+            <div style={{ display: 'flex', gap: 7, flexWrap: 'nowrap' }}>
+              {['Arts & Theater', 'Food & Drink', 'Festivals', 'Outdoor', 'Neighborhoods'].map(c => (
+                <Chip key={c} label={c} />
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* ── Bottom-right: site URL ── */}
+        {/* ── Bottom bar ── */}
         <div
           style={{
-            position:      'absolute',
-            bottom:        30,
-            right:         48,
-            display:       'flex',
-            color:         'rgba(251,247,241,0.30)',
-            fontSize:      17,
-            fontWeight:    500,
-            fontFamily:    'sans-serif',
-            letterSpacing: '0.02em',
+            position:       'absolute',
+            bottom:         0,
+            left:           5,
+            right:          0,
+            height:         44,
+            display:        'flex',
+            alignItems:     'center',
+            justifyContent: 'space-between',
+            padding:        '0 48px 0 76px',
+            background:     'rgba(26,22,20,0.6)',
+            borderTop:      '1px solid rgba(251,247,241,0.07)',
           }}
         >
-          abqunplugged.com
+          <span
+            style={{
+              color:      `rgba(251,247,241,0.28)`,
+              fontSize:   14,
+              fontFamily: 'sans-serif',
+            }}
+          >
+            abqunplugged.com
+          </span>
+          <span
+            style={{
+              display:    'flex',
+              alignItems: 'center',
+              gap:        6,
+              color:      `rgba(79,98,73,0.9)`,
+              fontSize:   13,
+              fontFamily: 'sans-serif',
+            }}
+          >
+            <div
+              style={{
+                width:        6,
+                height:       6,
+                borderRadius: '50%',
+                background:   SAGE,
+                display:      'flex',
+              }}
+            />
+            Updated daily
+          </span>
         </div>
       </div>
     ),
