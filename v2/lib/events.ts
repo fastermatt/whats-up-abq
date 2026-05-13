@@ -306,7 +306,7 @@ export async function fetchEvents({
       // OR across all terms × both columns — returns anything matching any term,
       // JS layer refines to strict AND. Acceptable: some over-fetch, zero under-fetch.
       const orParts = searchTerms.flatMap(t =>
-        [`venue_name.ilike.%${t}%`, `raw->>name.ilike.%${t}%`]
+        [`venue_name.ilike.%${t}%`, `raw->>name.ilike.%${t}%`, `raw->>title.ilike.%${t}%`]
       ).join(',')
       q = q.or(orParts)
     }

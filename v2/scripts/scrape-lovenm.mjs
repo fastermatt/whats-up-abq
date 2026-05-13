@@ -288,6 +288,7 @@ async function main() {
       id: recordId,
       url,
       title,
+      name: title,   // mirror of title — search pre-filter queries raw->>name
       description,
       image: meta.image ?? null,
       images: meta.image ? [{ url: meta.image }] : [],
