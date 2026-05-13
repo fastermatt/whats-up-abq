@@ -150,6 +150,8 @@ Return only the JSON object:`
 }
 
 // ── Get event URLs from homepage ──────────────────────────────────────────────
+// Captures both internal lovenm.org/event/ links AND external event links
+// (e.g. freedomabq.com) that appear in the events section of the homepage.
 async function fetchEventSlugs() {
   const r = await httpGet(BASE_URL, 20000)
   if (!r.ok || !r.text) {
@@ -158,15 +160,37 @@ async function fetchEventSlugs() {
   }
 
   const seen = new Set()
-  const slugs = []
-  const matches = [...r.text.matchAll(/href=["'](https:\/\/lovenm\.org\/event\/([^/"]+)\/?)["']/g)]
-  for (const [, url, slug] of matches) {
+  const events = []
+
+  // 1. Internal /event/ slugs
+  const internalMatches = [...r.text.matchAll(/href=["'](https:\/\/lovenm\.org\/event\/([^/"]+)\/?)["']/g)]
+  for (const [, , slug] of internalMatches) {
     if (!seen.has(slug)) {
       seen.add(slug)
-      slugs.push({ slug, url: `${BASE_URL}/event/${slug}/` })
+      events.push({ slug, url: `${BASE_URL}/event/${slug}/`, external: false })
     }
   }
-  return slugs
+
+  // 2. External event URLs linked from the #events section.
+  // Isolate the events section to avoid grabbing nav/footer links.
+  const eventsSectionMatch = r.text.match(/id="events"([\s\S]*?)id="serving-opportunities"/)
+  const eventsSection = eventsSectionMatch ? eventsSectionMatch[1] : ''
+
+  // Known external event domains promoted by Love NM.
+  // slug: stable ID suffix used for the DB record (year-scoped)
+  // titleOverride: use this name instead of whatever the og:title says
+  const EXTERNAL_EVENTS = [
+    { domain: 'freedomabq.com', slug: 'freedom-celebration', titleOverride: 'Freedom Celebration' },
+  ]
+  for (const { domain, slug, titleOverride } of EXTERNAL_EVENTS) {
+    const extMatches = [...eventsSection.matchAll(new RegExp(`href=["'](https?://${domain.replace('.', '\\.')}[^"']*)["']`, 'g'))]
+    if (extMatches.length > 0 && !seen.has(slug)) {
+      seen.add(slug)
+      events.push({ slug, url: extMatches[0][1], external: true, titleOverride })
+    }
+  }
+
+  return events
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -193,8 +217,13 @@ async function main() {
   let inserted = 0, updated = 0, failed = 0, skipped = 0
 
   for (let i = 0; i < events.length; i++) {
-    const { slug, url } = events[i]
-    const recordId = `lovenm-${slug}`
+    const { slug, url, external } = events[i]
+    // External events get a year-scoped ID so they re-upsert annually
+    const recordId = external
+      ? `lovenm-${slug}-${new Date().getFullYear()}`
+      : `lovenm-${slug}`
+    // Note: lovenm-freedom-celebration-2026 was manually inserted; the scraper
+    // will upsert over it with the same ID, keeping data fresh.
 
     process.stdout.write(`  [${i+1}/${events.length}] ${recordId} — fetching… `)
 
@@ -208,8 +237,9 @@ async function main() {
     const meta = extractOgMeta(pageRes.text)
     const bodyText = extractBodyText(pageRes.text)
 
-    // Clean title: strip " - Love NM" suffix
-    const title = (meta.title ?? slug)
+    // Clean title: use override for external events, strip suffixes for internal
+    const rawTitle = meta.title ?? slug
+    const title = events[i].titleOverride ?? rawTitle
       .replace(/\s*[-–]\s*Love\s*NM\s*$/i, '')
       .trim()
 
