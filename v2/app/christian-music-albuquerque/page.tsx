@@ -41,7 +41,7 @@ const FAQS = [
   },
   {
     q: 'Are there free Christian events in Albuquerque?',
-    a: 'Yes. Many local churches host free worship concerts, gospel nights, and community events open to the public. Love NM (lovenm.org) organizes several free community events throughout the year in Albuquerque. Check this page for no-cost options, or visit sagebrush.church and calvarynm.church for their schedules.',
+    a: 'Yes. Many local churches host free worship concerts, gospel nights, and community events open to the public — and community orgs like Love NM run free events throughout the year in Albuquerque. Check this page for no-cost options, or browse the free events calendar.',
   },
   {
     q: 'What is the difference between CCM, Christian rock, and worship music?',
@@ -57,8 +57,7 @@ const RELATED_LINKS = [
   { name: 'All Live Music in Albuquerque', url: '/live-music', description: 'The full upcoming music calendar across all genres.' },
   { name: 'Concerts in Albuquerque', url: '/concerts', description: 'Larger ticketed concerts and headlining acts.' },
   { name: 'Family-Friendly Events', url: '/family-friendly', description: 'All-ages events great for families in Albuquerque.' },
-  { name: 'Love NM', url: 'https://lovenm.org', description: 'Albuquerque-based Christian community org. Runs free events throughout the year.' },
-  { name: 'Sagebrush Church', url: 'https://sagebrush.church', description: "One of Albuquerque's largest churches — regularly hosts worship events and community nights." },
+  { name: 'Free Events in Albuquerque', url: '/free', description: 'No-cost events happening around the city.' },
   { name: 'K-LOVE Concert Finder', url: 'https://www.klove.com/music/concerts', description: 'National Christian radio station with a full tour calendar.' },
 ]
 
