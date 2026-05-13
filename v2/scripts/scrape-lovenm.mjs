@@ -95,31 +95,42 @@ function extractBodyText(html) {
     .slice(0, 4000)
 }
 
-// ── DeepSeek — extract date + time ───────────────────────────────────────────
+// ── DeepSeek — extract date, time, AND full enrichment in one call ───────────
 async function deepseekExtract(slug, title, bodyText, ogDesc) {
-  const prompt = `Extract event date and time from this page about a Love NM event in Albuquerque, NM.
+  const prompt = `You are extracting structured event data from a Love NM community event page in Albuquerque, NM.
+
 Event slug: ${slug}
 Event title: ${title}
 og:description: ${ogDesc ?? '(none)'}
-Body text (first 2000 chars):
-${bodyText.slice(0, 2000)}
+Body text (up to 3000 chars):
+${bodyText.slice(0, 3000)}
 
-Today's date is ${new Date().toISOString().slice(0, 10)} (reference point for year inference — all events are in the near future).
+Today's date is ${new Date().toISOString().slice(0, 10)}. All events on this page are UPCOMING (future). If a date like "June 25" would fall in the past for 2025, use 2026. Your extracted date MUST be >= ${new Date().toISOString().slice(0, 10)}.
 
 Return ONLY a JSON object (no markdown, no explanation):
 {
   "date": "YYYY-MM-DD",
-  "time": "human-readable time string or null (e.g. '6–7:30 pm', 'Evening', '4:00 PM – 9:00 PM', null)",
+  "time": "human-readable time range or null (e.g. '4:00 PM – 9:30 PM', 'Evening', null)",
   "venue": "venue name or null",
   "address": "street address or null",
-  "description": "clean 1-3 sentence summary of what the event is, max 350 chars, plain text"
+  "description": "2-3 sentence plain-text description of what the event is and who it's for. No HTML, no nav boilerplate.",
+  "about": "1-2 punchy sentences for an event listing card. Highlight what makes it compelling.",
+  "highlights": ["bullet 1", "bullet 2", "bullet 3"],
+  "artists": ["artist name", "..."],
+  "schedule": [{"time": "3:00 PM", "act": "Doors Open"}, ...],
+  "age_appeal": "all-ages | adult | kids | teens",
+  "indoor_outdoor": "indoor | outdoor | both",
+  "is_christian": true
 }
 
 Rules:
-- date is REQUIRED. Infer the year from context (all dates are future).
-- time: use human-readable range if available (e.g. '6–7:30 pm'); use null if no time mentioned; use 'All day' for all-day events.
-- venue/address: extract if mentioned in text, else null.
-- description: plain text, no HTML, no nav boilerplate, describe the actual event.
+- date REQUIRED. If the page shows a weekday + month/day, trust month/day over weekday if they conflict.
+- time: extract from schedule if available; null if not mentioned.
+- artists: list of performer/artist names found on the page; empty array [] if none.
+- schedule: extract the full schedule if listed; empty array [] if not mentioned.
+- highlights: 2-4 specific bullet points about what attendees will experience.
+- is_christian: true if event is explicitly Christian/faith-based/hosted by a church.
+- Omit fields you cannot determine — do NOT hallucinate values.
 
 Return only the JSON object:`
 
@@ -134,7 +145,7 @@ Return only the JSON object:`
         model: 'deepseek-chat',
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.1,
-        max_tokens: 200,
+        max_tokens: 600,
       }),
     })
 
@@ -200,7 +211,7 @@ async function main() {
 
   // Load existing lovenm records
   const { data: existing } = await supabase.schema('public').from('events')
-    .select('id, image_status, cached_photo_url').like('id', 'lovenm-%')
+    .select('id, image_status, cached_photo_url, ai_enrichment').like('id', 'lovenm-%')
   const existingById = new Map((existing ?? []).map(e => [e.id, e]))
   console.log(`${existingById.size} existing lovenm events in DB\n`)
 
@@ -273,44 +284,44 @@ async function main() {
       continue
     }
 
-    // Description: use body text — og:description on lovenm.org is cached/wrong on some pages
-    // Strip nav boilerplate (everything before the first real paragraph)
-    const bodyClean = bodyText
-      .replace(/^[\s\S]*?(Facebook|Share)\n/m, '')   // strip nav/share bar at top
-      .replace(/\nFacebook[\s\S]*$/m, '')            // strip share bar at bottom
-      .replace(/^(About|Events|Get Involved|Promote|Serve|Contact Us|Give)\n/gm, '')
-      .trim()
-    const description = (extracted.description ?? bodyClean.slice(0, 400))
-
     // Build raw payload — compatible with normalizeLocal()
-    // time stored as r.time (human-readable), read by normalizeLocal() r.time fallback
     const raw = {
       id: recordId,
       url,
       title,
-      name: title,   // mirror of title — search pre-filter queries raw->>name
-      description,
+      name: title,   // mirror — search pre-filter queries raw->>name
+      description: extracted.description ?? null,
       image: meta.image ?? null,
       images: meta.image ? [{ url: meta.image }] : [],
-      time: extracted.time ?? null,            // human-readable, e.g. "6–7:30 pm"
-      dates: {
-        start: {
-          localDate: extracted.date,
-          localTime: null,                     // no HH:MM — use r.time for display
-        },
-      },
+      time: extracted.time ?? null,
+      dates: { start: { localDate: extracted.date, localTime: null } },
       venue: extracted.venue ?? 'Albuquerque',
       address: extracted.address ?? null,
       city: 'Albuquerque',
-      isFree: true,                            // lovenm events are community/free
+      isFree: true,
       category: 'Community',
+      ...(extracted.artists?.length ? { artists: extracted.artists } : {}),
+      ...(extracted.schedule?.length ? { schedule: extracted.schedule } : {}),
       _source: 'lovenm',
       scraped_at: new Date().toISOString(),
       scraped_by: 'scrape-lovenm',
     }
 
-    // Preserve admin-rejected image
+    // Build ai_enrichment — preserve existing admin-set fields, layer in fresh data
     const prior = existingById.get(recordId)
+    const existingEnrichment = prior?.ai_enrichment ?? {}
+    const aiEnrichment = {
+      ...existingEnrichment,
+      ...(extracted.about       ? { about: extracted.about }             : {}),
+      ...(extracted.highlights?.length ? { highlights: extracted.highlights } : {}),
+      ...(extracted.age_appeal  ? { age_appeal: extracted.age_appeal }   : {}),
+      ...(extracted.indoor_outdoor ? { indoor_outdoor: extracted.indoor_outdoor } : {}),
+      ...(extracted.is_christian ? { christian_music: true, christian_artist: extracted.artists?.join(', ') || title } : {}),
+      enriched_at: new Date().toISOString(),
+      enriched_by: 'scrape-lovenm',
+    }
+
+    // Preserve admin-rejected image
     const adminRejected = prior?.image_status === 'rejected'
     const cachedPhotoUrl = adminRejected
       ? (prior?.cached_photo_url ?? null)
@@ -326,6 +337,7 @@ async function main() {
       event_date: extracted.date,
       cached_photo_url: cachedPhotoUrl,
       image_status: imageStatus,
+      ai_enrichment: aiEnrichment,
       featured: false,
       hidden: false,
       category: 'Community',
