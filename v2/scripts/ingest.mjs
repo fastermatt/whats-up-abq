@@ -114,6 +114,7 @@ const EXTRA_IMPORTERS = [
   { key: 'babydolls',    script: 'scrape-babydolls.mjs',     requires: ['DEEPSEEK_API_KEY'] },
   { key: 'local-venues', script: 'scrape-local-venues.mjs',  requires: ['DEEPSEEK_API_KEY'] },
   { key: 'amp',          script: 'scrape-amp-concerts.mjs',  requires: [] },
+  { key: 'lovenm',       script: 'scrape-lovenm.mjs',        requires: ['DEEPSEEK_API_KEY'] },
 ]
 
 // ── Helpers ────────────────────────────────────────────────────────────────
