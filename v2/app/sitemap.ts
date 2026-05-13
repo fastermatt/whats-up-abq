@@ -102,6 +102,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/albuquerque-date-night-ideas`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
     // Free events guide — evergreen high-volume keyword
     { url: `${baseUrl}/free-events-albuquerque`,    lastModified: new Date(), changeFrequency: 'daily',   priority: 0.85 },
+    // Niche landing pages — lower volume but high conversion intent
+    { url: `${baseUrl}/christian-music-albuquerque`, lastModified: new Date(), changeFrequency: 'daily',  priority: 0.75 },
     { url: `${baseUrl}/welcome`,        lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     { url: `${baseUrl}/about`,          lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
     // Category pages — high SEO value

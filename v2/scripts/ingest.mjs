@@ -567,6 +567,11 @@ async function main() {
     if (auditRes.ok) ok(`category audit (${(auditRes.durationMs/1000).toFixed(1)}s)`)
     else warn(`category audit returned non-zero — manual review may be needed`)
 
+    step('Christian music tagger (keyword → ai_enrichment.christian_music)')
+    const christianRes = await runScript('tag-christian-music.mjs')
+    if (christianRes.ok) ok(`christian music tagger (${(christianRes.durationMs/1000).toFixed(1)}s)`)
+    else warn(`christian music tagger returned non-zero — continuing`)
+
   } else {
     warn('Skipped enrichment (--skip-enrich)')
   }

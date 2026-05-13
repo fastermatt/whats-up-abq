@@ -55,6 +55,7 @@ export interface FetchEventsOptions {
   freeOnly?: boolean
   maxPrice?: number   // 0 = free only; 25 = under $25; 50 = under $50
   date?: string       // YYYY-MM-DD — overrides timeFilter when set
+  christianMusic?: boolean // filter to events tagged christian_music: true in ai_enrichment
   limit?: number
   offset?: number
 }
@@ -212,6 +213,7 @@ export async function fetchEvents({
   freeOnly = false,
   maxPrice,
   date,
+  christianMusic,
   limit = 24,
   offset = 0,
 }: FetchEventsOptions = {}): Promise<FetchEventsResult> {
@@ -259,6 +261,7 @@ export async function fetchEvents({
     if (topLevelCat) query = query.eq('category', topLevelCat)
     if (mood) query = query.eq('ai_enrichment->>mood', mood)
     if (neighborhood) query = query.eq('neighborhood_slug', neighborhood)
+    if (christianMusic) query = query.eq('ai_enrichment->>christian_music', 'true')
 
     const { data, error, count } = await query.range(offset, offset + limit - 1)
     if (error) {
