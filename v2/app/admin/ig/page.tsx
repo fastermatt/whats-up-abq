@@ -1,5 +1,4 @@
 import { fetchEventById } from '@/lib/events'
-import { getCategoryFallback } from '@/lib/fallback-images'
 import { IGEditor } from './IGEditor'
 
 export const dynamic = 'force-dynamic'
@@ -17,7 +16,7 @@ export default async function IGAdminPage({ searchParams }: PageProps) {
   if (id) {
     event = await fetchEventById(id)
     if (event) {
-      image = event.imageUrl || getCategoryFallback(event.category ?? undefined, id)
+      image = event.imageUrl ?? ''
     }
   }
 

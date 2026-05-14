@@ -636,7 +636,10 @@ export function DesignPanel() {
 
   return (
     <div className="lg:w-[320px] shrink-0 bg-[#0d0d0d] border border-white/[0.07] rounded-xl overflow-y-auto lg:max-h-[calc(100vh-180px)]">
-      {selected ? (
+      {/* Canvas/format controls always visible regardless of selection */}
+      <CanvasControls />
+      {/* Layer-specific controls appear below when a layer is selected */}
+      {selected && (
         <>
           <div className="px-4 pt-3 pb-2 border-b border-white/[0.06]">
             <h3 className="text-sm font-bold text-white capitalize">{selected.type} · {selected.name}</h3>
@@ -646,8 +649,6 @@ export function DesignPanel() {
           {selected.type === 'image' && <ImagePanel layer={selected} update={p => updateLayer(selected.id, p)} />}
           {selected.type === 'shape' && <ShapePanel layer={selected} update={p => updateLayer(selected.id, p)} />}
         </>
-      ) : (
-        <CanvasControls />
       )}
     </div>
   )
