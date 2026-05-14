@@ -183,7 +183,7 @@ function toResult(
   const raw = row.raw as Record<string, unknown> | null
   return {
     id:              String(row.id ?? ''),
-    title:           String(raw?.name ?? ''),
+    title:           String(raw?.name ?? raw?.title ?? ''),
     date:            String(row.event_date ?? ''),
     venue:           (row.venue_name as string | null) ?? null,
     category:        (row.category as string | null) ?? null,
