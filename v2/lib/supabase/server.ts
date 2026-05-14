@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
 export async function createClient() {
@@ -26,18 +27,20 @@ export async function createClient() {
   )
 }
 
-/** Service-role client for ingest functions — bypasses RLS. Server-only. */
-export async function createServiceClient() {
-  const cookieStore = await cookies()
-
-  return createServerClient(
+/**
+ * Service-role client — bypasses RLS entirely. Server-only.
+ *
+ * Uses @supabase/supabase-js createClient directly (NOT @supabase/ssr
+ * createServerClient). The SSR variant reads auth session cookies and can
+ * substitute a user JWT for the Authorization header, reducing the request
+ * to regular user privileges and making RLS apply. The plain client sends
+ * the service role key as both apikey and Authorization, which PostgREST
+ * recognises as service_role and skips all RLS policies.
+ */
+export function createServiceClient() {
+  return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      cookies: {
-        getAll() { return cookieStore.getAll() },
-        setAll() { /* service role doesn't need cookie persistence */ },
-      },
-    }
+    { auth: { persistSession: false, autoRefreshToken: false } }
   )
 }
