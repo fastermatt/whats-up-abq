@@ -167,6 +167,11 @@ async function main() {
     if (/deposits\b/i.test(title) && /season|goatheads/i.test(title)) return false
     // Merchandise add-on rows (photo packages, wooden souvenirs, etc.)
     if (/magical christmas ballets.*(photo|wooden)/i.test(title)) return false
+    // Gift cards and generic financial products
+    if (/\bgift\s+cards?\b/i.test(title)) return false
+    // Season ticket / premium ticket packages (not individual events)
+    if (/\bpremium\s+season\s+tickets?\b/i.test(title)) return false
+    if (/\bseason\s+(deposit|tickets?)\b/i.test(title)) return false
     return true
   })
   console.log(`  ${real.length} events after filtering shell/test events\n`)

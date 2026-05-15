@@ -286,6 +286,9 @@ function extractSourceImageUrl(row) {
         if (bPx !== aPx) return bPx - aPx  // larger first
         return 0
       })
+      // If every image is a TM fallback placeholder, there's no real artwork —
+      // return null so the event gets no cached_photo_url rather than a generic image.
+      if (withPixels[0].isFallback) return null
       return withPixels[0].url
     }
   }
