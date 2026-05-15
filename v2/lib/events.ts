@@ -388,16 +388,22 @@ export async function fetchEvents({
 /** Fetch highlighted upcoming events for the homepage.
  *
  *  Priority 1 — admin-marked featured=true events (manually curated).
- *  Priority 2 — algorithmic fallback: events in the next 14 days that have
- *    a photo and AI enrichment, from mainstream sources (TM/SG), in crowd-
- *    pleasing categories. Sorted by date ascending so soonest appears first.
+ *  Priority 2 — smart algorithmic selection scored by desirability:
+ *    - Base: popularity_score column (with heuristic fallback when null)
+ *    - "Coming weekend" bonus: Mon–Thu → upcoming Fri/Sat/Sun get +2.5
+ *    - "Today" bonus: events happening today get +1.0
+ *    - Title dedup: only the highest-scoring variant per event surfaces
+ *      (so "Boots Friday / Boots Saturday / Boots 2-day" fills one slot)
  *
- *  This keeps the homepage interesting even when no events are manually featured.
+ *  Net effect: the row surfaces what people are most likely to want to attend,
+ *  with weekend events taking prominence Mon–Thu before they arrive.
  */
 export async function fetchFeaturedEvents(limit = 6): Promise<NormalizedEvent[]> {
   const supabase = createStaticClient()
-  const today = new Date().toISOString().slice(0, 10)
-  const in14 = new Date(Date.now() + 14 * 86400_000).toISOString().slice(0, 10)
+  const now = new Date()
+  const today = now.toISOString().slice(0, 10)
+  const in14 = new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10)
+  const dow = now.getDay() // 0=Sun 1=Mon … 6=Sat
 
   // ── Priority 1: manual featured ──
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -417,38 +423,110 @@ export async function fetchFeaturedEvents(limit = 6): Promise<NormalizedEvent[]>
 
   if (featured.length >= limit) return featured
 
-  // ── Priority 2: algorithmic highlights (fills remaining slots) ──
-  // Criteria: has a photo, has AI enrichment, next 14 days, crowd-pleasing category.
-  const HIGHLIGHT_CATS = ['Music', 'Comedy', 'Sports', 'Arts & Theater', 'Festivals', 'Community']
+  // ── Priority 2: smart algorithmic highlights ──
+  const HIGHLIGHT_CATS = ['Music', 'Comedy', 'Sports', 'Arts & Theater', 'Festivals', 'Community', 'Food & Drink', 'Family']
   const manualIds = new Set(featured.map((e) => e.id))
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: autoData } = await (supabase as any)
     .schema('public')
     .from('events')
-    .select(COLS)
+    .select(COLS + ', popularity_score')
     .eq('hidden', false)
     .eq('featured', false)
     .gte('event_date', today)
     .lte('event_date', in14)
     .not('cached_photo_url', 'is', null)
-    .not('ai_enrichment', 'is', null)
     .in('category', HIGHLIGHT_CATS)
-    .order('event_date', { ascending: true })
-    .limit((limit - featured.length) * 6)  // fetch extra, filter in JS
+    .limit(80) // large pool — we score + filter in JS
 
-  const auto = ((autoData ?? []) as RawEventRow[])
-    .map(normalizeRow)
-    .filter((e): e is NormalizedEvent => e !== null && !manualIds.has(e.id))
-    // Prefer TM/SG sources (richer metadata) then others
-    .sort((a, b) => {
-      const srcScore = (s: string) =>
-        s === 'ticketmaster' ? 0 : s === 'seatgeek' ? 1 : 2
-      return srcScore(a.source) - srcScore(b.source) || a.date.localeCompare(b.date)
-    })
+  // Build the set of "coming weekend" dates for the bonus.
+  // Mon–Thu: the upcoming Fri/Sat/Sun. Fri–Sun: the current weekend day(s) remaining.
+  const weekendDates = new Set<string>()
+  if (dow >= 1 && dow <= 4) {
+    // Days until Friday: 4 on Mon, 3 on Tue, 2 on Wed, 1 on Thu
+    const daysToFri = 5 - dow
+    for (let d = 0; d < 3; d++) {
+      weekendDates.add(new Date(Date.now() + (daysToFri + d) * 86_400_000).toISOString().slice(0, 10))
+    }
+  } else {
+    // Already in the weekend — bonus for remaining days including today
+    const daysLeft = dow === 5 ? 2 : dow === 6 ? 1 : 0
+    for (let d = 0; d <= daysLeft; d++) {
+      weekendDates.add(new Date(Date.now() + d * 86_400_000).toISOString().slice(0, 10))
+    }
+  }
+  const preWeekend = dow >= 1 && dow <= 4 // Mon–Thu: pre-weekend context
+
+  type ScoredRow = RawEventRow & { popularity_score?: number | null }
+
+  function eventDesirabilityScore(row: ScoredRow): number {
+    // Base: DB popularity_score or heuristic fallback
+    let s = typeof row.popularity_score === 'number' ? row.popularity_score : _heuristicScore(row)
+    const dateStr = String(row.event_date ?? '').slice(0, 10)
+    // Coming-weekend bonus (stronger pre-weekend, weaker on the day)
+    if (weekendDates.has(dateStr)) s += preWeekend ? 2.5 : 1.0
+    // Today bonus — something happening right now is worth surfacing
+    if (dateStr === today) s += 1.0
+    return s
+  }
+
+  // Normalize title for dedup — strip ticket-tier qualifiers so variants
+  // of the same event collapse to the highest-scoring one.
+  function titleKey(title: string): string {
+    return title
+      .toLowerCase()
+      .replace(/\s*\([^)]*\)/g, '')          // "(Friday Only)" etc.
+      .replace(/\b(friday|saturday|sunday|2[\s-]?day\s+pass|day\s+pass|vip|general\s+admission)\b/gi, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+  }
+
+  const seenTitles = new Set<string>()
+  const pool = ((autoData ?? []) as ScoredRow[])
+    .filter((row) => !manualIds.has(String(row.id ?? '')))
+    .sort((a, b) => eventDesirabilityScore(b) - eventDesirabilityScore(a))
+    .reduce<NormalizedEvent[]>((acc, row) => {
+      const evt = normalizeRow(row)
+      if (!evt) return acc
+      const key = titleKey(evt.title ?? '')
+      if (seenTitles.has(key)) return acc  // keep first (highest-scoring) variant only
+      seenTitles.add(key)
+      acc.push(evt)
+      return acc
+    }, [])
     .slice(0, limit - featured.length)
 
-  return [...featured, ...auto]
+  return [...featured, ...pool]
+}
+
+/** Heuristic desirability score when popularity_score is NULL.
+ *  Mirrors the SQL expression in app/api/admin/ig/search/route.ts. */
+function _heuristicScore(row: RawEventRow): number {
+  const catScore: Record<string, number> = {
+    Festivals: 7.5, Music: 7.0, 'Arts & Theater': 6.5, Comedy: 6.5,
+    'Food & Drink': 6.0, Outdoor: 5.5, Sports: 5.5, Family: 5.0, Film: 4.5,
+  }
+  let s = catScore[row.category ?? ''] ?? 4.0
+
+  const date = new Date(String(row.event_date ?? '') + 'T12:00:00')
+  const d = date.getDay()
+  if (d === 5 || d === 6) s += 1.5
+  else if (d === 4) s += 0.8
+  else if (d === 0) s += 0.5
+
+  const raw = row.raw as Record<string, unknown>
+  const time = String(
+    (raw?.dates as Record<string, Record<string, unknown>>)?.start?.localTime ??
+    raw?.time ?? ''
+  )
+  if (time && time >= '17:00') s += 0.5
+  if (row.cached_photo_url) s += 0.3
+  if (row.featured === true) s += 1.5
+  const src = row.source ?? ''
+  if (src === 'ticketmaster' || src === 'seatgeek') s += 0.5
+
+  return Math.min(10, Math.max(1, s))
 }
 
 // ─── Neighborhood helpers ─────────────────────────────────────────────────────
