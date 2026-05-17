@@ -16,6 +16,7 @@ import { ScrollHintManager } from '@/app/components/ScrollHintManager'
 import { getFeaturedPlaces, PLACE_CATEGORIES, type Place } from '@/data/places'
 import { getActiveHoliday } from '@/data/holidays'
 import { fetchHolidayEventsCached } from '@/lib/holidays'
+import { HomepageStickyHook } from '@/app/components/HomepageStickyHook'
 
 // Rotates hourly (server-side, ISR updates within 60s of the hour turning)
 const HERO_SAYINGS = [
@@ -403,6 +404,39 @@ export default async function DiscoverPage() {
           </div>
         </div>
 
+        {/* ── Hero photo strip — decorative event tiles, desktop only ─────
+            Fills the previously-empty hero with event energy. Lazy-loaded
+            so they never become the LCP element (hero h2 is LCP now).
+            Two tilted cards in the right 20% of the hero surface.       */}
+        {featured.filter(e => e.imageUrl).length >= 2 && (
+          <div
+            className="absolute right-8 top-6 bottom-14 hidden lg:flex flex-col justify-center gap-3 pointer-events-none"
+            aria-hidden="true"
+            style={{ zIndex: 5 }}
+          >
+            {featured.filter(e => e.imageUrl).slice(0, 2).map((ev, i) => (
+              <div
+                key={ev.id}
+                className="rounded-xl overflow-hidden shadow-xl flex-shrink-0"
+                style={{
+                  width: 156,
+                  aspectRatio: '4/3',
+                  transform: `rotate(${i === 0 ? '-2.5deg' : '2deg'}) translateY(${i === 0 ? '6px' : '-6px'})`,
+                  opacity: 0.7,
+                }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={eventImageSrc(ev.imageUrl!, 312)}
+                  alt=""
+                  loading="lazy"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Stat strip — sentence-style links so the LABEL leads
             (round-2 critique: tiny labels under big numbers force a
             beat of parsing; pulling the label first reads instantly). */}
@@ -444,6 +478,65 @@ export default async function DiscoverPage() {
           </div>
         </div>
       </section>
+
+      {/* ── Editor's Picks — Featured Events ─────────────────────────────────
+          Moved ABOVE category/mood chips so IG visitors see real events with
+          photos immediately after the stat strip, rather than navigation UI.
+          They came with intent — give them the goods first.               */}
+      {featured.length > 0 && (
+        <AnimateIn animation="fade-up">
+          {/* Warm section bg differentiates this from the standard horizontal rows */}
+          <section className="py-6 bg-gradient-to-b from-[#f5ece3] to-[#fbf7f1] border-b border-[#e8d5c0]/70">
+            <div className="max-w-6xl mx-auto px-4 flex items-end justify-between mb-4">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] mb-0.5 font-semibold flex items-center gap-1">
+                  <span>★</span> Editor&apos;s picks
+                </p>
+                <h2
+                  className="text-xl font-black text-[#1a1614]"
+                  style={{ fontFamily: 'var(--font-epilogue)' }}
+                >
+                  Not to miss
+                </h2>
+              </div>
+              <Link
+                href="/events?featured=1"
+                data-umami-event="nav-see-all-featured"
+                className="text-xs font-semibold text-[#9a442d] hover:underline flex-shrink-0 flex items-center gap-1 group"
+              >
+                See all
+                <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
+
+            <div className="overflow-x-auto scrollbar-hide">
+              <div
+                className="flex gap-4 px-4 pb-2 snap-x snap-mandatory scroll-hint-inner"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {featured.map((event, i) => (
+                  <FeaturedCard key={event.id} event={event} index={i} />
+                ))}
+              </div>
+            </div>
+
+            {/* "Weekend picks drop Friday" — sets visit-cadence expectation inline.
+                Small enough to not compete with the event cards above, clear enough
+                to make the promise explicit.                                       */}
+            <p className="text-center text-[11px] text-[#8a7a74] mt-4 px-4">
+              Weekend picks refresh every Friday noon ·{' '}
+              <Link href="/events" className="text-[#9a442d] font-semibold hover:underline">
+                Browse all {allUpcoming.total.toLocaleString()} events
+              </Link>
+            </p>
+          </section>
+        </AnimateIn>
+      )}
+
+      {/* ── Inline stickiness hook — email + install, shown once ─────────────
+          Renders between featured events and category chips, at the exact
+          moment engagement is highest. Client component (localStorage check). */}
+      <HomepageStickyHook />
 
       {/* ── Category quick links ── */}
       <section className="py-4 border-b border-[#f0e4cc]/60 animate-fade-in">
@@ -539,47 +632,6 @@ export default async function DiscoverPage() {
                   prioritizeFirst={false}
                 />
               ))}
-            </div>
-          </section>
-        </AnimateIn>
-      )}
-
-      {/* ── Editor's Picks — Featured Events ── */}
-      {featured.length > 0 && (
-        <AnimateIn animation="fade-up">
-          {/* Warm section bg differentiates this from the standard horizontal rows */}
-          <section className="py-6 bg-gradient-to-b from-[#f5ece3] to-[#fbf7f1] border-y border-[#e8d5c0]/70">
-            <div className="max-w-6xl mx-auto px-4 flex items-end justify-between mb-4">
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] mb-0.5 font-semibold flex items-center gap-1">
-                  <span>★</span> Editor&apos;s picks
-                </p>
-                <h2
-                  className="text-xl font-black text-[#1a1614]"
-                  style={{ fontFamily: 'var(--font-epilogue)' }}
-                >
-                  Not to miss
-                </h2>
-              </div>
-              <Link
-                href="/events?featured=1"
-                data-umami-event="nav-see-all-featured"
-                className="text-xs font-semibold text-[#9a442d] hover:underline flex-shrink-0 flex items-center gap-1 group"
-              >
-                See all
-                <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
-            </div>
-
-            <div className="overflow-x-auto scrollbar-hide">
-              <div
-                className="flex gap-4 px-4 pb-2 snap-x snap-mandatory scroll-hint-inner"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-              >
-                {featured.map((event, i) => (
-                  <FeaturedCard key={event.id} event={event} index={i} />
-                ))}
-              </div>
             </div>
           </section>
         </AnimateIn>
