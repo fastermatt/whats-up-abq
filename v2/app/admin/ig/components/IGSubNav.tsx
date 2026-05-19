@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 
-export type IGSubNavTab = 'editor' | 'week' | 'queue' | 'history'
+export type IGSubNavTab = 'editor' | 'week' | 'digest' | 'queue' | 'history'
 
 interface Props {
   active: IGSubNavTab
@@ -10,10 +10,11 @@ interface Props {
 }
 
 const TABS: { id: IGSubNavTab; label: string; href: string }[] = [
-  { id: 'editor',  label: 'Editor',       href: '/admin/ig'         },
-  { id: 'week',    label: 'Week Planner', href: '/admin/ig/week'    },
-  { id: 'queue',   label: 'Queue',        href: '/admin/ig/queue'   },
-  { id: 'history', label: 'History',      href: '/admin/ig/history' },
+  { id: 'editor',  label: 'Editor',       href: '/admin/ig'          },
+  { id: 'week',    label: 'Week Planner', href: '/admin/ig/week'     },
+  { id: 'digest',  label: 'Digest',       href: '/admin/ig/digest'   },
+  { id: 'queue',   label: 'Queue',        href: '/admin/ig/queue'    },
+  { id: 'history', label: 'History',      href: '/admin/ig/history'  },
 ]
 
 /**

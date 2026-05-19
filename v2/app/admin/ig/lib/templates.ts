@@ -14,6 +14,16 @@ import { BRAND_COLORS, BRAND_FONTS, CANVAS_DIMS } from '../types'
  * swatch in the template gallery — no canvas rendering needed.
  */
 
+/** One event slot in a multi-event digest template */
+export interface TemplateEventSlot {
+  title: string
+  date?: string
+  time?: string
+  venue?: string
+  category?: string
+  imageUrl?: string
+}
+
 export interface TemplateContext {
   title?: string
   subtitle?: string
@@ -24,6 +34,8 @@ export interface TemplateContext {
   imageUrl?: string
   tagline?: string
   cta?: string
+  /** Multi-event digest: populated by /admin/ig/digest */
+  events?: TemplateEventSlot[]
 }
 
 // Thumbnail descriptor — rendered as a small SVG in the template gallery.
@@ -1747,6 +1759,378 @@ const storyTypeOnly: Template = {
 }
 
 // ════════════════════════════════════════════════════════════════════════
+//   DIGEST TEMPLATES — multi-event, auto-populated
+// ════════════════════════════════════════════════════════════════════════
+
+// ── D1. Weekend Digest ────────────────────────────────────────────────────
+
+const DIGEST_FALLBACKS = [
+  { title: 'Event name here',       venue: 'Venue TBD',    time: '' },
+  { title: 'Second event',          venue: 'Another Venue', time: '' },
+  { title: 'Third event',           venue: 'Venue Name',   time: '' },
+  { title: 'Fourth event',          venue: 'Venue Name',   time: '' },
+  { title: 'Fifth event',           venue: 'Venue Name',   time: '' },
+]
+
+const weekendDigest: Template = {
+  id: 'weekend-digest',
+  name: 'Weekend Digest',
+  description: '5-event weekend guide — auto-populates from top upcoming events. Gets saves.',
+  category: 'brand',
+  thumb: {
+    bg: BRAND_COLORS.cream,
+    blocks: [
+      { x: 7,  y: 5,  w: 28, h: 2, c: BRAND_COLORS.terra, o: 0.7 },
+      { x: 7,  y: 10, w: 70, h: 9, c: BRAND_COLORS.ink },
+      { x: 7,  y: 22, w: 40, h: 2, c: BRAND_COLORS.ink, o: 0.5 },
+      { x: 7,  y: 27, w: 86, h: 0.5, c: BRAND_COLORS.terra, o: 0.5 },
+      { x: 7,  y: 32, w: 8,  h: 2.5, c: BRAND_COLORS.terra }, { x: 18, y: 32, w: 68, h: 2.5, c: BRAND_COLORS.ink, o: 0.75 },
+      { x: 7,  y: 40, w: 8,  h: 2.5, c: BRAND_COLORS.terra }, { x: 18, y: 40, w: 58, h: 2.5, c: BRAND_COLORS.ink, o: 0.75 },
+      { x: 7,  y: 48, w: 8,  h: 2.5, c: BRAND_COLORS.terra }, { x: 18, y: 48, w: 72, h: 2.5, c: BRAND_COLORS.ink, o: 0.75 },
+      { x: 7,  y: 56, w: 8,  h: 2.5, c: BRAND_COLORS.terra }, { x: 18, y: 56, w: 63, h: 2.5, c: BRAND_COLORS.ink, o: 0.75 },
+      { x: 7,  y: 64, w: 8,  h: 2.5, c: BRAND_COLORS.terra }, { x: 18, y: 64, w: 55, h: 2.5, c: BRAND_COLORS.ink, o: 0.75 },
+      { x: 7,  y: 93, w: 86, h: 2,   c: BRAND_COLORS.terra },
+      { x: 22, y: 97, w: 56, h: 2.5, c: BRAND_COLORS.terra, o: 0.5 },
+    ],
+  },
+  build: (ctx, format) => {
+    const fmt = format ?? '4:5'
+    const { w, h } = CANVAS_DIMS[fmt]
+    const sy = (y: number) => Math.round(y * h / 1350)
+
+    // Weekend date range
+    const today = new Date()
+    const daysToSat = (6 - today.getDay() + 7) % 7 || 7
+    const sat = new Date(today); sat.setDate(today.getDate() + daysToSat)
+    const sun = new Date(sat); sun.setDate(sat.getDate() + 1)
+    const fmtD = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    const weekendRange = `${fmtD(sat)} – ${fmtD(sun)}`
+
+    // Merge provided events with fallbacks
+    const slots = Array.from({ length: 5 }, (_, i) => {
+      const e = ctx.events?.[i]
+      if (e) return { title: e.title, venue: e.venue ?? '', time: e.time ?? '' }
+      return DIGEST_FALLBACKS[i]
+    })
+
+    // Layout constants (all in 1350-unit space, scaled by sy())
+    const ROW_START = 480
+    const ROW_H     = 136
+
+    const layers: Layer[] = [
+      logo(LOGO_T, 80, sy(42), 50),
+      // Terra accent rule above kicker
+      shape({ shape: 'rect', x: 80, y: sy(108), width: 220, height: 2, fill: BRAND_COLORS.terra, opacity: 0.7 }),
+      textLayer({
+        name: 'Kicker', text: 'WEEKEND GUIDE',
+        x: 80, y: sy(122), width: w - 160,
+        fontFamily: font('DM Mono'), fontSize: 19, fontWeight: 500,
+        fill: BRAND_COLORS.terra, letterSpacing: 7, opacity: 0.85,
+      }),
+      // Headline — "This Weekend" fills the middle area
+      textLayer({
+        name: 'Headline', text: 'This\nWeekend',
+        x: 80, y: sy(155), width: w - 160,
+        fontFamily: font('Epilogue'), fontSize: 175, fontWeight: 900,
+        fill: BRAND_COLORS.ink, lineHeight: 0.82, letterSpacing: -4,
+      }),
+      textLayer({
+        name: 'Date Range', text: weekendRange,
+        x: 80, y: sy(430), width: w - 160,
+        fontFamily: font('DM Mono'), fontSize: 27, fontWeight: 500,
+        fill: BRAND_COLORS.ink, opacity: 0.42,
+      }),
+      shape({ shape: 'rect', x: 80, y: sy(464), width: w - 160, height: 2, fill: BRAND_COLORS.terra, opacity: 0.45 }),
+    ]
+
+    // 5 event rows
+    slots.forEach((slot, i) => {
+      const y = sy(ROW_START + i * ROW_H)
+      const num = String(i + 1).padStart(2, '0')
+      const meta = [slot.time, slot.venue].filter(Boolean).join(' · ')
+      layers.push(
+        textLayer({
+          name: `No.${num}`, text: num,
+          x: 80, y: y, width: 90,
+          fontFamily: font('DM Mono'), fontSize: 32, fontWeight: 500,
+          fill: BRAND_COLORS.terra,
+        }),
+        textLayer({
+          name: `Event ${i + 1}`, text: slot.title,
+          x: 180, y: y + sy(4), width: w - 268,
+          fontFamily: font('Fraunces'), fontSize: 46, fontStyle: 'italic', fontWeight: 400,
+          fill: BRAND_COLORS.ink, lineHeight: 1.05,
+        }),
+        ...(meta ? [textLayer({
+          name: `Meta ${i + 1}`, text: meta,
+          x: 180, y: y + sy(60), width: w - 268,
+          fontFamily: font('Inter'), fontSize: 23, fontWeight: 500,
+          fill: BRAND_COLORS.ink, opacity: 0.42, lineHeight: 1,
+        })] : []),
+        shape({ shape: 'rect', x: 80, y: y + sy(106), width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.1 }),
+      )
+    })
+
+    // Footer
+    const footerY = sy(ROW_START + 5 * ROW_H + 24)
+    layers.push(
+      shape({ shape: 'rect', x: 80, y: footerY, width: w - 160, height: 3, fill: BRAND_COLORS.terra }),
+      logo(LOGO_T, Math.round((w - Math.round(52 * LOGO_R)) / 2), footerY + sy(26), 52),
+    )
+
+    return {
+      id: uid(), name: 'Weekend digest', format: fmt,
+      slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.cream }, layers }],
+      createdAt: Date.now(), updatedAt: Date.now(),
+    }
+  },
+}
+
+// ── D2. Tonight List ──────────────────────────────────────────────────────
+
+const tonightList: Template = {
+  id: 'tonight-list',
+  name: 'Tonight in ABQ',
+  description: 'Dark 5-event tonight lineup. Drop it daily to drive /tonight traffic.',
+  category: 'brand',
+  thumb: {
+    bg: BRAND_COLORS.night,
+    blocks: [
+      { x: 7,  y: 6,  w: 30, h: 2.5, c: 'rgba(255,255,255,0.2)' },
+      { x: 7,  y: 12, w: 80, h: 12,  c: BRAND_COLORS.terra, o: 0.9 },
+      { x: 7,  y: 27, w: 50, h: 2,   c: 'rgba(255,255,255,0.35)' },
+      { x: 7,  y: 32, w: 86, h: 0.5, c: 'rgba(255,255,255,0.2)' },
+      { x: 7,  y: 36, w: 78, h: 2.5, c: 'rgba(255,255,255,0.8)' },
+      { x: 7,  y: 41, w: 35, h: 1.5, c: BRAND_COLORS.terra, o: 0.7 },
+      { x: 7,  y: 47, w: 68, h: 2.5, c: 'rgba(255,255,255,0.8)' },
+      { x: 7,  y: 52, w: 30, h: 1.5, c: BRAND_COLORS.terra, o: 0.7 },
+      { x: 7,  y: 58, w: 82, h: 2.5, c: 'rgba(255,255,255,0.8)' },
+      { x: 7,  y: 63, w: 42, h: 1.5, c: BRAND_COLORS.terra, o: 0.7 },
+      { x: 7,  y: 69, w: 58, h: 2.5, c: 'rgba(255,255,255,0.8)' },
+      { x: 7,  y: 74, w: 38, h: 1.5, c: BRAND_COLORS.terra, o: 0.7 },
+      { x: 7,  y: 80, w: 74, h: 2.5, c: 'rgba(255,255,255,0.8)' },
+      { x: 7,  y: 85, w: 27, h: 1.5, c: BRAND_COLORS.terra, o: 0.7 },
+      { x: 22, y: 96, w: 56, h: 2.5, c: 'rgba(255,255,255,0.2)' },
+    ],
+  },
+  build: (ctx, format) => {
+    const fmt = format ?? '4:5'
+    const { w, h } = CANVAS_DIMS[fmt]
+    const sy = (y: number) => Math.round(y * h / 1350)
+
+    const today = new Date()
+    const dayStr = today.toLocaleDateString('en-US', {
+      weekday: 'long', month: 'long', day: 'numeric',
+      timeZone: 'America/Denver',
+    })
+
+    const slots = Array.from({ length: 5 }, (_, i) => {
+      const e = ctx.events?.[i]
+      if (e) return { title: e.title, time: e.time ?? '', venue: e.venue ?? '' }
+      return { ...DIGEST_FALLBACKS[i], time: '' }
+    })
+
+    const ROW_START = 400
+    const ROW_H     = 144
+
+    const layers: Layer[] = [
+      logo(LOGO_W, 80, sy(42), 50),
+      // "TONIGHT" — big terra block headline
+      textLayer({
+        name: 'Tonight', text: 'TONIGHT',
+        x: 80, y: sy(108), width: w - 160,
+        fontFamily: font('Epilogue'), fontSize: 148, fontWeight: 900,
+        fill: BRAND_COLORS.terra, letterSpacing: -2, lineHeight: 1,
+      }),
+      textLayer({
+        name: 'Day', text: dayStr.toUpperCase(),
+        x: 80, y: sy(270), width: w - 160,
+        fontFamily: font('DM Mono'), fontSize: 22, fontWeight: 500,
+        fill: BRAND_COLORS.cream, opacity: 0.4, letterSpacing: 3,
+      }),
+      shape({ shape: 'rect', x: 80, y: sy(314), width: w - 160, height: 1, fill: BRAND_COLORS.cream, opacity: 0.15 }),
+      // "in ABQ" italic accent under TONIGHT
+      textLayer({
+        name: 'In ABQ', text: 'in ABQ',
+        x: 80, y: sy(330), width: w - 160,
+        fontFamily: font('Fraunces'), fontSize: 52, fontStyle: 'italic', fontWeight: 400,
+        fill: BRAND_COLORS.cream, opacity: 0.55,
+      }),
+    ]
+
+    // 5 event rows
+    slots.forEach((slot, i) => {
+      const y = sy(ROW_START + i * ROW_H)
+      const meta = [slot.time, slot.venue].filter(Boolean).join(' · ')
+      layers.push(
+        textLayer({
+          name: `Event ${i + 1}`, text: slot.title,
+          x: 80, y: y, width: w - 160,
+          fontFamily: font('Epilogue'), fontSize: 48, fontWeight: 700,
+          fill: BRAND_COLORS.cream, lineHeight: 1.05, letterSpacing: -0.5,
+        }),
+        ...(meta ? [textLayer({
+          name: `Meta ${i + 1}`, text: meta,
+          x: 80, y: y + sy(60), width: w - 160,
+          fontFamily: font('DM Mono'), fontSize: 23, fontWeight: 500,
+          fill: BRAND_COLORS.terra, opacity: 0.9, lineHeight: 1,
+        })] : []),
+        shape({ shape: 'rect', x: 80, y: y + sy(112), width: w - 160, height: 1, fill: BRAND_COLORS.cream, opacity: 0.1 }),
+      )
+    })
+
+    // Footer
+    const footerY = sy(ROW_START + 5 * ROW_H + 30)
+    layers.push(
+      logo(LOGO_W, Math.round((w - Math.round(52 * LOGO_R)) / 2), footerY, 52),
+      textLayer({
+        name: 'URL', text: 'abqunplugged.com',
+        x: 80, y: footerY + sy(72), width: w - 160,
+        fontFamily: font('DM Mono'), fontSize: 20, fontWeight: 400,
+        fill: BRAND_COLORS.cream, opacity: 0.3, align: 'center', letterSpacing: 2,
+      }),
+    )
+
+    return {
+      id: uid(), name: 'Tonight list', format: fmt,
+      slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.night }, layers }],
+      createdAt: Date.now(), updatedAt: Date.now(),
+    }
+  },
+}
+
+// ── D3. Weekly Five ───────────────────────────────────────────────────────
+
+const weeklyFive: Template = {
+  id: 'weekly-five',
+  name: 'Weekly Five',
+  description: '5 curated picks for the week. Terra background, bold editorial feel.',
+  category: 'brand',
+  thumb: {
+    bg: BRAND_COLORS.terra,
+    blocks: [
+      { x: 7,  y: 6,  w: 28, h: 2,   c: 'rgba(251,247,241,0.25)' },
+      { x: 7,  y: 12, w: 55, h: 6,   c: 'rgba(251,247,241,0.9)' },
+      { x: 7,  y: 20, w: 35, h: 3,   c: 'rgba(251,247,241,0.5)' },
+      { x: 60, y: 5,  w: 30, h: 22,  c: 'rgba(251,247,241,0.06)' }, // watermark
+      { x: 7,  y: 28, w: 86, h: 0.5, c: 'rgba(251,247,241,0.25)' },
+      { x: 7,  y: 33, w: 8,  h: 2.5, c: 'rgba(251,247,241,0.35)' }, { x: 18, y: 33, w: 68, h: 2.5, c: 'rgba(251,247,241,0.85)' },
+      { x: 7,  y: 41, w: 8,  h: 2.5, c: 'rgba(251,247,241,0.35)' }, { x: 18, y: 41, w: 55, h: 2.5, c: 'rgba(251,247,241,0.85)' },
+      { x: 7,  y: 49, w: 8,  h: 2.5, c: 'rgba(251,247,241,0.35)' }, { x: 18, y: 49, w: 72, h: 2.5, c: 'rgba(251,247,241,0.85)' },
+      { x: 7,  y: 57, w: 8,  h: 2.5, c: 'rgba(251,247,241,0.35)' }, { x: 18, y: 57, w: 60, h: 2.5, c: 'rgba(251,247,241,0.85)' },
+      { x: 7,  y: 65, w: 8,  h: 2.5, c: 'rgba(251,247,241,0.35)' }, { x: 18, y: 65, w: 48, h: 2.5, c: 'rgba(251,247,241,0.85)' },
+      { x: 22, y: 95, w: 56, h: 2.5, c: 'rgba(251,247,241,0.25)' },
+    ],
+  },
+  build: (ctx, format) => {
+    const fmt = format ?? '4:5'
+    const { w, h } = CANVAS_DIMS[fmt]
+    const sy = (y: number) => Math.round(y * h / 1350)
+
+    // Week range
+    const today = new Date()
+    const dayOfWeek = today.getDay()
+    const monday = new Date(today); monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
+    const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6)
+    const fmtD = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    const weekRange = `${fmtD(monday)} – ${fmtD(sunday)}`
+
+    const slots = Array.from({ length: 5 }, (_, i) => {
+      const e = ctx.events?.[i]
+      if (e) return { title: e.title, venue: e.venue ?? '', time: e.time ?? '' }
+      return DIGEST_FALLBACKS[i]
+    })
+
+    const ROW_START = 468
+    const ROW_H     = 144
+
+    const layers: Layer[] = [
+      logo(LOGO_W, 80, sy(42), 50),
+      // Watermark "5" — decorative, very low opacity
+      textLayer({
+        name: 'Watermark', text: '5',
+        x: w - 420, y: sy(20), width: 400,
+        fontFamily: font('Epilogue'), fontSize: 340, fontWeight: 900,
+        fill: BRAND_COLORS.cream, opacity: 0.06, align: 'right', lineHeight: 1,
+      }),
+      // "5 PICKS" headline
+      textLayer({
+        name: 'Headline', text: '5 PICKS',
+        x: 80, y: sy(112), width: w - 160,
+        fontFamily: font('Epilogue'), fontSize: 160, fontWeight: 900,
+        fill: BRAND_COLORS.cream, lineHeight: 0.88, letterSpacing: -3,
+      }),
+      textLayer({
+        name: 'Subhead', text: 'THIS WEEK IN ABQ',
+        x: 80, y: sy(288), width: w - 160,
+        fontFamily: font('DM Mono'), fontSize: 22, fontWeight: 500,
+        fill: BRAND_COLORS.cream, opacity: 0.55, letterSpacing: 6,
+      }),
+      textLayer({
+        name: 'Week Range', text: weekRange,
+        x: 80, y: sy(326), width: w - 160,
+        fontFamily: font('DM Mono'), fontSize: 24, fontWeight: 500,
+        fill: BRAND_COLORS.cream, opacity: 0.35,
+      }),
+      shape({ shape: 'rect', x: 80, y: sy(376), width: w - 160, height: 2, fill: BRAND_COLORS.cream, opacity: 0.2 }),
+      // "Curated picks" label
+      textLayer({
+        name: 'Label', text: 'CURATED PICKS',
+        x: 80, y: sy(390), width: w - 160,
+        fontFamily: font('DM Mono'), fontSize: 17, fontWeight: 500,
+        fill: BRAND_COLORS.cream, opacity: 0.4, letterSpacing: 5,
+      }),
+    ]
+
+    // 5 event rows
+    slots.forEach((slot, i) => {
+      const y = sy(ROW_START + i * ROW_H)
+      const num = String(i + 1).padStart(2, '0')
+      const meta = [slot.time, slot.venue].filter(Boolean).join(' · ')
+      layers.push(
+        textLayer({
+          name: `No.${num}`, text: num,
+          x: 80, y: y, width: 90,
+          fontFamily: font('DM Mono'), fontSize: 30, fontWeight: 500,
+          fill: BRAND_COLORS.cream, opacity: 0.3,
+        }),
+        textLayer({
+          name: `Event ${i + 1}`, text: slot.title,
+          x: 170, y: y + sy(2), width: w - 258,
+          fontFamily: font('Epilogue'), fontSize: 46, fontWeight: 700,
+          fill: BRAND_COLORS.cream, lineHeight: 1.05, letterSpacing: -0.5,
+        }),
+        ...(meta ? [textLayer({
+          name: `Meta ${i + 1}`, text: meta,
+          x: 170, y: y + sy(60), width: w - 258,
+          fontFamily: font('Inter'), fontSize: 23, fontWeight: 400,
+          fill: BRAND_COLORS.cream, opacity: 0.5, lineHeight: 1,
+        })] : []),
+        shape({ shape: 'rect', x: 80, y: y + sy(112), width: w - 160, height: 1, fill: BRAND_COLORS.cream, opacity: 0.15 }),
+      )
+    })
+
+    // Footer
+    const footerY = sy(ROW_START + 5 * ROW_H + 30)
+    layers.push(
+      logo(LOGO_W, Math.round((w - Math.round(52 * LOGO_R)) / 2), footerY, 52),
+      textLayer({
+        name: 'URL', text: 'abqunplugged.com',
+        x: 80, y: footerY + sy(72), width: w - 160,
+        fontFamily: font('DM Mono'), fontSize: 20, fontWeight: 400,
+        fill: BRAND_COLORS.cream, opacity: 0.4, align: 'center', letterSpacing: 2,
+      }),
+    )
+
+    return {
+      id: uid(), name: 'Weekly five', format: fmt,
+      slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.terra }, layers }],
+      createdAt: Date.now(), updatedAt: Date.now(),
+    }
+  },
+}
+
+// ════════════════════════════════════════════════════════════════════════
 //   EXPORTS
 // ════════════════════════════════════════════════════════════════════════
 
@@ -1757,7 +2141,10 @@ export const TEMPLATES: Template[] = [
   storyFullBleed, storySplit, storyTypeOnly,
   // Brand templates (7)
   statement, categorySpotlight, weekendPreview, mesa, tonightDrop, hiddenGem, blank,
+  // Digest templates — multi-event (3)
+  weekendDigest, tonightList, weeklyFive,
 ]
 
 export const EVENT_TEMPLATES  = TEMPLATES.filter(t => t.category === 'event')
 export const PROMO_TEMPLATES  = TEMPLATES.filter(t => t.category === 'brand')
+export const DIGEST_TEMPLATES = [weekendDigest, tonightList, weeklyFive]
