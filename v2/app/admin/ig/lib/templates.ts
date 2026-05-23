@@ -1764,7 +1764,7 @@ const storyTypeOnly: Template = {
 
 // ── D1. Weekend Digest ────────────────────────────────────────────────────
 
-const DIGEST_FALLBACKS = [
+const DIGEST_FALLBACKS: { title: string; venue: string; time: string; date?: string }[] = [
   { title: 'Event name here',       venue: 'Venue TBD',    time: '' },
   { title: 'Second event',          venue: 'Another Venue', time: '' },
   { title: 'Third event',           venue: 'Venue Name',   time: '' },
@@ -1783,6 +1783,13 @@ function resolveTitle(raw: string, venue: string): string {
   const v = venue.trim()
   if (v) return v
   return 'Event TBA'
+}
+
+/** "2025-05-24" → "Sat" (uses noon to avoid DST edge-cases) */
+function shortDay(date: string | undefined): string {
+  if (!date) return ''
+  const d = new Date(date + 'T12:00:00')
+  return d.toLocaleDateString('en-US', { weekday: 'short' })
 }
 
 /**
@@ -1849,7 +1856,7 @@ const weekendDigest: Template = {
       const e = ctx.events?.[i]
       if (e) {
         const venue = e.venue ?? ''
-        return { title: resolveTitle(e.title, venue), venue, time: e.time ?? '' }
+        return { title: resolveTitle(e.title, venue), venue, time: e.time ?? '', date: e.date }
       }
       return DIGEST_FALLBACKS[i]
     })
@@ -1888,7 +1895,7 @@ const weekendDigest: Template = {
     slots.forEach((slot, i) => {
       const y   = sy(ROW_START + i * ROW_H)
       const num = String(i + 1).padStart(2, '0')
-      const meta = [slot.time, slot.venue].filter(Boolean).join(' · ')
+      const meta = [shortDay(slot.date), slot.time, slot.venue].filter(Boolean).join(' · ')
       // Scale font so title always fits in ~1 line — no wrapping, no collisions
       const { fontSize: titleSize, text: titleText } = frauncesTitleSize(slot.title)
       layers.push(
@@ -1971,7 +1978,7 @@ const tonightList: Template = {
       const e = ctx.events?.[i]
       if (e) {
         const venue = e.venue ?? ''
-        return { title: resolveTitle(e.title, venue), time: e.time ?? '', venue }
+        return { title: resolveTitle(e.title, venue), time: e.time ?? '', venue, date: e.date }
       }
       return { ...DIGEST_FALLBACKS[i], time: '' }
     })
@@ -2007,7 +2014,7 @@ const tonightList: Template = {
     // 5 event rows
     slots.forEach((slot, i) => {
       const y    = sy(ROW_START + i * ROW_H)
-      const meta = [slot.time, slot.venue].filter(Boolean).join(' · ')
+      const meta = [shortDay(slot.date), slot.time, slot.venue].filter(Boolean).join(' · ')
       const { fontSize: titleSize, text: titleText } = epilogueTitleSize(slot.title, w - 160)
       layers.push(
         textLayer({
@@ -2086,7 +2093,7 @@ const weeklyFive: Template = {
       const e = ctx.events?.[i]
       if (e) {
         const venue = e.venue ?? ''
-        return { title: resolveTitle(e.title, venue), venue, time: e.time ?? '' }
+        return { title: resolveTitle(e.title, venue), venue, time: e.time ?? '', date: e.date }
       }
       return DIGEST_FALLBACKS[i]
     })
@@ -2136,7 +2143,7 @@ const weeklyFive: Template = {
     slots.forEach((slot, i) => {
       const y   = sy(ROW_START + i * ROW_H)
       const num = String(i + 1).padStart(2, '0')
-      const meta = [slot.time, slot.venue].filter(Boolean).join(' · ')
+      const meta = [shortDay(slot.date), slot.time, slot.venue].filter(Boolean).join(' · ')
       const { fontSize: titleSize, text: titleText } = epilogueTitleSize(slot.title, w - 258)
       layers.push(
         textLayer({
