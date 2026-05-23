@@ -1786,31 +1786,28 @@ function resolveTitle(raw: string, venue: string): string {
 }
 
 /**
- * Dynamic font size for Fraunces italic titles (weekendDigest).
- * Ensures the title fits within ~1 line on a 812px-wide column.
- * Conservative char-width estimate: 0.58 × fontSize.
- * len ≤ 24 → 46px | ≤ 32 → 38px | ≤ 42 → 30px | else → 24px + truncate.
+ * Fixed-size title for Fraunces italic rows (weekendDigest).
+ * All 5 rows use the same 36px — visual consistency over squeeze-to-fit.
+ * Available width: w-280 = 800px. Char estimate: 0.62 × 36 = 22.3px.
+ * Max chars = floor(800/22.3) = 35. Titles longer than that are truncated.
  */
 function frauncesTitleSize(title: string): { fontSize: number; text: string } {
-  const n = title.length
-  if (n <= 24) return { fontSize: 46, text: title }
-  if (n <= 32) return { fontSize: 38, text: title }
-  if (n <= 42) return { fontSize: 30, text: title }
-  return { fontSize: 24, text: n > 52 ? title.slice(0, 51) + '…' : title }
+  const MAX = 35
+  const text = title.length > MAX ? title.slice(0, MAX - 1) + '…' : title
+  return { fontSize: 36, text }
 }
 
 /**
- * Dynamic font size for Epilogue 700 titles (tonightList, weeklyFive).
- * Conservative char-width estimate: 0.54 × fontSize.
+ * Fixed-size title for Epilogue 700 rows (tonightList, weeklyFive).
+ * All rows in a given template use the same size — no per-row variation.
+ * Char estimate: 0.56 × fontSize (slightly conservative for bold).
+ * Max chars = floor(availWidth / (fontSize × 0.56)).
  */
 function epilogueTitleSize(title: string, availWidth: number): { fontSize: number; text: string } {
-  const charsAt = (px: number) => Math.floor(availWidth / (px * 0.54))
-  const n = title.length
-  if (n <= charsAt(48)) return { fontSize: 48, text: title }
-  if (n <= charsAt(40)) return { fontSize: 40, text: title }
-  if (n <= charsAt(32)) return { fontSize: 32, text: title }
-  const max = charsAt(26)
-  return { fontSize: 26, text: n > max ? title.slice(0, max - 1) + '…' : title }
+  const FONT_SIZE = 40
+  const MAX = Math.floor(availWidth / (FONT_SIZE * 0.56))
+  const text = title.length > MAX ? title.slice(0, MAX - 1) + '…' : title
+  return { fontSize: FONT_SIZE, text }
 }
 
 const weekendDigest: Template = {
