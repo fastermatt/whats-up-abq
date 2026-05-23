@@ -1,13 +1,19 @@
 /**
  * GET /api/admin/ig/digest-events
  *
- * Returns the top N events for a given time period, ranked by popularity
- * score (or heuristic if score is absent). Used to auto-populate the
- * digest IG templates (weekend-digest, tonight-list, weekly-five).
+ * Returns a pool of top candidates for a given period plus a recommended
+ * selection of 5 that maximises category variety.
  *
  * Query params:
  *   period  — 'tonight' | 'this-weekend' | 'this-week' (default: 'this-weekend')
- *   limit   — number of events to return (default: 5, max: 10)
+ *   pool    — total candidates to return (default: 12, max: 20)
+ *   picks   — how many events to recommend (default: 5, max: 8)
+ *
+ * Response:
+ *   { period, start, end, events: DigestEvent[], recommended: string[] }
+ *
+ *   `events`      — full ranked pool (up to `pool` events)
+ *   `recommended` — IDs of the diverse top picks the UI should pre-select
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -26,6 +32,14 @@ export interface DigestEvent {
   popularityScore: number
 }
 
+export interface DigestResponse {
+  period: string
+  start: string
+  end: string
+  events: DigestEvent[]
+  recommended: string[]  // IDs of category-diverse top picks
+}
+
 type Period = 'tonight' | 'this-weekend' | 'this-week'
 
 function isAuthorized(request: NextRequest): boolean {
@@ -35,7 +49,6 @@ function isAuthorized(request: NextRequest): boolean {
 }
 
 function toMDT(d: Date): string {
-  // Return YYYY-MM-DD in America/Denver
   return d.toLocaleDateString('en-CA', { timeZone: 'America/Denver' })
 }
 
@@ -48,20 +61,15 @@ function getDateRange(period: Period): { start: string; end: string } {
   }
 
   if (period === 'this-weekend') {
-    // Sat + Sun of the current week (or next weekend if today is Mon–Thu)
-    const dayOfWeek = now.getDay() // 0=Sun, 6=Sat
-    let daysToSat = (6 - dayOfWeek + 7) % 7
-    if (daysToSat === 0) daysToSat = 0 // today IS Saturday
-    const sat = new Date(now)
-    sat.setDate(now.getDate() + daysToSat)
-    const sun = new Date(sat)
-    sun.setDate(sat.getDate() + 1)
+    const dayOfWeek = now.getDay()
+    const daysToSat = (6 - dayOfWeek + 7) % 7 || 0
+    const sat = new Date(now); sat.setDate(now.getDate() + daysToSat)
+    const sun = new Date(sat); sun.setDate(sat.getDate() + 1)
     return { start: toMDT(sat), end: toMDT(sun) }
   }
 
-  // this-week: today through 6 days out
-  const end = new Date(now)
-  end.setDate(now.getDate() + 6)
+  // this-week: today + 6 days
+  const end = new Date(now); end.setDate(now.getDate() + 6)
   return { start: todayMDT, end: toMDT(end) }
 }
 
@@ -85,6 +93,45 @@ function heuristicScore(row: Record<string, unknown>): number {
   return Math.min(10, Math.max(1, s))
 }
 
+/**
+ * Diversity selection: walk the sorted list and pick the best event from
+ * each category first, then fill remaining slots from whatever's left.
+ * Result: at most 1 per category until we have `picks` events, then
+ * continue filling from high-score events regardless of category if
+ * there aren't enough distinct categories.
+ */
+function selectDiverse(
+  events: DigestEvent[],
+  picks: number,
+): string[] {
+  const seenCat = new Set<string>()
+  const selected: string[] = []
+
+  // First pass: one per category
+  for (const e of events) {
+    if (selected.length >= picks) break
+    const cat = e.category ?? '__none__'
+    if (!seenCat.has(cat)) {
+      seenCat.add(cat)
+      selected.push(e.id)
+    }
+  }
+
+  // Second pass: fill remaining slots from top score (may repeat categories)
+  if (selected.length < picks) {
+    const selectedSet = new Set(selected)
+    for (const e of events) {
+      if (selected.length >= picks) break
+      if (!selectedSet.has(e.id)) {
+        selected.push(e.id)
+        selectedSet.add(e.id)
+      }
+    }
+  }
+
+  return selected
+}
+
 interface EventRow {
   id: string
   raw: Record<string, unknown> | null
@@ -97,15 +144,44 @@ interface EventRow {
   source: string | null
 }
 
+function rowToDigestEvent(row: EventRow, score: number): DigestEvent {
+  const raw  = row.raw ?? {}
+  const dates = (raw as Record<string, Record<string, unknown>>).dates as
+    | Record<string, Record<string, unknown>>
+    | undefined
+  const time =
+    (dates?.start?.localTime as string | undefined) ??
+    ((raw as Record<string, unknown>).time as string | undefined) ??
+    null
+
+  let formattedTime = time
+  if (time && /^\d{2}:\d{2}(:\d{2})?$/.test(time)) {
+    const [h, m] = time.split(':').map(Number)
+    const ampm = h >= 12 ? 'PM' : 'AM'
+    formattedTime = `${h % 12 || 12}:${String(m).padStart(2, '0')} ${ampm}`
+  }
+
+  return {
+    id:              String(row.id),
+    title:           String((raw as Record<string, unknown>).name ?? ''),
+    date:            String(row.event_date).slice(0, 10),
+    time:            formattedTime,
+    venue:           row.venue_name,
+    category:        row.category,
+    imageUrl:        row.cached_photo_url,
+    popularityScore: Math.round(score * 10) / 10,
+  }
+}
+
 export async function GET(request: NextRequest) {
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const url = new URL(request.url)
-  const period  = (url.searchParams.get('period') ?? 'this-weekend') as Period
-  const limitRaw = parseInt(url.searchParams.get('limit') ?? '5', 10)
-  const limit    = Math.min(Math.max(1, limitRaw), 10)
+  const url   = new URL(request.url)
+  const period = (url.searchParams.get('period') ?? 'this-weekend') as Period
+  const pool   = Math.min(Math.max(5, parseInt(url.searchParams.get('pool') ?? '12', 10)), 20)
+  const picks  = Math.min(Math.max(1, parseInt(url.searchParams.get('picks') ?? '5', 10)), 8)
 
   if (!['tonight', 'this-weekend', 'this-week'].includes(period)) {
     return NextResponse.json({ error: 'Invalid period' }, { status: 400 })
@@ -129,43 +205,23 @@ export async function GET(request: NextRequest) {
 
   const rows = (data as EventRow[]) ?? []
 
-  // Score and sort
-  const scored = rows.map(row => {
-    const score = row.popularity_score ?? heuristicScore(row as unknown as Record<string, unknown>)
-    return { row, score }
-  })
-  scored.sort((a, b) => b.score - a.score)
+  // Score and sort descending
+  const scored = rows
+    .map(row => ({
+      row,
+      score: row.popularity_score ?? heuristicScore(row as unknown as Record<string, unknown>),
+    }))
+    .sort((a, b) => b.score - a.score)
 
-  const events: DigestEvent[] = scored.slice(0, limit).map(({ row, score }) => {
-    const raw  = row.raw ?? {}
-    const dates = (raw as Record<string, Record<string, unknown>>).dates as
-      | Record<string, Record<string, unknown>>
-      | undefined
-    const time =
-      (dates?.start?.localTime as string | undefined) ??
-      ((raw as Record<string, unknown>).time as string | undefined) ??
-      null
+  // Build the pool of candidates
+  const events: DigestEvent[] = scored.slice(0, pool).map(({ row, score }) =>
+    rowToDigestEvent(row, score)
+  )
 
-    // Format time to "7:00 PM" style if it's HH:MM:SS
-    let formattedTime = time
-    if (time && /^\d{2}:\d{2}(:\d{2})?$/.test(time)) {
-      const [h, m] = time.split(':').map(Number)
-      const ampm = h >= 12 ? 'PM' : 'AM'
-      const h12  = h % 12 || 12
-      formattedTime = `${h12}:${String(m).padStart(2, '0')} ${ampm}`
-    }
+  // Recommend diverse picks from the full sorted pool (not just the sliced pool)
+  const allEvents: DigestEvent[] = scored.map(({ row, score }) => rowToDigestEvent(row, score))
+  const recommended = selectDiverse(allEvents, picks)
 
-    return {
-      id:             String(row.id),
-      title:          String((raw as Record<string, unknown>).name ?? ''),
-      date:           String(row.event_date).slice(0, 10),
-      time:           formattedTime,
-      venue:          row.venue_name,
-      category:       row.category,
-      imageUrl:       row.cached_photo_url,
-      popularityScore: Math.round(score * 10) / 10,
-    }
-  })
-
-  return NextResponse.json({ period, start, end, events })
+  const body: DigestResponse = { period, start, end, events, recommended }
+  return NextResponse.json(body)
 }
