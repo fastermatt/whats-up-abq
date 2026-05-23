@@ -1772,6 +1772,47 @@ const DIGEST_FALLBACKS = [
   { title: 'Fifth event',           venue: 'Venue Name',   time: '' },
 ]
 
+/**
+ * Resolve a digest slot's display title.
+ * DB events sometimes have empty title strings — fall back to venue name,
+ * then to a generic placeholder so the text layer is never empty/invisible.
+ */
+function resolveTitle(raw: string, venue: string): string {
+  const t = raw.trim()
+  if (t) return t
+  const v = venue.trim()
+  if (v) return v
+  return 'Event TBA'
+}
+
+/**
+ * Dynamic font size for Fraunces italic titles (weekendDigest).
+ * Ensures the title fits within ~1 line on a 812px-wide column.
+ * Conservative char-width estimate: 0.58 × fontSize.
+ * len ≤ 24 → 46px | ≤ 32 → 38px | ≤ 42 → 30px | else → 24px + truncate.
+ */
+function frauncesTitleSize(title: string): { fontSize: number; text: string } {
+  const n = title.length
+  if (n <= 24) return { fontSize: 46, text: title }
+  if (n <= 32) return { fontSize: 38, text: title }
+  if (n <= 42) return { fontSize: 30, text: title }
+  return { fontSize: 24, text: n > 52 ? title.slice(0, 51) + '…' : title }
+}
+
+/**
+ * Dynamic font size for Epilogue 700 titles (tonightList, weeklyFive).
+ * Conservative char-width estimate: 0.54 × fontSize.
+ */
+function epilogueTitleSize(title: string, availWidth: number): { fontSize: number; text: string } {
+  const charsAt = (px: number) => Math.floor(availWidth / (px * 0.54))
+  const n = title.length
+  if (n <= charsAt(48)) return { fontSize: 48, text: title }
+  if (n <= charsAt(40)) return { fontSize: 40, text: title }
+  if (n <= charsAt(32)) return { fontSize: 32, text: title }
+  const max = charsAt(26)
+  return { fontSize: 26, text: n > max ? title.slice(0, max - 1) + '…' : title }
+}
+
 const weekendDigest: Template = {
   id: 'weekend-digest',
   name: 'Weekend Digest',
@@ -1806,16 +1847,19 @@ const weekendDigest: Template = {
     const fmtD = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     const weekendRange = `${fmtD(sat)} – ${fmtD(sun)}`
 
-    // Merge provided events with fallbacks
+    // Merge provided events with fallbacks; guard against empty titles from DB
     const slots = Array.from({ length: 5 }, (_, i) => {
       const e = ctx.events?.[i]
-      if (e) return { title: e.title, venue: e.venue ?? '', time: e.time ?? '' }
+      if (e) {
+        const venue = e.venue ?? ''
+        return { title: resolveTitle(e.title, venue), venue, time: e.time ?? '' }
+      }
       return DIGEST_FALLBACKS[i]
     })
 
     // Layout constants (all in 1350-unit space, scaled by sy())
     const ROW_START = 480
-    const ROW_H     = 136
+    const ROW_H     = 152   // bumped from 136 — gives meta + divider proper breathing room
 
     const layers: Layer[] = [
       logo(LOGO_T, 80, sy(42), 50),
@@ -1845,9 +1889,11 @@ const weekendDigest: Template = {
 
     // 5 event rows
     slots.forEach((slot, i) => {
-      const y = sy(ROW_START + i * ROW_H)
+      const y   = sy(ROW_START + i * ROW_H)
       const num = String(i + 1).padStart(2, '0')
       const meta = [slot.time, slot.venue].filter(Boolean).join(' · ')
+      // Scale font so title always fits in ~1 line — no wrapping, no collisions
+      const { fontSize: titleSize, text: titleText } = frauncesTitleSize(slot.title)
       layers.push(
         textLayer({
           name: `No.${num}`, text: num,
@@ -1856,23 +1902,23 @@ const weekendDigest: Template = {
           fill: BRAND_COLORS.terra,
         }),
         textLayer({
-          name: `Event ${i + 1}`, text: slot.title,
-          x: 180, y: y + sy(4), width: w - 268,
-          fontFamily: font('Fraunces'), fontSize: 46, fontStyle: 'italic', fontWeight: 400,
+          name: `Event ${i + 1}`, text: titleText,
+          x: 180, y: y + sy(4), width: w - 280,
+          fontFamily: font('Fraunces'), fontSize: titleSize, fontStyle: 'italic', fontWeight: 400,
           fill: BRAND_COLORS.ink, lineHeight: 1.05,
         }),
         ...(meta ? [textLayer({
           name: `Meta ${i + 1}`, text: meta,
-          x: 180, y: y + sy(60), width: w - 268,
-          fontFamily: font('Inter'), fontSize: 23, fontWeight: 500,
+          x: 180, y: y + sy(62), width: w - 280,
+          fontFamily: font('Inter'), fontSize: 22, fontWeight: 500,
           fill: BRAND_COLORS.ink, opacity: 0.42, lineHeight: 1,
         })] : []),
-        shape({ shape: 'rect', x: 80, y: y + sy(106), width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.1 }),
+        shape({ shape: 'rect', x: 80, y: y + sy(118), width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.1 }),
       )
     })
 
     // Footer
-    const footerY = sy(ROW_START + 5 * ROW_H + 24)
+    const footerY = sy(ROW_START + 5 * ROW_H + 18)
     layers.push(
       shape({ shape: 'rect', x: 80, y: footerY, width: w - 160, height: 3, fill: BRAND_COLORS.terra }),
       logo(LOGO_T, Math.round((w - Math.round(52 * LOGO_R)) / 2), footerY + sy(26), 52),
@@ -1926,12 +1972,15 @@ const tonightList: Template = {
 
     const slots = Array.from({ length: 5 }, (_, i) => {
       const e = ctx.events?.[i]
-      if (e) return { title: e.title, time: e.time ?? '', venue: e.venue ?? '' }
+      if (e) {
+        const venue = e.venue ?? ''
+        return { title: resolveTitle(e.title, venue), time: e.time ?? '', venue }
+      }
       return { ...DIGEST_FALLBACKS[i], time: '' }
     })
 
     const ROW_START = 400
-    const ROW_H     = 144
+    const ROW_H     = 156   // bumped from 144
 
     const layers: Layer[] = [
       logo(LOGO_W, 80, sy(42), 50),
@@ -1960,32 +2009,33 @@ const tonightList: Template = {
 
     // 5 event rows
     slots.forEach((slot, i) => {
-      const y = sy(ROW_START + i * ROW_H)
+      const y    = sy(ROW_START + i * ROW_H)
       const meta = [slot.time, slot.venue].filter(Boolean).join(' · ')
+      const { fontSize: titleSize, text: titleText } = epilogueTitleSize(slot.title, w - 160)
       layers.push(
         textLayer({
-          name: `Event ${i + 1}`, text: slot.title,
+          name: `Event ${i + 1}`, text: titleText,
           x: 80, y: y, width: w - 160,
-          fontFamily: font('Epilogue'), fontSize: 48, fontWeight: 700,
+          fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 700,
           fill: BRAND_COLORS.cream, lineHeight: 1.05, letterSpacing: -0.5,
         }),
         ...(meta ? [textLayer({
           name: `Meta ${i + 1}`, text: meta,
-          x: 80, y: y + sy(60), width: w - 160,
-          fontFamily: font('DM Mono'), fontSize: 23, fontWeight: 500,
+          x: 80, y: y + sy(64), width: w - 160,
+          fontFamily: font('DM Mono'), fontSize: 22, fontWeight: 500,
           fill: BRAND_COLORS.terra, opacity: 0.9, lineHeight: 1,
         })] : []),
-        shape({ shape: 'rect', x: 80, y: y + sy(112), width: w - 160, height: 1, fill: BRAND_COLORS.cream, opacity: 0.1 }),
+        shape({ shape: 'rect', x: 80, y: y + sy(122), width: w - 160, height: 1, fill: BRAND_COLORS.cream, opacity: 0.1 }),
       )
     })
 
     // Footer
-    const footerY = sy(ROW_START + 5 * ROW_H + 30)
+    const footerY = sy(ROW_START + 5 * ROW_H + 22)
     layers.push(
       logo(LOGO_W, Math.round((w - Math.round(52 * LOGO_R)) / 2), footerY, 52),
       textLayer({
         name: 'URL', text: 'abqunplugged.com',
-        x: 80, y: footerY + sy(72), width: w - 160,
+        x: 80, y: footerY + sy(68), width: w - 160,
         fontFamily: font('DM Mono'), fontSize: 20, fontWeight: 400,
         fill: BRAND_COLORS.cream, opacity: 0.3, align: 'center', letterSpacing: 2,
       }),
@@ -2037,12 +2087,15 @@ const weeklyFive: Template = {
 
     const slots = Array.from({ length: 5 }, (_, i) => {
       const e = ctx.events?.[i]
-      if (e) return { title: e.title, venue: e.venue ?? '', time: e.time ?? '' }
+      if (e) {
+        const venue = e.venue ?? ''
+        return { title: resolveTitle(e.title, venue), venue, time: e.time ?? '' }
+      }
       return DIGEST_FALLBACKS[i]
     })
 
     const ROW_START = 468
-    const ROW_H     = 144
+    const ROW_H     = 144   // already tight due to high ROW_START — font scaling prevents wrapping
 
     const layers: Layer[] = [
       logo(LOGO_W, 80, sy(42), 50),
@@ -2082,11 +2135,12 @@ const weeklyFive: Template = {
       }),
     ]
 
-    // 5 event rows
+    // 5 event rows — title width is w-258 (170px indent for number column)
     slots.forEach((slot, i) => {
-      const y = sy(ROW_START + i * ROW_H)
+      const y   = sy(ROW_START + i * ROW_H)
       const num = String(i + 1).padStart(2, '0')
       const meta = [slot.time, slot.venue].filter(Boolean).join(' · ')
+      const { fontSize: titleSize, text: titleText } = epilogueTitleSize(slot.title, w - 258)
       layers.push(
         textLayer({
           name: `No.${num}`, text: num,
@@ -2095,23 +2149,23 @@ const weeklyFive: Template = {
           fill: BRAND_COLORS.cream, opacity: 0.3,
         }),
         textLayer({
-          name: `Event ${i + 1}`, text: slot.title,
+          name: `Event ${i + 1}`, text: titleText,
           x: 170, y: y + sy(2), width: w - 258,
-          fontFamily: font('Epilogue'), fontSize: 46, fontWeight: 700,
+          fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 700,
           fill: BRAND_COLORS.cream, lineHeight: 1.05, letterSpacing: -0.5,
         }),
         ...(meta ? [textLayer({
           name: `Meta ${i + 1}`, text: meta,
-          x: 170, y: y + sy(60), width: w - 258,
-          fontFamily: font('Inter'), fontSize: 23, fontWeight: 400,
+          x: 170, y: y + sy(64), width: w - 258,
+          fontFamily: font('Inter'), fontSize: 22, fontWeight: 400,
           fill: BRAND_COLORS.cream, opacity: 0.5, lineHeight: 1,
         })] : []),
-        shape({ shape: 'rect', x: 80, y: y + sy(112), width: w - 160, height: 1, fill: BRAND_COLORS.cream, opacity: 0.15 }),
+        shape({ shape: 'rect', x: 80, y: y + sy(122), width: w - 160, height: 1, fill: BRAND_COLORS.cream, opacity: 0.15 }),
       )
     })
 
     // Footer
-    const footerY = sy(ROW_START + 5 * ROW_H + 30)
+    const footerY = sy(ROW_START + 5 * ROW_H + 22)
     layers.push(
       logo(LOGO_W, Math.round((w - Math.round(52 * LOGO_R)) / 2), footerY, 52),
       textLayer({
