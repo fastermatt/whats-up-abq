@@ -1887,10 +1887,10 @@ const weekendDigest: Template = {
       textLayer({
         name: 'Date Range', text: weekendRange,
         x: 80, y: sy(430), width: w - 160,
-        fontFamily: font('DM Mono'), fontSize: 27, fontWeight: 500,
-        fill: BRAND_COLORS.ink, opacity: 0.42,
+        fontFamily: font('DM Mono'), fontSize: 30, fontWeight: 500,
+        fill: BRAND_COLORS.ink, opacity: 0.58,
       }),
-      shape({ shape: 'rect', x: 80, y: sy(464), width: w - 160, height: 2, fill: BRAND_COLORS.terra, opacity: 0.45 }),
+      shape({ shape: 'rect', x: 80, y: sy(466), width: w - 160, height: 2, fill: BRAND_COLORS.terra, opacity: 0.45 }),
     ]
 
     // 5 event rows
@@ -1917,9 +1917,9 @@ const weekendDigest: Template = {
           name: `Meta ${i + 1}`, text: meta,
           x: 180, y: y + sy(62), width: w - 280,
           fontFamily: font('Inter'), fontSize: 22, fontWeight: 500,
-          fill: BRAND_COLORS.ink, opacity: 0.42, lineHeight: 1,
+          fill: BRAND_COLORS.ink, opacity: 0.52, lineHeight: 1,
         })] : []),
-        shape({ shape: 'rect', x: 80, y: y + sy(118), width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.1 }),
+        shape({ shape: 'rect', x: 80, y: y + sy(118), width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.13 }),
       )
     })
 
