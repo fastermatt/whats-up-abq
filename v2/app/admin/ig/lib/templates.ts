@@ -1785,11 +1785,13 @@ function resolveTitle(raw: string, venue: string): string {
   return 'Event TBA'
 }
 
-/** "2025-05-24" → "Sat" (uses noon to avoid DST edge-cases) */
+/** "2025-05-24" → "Sat May 24" (uses noon to avoid DST edge-cases) */
 function shortDay(date: string | undefined): string {
   if (!date) return ''
   const d = new Date(date + 'T12:00:00')
-  return d.toLocaleDateString('en-US', { weekday: 'short' })
+  const day = d.toLocaleDateString('en-US', { weekday: 'short' })
+  const md  = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  return `${day} ${md}`
 }
 
 /**

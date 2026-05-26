@@ -353,7 +353,10 @@ export default function DigestPage() {
                   {activeEvents.map((e, i) => (
                     <div key={e.id} className="flex items-center gap-2 p-2 rounded-lg bg-[#9a442d]/10 border border-[#9a442d]/25">
                       <span className="flex-shrink-0 text-[10px] font-bold text-[#9a442d] w-4 text-center">{i + 1}</span>
-                      <p className="flex-1 text-xs text-white/85 font-medium truncate leading-tight">{e.title || e.venue || 'Event TBA'}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-white/85 font-medium truncate leading-tight">{e.title || e.venue || 'Event TBA'}</p>
+                        <p className="text-[10px] text-white/35 leading-tight mt-0.5">{fmtDate(e.date)}</p>
+                      </div>
                       <button
                         onClick={() => removeSlot(e.id)}
                         className="flex-shrink-0 text-white/25 hover:text-white/60 transition-colors"
@@ -451,6 +454,10 @@ export default function DigestPage() {
                             )}
                           </div>
                           <div className="flex flex-wrap items-center gap-x-2 mt-0.5">
+                            <span className="flex items-center gap-1 text-[10px] text-white/50 font-medium">
+                              <Calendar className="w-2.5 h-2.5" />
+                              {fmtDate(e.date)}
+                            </span>
                             {e.time && (
                               <span className="flex items-center gap-1 text-[10px] text-white/35">
                                 <Clock className="w-2.5 h-2.5" />
