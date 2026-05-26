@@ -223,7 +223,8 @@ export default function DigestPage() {
         '',
         ...activeEvents.slice(0, 5).map((e, i) => {
           const t = formatTime(e.time)
-          return `${i + 1}. ${e.title}${t ? ' · ' + t : ''}${e.venue ? ' @ ' + e.venue : ''}`
+          const name = e.title || e.venue || 'Event TBA'
+          return `${i + 1}. ${name}${t ? ' · ' + t : ''}${e.venue ? ' @ ' + e.venue : ''}`
         }),
         '',
         'Full details → abqunplugged.com',
@@ -352,7 +353,7 @@ export default function DigestPage() {
                   {activeEvents.map((e, i) => (
                     <div key={e.id} className="flex items-center gap-2 p-2 rounded-lg bg-[#9a442d]/10 border border-[#9a442d]/25">
                       <span className="flex-shrink-0 text-[10px] font-bold text-[#9a442d] w-4 text-center">{i + 1}</span>
-                      <p className="flex-1 text-xs text-white/85 font-medium truncate leading-tight">{e.title}</p>
+                      <p className="flex-1 text-xs text-white/85 font-medium truncate leading-tight">{e.title || e.venue || 'Event TBA'}</p>
                       <button
                         onClick={() => removeSlot(e.id)}
                         className="flex-shrink-0 text-white/25 hover:text-white/60 transition-colors"
@@ -441,7 +442,7 @@ export default function DigestPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start gap-1.5 flex-wrap">
                             <p className={`text-xs font-semibold leading-tight ${isSelected ? 'text-white' : 'text-white/80'}`}>
-                              {e.title}
+                              {e.title || e.venue || 'Event TBA'}
                             </p>
                             {e.category && (
                               <span className={`flex-shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full ${catClass}`}>

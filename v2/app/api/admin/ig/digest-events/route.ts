@@ -161,9 +161,13 @@ function rowToDigestEvent(row: EventRow, score: number): DigestEvent {
     formattedTime = `${h % 12 || 12}:${String(m).padStart(2, '0')} ${ampm}`
   }
 
+  // raw.name (Ticketmaster/SeatGeek) | raw.title (local/volunteer/Eventbrite) | venue fallback
+  const r = raw as Record<string, unknown>
+  const title = String(r.name ?? r.title ?? '').trim() || (row.venue_name ?? '')
+
   return {
     id:              String(row.id),
-    title:           String((raw as Record<string, unknown>).name ?? ''),
+    title,
     date:            String(row.event_date).slice(0, 10),
     time:            formattedTime,
     venue:           row.venue_name,
