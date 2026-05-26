@@ -173,6 +173,7 @@ export default function DigestPage() {
   // ── Event pool state ───────────────────────────────────────────────────
   const [pool,         setPool]         = useState<DigestEvent[]>([])
   const [selected,     setSelected]     = useState<string[]>([])
+  const [poolSort,     setPoolSort]     = useState<'score' | 'date'>('score')
   const [loading,      setLoading]      = useState(false)
   const [fetchError,   setFetchError]   = useState<string | null>(null)
   const [actionStatus, setActionStatus] = useState<ActionStatus>('idle')
@@ -213,10 +214,23 @@ export default function DigestPage() {
     [templateId]
   )
 
-  const activeEvents = useMemo(
-    () => selected.map(id => pool.find(e => e.id === id)).filter(Boolean) as DigestEvent[],
-    [selected, pool]
-  )
+  const sortedPool = useMemo(() => {
+    if (poolSort === 'date') {
+      return [...pool].sort((a, b) => {
+        const dateCmp = a.date.localeCompare(b.date)
+        if (dateCmp !== 0) return dateCmp
+        return (a.time ?? '').localeCompare(b.time ?? '')
+      })
+    }
+    return pool // already sorted by score from API
+  }, [pool, poolSort])
+
+  const activeEvents = useMemo(() => {
+    const items = selected
+      .map(id => pool.find(e => e.id === id))
+      .filter(Boolean) as DigestEvent[]
+    return items.sort((a, b) => a.date.localeCompare(b.date))
+  }, [selected, pool])
 
   // ── Canvas sync ────────────────────────────────────────────────────────
   const ctx: TemplateContext = useMemo(() => ({
@@ -490,14 +504,37 @@ export default function DigestPage() {
                 <p className="text-[11px] uppercase tracking-[0.14em] text-white/35 font-semibold">
                   Event Pool
                 </p>
-                <button
-                  onClick={fetchPool}
-                  disabled={loading}
-                  className="flex items-center gap-1 text-[11px] text-white/30 hover:text-white/60 transition-colors"
-                >
-                  {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
-                  Refresh
-                </button>
+                <div className="flex items-center gap-2">
+                  {/* Sort toggle */}
+                  <div className="flex items-center rounded-lg border border-white/10 overflow-hidden text-[10px] font-semibold">
+                    <button
+                      onClick={() => setPoolSort('score')}
+                      className={[
+                        'px-2 py-1 transition-colors',
+                        poolSort === 'score' ? 'bg-white/10 text-white/75' : 'text-white/25 hover:text-white/50',
+                      ].join(' ')}
+                    >
+                      Score
+                    </button>
+                    <button
+                      onClick={() => setPoolSort('date')}
+                      className={[
+                        'px-2 py-1 transition-colors',
+                        poolSort === 'date' ? 'bg-white/10 text-white/75' : 'text-white/25 hover:text-white/50',
+                      ].join(' ')}
+                    >
+                      Date
+                    </button>
+                  </div>
+                  <button
+                    onClick={fetchPool}
+                    disabled={loading}
+                    className="flex items-center gap-1 text-[11px] text-white/30 hover:text-white/60 transition-colors"
+                  >
+                    {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                    Refresh
+                  </button>
+                </div>
               </div>
 
               {fetchError && (
@@ -519,7 +556,7 @@ export default function DigestPage() {
                 </div>
               ) : (
                 <div className="space-y-1">
-                  {pool.map(e => {
+                  {sortedPool.map(e => {
                     const isSelected = selected.includes(e.id)
                     const slotNum    = selected.indexOf(e.id) + 1
                     const catClass   = CAT_COLORS[e.category ?? ''] ?? 'bg-white/10 text-white/40'
