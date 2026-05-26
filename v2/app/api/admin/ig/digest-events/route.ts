@@ -238,9 +238,9 @@ export async function GET(request: NextRequest) {
     rowToDigestEvent(row, score)
   )
 
-  // Recommend diverse picks from the full sorted pool (not just the sliced pool)
-  const allEvents: DigestEvent[] = scored.map(({ row, score }) => rowToDigestEvent(row, score))
-  const recommended = selectDiverse(allEvents, picks)
+  // Recommend diverse picks from within the pool only — so all recommended IDs
+  // exist in the pool the client receives (prevents ghost selections that block picking)
+  const recommended = selectDiverse(events, picks)
 
   const body: DigestResponse = { period, start, end, events, recommended }
   return NextResponse.json(body)
