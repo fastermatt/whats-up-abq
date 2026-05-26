@@ -183,15 +183,31 @@ export async function GET(request: NextRequest) {
   }
 
   const url   = new URL(request.url)
-  const period = (url.searchParams.get('period') ?? 'this-weekend') as Period
   const pool   = Math.min(Math.max(5, parseInt(url.searchParams.get('pool') ?? '12', 10)), 20)
   const picks  = Math.min(Math.max(1, parseInt(url.searchParams.get('picks') ?? '5', 10)), 8)
 
-  if (!['tonight', 'this-weekend', 'this-week'].includes(period)) {
-    return NextResponse.json({ error: 'Invalid period' }, { status: 400 })
-  }
+  // Accept explicit start+end dates OR fall back to period preset
+  const startParam = url.searchParams.get('start')
+  const endParam   = url.searchParams.get('end')
+  let start: string, end: string, period: string
 
-  const { start, end } = getDateRange(period)
+  if (startParam && endParam) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(startParam) || !/^\d{4}-\d{2}-\d{2}$/.test(endParam)) {
+      return NextResponse.json({ error: 'start/end must be YYYY-MM-DD' }, { status: 400 })
+    }
+    start  = startParam
+    end    = endParam
+    period = start === end ? 'tonight' : 'custom'
+  } else {
+    const p = (url.searchParams.get('period') ?? 'this-weekend') as Period
+    if (!['tonight', 'this-weekend', 'this-week'].includes(p)) {
+      return NextResponse.json({ error: 'Invalid period' }, { status: 400 })
+    }
+    const range = getDateRange(p)
+    start  = range.start
+    end    = range.end
+    period = p
+  }
 
   const supabase = await createServiceClient()
   const { data, error } = await supabase

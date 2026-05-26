@@ -3,8 +3,8 @@
 /**
  * /admin/ig/digest — Multi-event digest post builder
  *
- * Fetches a pool of top events (category-diverse by default) for the
- * chosen period and lets you toggle which 5 appear in the post.
+ * Pick a date, date range, or quick preset → auto-selects template and
+ * schedule time → fetches events for that window → toggle which 5 appear.
  *
  * Canvas rendering: loadDesign() → Zustand store → PostCanvas rerenders
  */
@@ -29,13 +29,15 @@ const PostCanvas = dynamic(
 
 // ─── Types ────────────────────────────────────────────────────────────────
 
-type Period = 'tonight' | 'this-weekend' | 'this-week'
+type Preset = 'today' | 'this-weekend' | 'this-week' | 'next-weekend' | 'next-week'
 type ActionStatus = 'idle' | 'rendering' | 'uploading' | 'scheduled' | 'failed'
 
-const PERIODS: { id: Period; label: string; sub: string; template: string }[] = [
-  { id: 'tonight',      label: 'Tonight',      sub: "What's on today",  template: 'tonight-list'   },
-  { id: 'this-weekend', label: 'This Weekend',  sub: 'Sat & Sun picks',  template: 'weekend-digest' },
-  { id: 'this-week',    label: 'This Week',     sub: '7-day top picks',  template: 'weekly-five'    },
+const PRESETS: { id: Preset; label: string }[] = [
+  { id: 'today',        label: 'Today'         },
+  { id: 'this-weekend', label: 'This Weekend'  },
+  { id: 'this-week',    label: 'This Week'     },
+  { id: 'next-weekend', label: 'Next Weekend'  },
+  { id: 'next-week',    label: 'Next Week'     },
 ]
 
 const CAT_COLORS: Record<string, string> = {
@@ -86,17 +88,70 @@ function fmtDate(iso: string): string {
   })
 }
 
-function defaultScheduleAt(period: Period): string {
-  const d = new Date()
-  period === 'tonight' ? d.setHours(17, 0, 0, 0) : (d.setDate(d.getDate() + 1), d.setHours(10, 0, 0, 0))
-  return [
-    d.getFullYear(),
-    String(d.getMonth() + 1).padStart(2, '0'),
-    String(d.getDate()).padStart(2, '0'),
-  ].join('-') + 'T' + [
-    String(d.getHours()).padStart(2, '0'),
-    '00',
-  ].join(':')
+/** YYYY-MM-DD today in MDT */
+function todayMDT(): string {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Denver' })
+}
+
+/** Add N days to a YYYY-MM-DD string */
+function addDays(dateStr: string, days: number): string {
+  const d = new Date(dateStr + 'T12:00:00')
+  d.setDate(d.getDate() + days)
+  return d.toLocaleDateString('en-CA')
+}
+
+function getPresetDates(preset: Preset): { start: string; end: string } {
+  const today = todayMDT()
+  const dow   = new Date(today + 'T12:00:00').getDay() // 0=Sun…6=Sat
+
+  if (preset === 'today') return { start: today, end: today }
+
+  if (preset === 'this-weekend') {
+    const daysToSat = dow === 6 ? 0 : (6 - dow + 7) % 7 || 7
+    const sat = addDays(today, daysToSat)
+    return { start: sat, end: addDays(sat, 1) }
+  }
+
+  if (preset === 'this-week') {
+    return { start: today, end: addDays(today, 6) }
+  }
+
+  if (preset === 'next-weekend') {
+    const daysToSat = ((6 - dow + 7) % 7 || 7) + 7
+    const sat = addDays(today, daysToSat)
+    return { start: sat, end: addDays(sat, 1) }
+  }
+
+  if (preset === 'next-week') {
+    const daysToMon = (8 - dow) % 7 || 7
+    const mon = addDays(today, daysToMon)
+    return { start: mon, end: addDays(mon, 6) }
+  }
+
+  return { start: today, end: today }
+}
+
+/** Choose template automatically from date span */
+function templateForSpan(start: string, end: string): string {
+  if (start === end) return 'tonight-list'
+  const days = Math.round(
+    (new Date(end + 'T12:00:00').getTime() - new Date(start + 'T12:00:00').getTime()) / 86400000
+  ) + 1
+  return days <= 2 ? 'weekend-digest' : 'weekly-five'
+}
+
+/** Auto-suggest schedule time: single day → 5 PM that day; multi → day before at 6 PM */
+function autoSchedule(start: string, end: string): string {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  const fmt  = (d: Date)  => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:00`
+  const d = new Date(start + 'T12:00:00')
+  if (start === end) {
+    d.setHours(17, 0, 0, 0)
+    return fmt(d)
+  }
+  d.setDate(d.getDate() - 1)
+  d.setHours(18, 0, 0, 0)
+  return fmt(d)
 }
 
 // ─── Page ──────────────────────────────────────────────────────────────────
@@ -105,30 +160,59 @@ export default function DigestPage() {
   const { loadDesign } = useEditor()
   const canvasRef = useRef<PostCanvasHandle | null>(null)
 
-  // ── State ──────────────────────────────────────────────────────────────
-  const [period,       setPeriod]       = useState<Period>('this-weekend')
-  const [templateId,   setTemplateId]   = useState('weekend-digest')
+  // ── Date range state ───────────────────────────────────────────────────
+  const initPreset: Preset = 'this-weekend'
+  const { start: initStart, end: initEnd } = getPresetDates(initPreset)
+
+  const [preset,      setPreset]      = useState<Preset | null>(initPreset)
+  const [startDate,   setStartDate]   = useState(initStart)
+  const [endDate,     setEndDate]     = useState(initEnd)
+  const [templateId,  setTemplateId]  = useState(() => templateForSpan(initStart, initEnd))
+  const [scheduledAt, setScheduledAt] = useState(() => autoSchedule(initStart, initEnd))
+
+  // ── Event pool state ───────────────────────────────────────────────────
   const [pool,         setPool]         = useState<DigestEvent[]>([])
-  const [selected,     setSelected]     = useState<string[]>([])   // ordered IDs, max 5
+  const [selected,     setSelected]     = useState<string[]>([])
   const [loading,      setLoading]      = useState(false)
   const [fetchError,   setFetchError]   = useState<string | null>(null)
   const [actionStatus, setActionStatus] = useState<ActionStatus>('idle')
   const [errorMsg,     setErrorMsg]     = useState<string | null>(null)
-  const [scheduledAt,  setScheduledAt]  = useState(() => defaultScheduleAt('this-weekend'))
 
-  // Auto-sync template suggestion when period changes
-  useEffect(() => {
-    const opt = PERIODS.find(p => p.id === period)
-    if (opt) setTemplateId(opt.template)
-    setScheduledAt(defaultScheduleAt(period))
-  }, [period])
+  // ── Preset application ─────────────────────────────────────────────────
+  function applyPreset(p: Preset) {
+    const { start, end } = getPresetDates(p)
+    setPreset(p)
+    setStartDate(start)
+    setEndDate(end)
+    setTemplateId(templateForSpan(start, end))
+    setScheduledAt(autoSchedule(start, end))
+  }
 
+  function handleStartChange(val: string) {
+    if (!val) return
+    const safeEnd = endDate >= val ? endDate : val
+    setPreset(null)
+    setStartDate(val)
+    setEndDate(safeEnd)
+    setTemplateId(templateForSpan(val, safeEnd))
+    setScheduledAt(autoSchedule(val, safeEnd))
+  }
+
+  function handleEndChange(val: string) {
+    if (!val) return
+    const safeEnd = val >= startDate ? val : startDate
+    setPreset(null)
+    setEndDate(safeEnd)
+    setTemplateId(templateForSpan(startDate, safeEnd))
+    setScheduledAt(autoSchedule(startDate, safeEnd))
+  }
+
+  // ── Derived ────────────────────────────────────────────────────────────
   const template = useMemo(
     () => DIGEST_TEMPLATES.find(t => t.id === templateId) ?? DIGEST_TEMPLATES[0],
     [templateId]
   )
 
-  // Ordered selected events (preserves toggle order for slot assignment)
   const activeEvents = useMemo(
     () => selected.map(id => pool.find(e => e.id === id)).filter(Boolean) as DigestEvent[],
     [selected, pool]
@@ -150,34 +234,34 @@ export default function DigestPage() {
     loadDesign(template.build(ctx, '4:5'))
   }, [template, ctx, loadDesign])
 
-  // ── Fetch ──────────────────────────────────────────────────────────────
+  // ── Fetch pool ─────────────────────────────────────────────────────────
   const fetchPool = useCallback(async () => {
     setLoading(true)
     setFetchError(null)
+    setSelected([])
     try {
-      const res  = await fetch(`/api/admin/ig/digest-events?period=${period}&pool=12&picks=5`)
+      const res  = await fetch(`/api/admin/ig/digest-events?start=${startDate}&end=${endDate}&pool=12&picks=5`)
       if (!res.ok) {
         const body = await res.json().catch(() => ({})) as { error?: string }
         throw new Error(body.error ?? `HTTP ${res.status}`)
       }
       const data = await res.json() as DigestResponse
       setPool(data.events)
-      // Pre-select recommended (diverse) picks, capped at 5
       setSelected(data.recommended.slice(0, 5))
     } catch (e) {
       setFetchError(e instanceof Error ? e.message : 'Unknown error')
     } finally {
       setLoading(false)
     }
-  }, [period])
+  }, [startDate, endDate])
 
   useEffect(() => { fetchPool() }, [fetchPool])
 
-  // ── Toggle logic: click to add/remove from selection (ordered, max 5) ─
+  // ── Toggle logic ───────────────────────────────────────────────────────
   const toggle = useCallback((id: string) => {
     setSelected(prev => {
       if (prev.includes(id)) return prev.filter(x => x !== id)
-      if (prev.length >= 5) return prev  // at max — click X to remove first
+      if (prev.length >= 5) return prev
       return [...prev, id]
     })
   }, [])
@@ -199,13 +283,13 @@ export default function DigestPage() {
       const jpeg = await renderJpeg()
       const a = document.createElement('a')
       a.href = jpeg
-      a.download = `abq-digest-${period}-${new Date().toISOString().slice(0, 10)}.jpg`
+      a.download = `abq-digest-${startDate}-to-${endDate}.jpg`
       a.click()
     } catch (e) {
       alert('Export failed: ' + (e instanceof Error ? e.message : String(e)))
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [period])
+  }, [startDate, endDate])
 
   const handleSchedule = useCallback(async () => {
     setActionStatus('rendering')
@@ -214,12 +298,17 @@ export default function DigestPage() {
       const jpeg = await renderJpeg()
       setActionStatus('uploading')
 
+      const spanDays = Math.round(
+        (new Date(endDate + 'T12:00:00').getTime() - new Date(startDate + 'T12:00:00').getTime()) / 86400000
+      ) + 1
+      const intro = spanDays === 1
+        ? `🌆 Tonight in ABQ — what's on:`
+        : spanDays <= 2
+          ? `📅 This weekend in Albuquerque:`
+          : `📅 This week in ABQ — top picks:`
+
       const caption = [
-        period === 'tonight'
-          ? '🌆 Tonight in ABQ — what\'s happening:'
-          : period === 'this-weekend'
-            ? '📅 This weekend in Albuquerque:'
-            : '📅 5 picks for this week in ABQ:',
+        intro,
         '',
         ...activeEvents.slice(0, 5).map((e, i) => {
           const t = formatTime(e.time)
@@ -236,10 +325,10 @@ export default function DigestPage() {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          imageData:   jpeg,
+          imageDataUrl: jpeg,
           caption,
-          scheduledAt: new Date(scheduledAt).toISOString(),
-          label:       `Digest: ${period} (${new Date().toLocaleDateString()})`,
+          scheduledFor: new Date(scheduledAt).toISOString(),
+          mediaType:    'FEED',
         }),
       })
       if (!res.ok) {
@@ -253,7 +342,7 @@ export default function DigestPage() {
       setErrorMsg(e instanceof Error ? e.message : 'Unknown error')
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeEvents, period, scheduledAt])
+  }, [activeEvents, startDate, endDate, scheduledAt])
 
   // ─── Render ────────────────────────────────────────────────────────────
 
@@ -268,7 +357,7 @@ export default function DigestPage() {
             Digest Builder
           </h1>
           <p className="text-sm text-white/40">
-            Auto-picks a category-varied mix — tap any event to swap it in or out
+            Pick a date or range — auto-selects template and schedule time
           </p>
         </div>
 
@@ -277,54 +366,75 @@ export default function DigestPage() {
           {/* ── Left: controls ─────────────────────────────────────────── */}
           <div className="space-y-4">
 
-            {/* Period */}
+            {/* Date range picker */}
             <section>
-              <p className="text-[11px] uppercase tracking-[0.14em] text-white/35 font-semibold mb-2">Period</p>
-              <div className="grid grid-cols-3 gap-1.5">
-                {PERIODS.map(opt => (
+              <p className="text-[11px] uppercase tracking-[0.14em] text-white/35 font-semibold mb-2">Date Range</p>
+
+              {/* Quick presets */}
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                {PRESETS.map(p => (
                   <button
-                    key={opt.id}
-                    onClick={() => setPeriod(opt.id)}
+                    key={p.id}
+                    onClick={() => applyPreset(p.id)}
                     className={[
-                      'p-2.5 rounded-xl border text-left transition-all',
-                      period === opt.id
+                      'px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all',
+                      preset === p.id
                         ? 'bg-[#9a442d]/15 border-[#9a442d]/50 text-[#e8a898]'
-                        : 'bg-white/[0.03] border-white/10 text-white/55 hover:border-white/25',
+                        : 'bg-white/[0.04] border-white/10 text-white/45 hover:border-white/25 hover:text-white/70',
                     ].join(' ')}
                   >
-                    <p className="text-xs font-bold leading-tight">{opt.label}</p>
-                    <p className="text-[10px] opacity-55 mt-0.5 leading-tight">{opt.sub}</p>
+                    {p.label}
                   </button>
                 ))}
               </div>
+
+              {/* Custom date inputs */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <p className="text-[10px] text-white/25 uppercase tracking-wider mb-1">From</p>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={e => handleStartChange(e.target.value)}
+                    className="w-full bg-white/[0.04] border border-white/10 rounded-lg px-2.5 py-2 text-xs text-white/70 focus:outline-none focus:border-[#9a442d]/50 transition-colors"
+                  />
+                </div>
+                <div>
+                  <p className="text-[10px] text-white/25 uppercase tracking-wider mb-1">To</p>
+                  <input
+                    type="date"
+                    value={endDate}
+                    min={startDate}
+                    onChange={e => handleEndChange(e.target.value)}
+                    className="w-full bg-white/[0.04] border border-white/10 rounded-lg px-2.5 py-2 text-xs text-white/70 focus:outline-none focus:border-[#9a442d]/50 transition-colors"
+                  />
+                </div>
+              </div>
             </section>
 
-            {/* Template */}
+            {/* Template — auto-selected, can override */}
             <section>
-              <p className="text-[11px] uppercase tracking-[0.14em] text-white/35 font-semibold mb-2">Template</p>
+              <div className="flex items-center gap-2 mb-2">
+                <p className="text-[11px] uppercase tracking-[0.14em] text-white/35 font-semibold">Template</p>
+                <span className="text-[10px] text-white/20">auto-selected from date span</span>
+              </div>
               <div className="grid grid-cols-3 gap-1.5">
-                {DIGEST_TEMPLATES.map(t => {
-                  const isSuggested = PERIODS.find(p => p.id === period)?.template === t.id
-                  return (
-                    <button
-                      key={t.id}
-                      onClick={() => setTemplateId(t.id)}
-                      className={[
-                        'p-2.5 rounded-xl border text-left transition-all relative',
-                        templateId === t.id
-                          ? 'bg-[#9a442d]/15 border-[#9a442d]/50'
-                          : 'bg-white/[0.03] border-white/10 hover:border-white/25',
-                      ].join(' ')}
-                    >
-                      {isSuggested && (
-                        <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#9a442d]" />
-                      )}
-                      <p className={`text-[11px] font-bold leading-tight ${templateId === t.id ? 'text-[#e8a898]' : 'text-white/75'}`}>
-                        {t.name}
-                      </p>
-                    </button>
-                  )
-                })}
+                {DIGEST_TEMPLATES.map(t => (
+                  <button
+                    key={t.id}
+                    onClick={() => setTemplateId(t.id)}
+                    className={[
+                      'p-2.5 rounded-xl border text-left transition-all',
+                      templateId === t.id
+                        ? 'bg-[#9a442d]/15 border-[#9a442d]/50'
+                        : 'bg-white/[0.03] border-white/10 hover:border-white/25',
+                    ].join(' ')}
+                  >
+                    <p className={`text-[11px] font-bold leading-tight ${templateId === t.id ? 'text-[#e8a898]' : 'text-white/65'}`}>
+                      {t.name}
+                    </p>
+                  </button>
+                ))}
               </div>
             </section>
 
@@ -405,7 +515,7 @@ export default function DigestPage() {
                 </div>
               ) : pool.length === 0 ? (
                 <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10 text-center text-white/25 text-xs">
-                  No events found for this period
+                  No events found for this date range
                 </div>
               ) : (
                 <div className="space-y-1">
@@ -429,7 +539,7 @@ export default function DigestPage() {
                               : 'bg-white/[0.04] border-white/[0.07] hover:bg-white/[0.07] hover:border-white/20 cursor-pointer',
                         ].join(' ')}
                       >
-                        {/* Checkbox */}
+                        {/* Checkbox / slot number */}
                         <div className={[
                           'flex-shrink-0 w-5 h-5 rounded-md border flex items-center justify-center mt-0.5',
                           isSelected
@@ -483,7 +593,7 @@ export default function DigestPage() {
               )}
             </section>
 
-            {/* Schedule time */}
+            {/* Schedule */}
             <section>
               <p className="text-[11px] uppercase tracking-[0.14em] text-white/35 font-semibold mb-2">Schedule For</p>
               <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white/[0.04] border border-white/10">
@@ -495,6 +605,7 @@ export default function DigestPage() {
                   className="flex-1 bg-transparent text-sm text-white/75 focus:outline-none"
                 />
               </div>
+              <p className="text-[10px] text-white/20 mt-1 pl-1">Auto-set from date range — adjust as needed</p>
             </section>
 
             {/* Actions */}
