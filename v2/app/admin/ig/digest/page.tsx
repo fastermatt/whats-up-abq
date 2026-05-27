@@ -234,6 +234,7 @@ export default function DigestPage() {
 
   // ── Canvas sync ────────────────────────────────────────────────────────
   const ctx: TemplateContext = useMemo(() => ({
+    postDate: startDate,
     events: activeEvents.map(e => ({
       title:    e.title,
       date:     e.date,
@@ -242,7 +243,7 @@ export default function DigestPage() {
       category: e.category ?? undefined,
       imageUrl: e.imageUrl ?? undefined,
     })),
-  }), [activeEvents])
+  }), [activeEvents, startDate])
 
   useEffect(() => {
     loadDesign(template.build(ctx, '4:5'))

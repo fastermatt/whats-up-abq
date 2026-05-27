@@ -225,16 +225,36 @@ export async function GET(request: NextRequest) {
 
   const rows = (data as EventRow[]) ?? []
 
-  // Score and sort descending
-  const scored = rows
-    .map(row => ({
-      row,
-      score: row.popularity_score ?? heuristicScore(row as unknown as Record<string, unknown>),
-    }))
-    .sort((a, b) => b.score - a.score)
+  // Score
+  const scored = rows.map(row => ({
+    row,
+    score: row.popularity_score ?? heuristicScore(row as unknown as Record<string, unknown>),
+  }))
 
-  // Build the pool of candidates
-  const events: DigestEvent[] = scored.slice(0, pool).map(({ row, score }) =>
+  // Deduplicate: same date + same venue + same title prefix (first 4 words) → keep highest score
+  function titleKey(raw: Record<string, unknown> | null): string {
+    const r = raw ?? {}
+    const t = String((r as Record<string, unknown>).name ?? (r as Record<string, unknown>).title ?? '')
+    return t.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim().split(/\s+/).slice(0, 4).join(' ')
+  }
+  function venueKey(v: string | null): string {
+    return (v ?? '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20)
+  }
+
+  const deduped = new Map<string, typeof scored[number]>()
+  for (const item of scored) {
+    const key = `${item.row.event_date?.toString().slice(0, 10)}|${venueKey(item.row.venue_name)}|${titleKey(item.row.raw)}`
+    const existing = deduped.get(key)
+    if (!existing || item.score > existing.score) {
+      deduped.set(key, item)
+    }
+  }
+
+  // Sort deduplicated results descending by score
+  const dedupedSorted = [...deduped.values()].sort((a, b) => b.score - a.score)
+
+  // Build the pool of candidates from deduplicated results
+  const events: DigestEvent[] = dedupedSorted.slice(0, pool).map(({ row, score }) =>
     rowToDigestEvent(row, score)
   )
 

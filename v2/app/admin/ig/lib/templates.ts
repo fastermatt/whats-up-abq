@@ -34,6 +34,8 @@ export interface TemplateContext {
   imageUrl?: string
   tagline?: string
   cta?: string
+  /** YYYY-MM-DD date of the post (from digest date picker). Used by tonight/weekly templates. */
+  postDate?: string
   /** Multi-event digest: populated by /admin/ig/digest */
   events?: TemplateEventSlot[]
 }
@@ -1970,8 +1972,10 @@ const tonightList: Template = {
     const { w, h } = CANVAS_DIMS[fmt]
     const sy = (y: number) => Math.round(y * h / 1350)
 
-    const today = new Date()
-    const dayStr = today.toLocaleDateString('en-US', {
+    const postD = ctx.postDate
+      ? new Date(ctx.postDate + 'T12:00:00')
+      : new Date()
+    const dayStr = postD.toLocaleDateString('en-US', {
       weekday: 'long', month: 'long', day: 'numeric',
       timeZone: 'America/Denver',
     })
