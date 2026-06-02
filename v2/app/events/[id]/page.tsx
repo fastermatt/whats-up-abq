@@ -122,8 +122,23 @@ export default async function EventDetailPage({ params }: PageProps) {
 
   const startDate = (() => {
     if (/^\d{4}-\d{2}-\d{2}$/.test(event.date)) {
-      const time = event.time && /^\d{1,2}:\d{2}/.test(event.time) ? event.time.padStart(5, '0') : '12:00'
-      return `${event.date}T${time}:00-06:00`
+      // Convert display time (e.g. "7:30 PM") to 24-hour "HH:MM" for valid ISO 8601
+      let time24 = '12:00'
+      if (event.time) {
+        const h12 = event.time.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)/i)
+        const h24 = event.time.match(/^(\d{2}):(\d{2})/)
+        if (h12) {
+          let h = parseInt(h12[1])
+          const m = h12[2]
+          const pm = h12[3].toUpperCase() === 'PM'
+          if (pm && h !== 12) h += 12
+          if (!pm && h === 12) h = 0
+          time24 = `${String(h).padStart(2, '0')}:${m}`
+        } else if (h24) {
+          time24 = `${h24[1]}:${h24[2]}`
+        }
+      }
+      return `${event.date}T${time24}:00-06:00`
     }
     return event.date
   })()
