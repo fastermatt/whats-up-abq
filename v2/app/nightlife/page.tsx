@@ -1,16 +1,21 @@
 /**
  * SEO landing page: Albuquerque Nightlife
- * Auto-populates from live event data — revalidates every hour.
+ * Targets: "albuquerque nightlife", "bars in albuquerque nm", "albuquerque bars"
+ * GSC: 557 impressions / 1 click (0.2% CTR) — rewritten for better snippet relevance.
+ * Revalidates every hour.
  */
 import type { Metadata } from 'next'
-import { fetchEvents } from '@/lib/events'
+import { fetchEvents, NormalizedEvent } from '@/lib/events'
+import { createStaticClient } from '@/lib/supabase/static'
+import { normalizeRow } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
 export const revalidate = 3600
 
-const SEO_TITLE = 'Albuquerque Nightlife — Bars, Clubs & Things to Do at Night | ABQ Unplugged'
-const SEO_DESC = 'Explore Albuquerque nightlife: bars in Nob Hill and Downtown, live music at Sister Bar, comedy shows, and late-night eats.'
+// Tighter title — hits "bars albuquerque" + "nightlife" in first 55 chars
+const SEO_TITLE = 'Albuquerque Nightlife: Bars, Live Music & What\'s On Tonight | ABQ Unplugged'
+const SEO_DESC  = 'Sister Bar, Nob Hill, Marble Brewery, Downtown — find what\'s happening in Albuquerque tonight. Live music, comedy, taproom nights and late-night spots, all in one place.'
 
 export const metadata: Metadata = {
   title: { absolute: SEO_TITLE },
@@ -27,36 +32,72 @@ export const metadata: Metadata = {
 
 const FAQS = [
   {
-    q: 'What\'s the best area for nightlife?',
-    a: 'Nob Hill, hands down. Central between Girard and Carlisle. Sister Bar, Anodyne, O\'Neill\'s, plus food options. Downtown is good if you want variety but it\'s spread out.',
+    q: 'What\'s the best area for nightlife in Albuquerque?',
+    a: 'Nob Hill on Central between Girard and Carlisle. Sister Bar (rooftop + dance floor), Anodyne (dive, pool table, good jukebox), O\'Neill\'s Pub, Nob Hill Bar & Grill. Downtown has the Library Bar and the Kosmos if you want variety but it\'s more spread out.',
   },
   {
-    q: 'Do bars close early?',
-    a: 'Yeah, most close by 2am. Some earlier. Breweries close around 10 or 11. It\'s not a late-night town. You get used to it.',
+    q: 'Which Albuquerque bars have live music?',
+    a: 'Sister Bar has live DJs and bands on weekends. The Launchpad on Central is the main rock/indie venue. El Rey Theater does bigger touring acts. Canteen Brewhouse has regular live music in a great taproom setting. Marble Brewery and JUNO do acoustic sets. Check this page for what\'s on tonight.',
   },
   {
-    q: 'Is there a dance club scene?',
-    a: 'Sort of. Sister Bar has a dance floor. Effex Nightclub near downtown exists, but I\'ve never been. If you want to dance, check who\'s playing at the Launchpad or go to a DJ night at Sister.',
+    q: 'What time do bars close in Albuquerque?',
+    a: 'Most bars close at 2am. Breweries typically close around 10 or 11pm. It\'s not a 4am city — start earlier, maybe 8pm, do a brewery then a bar then live music. You can have a full night by midnight.',
+  },
+  {
+    q: 'Is there a good craft beer scene in Albuquerque?',
+    a: 'Yes. Canteen Brewhouse on Jefferson has the biggest taproom and regular live events. Marble Brewery has two locations — Downtown and their main spot. La Cumbre, Tractor Brewing, JUNO brewery + cafe + art. Most have regular music nights.',
+  },
+  {
+    q: 'Are there comedy clubs in Albuquerque?',
+    a: 'Hyena\'s Comedy Nightclub is the main one — national touring acts on weekends, open mic on Thursdays. The Kiva Auditorium at the convention center hosts bigger touring comedians. Check this page for the current lineup.',
   },
 ]
 
 const RELATED_LINKS = [
-  { name: 'Visit Albuquerque: Music & Nightlife', url: 'https://www.visitalbuquerque.org/things-to-do/music-and-nightlife/', description: 'Official guide to bars, clubs, and live music across Albuquerque.' },
-  { name: 'City of ABQ: Cultural Services', url: 'https://www.cabq.gov/culturalservices', description: 'City-run venues and events — KiMo, Civic Plaza, and more.' },
-  { name: 'Tractor Brewing', url: 'https://www.tractorbrewing.com', description: 'Local craft brewery with two taprooms and regular live music nights.' },
-  { name: 'Marble Brewery', url: 'https://www.marblebrewery.com', description: 'One of ABQ\'s original craft breweries with events and live music.' },
+  { name: 'Visit Albuquerque: Music & Nightlife', url: 'https://www.visitalbuquerque.org/things-to-do/music-and-nightlife/', description: 'Official city guide to bars, clubs, and live music.' },
+  { name: 'Tractor Brewing', url: 'https://www.tractorbrewing.com', description: 'Local craft brewery with two taprooms and live music.' },
+  { name: 'Marble Brewery', url: 'https://www.marblebrewery.com', description: 'Original ABQ craft brewery — Downtown and main taproom.' },
+  { name: 'Hyena\'s Comedy Nightclub', url: 'https://www.hyenascomedynightclub.com/albuquerque/', description: 'National touring comedians and weekly open mics.' },
 ]
 
+async function fetchBreweryEvents(): Promise<NormalizedEvent[]> {
+  const supabase = createStaticClient()
+  const today = new Date().toISOString().slice(0, 10)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data } = await (supabase as any)
+    .schema('public')
+    .from('events')
+    .select('id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, pinned_last, neighborhood, venue_slug, category, venue_name, submitted_by, image_status')
+    .eq('hidden', false)
+    .gte('event_date', today)
+    .or('venue_name.ilike.%brew%,venue_name.ilike.%taproom%,venue_name.ilike.%distill%,venue_name.ilike.%winery%')
+    .order('event_date', { ascending: true })
+    .limit(60)
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (data ?? []).map((row: any) => normalizeRow(row))
+}
+
 export default async function Page() {
-  const results = await Promise.all([
-    fetchEvents({ category: 'Music', limit: 100 }),
-    fetchEvents({ category: 'Comedy', limit: 100 }),
-    fetchEvents({ category: 'Food & Drink', limit: 100 }),
+  const [musicResult, comedyResult, foodResult, breweryEvents] = await Promise.all([
+    fetchEvents({ category: 'Music',      limit: 80 }),
+    fetchEvents({ category: 'Comedy',     limit: 40 }),
+    fetchEvents({ category: 'Food & Drink', limit: 40 }),
+    fetchBreweryEvents(),
   ])
-  const events = results
-    .flatMap(r => r.events)
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .slice(0, 200)
+
+  // Merge + dedup by id, then sort by date
+  const seen = new Set<string>()
+  const events = [
+    ...breweryEvents,
+    ...musicResult.events,
+    ...comedyResult.events,
+    ...foodResult.events,
+  ].filter(e => {
+    if (seen.has(e.id)) return false
+    seen.add(e.id)
+    return true
+  }).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 200)
 
   return (
     <CuratedListPage
@@ -64,14 +105,28 @@ export default async function Page() {
       config={{
         slug: 'nightlife',
         heading: 'Albuquerque Nightlife',
-        lede: `${events.length} nightlife events — bars, live music, comedy, and late nights across the city.`,
-        intro: 'Albuquerque nightlife isn\'t Vegas. The lights don\'t flash all night. The clubs don\'t have velvet ropes. But there\'s a thing here. It\'s more about the bar you end up at, the conversation you have, the band you stumble into. Nob Hill is the main drag. Central Avenue from about Girard to Carlisle. You\'ve got Sister Bar, which is a two-level bar with a dance floor downstairs and a rooftop. It gets packed on weekends. You\'ve got the Anodyne, a dive with a pool table and a jukebox that plays The Cure. You\'ve got O\'Neill\'s Pub for a quieter Irish vibe. Then there\'s Downtown. Less polished. More unpredictable. The Library Bar is a dark, cozy spot with leather chairs. The Kosmos is a venue that doubles as a community space. Then there\'s the breweries – La Cumbre, Marble, Tractor – they close early, but the taprooms have a loyal crowd. The trick to ABQ nightlife is to start early. Go out around 8. Do a brewery, then a bar, then maybe live music. By 11, things are winding down. That\'s fine. You don\'t need a 4am closing time to have a good night. You need a good bar stool and someone to talk to. I\'ve had nights that started with a single beer at the Nob Hill Bar & Grill and ended with new friends, a slice of pizza, and a story about a cat that somehow got into the bar. That\'s the nightlife here. Low key. Real. You\'ll like it.',
-        introExtra: 'I once went out on a Tuesday. That\'s stupid, I know. But I found myself at the Barley Room on Central. It was almost empty. The bartender knew my name by the end of the night. We talked about the music playing – this obscure soul album. She gave me a free shot. That doesn\'t happen in a club. That\'s Albuquerque. You\'re not a number. You\'re a regular waiting to happen.',
-        emptyHeading: 'No nightlife listings right now',
-        emptyBody: 'New events added daily — check back soon.',
+        lede: `${events.length} events — bars, live music, comedy, brewery nights and late-night spots across the city.`,
+        heroImage: {
+          src: '/hero/nightlife-concert.jpg',
+          alt: 'Live music at an Albuquerque nightlife venue',
+        },
+        venueStrip: [
+          { name: 'Sister Bar', emoji: '🎵', href: 'https://www.sisterabq.com' },
+          { name: 'Canteen Brewhouse', emoji: '🍺', href: 'https://canteenbrewhouse.com' },
+          { name: 'Launchpad', emoji: '🎸', href: 'https://launchpadrocks.com' },
+          { name: 'Hyena\'s Comedy', emoji: '🎤', href: 'https://www.hyenascomedynightclub.com/albuquerque/' },
+          { name: 'Marble Brewery', emoji: '🍻', href: 'https://www.marblebrewery.com' },
+          { name: 'El Rey Theater', emoji: '🎶' },
+        ],
+        intro: `Albuquerque nightlife doesn't need velvet ropes or a 4am last call to be worth your evening. The main drag is Nob Hill — Central Avenue from Girard to Carlisle — where Sister Bar anchors the strip with a rooftop, a dance floor, and a crowd that actually shows up. Anodyne is a few blocks away: darker, a pool table, a jukebox that plays The Cure. O'Neill's Irish Pub is quieter, reliable. Downtown has the Library Bar for leather chairs and low light, the Kosmos for something weirder and more community-flavored.\n\nThe craft brewery scene has quietly become the backbone of Albuquerque's social life. Canteen Brewhouse on Jefferson is the biggest taproom in the city, with regular live music most weekends. Marble Brewery runs two locations and pulls a loyal crowd. La Cumbre, Tractor, JUNO brewery + cafe + art — they all close earlier than bars, but the crowds are real and the beer is better.\n\nThe trick to a good night out in ABQ: start around 8pm. Hit a brewery first. Move to a bar by 9:30. Catch live music at 10 if there's something worth seeing. By midnight, most things are winding down, and that's fine. The city runs on sunlight. You don't need to burn until 3am to have had a good night.`,
+        introExtra: 'If you only do one thing: check what\'s playing at the Launchpad on Central. It\'s the best mid-size music venue in the city — 500 capacity, good sound, no bad sight lines. Touring acts that aren\'t quite stadium-size end up there. The people who show up actually know the music. That\'s the whole thing.',
+        emptyHeading: 'No nightlife events listed right now',
+        emptyBody: 'We update daily. Check back later or browse all upcoming events.',
         breadcrumbLabel: 'Nightlife',
         faqs: FAQS,
         relatedLinks: RELATED_LINKS,
+        submitUrl: '/submit',
+        submitLabel: 'Know a bar or show we\'re missing? Submit it.',
       }}
     />
   )

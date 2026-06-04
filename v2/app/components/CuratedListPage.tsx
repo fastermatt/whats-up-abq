@@ -3,6 +3,7 @@
  * /date-night, /this-week. Each page passes a config: heading, lede, filter,
  * empty state, JSON-LD itemList enrichment.
  */
+import Image from 'next/image'
 import Link from 'next/link'
 import { Clock, MapPin } from 'lucide-react'
 import { NormalizedEvent, venueToSlug } from '@/lib/events'
@@ -47,6 +48,10 @@ export interface CuratedListConfig {
   submitUrl?: string
   /** Label for the submit CTA (default: "Submit an event we're missing") */
   submitLabel?: string
+  /** Optional full-bleed hero image above the content */
+  heroImage?: { src: string; alt: string }
+  /** Optional venue strip — named venues shown between intro and events */
+  venueStrip?: { name: string; href?: string; emoji?: string }[]
 }
 
 export function curatedJsonLd(events: NormalizedEvent[], config: CuratedListConfig) {
@@ -121,6 +126,21 @@ export function CuratedListPage({
         />
       ))}
 
+      {/* ── Optional full-bleed hero image ── */}
+      {config.heroImage && (
+        <div className="relative w-full h-44 sm:h-60 md:h-72 overflow-hidden">
+          <Image
+            src={config.heroImage.src}
+            alt={config.heroImage.alt}
+            fill
+            priority
+            className="object-cover object-center"
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-[#fbf7f1]" />
+        </div>
+      )}
+
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-8">
         <div className="animate-fade-in">
           <h1
@@ -144,6 +164,39 @@ export function CuratedListPage({
               {config.introExtra.split(/\n\n+/).map((para, i) => (
                 <p key={i} className="text-sm text-[#4a3f3a] leading-relaxed">{para}</p>
               ))}
+            </div>
+          )}
+
+          {/* ── Optional venue strip ── */}
+          {config.venueStrip && config.venueStrip.length > 0 && (
+            <div className="mt-5 flex flex-wrap gap-2">
+              {config.venueStrip.map(({ name, href, emoji }) => {
+                const inner = (
+                  <span className="flex items-center gap-1.5 text-xs font-semibold text-[#9a442d]">
+                    {emoji && <span aria-hidden="true">{emoji}</span>}
+                    {name}
+                    {href && <span className="text-[#c4614a] text-[10px]">↗</span>}
+                  </span>
+                )
+                return href ? (
+                  <a
+                    key={name}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 rounded-full bg-[rgba(154,68,45,0.08)] border border-[rgba(154,68,45,0.18)] hover:bg-[rgba(154,68,45,0.15)] transition-colors"
+                  >
+                    {inner}
+                  </a>
+                ) : (
+                  <span
+                    key={name}
+                    className="px-3 py-1.5 rounded-full bg-[rgba(154,68,45,0.08)] border border-[rgba(154,68,45,0.18)]"
+                  >
+                    {inner}
+                  </span>
+                )
+              })}
             </div>
           )}
         </div>
