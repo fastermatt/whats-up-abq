@@ -180,57 +180,76 @@ const poster: Template = {
     const topSafe = isStory ? Math.round(h * 0.12) : 46  // px from top edge
     const botSafe = isStory ? Math.round(h * 0.15) : 80  // px from bottom edge
 
-    // ── Title sizing — responsive to avoid multi-line overflow ────────────
-    // At w=1080, usable width is 920px. Fraunces avg char width ≈ 65% of fontSize.
-    // Sizing keeps the title to ≤2 lines comfortably, leaving headroom for Date/Venue.
-    // Truncate very long titles at a word boundary so they never exceed ~3 lines
+    const hasImage = !!ctx.imageUrl
     const rawTitle = ctx.title ?? 'Your Title Here'
     const title = truncateAtWord(rawTitle, 58)
-    const titleSize = title.length < 10 ? 130
-                    : title.length < 20 ? 110
-                    : title.length < 35 ? 90
-                    : 70
 
-    // ── Bottom cluster: CTA → Date/Venue → [gap] → Title ─────────────────
-    // All positions are anchored relative to the bottom safe margin so they
-    // automatically adapt to every format without separate sy() scaling.
-    const ctaY   = h - botSafe - 50   // DM Mono 28px + 22px breathing room
-    const dateY  = h - botSafe - 210  // 2-line Date/Venue block (44px×1.3) ends ~46px above CTA
-    const titleY = h - botSafe - 545  // big gap above Date; clears 3-line title at 70px
+    // ── Bottom cluster anchors (shared by both layouts) ──────────────────
+    const ctaY  = h - botSafe - 50
+    const dateY = h - botSafe - 210
+
+    // ── Layout A: photo present — title in lower third over a scrim ───────
+    // ── Layout B: no photo — title centered higher, bigger, fills the frame
+    const titleSize = hasImage
+      ? (title.length < 10 ? 130 : title.length < 20 ? 110 : title.length < 35 ? 90 : 70)
+      : (title.length < 12 ? 150 : title.length < 24 ? 124 : title.length < 40 ? 100 : 82)
+    const titleY = hasImage
+      ? h - botSafe - 545
+      : Math.round(h * 0.34)   // upper-middle so the frame reads as composed, not empty
+
+    // Layered dark scrim toward the bottom — guarantees title/meta legibility
+    // over any busy photo (shape layers can't gradient, so stack rects).
+    const scrim: Layer[] = hasImage ? [
+      shape({ shape: 'rect', x: 0, y: Math.round(h * 0.46), width: w, height: Math.round(h * 0.54), fill: '#000000', opacity: 0.22 }),
+      shape({ shape: 'rect', x: 0, y: Math.round(h * 0.62), width: w, height: Math.round(h * 0.38), fill: '#000000', opacity: 0.26 }),
+      shape({ shape: 'rect', x: 0, y: Math.round(h * 0.78), width: w, height: Math.round(h * 0.22), fill: '#000000', opacity: 0.30 }),
+    ] : []
+
+    // No-photo decorative anchor: oversized ghosted wordmark fills the lower-right
+    // so the gradient frame reads as designed rather than as a missing image.
+    const ghost: Layer[] = !hasImage ? [
+      textLayer({
+        name: 'Ghost', text: 'ABQ',
+        x: w - 620, y: Math.round(h * 0.60), width: 600,
+        fontFamily: font('Epilogue'), fontSize: 360, fontWeight: 900,
+        fill: BRAND_COLORS.cream, opacity: 0.07, align: 'right', lineHeight: 1, letterSpacing: -8,
+      }),
+    ] : []
 
     const slide: Slide = {
       id: uid(),
-      background: ctx.imageUrl
-        ? { type: 'image', src: ctx.imageUrl, fit: 'cover', overlayColor: '#000000', overlayOpacity: 0.48 }
+      background: hasImage
+        ? { type: 'image', src: ctx.imageUrl!, fit: 'cover', overlayColor: '#000000', overlayOpacity: 0.38 }
         : { type: 'gradient', from: BRAND_COLORS.terra, to: BRAND_COLORS.mesaBrown, angle: 135 },
       layers: [
-        // Logo at top safe boundary (safe for all formats including Story)
+        ...scrim,
+        ...ghost,
         logo(LOGO_W, 80, topSafe, 60),
         ctx.category ? textLayer({
           name: 'Category', text: (ctx.category ?? '').toUpperCase(),
           x: 80, y: topSafe + 70, width: w - 160,
           fontFamily: font('Inter'), fontSize: 30, fontWeight: 700,
-          fill: BRAND_COLORS.white, opacity: 0.65, letterSpacing: 6,
+          fill: BRAND_COLORS.white, opacity: 0.7, letterSpacing: 6, align: 'left',
         }) : null,
         textLayer({
           name: 'Title', text: title,
           x: 80, y: titleY, width: w - 160,
           fontFamily: font('Fraunces'), fontSize: titleSize, fontWeight: 800,
-          fill: BRAND_COLORS.white, lineHeight: 1.05,
-          shadow: { enabled: true, color: 'rgba(0,0,0,0.4)', blur: 24, offsetX: 0, offsetY: 4 },
+          fill: BRAND_COLORS.white, lineHeight: 1.05, align: 'left',
+          shadow: { enabled: true, color: 'rgba(0,0,0,0.45)', blur: 24, offsetX: 0, offsetY: 4 },
         }),
         textLayer({
           name: 'Date & Venue',
           text: `${formatDate(ctx.date, ctx.time)}${ctx.venue ? `\n${shortVenue(ctx.venue)}` : ''}`,
           x: 80, y: dateY, width: w - 160,
           fontFamily: font('Fraunces'), fontSize: 44, fontWeight: 400, fontStyle: 'italic',
-          fill: BRAND_COLORS.white, opacity: 0.92, lineHeight: 1.3,
+          fill: BRAND_COLORS.white, opacity: 0.92, lineHeight: 1.3, align: 'left',
         }),
         textLayer({
           name: 'CTA', text: ctx.cta ?? 'abqunplugged.com',
           x: 80, y: ctaY, width: w - 160,
           fontFamily: font('DM Mono'), fontSize: 28, fontWeight: 500,
-          fill: BRAND_COLORS.white, opacity: 0.7, letterSpacing: 2,
+          fill: BRAND_COLORS.white, opacity: 0.75, letterSpacing: 2, align: 'left',
         }),
       ].filter(Boolean) as Layer[],
     }
@@ -1813,31 +1832,46 @@ function shortDay(date: string | undefined): string {
   return `${day} ${md}`
 }
 
+// Stopwords/articles/conjunctions a truncation should never end on — ending a
+// clipped title with "and…" or "of…" reads as a bug, not an editorial cut.
+const TRAILING_STOPWORDS = new Set([
+  'and', 'or', 'the', 'a', 'an', 'of', 'at', 'in', 'on', 'for', 'to',
+  'with', 'from', 'by', 'an', '&', 'vs', 'feat', 'ft', 'w',
+])
+
 /**
- * Truncate a title at a word boundary (never mid-word).
- * Snaps back to the last space before the char limit.
+ * Truncate a title at a word boundary (never mid-word), then drop any trailing
+ * stopword so the ellipsis lands on a content word:
+ *   "...an Evening of Beethoven and" → "...an Evening of Beethoven…"
+ *   "Roy E. Disney Center for"        → "Roy E. Disney Center…"
  */
 function truncateAtWord(title: string, max: number): string {
   if (title.length <= max) return title
   const cut = title.slice(0, max)
   const lastSpace = cut.lastIndexOf(' ')
-  const snap = lastSpace > max * 0.5 ? cut.slice(0, lastSpace) : cut
-  return snap.replace(/[,;:\-–—]+$/, '').trim() + '…'
+  let snap = lastSpace > max * 0.4 ? cut.slice(0, lastSpace) : cut
+  snap = snap.replace(/[,;:\-–—&]+$/, '').trim()
+  const words = snap.split(/\s+/)
+  while (words.length > 1 && TRAILING_STOPWORDS.has(words[words.length - 1].toLowerCase().replace(/[.,]/g, ''))) {
+    words.pop()
+  }
+  return words.join(' ') + '…'
 }
 
 /**
- * Shorten a venue name for display in the meta line.
- * Strips parenthetical sub-names and colon-delimited additions that
- * make venue names unwieldy ("Roy E. Disney Center: Bank of America Theatre").
- * Caps at 36 chars to fit on one Inter 22px line.
+ * Shorten a venue name for display. Strips sub-venue suffixes (": Bank of
+ * America Theatre"), " - Albuquerque", and trailing connector phrases
+ * ("Center for Performing Arts" → "Center") so the recognizable core remains.
+ * Caps at 34 chars on a word boundary.
  */
 function shortVenue(venue: string): string {
-  // Remove everything after " - " or ":" that looks like a sub-venue
   let v = venue
-    .replace(/\s*:\s*.+$/, '')        // strip ": Bank of America Theatre"
-    .replace(/\s*-\s*Albuquerque$/i, '') // strip " - Albuquerque" suffix
+    .replace(/\s*:\s*.+$/, '')           // ": Bank of America Theatre"
+    .replace(/\s*-\s*Albuquerque$/i, '') // " - Albuquerque"
+    .replace(/\s+for\s+Performing\s+Arts$/i, '') // "...Center for Performing Arts" → "...Center"
+    .replace(/\s+at\s+the\s+.+$/i, '')   // "Kiva Auditorium at the ABQ Convention Center" → "Kiva Auditorium"
     .trim()
-  if (v.length > 36) v = truncateAtWord(v, 36)
+  if (v.length > 34) v = truncateAtWord(v, 34)
   return v
 }
 
@@ -2075,9 +2109,11 @@ const tonightList: Template = {
         }),
         ...(meta ? [textLayer({
           name: `Meta ${i + 1}`, text: meta,
+          // skyGold (warm amber) reads far brighter than terra on the night bg —
+          // terra is too dark-on-dark for the must-read date/venue line.
           x: 80, y: y + sy(64), width: w - 160,
           fontFamily: font('DM Mono'), fontSize: 22, fontWeight: 500,
-          fill: BRAND_COLORS.terra, opacity: 0.9, lineHeight: 1,
+          fill: BRAND_COLORS.skyGold, opacity: 0.95, lineHeight: 1,
         })] : []),
         shape({ shape: 'rect', x: 80, y: y + sy(122), width: w - 160, height: 1, fill: BRAND_COLORS.cream, opacity: 0.18 }),
       )
