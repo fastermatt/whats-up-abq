@@ -398,7 +398,7 @@ const split: Template = {
       : 52                         // 2 lines, 34 chars/line, 2×52×0.92=96px
     // Truncate beyond 2-line capacity to prevent bleed into Date layer
     const maxChars = Math.floor((w - 160) / (titleSize * 0.52)) * 2
-    const title = rawTitle.length > maxChars ? rawTitle.slice(0, maxChars - 1) + '…' : rawTitle
+    const title = truncateAtWord(rawTitle, maxChars)
     const layers: Layer[] = []
     if (ctx.imageUrl) {
       // fit:'cover' ensures the photo fills the split zone without stretching
@@ -1920,27 +1920,23 @@ const weekendDigest: Template = {
       logo(LOGO_T, 80, sy(42), 50),
       // Terra accent rule above kicker
       shape({ shape: 'rect', x: 80, y: sy(108), width: 220, height: 2, fill: BRAND_COLORS.terra, opacity: 0.7 }),
+      // Kicker carries the weekend dates so no separate date line is needed
+      // (the 175px headline leaves no clean gap between itself and the rows).
       textLayer({
-        name: 'Kicker', text: 'WEEKEND GUIDE',
+        name: 'Kicker', text: `WEEKEND GUIDE · ${weekendRange.toUpperCase()}`,
         x: 80, y: sy(122), width: w - 160,
         fontFamily: font('DM Mono'), fontSize: 19, fontWeight: 500,
-        fill: BRAND_COLORS.terra, letterSpacing: 7, opacity: 0.85,
+        fill: BRAND_COLORS.terra, letterSpacing: 5, opacity: 0.9,
       }),
-      // Headline — "This Weekend" fills the middle area
-      // Headline at 155 → bottom of 2nd line at ~442. Date Range starts at 492 → 50px clear.
+      // Headline — "This Weekend" fills the upper area; bottom of line 2 ≈ sy(460)
       textLayer({
         name: 'Headline', text: 'This\nWeekend',
         x: 80, y: sy(155), width: w - 160,
         fontFamily: font('Epilogue'), fontSize: 175, fontWeight: 900,
         fill: BRAND_COLORS.ink, lineHeight: 0.82, letterSpacing: -4,
       }),
-      textLayer({
-        name: 'Date Range', text: weekendRange,
-        x: 80, y: sy(492), width: w - 160,
-        fontFamily: font('DM Mono'), fontSize: 30, fontWeight: 500,
-        fill: BRAND_COLORS.ink, opacity: 0.58,
-      }),
-      shape({ shape: 'rect', x: 80, y: sy(528), width: w - 160, height: 2, fill: BRAND_COLORS.terra, opacity: 0.6 }),
+      // Section rule sits just above the first row (ROW_START 480), below headline
+      shape({ shape: 'rect', x: 80, y: sy(466), width: w - 160, height: 2, fill: BRAND_COLORS.terra, opacity: 0.55 }),
     ]
 
     // 5 event rows
