@@ -235,12 +235,13 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
           >
             {event.title}
           </h3>
-          {timeStr && (
-            <p className="text-[10px] text-[#9a442d] font-medium flex items-center gap-1">
-              <Clock className="w-2.5 h-2.5 flex-shrink-0" />
-              <span>{timeStr}</span>
-            </p>
-          )}
+          <p className="text-[10px] font-medium flex items-center gap-1">
+            <Clock className="w-2.5 h-2.5 flex-shrink-0 text-[#9a442d]" />
+            {timeStr
+              ? <span className="text-[#9a442d]">{timeStr}</span>
+              : <span className="text-[#8a7a74] italic">Time TBA — check venue</span>
+            }
+          </p>
           {event.venue && (
             <p className="text-[10px] text-[#6b5d57] line-clamp-1 flex items-center gap-1">
               <MapPin className="w-2.5 h-2.5 flex-shrink-0" />

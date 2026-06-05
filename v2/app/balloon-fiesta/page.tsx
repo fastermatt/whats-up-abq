@@ -71,6 +71,13 @@ export default async function Page() {
         lede: `Find ${events.length} Balloon Fiesta events: mass ascensions, evening glows, and everything in between.`,
         intro: 'Look, every Albuquerque local has that friend who swears they\'ll go to Balloon Fiesta "next year." Next year comes. They don\'t go. Don\'t be that person. The Albuquerque International Balloon Fiesta is nine days in October, and it\'s the reason people move here. The sky fills with hundreds of balloons, the Field of Dreams turns into a walking rainbow, and the smell of breakfast burritos mixes with propane. It\'s chaotic, cold in the morning, and totally worth it. The official Balloon Fiesta site posts the full schedule, but we break it down into what\'s actually worth your time. Mass ascensions at dawn? Yes, even if it means waking up at 4am. The evening glow? Magical. And the special shapes rodeo is for the weirdos (I say that affectionately). We list dates, times, parking info, and tips from people who\'ve done this a dozen times. Don\'t scroll past this. Get your crew together and make it happen. One week a year, Albuquerque becomes the center of the ballooning world. Be there.',
         introExtra: 'Let\'s be real: Balloon Fiesta can feel overwhelming. Thousands of people, early mornings, traffic. But the payoff is unreal. We\'ve linked to the official Balloon Fiesta site for the hard numbers, and we also pull from Visit Albuquerque\'s essential visitor guide for logistics. Plus, the City of Albuquerque\'s events page has the lowdown on road closures and park-and-ride spots. Our goal is to cut through the noise and give you the one thing you need: a clear plan to actually go. No excuses.',
+        venueStrip: [
+          { name: 'Balloon Fiesta Park',   emoji: '🎈', href: 'https://www.balloonfiesta.com' },
+          { name: 'Visit Albuquerque',     emoji: '🗺️', href: 'https://www.visitalbuquerque.org/balloon-fiesta/' },
+          { name: 'Old Town ABQ',          emoji: '⛪', href: 'https://oldtownalbuquerqueabq.com' },
+          { name: 'Canteen Brewhouse',     emoji: '🍺', href: 'https://canteenbrewhouse.com' },
+          { name: 'NHCC',                  emoji: '🎭', href: 'https://nhccnm.org' },
+        ],
         emptyHeading: 'No balloon fiesta listings right now',
         emptyBody: 'Check back as October approaches. Events get added daily. The official Balloon Fiesta site starts releasing specific times in late summer.',
         breadcrumbLabel: 'Balloon Fiesta',
