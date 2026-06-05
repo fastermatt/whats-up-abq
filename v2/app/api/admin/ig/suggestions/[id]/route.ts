@@ -1,0 +1,106 @@
+/**
+ * PATCH /api/admin/ig/suggestions/[id]
+ *
+ * Accept or reject a suggestion. On accept, schedules the post.
+ * Body: { action: 'accept' | 'reject', reason?: string, caption?: string, imageDataUrl?: string }
+ */
+
+import { NextRequest, NextResponse } from 'next/server'
+import { createServiceClient } from '@/lib/supabase/server'
+
+export const dynamic = 'force-dynamic'
+
+function isAuthorized(req: NextRequest): boolean {
+  const secret = process.env.ADMIN_SECRET
+  if (!secret) return false
+  return req.cookies.get('admin_token')?.value === secret
+}
+
+interface PatchBody {
+  action: 'accept' | 'reject' | 'skip'
+  reason?: string
+  caption?: string
+  imageDataUrl?: string
+}
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  if (!isAuthorized(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { id } = await params
+  const body: PatchBody = await req.json()
+  const supabase = await createServiceClient()
+
+  if (body.action === 'accept') {
+    // Update suggestion to accepted
+    const updatePayload: Record<string, unknown> = {
+      status: 'accepted',
+      caption_edited: body.caption ? true : false,
+    }
+    if (body.caption)       updatePayload.caption = body.caption
+    if (body.imageDataUrl)  updatePayload.image_data_url = body.imageDataUrl
+
+    const { error: updateErr } = await (supabase as any)
+      .schema('public')
+      .from('ig_post_suggestions')
+      .update(updatePayload)
+      .eq('id', id)
+
+    if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 })
+
+    // Fetch the suggestion to schedule the post
+    const { data: suggestion } = await (supabase as any)
+      .schema('public')
+      .from('ig_post_suggestions')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (suggestion && body.imageDataUrl) {
+      // Create an ig_scheduled_post entry (uses existing scheduling infrastructure)
+      const { error: schedErr } = await (supabase as any)
+        .schema('public')
+        .from('ig_scheduled_posts')
+        .insert({
+          image_data_url: body.imageDataUrl,
+          caption:        body.caption ?? suggestion.caption ?? '',
+          scheduled_for:  suggestion.scheduled_for,
+          media_type:     'FEED',
+          status:         'pending',
+          suggestion_id:  id,
+        })
+
+      if (schedErr) console.warn('[suggestions] Failed to create scheduled post:', schedErr.message)
+    }
+
+    return NextResponse.json({ ok: true, status: 'accepted' })
+  }
+
+  if (body.action === 'reject') {
+    const { error } = await (supabase as any)
+      .schema('public')
+      .from('ig_post_suggestions')
+      .update({ status: 'rejected', rejection_reason: body.reason ?? '' })
+      .eq('id', id)
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ ok: true, status: 'rejected' })
+  }
+
+  if (body.action === 'skip') {
+    const { error } = await (supabase as any)
+      .schema('public')
+      .from('ig_post_suggestions')
+      .update({ status: 'skipped' })
+      .eq('id', id)
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ ok: true, status: 'skipped' })
+  }
+
+  return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
+}
