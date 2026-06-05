@@ -44,16 +44,20 @@ export function CanvasPreview({ templateId, ctx, onExport }: Props) {
 
   if (loading) {
     return (
-      <div className="w-full aspect-[4/5] bg-[#111] rounded-xl flex items-center justify-center">
-        <Loader2 className="w-6 h-6 text-zinc-500 animate-spin" />
+      <div className="flex justify-center">
+        <div className="w-[260px] aspect-[4/5] bg-[#111] rounded-xl flex items-center justify-center">
+          <Loader2 className="w-6 h-6 text-zinc-500 animate-spin" />
+        </div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="w-full aspect-[4/5] bg-[#111] rounded-xl flex items-center justify-center text-zinc-600 text-xs">
-        Preview unavailable
+      <div className="flex justify-center">
+        <div className="w-[260px] aspect-[4/5] bg-[#111] rounded-xl flex items-center justify-center text-zinc-600 text-xs">
+          Preview unavailable
+        </div>
       </div>
     )
   }
@@ -62,54 +66,75 @@ export function CanvasPreview({ templateId, ctx, onExport }: Props) {
   const template = DIGEST_TEMPLATES.find(t => t.id === templateId)
   const events = ctx.events ?? []
 
+  // Post type display label — override "Tonight in ABQ" when used for Brewery Nights
+  const headlineText =
+    templateId === 'weekend-digest' ? 'This Weekend' :
+    templateId === 'weekly-five'    ? 'This Week'    :
+    'Tonight in ABQ'
+
   return (
-    <div className="w-full aspect-[4/5] bg-[#1a1614] rounded-xl overflow-hidden flex flex-col p-4 text-[#fbf7f1] relative">
-      {/* ABQ Unplugged logo area */}
-      <div className="flex items-center gap-1.5 mb-3">
-        <div className="w-6 h-6 bg-[#9a442d] rounded-sm flex items-center justify-center">
-          <span className="text-[7px] font-black text-white">ABQ</span>
-        </div>
-        <span className="text-[9px] font-semibold text-[#9a442d] uppercase tracking-widest">Unplugged</span>
-      </div>
-
-      {/* Post type header */}
-      <div className="mb-3">
-        <p className="text-[9px] font-semibold text-[#9a442d] uppercase tracking-[0.2em] mb-1">
-          {template?.name ?? templateId}
-        </p>
-        <p className="text-lg font-black leading-tight" style={{ fontFamily: 'serif' }}>
-          {templateId === 'weekend-digest' ? 'This Weekend' :
-           templateId === 'tonight-list'   ? 'Tonight in ABQ' :
-           templateId === 'weekly-five'    ? 'This Week' : template?.name}
-        </p>
-      </div>
-
-      {/* Divider */}
-      <div className="h-px bg-[#9a442d]/40 mb-3" />
-
-      {/* Events list */}
-      <div className="flex-1 space-y-2.5 overflow-hidden">
-        {events.slice(0, 5).map((e, i) => (
-          <div key={i} className="flex gap-2">
-            <span className="text-[10px] text-[#9a442d] font-bold w-4 flex-shrink-0 pt-0.5">
-              {String(i + 1).padStart(2, '0')}
-            </span>
-            <div className="flex-1 min-w-0">
-              <p className="text-[11px] font-semibold leading-tight truncate" style={{ fontFamily: 'serif', fontStyle: 'italic' }}>
-                {e.title}
-              </p>
-              <p className="text-[9px] text-[#fbf7f1]/50 truncate">
-                {[e.date && new Date(e.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }), e.time, e.venue].filter(Boolean).join(' · ')}
-              </p>
-            </div>
+    // Outer: center the preview, cap at a real Instagram post size
+    <div className="flex justify-center">
+      <div
+        className="w-[260px] flex-shrink-0 aspect-[4/5] bg-[#1a1614] rounded-xl overflow-hidden flex flex-col text-[#fbf7f1] shadow-2xl"
+        style={{ padding: '18px 16px 14px' }}
+      >
+        {/* Logo row */}
+        <div className="flex items-center gap-1.5 mb-3">
+          <div className="w-7 h-7 bg-[#9a442d] rounded flex items-center justify-center flex-shrink-0">
+            <span className="text-[8px] font-black text-white leading-none">ABQ</span>
           </div>
-        ))}
-      </div>
+          <span className="text-[10px] font-bold text-[#9a442d] uppercase tracking-[0.18em]">Unplugged</span>
+        </div>
 
-      {/* Footer */}
-      <div className="mt-3 pt-2 border-t border-[#9a442d]/30 flex items-center justify-between">
-        <div className="h-px flex-1 bg-[#9a442d]/30 mr-2" />
-        <span className="text-[8px] text-[#fbf7f1]/40 uppercase tracking-widest">abqunplugged.com</span>
+        {/* Headline */}
+        <div className="mb-3">
+          <p className="text-[9px] font-semibold text-[#9a442d] uppercase tracking-[0.18em] mb-1">
+            {template?.name ?? templateId}
+          </p>
+          <p className="text-2xl font-black leading-tight" style={{ fontFamily: 'Georgia, serif' }}>
+            {headlineText}
+          </p>
+        </div>
+
+        {/* Terra rule */}
+        <div className="h-px bg-[#9a442d]/50 mb-3" />
+
+        {/* Events */}
+        <div className="flex-1 space-y-2.5 overflow-hidden">
+          {events.slice(0, 5).map((e, i) => (
+            <div key={i} className="flex gap-2 items-start">
+              <span className="text-[11px] text-[#9a442d] font-bold w-5 flex-shrink-0 tabular-nums">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <div className="flex-1 min-w-0">
+                <p
+                  className="text-[12px] font-semibold leading-tight line-clamp-2"
+                  style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
+                >
+                  {e.title}
+                </p>
+                <p className="text-[9px] text-[#fbf7f1]/50 mt-0.5 truncate">
+                  {[
+                    e.date ? new Date(e.date + 'T12:00:00').toLocaleDateString('en-US', {
+                      weekday: 'short', month: 'short', day: 'numeric',
+                    }) : null,
+                    e.time,
+                    e.venue,
+                  ].filter(Boolean).join(' · ')}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Footer */}
+        <div className="mt-3 pt-2 border-t border-[#9a442d]/30 flex items-center gap-2">
+          <div className="flex-1 h-px bg-[#9a442d]/30" />
+          <span className="text-[8px] text-[#fbf7f1]/35 uppercase tracking-widest flex-shrink-0">
+            abqunplugged.com
+          </span>
+        </div>
       </div>
     </div>
   )
