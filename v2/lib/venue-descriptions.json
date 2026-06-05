@@ -88,5 +88,29 @@
     "tagline": "UNM's home for Lobos football and major outdoor events.",
     "description": "Located on the UNM campus, University Stadium is the home of the New Mexico Lobos football team and also hosts concerts, festivals, and community events. The open-air stadium offers a classic college sports atmosphere, with seating for over 39,000 fans. It's worth going for the excitement of game day, complete with tailgating and the energy of the crowd, or for the chance to see major musical acts perform in a large outdoor setting. The campus location provides a lively backdrop, with easy access to parking and nearby student-oriented businesses.",
     "meta": "University Stadium on the UNM campus in Albuquerque hosts Lobos football and concerts. Enjoy game day excitement and major events at this outdoor venue."
+  },
+  "canteen-brewhouse": {
+    "slug": "canteen-brewhouse",
+    "tagline": "ABQ's biggest taproom — live music most weekends, craft beer all week.",
+    "description": "Canteen Brewhouse on Jefferson Street NE is the most active live music venue in the Albuquerque craft brewery scene. The sprawling taproom includes a large indoor space and a patio that transforms into an outdoor concert venue on warm evenings. Canteen hosts local and regional bands several nights a week, covering everything from acoustic singer-songwriters to full rock bands. The beer lineup is broad and rotates seasonally. It's a place where you can have a quiet Tuesday pint or a loud Saturday night — often both on the same visit if you stay long enough. The northwest location near I-25 makes it accessible from most of the metro area.",
+    "meta": "Canteen Brewhouse in Albuquerque hosts live music most weekends in a large taproom and outdoor patio. Craft beer and local bands on Jefferson St NE."
+  },
+  "hyenas-comedy-nightclub-albuquerque": {
+    "slug": "hyenas-comedy-nightclub-albuquerque",
+    "tagline": "Albuquerque's home for national touring comedians and weekly open mics.",
+    "description": "Hyena's Comedy Nightclub is the primary comedy club in Albuquerque, bringing national touring comedians to a cozy venue on the east side of the city. The club hosts headliner shows on Friday and Saturday nights, with an open mic every Thursday that draws local talent at every level. The room is intimate enough that there's not a bad seat — you're always close to the action. Drink service throughout the show, a two-drink minimum that nobody resents, and a genuine laugh-out-loud atmosphere. If you've been to a Hyena's in Dallas or Fort Worth, this is the Albuquerque outpost of the same brand, and it carries the same commitment to actual comedy.",
+    "meta": "Hyena's Comedy Nightclub in Albuquerque hosts national touring comedians and weekly open mic nights. Intimate venue with great sight lines on the east side."
+  },
+  "the-historic-el-rey-theater-albuquerque": {
+    "slug": "the-historic-el-rey-theater-albuquerque",
+    "tagline": "A 1940s movie house reborn as one of Central Avenue's best music rooms.",
+    "description": "The Historic El Rey Theater on Central Avenue NE is a restored 1940s-era neighborhood movie theater that now serves as one of Albuquerque's most beloved mid-size music venues. The art deco bones — high ceilings, ornate details, warm lighting — make it a room that feels like history even when a punk band is playing. Capacity sits around 700, which means you're never too far from the stage and the crowd energy is real. El Rey books a mix of touring indie, rock, and electronic acts that fit between the dive-bar circuit and the amphitheater circuit. The Nob Hill/Central location puts you within walking distance of bars and restaurants for before or after the show.",
+    "meta": "The Historic El Rey Theater on Central Ave in Albuquerque is a restored 1940s movie house hosting live music for up to 700. A classic ABQ venue on Route 66."
+  },
+  "marble-brewery-downtown": {
+    "slug": "marble-brewery-downtown",
+    "tagline": "Original Albuquerque craft brewery with a downtown taproom and regular events.",
+    "description": "Marble Brewery Downtown is one of the original anchors of Albuquerque's craft beer scene, operating out of a warehouse space near I-25 in downtown ABQ. The taproom is roomy and unpretentious — concrete floors, long communal tables, a full bar of house beers including the classic Marble IPA. Marble hosts events ranging from live acoustic sets to trivia nights to special tapping parties. It's a place where the crowd skews local and regulars know the bartenders by name. The downtown location has improved as the surrounding area has developed, and weekend evenings see a good mix of after-work crowds and date nights.",
+    "meta": "Marble Brewery Downtown in Albuquerque is a local craft beer institution with events and live music in a spacious warehouse taproom near downtown."
   }
 }
