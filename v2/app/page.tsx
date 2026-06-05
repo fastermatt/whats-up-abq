@@ -61,7 +61,7 @@ export const metadata: Metadata = {
     ],
   },
   alternates: {
-    canonical: 'https://abqunplugged.com',
+    canonical: 'https://abqunplugged.com/',
   },
 }
 

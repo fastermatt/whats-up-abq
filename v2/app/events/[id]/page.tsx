@@ -60,7 +60,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: seoTitle,
       description,
       url: canonicalUrl,
-      type: 'website',
+      type: 'article',
       images: ogImage ? [{ url: ogImage, width: 1200, height: 630, alt: event.title }] : undefined,
     },
     twitter: {
@@ -147,7 +147,10 @@ export default async function EventDetailPage({ params }: PageProps) {
     const start = new Date(startDate)
     if (isNaN(start.getTime())) return undefined
     start.setHours(start.getHours() + 3)
-    return start.toISOString()
+    // Use local offset format (-06:00) to match startDate — toISOString() emits UTC Z
+    // which creates an apparent timezone mismatch that Google Rich Results may warn on.
+    const pad = (n: number) => String(n).padStart(2, '0')
+    return `${start.getFullYear()}-${pad(start.getMonth()+1)}-${pad(start.getDate())}T${pad(start.getHours())}:${pad(start.getMinutes())}:00-06:00`
   })()
 
   const eventImage = event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)

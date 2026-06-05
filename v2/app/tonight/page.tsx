@@ -35,7 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
 const TONIGHT_FAQS = [
   {
     q: 'Where can I find last-minute events tonight in Albuquerque?',
-    a: "Check Instagram stories from @sisterabq, @launchpadabq, @tractorbrewing. The ABQ Unplugged tonight feed updates throughout the day. But honestly? Walk to Nob Hill and look at the marquees. That still works.",
+    a: "Check Instagram stories from @sisterabq, @launchpadabq, @tractorbrewing. The ABQ Unplugged tonight feed updates throughout the day. But honestly? Walk to Nob Hill — Central Ave between Girard and Carlisle, ABQ's main nightlife strip — and look at the marquees. That still works.",
   },
   {
     q: "What if I don't want to go out but I'm bored?",

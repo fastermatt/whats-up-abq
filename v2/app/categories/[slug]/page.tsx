@@ -64,7 +64,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: `${category} Events in Albuquerque, NM | ${modifier}`,
     description: metaDesc,
-    alternates: { canonical: `https://abqunplugged.com/categories/${slug}` },
+    alternates: {
+      // For categories that have a dedicated SEO landing page, point canonical there
+      // to consolidate link equity and avoid duplicate content.
+      canonical: slug === 'food-drink'
+        ? 'https://abqunplugged.com/food-drink-events'
+        : `https://abqunplugged.com/categories/${slug}`,
+    },
     openGraph: {
       title: `${category} Events in Albuquerque, NM`,
       description: metaDesc,

@@ -122,6 +122,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
   // Normalize slug-form category params (food-drink → Food & Drink, arts → Arts & Theater)
   const rawCat = params.category || null
   const category = rawCat ? (CATEGORY_SLUG_MAP[rawCat.toLowerCase()] ?? rawCat) : null
+  const categoryLabel = category ? (CATEGORY_TITLES[category] ?? `${category} Events`) : null
   const mood = params.mood || undefined
   const neighborhood = params.neighborhood || undefined
   const search = params.q?.trim() || undefined
@@ -239,7 +240,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
               className="text-2xl font-black text-[#1a1614]"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
-              {timeLabel}
+              {category && categoryLabel ? `${categoryLabel} in Albuquerque` : timeLabel}
             </h1>
             <p className="text-[#6b5d57] text-xs mt-0.5">Albuquerque, NM</p>
           </div>
