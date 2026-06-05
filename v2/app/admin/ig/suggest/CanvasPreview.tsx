@@ -1,14 +1,19 @@
 'use client'
 
 /**
- * CanvasPreview — renders a scaled-down Konva canvas from a template + ctx.
- * Calls onExport with the full-res JPEG data URL once rendered.
+ * CanvasPreview — visual mockup of an Instagram post suggestion.
+ *
+ * Two render modes:
+ *   - Digest templates (tonight-list, weekend-digest, weekly-five):
+ *     Numbered event list on dark background.
+ *   - Event templates (poster, golden-hour, split, broadside, etc.):
+ *     Hero image fill with title overlay — mirrors the actual canvas output.
  */
 
-import { useEffect, useRef, useState } from 'react'
-import { DIGEST_TEMPLATES, TemplateContext } from '@/app/admin/ig/lib/templates'
-import { useEditor } from '@/app/admin/ig/store'
 import { Loader2 } from 'lucide-react'
+import { DIGEST_TEMPLATES, TemplateContext } from '@/app/admin/ig/lib/templates'
+
+const DIGEST_TEMPLATE_IDS = new Set(['tonight-list', 'weekend-digest', 'weekly-five'])
 
 interface Props {
   templateId: string
@@ -16,64 +21,165 @@ interface Props {
   onExport?: (dataUrl: string) => void
 }
 
-export function CanvasPreview({ templateId, ctx, onExport }: Props) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState(false)
-  const loadDesign = useEditor(s => s.loadDesign)
+export function CanvasPreview({ templateId, ctx }: Props) {
+  const template  = DIGEST_TEMPLATES.find(t => t.id === templateId)
+  const events    = ctx.events ?? []
+  const isDigest  = DIGEST_TEMPLATE_IDS.has(templateId)
 
-  useEffect(() => {
-    setLoading(true)
-    setError(false)
+  // Single event context (for image-based event templates)
+  const event = events[0] ?? null
+  const imageUrl = event?.imageUrl ?? ctx.imageUrl ?? null
 
-    const template = DIGEST_TEMPLATES.find(t => t.id === templateId)
-    if (!template) { setError(true); setLoading(false); return }
-
-    try {
-      const design = template.build(ctx, '4:5')
-      loadDesign(design)
-    } catch {
-      setError(true)
-    }
-    setLoading(false)
-  }, [templateId, ctx, loadDesign])
-
-  // The actual Konva stage is rendered in PostCanvas.tsx (the shared editor canvas).
-  // Here we provide a placeholder that links to the full editor for the canvas export.
-  // For the preview, we use a simple text-based representation.
-
-  if (loading) {
-    return (
-      <div className="flex justify-center">
-        <div className="w-[260px] aspect-[4/5] bg-[#111] rounded-xl flex items-center justify-center">
-          <Loader2 className="w-6 h-6 text-zinc-500 animate-spin" />
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="flex justify-center">
-        <div className="w-[260px] aspect-[4/5] bg-[#111] rounded-xl flex items-center justify-center text-zinc-600 text-xs">
-          Preview unavailable
-        </div>
-      </div>
-    )
-  }
-
-  // Visual representation of the post without a full Konva render
-  const template = DIGEST_TEMPLATES.find(t => t.id === templateId)
-  const events = ctx.events ?? []
-
-  // Post type display label — override "Tonight in ABQ" when used for Brewery Nights
+  // Headline for digest posts
   const headlineText =
     templateId === 'weekend-digest' ? 'This Weekend' :
-    templateId === 'weekly-five'    ? 'This Week'    :
-    'Tonight in ABQ'
+    templateId === 'weekly-five'    ? 'This Week'    : 'Tonight in ABQ'
 
+  // ── Image-based event template preview ─────────────────────────────────────
+  if (!isDigest) {
+    const isPoster    = templateId === 'poster'
+    const isSplit     = templateId === 'split'
+    const isGolden    = templateId === 'golden-hour'
+    const isBroadside = templateId === 'broadside'
+
+    return (
+      <div className="flex justify-center">
+        <div className="w-[260px] flex-shrink-0 aspect-[4/5] rounded-xl overflow-hidden shadow-2xl relative">
+          {isBroadside || !imageUrl ? (
+            // ── Typographic / no-photo template ────────────────────────────
+            <div className="absolute inset-0 bg-[#fbf7f1] flex flex-col justify-center p-6">
+              <div className="text-[9px] font-bold text-[#9a442d] uppercase tracking-[0.2em] mb-2">
+                ABQ Unplugged
+              </div>
+              <div className="h-px bg-[#9a442d] mb-4" />
+              <p
+                className="text-xl font-black text-[#1a1614] leading-tight mb-3"
+                style={{ fontFamily: 'Georgia, serif' }}
+              >
+                {event?.title ?? 'Event Name'}
+              </p>
+              <div className="space-y-1 text-[10px] text-[#4a3f3a]">
+                {event?.date && (
+                  <p>{new Date(event.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                )}
+                {event?.time && <p>{event.time}</p>}
+                {event?.venue && <p>{event.venue}</p>}
+              </div>
+              <div className="mt-auto pt-4 text-[8px] text-[#9a442d] uppercase tracking-widest">
+                abqunplugged.com
+              </div>
+            </div>
+          ) : isSplit ? (
+            // ── Split: photo top half, text bottom ─────────────────────────
+            <div className="absolute inset-0 flex flex-col bg-[#fbf7f1]">
+              {/* Photo top */}
+              <div className="h-[52%] relative overflow-hidden">
+                <img src={imageUrl} alt="" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-black/10" />
+                <div className="absolute top-2 left-2 flex items-center gap-1">
+                  <div className="w-5 h-5 bg-[#9a442d] rounded flex items-center justify-center">
+                    <span className="text-[6px] font-black text-white">ABQ</span>
+                  </div>
+                </div>
+              </div>
+              {/* Text bottom */}
+              <div className="flex-1 p-4 flex flex-col justify-center">
+                <p className="text-[9px] font-semibold text-[#9a442d] uppercase tracking-[0.18em] mb-1">
+                  {event?.category ?? 'Event'}
+                </p>
+                <p
+                  className="text-base font-black text-[#1a1614] leading-tight line-clamp-3"
+                  style={{ fontFamily: 'Georgia, serif' }}
+                >
+                  {event?.title ?? 'Event Name'}
+                </p>
+                <div className="mt-2 text-[9px] text-[#6b5d57] space-y-0.5">
+                  {event?.time && <p>{event.time}</p>}
+                  {event?.venue && <p className="truncate">{event.venue}</p>}
+                </div>
+                <p className="mt-auto pt-2 text-[8px] text-[#9a442d]/60 uppercase tracking-widest">
+                  abqunplugged.com
+                </p>
+              </div>
+            </div>
+          ) : isGolden ? (
+            // ── Golden Hour: warm gradient + photo inset ───────────────────
+            <div className="absolute inset-0 flex flex-col p-4" style={{ background: 'linear-gradient(160deg, #2d1a0c 0%, #7a3a1a 50%, #1a0e06 100%)' }}>
+              <div className="flex items-center gap-1.5 mb-4">
+                <div className="w-6 h-6 bg-[#9a442d] rounded flex items-center justify-center">
+                  <span className="text-[7px] font-black text-white">ABQ</span>
+                </div>
+                <span className="text-[9px] text-[#e8c89a] uppercase tracking-wider font-semibold">Unplugged</span>
+              </div>
+              {/* Photo inset */}
+              <div className="flex-1 rounded-lg overflow-hidden mb-3 relative">
+                <img src={imageUrl} alt="" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-black/20" />
+              </div>
+              {/* Event info */}
+              <div>
+                <p className="text-[9px] text-[#e8c89a]/70 uppercase tracking-[0.18em] mb-1">
+                  {event?.category ?? 'Event'}
+                </p>
+                <p
+                  className="text-sm font-black text-[#fbf7f1] leading-tight line-clamp-2"
+                  style={{ fontFamily: 'Georgia, serif' }}
+                >
+                  {event?.title ?? 'Event Name'}
+                </p>
+                <div className="mt-1.5 text-[9px] text-[#e8c89a]/60 flex gap-2">
+                  {event?.time && <span>{event.time}</span>}
+                  {event?.venue && <span className="truncate">{event.venue}</span>}
+                </div>
+              </div>
+            </div>
+          ) : (
+            // ── Poster: full-bleed photo with title overlay (default) ──────
+            <div className="absolute inset-0">
+              <img src={imageUrl} alt="" className="w-full h-full object-cover" />
+              {/* Dark gradient overlay */}
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.15) 100%)' }} />
+              {/* Logo top-left */}
+              <div className="absolute top-3 left-3 flex items-center gap-1.5">
+                <div className="w-6 h-6 bg-[#9a442d] rounded flex items-center justify-center">
+                  <span className="text-[7px] font-black text-white">ABQ</span>
+                </div>
+                <span className="text-[9px] text-white/80 uppercase tracking-wider font-semibold">Unplugged</span>
+              </div>
+              {/* Category chip */}
+              {event?.category && (
+                <div className="absolute top-3 right-3 bg-[#9a442d]/80 text-white text-[8px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-sm">
+                  {event.category}
+                </div>
+              )}
+              {/* Bottom text */}
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                <p
+                  className="text-base font-black text-white leading-tight mb-1.5 line-clamp-3"
+                  style={{ fontFamily: 'Georgia, serif' }}
+                >
+                  {event?.title ?? 'Event Name'}
+                </p>
+                <div className="flex items-center gap-2 text-[9px] text-white/70">
+                  {event?.date && (
+                    <span>{new Date(event.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+                  )}
+                  {event?.time && <span>· {event.time}</span>}
+                </div>
+                {event?.venue && (
+                  <p className="text-[9px] text-white/50 mt-0.5 truncate">{event.venue}</p>
+                )}
+                <p className="text-[8px] text-white/30 mt-2 uppercase tracking-widest">abqunplugged.com</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // ── Digest template preview (numbered list) ─────────────────────────────────
   return (
-    // Outer: center the preview, cap at a real Instagram post size
     <div className="flex justify-center">
       <div
         className="w-[260px] flex-shrink-0 aspect-[4/5] bg-[#1a1614] rounded-xl overflow-hidden flex flex-col text-[#fbf7f1] shadow-2xl"

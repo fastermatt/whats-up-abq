@@ -247,9 +247,13 @@ export async function POST(req: NextRequest) {
   // Build suggestions
   const insertions: Record<string, unknown>[] = []
 
+  // Image-based event templates (use event photo as hero)
+  const IMAGE_TEMPLATES = ['poster', 'golden-hour', 'split', 'paper', 'dispatch'] as const
+
   for (const slot of slots) {
     let selected: EventSnap[] = []
     let strategyNotes = ''
+    let templateId = slot.templateId   // may be overridden below
 
     switch (slot.postType) {
       case 'WeeklyFive': {
@@ -285,15 +289,32 @@ export async function POST(req: NextRequest) {
         strategyNotes = 'Wed: early weekend teaser — saves and shares spike Thu-Fri'
         break
       case 'SingleEvent': {
-        // Best event on or near that day (score 8+)
+        // Best event on or near that day (score 8+), prefer events with photos
         const dayEvents = eventsOn(slot.dateStr)
         const high = dayEvents.filter(e => e.popularityScore >= 8)
-        selected = (high.length > 0 ? high : dayEvents).slice(0, 1)
+        const withPhoto = (high.length > 0 ? high : dayEvents).filter(e => e.imageUrl)
+        const any = (high.length > 0 ? high : dayEvents)
+        selected = (withPhoto.length > 0 ? withPhoto : any).slice(0, 1)
         if (selected.length === 0) {
-          // Fallback: best upcoming event
-          selected = snaps.filter(e => e.popularityScore >= 7).slice(0, 1)
+          // Fallback: best upcoming event with photo
+          const withImg = snaps.filter(e => e.popularityScore >= 7 && e.imageUrl)
+          selected = (withImg.length > 0 ? withImg : snaps.filter(e => e.popularityScore >= 7)).slice(0, 1)
         }
-        strategyNotes = `Thu/Sat: spotlight high-score event, build urgency for ${slot.dateStr}`
+
+        // Choose image-based template when event has a photo, typographic otherwise
+        const hasPhoto = !!selected[0]?.imageUrl
+        if (hasPhoto) {
+          // Rotate between poster, golden-hour, split based on category for variety
+          const cat = selected[0]?.category ?? ''
+          if (cat === 'Music' || cat === 'Festivals') templateId = 'poster'          // full bleed, dramatic
+          else if (cat === 'Food & Drink' || cat === 'Community') templateId = 'golden-hour' // warm, inviting
+          else templateId = 'split'   // photo top, clean info bottom
+        } else {
+          // No photo: use strong typographic template
+          templateId = 'broadside'
+        }
+
+        strategyNotes = `Thu/Sat: event spotlight — ${hasPhoto ? `photo post (${templateId})` : 'type-only (no photo)'}, high-score event for urgency`
         break
       }
       case 'Tonight':
@@ -307,16 +328,30 @@ export async function POST(req: NextRequest) {
     // Generate AI caption
     const caption = await generateCaption(slot.postType, selected)
 
+    // For event templates (image-based), store single event ctx fields at top level too
+    const isEventTemplate = IMAGE_TEMPLATES.includes(templateId as typeof IMAGE_TEMPLATES[number]) || templateId === 'broadside' || templateId === 'marquee'
+    const extraEventCtx = isEventTemplate && selected[0] ? {
+      event_ctx: {
+        title:    selected[0].title,
+        date:     selected[0].date,
+        time:     selected[0].time,
+        venue:    selected[0].venue,
+        category: selected[0].category,
+        imageUrl: selected[0].imageUrl,
+      }
+    } : {}
+
     insertions.push({
       generation_id:  generationId,
       post_type:      slot.postType,
-      template_id:    slot.templateId,
+      template_id:    templateId,
       event_ids:      selected.map(e => e.id),
       event_data:     selected,
       caption,
       scheduled_for:  slot.scheduledFor.toISOString(),
       status:         'pending',
       strategy_notes: strategyNotes,
+      ...extraEventCtx,
     })
   }
 

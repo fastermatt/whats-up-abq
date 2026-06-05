@@ -260,8 +260,16 @@ function PreviewPanel({
   }
 
   const meta = POST_TYPE_META[s.post_type]
+
+  // For event templates (poster, split, golden-hour, broadside…), pass the
+  // primary event's fields at the top level of ctx so the preview renders
+  // the hero image + title correctly.
+  const isEventTemplate = !['tonight-list', 'weekend-digest', 'weekly-five'].includes(s.template_id)
+  const primaryEvent = s.event_data[0]
+
   const ctx: TemplateContext = {
-    postDate: s.event_data[0]?.date,
+    postDate:  primaryEvent?.date,
+    // Always include events[] (digest templates need it)
     events: s.event_data.map(e => ({
       title:    e.title,
       date:     e.date,
@@ -270,6 +278,15 @@ function PreviewPanel({
       category: e.category ?? undefined,
       imageUrl: e.imageUrl ?? undefined,
     })),
+    // Also pass top-level fields for event templates (image hero, title overlay)
+    ...(isEventTemplate && primaryEvent ? {
+      title:    primaryEvent.title,
+      date:     primaryEvent.date,
+      time:     primaryEvent.time ?? undefined,
+      venue:    primaryEvent.venue ?? undefined,
+      category: primaryEvent.category ?? undefined,
+      imageUrl: primaryEvent.imageUrl ?? undefined,
+    } : {}),
   }
 
   async function handleAccept() {
