@@ -205,14 +205,16 @@ const poster: Template = {
       shape({ shape: 'rect', x: 0, y: Math.round(h * 0.78), width: w, height: Math.round(h * 0.22), fill: '#000000', opacity: 0.30 }),
     ] : []
 
-    // No-photo decorative anchor: oversized ghosted wordmark fills the lower-right
-    // so the gradient frame reads as designed rather than as a missing image.
+    // No-photo decorative anchor: a single large centered ghosted wordmark
+    // sits behind everything as an intentional watermark (same device as the
+    // Weekly Five "5"). Centered + fits within width so it never clips an edge
+    // or tangents the meta block.
     const ghost: Layer[] = !hasImage ? [
       textLayer({
         name: 'Ghost', text: 'ABQ',
-        x: w - 620, y: Math.round(h * 0.60), width: 600,
-        fontFamily: font('Epilogue'), fontSize: 360, fontWeight: 900,
-        fill: BRAND_COLORS.cream, opacity: 0.07, align: 'right', lineHeight: 1, letterSpacing: -8,
+        x: 0, y: Math.round(h * 0.30), width: w,
+        fontFamily: font('Epilogue'), fontSize: 400, fontWeight: 900,
+        fill: BRAND_COLORS.cream, opacity: 0.05, align: 'center', lineHeight: 1, letterSpacing: -10,
       }),
     ] : []
 
