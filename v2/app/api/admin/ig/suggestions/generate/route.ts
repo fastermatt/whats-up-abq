@@ -134,10 +134,14 @@ function rowToSnap(row: EventRow): EventSnap {
 
 const CAPTION_SYSTEM = `You write short, punchy Instagram captions for ABQ Unplugged — Albuquerque NM's local events guide.
 Voice: Burqueño insider — confident, slightly playful, never corporate.
-No em dashes. No "Discover". No "Unleash". No "#Blessed".
-Always end with: abqunplugged.com 🌵
-Use 3-5 hashtags: #ABQ #Albuquerque #505 plus 1-2 specific ones.
-Keep it under 220 characters before hashtags.`
+Rules:
+- No em dashes. No "Discover", "Unleash", "amazing", "epic", "#Blessed".
+- NO time-relative phrases ("tonight", "this week", "tomorrow") UNLESS the prompt explicitly says the post is for that exact day — these captions are scheduled days ahead and stale time claims look broken.
+- First line is a hook with a specific, concrete detail (an artist name, a venue, a vivid image). Not a generic greeting.
+- Include a save/tag prompt for roundup posts ("Save this", "Tag who you'd bring").
+- End with: abqunplugged.com 🌵
+- Exactly 8 hashtags on the final line: #ABQ #Albuquerque #505 #BurqueLife #ThingsToDo505 plus 3 specific to the events.
+- Body under 200 characters before the hashtag line.`
 
 const CAPTION_PROMPTS: Record<PostType, (events: EventSnap[]) => string> = {
   WeeklyFive: (e) => `Write an Instagram caption for a "5 things to do this week in Albuquerque" post.

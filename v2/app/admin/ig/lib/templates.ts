@@ -183,7 +183,9 @@ const poster: Template = {
     // ── Title sizing — responsive to avoid multi-line overflow ────────────
     // At w=1080, usable width is 920px. Fraunces avg char width ≈ 65% of fontSize.
     // Sizing keeps the title to ≤2 lines comfortably, leaving headroom for Date/Venue.
-    const title = ctx.title ?? 'Your Title Here'
+    // Truncate very long titles at a word boundary so they never exceed ~3 lines
+    const rawTitle = ctx.title ?? 'Your Title Here'
+    const title = truncateAtWord(rawTitle, 58)
     const titleSize = title.length < 10 ? 130
                     : title.length < 20 ? 110
                     : title.length < 35 ? 90
@@ -193,8 +195,8 @@ const poster: Template = {
     // All positions are anchored relative to the bottom safe margin so they
     // automatically adapt to every format without separate sy() scaling.
     const ctaY   = h - botSafe - 50   // DM Mono 28px + 22px breathing room
-    const dateY  = h - botSafe - 170  // ~120px for 2-line Date/Venue block above CTA gap
-    const titleY = h - botSafe - 505  // big gap above Date; same relative position as h-580 on 4:5
+    const dateY  = h - botSafe - 210  // 2-line Date/Venue block (44px×1.3) ends ~46px above CTA
+    const titleY = h - botSafe - 545  // big gap above Date; clears 3-line title at 70px
 
     const slide: Slide = {
       id: uid(),
@@ -214,12 +216,12 @@ const poster: Template = {
           name: 'Title', text: title,
           x: 80, y: titleY, width: w - 160,
           fontFamily: font('Fraunces'), fontSize: titleSize, fontWeight: 800,
-          fill: BRAND_COLORS.white, lineHeight: 0.96,
+          fill: BRAND_COLORS.white, lineHeight: 1.05,
           shadow: { enabled: true, color: 'rgba(0,0,0,0.4)', blur: 24, offsetX: 0, offsetY: 4 },
         }),
         textLayer({
           name: 'Date & Venue',
-          text: `${formatDate(ctx.date, ctx.time)}${ctx.venue ? `\n${ctx.venue}` : ''}`,
+          text: `${formatDate(ctx.date, ctx.time)}${ctx.venue ? `\n${shortVenue(ctx.venue)}` : ''}`,
           x: 80, y: dateY, width: w - 160,
           fontFamily: font('Fraunces'), fontSize: 44, fontWeight: 400, fontStyle: 'italic',
           fill: BRAND_COLORS.white, opacity: 0.92, lineHeight: 1.3,
@@ -260,9 +262,9 @@ const broadside: Template = {
   build: (ctx, format) => {
     const { w, h } = CANVAS_DIMS[format ?? '4:5']
     const sy = (y: number) => Math.round(y * h / 1350)
-    const title = ctx.title ?? 'Your Event'
+    const title = truncateAtWord(ctx.title ?? 'Your Event', 56)
     const titleSize = title.length < 15 ? 200 : title.length < 25 ? 170 : title.length < 40 ? 145 : 120
-    const dateLine = [formatDate(ctx.date, ctx.time), ctx.venue].filter(Boolean).join('\n')
+    const dateLine = [formatDate(ctx.date, ctx.time), ctx.venue ? shortVenue(ctx.venue) : ''].filter(Boolean).join('\n')
     const layers: Layer[] = [
       shape({ shape: 'rect', x: 80, y: sy(78), width: 180, height: 4, fill: BRAND_COLORS.terra }),
       logo(LOGO_T, 80, sy(96), 76),
@@ -349,10 +351,10 @@ const marquee: Template = {
     )
     if (ctx.venue) {
       layers.push(textLayer({
-        name: 'Venue', text: ctx.venue,
+        name: 'Venue', text: shortVenue(ctx.venue),
         x: 80, y: h - 290, width: w - 160,
         fontFamily: font('DM Mono'), fontSize: 30, fontWeight: 500,
-        fill: BRAND_COLORS.cream, opacity: 0.55, align: 'center', letterSpacing: 3,
+        fill: BRAND_COLORS.cream, opacity: 0.6, align: 'center', letterSpacing: 3,
         uppercase: true,
       }))
     }
@@ -439,10 +441,10 @@ const split: Template = {
     }
     if (ctx.venue) {
       layers.push(textLayer({
-        name: 'Venue', text: ctx.venue,
+        name: 'Venue', text: shortVenue(ctx.venue),
         x: 80, y: h - 170, width: w - 160,
         fontFamily: font('Inter'), fontSize: 40, fontWeight: 400,
-        fill: BRAND_COLORS.ink, opacity: 0.55,
+        fill: BRAND_COLORS.ink, opacity: 0.6,
       }))
     }
     layers.push(logo(LOGO_T, 80, h - 96, 60))
@@ -483,7 +485,7 @@ const dispatch: Template = {
     const titleSize = title.length < 15 ? 155 : title.length < 25 ? 135 : title.length < 40 ? 110 : 90
     const dateLine = formatDate(ctx.date, ctx.time) ||
       new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
-    const metaText = [ctx.venue, ctx.category].filter(Boolean).join(' · ') || 'Albuquerque, NM'
+    const metaText = [ctx.venue ? shortVenue(ctx.venue) : '', ctx.category].filter(Boolean).join(' · ') || 'Albuquerque, NM'
     const layers: Layer[] = [
       textLayer({
         name: 'Masthead', text: 'ABQ DISPATCH',
@@ -550,8 +552,10 @@ const goldenHour: Template = {
   build: (ctx, format) => {
     const { w, h } = CANVAS_DIMS[format ?? '4:5']
     const sy = (y: number) => Math.round(y * h / 1350)
-    const title = ctx.title ?? 'Your Event'
-    const titleSize = title.length < 15 ? 170 : title.length < 25 ? 145 : title.length < 40 ? 115 : 95
+    // Truncate at word boundary — with an image the title zone is only ~350px,
+    // so cap length and size to keep it within 2 lines.
+    const title = truncateAtWord(ctx.title ?? 'Your Event', 42)
+    const titleSize = title.length < 15 ? 150 : title.length < 25 ? 125 : title.length < 36 ? 100 : 84
     const layers: Layer[] = []
     if (ctx.category) {
       layers.push(textLayer({
@@ -594,7 +598,7 @@ const goldenHour: Template = {
     }
     if (ctx.venue) {
       layers.push(textLayer({
-        name: 'Venue', text: ctx.venue,
+        name: 'Venue', text: shortVenue(ctx.venue),
         x: 80, y: h - (dateStr ? 130 : 190), width: w - 160,
         fontFamily: font('Inter'), fontSize: 42, fontWeight: 400,
         fill: BRAND_COLORS.sandstone, align: 'center', opacity: 0.9,
@@ -742,7 +746,7 @@ const paper: Template = {
         // Venue
         ctx.venue ? textLayer({
           name: 'Venue',
-          text: ctx.venue,
+          text: shortVenue(ctx.venue),
           x: mx, y: venueY,
           width: w - mx * 2,
           fontFamily: font('Inter'),
@@ -876,7 +880,7 @@ const signal: Template = {
 
       // Venue
       ...(ctx.venue ? [textLayer({
-        name: 'Venue', text: ctx.venue,
+        name: 'Venue', text: shortVenue(ctx.venue),
         x: textX, y: venueY, width: textW,
         fontFamily: font('Inter'), fontSize: isStory ? 32 : 28, fontWeight: 400,
         fill: BRAND_COLORS.cream, opacity: 0.5, lineHeight: 1.2,
@@ -1102,7 +1106,7 @@ const terra: Template = {
 
       // Venue
       ...(ctx.venue ? [textLayer({
-        name: 'Venue', text: ctx.venue,
+        name: 'Venue', text: shortVenue(ctx.venue),
         x: mx, y: venueY, width: w - mx * 2,
         fontFamily: font('Inter'), fontSize: isStory ? 34 : 30, fontWeight: 400,
         fill: BRAND_COLORS.cream, opacity: 0.58, lineHeight: 1.2,
@@ -1810,14 +1814,43 @@ function shortDay(date: string | undefined): string {
 }
 
 /**
+ * Truncate a title at a word boundary (never mid-word).
+ * Snaps back to the last space before the char limit.
+ */
+function truncateAtWord(title: string, max: number): string {
+  if (title.length <= max) return title
+  const cut = title.slice(0, max)
+  const lastSpace = cut.lastIndexOf(' ')
+  const snap = lastSpace > max * 0.5 ? cut.slice(0, lastSpace) : cut
+  return snap.replace(/[,;:\-–—]+$/, '').trim() + '…'
+}
+
+/**
+ * Shorten a venue name for display in the meta line.
+ * Strips parenthetical sub-names and colon-delimited additions that
+ * make venue names unwieldy ("Roy E. Disney Center: Bank of America Theatre").
+ * Caps at 36 chars to fit on one Inter 22px line.
+ */
+function shortVenue(venue: string): string {
+  // Remove everything after " - " or ":" that looks like a sub-venue
+  let v = venue
+    .replace(/\s*:\s*.+$/, '')        // strip ": Bank of America Theatre"
+    .replace(/\s*-\s*Albuquerque$/i, '') // strip " - Albuquerque" suffix
+    .trim()
+  if (v.length > 36) v = truncateAtWord(v, 36)
+  return v
+}
+
+/**
  * Fixed-size title for Fraunces italic rows (weekendDigest).
  * All 5 rows use the same 36px — visual consistency over squeeze-to-fit.
  * Available width: w-280 = 800px. Char estimate: 0.62 × 36 = 22.3px.
- * Max chars = floor(800/22.3) = 35. Titles longer than that are truncated.
+ * Max chars = floor(800/22.3) = 35. Titles longer than that are truncated
+ * at a word boundary so we never get "Phoenix Risi…" — only "Phoenix…".
  */
 function frauncesTitleSize(title: string): { fontSize: number; text: string } {
   const MAX = 35
-  const text = title.length > MAX ? title.slice(0, MAX - 1) + '…' : title
+  const text = title.length > MAX ? truncateAtWord(title, MAX) : title
   return { fontSize: 36, text }
 }
 
@@ -1826,11 +1859,12 @@ function frauncesTitleSize(title: string): { fontSize: number; text: string } {
  * All rows in a given template use the same size — no per-row variation.
  * Char estimate: 0.56 × fontSize (slightly conservative for bold).
  * Max chars = floor(availWidth / (fontSize × 0.56)).
+ * Truncates at word boundary.
  */
 function epilogueTitleSize(title: string, availWidth: number): { fontSize: number; text: string } {
   const FONT_SIZE = 40
   const MAX = Math.floor(availWidth / (FONT_SIZE * 0.56))
-  const text = title.length > MAX ? title.slice(0, MAX - 1) + '…' : title
+  const text = title.length > MAX ? truncateAtWord(title, MAX) : title
   return { fontSize: FONT_SIZE, text }
 }
 
@@ -1906,14 +1940,14 @@ const weekendDigest: Template = {
         fontFamily: font('DM Mono'), fontSize: 30, fontWeight: 500,
         fill: BRAND_COLORS.ink, opacity: 0.58,
       }),
-      shape({ shape: 'rect', x: 80, y: sy(528), width: w - 160, height: 2, fill: BRAND_COLORS.terra, opacity: 0.45 }),
+      shape({ shape: 'rect', x: 80, y: sy(528), width: w - 160, height: 2, fill: BRAND_COLORS.terra, opacity: 0.6 }),
     ]
 
     // 5 event rows
     slots.forEach((slot, i) => {
       const y   = sy(ROW_START + i * ROW_H)
       const num = String(i + 1).padStart(2, '0')
-      const meta = [shortDay(slot.date), slot.time, slot.venue].filter(Boolean).join(' · ')
+      const meta = [shortDay(slot.date), slot.time, slot.venue ? shortVenue(slot.venue) : ''].filter(Boolean).join(' · ')
       // Scale font so title always fits in ~1 line — no wrapping, no collisions
       const { fontSize: titleSize, text: titleText } = frauncesTitleSize(slot.title)
       layers.push(
@@ -1933,9 +1967,9 @@ const weekendDigest: Template = {
           name: `Meta ${i + 1}`, text: meta,
           x: 180, y: y + sy(62), width: w - 280,
           fontFamily: font('Inter'), fontSize: 22, fontWeight: 500,
-          fill: BRAND_COLORS.ink, opacity: 0.52, lineHeight: 1,
+          fill: BRAND_COLORS.ink, opacity: 0.62, lineHeight: 1,
         })] : []),
-        shape({ shape: 'rect', x: 80, y: y + sy(118), width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.13 }),
+        shape({ shape: 'rect', x: 80, y: y + sy(118), width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.22 }),
       )
     })
 
@@ -2019,9 +2053,9 @@ const tonightList: Template = {
         name: 'Day', text: dayStr.toUpperCase(),
         x: 80, y: sy(270), width: w - 160,
         fontFamily: font('DM Mono'), fontSize: 22, fontWeight: 500,
-        fill: BRAND_COLORS.cream, opacity: 0.4, letterSpacing: 3,
+        fill: BRAND_COLORS.cream, opacity: 0.62, letterSpacing: 3,
       }),
-      shape({ shape: 'rect', x: 80, y: sy(314), width: w - 160, height: 1, fill: BRAND_COLORS.cream, opacity: 0.15 }),
+      shape({ shape: 'rect', x: 80, y: sy(314), width: w - 160, height: 1, fill: BRAND_COLORS.cream, opacity: 0.25 }),
       // "in ABQ" italic accent under TONIGHT
       textLayer({
         name: 'In ABQ', text: 'in ABQ',
@@ -2034,7 +2068,7 @@ const tonightList: Template = {
     // 5 event rows
     slots.forEach((slot, i) => {
       const y    = sy(ROW_START + i * ROW_H)
-      const meta = [shortDay(slot.date), slot.time, slot.venue].filter(Boolean).join(' · ')
+      const meta = [shortDay(slot.date), slot.time, slot.venue ? shortVenue(slot.venue) : ''].filter(Boolean).join(' · ')
       const { fontSize: titleSize, text: titleText } = epilogueTitleSize(slot.title, w - 160)
       layers.push(
         textLayer({
@@ -2049,7 +2083,7 @@ const tonightList: Template = {
           fontFamily: font('DM Mono'), fontSize: 22, fontWeight: 500,
           fill: BRAND_COLORS.terra, opacity: 0.9, lineHeight: 1,
         })] : []),
-        shape({ shape: 'rect', x: 80, y: y + sy(122), width: w - 160, height: 1, fill: BRAND_COLORS.cream, opacity: 0.1 }),
+        shape({ shape: 'rect', x: 80, y: y + sy(122), width: w - 160, height: 1, fill: BRAND_COLORS.cream, opacity: 0.18 }),
       )
     })
 
@@ -2061,7 +2095,7 @@ const tonightList: Template = {
         name: 'URL', text: 'abqunplugged.com',
         x: 80, y: footerY + sy(68), width: w - 160,
         fontFamily: font('DM Mono'), fontSize: 20, fontWeight: 400,
-        fill: BRAND_COLORS.cream, opacity: 0.3, align: 'center', letterSpacing: 2,
+        fill: BRAND_COLORS.cream, opacity: 0.6, align: 'center', letterSpacing: 2,
       }),
     )
 
@@ -2147,15 +2181,15 @@ const weeklyFive: Template = {
         name: 'Week Range', text: weekRange,
         x: 80, y: sy(326), width: w - 160,
         fontFamily: font('DM Mono'), fontSize: 24, fontWeight: 500,
-        fill: BRAND_COLORS.cream, opacity: 0.35,
+        fill: BRAND_COLORS.cream, opacity: 0.6,
       }),
-      shape({ shape: 'rect', x: 80, y: sy(376), width: w - 160, height: 2, fill: BRAND_COLORS.cream, opacity: 0.2 }),
+      shape({ shape: 'rect', x: 80, y: sy(376), width: w - 160, height: 2, fill: BRAND_COLORS.cream, opacity: 0.3 }),
       // "Curated picks" label
       textLayer({
         name: 'Label', text: 'CURATED PICKS',
         x: 80, y: sy(390), width: w - 160,
         fontFamily: font('DM Mono'), fontSize: 17, fontWeight: 500,
-        fill: BRAND_COLORS.cream, opacity: 0.4, letterSpacing: 5,
+        fill: BRAND_COLORS.cream, opacity: 0.6, letterSpacing: 5,
       }),
     ]
 
@@ -2163,14 +2197,14 @@ const weeklyFive: Template = {
     slots.forEach((slot, i) => {
       const y   = sy(ROW_START + i * ROW_H)
       const num = String(i + 1).padStart(2, '0')
-      const meta = [shortDay(slot.date), slot.time, slot.venue].filter(Boolean).join(' · ')
+      const meta = [shortDay(slot.date), slot.time, slot.venue ? shortVenue(slot.venue) : ''].filter(Boolean).join(' · ')
       const { fontSize: titleSize, text: titleText } = epilogueTitleSize(slot.title, w - 258)
       layers.push(
         textLayer({
           name: `No.${num}`, text: num,
           x: 80, y: y, width: 90,
           fontFamily: font('DM Mono'), fontSize: 30, fontWeight: 500,
-          fill: BRAND_COLORS.cream, opacity: 0.3,
+          fill: BRAND_COLORS.cream, opacity: 0.62,
         }),
         textLayer({
           name: `Event ${i + 1}`, text: titleText,
@@ -2182,9 +2216,9 @@ const weeklyFive: Template = {
           name: `Meta ${i + 1}`, text: meta,
           x: 170, y: y + sy(64), width: w - 258,
           fontFamily: font('Inter'), fontSize: 22, fontWeight: 400,
-          fill: BRAND_COLORS.cream, opacity: 0.5, lineHeight: 1,
+          fill: BRAND_COLORS.cream, opacity: 0.62, lineHeight: 1,
         })] : []),
-        shape({ shape: 'rect', x: 80, y: y + sy(122), width: w - 160, height: 1, fill: BRAND_COLORS.cream, opacity: 0.15 }),
+        shape({ shape: 'rect', x: 80, y: y + sy(122), width: w - 160, height: 1, fill: BRAND_COLORS.cream, opacity: 0.25 }),
       )
     })
 
@@ -2196,7 +2230,7 @@ const weeklyFive: Template = {
         name: 'URL', text: 'abqunplugged.com',
         x: 80, y: footerY + sy(72), width: w - 160,
         fontFamily: font('DM Mono'), fontSize: 20, fontWeight: 400,
-        fill: BRAND_COLORS.cream, opacity: 0.4, align: 'center', letterSpacing: 2,
+        fill: BRAND_COLORS.cream, opacity: 0.6, align: 'center', letterSpacing: 2,
       }),
     )
 

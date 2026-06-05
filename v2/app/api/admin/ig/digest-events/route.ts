@@ -231,11 +231,17 @@ export async function GET(request: NextRequest) {
     score: row.popularity_score ?? heuristicScore(row as unknown as Record<string, unknown>),
   }))
 
-  // Deduplicate: same date + same venue + same title prefix (first 4 words) → keep highest score
+  // Deduplicate: same event from multiple sources (TM + SeatGeek often both list the same show)
+  // Strategy: match on (date, venue, first-2-words-of-title). This catches:
+  //   "Joe Jackson" (SeatGeek) vs "Joe Jackson + Band – Hope and Fury Tour" (TM)
+  //   "John Mulaney" (SeatGeek) vs "John Mulaney: Mister Whatever" (TM)
+  //   "NM United vs Phoenix" (SeatGeek) vs "USL Cup: NM United vs Phoenix" (TM)
+  // Second pass: if venue is the same and either title contains the other → merge.
   function titleKey(raw: Record<string, unknown> | null): string {
     const r = raw ?? {}
     const t = String((r as Record<string, unknown>).name ?? (r as Record<string, unknown>).title ?? '')
-    return t.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim().split(/\s+/).slice(0, 4).join(' ')
+    // Use first 2 words — catches "Joe Jackson" matching "Joe Jackson + Band..."
+    return t.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim().split(/\s+/).slice(0, 2).join(' ')
   }
   function venueKey(v: string | null): string {
     return (v ?? '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20)
@@ -243,15 +249,45 @@ export async function GET(request: NextRequest) {
 
   const deduped = new Map<string, typeof scored[number]>()
   for (const item of scored) {
-    const key = `${item.row.event_date?.toString().slice(0, 10)}|${venueKey(item.row.venue_name)}|${titleKey(item.row.raw)}`
+    const date    = item.row.event_date?.toString().slice(0, 10) ?? ''
+    const vkey    = venueKey(item.row.venue_name)
+    const tkey    = titleKey(item.row.raw)
+    const key     = `${date}|${vkey}|${tkey}`
     const existing = deduped.get(key)
     if (!existing || item.score > existing.score) {
       deduped.set(key, item)
     }
   }
 
+  // Second-pass dedup: same date+venue, and one artist name fully contains the other
+  // Catches "NM United vs Phoenix" vs "USL Cup: NM United vs Phoenix" (different first 2 words)
+  function artistCore(raw: Record<string, unknown> | null): string {
+    const r = raw ?? {}
+    const t = String((r as Record<string, unknown>).name ?? (r as Record<string, unknown>).title ?? '')
+    return t.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim().split(/\s+/).slice(0, 5).join(' ')
+  }
+  const deduped2 = new Map<string, typeof scored[number]>()
+  for (const item of [...deduped.values()]) {
+    const date = item.row.event_date?.toString().slice(0, 10) ?? ''
+    const vkey = venueKey(item.row.venue_name)
+    const core = artistCore(item.row.raw)
+    let merged = false
+    for (const [k2, existing] of deduped2) {
+      const [d2, v2] = k2.split('|')
+      if (d2 !== date || v2 !== vkey) continue
+      const core2 = artistCore(existing.row.raw)
+      // If one title contains the other as a substring → same event
+      if (core.includes(core2) || core2.includes(core)) {
+        if (item.score > existing.score) deduped2.set(k2, item)
+        merged = true
+        break
+      }
+    }
+    if (!merged) deduped2.set(`${date}|${vkey}|${core}`, item)
+  }
+
   // Sort deduplicated results descending by score
-  const dedupedSorted = [...deduped.values()].sort((a, b) => b.score - a.score)
+  const dedupedSorted = [...deduped2.values()].sort((a, b) => b.score - a.score)
 
   // Build the pool of candidates from deduplicated results
   const events: DigestEvent[] = dedupedSorted.slice(0, pool).map(({ row, score }) =>

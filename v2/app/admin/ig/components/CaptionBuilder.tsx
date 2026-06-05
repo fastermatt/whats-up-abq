@@ -18,35 +18,37 @@ import type { PostCanvasHandle } from './PostCanvas'
 //   Category         → varies by event type (music, food, arts, etc.)
 //   Brand anchors    → #ABQUnplugged #Albuquerque #ABQ #NewMexico #505
 
-const BASE_TAGS = '#ABQUnplugged #Albuquerque #ABQ #NewMexico #505'
-const DISCOVERY_TAGS = '#ABQEvents #ABQWeekend #ThingsToDo505 #BurqueLife #DukeCity'
+// Hashtag strategy: Instagram's algorithm now favors 8-10 focused tags over
+// the old 30-tag spam. Brand anchors (4) + discovery (3) + category (2-3) = 8-9.
+const BASE_TAGS = '#ABQ #Albuquerque #505 #BurqueLife'
+const DISCOVERY_TAGS = '#ThingsToDo505 #ABQEvents #NewMexicoTrue'
 
 const CAT_TAGS: Record<string, string> = {
-  'Music':         '#ABQMusic #LiveMusicABQ #505Insta',
-  'Arts & Theater':'#ABQArts #AlbuquerqueArts #SupportLocalABQ',
-  'Sports':        '#ABQSports #AlbuquerqueSports #505Insta',
-  'Food & Drink':  '#ABQFood #ABQFoodie #SupportLocalABQ',
-  'Family':        '#ABQKids #AlbuquerqueFamilies #505Insta',
-  'Outdoor':       '#ABQOutdoors #NewMexicoOutdoors #NewMexicoTrue',
-  'Comedy':        '#ABQComedy #LiveComedy #505Insta',
-  'Film':          '#ABQFilm #IndieFilm #505Insta',
-  'Festivals':     '#ABQFestivals #BurqueLife #505Insta',
-  'Community':     '#SupportLocalABQ #ABQCommunity #BurqueLife',
+  'Music':         '#ABQMusic #LiveMusicABQ',
+  'Arts & Theater':'#ABQArts #AlbuquerqueArts',
+  'Sports':        '#ABQSports #NewMexicoUnited',
+  'Food & Drink':  '#ABQFood #ABQFoodie',
+  'Family':        '#ABQKids #FamilyFun505',
+  'Outdoor':       '#ABQOutdoors #NewMexicoOutdoors',
+  'Comedy':        '#ABQComedy #LiveComedy',
+  'Film':          '#ABQFilm #IndieFilm',
+  'Festivals':     '#ABQFestivals #505Fest',
+  'Community':     '#SupportLocalABQ #ABQCommunity',
 }
 
-// Warm openers by category — a gentle invitation, not a command or sales pitch.
-// Celebrates what's happening in Albuquerque and makes it easy to say yes.
+// Openers by category. NO time-relative language ("this week", "tonight") —
+// these captions get scheduled days ahead, so any time claim risks being stale.
 const CAT_OPENERS: Record<string, string> = {
-  'Music':         'Live music in Albuquerque this week.',
+  'Music':         'Live music in Albuquerque.',
   'Sports':        'Game day in the Duke City.',
-  'Arts & Theater':'Great arts happening in the 505.',
-  'Food & Drink':  'Something delicious coming to Albuquerque.',
-  'Comedy':        'A wonderful night of laughs in the 505.',
-  'Community':     'Your Albuquerque community coming together.',
-  'Family':        'A great family outing in the 505.',
-  'Outdoor':       'A wonderful chance to get outside in New Mexico.',
-  'Film':          'Good cinema in Albuquerque.',
-  'Festivals':     'A wonderful event coming to ABQ.',
+  'Arts & Theater':'Arts worth your evening in the 505.',
+  'Food & Drink':  'Something good to eat and drink in Burque.',
+  'Comedy':        'A night of laughs in the 505.',
+  'Community':     'Albuquerque, out and together.',
+  'Family':        'A good one for the whole family.',
+  'Outdoor':       'Get outside in New Mexico.',
+  'Film':          'On the big screen in Albuquerque.',
+  'Festivals':     'A festival worth showing up for.',
 }
 
 const CAT_EMOJI: Record<string, string> = {
@@ -86,10 +88,12 @@ export function buildCaptions(event: NormalizedEvent) {
   // Minimal: just the essentials, clean under a strong visual
   const minimal = `${event.title}\n${dateLabel}${timeStr} · ${venue}${priceStr}\n\n🔗 link in bio\n\n${BASE_TAGS}`
 
+  // Spotlight first — it has the strongest local voice and best matches the
+  // Burqueño insider tone. Users default to whatever is first, so lead with the best.
   return [
+    { id: 'spotlight', label: 'Spotlight', sublabel: 'Local pick tone',        text: spotlight },
     { id: 'standard',  label: 'Standard',  sublabel: 'Warm opener + details', text: standard },
     { id: 'friendly',  label: 'Friendly',  sublabel: 'Clean & easy to read',  text: friendly },
-    { id: 'spotlight', label: 'Spotlight', sublabel: 'Weekly pick tone',       text: spotlight },
     { id: 'minimal',   label: 'Minimal',   sublabel: 'Caption under visuals',  text: minimal },
   ]
 }
@@ -348,14 +352,14 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
 
   const staticCaptions = buildCaptions(event)
   const [captions, setCaptions] = useState<Caption[]>(staticCaptions)
-  const [activeId, setActiveId] = useState('standard')
+  const [activeId, setActiveId] = useState(staticCaptions[0].id)
   const [text, setText] = useState(staticCaptions[0].text)
 
   // Reset captions + text whenever a new event is picked
   useEffect(() => {
     const fresh = buildCaptions(event)
     setCaptions(fresh)
-    setActiveId('standard')
+    setActiveId(fresh[0].id)
     setText(fresh[0].text)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [event.id])
