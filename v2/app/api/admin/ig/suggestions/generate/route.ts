@@ -6,13 +6,13 @@
  * generates an AI caption via DeepSeek, and inserts suggestion rows.
  *
  * The weekly schedule (MDT times):
- *   Mon 11:30 — WeeklyFive      (5 events across the week)
- *   Tue 16:45 — BreweryNights   (events at breweries/taprooms)
- *   Wed 16:45 — WeekendDigest   (5 top weekend events)
- *   Thu 11:30 — SingleEvent     (one high-score event)
- *   Fri 16:00 — Tonight         (5 events tonight)
- *   Sat 09:30 — SingleEvent     (one high-score event)
- *   Sun 16:45 — BreweryNights
+ *   Mon 12:00 — WeeklyFive      (the week ahead, 5 picks)
+ *   Tue 17:30 — BreweryNights   (after-work taproom crowd)
+ *   Wed 12:00 — SingleEvent     (spotlight a standout, photo-led)
+ *   Thu 17:30 — WeekendDigest   (weekend-planning peak)
+ *   Fri 16:30 — Tonight         (peak "what's tonight" intent)
+ *   Sat 10:30 — SingleEvent     (Saturday's big event, photo-led)
+ *   Sun 16:00 — Tonight         (low-key "something tonight")
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -41,14 +41,22 @@ interface DaySlot {
   minute: number
 }
 
+// Optimal weekly cadence for a local-events IG account (all times MDT).
+// Mix: SingleEvent ×2 (photo-led, most shareable), Tonight ×2 (high-utility),
+// WeeklyFive ×1, WeekendDigest ×1, BreweryNights ×1 = 7 posts/week.
+// One post per day; never two of the same type back-to-back. WeekendDigest
+// lands Thursday late-afternoon — the moment people actually commit to
+// weekend plans (research-consistent peak for weekend-intent local content).
+// SingleEvent templateId is overridden per-event below (poster/golden-hour/
+// split when a photo exists, broadside when it doesn't).
 const WEEKLY_SLOTS: DaySlot[] = [
-  { dow: 1, postType: 'WeeklyFive',    templateId: 'weekly-five',    hour: 11, minute: 30 },
-  { dow: 2, postType: 'BreweryNights', templateId: 'tonight-list',   hour: 16, minute: 45 },
-  { dow: 3, postType: 'WeekendDigest', templateId: 'weekend-digest', hour: 16, minute: 45 },
-  { dow: 4, postType: 'SingleEvent',   templateId: 'tonight-list',   hour: 11, minute: 30 },
-  { dow: 5, postType: 'Tonight',       templateId: 'tonight-list',   hour: 16, minute: 0  },
-  { dow: 6, postType: 'SingleEvent',   templateId: 'tonight-list',   hour:  9, minute: 30 },
-  { dow: 0, postType: 'BreweryNights', templateId: 'tonight-list',   hour: 16, minute: 45 },
+  { dow: 1, postType: 'WeeklyFive',    templateId: 'weekly-five',    hour: 12, minute: 0  }, // Mon noon — plan the week
+  { dow: 2, postType: 'BreweryNights', templateId: 'tonight-list',   hour: 17, minute: 30 }, // Tue after-work taproom crowd
+  { dow: 3, postType: 'SingleEvent',   templateId: 'poster',         hour: 12, minute: 0  }, // Wed lunch — spotlight a standout
+  { dow: 4, postType: 'WeekendDigest', templateId: 'weekend-digest', hour: 17, minute: 30 }, // Thu after-work — weekend planning peak
+  { dow: 5, postType: 'Tonight',       templateId: 'tonight-list',   hour: 16, minute: 30 }, // Fri — "what's tonight" peak intent
+  { dow: 6, postType: 'SingleEvent',   templateId: 'poster',         hour: 10, minute: 30 }, // Sat morning — spotlight Saturday's event
+  { dow: 0, postType: 'Tonight',       templateId: 'tonight-list',   hour: 16, minute: 0  }, // Sun — low-key "something tonight"
 ]
 
 // ── Date helpers (MDT = UTC-6) ────────────────────────────────────────────────
@@ -286,11 +294,11 @@ export async function POST(req: NextRequest) {
       }
       case 'BreweryNights':
         selected = brewerySnaps.slice(0, 5)
-        strategyNotes = 'Tue/Sun: taproom + live music drives high ABQ community engagement'
+        strategyNotes = 'Tue 5:30pm: after-work taproom crowd — brewery + live music is peak ABQ midweek engagement'
         break
       case 'WeekendDigest':
         selected = weekendSnaps.slice(0, 5)
-        strategyNotes = 'Wed: early weekend teaser — saves and shares spike Thu-Fri'
+        strategyNotes = 'Thu 5:30pm: weekend-planning peak — the moment people commit to weekend plans'
         break
       case 'SingleEvent': {
         // Best event on or near that day (score 8+), prefer events with photos
@@ -318,12 +326,12 @@ export async function POST(req: NextRequest) {
           templateId = 'broadside'
         }
 
-        strategyNotes = `Thu/Sat: event spotlight — ${hasPhoto ? `photo post (${templateId})` : 'type-only (no photo)'}, high-score event for urgency`
+        strategyNotes = `Wed/Sat spotlight — ${hasPhoto ? `photo post (${templateId})` : 'type-only (no photo)'}, highest-score event for max shareability`
         break
       }
       case 'Tonight':
         selected = eventsOn(slot.dateStr).slice(0, 5)
-        strategyNotes = 'Fri 4pm: "what\'s happening tonight?" peak intent scroll window'
+        strategyNotes = 'Fri 4:30pm / Sun 4pm: "what\'s happening tonight?" peak intent scroll window'
         break
     }
 
