@@ -384,8 +384,19 @@ const split: Template = {
   build: (ctx, format) => {
     const { w, h } = CANVAS_DIMS[format ?? '4:5']
     const splitY = Math.round(h * 0.52)
-    const title = ctx.title ?? 'Your Event'
-    const titleSize = title.length < 15 ? 170 : title.length < 25 ? 145 : title.length < 40 ? 115 : 95
+    const rawTitle = ctx.title ?? 'Your Event'
+    // Text zone height: from textBaseY+category to Date layer (h-230).
+    // With category: (splitY+48+66) → (h-230) = ~304px. Max 2 lines.
+    // Font sizes chosen so 2 lines × lineHeight(0.92) fit within that zone.
+    // Max chars at each size: width(920) / (fontSize × 0.52) × 2 lines.
+    const titleSize =
+      rawTitle.length < 12 ? 110   // 1-2 lines, 14-16 chars/line
+      : rawTitle.length < 22 ? 88  // 2 lines, 20 chars/line, 2×88×0.92=162px
+      : rawTitle.length < 36 ? 68  // 2 lines, 26 chars/line, 2×68×0.92=125px
+      : 52                         // 2 lines, 34 chars/line, 2×52×0.92=96px
+    // Truncate beyond 2-line capacity to prevent bleed into Date layer
+    const maxChars = Math.floor((w - 160) / (titleSize * 0.52)) * 2
+    const title = rawTitle.length > maxChars ? rawTitle.slice(0, maxChars - 1) + '…' : rawTitle
     const layers: Layer[] = []
     if (ctx.imageUrl) {
       // fit:'cover' ensures the photo fills the split zone without stretching
@@ -1304,10 +1315,12 @@ const weekendPreview: Template = {
         fontFamily: font('DM Mono'), fontSize: 44, fontWeight: 500,
         fill: BRAND_COLORS.terra,
       }),
+      // Event 3 — reduced from 52 to 44px so 2 lines stay above the terra bar at h-328=1022.
+      // At 44px: 2 lines × 44 × 1.1 = 97px → bottom at sy(920)+97 ≈ 1017, clears the bar.
       textLayer({
         name: 'Event 3', text: 'Third event name',
         x: 200, y: sy(920), width: w - 280,
-        fontFamily: font('Fraunces'), fontSize: 52, fontStyle: 'italic', fontWeight: 400,
+        fontFamily: font('Fraunces'), fontSize: 44, fontStyle: 'italic', fontWeight: 400,
         fill: BRAND_COLORS.ink, lineHeight: 1.1,
       }),
       shape({ shape: 'rect', x: 80, y: h - 328, width: w - 160, height: 3, fill: BRAND_COLORS.terra }),
@@ -1638,18 +1651,18 @@ const storySplit: Template = {
       fill: '#1a1614', align: 'left', letterSpacing: -0.5, lineHeight: 1.0,
     }))
 
-    // Date
+    // Date — moved from halfH+260 to halfH+300 to clear 2-line title bottom (~halfH+260)
     layers.push(textLayer({
       name: 'date', text: date,
-      x: 90, y: halfH + 260, width: w - 150,
+      x: 90, y: halfH + 300, width: w - 150,
       fontFamily: font('Bebas Neue'), fontSize: 48, fontWeight: 400,
       fill: '#9a442d', align: 'left', letterSpacing: 3, uppercase: true,
     }))
 
-    // Time + Venue
+    // Time + Venue — shifted down to match
     layers.push(textLayer({
       name: 'timeVenue', text: time ? `${time} · ${venue}` : venue,
-      x: 90, y: halfH + 340, width: w - 150,
+      x: 90, y: halfH + 380, width: w - 150,
       fontFamily: font('Inter'), fontSize: 28, fontWeight: 400,
       fill: '#1a1614', align: 'left', letterSpacing: 0.5,
     }))
@@ -1880,6 +1893,7 @@ const weekendDigest: Template = {
         fill: BRAND_COLORS.terra, letterSpacing: 7, opacity: 0.85,
       }),
       // Headline — "This Weekend" fills the middle area
+      // Headline at 155 → bottom of 2nd line at ~442. Date Range starts at 492 → 50px clear.
       textLayer({
         name: 'Headline', text: 'This\nWeekend',
         x: 80, y: sy(155), width: w - 160,
@@ -1888,11 +1902,11 @@ const weekendDigest: Template = {
       }),
       textLayer({
         name: 'Date Range', text: weekendRange,
-        x: 80, y: sy(430), width: w - 160,
+        x: 80, y: sy(492), width: w - 160,
         fontFamily: font('DM Mono'), fontSize: 30, fontWeight: 500,
         fill: BRAND_COLORS.ink, opacity: 0.58,
       }),
-      shape({ shape: 'rect', x: 80, y: sy(466), width: w - 160, height: 2, fill: BRAND_COLORS.terra, opacity: 0.45 }),
+      shape({ shape: 'rect', x: 80, y: sy(528), width: w - 160, height: 2, fill: BRAND_COLORS.terra, opacity: 0.45 }),
     ]
 
     // 5 event rows
