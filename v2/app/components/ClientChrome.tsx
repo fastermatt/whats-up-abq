@@ -34,6 +34,10 @@ const AuthCallbackCatcher = dynamic(() => import('./AuthCallbackCatcher').then(m
 export function ClientChrome() {
   const pathname = usePathname()
   const isAdmin = pathname.startsWith('/admin')
+  // The homepage already runs HomepageStickyHook for the "new here / subscribe"
+  // job. Suppress the install prompt + first-visit banner there so two+ capture
+  // overlays don't stack over the featured events on mobile.
+  const isHome = pathname === '/'
 
   return (
     <>
@@ -42,8 +46,8 @@ export function ClientChrome() {
       {!isAdmin && <AnalyticsTracker />}
       {!isAdmin && <WebVitals />}
       <PWAManager />
-      <InstallPrompt />
-      <FirstVisitBanner />
+      {!isHome && <InstallPrompt />}
+      {!isHome && <FirstVisitBanner />}
     </>
   )
 }

@@ -236,7 +236,7 @@ export default async function ForYouPage() {
             )}
             <Link
               href="/profile#preferences"
-              className="text-[11px] text-[#8a7a74] hover:text-[#9a442d] transition-colors underline underline-offset-2 ml-1"
+              className="text-[11px] text-[#6b5d57] hover:text-[#9a442d] transition-colors underline underline-offset-2 ml-1"
             >
               Edit
             </Link>

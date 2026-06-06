@@ -55,7 +55,7 @@ export function FeaturedToggle({ tonight, weekend }: Props) {
 
       {/* Scroll row */}
       {events.length === 0 ? (
-        <p className="text-sm text-[#8a7a74] py-4">No events for this period yet.</p>
+        <p className="text-sm text-[#6b5d57] py-4">No events for this period yet.</p>
       ) : (
         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
           {events.map((e) => (
@@ -92,7 +92,7 @@ export function FeaturedToggle({ tonight, weekend }: Props) {
                       {e.time}
                     </p>
                   ) : (
-                    <p className="text-[11px] text-[#8a7a74] italic flex items-center gap-1">
+                    <p className="text-[11px] text-[#6b5d57] italic flex items-center gap-1">
                       <Clock className="w-3 h-3 flex-shrink-0" />
                       Time TBA
                     </p>

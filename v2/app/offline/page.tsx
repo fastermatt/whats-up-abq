@@ -43,7 +43,7 @@ export default function OfflinePage() {
           </a>
         </div>
 
-        <p className="text-[10px] text-[#8a7a74] pt-4">
+        <p className="text-[10px] text-[#6b5d57] pt-4">
           You see this page when ABQ Unplugged is installed and the network drops out.
         </p>
       </div>

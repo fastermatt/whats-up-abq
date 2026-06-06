@@ -242,7 +242,7 @@ export function PreferencesPicker({ userId, initial, onSaved, compact = false }:
             </span>
             Send me a weekly "what's on" email based on my picks
           </button>
-          <p className="text-[10px] text-[#8a7a74] mt-1.5 ml-0.5">
+          <p className="text-[10px] text-[#6b5d57] mt-1.5 ml-0.5">
             We send a maximum of one email per week. No ads, no spam.
           </p>
         </div>

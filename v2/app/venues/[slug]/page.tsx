@@ -209,7 +209,7 @@ export default async function VenuePage({ params }: PageProps) {
           alt={venue}
           className="w-full h-full object-cover animate-reveal-scale"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1a1614]/70 via-[#1a1614]/20 to-transparent" />
         {/* Category pill */}
         {topCategory && (
           <div className="absolute top-4 left-4 bg-[#9a442d] text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">
@@ -293,7 +293,7 @@ export default async function VenuePage({ params }: PageProps) {
               <Link
                 key={cat}
                 href={`/events?category=${encodeURIComponent(cat)}`}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold bg-white border border-[#ddc9a3] text-[#4a3f3a] px-3 py-1.5 rounded-full hover:border-[#9a442d] hover:text-[#9a442d] transition-all"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold bg-[#fffdf9] border border-[#ddc9a3] text-[#4a3f3a] px-3 py-1.5 rounded-full hover:border-[#9a442d] hover:text-[#9a442d] transition-all"
               >
                 {cat}
                 <span className="bg-[#9a442d] text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center flex-shrink-0">
@@ -340,7 +340,7 @@ export default async function VenuePage({ params }: PageProps) {
                 <AnimateIn key={event.id} animation="fade-up" delay={Math.min(i * 25, 200)}>
                   <Link
                     href={`/events/${event.id}`}
-                    className="group flex gap-3 bg-white rounded-xl border border-[#f0e4cc] p-3 shadow-sm hover:shadow-md hover:border-[#ddc9a3] transition-all"
+                    className="group flex gap-3 bg-[#fffdf9] rounded-xl border border-[#f0e4cc] p-3 shadow-sm hover:shadow-md hover:border-[#ddc9a3] transition-all"
                   >
                     {/* Thumbnail */}
                     <div className="w-[72px] h-[72px] rounded-lg overflow-hidden flex-shrink-0 bg-[#f0e4cc]">

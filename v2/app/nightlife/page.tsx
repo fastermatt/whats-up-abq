@@ -198,7 +198,7 @@ function RowCard({ event, index }: { event: NormalizedEvent; index: number }) {
           </p>
         ) : null}
         {event.venue && (
-          <p className="text-[10px] text-[#8a7a74] line-clamp-1 flex items-center gap-0.5 mt-0.5">
+          <p className="text-[10px] text-[#6b5d57] line-clamp-1 flex items-center gap-0.5 mt-0.5">
             <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
             {event.venue}
           </p>
@@ -292,7 +292,7 @@ export default async function NightlifePage() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-[#fbf7f1]" />
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 space-y-8 pt-5">
+      <div className="max-w-5xl mx-auto px-4 space-y-8 pt-5">
 
         {/* ── A: Header ── */}
         <div>

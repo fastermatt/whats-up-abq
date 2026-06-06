@@ -239,7 +239,7 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
             <Clock className="w-2.5 h-2.5 flex-shrink-0 text-[#9a442d]" />
             {timeStr
               ? <span className="text-[#9a442d]">{timeStr}</span>
-              : <span className="text-[#8a7a74] italic">Time TBA — check venue</span>
+              : <span className="text-[#6b5d57] italic">Time TBA — check venue</span>
             }
           </p>
           {event.venue && (

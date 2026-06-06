@@ -51,7 +51,7 @@ export function SearchBar() {
         value={value}
         onChange={handleChange}
         placeholder="Search events, venues, artists..."
-        className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-white border border-[#e8ddd0] text-sm text-[#1a1614] placeholder:text-[#b0a69e] focus:outline-none focus:border-[#9a442d] focus:ring-1 focus:ring-[#9a442d]/30 transition-colors"
+        className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-white border border-[#e8ddd0] text-sm text-[#1a1614] placeholder:text-[#6b5d57] focus:outline-none focus:border-[#9a442d] focus:ring-1 focus:ring-[#9a442d]/30 transition-colors"
         style={{ fontFamily: 'var(--font-inter)' }}
       />
       {value && (

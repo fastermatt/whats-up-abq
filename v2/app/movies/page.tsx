@@ -119,7 +119,7 @@ export default async function MoviesPage() {
             </div>
 
             {/* TMDb attribution, required by their API ToS */}
-            <p className="mt-8 text-center text-[11px] text-[#8a7a74] flex items-center justify-center gap-2">
+            <p className="mt-8 text-center text-[11px] text-[#6b5d57] flex items-center justify-center gap-2">
               <span>Movie data provided by</span>
               <a
                 href="https://www.themoviedb.org"
@@ -201,7 +201,7 @@ function MovieCard({ movie, priority }: { movie: Movie; priority?: boolean }) {
 
       {/* Release year */}
       {movie.releaseDate && (
-        <p className="text-[10px] text-[#8a7a74] mt-0.5">
+        <p className="text-[10px] text-[#6b5d57] mt-0.5">
           {movie.releaseDate.slice(0, 4)}
         </p>
       )}

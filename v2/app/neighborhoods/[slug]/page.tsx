@@ -176,7 +176,7 @@ export default async function NeighborhoodPage({ params }: PageProps) {
 
       <div className="max-w-3xl mx-auto px-4 py-6">
         {/* ── Neighborhood Hero ── */}
-        <div className="bg-white rounded-2xl border border-[#f0e4cc] shadow-sm p-6 mb-6">
+        <div className="bg-[#fffdf9] rounded-2xl border border-[#f0e4cc] shadow-sm p-6 mb-6">
           <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider bg-[#f0e4cc] text-[#9a442d] px-2.5 py-1 rounded-full mb-3">
             <Map className="w-3 h-3" />
             Albuquerque Neighborhood
@@ -214,7 +214,7 @@ export default async function NeighborhoodPage({ params }: PageProps) {
                 <Link
                   key={cat}
                   href={`/events?category=${encodeURIComponent(cat)}`}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold bg-white border border-[#ddc9a3] text-[#4a3f3a] px-3 py-1.5 rounded-full hover:border-[#006a62] hover:text-[#006a62] transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold bg-[#fffdf9] border border-[#ddc9a3] text-[#4a3f3a] px-3 py-1.5 rounded-full hover:border-[#006a62] hover:text-[#006a62] transition-colors"
                 >
                   {cat}
                   <span className="text-[#9a442d] font-bold">{cnt}</span>
@@ -239,7 +239,7 @@ export default async function NeighborhoodPage({ params }: PageProps) {
                   href={`/venues/${encodeURIComponent(
                     venue.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-')
                   )}`}
-                  className="inline-flex items-center gap-1.5 text-xs bg-white border border-[#ddc9a3] text-[#4a3f3a] px-2.5 py-1 rounded-full hover:border-[#9a442d] hover:text-[#9a442d] transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs bg-[#fffdf9] border border-[#ddc9a3] text-[#4a3f3a] px-2.5 py-1 rounded-full hover:border-[#9a442d] hover:text-[#9a442d] transition-colors"
                 >
                   <MapPin className="w-2.5 h-2.5 text-[#9a442d]" />
                   {venue}
@@ -272,7 +272,7 @@ export default async function NeighborhoodPage({ params }: PageProps) {
               <Link
                 key={event.id}
                 href={`/events/${event.id}`}
-                className="group flex gap-3 bg-white rounded-xl border border-[#f0e4cc] p-3 shadow-sm hover:shadow-md transition-all"
+                className="group flex gap-3 bg-[#fffdf9] rounded-xl border border-[#f0e4cc] p-3 shadow-sm hover:shadow-md transition-all"
               >
                 {/* Thumbnail */}
                 <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-[#f0e4cc]">
@@ -355,7 +355,7 @@ export default async function NeighborhoodPage({ params }: PageProps) {
           </h2>
           <div className="space-y-4">
             {neighborhoodFaqs.map(({ q, a }, i) => (
-              <div key={i} className="bg-white rounded-xl border border-[#f0e4cc] p-4">
+              <div key={i} className="bg-[#fffdf9] rounded-xl border border-[#f0e4cc] p-4">
                 <h3 className="text-sm font-bold text-[#1a1614] mb-1.5" style={{ fontFamily: 'var(--font-epilogue)' }}>{q}</h3>
                 <p className="text-xs text-[#6b5d57] leading-relaxed">{a}</p>
               </div>

@@ -25,6 +25,18 @@ import { StickyTicketCTA } from './StickyTicketCTA'
 
 export const revalidate = 60
 
+// Human-readable source labels — avoids leaking raw DB enums like "Local-venue" / "Nhcc"
+const SOURCE_LABELS: Record<string, string> = {
+  'ticketmaster':  'Ticketmaster',
+  'seatgeek':      'SeatGeek',
+  'eventbrite':    'Eventbrite',
+  'local-venue':   'Local venue',
+  'local':         'Local listing',
+  'nhcc':          'National Hispanic Cultural Center',
+  'volunteer':     'Volunteer org',
+  'community':     'Community submission',
+}
+
 interface PageProps {
   params: Promise<{ id: string }>
 }
@@ -281,8 +293,9 @@ export default async function EventDetailPage({ params }: PageProps) {
             alt={event.title}
             className="w-full h-full object-cover"
           />
-          {/* Gradient: heavy at bottom for title + logistics legibility, clear at top */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+          {/* Faint warm vignette — the title sits below the image on cream, so this
+              just grounds the photo bottom edge instead of crushing it to black. */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1a1614]/35 to-transparent" />
 
           {/* Film grain — softens low-res images, mobile only */}
           <div
@@ -589,7 +602,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                             title={spot.note}
                           >
                             <span className="font-semibold">{spot.name}</span>
-                            {spot.note && <span className="text-[#8a7a74]">· {spot.note}</span>}
+                            {spot.note && <span className="text-[#6b5d57]">· {spot.note}</span>}
                           </li>
                         ))}
                       </ul>
@@ -689,7 +702,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                 <Users className="w-3.5 h-3.5 text-[#9a442d]" />
                 {goingCount} {goingCount === 1 ? 'person' : 'people'} going
                 {(savedCount ?? 0) > 0 && (
-                  <span className="font-normal text-[#8a7a74] normal-case tracking-normal">
+                  <span className="font-normal text-[#6b5d57] normal-case tracking-normal">
                     · {savedCount} saved
                   </span>
                 )}
@@ -752,14 +765,12 @@ export default async function EventDetailPage({ params }: PageProps) {
 
           {/* Source + report */}
           <div className="flex items-center justify-between mb-6">
-            <p className="text-[10px] text-[#8a7a74]">
-              Source: {event.source === 'community'
-                ? 'Community submission'
-                : event.source.charAt(0).toUpperCase() + event.source.slice(1)}
+            <p className="text-[10px] text-[#6b5d57]">
+              Source: {SOURCE_LABELS[event.source] ?? (event.source.charAt(0).toUpperCase() + event.source.slice(1))}
             </p>
             <Link
               href={`/feedback?category=event_report&event_id=${event.id}`}
-              className="inline-flex items-center gap-1.5 text-[11px] text-[#8a7a74] hover:text-[#9a442d] transition-colors py-1"
+              className="inline-flex items-center gap-1.5 text-[11px] text-[#6b5d57] hover:text-[#9a442d] transition-colors py-1"
             >
               <Flag className="w-3 h-3" />
               Report an issue
@@ -800,7 +811,7 @@ export default async function EventDetailPage({ params }: PageProps) {
               <span className="text-base leading-none">📸</span>
               Share to Instagram
             </Link>
-            <p className="text-[10px] text-[#8a7a74] mt-2">Opens a feed-ready 4:5 graphic. Use Story or Square above for other formats.</p>
+            <p className="text-[10px] text-[#6b5d57] mt-2">Opens a feed-ready 4:5 graphic. Use Story or Square above for other formats.</p>
           </div>
 
           <div className="h-8" />

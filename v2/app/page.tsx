@@ -523,7 +523,7 @@ export default async function DiscoverPage() {
             {/* "Weekend picks drop Friday" — sets visit-cadence expectation inline.
                 Small enough to not compete with the event cards above, clear enough
                 to make the promise explicit.                                       */}
-            <p className="text-center text-[11px] text-[#8a7a74] mt-4 px-4">
+            <p className="text-center text-[11px] text-[#6b5d57] mt-4 px-4">
               Weekend picks refresh every Friday noon ·{' '}
               <Link href="/events" className="text-[#9a442d] font-semibold hover:underline">
                 Browse all {allUpcoming.total.toLocaleString()} events
@@ -797,7 +797,7 @@ export default async function DiscoverPage() {
                 {/* See all card */}
                 <Link
                   href="/movies"
-                  className="flex-shrink-0 w-[120px] snap-start flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-white/20 text-white/50 hover:border-white/50 hover:text-white/80 transition-all gap-2"
+                  className="flex-shrink-0 w-[120px] snap-start flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-white/40 text-white/70 hover:border-white/60 hover:text-white transition-all gap-2"
                   style={{ aspectRatio: '2/3' }}
                 >
                   <ArrowRight className="w-5 h-5" />
@@ -806,7 +806,7 @@ export default async function DiscoverPage() {
               </div>
             </div>
 
-            <p className="text-center text-[10px] text-white/30 mt-3">
+            <p className="text-center text-[10px] text-white/60 mt-3">
               Movie data from{' '}
               <a
                 href="https://www.themoviedb.org"
@@ -1045,7 +1045,7 @@ function PlaceTeaseCard({ place, index }: { place: Place; index: number }) {
 const SECTION_ACCENTS: Record<string, string> = {
   Tonight:        '#006a62', // turquoise
   'This Weekend': '#9a442d', // terra
-  New:            '#4a3f3a', // ink-mid — was #8a7a74 which fails WCAG AA at 10px
+  New:            '#4a3f3a', // ink-mid — was #6b5d57 which fails WCAG AA at 10px
 }
 
 function EventSection({
@@ -1065,7 +1065,7 @@ function EventSection({
   sectionBg?: string
   prioritizeFirst?: boolean
 }) {
-  const accentColor = SECTION_ACCENTS[sectionLabel] ?? '#8a7a74'
+  const accentColor = SECTION_ACCENTS[sectionLabel] ?? '#6b5d57'
 
   return (
     <section className="py-6" style={sectionBg ? { background: sectionBg } : undefined}>

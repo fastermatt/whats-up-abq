@@ -119,7 +119,7 @@ export function InstallPrompt() {
             <button
               onClick={dismiss}
               aria-label="Dismiss install prompt"
-              className="p-1.5 -mr-1 text-[#8a7a74] hover:text-[#4a3f3a] transition-colors flex-shrink-0"
+              className="p-1.5 -mr-1 text-[#6b5d57] hover:text-[#4a3f3a] transition-colors flex-shrink-0"
             >
               <X className="w-4 h-4" />
             </button>
@@ -157,7 +157,7 @@ export function InstallPrompt() {
           </div>
 
           <div className="border-t border-[#f0e4cc] px-4 py-2 text-center">
-            <p className="text-[10px] text-[#8a7a74]">
+            <p className="text-[10px] text-[#6b5d57]">
               ↓ Share is in Safari&apos;s bottom toolbar
             </p>
           </div>

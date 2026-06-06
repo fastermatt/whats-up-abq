@@ -355,7 +355,7 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
 
           {/* Category badge — top right */}
           {event.category && (
-            <div className="absolute top-1.5 right-1.5 bg-black/50 backdrop-blur-sm text-white text-[10px] px-1.5 py-0.5 rounded-full">
+            <div className="absolute top-1.5 right-1.5 bg-[#1a1614]/55 backdrop-blur-sm text-white text-[10px] px-1.5 py-0.5 rounded-full">
               {event.subcategory ? `${event.category} · ${event.subcategory}` : event.category}
             </div>
           )}
@@ -389,12 +389,13 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
 
           {/* Hover overlay (non-local-venue cards only — local-venue has its own permanent tint) */}
           {event.source !== 'local-venue' && (
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#1a1614]/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           )}
         </div>
 
-        {/* Info section — title + date only (venue is rendered as separate link below) */}
-        <div className="px-2 pt-2 pb-0.5 space-y-0.5 flex-1 flex flex-col">
+        {/* Info section — title + date only (venue is rendered as separate link below).
+            No flex-1: cards size to content so a missing venue doesn't leave a tall void. */}
+        <div className="px-2 pt-2 pb-0.5 space-y-0.5">
           <h3
             className="font-bold text-[#1a1614] text-xs leading-tight line-clamp-2 group-hover:text-[#9a442d] transition-colors"
             style={{ fontFamily: 'var(--font-epilogue)' }}

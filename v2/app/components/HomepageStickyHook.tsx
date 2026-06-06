@@ -130,7 +130,7 @@ export function HomepageStickyHook() {
           <p className="text-sm font-black text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
             Add to Home Screen
           </p>
-          <button onClick={dismiss} aria-label="Dismiss" className="p-1 -mr-1 text-[#8a7a74] hover:text-[#4a3f3a] transition-colors">
+          <button onClick={dismiss} aria-label="Dismiss" className="p-1 -mr-1 text-[#6b5d57] hover:text-[#4a3f3a] transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -154,7 +154,7 @@ export function HomepageStickyHook() {
           ))}
         </div>
         <div className="border-t border-[#f0e4cc] px-4 py-2 flex items-center justify-between">
-          <p className="text-[10px] text-[#8a7a74]">↓ Look for Share in the Safari toolbar</p>
+          <p className="text-[10px] text-[#6b5d57]">↓ Look for Share in the Safari toolbar</p>
           <button onClick={dismiss} className="text-[10px] text-[#9a442d] font-semibold">Done</button>
         </div>
       </div>
@@ -180,7 +180,7 @@ export function HomepageStickyHook() {
         <button
           onClick={dismiss}
           aria-label="Dismiss"
-          className="p-1 -mr-1 -mt-0.5 text-[#8a7a74] hover:text-[#4a3f3a] transition-colors flex-shrink-0"
+          className="p-1 -mr-1 -mt-0.5 text-[#6b5d57] hover:text-[#4a3f3a] transition-colors flex-shrink-0"
         >
           <X className="w-4 h-4" />
         </button>

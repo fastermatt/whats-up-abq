@@ -104,7 +104,7 @@ export default async function ProfilePage() {
                   {profile.neighborhood}
                 </p>
               )}
-              <p className="text-[#8a7a74] text-xs mt-1">
+              <p className="text-[#6b5d57] text-xs mt-1">
                 Member since {new Date(profile?.joined_at ?? user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
               </p>
             </div>

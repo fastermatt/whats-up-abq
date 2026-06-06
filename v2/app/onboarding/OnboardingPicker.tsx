@@ -42,12 +42,12 @@ export function OnboardingPicker({ userId, initial }: Props) {
           <button
             type="button"
             onClick={() => router.push('/')}
-            className="inline-flex items-center gap-1.5 text-sm text-[#8a7a74] hover:text-[#4a3f3a] transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm text-[#6b5d57] hover:text-[#4a3f3a] transition-colors"
           >
             Skip for now — I&apos;ll set this later
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
-          <p className="text-[10px] text-[#8a7a74] mt-1.5">
+          <p className="text-[10px] text-[#6b5d57] mt-1.5">
             You can always update this in your profile under &ldquo;What are you into?&rdquo;
           </p>
         </div>

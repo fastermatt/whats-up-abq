@@ -204,7 +204,7 @@ export default function SubmitEventPage() {
   }
 
   const inputClass = (hasError?: boolean) =>
-    `w-full px-3 py-2.5 rounded-xl border text-sm text-[#1a1614] bg-white placeholder-[#c4a97d] focus:outline-none focus:ring-2 transition ${
+    `w-full px-3 py-2.5 rounded-xl border text-sm text-[#1a1614] bg-white placeholder-[#6b5d57] focus:outline-none focus:ring-2 transition ${
       hasError
         ? 'border-red-400 focus:border-red-400 focus:ring-red-200'
         : 'border-[#ddc9a3] focus:border-[#9a442d] focus:ring-[#9a442d]/20'

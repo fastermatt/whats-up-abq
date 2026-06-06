@@ -364,7 +364,7 @@ export default function LoginPage() {
               {/* Submit */}
               <button
                 type="submit" disabled={loading || !email.trim() || !password}
-                className="w-full py-3 rounded-xl bg-[#9a442d] text-white font-semibold text-sm hover:bg-[#7d3725] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-xl bg-[#9a442d] text-white font-semibold text-sm hover:bg-[#7d3725] transition-all disabled:bg-[#e2d3c4] disabled:text-[#9a8a80] disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 style={{ fontFamily: 'var(--font-epilogue)' }}
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
@@ -396,7 +396,7 @@ export default function LoginPage() {
               )}
               <button
                 type="submit" disabled={loading || !email.trim()}
-                className="w-full py-3 rounded-xl bg-[#9a442d] text-white font-semibold text-sm hover:bg-[#7d3725] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-xl bg-[#9a442d] text-white font-semibold text-sm hover:bg-[#7d3725] transition-all disabled:bg-[#e2d3c4] disabled:text-[#9a8a80] disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 style={{ fontFamily: 'var(--font-epilogue)' }}
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
