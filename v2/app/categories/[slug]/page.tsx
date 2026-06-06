@@ -213,7 +213,7 @@ export default async function CategoryPage({ params }: PageProps) {
               ? new Date(event.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
               : null
             return (
-              <Link key={event.id} href={`/events/${event.id}`} target="_blank" rel="noopener noreferrer"
+              <Link key={event.id} href={`/events/${event.id}`}
                 className="group flex gap-3 bg-card rounded-xl border border-sand-light p-3 shadow-sm hover:shadow-md transition-all">
                 <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-sand-light">
                   <EventImage

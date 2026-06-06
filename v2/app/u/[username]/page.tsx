@@ -209,7 +209,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
                 return (
                   <Link
                     key={ev.id}
-                    href={`/events/${ev.event_id}`} target="_blank" rel="noopener noreferrer"
+                    href={`/events/${ev.event_id}`}
                     className="flex gap-3 bg-white rounded-xl border border-sand-light p-3 hover:shadow-md transition-shadow"
                   >
                     <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-sand-light">

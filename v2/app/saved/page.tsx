@@ -304,7 +304,7 @@ function FriendEventCard({ event, friendHandle }: { event: FriendEvent; friendHa
         </div>
         <div className="flex items-center gap-2 mt-1.5">
           <Link
-            href={`/events/${event.event_id}`} target="_blank" rel="noopener noreferrer"
+            href={`/events/${event.event_id}`}
             className="text-[10px] font-semibold text-terra hover:underline"
           >
             View event →
@@ -368,7 +368,7 @@ function SavedEventCard({ event, activeTab }: { event: UserEvent; activeTab: Tab
 
         <div className="flex items-center gap-2 mt-1.5">
           <Link
-            href={`/events/${event.event_id}`} target="_blank" rel="noopener noreferrer"
+            href={`/events/${event.event_id}`}
             className="text-[10px] font-semibold text-terra hover:underline"
           >
             View event →

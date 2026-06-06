@@ -92,7 +92,11 @@ export function getTimeRange(filter: TimeFilter): { gte: string; lte?: string } 
     }
     case 'upcoming':
     default:
-      return { gte: now.toISOString() }
+      // Use a bare date string (not a timestamp) so today's events always appear
+      // regardless of when in the day the query runs. A UTC timestamp gte would
+      // silently drop date-only rows earlier than "now" in UTC — so an NHCC event
+      // on June 6 disappears after 6 PM Mountain (midnight UTC).
+      return { gte: format(nowInABQ(), 'yyyy-MM-dd') }
   }
 }
 

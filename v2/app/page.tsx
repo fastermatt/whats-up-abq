@@ -1143,7 +1143,7 @@ function HorizontalCard({
 
   return (
     <Link
-      href={`/events/${event.id}`} target="_blank" rel="noopener noreferrer"
+      href={`/events/${event.id}`}
       className="group flex-shrink-0 w-[220px] snap-start scroll-reveal-slide"
     >
       {/* Landscape image */}
@@ -1217,7 +1217,7 @@ function FeaturedCard({ event, index = 0 }: { event: NormalizedEvent; index?: nu
 
   return (
     <Link
-      href={`/events/${event.id}`} target="_blank" rel="noopener noreferrer"
+      href={`/events/${event.id}`}
       className="group flex-shrink-0 w-[270px] snap-start"
     >
       {/* Landscape 16:10 — matches every other card on the site */}

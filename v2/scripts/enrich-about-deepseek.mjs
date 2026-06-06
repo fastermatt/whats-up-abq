@@ -9,7 +9,11 @@
  *   about          — 1-2 sentences about the performer / event
  *   highlights     — 2-3 bullet points on what to expect
  *   venue_tips     — neighborhood + parking / arrival info
- *   nearby_dining  — [{name, why}] pre-seeded from KNOWN_VENUES
+ *   nearby_dining  — [{name, why}] ONLY from KNOWN_VENUES verified seeds. Never AI-generated.
+ *                   Events whose venue is not in KNOWN_VENUES always get nearby_dining: [].
+ *                   IMPORTANT: nearby_dining is based on venue proximity, NOT the event address —
+ *                   the enrichment does not call a geocoding API. Only include dining when the
+ *                   venue is in KNOWN_VENUES with manually verified restaurant proximity.
  *   local_rec      — one verifiable insider tip
  *
  * Advantages over Gemma/LM Studio:
@@ -25,6 +29,9 @@
  *   node scripts/enrich-about-deepseek.mjs --dry-run        # preview prompt, no writes
  *   node scripts/enrich-about-deepseek.mjs --source=nhcc   # single source
  *   node scripts/enrich-about-deepseek.mjs --id=tm-123456   # single event
+ *   node scripts/enrich-about-deepseek.mjs --clear-unverified-dining  # one-time cleanup:
+ *                                           removes nearby_dining from events whose venue is
+ *                                           not in KNOWN_VENUES (clears any old hallucinated data)
  */
 
 import { createClient } from '@supabase/supabase-js'
@@ -60,6 +67,7 @@ const FORCE     = argv.includes('--force')
 const LIMIT     = parseInt(argv.find(a => a.startsWith('--limit='))?.split('=')[1] ?? '500')
 const SOURCE    = argv.find(a => a.startsWith('--source='))?.split('=')[1] ?? null
 const SINGLE_ID = argv.find(a => a.startsWith('--id='))?.split('=')[1] ?? null
+const CLEAR_UNVERIFIED = argv.includes('--clear-unverified-dining')
 const CONCURRENCY = 3   // parallel DeepSeek calls (lower = fewer empty-response rate-limit hits)
 
 // ── Venue knowledge base ──────────────────────────────────────────────────────
@@ -548,6 +556,36 @@ async function enrichEvent(event, idx, total) {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 async function main() {
+  // ── One-time maintenance: clear hallucinated dining from non-KNOWN_VENUES events ──
+  if (CLEAR_UNVERIFIED) {
+    console.log('🧹  Clearing unverified nearby_dining from events not in KNOWN_VENUES...')
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+    const knownPatterns = Object.keys(KNOWN_VENUES)
+    const today = new Date().toISOString().slice(0, 10)
+    const { data: candidates } = await supabase.schema('public').from('events')
+      .select('id, venue_name, ai_enrichment')
+      .eq('hidden', false).gte('event_date', today)
+      .not('ai_enrichment', 'is', null)
+    let cleared = 0
+    for (const ev of candidates ?? []) {
+      const ai = ev.ai_enrichment
+      if (!ai?.nearby_dining?.length) continue
+      const vname = (ev.venue_name ?? '').toLowerCase()
+      const isKnown = knownPatterns.some(p => vname.includes(p))
+      if (isKnown) continue
+      if (!DRY_RUN) {
+        const { error } = await supabase.schema('public').from('events')
+          .update({ ai_enrichment: { ...ai, nearby_dining: [] } }).eq('id', ev.id)
+        if (!error) cleared++
+      } else {
+        console.log(`  DRY-RUN would clear: ${ev.id} (${ev.venue_name})`)
+        cleared++
+      }
+    }
+    console.log(`✅  Cleared unverified dining from ${cleared} events.`)
+    return
+  }
+
   console.log(`🤖  ABQ Unplugged — DeepSeek Event Enrichment`)
   console.log(`    Mode: ${FORCE ? 'FORCE (re-enrich all)' : 'INCREMENTAL (skip enriched)'}`)
   console.log(`    Limit: ${LIMIT}${SOURCE ? `  Source: ${SOURCE}` : ''}${SINGLE_ID ? `  ID: ${SINGLE_ID}` : ''}`)

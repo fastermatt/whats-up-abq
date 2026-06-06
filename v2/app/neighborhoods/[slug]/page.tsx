@@ -269,7 +269,7 @@ export default async function NeighborhoodPage({ params }: PageProps) {
             return (
               <Link
                 key={event.id}
-                href={`/events/${event.id}`} target="_blank" rel="noopener noreferrer"
+                href={`/events/${event.id}`}
                 className="group flex gap-3 bg-card rounded-xl border border-sand-light p-3 shadow-sm hover:shadow-md transition-all"
               >
                 {/* Thumbnail */}
