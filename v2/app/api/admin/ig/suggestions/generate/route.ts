@@ -66,18 +66,26 @@ const WEEKLY_SLOTS: DaySlot[] = [
   { dow: 0, postType: 'Tonight',       templateId: 'tonight-list',   hour: 16, minute: 0  }, // Sun — low-key "something tonight"
 ]
 
-// ── Date helpers (MDT = UTC-6) ────────────────────────────────────────────────
+// ── Date helpers (America/Denver, DST-aware) ──────────────────────────────────
 
 function toMDT(d: Date): string {
   return d.toLocaleDateString('en-CA', { timeZone: 'America/Denver' })
 }
 
+/** Denver UTC offset in hours for a given date: 6 in MDT (summer), 7 in MST
+ *  (winter). Computed from the IANA zone so it's correct year-round. */
+function denverOffsetHours(dateStr: string): number {
+  const probe = new Date(dateStr + 'T12:00:00Z')
+  const denver = new Date(probe.toLocaleString('en-US', { timeZone: 'America/Denver' }))
+  const utc = new Date(probe.toLocaleString('en-US', { timeZone: 'UTC' }))
+  return Math.round((utc.getTime() - denver.getTime()) / 3_600_000)
+}
+
 function mdtToUTC(dateStr: string, hour: number, minute: number): Date {
-  // dateStr = YYYY-MM-DD in MDT; convert to UTC timestamp
+  // dateStr = YYYY-MM-DD Denver wall time → UTC instant (DST-aware).
   const [y, m, day] = dateStr.split('-').map(Number)
-  // MDT = UTC-6; schedule time → UTC
-  const utc = new Date(Date.UTC(y, m - 1, day, hour + 6, minute, 0))
-  return utc
+  const off = denverOffsetHours(dateStr)
+  return new Date(Date.UTC(y, m - 1, day, hour + off, minute, 0))
 }
 
 /** Get the next Monday (MDT) from today */
@@ -201,9 +209,30 @@ function ensureVenueTags(caption: string, handles: string[]): string {
   return caption + '\n\n' + tagLine
 }
 
+/** Deterministic caption used when DeepSeek is unavailable, so a post NEVER
+ *  ends up with a blank caption (which kills reach and drops venue tags). */
+function fallbackCaption(postType: PostType, events: EventSnap[], handles: string[]): string {
+  const hooks: Record<PostType, string> = {
+    WeeklyFive:    'This week in Burque:',
+    BreweryNights: 'Taproom nights in ABQ:',
+    WeekendDigest: 'Your Albuquerque weekend, sorted:',
+    SingleEvent:   'On our radar:',
+    Tonight:       'Tonight in Burque:',
+  }
+  const hook = hooks[postType] ?? 'Happening in Albuquerque:'
+  const lines = events.slice(0, 5).map(e => `• ${e.title}${e.venue ? ` @ ${e.venue}` : ''}`)
+  const tagLine = handles.length ? `\n📍 ${handles.map(h => '@' + h).join(' ')}` : ''
+  const saveLine = events.length > 1 ? '\nSave this for later. ' : '\n'
+  return `${hook}\n${lines.join('\n')}${tagLine}\n${saveLine}Full details → abqunplugged.com 🌵\n#ABQ #Albuquerque #505 #BurqueLife #ThingsToDo505 #ABQEvents #NewMexico #DukeCity`
+}
+
 async function generateCaption(postType: PostType, events: EventSnap[], handles: string[] = []): Promise<string> {
   const apiKey = process.env.DEEPSEEK_API_KEY
-  if (!apiKey || events.length === 0) return ''
+  if (events.length === 0) return ''
+  if (!apiKey) {
+    console.warn('[generateCaption] DEEPSEEK_API_KEY not set in this environment — using fallback caption')
+    return ''
+  }
 
   let userPrompt = CAPTION_PROMPTS[postType](events)
   if (handles.length > 0) {
@@ -227,10 +256,14 @@ async function generateCaption(postType: PostType, events: EventSnap[], handles:
         max_tokens: 200,
       }),
     })
-    if (!res.ok) return ''
+    if (!res.ok) {
+      console.error('[generateCaption] DeepSeek HTTP error:', res.status, (await res.text()).slice(0, 300))
+      return ''
+    }
     const data = await res.json() as { choices: { message: { content: string } }[] }
     return data.choices[0]?.message?.content?.trim() ?? ''
-  } catch {
+  } catch (err) {
+    console.error('[generateCaption] DeepSeek request failed:', err instanceof Error ? err.message : String(err))
     return ''
   }
 }
@@ -355,103 +388,121 @@ export async function POST(req: NextRequest) {
   // Image-based event templates (use event photo as hero)
   const IMAGE_TEMPLATES = ['poster', 'golden-hour', 'split', 'paper', 'dispatch'] as const
 
+  // Per-post-type memory so the SAME post type generated twice in one window
+  // (e.g. two BreweryNights in a 2-week range) doesn't repeat the same events.
+  const usedByType: Record<string, Set<string>> = {}
+  const typeSeen = (t: string) => (usedByType[t] ??= new Set<string>())
+
+  // Select up to `max` events: skip ones already used by this post type, dedupe
+  // by title within the post (no act twice), and cap any one venue to 2 slots.
+  const MAX_PER_VENUE = 2
+  function pickEvents(candidates: EventSnap[], max: number, exclude: Set<string>): EventSnap[] {
+    const out: EventSnap[] = []
+    const seenTitles = new Set<string>()
+    const venueCount = new Map<string, number>()
+    for (const e of candidates) {
+      if (exclude.has(e.id)) continue
+      const tkey = e.title.trim().toLowerCase()
+      if (tkey && seenTitles.has(tkey)) continue
+      const vkey = (e.venue ?? '').trim().toLowerCase()
+      if (vkey) {
+        const c = venueCount.get(vkey) ?? 0
+        if (c >= MAX_PER_VENUE) continue
+        venueCount.set(vkey, c + 1)
+      }
+      if (tkey) seenTitles.add(tkey)
+      out.push(e)
+      if (out.length >= max) break
+    }
+    return out
+  }
+
   for (const slot of slots) {
     let selected: EventSnap[] = []
     let strategyNotes = ''
     let templateId = slot.templateId   // may be overridden below
 
+    const exclude = typeSeen(slot.postType)
+
     switch (slot.postType) {
       case 'WeeklyFive': {
-        // One diverse pick per day, sorted by score
-        const seen = new Set<string>()
+        // Diverse: best event per day first, then fill by score — then dedupe/cap.
         const byDay = new Map<string, EventSnap[]>()
         for (const e of snaps) {
           if (!byDay.has(e.date)) byDay.set(e.date, [])
           byDay.get(e.date)!.push(e)
         }
-        for (const [, dayEvents] of byDay) {
-          const best = dayEvents[0]
-          if (best && !seen.has(best.id)) {
-            selected.push(best)
-            seen.add(best.id)
-          }
-          if (selected.length >= 5) break
-        }
-        // Fill remaining from top events
-        for (const e of snaps) {
-          if (selected.length >= 5) break
-          if (!seen.has(e.id)) { selected.push(e); seen.add(e.id) }
-        }
-        strategyNotes = 'Mon: weekly overview, diverse picks across the week for habitual check-in'
+        const ordered: EventSnap[] = []
+        for (const [, dayEvents] of byDay) if (dayEvents[0]) ordered.push(dayEvents[0])
+        ordered.push(...snaps)   // fill pool (pickEvents dedupes by id/title)
+        selected = pickEvents(ordered, 5, exclude)
+        strategyNotes = 'Weekly overview — diverse picks across the week for a habitual check-in'
         break
       }
       case 'BreweryNights':
-        selected = brewerySnaps.slice(0, 5)
-        strategyNotes = 'Tue 5:30pm: after-work taproom crowd — brewery + live music is peak ABQ midweek engagement'
+        selected = pickEvents(brewerySnaps, 5, exclude)
+        strategyNotes = 'Taproom crowd — brewery + live music is peak ABQ community engagement'
         break
       case 'WeekendDigest': {
-        // The coming weekend relative to this slot's date (Thu → Sat/Sun)
+        // Coming weekend relative to this slot's date. Guarantee BOTH days appear
+        // by interleaving Saturday and Sunday before capping at 5.
         const base = new Date(slot.dateStr + 'T12:00:00')
         const toSat = (6 - base.getDay() + 7) % 7
         const satStr = toMDT(addDays(base, toSat))
         const sunStr = toMDT(addDays(base, toSat + 1))
-        selected = snaps.filter(e => e.date === satStr || e.date === sunStr).slice(0, 5)
-        strategyNotes = 'Thu 5:30pm: weekend-planning peak — the moment people commit to weekend plans'
+        const sat = snaps.filter(e => e.date === satStr)
+        const sun = snaps.filter(e => e.date === sunStr)
+        const interleaved = [
+          ...sat.slice(0, 3), ...sun.slice(0, 2), ...sat.slice(3), ...sun.slice(2),
+        ]
+        selected = pickEvents(interleaved, 5, exclude)
+        strategyNotes = 'Weekend guide (Sat + Sun) — weekend-planning peak; save-bait roundup'
         break
       }
       case 'SingleEvent': {
-        // Best event on or near that day (score 8+), prefer events with photos
+        // Best event on that day (score 8+), prefer photos; fallback to the next
+        // few days only (never a far-future event that contradicts the post date).
         const dayEvents = eventsOn(slot.dateStr)
         const high = dayEvents.filter(e => e.popularityScore >= 8)
         const withPhoto = (high.length > 0 ? high : dayEvents).filter(e => e.imageUrl)
-        const any = (high.length > 0 ? high : dayEvents)
-        selected = (withPhoto.length > 0 ? withPhoto : any).slice(0, 1)
+        selected = pickEvents(withPhoto.length > 0 ? withPhoto : (high.length > 0 ? high : dayEvents), 1, exclude)
         if (selected.length === 0) {
-          // Fallback: best upcoming event with photo
-          const withImg = snaps.filter(e => e.popularityScore >= 7 && e.imageUrl)
-          selected = (withImg.length > 0 ? withImg : snaps.filter(e => e.popularityScore >= 7)).slice(0, 1)
+          const endStr = toMDT(addDays(new Date(slot.dateStr + 'T12:00:00'), 3))
+          const near = snaps.filter(e => e.date >= slot.dateStr && e.date <= endStr && e.popularityScore >= 7)
+          const nearImg = near.filter(e => e.imageUrl)
+          selected = pickEvents(nearImg.length > 0 ? nearImg : near, 1, exclude)
         }
+        if (selected.length === 0) continue   // no suitable spotlight — skip, don't force
 
-        // Choose image-based template when event has a photo, typographic otherwise
+        // Image template when a photo exists, typographic otherwise.
         const hasPhoto = !!selected[0]?.imageUrl
         if (hasPhoto) {
-          // Rotate between poster, golden-hour, split based on category for variety
           const cat = selected[0]?.category ?? ''
-          if (cat === 'Music' || cat === 'Festivals') templateId = 'poster'          // full bleed, dramatic
-          else if (cat === 'Food & Drink' || cat === 'Community') templateId = 'golden-hour' // warm, inviting
-          else templateId = 'split'   // photo top, clean info bottom
+          if (cat === 'Music' || cat === 'Festivals') templateId = 'poster'
+          else if (cat === 'Food & Drink' || cat === 'Community') templateId = 'golden-hour'
+          else templateId = 'split'
         } else {
-          // No photo: use strong typographic template
           templateId = 'broadside'
         }
-
-        strategyNotes = `Wed/Sat spotlight — ${hasPhoto ? `photo post (${templateId})` : 'type-only (no photo)'}, highest-score event for max shareability`
+        strategyNotes = `Spotlight — ${hasPhoto ? `photo post (${templateId})` : 'type-only (no photo)'}, highest-score event for max shareability`
         break
       }
       case 'Tonight':
-        selected = eventsOn(slot.dateStr).slice(0, 5)
-        strategyNotes = 'Fri 4:30pm / Sun 4pm: "what\'s happening tonight?" peak intent scroll window'
+        selected = pickEvents(eventsOn(slot.dateStr), 5, exclude)
+        strategyNotes = '"What\'s happening tonight?" — peak intent scroll window'
         break
     }
 
     if (selected.length === 0) continue
 
-    // Generate AI caption, auto-tagging the venues' Instagram handles
-    const handles = venueHandles(selected.map(e => e.venue))
-    const caption = ensureVenueTags(await generateCaption(slot.postType, selected, handles), handles)
+    // Remember these so the same post type won't repeat them later in this run.
+    selected.forEach(e => exclude.add(e.id))
 
-    // For event templates (image-based), store single event ctx fields at top level too
-    const isEventTemplate = IMAGE_TEMPLATES.includes(templateId as typeof IMAGE_TEMPLATES[number]) || templateId === 'broadside' || templateId === 'marquee'
-    const extraEventCtx = isEventTemplate && selected[0] ? {
-      event_ctx: {
-        title:    selected[0].title,
-        date:     selected[0].date,
-        time:     selected[0].time,
-        venue:    selected[0].venue,
-        category: selected[0].category,
-        imageUrl: selected[0].imageUrl,
-      }
-    } : {}
+    // Caption, auto-tagging venue IG handles. Fall back to a deterministic
+    // caption if DeepSeek is unavailable so a post is never published blank.
+    const handles = venueHandles(selected.map(e => e.venue))
+    const aiCaption = ensureVenueTags(await generateCaption(slot.postType, selected, handles), handles)
+    const caption = aiCaption.trim() || fallbackCaption(slot.postType, selected, handles)
 
     insertions.push({
       generation_id:  generationId,
@@ -463,7 +514,6 @@ export async function POST(req: NextRequest) {
       scheduled_for:  slot.scheduledFor.toISOString(),
       status:         'pending',
       strategy_notes: strategyNotes,
-      ...extraEventCtx,
     })
   }
 
@@ -473,6 +523,7 @@ export async function POST(req: NextRequest) {
       generationId,
       generated: 0,
       skipped:   skippedDays,
+      reason:    skippedDays > 0 ? 'All days already have pending suggestions' : 'No events found for this period',
       weekStart,
       weekEnd,
     })

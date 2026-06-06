@@ -36,6 +36,15 @@ export async function PATCH(
   const supabase = await createServiceClient()
 
   if (body.action === 'accept') {
+    // Guard: never accept a post with no caption or no rendered image — both
+    // would publish a broken post downstream.
+    if (body.caption !== undefined && !body.caption.trim()) {
+      return NextResponse.json({ error: 'Caption is empty — add a caption before accepting.' }, { status: 400 })
+    }
+    if (!body.imageDataUrl || !body.imageDataUrl.startsWith('data:image/')) {
+      return NextResponse.json({ error: 'Post image not ready yet — wait for the preview to render, then accept.' }, { status: 400 })
+    }
+
     // Update suggestion to accepted
     const updatePayload: Record<string, unknown> = {
       status: 'accepted',

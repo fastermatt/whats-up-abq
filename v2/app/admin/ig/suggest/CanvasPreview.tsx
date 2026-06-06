@@ -10,10 +10,20 @@
  *     Hero image fill with title overlay — mirrors the actual canvas output.
  */
 
-import { Loader2 } from 'lucide-react'
+import { useRef, useEffect, useCallback } from 'react'
+import { toPng } from 'html-to-image'
 import { DIGEST_TEMPLATES, TemplateContext } from '@/app/admin/ig/lib/templates'
 
 const DIGEST_TEMPLATE_IDS = new Set(['tonight-list', 'weekend-digest', 'weekly-five'])
+
+/** Route external images through the same-origin proxy so html-to-image can
+ *  capture them without tainting the canvas (cross-origin images would blank
+ *  the export). Same-origin / data URLs pass through untouched. */
+function proxyImage(url: string | null): string | null {
+  if (!url) return null
+  if (url.startsWith('data:') || url.startsWith('/')) return url
+  return `/api/image-proxy?url=${encodeURIComponent(url)}`
+}
 
 interface Props {
   templateId: string
@@ -21,7 +31,7 @@ interface Props {
   onExport?: (dataUrl: string) => void
 }
 
-export function CanvasPreview({ templateId, ctx }: Props) {
+export function CanvasPreview({ templateId, ctx, onExport }: Props) {
   const template  = DIGEST_TEMPLATES.find(t => t.id === templateId)
   const events    = ctx.events ?? []
   const isDigest  = DIGEST_TEMPLATE_IDS.has(templateId)
@@ -29,6 +39,32 @@ export function CanvasPreview({ templateId, ctx }: Props) {
   // Single event context (for image-based event templates)
   const event = events[0] ?? null
   const imageUrl = event?.imageUrl ?? ctx.imageUrl ?? null
+  const proxiedImageUrl = proxyImage(imageUrl)
+
+  // ── Export the rendered card to a PNG data URL for the accept/publish flow ──
+  const cardRef = useRef<HTMLDivElement>(null)
+  const ctxKey = JSON.stringify({ templateId, events, imageUrl })
+  const exportNow = useCallback(async () => {
+    const node = cardRef.current
+    if (!node || !onExport) return
+    try {
+      // Wait for any images inside the card to finish loading first.
+      const imgs = Array.from(node.querySelectorAll('img'))
+      await Promise.all(imgs.map(img =>
+        img.complete ? Promise.resolve()
+          : new Promise<void>(r => { img.onload = () => r(); img.onerror = () => r() })
+      ))
+      // pixelRatio ~4.2 → 260px card renders ~1090px wide (IG-ready).
+      const dataUrl = await toPng(node, { pixelRatio: 4.2, cacheBust: true })
+      onExport(dataUrl)
+    } catch (err) {
+      console.error('[CanvasPreview] export failed:', err)
+    }
+  }, [onExport])
+  useEffect(() => {
+    const t = setTimeout(exportNow, 200)
+    return () => clearTimeout(t)
+  }, [ctxKey, exportNow])
 
   // Headline for digest posts
   const headlineText =
@@ -44,7 +80,7 @@ export function CanvasPreview({ templateId, ctx }: Props) {
 
     return (
       <div className="flex justify-center">
-        <div className="w-[260px] flex-shrink-0 aspect-[4/5] rounded-xl overflow-hidden shadow-2xl relative">
+        <div ref={cardRef} className="w-[260px] flex-shrink-0 aspect-[4/5] rounded-xl overflow-hidden shadow-2xl relative">
           {isBroadside || !imageUrl ? (
             // ── Typographic / no-photo template ────────────────────────────
             <div className="absolute inset-0 bg-cream flex flex-col justify-center p-6">
@@ -74,7 +110,7 @@ export function CanvasPreview({ templateId, ctx }: Props) {
             <div className="absolute inset-0 flex flex-col bg-cream">
               {/* Photo top */}
               <div className="h-[52%] relative overflow-hidden">
-                <img src={imageUrl} alt="" className="w-full h-full object-cover" />
+                <img src={proxiedImageUrl ?? undefined} crossOrigin="anonymous" alt="" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-black/10" />
                 <div className="absolute top-2 left-2 flex items-center gap-1">
                   <div className="w-5 h-5 bg-terra rounded flex items-center justify-center">
@@ -113,7 +149,7 @@ export function CanvasPreview({ templateId, ctx }: Props) {
               </div>
               {/* Photo inset */}
               <div className="flex-1 rounded-lg overflow-hidden mb-3 relative">
-                <img src={imageUrl} alt="" className="w-full h-full object-cover" />
+                <img src={proxiedImageUrl ?? undefined} crossOrigin="anonymous" alt="" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-black/20" />
               </div>
               {/* Event info */}
@@ -136,7 +172,7 @@ export function CanvasPreview({ templateId, ctx }: Props) {
           ) : (
             // ── Poster: full-bleed photo with title overlay (default) ──────
             <div className="absolute inset-0">
-              <img src={imageUrl} alt="" className="w-full h-full object-cover" />
+              <img src={proxiedImageUrl ?? undefined} crossOrigin="anonymous" alt="" className="w-full h-full object-cover" />
               {/* Dark gradient overlay */}
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.15) 100%)' }} />
               {/* Logo top-left */}
@@ -182,6 +218,7 @@ export function CanvasPreview({ templateId, ctx }: Props) {
   return (
     <div className="flex justify-center">
       <div
+        ref={cardRef}
         className="w-[260px] flex-shrink-0 aspect-[4/5] bg-ink rounded-xl overflow-hidden flex flex-col text-cream shadow-2xl"
         style={{ padding: '18px 16px 14px' }}
       >

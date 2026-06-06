@@ -441,7 +441,8 @@ export function SuggestionQueue({ initial, initialStats }: Props) {
     setGenerating(false)
     if (res.ok) {
       const skipNote = data.skipped > 0 ? ` · skipped ${data.skipped} day${data.skipped === 1 ? '' : 's'} already pending` : ''
-      setGenMsg(`Generated ${data.generated} suggestions for ${data.weekStart} → ${data.weekEnd}${skipNote}`)
+      const reasonNote = data.generated === 0 && data.reason ? ` — ${data.reason}` : ''
+      setGenMsg(`Generated ${data.generated} suggestions${data.generated > 0 ? ` for ${data.weekStart} → ${data.weekEnd}` : ''}${skipNote}${reasonNote}`)
       if (isRange && data.generated > 0) setShowRange(false)
       await reload()
     } else {
@@ -462,7 +463,11 @@ export function SuggestionQueue({ initial, initialStats }: Props) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     })
-    if (!res.ok) return
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      setGenMsg(`Error: ${data.error ?? `${action} failed`}`)
+      return
+    }
 
     setSuggestions(prev =>
       prev.map(s => s.id === id ? { ...s, status: action === 'accept' ? 'accepted' : action === 'reject' ? 'rejected' : 'skipped', rejection_reason: reason ?? null } : s)
@@ -479,7 +484,11 @@ export function SuggestionQueue({ initial, initialStats }: Props) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'accept', caption, imageDataUrl }),
     })
-    if (!res.ok) return
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      setGenMsg(`Error: ${data.error ?? 'accept failed'}`)
+      return
+    }
 
     setSuggestions(prev =>
       prev.map(s => s.id === id ? { ...s, status: 'accepted', caption } : s)
