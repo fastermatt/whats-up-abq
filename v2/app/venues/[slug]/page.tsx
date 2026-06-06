@@ -391,6 +391,25 @@ export default async function VenuePage({ params }: PageProps) {
               )
             })}
           </div>
+
+          {/* Low-count edge state — keep sparse venues from leaving a tall void */}
+          {events.length <= 2 && (
+            <div className="mt-3 bg-[#fdf5ec] border border-[#f0e4cc] rounded-xl p-4">
+              <p className="text-sm font-bold text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
+                More shows coming soon
+              </p>
+              <p className="text-xs text-[#6b5d57] mt-0.5 mb-3">
+                {venue} adds dates regularly. In the meantime, here&apos;s what else is on around town.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Link href="/tonight"  className="inline-flex items-center min-h-[36px] px-3 py-1.5 rounded-full text-xs font-semibold bg-[#9a442d] text-white hover:bg-[#7d3725] transition-colors">Tonight in ABQ</Link>
+                <Link href="/weekend"  className="inline-flex items-center min-h-[36px] px-3 py-1.5 rounded-full text-xs font-semibold bg-[rgba(154,68,45,0.08)] text-[#9a442d] border border-[rgba(154,68,45,0.18)] hover:bg-[rgba(154,68,45,0.15)] transition-colors">This Weekend</Link>
+                {topCategory && (
+                  <Link href={`/events?category=${encodeURIComponent(topCategory)}`} className="inline-flex items-center min-h-[36px] px-3 py-1.5 rounded-full text-xs font-semibold bg-[rgba(154,68,45,0.08)] text-[#9a442d] border border-[rgba(154,68,45,0.18)] hover:bg-[rgba(154,68,45,0.15)] transition-colors">More {topCategory}</Link>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ── Browse more ── */}

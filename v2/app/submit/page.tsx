@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import {
   ArrowLeft, Send, CheckCircle, Calendar, MapPin, Tag, DollarSign,
   Image as ImageIcon, X, Loader2, Info, Upload, AlertCircle,
+  RectangleHorizontal, Ruler, FileType, Scale,
 } from 'lucide-react'
 
 const CATEGORIES = [
@@ -487,14 +488,14 @@ export default function SubmitEventPage() {
             {!photoFile && (
               <div className="grid grid-cols-2 gap-1.5">
                 {[
-                  ['📐', 'Landscape orientation (wider than tall)'],
-                  ['📏', 'Minimum 800 × 500 px'],
-                  ['🗂️', 'JPG, PNG, or WebP only'],
-                  ['⚖️', 'Max 5 MB file size'],
-                ].map(([icon, label]) => (
-                  <div key={label} className="flex items-center gap-1.5 bg-white/70 rounded-lg px-2.5 py-1.5">
-                    <span className="text-sm">{icon}</span>
-                    <span className="text-[10px] text-[#4a3f3a] font-medium leading-snug">{label}</span>
+                  [RectangleHorizontal, 'Landscape orientation (wider than tall)'],
+                  [Ruler,               'Minimum 800 × 500 px'],
+                  [FileType,            'JPG, PNG, or WebP only'],
+                  [Scale,               'Max 5 MB file size'],
+                ].map(([Icon, label]) => (
+                  <div key={label as string} className="flex items-center gap-1.5 bg-white/70 rounded-lg px-2.5 py-1.5">
+                    {(() => { const C = Icon as React.ComponentType<{ className?: string }>; return <C className="w-3.5 h-3.5 text-[#9a442d] flex-shrink-0" /> })()}
+                    <span className="text-[10px] text-[#4a3f3a] font-medium leading-snug">{label as string}</span>
                   </div>
                 ))}
               </div>

@@ -249,14 +249,14 @@ export function FilterBar({
     }`
 
   const subPill = (isActive: boolean) =>
-    `flex-none px-2.5 py-0.5 rounded-full text-[10px] font-semibold transition-colors whitespace-nowrap ${
+    `flex-none px-3 py-1.5 min-h-[34px] inline-flex items-center rounded-full text-[11px] font-semibold transition-colors whitespace-nowrap ${
       isActive
         ? 'bg-[#006a62]/80 text-white'
         : 'bg-[#f0e4cc]/60 border border-[#ddc9a3]/60 text-[#4a3f3a] hover:border-[#006a62] hover:text-[#006a62]'
     }`
 
   const vibePill = (isActive: boolean) =>
-    `flex-none px-2.5 py-1 rounded-full text-[10px] font-semibold whitespace-nowrap transition-colors ${
+    `flex-none px-3 py-1.5 min-h-[34px] inline-flex items-center rounded-full text-[11px] font-semibold whitespace-nowrap transition-colors ${
       isActive
         ? 'bg-[#9a442d] text-white border border-[#9a442d] shadow-sm'
         : 'bg-white border border-[#ddc9a3]/80 text-[#4a3f3a] hover:border-[#9a442d]/50 hover:text-[#9a442d] hover:bg-[#9a442d]/5'

@@ -164,7 +164,7 @@ export default async function WeekendPage() {
                 <section key={day}>
                   {/* Day header */}
                   <h2
-                    className="text-2xl font-black text-[#9a442d] mb-5 border-b-2 border-[#9a442d]/20 pb-2"
+                    className="text-2xl font-black text-[#1a1614] mb-5 border-b-2 border-[#9a442d]/30 pb-2"
                     style={{ fontFamily: 'var(--font-epilogue)' }}
                   >
                     {label}

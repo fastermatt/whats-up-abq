@@ -1175,7 +1175,7 @@ function HorizontalCard({
 
       {/* Info */}
       <h3
-        className="font-bold text-[#1a1614] text-xs leading-tight line-clamp-2 mb-0.5 group-hover:text-[#9a442d] transition-colors"
+        className="font-bold text-[#1a1614] text-sm leading-tight line-clamp-2 mb-0.5 group-hover:text-[#9a442d] transition-colors"
         style={{ fontFamily: 'var(--font-epilogue)' }}
       >
         {event.title}
