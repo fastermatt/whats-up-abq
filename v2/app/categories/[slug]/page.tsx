@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { fetchEvents } from '@/lib/events'
+import { fetchEvents, venueToSlug } from '@/lib/events'
 import { buildBreadcrumbs } from '@/lib/seo'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
@@ -192,7 +192,7 @@ export default async function CategoryPage({ params }: PageProps) {
             <div className="flex flex-wrap gap-2">
               {topVenues.map(([venue, cnt]) => (
                 <Link key={venue}
-                  href={`/venues/${encodeURIComponent(venue.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-'))}`}
+                  href={`/venues/${venueToSlug(venue)}`}
                   className="inline-flex items-center gap-1.5 text-xs bg-card border border-sand-mid text-ink-mid px-2.5 py-1 rounded-full hover:border-terra hover:text-terra transition-colors">
                   <MapPin className="w-2.5 h-2.5 text-terra" />
                   {venue}

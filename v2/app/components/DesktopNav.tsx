@@ -36,7 +36,7 @@ export default function DesktopNav() {
         </Link>
 
         {/* Nav links */}
-        <nav className="flex items-center gap-0.5">
+        <nav className="flex items-center gap-0.5" aria-label="Primary navigation">
           {NAV_ITEMS.map(({ href, label, Icon, primary }) => {
             const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href)
             return (

@@ -1110,8 +1110,9 @@ function normalizeTM(row: RawEventRow): NormalizedEvent {
     title: (r.name as string) ?? 'Untitled Event',
     date: row.event_date ?? startLocalDate ?? startTime ?? '',
     // Prefer localTime (venue-local, no UTC shift). dateTime is UTC and causes wrong display.
-    time: startLocalTime
-      ? formatTime(`${startLocalDate ?? ''}T${startLocalTime}`)
+    // Require BOTH date and time — formatTime returns '' for a bare 'T19:30' string.
+    time: (startLocalDate && startLocalTime)
+      ? formatTime(`${startLocalDate}T${startLocalTime}`)
       : startTime
       ? formatTime(startTime)
       : null,
@@ -1246,7 +1247,7 @@ function normalizeSG(row: RawEventRow): NormalizedEvent {
     id: row.id,
     title,
     date: row.event_date ?? startDate ?? startTime ?? '',
-    time: startLocal ? formatTime(`${startDate ?? ''}T${startLocal}`) : startTime ? formatTime(startTime) : null,
+    time: (startDate && startLocal) ? formatTime(`${startDate}T${startLocal}`) : startTime ? formatTime(startTime) : null,
     venue: (v?.name as string | undefined) ?? null,
     address: v ? buildTMAddress(v) : null,
     city: (v?.city as Record<string, unknown> | undefined)?.name as string | null ?? null,

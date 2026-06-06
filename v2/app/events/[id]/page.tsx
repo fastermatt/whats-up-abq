@@ -156,13 +156,17 @@ export default async function EventDetailPage({ params }: PageProps) {
   })()
 
   const endDate = (() => {
-    const start = new Date(startDate)
-    if (isNaN(start.getTime())) return undefined
-    start.setHours(start.getHours() + 3)
-    // Use local offset format (-06:00) to match startDate — toISOString() emits UTC Z
-    // which creates an apparent timezone mismatch that Google Rich Results may warn on.
+    // Add 3h to the wall-clock time, preserving the offset. Parse the components
+    // and do the math via Date.UTC so the result is independent of the SERVER's
+    // timezone (on Netlify TZ=UTC, getHours() would otherwise read UTC and skew
+    // the end time by ~6h).
+    const m = startDate.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})([+-]\d{2}:\d{2})$/)
+    if (!m) return undefined
+    const [, y, mo, d, hh, mm, , off] = m
+    const t = new Date(Date.UTC(+y, +mo - 1, +d, +hh, +mm, 0))
+    t.setUTCHours(t.getUTCHours() + 3)
     const pad = (n: number) => String(n).padStart(2, '0')
-    return `${start.getFullYear()}-${pad(start.getMonth()+1)}-${pad(start.getDate())}T${pad(start.getHours())}:${pad(start.getMinutes())}:00-06:00`
+    return `${t.getUTCFullYear()}-${pad(t.getUTCMonth()+1)}-${pad(t.getUTCDate())}T${pad(t.getUTCHours())}:${pad(t.getUTCMinutes())}:00${off}`
   })()
 
   const eventImage = event.imageUrl || getCategoryFallback(event.category ?? undefined, event.title ?? event.id)

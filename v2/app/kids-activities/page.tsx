@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: 'Kids Activities in Albuquerque' }],
   },
   twitter: { card: 'summary_large_image', images: [OG_IMAGE] },
-  alternates: { canonical: 'https://abqunplugged.com/family-friendly' },
+  alternates: { canonical: 'https://abqunplugged.com/kids-activities' },
 }
 
 const FAQS = [

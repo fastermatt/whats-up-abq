@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { fetchEventsByNeighborhood, neighborhoodToSlug } from '@/lib/events'
+import { fetchEventsByNeighborhood, neighborhoodToSlug, venueToSlug } from '@/lib/events'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
 import { MapPin, Calendar, ArrowLeft, ExternalLink, Map } from 'lucide-react'
@@ -236,9 +236,7 @@ export default async function NeighborhoodPage({ params }: PageProps) {
               {topVenues.map(([venue, cnt]) => (
                 <Link
                   key={venue}
-                  href={`/venues/${encodeURIComponent(
-                    venue.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-')
-                  )}`}
+                  href={`/venues/${venueToSlug(venue)}`}
                   className="inline-flex items-center gap-1.5 min-h-[36px] text-xs bg-card border border-sand-mid text-ink-mid px-3 py-1.5 rounded-full hover:border-terra hover:text-terra transition-colors"
                 >
                   <MapPin className="w-2.5 h-2.5 text-terra" />
