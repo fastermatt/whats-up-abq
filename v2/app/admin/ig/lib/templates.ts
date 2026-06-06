@@ -2060,8 +2060,19 @@ const tonightList: Template = {
       timeZone: 'America/Denver',
     })
 
-    const slots = Array.from({ length: 5 }, (_, i) => {
-      const e = ctx.events?.[i]
+    // "Tonight" must mean ONE night. Enforce the template's own contract: if a
+    // postDate is set, keep only events on that exact day, so a "TONIGHT /
+    // FRIDAY" header can never sit over Saturday/Sunday events (which happens
+    // when a multi-day range is fed in from the digest builder).
+    const sameNight = ctx.postDate
+      ? (ctx.events ?? []).filter(e => e.date === ctx.postDate)
+      : (ctx.events ?? [])
+    // Render only real rows; pad with design placeholders ONLY when there's no
+    // data at all (empty-state preview). A sparse night shows 3 rows, not 3 + 2
+    // "Event name here" placeholders.
+    const rowCount = sameNight.length > 0 ? Math.min(sameNight.length, 5) : 5
+    const slots = Array.from({ length: rowCount }, (_, i) => {
+      const e = sameNight[i]
       if (e) {
         const venue = e.venue ?? ''
         return { title: resolveTitle(e.title, venue), time: e.time ?? '', venue, date: e.date }
@@ -2100,7 +2111,9 @@ const tonightList: Template = {
     // 5 event rows
     slots.forEach((slot, i) => {
       const y    = sy(ROW_START + i * ROW_H)
-      const meta = [shortDay(slot.date), slot.time, slot.venue ? shortVenue(slot.venue) : ''].filter(Boolean).join(' · ')
+      // No per-row date here: the header already states the night, so rows show
+      // only time · venue (a date would be redundant, or contradictory if wrong).
+      const meta = [slot.time, slot.venue ? shortVenue(slot.venue) : ''].filter(Boolean).join(' · ')
       const { fontSize: titleSize, text: titleText } = epilogueTitleSize(slot.title, w - 160)
       layers.push(
         textLayer({
