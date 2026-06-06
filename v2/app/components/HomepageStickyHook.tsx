@@ -110,7 +110,7 @@ export function HomepageStickyHook() {
   // ── Success state ──────────────────────────────────────────────────────────
   if (emailStatus === 'success') {
     return (
-      <div className="mx-4 mb-2 rounded-2xl bg-[#9a442d] text-white px-4 py-3.5 flex items-center gap-3">
+      <div className="mx-4 mb-2 rounded-2xl bg-terra text-white px-4 py-3.5 flex items-center gap-3">
         <span className="text-lg" aria-hidden="true">✦</span>
         <div className="flex-1">
           <p className="text-sm font-black leading-tight" style={{ fontFamily: 'var(--font-epilogue)' }}>
@@ -125,12 +125,12 @@ export function HomepageStickyHook() {
   // ── iOS instructions ───────────────────────────────────────────────────────
   if (showIOSSteps) {
     return (
-      <div className="mx-4 mb-2 rounded-2xl border border-[#ddc9a3] bg-[#fbf7f1] overflow-hidden">
+      <div className="mx-4 mb-2 rounded-2xl border border-sand-mid bg-cream overflow-hidden">
         <div className="px-4 pt-3.5 pb-1 flex items-center justify-between">
-          <p className="text-sm font-black text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
+          <p className="text-sm font-black text-ink" style={{ fontFamily: 'var(--font-epilogue)' }}>
             Add to Home Screen
           </p>
-          <button onClick={dismiss} aria-label="Dismiss" className="p-1 -mr-1 text-[#6b5d57] hover:text-[#4a3f3a] transition-colors">
+          <button onClick={dismiss} aria-label="Dismiss" className="p-1 -mr-1 text-ink-light hover:text-ink-mid transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -146,16 +146,16 @@ export function HomepageStickyHook() {
             { n: 3, label: 'Tap Add. Done.' },
           ] as const).map(({ n, label }) => (
             <div key={n} className="flex items-start gap-2.5">
-              <div className="w-5 h-5 rounded-full bg-[#9a442d] text-white text-[10px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="w-5 h-5 rounded-full bg-terra text-white text-[10px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">
                 {n}
               </div>
-              <p className="text-xs text-[#4a3f3a] leading-relaxed">{label}</p>
+              <p className="text-xs text-ink-mid leading-relaxed">{label}</p>
             </div>
           ))}
         </div>
-        <div className="border-t border-[#f0e4cc] px-4 py-2 flex items-center justify-between">
-          <p className="text-[10px] text-[#6b5d57]">↓ Look for Share in the Safari toolbar</p>
-          <button onClick={dismiss} className="text-[10px] text-[#9a442d] font-semibold">Done</button>
+        <div className="border-t border-sand-light px-4 py-2 flex items-center justify-between">
+          <p className="text-[10px] text-ink-light">↓ Look for Share in the Safari toolbar</p>
+          <button onClick={dismiss} className="text-[10px] text-terra font-semibold">Done</button>
         </div>
       </div>
     )
@@ -163,15 +163,15 @@ export function HomepageStickyHook() {
 
   // ── Main state: two-tab layout ─────────────────────────────────────────────
   return (
-    <div className="mx-4 mb-2 rounded-2xl border border-[#e8d5c0] bg-gradient-to-br from-[#f8f1ea] to-[#fbf7f1] overflow-hidden">
+    <div className="mx-4 mb-2 rounded-2xl border border-[#e8d5c0] bg-gradient-to-br from-[#f8f1ea] to-cream overflow-hidden">
       {/* Header */}
       <div className="px-4 pt-3.5 pb-0 flex items-start justify-between">
         <div>
-          <p className="text-[10px] uppercase tracking-[0.16em] text-[#9a442d] font-semibold mb-0.5">
+          <p className="text-[10px] uppercase tracking-[0.16em] text-terra font-semibold mb-0.5">
             Updated daily
           </p>
           <p
-            className="text-base font-black text-[#1a1614] leading-tight"
+            className="text-base font-black text-ink leading-tight"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             Make it your go-to.
@@ -180,7 +180,7 @@ export function HomepageStickyHook() {
         <button
           onClick={dismiss}
           aria-label="Dismiss"
-          className="p-1 -mr-1 -mt-0.5 text-[#6b5d57] hover:text-[#4a3f3a] transition-colors flex-shrink-0"
+          className="p-1 -mr-1 -mt-0.5 text-ink-light hover:text-ink-mid transition-colors flex-shrink-0"
         >
           <X className="w-4 h-4" />
         </button>
@@ -192,8 +192,8 @@ export function HomepageStickyHook() {
           onClick={() => setTab('email')}
           className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
             tab === 'email'
-              ? 'bg-[#9a442d] text-white'
-              : 'bg-[#f0e4cc]/70 text-[#4a3f3a] hover:bg-[#f0e4cc]'
+              ? 'bg-terra text-white'
+              : 'bg-sand-light/70 text-ink-mid hover:bg-sand-light'
           }`}
         >
           Weekly picks
@@ -203,8 +203,8 @@ export function HomepageStickyHook() {
             onClick={() => setTab('save')}
             className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
               tab === 'save'
-                ? 'bg-[#9a442d] text-white'
-                : 'bg-[#f0e4cc]/70 text-[#4a3f3a] hover:bg-[#f0e4cc]'
+                ? 'bg-terra text-white'
+                : 'bg-sand-light/70 text-ink-mid hover:bg-sand-light'
             }`}
           >
             Save to phone
@@ -216,7 +216,7 @@ export function HomepageStickyHook() {
       <div className="px-4 pb-4 pt-3">
         {tab === 'email' ? (
           <>
-            <p className="text-xs text-[#4a3f3a] mb-2.5 leading-snug">
+            <p className="text-xs text-ink-mid mb-2.5 leading-snug">
               ABQ&apos;s best weekend picks, every Friday. No noise.
             </p>
             <form onSubmit={handleEmailSubmit} className="flex gap-2">
@@ -226,12 +226,12 @@ export function HomepageStickyHook() {
                 onChange={e => setEmail(e.target.value)}
                 placeholder="your@email.com"
                 required
-                className="flex-1 min-w-0 px-3 py-2 text-sm bg-white border border-[#ddc9a3] rounded-lg text-[#1a1614] placeholder:text-[#b0a69e] focus:outline-none focus:border-[#9a442d] focus:ring-1 focus:ring-[#9a442d]/30 transition-all"
+                className="flex-1 min-w-0 px-3 py-2 text-sm bg-white border border-sand-mid rounded-lg text-ink placeholder:text-[#b0a69e] focus-visible:outline-none focus:border-terra focus-visible:ring-1 focus-visible:ring-terra/30 transition-all"
               />
               <button
                 type="submit"
                 disabled={emailStatus === 'loading'}
-                className="px-4 py-2 bg-[#9a442d] text-white text-sm font-bold rounded-lg hover:bg-[#7d3725] transition-colors disabled:opacity-60 flex-shrink-0"
+                className="px-4 py-2 bg-terra text-white text-sm font-bold rounded-lg hover:bg-terra-hover transition-colors disabled:opacity-60 flex-shrink-0"
               >
                 {emailStatus === 'loading' ? '…' : 'Subscribe'}
               </button>
@@ -239,14 +239,14 @@ export function HomepageStickyHook() {
           </>
         ) : (
           <>
-            <p className="text-xs text-[#4a3f3a] mb-3 leading-snug">
+            <p className="text-xs text-ink-mid mb-3 leading-snug">
               {installState === 'ios-instructions'
                 ? 'One tap from your home screen to tonight\'s picks.'
                 : 'Install for one-tap access to tonight\'s events.'}
             </p>
             <button
               onClick={handleInstall}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#9a442d] text-white text-sm font-bold rounded-lg hover:bg-[#7d3725] transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-terra text-white text-sm font-bold rounded-lg hover:bg-terra-hover transition-colors"
             >
               {installState === 'ios-instructions' ? (
                 <><Share className="w-4 h-4" /> Add to Home Screen</>

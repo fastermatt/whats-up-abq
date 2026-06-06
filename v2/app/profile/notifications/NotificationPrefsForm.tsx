@@ -113,22 +113,22 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
     <form onSubmit={onSave} className="space-y-6">
 
       {/* ENABLE SWITCH */}
-      <div className="bg-white rounded-2xl p-4 border border-[#f0e4cc] flex items-center gap-3">
+      <div className="bg-white rounded-2xl p-4 border border-sand-light flex items-center gap-3">
         <input
           id="enabled"
           type="checkbox"
           checked={state.enabled}
           onChange={e => setState(s => ({ ...s, enabled: e.target.checked }))}
-          className="w-5 h-5 accent-[#9a442d]"
+          className="w-5 h-5 accent-terra"
         />
-        <label htmlFor="enabled" className="text-sm font-semibold text-[#1a1614] select-none">
+        <label htmlFor="enabled" className="text-sm font-semibold text-ink select-none">
           Send me notifications about matching events
         </label>
       </div>
 
       {/* CATEGORIES */}
-      <section className="bg-white rounded-2xl p-5 border border-[#f0e4cc]">
-        <h3 className="text-sm font-black text-[#1a1614] uppercase tracking-wide mb-3" style={{ fontFamily: 'var(--font-epilogue)' }}>
+      <section className="bg-white rounded-2xl p-5 border border-sand-light">
+        <h3 className="text-sm font-black text-ink uppercase tracking-wide mb-3" style={{ fontFamily: 'var(--font-epilogue)' }}>
           Categories you love
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -140,13 +140,13 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
                 key={c.slug}
                 onClick={() => toggleArr('categories', c.slug)}
                 className={`flex items-start gap-2 p-3 rounded-xl border text-left transition-all ${
-                  on ? 'bg-[#9a442d] text-white border-[#9a442d]' : 'bg-white text-[#1a1614] border-[#f0e4cc] hover:border-[#9a442d]/40'
+                  on ? 'bg-terra text-white border-terra' : 'bg-white text-ink border-sand-light hover:border-terra/40'
                 }`}
               >
                 <div className="mt-0.5 flex-shrink-0">{c.icon}</div>
                 <div className="min-w-0">
                   <div className="text-sm font-semibold leading-tight">{c.label}</div>
-                  <div className={`text-[10px] leading-snug mt-0.5 ${on ? 'text-white/70' : 'text-[#6b5d57]'}`}>{c.hint}</div>
+                  <div className={`text-[10px] leading-snug mt-0.5 ${on ? 'text-white/70' : 'text-ink-light'}`}>{c.hint}</div>
                 </div>
                 {on && <Check className="w-4 h-4 ml-auto flex-shrink-0" />}
               </button>
@@ -156,11 +156,11 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
       </section>
 
       {/* SUBCATEGORY TAGS */}
-      <section className="bg-white rounded-2xl p-5 border border-[#f0e4cc]">
-        <h3 className="text-sm font-black text-[#1a1614] uppercase tracking-wide mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
+      <section className="bg-white rounded-2xl p-5 border border-sand-light">
+        <h3 className="text-sm font-black text-ink uppercase tracking-wide mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
           Specific sub-genres / styles
         </h3>
-        <p className="text-xs text-[#6b5d57] mb-3">Pick anything. We match these against event titles + descriptions.</p>
+        <p className="text-xs text-ink-light mb-3">Pick anything. We match these against event titles + descriptions.</p>
         <div className="flex flex-wrap gap-2">
           {SUBCATEGORY_TAGS.map(t => {
             const on = state.subcategory_tags.includes(t)
@@ -170,7 +170,7 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
                 key={t}
                 onClick={() => toggleArr('subcategory_tags', t)}
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
-                  on ? 'bg-[#006a62] text-white border-[#006a62]' : 'bg-white text-[#1a1614] border-[#f0e4cc] hover:border-[#006a62]/40'
+                  on ? 'bg-turq text-white border-turq' : 'bg-white text-ink border-sand-light hover:border-turq/40'
                 }`}
               >
                 {t}
@@ -181,11 +181,11 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
       </section>
 
       {/* KEYWORDS */}
-      <section className="bg-white rounded-2xl p-5 border border-[#f0e4cc]">
-        <h3 id="keywords-label" className="text-sm font-black text-[#1a1614] uppercase tracking-wide mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
+      <section className="bg-white rounded-2xl p-5 border border-sand-light">
+        <h3 id="keywords-label" className="text-sm font-black text-ink uppercase tracking-wide mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
           Artists, teams, or keywords
         </h3>
-        <p id="keywords-hint" className="text-xs text-[#6b5d57] mb-3">e.g. &ldquo;john mulaney&rdquo;, &ldquo;nm united&rdquo;, &ldquo;balloon fiesta&rdquo;. Case-insensitive.</p>
+        <p id="keywords-hint" className="text-xs text-ink-light mb-3">e.g. &ldquo;john mulaney&rdquo;, &ldquo;nm united&rdquo;, &ldquo;balloon fiesta&rdquo;. Case-insensitive.</p>
         <label htmlFor="keyword-input" className="sr-only">Add a keyword</label>
         <div className="flex gap-2">
           <input
@@ -196,18 +196,18 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addKeyword() } }}
             placeholder="Add a keyword and press Enter"
             aria-describedby="keywords-hint"
-            className="flex-1 px-3 py-2 rounded-lg border border-[#f0e4cc] text-sm text-[#1a1614] bg-[#fbf7f1] focus:outline-none focus:border-[#9a442d]"
+            className="flex-1 px-3 py-2 rounded-lg border border-sand-light text-sm text-ink bg-cream focus-visible:outline-none focus:border-terra"
           />
-          <button type="button" onClick={addKeyword} className="px-4 py-2 rounded-lg bg-[#1a1614] text-white text-sm font-semibold hover:bg-[#4a3f3a]">
+          <button type="button" onClick={addKeyword} className="px-4 py-2 rounded-lg bg-ink text-white text-sm font-semibold hover:bg-ink-mid">
             Add
           </button>
         </div>
         {state.keywords.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-3">
             {state.keywords.map(k => (
-              <span key={k} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#9a442d]/10 text-[#9a442d] text-xs font-semibold">
+              <span key={k} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-terra/10 text-terra text-xs font-semibold">
                 {k}
-                <button type="button" onClick={() => toggleArr('keywords', k)} aria-label={`Remove ${k}`} className="hover:text-[#7d3725]">×</button>
+                <button type="button" onClick={() => toggleArr('keywords', k)} aria-label={`Remove ${k}`} className="hover:text-terra-hover">×</button>
               </span>
             ))}
           </div>
@@ -215,11 +215,11 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
       </section>
 
       {/* VENUES */}
-      <section className="bg-white rounded-2xl p-5 border border-[#f0e4cc]">
-        <h3 className="text-sm font-black text-[#1a1614] uppercase tracking-wide mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
+      <section className="bg-white rounded-2xl p-5 border border-sand-light">
+        <h3 className="text-sm font-black text-ink uppercase tracking-wide mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
           Favorite venues
         </h3>
-        <p id="venues-hint" className="text-xs text-[#6b5d57] mb-3">Tap a venue to favorite it, or type a custom one.</p>
+        <p id="venues-hint" className="text-xs text-ink-light mb-3">Tap a venue to favorite it, or type a custom one.</p>
         <div className="flex flex-wrap gap-1.5 mb-3">
           {topVenues.slice(0, 20).map(v => {
             const on = state.venues.includes(v.name)
@@ -230,10 +230,10 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
                 onClick={() => toggleArr('venues', v.name)}
                 aria-pressed={on}
                 className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all ${
-                  on ? 'bg-[#4f6249] text-white border-[#4f6249]' : 'bg-white text-[#1a1614] border-[#f0e4cc] hover:border-[#4f6249]/40'
+                  on ? 'bg-sage text-white border-sage' : 'bg-white text-ink border-sand-light hover:border-sage/40'
                 }`}
               >
-                {v.name} <span className={on ? 'text-white/70' : 'text-[#6b5d57]'}>· {v.count}</span>
+                {v.name} <span className={on ? 'text-white/70' : 'text-ink-light'}>· {v.count}</span>
               </button>
             )
           })}
@@ -248,16 +248,16 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addVenue() } }}
             placeholder="Add a venue not listed above"
             aria-describedby="venues-hint"
-            className="flex-1 px-3 py-2 rounded-lg border border-[#f0e4cc] text-sm text-[#1a1614] bg-[#fbf7f1] focus:outline-none focus:border-[#4f6249]"
+            className="flex-1 px-3 py-2 rounded-lg border border-sand-light text-sm text-ink bg-cream focus-visible:outline-none focus:border-sage"
           />
-          <button type="button" onClick={addVenue} className="px-4 py-2 rounded-lg bg-[#1a1614] text-white text-sm font-semibold hover:bg-[#4a3f3a]">
+          <button type="button" onClick={addVenue} className="px-4 py-2 rounded-lg bg-ink text-white text-sm font-semibold hover:bg-ink-mid">
             Add
           </button>
         </div>
         {state.venues.filter(v => !topVenues.find(tv => tv.name === v)).length > 0 && (
           <div className="flex flex-wrap gap-2 mt-3">
             {state.venues.filter(v => !topVenues.find(tv => tv.name === v)).map(v => (
-              <span key={v} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#4f6249]/10 text-[#4f6249] text-xs font-semibold">
+              <span key={v} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-sage/10 text-sage text-xs font-semibold">
                 {v}
                 <button type="button" onClick={() => toggleArr('venues', v)} aria-label={`Remove ${v}`} className="hover:opacity-70">×</button>
               </span>
@@ -268,8 +268,8 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
 
       {/* NEIGHBORHOODS */}
       {neighborhoods.length > 0 && (
-        <section className="bg-white rounded-2xl p-5 border border-[#f0e4cc]">
-          <h3 className="text-sm font-black text-[#1a1614] uppercase tracking-wide mb-3" style={{ fontFamily: 'var(--font-epilogue)' }}>
+        <section className="bg-white rounded-2xl p-5 border border-sand-light">
+          <h3 className="text-sm font-black text-ink uppercase tracking-wide mb-3" style={{ fontFamily: 'var(--font-epilogue)' }}>
             Neighborhoods
           </h3>
           <div className="flex flex-wrap gap-1.5">
@@ -281,7 +281,7 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
                   key={nb.slug}
                   onClick={() => toggleArr('neighborhoods', nb.slug)}
                   className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all ${
-                    on ? 'bg-[#006a62] text-white border-[#006a62]' : 'bg-white text-[#1a1614] border-[#f0e4cc] hover:border-[#006a62]/40'
+                    on ? 'bg-turq text-white border-turq' : 'bg-white text-ink border-sand-light hover:border-turq/40'
                   }`}
                 >
                   {nb.label}
@@ -293,23 +293,23 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
       )}
 
       {/* PRICE & FAMILY */}
-      <section className="bg-white rounded-2xl p-5 border border-[#f0e4cc] space-y-3">
-        <h3 className="text-sm font-black text-[#1a1614] uppercase tracking-wide" style={{ fontFamily: 'var(--font-epilogue)' }}>
+      <section className="bg-white rounded-2xl p-5 border border-sand-light space-y-3">
+        <h3 className="text-sm font-black text-ink uppercase tracking-wide" style={{ fontFamily: 'var(--font-epilogue)' }}>
           Filters
         </h3>
-        <label className="flex items-center gap-2 text-sm text-[#1a1614]">
-          <input type="checkbox" checked={state.include_free} onChange={e => setState(s => ({ ...s, include_free: e.target.checked }))} className="w-4 h-4 accent-[#9a442d]" />
+        <label className="flex items-center gap-2 text-sm text-ink">
+          <input type="checkbox" checked={state.include_free} onChange={e => setState(s => ({ ...s, include_free: e.target.checked }))} className="w-4 h-4 accent-terra" />
           Include free events
         </label>
-        <label className="flex items-center gap-2 text-sm text-[#1a1614]">
-          <input type="checkbox" checked={state.include_paid} onChange={e => setState(s => ({ ...s, include_paid: e.target.checked }))} className="w-4 h-4 accent-[#9a442d]" />
+        <label className="flex items-center gap-2 text-sm text-ink">
+          <input type="checkbox" checked={state.include_paid} onChange={e => setState(s => ({ ...s, include_paid: e.target.checked }))} className="w-4 h-4 accent-terra" />
           Include paid events
         </label>
-        <label className="flex items-center gap-2 text-sm text-[#1a1614]">
-          <input type="checkbox" checked={state.family_friendly} onChange={e => setState(s => ({ ...s, family_friendly: e.target.checked }))} className="w-4 h-4 accent-[#9a442d]" />
+        <label className="flex items-center gap-2 text-sm text-ink">
+          <input type="checkbox" checked={state.family_friendly} onChange={e => setState(s => ({ ...s, family_friendly: e.target.checked }))} className="w-4 h-4 accent-terra" />
           Only family-friendly events
         </label>
-        <div className="flex items-center gap-2 text-sm text-[#1a1614]">
+        <div className="flex items-center gap-2 text-sm text-ink">
           <label htmlFor="price-max">Max ticket price $</label>
           <input
             id="price-max"
@@ -323,20 +323,20 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
             }}
             placeholder="Any"
             aria-describedby="price-max-hint"
-            className="w-24 px-2 py-1 rounded-lg border border-[#f0e4cc] bg-[#fbf7f1] focus:outline-none focus:border-[#9a442d]"
+            className="w-24 px-2 py-1 rounded-lg border border-sand-light bg-cream focus-visible:outline-none focus:border-terra"
           />
-          <span id="price-max-hint" className="text-xs text-[#6b5d57]">(leave blank for any)</span>
+          <span id="price-max-hint" className="text-xs text-ink-light">(leave blank for any)</span>
         </div>
       </section>
 
       {/* DELIVERY */}
-      <section className="bg-white rounded-2xl p-5 border border-[#f0e4cc] space-y-4">
-        <h3 className="text-sm font-black text-[#1a1614] uppercase tracking-wide" style={{ fontFamily: 'var(--font-epilogue)' }}>
+      <section className="bg-white rounded-2xl p-5 border border-sand-light space-y-4">
+        <h3 className="text-sm font-black text-ink uppercase tracking-wide" style={{ fontFamily: 'var(--font-epilogue)' }}>
           How and when
         </h3>
 
         <div>
-          <p className="text-xs text-[#4a3f3a] mb-2 font-semibold">Channels</p>
+          <p className="text-xs text-ink-mid mb-2 font-semibold">Channels</p>
           <div className="flex flex-wrap gap-2">
             {(['in_app','email','push'] as const).map(ch => {
               const on = state.channels.includes(ch)
@@ -347,7 +347,7 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
                   key={ch}
                   onClick={() => toggleArr('channels', ch)}
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
-                    on ? 'bg-[#9a442d] text-white border-[#9a442d]' : 'bg-white text-[#1a1614] border-[#f0e4cc] hover:border-[#9a442d]/40'
+                    on ? 'bg-terra text-white border-terra' : 'bg-white text-ink border-sand-light hover:border-terra/40'
                   }`}
                 >
                   {label}
@@ -356,7 +356,7 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
             })}
           </div>
           {state.channels.includes('email') && !state.email_opted_in && (
-            <p className="text-[11px] text-[#9a442d] mt-2">
+            <p className="text-[11px] text-terra mt-2">
               Email will be sent to <strong>{userEmail}</strong>. Saving will opt you into the weekly digest.
             </p>
           )}
@@ -364,23 +364,23 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label htmlFor="digest-day" className="text-xs text-[#4a3f3a] mb-1.5 font-semibold block">Digest day</label>
+            <label htmlFor="digest-day" className="text-xs text-ink-mid mb-1.5 font-semibold block">Digest day</label>
             <select
               id="digest-day"
               value={state.digest_day}
               onChange={e => setState(s => ({ ...s, digest_day: parseInt(e.target.value, 10) }))}
-              className="w-full px-3 py-2 rounded-lg border border-[#f0e4cc] bg-[#fbf7f1] text-sm focus:outline-none focus:border-[#9a442d]"
+              className="w-full px-3 py-2 rounded-lg border border-sand-light bg-cream text-sm focus-visible:outline-none focus:border-terra"
             >
               {DAYS.map((d, i) => <option key={i} value={i}>{d}</option>)}
             </select>
           </div>
           <div>
-            <label htmlFor="digest-hour" className="text-xs text-[#4a3f3a] mb-1.5 font-semibold block">Digest hour</label>
+            <label htmlFor="digest-hour" className="text-xs text-ink-mid mb-1.5 font-semibold block">Digest hour</label>
             <select
               id="digest-hour"
               value={state.digest_hour}
               onChange={e => setState(s => ({ ...s, digest_hour: parseInt(e.target.value, 10) }))}
-              className="w-full px-3 py-2 rounded-lg border border-[#f0e4cc] bg-[#fbf7f1] text-sm focus:outline-none focus:border-[#9a442d]"
+              className="w-full px-3 py-2 rounded-lg border border-sand-light bg-cream text-sm focus-visible:outline-none focus:border-terra"
             >
               {Array.from({ length: 24 }, (_, h) => (
                 <option key={h} value={h}>{h === 0 ? '12 AM' : h < 12 ? `${h} AM` : h === 12 ? '12 PM' : `${h - 12} PM`}</option>
@@ -390,7 +390,7 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
         </div>
 
         <div>
-          <label htmlFor="days-ahead" className="text-xs text-[#4a3f3a] mb-1.5 font-semibold block">Look ahead</label>
+          <label htmlFor="days-ahead" className="text-xs text-ink-mid mb-1.5 font-semibold block">Look ahead</label>
           <input
             id="days-ahead"
             type="range"
@@ -399,25 +399,25 @@ export function NotificationPrefsForm({ userEmail, initial, topVenues, neighborh
             value={state.days_ahead}
             onChange={e => setState(s => ({ ...s, days_ahead: parseInt(e.target.value, 10) }))}
             aria-describedby="days-ahead-hint"
-            className="w-full accent-[#9a442d]"
+            className="w-full accent-terra"
           />
-          <p id="days-ahead-hint" className="text-[11px] text-[#6b5d57] text-center">Notify me about events happening in the next <strong>{state.days_ahead}</strong> days</p>
+          <p id="days-ahead-hint" className="text-[11px] text-ink-light text-center">Notify me about events happening in the next <strong>{state.days_ahead}</strong> days</p>
         </div>
       </section>
 
       {/* ACTIONS */}
       <div className="sticky bottom-4 z-10">
-        <div className="bg-white rounded-2xl p-4 border border-[#f0e4cc] shadow-lg flex items-center gap-3">
+        <div className="bg-white rounded-2xl p-4 border border-sand-light shadow-lg flex items-center gap-3">
           <button
             type="submit"
             disabled={saving}
-            className="flex-1 px-4 py-3 rounded-xl bg-[#9a442d] text-white text-sm font-black uppercase tracking-wide hover:bg-[#7d3725] disabled:opacity-50"
+            className="flex-1 px-4 py-3 rounded-xl bg-terra text-white text-sm font-black uppercase tracking-wide hover:bg-terra-hover disabled:opacity-50"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             {saving ? 'Saving…' : 'Save preferences'}
           </button>
-          {saved && <span role="status" className="text-sm text-[#4f6249] font-semibold">✓ Saved</span>}
-          {error && <span role="alert" className="text-sm text-[#9a442d] font-semibold">{error}</span>}
+          {saved && <span role="status" className="text-sm text-sage font-semibold">✓ Saved</span>}
+          {error && <span role="alert" className="text-sm text-terra font-semibold">{error}</span>}
         </div>
       </div>
     </form>

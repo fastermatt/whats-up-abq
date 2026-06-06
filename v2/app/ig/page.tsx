@@ -57,7 +57,7 @@ export default async function IgLandingPage() {
   ]
 
   return (
-    <main className="min-h-dvh bg-[#fbf7f1]">
+    <main className="min-h-dvh bg-cream">
 
       {/* ── Hero — full-bleed poster ── */}
       <section className="relative overflow-hidden text-white h-[280px] sm:h-[310px]">
@@ -68,7 +68,7 @@ export default async function IgLandingPage() {
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
         {/* Gradient: heavy at top so wordmark reads, warm at bottom to anchor headline */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/35 to-[#7d3725]/85" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/35 to-terra-hover/85" />
 
         <div className="relative flex flex-col justify-between h-full max-w-md mx-auto px-5 pt-6 pb-6">
           {/* Wordmark */}
@@ -101,7 +101,7 @@ export default async function IgLandingPage() {
         {/* Tonight — the hero CTA, count-led */}
         <Link
           href={`/events?time=tonight${utmAmp}`}
-          className="group flex items-center gap-4 bg-[#9a442d] text-white rounded-2xl px-5 py-5 shadow-md active:scale-[0.98] transition-transform"
+          className="group flex items-center gap-4 bg-terra text-white rounded-2xl px-5 py-5 shadow-md active:scale-[0.98] transition-transform"
         >
           <div className="flex-shrink-0 flex items-baseline gap-1">
             <span
@@ -126,7 +126,7 @@ export default async function IgLandingPage() {
         {/* Surprise Me */}
         <Link
           href={`/api/surprise${utm}`}
-          className="group flex items-center gap-4 bg-[#006a62] text-white rounded-2xl px-5 py-4 shadow-md active:scale-[0.98] transition-transform"
+          className="group flex items-center gap-4 bg-turq text-white rounded-2xl px-5 py-4 shadow-md active:scale-[0.98] transition-transform"
         >
           <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
             <Sparkles className="w-5 h-5" />
@@ -146,34 +146,34 @@ export default async function IgLandingPage() {
             href={`/events?time=this-weekend${utmAmp}`}
             className="bg-white border border-[#e2ccad] rounded-2xl p-4 shadow-sm active:scale-[0.98] transition-transform"
           >
-            <p className="text-[9px] uppercase tracking-wider text-[#4f6249] font-bold mb-1">Weekend</p>
+            <p className="text-[9px] uppercase tracking-wider text-sage font-bold mb-1">Weekend</p>
             <p
-              className="text-[2rem] font-black text-[#1a1614] leading-none tabular-nums"
+              className="text-[2rem] font-black text-ink leading-none tabular-nums"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               {weekend.total}
             </p>
-            <p className="text-[10px] text-[#6b5d57] mt-1.5">events Fri–Sun</p>
+            <p className="text-[10px] text-ink-light mt-1.5">events Fri–Sun</p>
           </Link>
           <Link
             href={`/events?time=tomorrow${utmAmp}`}
             className="bg-white border border-[#e2ccad] rounded-2xl p-4 shadow-sm active:scale-[0.98] transition-transform"
           >
-            <p className="text-[9px] uppercase tracking-wider text-[#6b5d57] font-bold mb-1">Tomorrow</p>
+            <p className="text-[9px] uppercase tracking-wider text-ink-light font-bold mb-1">Tomorrow</p>
             <p
-              className="text-[2rem] font-black text-[#1a1614] leading-none tabular-nums"
+              className="text-[2rem] font-black text-ink leading-none tabular-nums"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               {tomorrow.total}
             </p>
-            <p className="text-[10px] text-[#6b5d57] mt-1.5">events</p>
+            <p className="text-[10px] text-ink-light mt-1.5">events</p>
           </Link>
         </div>
       </section>
 
       {/* ── Category chips ── */}
       <section className="pt-6">
-        <p className="max-w-md mx-auto px-5 text-[10px] uppercase tracking-[0.22em] text-[#9a442d] mb-3 font-bold">
+        <p className="max-w-md mx-auto px-5 text-[10px] uppercase tracking-[0.22em] text-terra mb-3 font-bold">
           What&apos;s your vibe?
         </p>
         <div className="overflow-x-auto scrollbar-hide">
@@ -188,7 +188,7 @@ export default async function IgLandingPage() {
                 <Link
                   key={label}
                   href={href}
-                  className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white border border-[#ddc9a3] text-xs font-semibold text-[#4a3f3a] whitespace-nowrap active:scale-[0.97] transition-transform shadow-sm"
+                  className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white border border-sand-mid text-xs font-semibold text-ink-mid whitespace-nowrap active:scale-[0.97] transition-transform shadow-sm"
                 >
                   <span>{emoji}</span>
                   {label}
@@ -203,12 +203,12 @@ export default async function IgLandingPage() {
       {featured.length > 0 && (
         <section className="max-w-md mx-auto px-5 pt-7">
           <div className="flex items-baseline justify-between mb-3">
-            <p className="text-[10px] uppercase tracking-[0.22em] text-[#9a442d] font-bold">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-terra font-bold">
               ★ Don&apos;t miss
             </p>
             <Link
               href={`/events${utm}`}
-              className="text-[11px] font-semibold text-[#006a62] hover:underline"
+              className="text-[11px] font-semibold text-turq hover:underline"
             >
               All events →
             </Link>
@@ -226,9 +226,9 @@ export default async function IgLandingPage() {
                 <Link
                   key={event.id}
                   href={`/events/${event.id}${utm}`}
-                  className="flex gap-3 bg-white rounded-2xl border border-[#f0e4cc] p-3 shadow-sm active:scale-[0.98] transition-transform"
+                  className="flex gap-3 bg-white rounded-2xl border border-sand-light p-3 shadow-sm active:scale-[0.98] transition-transform"
                 >
-                  <div className="w-[76px] h-[76px] rounded-xl overflow-hidden flex-shrink-0 bg-[#f0e4cc]">
+                  <div className="w-[76px] h-[76px] rounded-xl overflow-hidden flex-shrink-0 bg-sand-light">
                     <EventImage
                       src={primary}
                       fallback={fallback}
@@ -238,17 +238,17 @@ export default async function IgLandingPage() {
                   </div>
                   <div className="flex-1 min-w-0 py-0.5">
                     {event.category && (
-                      <p className="text-[9px] font-bold uppercase tracking-wider text-[#9a442d] mb-0.5">
+                      <p className="text-[9px] font-bold uppercase tracking-wider text-terra mb-0.5">
                         {event.category}
                       </p>
                     )}
                     <h3
-                      className="text-sm font-bold text-[#1a1614] leading-tight line-clamp-2"
+                      className="text-sm font-bold text-ink leading-tight line-clamp-2"
                       style={{ fontFamily: 'var(--font-epilogue)' }}
                     >
                       {event.title}
                     </h3>
-                    <p className="text-[10px] text-[#6b5d57] mt-1 line-clamp-1">
+                    <p className="text-[10px] text-ink-light mt-1 line-clamp-1">
                       {dateStr}{event.venue ? ` · ${event.venue}` : ''}
                     </p>
                   </div>
@@ -262,7 +262,7 @@ export default async function IgLandingPage() {
       {/* ── Just Added ── */}
       {justAdded.length > 0 && (
         <section className="max-w-md mx-auto px-5 pt-7">
-          <p className="text-[10px] uppercase tracking-[0.22em] text-[#006a62] mb-3 font-bold flex items-center gap-1.5">
+          <p className="text-[10px] uppercase tracking-[0.22em] text-turq mb-3 font-bold flex items-center gap-1.5">
             <Sparkles className="w-3 h-3" /> Fresh on the calendar
           </p>
           <div className="overflow-x-auto scrollbar-hide -mx-5 px-5">
@@ -279,9 +279,9 @@ export default async function IgLandingPage() {
                   <Link
                     key={event.id}
                     href={`/events/${event.id}${utm}`}
-                    className="flex-shrink-0 w-36 bg-white rounded-xl border border-[#f0e4cc] overflow-hidden shadow-sm active:scale-[0.98] transition-transform"
+                    className="flex-shrink-0 w-36 bg-white rounded-xl border border-sand-light overflow-hidden shadow-sm active:scale-[0.98] transition-transform"
                   >
-                    <div className="w-full aspect-[16/10] bg-[#f0e4cc] overflow-hidden">
+                    <div className="w-full aspect-[16/10] bg-sand-light overflow-hidden">
                       <EventImage
                         src={primary}
                         fallback={fallback}
@@ -291,13 +291,13 @@ export default async function IgLandingPage() {
                     </div>
                     <div className="p-2">
                       <h4
-                        className="text-[11px] font-bold text-[#1a1614] leading-tight line-clamp-2"
+                        className="text-[11px] font-bold text-ink leading-tight line-clamp-2"
                         style={{ fontFamily: 'var(--font-epilogue)' }}
                       >
                         {event.title}
                       </h4>
                       {dateStr && (
-                        <p className="text-[9px] text-[#9a442d] font-medium mt-0.5">{dateStr}</p>
+                        <p className="text-[9px] text-terra font-medium mt-0.5">{dateStr}</p>
                       )}
                     </div>
                   </Link>
@@ -310,36 +310,36 @@ export default async function IgLandingPage() {
 
       {/* ── Secondary links ── */}
       <section className="max-w-md mx-auto px-5 pt-7">
-        <p className="text-[10px] uppercase tracking-[0.22em] text-[#6b5d57] mb-2.5 font-bold">
+        <p className="text-[10px] uppercase tracking-[0.22em] text-ink-light mb-2.5 font-bold">
           Explore more
         </p>
         <div className="grid grid-cols-2 gap-2">
           <Link
             href={`/saved${utm}`}
-            className="flex items-center gap-2.5 bg-white border border-[#ddc9a3] rounded-xl p-3 text-xs font-semibold text-[#4a3f3a] active:scale-[0.98] transition-transform shadow-sm"
+            className="flex items-center gap-2.5 bg-white border border-sand-mid rounded-xl p-3 text-xs font-semibold text-ink-mid active:scale-[0.98] transition-transform shadow-sm"
           >
-            <Bookmark className="w-3.5 h-3.5 text-[#9a442d] flex-shrink-0" />
+            <Bookmark className="w-3.5 h-3.5 text-terra flex-shrink-0" />
             <span>Save events</span>
           </Link>
           <Link
             href={`/neighborhoods${utm}`}
-            className="flex items-center gap-2.5 bg-white border border-[#ddc9a3] rounded-xl p-3 text-xs font-semibold text-[#4a3f3a] active:scale-[0.98] transition-transform shadow-sm"
+            className="flex items-center gap-2.5 bg-white border border-sand-mid rounded-xl p-3 text-xs font-semibold text-ink-mid active:scale-[0.98] transition-transform shadow-sm"
           >
-            <MapPin className="w-3.5 h-3.5 text-[#006a62] flex-shrink-0" />
+            <MapPin className="w-3.5 h-3.5 text-turq flex-shrink-0" />
             <span>By neighborhood</span>
           </Link>
           <Link
             href={`/submit${utm}`}
-            className="flex items-center gap-2.5 bg-white border border-[#ddc9a3] rounded-xl p-3 text-xs font-semibold text-[#4a3f3a] active:scale-[0.98] transition-transform shadow-sm"
+            className="flex items-center gap-2.5 bg-white border border-sand-mid rounded-xl p-3 text-xs font-semibold text-ink-mid active:scale-[0.98] transition-transform shadow-sm"
           >
-            <Mail className="w-3.5 h-3.5 text-[#4f6249] flex-shrink-0" />
+            <Mail className="w-3.5 h-3.5 text-sage flex-shrink-0" />
             <span>Share an event</span>
           </Link>
           <Link
             href={`/about${utm}`}
-            className="flex items-center gap-2.5 bg-white border border-[#ddc9a3] rounded-xl p-3 text-xs font-semibold text-[#4a3f3a] active:scale-[0.98] transition-transform shadow-sm"
+            className="flex items-center gap-2.5 bg-white border border-sand-mid rounded-xl p-3 text-xs font-semibold text-ink-mid active:scale-[0.98] transition-transform shadow-sm"
           >
-            <Info className="w-3.5 h-3.5 text-[#6b5d57] flex-shrink-0" />
+            <Info className="w-3.5 h-3.5 text-ink-light flex-shrink-0" />
             <span>About the site</span>
           </Link>
         </div>
@@ -347,16 +347,16 @@ export default async function IgLandingPage() {
 
       {/* ── Footer ── */}
       <section className="max-w-md mx-auto px-5 pt-8 pb-10 text-center">
-        <div className="pt-5 border-t border-[#ddc9a3]/60">
+        <div className="pt-5 border-t border-sand-mid/60">
           <ConnectionQuote size="sm" />
         </div>
         <Link
           href={`/${utm}`}
-          className="inline-block mt-6 text-[11px] font-bold text-[#9a442d] hover:underline"
+          className="inline-block mt-6 text-[11px] font-bold text-terra hover:underline"
         >
           See the full site →
         </Link>
-        <p className="text-[10px] text-[#6b5d57] mt-3">abqunplugged.com · Albuquerque, NM</p>
+        <p className="text-[10px] text-ink-light mt-3">abqunplugged.com · Albuquerque, NM</p>
         <p className="text-[10px] text-[#c8b89a] mt-0.5">Built with love for one city.</p>
       </section>
 

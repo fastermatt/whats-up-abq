@@ -94,8 +94,8 @@ export function SaveEventButton({ eventId, eventName, eventDate, venueName, cate
         data-umami-event-action={state === 'saved' ? 'unsave' : 'save'}
         className={`group flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${
           state === 'saved'
-            ? 'bg-[#9a442d]/10 border-[#9a442d]/30 text-[#9a442d]'
-            : 'bg-white border-[#ddc9a3] text-[#4a3f3a] hover:border-[#9a442d] hover:text-[#9a442d]'
+            ? 'bg-terra/10 border-terra/30 text-terra'
+            : 'bg-white border-sand-mid text-ink-mid hover:border-terra hover:text-terra'
         } disabled:opacity-50`}
       >
         {state === 'saved'
@@ -113,8 +113,8 @@ export function SaveEventButton({ eventId, eventName, eventDate, venueName, cate
         data-umami-event-action={state === 'going' ? 'ungoing' : 'going'}
         className={`group flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${
           state === 'going'
-            ? 'bg-[#4f6249] border-[#4f6249] text-white'
-            : 'bg-white border-[#ddc9a3] text-[#4a3f3a] hover:border-[#4f6249] hover:text-[#4f6249]'
+            ? 'bg-sage border-sage text-white'
+            : 'bg-white border-sand-mid text-ink-mid hover:border-sage hover:text-sage'
         } disabled:opacity-50`}
       >
         {state === 'going'
@@ -125,7 +125,7 @@ export function SaveEventButton({ eventId, eventName, eventDate, venueName, cate
 
       {/* Going count */}
       {count > 0 && (
-        <span className="text-[10px] text-[#6b5d57]">
+        <span className="text-[10px] text-ink-light">
           {count} {count === 1 ? 'person' : 'people'} going
         </span>
       )}

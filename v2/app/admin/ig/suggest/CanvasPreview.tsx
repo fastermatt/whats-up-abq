@@ -47,57 +47,57 @@ export function CanvasPreview({ templateId, ctx }: Props) {
         <div className="w-[260px] flex-shrink-0 aspect-[4/5] rounded-xl overflow-hidden shadow-2xl relative">
           {isBroadside || !imageUrl ? (
             // ── Typographic / no-photo template ────────────────────────────
-            <div className="absolute inset-0 bg-[#fbf7f1] flex flex-col justify-center p-6">
-              <div className="text-[9px] font-bold text-[#9a442d] uppercase tracking-[0.2em] mb-2">
+            <div className="absolute inset-0 bg-cream flex flex-col justify-center p-6">
+              <div className="text-[9px] font-bold text-terra uppercase tracking-[0.2em] mb-2">
                 ABQ Unplugged
               </div>
-              <div className="h-px bg-[#9a442d] mb-4" />
+              <div className="h-px bg-terra mb-4" />
               <p
-                className="text-xl font-black text-[#1a1614] leading-tight mb-3"
+                className="text-xl font-black text-ink leading-tight mb-3"
                 style={{ fontFamily: 'Georgia, serif' }}
               >
                 {event?.title ?? 'Event Name'}
               </p>
-              <div className="space-y-1 text-[10px] text-[#4a3f3a]">
+              <div className="space-y-1 text-[10px] text-ink-mid">
                 {event?.date && (
                   <p>{new Date(event.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
                 )}
                 {event?.time && <p>{event.time}</p>}
                 {event?.venue && <p>{event.venue}</p>}
               </div>
-              <div className="mt-auto pt-4 text-[8px] text-[#9a442d] uppercase tracking-widest">
+              <div className="mt-auto pt-4 text-[8px] text-terra uppercase tracking-widest">
                 abqunplugged.com
               </div>
             </div>
           ) : isSplit ? (
             // ── Split: photo top half, text bottom ─────────────────────────
-            <div className="absolute inset-0 flex flex-col bg-[#fbf7f1]">
+            <div className="absolute inset-0 flex flex-col bg-cream">
               {/* Photo top */}
               <div className="h-[52%] relative overflow-hidden">
                 <img src={imageUrl} alt="" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-black/10" />
                 <div className="absolute top-2 left-2 flex items-center gap-1">
-                  <div className="w-5 h-5 bg-[#9a442d] rounded flex items-center justify-center">
+                  <div className="w-5 h-5 bg-terra rounded flex items-center justify-center">
                     <span className="text-[6px] font-black text-white">ABQ</span>
                   </div>
                 </div>
               </div>
               {/* Text bottom */}
               <div className="flex-1 p-4 flex flex-col justify-center">
-                <p className="text-[9px] font-semibold text-[#9a442d] uppercase tracking-[0.18em] mb-1">
+                <p className="text-[9px] font-semibold text-terra uppercase tracking-[0.18em] mb-1">
                   {event?.category ?? 'Event'}
                 </p>
                 <p
-                  className="text-base font-black text-[#1a1614] leading-tight line-clamp-3"
+                  className="text-base font-black text-ink leading-tight line-clamp-3"
                   style={{ fontFamily: 'Georgia, serif' }}
                 >
                   {event?.title ?? 'Event Name'}
                 </p>
-                <div className="mt-2 text-[9px] text-[#6b5d57] space-y-0.5">
+                <div className="mt-2 text-[9px] text-ink-light space-y-0.5">
                   {event?.time && <p>{event.time}</p>}
                   {event?.venue && <p className="truncate">{event.venue}</p>}
                 </div>
-                <p className="mt-auto pt-2 text-[8px] text-[#9a442d]/60 uppercase tracking-widest">
+                <p className="mt-auto pt-2 text-[8px] text-terra/60 uppercase tracking-widest">
                   abqunplugged.com
                 </p>
               </div>
@@ -106,7 +106,7 @@ export function CanvasPreview({ templateId, ctx }: Props) {
             // ── Golden Hour: warm gradient + photo inset ───────────────────
             <div className="absolute inset-0 flex flex-col p-4" style={{ background: 'linear-gradient(160deg, #2d1a0c 0%, #7a3a1a 50%, #1a0e06 100%)' }}>
               <div className="flex items-center gap-1.5 mb-4">
-                <div className="w-6 h-6 bg-[#9a442d] rounded flex items-center justify-center">
+                <div className="w-6 h-6 bg-terra rounded flex items-center justify-center">
                   <span className="text-[7px] font-black text-white">ABQ</span>
                 </div>
                 <span className="text-[9px] text-[#e8c89a] uppercase tracking-wider font-semibold">Unplugged</span>
@@ -122,7 +122,7 @@ export function CanvasPreview({ templateId, ctx }: Props) {
                   {event?.category ?? 'Event'}
                 </p>
                 <p
-                  className="text-sm font-black text-[#fbf7f1] leading-tight line-clamp-2"
+                  className="text-sm font-black text-cream leading-tight line-clamp-2"
                   style={{ fontFamily: 'Georgia, serif' }}
                 >
                   {event?.title ?? 'Event Name'}
@@ -141,14 +141,14 @@ export function CanvasPreview({ templateId, ctx }: Props) {
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.15) 100%)' }} />
               {/* Logo top-left */}
               <div className="absolute top-3 left-3 flex items-center gap-1.5">
-                <div className="w-6 h-6 bg-[#9a442d] rounded flex items-center justify-center">
+                <div className="w-6 h-6 bg-terra rounded flex items-center justify-center">
                   <span className="text-[7px] font-black text-white">ABQ</span>
                 </div>
                 <span className="text-[9px] text-white/80 uppercase tracking-wider font-semibold">Unplugged</span>
               </div>
               {/* Category chip */}
               {event?.category && (
-                <div className="absolute top-3 right-3 bg-[#9a442d]/80 text-white text-[8px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-sm">
+                <div className="absolute top-3 right-3 bg-terra/80 text-white text-[8px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-sm">
                   {event.category}
                 </div>
               )}
@@ -182,20 +182,20 @@ export function CanvasPreview({ templateId, ctx }: Props) {
   return (
     <div className="flex justify-center">
       <div
-        className="w-[260px] flex-shrink-0 aspect-[4/5] bg-[#1a1614] rounded-xl overflow-hidden flex flex-col text-[#fbf7f1] shadow-2xl"
+        className="w-[260px] flex-shrink-0 aspect-[4/5] bg-ink rounded-xl overflow-hidden flex flex-col text-cream shadow-2xl"
         style={{ padding: '18px 16px 14px' }}
       >
         {/* Logo row */}
         <div className="flex items-center gap-1.5 mb-3">
-          <div className="w-7 h-7 bg-[#9a442d] rounded flex items-center justify-center flex-shrink-0">
+          <div className="w-7 h-7 bg-terra rounded flex items-center justify-center flex-shrink-0">
             <span className="text-[8px] font-black text-white leading-none">ABQ</span>
           </div>
-          <span className="text-[10px] font-bold text-[#9a442d] uppercase tracking-[0.18em]">Unplugged</span>
+          <span className="text-[10px] font-bold text-terra uppercase tracking-[0.18em]">Unplugged</span>
         </div>
 
         {/* Headline */}
         <div className="mb-3">
-          <p className="text-[9px] font-semibold text-[#9a442d] uppercase tracking-[0.18em] mb-1">
+          <p className="text-[9px] font-semibold text-terra uppercase tracking-[0.18em] mb-1">
             {template?.name ?? templateId}
           </p>
           <p className="text-2xl font-black leading-tight" style={{ fontFamily: 'Georgia, serif' }}>
@@ -204,13 +204,13 @@ export function CanvasPreview({ templateId, ctx }: Props) {
         </div>
 
         {/* Terra rule */}
-        <div className="h-px bg-[#9a442d]/50 mb-3" />
+        <div className="h-px bg-terra/50 mb-3" />
 
         {/* Events */}
         <div className="flex-1 space-y-2.5 overflow-hidden">
           {events.slice(0, 5).map((e, i) => (
             <div key={i} className="flex gap-2 items-start">
-              <span className="text-[11px] text-[#9a442d] font-bold w-5 flex-shrink-0 tabular-nums">
+              <span className="text-[11px] text-terra font-bold w-5 flex-shrink-0 tabular-nums">
                 {String(i + 1).padStart(2, '0')}
               </span>
               <div className="flex-1 min-w-0">
@@ -220,7 +220,7 @@ export function CanvasPreview({ templateId, ctx }: Props) {
                 >
                   {e.title}
                 </p>
-                <p className="text-[9px] text-[#fbf7f1]/50 mt-0.5 truncate">
+                <p className="text-[9px] text-cream/50 mt-0.5 truncate">
                   {[
                     e.date ? new Date(e.date + 'T12:00:00').toLocaleDateString('en-US', {
                       weekday: 'short', month: 'short', day: 'numeric',
@@ -235,9 +235,9 @@ export function CanvasPreview({ templateId, ctx }: Props) {
         </div>
 
         {/* Footer */}
-        <div className="mt-3 pt-2 border-t border-[#9a442d]/30 flex items-center gap-2">
-          <div className="flex-1 h-px bg-[#9a442d]/30" />
-          <span className="text-[8px] text-[#fbf7f1]/35 uppercase tracking-widest flex-shrink-0">
+        <div className="mt-3 pt-2 border-t border-terra/30 flex items-center gap-2">
+          <div className="flex-1 h-px bg-terra/30" />
+          <span className="text-[8px] text-cream/35 uppercase tracking-widest flex-shrink-0">
             abqunplugged.com
           </span>
         </div>

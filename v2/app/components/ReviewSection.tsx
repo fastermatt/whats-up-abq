@@ -98,12 +98,12 @@ export function ReviewSection({ eventId }: Props) {
   if (reviews.length === 0 && !user) return null
 
   return (
-    <section className="mt-6 pt-6 border-t border-[#f0e4cc]">
+    <section className="mt-6 pt-6 border-t border-sand-light">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2
-            className="text-base font-black text-[#1a1614]"
+            className="text-base font-black text-ink"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             Reviews
@@ -111,7 +111,7 @@ export function ReviewSection({ eventId }: Props) {
           {reviews.length > 0 && (
             <div className="flex items-center gap-1.5 mt-0.5">
               <StarDisplay rating={avgRating} size="sm" />
-              <span className="text-xs text-[#6b5d57]">
+              <span className="text-xs text-ink-light">
                 {avgRating.toFixed(1)} · {reviews.length} review{reviews.length !== 1 ? 's' : ''}
               </span>
             </div>
@@ -120,13 +120,13 @@ export function ReviewSection({ eventId }: Props) {
         {user && !showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="text-xs font-semibold text-[#9a442d] hover:underline"
+            className="text-xs font-semibold text-terra hover:underline"
           >
             {myReview ? 'Edit review' : 'Write a review'}
           </button>
         )}
         {!user && (
-          <a href="/login" className="text-xs text-[#6b5d57] hover:text-[#9a442d]">
+          <a href="/login" className="text-xs text-ink-light hover:text-terra">
             Sign in to review
           </a>
         )}
@@ -134,8 +134,8 @@ export function ReviewSection({ eventId }: Props) {
 
       {/* Review form */}
       {showForm && user && (
-        <div className="bg-white rounded-xl border border-[#ddc9a3] p-4 mb-4 shadow-sm">
-          <p className="text-xs font-semibold text-[#4a3f3a] mb-2">
+        <div className="bg-white rounded-xl border border-sand-mid p-4 mb-4 shadow-sm">
+          <p className="text-xs font-semibold text-ink-mid mb-2">
             {myReview ? 'Update your review' : 'Rate this event'}
           </p>
 
@@ -153,7 +153,7 @@ export function ReviewSection({ eventId }: Props) {
                   className={`w-6 h-6 transition-colors ${
                     star <= (hoveredStar || selectedRating)
                       ? 'fill-[#f59e0b] text-[#f59e0b]'
-                      : 'text-[#ddc9a3]'
+                      : 'text-sand-mid'
                   }`}
                 />
               </button>
@@ -166,20 +166,20 @@ export function ReviewSection({ eventId }: Props) {
             placeholder="Share your thoughts (optional)…"
             rows={3}
             maxLength={500}
-            className="w-full text-sm text-[#1a1614] bg-[#fafaf8] border border-[#f0e4cc] rounded-lg px-3 py-2 resize-none focus:outline-none focus:border-[#9a442d] transition-colors mb-3"
+            className="w-full text-sm text-ink bg-[#fafaf8] border border-sand-light rounded-lg px-3 py-2 resize-none focus-visible:outline-none focus:border-terra transition-colors mb-3"
           />
 
           <div className="flex gap-2">
             <button
               onClick={handleSubmit}
               disabled={submitting || selectedRating === 0}
-              className="px-4 py-2 rounded-xl bg-[#9a442d] text-white text-xs font-semibold hover:bg-[#7d3725] disabled:opacity-50 transition-colors"
+              className="px-4 py-2 rounded-xl bg-terra text-white text-xs font-semibold hover:bg-terra-hover disabled:opacity-50 transition-colors"
             >
               {submitting ? 'Saving…' : myReview ? 'Update' : 'Submit'}
             </button>
             <button
               onClick={() => setShowForm(false)}
-              className="px-4 py-2 rounded-xl border border-[#ddc9a3] text-xs font-semibold text-[#4a3f3a] hover:border-[#9a442d] transition-colors"
+              className="px-4 py-2 rounded-xl border border-sand-mid text-xs font-semibold text-ink-mid hover:border-terra transition-colors"
             >
               Cancel
             </button>
@@ -191,10 +191,10 @@ export function ReviewSection({ eventId }: Props) {
       {reviews.length > 0 ? (
         <div className="space-y-3">
           {reviews.slice(0, 5).map((review) => (
-            <div key={review.id} className="bg-white rounded-xl border border-[#f0e4cc] p-3 shadow-sm">
+            <div key={review.id} className="bg-white rounded-xl border border-sand-light p-3 shadow-sm">
               <div className="flex items-center justify-between mb-1.5">
                 <StarDisplay rating={review.rating} size="sm" />
-                <span className="text-[10px] text-[#6b5d57]">
+                <span className="text-[10px] text-ink-light">
                   {new Date(review.created_at).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
@@ -202,13 +202,13 @@ export function ReviewSection({ eventId }: Props) {
                 </span>
               </div>
               {review.body && (
-                <p className="text-sm text-[#4a3f3a] leading-relaxed">{review.body}</p>
+                <p className="text-sm text-ink-mid leading-relaxed">{review.body}</p>
               )}
             </div>
           ))}
         </div>
       ) : (
-        <p className="text-sm text-[#6b5d57]">
+        <p className="text-sm text-ink-light">
           {user ? 'Be the first to review this event.' : 'No reviews yet.'}
         </p>
       )}
@@ -226,7 +226,7 @@ function StarDisplay({ rating, size = 'md' }: { rating: number; size?: 'sm' | 'm
           className={`${cls} ${
             star <= Math.round(rating)
               ? 'fill-[#f59e0b] text-[#f59e0b]'
-              : 'text-[#ddc9a3]'
+              : 'text-sand-mid'
           }`}
         />
       ))}

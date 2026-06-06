@@ -36,11 +36,11 @@ export default async function OnboardingPage() {
   const existing = (profile?.preferences ?? {}) as UserPreferences
 
   return (
-    <main id="main" className="min-h-dvh bg-[#fbf7f1] flex flex-col">
+    <main id="main" className="min-h-dvh bg-cream flex flex-col">
       {/* Minimal header — just the wordmark */}
-      <header className="px-6 py-5 border-b border-[#ddc9a3]/40">
+      <header className="px-6 py-5 border-b border-sand-mid/40">
         <span
-          className="font-black text-xl text-[#1a1614] tracking-tight"
+          className="font-black text-xl text-ink tracking-tight"
           style={{ fontFamily: 'var(--font-epilogue)' }}
         >
           ABQ Unplugged
@@ -50,18 +50,18 @@ export default async function OnboardingPage() {
       <div className="flex-1 max-w-2xl mx-auto w-full px-4 py-10">
         {/* Heading */}
         <div className="mb-8">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-[#9a442d] font-bold mb-2 flex items-center gap-2">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-terra font-bold mb-2 flex items-center gap-2">
             <span>Quick setup</span>
-            <span className="text-[#9a442d]/50" aria-hidden="true">·</span>
-            <span className="font-semibold text-[#9a442d]/70">Almost done</span>
+            <span className="text-terra/50" aria-hidden="true">·</span>
+            <span className="font-semibold text-terra/70">Almost done</span>
           </p>
           <h1
-            className="text-3xl sm:text-4xl font-black text-[#1a1614] leading-tight mb-3"
+            className="text-3xl sm:text-4xl font-black text-ink leading-tight mb-3"
             style={{ fontFamily: 'var(--font-epilogue)', letterSpacing: '-0.5px' }}
           >
             What kind of nights<br />are you into?
           </h1>
-          <p className="text-[15px] text-[#4a3f3a] leading-relaxed max-w-md">
+          <p className="text-[15px] text-ink-mid leading-relaxed max-w-md">
             30 seconds. We&apos;ll use this to filter your For You feed and skip events
             that aren&apos;t for you (like showing kids&apos; events to someone without kids).
           </p>

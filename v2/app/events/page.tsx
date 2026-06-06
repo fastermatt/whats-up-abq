@@ -237,12 +237,12 @@ export default async function EventsPage({ searchParams }: PageProps) {
         <div className="flex items-center justify-between animate-fade-in">
           <div>
             <h1
-              className="text-2xl font-black text-[#1a1614]"
+              className="text-2xl font-black text-ink"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               {category && categoryLabel ? `${categoryLabel} in Albuquerque` : timeLabel}
             </h1>
-            <p className="text-[#6b5d57] text-xs mt-0.5">Albuquerque, NM</p>
+            <p className="text-ink-light text-xs mt-0.5">Albuquerque, NM</p>
           </div>
           {/* Calendar toggle button — client component so it can read/set URL param */}
           <Suspense>
@@ -278,7 +278,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
           <EmptyState timeLabel={timeLabel} />
         ) : (
           <>
-            <p className="text-xs text-[#6b5d57] tabular-nums">
+            <p className="text-xs text-ink-light tabular-nums">
               {offset + 1}–{Math.min(offset + limit, total)} of {total.toLocaleString()}
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
@@ -293,21 +293,21 @@ export default async function EventsPage({ searchParams }: PageProps) {
             cream/terra system instead of a full-bleed gradient that read
             as an ad. Cream bg + terra accent + dashed terra border keeps
             the "you can contribute" energy without the banner-ad feel. */}
-        <div className="mt-2 rounded-2xl border border-dashed border-[#9a442d]/35 bg-[#fdf9f4] p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="mt-2 rounded-2xl border border-dashed border-terra/35 bg-cream-raised p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] font-semibold mb-0.5">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-terra font-semibold mb-0.5">
               Know something we don&apos;t?
             </p>
-            <p className="text-base font-black text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
+            <p className="text-base font-black text-ink" style={{ fontFamily: 'var(--font-epilogue)' }}>
               Submit your event
             </p>
-            <p className="text-xs text-[#6b5d57] mt-0.5">
+            <p className="text-xs text-ink-light mt-0.5">
               Community events reviewed within 24 hours · free to list
             </p>
           </div>
           <Link
             href="/submit"
-            className="flex-shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#9a442d] text-white text-sm font-bold hover:bg-[#7d3725] transition-colors"
+            className="flex-shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-terra text-white text-sm font-bold hover:bg-terra-hover transition-colors"
           >
             Add your event →
           </Link>
@@ -339,12 +339,12 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
     // Outer wrapper holds spring animation + group hover. QuickSaveButton sits
     // outside the <Link> so we avoid nested-interactive-element issues.
     <div
-      className="group relative spring-card rounded-xl overflow-hidden border border-[#f0e4cc]/80 bg-white shadow-[0_1px_3px_rgba(26,22,20,0.04)] hover:shadow-[0_8px_24px_rgba(26,22,20,0.12)] transition-all duration-300 hover:-translate-y-1"
+      className="group relative spring-card rounded-xl overflow-hidden border border-sand-light/80 bg-white shadow-[0_1px_3px_rgba(26,22,20,0.04)] hover:shadow-[0_8px_24px_rgba(26,22,20,0.12)] transition-all duration-300 hover:-translate-y-1"
       style={{ '--card-i': Math.min(index, 14) } as React.CSSProperties}
     >
       <Link href={`/events/${event.id}`} className="flex flex-col h-full">
         {/* Landscape image — 16:10 ratio */}
-        <div className="relative aspect-[16/10] bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] overflow-hidden">
+        <div className="relative aspect-[16/10] bg-gradient-to-br from-sand-light to-sand-mid overflow-hidden">
           <EventImage
             src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
             fallback={getCategoryFallback(event.category ?? undefined, event.id)}
@@ -355,7 +355,7 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
 
           {/* Category badge — top right */}
           {event.category && (
-            <div className="absolute top-1.5 right-1.5 bg-[#1a1614]/55 backdrop-blur-sm text-white text-[10px] px-1.5 py-0.5 rounded-full">
+            <div className="absolute top-1.5 right-1.5 bg-ink/55 backdrop-blur-sm text-white text-[10px] px-1.5 py-0.5 rounded-full">
               {event.subcategory ? `${event.category} · ${event.subcategory}` : event.category}
             </div>
           )}
@@ -364,7 +364,7 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
           {event.source === 'local-venue' && (
             <>
               {/* Always-visible warm tint: signals "intimate local show", not a ticketed big venue */}
-              <div className="absolute inset-0 bg-[#9a442d]/20 mix-blend-multiply pointer-events-none" />
+              <div className="absolute inset-0 bg-terra/20 mix-blend-multiply pointer-events-none" />
               {/* Bottom gradient for badge legibility */}
               <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[#6b2e1a]/70 to-transparent pointer-events-none" />
               <div className="absolute bottom-1.5 left-1.5 flex items-center gap-0.5 text-white text-[10px] font-semibold">
@@ -375,21 +375,21 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
 
           {/* Community badge — bottom left */}
           {event.source === 'community' && (
-            <div className="absolute bottom-1.5 left-1.5 bg-[#006a62]/90 backdrop-blur-sm text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+            <div className="absolute bottom-1.5 left-1.5 bg-turq/90 backdrop-blur-sm text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
               👥 Community
             </div>
           )}
 
           {/* Price badge — bottom right */}
           {event.price && (
-            <div className="absolute bottom-1.5 right-1.5 bg-[#006a62]/90 backdrop-blur-sm text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
+            <div className="absolute bottom-1.5 right-1.5 bg-turq/90 backdrop-blur-sm text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
               {event.price}
             </div>
           )}
 
           {/* Hover overlay (non-local-venue cards only — local-venue has its own permanent tint) */}
           {event.source !== 'local-venue' && (
-            <div className="absolute inset-0 bg-gradient-to-t from-[#1a1614]/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-0 bg-gradient-to-t from-ink/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           )}
         </div>
 
@@ -397,14 +397,14 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
             No flex-1: cards size to content so a missing venue doesn't leave a tall void. */}
         <div className="px-2 pt-2 pb-0.5 space-y-0.5">
           <h3
-            className="font-bold text-[#1a1614] text-xs leading-tight line-clamp-2 group-hover:text-[#9a442d] transition-colors"
+            className="font-bold text-ink text-xs leading-tight line-clamp-2 group-hover:text-terra transition-colors"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             {event.title}
           </h3>
 
           {(dateStr || timeStr) && (
-            <p className="text-[10px] text-[#9a442d] font-medium flex items-center gap-1">
+            <p className="text-[10px] text-terra font-medium flex items-center gap-1">
               <Clock className="w-2.5 h-2.5 flex-shrink-0" />
               <span>{timeStr ? `${dateStr} · ${timeStr}` : dateStr}</span>
             </p>
@@ -417,7 +417,7 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
       {event.venue && (
         <Link
           href={`/venues/${venueToSlug(event.venue)}`}
-          className="block px-2 pb-2 text-[10px] text-[#6b5d57] hover:text-[#9a442d] hover:underline line-clamp-1 flex items-center gap-1 transition-colors"
+          className="block px-2 pb-2 text-[10px] text-ink-light hover:text-terra hover:underline line-clamp-1 flex items-center gap-1 transition-colors"
           aria-label={`See all events at ${event.venue}`}
         >
           <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
@@ -456,12 +456,12 @@ function EmptyState({ timeLabel }: { timeLabel: string }) {
     <div className="flex flex-col items-center justify-center py-16 text-center animate-fade-in">
       <div className="text-5xl mb-3">🌵</div>
       <h2
-        className="text-lg font-bold text-[#1a1614] mb-1"
+        className="text-lg font-bold text-ink mb-1"
         style={{ fontFamily: 'var(--font-epilogue)' }}
       >
         No events found
       </h2>
-      <p className="text-[#6b5d57] text-xs max-w-xs mb-5">
+      <p className="text-ink-light text-xs max-w-xs mb-5">
         No {timeLabel.toLowerCase()} events right now. Try a different time range or browse by category.
       </p>
 
@@ -471,7 +471,7 @@ function EmptyState({ timeLabel }: { timeLabel: string }) {
           <Link
             key={label}
             href={href}
-            className="px-3 py-1.5 rounded-full bg-white border border-[#ddc9a3] text-xs font-semibold text-[#4a3f3a] hover:border-[#9a442d] hover:text-[#9a442d] transition-all"
+            className="px-3 py-1.5 rounded-full bg-white border border-sand-mid text-xs font-semibold text-ink-mid hover:border-terra hover:text-terra transition-all"
           >
             {label}
           </Link>
@@ -480,7 +480,7 @@ function EmptyState({ timeLabel }: { timeLabel: string }) {
 
       <Link
         href="/events"
-        className="px-4 py-1.5 rounded-full bg-[#9a442d] text-white text-xs font-medium hover:bg-[#7d3725] transition-colors"
+        className="px-4 py-1.5 rounded-full bg-terra text-white text-xs font-medium hover:bg-terra-hover transition-colors"
       >
         View All Upcoming
       </Link>
@@ -521,18 +521,18 @@ function Pagination({
       {page > 1 && (
         <Link
           href={buildUrl(page - 1)}
-          className="px-4 py-1.5 rounded-full border border-[#ddc9a3] text-xs text-[#4a3f3a] hover:border-[#9a442d] hover:text-[#9a442d] transition-colors"
+          className="px-4 py-1.5 rounded-full border border-sand-mid text-xs text-ink-mid hover:border-terra hover:text-terra transition-colors"
         >
           ← Prev
         </Link>
       )}
-      <span className="text-xs text-[#6b5d57] tabular-nums">
+      <span className="text-xs text-ink-light tabular-nums">
         {page} / {totalPages}
       </span>
       {page < totalPages && (
         <Link
           href={buildUrl(page + 1)}
-          className="px-4 py-1.5 rounded-full border border-[#ddc9a3] text-xs text-[#4a3f3a] hover:border-[#9a442d] hover:text-[#9a442d] transition-colors"
+          className="px-4 py-1.5 rounded-full border border-sand-mid text-xs text-ink-mid hover:border-terra hover:text-terra transition-colors"
         >
           Next →
         </Link>

@@ -41,12 +41,12 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
 
   return (
     <main id="main" className="min-h-dvh bg-[--bg]">
-      <header className="sticky top-0 z-20 bg-[--bg]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
+      <header className="sticky top-0 z-20 bg-[--bg]/90 backdrop-blur-md border-b border-sand-mid/60">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
-          <Link href="/profile" className="text-[#4a3f3a] hover:text-[#9a442d] transition-colors">
+          <Link href="/profile" className="text-ink-mid hover:text-terra transition-colors">
             <ArrowLeft className="w-4 h-4" />
           </Link>
-          <h1 className="font-black text-lg text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
+          <h1 className="font-black text-lg text-ink" style={{ fontFamily: 'var(--font-epilogue)' }}>
             Leaderboard
           </h1>
         </div>
@@ -57,17 +57,17 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
         {/* Hero — flat cream + terra accent (round-4 #8). DESIGN.md reserves
             turquoise for ticket/info color, not hero gradients. Matches the
             editorial-flat treatment of the rest of the public site. */}
-        <div className="rounded-2xl p-5 text-center bg-white border border-[#f0e4cc]">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#9a442d]/10 mb-3">
-            <Trophy className="w-7 h-7 text-[#9a442d]" />
+        <div className="rounded-2xl p-5 text-center bg-white border border-sand-light">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-terra/10 mb-3">
+            <Trophy className="w-7 h-7 text-terra" />
           </div>
-          <h2 className="text-xl font-black text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
+          <h2 className="text-xl font-black text-ink" style={{ fontFamily: 'var(--font-epilogue)' }}>
             Top ABQ Event-Goers
           </h2>
-          <p className="text-[#6b5d57] text-sm mt-1">Who&apos;s actually out there living it up</p>
+          <p className="text-ink-light text-sm mt-1">Who&apos;s actually out there living it up</p>
           {user && myRank >= 0 && (
             <div className="mt-3 flex flex-col items-center gap-2">
-              <div className="inline-flex items-center gap-2 bg-[#9a442d]/10 text-[#7d3725] rounded-full px-3 py-1.5 text-sm font-semibold">
+              <div className="inline-flex items-center gap-2 bg-terra/10 text-terra-hover rounded-full px-3 py-1.5 text-sm font-semibold">
                 <Medal className="w-4 h-4" />
                 You&apos;re ranked #{myRank + 1} {isWeekly ? 'this week' : 'overall'}
               </div>
@@ -75,7 +75,7 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
             </div>
           )}
           {user && myRank < 0 && (
-            <div className="mt-3 inline-flex items-center gap-2 bg-[#fbf7f1] border border-[#f0e4cc] rounded-full px-3 py-1.5 text-sm text-[#6b5d57]">
+            <div className="mt-3 inline-flex items-center gap-2 bg-cream border border-sand-light rounded-full px-3 py-1.5 text-sm text-ink-light">
               Check in at events to get on the board
             </div>
           )}
@@ -91,8 +91,8 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
                 href={tab.href}
                 className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all ${
                   active
-                    ? 'bg-[#9a442d] text-white border-[#9a442d]'
-                    : 'bg-white text-[#4a3f3a] border-[#ddc9a3] hover:border-[#9a442d]'
+                    ? 'bg-terra text-white border-terra'
+                    : 'bg-white text-ink-mid border-sand-mid hover:border-terra'
                 }`}
               >
                 {tab.label}
@@ -103,17 +103,17 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
 
         {/* Leaderboard list */}
         {displayBoard.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-2xl border border-[#f0e4cc]">
-            <Trophy className="w-10 h-10 text-[#ddc9a3] mx-auto mb-3" />
-            <h3 className="font-bold text-[#1a1614] mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
+          <div className="text-center py-12 bg-white rounded-2xl border border-sand-light">
+            <Trophy className="w-10 h-10 text-sand-mid mx-auto mb-3" />
+            <h3 className="font-bold text-ink mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
               {isWeekly ? 'No check-ins this week yet' : 'No one here yet'}
             </h3>
-            <p className="text-xs text-[#6b5d57] mb-4">
+            <p className="text-xs text-ink-light mb-4">
               {isWeekly
                 ? 'Check into an event this week to appear on the board!'
                 : 'Be the first to check in and claim the #1 spot!'}
             </p>
-            <Link href="/events" className="text-xs font-semibold text-[#9a442d] hover:underline">
+            <Link href="/events" className="text-xs font-semibold text-terra hover:underline">
               Find an event →
             </Link>
           </div>
@@ -126,9 +126,9 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
               const handle = person.handle?.replace('@', '') ?? null
               const cardClass = `flex items-center gap-3 rounded-xl px-4 py-3 border transition-all ${
                 isMe
-                  ? 'bg-[#9a442d]/5 border-[#9a442d]/30 shadow-sm'
-                  : 'bg-white border-[#f0e4cc]'
-              } ${handle && !isMe ? 'hover:border-[#9a442d]/30 hover:shadow-sm' : ''}`
+                  ? 'bg-terra/5 border-terra/30 shadow-sm'
+                  : 'bg-white border-sand-light'
+              } ${handle && !isMe ? 'hover:border-terra/30 hover:shadow-sm' : ''}`
 
               const inner = (
                 <>
@@ -137,24 +137,24 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
                     {medal ? (
                       <span className="text-xl">{medal}</span>
                     ) : (
-                      <span className="text-sm font-bold text-[#6b5d57]">#{idx + 1}</span>
+                      <span className="text-sm font-bold text-ink-light">#{idx + 1}</span>
                     )}
                   </div>
 
                   {/* Avatar */}
                   <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-black flex-shrink-0 ${
-                    isMe ? 'bg-[#9a442d] text-white' : 'bg-[#f0e4cc] text-[#9a442d]'
+                    isMe ? 'bg-terra text-white' : 'bg-sand-light text-terra'
                   }`} style={{ fontFamily: 'var(--font-epilogue)' }}>
                     {(person.display_name || person.handle || '?').charAt(0).toUpperCase()}
                   </div>
 
                   {/* Name + meta */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-[#1a1614] truncate">
+                    <p className="text-sm font-bold text-ink truncate">
                       {person.display_name || person.handle || 'ABQ Fan'}
-                      {isMe && <span className="ml-1.5 text-[10px] text-[#9a442d] font-normal">you</span>}
+                      {isMe && <span className="ml-1.5 text-[10px] text-terra font-normal">you</span>}
                     </p>
-                    <div className="flex items-center gap-2 text-[10px] text-[#6b5d57]">
+                    <div className="flex items-center gap-2 text-[10px] text-ink-light">
                       {person.neighborhood && (
                         <span className="flex items-center gap-0.5">
                           <MapPin className="w-2.5 h-2.5" />
@@ -169,16 +169,16 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
 
                   {/* Score */}
                   <div className="text-right flex-shrink-0">
-                    <p className="text-base font-black text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
+                    <p className="text-base font-black text-ink" style={{ fontFamily: 'var(--font-epilogue)' }}>
                       {score}
                     </p>
-                    <p className="text-[10px] text-[#6b5d57]">
+                    <p className="text-[10px] text-ink-light">
                       {isWeekly ? 'this week' : 'total'}
                     </p>
                   </div>
                   {/* Tap hint — only for other users with a profile */}
                   {handle && !isMe && (
-                    <div className="text-[#ddc9a3] flex-shrink-0">
+                    <div className="text-sand-mid flex-shrink-0">
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                     </div>
                   )}
@@ -193,21 +193,21 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
         )}
 
         {/* How it works */}
-        <div className="bg-white rounded-2xl border border-[#f0e4cc] p-4">
-          <p className="text-xs font-bold text-[#1a1614] mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
+        <div className="bg-white rounded-2xl border border-sand-light p-4">
+          <p className="text-xs font-bold text-ink mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
             How to climb the ranks
           </p>
-          <ul className="space-y-1.5 text-xs text-[#6b5d57]">
+          <ul className="space-y-1.5 text-xs text-ink-light">
             <li className="flex items-center gap-2">
-              <span className="w-4 h-4 rounded-full bg-[#9a442d]/10 flex items-center justify-center text-[9px]">1</span>
+              <span className="w-4 h-4 rounded-full bg-terra/10 flex items-center justify-center text-[9px]">1</span>
               Browse events and tap &quot;I&apos;m going&quot;
             </li>
             <li className="flex items-center gap-2">
-              <span className="w-4 h-4 rounded-full bg-[#9a442d]/10 flex items-center justify-center text-[9px]">2</span>
+              <span className="w-4 h-4 rounded-full bg-terra/10 flex items-center justify-center text-[9px]">2</span>
               Show up and tap &quot;Check in&quot; on the event page
             </li>
             <li className="flex items-center gap-2">
-              <span className="w-4 h-4 rounded-full bg-[#9a442d]/10 flex items-center justify-center text-[9px]">3</span>
+              <span className="w-4 h-4 rounded-full bg-terra/10 flex items-center justify-center text-[9px]">3</span>
               Earn points, badges, and a spot on the weekly board
             </li>
           </ul>
@@ -215,12 +215,12 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
 
         {/* CTA for unauthed */}
         {!user && (
-          <div className="bg-white rounded-2xl border border-[#f0e4cc] p-5 text-center">
-            <p className="text-sm font-bold text-[#1a1614] mb-1">Want to compete?</p>
-            <p className="text-xs text-[#6b5d57] mb-3">Create a free account to track your check-ins and climb the rankings.</p>
+          <div className="bg-white rounded-2xl border border-sand-light p-5 text-center">
+            <p className="text-sm font-bold text-ink mb-1">Want to compete?</p>
+            <p className="text-xs text-ink-light mb-3">Create a free account to track your check-ins and climb the rankings.</p>
             <Link
               href="/login"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#9a442d] text-white text-xs font-semibold hover:bg-[#7d3725] transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-terra text-white text-xs font-semibold hover:bg-terra-hover transition-colors"
             >
               Join free →
             </Link>

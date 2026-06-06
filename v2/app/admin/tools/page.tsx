@@ -22,7 +22,7 @@ const ACTIONS_BASE = `https://github.com/${REPO}/actions/workflows`
 function SectionHeader({ icon, title, sub }: { icon: React.ReactNode; title: string; sub: string }) {
   return (
     <div className="flex items-start gap-3 mb-5">
-      <div className="w-8 h-8 rounded-xl bg-[#9a442d]/15 flex items-center justify-center shrink-0 mt-0.5">
+      <div className="w-8 h-8 rounded-xl bg-terra/15 flex items-center justify-center shrink-0 mt-0.5">
         {icon}
       </div>
       <div>
@@ -79,7 +79,7 @@ function WorkflowCard({
   }
 
   return (
-    <div className={`bg-[#201c1a] border rounded-2xl p-5 ${disabled ? 'border-white/[0.04] opacity-50' : 'border-white/[0.07]'}`}>
+    <div className={`bg-ink-deep border rounded-2xl p-5 ${disabled ? 'border-white/[0.04] opacity-50' : 'border-white/[0.07]'}`}>
       <div className="flex items-start justify-between gap-4 mb-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -98,8 +98,8 @@ function WorkflowCard({
             target="_blank"
             rel="noopener noreferrer"
             className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold
-              bg-[#9a442d]/15 text-[#c4705a] border border-[#9a442d]/30
-              hover:bg-[#9a442d]/25 hover:text-white transition-all"
+              bg-terra/15 text-[#c4705a] border border-terra/30
+              hover:bg-terra/25 hover:text-white transition-all"
           >
             <ExternalLink size={11} />
             Open in GitHub
@@ -146,10 +146,10 @@ function AdminPageLink({ href, icon, label, sub }: { href: string; icon: React.R
   return (
     <Link
       href={href}
-      className="flex items-center gap-3 bg-[#201c1a] border border-white/[0.07] rounded-xl px-4 py-3
+      className="flex items-center gap-3 bg-ink-deep border border-white/[0.07] rounded-xl px-4 py-3
         hover:border-white/[0.15] hover:bg-white/[0.04] transition-all group"
     >
-      <div className="w-8 h-8 rounded-lg bg-[#9a442d]/12 flex items-center justify-center shrink-0">
+      <div className="w-8 h-8 rounded-lg bg-terra/12 flex items-center justify-center shrink-0">
         {icon}
       </div>
       <div className="min-w-0 flex-1">
@@ -180,7 +180,7 @@ export default function ToolsPage() {
       {/* ── The Weekly Ritual ─────────────────────────────────────────────────── */}
       <section>
         <SectionHeader
-          icon={<RefreshCw size={16} className="text-[#9a442d]" />}
+          icon={<RefreshCw size={16} className="text-terra" />}
           title="The Weekly Ritual"
           sub="Do these three things every week to keep the site healthy"
         />
@@ -214,9 +214,9 @@ export default function ToolsPage() {
           ].map(({ num, label, detail, href, hrefLabel }) => (
             <div
               key={num}
-              className="bg-[#201c1a] border border-white/[0.07] rounded-2xl p-5 flex gap-5 items-start"
+              className="bg-ink-deep border border-white/[0.07] rounded-2xl p-5 flex gap-5 items-start"
             >
-              <div className="w-8 h-8 rounded-full bg-[#9a442d]/20 flex items-center justify-center shrink-0 text-sm font-black text-[#c4705a]">
+              <div className="w-8 h-8 rounded-full bg-terra/20 flex items-center justify-center shrink-0 text-sm font-black text-[#c4705a]">
                 {num}
               </div>
               <div className="min-w-0 flex-1">
@@ -240,7 +240,7 @@ export default function ToolsPage() {
       {/* ── GitHub Actions ────────────────────────────────────────────────────── */}
       <section>
         <SectionHeader
-          icon={<RefreshCw size={16} className="text-[#9a442d]" />}
+          icon={<RefreshCw size={16} className="text-terra" />}
           title="GitHub Actions"
           sub='Run these from the GitHub Actions tab → select the workflow → "Run workflow" button'
         />
@@ -307,7 +307,7 @@ export default function ToolsPage() {
       {/* ── Terminal Scripts ──────────────────────────────────────────────────── */}
       <section>
         <SectionHeader
-          icon={<Terminal size={16} className="text-[#9a442d]" />}
+          icon={<Terminal size={16} className="text-terra" />}
           title="Terminal Scripts"
           sub="Run from inside the v2/ directory. Requires v2/scripts/.env with Supabase credentials."
         />
@@ -326,8 +326,8 @@ export default function ToolsPage() {
         </div>
 
         {/* Main Pipeline */}
-        <div className="bg-[#201c1a] border border-white/[0.07] rounded-2xl p-5 mb-4">
-          <p className="text-xs font-bold text-[#9a442d] uppercase tracking-widest mb-4">Main Pipeline</p>
+        <div className="bg-ink-deep border border-white/[0.07] rounded-2xl p-5 mb-4">
+          <p className="text-xs font-bold text-terra uppercase tracking-widest mb-4">Main Pipeline</p>
           <div className="space-y-5">
             <ScriptRow
               name="Full Ingest (all sources)"
@@ -363,7 +363,7 @@ export default function ToolsPage() {
         </div>
 
         {/* Per-Source Import */}
-        <div className="bg-[#201c1a] border border-white/[0.07] rounded-2xl p-5 mb-4">
+        <div className="bg-ink-deep border border-white/[0.07] rounded-2xl p-5 mb-4">
           <p className="text-xs font-bold text-white/55 uppercase tracking-widest mb-4">Import, Individual Sources</p>
           <div className="space-y-5">
             <ScriptRow
@@ -412,7 +412,7 @@ export default function ToolsPage() {
         </div>
 
         {/* AI Enrichment */}
-        <div className="bg-[#201c1a] border border-white/[0.07] rounded-2xl p-5 mb-4">
+        <div className="bg-ink-deep border border-white/[0.07] rounded-2xl p-5 mb-4">
           <div className="flex items-center gap-2 mb-4">
             <p className="text-xs font-bold text-white/55 uppercase tracking-widest">AI Enrichment</p>
             <span className="text-[10px] text-white/25 border border-white/10 rounded px-1.5 py-0.5">
@@ -451,7 +451,7 @@ export default function ToolsPage() {
         </div>
 
         {/* Data Quality */}
-        <div className="bg-[#201c1a] border border-white/[0.07] rounded-2xl p-5 mb-4">
+        <div className="bg-ink-deep border border-white/[0.07] rounded-2xl p-5 mb-4">
           <p className="text-xs font-bold text-white/55 uppercase tracking-widest mb-4">Data Quality & Auditing</p>
           <div className="space-y-5">
             <ScriptRow
@@ -508,7 +508,7 @@ export default function ToolsPage() {
         </div>
 
         {/* Images */}
-        <div className="bg-[#201c1a] border border-white/[0.07] rounded-2xl p-5 mb-4">
+        <div className="bg-ink-deep border border-white/[0.07] rounded-2xl p-5 mb-4">
           <p className="text-xs font-bold text-white/55 uppercase tracking-widest mb-4">Images</p>
           <div className="space-y-5">
             <ScriptRow
@@ -540,7 +540,7 @@ export default function ToolsPage() {
         </div>
 
         {/* Notifications */}
-        <div className="bg-[#201c1a] border border-white/[0.07] rounded-2xl p-5">
+        <div className="bg-ink-deep border border-white/[0.07] rounded-2xl p-5">
           <p className="text-xs font-bold text-white/55 uppercase tracking-widest mb-4">Notifications & Email</p>
           <div className="space-y-5">
             <ScriptRow
@@ -571,7 +571,7 @@ export default function ToolsPage() {
       {/* ── Admin Pages ───────────────────────────────────────────────────────── */}
       <section>
         <SectionHeader
-          icon={<LayoutDashboard size={16} className="text-[#9a442d]" />}
+          icon={<LayoutDashboard size={16} className="text-terra" />}
           title="Admin Pages"
           sub="All the tools built into the admin panel"
         />
@@ -579,49 +579,49 @@ export default function ToolsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <AdminPageLink
             href="/admin"
-            icon={<BarChart2 size={16} className="text-[#9a442d]" />}
+            icon={<BarChart2 size={16} className="text-terra" />}
             label="Dashboard"
             sub="Live event counts, user stats, analytics, recent reports"
           />
           <AdminPageLink
             href="/admin/ig-captions"
-            icon={<Camera size={16} className="text-[#9a442d]" />}
+            icon={<Camera size={16} className="text-terra" />}
             label="Instagram Posts"
             sub="Event spotlight cards + AI captions + round-ups + site promos"
           />
           <AdminPageLink
             href="/admin/ig"
-            icon={<Image size={16} className="text-[#9a442d]" />}
+            icon={<Image size={16} className="text-terra" />}
             label="IG Editor (Advanced)"
             sub="Drag-and-drop canvas editor for custom Instagram graphics"
           />
           <AdminPageLink
             href="/admin/events"
-            icon={<Database size={16} className="text-[#9a442d]" />}
+            icon={<Database size={16} className="text-terra" />}
             label="Events"
             sub="Browse, filter, hide/unhide, feature events"
           />
           <AdminPageLink
             href="/admin/submissions"
-            icon={<FileText size={16} className="text-[#9a442d]" />}
+            icon={<FileText size={16} className="text-terra" />}
             label="Submissions"
             sub="Community-submitted events waiting for your approval"
           />
           <AdminPageLink
             href="/admin/reports"
-            icon={<AlertCircle size={16} className="text-[#9a442d]" />}
+            icon={<AlertCircle size={16} className="text-terra" />}
             label="Reports"
             sub="User-flagged events needing review"
           />
           <AdminPageLink
             href="/admin/feedback"
-            icon={<FileText size={16} className="text-[#9a442d]" />}
+            icon={<FileText size={16} className="text-terra" />}
             label="Feedback"
             sub="User-submitted feedback and suggestions"
           />
           <AdminPageLink
             href="/admin/analytics"
-            icon={<BarChart2 size={16} className="text-[#9a442d]" />}
+            icon={<BarChart2 size={16} className="text-terra" />}
             label="Analytics"
             sub="Page views, ticket clicks, session data"
           />
@@ -631,7 +631,7 @@ export default function ToolsPage() {
       {/* ── Quick Reference ───────────────────────────────────────────────────── */}
       <section>
         <SectionHeader
-          icon={<CheckCircle2 size={16} className="text-[#9a442d]" />}
+          icon={<CheckCircle2 size={16} className="text-terra" />}
           title="If Something Looks Wrong"
           sub="Most common issues and what to run"
         />
@@ -669,7 +669,7 @@ export default function ToolsPage() {
               cmd: 'node scripts/enrich-deepseek.mjs --limit=500',
             },
           ].map(({ problem, fix, cmd }) => (
-            <div key={problem} className="bg-[#201c1a] border border-white/[0.07] rounded-xl p-4">
+            <div key={problem} className="bg-ink-deep border border-white/[0.07] rounded-xl p-4">
               <p className="text-sm font-semibold text-white mb-1">🔴 {problem}</p>
               <p className="text-xs text-white/50 mb-2">{fix}</p>
               <div className="flex items-center gap-2 bg-[#111] rounded-lg px-3 py-1.5">
@@ -700,7 +700,7 @@ export default function ToolsPage() {
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-2 bg-[#201c1a] border border-white/[0.07] rounded-xl
+              className="flex items-center gap-1.5 px-3 py-2 bg-ink-deep border border-white/[0.07] rounded-xl
                 text-sm text-white/50 hover:text-white hover:border-white/20 transition-all"
             >
               {label}

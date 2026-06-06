@@ -160,14 +160,14 @@ export default async function ForYouPage() {
   const showNudge = !hasTastePrefs
 
   return (
-    <main id="main" className="min-h-dvh bg-[#fbf7f1]">
+    <main id="main" className="min-h-dvh bg-cream">
       {/* Nav */}
-      <header className="border-b border-[#ddc9a3]/60 bg-[#fbf7f1]/80 backdrop-blur-md sticky top-0 z-20">
+      <header className="border-b border-sand-mid/60 bg-cream/80 backdrop-blur-md sticky top-0 z-20">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-[#9a442d]" />
+            <Sparkles className="w-5 h-5 text-terra" />
             <h1
-              className="font-black text-lg text-[#1a1614]"
+              className="font-black text-lg text-ink"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               For You
@@ -176,7 +176,7 @@ export default async function ForYouPage() {
           <div className="flex items-center gap-3">
             <Link
               href="/profile#preferences"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#4a3f3a] hover:text-[#9a442d] transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-mid hover:text-terra transition-colors"
             >
               <SlidersHorizontal className="w-3.5 h-3.5" />
               My picks
@@ -189,22 +189,22 @@ export default async function ForYouPage() {
 
         {/* ── Preferences nudge — shown when taste profile is empty ── */}
         {showNudge && (
-          <div className="mb-6 rounded-2xl border border-[#e8d9bf] bg-[#fdf9f4] p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-[#9a442d]/10 flex items-center justify-center flex-shrink-0">
-              <SlidersHorizontal className="w-5 h-5 text-[#9a442d]" />
+          <div className="mb-6 rounded-2xl border border-[#e8d9bf] bg-cream-raised p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-terra/10 flex items-center justify-center flex-shrink-0">
+              <SlidersHorizontal className="w-5 h-5 text-terra" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-[#1a1614] mb-0.5">
+              <p className="text-sm font-bold text-ink mb-0.5">
                 Personalize your feed
               </p>
-              <p className="text-xs text-[#6b5d57] leading-relaxed">
+              <p className="text-xs text-ink-light leading-relaxed">
                 Tell us who&apos;s coming and what you&apos;re into. We&apos;ll stop showing you
                 events that don&apos;t fit, and surface the ones that do.
               </p>
             </div>
             <Link
               href="/profile#preferences"
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#9a442d] text-white text-xs font-bold hover:bg-[#7d3725] transition-colors flex-shrink-0 whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-terra text-white text-xs font-bold hover:bg-terra-hover transition-colors flex-shrink-0 whitespace-nowrap"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               Set my picks
@@ -216,27 +216,27 @@ export default async function ForYouPage() {
         {/* Active filter pills — show what's being filtered */}
         {hasTastePrefs && (
           <div className="flex flex-wrap items-center gap-2 mb-5">
-            <span className="text-[11px] text-[#6b5d57] font-semibold">Filtered by:</span>
+            <span className="text-[11px] text-ink-light font-semibold">Filtered by:</span>
             {tastePrefs.who && (
-              <span className="text-[11px] bg-[#9a442d]/10 text-[#9a442d] px-2.5 py-1 rounded-full font-semibold">
+              <span className="text-[11px] bg-terra/10 text-terra px-2.5 py-1 rounded-full font-semibold">
                 {tastePrefs.who === 'solo' ? 'Just me' :
                  tastePrefs.who === 'couple' ? 'Me + partner' :
                  tastePrefs.who === 'family_kids' ? 'Family with kids' : 'Group'}
               </span>
             )}
             {(tastePrefs.categories ?? []).map(c => (
-              <span key={c} className="text-[11px] bg-[#9a442d]/10 text-[#9a442d] px-2.5 py-1 rounded-full font-semibold">
+              <span key={c} className="text-[11px] bg-terra/10 text-terra px-2.5 py-1 rounded-full font-semibold">
                 {c}
               </span>
             ))}
             {tastePrefs.budget === 'free' && (
-              <span className="text-[11px] bg-[#4f6249]/10 text-[#4f6249] px-2.5 py-1 rounded-full font-semibold">
+              <span className="text-[11px] bg-sage/10 text-sage px-2.5 py-1 rounded-full font-semibold">
                 Free only
               </span>
             )}
             <Link
               href="/profile#preferences"
-              className="text-[11px] text-[#6b5d57] hover:text-[#9a442d] transition-colors underline underline-offset-2 ml-1"
+              className="text-[11px] text-ink-light hover:text-terra transition-colors underline underline-offset-2 ml-1"
             >
               Edit
             </Link>
@@ -245,11 +245,11 @@ export default async function ForYouPage() {
 
         {/* Notification prefs not set yet — secondary nudge */}
         {!hasNotifPrefs && hasTastePrefs && (
-          <div className="mb-5 rounded-xl border border-[#ddc9a3]/60 bg-white px-4 py-3 flex items-center gap-3">
+          <div className="mb-5 rounded-xl border border-sand-mid/60 bg-white px-4 py-3 flex items-center gap-3">
             <span className="text-base">🔔</span>
-            <p className="text-xs text-[#4a3f3a] flex-1">
+            <p className="text-xs text-ink-mid flex-1">
               Want alerts when new matching events drop?{' '}
-              <Link href="/profile/notifications" className="font-semibold text-[#9a442d] hover:underline underline-offset-2">
+              <Link href="/profile/notifications" className="font-semibold text-terra hover:underline underline-offset-2">
                 Set up notifications →
               </Link>
             </p>
@@ -258,14 +258,14 @@ export default async function ForYouPage() {
 
         {/* No matches */}
         {items.length === 0 && hasNotifPrefs && (
-          <div className="rounded-2xl p-7 border border-[#e8d9bf] bg-[#fdf9f4] text-center">
-            <p className="text-base font-bold text-[#1a1614] mb-1">Nothing matched yet</p>
-            <p className="text-sm text-[#4a3f3a] mb-4 max-w-sm mx-auto">
+          <div className="rounded-2xl p-7 border border-[#e8d9bf] bg-cream-raised text-center">
+            <p className="text-base font-bold text-ink mb-1">Nothing matched yet</p>
+            <p className="text-sm text-ink-mid mb-4 max-w-sm mx-auto">
               The matcher runs daily. Check back tomorrow, or broaden your picks.
             </p>
             <Link
               href="/profile#preferences"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1a1614] text-white text-xs font-semibold hover:bg-[#4a3f3a] transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-ink text-white text-xs font-semibold hover:bg-ink-mid transition-colors"
             >
               Adjust my picks
             </Link>
@@ -274,11 +274,11 @@ export default async function ForYouPage() {
 
         {/* No matches + no notif prefs — show all-events fallback */}
         {items.length === 0 && !hasNotifPrefs && (
-          <div className="rounded-2xl p-7 border border-[#e8d9bf] bg-[#fdf9f4] text-center">
-            <p className="text-base font-bold text-[#1a1614] mb-1">
+          <div className="rounded-2xl p-7 border border-[#e8d9bf] bg-cream-raised text-center">
+            <p className="text-base font-bold text-ink mb-1">
               {hasTastePrefs ? 'No matches for your filters yet' : 'Your feed is empty'}
             </p>
-            <p className="text-sm text-[#4a3f3a] mb-5 max-w-sm mx-auto">
+            <p className="text-sm text-ink-mid mb-5 max-w-sm mx-auto">
               {hasTastePrefs
                 ? 'Try broadening your category picks, or browse everything.'
                 : 'Set your picks so we know what to surface for you.'}
@@ -286,7 +286,7 @@ export default async function ForYouPage() {
             <div className="flex flex-wrap gap-3 justify-center">
               <Link
                 href="/profile#preferences"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#9a442d] text-white text-sm font-bold hover:bg-[#7d3725] transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-terra text-white text-sm font-bold hover:bg-terra-hover transition-colors"
                 style={{ fontFamily: 'var(--font-epilogue)' }}
               >
                 <SlidersHorizontal className="w-3.5 h-3.5" />
@@ -294,7 +294,7 @@ export default async function ForYouPage() {
               </Link>
               <Link
                 href="/events"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[#ddc9a3] text-sm font-semibold text-[#4a3f3a] hover:border-[#9a442d] transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-sand-mid text-sm font-semibold text-ink-mid hover:border-terra transition-colors"
               >
                 Browse all events
               </Link>
@@ -305,17 +305,17 @@ export default async function ForYouPage() {
         {/* Event grid */}
         {items.length > 0 && (
           <>
-            <p className="text-[12px] text-[#6b5d57] mb-4">
-              <strong className="text-[#1a1614]">{items.length}</strong> events matched to your picks
+            <p className="text-[12px] text-ink-light mb-4">
+              <strong className="text-ink">{items.length}</strong> events matched to your picks
             </p>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
               {items.map(({ event, score, reasons }) => (
                 <Link
                   key={event.id}
                   href={`/events/${event.id}`}
-                  className="relative block rounded-xl overflow-hidden bg-[#fdf9f4] border border-[#e8d9bf] shadow-sm hover:shadow-md transition-shadow group"
+                  className="relative block rounded-xl overflow-hidden bg-cream-raised border border-[#e8d9bf] shadow-sm hover:shadow-md transition-shadow group"
                 >
-                  <div className="aspect-[16/10] relative bg-[#f0e4cc] overflow-hidden">
+                  <div className="aspect-[16/10] relative bg-sand-light overflow-hidden">
                     <EventImage
                       src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
                       fallback={getCategoryFallback(event.category ?? undefined, event.id)}
@@ -323,7 +323,7 @@ export default async function ForYouPage() {
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     <DismissButton eventId={event.id} />
-                    <div className="absolute top-2 right-2 z-10 px-2 py-0.5 rounded-full bg-[#9a442d] text-white text-[10px] font-black shadow">
+                    <div className="absolute top-2 right-2 z-10 px-2 py-0.5 rounded-full bg-terra text-white text-[10px] font-black shadow">
                       {score}%
                     </div>
                     {event.category && (
@@ -334,19 +334,19 @@ export default async function ForYouPage() {
                   </div>
                   <div className="p-3">
                     <h3
-                      className="text-xs font-black text-[#1a1614] line-clamp-2 leading-tight group-hover:text-[#9a442d] transition-colors"
+                      className="text-xs font-black text-ink line-clamp-2 leading-tight group-hover:text-terra transition-colors"
                       style={{ fontFamily: 'var(--font-epilogue)' }}
                     >
                       {event.title}
                     </h3>
                     {event.venue && (
-                      <p className="text-[10px] text-[#6b5d57] mt-1 line-clamp-1">{event.venue}</p>
+                      <p className="text-[10px] text-ink-light mt-1 line-clamp-1">{event.venue}</p>
                     )}
                     {event.price && (
-                      <p className="text-[10px] text-[#4f6249] mt-0.5 font-semibold">{event.price}</p>
+                      <p className="text-[10px] text-sage mt-0.5 font-semibold">{event.price}</p>
                     )}
                     {reasons?.length > 0 && (
-                      <p className="text-[9px] text-[#4f6249] mt-1 line-clamp-1 font-semibold">
+                      <p className="text-[9px] text-sage mt-1 line-clamp-1 font-semibold">
                         {reasons.slice(0, 2).map(r => r.replace(/^(category|venue|nh|tag|kw|mood):/, '')).join(' · ')}
                       </p>
                     )}

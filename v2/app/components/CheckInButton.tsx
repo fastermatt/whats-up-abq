@@ -155,8 +155,8 @@ export function CheckInButton({ eventId, eventName, eventDate, venueName, venueA
 
   if (checkedIn) {
     return (
-      <div className="flex items-center gap-2 text-[#4f6249]">
-        <CheckCircle2 className="w-4 h-4 fill-[#4f6249] text-white" />
+      <div className="flex items-center gap-2 text-sage">
+        <CheckCircle2 className="w-4 h-4 fill-sage text-white" />
         <span className="text-xs font-semibold">Checked in!</span>
       </div>
     )
@@ -232,7 +232,7 @@ export function CheckInButton({ eventId, eventName, eventDate, venueName, venueA
 
   if (geoState === 'verifying') {
     return (
-      <div className="flex items-center gap-2 text-[#6b5d57]">
+      <div className="flex items-center gap-2 text-ink-light">
         <Loader2 className="w-3.5 h-3.5 animate-spin" />
         <span className="text-xs">Getting your location…</span>
       </div>
@@ -247,11 +247,11 @@ export function CheckInButton({ eventId, eventName, eventDate, venueName, venueA
 
     return (
       <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-1.5 text-[#9a442d]">
+        <div className="flex items-center gap-1.5 text-terra">
           <Navigation className="w-3.5 h-3.5" />
           <span className="text-xs font-semibold">Get a little closer to check in{displayDist}</span>
         </div>
-        <p className="text-[10px] text-[#6b5d57]">You need to be at the venue to check in.</p>
+        <p className="text-[10px] text-ink-light">You need to be at the venue to check in.</p>
       </div>
     )
   }
@@ -259,11 +259,11 @@ export function CheckInButton({ eventId, eventName, eventDate, venueName, venueA
   if (geoState === 'geo_denied') {
     return (
       <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-1.5 text-[#6b5d57]">
+        <div className="flex items-center gap-1.5 text-ink-light">
           <MapPin className="w-3.5 h-3.5" />
           <span className="text-xs font-semibold">Location access needed</span>
         </div>
-        <p className="text-[10px] text-[#6b5d57]">Enable location services to verify you&apos;re at the event.</p>
+        <p className="text-[10px] text-ink-light">Enable location services to verify you&apos;re at the event.</p>
       </div>
     )
   }
@@ -274,7 +274,7 @@ export function CheckInButton({ eventId, eventName, eventDate, venueName, venueA
         <button
           onClick={handleConfirm}
           disabled={geoState === 'submitting'}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#4f6249] text-white text-xs font-semibold hover:bg-[#3d4e38] transition-colors disabled:opacity-50"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-sage text-white text-xs font-semibold hover:bg-[#3d4e38] transition-colors disabled:opacity-50"
         >
           <CheckCircle2 className="w-3.5 h-3.5" />
           {geoState === 'submitting' ? 'Checking in…' : "Yes, I'm here!"}
@@ -282,7 +282,7 @@ export function CheckInButton({ eventId, eventName, eventDate, venueName, venueA
         {geoState !== 'submitting' && (
           <button
             onClick={() => setGeoState('idle')}
-            className="text-xs text-[#6b5d57] hover:text-[#4a3f3a]"
+            className="text-xs text-ink-light hover:text-ink-mid"
           >
             Cancel
           </button>
@@ -295,7 +295,7 @@ export function CheckInButton({ eventId, eventName, eventDate, venueName, venueA
   return (
     <button
       onClick={handleCheckInTap}
-      className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[#ddc9a3] bg-white text-xs font-semibold text-[#4a3f3a] hover:border-[#4f6249] hover:text-[#4f6249] transition-all"
+      className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-sand-mid bg-white text-xs font-semibold text-ink-mid hover:border-sage hover:text-sage transition-all"
     >
       <MapPin className="w-3.5 h-3.5" />
       Check in

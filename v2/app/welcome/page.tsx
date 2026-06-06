@@ -86,9 +86,9 @@ export default async function WelcomePage() {
   const { total } = await fetchEvents({ timeFilter: 'upcoming', limit: 1 })
 
   return (
-    <main id="main" className="min-h-dvh bg-[#fbf7f1]">
+    <main id="main" className="min-h-dvh bg-cream">
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#9a442d] via-[#7d3725] to-[#5a2416] text-white">
+      <section className="relative overflow-hidden bg-gradient-to-br from-terra via-terra-hover to-[#5a2416] text-white">
         <div className="absolute inset-0 opacity-[0.07] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMS41IiBmaWxsPSIjZmZmIi8+PC9zdmc+')]" />
         <div className="max-w-5xl mx-auto px-6 pt-16 pb-20 relative">
           <p className="text-[11px] uppercase tracking-[0.22em] text-[#ffd9c8] mb-3 font-semibold">
@@ -108,7 +108,7 @@ export default async function WelcomePage() {
           <div className="flex flex-wrap gap-3">
             <Link
               href="/events"
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-white text-[#9a442d] font-bold shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-white text-terra font-bold shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
             >
               Browse all events
               <ArrowRight className="w-4 h-4" />
@@ -128,8 +128,8 @@ export default async function WelcomePage() {
 
       {/* ── Quick paths ── */}
       <section className="max-w-5xl mx-auto px-6 -mt-7 relative z-10">
-        <div className="bg-white rounded-2xl shadow-lg border border-[#f0e4cc] p-4 sm:p-5">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-[#9a442d] font-bold mb-3">
+        <div className="bg-white rounded-2xl shadow-lg border border-sand-light p-4 sm:p-5">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-terra font-bold mb-3">
             Jump in
           </p>
           <div className="flex flex-wrap gap-2">
@@ -137,7 +137,7 @@ export default async function WelcomePage() {
               <Link
                 key={p.href}
                 href={p.href}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#fbf7f1] border border-[#f0e4cc] text-sm font-semibold text-[#1a1614] hover:border-[#9a442d] hover:text-[#9a442d] transition-colors"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-cream border border-sand-light text-sm font-semibold text-ink hover:border-terra hover:text-terra transition-colors"
               >
                 {p.label}
                 <ArrowRight className="w-3 h-3" />
@@ -150,12 +150,12 @@ export default async function WelcomePage() {
       {/* ── Benefits grid ── */}
       <section className="max-w-5xl mx-auto px-6 py-14">
         <h2
-          className="text-3xl font-black text-[#1a1614] tracking-tight mb-2"
+          className="text-3xl font-black text-ink tracking-tight mb-2"
           style={{ fontFamily: 'var(--font-epilogue)' }}
         >
           Built for finding things, not selling tickets.
         </h2>
-        <p className="text-[#6b5d57] mb-8 max-w-2xl">
+        <p className="text-ink-light mb-8 max-w-2xl">
           We aggregate. We don&apos;t take a cut. The site exists to help you find one thing
           worth doing tonight, and to help local venues fill their rooms.
         </p>
@@ -165,35 +165,35 @@ export default async function WelcomePage() {
             "identical card grids" anti-pattern. */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Featured: spans 2 cols on desktop, top of stack on mobile */}
-          <div className="lg:col-span-2 lg:row-span-2 bg-gradient-to-br from-[#fdf9f4] to-[#f8eddf] border border-[#e8d9bf] rounded-2xl p-7 flex flex-col justify-center">
+          <div className="lg:col-span-2 lg:row-span-2 bg-gradient-to-br from-cream-raised to-[#f8eddf] border border-[#e8d9bf] rounded-2xl p-7 flex flex-col justify-center">
             <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center mb-4 shadow-sm">
-              <Calendar className="w-6 h-6 text-[#9a442d]" strokeWidth={2.2} />
+              <Calendar className="w-6 h-6 text-terra" strokeWidth={2.2} />
             </div>
             <h3
-              className="font-black text-[#1a1614] text-xl mb-2"
+              className="font-black text-ink text-xl mb-2"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               {benefits[0].title}
             </h3>
-            <p className="text-base text-[#4a3f3a] leading-relaxed max-w-md">{benefits[0].body}</p>
+            <p className="text-base text-ink-mid leading-relaxed max-w-md">{benefits[0].body}</p>
           </div>
 
           {/* Compact tiles — the rest of the benefits */}
           {benefits.slice(1).map((b, i) => (
             <div
               key={i}
-              className="bg-white border border-[#f0e4cc] rounded-2xl p-5 hover:border-[#ddc9a3] hover:shadow-md transition-all"
+              className="bg-white border border-sand-light rounded-2xl p-5 hover:border-sand-mid hover:shadow-md transition-all"
             >
-              <div className="w-9 h-9 rounded-xl bg-[#fbf7f1] flex items-center justify-center mb-2.5">
-                <b.icon className="w-4 h-4 text-[#9a442d]" strokeWidth={2.2} />
+              <div className="w-9 h-9 rounded-xl bg-cream flex items-center justify-center mb-2.5">
+                <b.icon className="w-4 h-4 text-terra" strokeWidth={2.2} />
               </div>
               <h3
-                className="font-black text-[#1a1614] text-sm mb-1"
+                className="font-black text-ink text-sm mb-1"
                 style={{ fontFamily: 'var(--font-epilogue)' }}
               >
                 {b.title}
               </h3>
-              <p className="text-xs text-[#4a3f3a] leading-relaxed">{b.body}</p>
+              <p className="text-xs text-ink-mid leading-relaxed">{b.body}</p>
             </div>
           ))}
         </div>
@@ -202,7 +202,7 @@ export default async function WelcomePage() {
       {/* ── Categories preview ── */}
       <section className="max-w-5xl mx-auto px-6 pb-14">
         <h2
-          className="text-2xl font-black text-[#1a1614] tracking-tight mb-4"
+          className="text-2xl font-black text-ink tracking-tight mb-4"
           style={{ fontFamily: 'var(--font-epilogue)' }}
         >
           Pick your night
@@ -212,14 +212,14 @@ export default async function WelcomePage() {
             <Link
               key={c.label}
               href={c.href}
-              className="group flex items-center gap-3 bg-white border border-[#f0e4cc] rounded-xl p-4 hover:border-[#9a442d] hover:bg-[#fbf7f1] transition-all"
+              className="group flex items-center gap-3 bg-white border border-sand-light rounded-xl p-4 hover:border-terra hover:bg-cream transition-all"
             >
-              <div className="w-9 h-9 rounded-lg bg-[#9a442d]/10 group-hover:bg-[#9a442d]/20 flex items-center justify-center transition-colors">
-                <c.icon className="w-5 h-5 text-[#9a442d]" />
+              <div className="w-9 h-9 rounded-lg bg-terra/10 group-hover:bg-terra/20 flex items-center justify-center transition-colors">
+                <c.icon className="w-5 h-5 text-terra" />
               </div>
               <div>
-                <p className="text-sm font-bold text-[#1a1614]">{c.label}</p>
-                <p className="text-[11px] text-[#6b5d57]">{c.count} events</p>
+                <p className="text-sm font-bold text-ink">{c.label}</p>
+                <p className="text-[11px] text-ink-light">{c.count} events</p>
               </div>
             </Link>
           ))}
@@ -227,7 +227,7 @@ export default async function WelcomePage() {
       </section>
 
       {/* ── Trust strip ── */}
-      <section className="bg-white border-y border-[#f0e4cc] py-10">
+      <section className="bg-white border-y border-sand-light py-10">
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
             <Stat label="Upcoming events"    value={total.toLocaleString()} />
@@ -243,55 +243,55 @@ export default async function WelcomePage() {
         {/* Round-4 #6: removed the 5-star widget. Five stars not tied to any
             review system reads as fake social proof. The trust signal is
             already carried by the body copy + the actual product. */}
-        <p className="text-[10px] uppercase tracking-[0.22em] text-[#9a442d] font-semibold mb-3">
+        <p className="text-[10px] uppercase tracking-[0.22em] text-terra font-semibold mb-3">
           Built in Albuquerque, used by Burqueños
         </p>
         <h2
-          className="text-3xl sm:text-4xl font-black text-[#1a1614] tracking-tight mb-3"
+          className="text-3xl sm:text-4xl font-black text-ink tracking-tight mb-3"
           style={{ fontFamily: 'var(--font-epilogue)' }}
         >
           Make ABQ feel smaller.
         </h2>
-        <p className="text-lg text-[#4a3f3a] mb-6 max-w-xl mx-auto leading-relaxed">
+        <p className="text-lg text-ink-mid mb-6 max-w-xl mx-auto leading-relaxed">
           Save your favorite events, get smart reminders, and see what your friends are going to.
           All free, no ads in your inbox.
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
           <Link
             href="/login?tab=signup"
-            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#9a442d] text-white font-bold shadow-md hover:bg-[#7d3725] hover:shadow-lg transition-all"
+            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-terra text-white font-bold shadow-md hover:bg-terra-hover hover:shadow-lg transition-all"
           >
             Create free account
             <ArrowRight className="w-4 h-4" />
           </Link>
           <Link
             href="/events"
-            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full border-2 border-[#9a442d] text-[#9a442d] font-bold hover:bg-[#9a442d] hover:text-white transition-all"
+            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full border-2 border-terra text-terra font-bold hover:bg-terra hover:text-white transition-all"
           >
             Just let me browse
           </Link>
         </div>
-        <p className="text-xs text-[#6b5d57] mt-5">
-          Already have an account? <Link href="/login" className="text-[#9a442d] font-semibold underline-offset-2 hover:underline">Sign in →</Link>
+        <p className="text-xs text-ink-light mt-5">
+          Already have an account? <Link href="/login" className="text-terra font-semibold underline-offset-2 hover:underline">Sign in →</Link>
         </p>
       </section>
 
       {/* ── About strip ── */}
-      <section className="bg-[#fbf7f1] py-10 border-t border-[#f0e4cc]">
+      <section className="bg-cream py-10 border-t border-sand-light">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <p className="text-[11px] uppercase tracking-[0.2em] text-[#9a442d] font-bold mb-3">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-terra font-bold mb-3">
             About
           </p>
-          <p className="text-base text-[#1a1614] leading-relaxed">
+          <p className="text-base text-ink leading-relaxed">
             ABQ Unplugged was built by a Burqueño tired of missing shows because the calendars
             were scattered. We aggregate from{' '}
-            <Link href="/about" className="text-[#9a442d] underline underline-offset-2 hover:no-underline">
+            <Link href="/about" className="text-terra underline underline-offset-2 hover:no-underline">
               every reliable source
             </Link>{' '}
             so you never have to.
             <br className="hidden sm:block" />
             Spotted a bug or a missing event?{' '}
-            <Link href="/feedback" className="text-[#9a442d] underline underline-offset-2 hover:no-underline">
+            <Link href="/feedback" className="text-terra underline underline-offset-2 hover:no-underline">
               Let us know →
             </Link>
           </p>
@@ -305,12 +305,12 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p
-        className="text-3xl font-black text-[#9a442d]"
+        className="text-3xl font-black text-terra"
         style={{ fontFamily: 'var(--font-epilogue)' }}
       >
         {value}
       </p>
-      <p className="text-[11px] uppercase tracking-[0.18em] text-[#6b5d57] font-semibold mt-1">
+      <p className="text-[11px] uppercase tracking-[0.18em] text-ink-light font-semibold mt-1">
         {label}
       </p>
     </div>

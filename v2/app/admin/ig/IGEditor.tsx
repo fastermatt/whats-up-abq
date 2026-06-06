@@ -117,7 +117,7 @@ export function IGEditor({ event, image, returnTo, rowKey }: Props) {
 
       {/* Return-to-week sticky banner — only when launched from a week row */}
       {isReturnMode && (
-        <div className="sticky top-0 z-30 bg-[#9a442d] border-b border-[#7d3725] -mx-3 sm:-mx-6 px-3 sm:px-6 py-2 flex items-center gap-3 flex-wrap">
+        <div className="sticky top-0 z-30 bg-terra border-b border-terra-hover -mx-3 sm:-mx-6 px-3 sm:px-6 py-2 flex items-center gap-3 flex-wrap">
           <button
             onClick={() => router.push('/admin/ig/week')}
             className="flex items-center gap-1.5 text-xs text-white/85 hover:text-white font-semibold"
@@ -132,7 +132,7 @@ export function IGEditor({ event, image, returnTo, rowKey }: Props) {
           <button
             onClick={saveAndReturn}
             disabled={savingReturn || !hasLayers}
-            className="px-4 py-1.5 rounded-lg bg-white text-[#9a442d] text-xs font-bold hover:bg-white/90 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-1.5 rounded-lg bg-white text-terra text-xs font-bold hover:bg-white/90 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {savingReturn ? 'Saving…' : 'Apply to week row →'}
           </button>

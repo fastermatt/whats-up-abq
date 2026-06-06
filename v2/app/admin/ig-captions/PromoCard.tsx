@@ -116,15 +116,15 @@ export function PromoCard({ variant, label, count, tonightCount, tonightEvents }
     <div className="flex flex-col gap-2">
       {/* Toolbar */}
       <div className="flex items-center justify-between">
-        <p className="text-[10px] uppercase tracking-[0.16em] text-[#9a442d] font-bold">{label}</p>
+        <p className="text-[10px] uppercase tracking-[0.16em] text-terra font-bold">{label}</p>
         <button
           onClick={handleDownload}
           disabled={busy}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
-            bg-white/[0.06] text-white/50 hover:bg-[#9a442d] hover:text-white
+            bg-white/[0.06] text-white/50 hover:bg-terra hover:text-white
             transition-all active:scale-95 disabled:opacity-40
-            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9a442d]
-            focus-visible:ring-offset-2 focus-visible:ring-offset-[#201c1a]"
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terra
+            focus-visible:ring-offset-2 focus-visible:ring-offset-ink-deep"
         >
           {busy
             ? <Loader2 size={12} className="animate-spin" />

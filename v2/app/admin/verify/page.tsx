@@ -84,13 +84,13 @@ export default function AdminVerifyPage() {
   }, [router])
 
   return (
-    <main id="main" className="min-h-dvh bg-[#1a1614] flex items-center justify-center px-4">
+    <main id="main" className="min-h-dvh bg-ink flex items-center justify-center px-4">
       <div className="w-full max-w-sm text-center">
         {status === 'verifying' && (
           <>
-            <Loader2 className="w-10 h-10 text-[#9a442d] mx-auto mb-4 animate-spin" />
+            <Loader2 className="w-10 h-10 text-terra mx-auto mb-4 animate-spin" />
             <p className="text-white font-semibold">Verifying your login link…</p>
-            <p className="text-[#6b5d57] text-sm mt-1">This only takes a moment.</p>
+            <p className="text-ink-light text-sm mt-1">This only takes a moment.</p>
           </>
         )}
         {status === 'success' && (
@@ -99,7 +99,7 @@ export default function AdminVerifyPage() {
             <p className="text-white font-semibold text-lg" style={{ fontFamily: 'var(--font-epilogue)' }}>
               Verified!
             </p>
-            <p className="text-[#6b5d57] text-sm mt-1">Taking you to the admin panel…</p>
+            <p className="text-ink-light text-sm mt-1">Taking you to the admin panel…</p>
             <p className="text-[#4a4040] text-[11px] mt-4">
               This device is now trusted for 90 days.
             </p>
@@ -111,10 +111,10 @@ export default function AdminVerifyPage() {
             <p className="text-white font-semibold text-lg" style={{ fontFamily: 'var(--font-epilogue)' }}>
               Verification failed
             </p>
-            <p className="text-[#6b5d57] text-sm mt-1 leading-relaxed">{errorMsg}</p>
+            <p className="text-ink-light text-sm mt-1 leading-relaxed">{errorMsg}</p>
             <a
               href="/admin/login"
-              className="inline-block mt-6 px-4 py-2 rounded-lg bg-[#9a442d]/20 text-[#9a442d] text-sm hover:bg-[#9a442d]/30 transition-colors"
+              className="inline-block mt-6 px-4 py-2 rounded-lg bg-terra/20 text-terra text-sm hover:bg-terra/30 transition-colors"
             >
               ← Back to login
             </a>

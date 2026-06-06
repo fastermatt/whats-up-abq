@@ -41,9 +41,9 @@ const PRESETS: { id: Preset; label: string }[] = [
 ]
 
 const CAT_COLORS: Record<string, string> = {
-  'Music':         'bg-[#9a442d]/20 text-[#c97a5a]',
-  'Comedy':        'bg-[#4f6249]/20 text-[#7a9a74]',
-  'Arts & Theater':'bg-[#006a62]/20 text-[#4aa89e]',
+  'Music':         'bg-terra/20 text-[#c97a5a]',
+  'Comedy':        'bg-sage/20 text-[#7a9a74]',
+  'Arts & Theater':'bg-turq/20 text-[#4aa89e]',
   'Food & Drink':  'bg-[#7d6030]/20 text-[#b89050]',
   'Sports':        'bg-[#3a3a6a]/20 text-[#7070b0]',
   'Family':        'bg-[#6a4a20]/20 text-[#b08050]',
@@ -394,7 +394,7 @@ export default function DigestPage() {
                     className={[
                       'px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all',
                       preset === p.id
-                        ? 'bg-[#9a442d]/15 border-[#9a442d]/50 text-[#e8a898]'
+                        ? 'bg-terra/15 border-terra/50 text-terra-light'
                         : 'bg-white/[0.04] border-white/10 text-white/45 hover:border-white/25 hover:text-white/70',
                     ].join(' ')}
                   >
@@ -411,7 +411,7 @@ export default function DigestPage() {
                     type="date"
                     value={startDate}
                     onChange={e => handleStartChange(e.target.value)}
-                    className="w-full bg-white/[0.04] border border-white/10 rounded-lg px-2.5 py-2 text-xs text-white/70 focus:outline-none focus:border-[#9a442d]/50 transition-colors"
+                    className="w-full bg-white/[0.04] border border-white/10 rounded-lg px-2.5 py-2 text-xs text-white/70 focus-visible:outline-none focus:border-terra/50 transition-colors"
                   />
                 </div>
                 <div>
@@ -421,7 +421,7 @@ export default function DigestPage() {
                     value={endDate}
                     min={startDate}
                     onChange={e => handleEndChange(e.target.value)}
-                    className="w-full bg-white/[0.04] border border-white/10 rounded-lg px-2.5 py-2 text-xs text-white/70 focus:outline-none focus:border-[#9a442d]/50 transition-colors"
+                    className="w-full bg-white/[0.04] border border-white/10 rounded-lg px-2.5 py-2 text-xs text-white/70 focus-visible:outline-none focus:border-terra/50 transition-colors"
                   />
                 </div>
               </div>
@@ -441,11 +441,11 @@ export default function DigestPage() {
                     className={[
                       'p-2.5 rounded-xl border text-left transition-all',
                       templateId === t.id
-                        ? 'bg-[#9a442d]/15 border-[#9a442d]/50'
+                        ? 'bg-terra/15 border-terra/50'
                         : 'bg-white/[0.03] border-white/10 hover:border-white/25',
                     ].join(' ')}
                   >
-                    <p className={`text-[11px] font-bold leading-tight ${templateId === t.id ? 'text-[#e8a898]' : 'text-white/65'}`}>
+                    <p className={`text-[11px] font-bold leading-tight ${templateId === t.id ? 'text-terra-light' : 'text-white/65'}`}>
                       {t.name}
                     </p>
                   </button>
@@ -457,7 +457,7 @@ export default function DigestPage() {
             <section>
               <div className="flex items-center justify-between mb-2">
                 <p className="text-[11px] uppercase tracking-[0.14em] text-white/35 font-semibold">
-                  Selected <span className="text-[#9a442d]">{selected.length}</span>/5
+                  Selected <span className="text-terra">{selected.length}</span>/5
                 </p>
                 {selected.length > 0 && (
                   <button
@@ -476,8 +476,8 @@ export default function DigestPage() {
               ) : (
                 <div className="space-y-1">
                   {activeEvents.map((e, i) => (
-                    <div key={e.id} className="flex items-center gap-2 p-2 rounded-lg bg-[#9a442d]/10 border border-[#9a442d]/25">
-                      <span className="flex-shrink-0 text-[10px] font-bold text-[#9a442d] w-4 text-center">{i + 1}</span>
+                    <div key={e.id} className="flex items-center gap-2 p-2 rounded-lg bg-terra/10 border border-terra/25">
+                      <span className="flex-shrink-0 text-[10px] font-bold text-terra w-4 text-center">{i + 1}</span>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs text-white/85 font-medium truncate leading-tight">{e.title || e.venue || 'Event TBA'}</p>
                         <p className="text-[10px] text-white/35 leading-tight mt-0.5">{fmtDate(e.date)}</p>
@@ -571,7 +571,7 @@ export default function DigestPage() {
                         className={[
                           'w-full flex items-start gap-2.5 p-2.5 rounded-xl border text-left transition-all',
                           isSelected
-                            ? 'bg-[#9a442d]/12 border-[#9a442d]/35'
+                            ? 'bg-terra/12 border-terra/35'
                             : atMax
                               ? 'bg-white/[0.02] border-white/[0.06] opacity-40 cursor-not-allowed'
                               : 'bg-white/[0.04] border-white/[0.07] hover:bg-white/[0.07] hover:border-white/20 cursor-pointer',
@@ -581,7 +581,7 @@ export default function DigestPage() {
                         <div className={[
                           'flex-shrink-0 w-5 h-5 rounded-md border flex items-center justify-center mt-0.5',
                           isSelected
-                            ? 'bg-[#9a442d] border-[#9a442d]'
+                            ? 'bg-terra border-terra'
                             : 'border-white/20 bg-transparent',
                         ].join(' ')}>
                           {isSelected
@@ -622,7 +622,7 @@ export default function DigestPage() {
                         </div>
 
                         {isSelected && (
-                          <Check className="flex-shrink-0 w-3.5 h-3.5 text-[#9a442d] mt-1" />
+                          <Check className="flex-shrink-0 w-3.5 h-3.5 text-terra mt-1" />
                         )}
                       </button>
                     )
@@ -640,7 +640,7 @@ export default function DigestPage() {
                   type="datetime-local"
                   value={scheduledAt}
                   onChange={e => setScheduledAt(e.target.value)}
-                  className="flex-1 bg-transparent text-sm text-white/75 focus:outline-none"
+                  className="flex-1 bg-transparent text-sm text-white/75 focus-visible:outline-none"
                 />
               </div>
               <p className="text-[10px] text-white/20 mt-1 pl-1">Auto-set from date range — adjust as needed</p>
@@ -659,7 +659,7 @@ export default function DigestPage() {
                   'w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all',
                   actionStatus === 'scheduled' ? 'bg-green-700 text-white'
                   : actionStatus === 'failed'  ? 'bg-red-700 text-white'
-                  : 'bg-[#9a442d] text-white hover:bg-[#7d3725] disabled:opacity-40 disabled:cursor-not-allowed',
+                  : 'bg-terra text-white hover:bg-terra-hover disabled:opacity-40 disabled:cursor-not-allowed',
                 ].join(' ')}
               >
                 {actionStatus === 'rendering' && <><Loader2 className="w-4 h-4 animate-spin" /> Rendering…</>}
@@ -686,7 +686,7 @@ export default function DigestPage() {
           {/* ── Right: canvas preview ──────────────────────────────────── */}
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-[#9a442d]" />
+              <Sparkles className="w-3.5 h-3.5 text-terra" />
               <p className="text-[11px] uppercase tracking-[0.14em] text-white/35 font-semibold">Live Preview</p>
               <span className="text-[10px] text-white/20 ml-1">updates as you pick</span>
             </div>

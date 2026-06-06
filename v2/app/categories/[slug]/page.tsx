@@ -144,9 +144,9 @@ export default async function CategoryPage({ params }: PageProps) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
-      <header className="sticky top-0 z-20 bg-[--bg]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
+      <header className="sticky top-0 z-20 bg-[--bg]/90 backdrop-blur-md border-b border-sand-mid/60">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
-          <Link href="/events" className="flex items-center gap-1.5 text-sm text-[#4a3f3a] hover:text-[#9a442d] transition-colors">
+          <Link href="/events" className="flex items-center gap-1.5 text-sm text-ink-mid hover:text-terra transition-colors">
             <ArrowLeft className="w-4 h-4" />
             <span className="font-medium">Events</span>
           </Link>
@@ -154,31 +154,31 @@ export default async function CategoryPage({ params }: PageProps) {
       </header>
 
       <div className="max-w-3xl mx-auto px-4 py-6">
-        <div className="bg-[#fffdf9] rounded-2xl border border-[#f0e4cc] shadow-sm p-6 mb-6">
-          <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider bg-[#f0e4cc] text-[#9a442d] px-2.5 py-1 rounded-full mb-3">
+        <div className="bg-card rounded-2xl border border-sand-light shadow-sm p-6 mb-6">
+          <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider bg-sand-light text-terra px-2.5 py-1 rounded-full mb-3">
             <Tag className="w-3 h-3" />
             {total.toLocaleString()} live listing{total !== 1 ? 's' : ''}
           </span>
-          <h1 className="text-2xl sm:text-3xl font-black text-[#1a1614] leading-tight mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
+          <h1 className="text-2xl sm:text-3xl font-black text-ink leading-tight mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
             {category} in Albuquerque
           </h1>
-          <p className="text-sm text-[#6b5d57] leading-relaxed mb-3">{description}</p>
-          <div className="flex flex-wrap items-center gap-3 text-sm text-[#6b5d57]">
-            <span className="font-medium text-[#1a1614]">{total.toLocaleString()} upcoming event{total !== 1 ? 's' : ''}</span>
+          <p className="text-sm text-ink-light leading-relaxed mb-3">{description}</p>
+          <div className="flex flex-wrap items-center gap-3 text-sm text-ink-light">
+            <span className="font-medium text-ink">{total.toLocaleString()} upcoming event{total !== 1 ? 's' : ''}</span>
           </div>
         </div>
 
         {Object.keys(subCounts).length > 0 && (
           <div className="flex flex-wrap gap-2 mb-5">
             <Link href={`/events?category=${encodeURIComponent(category)}`}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold bg-[#9a442d] text-white px-3 py-1.5 rounded-full">
+              className="inline-flex items-center gap-1.5 text-xs font-semibold bg-terra text-white px-3 py-1.5 rounded-full">
               All {category}
             </Link>
             {Object.entries(subCounts).sort((a, b) => b[1] - a[1]).map(([sub, cnt]) => (
               <span key={sub}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold bg-[#fffdf9] border border-[#ddc9a3] text-[#4a3f3a] px-3 py-1.5 rounded-full">
+                className="inline-flex items-center gap-1.5 text-xs font-semibold bg-card border border-sand-mid text-ink-mid px-3 py-1.5 rounded-full">
                 {sub}
-                <span className="text-[#9a442d] font-bold">{cnt}</span>
+                <span className="text-terra font-bold">{cnt}</span>
               </span>
             ))}
           </div>
@@ -186,24 +186,24 @@ export default async function CategoryPage({ params }: PageProps) {
 
         {topVenues.length > 0 && (
           <div className="mb-5">
-            <h2 className="text-xs font-bold text-[#6b5d57] uppercase tracking-wider mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
+            <h2 className="text-xs font-bold text-ink-light uppercase tracking-wider mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
               Top Venues
             </h2>
             <div className="flex flex-wrap gap-2">
               {topVenues.map(([venue, cnt]) => (
                 <Link key={venue}
                   href={`/venues/${encodeURIComponent(venue.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-'))}`}
-                  className="inline-flex items-center gap-1.5 text-xs bg-[#fffdf9] border border-[#ddc9a3] text-[#4a3f3a] px-2.5 py-1 rounded-full hover:border-[#9a442d] hover:text-[#9a442d] transition-colors">
-                  <MapPin className="w-2.5 h-2.5 text-[#9a442d]" />
+                  className="inline-flex items-center gap-1.5 text-xs bg-card border border-sand-mid text-ink-mid px-2.5 py-1 rounded-full hover:border-terra hover:text-terra transition-colors">
+                  <MapPin className="w-2.5 h-2.5 text-terra" />
                   {venue}
-                  <span className="text-[#6b5d57] font-semibold">{cnt}</span>
+                  <span className="text-ink-light font-semibold">{cnt}</span>
                 </Link>
               ))}
             </div>
           </div>
         )}
 
-        <h2 className="text-sm font-bold text-[#1a1614] uppercase tracking-wider mb-3" style={{ fontFamily: 'var(--font-epilogue)' }}>
+        <h2 className="text-sm font-bold text-ink uppercase tracking-wider mb-3" style={{ fontFamily: 'var(--font-epilogue)' }}>
           Upcoming {category} Events
         </h2>
 
@@ -214,8 +214,8 @@ export default async function CategoryPage({ params }: PageProps) {
               : null
             return (
               <Link key={event.id} href={`/events/${event.id}`}
-                className="group flex gap-3 bg-[#fffdf9] rounded-xl border border-[#f0e4cc] p-3 shadow-sm hover:shadow-md transition-all">
-                <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-[#f0e4cc]">
+                className="group flex gap-3 bg-card rounded-xl border border-sand-light p-3 shadow-sm hover:shadow-md transition-all">
+                <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-sand-light">
                   <EventImage
                     src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
                     fallback={getCategoryFallback(event.category ?? undefined, event.id)}
@@ -226,25 +226,25 @@ export default async function CategoryPage({ params }: PageProps) {
                 <div className="flex-1 min-w-0 flex flex-col justify-between">
                   <div>
                     {event.subcategory && (
-                      <span className="inline-block text-[9px] font-bold uppercase tracking-wider text-[#9a442d] mb-0.5">{event.subcategory}</span>
+                      <span className="inline-block text-[9px] font-bold uppercase tracking-wider text-terra mb-0.5">{event.subcategory}</span>
                     )}
-                    <h3 className="text-sm font-bold text-[#1a1614] leading-tight line-clamp-2 group-hover:text-[#9a442d] transition-colors" style={{ fontFamily: 'var(--font-epilogue)' }}>
+                    <h3 className="text-sm font-bold text-ink leading-tight line-clamp-2 group-hover:text-terra transition-colors" style={{ fontFamily: 'var(--font-epilogue)' }}>
                       {event.title}
                     </h3>
                     {event.venue && (
-                      <p className="text-[10px] text-[#6b5d57] flex items-center gap-0.5 mt-0.5">
+                      <p className="text-[10px] text-ink-light flex items-center gap-0.5 mt-0.5">
                         <MapPin className="w-2.5 h-2.5 flex-shrink-0" />{event.venue}
                       </p>
                     )}
                     {dateStr && (
-                      <p className="text-[10px] text-[#9a442d] font-medium flex items-center gap-1 mt-0.5">
+                      <p className="text-[10px] text-terra font-medium flex items-center gap-1 mt-0.5">
                         <Calendar className="w-2.5 h-2.5" />{dateStr}{event.time && ` · ${event.time}`}
                       </p>
                     )}
                   </div>
                   <div className="flex items-center gap-3 mt-1">
-                    {event.price && <span className="text-[10px] font-semibold text-[#4f6249]">{event.price}</span>}
-                    {event.ticketUrl && <span className="flex items-center gap-0.5 text-[10px] text-[#006a62]">Tickets <ExternalLink className="w-2.5 h-2.5" /></span>}
+                    {event.price && <span className="text-[10px] font-semibold text-sage">{event.price}</span>}
+                    {event.ticketUrl && <span className="flex items-center gap-0.5 text-[10px] text-turq">Tickets <ExternalLink className="w-2.5 h-2.5" /></span>}
                   </div>
                 </div>
               </Link>
@@ -252,22 +252,22 @@ export default async function CategoryPage({ params }: PageProps) {
           })}
         </div>
 
-        <div className="mt-8 pt-6 border-t border-[#f0e4cc]">
-          <p className="text-xs text-[#6b5d57] leading-relaxed">
+        <div className="mt-8 pt-6 border-t border-sand-light">
+          <p className="text-xs text-ink-light leading-relaxed">
             Find upcoming {category.toLowerCase()} events in Albuquerque, NM.
             ABQ Unplugged aggregates events from Ticketmaster, Eventbrite, SeatGeek, and local sources.
           </p>
           <div className="flex flex-wrap gap-3 mt-3">
-            <Link href="/events" className="text-xs font-semibold text-[#9a442d] hover:underline">Browse all events →</Link>
+            <Link href="/events" className="text-xs font-semibold text-terra hover:underline">Browse all events →</Link>
             {Object.entries(CATEGORY_MAP).filter(([s]) => s !== slug).slice(0, 4).map(([s, c]) => (
-              <Link key={s} href={`/categories/${s}`} className="text-xs text-[#6b5d57] hover:text-[#9a442d] transition-colors">{c}</Link>
+              <Link key={s} href={`/categories/${s}`} className="text-xs text-ink-light hover:text-terra transition-colors">{c}</Link>
             ))}
           </div>
         </div>
 
         {topNeighborhoods.length > 0 && (
-          <div className="mt-6 pt-5 border-t border-[#f0e4cc]">
-            <h2 className="text-xs font-bold text-[#6b5d57] uppercase tracking-wider mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
+          <div className="mt-6 pt-5 border-t border-sand-light">
+            <h2 className="text-xs font-bold text-ink-light uppercase tracking-wider mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
               {category} Events by Neighborhood
             </h2>
             <div className="flex flex-wrap gap-2">
@@ -275,9 +275,9 @@ export default async function CategoryPage({ params }: PageProps) {
                 <Link
                   key={nSlug}
                   href={`/neighborhoods/${nSlug}`}
-                  className="inline-flex items-center gap-1 text-xs bg-[#fffdf9] border border-[#ddc9a3] text-[#4a3f3a] px-2.5 py-1 rounded-full hover:border-[#9a442d] hover:text-[#9a442d] transition-colors"
+                  className="inline-flex items-center gap-1 text-xs bg-card border border-sand-mid text-ink-mid px-2.5 py-1 rounded-full hover:border-terra hover:text-terra transition-colors"
                 >
-                  <MapPin className="w-2.5 h-2.5 text-[#9a442d]" />
+                  <MapPin className="w-2.5 h-2.5 text-terra" />
                   {label}
                 </Link>
               ))}
@@ -286,15 +286,15 @@ export default async function CategoryPage({ params }: PageProps) {
         )}
 
         {faqs.length > 0 && (
-          <div className="mt-8 pt-6 border-t border-[#f0e4cc]">
-            <h2 className="text-sm font-bold text-[#1a1614] uppercase tracking-wider mb-4" style={{ fontFamily: 'var(--font-epilogue)' }}>
+          <div className="mt-8 pt-6 border-t border-sand-light">
+            <h2 className="text-sm font-bold text-ink uppercase tracking-wider mb-4" style={{ fontFamily: 'var(--font-epilogue)' }}>
               Frequently Asked Questions
             </h2>
             <div className="space-y-4">
               {faqs.map(({ q, a }, i) => (
-                <div key={i} className="bg-[#fffdf9] rounded-xl border border-[#f0e4cc] p-4">
-                  <h3 className="text-sm font-bold text-[#1a1614] mb-1.5" style={{ fontFamily: 'var(--font-epilogue)' }}>{q}</h3>
-                  <p className="text-xs text-[#6b5d57] leading-relaxed">{a}</p>
+                <div key={i} className="bg-card rounded-xl border border-sand-light p-4">
+                  <h3 className="text-sm font-bold text-ink mb-1.5" style={{ fontFamily: 'var(--font-epilogue)' }}>{q}</h3>
+                  <p className="text-xs text-ink-light leading-relaxed">{a}</p>
                 </div>
               ))}
             </div>

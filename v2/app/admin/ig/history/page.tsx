@@ -148,7 +148,7 @@ export default function HistoryPage() {
           <div className="text-center py-16 text-white/55">
             <ImageIcon size={32} className="mx-auto mb-3 opacity-30" />
             <p className="text-sm">No posts yet.</p>
-            <Link href="/admin/ig" className="text-[#9a442d] hover:underline text-sm mt-1 inline-block">Open the editor →</Link>
+            <Link href="/admin/ig" className="text-terra hover:underline text-sm mt-1 inline-block">Open the editor →</Link>
           </div>
         )}
       </div>

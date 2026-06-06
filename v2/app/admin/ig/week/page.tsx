@@ -667,7 +667,7 @@ export default function WeekSchedulerPage() {
               value={start}
               min={todayStr}
               onChange={e => e.target.value && setStart(e.target.value)}
-              className="flex-1 bg-black/40 border border-white/10 rounded-lg px-2.5 min-h-[40px] text-sm text-white/90 focus:outline-none focus:border-[#9a442d] [color-scheme:dark]"
+              className="flex-1 bg-black/40 border border-white/10 rounded-lg px-2.5 min-h-[40px] text-sm text-white/90 focus-visible:outline-none focus:border-terra [color-scheme:dark]"
             />
           </label>
 
@@ -697,7 +697,7 @@ export default function WeekSchedulerPage() {
                   onClick={() => setPerDay(n)}
                   className={`min-h-[40px] min-w-[40px] px-3 rounded-lg text-sm font-bold transition-colors ${
                     perDay === n
-                      ? 'bg-[#9a442d] text-white'
+                      ? 'bg-terra text-white'
                       : 'bg-white/[0.05] text-white/60 hover:bg-white/[0.1] hover:text-white'
                   }`}
                   aria-pressed={perDay === n}
@@ -711,10 +711,10 @@ export default function WeekSchedulerPage() {
         </div>
 
         {/* Schedule-all action with confirm gate */}
-        <div className="bg-[#9a442d]/10 border border-[#9a442d]/30 rounded-xl px-4 py-3 mb-6 space-y-2">
+        <div className="bg-terra/10 border border-terra/30 rounded-xl px-4 py-3 mb-6 space-y-2">
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div>
-              <p className="text-sm font-bold text-[#e8a898]">
+              <p className="text-sm font-bold text-terra-light">
                 {stats.scheduled === 0
                   ? `Ready to schedule ${remainingToSchedule} post${remainingToSchedule === 1 ? '' : 's'}`
                   : `${stats.scheduled} of ${stats.total} scheduled`}
@@ -771,7 +771,7 @@ export default function WeekSchedulerPage() {
                 <button
                   onClick={() => setConfirmingBatch(true)}
                   disabled={remainingToSchedule === 0}
-                  className="flex items-center gap-2 min-h-[40px] px-4 bg-[#9a442d] hover:bg-[#b5502f] disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-sm font-bold transition-colors"
+                  className="flex items-center gap-2 min-h-[40px] px-4 bg-terra hover:bg-terra-hover disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-sm font-bold transition-colors"
                 >
                   <Send size={14} />
                   Schedule entire week
@@ -810,7 +810,7 @@ export default function WeekSchedulerPage() {
                       onChange={checked => selectDay(day.date, checked)}
                       disabled={batchRunning}
                       aria-label={`Select all events on ${fmtDayHeader(day.date)}`}
-                      className="w-3.5 h-3.5 accent-[#9a442d] cursor-pointer disabled:opacity-40 shrink-0"
+                      className="w-3.5 h-3.5 accent-terra cursor-pointer disabled:opacity-40 shrink-0"
                     />
                   )
                 })()}
@@ -925,7 +925,7 @@ function DayRow({
     <div className={`bg-[#111] border rounded-xl p-3 mb-2 transition-colors ${
       isScheduled ? 'border-green-500/30 bg-green-500/[0.04]'
         : isFailed ? 'border-red-500/40'
-        : row.selected ? 'border-[#9a442d]/40 bg-[#9a442d]/[0.05]'
+        : row.selected ? 'border-terra/40 bg-terra/[0.05]'
         : 'border-white/[0.07]'
     }`}>
       <div className="flex gap-3 items-start">
@@ -937,7 +937,7 @@ function DayRow({
             onChange={e => onSelect(e.target.checked)}
             disabled={disabled}
             aria-label={`Select ${evt.title}`}
-            className="mt-1 w-4 h-4 accent-[#9a442d] cursor-pointer disabled:opacity-40 shrink-0"
+            className="mt-1 w-4 h-4 accent-terra cursor-pointer disabled:opacity-40 shrink-0"
           />
         )}
 
@@ -980,7 +980,7 @@ function DayRow({
               {scoreStr}
             </div>
             {evt.featured && (
-              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded border border-[#9a442d]/40 bg-[#9a442d]/10 text-[#e8a898] uppercase tracking-wider">
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded border border-terra/40 bg-terra/10 text-terra-light uppercase tracking-wider">
                 ⭐ Featured
               </span>
             )}
@@ -1004,7 +1004,7 @@ function DayRow({
             onChange={e => onUpdate({ time: e.target.value })}
             disabled={isBusy || disabled || isScheduled}
             aria-label="Scheduled time"
-            className="bg-black/40 border border-white/10 rounded-lg px-2.5 min-h-[40px] text-sm text-white/90 focus:outline-none focus:border-[#9a442d] [color-scheme:dark] disabled:opacity-50 w-[112px]"
+            className="bg-black/40 border border-white/10 rounded-lg px-2.5 min-h-[40px] text-sm text-white/90 focus-visible:outline-none focus:border-terra [color-scheme:dark] disabled:opacity-50 w-[112px]"
           />
           <span className="text-[10px] text-white/45 whitespace-nowrap">
             {fmtScheduledFor(row.date, row.time)}
@@ -1037,7 +1037,7 @@ function DayRow({
           onChange={e => onUpdate({ caption: e.target.value, captionEdited: true })}
           rows={6}
           disabled={isBusy || disabled || isScheduled}
-          className="mt-2 w-full bg-black/30 border border-white/[0.1] rounded-lg px-3 py-2 text-white/85 text-[11px] leading-relaxed font-mono resize-y focus:outline-none focus:border-[#9a442d]/60 disabled:opacity-50"
+          className="mt-2 w-full bg-black/30 border border-white/[0.1] rounded-lg px-3 py-2 text-white/85 text-[11px] leading-relaxed font-mono resize-y focus-visible:outline-none focus:border-terra/60 disabled:opacity-50"
         />
       )}
 
@@ -1093,7 +1093,7 @@ function DayRow({
             className={`min-h-[40px] px-4 rounded-lg text-xs font-bold text-white transition-colors flex items-center gap-1.5 ${
               isFailed
                 ? 'bg-red-500 hover:bg-red-400 disabled:opacity-40'
-                : 'bg-[#9a442d] hover:bg-[#b5502f] disabled:opacity-40'
+                : 'bg-terra hover:bg-terra-hover disabled:opacity-40'
             }`}
           >
             {isBusy ? <Loader2 size={12} className="animate-spin" /> : isFailed ? <RefreshCw size={12} /> : <Sparkles size={12} />}
@@ -1170,11 +1170,11 @@ function BatchSelectionFooter({
       style={{ transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
     >
       <div className="max-w-4xl mx-auto px-4 pb-4">
-        <div className="bg-[#1c1513] border border-[#9a442d]/45 rounded-2xl px-5 py-3.5 flex items-center gap-4 shadow-[0_-4px_32px_rgba(0,0,0,0.6)]">
+        <div className="bg-[#1c1513] border border-terra/45 rounded-2xl px-5 py-3.5 flex items-center gap-4 shadow-[0_-4px_32px_rgba(0,0,0,0.6)]">
           {batchRunning && batchProgress ? (
             /* Running state — progress bar */
             <>
-              <Loader2 size={16} className="animate-spin text-[#9a442d] shrink-0" />
+              <Loader2 size={16} className="animate-spin text-terra shrink-0" />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-sm font-semibold text-white/90">Scheduling posts…</span>
@@ -1184,7 +1184,7 @@ function BatchSelectionFooter({
                 </div>
                 <div className="h-1 bg-white/10 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#9a442d] rounded-full transition-all duration-300 ease-out"
+                    className="h-full bg-terra rounded-full transition-all duration-300 ease-out"
                     style={{ width: `${progressPct}%` }}
                   />
                 </div>
@@ -1194,7 +1194,7 @@ function BatchSelectionFooter({
             /* Idle state — count + actions */
             <>
               <p className="text-sm shrink-0 text-white/60">
-                <span className="text-[#e8a898] font-bold">{count}</span>
+                <span className="text-terra-light font-bold">{count}</span>
                 {' '}event{count === 1 ? '' : 's'} selected
               </p>
               <button
@@ -1207,7 +1207,7 @@ function BatchSelectionFooter({
               <button
                 onClick={onSchedule}
                 disabled={count === 0}
-                className="flex items-center gap-2 min-h-[40px] px-5 bg-[#9a442d] hover:bg-[#b5502f] disabled:opacity-40 disabled:cursor-not-allowed rounded-xl text-sm font-bold transition-colors"
+                className="flex items-center gap-2 min-h-[40px] px-5 bg-terra hover:bg-terra-hover disabled:opacity-40 disabled:cursor-not-allowed rounded-xl text-sm font-bold transition-colors"
               >
                 <Send size={14} />
                 Schedule {count} post{count === 1 ? '' : 's'} →
@@ -1291,7 +1291,7 @@ function DesignQuickEdit({
         disabled={disabled}
         className={`shrink-0 flex items-center gap-1 px-2 py-1 rounded text-[10px] font-semibold transition-colors ${
           hasOverride
-            ? 'bg-[#9a442d]/20 text-[#e8a898] hover:bg-[#9a442d]/30'
+            ? 'bg-terra/20 text-terra-light hover:bg-terra/30'
             : 'bg-white/[0.05] text-white/55 hover:bg-white/[0.1] hover:text-white'
         }`}
         aria-expanded={open}
@@ -1326,7 +1326,7 @@ function DesignQuickEdit({
                     disabled={disabled}
                     className={`min-h-[36px] px-2.5 rounded-md text-[11px] font-semibold capitalize transition-colors ${
                       isActive
-                        ? 'bg-[#9a442d] text-white'
+                        ? 'bg-terra text-white'
                         : 'bg-white/[0.06] text-white/65 hover:bg-white/[0.12] hover:text-white'
                     }`}
                   >
@@ -1347,7 +1347,7 @@ function DesignQuickEdit({
                 onChange={e => setDraftImageUrl(e.target.value)}
                 placeholder={draftImageUrl.startsWith('data:') ? '(uploaded file)' : 'Paste image URL, or upload →'}
                 disabled={disabled}
-                className="flex-1 min-w-0 bg-black/40 border border-white/[0.1] rounded px-2 py-1.5 text-[11px] text-white/85 placeholder-white/30 focus:outline-none focus:border-[#9a442d]/60 disabled:opacity-50"
+                className="flex-1 min-w-0 bg-black/40 border border-white/[0.1] rounded px-2 py-1.5 text-[11px] text-white/85 placeholder-white/30 focus-visible:outline-none focus:border-terra/60 disabled:opacity-50"
               />
               <input
                 ref={fileInputRef}
@@ -1385,7 +1385,7 @@ function DesignQuickEdit({
             <button
               onClick={applyAndRender}
               disabled={disabled}
-              className="min-h-[36px] px-4 rounded-lg text-[11px] font-bold text-white bg-[#9a442d] hover:bg-[#b5502f] disabled:opacity-40 transition-colors flex items-center gap-1.5"
+              className="min-h-[36px] px-4 rounded-lg text-[11px] font-bold text-white bg-terra hover:bg-terra-hover disabled:opacity-40 transition-colors flex items-center gap-1.5"
             >
               <Check size={11} /> Apply &amp; re-render
             </button>

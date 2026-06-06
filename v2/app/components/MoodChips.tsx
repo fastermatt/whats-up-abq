@@ -37,9 +37,9 @@ function buildHref(query: { category?: string; free?: string; time?: string }): 
 
 export default function MoodChips() {
   return (
-    <section aria-label="Browse by mood" className="py-4 border-b border-[#f0e4cc]/60">
+    <section aria-label="Browse by mood" className="py-4 border-b border-sand-light/60">
       <div className="max-w-6xl mx-auto px-4 mb-2">
-        <p className="text-[10px] uppercase tracking-[0.15em] text-[#6b5d57] font-semibold">
+        <p className="text-[10px] uppercase tracking-[0.15em] text-ink-light font-semibold">
           What&apos;s your vibe?
         </p>
       </div>
@@ -57,9 +57,9 @@ export default function MoodChips() {
               data-umami-event-mood={mood.slug}
               className={[
                 'flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full',
-                'bg-[#9a442d]/10 border border-[#9a442d]/20 text-[#9a442d]',
+                'bg-terra/10 border border-terra/20 text-terra',
                 'text-xs font-semibold whitespace-nowrap',
-                'hover:bg-[#9a442d] hover:text-white hover:border-[#9a442d]',
+                'hover:bg-terra hover:text-white hover:border-terra',
                 'transition-all duration-200',
                 'motion-reduce:transition-none',
               ].join(' ')}

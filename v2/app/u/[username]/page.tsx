@@ -112,14 +112,14 @@ export default async function PublicProfilePage({ params }: PageProps) {
   const totalCheckIns = profile.total_check_ins ?? 0
 
   return (
-    <main id="main" className="min-h-dvh bg-[#fbf7f1]">
+    <main id="main" className="min-h-dvh bg-cream">
       {/* Header */}
-      <header className="sticky top-0 z-20 bg-[#fbf7f1]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
+      <header className="sticky top-0 z-20 bg-cream/90 backdrop-blur-md border-b border-sand-mid/60">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
-          <Link href="/" className="text-[#4a3f3a] hover:text-[#9a442d] transition-colors">
+          <Link href="/" className="text-ink-mid hover:text-terra transition-colors">
             <ArrowLeft className="w-4 h-4" />
           </Link>
-          <h1 className="font-black text-lg text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
+          <h1 className="font-black text-lg text-ink" style={{ fontFamily: 'var(--font-epilogue)' }}>
             Profile
           </h1>
         </div>
@@ -129,11 +129,11 @@ export default async function PublicProfilePage({ params }: PageProps) {
 
         {/* Profile card — flat cream + terra avatar to match /profile
             (round-4 #9). Public profiles read as "person", not "dashboard". */}
-        <div className="bg-white border border-[#f0e4cc] rounded-2xl p-5">
+        <div className="bg-white border border-sand-light rounded-2xl p-5">
           <div className="flex items-start gap-4">
             {/* Avatar — terra-filled, the brand moment */}
             <div
-              className="w-16 h-16 rounded-full bg-[#9a442d] text-white flex items-center justify-center text-2xl font-black flex-shrink-0"
+              className="w-16 h-16 rounded-full bg-terra text-white flex items-center justify-center text-2xl font-black flex-shrink-0"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               {displayName.charAt(0).toUpperCase()}
@@ -141,12 +141,12 @@ export default async function PublicProfilePage({ params }: PageProps) {
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <h1 className="text-xl font-black text-[#1a1614] truncate" style={{ fontFamily: 'var(--font-epilogue)' }}>
+                  <h1 className="text-xl font-black text-ink truncate" style={{ fontFamily: 'var(--font-epilogue)' }}>
                     {displayName}
                   </h1>
-                  <p className="text-[#6b5d57] text-sm">{handle}</p>
+                  <p className="text-ink-light text-sm">{handle}</p>
                   {profile.neighborhood && (
-                    <p className="text-[#6b5d57] text-xs flex items-center gap-1 mt-0.5">
+                    <p className="text-ink-light text-xs flex items-center gap-1 mt-0.5">
                       <MapPin className="w-3 h-3" />
                       {profile.neighborhood}
                     </p>
@@ -160,7 +160,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
                 )}
               </div>
               {profile.bio && (
-                <p className="text-[#4a3f3a] text-xs mt-2 leading-relaxed">{profile.bio}</p>
+                <p className="text-ink-mid text-xs mt-2 leading-relaxed">{profile.bio}</p>
               )}
             </div>
           </div>
@@ -172,9 +172,9 @@ export default async function PublicProfilePage({ params }: PageProps) {
               { n: followerCount ?? 0, label: 'Followers' },
               { n: followingCount ?? 0, label: 'Following' },
             ].map(({ n, label }) => (
-              <div key={label} className="bg-[#fbf7f1] border border-[#f0e4cc] rounded-xl p-2.5 text-center">
-                <p className="text-xl font-black text-[#9a442d]" style={{ fontFamily: 'var(--font-epilogue)' }}>{n}</p>
-                <p className="text-[10px] text-[#6b5d57] uppercase tracking-wide">{label}</p>
+              <div key={label} className="bg-cream border border-sand-light rounded-xl p-2.5 text-center">
+                <p className="text-xl font-black text-terra" style={{ fontFamily: 'var(--font-epilogue)' }}>{n}</p>
+                <p className="text-[10px] text-ink-light uppercase tracking-wide">{label}</p>
               </div>
             ))}
           </div>
@@ -182,14 +182,14 @@ export default async function PublicProfilePage({ params }: PageProps) {
 
         {/* Going to */}
         <section>
-          <h2 className="text-base font-black text-[#1a1614] mb-3" style={{ fontFamily: 'var(--font-epilogue)' }}>
+          <h2 className="text-base font-black text-ink mb-3" style={{ fontFamily: 'var(--font-epilogue)' }}>
             Going to
           </h2>
           {(goingEvents?.length ?? 0) === 0 ? (
-            <div className="text-center py-8 bg-white rounded-2xl border border-[#f0e4cc]">
-              <Calendar className="w-8 h-8 text-[#ddc9a3] mx-auto mb-2" />
-              <p className="text-sm font-semibold text-[#1a1614]">{displayName} hasn&apos;t picked their next move yet.</p>
-              <p className="text-xs text-[#6b5d57] mt-1">Check back soon.</p>
+            <div className="text-center py-8 bg-white rounded-2xl border border-sand-light">
+              <Calendar className="w-8 h-8 text-sand-mid mx-auto mb-2" />
+              <p className="text-sm font-semibold text-ink">{displayName} hasn&apos;t picked their next move yet.</p>
+              <p className="text-xs text-ink-light mt-1">Check back soon.</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -205,24 +205,24 @@ export default async function PublicProfilePage({ params }: PageProps) {
                   <Link
                     key={ev.id}
                     href={`/events/${ev.event_id}`}
-                    className="flex gap-3 bg-white rounded-xl border border-[#f0e4cc] p-3 hover:shadow-md transition-shadow"
+                    className="flex gap-3 bg-white rounded-xl border border-sand-light p-3 hover:shadow-md transition-shadow"
                   >
-                    <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-[#f0e4cc]">
+                    <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-sand-light">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={imageUrl} alt="" className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-bold text-[#1a1614] leading-tight line-clamp-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
+                      <h3 className="text-sm font-bold text-ink leading-tight line-clamp-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
                         {ev.event_name || 'Untitled Event'}
                       </h3>
                       {dateStr && (
-                        <p className="text-[10px] text-[#9a442d] font-medium flex items-center gap-1 mt-0.5">
+                        <p className="text-[10px] text-terra font-medium flex items-center gap-1 mt-0.5">
                           <Calendar className="w-2.5 h-2.5" />
                           {dateStr}
                         </p>
                       )}
                       {ev.venue_name && (
-                        <p className="text-[10px] text-[#6b5d57] flex items-center gap-1">
+                        <p className="text-[10px] text-ink-light flex items-center gap-1">
                           <MapPin className="w-2.5 h-2.5" />
                           {ev.venue_name}
                         </p>
@@ -239,10 +239,10 @@ export default async function PublicProfilePage({ params }: PageProps) {
         {earnedBadges.length > 0 && (
           <section>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-black text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
+              <h2 className="text-base font-black text-ink" style={{ fontFamily: 'var(--font-epilogue)' }}>
                 Badges
               </h2>
-              <span className="text-xs text-[#6b5d57]">{earnedBadges.length}/{BADGE_DEFS.length}</span>
+              <span className="text-xs text-ink-light">{earnedBadges.length}/{BADGE_DEFS.length}</span>
             </div>
             <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
               {BADGE_DEFS.map(badge => {
@@ -253,13 +253,13 @@ export default async function PublicProfilePage({ params }: PageProps) {
                     title={badge.desc}
                     className={`flex flex-col items-center p-2.5 rounded-xl border text-center transition-all ${
                       earned
-                        ? 'bg-white border-[#f0e4cc] shadow-sm'
+                        ? 'bg-white border-sand-light shadow-sm'
                         : 'bg-[#f7f2ec] border-[#e8d9bf] opacity-40'
                     }`}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={badge.icon} alt={badge.label} className="w-8 h-8 mb-1" style={earned ? {} : { filter: 'grayscale(1)' }} />
-                    <span className="text-[9px] font-semibold text-[#4a3f3a] leading-tight">{badge.label}</span>
+                    <span className="text-[9px] font-semibold text-ink-mid leading-tight">{badge.label}</span>
                   </div>
                 )
               })}
@@ -269,13 +269,13 @@ export default async function PublicProfilePage({ params }: PageProps) {
 
         {/* Login prompt to follow */}
         {!user && (
-          <div className="bg-white rounded-2xl border border-[#f0e4cc] p-5 text-center">
-            <Users className="w-8 h-8 text-[#ddc9a3] mx-auto mb-2" />
-            <p className="text-sm font-bold text-[#1a1614] mb-1">Follow {displayName}</p>
-            <p className="text-xs text-[#6b5d57] mb-3">Sign in to follow and see where your friends are going.</p>
+          <div className="bg-white rounded-2xl border border-sand-light p-5 text-center">
+            <Users className="w-8 h-8 text-sand-mid mx-auto mb-2" />
+            <p className="text-sm font-bold text-ink mb-1">Follow {displayName}</p>
+            <p className="text-xs text-ink-light mb-3">Sign in to follow and see where your friends are going.</p>
             <Link
               href="/login"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#9a442d] text-white text-xs font-semibold hover:bg-[#7d3725] transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-terra text-white text-xs font-semibold hover:bg-terra-hover transition-colors"
             >
               Sign in free
             </Link>

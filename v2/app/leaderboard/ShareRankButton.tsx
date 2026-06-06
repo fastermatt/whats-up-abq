@@ -16,7 +16,7 @@ export function ShareRankButton({ rank }: { rank: number }) {
   return (
     <button
       onClick={share}
-      className="text-xs px-3 py-1 bg-[#9a442d]/10 text-[#9a442d] rounded-full hover:bg-[#9a442d]/20 transition-colors font-semibold"
+      className="text-xs px-3 py-1 bg-terra/10 text-terra rounded-full hover:bg-terra/20 transition-colors font-semibold"
     >
       Share rank
     </button>

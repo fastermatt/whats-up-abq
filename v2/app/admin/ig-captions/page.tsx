@@ -376,7 +376,7 @@ export default async function IGCaptionsPage() {
 
         <div className="space-y-8">
           {tonightRoundup && (
-            <div className="bg-[#201c1a] border border-white/[0.07] rounded-2xl p-5 space-y-5">
+            <div className="bg-ink-deep border border-white/[0.07] rounded-2xl p-5 space-y-5">
               <p className="text-xs text-white/55">
                 🌙 Tonight&apos;s picks — image + caption ready to paste into Instagram
               </p>
@@ -400,7 +400,7 @@ export default async function IGCaptionsPage() {
           )}
 
           {weeklyRoundup && (
-            <div className="bg-[#201c1a] border border-white/[0.07] rounded-2xl p-5 space-y-5">
+            <div className="bg-ink-deep border border-white/[0.07] rounded-2xl p-5 space-y-5">
               <p className="text-xs text-white/55">
                 📅 Weekly round-up — image + caption ready to paste into Instagram
               </p>
@@ -449,7 +449,7 @@ export default async function IGCaptionsPage() {
           {promos.map(({ variant, label, description, caption }) => (
             <div
               key={variant}
-              className="bg-[#201c1a] border border-white/[0.07] rounded-2xl p-5 space-y-5"
+              className="bg-ink-deep border border-white/[0.07] rounded-2xl p-5 space-y-5"
             >
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-white/45 bg-white/[0.04] rounded px-2 py-0.5">

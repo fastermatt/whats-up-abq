@@ -72,14 +72,14 @@ export function RoundUpCard({ type, events, count }: Props) {
     <div className="flex flex-col gap-2">
       {/* Toolbar */}
       <div className="flex items-center justify-between">
-        <p className="text-[10px] uppercase tracking-[0.16em] text-[#9a442d] font-bold">
+        <p className="text-[10px] uppercase tracking-[0.16em] text-terra font-bold">
           {isTonight ? "Tonight's Picks" : 'Weekly Round-Up'}
         </p>
         <button
           onClick={handleDownload}
           disabled={busy}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
-            bg-white/[0.06] text-white/50 hover:bg-[#9a442d] hover:text-white
+            bg-white/[0.06] text-white/50 hover:bg-terra hover:text-white
             transition-all active:scale-95 disabled:opacity-40"
         >
           {busy ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}

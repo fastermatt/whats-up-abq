@@ -388,13 +388,13 @@ export default async function DiscoverPage() {
                 name="q"
                 type="text"
                 placeholder="Search events, venues, neighborhoods…"
-                className="flex-1 min-h-[48px] bg-white text-[#1a1614] text-sm px-4 outline-none placeholder:text-[#a8958a]"
+                className="flex-1 min-h-[48px] bg-white text-ink text-sm px-4 outline-none placeholder:text-[#a8958a]"
                 aria-label="Search events"
               />
               <button
                 type="submit"
                 data-umami-event="hero-search-submit"
-                className="bg-[#9a442d] text-white font-bold text-sm px-5 min-h-[48px] hover:bg-[#7d3725] transition-colors flex items-center gap-1.5 whitespace-nowrap"
+                className="bg-terra text-white font-bold text-sm px-5 min-h-[48px] hover:bg-terra-hover transition-colors flex items-center gap-1.5 whitespace-nowrap"
               >
                 <i className="fi fi-rr-search text-[12px]" aria-hidden="true" />
                 Search
@@ -438,7 +438,7 @@ export default async function DiscoverPage() {
               {tiles.map((t) => (
                 <div
                   key={t.key}
-                  className="rounded-xl overflow-hidden shadow-lg ring-1 ring-[#1a1614]/8"
+                  className="rounded-xl overflow-hidden shadow-lg ring-1 ring-ink/8"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -502,14 +502,14 @@ export default async function DiscoverPage() {
       {featured.length > 0 && (
         <AnimateIn animation="fade-up">
           {/* Warm section bg differentiates this from the standard horizontal rows */}
-          <section className="py-6 bg-gradient-to-b from-[#f5ece3] to-[#fbf7f1] border-b border-[#e8d5c0]/70">
+          <section className="py-6 bg-gradient-to-b from-[#f5ece3] to-cream border-b border-[#e8d5c0]/70">
             <div className="max-w-6xl mx-auto px-4 flex items-end justify-between mb-4">
               <div>
-                <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] mb-0.5 font-semibold flex items-center gap-1">
+                <p className="text-[10px] uppercase tracking-[0.15em] text-terra mb-0.5 font-semibold flex items-center gap-1">
                   <span>★</span> Editor&apos;s picks
                 </p>
                 <h2
-                  className="text-xl font-black text-[#1a1614]"
+                  className="text-xl font-black text-ink"
                   style={{ fontFamily: 'var(--font-epilogue)' }}
                 >
                   Not to miss
@@ -518,7 +518,7 @@ export default async function DiscoverPage() {
               <Link
                 href="/events?featured=1"
                 data-umami-event="nav-see-all-featured"
-                className="text-xs font-semibold text-[#9a442d] hover:underline flex-shrink-0 flex items-center gap-1 group"
+                className="text-xs font-semibold text-terra hover:underline flex-shrink-0 flex items-center gap-1 group"
               >
                 See all
                 <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
@@ -539,9 +539,9 @@ export default async function DiscoverPage() {
             {/* "Weekend picks drop Friday" — sets visit-cadence expectation inline.
                 Small enough to not compete with the event cards above, clear enough
                 to make the promise explicit.                                       */}
-            <p className="text-center text-[11px] text-[#6b5d57] mt-4 px-4">
+            <p className="text-center text-[11px] text-ink-light mt-4 px-4">
               Weekend picks refresh every Friday noon ·{' '}
-              <Link href="/events" className="text-[#9a442d] font-semibold hover:underline">
+              <Link href="/events" className="text-terra font-semibold hover:underline">
                 Browse all {allUpcoming.total.toLocaleString()} events
               </Link>
             </p>
@@ -555,7 +555,7 @@ export default async function DiscoverPage() {
       <HomepageStickyHook />
 
       {/* ── Category quick links ── */}
-      <section className="py-4 border-b border-[#f0e4cc]/60 animate-fade-in">
+      <section className="py-4 border-b border-sand-light/60 animate-fade-in">
         <div className="overflow-x-auto scrollbar-hide">
           <div
             className="flex gap-2 px-4 pb-1 scroll-hint-inner"
@@ -579,9 +579,9 @@ export default async function DiscoverPage() {
                 href={href}
                 data-umami-event="category-chip"
                 data-umami-event-category={label}
-                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full bg-white border border-[#ddc9a3] text-xs font-semibold text-[#4a3f3a] hover:border-[#9a442d] hover:text-[#9a442d] transition-all whitespace-nowrap group"
+                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full bg-white border border-sand-mid text-xs font-semibold text-ink-mid hover:border-terra hover:text-terra transition-all whitespace-nowrap group"
               >
-                <i className={`fi ${icon} text-[13px] text-[#9a442d] group-hover:text-[#9a442d]`} aria-hidden="true" />
+                <i className={`fi ${icon} text-[13px] text-terra group-hover:text-terra`} aria-hidden="true" />
                 {label}
               </Link>
             ))}
@@ -603,7 +603,7 @@ export default async function DiscoverPage() {
         <AnimateIn animation="fade-up">
           <section
             id="holiday-rail"
-            className="py-6 bg-gradient-to-b from-[#fbf2ec] to-[#fbf7f1] border-y border-[#9a442d]/15"
+            className="py-6 bg-gradient-to-b from-[#fbf2ec] to-cream border-y border-terra/15"
           >
             <div className="max-w-6xl mx-auto px-4 flex items-end gap-4 mb-4">
               {activeHoliday.holiday.heroImage && (
@@ -619,12 +619,12 @@ export default async function DiscoverPage() {
                 </div>
               )}
               <div className="flex-1">
-                <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] mb-0.5 font-semibold flex items-center gap-1.5">
+                <p className="text-[10px] uppercase tracking-[0.15em] text-terra mb-0.5 font-semibold flex items-center gap-1.5">
                   <span aria-hidden="true">{activeHoliday.holiday.emoji}</span>
                   <span>{activeHoliday.holiday.name}</span>
                 </p>
                 <h2
-                  className="text-xl font-black text-[#1a1614] leading-tight"
+                  className="text-xl font-black text-ink leading-tight"
                   style={{ fontFamily: 'var(--font-epilogue)' }}
                 >
                   {activeHoliday.daysUntil === 0
@@ -634,7 +634,7 @@ export default async function DiscoverPage() {
                     : `${activeHoliday.holiday.name} picks`}
                 </h2>
                 {activeHoliday.holiday.subtitle && (
-                  <p className="text-xs text-[#4a3f3a] mt-1">{activeHoliday.holiday.subtitle}</p>
+                  <p className="text-xs text-ink-mid mt-1">{activeHoliday.holiday.subtitle}</p>
                 )}
               </div>
             </div>
@@ -682,13 +682,13 @@ export default async function DiscoverPage() {
 
       {/* ── Explore ABQ — places + neighborhoods unified ── */}
       <AnimateIn animation="fade-up" delay={130}>
-        <section className="py-10 bg-gradient-to-b from-[#f5ece3] to-[#fbf7f1] border-y border-[#e8d5c0]/70">
+        <section className="py-10 bg-gradient-to-b from-[#f5ece3] to-cream border-y border-[#e8d5c0]/70">
 
           {/* Section header */}
           <div className="max-w-6xl mx-auto px-4 mb-6">
-            <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] mb-0.5 font-semibold">Beyond tonight</p>
+            <p className="text-[10px] uppercase tracking-[0.15em] text-terra mb-0.5 font-semibold">Beyond tonight</p>
             <h2
-              className="text-xl font-black text-[#1a1614]"
+              className="text-xl font-black text-ink"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               Explore Albuquerque
@@ -698,12 +698,12 @@ export default async function DiscoverPage() {
           {/* Places row */}
           <div className="mb-8">
             <div className="max-w-6xl mx-auto px-4 flex items-center justify-between mb-3">
-              <p className="text-xs font-semibold text-[#9a442d]">📍 Places &amp; things to do</p>
+              <p className="text-xs font-semibold text-terra">📍 Places &amp; things to do</p>
               <Link
                 href="/things-to-do"
                 data-umami-event="things-to-do-cta"
                 data-umami-event-position="section-header"
-                className="text-xs font-semibold text-[#9a442d] hover:underline flex-shrink-0 flex items-center gap-1 group"
+                className="text-xs font-semibold text-terra hover:underline flex-shrink-0 flex items-center gap-1 group"
               >
                 See all
                 <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
@@ -721,7 +721,7 @@ export default async function DiscoverPage() {
                   href="/things-to-do"
                   data-umami-event="things-to-do-cta"
                   data-umami-event-position="row-end-card"
-                  className="flex-shrink-0 w-[160px] snap-start flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#9a442d]/30 text-[#9a442d] hover:border-[#9a442d] hover:bg-[#9a442d]/5 transition-all gap-2 aspect-[4/3]"
+                  className="flex-shrink-0 w-[160px] snap-start flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-terra/30 text-terra hover:border-terra hover:bg-terra/5 transition-all gap-2 aspect-[4/3]"
                 >
                   <ArrowRight className="w-5 h-5" />
                   <span className="text-xs font-semibold">See all places</span>
@@ -734,11 +734,11 @@ export default async function DiscoverPage() {
           {neighborhoodCounts.length > 0 && (
             <div>
               <div className="max-w-6xl mx-auto px-4 flex items-center justify-between mb-3">
-                <p className="text-[10px] uppercase tracking-[0.15em] text-[#6b5d57] font-semibold">By neighborhood</p>
+                <p className="text-[10px] uppercase tracking-[0.15em] text-ink-light font-semibold">By neighborhood</p>
                 <Link
                   href="/neighborhoods"
                   data-umami-event="nav-see-all-neighborhoods"
-                  className="text-xs font-semibold text-[#9a442d] hover:underline flex-shrink-0 flex items-center gap-1 group"
+                  className="text-xs font-semibold text-terra hover:underline flex-shrink-0 flex items-center gap-1 group"
                 >
                   See all
                   <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
@@ -752,19 +752,19 @@ export default async function DiscoverPage() {
                       href={`/neighborhoods/${slug}`}
                       data-umami-event="neighborhood-click"
                       data-umami-event-neighborhood={slug}
-                      className="flex flex-col items-start px-3 py-2.5 rounded-xl bg-white border border-[#ede4d3] hover:border-[#9a442d] hover:shadow-sm transition-all group"
+                      className="flex flex-col items-start px-3 py-2.5 rounded-xl bg-white border border-[#ede4d3] hover:border-terra hover:shadow-sm transition-all group"
                     >
                       <span
-                        className="font-black text-[13px] text-[#1a1614] group-hover:text-[#9a442d] transition-colors leading-tight mb-0.5"
+                        className="font-black text-[13px] text-ink group-hover:text-terra transition-colors leading-tight mb-0.5"
                         style={{ fontFamily: 'var(--font-epilogue)' }}
                       >
                         {neighborhood}
                       </span>
-                      <span className="text-[10px] text-[#6b5d57] leading-snug line-clamp-1">
+                      <span className="text-[10px] text-ink-light leading-snug line-clamp-1">
                         {NEIGHBORHOOD_TAGLINES[slug] ?? 'Events & local spots'}
                       </span>
-                      <span className="mt-1.5 flex items-center gap-1 text-[11px] font-bold text-[#9a442d]">
-                        <span className="w-[4px] h-[4px] rounded-full bg-[#9a442d] flex-shrink-0" />
+                      <span className="mt-1.5 flex items-center gap-1 text-[11px] font-bold text-terra">
+                        <span className="w-[4px] h-[4px] rounded-full bg-terra flex-shrink-0" />
                         {count} event{count !== 1 ? 's' : ''}
                       </span>
                     </Link>
@@ -840,23 +840,23 @@ export default async function DiscoverPage() {
 
       {/* ── FAQ section — targets AI search / voice queries ── */}
       <AnimateIn animation="fade-up" delay={190}>
-        <section className="py-5 border-t border-[#f0e4cc]/60">
+        <section className="py-5 border-t border-sand-light/60">
           <div className="max-w-3xl mx-auto px-4">
-            <div className="divide-y divide-[#f0e4cc]">
+            <div className="divide-y divide-sand-light">
               {HOMEPAGE_FAQS.map(({ q, a }, i) => (
                 <details key={i} className="group py-3 first:pt-0 last:pb-0">
                   <summary className="flex items-center justify-between gap-3 cursor-pointer list-none select-none">
                     <h3
-                      className="text-sm font-bold text-[#1a1614] group-open:text-[#9a442d] transition-colors"
+                      className="text-sm font-bold text-ink group-open:text-terra transition-colors"
                       style={{ fontFamily: 'var(--font-epilogue)' }}
                     >
                       {q}
                     </h3>
-                    <span className="flex-shrink-0 text-[#9a442d]/60 group-open:rotate-180 transition-transform duration-200 text-[10px]">
+                    <span className="flex-shrink-0 text-terra/60 group-open:rotate-180 transition-transform duration-200 text-[10px]">
                       ▾
                     </span>
                   </summary>
-                  <p className="text-xs text-[#6b5d57] leading-relaxed mt-2 pr-6">{a}</p>
+                  <p className="text-xs text-ink-light leading-relaxed mt-2 pr-6">{a}</p>
                 </details>
               ))}
             </div>
@@ -871,16 +871,16 @@ export default async function DiscoverPage() {
           style={{ background: '#eedcd0', borderTop: '1px solid rgba(200,170,140,.35)' }}
         >
           <div className="max-w-xl mx-auto px-4 text-center">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-[#9a442d] mb-3 font-semibold">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-terra mb-3 font-semibold">
               ABQ Unplugged community
             </p>
             <h2
-              className="font-black text-2xl sm:text-3xl text-[#1a1614] mb-3 leading-tight"
+              className="font-black text-2xl sm:text-3xl text-ink mb-3 leading-tight"
               style={{ fontFamily: 'var(--font-epilogue)', letterSpacing: '-0.4px' }}
             >
               Albuquerque showing<br />up for itself
             </h2>
-            <p className="text-sm text-[#4a3f3a] mb-6 leading-relaxed">
+            <p className="text-sm text-ink-mid mb-6 leading-relaxed">
               Track events, save favorites, and find what ABQ locals are actually doing. Free.
             </p>
             {/* Instagram follow pill — visually quieter than the primary CTAs
@@ -893,11 +893,11 @@ export default async function DiscoverPage() {
               rel="noopener noreferrer"
               data-umami-event="instagram-follow"
               data-umami-event-position="community-section"
-              className="group inline-flex items-center gap-2 mb-5 px-5 py-3 min-h-[44px] rounded-full bg-white/60 hover:bg-white text-[#4a3f3a] hover:text-[#9a442d] text-sm font-semibold border border-[#c8aa8c]/60 hover:border-[#9a442d] transition-all"
+              className="group inline-flex items-center gap-2 mb-5 px-5 py-3 min-h-[44px] rounded-full bg-white/60 hover:bg-white text-ink-mid hover:text-terra text-sm font-semibold border border-[#c8aa8c]/60 hover:border-terra transition-all"
             >
               <InstagramIcon className="w-4 h-4" />
-              Follow <span className="text-[#9a442d] group-hover:underline">@abqunplugged</span>
-              <span className="text-[11px] text-[#6b5d57] group-hover:text-[#9a442d]/80 font-normal hidden sm:inline">
+              Follow <span className="text-terra group-hover:underline">@abqunplugged</span>
+              <span className="text-[11px] text-ink-light group-hover:text-terra/80 font-normal hidden sm:inline">
                 · daily picks
               </span>
             </a>
@@ -905,7 +905,7 @@ export default async function DiscoverPage() {
               <Link
                 href="/login"
                 data-umami-event="join-community-cta"
-                className="inline-flex items-center gap-2 bg-[#9a442d] text-white font-bold text-sm px-5 py-2.5 rounded-full hover:bg-[#7d3725] transition-colors"
+                className="inline-flex items-center gap-2 bg-terra text-white font-bold text-sm px-5 py-2.5 rounded-full hover:bg-terra-hover transition-colors"
               >
                 Join the community
                 <ArrowRight className="w-4 h-4" />
@@ -913,7 +913,7 @@ export default async function DiscoverPage() {
               <Link
                 href="/leaderboard"
                 data-umami-event="see-leaderboard-cta"
-                className="inline-flex items-center gap-2 text-[#4a3f3a] font-semibold text-sm px-5 py-2.5 rounded-full border border-[#c8aa8c] hover:border-[#9a442d] hover:text-[#9a442d] transition-all"
+                className="inline-flex items-center gap-2 text-ink-mid font-semibold text-sm px-5 py-2.5 rounded-full border border-[#c8aa8c] hover:border-terra hover:text-terra transition-all"
               >
                 See leaderboard
               </Link>
@@ -922,7 +922,7 @@ export default async function DiscoverPage() {
             <Link
               href="/events"
               data-umami-event="browse-all-events-cta"
-              className="inline-flex items-center gap-1.5 text-xs text-[#6b5d57] hover:text-[#9a442d] transition-colors group"
+              className="inline-flex items-center gap-1.5 text-xs text-ink-light hover:text-terra transition-colors group"
             >
               Browse all {allUpcoming.total.toLocaleString()} events
               <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
@@ -976,7 +976,7 @@ function MovieCard({ movie }: { movie: Movie }) {
         )}
 
         {/* Hover: CTA strip */}
-        <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[#9a442d] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-1.5">
+        <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-terra to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-1.5">
           <span className="text-[9px] font-bold text-white flex items-center gap-0.5">
             <ExternalLink className="w-2.5 h-2.5" />
             Showtimes
@@ -1029,28 +1029,28 @@ function PlaceTeaseCard({ place, index }: { place: Place; index: number }) {
           </div>
         )}
         {/* Category chip */}
-        <div className="absolute top-1.5 left-1.5 text-[10px] font-semibold bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-full text-[#4a3f3a]">
+        <div className="absolute top-1.5 left-1.5 text-[10px] font-semibold bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-full text-ink-mid">
           {catMeta?.emoji} {catMeta?.label}
         </div>
         {place.free && (
-          <div className="absolute top-1.5 right-1.5 text-[10px] font-bold bg-[#9a442d]/90 text-white px-1.5 py-0.5 rounded-full">
+          <div className="absolute top-1.5 right-1.5 text-[10px] font-bold bg-terra/90 text-white px-1.5 py-0.5 rounded-full">
             Free
           </div>
         )}
         {/* Hover: external link hint */}
         <div className="absolute bottom-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <div className="bg-white/95 rounded-full p-1 shadow-sm">
-            <ExternalLink className="w-2.5 h-2.5 text-[#9a442d]" />
+            <ExternalLink className="w-2.5 h-2.5 text-terra" />
           </div>
         </div>
       </div>
       <h3
-        className="font-bold text-[#1a1614] text-xs leading-tight line-clamp-2 mb-0.5 group-hover:text-[#9a442d] transition-colors"
+        className="font-bold text-ink text-xs leading-tight line-clamp-2 mb-0.5 group-hover:text-terra transition-colors"
         style={{ fontFamily: 'var(--font-epilogue)' }}
       >
         {place.name}
       </h3>
-      <p className="text-[10px] text-[#6b5d57] line-clamp-1">{place.tagline}</p>
+      <p className="text-[10px] text-ink-light line-clamp-1">{place.tagline}</p>
     </a>
   )
 }
@@ -1094,7 +1094,7 @@ function EventSection({
             {subtitle}
           </p>
           <h2
-            className="text-xl font-black text-[#1a1614]"
+            className="text-xl font-black text-ink"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             {title}
@@ -1104,7 +1104,7 @@ function EventSection({
           href={seeAllHref}
           data-umami-event="nav-see-all"
           data-umami-event-section={sectionLabel}
-          className="text-xs font-semibold text-[#9a442d] hover:underline flex-shrink-0 flex items-center gap-1 group"
+          className="text-xs font-semibold text-terra hover:underline flex-shrink-0 flex items-center gap-1 group"
         >
           See all
           <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
@@ -1147,7 +1147,7 @@ function HorizontalCard({
       className="group flex-shrink-0 w-[220px] snap-start scroll-reveal-slide"
     >
       {/* Landscape image */}
-      <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] mb-1.5 shadow-sm group-hover:shadow-md transition-shadow duration-300">
+      <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-gradient-to-br from-sand-light to-sand-mid mb-1.5 shadow-sm group-hover:shadow-md transition-shadow duration-300">
         {/* fetchPriority="high" restored on the LCP candidate (2026-05-09).
             Lighthouse caught the LCP element as this card's <img>, NOT the
             hero h2 (which renders fast from text + cached font). Without the
@@ -1166,7 +1166,7 @@ function HorizontalCard({
 
         {/* Time badge */}
         {timeStr && (
-          <div className="absolute top-1.5 left-1.5 bg-white/90 backdrop-blur-sm text-[#1a1614] text-[10px] font-semibold px-2 py-0.5 rounded-full">
+          <div className="absolute top-1.5 left-1.5 bg-white/90 backdrop-blur-sm text-ink text-[10px] font-semibold px-2 py-0.5 rounded-full">
             {sectionLabel} · {timeStr}
           </div>
         )}
@@ -1180,7 +1180,7 @@ function HorizontalCard({
 
         {/* Price */}
         {event.price && (
-          <div className="absolute bottom-1.5 right-1.5 bg-[#006a62]/90 backdrop-blur-sm text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
+          <div className="absolute bottom-1.5 right-1.5 bg-turq/90 backdrop-blur-sm text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
             {event.price}
           </div>
         )}
@@ -1191,13 +1191,13 @@ function HorizontalCard({
 
       {/* Info */}
       <h3
-        className="font-bold text-[#1a1614] text-sm leading-tight line-clamp-2 mb-0.5 group-hover:text-[#9a442d] transition-colors"
+        className="font-bold text-ink text-sm leading-tight line-clamp-2 mb-0.5 group-hover:text-terra transition-colors"
         style={{ fontFamily: 'var(--font-epilogue)' }}
       >
         {event.title}
       </h3>
       {event.venue && (
-        <p className="text-[10px] text-[#6b5d57] line-clamp-1 flex items-center gap-0.5">
+        <p className="text-[10px] text-ink-light line-clamp-1 flex items-center gap-0.5">
           <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
           {event.venue}
         </p>
@@ -1221,7 +1221,7 @@ function FeaturedCard({ event, index = 0 }: { event: NormalizedEvent; index?: nu
       className="group flex-shrink-0 w-[270px] snap-start"
     >
       {/* Landscape 16:10 — matches every other card on the site */}
-      <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] mb-2 shadow-md group-hover:shadow-lg transition-shadow duration-300">
+      <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-gradient-to-br from-sand-light to-sand-mid mb-2 shadow-md group-hover:shadow-lg transition-shadow duration-300">
         {/* fetchPriority="high" restored on the first FeaturedCard (2026-05-09).
             Lighthouse caught the LCP element as the first card image, NOT the
             hero h2. Without the priority hint LCP slipped from ~4s to ~10s.
@@ -1238,12 +1238,12 @@ function FeaturedCard({ event, index = 0 }: { event: NormalizedEvent; index?: nu
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
         />
         {/* ★ Featured badge */}
-        <div className="absolute top-2 left-2 bg-[#9a442d] text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+        <div className="absolute top-2 left-2 bg-terra text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm">
           ★ Featured
         </div>
         {/* Price */}
         {event.price && (
-          <div className="absolute top-2 right-2 bg-[#006a62]/90 backdrop-blur-sm text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
+          <div className="absolute top-2 right-2 bg-turq/90 backdrop-blur-sm text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
             {event.price}
           </div>
         )}
@@ -1256,13 +1256,13 @@ function FeaturedCard({ event, index = 0 }: { event: NormalizedEvent; index?: nu
         )}
       </div>
       <h3
-        className="font-bold text-[#1a1614] text-sm leading-tight line-clamp-2 mb-0.5 group-hover:text-[#9a442d] transition-colors"
+        className="font-bold text-ink text-sm leading-tight line-clamp-2 mb-0.5 group-hover:text-terra transition-colors"
         style={{ fontFamily: 'var(--font-epilogue)' }}
       >
         {event.title}
       </h3>
       {event.venue && (
-        <p className="text-[10px] text-[#6b5d57] line-clamp-1 flex items-center gap-0.5">
+        <p className="text-[10px] text-ink-light line-clamp-1 flex items-center gap-0.5">
           <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
           {event.venue}
         </p>

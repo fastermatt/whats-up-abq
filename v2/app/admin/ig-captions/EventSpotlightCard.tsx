@@ -387,7 +387,7 @@ export function EventSpotlightCard({
               key={f}
               onClick={() => setFormat(f)}
               className={`px-2 py-1 rounded text-[10px] font-bold tracking-wide transition-colors ${
-                format === f ? 'bg-[#9a442d] text-white' : 'text-white/35 hover:text-white/70'
+                format === f ? 'bg-terra text-white' : 'text-white/35 hover:text-white/70'
               }`}
             >
               {f}
@@ -402,7 +402,7 @@ export function EventSpotlightCard({
               key={t}
               onClick={() => setTemplate(t)}
               className={`px-2 py-1 rounded text-[10px] font-bold tracking-wide transition-colors ${
-                template === t ? 'bg-[#9a442d] text-white' : 'text-white/35 hover:text-white/70'
+                template === t ? 'bg-terra text-white' : 'text-white/35 hover:text-white/70'
               }`}
             >
               {label}
@@ -415,10 +415,10 @@ export function EventSpotlightCard({
           onClick={handleDownload}
           disabled={busy}
           className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
-            bg-white/[0.06] text-white/50 hover:bg-[#9a442d] hover:text-white
+            bg-white/[0.06] text-white/50 hover:bg-terra hover:text-white
             transition-all active:scale-95 disabled:opacity-40
-            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9a442d]
-            focus-visible:ring-offset-2 focus-visible:ring-offset-[#201c1a]"
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terra
+            focus-visible:ring-offset-2 focus-visible:ring-offset-ink-deep"
         >
           {busy ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
           {busy ? 'Exporting…' : `Download ${format}`}

@@ -119,7 +119,7 @@ function EventRow({
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-white/[0.04] active:bg-[#9a442d]/10 transition-colors group"
+      className="w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-white/[0.04] active:bg-terra/10 transition-colors group"
     >
       {/* Rank badge for top-picks */}
       {showScore && evt.rank && (
@@ -145,7 +145,7 @@ function EventRow({
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-white font-semibold truncate leading-tight group-hover:text-[#e8a898] transition-colors">
+        <p className="text-sm text-white font-semibold truncate leading-tight group-hover:text-terra-light transition-colors">
           {evt.title}
         </p>
         <div className="flex items-center gap-2 mt-0.5 flex-wrap">
@@ -255,12 +255,12 @@ export function EventSearch({ event }: EventSearchProps) {
   // ── Collapsed state ─────────────────────────────────────────────────────────
   if (event && !expanded) {
     return (
-      <div className="flex items-center gap-3 bg-[#151210] border border-[#9a442d]/25 rounded-xl px-4 py-2.5">
-        <div className="w-1.5 h-1.5 rounded-full bg-[#9a442d] shrink-0" />
+      <div className="flex items-center gap-3 bg-[#151210] border border-terra/25 rounded-xl px-4 py-2.5">
+        <div className="w-1.5 h-1.5 rounded-full bg-terra shrink-0" />
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold text-white truncate leading-tight">{event.title}</p>
           <p className="text-[11px] text-white/40 mt-0.5 truncate">
-            {event.category && <span className="text-[#9a442d]/80 font-semibold mr-2">{event.category}</span>}
+            {event.category && <span className="text-terra/80 font-semibold mr-2">{event.category}</span>}
             {event.date && fmtDateShort(event.date)}
             {event.time && ` · ${event.time}`}
             {event.venue && ` · ${event.venue}`}
@@ -324,7 +324,7 @@ export function EventSearch({ event }: EventSearchProps) {
           <p className="text-sm text-white/50">Looks like an event ID or URL</p>
           <button
             onClick={() => { const id = extractId(query); if (id) navigate(id) }}
-            className="flex items-center gap-1.5 text-xs text-[#e8a898] hover:text-white font-semibold transition-colors"
+            className="flex items-center gap-1.5 text-xs text-terra-light hover:text-white font-semibold transition-colors"
           >
             Open it <ArrowRight size={12} />
           </button>
@@ -365,7 +365,7 @@ export function EventSearch({ event }: EventSearchProps) {
       {/* Header */}
       <div className="px-5 pt-4 pb-3 flex items-center justify-between">
         <div>
-          <p className="text-xs font-bold text-[#e8a898] uppercase tracking-[0.14em] mb-0.5">
+          <p className="text-xs font-bold text-terra-light uppercase tracking-[0.14em] mb-0.5">
             ⚡ Load Event
           </p>
           <p className="text-[11px] text-white/55">
@@ -421,7 +421,7 @@ export function EventSearch({ event }: EventSearchProps) {
                 aria-pressed={time === pill.value}
                 className={`min-h-[40px] px-3 rounded-lg text-xs font-semibold transition-all border ${
                   time === pill.value
-                    ? 'bg-[#9a442d] border-[#9a442d] text-white'
+                    ? 'bg-terra border-terra text-white'
                     : 'bg-white/[0.04] border-white/[0.08] text-white/65 hover:bg-white/[0.07] hover:text-white'
                 }`}
               >
@@ -468,8 +468,8 @@ export function EventSearch({ event }: EventSearchProps) {
                 onKeyDown={handleKey}
                 placeholder="Search by name, or paste URL / ID…"
                 className="w-full bg-white/[0.05] border border-white/[0.08] rounded-xl pl-9 pr-9 py-2 min-h-[40px]
-                  text-white text-sm placeholder:text-white/45 focus:outline-none
-                  focus:border-[#9a442d]/50 focus:bg-white/[0.07] transition-all"
+                  text-white text-sm placeholder:text-white/45 focus-visible:outline-none
+                  focus:border-terra/50 focus:bg-white/[0.07] transition-all"
                 autoComplete="off"
                 spellCheck={false}
               />
@@ -486,8 +486,8 @@ export function EventSearch({ event }: EventSearchProps) {
             <button
               onClick={handleGo}
               disabled={!query.trim() && results.length === 0}
-              className="flex items-center gap-1.5 px-3.5 min-h-[40px] rounded-xl bg-[#9a442d] text-white
-                text-sm font-semibold hover:bg-[#b5502f] active:scale-95 transition-all
+              className="flex items-center gap-1.5 px-3.5 min-h-[40px] rounded-xl bg-terra text-white
+                text-sm font-semibold hover:bg-terra-hover active:scale-95 transition-all
                 disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
             >
               <ArrowRight size={14} />

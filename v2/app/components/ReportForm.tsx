@@ -70,7 +70,7 @@ export function ReportForm({ eventId, eventTitle }: Props) {
       {/* Trigger button */}
       <button
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 text-xs text-[#6b5d57] hover:text-[#1a1614] transition-colors py-1"
+        className="inline-flex items-center gap-1.5 text-xs text-ink-light hover:text-ink transition-colors py-1"
       >
         <Flag className="w-3 h-3" />
         Report an issue
@@ -84,11 +84,11 @@ export function ReportForm({ eventId, eventTitle }: Props) {
         >
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-fade-in">
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#f0e4cc]">
-              <h3 className="font-bold text-[#1a1614] text-sm" style={{ fontFamily: 'var(--font-epilogue)' }}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-sand-light">
+              <h3 className="font-bold text-ink text-sm" style={{ fontFamily: 'var(--font-epilogue)' }}>
                 Report an issue
               </h3>
-              <button onClick={reset} className="text-[#6b5d57] hover:text-[#1a1614] transition-colors">
+              <button onClick={reset} className="text-ink-light hover:text-ink transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -96,13 +96,13 @@ export function ReportForm({ eventId, eventTitle }: Props) {
             {submitted ? (
               <div className="px-5 py-10 text-center">
                 <p className="text-2xl mb-2">✓</p>
-                <p className="font-semibold text-[#1a1614] text-sm">Thanks for the report!</p>
-                <p className="text-xs text-[#6b5d57] mt-1">We&apos;ll review it soon.</p>
+                <p className="font-semibold text-ink text-sm">Thanks for the report!</p>
+                <p className="text-xs text-ink-light mt-1">We&apos;ll review it soon.</p>
               </div>
             ) : (
               <form onSubmit={submit} className="px-5 py-4 space-y-4">
                 {/* Event name preview */}
-                <p className="text-xs text-[#6b5d57] line-clamp-1 italic">{eventTitle}</p>
+                <p className="text-xs text-ink-light line-clamp-1 italic">{eventTitle}</p>
 
                 {/* Report type */}
                 <div className="space-y-2">
@@ -114,9 +114,9 @@ export function ReportForm({ eventId, eventTitle }: Props) {
                         value={value}
                         checked={reportType === value}
                         onChange={() => setReportType(value)}
-                        className="accent-[#9a442d]"
+                        className="accent-terra"
                       />
-                      <span className="text-sm text-[#1a1614] group-hover:text-[#9a442d] transition-colors">
+                      <span className="text-sm text-ink group-hover:text-terra transition-colors">
                         {label}
                       </span>
                     </label>
@@ -129,7 +129,7 @@ export function ReportForm({ eventId, eventTitle }: Props) {
                   onChange={e => setMessage(e.target.value)}
                   placeholder="More details (optional)"
                   rows={2}
-                  className="w-full border border-[#ddc9a3] rounded-xl px-3 py-2 text-sm text-[#1a1614] placeholder-[#6b5d57] focus:outline-none focus:border-[#9a442d] resize-none"
+                  className="w-full border border-sand-mid rounded-xl px-3 py-2 text-sm text-ink placeholder-ink-light focus-visible:outline-none focus:border-terra resize-none"
                 />
 
                 {/* Email */}
@@ -138,7 +138,7 @@ export function ReportForm({ eventId, eventTitle }: Props) {
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   placeholder="Your email (optional, for follow-up)"
-                  className="w-full border border-[#ddc9a3] rounded-xl px-3 py-2 text-sm text-[#1a1614] placeholder-[#6b5d57] focus:outline-none focus:border-[#9a442d]"
+                  className="w-full border border-sand-mid rounded-xl px-3 py-2 text-sm text-ink placeholder-ink-light focus-visible:outline-none focus:border-terra"
                 />
 
                 {error && <p className="text-red-500 text-xs">{error}</p>}
@@ -147,14 +147,14 @@ export function ReportForm({ eventId, eventTitle }: Props) {
                   <button
                     type="button"
                     onClick={reset}
-                    className="flex-1 py-2.5 rounded-xl border border-[#ddc9a3] text-sm text-[#4a3f3a] hover:bg-[#f5f0e8] transition-colors"
+                    className="flex-1 py-2.5 rounded-xl border border-sand-mid text-sm text-ink-mid hover:bg-[#f5f0e8] transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={!reportType || submitting}
-                    className="flex-1 py-2.5 rounded-xl bg-[#9a442d] text-white text-sm font-semibold hover:bg-[#7d3725] transition-colors disabled:opacity-50"
+                    className="flex-1 py-2.5 rounded-xl bg-terra text-white text-sm font-semibold hover:bg-terra-hover transition-colors disabled:opacity-50"
                   >
                     {submitting ? 'Sending…' : 'Submit'}
                   </button>

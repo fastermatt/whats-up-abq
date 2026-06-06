@@ -35,7 +35,7 @@ export function ReportActions({ reportId, currentStatus, initialNotes }: Props) 
           onChange={e => setNotes(e.target.value)}
           placeholder="Admin notes (optional)"
           rows={2}
-          className="w-full bg-white/10 border border-white/20 text-white placeholder-white/30 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-[#9a442d] resize-none"
+          className="w-full bg-white/10 border border-white/20 text-white placeholder-white/30 rounded-lg px-3 py-2 text-xs focus-visible:outline-none focus:border-terra resize-none"
         />
       )}
 

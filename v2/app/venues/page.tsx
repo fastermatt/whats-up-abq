@@ -36,18 +36,18 @@ export default async function VenuesPage() {
   const venues = await fetchTopVenues(80)
 
   return (
-    <main id="main" className="min-h-dvh bg-[#fbf7f1]">
+    <main id="main" className="min-h-dvh bg-cream">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd(venues)) }}
       />
 
       {/* ── Header ── */}
-      <header className="sticky top-0 z-20 bg-[#fbf7f1]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
+      <header className="sticky top-0 z-20 bg-cream/90 backdrop-blur-md border-b border-sand-mid/60">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-3">
           <Link
             href="/"
-            className="flex items-center gap-1.5 text-sm text-[#4a3f3a] hover:text-[#9a442d] transition-colors"
+            className="flex items-center gap-1.5 text-sm text-ink-mid hover:text-terra transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="font-medium">Home</span>
@@ -59,16 +59,16 @@ export default async function VenuesPage() {
         {/* ── Hero ── */}
         <AnimateIn animation="fade-up">
           <div className="mb-8">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[#9a442d] font-semibold mb-1">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-terra font-semibold mb-1">
               Albuquerque, NM
             </p>
             <h1
-              className="text-3xl font-black text-[#1a1614] leading-tight mb-2"
+              className="text-3xl font-black text-ink leading-tight mb-2"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               Event Venues
             </h1>
-            <p className="text-sm text-[#6b5d57]">
+            <p className="text-sm text-ink-light">
               {venues.length} venues with upcoming events, concerts, comedy, arts, sports, and more.
             </p>
           </div>
@@ -80,20 +80,20 @@ export default async function VenuesPage() {
             <AnimateIn key={v.venueName} animation="fade-up" delay={Math.min(i * 20, 300)}>
               <Link
                 href={`/venues/${venueToSlug(v.venueName)}`}
-                className="group flex items-center justify-between bg-white rounded-xl border border-[#f0e4cc] px-4 py-3 shadow-sm hover:shadow-md hover:border-[#ddc9a3] transition-all"
+                className="group flex items-center justify-between bg-white rounded-xl border border-sand-light px-4 py-3 shadow-sm hover:shadow-md hover:border-sand-mid transition-all"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] flex items-center justify-center flex-shrink-0 group-hover:from-[#e8a898]/30 group-hover:to-[#9a442d]/10 transition-all">
-                    <MapPin className="w-4 h-4 text-[#9a442d]" />
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sand-light to-sand-mid flex items-center justify-center flex-shrink-0 group-hover:from-terra-light/30 group-hover:to-terra/10 transition-all">
+                    <MapPin className="w-4 h-4 text-terra" />
                   </div>
                   <span
-                    className="font-semibold text-sm text-[#1a1614] group-hover:text-[#9a442d] transition-colors leading-tight line-clamp-2"
+                    className="font-semibold text-sm text-ink group-hover:text-terra transition-colors leading-tight line-clamp-2"
                     style={{ fontFamily: 'var(--font-epilogue)' }}
                   >
                     {v.venueName}
                   </span>
                 </div>
-                <span className="ml-3 flex-shrink-0 text-[10px] font-bold text-[#6b5d57] bg-[#f0e4cc] rounded-full px-2 py-0.5 tabular-nums">
+                <span className="ml-3 flex-shrink-0 text-[10px] font-bold text-ink-light bg-sand-light rounded-full px-2 py-0.5 tabular-nums">
                   {v.count}
                 </span>
               </Link>
@@ -105,7 +105,7 @@ export default async function VenuesPage() {
         <div className="mt-10 text-center">
           <Link
             href="/events"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#9a442d] text-white font-semibold text-sm hover:bg-[#7d3725] transition-colors shadow-sm hover:shadow-md"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-terra text-white font-semibold text-sm hover:bg-terra-hover transition-colors shadow-sm hover:shadow-md"
           >
             Browse All Events
           </Link>

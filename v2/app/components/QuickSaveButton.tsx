@@ -84,8 +84,8 @@ export function QuickSaveButton({
       className={`relative flex items-center justify-center w-8 h-8 rounded-full
         transition-all duration-200 select-none
         ${saved
-          ? 'bg-[#9a442d] shadow-md shadow-[#9a442d]/40'
-          : 'bg-black/40 backdrop-blur-sm hover:bg-[#9a442d]/80'}
+          ? 'bg-terra shadow-md shadow-terra/40'
+          : 'bg-black/40 backdrop-blur-sm hover:bg-terra/80'}
         disabled:opacity-60 active:scale-90
         ${className}`}
     >
@@ -100,7 +100,7 @@ export function QuickSaveButton({
       {burst && (
         <span
           aria-hidden="true"
-          className="absolute inset-0 rounded-full bg-[#9a442d] animate-heart-ring"
+          className="absolute inset-0 rounded-full bg-terra animate-heart-ring"
         />
       )}
     </button>

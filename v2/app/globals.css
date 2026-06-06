@@ -1,23 +1,61 @@
 @import "tailwindcss";
 
-/* ─── Brand CSS variables ─────────────────────────────────────────────── */
+/* ─── Design tokens ───────────────────────────────────────────────────────
+   Tailwind 4 CSS-first theme. Defining --color-* here generates the named
+   utilities (bg-terra, text-ink, border-sand-mid, ring-terra/30, etc.) so the
+   codebase uses ONE source of truth instead of ~1,700 scattered [#hex] literals.
+   Light-mode only by design (load-bearing brand choice — the city runs on sun).
+*/
+@theme {
+  /* Surfaces */
+  --color-cream:        #fbf7f1;  /* page canvas */
+  --color-cream-raised: #fdf9f4;  /* subtly raised panels */
+  --color-card:         #fffdf9;  /* warm card (vs cold #fff) */
+
+  /* Terra — the brand accent (keep to <=15% of any screen at rest) */
+  --color-terra:        #9a442d;
+  --color-terra-hover:  #7d3725;  /* the one true hover/pressed terra */
+  --color-terra-mid:    #c4614a;
+  --color-terra-light:  #e8a898;
+
+  /* Secondary accents */
+  --color-sage:         #4f6249;
+  --color-sage-mid:     #6f8469;
+  --color-turq:         #006a62;
+  --color-turq-mid:     #2a8f87;
+  --color-sky-gold:     #c99b3b;
+
+  /* Sand — warm borders / fills */
+  --color-sand-light:   #f0e4cc;
+  --color-sand-mid:     #ddc9a3;
+  --color-sand-dark:    #c4a97d;
+  --color-sand-border:  #e8ddd0;  /* input strokes */
+
+  /* Ink — text */
+  --color-ink:          #1a1614;  /* primary text (15:1 on cream) */
+  --color-ink-deep:     #201c1a;  /* footer / deepest */
+  --color-ink-mid:      #4a3f3a;  /* secondary text (AAA) */
+  --color-ink-light:    #6b5d57;  /* small metadata (AA) */
+}
+
+/* ─── Legacy CSS variable aliases (raw-CSS usages: html/body, keyframes) ─── */
 :root {
-  --bg:           #fbf7f1;
-  --terra-deep:   #9a442d;
-  --terra-mid:    #c4614a;
-  --terra-light:  #e8a898;
-  --sage-deep:    #4f6249;
-  --sage-mid:     #6f8469;
+  --bg:           var(--color-cream);
+  --terra-deep:   var(--color-terra);
+  --terra-mid:    var(--color-terra-mid);
+  --terra-light:  var(--color-terra-light);
+  --sage-deep:    var(--color-sage);
+  --sage-mid:     var(--color-sage-mid);
   --sage-light:   #b0c4b1;
-  --turq-deep:    #006a62;
-  --turq-mid:     #2a8f87;
+  --turq-deep:    var(--color-turq);
+  --turq-mid:     var(--color-turq-mid);
   --turq-light:   #7cc4bf;
-  --sand-dark:    #c4a97d;
-  --sand-mid:     #ddc9a3;
-  --sand-light:   #f0e4cc;
-  --ink:          #1a1614;
-  --ink-mid:      #4a3f3a;
-  --ink-light:    #6b5d57;
+  --sand-dark:    var(--color-sand-dark);
+  --sand-mid:     var(--color-sand-mid);
+  --sand-light:   var(--color-sand-light);
+  --ink:          var(--color-ink);
+  --ink-mid:      var(--color-ink-mid);
+  --ink-light:    var(--color-ink-light);
 }
 
 /* ─── Base ────────────────────────────────────────────────────────────── */
@@ -110,7 +148,7 @@ body {
 
 /* Always define the class; inside reduced-motion we just make it instant */
 .spring-card {
-  animation: springUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)
+  animation: springUp 0.5s cubic-bezier(0.34, 1.12, 0.64, 1)
              calc(var(--card-i, 0) * 35ms) backwards;
 }
 
@@ -361,7 +399,7 @@ html.scroll-hint-done .scroll-hint-inner {
 }
 
 .animate-heart-pop {
-  animation: heartPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: heartPop 0.5s cubic-bezier(0.34, 1.12, 0.64, 1) forwards;
 }
 
 /* Ring expands from center and fades — like a ripple */

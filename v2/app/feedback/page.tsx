@@ -72,26 +72,26 @@ export default function FeedbackPage() {
     }
   }
 
-  const inputClass = 'w-full px-3 py-2.5 rounded-xl border border-[#ddc9a3] text-sm text-[#1a1614] bg-white placeholder-[#c4a97d] focus:outline-none focus:border-[#9a442d] focus:ring-2 focus:ring-[#9a442d]/20 transition'
+  const inputClass = 'w-full px-3 py-2.5 rounded-xl border border-sand-mid text-sm text-ink bg-white placeholder-sand-dark focus-visible:outline-none focus:border-terra focus-visible:ring-2 focus-visible:ring-terra/20 transition'
 
   if (status === 'success') {
     return (
-      <main id="main" className="min-h-dvh bg-[#fbf7f1] flex items-center justify-center px-4">
+      <main id="main" className="min-h-dvh bg-cream flex items-center justify-center px-4">
         <div className="max-w-md w-full text-center animate-fade-up">
-          <CheckCircle className="w-16 h-16 text-[#4f6249] mx-auto mb-4" />
-          <h1 className="text-2xl font-black text-[#1a1614] mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
+          <CheckCircle className="w-16 h-16 text-sage mx-auto mb-4" />
+          <h1 className="text-2xl font-black text-ink mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
             Thanks. We got it.
           </h1>
-          <p className="text-sm text-[#6b5d57] mb-6 leading-relaxed">
+          <p className="text-sm text-ink-light mb-6 leading-relaxed">
             Your feedback is in the inbox. If you gave us an email, we&apos;ll follow up if there&apos;s anything to share.
           </p>
           <div className="flex justify-center gap-3 flex-wrap">
-            <Link href="/" className="px-4 py-2 rounded-full bg-[#9a442d] text-white text-sm font-semibold hover:bg-[#7d3725] transition-colors">
+            <Link href="/" className="px-4 py-2 rounded-full bg-terra text-white text-sm font-semibold hover:bg-terra-hover transition-colors">
               Back to home
             </Link>
             <button
               onClick={() => { setStatus('idle'); setCategory(null); setSubject(''); setMessage(''); setEmail('') }}
-              className="px-4 py-2 rounded-full border border-[#ddc9a3] text-sm text-[#4a3f3a] hover:border-[#9a442d] transition-colors"
+              className="px-4 py-2 rounded-full border border-sand-mid text-sm text-ink-mid hover:border-terra transition-colors"
             >
               Send another
             </button>
@@ -102,10 +102,10 @@ export default function FeedbackPage() {
   }
 
   return (
-    <main id="main" className="min-h-dvh bg-[#fbf7f1]">
-      <header className="sticky top-0 z-20 bg-[#fbf7f1]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
+    <main id="main" className="min-h-dvh bg-cream">
+      <header className="sticky top-0 z-20 bg-cream/90 backdrop-blur-md border-b border-sand-mid/60">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-1.5 text-sm text-[#4a3f3a] hover:text-[#9a442d] transition-colors">
+          <Link href="/" className="flex items-center gap-1.5 text-sm text-ink-mid hover:text-terra transition-colors">
             <ArrowLeft className="w-4 h-4" />
             <span className="font-medium">Home</span>
           </Link>
@@ -114,18 +114,18 @@ export default function FeedbackPage() {
 
       <div className="max-w-2xl mx-auto px-4 py-6">
         <div className="mb-6">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-[#006a62] font-semibold mb-1">Feedback &amp; ideas</p>
-          <h1 className="text-2xl font-black text-[#1a1614] mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-turq font-semibold mb-1">Feedback &amp; ideas</p>
+          <h1 className="text-2xl font-black text-ink mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
             Tell us what you think
           </h1>
-          <p className="text-sm text-[#6b5d57]">
+          <p className="text-sm text-ink-light">
             Every message lands in our inbox and gets read. Bugs, ideas, event reports: all welcome.
           </p>
           {presetEventId && (
-            <div className="mt-3 flex items-center gap-2 bg-[#9a442d]/8 border border-[#9a442d]/20 rounded-xl px-3 py-2">
-              <Flag className="w-3.5 h-3.5 text-[#9a442d] flex-shrink-0" />
-              <p className="text-[11px] text-[#4a3f3a]">
-                Reporting about event <Link href={`/events/${presetEventId}`} className="text-[#9a442d] underline">#{presetEventId.slice(0,8)}…</Link>
+            <div className="mt-3 flex items-center gap-2 bg-terra/8 border border-terra/20 rounded-xl px-3 py-2">
+              <Flag className="w-3.5 h-3.5 text-terra flex-shrink-0" />
+              <p className="text-[11px] text-ink-mid">
+                Reporting about event <Link href={`/events/${presetEventId}`} className="text-terra underline">#{presetEventId.slice(0,8)}…</Link>
               </p>
             </div>
           )}
@@ -134,7 +134,7 @@ export default function FeedbackPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Category picker */}
           <div className="space-y-2">
-            <p id="feedback-category-label" className="text-xs font-semibold text-[#4a3f3a] mb-2">What are you telling us about?</p>
+            <p id="feedback-category-label" className="text-xs font-semibold text-ink-mid mb-2">What are you telling us about?</p>
             <div role="radiogroup" aria-labelledby="feedback-category-label" className="space-y-2">
               {OPTIONS.map(({ value, label, icon: Icon, blurb }) => {
                 const isActive = category === value
@@ -147,18 +147,18 @@ export default function FeedbackPage() {
                     onClick={() => setCategory(value)}
                     className={`w-full flex items-start gap-3 p-3.5 rounded-xl border-2 transition-all text-left ${
                       isActive
-                        ? 'border-[#9a442d] bg-[#9a442d]/5'
-                        : 'border-[#f0e4cc] bg-white hover:border-[#ddc9a3]'
+                        ? 'border-terra bg-terra/5'
+                        : 'border-sand-light bg-white hover:border-sand-mid'
                     }`}
                   >
                     <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                      isActive ? 'bg-[#9a442d] text-white' : 'bg-[#f0e4cc] text-[#9a442d]'
+                      isActive ? 'bg-terra text-white' : 'bg-sand-light text-terra'
                     }`}>
                       <Icon className="w-4 h-4" aria-hidden="true" />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-semibold text-sm text-[#1a1614]">{label}</p>
-                      <p className="text-xs text-[#6b5d57] mt-0.5">{blurb}</p>
+                      <p className="font-semibold text-sm text-ink">{label}</p>
+                      <p className="text-xs text-ink-light mt-0.5">{blurb}</p>
                     </div>
                   </button>
                 )
@@ -168,10 +168,10 @@ export default function FeedbackPage() {
 
           {category && (
             <>
-              <div className="bg-white rounded-2xl border border-[#f0e4cc] p-5 space-y-4">
+              <div className="bg-white rounded-2xl border border-sand-light p-5 space-y-4">
                 <div>
-                  <label htmlFor="subject" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">
-                    Subject <span className="text-[#6b5d57] font-normal">(optional)</span>
+                  <label htmlFor="subject" className="block text-xs font-semibold text-ink-mid mb-1.5">
+                    Subject <span className="text-ink-light font-normal">(optional)</span>
                   </label>
                   <input id="subject" type="text" maxLength={200} value={subject}
                     onChange={e => setSubject(e.target.value)}
@@ -179,8 +179,8 @@ export default function FeedbackPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="message" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">
-                    Message <span className="text-[#9a442d]" aria-hidden="true">*</span>
+                  <label htmlFor="message" className="block text-xs font-semibold text-ink-mid mb-1.5">
+                    Message <span className="text-terra" aria-hidden="true">*</span>
                   </label>
                   <textarea id="message" rows={6} maxLength={5000} required value={message}
                     onChange={e => setMessage(e.target.value)}
@@ -189,13 +189,13 @@ export default function FeedbackPage() {
                     aria-invalid={!!errorMsg && !message.trim()}
                     aria-describedby="message-counter"
                     className={inputClass + ' resize-none'} />
-                  <p id="message-counter" className="text-[10px] text-[#6b5d57] mt-1">{message.length}/5000</p>
+                  <p id="message-counter" className="text-[10px] text-ink-light mt-1">{message.length}/5000</p>
                 </div>
 
                 {!userEmail && (
                   <div>
-                    <label htmlFor="contact-email" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">
-                      Email <span className="text-[#6b5d57] font-normal">(optional, only if you want a reply)</span>
+                    <label htmlFor="contact-email" className="block text-xs font-semibold text-ink-mid mb-1.5">
+                      Email <span className="text-ink-light font-normal">(optional, only if you want a reply)</span>
                     </label>
                     <input id="contact-email" type="email" maxLength={200} value={email}
                       onChange={e => setEmail(e.target.value)}
@@ -204,7 +204,7 @@ export default function FeedbackPage() {
                 )}
 
                 {userEmail && (
-                  <p className="text-[11px] text-[#6b5d57]">Sending as <b>{userEmail}</b></p>
+                  <p className="text-[11px] text-ink-light">Sending as <b>{userEmail}</b></p>
                 )}
               </div>
 
@@ -213,7 +213,7 @@ export default function FeedbackPage() {
               )}
 
               <button type="submit" disabled={status === 'submitting'}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#9a442d] text-white font-semibold text-sm hover:bg-[#7d3725] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-terra text-white font-semibold text-sm hover:bg-terra-hover transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                 style={{ fontFamily: 'var(--font-epilogue)' }}>
                 {status === 'submitting' ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Sending…</>

@@ -267,7 +267,7 @@ function SchedulePanel({
                 onClick={() => applyPreset(p)}
                 className={`px-2.5 py-1 text-[10px] font-semibold rounded-md transition-colors ${
                   isPresetActive(p)
-                    ? 'bg-[#9a442d] text-white'
+                    ? 'bg-terra text-white'
                     : 'bg-white/[0.07] text-white/60 hover:bg-white/[0.12] hover:text-white'
                 }`}
               >
@@ -288,7 +288,7 @@ function SchedulePanel({
             onChange={e => onDateChange(e.target.value)}
             min={todayStr}
             className="w-full bg-black/40 border border-white/10 rounded-lg px-2.5 py-2 text-xs text-white/90
-              focus:outline-none focus:border-[#9a442d]/60 transition-colors
+              focus-visible:outline-none focus:border-terra/60 transition-colors
               [color-scheme:dark]"
           />
         </div>
@@ -299,7 +299,7 @@ function SchedulePanel({
             value={scheduleTime}
             onChange={e => onTimeChange(e.target.value)}
             className="w-full bg-black/40 border border-white/10 rounded-lg px-2.5 py-2 text-xs text-white/90
-              focus:outline-none focus:border-[#9a442d]/60 transition-colors
+              focus-visible:outline-none focus:border-terra/60 transition-colors
               [color-scheme:dark]"
           />
         </div>
@@ -307,7 +307,7 @@ function SchedulePanel({
 
       {/* Human-readable preview */}
       {humanReadable && (
-        <p className="text-[11px] text-[#9a442d]/80 font-semibold flex items-center gap-1.5">
+        <p className="text-[11px] text-terra/80 font-semibold flex items-center gap-1.5">
           <Calendar size={11} />
           {humanReadable}
         </p>
@@ -318,7 +318,7 @@ function SchedulePanel({
         <button
           onClick={onConfirm}
           disabled={!scheduleDateTime || isScheduling}
-          className="flex items-center gap-1.5 px-4 py-2 bg-[#9a442d] hover:opacity-90 disabled:opacity-40 rounded-lg text-xs font-bold text-white transition-opacity"
+          className="flex items-center gap-1.5 px-4 py-2 bg-terra hover:opacity-90 disabled:opacity-40 rounded-lg text-xs font-bold text-white transition-opacity"
         >
           {isScheduling
             ? <><Loader2 size={12} className="animate-spin" /> Scheduling…</>
@@ -643,8 +643,8 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
             )}
           </div>
           {venueId ? (
-            <div className="flex items-center gap-2 bg-white/[0.06] border border-[#9a442d]/25 rounded-lg px-3 py-2">
-              <MapPin size={11} className="text-[#9a442d] shrink-0" />
+            <div className="flex items-center gap-2 bg-white/[0.06] border border-terra/25 rounded-lg px-3 py-2">
+              <MapPin size={11} className="text-terra shrink-0" />
               <span className="text-xs text-white/80 flex-1 truncate">{venueName}</span>
               <button onClick={clearVenue} className="text-white/55 hover:text-white/70 transition-colors ml-1">
                 <X size={12} />
@@ -661,16 +661,16 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
                 placeholder="Search venues to tag…"
                 disabled={isPosting || isScheduling}
                 className="w-full bg-white/[0.05] border border-white/[0.08] rounded-lg pl-8 pr-3 py-2 text-xs text-white
-                  placeholder:text-white/25 focus:outline-none focus:border-[#9a442d]/50 focus:bg-white/[0.07]
+                  placeholder:text-white/25 focus-visible:outline-none focus:border-terra/50 focus:bg-white/[0.07]
                   transition-all disabled:opacity-40"
               />
               {venueResults.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-[#1a1614] border border-white/[0.1] rounded-lg overflow-hidden z-20 shadow-2xl">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-ink border border-white/[0.1] rounded-lg overflow-hidden z-20 shadow-2xl">
                   {venueResults.map((v, i) => (
                     <button
                       key={v.id}
                       onClick={() => selectVenue(v)}
-                      className={`w-full flex flex-col text-left px-3 py-2.5 hover:bg-white/[0.06] active:bg-[#9a442d]/10 transition-colors ${
+                      className={`w-full flex flex-col text-left px-3 py-2.5 hover:bg-white/[0.06] active:bg-terra/10 transition-colors ${
                         i > 0 ? 'border-t border-white/[0.04]' : ''
                       }`}
                     >
@@ -693,7 +693,7 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
             onClick={() => selectStyle(c.id)}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors touch-manipulation ${
               activeId === c.id
-                ? 'bg-[#9a442d] text-white'
+                ? 'bg-terra text-white'
                 : 'bg-white/[0.06] text-white/60 hover:bg-white/[0.1] hover:text-white'
             }`}
           >
@@ -723,7 +723,7 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
         value={text}
         onChange={e => setText(e.target.value)}
         rows={10}
-        className="w-full bg-black/30 border border-white/[0.1] rounded-lg px-3 py-2.5 text-white/85 text-[12px] leading-relaxed font-mono resize-y focus:outline-none focus:border-[#9a442d]/60 transition-colors"
+        className="w-full bg-black/30 border border-white/[0.1] rounded-lg px-3 py-2.5 text-white/85 text-[12px] leading-relaxed font-mono resize-y focus-visible:outline-none focus:border-terra/60 transition-colors"
         placeholder="Your caption…"
         disabled={isPosting || isScheduling}
       />

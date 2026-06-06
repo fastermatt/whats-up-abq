@@ -133,7 +133,7 @@ export default function AdminErrorsPage() {
               type="checkbox"
               checked={showResolved}
               onChange={e => setShowResolved(e.target.checked)}
-              className="accent-[#9a442d]"
+              className="accent-terra"
             />
             Include resolved
           </label>

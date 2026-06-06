@@ -92,25 +92,25 @@ export default function RootError({
 
   if (autoReloading) {
     return (
-      <main id="main" className="min-h-dvh bg-[#fbf7f1] flex items-center justify-center px-4">
-        <p className="text-sm text-[#6b5d57]">Reloading to pick up the latest version…</p>
+      <main id="main" className="min-h-dvh bg-cream flex items-center justify-center px-4">
+        <p className="text-sm text-ink-light">Reloading to pick up the latest version…</p>
       </main>
     )
   }
 
   return (
-    <main id="main" className="min-h-dvh bg-[#fbf7f1] flex items-center justify-center px-4">
+    <main id="main" className="min-h-dvh bg-cream flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center space-y-6">
         {/* Heading */}
         <h1
-          className="text-3xl font-black text-[#1a1614]"
+          className="text-3xl font-black text-ink"
           style={{ fontFamily: 'var(--font-epilogue)' }}
         >
           Something broke
         </h1>
 
         {/* Subtitle */}
-        <p className="text-[#6b5d57]">
+        <p className="text-ink-light">
           The page didn&apos;t load. Usually a refresh fixes it.
         </p>
 
@@ -118,7 +118,7 @@ export default function RootError({
         <div className="space-y-3">
           <button
             onClick={() => reset()}
-            className="w-full bg-[#9a442d] text-white rounded-2xl px-6 py-3 font-semibold hover:bg-[#7d3725] transition-colors duration-300"
+            className="w-full bg-terra text-white rounded-2xl px-6 py-3 font-semibold hover:bg-terra-hover transition-colors duration-300"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             Try again
@@ -126,7 +126,7 @@ export default function RootError({
 
           <button
             onClick={() => nukeCachesAndReload()}
-            className="block w-full bg-[#e8ddd0] text-[#1a1614] rounded-2xl px-6 py-3 font-semibold hover:bg-[#ddc9a3] transition-colors duration-300"
+            className="block w-full bg-sand-border text-ink rounded-2xl px-6 py-3 font-semibold hover:bg-sand-mid transition-colors duration-300"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             Hard refresh
@@ -134,7 +134,7 @@ export default function RootError({
 
           <a
             href="/"
-            className="block w-full text-[#6b5d57] rounded-2xl px-6 py-2 text-sm hover:text-[#9a442d] transition-colors duration-300"
+            className="block w-full text-ink-light rounded-2xl px-6 py-2 text-sm hover:text-terra transition-colors duration-300"
           >
             Back to home
           </a>
@@ -145,7 +145,7 @@ export default function RootError({
         {error.digest || error.message ? (
           <details className="text-left text-xs text-[#9a8880]">
             <summary className="cursor-pointer text-center">Technical details</summary>
-            <pre className="mt-2 p-3 bg-[#f0e4cc]/40 rounded overflow-auto whitespace-pre-wrap break-all">
+            <pre className="mt-2 p-3 bg-sand-light/40 rounded overflow-auto whitespace-pre-wrap break-all">
               {error.name}: {error.message}
               {error.digest ? `\n\ndigest: ${error.digest}` : ''}
             </pre>

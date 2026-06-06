@@ -166,19 +166,19 @@ export default function LoginPage() {
   if (done) {
     const messages = {
       'signup-confirm': {
-        icon: <CheckCircle className="w-14 h-14 text-[#4f6249]" />,
+        icon: <CheckCircle className="w-14 h-14 text-sage" />,
         heading: 'Check your email',
         body: `We sent a confirmation link to ${email}. Click it to activate your account.`,
         sub: 'Can\'t find it? Check your spam folder.',
       },
       'magic-sent': {
-        icon: <CheckCircle className="w-14 h-14 text-[#4f6249]" />,
+        icon: <CheckCircle className="w-14 h-14 text-sage" />,
         heading: 'Magic link sent',
         body: `Click the link in the email we sent to ${email} to sign in instantly.`,
         sub: 'The link expires in 1 hour.',
       },
       'reset-sent': {
-        icon: <CheckCircle className="w-14 h-14 text-[#4f6249]" />,
+        icon: <CheckCircle className="w-14 h-14 text-sage" />,
         heading: 'Check your email',
         body: `We sent a password reset link to ${email}.`,
         sub: 'The link expires in 1 hour.',
@@ -191,12 +191,12 @@ export default function LoginPage() {
         <div className="flex-1 flex items-center justify-center px-4 py-12">
           <div className="w-full max-w-sm text-center animate-fade-up">
             <div className="flex justify-center mb-4">{messages.icon}</div>
-            <h1 className="text-2xl font-black text-[#1a1614] mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
+            <h1 className="text-2xl font-black text-ink mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
               {messages.heading}
             </h1>
-            <p className="text-sm text-[#4a3f3a] mb-2">{messages.body}</p>
-            <p className="text-xs text-[#6b5d57] mb-6">{messages.sub}</p>
-            <button onClick={() => { setDone(null); setShowMagic(false) }} className="text-xs text-[#9a442d] hover:underline">
+            <p className="text-sm text-ink-mid mb-2">{messages.body}</p>
+            <p className="text-xs text-ink-light mb-6">{messages.sub}</p>
+            <button onClick={() => { setDone(null); setShowMagic(false) }} className="text-xs text-terra hover:underline">
               ← Back to sign in
             </button>
           </div>
@@ -222,7 +222,7 @@ export default function LoginPage() {
               className="mx-auto mb-4"
               style={{ width: '168px', height: 'auto' }}
             />
-            <p className="text-sm text-[#6b5d57]">Save events · Check in · Earn badges</p>
+            <p className="text-sm text-ink-light">Save events · Check in · Earn badges</p>
           </div>
 
           {/* Expired / failed magic-link alert */}
@@ -230,25 +230,25 @@ export default function LoginPage() {
             <div
               role="alert"
               aria-live="polite"
-              className="mb-5 rounded-xl border border-[#9a442d]/25 bg-[#9a442d]/10 px-4 py-3 flex gap-3 items-start animate-fade-up"
+              className="mb-5 rounded-xl border border-terra/25 bg-terra/10 px-4 py-3 flex gap-3 items-start animate-fade-up"
             >
-              <div className="shrink-0 mt-0.5 text-[#9a442d]">
+              <div className="shrink-0 mt-0.5 text-terra">
                 {linkAlert.kind === 'expired'
                   ? <Clock className="w-5 h-5" aria-hidden="true" />
                   : <AlertCircle className="w-5 h-5" aria-hidden="true" />}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-[#9a442d]" style={{ fontFamily: 'var(--font-epilogue)' }}>
+                <p className="text-sm font-semibold text-terra" style={{ fontFamily: 'var(--font-epilogue)' }}>
                   {linkAlert.title}
                 </p>
-                <p className="text-xs text-[#4a3f3a] mt-0.5 leading-relaxed">
+                <p className="text-xs text-ink-mid mt-0.5 leading-relaxed">
                   {linkAlert.body}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={dismissLinkAlert}
-                className="shrink-0 text-xs text-[#6b5d57] hover:text-[#9a442d] transition-colors px-1"
+                className="shrink-0 text-xs text-ink-light hover:text-terra transition-colors px-1"
                 aria-label="Dismiss alert"
               >
                 ×
@@ -257,15 +257,15 @@ export default function LoginPage() {
           )}
 
           {/* Tabs */}
-          <div className="flex rounded-xl bg-[#f0e4cc] p-1 mb-6">
+          <div className="flex rounded-xl bg-sand-light p-1 mb-6">
             {(['signin', 'signup'] as Tab[]).map(t => (
               <button
                 key={t}
                 onClick={() => { setTab(t); reset() }}
                 className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${
                   tab === t
-                    ? 'bg-white text-[#1a1614] shadow-sm'
-                    : 'text-[#6b5d57] hover:text-[#4a3f3a]'
+                    ? 'bg-white text-ink shadow-sm'
+                    : 'text-ink-light hover:text-ink-mid'
                 }`}
                 style={{ fontFamily: 'var(--font-epilogue)' }}
               >
@@ -280,9 +280,9 @@ export default function LoginPage() {
 
               {/* Email */}
               <div>
-                <label htmlFor="email" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">Email</label>
+                <label htmlFor="email" className="block text-xs font-semibold text-ink-mid mb-1.5">Email</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" aria-hidden="true" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-light" aria-hidden="true" />
                   <input
                     id="email"
                     type="email" value={email} onChange={e => setEmail(e.target.value)}
@@ -290,16 +290,16 @@ export default function LoginPage() {
                     aria-required="true"
                     aria-invalid={!!error}
                     aria-describedby={error ? 'login-error' : undefined}
-                    className="w-full pl-9 pr-4 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#6b5d57] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
+                    className="w-full pl-9 pr-4 py-3 rounded-xl border border-sand-mid bg-white text-sm text-ink placeholder:text-ink-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terra/30 focus:border-terra transition-all"
                   />
                 </div>
               </div>
 
               {/* Password */}
               <div>
-                <label htmlFor="password" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">Password</label>
+                <label htmlFor="password" className="block text-xs font-semibold text-ink-mid mb-1.5">Password</label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" aria-hidden="true" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-light" aria-hidden="true" />
                   <input
                     id="password"
                     type={showPw ? 'text' : 'password'} value={password}
@@ -310,11 +310,11 @@ export default function LoginPage() {
                     aria-required="true"
                     aria-invalid={!!error}
                     aria-describedby={error ? 'login-error' : undefined}
-                    className="w-full pl-9 pr-10 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#6b5d57] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
+                    className="w-full pl-9 pr-10 py-3 rounded-xl border border-sand-mid bg-white text-sm text-ink placeholder:text-ink-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terra/30 focus:border-terra transition-all"
                   />
                   <button
                     type="button" onClick={() => setShowPw(v => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b5d57] hover:text-[#4a3f3a]"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-light hover:text-ink-mid"
                     aria-label={showPw ? 'Hide password' : 'Show password'}
                   >
                     {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -325,9 +325,9 @@ export default function LoginPage() {
               {/* Confirm password (signup only) */}
               {tab === 'signup' && (
                 <div>
-                  <label htmlFor="confirm-password" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">Confirm password</label>
+                  <label htmlFor="confirm-password" className="block text-xs font-semibold text-ink-mid mb-1.5">Confirm password</label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" aria-hidden="true" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-light" aria-hidden="true" />
                     <input
                       id="confirm-password"
                       type={showPw ? 'text' : 'password'} value={confirm}
@@ -337,7 +337,7 @@ export default function LoginPage() {
                       aria-required="true"
                       aria-invalid={!!error}
                       aria-describedby={error ? 'login-error' : undefined}
-                      className="w-full pl-9 pr-4 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#6b5d57] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
+                      className="w-full pl-9 pr-4 py-3 rounded-xl border border-sand-mid bg-white text-sm text-ink placeholder:text-ink-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terra/30 focus:border-terra transition-all"
                     />
                   </div>
                 </div>
@@ -349,7 +349,7 @@ export default function LoginPage() {
                   <button
                     type="button" onClick={handleForgotPassword}
                     disabled={loading}
-                    className="text-xs text-[#9a442d] hover:underline disabled:opacity-50"
+                    className="text-xs text-terra hover:underline disabled:opacity-50"
                   >
                     Forgot password?
                   </button>
@@ -364,7 +364,7 @@ export default function LoginPage() {
               {/* Submit */}
               <button
                 type="submit" disabled={loading || !email.trim() || !password}
-                className="w-full py-3 rounded-xl bg-[#9a442d] text-white font-semibold text-sm hover:bg-[#7d3725] transition-all disabled:bg-[#e2d3c4] disabled:text-[#9a8a80] disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-xl bg-terra text-white font-semibold text-sm hover:bg-terra-hover transition-all disabled:bg-[#e2d3c4] disabled:text-[#9a8a80] disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 style={{ fontFamily: 'var(--font-epilogue)' }}
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
@@ -377,9 +377,9 @@ export default function LoginPage() {
           {showMagic && (
             <form onSubmit={handleMagic} className="space-y-4">
               <div>
-                <label htmlFor="magic-email" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">Email</label>
+                <label htmlFor="magic-email" className="block text-xs font-semibold text-ink-mid mb-1.5">Email</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" aria-hidden="true" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-light" aria-hidden="true" />
                   <input
                     id="magic-email"
                     type="email" value={email} onChange={e => setEmail(e.target.value)}
@@ -387,7 +387,7 @@ export default function LoginPage() {
                     aria-required="true"
                     aria-invalid={!!error}
                     aria-describedby={error ? 'magic-error' : undefined}
-                    className="w-full pl-9 pr-4 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#6b5d57] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
+                    className="w-full pl-9 pr-4 py-3 rounded-xl border border-sand-mid bg-white text-sm text-ink placeholder:text-ink-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terra/30 focus:border-terra transition-all"
                   />
                 </div>
               </div>
@@ -396,7 +396,7 @@ export default function LoginPage() {
               )}
               <button
                 type="submit" disabled={loading || !email.trim()}
-                className="w-full py-3 rounded-xl bg-[#9a442d] text-white font-semibold text-sm hover:bg-[#7d3725] transition-all disabled:bg-[#e2d3c4] disabled:text-[#9a8a80] disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-xl bg-terra text-white font-semibold text-sm hover:bg-terra-hover transition-all disabled:bg-[#e2d3c4] disabled:text-[#9a8a80] disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 style={{ fontFamily: 'var(--font-epilogue)' }}
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
@@ -409,7 +409,7 @@ export default function LoginPage() {
           <div className="mt-6 text-center">
             <button
               onClick={() => { setShowMagic(v => !v); reset() }}
-              className="text-xs text-[#6b5d57] hover:text-[#9a442d] transition-colors"
+              className="text-xs text-ink-light hover:text-terra transition-colors"
             >
               {showMagic ? '← Sign in with password instead' : 'Or sign in without a password →'}
             </button>
@@ -420,7 +420,7 @@ export default function LoginPage() {
               The "Save events · Check in · Earn badges" subhead at the top
               of the page already does the social-proof job. */}
 
-          <p className="text-center text-[10px] text-[#6b5d57] mt-8">
+          <p className="text-center text-[10px] text-ink-light mt-8">
             No spam. Just Albuquerque.
           </p>
         </div>
@@ -431,12 +431,12 @@ export default function LoginPage() {
 
 function Header() {
   return (
-    <header className="sticky top-0 z-20 bg-[--bg]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
+    <header className="sticky top-0 z-20 bg-[--bg]/90 backdrop-blur-md border-b border-sand-mid/60">
       <div className="max-w-md mx-auto px-4 py-3 flex items-center gap-3">
-        <Link href="/" className="flex items-center gap-1.5 text-sm text-[#4a3f3a] hover:text-[#9a442d] transition-colors">
+        <Link href="/" className="flex items-center gap-1.5 text-sm text-ink-mid hover:text-terra transition-colors">
           <ArrowLeft className="w-4 h-4" />
         </Link>
-        <span className="font-black text-lg text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
+        <span className="font-black text-lg text-ink" style={{ fontFamily: 'var(--font-epilogue)' }}>
           ABQ Unplugged
         </span>
       </div>

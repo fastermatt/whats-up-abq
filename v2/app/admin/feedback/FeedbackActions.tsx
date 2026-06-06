@@ -54,7 +54,7 @@ export function FeedbackActions({
         value={notes}
         onChange={e => setNotes(e.target.value)}
         rows={2}
-        className="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs text-white/90 placeholder:text-white/55 resize-none focus:outline-none focus:border-white/30"
+        className="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs text-white/90 placeholder:text-white/55 resize-none focus-visible:outline-none focus:border-white/30"
       />
       {error && <p className="text-xs text-red-400">{error}</p>}
       <div className="flex gap-1.5 flex-wrap">

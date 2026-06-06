@@ -65,7 +65,7 @@ const BUDGET_OPTIONS: { value: UserPreferences['budget']; label: string }[] = [
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[11px] uppercase tracking-[0.14em] font-bold text-[#6b5d57] mb-2.5">
+    <p className="text-[11px] uppercase tracking-[0.14em] font-bold text-ink-light mb-2.5">
       {children}
     </p>
   )
@@ -88,8 +88,8 @@ function Chip({
         'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-semibold',
         'border transition-all duration-150 active:scale-95',
         active
-          ? 'bg-[#9a442d] border-[#9a442d] text-white shadow-sm'
-          : 'bg-[#fdf9f4] border-[#ddc9a3] text-[#4a3f3a] hover:border-[#9a442d]/60 hover:bg-[#f9f3ec]',
+          ? 'bg-terra border-terra text-white shadow-sm'
+          : 'bg-cream-raised border-sand-mid text-ink-mid hover:border-terra/60 hover:bg-[#f9f3ec]',
       ].join(' ')}
     >
       {children}
@@ -230,19 +230,19 @@ export function PreferencesPicker({ userId, initial, onSaved, compact = false }:
             className={[
               'inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all',
               prefs.digest
-                ? 'bg-[#4f6249]/10 border-[#4f6249]/40 text-[#4f6249]'
-                : 'bg-[#fdf9f4] border-[#ddc9a3] text-[#4a3f3a] hover:border-[#4f6249]/50',
+                ? 'bg-sage/10 border-sage/40 text-sage'
+                : 'bg-cream-raised border-sand-mid text-ink-mid hover:border-sage/50',
             ].join(' ')}
           >
             <span className={[
               'w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors',
-              prefs.digest ? 'bg-[#4f6249] border-[#4f6249]' : 'border-[#c4b9b0]',
+              prefs.digest ? 'bg-sage border-sage' : 'border-[#c4b9b0]',
             ].join(' ')}>
               {prefs.digest && <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />}
             </span>
             Send me a weekly "what's on" email based on my picks
           </button>
-          <p className="text-[10px] text-[#6b5d57] mt-1.5 ml-0.5">
+          <p className="text-[10px] text-ink-light mt-1.5 ml-0.5">
             We send a maximum of one email per week. No ads, no spam.
           </p>
         </div>
@@ -257,8 +257,8 @@ export function PreferencesPicker({ userId, initial, onSaved, compact = false }:
           className={[
             'inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all',
             saved
-              ? 'bg-[#4f6249] text-white'
-              : 'bg-[#9a442d] text-white hover:bg-[#7d3725] disabled:opacity-40 disabled:cursor-not-allowed',
+              ? 'bg-sage text-white'
+              : 'bg-terra text-white hover:bg-terra-hover disabled:opacity-40 disabled:cursor-not-allowed',
           ].join(' ')}
           style={{ fontFamily: 'var(--font-epilogue)' }}
         >
@@ -274,7 +274,7 @@ export function PreferencesPicker({ userId, initial, onSaved, compact = false }:
           )}
         </button>
         {saved && (
-          <p className="text-[11px] text-[#4f6249] font-medium">
+          <p className="text-[11px] text-sage font-medium">
             Your For You feed will update on your next visit.
           </p>
         )}

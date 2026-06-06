@@ -137,32 +137,32 @@ export function CuratedListPage({
             className="object-cover object-center"
             sizes="100vw"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-[#fbf7f1]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-cream" />
         </div>
       )}
 
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-8">
         <div className="animate-fade-in">
           <h1
-            className="text-3xl font-black text-[#1a1614] tracking-tight"
+            className="text-3xl font-black text-ink tracking-tight"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             {config.heading}
           </h1>
-          <p className="text-[#6b5d57] text-sm mt-1">{config.lede}</p>
+          <p className="text-ink-light text-sm mt-1">{config.lede}</p>
 
           {/* SEO body copy keeps the page above the threshold for crawlable text.
               Split on \n\n so authors can break long intros into real paragraphs
               without HTML in the data; each chunk renders as its own <p>. */}
           <div className="mt-4 max-w-3xl space-y-3">
             {config.intro.split(/\n\n+/).map((para, i) => (
-              <p key={i} className="text-sm text-[#4a3f3a] leading-relaxed">{para}</p>
+              <p key={i} className="text-sm text-ink-mid leading-relaxed">{para}</p>
             ))}
           </div>
           {config.introExtra && (
             <div className="mt-3 max-w-3xl space-y-3">
               {config.introExtra.split(/\n\n+/).map((para, i) => (
-                <p key={i} className="text-sm text-[#4a3f3a] leading-relaxed">{para}</p>
+                <p key={i} className="text-sm text-ink-mid leading-relaxed">{para}</p>
               ))}
             </div>
           )}
@@ -172,10 +172,10 @@ export function CuratedListPage({
             <div className="mt-5 flex flex-wrap gap-2">
               {config.venueStrip.map(({ name, href, emoji }) => {
                 const inner = (
-                  <span className="flex items-center gap-1.5 text-xs font-semibold text-[#9a442d]">
+                  <span className="flex items-center gap-1.5 text-xs font-semibold text-terra">
                     {emoji && <span aria-hidden="true">{emoji}</span>}
                     {name}
-                    {href && <span className="text-[#c4614a] text-[10px]">↗</span>}
+                    {href && <span className="text-terra-mid text-[10px]">↗</span>}
                   </span>
                 )
                 return href ? (
@@ -205,17 +205,17 @@ export function CuratedListPage({
           <div className="flex flex-col items-center justify-center py-24 text-center animate-fade-in">
             <div className="text-5xl mb-4">🌵</div>
             <h2
-              className="text-lg font-bold text-[#1a1614] mb-2"
+              className="text-lg font-bold text-ink mb-2"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               {config.emptyHeading}
             </h2>
-            <p className="text-[#6b5d57] text-sm max-w-xs mb-6">
+            <p className="text-ink-light text-sm max-w-xs mb-6">
               {config.emptyBody}
             </p>
             <Link
               href="/events"
-              className="px-5 py-2 rounded-full bg-[#9a442d] text-white text-sm font-medium hover:bg-[#7d3725] transition-colors"
+              className="px-5 py-2 rounded-full bg-terra text-white text-sm font-medium hover:bg-terra-hover transition-colors"
             >
               Browse all events →
             </Link>
@@ -228,7 +228,7 @@ export function CuratedListPage({
                     "Music" heading on pages that are already scoped to a single category */}
                 {sortedCats.length > 1 && (
                   <h2
-                    className="text-lg font-black text-[#1a1614] mb-3 border-b border-[#f0e4cc] pb-1"
+                    className="text-lg font-black text-ink mb-3 border-b border-sand-light pb-1"
                     style={{ fontFamily: 'var(--font-epilogue)' }}
                   >
                     {cat}
@@ -246,22 +246,22 @@ export function CuratedListPage({
 
         {/* ── Submit CTA ── */}
         {config.submitUrl && (
-          <div className="mt-10 pt-8 border-t border-[#f0e4cc]">
-            <div className="bg-[#fdf5ec] border border-[#f0e4cc] rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 max-w-3xl">
+          <div className="mt-10 pt-8 border-t border-sand-light">
+            <div className="bg-[#fdf5ec] border border-sand-light rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 max-w-3xl">
               <div className="flex-1">
                 <p
-                  className="text-sm font-bold text-[#1a1614]"
+                  className="text-sm font-bold text-ink"
                   style={{ fontFamily: 'var(--font-epilogue)' }}
                 >
                   Know of an event we&apos;re missing?
                 </p>
-                <p className="text-xs text-[#6b5d57] mt-0.5">
+                <p className="text-xs text-ink-light mt-0.5">
                   {config.submitLabel ?? "We update daily, but we don't catch everything. Submit it and we'll add it."}
                 </p>
               </div>
               <Link
                 href={config.submitUrl}
-                className="shrink-0 px-5 py-2.5 rounded-full bg-[#9a442d] text-white text-sm font-semibold hover:bg-[#7d3725] transition-colors whitespace-nowrap"
+                className="shrink-0 px-5 py-2.5 rounded-full bg-terra text-white text-sm font-semibold hover:bg-terra-hover transition-colors whitespace-nowrap"
               >
                 Submit an event →
               </Link>
@@ -271,23 +271,23 @@ export function CuratedListPage({
 
         {/* ── FAQ section — FAQPage schema is already emitted; this is the visible counterpart ── */}
         {config.faqs && config.faqs.length > 0 && (
-          <div className="mt-10 pt-8 border-t border-[#f0e4cc]">
+          <div className="mt-10 pt-8 border-t border-sand-light">
             <h2
-              className="text-base font-black text-[#1a1614] mb-4 uppercase tracking-wider"
+              className="text-base font-black text-ink mb-4 uppercase tracking-wider"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               Frequently Asked Questions
             </h2>
             <div className="space-y-3 max-w-3xl">
               {config.faqs.map(({ q, a }, i) => (
-                <div key={i} className="bg-white rounded-xl border border-[#f0e4cc] p-4 shadow-sm">
+                <div key={i} className="bg-white rounded-xl border border-sand-light p-4 shadow-sm">
                   <h3
-                    className="text-sm font-bold text-[#1a1614] mb-1.5"
+                    className="text-sm font-bold text-ink mb-1.5"
                     style={{ fontFamily: 'var(--font-epilogue)' }}
                   >
                     {q}
                   </h3>
-                  <p className="text-xs text-[#6b5d57] leading-relaxed">{a}</p>
+                  <p className="text-xs text-ink-light leading-relaxed">{a}</p>
                 </div>
               ))}
             </div>
@@ -296,14 +296,14 @@ export function CuratedListPage({
 
         {/* ── Around Albuquerque — external trust links ── */}
         {config.relatedLinks && config.relatedLinks.length > 0 && (
-          <div className="mt-10 pt-8 border-t border-[#f0e4cc]">
+          <div className="mt-10 pt-8 border-t border-sand-light">
             <h2
-              className="text-base font-black text-[#1a1614] mb-1 uppercase tracking-wider"
+              className="text-base font-black text-ink mb-1 uppercase tracking-wider"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               Around Albuquerque
             </h2>
-            <p className="text-xs text-[#6b5d57] mb-4">Other places to look.</p>
+            <p className="text-xs text-ink-light mb-4">Other places to look.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-3xl">
               {config.relatedLinks.map(({ name, url, description }) => (
                 <a
@@ -311,15 +311,15 @@ export function CuratedListPage({
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex flex-col gap-0.5 bg-white rounded-xl border border-[#f0e4cc] p-3.5 shadow-sm hover:border-[#9a442d] hover:shadow-md transition-all group"
+                  className="flex flex-col gap-0.5 bg-white rounded-xl border border-sand-light p-3.5 shadow-sm hover:border-terra hover:shadow-md transition-all group"
                 >
                   <span
-                    className="text-sm font-bold text-[#9a442d] group-hover:underline leading-tight"
+                    className="text-sm font-bold text-terra group-hover:underline leading-tight"
                     style={{ fontFamily: 'var(--font-epilogue)' }}
                   >
                     {name} ↗
                   </span>
-                  <span className="text-[11px] text-[#6b5d57] leading-snug">{description}</span>
+                  <span className="text-[11px] text-ink-light leading-snug">{description}</span>
                 </a>
               ))}
             </div>
@@ -347,11 +347,11 @@ function CuratedCard({ event, index }: { event: NormalizedEvent; index: number }
   })()
   return (
     <div
-      className="group relative spring-card rounded-xl overflow-hidden border border-[#f0e4cc]/80 bg-white shadow-[0_1px_3px_rgba(26,22,20,0.04)] hover:shadow-[0_8px_24px_rgba(26,22,20,0.12)] transition-all duration-300 hover:-translate-y-1"
+      className="group relative spring-card rounded-xl overflow-hidden border border-sand-light/80 bg-white shadow-[0_1px_3px_rgba(26,22,20,0.04)] hover:shadow-[0_8px_24px_rgba(26,22,20,0.12)] transition-all duration-300 hover:-translate-y-1"
       style={{ '--card-i': Math.min(index, 14) } as React.CSSProperties}
     >
       <Link href={`/events/${event.id}`} className="flex flex-col h-full">
-        <div className="relative aspect-[16/10] bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] overflow-hidden">
+        <div className="relative aspect-[16/10] bg-gradient-to-br from-sand-light to-sand-mid overflow-hidden">
           <EventImage
             src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
             fallback={getCategoryFallback(event.category ?? undefined, event.id)}
@@ -360,25 +360,25 @@ function CuratedCard({ event, index }: { event: NormalizedEvent; index: number }
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
           />
           {event.category && (
-            <div className="absolute top-1.5 right-1.5 bg-[#1a1614]/60 backdrop-blur-sm text-white text-[10px] px-1.5 py-0.5 rounded-full">
+            <div className="absolute top-1.5 right-1.5 bg-ink/60 backdrop-blur-sm text-white text-[10px] px-1.5 py-0.5 rounded-full">
               {event.subcategory ? `${event.category} · ${event.subcategory}` : event.category}
             </div>
           )}
           {event.price && (
-            <div className="absolute bottom-1.5 right-1.5 bg-[#006a62]/90 backdrop-blur-sm text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
+            <div className="absolute bottom-1.5 right-1.5 bg-turq/90 backdrop-blur-sm text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
               {event.price}
             </div>
           )}
         </div>
         <div className="px-2 pt-2 pb-0.5 space-y-0.5 flex-1 flex flex-col">
           <h3
-            className="font-bold text-[#1a1614] text-xs leading-tight line-clamp-2 group-hover:text-[#9a442d] transition-colors"
+            className="font-bold text-ink text-xs leading-tight line-clamp-2 group-hover:text-terra transition-colors"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             {event.title}
           </h3>
           {(dayLabel || timeStr) && (
-            <p className="text-[11px] text-[#9a442d] font-medium flex items-center gap-1">
+            <p className="text-[11px] text-terra font-medium flex items-center gap-1">
               <Clock className="w-2.5 h-2.5 flex-shrink-0" />
               <span>
                 {dayLabel}{dayLabel && timeStr ? ' · ' : ''}{timeStr}
@@ -391,7 +391,7 @@ function CuratedCard({ event, index }: { event: NormalizedEvent; index: number }
       {event.venue && (
         <Link
           href={`/venues/${venueToSlug(event.venue)}`}
-          className="flex items-center gap-1 px-2 pb-2 text-[11px] text-[#4a3f3a] hover:text-[#9a442d] hover:underline line-clamp-1 transition-colors"
+          className="flex items-center gap-1 px-2 pb-2 text-[11px] text-ink-mid hover:text-terra hover:underline line-clamp-1 transition-colors"
           aria-label={`See all events at ${event.venue}`}
         >
           <MapPin className="w-2.5 h-2.5 flex-shrink-0" />

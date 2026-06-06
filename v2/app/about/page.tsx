@@ -63,12 +63,12 @@ const SOURCES = [
 
 export default function AboutPage() {
   return (
-    <main id="main" className="min-h-dvh bg-[#fbf7f1] text-[#1a1614]">
+    <main id="main" className="min-h-dvh bg-cream text-ink">
       <div className="max-w-2xl mx-auto px-4 py-8 md:py-12">
         {/* Back button */}
         <Link
           href="/"
-          className="inline-flex items-center gap-1 text-sm font-semibold text-[#9a442d] hover:text-[#7d3725] transition-colors mb-8"
+          className="inline-flex items-center gap-1 text-sm font-semibold text-terra hover:text-terra-hover transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
           Back
@@ -77,7 +77,7 @@ export default function AboutPage() {
         {/* H1 */}
         <AnimateIn animation="fade-up" onScroll={false} delay={50}>
           <h1
-            className="text-4xl md:text-5xl font-black leading-tight mb-3 text-[#1a1614]"
+            className="text-4xl md:text-5xl font-black leading-tight mb-3 text-ink"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             About ABQ Unplugged
@@ -85,7 +85,7 @@ export default function AboutPage() {
         </AnimateIn>
 
         <AnimateIn animation="fade-up" onScroll={false} delay={100}>
-          <p className="text-base md:text-lg leading-relaxed mb-10 text-[#4a3f3a]">
+          <p className="text-base md:text-lg leading-relaxed mb-10 text-ink-mid">
             Albuquerque has more going on than most people realize. Music at the Launchpad.
             Comedy at Hyena&apos;s. NM United at Isotopes Park. Art walks and food festivals every
             weekend. ABQ Unplugged puts all of it in one place, so getting out and meeting people
@@ -97,7 +97,7 @@ export default function AboutPage() {
         <AnimateIn animation="fade-up" delay={50}>
           <section className="mb-10">
             <h2
-              className="text-2xl font-bold mb-4 text-[#1a1614]"
+              className="text-2xl font-bold mb-4 text-ink"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               What makes it different
@@ -109,29 +109,29 @@ export default function AboutPage() {
               {FEATURES.slice(0, 1).map(({ icon: Icon, title, desc }) => (
                 <div
                   key={title}
-                  className="sm:col-span-3 bg-gradient-to-br from-[#fdf9f4] to-[#f8eddf] rounded-xl p-5 border border-[#e8d9bf] flex gap-4 items-start"
+                  className="sm:col-span-3 bg-gradient-to-br from-cream-raised to-[#f8eddf] rounded-xl p-5 border border-[#e8d9bf] flex gap-4 items-start"
                 >
                   <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <Icon className="w-5 h-5 text-[#9a442d]" />
+                    <Icon className="w-5 h-5 text-terra" />
                   </div>
                   <div>
-                    <p className="text-base font-black text-[#1a1614] mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
+                    <p className="text-base font-black text-ink mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
                       {title}
                     </p>
-                    <p className="text-sm text-[#4a3f3a] leading-relaxed">{desc}</p>
+                    <p className="text-sm text-ink-mid leading-relaxed">{desc}</p>
                   </div>
                 </div>
               ))}
               {FEATURES.slice(1).map(({ icon: Icon, title, desc }) => (
                 <div
                   key={title}
-                  className="bg-white rounded-xl p-4 border border-[#f0e4cc] shadow-sm"
+                  className="bg-white rounded-xl p-4 border border-sand-light shadow-sm"
                 >
-                  <Icon className="w-5 h-5 text-[#9a442d] mb-2" />
-                  <p className="text-sm font-bold text-[#1a1614] mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
+                  <Icon className="w-5 h-5 text-terra mb-2" />
+                  <p className="text-sm font-bold text-ink mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
                     {title}
                   </p>
-                  <p className="text-xs text-[#6b5d57] leading-relaxed">{desc}</p>
+                  <p className="text-xs text-ink-light leading-relaxed">{desc}</p>
                 </div>
               ))}
             </div>
@@ -142,24 +142,24 @@ export default function AboutPage() {
         <AnimateIn animation="fade-up" delay={100}>
           <section className="mb-10">
             <h2
-              className="text-2xl font-bold mb-4 text-[#1a1614]"
+              className="text-2xl font-bold mb-4 text-ink"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               Where events come from
             </h2>
-            <p className="text-sm text-[#6b5d57] mb-3">
+            <p className="text-sm text-ink-light mb-3">
               Updated daily from multiple trusted ticket and event sources:
             </p>
             <div className="space-y-2">
               {SOURCES.map(({ name, desc }) => (
                 <div
                   key={name}
-                  className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 border border-[#f0e4cc]"
+                  className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 border border-sand-light"
                 >
-                  <span className="w-2 h-2 rounded-full bg-[#9a442d] flex-shrink-0" />
+                  <span className="w-2 h-2 rounded-full bg-terra flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-semibold text-[#1a1614]">{name}</p>
-                    <p className="text-xs text-[#6b5d57]">{desc}</p>
+                    <p className="text-sm font-semibold text-ink">{name}</p>
+                    <p className="text-xs text-ink-light">{desc}</p>
                   </div>
                 </div>
               ))}
@@ -169,17 +169,17 @@ export default function AboutPage() {
 
         {/* Built by */}
         <AnimateIn animation="fade-up" delay={100}>
-          <section className="mb-10 pb-8 border-b border-[#f0e4cc]">
+          <section className="mb-10 pb-8 border-b border-sand-light">
             <h2
-              className="text-2xl font-bold mb-3 text-[#1a1614]"
+              className="text-2xl font-bold mb-3 text-ink"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               Built by
             </h2>
-            <p className="text-base text-[#1a1614]">
+            <p className="text-base text-ink">
               Matt Carlson, Albuquerque, NM
             </p>
-            <p className="text-sm text-[#6b5d57] mt-1">
+            <p className="text-sm text-ink-light mt-1">
               Built to make it easier for Albuquerqueans to get off the couch and experience
               what makes this city great.
             </p>
@@ -190,12 +190,12 @@ export default function AboutPage() {
         <AnimateIn animation="fade-up" delay={100}>
           <section className="mb-10" id="press">
             <h2
-              className="text-2xl font-bold mb-3 text-[#1a1614]"
+              className="text-2xl font-bold mb-3 text-ink"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               Press &amp; Media
             </h2>
-            <p className="text-sm text-[#6b5d57] mb-5">
+            <p className="text-sm text-ink-light mb-5">
               ABQ Unplugged is Albuquerque&apos;s independent, free event discovery platform — built and run locally.
               We&apos;re happy to talk to local press and media about Albuquerque&apos;s events scene.
             </p>
@@ -210,26 +210,26 @@ export default function AboutPage() {
               ].map(({ stat, label }) => (
                 <div
                   key={label}
-                  className="bg-white rounded-xl p-3 border border-[#f0e4cc] text-center"
+                  className="bg-white rounded-xl p-3 border border-sand-light text-center"
                 >
-                  <p className="text-xl font-black text-[#9a442d]" style={{ fontFamily: 'var(--font-epilogue)' }}>{stat}</p>
-                  <p className="text-[11px] text-[#6b5d57] mt-0.5">{label}</p>
+                  <p className="text-xl font-black text-terra" style={{ fontFamily: 'var(--font-epilogue)' }}>{stat}</p>
+                  <p className="text-[11px] text-ink-light mt-0.5">{label}</p>
                 </div>
               ))}
             </div>
 
             {/* Contact */}
-            <div className="flex items-start gap-3 bg-[#fdf9f4] border border-[#e8d9bf] rounded-xl px-4 py-4">
-              <Mail className="w-4 h-4 text-[#9a442d] mt-0.5 flex-shrink-0" />
+            <div className="flex items-start gap-3 bg-cream-raised border border-[#e8d9bf] rounded-xl px-4 py-4">
+              <Mail className="w-4 h-4 text-terra mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-sm font-semibold text-[#1a1614] mb-0.5">Media inquiries</p>
+                <p className="text-sm font-semibold text-ink mb-0.5">Media inquiries</p>
                 <a
                   href="mailto:hello@abqunplugged.com"
-                  className="text-sm text-[#9a442d] hover:underline"
+                  className="text-sm text-terra hover:underline"
                 >
                   hello@abqunplugged.com
                 </a>
-                <p className="text-xs text-[#6b5d57] mt-1">
+                <p className="text-xs text-ink-light mt-1">
                   For interview requests, data questions, or coverage of the Albuquerque events scene.
                 </p>
               </div>
@@ -242,14 +242,14 @@ export default function AboutPage() {
           <div className="flex flex-col sm:flex-row gap-3 mt-8">
             <Link
               href="/events"
-              className="inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-[#9a442d] text-white font-semibold text-sm hover:bg-[#7d3725] transition-all duration-300 hover:shadow-lg hover:shadow-[#9a442d]/20"
+              className="inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-terra text-white font-semibold text-sm hover:bg-terra-hover transition-all duration-300 hover:shadow-lg hover:shadow-terra/20"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               Browse Events
             </Link>
             <Link
               href="/leaderboard"
-              className="inline-flex items-center justify-center px-6 py-3 rounded-2xl border-2 border-[#f0e4cc] text-[#1a1614] font-semibold text-sm hover:bg-[#f5f0e8] transition-all duration-300"
+              className="inline-flex items-center justify-center px-6 py-3 rounded-2xl border-2 border-sand-light text-ink font-semibold text-sm hover:bg-[#f5f0e8] transition-all duration-300"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               View Leaderboard
@@ -257,10 +257,10 @@ export default function AboutPage() {
           </div>
 
           {/* Utility links */}
-          <p className="mt-6 text-xs text-[#6b5d57]">
+          <p className="mt-6 text-xs text-ink-light">
             <Link
               href="/privacy"
-              className="hover:text-[#9a442d] transition-colors underline underline-offset-2"
+              className="hover:text-terra transition-colors underline underline-offset-2"
             >
               Privacy Policy
             </Link>

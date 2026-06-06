@@ -60,7 +60,7 @@ export function EventEditForm({ eventId, rawTitle, initialValues }: Props) {
     }
   }
 
-  const inputClass = 'w-full bg-white/10 border border-white/20 text-white placeholder-white/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#9a442d] transition-colors'
+  const inputClass = 'w-full bg-white/10 border border-white/20 text-white placeholder-white/30 rounded-xl px-4 py-2.5 text-sm focus-visible:outline-none focus:border-terra transition-colors'
   const selectClass = `${inputClass} appearance-none cursor-pointer`
 
   return (
@@ -124,7 +124,7 @@ export function EventEditForm({ eventId, rawTitle, initialValues }: Props) {
             onChange={e => { set('category', e.target.value); set('subcategory', '') }}
             className={selectClass}
           >
-            {CATEGORIES.map(c => <option key={c} value={c} className="bg-[#1a1614]">{c || '— no override —'}</option>)}
+            {CATEGORIES.map(c => <option key={c} value={c} className="bg-ink">{c || '— no override —'}</option>)}
           </select>
         </div>
         <div>
@@ -135,7 +135,7 @@ export function EventEditForm({ eventId, rawTitle, initialValues }: Props) {
             disabled={subs.length <= 1}
             className={`${selectClass} disabled:opacity-40`}
           >
-            {subs.map(s => <option key={s} value={s} className="bg-[#1a1614]">{s || '— none —'}</option>)}
+            {subs.map(s => <option key={s} value={s} className="bg-ink">{s || '— none —'}</option>)}
           </select>
         </div>
       </div>
@@ -157,7 +157,7 @@ export function EventEditForm({ eventId, rawTitle, initialValues }: Props) {
         <button
           onClick={save}
           disabled={saving}
-          className="px-6 py-2.5 bg-[#9a442d] text-white font-semibold rounded-xl text-sm hover:bg-[#7d3725] transition-colors disabled:opacity-50"
+          className="px-6 py-2.5 bg-terra text-white font-semibold rounded-xl text-sm hover:bg-terra-hover transition-colors disabled:opacity-50"
         >
           {saving ? 'Saving…' : 'Save Changes'}
         </button>

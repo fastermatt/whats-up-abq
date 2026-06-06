@@ -52,14 +52,14 @@ export default async function MoviesPage() {
   } : null
 
   return (
-    <main id="main" className="min-h-dvh bg-[#fbf7f1]">
+    <main id="main" className="min-h-dvh bg-cream">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {itemListLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />}
       {/* ── Page header — solid dark (thematic: movies show in dark
           theaters, posters look right on a dark canvas). Round-6 flagged
           the prior gradient-to-cream fade as an awkward theme break;
           this version is intentional, not accidental. */}
-      <section className="py-10 px-4 bg-[#1a1614]">
+      <section className="py-10 px-4 bg-ink">
         <div className="max-w-6xl mx-auto">
           <Link
             href="/"
@@ -87,18 +87,18 @@ export default async function MoviesPage() {
       <section className="max-w-6xl mx-auto px-4 py-8">
         {!hasKey ? (
           /* Admin notice, only shows when TMDB_READ_ACCESS_TOKEN is not set */
-          <div className="rounded-xl border border-[#f0e4cc] bg-white p-8 text-center">
+          <div className="rounded-xl border border-sand-light bg-white p-8 text-center">
             <p className="text-2xl mb-3">🎬</p>
-            <h2 className="font-bold text-[#1a1614] text-lg mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
+            <h2 className="font-bold text-ink text-lg mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
               Movies feature needs a TMDb API key
             </h2>
-            <p className="text-sm text-[#6b5d57] mb-4 max-w-sm mx-auto">
+            <p className="text-sm text-ink-light mb-4 max-w-sm mx-auto">
               Get a free key at{' '}
               <a
                 href="https://www.themoviedb.org/settings/api"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#9a442d] underline hover:no-underline"
+                className="text-terra underline hover:no-underline"
               >
                 themoviedb.org/settings/api
               </a>
@@ -107,8 +107,8 @@ export default async function MoviesPage() {
             </p>
           </div>
         ) : !hasMovies ? (
-          <div className="rounded-xl border border-[#f0e4cc] bg-white p-8 text-center">
-            <p className="text-sm text-[#6b5d57]">No movies found right now. Check back soon.</p>
+          <div className="rounded-xl border border-sand-light bg-white p-8 text-center">
+            <p className="text-sm text-ink-light">No movies found right now. Check back soon.</p>
           </div>
         ) : (
           <>
@@ -119,13 +119,13 @@ export default async function MoviesPage() {
             </div>
 
             {/* TMDb attribution, required by their API ToS */}
-            <p className="mt-8 text-center text-[11px] text-[#6b5d57] flex items-center justify-center gap-2">
+            <p className="mt-8 text-center text-[11px] text-ink-light flex items-center justify-center gap-2">
               <span>Movie data provided by</span>
               <a
                 href="https://www.themoviedb.org"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-[#9a442d] transition-colors underline"
+                className="hover:text-terra transition-colors underline"
               >
                 The Movie Database (TMDb)
               </a>
@@ -183,7 +183,7 @@ function MovieCard({ movie, priority }: { movie: Movie; priority?: boolean }) {
         {/* Hover overlay with CTA */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-end">
           <div className="w-full p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <span className="flex items-center justify-center gap-1.5 w-full bg-[#9a442d] text-white text-[11px] font-bold py-2 rounded-lg">
+            <span className="flex items-center justify-center gap-1.5 w-full bg-terra text-white text-[11px] font-bold py-2 rounded-lg">
               <ExternalLink className="w-3 h-3" />
               Get showtimes
             </span>
@@ -193,7 +193,7 @@ function MovieCard({ movie, priority }: { movie: Movie; priority?: boolean }) {
 
       {/* Title */}
       <h2
-        className="font-bold text-[#1a1614] text-xs leading-tight line-clamp-2 group-hover:text-[#9a442d] transition-colors"
+        className="font-bold text-ink text-xs leading-tight line-clamp-2 group-hover:text-terra transition-colors"
         style={{ fontFamily: 'var(--font-epilogue)' }}
       >
         {movie.title}
@@ -201,7 +201,7 @@ function MovieCard({ movie, priority }: { movie: Movie; priority?: boolean }) {
 
       {/* Release year */}
       {movie.releaseDate && (
-        <p className="text-[10px] text-[#6b5d57] mt-0.5">
+        <p className="text-[10px] text-ink-light mt-0.5">
           {movie.releaseDate.slice(0, 4)}
         </p>
       )}

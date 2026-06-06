@@ -30,7 +30,7 @@ export function NewsletterBar() {
 
   if (status === 'success') {
     return (
-      <div className="bg-[#9a442d] text-white text-center py-3 px-4">
+      <div className="bg-terra text-white text-center py-3 px-4">
         <p className="text-sm font-semibold mb-1.5">You&apos;re subscribed ✦ Weekend picks hit your inbox every Friday.</p>
         {/* Convert the success moment — they just opted in once, so a follow
             ask here is the warmest possible context for the second action. */}

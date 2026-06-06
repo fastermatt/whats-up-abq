@@ -252,7 +252,7 @@ export default async function AnalyticsPage() {
       {/* ── Top KPIs ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Today',         value: todaySessions,    icon: TrendingUp,  color: 'text-[#9a442d]',  tip: 'Unique visitor sessions today' },
+          { label: 'Today',         value: todaySessions,    icon: TrendingUp,  color: 'text-terra',  tip: 'Unique visitor sessions today' },
           { label: 'This Week',     value: week7Sessions,    icon: Users,       color: 'text-[#7cc4bf]',  tip: 'Sessions in the last 7 days' },
           { label: '30-Day Total',  value: totalSessions30,  icon: Users,       color: 'text-white',      tip: 'Total sessions this month' },
           { label: 'Mobile Share',  value: `${mobileShare}%`, icon: Smartphone, color: 'text-[#b0c4b1]',  tip: 'Percentage of mobile visitors' },
@@ -342,7 +342,7 @@ export default async function AnalyticsPage() {
                 return (
                   <div key={day} className="flex-1 relative group" title={`${label}: ${count} sessions`}>
                     <div
-                      className={`absolute bottom-0 inset-x-0 rounded-t transition-all ${isToday ? 'bg-[#9a442d]' : 'bg-white/20 group-hover:bg-white/35'}`}
+                      className={`absolute bottom-0 inset-x-0 rounded-t transition-all ${isToday ? 'bg-terra' : 'bg-white/20 group-hover:bg-white/35'}`}
                       style={{ height: `${pxH}px` }}
                     />
                     <div className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:flex bg-black/80 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap z-10 pointer-events-none">
@@ -375,7 +375,7 @@ export default async function AnalyticsPage() {
                   <span className="text-white/55 text-[10px] w-8 text-right tabular-nums">{HOUR_LABEL(hour)}</span>
                   <div className="flex-1 h-3 bg-white/10 rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full transition-all ${isTop ? 'bg-[#9a442d]' : 'bg-white/30'}`}
+                      className={`h-full rounded-full transition-all ${isTop ? 'bg-terra' : 'bg-white/30'}`}
                       style={{ width: `${Math.max(pct, count > 0 ? 2 : 0)}%` }}
                     />
                   </div>
@@ -400,7 +400,7 @@ export default async function AnalyticsPage() {
                   <span className="text-white/55 text-[10px] tabular-nums leading-none mb-1 shrink-0">{count}</span>
                   <div className="w-full relative shrink-0" style={{ height: '112px' }}>
                     <div
-                      className={`absolute bottom-0 inset-x-0 rounded-t transition-all ${isTop ? 'bg-[#9a442d]' : 'bg-white/20'}`}
+                      className={`absolute bottom-0 inset-x-0 rounded-t transition-all ${isTop ? 'bg-terra' : 'bg-white/20'}`}
                       style={{ height: `${pxH}px` }}
                     />
                   </div>
@@ -455,7 +455,7 @@ export default async function AnalyticsPage() {
                 <div key={path} className="flex items-center gap-3">
                   <span className="text-white/50 text-xs font-mono w-36 truncate" title={path}>{path}</span>
                   <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full bg-[#9a442d] rounded-full" style={{ width: `${pct}%` }} />
+                    <div className="h-full bg-terra rounded-full" style={{ width: `${pct}%` }} />
                   </div>
                   <span className="text-white/40 text-xs tabular-nums w-12 text-right">{views}</span>
                   <span className="text-white/45 text-[10px] w-16 text-right">{unique} uniq</span>
@@ -472,9 +472,9 @@ export default async function AnalyticsPage() {
         <p className="text-white/45 text-[10px] mb-4">Actions taken in the last 30 days</p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { key: 'event_click',    label: 'Event Clicks',   icon: MousePointer, color: 'text-[#9a442d]',  tip: 'Tapped through to an event detail page' },
+            { key: 'event_click',    label: 'Event Clicks',   icon: MousePointer, color: 'text-terra',  tip: 'Tapped through to an event detail page' },
             { key: 'search',         label: 'Searches',        icon: Search,       color: 'text-[#7cc4bf]',  tip: 'Used the search bar' },
-            { key: 'wishlist_add',   label: 'Events Saved',    icon: Heart,        color: 'text-[#e8a898]',  tip: 'Added an event to wishlist/saved' },
+            { key: 'wishlist_add',   label: 'Events Saved',    icon: Heart,        color: 'text-terra-light',  tip: 'Added an event to wishlist/saved' },
             { key: 'category_click', label: 'Category Clicks', icon: TrendingUp,   color: 'text-[#b0c4b1]',  tip: 'Clicked a category filter' },
           ].map(({ key, label, icon: Icon, color, tip }) => {
             const d = engCounts[key]

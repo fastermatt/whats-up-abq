@@ -53,44 +53,44 @@ export default async function ThingsToDoPage({
   }
 
   return (
-    <main id="main" className="min-h-dvh bg-[#fbf7f1]">
+    <main id="main" className="min-h-dvh bg-cream">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionLd) }} />
 
       {/* ── Header — flat per round-6 (gradient hero was the round-4
           anti-pattern that survived; now killed). Mirrors the
           /neighborhoods page treatment which round-6 scored 8.0. */}
-      <section className="bg-[#fbf7f1] border-b border-[#f0e4cc]">
+      <section className="bg-cream border-b border-sand-light">
         <div className="max-w-6xl mx-auto px-4 pt-5 pb-6">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-[#6b5d57] hover:text-[#9a442d] text-xs mb-4 transition-colors"
+            className="inline-flex items-center gap-1.5 text-ink-light hover:text-terra text-xs mb-4 transition-colors"
           >
             <ArrowLeft className="w-3 h-3" />
             Back
           </Link>
-          <p className="text-[11px] uppercase tracking-[0.2em] text-[#9a442d] mb-1.5 font-semibold">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-terra mb-1.5 font-semibold">
             Albuquerque
           </p>
           <h1
-            className="text-2xl sm:text-3xl font-black leading-tight mb-1.5 text-[#1a1614]"
+            className="text-2xl sm:text-3xl font-black leading-tight mb-1.5 text-ink"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             Things To Do
           </h1>
-          <p className="text-xs text-[#6b5d57] max-w-lg">
+          <p className="text-xs text-ink-light max-w-lg">
             Parks, skate parks, pools, golf courses, museums, arts &amp; culture, and historic sites, all public, all Albuquerque. Every link goes straight to the venue.
           </p>
           <div className="flex gap-4 mt-4 text-xs">
-            <span className="text-[#6b5d57]"><span className="text-[#1a1614] font-bold">{PLACES.length}</span> places</span>
-            <span className="text-[#6b5d57]"><span className="text-[#1a1614] font-bold">{PLACE_CATEGORIES.filter(c => PLACES.some(p => p.category === c.slug)).length}</span> categories</span>
-            <span className="text-[#6b5d57]"><span className="text-[#1a1614] font-bold">{PLACES.filter(p => p.free).length}</span> free</span>
+            <span className="text-ink-light"><span className="text-ink font-bold">{PLACES.length}</span> places</span>
+            <span className="text-ink-light"><span className="text-ink font-bold">{PLACE_CATEGORIES.filter(c => PLACES.some(p => p.category === c.slug)).length}</span> categories</span>
+            <span className="text-ink-light"><span className="text-ink font-bold">{PLACES.filter(p => p.free).length}</span> free</span>
           </div>
         </div>
       </section>
 
       {/* ── Sticky category filter ── */}
-      <div className="sticky top-0 md:top-14 z-30 bg-[#fbf7f1]/95 backdrop-blur-sm border-b border-[#f0e4cc]">
+      <div className="sticky top-0 md:top-14 z-30 bg-cream/95 backdrop-blur-sm border-b border-sand-light">
         <div
           className="flex gap-1.5 overflow-x-auto px-4 py-2.5"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -100,8 +100,8 @@ export default async function ThingsToDoPage({
             href="/things-to-do"
             className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all whitespace-nowrap ${
               !activeCategory
-                ? 'bg-[#006a62] text-white shadow-sm'
-                : 'bg-white border border-[#ddc9a3] text-[#4a3f3a] hover:border-[#006a62] hover:text-[#006a62]'
+                ? 'bg-turq text-white shadow-sm'
+                : 'bg-white border border-sand-mid text-ink-mid hover:border-turq hover:text-turq'
             }`}
           >
             All
@@ -119,8 +119,8 @@ export default async function ThingsToDoPage({
                 href={isActive ? '/things-to-do' : `/things-to-do?category=${cat.slug}`}
                 className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all whitespace-nowrap ${
                   isActive
-                    ? 'bg-[#006a62] text-white shadow-sm'
-                    : 'bg-white border border-[#ddc9a3] text-[#4a3f3a] hover:border-[#006a62] hover:text-[#006a62]'
+                    ? 'bg-turq text-white shadow-sm'
+                    : 'bg-white border border-sand-mid text-ink-mid hover:border-turq hover:text-turq'
                 }`}
               >
                 <span>{cat.emoji}</span>
@@ -137,14 +137,14 @@ export default async function ThingsToDoPage({
       {/* ── Grid ── */}
       <section className="max-w-6xl mx-auto px-4 py-6">
         {activeCategory && (
-          <p className="text-xs text-[#6b5d57] mb-4">
+          <p className="text-xs text-ink-light mb-4">
             {PLACE_CATEGORIES.find(c => c.slug === activeCategory)?.emoji}{' '}
-            <span className="font-semibold text-[#1a1614]">
+            <span className="font-semibold text-ink">
               {PLACE_CATEGORIES.find(c => c.slug === activeCategory)?.label}
             </span>
             {' '}·{' '}{places.length} place{places.length !== 1 ? 's' : ''}
             {freeCount > 0 && (
-              <span className="text-[#006a62] ml-1">· {freeCount} free</span>
+              <span className="text-turq ml-1">· {freeCount} free</span>
             )}
           </p>
         )}
@@ -159,9 +159,9 @@ export default async function ThingsToDoPage({
         </div>
 
         {places.length === 0 && (
-          <div className="text-center py-16 text-[#6b5d57]">
+          <div className="text-center py-16 text-ink-light">
             <p className="text-base font-semibold mb-1">Nothing here yet</p>
-            <Link href="/things-to-do" className="text-sm text-[#006a62] hover:underline">
+            <Link href="/things-to-do" className="text-sm text-turq hover:underline">
               View all places
             </Link>
           </div>
@@ -170,21 +170,21 @@ export default async function ThingsToDoPage({
 
       {/* ── Events CTA ── */}
       <section className="max-w-6xl mx-auto px-4 pb-10">
-        <div className="rounded-2xl bg-[#fdf9f4] border border-[#e8d5c0] p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="rounded-2xl bg-cream-raised border border-[#e8d5c0] p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.15em] text-[#9a442d] mb-0.5 font-semibold">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-terra mb-0.5 font-semibold">
               Looking for something tonight?
             </p>
-            <p className="text-base font-black text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
+            <p className="text-base font-black text-ink" style={{ fontFamily: 'var(--font-epilogue)' }}>
               Check the event calendar
             </p>
-            <p className="text-xs text-[#6b5d57] mt-0.5">
+            <p className="text-xs text-ink-light mt-0.5">
               Concerts, shows, sports, updated daily
             </p>
           </div>
           <Link
             href="/events"
-            className="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#9a442d] text-white text-sm font-semibold hover:bg-[#7d3725] transition-colors"
+            className="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-terra text-white text-sm font-semibold hover:bg-terra-hover transition-colors"
           >
             Browse Events
             <ArrowRight className="w-3.5 h-3.5" />
@@ -205,7 +205,7 @@ function PlaceCard({ place }: { place: Place }) {
       href={place.website}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex flex-col rounded-xl overflow-hidden bg-white border border-[#f0e4cc] hover:border-[#006a62]/40 hover:shadow-md transition-all duration-300 h-full"
+      className="group flex flex-col rounded-xl overflow-hidden bg-white border border-sand-light hover:border-turq/40 hover:shadow-md transition-all duration-300 h-full"
     >
       {/* Image or emoji fallback */}
       <div className="relative aspect-[4/3] overflow-hidden flex-shrink-0">
@@ -234,7 +234,7 @@ function PlaceCard({ place }: { place: Place }) {
 
         {/* Free badge */}
         {place.free && (
-          <div className="absolute top-1.5 right-1.5 bg-[#006a62] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
+          <div className="absolute top-1.5 right-1.5 bg-turq text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
             Free
           </div>
         )}
@@ -242,7 +242,7 @@ function PlaceCard({ place }: { place: Place }) {
         {/* External link on hover */}
         <div className="absolute bottom-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <div className="bg-white/95 rounded-full p-1 shadow-sm">
-            <ExternalLink className="w-2.5 h-2.5 text-[#006a62]" />
+            <ExternalLink className="w-2.5 h-2.5 text-turq" />
           </div>
         </div>
       </div>
@@ -250,28 +250,28 @@ function PlaceCard({ place }: { place: Place }) {
       {/* Content */}
       <div className="p-2.5 flex flex-col flex-1">
         {/* Category label */}
-        <p className="text-[9px] font-bold uppercase tracking-wider text-[#6b5d57] mb-0.5">
+        <p className="text-[9px] font-bold uppercase tracking-wider text-ink-light mb-0.5">
           {catMeta?.emoji} {catMeta?.label}
         </p>
 
         <h3
-          className="font-bold text-[#1a1614] text-xs leading-snug mb-0.5 group-hover:text-[#006a62] transition-colors line-clamp-2"
+          className="font-bold text-ink text-xs leading-snug mb-0.5 group-hover:text-turq transition-colors line-clamp-2"
           style={{ fontFamily: 'var(--font-epilogue)' }}
         >
           {place.name}
         </h3>
 
-        <p className="text-[10px] text-[#6b5d57] line-clamp-2 flex-1">
+        <p className="text-[10px] text-ink-light line-clamp-2 flex-1">
           {place.tagline}
         </p>
 
         {/* Footer */}
         <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#f5eee4]">
-          <span className="flex items-center gap-0.5 text-[9px] text-[#6b5d57] truncate">
+          <span className="flex items-center gap-0.5 text-[9px] text-ink-light truncate">
             <MapPin className="w-2 h-2 flex-shrink-0" />
             {place.neighborhood}
           </span>
-          <span className="flex items-center gap-0.5 text-[9px] text-[#006a62] font-semibold whitespace-nowrap group-hover:underline">
+          <span className="flex items-center gap-0.5 text-[9px] text-turq font-semibold whitespace-nowrap group-hover:underline">
             Hours & info
             <ExternalLink className="w-2 h-2 flex-shrink-0" />
           </span>

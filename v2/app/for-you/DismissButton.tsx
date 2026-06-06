@@ -51,7 +51,7 @@ export function DismissButton({ eventId }: { eventId: string }) {
 
   if (state === 'undone') {
     return (
-      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#4f6249] px-2 py-1">
+      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-sage px-2 py-1">
         restored
       </span>
     )
@@ -65,7 +65,7 @@ export function DismissButton({ eventId }: { eventId: string }) {
           <button
             type="button"
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); undo() }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white text-[#1a1614] text-[11px] font-semibold hover:bg-[#f0e4cc] transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white text-ink text-[11px] font-semibold hover:bg-sand-light transition-colors"
           >
             <Undo2 className="w-3 h-3" /> Undo
           </button>

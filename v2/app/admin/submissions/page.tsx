@@ -155,7 +155,7 @@ export default async function AdminSubmissionsPage({ searchParams }: PageProps) 
             No {status === 'all' ? '' : status.replace(/_/g, ' ')} submissions.
           </p>
           {status !== 'all' && TAB_COUNTS.all > 0 && (
-            <Link href="/admin/submissions?status=all" className="text-xs text-[#9a442d] hover:underline">
+            <Link href="/admin/submissions?status=all" className="text-xs text-terra hover:underline">
               View all {TAB_COUNTS.all} submission{TAB_COUNTS.all !== 1 ? 's' : ''} →
             </Link>
           )}
@@ -214,7 +214,7 @@ export default async function AdminSubmissionsPage({ searchParams }: PageProps) 
                   {s.ticket_url && (<>
                     <div className="text-white/40">Ticket URL</div>
                     <div className="text-white/80 truncate">
-                      <a href={s.ticket_url} target="_blank" rel="noopener" className="text-[#9a442d] hover:underline">
+                      <a href={s.ticket_url} target="_blank" rel="noopener" className="text-terra hover:underline">
                         {s.ticket_url}
                       </a>
                     </div>
@@ -245,7 +245,7 @@ export default async function AdminSubmissionsPage({ searchParams }: PageProps) 
 
                 {/* Reviewer notes (if any) */}
                 {s.reviewer_notes && (
-                  <p className="text-xs text-[#9a442d]/80 italic">
+                  <p className="text-xs text-terra/80 italic">
                     Note: {s.reviewer_notes}
                   </p>
                 )}

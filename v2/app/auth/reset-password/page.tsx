@@ -40,11 +40,11 @@ export default function ResetPasswordPage() {
         <Header />
         <div className="flex-1 flex items-center justify-center px-4">
           <div className="text-center animate-fade-up">
-            <CheckCircle className="w-14 h-14 text-[#4f6249] mx-auto mb-4" />
-            <h1 className="text-2xl font-black text-[#1a1614] mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
+            <CheckCircle className="w-14 h-14 text-sage mx-auto mb-4" />
+            <h1 className="text-2xl font-black text-ink mb-2" style={{ fontFamily: 'var(--font-epilogue)' }}>
               Password updated
             </h1>
-            <p className="text-sm text-[#6b5d57]">Redirecting you to your profile…</p>
+            <p className="text-sm text-ink-light">Redirecting you to your profile…</p>
           </div>
         </div>
       </main>
@@ -66,17 +66,17 @@ export default function ResetPasswordPage() {
               className="mx-auto mb-4"
               style={{ width: '140px', height: 'auto' }}
             />
-            <h1 className="text-2xl font-black text-[#1a1614] mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
+            <h1 className="text-2xl font-black text-ink mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
               Set new password
             </h1>
-            <p className="text-sm text-[#6b5d57]">Choose a password for your account</p>
+            <p className="text-sm text-ink-light">Choose a password for your account</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="new-password" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">New password</label>
+              <label htmlFor="new-password" className="block text-xs font-semibold text-ink-mid mb-1.5">New password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" aria-hidden="true" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-light" aria-hidden="true" />
                 <input
                   id="new-password"
                   type={showPw ? 'text' : 'password'}
@@ -86,11 +86,11 @@ export default function ResetPasswordPage() {
                   aria-required="true"
                   aria-invalid={!!error}
                   aria-describedby={error ? 'reset-error' : undefined}
-                  className="w-full pl-9 pr-10 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#6b5d57] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
+                  className="w-full pl-9 pr-10 py-3 rounded-xl border border-sand-mid bg-white text-sm text-ink placeholder:text-ink-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terra/30 focus:border-terra transition-all"
                 />
                 <button
                   type="button" onClick={() => setShowPw(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b5d57] hover:text-[#4a3f3a]"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-light hover:text-ink-mid"
                   aria-label={showPw ? 'Hide password' : 'Show password'}
                 >
                   {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -99,9 +99,9 @@ export default function ResetPasswordPage() {
             </div>
 
             <div>
-              <label htmlFor="confirm-password" className="block text-xs font-semibold text-[#4a3f3a] mb-1.5">Confirm password</label>
+              <label htmlFor="confirm-password" className="block text-xs font-semibold text-ink-mid mb-1.5">Confirm password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" aria-hidden="true" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-light" aria-hidden="true" />
                 <input
                   id="confirm-password"
                   type={showPw ? 'text' : 'password'}
@@ -111,7 +111,7 @@ export default function ResetPasswordPage() {
                   aria-required="true"
                   aria-invalid={!!error}
                   aria-describedby={error ? 'reset-error' : undefined}
-                  className="w-full pl-9 pr-4 py-3 rounded-xl border border-[#ddc9a3] bg-white text-sm text-[#1a1614] placeholder:text-[#6b5d57] focus:outline-none focus:ring-2 focus:ring-[#9a442d]/30 focus:border-[#9a442d] transition-all"
+                  className="w-full pl-9 pr-4 py-3 rounded-xl border border-sand-mid bg-white text-sm text-ink placeholder:text-ink-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terra/30 focus:border-terra transition-all"
                 />
               </div>
             </div>
@@ -123,7 +123,7 @@ export default function ResetPasswordPage() {
             <button
               type="submit"
               disabled={loading || !password || !confirm}
-              className="w-full py-3 rounded-xl bg-[#9a442d] text-white font-semibold text-sm hover:bg-[#7d3725] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl bg-terra text-white font-semibold text-sm hover:bg-terra-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
@@ -132,7 +132,7 @@ export default function ResetPasswordPage() {
           </form>
 
           <p className="text-center mt-6">
-            <Link href="/login" className="text-xs text-[#6b5d57] hover:text-[#9a442d] transition-colors">
+            <Link href="/login" className="text-xs text-ink-light hover:text-terra transition-colors">
               ← Back to sign in
             </Link>
           </p>
@@ -144,12 +144,12 @@ export default function ResetPasswordPage() {
 
 function Header() {
   return (
-    <header className="sticky top-0 z-20 bg-[--bg]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
+    <header className="sticky top-0 z-20 bg-[--bg]/90 backdrop-blur-md border-b border-sand-mid/60">
       <div className="max-w-md mx-auto px-4 py-3 flex items-center gap-3">
-        <Link href="/login" className="flex items-center gap-1.5 text-sm text-[#4a3f3a] hover:text-[#9a442d] transition-colors">
+        <Link href="/login" className="flex items-center gap-1.5 text-sm text-ink-mid hover:text-terra transition-colors">
           <ArrowLeft className="w-4 h-4" />
         </Link>
-        <span className="font-black text-lg text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
+        <span className="font-black text-lg text-ink" style={{ fontFamily: 'var(--font-epilogue)' }}>
           ABQ Unplugged
         </span>
       </div>

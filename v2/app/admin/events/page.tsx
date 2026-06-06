@@ -165,7 +165,7 @@ export default async function AdminEventsPage({ searchParams }: PageProps) {
             <input
               type="checkbox"
               data-event-id={event.id}
-              className="event-bulk-check w-4 h-4 accent-[#9a442d] flex-shrink-0 opacity-50 group-hover:opacity-100 focus:opacity-100 transition-opacity cursor-pointer"
+              className="event-bulk-check w-4 h-4 accent-terra flex-shrink-0 opacity-50 group-hover:opacity-100 focus:opacity-100 transition-opacity cursor-pointer"
               aria-label={`Select ${event.title}`}
             />
 
@@ -191,7 +191,7 @@ export default async function AdminEventsPage({ searchParams }: PageProps) {
               <QuickHideButton eventId={event.id} hidden={event.hidden} />
               <Link
                 href={`/admin/ig?id=${event.id}`}
-                className="text-xs px-2.5 py-1 bg-[#9a442d]/15 text-[#9a442d] rounded-lg hover:bg-[#9a442d]/30 transition-colors"
+                className="text-xs px-2.5 py-1 bg-terra/15 text-terra rounded-lg hover:bg-terra/30 transition-colors"
                 title="Create Instagram post"
               >
                 📸

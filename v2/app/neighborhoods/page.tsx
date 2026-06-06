@@ -64,15 +64,15 @@ export default async function NeighborhoodsPage() {
   }
 
   return (
-    <main id="main" className="min-h-dvh bg-[#fbf7f1]">
+    <main id="main" className="min-h-dvh bg-cream">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
       {/* ── Header ── */}
-      <header className="sticky top-0 z-20 bg-[#fbf7f1]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
+      <header className="sticky top-0 z-20 bg-cream/90 backdrop-blur-md border-b border-sand-mid/60">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-3">
           <Link
             href="/"
-            className="flex items-center gap-1.5 text-sm text-[#4a3f3a] hover:text-[#9a442d] transition-colors"
+            className="flex items-center gap-1.5 text-sm text-ink-mid hover:text-terra transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="font-medium">Home</span>
@@ -84,16 +84,16 @@ export default async function NeighborhoodsPage() {
         {/* ── Hero ── */}
         <AnimateIn animation="fade-up">
           <div className="mb-8">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[#006a62] font-semibold mb-1">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-turq font-semibold mb-1">
               Browse by area
             </p>
             <h1
-              className="text-3xl font-black text-[#1a1614] leading-tight mb-2"
+              className="text-3xl font-black text-ink leading-tight mb-2"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               Albuquerque Neighborhoods
             </h1>
-            <p className="text-sm text-[#6b5d57]">
+            <p className="text-sm text-ink-light">
               Find events happening near you across all of Albuquerque.
             </p>
           </div>
@@ -105,23 +105,23 @@ export default async function NeighborhoodsPage() {
             <AnimateIn key={n.slug} animation="fade-up" delay={Math.min(i * 30, 300)}>
               <Link
                 href={`/neighborhoods/${n.slug}`}
-                className="group bg-white rounded-xl border border-[#ede4d3] px-4 py-3.5 shadow-sm hover:shadow-md hover:border-[#9a442d]/40 transition-all"
+                className="group bg-white rounded-xl border border-[#ede4d3] px-4 py-3.5 shadow-sm hover:shadow-md hover:border-terra/40 transition-all"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <h2
-                      className="font-bold text-sm text-[#1a1614] group-hover:text-[#9a442d] transition-colors leading-tight mb-0.5"
+                      className="font-bold text-sm text-ink group-hover:text-terra transition-colors leading-tight mb-0.5"
                       style={{ fontFamily: 'var(--font-epilogue)' }}
                     >
                       {n.neighborhood}
                     </h2>
                     {NEIGHBORHOOD_DESC[n.slug] && (
-                      <p className="text-[10px] text-[#6b5d57] line-clamp-1">
+                      <p className="text-[10px] text-ink-light line-clamp-1">
                         {NEIGHBORHOOD_DESC[n.slug]}
                       </p>
                     )}
                   </div>
-                  <span className="flex-shrink-0 text-[10px] font-bold text-[#6b5d57] bg-[#f0e4cc] rounded-full px-2.5 py-1 tabular-nums">
+                  <span className="flex-shrink-0 text-[10px] font-bold text-ink-light bg-sand-light rounded-full px-2.5 py-1 tabular-nums">
                     {n.count} events
                   </span>
                 </div>
@@ -134,7 +134,7 @@ export default async function NeighborhoodsPage() {
         <div className="mt-10 text-center">
           <Link
             href="/events"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#9a442d] text-white font-semibold text-sm hover:bg-[#7d3725] transition-colors shadow-sm hover:shadow-md"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-terra text-white font-semibold text-sm hover:bg-terra-hover transition-colors shadow-sm hover:shadow-md"
           >
             Browse All Events
           </Link>

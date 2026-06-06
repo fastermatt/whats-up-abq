@@ -88,7 +88,7 @@ export default async function AdminReportsPage({ searchParams }: PageProps) {
         <div className="py-12 text-center space-y-2">
           <p className="text-white/40 text-sm">No {status} reports.</p>
           {status !== 'all' && TAB_COUNTS.all > 0 && (
-            <Link href="/admin/reports?status=all" className="text-xs text-[#9a442d] hover:underline">
+            <Link href="/admin/reports?status=all" className="text-xs text-terra hover:underline">
               View all {TAB_COUNTS.all} report{TAB_COUNTS.all !== 1 ? 's' : ''} →
             </Link>
           )}
@@ -115,14 +115,14 @@ export default async function AdminReportsPage({ searchParams }: PageProps) {
                   {r.message && <p className="text-sm text-white/60 mt-1">{r.message}</p>}
                   {r.user_email && <p className="text-xs text-white/40 mt-1">From: {r.user_email}</p>}
                   {r.admin_notes && (
-                    <p className="text-xs text-[#9a442d]/80 mt-1 italic">Note: {r.admin_notes}</p>
+                    <p className="text-xs text-terra/80 mt-1 italic">Note: {r.admin_notes}</p>
                   )}
                   <p className="text-xs text-white/55 mt-1">{new Date(r.created_at).toLocaleString()}</p>
                 </div>
                 <div className="flex flex-col gap-1.5 items-end flex-shrink-0">
                   <Link
                     href={`/events/${r.event_id}`}
-                    className="text-xs text-[#9a442d] hover:underline"
+                    className="text-xs text-terra hover:underline"
                     target="_blank"
                   >
                     View event →

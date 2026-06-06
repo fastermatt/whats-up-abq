@@ -58,26 +58,26 @@ export function InviteCard({ eventId, eventTitle, eventDate, venue }: Props) {
   const canNativeShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function'
 
   return (
-    <div className="mb-6 rounded-2xl border border-[#f0e4cc] bg-gradient-to-br from-white to-[#faf4eb] px-4 py-3.5 shadow-sm">
+    <div className="mb-6 rounded-2xl border border-sand-light bg-gradient-to-br from-white to-[#faf4eb] px-4 py-3.5 shadow-sm">
       <div className="flex items-start gap-3">
-        <div className="w-8 h-8 rounded-full bg-[#006a62]/10 text-[#006a62] flex items-center justify-center flex-shrink-0">
+        <div className="w-8 h-8 rounded-full bg-turq/10 text-turq flex items-center justify-center flex-shrink-0">
           <UserPlus className="w-4 h-4" />
         </div>
         <div className="flex-1 min-w-0">
           <p
-            className="font-bold text-sm text-[#1a1614] leading-tight"
+            className="font-bold text-sm text-ink leading-tight"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             Who would love this?
           </p>
-          <p className="text-[11px] text-[#6b5d57] mt-0.5 leading-relaxed">
+          <p className="text-[11px] text-ink-light mt-0.5 leading-relaxed">
             More fun with someone else. Take 10 seconds to invite them.
           </p>
           <div className="flex flex-wrap gap-2 mt-2.5">
             {canNativeShare && (
               <button
                 onClick={nativeShare}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#006a62] text-white text-xs font-semibold hover:bg-[#005249] transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-turq text-white text-xs font-semibold hover:bg-[#005249] transition-colors"
               >
                 <Share2 className="w-3.5 h-3.5" />
                 Share
@@ -88,7 +88,7 @@ export function InviteCard({ eventId, eventTitle, eventDate, venue }: Props) {
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 copied
                   ? 'bg-green-100 text-green-800'
-                  : 'bg-white border border-[#ddc9a3] text-[#4a3f3a] hover:border-[#006a62] hover:text-[#006a62]'
+                  : 'bg-white border border-sand-mid text-ink-mid hover:border-turq hover:text-turq'
               }`}
             >
               {copied

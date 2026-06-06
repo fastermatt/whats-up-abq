@@ -45,19 +45,19 @@ export function SearchBar() {
 
   return (
     <div className="relative">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b5d57]" />
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-light" />
       <input
         type="text"
         value={value}
         onChange={handleChange}
         placeholder="Search events, venues, artists..."
-        className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-white border border-[#e8ddd0] text-sm text-[#1a1614] placeholder:text-[#6b5d57] focus:outline-none focus:border-[#9a442d] focus:ring-1 focus:ring-[#9a442d]/30 transition-colors"
+        className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-white border border-sand-border text-sm text-ink placeholder:text-ink-light focus-visible:outline-none focus:border-terra focus-visible:ring-1 focus-visible:ring-terra/30 transition-colors"
         style={{ fontFamily: 'var(--font-inter)' }}
       />
       {value && (
         <button
           onClick={handleClear}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b5d57] hover:text-[#1a1614] transition-colors"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-light hover:text-ink transition-colors"
         >
           <X className="w-4 h-4" />
         </button>

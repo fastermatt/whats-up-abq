@@ -35,7 +35,7 @@ const CATEGORY_LABEL: Record<string, string> = {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  new:         'bg-[#9a442d]/30 text-[#e8a898]',
+  new:         'bg-terra/30 text-terra-light',
   in_progress: 'bg-blue-500/20 text-blue-400',
   resolved:    'bg-green-500/20 text-green-400',
   wontfix:     'bg-white/10 text-white/50',
@@ -135,7 +135,7 @@ export default async function AdminFeedbackPage({ searchParams }: PageProps) {
             key={f.value}
             href={`/admin/feedback?status=${status}${f.value ? '&category='+f.value : ''}`}
             className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-              category === f.value ? 'bg-[#9a442d] text-white' : 'bg-white/5 text-white/60 hover:bg-white/10'
+              category === f.value ? 'bg-terra text-white' : 'bg-white/5 text-white/60 hover:bg-white/10'
             }`}
           >
             {f.label}
@@ -147,7 +147,7 @@ export default async function AdminFeedbackPage({ searchParams }: PageProps) {
         <div className="py-12 text-center space-y-2">
           <p className="text-white/40 text-sm">No {status === 'all' ? '' : status.replace(/_/g, ' ')} feedback.</p>
           {status !== 'all' && TAB_COUNTS.all > 0 && (
-            <Link href={`/admin/feedback?status=all${category ? '&category='+category : ''}`} className="text-xs text-[#9a442d] hover:underline">
+            <Link href={`/admin/feedback?status=all${category ? '&category='+category : ''}`} className="text-xs text-terra hover:underline">
               View all {TAB_COUNTS.all} item{TAB_COUNTS.all !== 1 ? 's' : ''} →
             </Link>
           )}
@@ -174,13 +174,13 @@ export default async function AdminFeedbackPage({ searchParams }: PageProps) {
                       <p>From: {f.email ?? f.contact_email}{f.submitted_by && ' (signed in)'}</p>
                     )}
                     {f.event_id && (
-                      <p>Event: <Link href={`/events/${f.event_id}`} target="_blank" className="text-[#9a442d] hover:underline">{f.event_id}</Link></p>
+                      <p>Event: <Link href={`/events/${f.event_id}`} target="_blank" className="text-terra hover:underline">{f.event_id}</Link></p>
                     )}
                     <p>{new Date(f.created_at).toLocaleString()}</p>
                   </div>
 
                   {f.admin_notes && (
-                    <p className="text-xs text-[#9a442d]/80 mt-2 italic">Note: {f.admin_notes}</p>
+                    <p className="text-xs text-terra/80 mt-2 italic">Note: {f.admin_notes}</p>
                   )}
                 </div>
               </div>

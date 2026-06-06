@@ -264,18 +264,18 @@ export default async function EventDetailPage({ params }: PageProps) {
       />
 
       {/* ── Nav — cream bar above image on all sizes ── */}
-      <header className="sticky top-0 z-20 bg-[#fbf7f1]/95 backdrop-blur-md border-b border-[#ddc9a3]/60">
+      <header className="sticky top-0 z-20 bg-cream/95 backdrop-blur-md border-b border-sand-mid/60">
         <div className="max-w-3xl mx-auto px-4 py-2.5 flex items-center justify-between">
           <Link
             href="/events"
-            className="flex items-center gap-1.5 text-sm font-medium text-[#4a3f3a] hover:text-[#9a442d] transition-colors"
+            className="flex items-center gap-1.5 text-sm font-medium text-ink-mid hover:text-terra transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Events</span>
           </Link>
           <Link
             href="/"
-            className="font-black text-lg tracking-tight text-[#1a1614] hover:text-[#9a442d] transition-colors"
+            className="font-black text-lg tracking-tight text-ink hover:text-terra transition-colors"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             ABQ Unplugged
@@ -295,7 +295,7 @@ export default async function EventDetailPage({ params }: PageProps) {
           />
           {/* Faint warm vignette — the title sits below the image on cream, so this
               just grounds the photo bottom edge instead of crushing it to black. */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#1a1614]/35 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink/35 to-transparent" />
 
           {/* Film grain — softens low-res images, mobile only */}
           <div
@@ -313,12 +313,12 @@ export default async function EventDetailPage({ params }: PageProps) {
 
           <div>
             {event.category && (
-              <p className="text-[11px] uppercase tracking-[0.15em] text-[#9a442d] font-bold mb-2">
+              <p className="text-[11px] uppercase tracking-[0.15em] text-terra font-bold mb-2">
                 {event.subcategory ? `${event.category} · ${event.subcategory}` : event.category}
               </p>
             )}
             <h1
-              className="text-3xl sm:text-4xl font-black text-[#1a1614] leading-[1.1] mb-5"
+              className="text-3xl sm:text-4xl font-black text-ink leading-[1.1] mb-5"
               style={{ fontFamily: 'var(--font-epilogue)', letterSpacing: '-0.5px' }}
             >
               {event.title}
@@ -331,21 +331,21 @@ export default async function EventDetailPage({ params }: PageProps) {
             {dateStr && (
               <div className="mb-2">
                 <p
-                  className="text-[1.35rem] font-black text-[#1a1614] leading-tight"
+                  className="text-[1.35rem] font-black text-ink leading-tight"
                   style={{ fontFamily: 'var(--font-epilogue)', letterSpacing: '-0.3px' }}
                 >
                   {dateStr}
                 </p>
                 {timeStr && (
-                  <p className="text-base font-semibold text-[#9a442d] mt-0.5">{timeStr}</p>
+                  <p className="text-base font-semibold text-terra mt-0.5">{timeStr}</p>
                 )}
-                {!timeStr && timesVary && <p className="text-sm text-[#4f6249] font-medium mt-0.5">Times vary — see host site</p>}
-                {!timeStr && !timesVary && <p className="text-sm text-[#6b5d57] italic mt-0.5">Time TBA</p>}
+                {!timeStr && timesVary && <p className="text-sm text-sage font-medium mt-0.5">Times vary — see host site</p>}
+                {!timeStr && !timesVary && <p className="text-sm text-ink-light italic mt-0.5">Time TBA</p>}
               </div>
             )}
 
             {/* Divider */}
-            <div className="w-8 h-[2px] bg-[#ddc9a3] my-3" />
+            <div className="w-8 h-[2px] bg-sand-mid my-3" />
 
             {/* Venue (mobile-specific block) */}
             {event.venue && (() => {
@@ -354,20 +354,20 @@ export default async function EventDetailPage({ params }: PageProps) {
               <div className="mb-3">
                 <Link
                   href={`/venues/${venueToSlug(event.venue)}`}
-                  className="text-[1.1rem] font-bold text-[#4a3f3a] hover:text-[#9a442d] transition-colors block leading-tight"
+                  className="text-[1.1rem] font-bold text-ink-mid hover:text-terra transition-colors block leading-tight"
                   style={{ fontFamily: 'var(--font-epilogue)' }}
                 >
                   {event.venue}
                 </Link>
-                {event.address && <p className="text-xs text-[#6b5d57] mt-1">{event.address}</p>}
+                {event.address && <p className="text-xs text-ink-light mt-1">{event.address}</p>}
                 {event.neighborhood && (
-                  <Link href={`/neighborhoods/${neighborhoodToSlug(event.neighborhood)}`} className="block text-xs text-[#006a62] hover:text-[#9a442d] transition-colors mt-0.5">
+                  <Link href={`/neighborhoods/${neighborhoodToSlug(event.neighborhood)}`} className="block text-xs text-turq hover:text-terra transition-colors mt-0.5">
                     {event.neighborhood}
                   </Link>
                 )}
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
                   <a href={mapsUrl} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#006a62] hover:text-[#9a442d] hover:bg-[#006a62]/5 transition-colors px-2.5 py-2 -mx-1 rounded min-h-[32px]">
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-turq hover:text-terra hover:bg-turq/5 transition-colors px-2.5 py-2 -mx-1 rounded min-h-[32px]">
                     <MapPin className="w-2.5 h-2.5" /> Open in Maps
                   </a>
                   {venueIg && (
@@ -378,7 +378,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                       data-umami-event="venue-instagram"
                       data-umami-event-handle={venueIg.handle}
                       data-umami-event-venue={event.venue}
-                      className="inline-flex items-center gap-1 text-[11px] text-[#9a442d] hover:underline transition-colors"
+                      className="inline-flex items-center gap-1 text-[11px] text-terra hover:underline transition-colors"
                     >
                       <InstagramIcon size={11} />
                       @{venueIg.display ?? venueIg.handle}
@@ -390,9 +390,9 @@ export default async function EventDetailPage({ params }: PageProps) {
             })()}
             {!event.venue && event.address && (
               <div className="mb-3">
-                <p className="text-[1.1rem] font-bold text-[#4a3f3a]" style={{ fontFamily: 'var(--font-epilogue)' }}>{event.address}</p>
+                <p className="text-[1.1rem] font-bold text-ink-mid" style={{ fontFamily: 'var(--font-epilogue)' }}>{event.address}</p>
                 <a href={mapsUrl} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#006a62] hover:text-[#9a442d] hover:bg-[#006a62]/5 transition-colors px-2.5 py-2 -mx-1 rounded min-h-[32px] mt-1">
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-turq hover:text-terra hover:bg-turq/5 transition-colors px-2.5 py-2 -mx-1 rounded min-h-[32px] mt-1">
                   <MapPin className="w-2.5 h-2.5" /> Open in Maps
                 </a>
               </div>
@@ -401,7 +401,7 @@ export default async function EventDetailPage({ params }: PageProps) {
             {/* Price badge */}
             {event.price && (
               <span className={`inline-block text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full ${
-                isFree ? 'bg-[#4f6249]/12 text-[#4f6249]' : 'bg-[#9a442d]/10 text-[#9a442d]'
+                isFree ? 'bg-sage/12 text-sage' : 'bg-terra/10 text-terra'
               }`}>
                 {isFree ? '✓ Free' : event.price}
               </span>
@@ -415,17 +415,17 @@ export default async function EventDetailPage({ params }: PageProps) {
             {/* Date + time */}
             {dateStr && (
               <div className="flex items-start gap-3">
-                <Calendar className="w-4 h-4 text-[#9a442d] mt-0.5 flex-shrink-0" />
+                <Calendar className="w-4 h-4 text-terra mt-0.5 flex-shrink-0" />
                 <div className="leading-snug">
-                  <span className="font-semibold text-[#1a1614]">{dateStr}</span>
+                  <span className="font-semibold text-ink">{dateStr}</span>
                   {timeStr && (
-                    <span className="text-[#4a3f3a]"> · {timeStr}</span>
+                    <span className="text-ink-mid"> · {timeStr}</span>
                   )}
                   {!timeStr && timesVary && (
-                    <span className="text-[#4f6249] font-medium"> · Times vary — see host site</span>
+                    <span className="text-sage font-medium"> · Times vary — see host site</span>
                   )}
                   {!timeStr && !timesVary && (
-                    <span className="text-[#6b5d57] italic"> · Time TBA</span>
+                    <span className="text-ink-light italic"> · Time TBA</span>
                   )}
                 </div>
               </div>
@@ -436,21 +436,21 @@ export default async function EventDetailPage({ params }: PageProps) {
               const venueIg = venueInstagram(event.venue)
               return (
               <div className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-[#006a62] mt-0.5 flex-shrink-0" />
+                <MapPin className="w-4 h-4 text-turq mt-0.5 flex-shrink-0" />
                 <div className="leading-snug space-y-0.5">
                   <Link
                     href={`/venues/${venueToSlug(event.venue)}`}
-                    className="font-semibold text-[#1a1614] hover:text-[#9a442d] transition-colors"
+                    className="font-semibold text-ink hover:text-terra transition-colors"
                   >
                     {event.venue}
                   </Link>
                   {event.address && (
-                    <p className="text-xs text-[#4a3f3a]">{event.address}</p>
+                    <p className="text-xs text-ink-mid">{event.address}</p>
                   )}
                   {event.neighborhood && (
                     <Link
                       href={`/neighborhoods/${neighborhoodToSlug(event.neighborhood)}`}
-                      className="block text-xs text-[#006a62] hover:text-[#9a442d] transition-colors"
+                      className="block text-xs text-turq hover:text-terra transition-colors"
                     >
                       {event.neighborhood}
                     </Link>
@@ -460,7 +460,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                       href={mapsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#006a62] hover:text-[#9a442d] hover:bg-[#006a62]/5 transition-colors px-2.5 py-2 -mx-1 rounded min-h-[32px]"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-turq hover:text-terra hover:bg-turq/5 transition-colors px-2.5 py-2 -mx-1 rounded min-h-[32px]"
                     >
                       <MapPin className="w-2.5 h-2.5" />
                       Open in Maps
@@ -477,7 +477,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                         data-umami-event="venue-instagram"
                         data-umami-event-handle={venueIg.handle}
                         data-umami-event-venue={event.venue}
-                        className="inline-flex items-center gap-1 text-[11px] text-[#9a442d] hover:underline transition-colors"
+                        className="inline-flex items-center gap-1 text-[11px] text-terra hover:underline transition-colors"
                       >
                         <InstagramIcon size={11} />
                         @{venueIg.display ?? venueIg.handle}
@@ -492,14 +492,14 @@ export default async function EventDetailPage({ params }: PageProps) {
             {/* Address-only (no venue name) */}
             {!event.venue && event.address && (
               <div className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-[#006a62] mt-0.5 flex-shrink-0" />
+                <MapPin className="w-4 h-4 text-turq mt-0.5 flex-shrink-0" />
                 <div className="leading-snug space-y-0.5">
-                  <p className="font-semibold text-[#1a1614]">{event.address}</p>
+                  <p className="font-semibold text-ink">{event.address}</p>
                   <a
                     href={mapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#006a62] hover:text-[#9a442d] hover:bg-[#006a62]/5 transition-colors px-2.5 py-2 -mx-1 rounded min-h-[32px]"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-turq hover:text-terra hover:bg-turq/5 transition-colors px-2.5 py-2 -mx-1 rounded min-h-[32px]"
                   >
                     <MapPin className="w-2.5 h-2.5" />
                     Open in Maps
@@ -510,31 +510,31 @@ export default async function EventDetailPage({ params }: PageProps) {
 
             {/* Price */}
             <div className="flex items-start gap-3">
-              <Ticket className="w-4 h-4 text-[#4f6249] mt-0.5 flex-shrink-0" />
+              <Ticket className="w-4 h-4 text-sage mt-0.5 flex-shrink-0" />
               <div className="leading-snug">
                 {event.price ? (
-                  <span className="font-semibold text-[#1a1614]">
+                  <span className="font-semibold text-ink">
                     {event.price}
                     {isFree && (
-                      <span className="ml-2 text-[10px] uppercase tracking-wider font-bold text-[#4f6249] bg-[#4f6249]/10 px-1.5 py-0.5 rounded-full align-middle">
+                      <span className="ml-2 text-[10px] uppercase tracking-wider font-bold text-sage bg-sage/10 px-1.5 py-0.5 rounded-full align-middle">
                         Free
                       </span>
                     )}
                   </span>
                 ) : event.ticketUrl ? (
-                  <span className="text-[#4a3f3a]">
+                  <span className="text-ink-mid">
                     Price on{' '}
                     <a
                       href={event.ticketUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-semibold text-[#9a442d] underline-offset-2 hover:underline"
+                      className="font-semibold text-terra underline-offset-2 hover:underline"
                     >
                       ticket page
                     </a>
                   </span>
                 ) : (
-                  <span className="text-[#6b5d57]">Price not listed</span>
+                  <span className="text-ink-light">Price not listed</span>
                 )}
               </div>
             </div>
@@ -548,7 +548,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                 href={ticketHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 sm:flex-none group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-[#9a442d] text-white font-bold text-[15px] hover:bg-[#7d3725] transition-all duration-200 hover:shadow-lg hover:shadow-[#9a442d]/25 hover:scale-[1.01] active:scale-[0.99]"
+                className="flex-1 sm:flex-none group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-terra text-white font-bold text-[15px] hover:bg-terra-hover transition-all duration-200 hover:shadow-lg hover:shadow-terra/25 hover:scale-[1.01] active:scale-[0.99]"
                 style={{ fontFamily: 'var(--font-epilogue)' }}
                 data-umami-event="ticket-click"
                 data-umami-event-event-id={event.id}
@@ -565,7 +565,7 @@ export default async function EventDetailPage({ params }: PageProps) {
           {/* ── Description ── */}
           {event.description && (
             <div className="mb-7">
-              <p className="text-[15px] text-[#4a3f3a] leading-relaxed">{event.description}</p>
+              <p className="text-[15px] text-ink-mid leading-relaxed">{event.description}</p>
             </div>
           )}
 
@@ -578,9 +578,9 @@ export default async function EventDetailPage({ params }: PageProps) {
           {(event.about || event.highlights.length > 0 || event.venueTips || event.localTips || event.nearbyDining.length > 0 || event.localRec) && (
             <div className="space-y-3 mb-7">
               {event.about && (
-                <div className="rounded-xl px-4 py-3.5 border border-[#e8d9bf] bg-[#fdf9f4]">
-                  <p className="text-[11px] font-bold text-[#9a442d] uppercase tracking-wider mb-1.5">About</p>
-                  <p className="text-sm text-[#4a3f3a] leading-relaxed">{event.about}</p>
+                <div className="rounded-xl px-4 py-3.5 border border-[#e8d9bf] bg-cream-raised">
+                  <p className="text-[11px] font-bold text-terra uppercase tracking-wider mb-1.5">About</p>
+                  <p className="text-sm text-ink-mid leading-relaxed">{event.about}</p>
                 </div>
               )}
 
@@ -590,19 +590,19 @@ export default async function EventDetailPage({ params }: PageProps) {
                   inside the brand palette (no purple/lavender outliers). */}
               {(event.nearbyDining.length > 0 || event.localRec) && (
                 <div className="rounded-xl px-4 py-3.5 border border-[#e8d0b5] bg-[#fdf3e9] space-y-3">
-                  <p className="text-[11px] font-bold text-[#7d3725] uppercase tracking-wider">Plan your night</p>
+                  <p className="text-[11px] font-bold text-terra-hover uppercase tracking-wider">Plan your night</p>
                   {event.nearbyDining.length > 0 && (
                     <div>
-                      <p className="text-[10px] font-semibold text-[#9a442d] uppercase tracking-wider mb-1.5">Eat nearby</p>
+                      <p className="text-[10px] font-semibold text-terra uppercase tracking-wider mb-1.5">Eat nearby</p>
                       <ul className="flex flex-wrap gap-1.5">
                         {event.nearbyDining.map((spot, i) => (
                           <li
                             key={i}
-                            className="text-xs text-[#4a3f3a] bg-white border border-[#e8d0b5] rounded-full px-2.5 py-1 inline-flex items-baseline gap-1"
+                            className="text-xs text-ink-mid bg-white border border-[#e8d0b5] rounded-full px-2.5 py-1 inline-flex items-baseline gap-1"
                             title={spot.note}
                           >
                             <span className="font-semibold">{spot.name}</span>
-                            {spot.note && <span className="text-[#6b5d57]">· {spot.note}</span>}
+                            {spot.note && <span className="text-ink-light">· {spot.note}</span>}
                           </li>
                         ))}
                       </ul>
@@ -610,20 +610,20 @@ export default async function EventDetailPage({ params }: PageProps) {
                   )}
                   {event.localRec && (
                     <div>
-                      <p className="text-[10px] font-semibold text-[#9a442d] uppercase tracking-wider mb-1">Make a night of it</p>
-                      <p className="text-sm text-[#4a3f3a] leading-relaxed">{event.localRec}</p>
+                      <p className="text-[10px] font-semibold text-terra uppercase tracking-wider mb-1">Make a night of it</p>
+                      <p className="text-sm text-ink-mid leading-relaxed">{event.localRec}</p>
                     </div>
                   )}
                 </div>
               )}
 
               {event.highlights.length > 0 && (
-                <div className="rounded-xl px-4 py-3.5 border border-[#e8d9bf] bg-[#fdf9f4]">
-                  <p className="text-[11px] font-bold text-[#9a442d] uppercase tracking-wider mb-2">What to Expect</p>
+                <div className="rounded-xl px-4 py-3.5 border border-[#e8d9bf] bg-cream-raised">
+                  <p className="text-[11px] font-bold text-terra uppercase tracking-wider mb-2">What to Expect</p>
                   <ul className="space-y-1.5">
                     {event.highlights.map((h, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-[#4a3f3a]">
-                        <span className="text-[#9a442d] font-bold mt-0.5 leading-none">·</span>
+                      <li key={i} className="flex items-start gap-2 text-sm text-ink-mid">
+                        <span className="text-terra font-bold mt-0.5 leading-none">·</span>
                         <span>{h}</span>
                       </li>
                     ))}
@@ -634,14 +634,14 @@ export default async function EventDetailPage({ params }: PageProps) {
                 <div className="rounded-xl px-4 py-3.5 border border-[#d6e8d6] bg-[#f6fbf5] space-y-3">
                   {event.venueTips && (
                     <div>
-                      <p className="text-[11px] font-bold text-[#4f6249] uppercase tracking-wider mb-1">Venue Tips</p>
-                      <p className="text-sm text-[#4a3f3a] leading-relaxed">{event.venueTips}</p>
+                      <p className="text-[11px] font-bold text-sage uppercase tracking-wider mb-1">Venue Tips</p>
+                      <p className="text-sm text-ink-mid leading-relaxed">{event.venueTips}</p>
                     </div>
                   )}
                   {event.localTips && (
                     <div>
-                      <p className="text-[11px] font-bold text-[#006a62] uppercase tracking-wider mb-1">Local Tips</p>
-                      <p className="text-sm text-[#4a3f3a] leading-relaxed">{event.localTips}</p>
+                      <p className="text-[11px] font-bold text-turq uppercase tracking-wider mb-1">Local Tips</p>
+                      <p className="text-sm text-ink-mid leading-relaxed">{event.localTips}</p>
                     </div>
                   )}
                 </div>
@@ -690,19 +690,19 @@ export default async function EventDetailPage({ params }: PageProps) {
 
           {/* ── Belonging proof ── */}
           {(savedCount ?? 0) > 0 && (goingCount ?? 0) === 0 && (
-            <p className="text-[11px] text-[#6b5d57] mb-5 italic">
+            <p className="text-[11px] text-ink-light mb-5 italic">
               {savedCount} {savedCount === 1 ? 'person has' : 'people have'} saved this
             </p>
           )}
 
           {/* Who's going */}
           {(goingCount ?? 0) > 0 && (
-            <div className="mb-6 bg-[#fdf9f4] rounded-xl border border-[#e8d9bf] px-4 py-3.5">
-              <p className="text-xs font-bold text-[#4a3f3a] uppercase tracking-wider mb-3 flex items-center gap-2">
-                <Users className="w-3.5 h-3.5 text-[#9a442d]" />
+            <div className="mb-6 bg-cream-raised rounded-xl border border-[#e8d9bf] px-4 py-3.5">
+              <p className="text-xs font-bold text-ink-mid uppercase tracking-wider mb-3 flex items-center gap-2">
+                <Users className="w-3.5 h-3.5 text-terra" />
                 {goingCount} {goingCount === 1 ? 'person' : 'people'} going
                 {(savedCount ?? 0) > 0 && (
-                  <span className="font-normal text-[#6b5d57] normal-case tracking-normal">
+                  <span className="font-normal text-ink-light normal-case tracking-normal">
                     · {savedCount} saved
                   </span>
                 )}
@@ -718,17 +718,17 @@ export default async function EventDetailPage({ params }: PageProps) {
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={a.avatar_url} alt="" className="w-5 h-5 rounded-full object-cover" />
                         ) : (
-                          <div className="w-5 h-5 rounded-full bg-[#9a442d] flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0">
+                          <div className="w-5 h-5 rounded-full bg-terra flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0">
                             {initials}
                           </div>
                         )}
-                        <span className="text-[11px] text-[#4a3f3a] font-medium">@{name}</span>
+                        <span className="text-[11px] text-ink-mid font-medium">@{name}</span>
                       </div>
                     )
                   })}
                   {(goingCount ?? 0) > attendees.length && (
                     <div className="flex items-center px-2.5 py-1">
-                      <span className="text-[11px] text-[#6b5d57]">
+                      <span className="text-[11px] text-ink-light">
                         +{(goingCount ?? 0) - attendees.length} more
                       </span>
                     </div>
@@ -748,15 +748,15 @@ export default async function EventDetailPage({ params }: PageProps) {
 
           {/* Community attribution */}
           {event.source === 'community' && (
-            <div className="mb-5 flex items-center gap-2.5 p-3.5 rounded-xl bg-[#006a62]/8 border border-[#006a62]/20">
-              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#006a62]/15 text-sm">
+            <div className="mb-5 flex items-center gap-2.5 p-3.5 rounded-xl bg-turq/8 border border-turq/20">
+              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-turq/15 text-sm">
                 👥
               </span>
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-bold text-[#006a62] uppercase tracking-wider">Community event</p>
-                <p className="text-[11px] text-[#4a3f3a]">
+                <p className="text-[11px] font-bold text-turq uppercase tracking-wider">Community event</p>
+                <p className="text-[11px] text-ink-mid">
                   {event.submitterHandle
-                    ? <>Submitted by <span className="font-semibold text-[#006a62]">@{event.submitterHandle}</span></>
+                    ? <>Submitted by <span className="font-semibold text-turq">@{event.submitterHandle}</span></>
                     : 'Submitted by a member of the ABQ Unplugged community'}
                 </p>
               </div>
@@ -765,12 +765,12 @@ export default async function EventDetailPage({ params }: PageProps) {
 
           {/* Source + report */}
           <div className="flex items-center justify-between mb-6">
-            <p className="text-[10px] text-[#6b5d57]">
+            <p className="text-[10px] text-ink-light">
               Source: {SOURCE_LABELS[event.source] ?? (event.source.charAt(0).toUpperCase() + event.source.slice(1))}
             </p>
             <Link
               href={`/feedback?category=event_report&event_id=${event.id}`}
-              className="inline-flex items-center gap-1.5 text-[11px] text-[#6b5d57] hover:text-[#9a442d] transition-colors py-1"
+              className="inline-flex items-center gap-1.5 text-[11px] text-ink-light hover:text-terra transition-colors py-1"
             >
               <Flag className="w-3 h-3" />
               Report an issue
@@ -787,7 +787,7 @@ export default async function EventDetailPage({ params }: PageProps) {
               jump straight to Story or Square. */}
           <div className="mt-8 pt-6 border-t border-[#eee0cc]">
             <div className="flex items-center justify-between gap-3 flex-wrap mb-2">
-              <p className="text-[11px] font-semibold text-[#6b5d57] uppercase tracking-wide">Share to Instagram</p>
+              <p className="text-[11px] font-semibold text-ink-light uppercase tracking-wide">Share to Instagram</p>
               <div className="flex gap-1 text-[11px]">
                 {[
                   { href: `/events/${event.id}/ig3`, label: 'Story' },
@@ -796,7 +796,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                   <Link
                     key={href}
                     href={href}
-                    className="px-2 py-1 rounded-md text-[#9a442d] hover:bg-[#9a442d]/10 transition-colors font-semibold"
+                    className="px-2 py-1 rounded-md text-terra hover:bg-terra/10 transition-colors font-semibold"
                   >
                     {label}
                   </Link>
@@ -805,13 +805,13 @@ export default async function EventDetailPage({ params }: PageProps) {
             </div>
             <Link
               href={`/events/${event.id}/ig2`}
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#9a442d] text-white font-bold text-sm hover:bg-[#7d3725] transition-all active:scale-[0.98]"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-terra text-white font-bold text-sm hover:bg-terra-hover transition-all active:scale-[0.98]"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               <span className="text-base leading-none">📸</span>
               Share to Instagram
             </Link>
-            <p className="text-[10px] text-[#6b5d57] mt-2">Opens a feed-ready 4:5 graphic. Use Story or Square above for other formats.</p>
+            <p className="text-[10px] text-ink-light mt-2">Opens a feed-ready 4:5 graphic. Use Story or Square above for other formats.</p>
           </div>
 
           <div className="h-8" />
@@ -848,7 +848,7 @@ async function SimilarEvents({ eventId, category }: { eventId: string; category:
       <section className="max-w-3xl mx-auto px-4 pb-10">
         <div className="border-t border-[#eee0cc] pt-7">
           <h2
-            className="text-lg font-black text-[#1a1614] mb-5"
+            className="text-lg font-black text-ink mb-5"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             More {category}
@@ -856,7 +856,7 @@ async function SimilarEvents({ eventId, category }: { eventId: string; category:
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {similar.map((event) => (
               <Link key={event.id} href={`/events/${event.id}`} className="group">
-                <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-[#f0e4cc] mb-2 shadow-sm group-hover:shadow-md transition-shadow">
+                <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-sand-light mb-2 shadow-sm group-hover:shadow-md transition-shadow">
                   <EventImage
                     src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
                     fallback={getCategoryFallback(event.category ?? undefined, event.id)}
@@ -866,13 +866,13 @@ async function SimilarEvents({ eventId, category }: { eventId: string; category:
                   />
                 </div>
                 <h3
-                  className="font-bold text-[11px] text-[#1a1614] line-clamp-2 group-hover:text-[#9a442d] transition-colors"
+                  className="font-bold text-[11px] text-ink line-clamp-2 group-hover:text-terra transition-colors"
                   style={{ fontFamily: 'var(--font-epilogue)' }}
                 >
                   {event.title}
                 </h3>
                 {event.venue && (
-                  <p className="text-[10px] text-[#6b5d57] line-clamp-1 mt-0.5">{event.venue}</p>
+                  <p className="text-[10px] text-ink-light line-clamp-1 mt-0.5">{event.venue}</p>
                 )}
               </Link>
             ))}

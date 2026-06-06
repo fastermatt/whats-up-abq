@@ -52,7 +52,7 @@ export function FirstVisitBanner() {
       aria-label="Welcome banner"
       className="fixed bottom-20 md:bottom-4 left-3 right-3 md:left-auto md:right-4 md:w-[360px] z-40 animate-fade-up"
     >
-      <div className="bg-gradient-to-br from-[#9a442d] to-[#7d3725] text-white rounded-2xl shadow-2xl border border-white/10 p-3 sm:p-4 flex items-start gap-3">
+      <div className="bg-gradient-to-br from-terra to-terra-hover text-white rounded-2xl shadow-2xl border border-white/10 p-3 sm:p-4 flex items-start gap-3">
         <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
           <Sparkles className="w-5 h-5" strokeWidth={2.4} />
         </div>
@@ -70,7 +70,7 @@ export function FirstVisitBanner() {
             <Link
               href="/welcome"
               onClick={dismiss}
-              className="inline-flex items-center text-xs font-bold bg-white text-[#9a442d] px-3 py-1.5 rounded-full hover:bg-[#fbf7f1] transition-colors"
+              className="inline-flex items-center text-xs font-bold bg-white text-terra px-3 py-1.5 rounded-full hover:bg-cream transition-colors"
             >
               Take a tour
             </Link>

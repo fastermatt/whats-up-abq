@@ -121,10 +121,10 @@ export function PushBell({ className = '' }: { className?: string }) {
         flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold
         border transition-all
         ${state === 'subscribed'
-          ? 'bg-[#4f6249]/10 border-[#4f6249]/30 text-[#4f6249]'
+          ? 'bg-sage/10 border-sage/30 text-sage'
           : state === 'denied'
-          ? 'bg-[#f0e4cc] border-[#ddc9a3] text-[#6b5d57] cursor-not-allowed'
-          : 'bg-white border-[#ddc9a3] text-[#4a3f3a] hover:border-[#9a442d] hover:text-[#9a442d]'
+          ? 'bg-sand-light border-sand-mid text-ink-light cursor-not-allowed'
+          : 'bg-white border-sand-mid text-ink-mid hover:border-terra hover:text-terra'
         }
         ${state === 'loading' ? 'opacity-60 cursor-wait' : ''}
         ${className}

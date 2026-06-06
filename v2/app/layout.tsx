@@ -149,11 +149,11 @@ export default function RootLayout({
           <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-solid-rounded/css/uicons-solid-rounded.css" />
         </noscript>
       </head>
-      <body className="bg-[#fbf7f1] text-[#1a1614] min-h-full flex flex-col">
+      <body className="bg-cream text-ink min-h-full flex flex-col">
         {/* Skip to main content — for keyboard/screen-reader users */}
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-white focus:text-[#9a442d] focus:px-3 focus:py-2 focus:rounded-lg focus:font-semibold focus:text-sm focus:shadow-lg"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-white focus:text-terra focus:px-3 focus:py-2 focus:rounded-lg focus:font-semibold focus:text-sm focus:shadow-lg"
         >
           Skip to main content
         </a>
@@ -187,7 +187,7 @@ export default function RootLayout({
                 {/* Ornamental rule — left line shorter so dot sits above the ♥ */}
                 <div className="flex items-center gap-3">
                   <div className="w-[77px] h-px bg-gradient-to-r from-transparent via-[#c8b4a4] to-[#c8b4a4]" />
-                  <div className="w-1 h-1 rounded-full bg-[#9a442d]/50" />
+                  <div className="w-1 h-1 rounded-full bg-terra/50" />
                   <div className="w-[135px] h-px bg-gradient-to-l from-transparent via-[#c8b4a4] to-[#c8b4a4]" />
                 </div>
 
@@ -195,7 +195,7 @@ export default function RootLayout({
                 <p className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.22em] uppercase text-[#9a8880]">
                   <span>Built with</span>
                   <span
-                    className="animate-heartbeat-word inline-flex items-center gap-0.5 text-[#9a442d]"
+                    className="animate-heartbeat-word inline-flex items-center gap-0.5 text-terra"
                     aria-label="love"
                   >
                     <span style={{ fontSize: '0.95rem', lineHeight: 1 }} aria-hidden="true">♥</span>
@@ -209,7 +209,7 @@ export default function RootLayout({
                   href="https://ko-fi.com/stopscrolling"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[10px] text-[#b8a89e] hover:text-[#9a442d] transition-colors tracking-wide"
+                  className="text-[10px] text-[#b8a89e] hover:text-terra transition-colors tracking-wide"
                 >
                   ☕ ko-fi.com/stopscrolling
                 </a>

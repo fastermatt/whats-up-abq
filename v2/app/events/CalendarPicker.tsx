@@ -19,12 +19,12 @@ function toLocalDateStr(d: Date): string {
 
 /** Heat-map class based on event count. */
 function heatClass(count: number, isSelected: boolean, isToday: boolean): string {
-  if (isSelected) return 'bg-[#9a442d] text-white font-bold ring-2 ring-[#9a442d] ring-offset-1'
+  if (isSelected) return 'bg-terra text-white font-bold ring-2 ring-terra ring-offset-1'
   if (count === 0) return 'text-[#c0b0a8] bg-transparent'
-  if (count <= 3)  return 'bg-[#f5ede0] text-[#4a3f3a]'
-  if (count <= 8)  return 'bg-[#e8d4b8] text-[#4a3f3a]'
+  if (count <= 3)  return 'bg-[#f5ede0] text-ink-mid'
+  if (count <= 8)  return 'bg-[#e8d4b8] text-ink-mid'
   if (count <= 15) return 'bg-[#d4a87a] text-[#2a1f1a]'
-  return                  'bg-[#9a442d]/80 text-white'
+  return                  'bg-terra/80 text-white'
 }
 
 export function CalendarPicker({ counts, selectedDate }: CalendarPickerProps) {
@@ -100,29 +100,29 @@ export function CalendarPicker({ counts, selectedDate }: CalendarPickerProps) {
   )
 
   return (
-    <div className="bg-white rounded-2xl border border-[#ddc9a3] p-4 shadow-sm">
+    <div className="bg-white rounded-2xl border border-sand-mid p-4 shadow-sm">
       {/* ── Header ── */}
       <div className="flex items-center justify-between mb-3">
         <button
           onClick={prevMonth}
-          className="p-1.5 rounded-lg hover:bg-[#f0e4cc] transition-colors text-[#4a3f3a]"
+          className="p-1.5 rounded-lg hover:bg-sand-light transition-colors text-ink-mid"
           aria-label="Previous month"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
 
         <div className="text-center">
-          <p className="text-sm font-bold text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
+          <p className="text-sm font-bold text-ink" style={{ fontFamily: 'var(--font-epilogue)' }}>
             {monthLabel}
           </p>
-          <p className="text-[10px] text-[#6b5d57]">
+          <p className="text-[10px] text-ink-light">
             {monthTotal > 0 ? `${monthTotal} events this month` : 'No events this month'}
           </p>
         </div>
 
         <button
           onClick={nextMonth}
-          className="p-1.5 rounded-lg hover:bg-[#f0e4cc] transition-colors text-[#4a3f3a]"
+          className="p-1.5 rounded-lg hover:bg-sand-light transition-colors text-ink-mid"
           aria-label="Next month"
         >
           <ChevronRight className="w-4 h-4" />
@@ -132,7 +132,7 @@ export function CalendarPicker({ counts, selectedDate }: CalendarPickerProps) {
       {/* ── Day headers ── */}
       <div className="grid grid-cols-7 gap-0.5 mb-1">
         {DAY_HEADERS.map(d => (
-          <div key={d} className="text-center text-[10px] font-semibold text-[#6b5d57] py-1">
+          <div key={d} className="text-center text-[10px] font-semibold text-ink-light py-1">
             {d}
           </div>
         ))}
@@ -158,7 +158,7 @@ export function CalendarPicker({ counts, selectedDate }: CalendarPickerProps) {
                 rounded-lg aspect-square text-xs transition-all
                 ${heatClass(count, isSelected, isToday)}
                 ${hasEvents || isSelected ? 'cursor-pointer hover:scale-105 hover:shadow-sm active:scale-95' : 'cursor-default'}
-                ${isToday && !isSelected ? 'ring-1 ring-[#9a442d]/40' : ''}
+                ${isToday && !isSelected ? 'ring-1 ring-terra/40' : ''}
               `}
               aria-label={`${cell.date}${count > 0 ? `, ${count} events` : ''}`}
             >
@@ -166,7 +166,7 @@ export function CalendarPicker({ counts, selectedDate }: CalendarPickerProps) {
                 {cell.day}
               </span>
               {count > 0 && !isSelected && (
-                <span className={`text-[9px] leading-none mt-0.5 font-semibold tabular-nums ${count > 15 ? 'text-white' : 'text-[#9a442d]'}`}>
+                <span className={`text-[9px] leading-none mt-0.5 font-semibold tabular-nums ${count > 15 ? 'text-white' : 'text-terra'}`}>
                   {count}
                 </span>
               )}
@@ -182,16 +182,16 @@ export function CalendarPicker({ counts, selectedDate }: CalendarPickerProps) {
 
       {/* ── Legend ── */}
       <div className="flex items-center gap-3 mt-3 justify-end">
-        <span className="text-[9px] text-[#6b5d57]">Events:</span>
+        <span className="text-[9px] text-ink-light">Events:</span>
         {[
           { label: '1–3',  cls: 'bg-[#f5ede0]' },
           { label: '4–8',  cls: 'bg-[#e8d4b8]' },
           { label: '9–15', cls: 'bg-[#d4a87a]' },
-          { label: '16+',  cls: 'bg-[#9a442d]/80' },
+          { label: '16+',  cls: 'bg-terra/80' },
         ].map(({ label, cls }) => (
           <div key={label} className="flex items-center gap-1">
             <div className={`w-3 h-3 rounded-sm ${cls}`} />
-            <span className="text-[9px] text-[#6b5d57]">{label}</span>
+            <span className="text-[9px] text-ink-light">{label}</span>
           </div>
         ))}
       </div>
@@ -199,7 +199,7 @@ export function CalendarPicker({ counts, selectedDate }: CalendarPickerProps) {
       {selectedDate && (
         <button
           onClick={() => handleDateClick(selectedDate)}
-          className="mt-2 w-full text-xs text-center text-[#9a442d] hover:underline"
+          className="mt-2 w-full text-xs text-center text-terra hover:underline"
         >
           Clear date filter ×
         </button>

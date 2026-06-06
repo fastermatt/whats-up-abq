@@ -31,11 +31,11 @@ export function CaptionCard({ caption, label, sublabel }: Props) {
   }
 
   return (
-    <div className="bg-[#201c1a] border border-white/[0.07] rounded-xl p-4 space-y-3 hover:border-white/[0.14] transition-colors group">
+    <div className="bg-ink-deep border border-white/[0.07] rounded-xl p-4 space-y-3 hover:border-white/[0.14] transition-colors group">
       {/* Header row */}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[10px] uppercase tracking-[0.16em] text-[#9a442d] font-bold">{label}</p>
+          <p className="text-[10px] uppercase tracking-[0.16em] text-terra font-bold">{label}</p>
           {sublabel && (
             <p className="text-xs text-white/40 mt-0.5 truncate">{sublabel}</p>
           )}
@@ -47,7 +47,7 @@ export function CaptionCard({ caption, label, sublabel }: Props) {
             transition-all active:scale-95
             ${copied
               ? 'bg-green-900/40 text-green-400 border border-green-800/60'
-              : 'bg-white/[0.06] text-white/50 hover:bg-[#9a442d] hover:text-white border border-transparent'
+              : 'bg-white/[0.06] text-white/50 hover:bg-terra hover:text-white border border-transparent'
             }
           `}
         >

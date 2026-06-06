@@ -51,8 +51,8 @@ export function EventIGThumb({ eventId, title, imageUrl }: Props) {
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
-              bg-[#9a442d]/20 text-[#e8a898] hover:bg-[#9a442d] hover:text-white
-              border border-[#9a442d]/30 hover:border-[#9a442d]
+              bg-terra/20 text-terra-light hover:bg-terra hover:text-white
+              border border-terra/30 hover:border-terra
               transition-all active:scale-95"
           >
             <ExternalLink size={11} />

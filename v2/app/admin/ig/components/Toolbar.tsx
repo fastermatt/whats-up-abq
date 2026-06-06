@@ -130,7 +130,7 @@ function TemplateGallery({
         <button
           onClick={() => onTabChange('event')}
           className={`flex-1 py-2.5 text-xs font-bold tracking-wide transition-colors ${
-            activeTab === 'event' ? 'bg-[#9a442d]/20 text-[#9a442d]' : 'text-white/50 hover:text-white/80'
+            activeTab === 'event' ? 'bg-terra/20 text-terra' : 'text-white/50 hover:text-white/80'
           }`}
         >
           Event Templates ({EVENT_TEMPLATES.length})
@@ -139,7 +139,7 @@ function TemplateGallery({
         <button
           onClick={() => onTabChange('user')}
           className={`flex-1 py-2.5 text-xs font-bold tracking-wide transition-colors ${
-            activeTab === 'user' ? 'bg-[#9a442d]/20 text-[#9a442d]' : 'text-white/50 hover:text-white/80'
+            activeTab === 'user' ? 'bg-terra/20 text-terra' : 'text-white/50 hover:text-white/80'
           }`}
         >
           My Templates ({userTemplates.length})
@@ -148,7 +148,7 @@ function TemplateGallery({
         <button
           onClick={() => onTabChange('brand')}
           className={`flex-1 py-2.5 text-xs font-bold tracking-wide transition-colors ${
-            activeTab === 'brand' ? 'bg-[#9a442d]/20 text-[#9a442d]' : 'text-white/50 hover:text-white/80'
+            activeTab === 'brand' ? 'bg-terra/20 text-terra' : 'text-white/50 hover:text-white/80'
           }`}
         >
           Brand Posts ({PROMO_TEMPLATES.length})
@@ -178,7 +178,7 @@ function TemplateGallery({
               onClick={() => onApply(t)}
               className="group bg-[#111] hover:bg-white/[0.05] active:bg-white/[0.08] transition-colors p-3 sm:p-2.5 flex flex-col items-center gap-2 text-left touch-manipulation"
             >
-              <div className="rounded overflow-hidden ring-1 ring-white/[0.08] group-hover:ring-[#9a442d]/60 transition-all group-hover:scale-[1.03]">
+              <div className="rounded overflow-hidden ring-1 ring-white/[0.08] group-hover:ring-terra/60 transition-all group-hover:scale-[1.03]">
                 <TemplateSwatch thumb={t.thumb} id={t.id} />
               </div>
               <div className="w-full">
@@ -202,7 +202,7 @@ function TemplateGallery({
                 onClick={() => onApplyUserTemplate(d)}
                 className="w-full flex flex-col items-center gap-2 text-left touch-manipulation"
               >
-                <div className="w-16 h-20 rounded overflow-hidden ring-1 ring-white/[0.08] group-hover:ring-[#9a442d]/60 transition-all bg-black flex items-center justify-center">
+                <div className="w-16 h-20 rounded overflow-hidden ring-1 ring-white/[0.08] group-hover:ring-terra/60 transition-all bg-black flex items-center justify-center">
                   {d.thumbnail ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={d.thumbnail} alt={d.name} className="w-full h-full object-contain" />
@@ -386,7 +386,7 @@ export function Toolbar({ mode, onModeChange, canvasRef, event, image }: Toolbar
               role="radio"
               aria-checked={mode === 'event'}
               className={`min-h-[40px] px-3.5 text-xs font-bold rounded transition-colors touch-manipulation ${
-                mode === 'event' ? 'bg-[#9a442d] text-white' : 'text-white/65 hover:text-white'
+                mode === 'event' ? 'bg-terra text-white' : 'text-white/65 hover:text-white'
               }`}
             >Event</button>
             <button
@@ -394,7 +394,7 @@ export function Toolbar({ mode, onModeChange, canvasRef, event, image }: Toolbar
               role="radio"
               aria-checked={mode === 'generic'}
               className={`min-h-[40px] px-3.5 text-xs font-bold rounded transition-colors touch-manipulation ${
-                mode === 'generic' ? 'bg-[#9a442d] text-white' : 'text-white/65 hover:text-white'
+                mode === 'generic' ? 'bg-terra text-white' : 'text-white/65 hover:text-white'
               }`}
             >Brand</button>
           </div>
@@ -407,8 +407,8 @@ export function Toolbar({ mode, onModeChange, canvasRef, event, image }: Toolbar
             aria-expanded={showGallery}
             className={`flex items-center gap-1.5 min-h-[40px] px-3.5 rounded-lg text-xs font-bold transition-colors touch-manipulation ${
               showGallery
-                ? 'bg-[#9a442d]/25 border border-[#9a442d]/60 text-[#e8a898]'
-                : 'bg-[#9a442d] hover:bg-[#b5502f] text-white border border-[#9a442d]'
+                ? 'bg-terra/25 border border-terra/60 text-terra-light'
+                : 'bg-terra hover:bg-terra-hover text-white border border-terra'
             }`}
           >
             <LayersIcon size={13} /> Templates
@@ -440,7 +440,7 @@ export function Toolbar({ mode, onModeChange, canvasRef, event, image }: Toolbar
             onChange={e => renameDesign(e.target.value)}
             placeholder="Untitled"
             aria-label="Design name"
-            className="bg-[#0a0807]/50 border border-white/[0.08] rounded px-2.5 min-h-[40px] text-xs text-white/90 focus:outline-none focus:ring-1 focus:ring-[#9a442d]/50 focus:border-[#9a442d]/60 w-32 sm:w-28"
+            className="bg-[#0a0807]/50 border border-white/[0.08] rounded px-2.5 min-h-[40px] text-xs text-white/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-terra/50 focus:border-terra/60 w-32 sm:w-28"
           />
           <div className="flex gap-1">
             <button
@@ -504,7 +504,7 @@ export function Toolbar({ mode, onModeChange, canvasRef, event, image }: Toolbar
               type="checkbox"
               checked={saveAsTemplate}
               onChange={e => setSaveAsTemplate(e.target.checked)}
-              className="accent-[#9a442d] w-3 h-3"
+              className="accent-terra w-3 h-3"
             />
             <span className="hidden sm:inline">Save as template</span>
             <span className="sm:hidden">Template</span>
@@ -522,14 +522,14 @@ export function Toolbar({ mode, onModeChange, canvasRef, event, image }: Toolbar
           {design.slides.length > 1 ? (
             <button
               onClick={exportAllSlides}
-              className="flex items-center gap-1.5 min-h-[40px] px-3.5 bg-[#9a442d] hover:bg-[#b85535] rounded text-xs font-bold text-white touch-manipulation"
+              className="flex items-center gap-1.5 min-h-[40px] px-3.5 bg-terra hover:bg-[#b85535] rounded text-xs font-bold text-white touch-manipulation"
             >
               <LayersIcon size={13} /> Export ZIP
             </button>
           ) : (
             <button
               onClick={exportPng}
-              className="flex items-center gap-1.5 min-h-[40px] px-3.5 bg-[#9a442d] hover:bg-[#b85535] rounded text-xs font-bold text-white touch-manipulation"
+              className="flex items-center gap-1.5 min-h-[40px] px-3.5 bg-terra hover:bg-[#b85535] rounded text-xs font-bold text-white touch-manipulation"
             >
               <Download size={13} /> Download
             </button>

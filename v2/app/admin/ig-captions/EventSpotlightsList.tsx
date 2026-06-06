@@ -67,8 +67,8 @@ export function EventSpotlightsList({ events }: { events: SpotlightItem[] }) {
           onChange={e => setSearch(e.target.value)}
           placeholder="Search by title, venue, category, date…"
           className="w-full pl-9 pr-9 py-2.5 bg-white/[0.06] border border-white/[0.1] rounded-xl
-            text-white text-sm placeholder:text-white/45 focus:outline-none
-            focus:border-[#9a442d]/60 focus:bg-white/[0.08] transition-all"
+            text-white text-sm placeholder:text-white/45 focus-visible:outline-none
+            focus:border-terra/60 focus:bg-white/[0.08] transition-all"
         />
         {search && (
           <button
@@ -100,7 +100,7 @@ export function EventSpotlightsList({ events }: { events: SpotlightItem[] }) {
         {filtered.map((event, i) => (
           <div
             key={event.id}
-            className="bg-[#201c1a] border border-white/[0.07] rounded-2xl p-5 space-y-5"
+            className="bg-ink-deep border border-white/[0.07] rounded-2xl p-5 space-y-5"
           >
             {/* Event header */}
             <div className="flex items-start justify-between gap-4">

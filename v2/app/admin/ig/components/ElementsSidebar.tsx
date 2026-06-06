@@ -83,7 +83,7 @@ export function ElementsSidebar() {
               <div key={layer.id}
                 onClick={() => selectLayer(layer.id)}
                 className={`group flex items-center gap-1.5 px-2 py-2 rounded cursor-pointer ${
-                  selected ? 'bg-[#9a442d]/30 text-white' : 'hover:bg-white/[0.04] text-white/70'
+                  selected ? 'bg-terra/30 text-white' : 'hover:bg-white/[0.04] text-white/70'
                 }`}>
                 <button onClick={e => { e.stopPropagation(); updateLayer(layer.id, { visible: !layer.visible }) }}
                   aria-label={layer.visible ? 'Hide layer' : 'Show layer'}

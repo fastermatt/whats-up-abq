@@ -173,9 +173,9 @@ function RowCard({ event, index }: { event: NormalizedEvent; index: number }) {
   return (
     <Link
       href={`/events/${event.id}`}
-      className="group flex-shrink-0 w-[155px] sm:w-[175px] rounded-xl overflow-hidden border border-[#f0e4cc]/80 bg-white shadow-[0_1px_3px_rgba(26,22,20,0.04)] hover:shadow-[0_6px_20px_rgba(26,22,20,0.1)] hover:-translate-y-0.5 transition-all duration-300"
+      className="group flex-shrink-0 w-[155px] sm:w-[175px] rounded-xl overflow-hidden border border-sand-light/80 bg-white shadow-[0_1px_3px_rgba(26,22,20,0.04)] hover:shadow-[0_6px_20px_rgba(26,22,20,0.1)] hover:-translate-y-0.5 transition-all duration-300"
     >
-      <div className="relative aspect-[3/2] bg-[#f0e4cc] overflow-hidden">
+      <div className="relative aspect-[3/2] bg-sand-light overflow-hidden">
         <EventImage
           src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
           fallback={getCategoryFallback(event.category ?? undefined, event.id)}
@@ -186,19 +186,19 @@ function RowCard({ event, index }: { event: NormalizedEvent; index: number }) {
       </div>
       <div className="p-2">
         <h3
-          className="font-bold text-[#1a1614] text-[11px] sm:text-xs leading-snug line-clamp-2 group-hover:text-[#9a442d] transition-colors"
+          className="font-bold text-ink text-[11px] sm:text-xs leading-snug line-clamp-2 group-hover:text-terra transition-colors"
           style={{ fontFamily: 'var(--font-epilogue)' }}
         >
           {event.title}
         </h3>
         {event.time ? (
-          <p className="mt-1 text-[10px] text-[#9a442d] font-medium flex items-center gap-0.5">
+          <p className="mt-1 text-[10px] text-terra font-medium flex items-center gap-0.5">
             <Clock className="w-2.5 h-2.5 flex-shrink-0" />
             {event.time}
           </p>
         ) : null}
         {event.venue && (
-          <p className="text-[10px] text-[#6b5d57] line-clamp-1 flex items-center gap-0.5 mt-0.5">
+          <p className="text-[10px] text-ink-light line-clamp-1 flex items-center gap-0.5 mt-0.5">
             <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
             {event.venue}
           </p>
@@ -224,14 +224,14 @@ function CategoryRow({
     <section>
       <div className="flex items-center justify-between mb-3">
         <h2
-          className="text-[11px] font-semibold uppercase tracking-[0.20em] text-[#9a442d]"
+          className="text-[11px] font-semibold uppercase tracking-[0.20em] text-terra"
           style={{ fontFamily: 'var(--font-inter)' }}
         >
           {label}
         </h2>
         <Link
           href={seeAllHref}
-          className="text-[11px] text-[#6b5d57] hover:text-[#9a442d] flex items-center gap-0.5 transition-colors"
+          className="text-[11px] text-ink-light hover:text-terra flex items-center gap-0.5 transition-colors"
         >
           See all <ChevronRight className="w-3 h-3" />
         </Link>
@@ -273,7 +273,7 @@ export default async function NightlifePage() {
   const jsonLd = buildJsonLd()
 
   return (
-    <main id="main" className="min-h-dvh bg-[#fbf7f1] pb-24 md:pb-10">
+    <main id="main" className="min-h-dvh bg-cream pb-24 md:pb-10">
 
       {/* JSON-LD */}
       {jsonLd.map((node, i) => (
@@ -289,7 +289,7 @@ export default async function NightlifePage() {
           className="object-cover object-center"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-[#fbf7f1]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-cream" />
       </div>
 
       <div className="max-w-5xl mx-auto px-4 space-y-8 pt-5">
@@ -297,12 +297,12 @@ export default async function NightlifePage() {
         {/* ── A: Header ── */}
         <div>
           <h1
-            className="text-3xl sm:text-4xl font-black text-[#1a1614] tracking-tight leading-none"
+            className="text-3xl sm:text-4xl font-black text-ink tracking-tight leading-none"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             Albuquerque Nightlife
           </h1>
-          <p className="text-[#6b5d57] text-sm mt-1">
+          <p className="text-ink-light text-sm mt-1">
             {totalEvents > 0
               ? `${musicEvents.length} live music, ${comedyEvents.length} comedy, ${brewFiltered.length} brewery nights — updated daily.`
               : 'Bars, live music, comedy and brewery nights — updated daily.'}
@@ -317,7 +317,7 @@ export default async function NightlifePage() {
               { name: 'Marble Brewery',   href: 'https://www.marblebrewery.com' },
               { name: 'El Rey Theater',   href: undefined },
             ].map(({ name, href }) => {
-              const cls = 'flex items-center text-[11px] font-semibold text-[#9a442d] px-2.5 py-1 rounded-full bg-[rgba(154,68,45,0.08)] border border-[rgba(154,68,45,0.16)] hover:bg-[rgba(154,68,45,0.15)] transition-colors'
+              const cls = 'flex items-center text-[11px] font-semibold text-terra px-2.5 py-1 rounded-full bg-[rgba(154,68,45,0.08)] border border-[rgba(154,68,45,0.16)] hover:bg-[rgba(154,68,45,0.15)] transition-colors'
               return href ? (
                 <a key={name} href={href} target="_blank" rel="noopener noreferrer" className={cls}>
                   {name}
@@ -335,7 +335,7 @@ export default async function NightlifePage() {
         {/* ── C: Local Intel — 3 quick-answer tips ── */}
         <section>
           <h2
-            className="text-[11px] font-semibold uppercase tracking-[0.20em] text-[#9a442d] mb-3"
+            className="text-[11px] font-semibold uppercase tracking-[0.20em] text-terra mb-3"
             style={{ fontFamily: 'var(--font-inter)' }}
           >
             Local Intel
@@ -344,16 +344,16 @@ export default async function NightlifePage() {
             {INTEL.map(({ q, a, icon }) => (
               <div
                 key={q}
-                className="bg-[#fdf5ec] border border-[#f0e4cc] rounded-xl p-4"
+                className="bg-[#fdf5ec] border border-sand-light rounded-xl p-4"
               >
                 <p className="text-base mb-1.5" aria-hidden="true">{icon}</p>
                 <h3
-                  className="text-sm font-black text-[#1a1614] mb-1 leading-tight"
+                  className="text-sm font-black text-ink mb-1 leading-tight"
                   style={{ fontFamily: 'var(--font-epilogue)' }}
                 >
                   {q}
                 </h3>
-                <p className="text-xs text-[#4a3f3a] leading-relaxed">{a}</p>
+                <p className="text-xs text-ink-mid leading-relaxed">{a}</p>
               </div>
             ))}
           </div>
@@ -381,12 +381,12 @@ export default async function NightlifePage() {
         {/* ── E: About Albuquerque nightlife (SEO prose) ── */}
         <section className="max-w-prose">
           <h2
-            className="text-lg font-black text-[#1a1614] mb-3"
+            className="text-lg font-black text-ink mb-3"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             About Albuquerque Nightlife
           </h2>
-          <div className="space-y-3 text-sm text-[#4a3f3a] leading-relaxed">
+          <div className="space-y-3 text-sm text-ink-mid leading-relaxed">
             <p>
               Albuquerque nightlife doesn&rsquo;t need velvet ropes or a 4am last call to be worth your evening.
               The main drag is Nob Hill — Central Avenue from Girard to Carlisle — where Sister Bar anchors
@@ -410,7 +410,7 @@ export default async function NightlifePage() {
         {/* ── F: FAQ accordion ── */}
         <section>
           <h2
-            className="text-[11px] font-semibold uppercase tracking-[0.20em] text-[#9a442d] mb-3"
+            className="text-[11px] font-semibold uppercase tracking-[0.20em] text-terra mb-3"
             style={{ fontFamily: 'var(--font-inter)' }}
           >
             Frequently Asked
@@ -419,13 +419,13 @@ export default async function NightlifePage() {
             {FAQS.map(({ q, a }) => (
               <details
                 key={q}
-                className="group bg-white border border-[#f0e4cc] rounded-xl overflow-hidden"
+                className="group bg-white border border-sand-light rounded-xl overflow-hidden"
               >
-                <summary className="flex items-center justify-between gap-2 px-4 py-3 cursor-pointer list-none text-sm font-bold text-[#1a1614] hover:text-[#9a442d] transition-colors select-none" style={{ fontFamily: 'var(--font-epilogue)' }}>
+                <summary className="flex items-center justify-between gap-2 px-4 py-3 cursor-pointer list-none text-sm font-bold text-ink hover:text-terra transition-colors select-none" style={{ fontFamily: 'var(--font-epilogue)' }}>
                   {q}
-                  <ChevronRight className="w-4 h-4 flex-shrink-0 text-[#9a442d] rotate-90 group-open:rotate-[270deg] transition-transform duration-200" />
+                  <ChevronRight className="w-4 h-4 flex-shrink-0 text-terra rotate-90 group-open:rotate-[270deg] transition-transform duration-200" />
                 </summary>
-                <p className="px-4 pb-3.5 text-xs text-[#4a3f3a] leading-relaxed border-t border-[#f0e4cc] pt-3">
+                <p className="px-4 pb-3.5 text-xs text-ink-mid leading-relaxed border-t border-sand-light pt-3">
                   {a}
                 </p>
               </details>
@@ -434,16 +434,16 @@ export default async function NightlifePage() {
         </section>
 
         {/* ── G: Submit CTA ── */}
-        <div className="bg-[#fdf5ec] border border-[#f0e4cc] rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 max-w-prose">
+        <div className="bg-[#fdf5ec] border border-sand-light rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 max-w-prose">
           <div className="flex-1">
-            <p className="text-sm font-bold text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
+            <p className="text-sm font-bold text-ink" style={{ fontFamily: 'var(--font-epilogue)' }}>
               Know a bar or show we&rsquo;re missing?
             </p>
-            <p className="text-xs text-[#6b5d57] mt-0.5">We update daily but we don&rsquo;t catch everything.</p>
+            <p className="text-xs text-ink-light mt-0.5">We update daily but we don&rsquo;t catch everything.</p>
           </div>
           <Link
             href="/submit"
-            className="shrink-0 px-5 py-2.5 rounded-full bg-[#9a442d] text-white text-sm font-semibold hover:bg-[#7d3725] transition-colors whitespace-nowrap"
+            className="shrink-0 px-5 py-2.5 rounded-full bg-terra text-white text-sm font-semibold hover:bg-terra-hover transition-colors whitespace-nowrap"
           >
             Submit an event →
           </Link>
@@ -452,7 +452,7 @@ export default async function NightlifePage() {
         {/* ── H: Related links ── */}
         <section>
           <h2
-            className="text-[11px] font-semibold uppercase tracking-[0.20em] text-[#9a442d] mb-3"
+            className="text-[11px] font-semibold uppercase tracking-[0.20em] text-terra mb-3"
             style={{ fontFamily: 'var(--font-inter)' }}
           >
             Around Albuquerque
@@ -464,15 +464,15 @@ export default async function NightlifePage() {
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col gap-0.5 bg-white rounded-xl border border-[#f0e4cc] p-3.5 hover:border-[#9a442d] hover:shadow-md transition-all group"
+                className="flex flex-col gap-0.5 bg-white rounded-xl border border-sand-light p-3.5 hover:border-terra hover:shadow-md transition-all group"
               >
                 <span
-                  className="text-sm font-bold text-[#9a442d] group-hover:underline leading-tight"
+                  className="text-sm font-bold text-terra group-hover:underline leading-tight"
                   style={{ fontFamily: 'var(--font-epilogue)' }}
                 >
                   {name} ↗
                 </span>
-                <span className="text-[11px] text-[#6b5d57] leading-snug">{description}</span>
+                <span className="text-[11px] text-ink-light leading-snug">{description}</span>
               </a>
             ))}
           </div>

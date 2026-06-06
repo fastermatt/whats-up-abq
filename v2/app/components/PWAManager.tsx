@@ -113,7 +113,7 @@ export function PWAManager() {
       className="fixed top-0 left-0 right-0 z-[100] flex justify-center pointer-events-none"
       style={{
         transform:  `translateY(${refreshing ? 52 : pullY - 8}px)`,
-        transition: refreshing || pullY === 0 ? 'transform 0.35s cubic-bezier(0.34,1.56,0.64,1)' : 'none',
+        transition: refreshing || pullY === 0 ? 'transform 0.35s cubic-bezier(0.34,1.12,0.64,1)' : 'none',
       }}
     >
       <div
@@ -121,8 +121,8 @@ export function PWAManager() {
           w-10 h-10 rounded-full shadow-lg flex items-center justify-center
           transition-colors duration-200
           ${triggered
-            ? 'bg-[#9a442d] text-white'
-            : 'bg-white text-[#9a442d] border border-[#f0e4cc]'
+            ? 'bg-terra text-white'
+            : 'bg-white text-terra border border-sand-light'
           }
         `}
         style={{ opacity: Math.min(1, pullY / 30) }}

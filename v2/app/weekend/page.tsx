@@ -109,12 +109,12 @@ export default async function WeekendPage() {
         {/* ── Header ── */}
         <div className="animate-fade-in">
           <h1
-            className="text-3xl font-black text-[#1a1614] tracking-tight"
+            className="text-3xl font-black text-ink tracking-tight"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             This Weekend in Albuquerque
           </h1>
-          <p className="text-[#6b5d57] text-sm mt-1">{fri} – {sun}</p>
+          <p className="text-ink-light text-sm mt-1">{fri} – {sun}</p>
         </div>
 
         {/* ── Empty state ── */}
@@ -122,17 +122,17 @@ export default async function WeekendPage() {
           <div className="flex flex-col items-center justify-center py-24 text-center animate-fade-in">
             <div className="text-5xl mb-4">🌵</div>
             <h2
-              className="text-lg font-bold text-[#1a1614] mb-2"
+              className="text-lg font-bold text-ink mb-2"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               Nothing listed yet.
             </h2>
-            <p className="text-[#6b5d57] text-sm max-w-xs mb-6">
+            <p className="text-ink-light text-sm max-w-xs mb-6">
               Weekend events haven&apos;t been added yet — check back closer to the weekend or browse all upcoming events.
             </p>
             <Link
               href="/events"
-              className="px-5 py-2 rounded-full bg-[#9a442d] text-white text-sm font-medium hover:bg-[#7d3725] transition-colors"
+              className="px-5 py-2 rounded-full bg-terra text-white text-sm font-medium hover:bg-terra-hover transition-colors"
             >
               Browse All Events →
             </Link>
@@ -164,7 +164,7 @@ export default async function WeekendPage() {
                 <section key={day}>
                   {/* Day header */}
                   <h2
-                    className="text-2xl font-black text-[#1a1614] mb-5 border-b-2 border-[#9a442d]/30 pb-2"
+                    className="text-2xl font-black text-ink mb-5 border-b-2 border-terra/30 pb-2"
                     style={{ fontFamily: 'var(--font-epilogue)' }}
                   >
                     {label}
@@ -174,7 +174,7 @@ export default async function WeekendPage() {
                     {sortedCats.map((cat) => (
                       <div key={cat}>
                         <h3
-                          className="text-base font-bold text-[#1a1614] mb-3 border-b border-[#f0e4cc] pb-1"
+                          className="text-base font-bold text-ink mb-3 border-b border-sand-light pb-1"
                           style={{ fontFamily: 'var(--font-epilogue)' }}
                         >
                           {cat}
@@ -198,7 +198,7 @@ export default async function WeekendPage() {
           <div className="text-center pt-4">
             <Link
               href="/events"
-              className="text-sm text-[#9a442d] font-medium hover:underline"
+              className="text-sm text-terra font-medium hover:underline"
             >
               Browse all upcoming events →
             </Link>
@@ -206,23 +206,23 @@ export default async function WeekendPage() {
         )}
 
         {/* ── FAQ section ── */}
-        <div className="mt-10 pt-8 border-t border-[#f0e4cc]">
+        <div className="mt-10 pt-8 border-t border-sand-light">
           <h2
-            className="text-base font-black text-[#1a1614] mb-4 uppercase tracking-wider"
+            className="text-base font-black text-ink mb-4 uppercase tracking-wider"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             Frequently Asked Questions
           </h2>
           <div className="space-y-3 max-w-3xl">
             {WEEKEND_FAQS.map(({ q, a }, i) => (
-              <div key={i} className="bg-white rounded-xl border border-[#f0e4cc] p-4 shadow-sm">
+              <div key={i} className="bg-white rounded-xl border border-sand-light p-4 shadow-sm">
                 <h3
-                  className="text-sm font-bold text-[#1a1614] mb-1.5"
+                  className="text-sm font-bold text-ink mb-1.5"
                   style={{ fontFamily: 'var(--font-epilogue)' }}
                 >
                   {q}
                 </h3>
-                <p className="text-xs text-[#6b5d57] leading-relaxed">{a}</p>
+                <p className="text-xs text-ink-light leading-relaxed">{a}</p>
               </div>
             ))}
           </div>
@@ -239,11 +239,11 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
 
   return (
     <div
-      className="group relative spring-card rounded-xl overflow-hidden border border-[#f0e4cc]/80 bg-white shadow-[0_1px_3px_rgba(26,22,20,0.04)] hover:shadow-[0_8px_24px_rgba(26,22,20,0.12)] transition-all duration-300 hover:-translate-y-1"
+      className="group relative spring-card rounded-xl overflow-hidden border border-sand-light/80 bg-white shadow-[0_1px_3px_rgba(26,22,20,0.04)] hover:shadow-[0_8px_24px_rgba(26,22,20,0.12)] transition-all duration-300 hover:-translate-y-1"
       style={{ '--card-i': Math.min(index, 14) } as React.CSSProperties}
     >
       <Link href={`/events/${event.id}`} className="flex flex-col h-full">
-        <div className="relative aspect-[16/10] bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3] overflow-hidden">
+        <div className="relative aspect-[16/10] bg-gradient-to-br from-sand-light to-sand-mid overflow-hidden">
           <EventImage
             src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
             fallback={getCategoryFallback(event.category ?? undefined, event.id)}
@@ -257,7 +257,7 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
             </div>
           )}
           {event.price && (
-            <div className="absolute bottom-1.5 right-1.5 bg-[#006a62]/90 backdrop-blur-sm text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
+            <div className="absolute bottom-1.5 right-1.5 bg-turq/90 backdrop-blur-sm text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
               {event.price}
             </div>
           )}
@@ -265,19 +265,19 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
         </div>
         <div className="p-2 space-y-0.5 flex-1 flex flex-col">
           <h3
-            className="font-bold text-[#1a1614] text-xs leading-tight line-clamp-2 group-hover:text-[#9a442d] transition-colors"
+            className="font-bold text-ink text-xs leading-tight line-clamp-2 group-hover:text-terra transition-colors"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             {event.title}
           </h3>
           {timeStr && (
-            <p className="text-[10px] text-[#9a442d] font-medium flex items-center gap-1">
+            <p className="text-[10px] text-terra font-medium flex items-center gap-1">
               <Clock className="w-2.5 h-2.5 flex-shrink-0" />
               <span>{timeStr}</span>
             </p>
           )}
           {event.venue && (
-            <p className="text-[10px] text-[#6b5d57] line-clamp-1 flex items-center gap-1">
+            <p className="text-[10px] text-ink-light line-clamp-1 flex items-center gap-1">
               <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
               {event.venue}
             </p>

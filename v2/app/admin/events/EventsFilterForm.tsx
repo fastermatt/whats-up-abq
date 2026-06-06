@@ -46,7 +46,7 @@ export function EventsFilterForm({ search, source, catFilter, showHidden, showFe
         type="text"
         placeholder="Search events…"
         defaultValue={search}
-        className="bg-white/10 border border-white/20 text-white placeholder-white/30 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-[#9a442d] w-56"
+        className="bg-white/10 border border-white/20 text-white placeholder-white/30 rounded-xl px-4 py-2 text-sm focus-visible:outline-none focus:border-terra w-56"
       />
       <button
         type="submit"
@@ -57,21 +57,21 @@ export function EventsFilterForm({ search, source, catFilter, showHidden, showFe
 
       <select
         value={source}
-        className="bg-white/10 border border-white/20 text-white rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-[#9a442d] cursor-pointer"
+        className="bg-white/10 border border-white/20 text-white rounded-xl px-4 py-2 text-sm focus-visible:outline-none focus:border-terra cursor-pointer"
         onChange={e => router.push(buildUrl({ source: e.target.value, page: '' }))}
       >
         {sources.map(s => (
-          <option key={s} value={s} className="bg-[#1a1614]">{s || 'All sources'}</option>
+          <option key={s} value={s} className="bg-ink">{s || 'All sources'}</option>
         ))}
       </select>
 
       <select
         value={catFilter}
-        className="bg-white/10 border border-white/20 text-white rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-[#9a442d] cursor-pointer"
+        className="bg-white/10 border border-white/20 text-white rounded-xl px-4 py-2 text-sm focus-visible:outline-none focus:border-terra cursor-pointer"
         onChange={e => router.push(buildUrl({ cat: e.target.value, page: '' }))}
       >
         {categories.map(c => (
-          <option key={c} value={c} className="bg-[#1a1614]">{c || 'All categories'}</option>
+          <option key={c} value={c} className="bg-ink">{c || 'All categories'}</option>
         ))}
       </select>
 

@@ -45,8 +45,8 @@ export function HolidayBanner(props: HolidayBannerProps) {
   }
 
   // Tone subtle — terra background by default, single line on mobile
-  const bg = props.bgClass ?? 'bg-[#9a442d]'
-  const text = props.textClass ?? 'text-[#fbf7f1]'
+  const bg = props.bgClass ?? 'bg-terra'
+  const text = props.textClass ?? 'text-cream'
   const dayLabel =
     props.daysUntil === 0 ? 'Today'
     : props.daysUntil === 1 ? 'Tomorrow'

@@ -28,8 +28,8 @@ export function CalendarToggle({ isOpen }: CalendarToggleProps) {
       onClick={toggle}
       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
         isOpen
-          ? 'bg-[#9a442d] text-white'
-          : 'bg-white border border-[#ddc9a3] text-[#4a3f3a] hover:border-[#9a442d] hover:text-[#9a442d]'
+          ? 'bg-terra text-white'
+          : 'bg-white border border-sand-mid text-ink-mid hover:border-terra hover:text-terra'
       }`}
       aria-label={isOpen ? 'Hide calendar' : 'Show calendar'}
     >

@@ -98,21 +98,21 @@ export default async function LandingPage() {
   const cards = featuredEvents.filter(e => e.imageUrl).slice(0, 6)
 
   return (
-    <main id="main" className="min-h-dvh bg-[#fbf7f1]">
+    <main id="main" className="min-h-dvh bg-cream">
 
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
       <section className="px-5 pt-10 pb-8 max-w-2xl mx-auto">
 
         {/* Brand mark */}
         <div className="flex items-center gap-2 mb-8">
-          <div className="w-2 h-2 rounded-full bg-[#9a442d]" />
+          <div className="w-2 h-2 rounded-full bg-terra" />
           <span
-            className="text-sm font-black text-[#1a1614] tracking-tight"
+            className="text-sm font-black text-ink tracking-tight"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             ABQ Unplugged
           </span>
-          <span className="text-[10px] uppercase tracking-[0.18em] text-[#9a442d] font-semibold ml-1">
+          <span className="text-[10px] uppercase tracking-[0.18em] text-terra font-semibold ml-1">
             Albuquerque, NM
           </span>
         </div>
@@ -121,23 +121,23 @@ export default async function LandingPage() {
         <div className="mb-6">
           <div className="flex items-end gap-2 mb-1">
             <span
-              className="text-7xl sm:text-8xl font-black text-[#9a442d] leading-none tabular-nums"
+              className="text-7xl sm:text-8xl font-black text-terra leading-none tabular-nums"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               {heroCount > 0 ? heroCount.toLocaleString() : '900+'}
             </span>
           </div>
           <p
-            className="text-2xl sm:text-3xl font-black text-[#1a1614] leading-tight -mt-1"
+            className="text-2xl sm:text-3xl font-black text-ink leading-tight -mt-1"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             {heroLabel}
             <br />
-            <span className="text-[#9a442d]">{heroSub}</span>
+            <span className="text-terra">{heroSub}</span>
           </p>
         </div>
 
-        <p className="text-[#4a3f3a] text-base leading-relaxed mb-7 max-w-md">
+        <p className="text-ink-mid text-base leading-relaxed mb-7 max-w-md">
           Concerts, comedy shows, art openings, food festivals, free events — every ticket
           source in Albuquerque in one place, updated daily.
         </p>
@@ -147,7 +147,7 @@ export default async function LandingPage() {
           <Link
             href="/events"
             data-umami-event="landing-browse-events"
-            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-[#9a442d] text-white font-bold shadow-md hover:bg-[#7d3725] hover:shadow-lg transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-terra text-white font-bold shadow-md hover:bg-terra-hover hover:shadow-lg transition-all"
           >
             Browse events
             <ArrowRight className="w-4 h-4" />
@@ -155,7 +155,7 @@ export default async function LandingPage() {
           <Link
             href="/tonight"
             data-umami-event="landing-tonight"
-            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full border-2 border-[#9a442d]/30 text-[#9a442d] font-bold hover:border-[#9a442d] transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full border-2 border-terra/30 text-terra font-bold hover:border-terra transition-colors"
           >
             Tonight
           </Link>
@@ -168,13 +168,13 @@ export default async function LandingPage() {
         <section className="pb-10">
           <div className="px-5 mb-4 flex items-center justify-between">
             <p
-              className="text-[10px] uppercase tracking-[0.2em] text-[#9a442d] font-bold"
+              className="text-[10px] uppercase tracking-[0.2em] text-terra font-bold"
             >
               Happening soon
             </p>
             <Link
               href="/events"
-              className="text-xs text-[#9a442d] font-semibold flex items-center gap-1 hover:underline underline-offset-2"
+              className="text-xs text-terra font-semibold flex items-center gap-1 hover:underline underline-offset-2"
             >
               See all <ArrowRight className="w-3 h-3" />
             </Link>
@@ -194,10 +194,10 @@ export default async function LandingPage() {
                   key={event.id}
                   href={`/events/${event.id}`}
                   data-umami-event="landing-event-card"
-                  className="flex-shrink-0 snap-start w-[200px] sm:w-[220px] rounded-2xl overflow-hidden bg-white border border-[#f0e4cc] hover:border-[#ddc9a3] hover:shadow-md transition-all block"
+                  className="flex-shrink-0 snap-start w-[200px] sm:w-[220px] rounded-2xl overflow-hidden bg-white border border-sand-light hover:border-sand-mid hover:shadow-md transition-all block"
                 >
                   {/* Photo */}
-                  <div className="relative w-full aspect-[4/3] overflow-hidden bg-[#f0e4cc]">
+                  <div className="relative w-full aspect-[4/3] overflow-hidden bg-sand-light">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={imgSrc}
@@ -216,16 +216,16 @@ export default async function LandingPage() {
 
                   {/* Info */}
                   <div className="p-3">
-                    <p className="text-[#1a1614] text-xs font-black leading-snug line-clamp-2 mb-1.5"
+                    <p className="text-ink text-xs font-black leading-snug line-clamp-2 mb-1.5"
                        style={{ fontFamily: 'var(--font-epilogue)' }}>
                       {event.title}
                     </p>
-                    <div className="flex items-center gap-1 text-[10px] text-[#6b5d57]">
+                    <div className="flex items-center gap-1 text-[10px] text-ink-light">
                       <Calendar className="w-3 h-3 flex-shrink-0" />
                       <span className="truncate">{formatEventDate(event.date, event.time)}</span>
                     </div>
                     {event.venue && (
-                      <div className="flex items-center gap-1 mt-0.5 text-[10px] text-[#6b5d57]">
+                      <div className="flex items-center gap-1 mt-0.5 text-[10px] text-ink-light">
                         <MapPin className="w-3 h-3 flex-shrink-0" />
                         <span className="truncate">{event.venue}</span>
                       </div>
@@ -238,7 +238,7 @@ export default async function LandingPage() {
             {/* Terminal "see more" card */}
             <Link
               href="/events"
-              className="flex-shrink-0 snap-start w-[160px] rounded-2xl bg-[#9a442d] flex flex-col items-center justify-center gap-2 px-4 text-center hover:bg-[#7d3725] transition-colors"
+              className="flex-shrink-0 snap-start w-[160px] rounded-2xl bg-terra flex flex-col items-center justify-center gap-2 px-4 text-center hover:bg-terra-hover transition-colors"
             >
               <ArrowRight className="w-6 h-6 text-white" />
               <p className="text-white text-xs font-bold leading-tight">See all events</p>
@@ -255,14 +255,14 @@ export default async function LandingPage() {
             { value: '80+',    label: 'local venues' },
             { value: 'Daily',  label: 'updates' },
           ].map(stat => (
-            <div key={stat.label} className="bg-white rounded-2xl border border-[#f0e4cc] py-4 px-2">
+            <div key={stat.label} className="bg-white rounded-2xl border border-sand-light py-4 px-2">
               <p
-                className="text-xl font-black text-[#9a442d]"
+                className="text-xl font-black text-terra"
                 style={{ fontFamily: 'var(--font-epilogue)' }}
               >
                 {stat.value}
               </p>
-              <p className="text-[10px] uppercase tracking-[0.14em] text-[#6b5d57] font-semibold mt-0.5">
+              <p className="text-[10px] uppercase tracking-[0.14em] text-ink-light font-semibold mt-0.5">
                 {stat.label}
               </p>
             </div>
@@ -277,7 +277,7 @@ export default async function LandingPage() {
 
       {/* ── Category quick links ─────────────────────────────────────────────── */}
       <section className="px-5 pb-10 max-w-2xl mx-auto">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-[#9a442d] font-bold mb-3">
+        <p className="text-[10px] uppercase tracking-[0.2em] text-terra font-bold mb-3">
           Pick your night
         </p>
         <div className="flex flex-wrap gap-2">
@@ -294,7 +294,7 @@ export default async function LandingPage() {
             <Link
               key={c.href}
               href={c.href}
-              className="px-3.5 py-2 rounded-full bg-white border border-[#e8d5c0] text-sm font-semibold text-[#4a3f3a] hover:border-[#9a442d] hover:text-[#9a442d] transition-colors"
+              className="px-3.5 py-2 rounded-full bg-white border border-[#e8d5c0] text-sm font-semibold text-ink-mid hover:border-terra hover:text-terra transition-colors"
             >
               {c.label}
             </Link>
@@ -303,16 +303,16 @@ export default async function LandingPage() {
       </section>
 
       {/* ── IG follow + about ────────────────────────────────────────────────── */}
-      <section className="border-t border-[#f0e4cc] bg-white px-5 py-8">
+      <section className="border-t border-sand-light bg-white px-5 py-8">
         <div className="max-w-2xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
           <div>
             <p
-              className="text-base font-black text-[#1a1614] mb-1"
+              className="text-base font-black text-ink mb-1"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               Built by a Burqueño, for Burqueños.
             </p>
-            <p className="text-xs text-[#6b5d57] max-w-xs leading-relaxed">
+            <p className="text-xs text-ink-light max-w-xs leading-relaxed">
               Free, no ads, no tickets fees. We aggregate so you don&apos;t
               have to check five different sites.
             </p>
@@ -324,14 +324,14 @@ export default async function LandingPage() {
               rel="noopener noreferrer"
               data-umami-event="instagram-follow"
               data-umami-event-position="landing-footer"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border-2 border-[#9a442d]/30 text-[#9a442d] text-sm font-bold hover:border-[#9a442d] hover:bg-[#9a442d] hover:text-white transition-all"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border-2 border-terra/30 text-terra text-sm font-bold hover:border-terra hover:bg-terra hover:text-white transition-all"
             >
               <InstagramIcon size={15} />
               @abqunplugged
             </a>
             <Link
               href="/events"
-              className="inline-flex items-center justify-center gap-1 px-4 py-2.5 rounded-full bg-[#9a442d] text-white text-sm font-bold hover:bg-[#7d3725] transition-colors"
+              className="inline-flex items-center justify-center gap-1 px-4 py-2.5 rounded-full bg-terra text-white text-sm font-bold hover:bg-terra-hover transition-colors"
             >
               Browse all events <ArrowRight className="w-3.5 h-3.5" />
             </Link>

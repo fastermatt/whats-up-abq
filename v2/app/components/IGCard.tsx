@@ -1073,7 +1073,7 @@ export function IGCardClient({
           {FORMATS.map(f => (
             <button key={f.key} onClick={() => setFormat(f.key)}
               className={`px-2.5 py-1.5 rounded-lg text-xs font-bold tracking-wide transition-all ${
-                format === f.key ? 'bg-[#9a442d] text-white shadow-sm' : 'text-white/35 hover:text-white/65 hover:bg-white/[0.04]'
+                format === f.key ? 'bg-terra text-white shadow-sm' : 'text-white/35 hover:text-white/65 hover:bg-white/[0.04]'
               }`}>
               {f.label}
               <span className={`hidden sm:inline ml-1 text-[10px] font-normal ${format === f.key ? 'opacity-75' : 'opacity-50'}`}>
@@ -1105,7 +1105,7 @@ export function IGCardClient({
         <div className="flex items-center gap-1.5 shrink-0">
           <button onClick={handleShare} disabled={downloading || !imageLoaded}
             title={!imageLoaded ? 'Waiting for image…' : 'Share or save to Photos'}
-            className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-[#006a62] text-white text-sm font-semibold hover:bg-[#008176] active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-turq text-white text-sm font-semibold hover:bg-[#008176] active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
             {downloading ? <Loader2 size={15} className="animate-spin" />
               : !imageLoaded ? <Loader2 size={15} className="animate-spin opacity-60" />
               : <Share2 size={15} />}
@@ -1115,7 +1115,7 @@ export function IGCardClient({
           </button>
           <button onClick={handleDownload} disabled={downloading || !imageLoaded}
             title={!imageLoaded ? 'Waiting for image…' : 'Download PNG'}
-            className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-[#9a442d] text-white text-sm font-semibold hover:bg-[#b5502f] active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-terra text-white text-sm font-semibold hover:bg-terra-hover active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
             {downloading ? <Loader2 size={15} className="animate-spin" />
               : !imageLoaded ? <Loader2 size={15} className="animate-spin opacity-60" />
               : <Download size={15} />}
@@ -1171,7 +1171,7 @@ export function IGCardClient({
               <button key={t.key} onClick={() => setTemplate(t.key)}
                 className={`flex flex-col items-start px-3 py-2 rounded-xl text-xs transition-all ${
                   template === t.key
-                    ? 'bg-[#9a442d] text-white'
+                    ? 'bg-terra text-white'
                     : 'bg-white/[0.06] text-white/35 hover:text-white/65 hover:bg-white/[0.1]'
                 }`}>
                 <span className="font-bold">{t.label}</span>
@@ -1228,7 +1228,7 @@ export function IGCardClient({
             ] as { label: string; val: boolean; set: (v: boolean) => void }[]).map(({ label, val, set }) => (
               <button key={label} onClick={() => set(!val)}
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                  val ? 'bg-[#9a442d] text-white' : 'bg-white/[0.07] text-white/30 hover:text-white/55 hover:bg-white/[0.1]'
+                  val ? 'bg-terra text-white' : 'bg-white/[0.07] text-white/30 hover:text-white/55 hover:bg-white/[0.1]'
                 }`}>
                 {label}
               </button>

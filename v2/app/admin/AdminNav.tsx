@@ -35,11 +35,11 @@ export function AdminNav() {
     item.exact ? pathname === item.href : pathname.startsWith(item.prefix)
 
   return (
-    <nav className="border-b border-white/10 sticky top-0 bg-[#1a1614]/95 backdrop-blur z-10">
+    <nav className="border-b border-white/10 sticky top-0 bg-ink/95 backdrop-blur z-10">
       <div className="flex items-center gap-4 px-4 py-3 overflow-x-auto"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
       >
-        <span className="font-black text-[#9a442d] shrink-0" style={{ fontFamily: 'var(--font-epilogue)' }}>
+        <span className="font-black text-terra shrink-0" style={{ fontFamily: 'var(--font-epilogue)' }}>
           Admin
         </span>
         {NAV_ITEMS.map(item => {
@@ -51,7 +51,7 @@ export function AdminNav() {
               aria-current={active ? 'page' : undefined}
               className={`text-sm transition-colors shrink-0 border-b-2 -mb-3 pb-3 ${
                 active
-                  ? 'text-white font-bold border-[#9a442d]'
+                  ? 'text-white font-bold border-terra'
                   : 'text-white/65 hover:text-white border-transparent'
               }`}
             >

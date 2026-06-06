@@ -25,7 +25,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     redirect('/admin/login')
   }
   return (
-    <div className="min-h-dvh bg-[#1a1614] text-white">
+    <div className="min-h-dvh bg-ink text-white">
       <AdminNav />
       <main id="main" className="max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
         {children}

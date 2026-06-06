@@ -25,7 +25,7 @@ export function LandingEmailForm() {
 
   if (status === 'success') {
     return (
-      <div className="rounded-2xl bg-[#9a442d] px-6 py-8 text-center">
+      <div className="rounded-2xl bg-terra px-6 py-8 text-center">
         <p
           className="text-xl font-black text-white mb-1"
           style={{ fontFamily: 'var(--font-epilogue)' }}
@@ -51,14 +51,14 @@ export function LandingEmailForm() {
   }
 
   return (
-    <div className="rounded-2xl bg-[#1a1614] px-6 py-7">
+    <div className="rounded-2xl bg-ink px-6 py-7">
       <p
-        className="text-lg font-black text-[#fbf7f1] mb-1"
+        className="text-lg font-black text-cream mb-1"
         style={{ fontFamily: 'var(--font-epilogue)' }}
       >
         Get Friday picks in your inbox.
       </p>
-      <p className="text-xs text-[#fbf7f1]/45 mb-5">
+      <p className="text-xs text-cream/45 mb-5">
         Best of ABQ every weekend. Free, no spam, unsubscribe anytime.
       </p>
       <form onSubmit={submit} className="flex gap-2">
@@ -68,13 +68,13 @@ export function LandingEmailForm() {
           onChange={e => setEmail(e.target.value)}
           placeholder="your@email.com"
           required
-          className="flex-1 min-w-0 px-3 py-2.5 rounded-xl text-sm bg-white/8 border border-white/12 text-[#fbf7f1] placeholder:text-[#fbf7f1]/30 focus:outline-none focus:border-[#9a442d]/60 focus:ring-1 focus:ring-[#9a442d]/30 transition-all"
+          className="flex-1 min-w-0 px-3 py-2.5 rounded-xl text-sm bg-white/8 border border-white/12 text-cream placeholder:text-cream/30 focus-visible:outline-none focus:border-terra/60 focus-visible:ring-1 focus-visible:ring-terra/30 transition-all"
           style={{ background: 'rgba(251,247,241,0.07)', borderColor: 'rgba(251,247,241,0.11)' }}
         />
         <button
           type="submit"
           disabled={status === 'loading'}
-          className="px-5 py-2.5 rounded-xl bg-[#9a442d] text-white text-sm font-bold hover:bg-[#7d3725] transition-colors disabled:opacity-50 flex-shrink-0"
+          className="px-5 py-2.5 rounded-xl bg-terra text-white text-sm font-bold hover:bg-terra-hover transition-colors disabled:opacity-50 flex-shrink-0"
         >
           {status === 'loading' ? '…' : 'Subscribe'}
         </button>

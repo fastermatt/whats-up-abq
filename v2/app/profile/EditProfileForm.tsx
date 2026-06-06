@@ -67,15 +67,15 @@ export function EditProfileForm({
   }
 
   return (
-    <div className="bg-[#fdf9f4] rounded-2xl border border-[#e8d9bf] overflow-hidden">
+    <div className="bg-cream-raised rounded-2xl border border-[#e8d9bf] overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
         className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-[#f7f0e5] transition-colors"
       >
-        <span className="text-sm font-bold text-[#1a1614]">Edit Profile &amp; Preferences</span>
+        <span className="text-sm font-bold text-ink">Edit Profile &amp; Preferences</span>
         {open
-          ? <ChevronUp className="w-4 h-4 text-[#6b5d57]" />
-          : <ChevronDown className="w-4 h-4 text-[#6b5d57]" />}
+          ? <ChevronUp className="w-4 h-4 text-ink-light" />
+          : <ChevronDown className="w-4 h-4 text-ink-light" />}
       </button>
 
       {open && (
@@ -84,7 +84,7 @@ export function EditProfileForm({
           <form onSubmit={handleSave} className="px-4 pt-4 pb-5 space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[10px] font-semibold text-[#4a3f3a] uppercase tracking-wide mb-1">
+                <label className="block text-[10px] font-semibold text-ink-mid uppercase tracking-wide mb-1">
                   Display Name
                 </label>
                 <input
@@ -92,34 +92,34 @@ export function EditProfileForm({
                   value={displayName}
                   onChange={e => setDisplayName(e.target.value)}
                   placeholder="Your name"
-                  className="w-full px-3 py-2 rounded-lg border border-[#ddc9a3] bg-white text-sm text-[#1a1614] focus:outline-none focus:ring-1 focus:ring-[#9a442d]"
+                  className="w-full px-3 py-2 rounded-lg border border-sand-mid bg-white text-sm text-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-terra"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-semibold text-[#4a3f3a] uppercase tracking-wide mb-1">
+                <label className="block text-[10px] font-semibold text-ink-mid uppercase tracking-wide mb-1">
                   Handle
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#6b5d57]">@</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-ink-light">@</span>
                   <input
                     type="text"
                     value={handle}
                     onChange={e => setHandle(e.target.value)}
                     placeholder="handle"
-                    className="w-full pl-7 pr-3 py-2 rounded-lg border border-[#ddc9a3] bg-white text-sm text-[#1a1614] focus:outline-none focus:ring-1 focus:ring-[#9a442d]"
+                    className="w-full pl-7 pr-3 py-2 rounded-lg border border-sand-mid bg-white text-sm text-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-terra"
                   />
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="block text-[10px] font-semibold text-[#4a3f3a] uppercase tracking-wide mb-1">
+              <label className="block text-[10px] font-semibold text-ink-mid uppercase tracking-wide mb-1">
                 Neighborhood
               </label>
               <select
                 value={neighborhood}
                 onChange={e => setNeighborhood(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-[#ddc9a3] bg-white text-sm text-[#1a1614] focus:outline-none focus:ring-1 focus:ring-[#9a442d]"
+                className="w-full px-3 py-2 rounded-lg border border-sand-mid bg-white text-sm text-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-terra"
               >
                 <option value="">Select your neighborhood</option>
                 {NEIGHBORHOODS.map(n => <option key={n} value={n}>{n}</option>)}
@@ -127,7 +127,7 @@ export function EditProfileForm({
             </div>
 
             <div>
-              <label className="block text-[10px] font-semibold text-[#4a3f3a] uppercase tracking-wide mb-1">
+              <label className="block text-[10px] font-semibold text-ink-mid uppercase tracking-wide mb-1">
                 Bio
               </label>
               <textarea
@@ -136,7 +136,7 @@ export function EditProfileForm({
                 placeholder="What kind of events do you love?"
                 rows={2}
                 maxLength={160}
-                className="w-full px-3 py-2 rounded-lg border border-[#ddc9a3] bg-white text-sm text-[#1a1614] focus:outline-none focus:ring-1 focus:ring-[#9a442d] resize-none"
+                className="w-full px-3 py-2 rounded-lg border border-sand-mid bg-white text-sm text-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-terra resize-none"
               />
             </div>
 
@@ -145,7 +145,7 @@ export function EditProfileForm({
             <button
               type="submit"
               disabled={saving}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#9a442d] text-white text-xs font-semibold hover:bg-[#7d3725] transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-terra text-white text-xs font-semibold hover:bg-terra-hover transition-colors disabled:opacity-50"
             >
               <Save className="w-3.5 h-3.5" />
               {saving ? 'Saving…' : saved ? 'Saved!' : 'Save Profile'}
@@ -154,10 +154,10 @@ export function EditProfileForm({
 
           {/* ── Preferences ── */}
           <div className="border-t border-[#e8d9bf] px-4 pt-5 pb-6">
-            <p className="text-[11px] uppercase tracking-[0.14em] font-bold text-[#9a442d] mb-1">
+            <p className="text-[11px] uppercase tracking-[0.14em] font-bold text-terra mb-1">
               What are you into?
             </p>
-            <p className="text-[12px] text-[#6b5d57] mb-5 leading-relaxed">
+            <p className="text-[12px] text-ink-light mb-5 leading-relaxed">
               We use this to filter your For You feed and skip events that aren&apos;t for you.
             </p>
             <PreferencesPicker

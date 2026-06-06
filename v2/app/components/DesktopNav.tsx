@@ -26,7 +26,7 @@ export default function DesktopNav() {
   if (pathname.startsWith('/admin')) return null
 
   return (
-    <header className="hidden md:block sticky top-0 z-40 h-14 bg-[#fbf7f1]/95 backdrop-blur-md border-b border-[#f0e4cc]">
+    <header className="hidden md:block sticky top-0 z-40 h-14 bg-cream/95 backdrop-blur-md border-b border-sand-light">
       {/* Inner wrapper aligns logo+nav with page content on wide viewports */}
       <div className="flex items-center justify-between gap-4 h-full max-w-6xl mx-auto px-4">
         {/* Logo */}
@@ -49,8 +49,8 @@ export default function DesktopNav() {
                   !primary ? 'hidden lg:inline-flex' : ''
                 } ${
                   isActive
-                    ? 'bg-[#9a442d] text-white'
-                    : 'text-[#4a3f3a] hover:bg-[#f0e4cc] hover:text-[#1a1614]'
+                    ? 'bg-terra text-white'
+                    : 'text-ink-mid hover:bg-sand-light hover:text-ink'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5 flex-shrink-0" />

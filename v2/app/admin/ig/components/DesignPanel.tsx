@@ -138,7 +138,7 @@ function ColorSchemePicker() {
                 onClick={() => apply(s.id)}
                 className={`w-full flex items-center gap-2 px-2 py-2 text-left text-xs transition-colors ${
                   s.id === activeScheme
-                    ? 'bg-[#9a442d]/25 text-white'
+                    ? 'bg-terra/25 text-white'
                     : 'text-white/75 hover:bg-white/[0.06] hover:text-white'
                 }`}
               >
@@ -183,7 +183,7 @@ function NumInput({ value, onChange, min, max, step }: { value: number; onChange
       value={Math.round(value)}
       onChange={e => onChange(parseFloat(e.target.value) || 0)}
       min={min} max={max} step={step ?? 1}
-      className="w-full bg-black/40 border border-white/10 rounded px-2 py-2 sm:py-1 text-xs text-white/90 focus:outline-none focus:border-[#9a442d]"
+      className="w-full bg-black/40 border border-white/10 rounded px-2 py-2 sm:py-1 text-xs text-white/90 focus-visible:outline-none focus:border-terra"
     />
   )
 }
@@ -191,18 +191,18 @@ function TextInput({ value, onChange, rows }: { value: string; onChange: (v: str
   if (rows) {
     return (
       <textarea value={value} onChange={e => onChange(e.target.value)} rows={rows}
-        className="w-full bg-black/40 border border-white/10 rounded px-2 py-1.5 text-xs text-white/90 focus:outline-none focus:border-[#9a442d] resize-none font-mono" />
+        className="w-full bg-black/40 border border-white/10 rounded px-2 py-1.5 text-xs text-white/90 focus-visible:outline-none focus:border-terra resize-none font-mono" />
     )
   }
   return (
     <input value={value} onChange={e => onChange(e.target.value)}
-      className="w-full bg-black/40 border border-white/10 rounded px-2 py-1 text-xs text-white/90 focus:outline-none focus:border-[#9a442d]" />
+      className="w-full bg-black/40 border border-white/10 rounded px-2 py-1 text-xs text-white/90 focus-visible:outline-none focus:border-terra" />
   )
 }
 function Slider({ value, onChange, min, max, step }: { value: number; onChange: (n: number) => void; min: number; max: number; step?: number }) {
   return (
     <input type="range" min={min} max={max} step={step ?? 1} value={value} onChange={e => onChange(parseFloat(e.target.value))}
-      className="w-full accent-[#9a442d]" />
+      className="w-full accent-terra" />
   )
 }
 function ColorInput({ value, onChange }: { value: string; onChange: (c: string) => void }) {
@@ -211,7 +211,7 @@ function ColorInput({ value, onChange }: { value: string; onChange: (c: string) 
       <input type="color" value={value.startsWith('#') ? value : '#000000'} onChange={e => onChange(e.target.value)}
         className="w-10 h-8 rounded cursor-pointer bg-transparent border border-white/10" />
       <input value={value} onChange={e => onChange(e.target.value)}
-        className="flex-1 bg-black/40 border border-white/10 rounded px-2 py-1 text-xs text-white/80 font-mono focus:outline-none focus:border-[#9a442d]" />
+        className="flex-1 bg-black/40 border border-white/10 rounded px-2 py-1 text-xs text-white/80 font-mono focus-visible:outline-none focus:border-terra" />
     </div>
   )
 }
@@ -220,7 +220,7 @@ function Btn({ active, onClick, children, title }: { active?: boolean; onClick: 
     <button onClick={onClick} title={title}
       className={`px-3 py-2 sm:px-2 sm:py-1 text-xs rounded border transition-colors touch-manipulation min-h-[36px] sm:min-h-0 ${
         active
-          ? 'bg-[#9a442d] border-[#9a442d] text-white'
+          ? 'bg-terra border-terra text-white'
           : 'bg-black/30 border-white/10 text-white/70 hover:bg-black/50 hover:text-white'
       }`}>
       {children}
@@ -261,7 +261,7 @@ function CanvasControls() {
               <button key={i} onClick={() => setActiveSlide(i)}
                 className={`w-8 h-8 rounded border text-xs font-bold ${
                   activeSlideIndex === i
-                    ? 'bg-[#9a442d] border-[#9a442d] text-white'
+                    ? 'bg-terra border-terra text-white'
                     : 'bg-black/30 border-white/10 text-white/70'
                 }`}>{i + 1}</button>
             ))}
@@ -343,7 +343,7 @@ function CanvasControls() {
               {((bg.brightness ?? 0) !== 0 || (bg.contrast ?? 0) !== 0 || (bg.saturation ?? 0) !== 0 || (bg.blur ?? 0) !== 0) && (
                 <button
                   onClick={() => setBackground({ ...bg, brightness: 0, contrast: 0, saturation: 0, blur: 0 })}
-                  className="text-[10px] text-[#9a442d] hover:text-white/60 transition-colors"
+                  className="text-[10px] text-terra hover:text-white/60 transition-colors"
                 >
                   Reset filters
                 </button>
@@ -414,7 +414,7 @@ function UploadRow({ current, onPick, label }: { current?: string; onPick: (url:
           value={current ?? ''}
           onChange={e => onPick(e.target.value)}
           placeholder="https://…"
-          className="flex-1 bg-black/40 border border-white/10 rounded px-2 py-1 text-xs text-white/80 font-mono focus:outline-none focus:border-[#9a442d]"
+          className="flex-1 bg-black/40 border border-white/10 rounded px-2 py-1 text-xs text-white/80 font-mono focus-visible:outline-none focus:border-terra"
         />
       </div>
     </div>
@@ -431,7 +431,7 @@ function TextPanel({ layer, update }: { layer: TextLayer; update: (p: Partial<Te
         <div>
           <Label>Font</Label>
           <select value={layer.fontFamily} onChange={e => update({ fontFamily: e.target.value })}
-            className="w-full bg-black/40 border border-white/10 rounded px-2 py-1 text-xs text-white/90 focus:outline-none focus:border-[#9a442d]">
+            className="w-full bg-black/40 border border-white/10 rounded px-2 py-1 text-xs text-white/90 focus-visible:outline-none focus:border-terra">
             {BRAND_FONTS.map(f => <option key={f.name} value={f.stack}>{f.name}</option>)}
           </select>
         </div>
@@ -440,7 +440,7 @@ function TextPanel({ layer, update }: { layer: TextLayer; update: (p: Partial<Te
           <div>
             <Label>Weight</Label>
             <select value={layer.fontWeight} onChange={e => update({ fontWeight: parseInt(e.target.value) })}
-              className="w-full bg-black/40 border border-white/10 rounded px-2 py-1 text-xs text-white/90 focus:outline-none focus:border-[#9a442d]">
+              className="w-full bg-black/40 border border-white/10 rounded px-2 py-1 text-xs text-white/90 focus-visible:outline-none focus:border-terra">
               {/* Only show weights the selected font actually supports */}
               {(BRAND_FONTS.find(f => f.stack === layer.fontFamily)?.weights ?? [400, 700, 900]).map(w => (
                 <option key={w} value={w}>{w}</option>
@@ -518,7 +518,7 @@ function ImagePanel({ layer, update }: { layer: ImageLayer; update: (p: Partial<
                 title={v.label}
                 className={`flex flex-col items-center gap-1 px-2.5 py-1.5 rounded-lg border text-[10px] font-semibold transition-all ${
                   layer.src === v.src
-                    ? 'border-[#9a442d] bg-[#9a442d]/15 text-white'
+                    ? 'border-terra bg-terra/15 text-white'
                     : 'border-white/10 bg-white/[0.04] text-white/50 hover:border-white/25 hover:text-white/70'
                 }`}
               >

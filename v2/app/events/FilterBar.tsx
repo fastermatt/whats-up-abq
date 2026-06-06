@@ -91,7 +91,7 @@ function ScrollRow({ children, className = '' }: { children: React.ReactNode; cl
         {children}
       </div>
       {/* fade hint — signals more content to the right */}
-      <div className="pointer-events-none absolute right-0 top-0 bottom-0.5 w-8 bg-gradient-to-l from-[#fbf7f1] to-transparent" />
+      <div className="pointer-events-none absolute right-0 top-0 bottom-0.5 w-8 bg-gradient-to-l from-cream to-transparent" />
     </div>
   )
 }
@@ -230,36 +230,36 @@ export function FilterBar({
   const timePill = (isActive: boolean) =>
     `flex-none px-3.5 py-2 min-h-[36px] rounded-full text-xs font-semibold transition-colors whitespace-nowrap inline-flex items-center ${
       isActive
-        ? 'bg-[#9a442d] text-white'
-        : 'bg-white border border-[#ddc9a3] text-[#4a3f3a] hover:border-[#9a442d] hover:text-[#9a442d]'
+        ? 'bg-terra text-white'
+        : 'bg-white border border-sand-mid text-ink-mid hover:border-terra hover:text-terra'
     }`
 
   const pricePill = (isActive: boolean) =>
     `flex-none px-3.5 py-2 min-h-[36px] rounded-full text-xs font-semibold transition-colors whitespace-nowrap inline-flex items-center ${
       isActive
-        ? 'bg-[#4f6249] text-white'
-        : 'bg-white border border-[#ddc9a3] text-[#4a3f3a] hover:border-[#4f6249] hover:text-[#4f6249]'
+        ? 'bg-sage text-white'
+        : 'bg-white border border-sand-mid text-ink-mid hover:border-sage hover:text-sage'
     }`
 
   const catPill = (isActive: boolean) =>
     `flex-none px-3.5 py-2 min-h-[36px] rounded-full text-xs font-semibold transition-colors whitespace-nowrap inline-flex items-center gap-1 ${
       isActive
-        ? 'bg-[#006a62] text-white'
-        : 'bg-white border border-[#ddc9a3] text-[#4a3f3a] hover:border-[#006a62] hover:text-[#006a62]'
+        ? 'bg-turq text-white'
+        : 'bg-white border border-sand-mid text-ink-mid hover:border-turq hover:text-turq'
     }`
 
   const subPill = (isActive: boolean) =>
     `flex-none px-3 py-1.5 min-h-[34px] inline-flex items-center rounded-full text-[11px] font-semibold transition-colors whitespace-nowrap ${
       isActive
-        ? 'bg-[#006a62]/80 text-white'
-        : 'bg-[#f0e4cc]/60 border border-[#ddc9a3]/60 text-[#4a3f3a] hover:border-[#006a62] hover:text-[#006a62]'
+        ? 'bg-turq/80 text-white'
+        : 'bg-sand-light/60 border border-sand-mid/60 text-ink-mid hover:border-turq hover:text-turq'
     }`
 
   const vibePill = (isActive: boolean) =>
     `flex-none px-3 py-1.5 min-h-[34px] inline-flex items-center rounded-full text-[11px] font-semibold whitespace-nowrap transition-colors ${
       isActive
-        ? 'bg-[#9a442d] text-white border border-[#9a442d] shadow-sm'
-        : 'bg-white border border-[#ddc9a3]/80 text-[#4a3f3a] hover:border-[#9a442d]/50 hover:text-[#9a442d] hover:bg-[#9a442d]/5'
+        ? 'bg-terra text-white border border-terra shadow-sm'
+        : 'bg-white border border-sand-mid/80 text-ink-mid hover:border-terra/50 hover:text-terra hover:bg-terra/5'
     }`
 
   /** A vibe is "active" when ALL of its preset params currently match the URL.
@@ -310,7 +310,7 @@ export function FilterBar({
           {activeTimeFilter && (
             <button
               onClick={() => { setOptTime(''); startTransition(() => setFilter('time', 'upcoming')) }}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#9a442d] text-white shadow-sm hover:bg-[#7d3725] transition-colors"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-terra text-white shadow-sm hover:bg-terra-hover transition-colors"
             >
               {activeTimeFilter.label}
               <X className="w-3 h-3 opacity-80" />
@@ -319,7 +319,7 @@ export function FilterBar({
           {effectiveCategory && (
             <button
               onClick={clearCategory}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#006a62] text-white shadow-sm hover:bg-[#004d47] transition-colors"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-turq text-white shadow-sm hover:bg-[#004d47] transition-colors"
             >
               {effectiveCategory.replace(' > ', ' › ')}
               <X className="w-3 h-3 opacity-80" />
@@ -328,7 +328,7 @@ export function FilterBar({
           {activePriceFilter && (
             <button
               onClick={clearPrice}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#4f6249] text-white shadow-sm hover:bg-[#3d4d39] transition-colors"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-sage text-white shadow-sm hover:bg-[#3d4d39] transition-colors"
             >
               {activePriceFilter.label}
               <X className="w-3 h-3 opacity-80" />
@@ -337,7 +337,7 @@ export function FilterBar({
           {activeNeighborhood && (
             <button
               onClick={clearNeighborhood}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#9a442d]/70 text-white shadow-sm hover:bg-[#9a442d] transition-colors"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-terra/70 text-white shadow-sm hover:bg-terra transition-colors"
             >
               <MapPin className="w-3 h-3" />
               {activeNeighborhood.label}
@@ -347,7 +347,7 @@ export function FilterBar({
           {activeCount > 1 && (
             <button
               onClick={clearAll}
-              className="px-2.5 py-1 rounded-full text-xs font-medium text-[#6b5d57] border border-[#ddc9a3] hover:text-[#9a442d] hover:border-[#9a442d] transition-colors"
+              className="px-2.5 py-1 rounded-full text-xs font-medium text-ink-light border border-sand-mid hover:text-terra hover:border-terra transition-colors"
             >
               Clear all
             </button>
@@ -367,7 +367,7 @@ export function FilterBar({
         })}
 
         {/* Divider */}
-        <div className="flex-none self-center w-px h-4 bg-[#ddc9a3] mx-0.5" />
+        <div className="flex-none self-center w-px h-4 bg-sand-mid mx-0.5" />
 
         {PRICE_FILTERS.map(({ value, label }) => (
           <button key={value} onClick={() => setPrice(value)} className={pricePill(effectivePrice === value)}>
@@ -488,7 +488,7 @@ export function FilterBar({
 
       {/* Vibe row — compact discovery shortcuts, always visible */}
       <ScrollRow>
-        <span className="flex-none self-center text-[9px] uppercase tracking-[0.12em] text-[#6b5d57] font-semibold pr-0.5 pl-0.5 whitespace-nowrap">
+        <span className="flex-none self-center text-[9px] uppercase tracking-[0.12em] text-ink-light font-semibold pr-0.5 pl-0.5 whitespace-nowrap">
           Vibe
         </span>
         {VIBES.map((v) => {

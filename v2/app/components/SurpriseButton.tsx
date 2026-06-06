@@ -35,8 +35,8 @@ export default function SurpriseButton() {
       data-umami-event="surprise-click"
       className={[
         'flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0',
-        'bg-[#9a442d] text-white',
-        'hover:bg-[#7d3725] active:scale-95',
+        'bg-terra text-white',
+        'hover:bg-terra-hover active:scale-95',
         'transition-all duration-200',
         'motion-reduce:transition-none motion-reduce:active:scale-100',
         'disabled:opacity-70 disabled:cursor-wait shadow-sm',

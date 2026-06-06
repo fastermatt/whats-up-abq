@@ -97,7 +97,7 @@ function SuggestionCard({
 
   const ringColor = isAccepted ? 'ring-1 ring-emerald-500/40 bg-emerald-950/20'
     : isRejected ? 'ring-1 ring-red-500/30 bg-red-950/20'
-    : selected ? 'ring-1 ring-[#9a442d]/60 bg-[#1a0e0a]'
+    : selected ? 'ring-1 ring-terra/60 bg-[#1a0e0a]'
     : 'ring-1 ring-white/5 bg-[#161616] hover:bg-[#1c1c1c]'
 
   async function handle(action: 'accept' | 'reject' | 'skip') {
@@ -207,7 +207,7 @@ function SuggestionCard({
                 onChange={e => setReason(e.target.value)}
                 placeholder="Why reject? (teaches the system)"
                 rows={2}
-                className="w-full text-xs bg-[#111] border border-red-500/30 rounded-lg px-2.5 py-1.5 text-zinc-300 placeholder:text-zinc-600 resize-none focus:outline-none focus:border-red-500/60"
+                className="w-full text-xs bg-[#111] border border-red-500/30 rounded-lg px-2.5 py-1.5 text-zinc-300 placeholder:text-zinc-600 resize-none focus-visible:outline-none focus:border-red-500/60"
               />
               <div className="flex gap-2">
                 <button
@@ -312,7 +312,7 @@ function PreviewPanel({
         </div>
         <Link
           href={`/admin/ig/digest?events=${s.event_ids.join(',')}`}
-          className="ml-auto text-[11px] text-[#9a442d] hover:text-[#c4614a] transition-colors"
+          className="ml-auto text-[11px] text-terra hover:text-terra-mid transition-colors"
         >
           Edit in Digest →
         </Link>
@@ -344,7 +344,7 @@ function PreviewPanel({
           value={caption}
           onChange={e => setCaption(e.target.value)}
           rows={5}
-          className="w-full text-xs bg-[#111] border border-white/8 rounded-xl px-3 py-2.5 text-zinc-300 placeholder:text-zinc-600 resize-none focus:outline-none focus:border-[#9a442d]/50 leading-relaxed"
+          className="w-full text-xs bg-[#111] border border-white/8 rounded-xl px-3 py-2.5 text-zinc-300 placeholder:text-zinc-600 resize-none focus-visible:outline-none focus:border-terra/50 leading-relaxed"
           placeholder="AI-generated caption will appear here…"
         />
         <p className="text-[10px] text-zinc-600">{caption.length} chars</p>
@@ -355,7 +355,7 @@ function PreviewPanel({
         <button
           onClick={handleAccept}
           disabled={accepting || !imageDataUrl}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#9a442d] text-white text-sm font-semibold hover:bg-[#7d3725] transition-colors disabled:opacity-40"
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-terra text-white text-sm font-semibold hover:bg-terra-hover transition-colors disabled:opacity-40"
         >
           {accepting
             ? <><Loader2 className="w-4 h-4 animate-spin" /> Scheduling…</>
@@ -493,13 +493,13 @@ export function SuggestionQueue({ initial, initialStats }: Props) {
               className={[
                 'px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors capitalize',
                 filter === f
-                  ? 'bg-[#9a442d]/20 text-[#9a442d]'
+                  ? 'bg-terra/20 text-terra'
                   : 'text-zinc-500 hover:text-zinc-400',
               ].join(' ')}
             >
               {f}
               {f === 'pending' && pending > 0 && (
-                <span className="ml-1 bg-[#9a442d] text-white text-[9px] px-1 rounded-full">{pending}</span>
+                <span className="ml-1 bg-terra text-white text-[9px] px-1 rounded-full">{pending}</span>
               )}
             </button>
           ))}
@@ -514,7 +514,7 @@ export function SuggestionQueue({ initial, initialStats }: Props) {
               }}
               className={[
                 'w-9 h-5 rounded-full transition-colors relative',
-                autoPost ? 'bg-[#9a442d]' : 'bg-zinc-700',
+                autoPost ? 'bg-terra' : 'bg-zinc-700',
               ].join(' ')}
             >
               <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${autoPost ? 'translate-x-4' : 'translate-x-0.5'}`} />
@@ -525,7 +525,7 @@ export function SuggestionQueue({ initial, initialStats }: Props) {
           <button
             onClick={generate}
             disabled={generating}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#9a442d] text-white text-[11px] font-semibold hover:bg-[#7d3725] transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-terra text-white text-[11px] font-semibold hover:bg-terra-hover transition-colors disabled:opacity-50"
           >
             {generating
               ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Generating…</>
@@ -558,7 +558,7 @@ export function SuggestionQueue({ initial, initialStats }: Props) {
               <button
                 onClick={generate}
                 disabled={generating}
-                className="text-xs text-[#9a442d] hover:text-[#c4614a] transition-colors"
+                className="text-xs text-terra hover:text-terra-mid transition-colors"
               >
                 Generate next week →
               </button>

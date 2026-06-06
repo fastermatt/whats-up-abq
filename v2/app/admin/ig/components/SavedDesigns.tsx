@@ -49,7 +49,7 @@ export function SavedDesigns() {
         {items.map(d => (
           <div
             key={d.id}
-            className="group relative bg-black/40 rounded-lg overflow-hidden border border-white/[0.06] hover:border-[#9a442d]/60 transition-colors"
+            className="group relative bg-black/40 rounded-lg overflow-hidden border border-white/[0.06] hover:border-terra/60 transition-colors"
           >
             <button onClick={() => loadDesign(d)} className="block w-full">
               <div className="aspect-[4/5] bg-black">

@@ -97,7 +97,7 @@ export function InstallPrompt() {
   if (showIOS) {
     return (
       <div className="fixed bottom-20 md:bottom-4 left-3 right-3 md:left-auto md:right-4 md:w-[340px] z-50 animate-fade-up">
-        <div className="bg-[#fbf7f1] border border-[#ddc9a3] rounded-2xl shadow-2xl overflow-hidden">
+        <div className="bg-cream border border-sand-mid rounded-2xl shadow-2xl overflow-hidden">
           {/* Header */}
           <div className="flex items-center gap-3 px-4 pt-3.5 pb-2.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -109,24 +109,24 @@ export function InstallPrompt() {
             />
             <div className="flex-1 min-w-0">
               <p
-                className="text-sm font-black text-[#1a1614] leading-tight"
+                className="text-sm font-black text-ink leading-tight"
                 style={{ fontFamily: 'var(--font-epilogue)' }}
               >
                 Save ABQ Unplugged
               </p>
-              <p className="text-[11px] text-[#6b5d57]">One tap to tonight&apos;s picks</p>
+              <p className="text-[11px] text-ink-light">One tap to tonight&apos;s picks</p>
             </div>
             <button
               onClick={dismiss}
               aria-label="Dismiss install prompt"
-              className="p-1.5 -mr-1 text-[#6b5d57] hover:text-[#4a3f3a] transition-colors flex-shrink-0"
+              className="p-1.5 -mr-1 text-ink-light hover:text-ink-mid transition-colors flex-shrink-0"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Steps */}
-          <div className="border-t border-[#f0e4cc] px-4 py-3 space-y-2.5">
+          <div className="border-t border-sand-light px-4 py-3 space-y-2.5">
             {[
               {
                 n: '1',
@@ -148,16 +148,16 @@ export function InstallPrompt() {
               },
             ].map(({ n, content }) => (
               <div key={n} className="flex items-start gap-2.5">
-                <div className="w-5 h-5 rounded-full bg-[#9a442d] text-white text-[10px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">
+                <div className="w-5 h-5 rounded-full bg-terra text-white text-[10px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">
                   {n}
                 </div>
-                <p className="text-[12px] text-[#4a3f3a] leading-relaxed">{content}</p>
+                <p className="text-[12px] text-ink-mid leading-relaxed">{content}</p>
               </div>
             ))}
           </div>
 
-          <div className="border-t border-[#f0e4cc] px-4 py-2 text-center">
-            <p className="text-[10px] text-[#6b5d57]">
+          <div className="border-t border-sand-light px-4 py-2 text-center">
+            <p className="text-[10px] text-ink-light">
               ↓ Share is in Safari&apos;s bottom toolbar
             </p>
           </div>
@@ -170,8 +170,8 @@ export function InstallPrompt() {
   if (androidPrompt) {
     return (
       <div className="fixed bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 z-50 animate-fade-up">
-        <div className="bg-[#1a1614] text-white rounded-2xl shadow-xl p-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#9a442d] flex items-center justify-center flex-shrink-0">
+        <div className="bg-ink text-white rounded-2xl shadow-xl p-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-terra flex items-center justify-center flex-shrink-0">
             <Download className="w-5 h-5" aria-hidden="true" />
           </div>
           <div className="flex-1 min-w-0">
@@ -186,7 +186,7 @@ export function InstallPrompt() {
           <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={handleAndroidInstall}
-              className="px-3 py-1.5 rounded-lg bg-[#9a442d] text-white text-xs font-bold hover:bg-[#7d3725] transition-colors"
+              className="px-3 py-1.5 rounded-lg bg-terra text-white text-xs font-bold hover:bg-terra-hover transition-colors"
             >
               Add
             </button>

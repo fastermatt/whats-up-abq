@@ -37,8 +37,8 @@ export function FollowButton({ handle, initialFollowing = false, className }: Pr
   }
 
   const baseClass = className ?? ''
-  const followingClass = `bg-[#f0e4cc] text-[#4a3f3a] text-xs font-semibold px-3 py-1 rounded-full hover:bg-[#e8d9bf] transition-all`
-  const notFollowingClass = `border border-[#9a442d] text-[#9a442d] text-xs font-semibold px-3 py-1 rounded-full hover:bg-[#9a442d] hover:text-white transition-all`
+  const followingClass = `bg-sand-light text-ink-mid text-xs font-semibold px-3 py-1 rounded-full hover:bg-[#e8d9bf] transition-all`
+  const notFollowingClass = `border border-terra text-terra text-xs font-semibold px-3 py-1 rounded-full hover:bg-terra hover:text-white transition-all`
 
   return (
     <button

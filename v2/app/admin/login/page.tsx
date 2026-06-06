@@ -35,10 +35,10 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main id="main" className="min-h-dvh bg-[#1a1614] flex items-center justify-center px-4">
+    <main id="main" className="min-h-dvh bg-ink flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <div className="w-10 h-10 rounded-xl bg-[#9a442d]/20 flex items-center justify-center mb-6">
-          <Lock className="w-5 h-5 text-[#9a442d]" aria-hidden="true" />
+        <div className="w-10 h-10 rounded-xl bg-terra/20 flex items-center justify-center mb-6">
+          <Lock className="w-5 h-5 text-terra" aria-hidden="true" />
         </div>
         <h1 className="text-2xl font-black text-white mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
           ABQ Unplugged
@@ -61,7 +61,7 @@ export default function AdminLoginPage() {
               aria-required="true"
               aria-invalid={!!error}
               aria-describedby={error ? 'admin-login-error' : undefined}
-              className="w-full bg-white/10 border border-white/20 text-white placeholder-white/45 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#9a442d] focus:ring-2 focus:ring-[#9a442d]/30 transition-colors"
+              className="w-full bg-white/10 border border-white/20 text-white placeholder-white/45 rounded-xl px-4 py-3 text-sm focus-visible:outline-none focus:border-terra focus-visible:ring-2 focus-visible:ring-terra/30 transition-colors"
             />
           </div>
           {error && (
@@ -70,7 +70,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={loading || !password}
-            className="w-full bg-[#9a442d] text-white font-semibold py-3 rounded-xl text-sm hover:bg-[#7d3725] transition-colors disabled:opacity-50"
+            className="w-full bg-terra text-white font-semibold py-3 rounded-xl text-sm hover:bg-terra-hover transition-colors disabled:opacity-50"
           >
             {loading ? 'Signing in…' : 'Sign in'}
           </button>

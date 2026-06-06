@@ -46,7 +46,7 @@ export default async function AdminEventEditPage({ params }: PageProps) {
         <p className="text-white/40 text-xs">
           {row.source} · {row.event_date} · ID: {id}
           {' · '}
-          <Link href={`/events/${id}`} className="text-[#9a442d] hover:underline" target="_blank">
+          <Link href={`/events/${id}`} className="text-terra hover:underline" target="_blank">
             View on site →
           </Link>
         </p>

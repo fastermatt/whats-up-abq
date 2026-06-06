@@ -189,11 +189,11 @@ export default async function VenuePage({ params }: PageProps) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
       {/* ── Sticky Header ── */}
-      <header className="sticky top-0 z-20 bg-[#fbf7f1]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
+      <header className="sticky top-0 z-20 bg-cream/90 backdrop-blur-md border-b border-sand-mid/60">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
           <Link
             href="/events"
-            className="flex items-center gap-1.5 text-sm text-[#4a3f3a] hover:text-[#9a442d] transition-colors"
+            className="flex items-center gap-1.5 text-sm text-ink-mid hover:text-terra transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="font-medium">Events</span>
@@ -202,17 +202,17 @@ export default async function VenuePage({ params }: PageProps) {
       </header>
 
       {/* ── Venue Hero ── */}
-      <div className="relative h-52 sm:h-64 overflow-hidden bg-gradient-to-br from-[#f0e4cc] to-[#ddc9a3]">
+      <div className="relative h-52 sm:h-64 overflow-hidden bg-gradient-to-br from-sand-light to-sand-mid">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={venueImage}
           alt={venue}
           className="w-full h-full object-cover animate-reveal-scale"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1a1614]/70 via-[#1a1614]/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/20 to-transparent" />
         {/* Category pill */}
         {topCategory && (
-          <div className="absolute top-4 left-4 bg-[#9a442d] text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">
+          <div className="absolute top-4 left-4 bg-terra text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">
             {topCategory} Venue
           </div>
         )}
@@ -235,21 +235,21 @@ export default async function VenuePage({ params }: PageProps) {
 
       <div className="max-w-3xl mx-auto px-4 py-5 space-y-5">
         {/* Third-place framing — venues are rooms that belong to the people in them */}
-        <p className="text-xs italic text-[#6b5d57] leading-relaxed">
+        <p className="text-xs italic text-ink-light leading-relaxed">
           {thirdPlaceLine(topCategory, events.length)}
         </p>
 
         {/* ── Stats + Neighborhood + Venue Instagram ── */}
         <div className="flex flex-wrap items-center gap-3">
-          <span className="text-sm font-bold text-[#1a1614]">
+          <span className="text-sm font-bold text-ink">
             {events.length} upcoming event{events.length !== 1 ? 's' : ''}
           </span>
           {neighborhood && neighborhoodSlug && (
             <>
-              <span className="text-[#ddc9a3]">·</span>
+              <span className="text-sand-mid">·</span>
               <Link
                 href={`/neighborhoods/${neighborhoodSlug}`}
-                className="text-xs font-semibold text-[#006a62] hover:underline flex items-center gap-1"
+                className="text-xs font-semibold text-turq hover:underline flex items-center gap-1"
               >
                 <MapPin className="w-3 h-3" />
                 {neighborhood}
@@ -260,7 +260,7 @@ export default async function VenuePage({ params }: PageProps) {
             const venueIg = venueInstagram(venue)
             return venueIg ? (
               <>
-                <span className="text-[#ddc9a3]">·</span>
+                <span className="text-sand-mid">·</span>
                 <a
                   href={`https://instagram.com/${venueIg.handle}`}
                   target="_blank"
@@ -269,7 +269,7 @@ export default async function VenuePage({ params }: PageProps) {
                   data-umami-event-handle={venueIg.handle}
                   data-umami-event-venue={venue}
                   data-umami-event-position="venue-page-hero"
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#9a442d] hover:underline px-2 py-2 -my-1 rounded"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-terra hover:underline px-2 py-2 -my-1 rounded"
                 >
                   <InstagramIcon size={12} />
                   @{venueIg.display ?? venueIg.handle}
@@ -293,10 +293,10 @@ export default async function VenuePage({ params }: PageProps) {
               <Link
                 key={cat}
                 href={`/events?category=${encodeURIComponent(cat)}`}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold bg-[#fffdf9] border border-[#ddc9a3] text-[#4a3f3a] px-3 py-1.5 rounded-full hover:border-[#9a442d] hover:text-[#9a442d] transition-all"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold bg-card border border-sand-mid text-ink-mid px-3 py-1.5 rounded-full hover:border-terra hover:text-terra transition-all"
               >
                 {cat}
-                <span className="bg-[#9a442d] text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center flex-shrink-0">
+                <span className="bg-terra text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center flex-shrink-0">
                   {cnt}
                 </span>
               </Link>
@@ -310,7 +310,7 @@ export default async function VenuePage({ params }: PageProps) {
             href={`https://maps.google.com/?q=${encodeURIComponent(`${venue} ${fullAddress}`)}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs text-[#006a62] font-semibold hover:underline"
+            className="inline-flex items-center gap-1.5 text-xs text-turq font-semibold hover:underline"
           >
             <MapPin className="w-3.5 h-3.5" />
             View on Google Maps
@@ -321,7 +321,7 @@ export default async function VenuePage({ params }: PageProps) {
         {/* ── Upcoming Events ── */}
         <div>
           <h2
-            className="text-sm font-bold text-[#1a1614] uppercase tracking-wider mb-3"
+            className="text-sm font-bold text-ink uppercase tracking-wider mb-3"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             Upcoming Events at {venue}
@@ -340,10 +340,10 @@ export default async function VenuePage({ params }: PageProps) {
                 <AnimateIn key={event.id} animation="fade-up" delay={Math.min(i * 25, 200)}>
                   <Link
                     href={`/events/${event.id}`}
-                    className="group flex gap-3 bg-[#fffdf9] rounded-xl border border-[#f0e4cc] p-3 shadow-sm hover:shadow-md hover:border-[#ddc9a3] transition-all"
+                    className="group flex gap-3 bg-card rounded-xl border border-sand-light p-3 shadow-sm hover:shadow-md hover:border-sand-mid transition-all"
                   >
                     {/* Thumbnail */}
-                    <div className="w-[72px] h-[72px] rounded-lg overflow-hidden flex-shrink-0 bg-[#f0e4cc]">
+                    <div className="w-[72px] h-[72px] rounded-lg overflow-hidden flex-shrink-0 bg-sand-light">
                       <EventImage
                         src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
                         fallback={getCategoryFallback(event.category ?? undefined, event.id)}
@@ -356,28 +356,28 @@ export default async function VenuePage({ params }: PageProps) {
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                       {event.category && (
-                        <span className="inline-block text-[9px] font-bold uppercase tracking-wider text-[#9a442d] mb-0.5">
+                        <span className="inline-block text-[9px] font-bold uppercase tracking-wider text-terra mb-0.5">
                           {event.category}
                         </span>
                       )}
                       <h3
-                        className="text-sm font-bold text-[#1a1614] leading-tight line-clamp-2 group-hover:text-[#9a442d] transition-colors"
+                        className="text-sm font-bold text-ink leading-tight line-clamp-2 group-hover:text-terra transition-colors"
                         style={{ fontFamily: 'var(--font-epilogue)' }}
                       >
                         {event.title}
                       </h3>
                       <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1">
                         {dateStr && (
-                          <p className="text-[10px] text-[#9a442d] font-medium flex items-center gap-1">
+                          <p className="text-[10px] text-terra font-medium flex items-center gap-1">
                             <Calendar className="w-2.5 h-2.5" />
                             {dateStr}{event.time && ` · ${event.time}`}
                           </p>
                         )}
                         {event.price && (
-                          <span className="text-[10px] font-semibold text-[#4f6249]">{event.price}</span>
+                          <span className="text-[10px] font-semibold text-sage">{event.price}</span>
                         )}
                         {event.ticketUrl && (
-                          <span className="flex items-center gap-0.5 text-[10px] text-[#006a62]">
+                          <span className="flex items-center gap-0.5 text-[10px] text-turq">
                             <Ticket className="w-2.5 h-2.5" />
                             Tickets
                           </span>
@@ -385,7 +385,7 @@ export default async function VenuePage({ params }: PageProps) {
                       </div>
                     </div>
 
-                    <ExternalLink className="w-3.5 h-3.5 text-[#6b5d57] flex-shrink-0 mt-0.5 group-hover:text-[#9a442d] transition-colors" />
+                    <ExternalLink className="w-3.5 h-3.5 text-ink-light flex-shrink-0 mt-0.5 group-hover:text-terra transition-colors" />
                   </Link>
                 </AnimateIn>
               )
@@ -394,18 +394,18 @@ export default async function VenuePage({ params }: PageProps) {
 
           {/* Low-count edge state — keep sparse venues from leaving a tall void */}
           {events.length <= 2 && (
-            <div className="mt-3 bg-[#fdf5ec] border border-[#f0e4cc] rounded-xl p-4">
-              <p className="text-sm font-bold text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
+            <div className="mt-3 bg-[#fdf5ec] border border-sand-light rounded-xl p-4">
+              <p className="text-sm font-bold text-ink" style={{ fontFamily: 'var(--font-epilogue)' }}>
                 More shows coming soon
               </p>
-              <p className="text-xs text-[#6b5d57] mt-0.5 mb-3">
+              <p className="text-xs text-ink-light mt-0.5 mb-3">
                 {venue} adds dates regularly. In the meantime, here&apos;s what else is on around town.
               </p>
               <div className="flex flex-wrap gap-2">
-                <Link href="/tonight"  className="inline-flex items-center min-h-[36px] px-3 py-1.5 rounded-full text-xs font-semibold bg-[#9a442d] text-white hover:bg-[#7d3725] transition-colors">Tonight in ABQ</Link>
-                <Link href="/weekend"  className="inline-flex items-center min-h-[36px] px-3 py-1.5 rounded-full text-xs font-semibold bg-[rgba(154,68,45,0.08)] text-[#9a442d] border border-[rgba(154,68,45,0.18)] hover:bg-[rgba(154,68,45,0.15)] transition-colors">This Weekend</Link>
+                <Link href="/tonight"  className="inline-flex items-center min-h-[36px] px-3 py-1.5 rounded-full text-xs font-semibold bg-terra text-white hover:bg-terra-hover transition-colors">Tonight in ABQ</Link>
+                <Link href="/weekend"  className="inline-flex items-center min-h-[36px] px-3 py-1.5 rounded-full text-xs font-semibold bg-[rgba(154,68,45,0.08)] text-terra border border-[rgba(154,68,45,0.18)] hover:bg-[rgba(154,68,45,0.15)] transition-colors">This Weekend</Link>
                 {topCategory && (
-                  <Link href={`/events?category=${encodeURIComponent(topCategory)}`} className="inline-flex items-center min-h-[36px] px-3 py-1.5 rounded-full text-xs font-semibold bg-[rgba(154,68,45,0.08)] text-[#9a442d] border border-[rgba(154,68,45,0.18)] hover:bg-[rgba(154,68,45,0.15)] transition-colors">More {topCategory}</Link>
+                  <Link href={`/events?category=${encodeURIComponent(topCategory)}`} className="inline-flex items-center min-h-[36px] px-3 py-1.5 rounded-full text-xs font-semibold bg-[rgba(154,68,45,0.08)] text-terra border border-[rgba(154,68,45,0.18)] hover:bg-[rgba(154,68,45,0.15)] transition-colors">More {topCategory}</Link>
                 )}
               </div>
             </div>
@@ -416,7 +416,7 @@ export default async function VenuePage({ params }: PageProps) {
         <div className="pt-2 pb-4">
           <Link
             href="/events"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-[#9a442d] hover:underline"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-terra hover:underline"
           >
             ← Browse all Albuquerque events
           </Link>

@@ -34,7 +34,7 @@ export function IGSubNav({ active, className = '', pendingCount }: Props) {
         return isActive ? (
           <span
             key={tab.id}
-            className="px-2.5 py-1.5 rounded-md bg-[#9a442d]/15 text-[#e8a898] font-bold border-b-2 border-[#9a442d]"
+            className="px-2.5 py-1.5 rounded-md bg-terra/15 text-terra-light font-bold border-b-2 border-terra"
             aria-current="page"
           >
             {tab.label}
@@ -43,11 +43,11 @@ export function IGSubNav({ active, className = '', pendingCount }: Props) {
           <Link
             key={tab.id}
             href={tab.href}
-            className="relative px-2.5 py-1.5 rounded-md text-white/65 hover:bg-white/[0.05] hover:text-white transition-colors border-b-2 border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9a442d]/60"
+            className="relative px-2.5 py-1.5 rounded-md text-white/65 hover:bg-white/[0.05] hover:text-white transition-colors border-b-2 border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terra/60"
           >
             {tab.label}
             {tab.id === 'suggest' && pendingCount && pendingCount > 0 ? (
-              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#9a442d] text-white text-[8px] font-bold rounded-full flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-terra text-white text-[8px] font-bold rounded-full flex items-center justify-center">
                 {pendingCount > 9 ? '9+' : pendingCount}
               </span>
             ) : null}

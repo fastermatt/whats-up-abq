@@ -43,9 +43,9 @@ export function QuickPostInput() {
   }
 
   return (
-    <div className="bg-[#201c1a] border border-[#9a442d]/40 rounded-2xl p-5 space-y-3">
+    <div className="bg-ink-deep border border-terra/40 rounded-2xl p-5 space-y-3">
       <div>
-        <p className="text-xs font-bold text-[#e8a898] uppercase tracking-[0.14em] mb-1">
+        <p className="text-xs font-bold text-terra-light uppercase tracking-[0.14em] mb-1">
           ⚡ Quick Post
         </p>
         <p className="text-xs text-white/35">
@@ -61,16 +61,16 @@ export function QuickPostInput() {
           onKeyDown={e => e.key === 'Enter' && handleGo()}
           placeholder="https://abqunplugged.com/events/... or bare event ID"
           className="flex-1 bg-white/[0.06] border border-white/[0.1] rounded-xl px-3 py-2.5
-            text-white text-sm placeholder:text-white/45 focus:outline-none
-            focus:border-[#9a442d]/60 focus:bg-white/[0.08] transition-all"
+            text-white text-sm placeholder:text-white/45 focus-visible:outline-none
+            focus:border-terra/60 focus:bg-white/[0.08] transition-all"
           autoComplete="off"
           spellCheck={false}
         />
         <button
           onClick={handleGo}
           disabled={!value.trim()}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#9a442d] text-white
-            text-sm font-semibold hover:bg-[#b5502f] active:scale-95 transition-all
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-terra text-white
+            text-sm font-semibold hover:bg-terra-hover active:scale-95 transition-all
             disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
         >
           <ArrowRight size={15} />

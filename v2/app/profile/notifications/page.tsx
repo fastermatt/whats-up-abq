@@ -68,24 +68,24 @@ export default async function NotificationsPrefsPage() {
     .sort((a, b) => a.label.localeCompare(b.label))
 
   return (
-    <main id="main" className="min-h-dvh bg-[#fbf7f1]">
-      <header className="sticky top-0 z-20 bg-[#fbf7f1]/90 backdrop-blur-md border-b border-[#ddc9a3]/60">
+    <main id="main" className="min-h-dvh bg-cream">
+      <header className="sticky top-0 z-20 bg-cream/90 backdrop-blur-md border-b border-sand-mid/60">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
-          <Link href="/profile" className="flex items-center gap-1.5 text-sm text-[#4a3f3a] hover:text-[#9a442d] transition-colors">
+          <Link href="/profile" className="flex items-center gap-1.5 text-sm text-ink-mid hover:text-terra transition-colors">
             <ArrowLeft className="w-4 h-4" />
           </Link>
-          <span className="font-black text-lg text-[#1a1614]" style={{ fontFamily: 'var(--font-epilogue)' }}>
+          <span className="font-black text-lg text-ink" style={{ fontFamily: 'var(--font-epilogue)' }}>
             Notification Preferences
           </span>
         </div>
       </header>
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
-        <div className="bg-white rounded-2xl p-5 border border-[#f0e4cc]">
-          <h2 className="text-base font-black text-[#1a1614] mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
+        <div className="bg-white rounded-2xl p-5 border border-sand-light">
+          <h2 className="text-base font-black text-ink mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
             Tell us what you love
           </h2>
-          <p className="text-sm text-[#4a3f3a] leading-relaxed">
+          <p className="text-sm text-ink-mid leading-relaxed">
             We will only reach out about events that match your picks: concerts, comedy, arts &amp; crafts, family days, whatever you want. Nothing generic, nothing you did not ask for.
           </p>
         </div>

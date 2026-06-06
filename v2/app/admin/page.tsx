@@ -102,7 +102,7 @@ export default async function AdminDashboard() {
         <p><span className="text-white/70">Hidden</span>, Filtered out: past events, cross-source duplicates, non-ABQ listings, cancelled shows, Eventbrite spam. Click to review and unhide anything that shouldn&apos;t be hidden.</p>
         <p><span className="text-white/70">Featured</span>, Pinned to the top of the homepage &quot;Featured&quot; section. Use sparingly, 3–6 events max.</p>
         <p><span className="text-white/70">Pending Reports</span>, Users flagged these events as wrong/inappropriate. Review and resolve in Reports.</p>
-        <p><span className="text-white/70">AI Enrichment</span>, Events that have been enriched with descriptions, highlights, venue tips, and mood tags by the AI pipeline. Run <code className="text-[#9a442d] text-xs">node scripts/enrich-moods-lm.mjs</code> to enrich more.</p>
+        <p><span className="text-white/70">AI Enrichment</span>, Events that have been enriched with descriptions, highlights, venue tips, and mood tags by the AI pipeline. Run <code className="text-terra text-xs">node scripts/enrich-moods-lm.mjs</code> to enrich more.</p>
         <p><span className="text-white/70">Submissions</span>, Community-submitted events awaiting your approval before going live.</p>
       </section>
 
@@ -138,7 +138,7 @@ export default async function AdminDashboard() {
           </div>
           <div className="bg-white/5 rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-2">
-              <Heart className="w-4 h-4 text-[#e8a898]" />
+              <Heart className="w-4 h-4 text-terra-light" />
               <p className="text-white/40 text-xs uppercase tracking-wider">Saved</p>
             </div>
             <p className="text-3xl font-black tabular-nums" style={{ fontFamily: 'var(--font-epilogue)' }}>{(savedCount ?? 0).toLocaleString()}</p>
@@ -158,14 +158,14 @@ export default async function AdminDashboard() {
         {/* Enrichment */}
         <div className="bg-white/5 rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-3">
-            <TrendingUp className="w-4 h-4 text-[#9a442d]" />
+            <TrendingUp className="w-4 h-4 text-terra" />
             <p className="text-white/40 text-xs uppercase tracking-wider">AI Enrichment</p>
           </div>
           <p className="text-4xl font-black tabular-nums mb-1" style={{ fontFamily: 'var(--font-epilogue)' }}>
             {enrichmentPct}%
           </p>
           <div className="h-2 bg-white/10 rounded-full mb-2">
-            <div className="h-full bg-[#9a442d] rounded-full transition-all" style={{ width: `${enrichmentPct}%` }} />
+            <div className="h-full bg-terra rounded-full transition-all" style={{ width: `${enrichmentPct}%` }} />
           </div>
           <p className="text-white/55 text-xs">{(enrichedCount ?? 0).toLocaleString()} of {(totalEvents ?? 0).toLocaleString()} live events enriched</p>
         </div>
@@ -173,7 +173,7 @@ export default async function AdminDashboard() {
         {/* Categories */}
         <div className="bg-white/5 rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-3">
-            <BarChart2 className="w-4 h-4 text-[#9a442d]" />
+            <BarChart2 className="w-4 h-4 text-terra" />
             <p className="text-white/40 text-xs uppercase tracking-wider">Events by Category</p>
           </div>
           {sortedCats.length === 0 ? (
@@ -184,7 +184,7 @@ export default async function AdminDashboard() {
                 <div key={cat} className="flex items-center gap-2">
                   <span className="text-white/60 text-xs w-28 truncate">{cat}</span>
                   <div className="flex-1 h-1.5 bg-white/10 rounded-full">
-                    <div className="h-full bg-[#9a442d] rounded-full" style={{ width: `${Math.round((cnt / (totalEvents ?? 1)) * 100)}%` }} />
+                    <div className="h-full bg-terra rounded-full" style={{ width: `${Math.round((cnt / (totalEvents ?? 1)) * 100)}%` }} />
                   </div>
                   <span className="text-white/55 text-xs w-6 text-right">{cnt}</span>
                 </div>
@@ -229,7 +229,7 @@ export default async function AdminDashboard() {
       <section>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-xs uppercase tracking-widest text-white/55">Recent Reports</h2>
-          <Link href="/admin/reports" className="text-xs text-[#9a442d] hover:underline">View all →</Link>
+          <Link href="/admin/reports" className="text-xs text-terra hover:underline">View all →</Link>
         </div>
         {!recentReports?.length ? (
           <p className="text-white/55 text-sm">No reports yet.</p>

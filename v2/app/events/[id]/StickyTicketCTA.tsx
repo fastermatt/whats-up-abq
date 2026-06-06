@@ -37,7 +37,7 @@ export function StickyTicketCTA({ href, label }: Props) {
       aria-hidden={!visible}
       className={[
         'fixed bottom-0 inset-x-0 z-40 md:hidden',
-        'bg-[#fbf7f1]/95 backdrop-blur-sm border-t border-[#ddc9a3]/60',
+        'bg-cream/95 backdrop-blur-sm border-t border-sand-mid/60',
         'px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]',
         'transition-transform duration-300 ease-out',
         visible ? 'translate-y-0' : 'translate-y-full',
@@ -48,7 +48,7 @@ export function StickyTicketCTA({ href, label }: Props) {
         target="_blank"
         rel="noopener noreferrer"
         tabIndex={visible ? 0 : -1}
-        className="flex items-center justify-center gap-2 w-full px-6 py-3.5 rounded-xl bg-[#9a442d] text-white font-bold text-[15px] shadow-lg shadow-[#9a442d]/25 hover:bg-[#7d3725] transition-colors active:scale-[0.98]"
+        className="flex items-center justify-center gap-2 w-full px-6 py-3.5 rounded-xl bg-terra text-white font-bold text-[15px] shadow-lg shadow-terra/25 hover:bg-terra-hover transition-colors active:scale-[0.98]"
         style={{ fontFamily: 'var(--font-epilogue)' }}
       >
         {label}

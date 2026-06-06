@@ -25,12 +25,12 @@ export const revalidate = false
 
 export default function PrivacyPage() {
   return (
-    <main id="main" className="min-h-dvh bg-[#fbf7f1] text-[#1a1614]">
+    <main id="main" className="min-h-dvh bg-cream text-ink">
       <div className="max-w-2xl mx-auto px-4 py-8 md:py-12">
         {/* Back button */}
         <Link
           href="/"
-          className="inline-flex items-center gap-1 text-sm font-semibold text-[#9a442d] hover:text-[#7d3725] transition-colors mb-8"
+          className="inline-flex items-center gap-1 text-sm font-semibold text-terra hover:text-terra-hover transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
           Back
@@ -38,18 +38,18 @@ export default function PrivacyPage() {
 
         {/* H1 */}
         <h1
-          className="text-4xl md:text-5xl font-black leading-tight mb-3 text-[#1a1614]"
+          className="text-4xl md:text-5xl font-black leading-tight mb-3 text-ink"
           style={{ fontFamily: 'var(--font-epilogue)' }}
         >
           Privacy Policy
         </h1>
 
-        <p className="text-sm text-[#6b5d57] mb-10">
+        <p className="text-sm text-ink-light mb-10">
           Last updated: April 19, 2026
         </p>
 
         {/* Intro */}
-        <p className="text-base md:text-lg leading-relaxed mb-10 text-[#4a3f3a]">
+        <p className="text-base md:text-lg leading-relaxed mb-10 text-ink-mid">
           ABQ Unplugged is a free community tool. Our whole purpose is to make it
           easy to find events happening in Albuquerque and get you to them, not to
           collect your data, profile your interests, or sell anything about you to
@@ -62,12 +62,12 @@ export default function PrivacyPage() {
           {/* What we are */}
           <section>
             <h2
-              className="text-2xl font-bold mb-3 text-[#1a1614]"
+              className="text-2xl font-bold mb-3 text-ink"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               What ABQ Unplugged is
             </h2>
-            <p className="text-base leading-relaxed text-[#4a3f3a]">
+            <p className="text-base leading-relaxed text-ink-mid">
               ABQ Unplugged is an event aggregator. We pull upcoming event listings
               from sources like Ticketmaster, SeatGeek, Eventbrite, Bandsintown,
               the National Hispanic Cultural Centre, and local Albuquerque venues
@@ -81,12 +81,12 @@ export default function PrivacyPage() {
           {/* Our mission */}
           <section>
             <h2
-              className="text-2xl font-bold mb-3 text-[#1a1614]"
+              className="text-2xl font-bold mb-3 text-ink"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               Our mission: send you somewhere else
             </h2>
-            <p className="text-base leading-relaxed text-[#4a3f3a]">
+            <p className="text-base leading-relaxed text-ink-mid">
               Most websites are built to keep you on them as long as possible.
               We&apos;re doing the opposite. ABQ Unplugged exists to push traffic
               to event organizers, venues, and ticket sellers, not to accumulate
@@ -99,27 +99,27 @@ export default function PrivacyPage() {
           {/* What we collect */}
           <section>
             <h2
-              className="text-2xl font-bold mb-3 text-[#1a1614]"
+              className="text-2xl font-bold mb-3 text-ink"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               What data we collect
             </h2>
-            <p className="text-base leading-relaxed text-[#4a3f3a] mb-4">
+            <p className="text-base leading-relaxed text-ink-mid mb-4">
               We keep this minimal by design.
             </p>
-            <ul className="space-y-3 text-base text-[#4a3f3a]">
+            <ul className="space-y-3 text-base text-ink-mid">
               <li className="flex gap-3">
-                <span className="w-2 h-2 rounded-full bg-[#9a442d] flex-shrink-0 mt-[0.45rem]" />
+                <span className="w-2 h-2 rounded-full bg-terra flex-shrink-0 mt-[0.45rem]" />
                 <span>
-                  <strong className="text-[#1a1614]">No account required.</strong>{' '}
+                  <strong className="text-ink">No account required.</strong>{' '}
                   You can browse every event on the site without creating an account
                   or providing any personal information.
                 </span>
               </li>
               <li className="flex gap-3">
-                <span className="w-2 h-2 rounded-full bg-[#9a442d] flex-shrink-0 mt-[0.45rem]" />
+                <span className="w-2 h-2 rounded-full bg-terra flex-shrink-0 mt-[0.45rem]" />
                 <span>
-                  <strong className="text-[#1a1614]">Optional accounts.</strong>{' '}
+                  <strong className="text-ink">Optional accounts.</strong>{' '}
                   If you create an account (to save events, check in, or track
                   your activity), we store your email address and the activity
                   data you create. You can delete your account at any time by
@@ -127,9 +127,9 @@ export default function PrivacyPage() {
                 </span>
               </li>
               <li className="flex gap-3">
-                <span className="w-2 h-2 rounded-full bg-[#9a442d] flex-shrink-0 mt-[0.45rem]" />
+                <span className="w-2 h-2 rounded-full bg-terra flex-shrink-0 mt-[0.45rem]" />
                 <span>
-                  <strong className="text-[#1a1614]">Anonymous analytics.</strong>{' '}
+                  <strong className="text-ink">Anonymous analytics.</strong>{' '}
                   We use Umami, a privacy-first analytics tool, to understand
                   which events and categories people find useful. Umami does not
                   track individuals, does not use cookies for analytics, and does
@@ -144,12 +144,12 @@ export default function PrivacyPage() {
           {/* Cookies */}
           <section>
             <h2
-              className="text-2xl font-bold mb-3 text-[#1a1614]"
+              className="text-2xl font-bold mb-3 text-ink"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               Cookies
             </h2>
-            <p className="text-base leading-relaxed text-[#4a3f3a]">
+            <p className="text-base leading-relaxed text-ink-mid">
               We use session cookies for basic site functionality, for example,
               keeping you signed in if you have an account. We do not use
               advertising cookies, tracking pixels, or third-party behavioral
@@ -161,12 +161,12 @@ export default function PrivacyPage() {
           {/* Third-party links */}
           <section>
             <h2
-              className="text-2xl font-bold mb-3 text-[#1a1614]"
+              className="text-2xl font-bold mb-3 text-ink"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               Third-party links
             </h2>
-            <p className="text-base leading-relaxed text-[#4a3f3a]">
+            <p className="text-base leading-relaxed text-ink-mid">
               Every event on ABQ Unplugged links to an external site, Ticketmaster,
               Eventbrite, SeatGeek, a venue&apos;s website, or another ticket
               platform. Once you click through to one of those sites, their own
@@ -179,12 +179,12 @@ export default function PrivacyPage() {
           {/* Children */}
           <section>
             <h2
-              className="text-2xl font-bold mb-3 text-[#1a1614]"
+              className="text-2xl font-bold mb-3 text-ink"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               Children
             </h2>
-            <p className="text-base leading-relaxed text-[#4a3f3a]">
+            <p className="text-base leading-relaxed text-ink-mid">
               ABQ Unplugged is appropriate for all ages, we list family-friendly
               events alongside everything else. We do not knowingly collect personal
               information from children under 13. If a child has created an account
@@ -195,20 +195,20 @@ export default function PrivacyPage() {
           {/* Contact */}
           <section>
             <h2
-              className="text-2xl font-bold mb-3 text-[#1a1614]"
+              className="text-2xl font-bold mb-3 text-ink"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               Contact
             </h2>
-            <p className="text-base leading-relaxed text-[#4a3f3a]">
+            <p className="text-base leading-relaxed text-ink-mid">
               Questions, requests, or concerns about this policy:
             </p>
-            <p className="text-base text-[#4a3f3a] mt-2">
+            <p className="text-base text-ink-mid mt-2">
               Matt Carlson
               <br />
               <a
                 href="mailto:4mattcarlson@gmail.com"
-                className="text-[#9a442d] hover:text-[#7d3725] font-semibold underline underline-offset-2 transition-colors"
+                className="text-terra hover:text-terra-hover font-semibold underline underline-offset-2 transition-colors"
               >
                 4mattcarlson@gmail.com
               </a>
@@ -216,14 +216,14 @@ export default function PrivacyPage() {
           </section>
 
           {/* Updates */}
-          <section className="pb-8 border-b border-[#f0e4cc]">
+          <section className="pb-8 border-b border-sand-light">
             <h2
-              className="text-2xl font-bold mb-3 text-[#1a1614]"
+              className="text-2xl font-bold mb-3 text-ink"
               style={{ fontFamily: 'var(--font-epilogue)' }}
             >
               Updates to this policy
             </h2>
-            <p className="text-base leading-relaxed text-[#4a3f3a]">
+            <p className="text-base leading-relaxed text-ink-mid">
               If we change this policy in a meaningful way, we&apos;ll update the
               date at the top of this page. We don&apos;t anticipate many changes
              , the site&apos;s privacy stance is pretty baked into what it is.
@@ -236,7 +236,7 @@ export default function PrivacyPage() {
         <div className="mt-8">
           <Link
             href="/events"
-            className="inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-[#9a442d] text-white font-semibold text-sm hover:bg-[#7d3725] transition-all duration-300 hover:shadow-lg hover:shadow-[#9a442d]/20"
+            className="inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-terra text-white font-semibold text-sm hover:bg-terra-hover transition-all duration-300 hover:shadow-lg hover:shadow-terra/20"
             style={{ fontFamily: 'var(--font-epilogue)' }}
           >
             Browse Events
