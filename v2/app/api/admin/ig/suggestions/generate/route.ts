@@ -423,6 +423,12 @@ export async function POST(req: NextRequest) {
     /brew|taproom|distill/i.test(e.venue ?? '')
   )
 
+  // Exclude events with adult/explicit content from digest posts (general audience).
+  // Events marked hidden=true are already excluded by the DB query above.
+  // This catches events still on the site that shouldn't be in family-general IG posts.
+  const ADULT_RE = /\b(burlesque|strip club|striptease|erotic|fetish|kink|nsfw|xxx|adult show|topless|pole dance)\b/i
+  const isAdultContent = (e: EventSnap) => ADULT_RE.test(e.title) || ADULT_RE.test(e.venue ?? '')
+
   // Build suggestions.
   // NOTE: this type mirrors the EXACT columns of public.ig_post_suggestions.
   // Keep it in sync with the table. Typing the array (instead of
@@ -518,7 +524,8 @@ export async function POST(req: NextRequest) {
         const toSat = (6 - base.getDay() + 7) % 7
         const satStr = toMDT(addDays(base, toSat))
         const sunStr = toMDT(addDays(base, toSat + 1))
-        const weekend = snaps.filter(e => e.date === satStr || e.date === sunStr)
+        // Filter adult content — digest posts go to a general audience.
+        const weekend = snaps.filter(e => (e.date === satStr || e.date === sunStr) && !isAdultContent(e))
         // Big ticketed shows come from TM/SG; local/free/community come from the
         // other sources (local-, nhcc-, eb-, rrfb, lovenm, abqtodo, babydolls…).
         const isMarquee = (e: EventSnap) => /^(ticketmaster_|seatgeek_)/.test(e.id)
@@ -601,16 +608,12 @@ export async function POST(req: NextRequest) {
     // Remember these so the same post type won't repeat them later in this run.
     selected.forEach(e => exclude.add(e.id))
 
-    // Caption, auto-tagging venue IG handles. Fall back to a deterministic
-    // caption if DeepSeek is unavailable so a post is never published blank.
+    // Collect the data needed for caption generation — we'll fire all captions
+    // concurrently after the selection loop (see Promise.all below).
     const handles = venueHandles(selected.map(e => e.venue))
-    // The under-the-radar weekend digest gets a distinct framing so the two
-    // Friday digests don't read like the same post twice.
     const captionExtra = slot.postType === 'WeekendDigest' && slot.variant === 'under-radar'
       ? 'Frame these as the under-the-radar weekend picks — the free, local, smaller-venue stuff people overlook while everyone talks about the big shows. The locals\' alternative.'
       : ''
-    const aiCaption = ensureVenueTags(await generateCaption(slot.postType, selected, handles, captionExtra), handles)
-    const caption = aiCaption.trim() || fallbackCaption(slot.postType, selected, handles)
 
     insertions.push({
       generation_id:  generationId,
@@ -618,12 +621,31 @@ export async function POST(req: NextRequest) {
       template_id:    templateId,
       event_ids:      selected.map(e => e.id),
       event_data:     selected,
-      caption,
+      caption:        '',   // filled in by parallel caption pass below
       scheduled_for:  slot.scheduledFor.toISOString(),
       status:         'pending',
       strategy_notes: strategyNotes,
-    })
+      // Transient fields used for caption generation — stripped before insert.
+      _handles:       handles,
+      _captionExtra:  captionExtra,
+    } as SuggestionInsert & { _handles: string[]; _captionExtra: string })
   }
+
+  // Generate all captions concurrently — instead of 8 sequential DeepSeek calls
+  // (~60s risk of Netlify timeout), fire them in parallel so total time = slowest
+  // single request (~8–12s).
+  await Promise.all(insertions.map(async (ins) => {
+    const rec = ins as SuggestionInsert & { _handles?: string[]; _captionExtra?: string }
+    const handles = rec._handles ?? []
+    const extra   = rec._captionExtra ?? ''
+    delete rec._handles
+    delete rec._captionExtra
+    const aiCaption = ensureVenueTags(
+      await generateCaption(ins.post_type, ins.event_data, handles, extra),
+      handles
+    )
+    ins.caption = aiCaption.trim() || fallbackCaption(ins.post_type, ins.event_data, handles)
+  }))
 
   // Nothing to insert (every day was already covered, or no events matched)
   if (insertions.length === 0) {

@@ -129,8 +129,15 @@ export function CanvasPreview({ templateId, ctx, onExport }: { templateId: strin
         <div className="flex justify-center">
           <div ref={cardRef} className={CARD} style={{ background: C.card }}>
             <div className="absolute inset-0 flex flex-col">
-              <div className="h-[55%] relative overflow-hidden">
-                <img src={proxiedImageUrl ?? undefined} crossOrigin="anonymous" alt="" className="w-full h-full object-cover" />
+              {/* Photo half — gradient fallback when image fails to load (broken URL, proxy error, etc.)
+                  so the card always looks intentional rather than showing a torn-image icon. */}
+              <div className="h-[55%] relative overflow-hidden" style={{ background: `linear-gradient(155deg, ${C.terraDeep} 0%, ${C.terra} 55%, ${C.inkMid} 100%)` }}>
+                {proxiedImageUrl && (
+                  <img src={proxiedImageUrl} crossOrigin="anonymous" alt=""
+                    className="w-full h-full object-cover object-top"
+                    onError={e => { e.currentTarget.style.display = 'none' }}
+                  />
+                )}
                 <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(26,22,20,0.28), rgba(26,22,20,0))' }} />
                 <div className="absolute top-3 left-4"><Wordmark light /></div>
               </div>
@@ -164,7 +171,9 @@ export function CanvasPreview({ templateId, ctx, onExport }: { templateId: strin
             <div className="absolute inset-0 flex flex-col p-4">
               <Wordmark light />
               <div className="flex-1 rounded-lg overflow-hidden my-3 relative" style={{ boxShadow: '0 6px 20px rgba(26,22,20,0.4)' }}>
-                <img src={proxiedImageUrl ?? undefined} crossOrigin="anonymous" alt="" className="w-full h-full object-cover" />
+                {/* object-top: event photos usually have the subject (performer, sign) at
+                    the top — center-crop cuts heads off. Top-anchored is almost always right. */}
+                <img src={proxiedImageUrl ?? undefined} crossOrigin="anonymous" alt="" className="w-full h-full object-cover object-top" />
                 <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(26,22,20,0.35), rgba(26,22,20,0))' }} />
               </div>
               <p className="text-[9px] font-semibold uppercase mb-1" style={{ fontFamily: BODY, letterSpacing: '0.2em', color: C.gold }}>
@@ -188,7 +197,7 @@ export function CanvasPreview({ templateId, ctx, onExport }: { templateId: strin
     return (
       <div className="flex justify-center">
         <div ref={cardRef} className={CARD} style={{ background: C.ink }}>
-          <img src={proxiedImageUrl ?? undefined} crossOrigin="anonymous" alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <img src={proxiedImageUrl ?? undefined} crossOrigin="anonymous" alt="" className="absolute inset-0 w-full h-full object-cover object-top" />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(26,22,20,0.94) 0%, rgba(26,22,20,0.45) 42%, rgba(26,22,20,0.05) 72%)' }} />
           <div className="absolute top-3 left-4 right-3 flex items-start justify-between">
             <Wordmark light />

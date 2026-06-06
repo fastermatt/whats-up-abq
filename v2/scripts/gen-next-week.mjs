@@ -49,6 +49,13 @@ const SLOTS = [
 const normT = t=>(t??'').toLowerCase().replace(/^[^:]{1,18}:\s*/,'').replace(/[^a-z0-9]+/g,'')
 const isMarquee = e=>/^(ticketmaster_|seatgeek_)/.test(e.id)
 
+// Exclude events with adult/explicit content from digest posts.
+// These events may still appear on the public site — they're only excluded from
+// family-general IG digest selection. Matt can also set hidden=true on events
+// that should be removed from everything.
+const ADULT_RE = /\b(burlesque|strip club|striptease|erotic|fetish|kink|nsfw|xxx|adult show|topless|pole dance)\b/i
+const isAdultContent = e => ADULT_RE.test(e.title ?? '') || ADULT_RE.test(e.venue ?? '')
+
 function pick(candidates, max, exclude) {
   const out=[],seen=new Set(),vc=new Map()
   for (const e of candidates) {
@@ -67,6 +74,8 @@ function pick(candidates, max, exclude) {
 const SYSTEM = `You write Instagram captions for ABQ Unplugged — Albuquerque NM's local events guide.
 
 VOICE: You are a Burqueño who has been to these shows, knows these venues, and is texting a friend about what's worth their Friday night. Confident, specific, never corporate. Write complete sentences like a real person — NOT advertising fragments.
+
+CRITICAL: Write the caption directly. Do NOT say "Here's a caption", "Okay here's one", "Sure!", or any other preamble. Do NOT include a separator line (---). The very first word of your response is the first word of the caption.
 
 BANNED PATTERNS (instantly sound AI-generated — never use):
 - Three-word fragment sentences: "Cold beer. Live music." / "Four bands. One room."
@@ -182,7 +191,8 @@ for (const slot of slots) {
       const base=new Date(slot.dateStr+'T12:00:00')
       const toSat=(6-base.getDay()+7)%7
       const satStr=toMDT(addDays(base,toSat)), sunStr=toMDT(addDays(base,toSat+1))
-      const wknd=snaps.filter(e=>e.date===satStr||e.date===sunStr)
+      // Filter adult content from digest posts — these go to a general audience.
+      const wknd=snaps.filter(e=>(e.date===satStr||e.date===sunStr)&&!isAdultContent(e))
       if (slot.variant==='under-radar') {
         const local=wknd.filter(e=>!isMarquee(e)), rest=wknd.filter(e=>isMarquee(e))
         selected=pick([...local,...rest],5,ex); notes='Under the radar — free/local/overlooked, no overlap with headliners'
