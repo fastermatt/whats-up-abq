@@ -404,30 +404,30 @@ export default async function DiscoverPage() {
           </div>
         </div>
 
-        {/* ── Hero photo strip — decorative event tiles, desktop only ─────
-            Fills the previously-empty hero with event energy. Lazy-loaded
-            so they never become the LCP element (hero h2 is LCP now).
-            Two tilted cards in the right 20% of the hero surface.       */}
-        {featured.filter(e => e.imageUrl).length >= 2 && (
+        {/* ── Hero photo collage — decorative event tiles, desktop only ───
+            A staggered 2-column cluster of real event photos fills the right
+            third of the hero so it reads as a composed scene, not an empty
+            cream void. Lazy-loaded so they never become the LCP element. */}
+        {featured.filter(e => e.imageUrl).length >= 4 && (
           <div
-            className="absolute right-8 top-6 bottom-14 hidden lg:flex flex-col justify-center gap-3 pointer-events-none"
+            className="absolute right-6 top-4 bottom-10 hidden lg:grid grid-cols-2 gap-3 items-center pointer-events-none w-[360px]"
             aria-hidden="true"
             style={{ zIndex: 5 }}
           >
-            {featured.filter(e => e.imageUrl).slice(0, 2).map((ev, i) => (
+            {featured.filter(e => e.imageUrl).slice(0, 4).map((ev, i) => (
               <div
                 key={ev.id}
-                className="rounded-xl overflow-hidden shadow-xl flex-shrink-0"
+                className="rounded-xl overflow-hidden shadow-xl ring-1 ring-[#1a1614]/5"
                 style={{
-                  width: 156,
-                  aspectRatio: '4/3',
-                  transform: `rotate(${i === 0 ? '-2.5deg' : '2deg'}) translateY(${i === 0 ? '6px' : '-6px'})`,
-                  opacity: 0.7,
+                  aspectRatio: '4/5',
+                  // Stagger the two columns vertically for a collage feel
+                  transform: `translateY(${i % 2 === 0 ? '-14px' : '14px'}) rotate(${i % 2 === 0 ? '-1.5deg' : '1.5deg'})`,
+                  opacity: 0.92,
                 }}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={eventImageSrc(ev.imageUrl!, 312)}
+                  src={eventImageSrc(ev.imageUrl!, 320)}
                   alt=""
                   loading="lazy"
                   className="w-full h-full object-cover"
