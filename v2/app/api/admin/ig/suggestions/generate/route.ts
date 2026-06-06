@@ -23,6 +23,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
+import { venueHandles } from '@/lib/venue-instagram'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60 // caption generation can take a few seconds
@@ -153,6 +154,7 @@ Rules:
 - NO time-relative phrases ("tonight", "this week", "tomorrow") UNLESS the prompt explicitly says the post is for that exact day — these captions are scheduled days ahead and stale time claims look broken.
 - First line is a hook with a specific, concrete detail (an artist name, a venue, a vivid image). Not a generic greeting.
 - Include a save/tag prompt for roundup posts ("Save this", "Tag who you'd bring").
+- When the prompt lists "Venue tags", mention the venue by its @handle naturally in the body. NEVER invent or guess an @handle — only use handles explicitly provided.
 - End with: abqunplugged.com 🌵
 - Exactly 8 hashtags on the final line: #ABQ #Albuquerque #505 #BurqueLife #ThingsToDo505 plus 3 specific to the events.
 - Body under 200 characters before the hashtag line.`
@@ -179,11 +181,34 @@ Events: ${e.map(ev => `${ev.title}${ev.time ? ` at ${ev.time}` : ''}`).join(', '
 Hook: "Tonight in Burque:" or "Last-minute plans?" Make it feel alive.`,
 }
 
-async function generateCaption(postType: PostType, events: EventSnap[]): Promise<string> {
+/** Insert any venue @handles the caption didn't already include, on their own
+ *  line just before the hashtag line. Guarantees venues get tagged even if the
+ *  model omits them. Never adds a handle not in `handles` (no invention). */
+function ensureVenueTags(caption: string, handles: string[]): string {
+  if (!caption || handles.length === 0) return caption
+  const missing = handles.filter(h => !caption.includes('@' + h))
+  if (missing.length === 0) return caption
+
+  const tagLine = '📍 ' + missing.map(h => '@' + h).join(' ')
+  const lines = caption.split('\n')
+  // Find the last non-empty line; if it's the hashtag line, insert before it.
+  let lastIdx = lines.length - 1
+  while (lastIdx >= 0 && lines[lastIdx].trim() === '') lastIdx--
+  if (lastIdx >= 0 && lines[lastIdx].trim().startsWith('#')) {
+    lines.splice(lastIdx, 0, '', tagLine)
+    return lines.join('\n')
+  }
+  return caption + '\n\n' + tagLine
+}
+
+async function generateCaption(postType: PostType, events: EventSnap[], handles: string[] = []): Promise<string> {
   const apiKey = process.env.DEEPSEEK_API_KEY
   if (!apiKey || events.length === 0) return ''
 
-  const userPrompt = CAPTION_PROMPTS[postType](events)
+  let userPrompt = CAPTION_PROMPTS[postType](events)
+  if (handles.length > 0) {
+    userPrompt += `\nVenue tags (use these exact handles when you mention the venue; do not invent any others): ${handles.map(h => '@' + h).join(' ')}`
+  }
 
   try {
     const res = await fetch('https://api.deepseek.com/chat/completions', {
@@ -386,8 +411,9 @@ export async function POST(req: NextRequest) {
 
     if (selected.length === 0) continue
 
-    // Generate AI caption
-    const caption = await generateCaption(slot.postType, selected)
+    // Generate AI caption, auto-tagging the venues' Instagram handles
+    const handles = venueHandles(selected.map(e => e.venue))
+    const caption = ensureVenueTags(await generateCaption(slot.postType, selected, handles), handles)
 
     // For event templates (image-based), store single event ctx fields at top level too
     const isEventTemplate = IMAGE_TEMPLATES.includes(templateId as typeof IMAGE_TEMPLATES[number]) || templateId === 'broadside' || templateId === 'marquee'
