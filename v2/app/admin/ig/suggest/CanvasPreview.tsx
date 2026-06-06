@@ -1,43 +1,63 @@
 'use client'
 
 /**
- * CanvasPreview — visual mockup of an Instagram post suggestion.
+ * CanvasPreview — the actual image published to Instagram from the suggestion
+ * queue (exported via html-to-image in the accept flow).
+ *
+ * Brand system (kept in-DOM so html-to-image captures it):
+ *   - Display/headlines/titles: Epilogue (var(--font-epilogue), globally loaded)
+ *   - Meta/eyebrows/body:       Inter   (var(--font-inter), globally loaded)
+ *   Fraunces/DM Mono are NOT loaded on this route, so they're intentionally
+ *   avoided here — they would fall back to serif/mono in the export.
  *
  * Two render modes:
- *   - Digest templates (tonight-list, weekend-digest, weekly-five):
- *     Numbered event list on dark background.
- *   - Event templates (poster, golden-hour, split, broadside, etc.):
- *     Hero image fill with title overlay — mirrors the actual canvas output.
+ *   - Digest (tonight-list / weekend-digest / weekly-five): dark ink editorial list
+ *   - Event (poster / split / golden-hour / broadside): photo or typographic hero
  */
 
 import { useRef, useEffect, useCallback } from 'react'
 import { toPng } from 'html-to-image'
-import { DIGEST_TEMPLATES, TemplateContext } from '@/app/admin/ig/lib/templates'
+import { TemplateContext } from '@/app/admin/ig/lib/templates'
 
 const DIGEST_TEMPLATE_IDS = new Set(['tonight-list', 'weekend-digest', 'weekly-five'])
 
+// Brand tokens (literal hex — this DOM is rasterized, not Tailwind-purged).
+const C = {
+  cream: '#fbf7f1', terra: '#9a442d', terraDeep: '#7d3725', ink: '#1a1614',
+  inkMid: '#4a3f3a', sand: '#ddc9a3', sandLt: '#f0e4cc', card: '#fffdf9', gold: '#c99b3b',
+}
+const HEAD = 'var(--font-epilogue), system-ui, sans-serif'
+const BODY = 'var(--font-inter), system-ui, sans-serif'
+
 /** Route external images through the same-origin proxy so html-to-image can
- *  capture them without tainting the canvas (cross-origin images would blank
- *  the export). Same-origin / data URLs pass through untouched. */
+ *  capture them without tainting the canvas. Same-origin / data URLs pass through. */
 function proxyImage(url: string | null): string | null {
   if (!url) return null
   if (url.startsWith('data:') || url.startsWith('/')) return url
   return `/api/image-proxy?url=${encodeURIComponent(url)}`
 }
 
-interface Props {
-  templateId: string
-  ctx: TemplateContext
-  onExport?: (dataUrl: string) => void
+function Wordmark({ light = false }: { light?: boolean }) {
+  return (
+    <div className="flex items-center gap-[5px]" style={{ fontFamily: HEAD }}>
+      <span style={{ width: 13, height: 13, background: C.terra, borderRadius: 3, display: 'inline-block' }} />
+      <span
+        className="text-[10px] font-extrabold uppercase"
+        style={{ letterSpacing: '0.2em', color: light ? C.cream : C.ink }}
+      >
+        ABQ <span style={{ color: C.terra }}>Unplugged</span>
+      </span>
+    </div>
+  )
 }
 
-export function CanvasPreview({ templateId, ctx, onExport }: Props) {
-  const template  = DIGEST_TEMPLATES.find(t => t.id === templateId)
-  const events    = ctx.events ?? []
-  const isDigest  = DIGEST_TEMPLATE_IDS.has(templateId)
+const fmtDay = (d?: string) =>
+  d ? new Date(d + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : null
 
-  // Single event context (for image-based event templates)
-  const event = events[0] ?? null
+export function CanvasPreview({ templateId, ctx, onExport }: { templateId: string; ctx: TemplateContext; onExport?: (dataUrl: string) => void }) {
+  const events   = ctx.events ?? []
+  const isDigest = DIGEST_TEMPLATE_IDS.has(templateId)
+  const event    = events[0] ?? null
   const imageUrl = event?.imageUrl ?? ctx.imageUrl ?? null
   const proxiedImageUrl = proxyImage(imageUrl)
 
@@ -48,7 +68,6 @@ export function CanvasPreview({ templateId, ctx, onExport }: Props) {
     const node = cardRef.current
     if (!node || !onExport) return
     try {
-      // Wait for any images inside the card to finish loading first.
       const imgs = Array.from(node.querySelectorAll('img'))
       await Promise.all(imgs.map(img =>
         img.complete ? Promise.resolve()
@@ -66,217 +85,184 @@ export function CanvasPreview({ templateId, ctx, onExport }: Props) {
     return () => clearTimeout(t)
   }, [ctxKey, exportNow])
 
-  // Headline for digest posts
-  const headlineText =
-    templateId === 'weekend-digest' ? 'This Weekend' :
-    templateId === 'weekly-five'    ? 'This Week'    : 'Tonight in ABQ'
+  const CARD = 'w-[260px] flex-shrink-0 aspect-[4/5] rounded-xl overflow-hidden shadow-2xl relative'
 
-  // ── Image-based event template preview ─────────────────────────────────────
+  // ── Event templates ────────────────────────────────────────────────────────
   if (!isDigest) {
-    const isPoster    = templateId === 'poster'
-    const isSplit     = templateId === 'split'
-    const isGolden    = templateId === 'golden-hour'
-    const isBroadside = templateId === 'broadside'
+    const isSplit  = templateId === 'split'
+    const isGolden = templateId === 'golden-hour'
+    const isType   = templateId === 'broadside' || !imageUrl
+    const title    = event?.title ?? 'Event Name'
+    const titleSize = title.length > 42 ? 'text-[19px]' : title.length > 24 ? 'text-[23px]' : 'text-[27px]'
 
+    // Typographic hero (no photo) — letterpress-poster energy on cream.
+    if (isType) {
+      return (
+        <div className="flex justify-center">
+          <div ref={cardRef} className={CARD} style={{ background: C.cream }}>
+            <div className="absolute inset-0 flex flex-col p-6">
+              <Wordmark />
+              <div className="flex-1 flex flex-col justify-center">
+                <p className="text-[10px] font-semibold uppercase mb-3" style={{ fontFamily: BODY, letterSpacing: '0.2em', color: C.terra }}>
+                  {event?.category ?? 'Albuquerque'}
+                </p>
+                <p className={`${titleSize} font-black leading-[0.95] mb-4`} style={{ fontFamily: HEAD, color: C.ink, display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  {title}
+                </p>
+                <div style={{ width: 44, height: 3, background: C.terra }} />
+                <div className="mt-4 space-y-1" style={{ fontFamily: BODY }}>
+                  {fmtDay(event?.date) && <p className="text-[13px] font-bold" style={{ color: C.ink }}>{fmtDay(event?.date)}</p>}
+                  {event?.time && <p className="text-[11px]" style={{ color: C.inkMid }}>{event.time}</p>}
+                  {event?.venue && <p className="text-[11px]" style={{ color: C.inkMid }}>{event.venue}</p>}
+                </div>
+              </div>
+              <p className="text-[8px] font-semibold uppercase" style={{ fontFamily: BODY, letterSpacing: '0.22em', color: C.terra }}>abqunplugged.com</p>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // Split — photo top, editorial info panel on cream below.
+    if (isSplit) {
+      return (
+        <div className="flex justify-center">
+          <div ref={cardRef} className={CARD} style={{ background: C.card }}>
+            <div className="absolute inset-0 flex flex-col">
+              <div className="h-[55%] relative overflow-hidden">
+                <img src={proxiedImageUrl ?? undefined} crossOrigin="anonymous" alt="" className="w-full h-full object-cover" />
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(26,22,20,0.28), rgba(26,22,20,0))' }} />
+                <div className="absolute top-3 left-4"><Wordmark light /></div>
+              </div>
+              <div className="flex-1 flex flex-col p-4">
+                <p className="text-[9px] font-semibold uppercase mb-1.5" style={{ fontFamily: BODY, letterSpacing: '0.2em', color: C.terra }}>
+                  {event?.category ?? 'Event'}
+                </p>
+                <p className="text-[19px] font-black leading-[0.98]" style={{ fontFamily: HEAD, color: C.ink, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  {title}
+                </p>
+                <div className="mt-2 space-y-0.5" style={{ fontFamily: BODY }}>
+                  {fmtDay(event?.date) && <p className="text-[10px] font-bold" style={{ color: C.ink }}>{fmtDay(event?.date)}{event?.time ? ` · ${event.time}` : ''}</p>}
+                  {event?.venue && <p className="text-[10px] truncate" style={{ color: C.inkMid }}>{event.venue}</p>}
+                </div>
+                <div className="mt-auto flex items-center gap-2 pt-2">
+                  <div className="flex-1 h-px" style={{ background: C.sand }} />
+                  <span className="text-[8px] font-semibold uppercase" style={{ fontFamily: BODY, letterSpacing: '0.2em', color: C.terra }}>abqunplugged.com</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // Golden-hour — warm ABQ-sunset gradient with a framed photo.
+    if (isGolden) {
+      return (
+        <div className="flex justify-center">
+          <div ref={cardRef} className={CARD} style={{ background: `linear-gradient(155deg, ${C.terraDeep} 0%, ${C.terra} 42%, ${C.ink} 100%)` }}>
+            <div className="absolute inset-0 flex flex-col p-4">
+              <Wordmark light />
+              <div className="flex-1 rounded-lg overflow-hidden my-3 relative" style={{ boxShadow: '0 6px 20px rgba(26,22,20,0.4)' }}>
+                <img src={proxiedImageUrl ?? undefined} crossOrigin="anonymous" alt="" className="w-full h-full object-cover" />
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(26,22,20,0.35), rgba(26,22,20,0))' }} />
+              </div>
+              <p className="text-[9px] font-semibold uppercase mb-1" style={{ fontFamily: BODY, letterSpacing: '0.2em', color: C.gold }}>
+                {event?.category ?? 'Event'}
+              </p>
+              <p className="text-[20px] font-black leading-[0.98]" style={{ fontFamily: HEAD, color: C.cream, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                {title}
+              </p>
+              <div className="mt-1.5 text-[10px] flex gap-2" style={{ fontFamily: BODY, color: 'rgba(251,247,241,0.75)' }}>
+                {fmtDay(event?.date) && <span className="font-semibold">{fmtDay(event?.date)}</span>}
+                {event?.time && <span>{event.time}</span>}
+                {event?.venue && <span className="truncate">· {event.venue}</span>}
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // Poster — full-bleed photo, warm ink gradient, terra furniture.
     return (
       <div className="flex justify-center">
-        <div ref={cardRef} className="w-[260px] flex-shrink-0 aspect-[4/5] rounded-xl overflow-hidden shadow-2xl relative">
-          {isBroadside || !imageUrl ? (
-            // ── Typographic / no-photo template ────────────────────────────
-            <div className="absolute inset-0 bg-cream flex flex-col justify-center p-6">
-              <div className="text-[9px] font-bold text-terra uppercase tracking-[0.2em] mb-2">
-                ABQ Unplugged
-              </div>
-              <div className="h-px bg-terra mb-4" />
-              <p
-                className="text-xl font-black text-ink leading-tight mb-3"
-                style={{ fontFamily: 'Georgia, serif' }}
-              >
-                {event?.title ?? 'Event Name'}
-              </p>
-              <div className="space-y-1 text-[10px] text-ink-mid">
-                {event?.date && (
-                  <p>{new Date(event.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
-                )}
-                {event?.time && <p>{event.time}</p>}
-                {event?.venue && <p>{event.venue}</p>}
-              </div>
-              <div className="mt-auto pt-4 text-[8px] text-terra uppercase tracking-widest">
-                abqunplugged.com
-              </div>
+        <div ref={cardRef} className={CARD} style={{ background: C.ink }}>
+          <img src={proxiedImageUrl ?? undefined} crossOrigin="anonymous" alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(26,22,20,0.94) 0%, rgba(26,22,20,0.45) 42%, rgba(26,22,20,0.05) 72%)' }} />
+          <div className="absolute top-3 left-4 right-3 flex items-start justify-between">
+            <Wordmark light />
+            {event?.category && (
+              <span className="text-[8px] font-bold uppercase px-2 py-1 rounded-full" style={{ fontFamily: BODY, letterSpacing: '0.12em', background: C.terra, color: C.cream }}>
+                {event.category}
+              </span>
+            )}
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 p-5">
+            <div className="flex items-center gap-2 mb-2">
+              <div style={{ width: 22, height: 2, background: C.terra }} />
+              {fmtDay(event?.date) && <span className="text-[9px] font-semibold uppercase" style={{ fontFamily: BODY, letterSpacing: '0.16em', color: C.gold }}>{fmtDay(event?.date)}</span>}
             </div>
-          ) : isSplit ? (
-            // ── Split: photo top half, text bottom ─────────────────────────
-            <div className="absolute inset-0 flex flex-col bg-cream">
-              {/* Photo top */}
-              <div className="h-[52%] relative overflow-hidden">
-                <img src={proxiedImageUrl ?? undefined} crossOrigin="anonymous" alt="" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-black/10" />
-                <div className="absolute top-2 left-2 flex items-center gap-1">
-                  <div className="w-5 h-5 bg-terra rounded flex items-center justify-center">
-                    <span className="text-[6px] font-black text-white">ABQ</span>
-                  </div>
-                </div>
-              </div>
-              {/* Text bottom */}
-              <div className="flex-1 p-4 flex flex-col justify-center">
-                <p className="text-[9px] font-semibold text-terra uppercase tracking-[0.18em] mb-1">
-                  {event?.category ?? 'Event'}
-                </p>
-                <p
-                  className="text-base font-black text-ink leading-tight line-clamp-3"
-                  style={{ fontFamily: 'Georgia, serif' }}
-                >
-                  {event?.title ?? 'Event Name'}
-                </p>
-                <div className="mt-2 text-[9px] text-ink-light space-y-0.5">
-                  {event?.time && <p>{event.time}</p>}
-                  {event?.venue && <p className="truncate">{event.venue}</p>}
-                </div>
-                <p className="mt-auto pt-2 text-[8px] text-terra/60 uppercase tracking-widest">
-                  abqunplugged.com
-                </p>
-              </div>
+            <p className={`${titleSize} font-black leading-[0.95]`} style={{ fontFamily: HEAD, color: C.cream, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              {title}
+            </p>
+            <div className="mt-2 text-[10px] flex items-center gap-1.5" style={{ fontFamily: BODY, color: 'rgba(251,247,241,0.7)' }}>
+              {event?.time && <span className="font-semibold">{event.time}</span>}
+              {event?.venue && <span className="truncate">{event.time ? '· ' : ''}{event.venue}</span>}
             </div>
-          ) : isGolden ? (
-            // ── Golden Hour: warm gradient + photo inset ───────────────────
-            <div className="absolute inset-0 flex flex-col p-4" style={{ background: 'linear-gradient(160deg, #2d1a0c 0%, #7a3a1a 50%, #1a0e06 100%)' }}>
-              <div className="flex items-center gap-1.5 mb-4">
-                <div className="w-6 h-6 bg-terra rounded flex items-center justify-center">
-                  <span className="text-[7px] font-black text-white">ABQ</span>
-                </div>
-                <span className="text-[9px] text-[#e8c89a] uppercase tracking-wider font-semibold">Unplugged</span>
-              </div>
-              {/* Photo inset */}
-              <div className="flex-1 rounded-lg overflow-hidden mb-3 relative">
-                <img src={proxiedImageUrl ?? undefined} crossOrigin="anonymous" alt="" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-black/20" />
-              </div>
-              {/* Event info */}
-              <div>
-                <p className="text-[9px] text-[#e8c89a]/70 uppercase tracking-[0.18em] mb-1">
-                  {event?.category ?? 'Event'}
-                </p>
-                <p
-                  className="text-sm font-black text-cream leading-tight line-clamp-2"
-                  style={{ fontFamily: 'Georgia, serif' }}
-                >
-                  {event?.title ?? 'Event Name'}
-                </p>
-                <div className="mt-1.5 text-[9px] text-[#e8c89a]/60 flex gap-2">
-                  {event?.time && <span>{event.time}</span>}
-                  {event?.venue && <span className="truncate">{event.venue}</span>}
-                </div>
-              </div>
-            </div>
-          ) : (
-            // ── Poster: full-bleed photo with title overlay (default) ──────
-            <div className="absolute inset-0">
-              <img src={proxiedImageUrl ?? undefined} crossOrigin="anonymous" alt="" className="w-full h-full object-cover" />
-              {/* Dark gradient overlay */}
-              <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.15) 100%)' }} />
-              {/* Logo top-left */}
-              <div className="absolute top-3 left-3 flex items-center gap-1.5">
-                <div className="w-6 h-6 bg-terra rounded flex items-center justify-center">
-                  <span className="text-[7px] font-black text-white">ABQ</span>
-                </div>
-                <span className="text-[9px] text-white/80 uppercase tracking-wider font-semibold">Unplugged</span>
-              </div>
-              {/* Category chip */}
-              {event?.category && (
-                <div className="absolute top-3 right-3 bg-terra/80 text-white text-[8px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-sm">
-                  {event.category}
-                </div>
-              )}
-              {/* Bottom text */}
-              <div className="absolute bottom-0 left-0 right-0 p-4">
-                <p
-                  className="text-base font-black text-white leading-tight mb-1.5 line-clamp-3"
-                  style={{ fontFamily: 'Georgia, serif' }}
-                >
-                  {event?.title ?? 'Event Name'}
-                </p>
-                <div className="flex items-center gap-2 text-[9px] text-white/70">
-                  {event?.date && (
-                    <span>{new Date(event.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
-                  )}
-                  {event?.time && <span>· {event.time}</span>}
-                </div>
-                {event?.venue && (
-                  <p className="text-[9px] text-white/50 mt-0.5 truncate">{event.venue}</p>
-                )}
-                <p className="text-[8px] text-white/30 mt-2 uppercase tracking-widest">abqunplugged.com</p>
-              </div>
-            </div>
-          )}
+            <p className="mt-3 text-[8px] font-semibold uppercase" style={{ fontFamily: BODY, letterSpacing: '0.22em', color: 'rgba(251,247,241,0.45)' }}>abqunplugged.com</p>
+          </div>
         </div>
       </div>
     )
   }
 
-  // ── Digest template preview (numbered list) ─────────────────────────────────
+  // ── Digest templates (dark editorial list) ──────────────────────────────────
+  const headline =
+    templateId === 'weekend-digest' ? { a: 'This ', b: 'Weekend' } :
+    templateId === 'weekly-five'    ? { a: 'The Week ', b: 'Ahead' } :
+                                      { a: 'Tonight ', b: 'in ABQ' }
+  const kicker =
+    templateId === 'weekend-digest' ? 'Weekend Guide' :
+    templateId === 'weekly-five'    ? 'Five Picks This Week' :
+                                      "What's On Tonight"
+
   return (
     <div className="flex justify-center">
-      <div
-        ref={cardRef}
-        className="w-[260px] flex-shrink-0 aspect-[4/5] bg-ink rounded-xl overflow-hidden flex flex-col text-cream shadow-2xl"
-        style={{ padding: '18px 16px 14px' }}
-      >
-        {/* Logo row */}
-        <div className="flex items-center gap-1.5 mb-3">
-          <div className="w-7 h-7 bg-terra rounded flex items-center justify-center flex-shrink-0">
-            <span className="text-[8px] font-black text-white leading-none">ABQ</span>
-          </div>
-          <span className="text-[10px] font-bold text-terra uppercase tracking-[0.18em]">Unplugged</span>
-        </div>
+      <div ref={cardRef} className={CARD} style={{ background: C.ink, padding: '20px 18px 16px', display: 'flex', flexDirection: 'column' }}>
+        <Wordmark light />
 
-        {/* Headline */}
-        <div className="mb-3">
-          <p className="text-[9px] font-semibold text-terra uppercase tracking-[0.18em] mb-1">
-            {template?.name ?? templateId}
+        <div className="mt-4">
+          <p className="text-[9px] font-semibold uppercase mb-1.5" style={{ fontFamily: BODY, letterSpacing: '0.2em', color: C.terra }}>
+            {kicker}
           </p>
-          <p className="text-2xl font-black leading-tight" style={{ fontFamily: 'Georgia, serif' }}>
-            {headlineText}
+          <p className="text-[29px] font-black leading-[0.92]" style={{ fontFamily: HEAD, color: C.cream }}>
+            {headline.a}<span style={{ color: C.terra }}>{headline.b}</span>
           </p>
         </div>
 
-        {/* Terra rule */}
-        <div className="h-px bg-terra/50 mb-3" />
-
-        {/* Events */}
-        <div className="flex-1 space-y-2.5 overflow-hidden">
+        <div className="mt-3.5 flex-1 flex flex-col">
           {events.slice(0, 5).map((e, i) => (
-            <div key={i} className="flex gap-2 items-start">
-              <span className="text-[11px] text-terra font-bold w-5 flex-shrink-0 tabular-nums">
-                {String(i + 1).padStart(2, '0')}
+            <div key={i} className="flex gap-2.5 items-baseline py-2" style={{ borderTop: i === 0 ? 'none' : '1px solid rgba(154,68,45,0.22)' }}>
+              <span className="text-[13px] font-black tabular-nums flex-shrink-0" style={{ fontFamily: HEAD, color: C.terra, width: 18 }}>
+                {i + 1}
               </span>
               <div className="flex-1 min-w-0">
-                <p
-                  className="text-[12px] font-semibold leading-tight line-clamp-2"
-                  style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
-                >
+                <p className="text-[12.5px] font-bold leading-[1.05]" style={{ fontFamily: HEAD, color: C.cream, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                   {e.title}
                 </p>
-                <p className="text-[9px] text-cream/50 mt-0.5 truncate">
-                  {[
-                    e.date ? new Date(e.date + 'T12:00:00').toLocaleDateString('en-US', {
-                      weekday: 'short', month: 'short', day: 'numeric',
-                    }) : null,
-                    e.time,
-                    e.venue,
-                  ].filter(Boolean).join(' · ')}
+                <p className="text-[9px] mt-0.5 truncate" style={{ fontFamily: BODY, color: 'rgba(251,247,241,0.5)' }}>
+                  {[fmtDay(e.date), e.time, e.venue].filter(Boolean).join(' · ')}
                 </p>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Footer */}
-        <div className="mt-3 pt-2 border-t border-terra/30 flex items-center gap-2">
-          <div className="flex-1 h-px bg-terra/30" />
-          <span className="text-[8px] text-cream/35 uppercase tracking-widest flex-shrink-0">
-            abqunplugged.com
-          </span>
+        <div className="flex items-center gap-2 pt-2.5" style={{ borderTop: `1px solid ${C.terra}` }}>
+          <span className="text-[8px] font-bold uppercase" style={{ fontFamily: BODY, letterSpacing: '0.16em', color: C.gold }}>Save this</span>
+          <div className="flex-1" />
+          <span className="text-[8px] font-semibold uppercase" style={{ fontFamily: BODY, letterSpacing: '0.18em', color: 'rgba(251,247,241,0.5)' }}>abqunplugged.com</span>
         </div>
       </div>
     </div>
