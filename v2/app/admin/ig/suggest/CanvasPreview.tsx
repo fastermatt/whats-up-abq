@@ -229,29 +229,33 @@ export function CanvasPreview({ templateId, ctx, onExport }: { templateId: strin
 
   return (
     <div className="flex justify-center">
-      <div ref={cardRef} className={CARD} style={{ background: C.ink, padding: '20px 18px 16px', display: 'flex', flexDirection: 'column' }}>
+      {/* padding tighter than event templates so 5 rows always fit */}
+      <div ref={cardRef} className={CARD} style={{ background: C.ink, padding: '16px 16px 12px', display: 'flex', flexDirection: 'column' }}>
         <Wordmark light />
 
-        <div className="mt-4">
-          <p className="text-[9px] font-semibold uppercase mb-1.5" style={{ fontFamily: BODY, letterSpacing: '0.2em', color: C.terra }}>
+        <div className="mt-3">
+          <p className="text-[8px] font-semibold uppercase mb-1" style={{ fontFamily: BODY, letterSpacing: '0.2em', color: C.terra }}>
             {kicker}
           </p>
-          <p className="text-[29px] font-black leading-[0.92]" style={{ fontFamily: HEAD, color: C.cream }}>
+          {/* 23px keeps the headline to 2 lines without overflowing into the list */}
+          <p className="text-[23px] font-black leading-[0.92]" style={{ fontFamily: HEAD, color: C.cream }}>
             {headline.a}<span style={{ color: C.terra }}>{headline.b}</span>
           </p>
         </div>
 
-        <div className="mt-3.5 flex-1 flex flex-col">
+        <div className="mt-2 flex-1 flex flex-col">
           {events.slice(0, 5).map((e, i) => (
-            <div key={i} className="flex gap-2.5 items-baseline py-2" style={{ borderTop: i === 0 ? 'none' : '1px solid rgba(154,68,45,0.22)' }}>
-              <span className="text-[13px] font-black tabular-nums flex-shrink-0" style={{ fontFamily: HEAD, color: C.terra, width: 18 }}>
+            <div key={i} className="flex gap-2 items-baseline py-1.5" style={{ borderTop: i === 0 ? 'none' : '1px solid rgba(154,68,45,0.22)' }}>
+              <span className="text-[11px] font-black tabular-nums flex-shrink-0" style={{ fontFamily: HEAD, color: C.terra, width: 14 }}>
                 {i + 1}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="text-[12.5px] font-bold leading-[1.05]" style={{ fontFamily: HEAD, color: C.cream, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                {/* Always clamp to 1 line — long titles (e.g. "Luke Bryan with…") must truncate
+                    rather than expand the row and push item 5 off the bottom of the card */}
+                <p className="text-[11.5px] font-bold leading-[1.1] truncate" style={{ fontFamily: HEAD, color: C.cream }}>
                   {e.title}
                 </p>
-                <p className="text-[9px] mt-0.5 truncate" style={{ fontFamily: BODY, color: 'rgba(251,247,241,0.5)' }}>
+                <p className="text-[8.5px] truncate" style={{ fontFamily: BODY, color: 'rgba(251,247,241,0.5)', marginTop: 1 }}>
                   {[fmtDay(e.date), e.time, e.venue].filter(Boolean).join(' · ')}
                 </p>
               </div>
@@ -259,10 +263,10 @@ export function CanvasPreview({ templateId, ctx, onExport }: { templateId: strin
           ))}
         </div>
 
-        <div className="flex items-center gap-2 pt-2.5" style={{ borderTop: `1px solid ${C.terra}` }}>
-          <span className="text-[8px] font-bold uppercase" style={{ fontFamily: BODY, letterSpacing: '0.16em', color: C.gold }}>Save this</span>
+        <div className="flex items-center gap-2 pt-2" style={{ borderTop: `1px solid ${C.terra}` }}>
+          <span className="text-[7.5px] font-bold uppercase" style={{ fontFamily: BODY, letterSpacing: '0.16em', color: C.gold }}>Save this</span>
           <div className="flex-1" />
-          <span className="text-[8px] font-semibold uppercase" style={{ fontFamily: BODY, letterSpacing: '0.18em', color: 'rgba(251,247,241,0.5)' }}>abqunplugged.com</span>
+          <span className="text-[7.5px] font-semibold uppercase" style={{ fontFamily: BODY, letterSpacing: '0.18em', color: 'rgba(251,247,241,0.5)' }}>abqunplugged.com</span>
         </div>
       </div>
     </div>
