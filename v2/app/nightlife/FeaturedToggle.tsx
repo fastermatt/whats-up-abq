@@ -61,7 +61,7 @@ export function FeaturedToggle({ tonight, weekend }: Props) {
           {events.map((e) => (
             <Link
               key={e.id}
-              href={`/events/${e.id}`}
+              href={`/events/${e.id}`} target="_blank" rel="noopener noreferrer"
               className="group flex-shrink-0 w-[220px] sm:w-[260px] rounded-xl overflow-hidden border border-sand-light/80 bg-white shadow-[0_1px_3px_rgba(26,22,20,0.04)] hover:shadow-[0_8px_24px_rgba(26,22,20,0.12)] hover:-translate-y-1 transition-all duration-300"
             >
               <div className="relative aspect-[4/3] bg-sand-light overflow-hidden">

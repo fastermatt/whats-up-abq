@@ -350,7 +350,7 @@ function CuratedCard({ event, index }: { event: NormalizedEvent; index: number }
       className="group relative spring-card rounded-xl overflow-hidden border border-sand-light/80 bg-white shadow-[0_1px_3px_rgba(26,22,20,0.04)] hover:shadow-[0_8px_24px_rgba(26,22,20,0.12)] transition-all duration-300 hover:-translate-y-1"
       style={{ '--card-i': Math.min(index, 14) } as React.CSSProperties}
     >
-      <Link href={`/events/${event.id}`} className="flex flex-col h-full">
+      <Link href={`/events/${event.id}`} target="_blank" rel="noopener noreferrer" className="flex flex-col h-full">
         <div className="relative aspect-[16/10] bg-gradient-to-br from-sand-light to-sand-mid overflow-hidden">
           <EventImage
             src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}

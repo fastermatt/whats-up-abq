@@ -192,7 +192,7 @@ export default async function LandingPage() {
               return (
                 <Link
                   key={event.id}
-                  href={`/events/${event.id}`}
+                  href={`/events/${event.id}`} target="_blank" rel="noopener noreferrer"
                   data-umami-event="landing-event-card"
                   className="flex-shrink-0 snap-start w-[200px] sm:w-[220px] rounded-2xl overflow-hidden bg-white border border-sand-light hover:border-sand-mid hover:shadow-md transition-all block"
                 >

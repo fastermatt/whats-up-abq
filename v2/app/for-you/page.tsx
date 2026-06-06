@@ -312,7 +312,7 @@ export default async function ForYouPage() {
               {items.map(({ event, score, reasons }) => (
                 <Link
                   key={event.id}
-                  href={`/events/${event.id}`}
+                  href={`/events/${event.id}`} target="_blank" rel="noopener noreferrer"
                   className="relative block rounded-xl overflow-hidden bg-cream-raised border border-[#e8d9bf] shadow-sm hover:shadow-md transition-shadow group"
                 >
                   <div className="aspect-[16/10] relative bg-sand-light overflow-hidden">

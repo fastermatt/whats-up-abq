@@ -859,7 +859,7 @@ async function SimilarEvents({ eventId, category }: { eventId: string; category:
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {similar.map((event) => (
-              <Link key={event.id} href={`/events/${event.id}`} className="group">
+              <Link key={event.id} href={`/events/${event.id}`} target="_blank" rel="noopener noreferrer" className="group">
                 <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-sand-light mb-2 shadow-sm group-hover:shadow-md transition-shadow">
                   <EventImage
                     src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}

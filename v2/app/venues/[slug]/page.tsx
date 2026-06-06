@@ -339,7 +339,7 @@ export default async function VenuePage({ params }: PageProps) {
               return (
                 <AnimateIn key={event.id} animation="fade-up" delay={Math.min(i * 25, 200)}>
                   <Link
-                    href={`/events/${event.id}`}
+                    href={`/events/${event.id}`} target="_blank" rel="noopener noreferrer"
                     className="group flex gap-3 bg-card rounded-xl border border-sand-light p-3 shadow-sm hover:shadow-md hover:border-sand-mid transition-all"
                   >
                     {/* Thumbnail */}

@@ -172,7 +172,7 @@ function buildJsonLd() {
 function RowCard({ event, index }: { event: NormalizedEvent; index: number }) {
   return (
     <Link
-      href={`/events/${event.id}`}
+      href={`/events/${event.id}`} target="_blank" rel="noopener noreferrer"
       className="group flex-shrink-0 w-[155px] sm:w-[175px] rounded-xl overflow-hidden border border-sand-light/80 bg-white shadow-[0_1px_3px_rgba(26,22,20,0.04)] hover:shadow-[0_6px_20px_rgba(26,22,20,0.1)] hover:-translate-y-0.5 transition-all duration-300"
     >
       <div className="relative aspect-[3/2] bg-sand-light overflow-hidden">
