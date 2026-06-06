@@ -411,40 +411,38 @@ export default async function DiscoverPage() {
             e.g. two near-identical stadium shots in a sports-heavy week).
             Lazy-loaded so they never become the LCP element. */}
         {(() => {
-          // Source from featured + tonight + weekend so we have enough category
-          // spread to fill 4 visually-distinct tiles even when "featured" alone
-          // is dominated by one or two categories (e.g. a sports-heavy week).
-          const pool: NormalizedEvent[] = []
-          const poolSeen = new Set<string>()
-          for (const e of [...featured, ...tonight.events, ...weekend.events]) {
-            if (e.imageUrl && !poolSeen.has(e.id)) { poolSeen.add(e.id); pool.push(e) }
+          // Build a 4-tile collage that ALWAYS spans 4 distinct categories so it
+          // reads as composed and varied regardless of the week's event mix.
+          // For each target category: prefer a real event photo; fall back to the
+          // curated category illustration if no live event in that category has one.
+          const livePool = [...featured, ...tonight.events, ...weekend.events]
+            .filter(e => e.imageUrl)
+          const firstWithImage = (cat: string) =>
+            livePool.find(e => e.category === cat)?.imageUrl
+
+          // Visual-variety order — these four read very differently from each other.
+          const TARGETS = ['Music', 'Comedy', 'Arts & Theater', 'Food & Drink', 'Sports', 'Family', 'Outdoor']
+          const tiles: { key: string; src: string }[] = []
+          for (const cat of TARGETS) {
+            if (tiles.length === 4) break
+            const live = firstWithImage(cat)
+            tiles.push({ key: cat, src: live ? eventImageSrc(live, 320) : getCategoryFallback(cat) })
           }
-          const seen = new Set<string>()
-          const diverse: NormalizedEvent[] = []
-          for (const e of pool) {
-            const c = e.category ?? '_'
-            if (!seen.has(c)) { seen.add(c); diverse.push(e) }
-            if (diverse.length === 4) break
-          }
-          for (const e of pool) {
-            if (diverse.length === 4) break
-            if (!diverse.includes(e)) diverse.push(e)
-          }
-          if (diverse.length < 4) return null
+          if (tiles.length < 4) return null
           return (
             <div
               className="absolute right-7 top-7 bottom-12 hidden lg:grid grid-cols-2 grid-rows-2 gap-2.5 items-stretch pointer-events-none w-[340px]"
               aria-hidden="true"
               style={{ zIndex: 5 }}
             >
-              {diverse.slice(0, 4).map((ev) => (
+              {tiles.map((t) => (
                 <div
-                  key={ev.id}
+                  key={t.key}
                   className="rounded-xl overflow-hidden shadow-lg ring-1 ring-[#1a1614]/8"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={eventImageSrc(ev.imageUrl!, 320)}
+                    src={t.src}
                     alt=""
                     loading="lazy"
                     className="w-full h-full object-cover"
