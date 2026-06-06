@@ -247,16 +247,36 @@ export async function POST(req: NextRequest) {
 
   // Map each calendar date to its day-of-week template slot.
   const slotByDow = new Map(WEEKLY_SLOTS.map(s => [s.dow, s]))
-  const slots = dateStrs.map(dateStr => {
+  const weekStart = dateStrs[0]
+  const weekEnd   = dateStrs[dateStrs.length - 1]
+
+  // Skip days already covered by a pending suggestion, so re-running an
+  // overlapping range doesn't create duplicates. Map each pending row's
+  // scheduled_for (UTC) back to its MDT calendar date.
+  const { data: pendingRows } = await supabase
+    .schema('public')
+    .from('ig_post_suggestions')
+    .select('scheduled_for')
+    .eq('status', 'pending')
+    .gte('scheduled_for', mdtToUTC(weekStart, 0, 0).toISOString())
+    .lte('scheduled_for', mdtToUTC(weekEnd, 23, 59).toISOString())
+
+  const coveredDays = new Set(
+    (pendingRows ?? []).map(r => toMDT(new Date(r.scheduled_for as string)))
+  )
+
+  const allSlots = dateStrs.map(dateStr => {
     const dow = new Date(dateStr + 'T12:00:00').getDay()
     const slot = slotByDow.get(dow)!
     const scheduledFor = mdtToUTC(dateStr, slot.hour, slot.minute)
     return { ...slot, dateStr, scheduledFor }
-  }).sort((a, b) => a.scheduledFor.getTime() - b.scheduledFor.getTime())
+  })
+  const skippedDays = allSlots.filter(s => coveredDays.has(s.dateStr)).length
+  const slots = allSlots
+    .filter(s => !coveredDays.has(s.dateStr))
+    .sort((a, b) => a.scheduledFor.getTime() - b.scheduledFor.getTime())
 
   // Fetch events spanning the whole window
-  const weekStart = dateStrs[0]
-  const weekEnd   = dateStrs[dateStrs.length - 1]
 
   const { data: allRows } = await supabase
     .schema('public')
@@ -396,6 +416,17 @@ export async function POST(req: NextRequest) {
     })
   }
 
+  // Nothing to insert (every day was already covered, or no events matched)
+  if (insertions.length === 0) {
+    return NextResponse.json({
+      generationId,
+      generated: 0,
+      skipped:   skippedDays,
+      weekStart,
+      weekEnd,
+    })
+  }
+
   const { data: inserted, error } = await supabase
     .schema('public')
     .from('ig_post_suggestions')
@@ -409,6 +440,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     generationId,
     generated:  inserted?.length ?? 0,
+    skipped:    skippedDays,
     weekStart,
     weekEnd,
   })

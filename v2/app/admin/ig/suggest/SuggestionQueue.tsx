@@ -439,8 +439,9 @@ export function SuggestionQueue({ initial, initialStats }: Props) {
     const data = await res.json()
     setGenerating(false)
     if (res.ok) {
-      setGenMsg(`Generated ${data.generated} suggestions for ${data.weekStart} → ${data.weekEnd}`)
-      if (range) setShowRange(false)
+      const skipNote = data.skipped > 0 ? ` · skipped ${data.skipped} day${data.skipped === 1 ? '' : 's'} already pending` : ''
+      setGenMsg(`Generated ${data.generated} suggestions for ${data.weekStart} → ${data.weekEnd}${skipNote}`)
+      if (range && data.generated > 0) setShowRange(false)
       await reload()
     } else {
       setGenMsg(`Error: ${data.error}`)
