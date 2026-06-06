@@ -317,8 +317,8 @@ export default async function ForYouPage() {
                 >
                   <div className="aspect-[16/10] relative bg-sand-light overflow-hidden">
                     <EventImage
-                      src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
-                      fallback={getCategoryFallback(event.category ?? undefined, event.id)}
+                      src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}
+                      fallback={getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}
                       alt={event.title}
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />

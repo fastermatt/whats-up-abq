@@ -100,7 +100,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const venue = events[0].venue ?? venueName
   const canonicalUrl = `https://abqunplugged.com/venues/${slug}`
-  const ogImage = events[0].imageUrl || getCategoryFallback(events[0].category ?? undefined, events[0].id)
+  const ogImage = events[0].imageUrl || getCategoryFallback(events[0].category ?? undefined, events[0].title ?? events[0].id)
 
   const venueData = (venueDescriptions as Record<string, { meta?: string; tagline?: string }>)[slug]
   const metaDesc = venueData?.meta
@@ -139,7 +139,7 @@ export default async function VenuePage({ params }: PageProps) {
   const venueInfo = (venueDescriptions as Record<string, { tagline?: string; description?: string }>)[slug] ?? null
 
   // Best venue image — first event photo, else category fallback
-  const venueImage = events[0].imageUrl || getCategoryFallback(events[0].category ?? undefined, events[0].id)
+  const venueImage = events[0].imageUrl || getCategoryFallback(events[0].category ?? undefined, events[0].title ?? events[0].id)
 
   // Category distribution
   const catCounts: Record<string, number> = {}
@@ -345,8 +345,8 @@ export default async function VenuePage({ params }: PageProps) {
                     {/* Thumbnail */}
                     <div className="w-[72px] h-[72px] rounded-lg overflow-hidden flex-shrink-0 bg-sand-light">
                       <EventImage
-                        src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
-                        fallback={getCategoryFallback(event.category ?? undefined, event.id)}
+                        src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}
+                        fallback={getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}
                         alt={event.title}
                         loading="lazy"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"

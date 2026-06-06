@@ -876,7 +876,7 @@ export function IGCardClient({
   const cardRef = useRef<HTMLDivElement>(null)
   const imgRef  = useRef<HTMLImageElement>(null)
 
-  const categoryFallback = getCategoryFallback(event.category ?? undefined, event.id)
+  const categoryFallback = getCategoryFallback(event.category ?? undefined, event.title ?? event.id)
   useEffect(() => { setImgSrc(image); setImageLoaded(false) }, [image])
 
   const proxiedSrc = imgSrc.startsWith('http')

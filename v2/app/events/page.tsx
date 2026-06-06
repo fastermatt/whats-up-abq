@@ -346,8 +346,8 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
         {/* Landscape image — 16:10 ratio */}
         <div className="relative aspect-[16/10] bg-gradient-to-br from-sand-light to-sand-mid overflow-hidden">
           <EventImage
-            src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
-            fallback={getCategoryFallback(event.category ?? undefined, event.id)}
+            src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}
+            fallback={getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}
             alt={event.title}
             loading="lazy"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"

@@ -278,12 +278,16 @@ export function getHeroImage(): string {
  *   2. Midjourney Southwest illustration for the category
  *   3. Default Midjourney landscape images
  *
- * Uses a hash of the event ID to pick a variation deterministically,
- * ensuring visual variety across the grid without random flicker.
+ * `seed` picks a variation deterministically. PREFER the event TITLE as the seed
+ * (callers pass `event.title ?? event.id`): recurring same-name events — "The
+ * Bodyguard (Touring)" across 6 dates, a weekly trivia night — then share ONE
+ * placeholder instead of showing a different random image on every date. Two
+ * different events in the same category still hash to different images, so a
+ * grid keeps its variety. Falling back to the id keeps it stable when no title.
  */
 export function getCategoryFallback(
   category: string | undefined,
-  eventId?: string
+  seed?: string
 ): string {
   const key = category?.toLowerCase() ?? ''
 
@@ -299,13 +303,16 @@ export function getCategoryFallback(
 
   if (!images.length) return ''
 
-  // Use event ID to deterministically pick a variation (consistent per event)
-  if (eventId) {
-    const hash = simpleHash(eventId)
+  // Deterministic pick. Normalize the seed (lowercase, strip a trailing
+  // "(Touring)"/date-ish noise) so minor title variants still collide to the
+  // same placeholder for the same recurring show.
+  if (seed) {
+    const norm = seed.toLowerCase().replace(/\s*\((touring|tour)\)\s*$/i, '').trim()
+    const hash = simpleHash(norm)
     return images[hash % images.length]
   }
 
-  // Random fallback if no event ID
+  // Random fallback if no seed
   return images[Math.floor(Math.random() * images.length)]
 }
 

@@ -101,6 +101,7 @@ const IMPORT_STEPS = [
 
 const ENRICH_STEPS = [
   { key: 'tag',       name: 'Tag Neighborhoods', script: 'tag-neighborhoods.mjs', args: ['--force'] },
+  { key: 'ogimages',  name: 'Backfill OG Images', script: 'backfill-og-images.mjs' },
   { key: 'moods',     name: 'Enrich Moods',       script: 'enrich-moods-rules.mjs' },
   { key: 'cleanup',   name: 'Cleanup Events',     script: 'cleanup-events.mjs' },
   { key: 'validate',  name: 'Validate Events',    script: 'validate-events.mjs' },

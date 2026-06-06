@@ -273,7 +273,7 @@ function FriendEventCard({ event, friendHandle }: { event: FriendEvent; friendHa
         weekday: 'short', month: 'short', day: 'numeric',
       })
     : null
-  const imageUrl = event.image_url || getCategoryFallback(event.category ?? undefined, event.event_id)
+  const imageUrl = event.image_url || getCategoryFallback(event.category ?? undefined, event.event_name ?? event.event_id)
 
   return (
     <div className="flex gap-3 bg-white rounded-xl border border-sand-light p-3 shadow-sm hover:shadow-md transition-shadow">
@@ -331,7 +331,7 @@ function SavedEventCard({ event, activeTab }: { event: UserEvent; activeTab: Tab
         weekday: 'short', month: 'short', day: 'numeric',
       })
     : null
-  const imageUrl = event.image_url || getCategoryFallback(event.category ?? undefined, event.event_id)
+  const imageUrl = event.image_url || getCategoryFallback(event.category ?? undefined, event.event_name ?? event.event_id)
 
   return (
     <div className="flex gap-3 bg-white rounded-xl border border-sand-light p-3 shadow-sm hover:shadow-md transition-shadow">

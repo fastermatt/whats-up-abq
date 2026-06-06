@@ -217,8 +217,8 @@ export default async function CategoryPage({ params }: PageProps) {
                 className="group flex gap-3 bg-card rounded-xl border border-sand-light p-3 shadow-sm hover:shadow-md transition-all">
                 <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-sand-light">
                   <EventImage
-                    src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
-                    fallback={getCategoryFallback(event.category ?? undefined, event.id)}
+                    src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}
+                    fallback={getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}
                     alt={event.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />

@@ -177,8 +177,8 @@ function RowCard({ event, index }: { event: NormalizedEvent; index: number }) {
     >
       <div className="relative aspect-[3/2] bg-sand-light overflow-hidden">
         <EventImage
-          src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
-          fallback={getCategoryFallback(event.category ?? undefined, event.id)}
+          src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}
+          fallback={getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}
           alt={event.title}
           loading={index < 4 ? 'eager' : 'lazy'}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"

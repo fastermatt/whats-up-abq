@@ -199,7 +199,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
                       weekday: 'short', month: 'short', day: 'numeric',
                     })
                   : null
-                const imageUrl = ev.image_url || getCategoryFallback(ev.category ?? undefined, ev.event_id)
+                const imageUrl = ev.image_url || getCategoryFallback(ev.category ?? undefined, ev.event_name ?? ev.event_id)
 
                 return (
                   <Link

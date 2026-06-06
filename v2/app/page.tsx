@@ -1155,8 +1155,8 @@ function HorizontalCard({
             from ~4s to ~10s. The earlier "auto-injected preload steals from
             the h2 LCP" assumption was based on a different LCP element. */}
         <EventImage
-          src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
-          fallback={getCategoryFallback(event.category ?? undefined, event.id)}
+          src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}
+          fallback={getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}
           alt={event.title}
           loading={isLCPCandidate ? 'eager' : 'lazy'}
           fetchPriority={isLCPCandidate ? 'high' : undefined}
@@ -1229,8 +1229,8 @@ function FeaturedCard({ event, index = 0 }: { event: NormalizedEvent; index?: nu
             TM/SG CDNs through Netlify Image CDN for AVIF instead of the slow
             /api/image-proxy. */}
         <EventImage
-          src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
-          fallback={getCategoryFallback(event.category ?? undefined, event.id)}
+          src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}
+          fallback={getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}
           alt={event.title}
           loading={index === 0 ? 'eager' : 'lazy'}
           fetchPriority={index === 0 ? 'high' : undefined}

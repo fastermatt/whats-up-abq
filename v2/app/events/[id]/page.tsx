@@ -165,7 +165,7 @@ export default async function EventDetailPage({ params }: PageProps) {
     return `${start.getFullYear()}-${pad(start.getMonth()+1)}-${pad(start.getDate())}T${pad(start.getHours())}:${pad(start.getMinutes())}:00-06:00`
   })()
 
-  const eventImage = event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)
+  const eventImage = event.imageUrl || getCategoryFallback(event.category ?? undefined, event.title ?? event.id)
 
   const rawPrice = event.price
   let offerPrice: string | undefined
@@ -288,8 +288,8 @@ export default async function EventDetailPage({ params }: PageProps) {
         <div className="relative h-[420px] sm:h-auto sm:aspect-[2/1]
           sm:mt-4 sm:mx-4 sm:rounded-2xl overflow-hidden">
           <EventImage
-            src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
-            fallback={getCategoryFallback(event.category ?? undefined, event.id)}
+            src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}
+            fallback={getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}
             alt={event.title}
             className="w-full h-full object-cover"
           />
@@ -858,8 +858,8 @@ async function SimilarEvents({ eventId, category }: { eventId: string; category:
               <Link key={event.id} href={`/events/${event.id}`} className="group">
                 <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-sand-light mb-2 shadow-sm group-hover:shadow-md transition-shadow">
                   <EventImage
-                    src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.id)}
-                    fallback={getCategoryFallback(event.category ?? undefined, event.id)}
+                    src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}
+                    fallback={getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}
                     alt={event.title}
                     loading="lazy"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

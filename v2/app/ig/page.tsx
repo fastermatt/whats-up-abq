@@ -215,7 +215,7 @@ export default async function IgLandingPage() {
           </div>
           <div className="space-y-2">
             {featured.map((event) => {
-              const fallback = getCategoryFallback(event.category ?? undefined, event.id)
+              const fallback = getCategoryFallback(event.category ?? undefined, event.title ?? event.id)
               const primary = event.imageUrl || fallback
               const dateStr = event.date
                 ? new Date(event.date + 'T12:00:00').toLocaleDateString('en-US', {
@@ -268,7 +268,7 @@ export default async function IgLandingPage() {
           <div className="overflow-x-auto scrollbar-hide -mx-5 px-5">
             <div className="flex gap-2.5" style={{ scrollbarWidth: 'none' }}>
               {justAdded.slice(0, 4).map((event) => {
-                const fallback = getCategoryFallback(event.category ?? undefined, event.id)
+                const fallback = getCategoryFallback(event.category ?? undefined, event.title ?? event.id)
                 const primary = event.imageUrl || fallback
                 const dateStr = event.date
                   ? new Date(event.date + 'T12:00:00').toLocaleDateString('en-US', {

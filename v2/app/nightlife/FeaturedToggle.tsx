@@ -66,8 +66,8 @@ export function FeaturedToggle({ tonight, weekend }: Props) {
             >
               <div className="relative aspect-[4/3] bg-sand-light overflow-hidden">
                 <EventImage
-                  src={e.imageUrl || getCategoryFallback(e.category ?? undefined, e.id)}
-                  fallback={getCategoryFallback(e.category ?? undefined, e.id)}
+                  src={e.imageUrl || getCategoryFallback(e.category ?? undefined, e.title ?? e.id)}
+                  fallback={getCategoryFallback(e.category ?? undefined, e.title ?? e.id)}
                   alt={e.title}
                   loading="eager"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"

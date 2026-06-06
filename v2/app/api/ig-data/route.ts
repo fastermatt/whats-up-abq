@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
     // the IG card pages show — so the editor always matches what the user sees
     // on the event page. getCategoryFallback returns a same-origin /fallbacks/ path.
     imageUrl: event.imageUrl
-      ?? getCategoryFallback(event.category ?? undefined, event.id)
+      ?? getCategoryFallback(event.category ?? undefined, event.title ?? event.id)
       ?? '',
   })
 }
