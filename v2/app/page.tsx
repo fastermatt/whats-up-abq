@@ -405,37 +405,49 @@ export default async function DiscoverPage() {
         </div>
 
         {/* ── Hero photo collage — decorative event tiles, desktop only ───
-            A staggered 2-column cluster of real event photos fills the right
-            third of the hero so it reads as a composed scene, not an empty
-            cream void. Lazy-loaded so they never become the LCP element. */}
-        {featured.filter(e => e.imageUrl).length >= 4 && (
-          <div
-            className="absolute right-6 top-4 bottom-10 hidden lg:grid grid-cols-2 gap-3 items-center pointer-events-none w-[360px]"
-            aria-hidden="true"
-            style={{ zIndex: 5 }}
-          >
-            {featured.filter(e => e.imageUrl).slice(0, 4).map((ev, i) => (
-              <div
-                key={ev.id}
-                className="rounded-xl overflow-hidden shadow-xl ring-1 ring-[#1a1614]/5"
-                style={{
-                  aspectRatio: '4/5',
-                  // Stagger the two columns vertically for a collage feel
-                  transform: `translateY(${i % 2 === 0 ? '-14px' : '14px'}) rotate(${i % 2 === 0 ? '-1.5deg' : '1.5deg'})`,
-                  opacity: 0.92,
-                }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={eventImageSrc(ev.imageUrl!, 320)}
-                  alt=""
-                  loading="lazy"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ))}
-          </div>
-        )}
+            A clean 2×2 grid of CATEGORY-DIVERSE event photos fills the right
+            third of the hero so it reads as a composed, curated scene. Picks
+            one event per distinct category so no two tiles look alike (avoids
+            e.g. two near-identical stadium shots in a sports-heavy week).
+            Lazy-loaded so they never become the LCP element. */}
+        {(() => {
+          // One photo per category for visual variety, then top up if needed.
+          const withImg = featured.filter(e => e.imageUrl)
+          const seen = new Set<string>()
+          const diverse: typeof withImg = []
+          for (const e of withImg) {
+            const c = e.category ?? '_'
+            if (!seen.has(c)) { seen.add(c); diverse.push(e) }
+            if (diverse.length === 4) break
+          }
+          for (const e of withImg) {
+            if (diverse.length === 4) break
+            if (!diverse.includes(e)) diverse.push(e)
+          }
+          if (diverse.length < 4) return null
+          return (
+            <div
+              className="absolute right-7 top-7 bottom-12 hidden lg:grid grid-cols-2 grid-rows-2 gap-2.5 items-stretch pointer-events-none w-[340px]"
+              aria-hidden="true"
+              style={{ zIndex: 5 }}
+            >
+              {diverse.slice(0, 4).map((ev) => (
+                <div
+                  key={ev.id}
+                  className="rounded-xl overflow-hidden shadow-lg ring-1 ring-[#1a1614]/8"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={eventImageSrc(ev.imageUrl!, 320)}
+                    alt=""
+                    loading="lazy"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          )
+        })()}
 
         {/* Stat strip — sentence-style links so the LABEL leads
             (round-2 critique: tiny labels under big numbers force a
