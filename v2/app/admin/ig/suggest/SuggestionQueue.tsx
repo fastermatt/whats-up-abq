@@ -400,6 +400,9 @@ export function SuggestionQueue({ initial, initialStats }: Props) {
   const [genMsg, setGenMsg]           = useState<string | null>(null)
   const [filter, setFilter]           = useState<'all' | 'pending' | 'accepted' | 'rejected'>('all')
   const [autoPost, setAutoPost]       = useState(false)
+  const [showRange, setShowRange]     = useState(false)
+  const [rangeStart, setRangeStart]   = useState('')
+  const [rangeEnd, setRangeEnd]       = useState('')
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const filtered = suggestions.filter(s => filter === 'all' || s.status === filter)
@@ -417,14 +420,27 @@ export function SuggestionQueue({ initial, initialStats }: Props) {
     setStats(data.stats ?? {})
   }, [])
 
-  async function generate() {
+  async function generate(range?: { start: string; end: string }) {
+    if (range && (!range.start || !range.end)) {
+      setGenMsg('Pick both a start and end date.')
+      return
+    }
+    if (range && range.end < range.start) {
+      setGenMsg('End date must be on or after the start date.')
+      return
+    }
     setGenerating(true)
     setGenMsg(null)
-    const res = await fetch('/api/admin/ig/suggestions/generate', { method: 'POST' })
+    const res = await fetch('/api/admin/ig/suggestions/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(range ?? {}),
+    })
     const data = await res.json()
     setGenerating(false)
     if (res.ok) {
       setGenMsg(`Generated ${data.generated} suggestions for ${data.weekStart} → ${data.weekEnd}`)
+      if (range) setShowRange(false)
       await reload()
     } else {
       setGenMsg(`Error: ${data.error}`)
@@ -521,9 +537,9 @@ export function SuggestionQueue({ initial, initialStats }: Props) {
             </button>
           </div>
 
-          {/* Generate button */}
+          {/* Generate (next week) button */}
           <button
-            onClick={generate}
+            onClick={() => generate()}
             disabled={generating}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-terra text-white text-[11px] font-semibold hover:bg-terra-hover transition-colors disabled:opacity-50"
           >
@@ -533,10 +549,58 @@ export function SuggestionQueue({ initial, initialStats }: Props) {
             }
           </button>
 
+          {/* Date-range toggle */}
+          <button
+            onClick={() => setShowRange(v => !v)}
+            title="Generate for a specific date range"
+            className={[
+              'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border transition-colors',
+              showRange
+                ? 'bg-terra/15 text-terra border-terra/30'
+                : 'text-zinc-400 border-white/10 hover:text-zinc-200 hover:border-white/20',
+            ].join(' ')}
+          >
+            <Calendar className="w-3.5 h-3.5" /> Range
+          </button>
+
           <button onClick={reload} className="p-1.5 text-zinc-500 hover:text-zinc-300 transition-colors">
             <RefreshCw className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Date-range picker row */}
+        {showRange && (
+          <div className="w-full flex items-center gap-2 flex-wrap bg-[#161616] border border-white/8 rounded-lg px-3 py-2">
+            <span className="text-[11px] text-zinc-500">Generate posts from</span>
+            <input
+              type="date"
+              value={rangeStart}
+              onChange={e => setRangeStart(e.target.value)}
+              className="bg-[#0e0e0e] border border-white/10 rounded-md px-2 py-1 text-[11px] text-zinc-200 [color-scheme:dark] focus:border-terra focus:outline-none"
+            />
+            <span className="text-[11px] text-zinc-500">to</span>
+            <input
+              type="date"
+              value={rangeEnd}
+              min={rangeStart || undefined}
+              onChange={e => setRangeEnd(e.target.value)}
+              className="bg-[#0e0e0e] border border-white/10 rounded-md px-2 py-1 text-[11px] text-zinc-200 [color-scheme:dark] focus:border-terra focus:outline-none"
+            />
+            <button
+              onClick={() => generate({ start: rangeStart, end: rangeEnd })}
+              disabled={generating || !rangeStart || !rangeEnd}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-terra text-white text-[11px] font-semibold hover:bg-terra-hover transition-colors disabled:opacity-40"
+            >
+              {generating
+                ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Generating…</>
+                : <><Zap className="w-3.5 h-3.5" /> Generate range</>
+              }
+            </button>
+            <span className="text-[10px] text-zinc-600">
+              One post per day, by weekday template · max 31 days
+            </span>
+          </div>
+        )}
 
         {genMsg && (
           <div className="w-full flex items-center gap-2 text-[11px] text-zinc-400 bg-[#1a1a1a] rounded-lg px-3 py-2">
@@ -556,7 +620,7 @@ export function SuggestionQueue({ initial, initialStats }: Props) {
               <Zap className="w-8 h-8" />
               <p className="text-sm">No suggestions yet.</p>
               <button
-                onClick={generate}
+                onClick={() => generate()}
                 disabled={generating}
                 className="text-xs text-terra hover:text-terra-mid transition-colors"
               >

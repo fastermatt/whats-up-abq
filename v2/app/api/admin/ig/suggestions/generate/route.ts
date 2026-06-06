@@ -1,11 +1,17 @@
 /**
  * POST /api/admin/ig/suggestions/generate
  *
- * Generates 7 days of Instagram post suggestions based on the DeepSeek-derived
- * posting schedule. For each day of the coming week, picks events from the DB,
+ * Generates Instagram post suggestions based on the DeepSeek-derived posting
+ * schedule. For each day in the target window, picks events from the DB,
  * generates an AI caption via DeepSeek, and inserts suggestion rows.
  *
- * The weekly schedule (MDT times):
+ * Body (all optional — JSON):
+ *   { start?: "YYYY-MM-DD", end?: "YYYY-MM-DD" }   // MDT dates, inclusive
+ * When start+end are omitted, defaults to the coming Mon→Sun week.
+ * Each day maps to its day-of-week template, so a 3-day range yields 3 posts,
+ * a 14-day range yields 14, etc. Range is capped at 31 days.
+ *
+ * The weekly schedule (MDT times), applied by day-of-week:
  *   Mon 12:00 — WeeklyFive      (the week ahead, 5 picks)
  *   Tue 17:30 — BreweryNights   (after-work taproom crowd)
  *   Wed 12:00 — SingleEvent     (spotlight a standout, photo-led)
@@ -214,21 +220,43 @@ export async function POST(req: NextRequest) {
   const supabase = await createServiceClient()
   const generationId = crypto.randomUUID()
 
-  // Determine the week to generate (next Mon → following Sun)
-  const monday = nextMondayMDT()
+  // ── Resolve the target date window ──────────────────────────────────────────
+  // Optional { start, end } body (MDT, inclusive). Defaults to next Mon→Sun.
+  const body = await req.json().catch(() => ({})) as { start?: string; end?: string }
+  const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 
-  // Build list of (date, slot) pairs for the 7-day window
-  const slots = WEEKLY_SLOTS.map(slot => {
-    const diff = (slot.dow - monday.getDay() + 7) % 7
-    const date = addDays(monday, diff)
-    const dateStr = toMDT(date)
+  let dateStrs: string[]
+  if (body.start && body.end) {
+    if (!DATE_RE.test(body.start) || !DATE_RE.test(body.end)) {
+      return NextResponse.json({ error: 'start/end must be YYYY-MM-DD' }, { status: 400 })
+    }
+    if (body.end < body.start) {
+      return NextResponse.json({ error: 'end must be on or after start' }, { status: 400 })
+    }
+    const startD = new Date(body.start + 'T12:00:00')
+    const endD   = new Date(body.end + 'T12:00:00')
+    const days   = Math.round((endD.getTime() - startD.getTime()) / 86_400_000) + 1
+    if (days > 31) {
+      return NextResponse.json({ error: 'Range too large (max 31 days)' }, { status: 400 })
+    }
+    dateStrs = Array.from({ length: days }, (_, i) => toMDT(addDays(startD, i)))
+  } else {
+    const monday = nextMondayMDT()
+    dateStrs = Array.from({ length: 7 }, (_, i) => toMDT(addDays(monday, i)))
+  }
+
+  // Map each calendar date to its day-of-week template slot.
+  const slotByDow = new Map(WEEKLY_SLOTS.map(s => [s.dow, s]))
+  const slots = dateStrs.map(dateStr => {
+    const dow = new Date(dateStr + 'T12:00:00').getDay()
+    const slot = slotByDow.get(dow)!
     const scheduledFor = mdtToUTC(dateStr, slot.hour, slot.minute)
     return { ...slot, dateStr, scheduledFor }
   }).sort((a, b) => a.scheduledFor.getTime() - b.scheduledFor.getTime())
 
-  // Fetch upcoming events for the week
-  const weekStart = toMDT(monday)
-  const weekEnd   = toMDT(addDays(monday, 6))
+  // Fetch events spanning the whole window
+  const weekStart = dateStrs[0]
+  const weekEnd   = dateStrs[dateStrs.length - 1]
 
   const { data: allRows } = await supabase
     .schema('public')
@@ -250,11 +278,6 @@ export async function POST(req: NextRequest) {
   const brewerySnaps = snaps.filter(e =>
     /brew|taproom|distill/i.test(e.venue ?? '')
   )
-
-  // Weekend events (Sat + Sun of the generated week)
-  const satStr = toMDT(addDays(monday, 5))
-  const sunStr = toMDT(addDays(monday, 6))
-  const weekendSnaps = snaps.filter(e => e.date === satStr || e.date === sunStr)
 
   // Build suggestions
   const insertions: Record<string, unknown>[] = []
@@ -296,10 +319,16 @@ export async function POST(req: NextRequest) {
         selected = brewerySnaps.slice(0, 5)
         strategyNotes = 'Tue 5:30pm: after-work taproom crowd — brewery + live music is peak ABQ midweek engagement'
         break
-      case 'WeekendDigest':
-        selected = weekendSnaps.slice(0, 5)
+      case 'WeekendDigest': {
+        // The coming weekend relative to this slot's date (Thu → Sat/Sun)
+        const base = new Date(slot.dateStr + 'T12:00:00')
+        const toSat = (6 - base.getDay() + 7) % 7
+        const satStr = toMDT(addDays(base, toSat))
+        const sunStr = toMDT(addDays(base, toSat + 1))
+        selected = snaps.filter(e => e.date === satStr || e.date === sunStr).slice(0, 5)
         strategyNotes = 'Thu 5:30pm: weekend-planning peak — the moment people commit to weekend plans'
         break
+      }
       case 'SingleEvent': {
         // Best event on or near that day (score 8+), prefer events with photos
         const dayEvents = eventsOn(slot.dateStr)
