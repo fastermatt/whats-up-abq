@@ -174,6 +174,8 @@ export function IGEditor({ event, image, returnTo, rowKey }: Props) {
       {/* Mobile sidebar toggle */}
       <button
         onClick={() => setShowSidebar(v => !v)}
+        aria-label={showSidebar ? 'Hide elements sidebar' : 'Show elements sidebar'}
+        aria-expanded={showSidebar}
         className={`lg:hidden flex items-center justify-center gap-2 w-full py-2.5 rounded-lg border text-xs font-bold tracking-wide transition-colors touch-manipulation ${
           showSidebar
             ? 'bg-white/[0.1] border-white/20 text-white'

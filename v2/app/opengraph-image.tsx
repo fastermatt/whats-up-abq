@@ -10,17 +10,18 @@
  */
 
 import { ImageResponse } from 'next/og'
+import { COLORS } from '@/lib/colors'
 
 export const runtime     = 'edge'
 export const alt         = 'ABQ Unplugged — Things to do in Albuquerque, NM'
 export const size        = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
-// ── Brand tokens ─────────────────────────────────────────────────────────────
-const TERRA   = '#9a442d'
-const CREAM   = '#fbf7f1'
-const DARK    = '#1a1614'
-const SAGE    = '#4f6249'
+// ── Brand tokens (from the single source in lib/colors.ts) ────────────────────
+const TERRA   = COLORS.terra
+const CREAM   = COLORS.cream
+const DARK    = COLORS.ink
+const SAGE    = COLORS.sage
 const MUTED   = 'rgba(251,247,241,0.55)'
 const PILL_BG = 'rgba(154,68,45,0.14)'
 const PILL_BD = 'rgba(154,68,45,0.28)'
