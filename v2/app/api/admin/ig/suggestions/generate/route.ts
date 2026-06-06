@@ -246,12 +246,35 @@ export async function POST(req: NextRequest) {
   const generationId = crypto.randomUUID()
 
   // ── Resolve the target date window ──────────────────────────────────────────
-  // Optional { start, end } body (MDT, inclusive). Defaults to next Mon→Sun.
-  const body = await req.json().catch(() => ({})) as { start?: string; end?: string }
+  // Body (all optional): { weekend?: boolean, start?, end? } MDT, inclusive.
+  // weekend → this coming Fri→Sun, led by a "this weekend" digest.
+  // start+end → that range. Neither → next Mon→Sun.
+  const body = await req.json().catch(() => ({})) as { start?: string; end?: string; weekend?: boolean }
   const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 
+  // Explicit slots that aren't derived from the day-of-week mapping (e.g. the
+  // weekend digest that leads a weekend batch).
+  type ExtraSlot = DaySlot & { dateStr: string }
+  const extraSlots: ExtraSlot[] = []
+
   let dateStrs: string[]
-  if (body.start && body.end) {
+  if (body.weekend) {
+    // This weekend = the coming Fri/Sat/Sun (on Sun, rolls to next weekend).
+    const todayMDT = toMDT(new Date())
+    const todayD = new Date(todayMDT + 'T12:00:00')
+    const daysToSat = (6 - todayD.getDay() + 7) % 7   // 0 if Sat, 6 if Sun
+    const sat = addDays(todayD, daysToSat)
+    const fri = addDays(sat, -1)
+    const sun = addDays(sat, 1)
+    // Drop any weekend day already past (e.g. Friday when generating on Saturday).
+    dateStrs = [toMDT(fri), toMDT(sat), toMDT(sun)].filter(d => d >= todayMDT)
+    // Lead post: "what's happening this weekend" roundup, on the earliest
+    // remaining weekend day (late morning).
+    extraSlots.push({
+      dow: 5, postType: 'WeekendDigest', templateId: 'weekend-digest',
+      hour: 11, minute: 0, dateStr: dateStrs[0],
+    })
+  } else if (body.start && body.end) {
     if (!DATE_RE.test(body.start) || !DATE_RE.test(body.end)) {
       return NextResponse.json({ error: 'start/end must be YYYY-MM-DD' }, { status: 400 })
     }
@@ -290,12 +313,14 @@ export async function POST(req: NextRequest) {
     (pendingRows ?? []).map(r => toMDT(new Date(r.scheduled_for as string)))
   )
 
-  const allSlots = dateStrs.map(dateStr => {
+  const perDaySlots: ExtraSlot[] = dateStrs.map(dateStr => {
     const dow = new Date(dateStr + 'T12:00:00').getDay()
-    const slot = slotByDow.get(dow)!
-    const scheduledFor = mdtToUTC(dateStr, slot.hour, slot.minute)
-    return { ...slot, dateStr, scheduledFor }
+    return { ...slotByDow.get(dow)!, dateStr }
   })
+  const allSlots = [...extraSlots, ...perDaySlots].map(s => ({
+    ...s,
+    scheduledFor: mdtToUTC(s.dateStr, s.hour, s.minute),
+  }))
   const skippedDays = allSlots.filter(s => coveredDays.has(s.dateStr)).length
   const slots = allSlots
     .filter(s => !coveredDays.has(s.dateStr))

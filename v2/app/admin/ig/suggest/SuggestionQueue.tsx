@@ -420,12 +420,13 @@ export function SuggestionQueue({ initial, initialStats }: Props) {
     setStats(data.stats ?? {})
   }, [])
 
-  async function generate(range?: { start: string; end: string }) {
-    if (range && (!range.start || !range.end)) {
+  async function generate(opts: { start?: string; end?: string; weekend?: boolean } = {}) {
+    const isRange = !!(opts.start || opts.end)
+    if (isRange && (!opts.start || !opts.end)) {
       setGenMsg('Pick both a start and end date.')
       return
     }
-    if (range && range.end < range.start) {
+    if (isRange && opts.end! < opts.start!) {
       setGenMsg('End date must be on or after the start date.')
       return
     }
@@ -434,14 +435,14 @@ export function SuggestionQueue({ initial, initialStats }: Props) {
     const res = await fetch('/api/admin/ig/suggestions/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(range ?? {}),
+      body: JSON.stringify(opts),
     })
     const data = await res.json()
     setGenerating(false)
     if (res.ok) {
       const skipNote = data.skipped > 0 ? ` · skipped ${data.skipped} day${data.skipped === 1 ? '' : 's'} already pending` : ''
       setGenMsg(`Generated ${data.generated} suggestions for ${data.weekStart} → ${data.weekEnd}${skipNote}`)
-      if (range && data.generated > 0) setShowRange(false)
+      if (isRange && data.generated > 0) setShowRange(false)
       await reload()
     } else {
       setGenMsg(`Error: ${data.error}`)
@@ -548,6 +549,16 @@ export function SuggestionQueue({ initial, initialStats }: Props) {
               ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Generating…</>
               : <><Zap className="w-3.5 h-3.5" /> Generate next week</>
             }
+          </button>
+
+          {/* This weekend — digest-led batch for the coming Fri–Sun */}
+          <button
+            onClick={() => generate({ weekend: true })}
+            disabled={generating}
+            title="Generate this weekend's posts (Fri–Sun), led by a weekend guide"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-terra/15 text-terra border border-terra/30 text-[11px] font-semibold hover:bg-terra/25 transition-colors disabled:opacity-50"
+          >
+            <Sun className="w-3.5 h-3.5" /> This weekend
           </button>
 
           {/* Date-range toggle */}

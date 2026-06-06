@@ -1930,13 +1930,25 @@ const weekendDigest: Template = {
     const { w, h } = CANVAS_DIMS[fmt]
     const sy = (y: number) => Math.round(y * h / 1350)
 
-    // Weekend date range
-    const today = new Date()
-    const daysToSat = (6 - today.getDay() + 7) % 7 || 7
-    const sat = new Date(today); sat.setDate(today.getDate() + daysToSat)
-    const sun = new Date(sat); sun.setDate(sat.getDate() + 1)
+    // Weekend date range — derive from the actual selected events when present
+    // (so "this weekend" generation shows the right dates), else the next Sat/Sun.
     const fmtD = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    const weekendRange = `${fmtD(sat)} – ${fmtD(sun)}`
+    const evDates = (ctx.events ?? [])
+      .map(e => e.date).filter((d): d is string => !!d).sort()
+    let weekendRange: string
+    if (evDates.length > 0) {
+      const first = new Date(evDates[0] + 'T12:00:00')
+      const last  = new Date(evDates[evDates.length - 1] + 'T12:00:00')
+      weekendRange = first.getTime() === last.getTime()
+        ? fmtD(first)
+        : `${fmtD(first)} – ${fmtD(last)}`
+    } else {
+      const today = new Date()
+      const daysToSat = (6 - today.getDay() + 7) % 7 || 7
+      const sat = new Date(today); sat.setDate(today.getDate() + daysToSat)
+      const sun = new Date(sat); sun.setDate(sat.getDate() + 1)
+      weekendRange = `${fmtD(sat)} – ${fmtD(sun)}`
+    }
 
     // Merge provided events with fallbacks; guard against empty titles from DB
     const slots = Array.from({ length: 5 }, (_, i) => {
