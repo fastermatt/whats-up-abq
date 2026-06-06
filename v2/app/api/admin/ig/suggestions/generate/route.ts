@@ -38,7 +38,7 @@ function isAuthorized(req: NextRequest): boolean {
 
 // ── Weekly schedule ───────────────────────────────────────────────────────────
 
-type PostType = 'WeeklyFive' | 'BreweryNights' | 'WeekendDigest' | 'SingleEvent' | 'Tonight'
+type PostType = 'WeeklyFive' | 'BreweryNights' | 'WeekendDigest' | 'SingleEvent' | 'Tonight' | 'DeepDive'
 
 interface DaySlot {
   dow: number      // 0=Sun … 6=Sat
@@ -46,24 +46,36 @@ interface DaySlot {
   templateId: string
   hour: number
   minute: number
+  // For WeekendDigest: 'headliners' = the biggest weekend events;
+  // 'under-radar' = free / local / overlooked picks (no overlap with headliners).
+  variant?: 'headliners' | 'under-radar'
 }
 
-// Optimal weekly cadence for a local-events IG account (all times MDT).
-// Mix: SingleEvent ×2 (photo-led, most shareable), Tonight ×2 (high-utility),
-// WeeklyFive ×1, WeekendDigest ×1, BreweryNights ×1 = 7 posts/week.
-// One post per day; never two of the same type back-to-back. WeekendDigest
-// lands Thursday late-afternoon — the moment people actually commit to
-// weekend plans (research-consistent peak for weekend-intent local content).
-// SingleEvent templateId is overridden per-event below (poster/golden-hour/
-// split when a photo exists, broadside when it doesn't).
+// Weekly content calendar (all times MDT). Designed around what actually earns
+// attention for a local-events account, plus discovery:
+//
+//   Mon  9:00am  WeeklyFive    — "the week ahead", the Monday-morning planning post
+//   Tue  5:30pm  SingleEvent   — the week's marquee show, photo-led (highest reach)
+//   Wed  12:00pm DeepDive      — ONE under-the-radar event people would miss
+//   Thu  5:30pm  BreweryNights — themed taproom + live-music roundup
+//   Fri 11:00am  WeekendDigest (headliners)  — the weekend's biggest draws
+//   Fri  4:30pm  WeekendDigest (under-radar) — free/local/overlooked, NO overlap
+//   Sat 10:30am  SingleEvent   — Saturday's standout, photo-led
+//   Sun  4:00pm  Tonight       — low-key "what's on" roundup
+//
+// Two weekend digests both land Friday (peak weekend-planning intent). They share
+// the same post type, so the per-type cross-run dedup guarantees zero overlapping
+// events between them — the headliners post takes the top draws, the under-radar
+// post takes the next tier (free, local, smaller venues). 8 posts/week.
 const WEEKLY_SLOTS: DaySlot[] = [
-  { dow: 1, postType: 'WeeklyFive',    templateId: 'weekly-five',    hour: 12, minute: 0  }, // Mon noon — plan the week
-  { dow: 2, postType: 'BreweryNights', templateId: 'tonight-list',   hour: 17, minute: 30 }, // Tue after-work taproom crowd
-  { dow: 3, postType: 'SingleEvent',   templateId: 'poster',         hour: 12, minute: 0  }, // Wed lunch — spotlight a standout
-  { dow: 4, postType: 'WeekendDigest', templateId: 'weekend-digest', hour: 17, minute: 30 }, // Thu after-work — weekend planning peak
-  { dow: 5, postType: 'Tonight',       templateId: 'tonight-list',   hour: 16, minute: 30 }, // Fri — "what's tonight" peak intent
-  { dow: 6, postType: 'SingleEvent',   templateId: 'poster',         hour: 10, minute: 30 }, // Sat morning — spotlight Saturday's event
-  { dow: 0, postType: 'Tonight',       templateId: 'tonight-list',   hour: 16, minute: 0  }, // Sun — low-key "something tonight"
+  { dow: 1, postType: 'WeeklyFive',    templateId: 'weekly-five',    hour: 9,  minute: 0  },
+  { dow: 2, postType: 'SingleEvent',   templateId: 'poster',         hour: 17, minute: 30 },
+  { dow: 3, postType: 'DeepDive',      templateId: 'split',          hour: 12, minute: 0  },
+  { dow: 4, postType: 'BreweryNights', templateId: 'tonight-list',   hour: 17, minute: 30 },
+  { dow: 5, postType: 'WeekendDigest', templateId: 'weekend-digest', hour: 11, minute: 0, variant: 'headliners'  },
+  { dow: 5, postType: 'WeekendDigest', templateId: 'weekend-digest', hour: 16, minute: 30, variant: 'under-radar' },
+  { dow: 6, postType: 'SingleEvent',   templateId: 'poster',         hour: 10, minute: 30 },
+  { dow: 0, postType: 'Tonight',       templateId: 'tonight-list',   hour: 16, minute: 0  },
 ]
 
 // ── Date helpers (America/Denver, DST-aware) ──────────────────────────────────
@@ -197,6 +209,10 @@ Write 2–3 sentences about why this is worth going to. Reference something real
   Tonight: (e) => `Instagram caption for an Albuquerque live events roundup.
 Events: ${e.map(ev => `${ev.title} at ${ev.venue ?? 'ABQ'}${ev.time ? ' at ' + ev.time : ''}`).join(' / ')}
 Lead with the most interesting name or pairing on the list. Write naturally — you're pointing someone toward their options for the night, not filing a press release. Include a tag prompt.`,
+
+  DeepDive: (e) => `Instagram caption for a "deep dive" spotlight on ONE under-the-radar Albuquerque event most people will scroll past.
+Event: ${e[0]?.title} at ${e[0]?.venue} on ${e[0]?.date}${e[0]?.time ? ' at ' + e[0].time : ''} (${e[0]?.category}).
+This is the discovery post — the kind of thing that doesn't sell out but is genuinely worth knowing about. Write 3-4 sentences making the case for it: who it's for, what makes it worth the trip, why it's a hidden gem. Sound like a local sharing a tip, not promoting. Earnest, specific, a little protective of the good stuff.`,
 }
 
 /** Insert any venue @handles the caption didn't already include, on their own
@@ -228,6 +244,7 @@ function fallbackCaption(postType: PostType, events: EventSnap[], handles: strin
     WeekendDigest: 'Your Albuquerque weekend, sorted:',
     SingleEvent:   'On our radar:',
     Tonight:       'Tonight in Burque:',
+    DeepDive:      'One you might have missed:',
   }
   const hook = hooks[postType] ?? 'Happening in Albuquerque:'
   const lines = events.slice(0, 5).map(e => `• ${e.title}${e.venue ? ` @ ${e.venue}` : ''}`)
@@ -236,7 +253,7 @@ function fallbackCaption(postType: PostType, events: EventSnap[], handles: strin
   return `${hook}\n${lines.join('\n')}${tagLine}\n${saveLine}Full details → abqunplugged.com 🌵\n#ABQ #Albuquerque #505 #BurqueLife #ThingsToDo505 #ABQEvents #NewMexico #DukeCity`
 }
 
-async function generateCaption(postType: PostType, events: EventSnap[], handles: string[] = []): Promise<string> {
+async function generateCaption(postType: PostType, events: EventSnap[], handles: string[] = [], extra = ''): Promise<string> {
   const apiKey = process.env.DEEPSEEK_API_KEY
   if (events.length === 0) return ''
   if (!apiKey) {
@@ -245,6 +262,7 @@ async function generateCaption(postType: PostType, events: EventSnap[], handles:
   }
 
   let userPrompt = CAPTION_PROMPTS[postType](events)
+  if (extra) userPrompt += `\n${extra}`
   if (handles.length > 0) {
     userPrompt += `\nVenue tags (use these exact handles when you mention the venue; do not invent any others): ${handles.map(h => '@' + h).join(' ')}`
   }
@@ -316,12 +334,12 @@ export async function POST(req: NextRequest) {
     const sun = addDays(sat, 1)
     // Drop any weekend day already past (e.g. Friday when generating on Saturday).
     dateStrs = [toMDT(fri), toMDT(sat), toMDT(sun)].filter(d => d >= todayMDT)
-    // Lead post: "what's happening this weekend" roundup, on the earliest
-    // remaining weekend day (late morning).
-    extraSlots.push({
-      dow: 5, postType: 'WeekendDigest', templateId: 'weekend-digest',
-      hour: 11, minute: 0, dateStr: dateStrs[0],
-    })
+    // Two weekend digests on the earliest remaining day: the headliners and the
+    // under-the-radar picks (deduped against each other by post-type memory).
+    extraSlots.push(
+      { dow: 5, postType: 'WeekendDigest', templateId: 'weekend-digest', hour: 11, minute: 0,  dateStr: dateStrs[0], variant: 'headliners'  },
+      { dow: 5, postType: 'WeekendDigest', templateId: 'weekend-digest', hour: 16, minute: 30, dateStr: dateStrs[0], variant: 'under-radar' },
+    )
   } else if (body.start && body.end) {
     if (!DATE_RE.test(body.start) || !DATE_RE.test(body.end)) {
       return NextResponse.json({ error: 'start/end must be YYYY-MM-DD' }, { status: 400 })
@@ -341,8 +359,14 @@ export async function POST(req: NextRequest) {
     dateStrs = Array.from({ length: 7 }, (_, i) => toMDT(addDays(monday, i)))
   }
 
-  // Map each calendar date to its day-of-week template slot.
-  const slotByDow = new Map(WEEKLY_SLOTS.map(s => [s.dow, s]))
+  // Map each calendar date to its day-of-week template slot(s). A day can have
+  // MORE than one slot (e.g. Friday's two weekend digests), so this is a multimap.
+  const slotsByDow = new Map<number, DaySlot[]>()
+  for (const s of WEEKLY_SLOTS) {
+    const list = slotsByDow.get(s.dow) ?? []
+    list.push(s)
+    slotsByDow.set(s.dow, list)
+  }
   const weekStart = dateStrs[0]
   const weekEnd   = dateStrs[dateStrs.length - 1]
 
@@ -361,9 +385,9 @@ export async function POST(req: NextRequest) {
     (pendingRows ?? []).map(r => toMDT(new Date(r.scheduled_for as string)))
   )
 
-  const perDaySlots: ExtraSlot[] = dateStrs.map(dateStr => {
+  const perDaySlots: ExtraSlot[] = dateStrs.flatMap(dateStr => {
     const dow = new Date(dateStr + 'T12:00:00').getDay()
-    return { ...slotByDow.get(dow)!, dateStr }
+    return (slotsByDow.get(dow) ?? []).map(slot => ({ ...slot, dateStr }))
   })
   const allSlots = [...extraSlots, ...perDaySlots].map(s => ({
     ...s,
@@ -487,19 +511,53 @@ export async function POST(req: NextRequest) {
         strategyNotes = 'Taproom crowd — brewery + live music is peak ABQ community engagement'
         break
       case 'WeekendDigest': {
-        // Coming weekend relative to this slot's date. Guarantee BOTH days appear
-        // by interleaving Saturday and Sunday before capping at 5.
+        // Coming weekend relative to this slot's date.
         const base = new Date(slot.dateStr + 'T12:00:00')
         const toSat = (6 - base.getDay() + 7) % 7
         const satStr = toMDT(addDays(base, toSat))
         const sunStr = toMDT(addDays(base, toSat + 1))
-        const sat = snaps.filter(e => e.date === satStr)
-        const sun = snaps.filter(e => e.date === sunStr)
-        const interleaved = [
-          ...sat.slice(0, 3), ...sun.slice(0, 2), ...sat.slice(3), ...sun.slice(2),
-        ]
-        selected = pickEvents(interleaved, 5, exclude)
-        strategyNotes = 'Weekend guide (Sat + Sun) — weekend-planning peak; save-bait roundup'
+        const weekend = snaps.filter(e => e.date === satStr || e.date === sunStr)
+        // Big ticketed shows come from TM/SG; local/free/community come from the
+        // other sources (local-, nhcc-, eb-, rrfb, lovenm, abqtodo, babydolls…).
+        const isMarquee = (e: EventSnap) => /^(ticketmaster_|seatgeek_)/.test(e.id)
+
+        if (slot.variant === 'under-radar') {
+          // The second Friday digest: free / local / smaller-venue picks. Non-marquee
+          // events first (best local picks lead), then the rest. The headliner post
+          // already ran, so its events are excluded via typeSeen — guaranteeing zero
+          // overlap between the two weekend digests.
+          const local = weekend.filter(e => !isMarquee(e))
+          const rest  = weekend.filter(e => isMarquee(e))
+          selected = pickEvents([...local, ...rest], 5, exclude)
+          strategyNotes = 'Weekend (under the radar) — free/local/overlooked picks; no overlap with the headliners post'
+        } else {
+          // The first Friday digest: the weekend's biggest draws, balanced Sat + Sun.
+          const sat = weekend.filter(e => e.date === satStr)
+          const sun = weekend.filter(e => e.date === sunStr)
+          const interleaved = [...sat.slice(0, 3), ...sun.slice(0, 2), ...sat.slice(3), ...sun.slice(2)]
+          selected = pickEvents(interleaved, 5, exclude)
+          strategyNotes = 'Weekend headliners — the biggest draws Sat + Sun; the high-attention save-bait post'
+        }
+        break
+      }
+      case 'DeepDive': {
+        // ONE under-the-radar event people would likely miss. Not the marquee
+        // headliners (those get their own spotlights) — a real local/community/arts
+        // event with a photo and enough substance to write about. Mid popularity:
+        // good enough to matter, overlooked enough to be a discovery.
+        const isMarquee = (e: EventSnap) => /^(ticketmaster_|seatgeek_)/.test(e.id)
+        const band = snaps.filter(e =>
+          e.imageUrl && !isMarquee(e) &&
+          e.popularityScore >= 4 && e.popularityScore <= 7.5
+        )
+        // Best within the under-the-radar band (it's worth featuring, just not famous).
+        selected = pickEvents(band, 1, exclude)
+        if (selected.length === 0) {
+          selected = pickEvents(snaps.filter(e => e.imageUrl && !isMarquee(e)), 1, exclude)
+        }
+        if (selected.length === 0) continue
+        templateId = selected[0]?.imageUrl ? 'split' : 'broadside'
+        strategyNotes = 'Deep dive — an overlooked local event worth knowing about; the discovery post'
         break
       }
       case 'SingleEvent': {
@@ -544,7 +602,12 @@ export async function POST(req: NextRequest) {
     // Caption, auto-tagging venue IG handles. Fall back to a deterministic
     // caption if DeepSeek is unavailable so a post is never published blank.
     const handles = venueHandles(selected.map(e => e.venue))
-    const aiCaption = ensureVenueTags(await generateCaption(slot.postType, selected, handles), handles)
+    // The under-the-radar weekend digest gets a distinct framing so the two
+    // Friday digests don't read like the same post twice.
+    const captionExtra = slot.postType === 'WeekendDigest' && slot.variant === 'under-radar'
+      ? 'Frame these as the under-the-radar weekend picks — the free, local, smaller-venue stuff people overlook while everyone talks about the big shows. The locals\' alternative.'
+      : ''
+    const aiCaption = ensureVenueTags(await generateCaption(slot.postType, selected, handles, captionExtra), handles)
     const caption = aiCaption.trim() || fallbackCaption(slot.postType, selected, handles)
 
     insertions.push({
