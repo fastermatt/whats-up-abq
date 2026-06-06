@@ -80,7 +80,7 @@ Use `bg-[#fbf7f1]`, `text-[#9a442d]` etc — no CSS variables in use.
 ## Common gotchas
 
 - Supabase queries need `.schema('public')` prefix — no default schema set
-- `event_date` column is a string (`YYYY-MM-DD` or `YYYY-MM-DDTHH:MM:SS-07:00`)
+- `event_date` is a Postgres **`date`** type → Supabase always returns it as a `YYYY-MM-DD` string (never a timestamp). So `new Date(event.date + 'T12:00:00')` is always valid. Time-of-day lives in the separate `time` field. (Older docs called this a "string with optional timestamp" — that's stale; verified `date` type 2026-06-06.)
 - `raw` column is untyped JSONB — always cast with `as Record<string, unknown>`
 - `featured` is `boolean | null` — always use `?? false`
 - New API routes need `export const dynamic = 'force-dynamic'` if they can't be cached
