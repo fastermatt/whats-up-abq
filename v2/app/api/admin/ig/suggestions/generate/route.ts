@@ -393,24 +393,36 @@ export async function POST(req: NextRequest) {
   const usedByType: Record<string, Set<string>> = {}
   const typeSeen = (t: string) => (usedByType[t] ??= new Set<string>())
 
-  // Select up to `max` events: skip ones already used by this post type, dedupe
-  // by title within the post (no act twice), and cap any one venue to 2 slots.
+  // Normalize a title for fuzzy de-duplication: drop a leading "Prefix:" tag
+  // (e.g. "USL Cup:"), then strip punctuation/spacing. Catches the same event
+  // listed by two sources with slightly different titles.
+  const normTitle = (t: string) =>
+    (t ?? '').toLowerCase().replace(/^[^:]{1,18}:\s*/, '').replace(/[^a-z0-9]+/g, '')
+
+  // Select up to `max` events. Skips ones already used by this post type, then
+  // de-dupes WITHIN the post by (a) normalized title and (b) a date|venue|time
+  // slot key — so the same game/show cross-listed by SeatGeek + Ticketmaster
+  // only appears once — and caps any one venue to 2 slots.
   const MAX_PER_VENUE = 2
   function pickEvents(candidates: EventSnap[], max: number, exclude: Set<string>): EventSnap[] {
     const out: EventSnap[] = []
-    const seenTitles = new Set<string>()
+    const seenKeys = new Set<string>()
     const venueCount = new Map<string, number>()
     for (const e of candidates) {
       if (exclude.has(e.id)) continue
-      const tkey = e.title.trim().toLowerCase()
-      if (tkey && seenTitles.has(tkey)) continue
       const vkey = (e.venue ?? '').trim().toLowerCase()
+      const tkey = normTitle(e.title)
+      const timeKey = (e.time ?? '').trim().toLowerCase()
+      const slotKey = timeKey ? `@${e.date}|${vkey}|${timeKey}` : ''
+      if (tkey && seenKeys.has(tkey)) continue
+      if (slotKey && seenKeys.has(slotKey)) continue
       if (vkey) {
         const c = venueCount.get(vkey) ?? 0
         if (c >= MAX_PER_VENUE) continue
         venueCount.set(vkey, c + 1)
       }
-      if (tkey) seenTitles.add(tkey)
+      if (tkey) seenKeys.add(tkey)
+      if (slotKey) seenKeys.add(slotKey)
       out.push(e)
       if (out.length >= max) break
     }
