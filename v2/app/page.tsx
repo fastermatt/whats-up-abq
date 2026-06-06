@@ -431,7 +431,7 @@ export default async function DiscoverPage() {
           if (tiles.length < 4) return null
           return (
             <div
-              className="absolute right-7 top-7 bottom-12 hidden lg:grid grid-cols-2 grid-rows-2 gap-2.5 items-stretch pointer-events-none w-[340px]"
+              className="absolute right-7 top-12 bottom-12 hidden lg:grid grid-cols-2 grid-rows-2 gap-2.5 items-stretch pointer-events-none w-[376px]"
               aria-hidden="true"
               style={{ zIndex: 5 }}
             >
