@@ -155,38 +155,48 @@ function rowToSnap(row: EventRow): EventSnap {
 
 // ── Caption generator (DeepSeek) ──────────────────────────────────────────────
 
-const CAPTION_SYSTEM = `You write short, punchy Instagram captions for ABQ Unplugged — Albuquerque NM's local events guide.
-Voice: Burqueño insider — confident, slightly playful, never corporate.
-Rules:
-- No em dashes. No "Discover", "Unleash", "amazing", "epic", "#Blessed".
-- NO time-relative phrases ("tonight", "this week", "tomorrow") UNLESS the prompt explicitly says the post is for that exact day — these captions are scheduled days ahead and stale time claims look broken.
-- First line is a hook with a specific, concrete detail (an artist name, a venue, a vivid image). Not a generic greeting.
-- Include a save/tag prompt for roundup posts ("Save this", "Tag who you'd bring").
-- When the prompt lists "Venue tags", mention the venue by its @handle naturally in the body. NEVER invent or guess an @handle — only use handles explicitly provided.
-- End with: abqunplugged.com 🌵
-- Exactly 8 hashtags on the final line: #ABQ #Albuquerque #505 #BurqueLife #ThingsToDo505 plus 3 specific to the events.
-- Body under 200 characters before the hashtag line.`
+const CAPTION_SYSTEM = `You write Instagram captions for ABQ Unplugged — Albuquerque NM's local events guide.
+
+VOICE: You are a Burqueño who has been to these shows, knows these venues, and is texting a friend about what's worth their Friday night. Confident, specific, never corporate. Write complete sentences like a real person — NOT advertising fragments.
+
+BANNED PATTERNS (these instantly sound AI-generated — never use them):
+- Three-word fragment sentences: "Cold beer. Live music." / "Four bands. One room."
+- Invented crowd sizes or stadium imagery: "12,000 voices", "15,000 boots"
+- Generic hype words: "amazing", "epic", "wild", "iconic", "unforgettable", "zero filler", "summer formula"
+- Marketing hooks: "Discover", "Unleash", "Don't miss", "You won't want to miss"
+- Em dashes
+- Stacked bullet lists for every event — pick 1–2 highlights and tell people about them
+
+GOOD APPROACH: Lead with the ONE detail that makes this interesting. Write like you know the venue, the artist's genre, the vibe. Mention a real specific fact if you have one. For roundups, pick what's most interesting and let the rest follow naturally. A save/tag prompt should feel conversational, not like a call-to-action template.
+
+DO NOT use time-relative phrases ("tonight", "this week", "this weekend") unless the prompt explicitly says the post goes live that same day — these are scheduled ahead.
+
+When the prompt provides venue @handles, weave 1–2 naturally into the body. Never invent a handle.
+
+End with: abqunplugged.com 🌵
+Final line: exactly 8 hashtags — #ABQ #Albuquerque #505 #BurqueLife #ThingsToDo505 plus 3 specific.
+Body length: 150–350 characters (enough to write a real thought, not so long it loses people).`
 
 const CAPTION_PROMPTS: Record<PostType, (events: EventSnap[]) => string> = {
-  WeeklyFive: (e) => `Write an Instagram caption for a "5 things to do this week in Albuquerque" post.
-Events: ${e.map(ev => `${ev.title} (${ev.date})`).join(', ')}
-Hook with "This week in Burque:" or similar. List events briefly. Keep it punchy.`,
+  WeeklyFive: (e) => `Instagram caption for an Albuquerque "five shows worth knowing about this week" post.
+Events (with dates so you can reference them naturally): ${e.map(ev => `${ev.title} at ${ev.venue ?? 'ABQ'} on ${ev.date}${ev.time ? ' at ' + ev.time : ''}`).join(' / ')}
+Lead with the most impressive or unexpected name on the list. Write it like you're telling a friend which nights are worth planning around — not like you're listing every event. Save this prompt.`,
 
-  BreweryNights: (e) => `Write an Instagram caption for a "brewery nights in ABQ" post.
-Events: ${e.map(ev => `${ev.title} @ ${ev.venue} on ${ev.date}`).join(', ')}
-Hook: something about cold beer + live music. Mention 1-2 venues by name.`,
+  BreweryNights: (e) => `Instagram caption for an ABQ brewery live music roundup.
+Events: ${e.map(ev => `${ev.title} at ${ev.venue ?? 'ABQ'} on ${ev.date}${ev.time ? ' at ' + ev.time : ''}`).join(' / ')}
+Highlight the 1–2 most interesting ones — an album release, a local act worth knowing, or something specific about the venue. Sound like someone who goes to these spots, not like a promo post. Include a tag prompt.`,
 
-  WeekendDigest: (e) => `Write an Instagram caption for a "this weekend in Albuquerque" roundup.
-Events: ${e.map(ev => `${ev.title} (${ev.date})`).join(', ')}
-Hook: "Your Albuquerque weekend, sorted:" or similar. Tease 2-3 highlights.`,
+  WeekendDigest: (e) => `Instagram caption for an Albuquerque weekend events roundup.
+Events: ${e.map(ev => `${ev.title} at ${ev.venue ?? 'ABQ'} on ${ev.date}${ev.time ? ' at ' + ev.time : ''}`).join(' / ')}
+Pick the angle that makes this weekend interesting — a surprising pairing, an unusual range, or a standout show. Don't list every event. Write the way you'd explain the weekend to someone deciding what to do. Save this prompt.`,
 
-  SingleEvent: (e) => `Write an Instagram caption spotlighting this one Albuquerque event.
-Event: ${e[0]?.title} at ${e[0]?.venue} on ${e[0]?.date}${e[0]?.time ? ` at ${e[0].time}` : ''}.
-Hook with a specific detail that makes someone want to go. Create urgency without "amazing" or "epic".`,
+  SingleEvent: (e) => `Instagram caption spotlighting one Albuquerque event.
+Event: ${e[0]?.title} at ${e[0]?.venue} on ${e[0]?.date}${e[0]?.time ? ' at ' + e[0].time : ''}.
+Write 2–3 sentences about why this is worth going to. Reference something real about the artist or the venue if you know it. Sound like a local who cares about the show, not a ticket seller.`,
 
-  Tonight: (e) => `Write an Instagram caption for a "what's happening in ABQ tonight" post.
-Events: ${e.map(ev => `${ev.title}${ev.time ? ` at ${ev.time}` : ''}`).join(', ')}
-Hook: "Tonight in Burque:" or "Last-minute plans?" Make it feel alive.`,
+  Tonight: (e) => `Instagram caption for an Albuquerque live events roundup.
+Events: ${e.map(ev => `${ev.title} at ${ev.venue ?? 'ABQ'}${ev.time ? ' at ' + ev.time : ''}`).join(' / ')}
+Lead with the most interesting name or pairing on the list. Write naturally — you're pointing someone toward their options for the night, not filing a press release. Include a tag prompt.`,
 }
 
 /** Insert any venue @handles the caption didn't already include, on their own
