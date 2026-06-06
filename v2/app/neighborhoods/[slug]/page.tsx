@@ -214,10 +214,10 @@ export default async function NeighborhoodPage({ params }: PageProps) {
                 <Link
                   key={cat}
                   href={`/events?category=${encodeURIComponent(cat)}`}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold bg-[#fffdf9] border border-[#ddc9a3] text-[#4a3f3a] px-3 py-1.5 rounded-full hover:border-[#006a62] hover:text-[#006a62] transition-colors"
+                  className="inline-flex items-center gap-1.5 min-h-[36px] text-xs font-semibold bg-[#fffdf9] border border-[#ddc9a3] text-[#4a3f3a] px-3 py-1.5 rounded-full hover:border-[#006a62] hover:text-[#006a62] transition-colors"
                 >
                   {cat}
-                  <span className="text-[#9a442d] font-bold">{cnt}</span>
+                  <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-[#9a442d]/12 text-[#9a442d] text-[10px] font-bold">{cnt}</span>
                 </Link>
               ))}
           </div>
@@ -239,11 +239,11 @@ export default async function NeighborhoodPage({ params }: PageProps) {
                   href={`/venues/${encodeURIComponent(
                     venue.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-')
                   )}`}
-                  className="inline-flex items-center gap-1.5 text-xs bg-[#fffdf9] border border-[#ddc9a3] text-[#4a3f3a] px-2.5 py-1 rounded-full hover:border-[#9a442d] hover:text-[#9a442d] transition-colors"
+                  className="inline-flex items-center gap-1.5 min-h-[36px] text-xs bg-[#fffdf9] border border-[#ddc9a3] text-[#4a3f3a] px-3 py-1.5 rounded-full hover:border-[#9a442d] hover:text-[#9a442d] transition-colors"
                 >
                   <MapPin className="w-2.5 h-2.5 text-[#9a442d]" />
                   {venue}
-                  <span className="text-[#6b5d57] font-semibold">{cnt}</span>
+                  <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-[#9a442d]/12 text-[#9a442d] text-[10px] font-bold">{cnt}</span>
                 </Link>
               ))}
             </div>
@@ -331,14 +331,13 @@ export default async function NeighborhoodPage({ params }: PageProps) {
           })}
         </div>
 
-        {/* ── SEO footer ── */}
+        {/* ── SEO footer ── distinct aggregator copy (the neighborhood description
+            already renders once under the H1; don't repeat it verbatim here) ── */}
         <div className="mt-8 pt-6 border-t border-[#f0e4cc]">
           <p className="text-xs text-[#6b5d57] leading-relaxed">
-            {hoodInfo?.description
-              ? hoodInfo.description
-              : `Find upcoming concerts, comedy shows, arts events, sports, food & drink festivals,
-                and more in the ${neighborhood} area of Albuquerque, NM.
-                ABQ Unplugged aggregates events from Ticketmaster, Eventbrite, SeatGeek, and local sources.`}
+            Find upcoming concerts, comedy shows, arts events, sports, and food &amp; drink
+            festivals in the {neighborhood} area of Albuquerque, NM. ABQ Unplugged aggregates
+            events from Ticketmaster, Eventbrite, SeatGeek, and local sources, updated daily.
           </p>
           <Link
             href="/events"
