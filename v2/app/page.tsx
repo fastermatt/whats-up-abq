@@ -411,16 +411,22 @@ export default async function DiscoverPage() {
             e.g. two near-identical stadium shots in a sports-heavy week).
             Lazy-loaded so they never become the LCP element. */}
         {(() => {
-          // One photo per category for visual variety, then top up if needed.
-          const withImg = featured.filter(e => e.imageUrl)
+          // Source from featured + tonight + weekend so we have enough category
+          // spread to fill 4 visually-distinct tiles even when "featured" alone
+          // is dominated by one or two categories (e.g. a sports-heavy week).
+          const pool: NormalizedEvent[] = []
+          const poolSeen = new Set<string>()
+          for (const e of [...featured, ...tonight.events, ...weekend.events]) {
+            if (e.imageUrl && !poolSeen.has(e.id)) { poolSeen.add(e.id); pool.push(e) }
+          }
           const seen = new Set<string>()
-          const diverse: typeof withImg = []
-          for (const e of withImg) {
+          const diverse: NormalizedEvent[] = []
+          for (const e of pool) {
             const c = e.category ?? '_'
             if (!seen.has(c)) { seen.add(c); diverse.push(e) }
             if (diverse.length === 4) break
           }
-          for (const e of withImg) {
+          for (const e of pool) {
             if (diverse.length === 4) break
             if (!diverse.includes(e)) diverse.push(e)
           }
