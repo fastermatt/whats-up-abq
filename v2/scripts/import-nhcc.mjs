@@ -147,15 +147,94 @@ function classify(title, tags) {
   return 'Community'
 }
 
-/** Format price: empty/null → 'Free', otherwise pass through */
-function formatPrice(cost) {
-  if (!cost || cost.trim() === '' || /free/i.test(cost)) return 'Free'
-  // Some prices look like "10 - 20" → "$10–$20"
-  const range = cost.match(/(\d+)\s*[-–]\s*(\d+)/)
-  if (range) return `$${range[1]}–$${range[2]}`
-  const single = cost.match(/\d+/)
-  if (single) return `$${single[0]}`
-  return cost
+/**
+ * NHCC API does not populate the `cost` field or `all_day: false` for most
+ * events — everything is embedded in the description HTML. These helpers
+ * extract structured data from the raw HTML before stripping tags.
+ */
+
+/** Extract the first start time from NHCC description HTML.
+ *  NHCC always puts time in the first couple of paragraphs:
+ *    "8:00 am – 5:00 pm" | "12:00 pm" | "5:00 – 7:00 pm" | "10:00 am to 4:00 pm"
+ *  Returns "H:MM AM/PM" display string or null if none found. */
+function extractTimeFromDesc(html) {
+  if (!html) return null
+  // Strip tags, decode entities for clean text matching
+  const text = html
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&amp;/g, '&').replace(/&#8211;/g, '–').replace(/&#8212;/g, '—')
+    .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/\s+/g, ' ')
+  // Match the first standalone time (not a year like "2026")
+  const m = text.match(/\b(\d{1,2}:\d{2})\s*(am|pm)/i)
+  if (!m) return null
+  let [, hhmm, ampm] = m
+  // Normalise: "8:00 am" → "8:00 AM"
+  return `${hhmm} ${ampm.toUpperCase()}`
+}
+
+/** Extract ticket/reservation URL from NHCC description HTML.
+ *  NHCC embeds ticket links as <a href="...">RESERVE YOUR TICKETS HERE!</a>
+ *  Returns first external href found (nhccnm.org/wp/... or my.nmculture.org/...) or null. */
+function extractTicketUrl(html) {
+  if (!html) return null
+  // Match <a href="..."> that looks like a ticket/reservation link
+  const linkRe = /<a[^>]+href=["']([^"']+)["'][^>]*>([^<]*(?:ticket|reserve|purchase|buy|book|register|here)[^<]*)/gi
+  let m
+  while ((m = linkRe.exec(html)) !== null) {
+    const href = m[1].trim()
+    if (href && href.startsWith('http')) return href
+  }
+  // Fallback: any my.nmculture.org or eventbrite link
+  const culturem = html.match(/href=["'](https?:\/\/my\.nmculture\.org\/[^"']+)["']/i)
+  if (culturem) return culturem[1]
+  const ebrm = html.match(/href=["'](https?:\/\/(?:www\.)?eventbrite\.com\/[^"']+)["']/i)
+  if (ebrm) return ebrm[1]
+  return null
+}
+
+/** Extract price from NHCC description HTML.
+ *  The API `cost` field is almost always empty; price is in the description text:
+ *    "All tickets $16 each" | "All tickets $20" | "Free" | "free, monthly" | "$2" | "Admission $10"
+ *  Returns formatted price string or null (null = unknown, not necessarily free). */
+function extractPriceFromDesc(html) {
+  if (!html) return null
+  const text = html.replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ')
+
+  // Explicit free indicators
+  if (/\bfree\s+(?:community\s+)?event\b/i.test(text)) return 'Free'
+  if (/\bno\s+cost\b/i.test(text)) return 'Free'
+  if (/\bfree\s+(?:admission|entry|to\s+all|for\s+all)\b/i.test(text)) return 'Free'
+  // "free, monthly" → free
+  if (/\bthis\s+free\b/i.test(text) || /\bfree,?\s+(monthly|program|class)/i.test(text)) return 'Free'
+
+  // Explicit dollar amounts: "$16", "$10–$20", "$2 per person", "tickets $20", "admission $10"
+  const rangeM = text.match(/\$(\d+(?:\.\d+)?)\s*(?:–|-)\s*\$(\d+(?:\.\d+)?)/)
+  if (rangeM) return `$${rangeM[1]}–$${rangeM[2]}`
+  // "All tickets $16 each" | "tickets $20" | "admission $10" | "$16 per"
+  const amountM = text.match(/(?:ticket|tickets|admission|cost|price)[^.]{0,30}\$(\d+(?:\.\d+)?)/i)
+              || text.match(/\$(\d+(?:\.\d+)?)\s*(?:each|per|per person)/i)
+  if (amountM) return `$${amountM[1]}`
+  // Bare $ amount early in description (first 300 chars)
+  const bareM = text.slice(0, 300).match(/\$(\d+(?:\.\d+)?)/)
+  if (bareM) return `$${bareM[1]}`
+
+  return null  // Unknown — do NOT assume free
+}
+
+/** Format price: explicit cost field (rarely populated) → structured display. */
+function formatPrice(cost, descHtml) {
+  // 1. Structured API field (rarely filled by NHCC)
+  if (cost && cost.trim() && !/^\s*$/.test(cost)) {
+    if (/free/i.test(cost)) return 'Free'
+    const range = cost.match(/(\d+)\s*[-–]\s*(\d+)/)
+    if (range) return `$${range[1]}–$${range[2]}`
+    const single = cost.match(/(\d+(?:\.\d+)?)/)
+    if (single) return `$${single[1]}`
+    return cost.trim()
+  }
+  // 2. Parse from description HTML (NHCC's actual data source for price)
+  return extractPriceFromDesc(descHtml)
 }
 
 /** Fetch all upcoming NHCC events across pages */
@@ -233,12 +312,30 @@ async function main() {
       continue
     }
 
-    // Build datetime string for event_date (keep time if not midnight)
-    const startTime = startDateRaw.slice(11, 16) // HH:MM
+    // ── Time ─────────────────────────────────────────────────────────────────
+    // NHCC almost always sets all_day=true and start_date to midnight, putting
+    // the real time in the description HTML. Extract it from there first, then
+    // fall back to the structured start_date field.
+    const startTime = startDateRaw.slice(11, 16) // HH:MM from API
     const isAllDay = ev.all_day || startTime === '00:00'
+    const descTime  = extractTimeFromDesc(ev.description)  // "8:00 AM" | null
+    // event_date: use date-only when all_day or when the API gives midnight;
+    // for rare timestamped events, embed the time in the field.
     const eventDatetime = isAllDay ? eventDate : `${eventDate}T${startTime}:00-07:00`
 
-    // Venue
+    // ── Price ─────────────────────────────────────────────────────────────────
+    // Pass both the API cost field AND the raw HTML so formatPrice can extract
+    // price from the description when the cost field is empty (which is nearly
+    // always for NHCC events).
+    const price = formatPrice(ev.cost, ev.description)
+
+    // ── Ticket URL ────────────────────────────────────────────────────────────
+    // NHCC embeds ticket/reservation links as anchor tags in the description.
+    // Extract before stripping HTML.
+    const ticketUrl = extractTicketUrl(ev.description)
+              || (ev.website && ev.website !== ev.url ? ev.website : null)
+
+    // ── Venue ─────────────────────────────────────────────────────────────────
     const venue = decodeTitle(ev.venue?.venue || 'National Hispanic Cultural Center')
     const venueAddr = [
       ev.venue?.address,
@@ -249,16 +346,23 @@ async function main() {
     // Category from tags + title
     const tags = ev.tags || []
     const category = classify(title, tags)
-    const price = formatPrice(ev.cost)
     const tagNames = tags.map(t => t.name).join(', ')
 
     // Strip HTML description, prefer excerpt if description is very long
     const description = stripHtml(ev.description) || stripHtml(ev.excerpt)
 
+    const priceDisplay = price ?? 'See website'
     console.log(`  [${i + 1}/${toProcess.length}] ${title}`)
-    console.log(`    ${eventDate}  ${category}  ${venue}  ${price}`)
+    console.log(`    ${eventDate} ${descTime ?? '(time in desc)'}  ${category}  ${venue}  ${priceDisplay}`)
 
-    // Build raw payload in 'local' normalizer format
+    // Build raw payload in 'local' normalizer format.
+    // The normalizeLocal() dispatcher reads these fields:
+    //   title/name → display title
+    //   time        → display time string (shown on event cards + detail page)
+    //   url         → event page
+    //   ticket_url  → CTA button target
+    //   isFree      → drives "Free" badge; set only when confirmed free
+    //   price       → display string ("$16", "$10–$20", null = unknown)
     const raw = {
       title,
       venue,
@@ -268,8 +372,14 @@ async function main() {
       description,
       image: imageUrl,
       url: ev.url || 'https://nhccnm.org/events/',
+      ticket_url: ticketUrl ?? undefined,
+      // Time from description (e.g. "8:00 AM") — shown on cards and detail page.
+      // Only set when we successfully parsed it; absent means "check the event page".
+      time: descTime ?? undefined,
+      // isFree: ONLY true when we can confirm it from API cost field or description.
+      // Leave false when price is unknown — never assume free.
       isFree: price === 'Free',
-      price: price === 'Free' ? null : price,
+      price: price === 'Free' ? null : price,  // null for free; string like "$16" otherwise
       category,
       tags: tagNames,
       // Original WP data for reference
