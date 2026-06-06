@@ -802,6 +802,54 @@ const TESTS = [
       },
     },
   ] : []),
+
+  // ── IG suggestion pipeline invariants ──────────────────────────────────
+  // Added after the 2026-06 incidents: (1) generator inserted a non-existent
+  // `event_ctx` column → crash; (2) DeepSeek key unset → blank captions;
+  // (3) same event cross-listed by two sources appeared twice in one post.
+  {
+    id: 'ig-suggestions-columns-exist',
+    tag: 'ig',
+    description: 'Every column the IG generator writes must exist on ig_post_suggestions (guards the event_ctx-class insert crash)',
+    async fn() {
+      const cols = 'id,created_at,generation_id,post_type,template_id,event_ids,event_data,caption,scheduled_for,status,strategy_notes,rejection_reason,caption_edited,image_data_url,ig_media_id'
+      const { error } = await sb.from('ig_post_suggestions').select(cols).limit(1)
+      return error
+        ? { ok: false, detail: `Column mismatch on ig_post_suggestions: ${error.message}` }
+        : { ok: true, detail: 'all generator columns present' }
+    },
+  },
+  {
+    id: 'ig-accepted-has-caption',
+    tag: 'ig',
+    description: 'No accepted/published IG suggestion may have an empty caption (guards the blank-caption publish bug)',
+    async fn() {
+      const { data, error } = await sb.from('ig_post_suggestions').select('id,caption').in('status', ['accepted', 'published'])
+      if (error) return { ok: false, detail: error.message }
+      const blanks = (data ?? []).filter(r => !r.caption || !r.caption.trim())
+      return blanks.length === 0
+        ? { ok: true, detail: `${data?.length ?? 0} accepted/published, all captioned` }
+        : { ok: false, detail: `${blanks.length} accepted/published with empty caption: ${blanks.map(b => b.id).slice(0, 3).join(', ')}` }
+    },
+  },
+  {
+    id: 'ig-no-duplicate-event-in-post',
+    tag: 'ig',
+    description: 'No pending IG suggestion lists the same event twice by normalized title (guards the cross-source dup-event bug)',
+    async fn() {
+      const { data, error } = await sb.from('ig_post_suggestions').select('id,event_data').eq('status', 'pending')
+      if (error) return { ok: false, detail: error.message }
+      const norm = t => (t ?? '').toLowerCase().replace(/^[^:]{1,18}:\s*/, '').replace(/[^a-z0-9]+/g, '')
+      const bad = []
+      for (const row of data ?? []) {
+        const titles = (row.event_data ?? []).map(e => norm(e.title)).filter(Boolean)
+        if (new Set(titles).size !== titles.length) bad.push(row.id)
+      }
+      return bad.length === 0
+        ? { ok: true, detail: `${data?.length ?? 0} pending posts, none with duplicate events` }
+        : { ok: false, detail: `${bad.length} posts with duplicate events: ${bad.slice(0, 3).join(', ')}` }
+    },
+  },
 ]
 
 // ─────────────────────────────────────────────────────────────────────────

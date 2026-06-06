@@ -382,8 +382,24 @@ export async function POST(req: NextRequest) {
     /brew|taproom|distill/i.test(e.venue ?? '')
   )
 
-  // Build suggestions
-  const insertions: Record<string, unknown>[] = []
+  // Build suggestions.
+  // NOTE: this type mirrors the EXACT columns of public.ig_post_suggestions.
+  // Keep it in sync with the table. Typing the array (instead of
+  // Record<string, unknown>) makes excess-property checks fire if anyone adds a
+  // field that isn't a real column — this is the compile-time guard that would
+  // have caught the `event_ctx` insert crash. Do NOT loosen it back to a record.
+  interface SuggestionInsert {
+    generation_id:  string
+    post_type:      PostType
+    template_id:    string
+    event_ids:      string[]
+    event_data:     EventSnap[]
+    caption:        string
+    scheduled_for:  string
+    status:         'pending'
+    strategy_notes: string
+  }
+  const insertions: SuggestionInsert[] = []
 
   // Image-based event templates (use event photo as hero)
   const IMAGE_TEMPLATES = ['poster', 'golden-hour', 'split', 'paper', 'dispatch'] as const
