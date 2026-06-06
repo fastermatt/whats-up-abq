@@ -388,7 +388,7 @@ export default async function DiscoverPage() {
                 name="q"
                 type="text"
                 placeholder="Search events, venues, neighborhoods…"
-                className="flex-1 min-h-[48px] bg-white text-ink text-sm px-4 outline-none placeholder:text-[#a8958a]"
+                className="flex-1 min-h-[48px] bg-white text-ink text-sm px-4 outline-none placeholder:text-ink-light focus-visible:ring-2 focus-visible:ring-terra/40 focus-visible:ring-inset"
                 aria-label="Search events"
               />
               <button
