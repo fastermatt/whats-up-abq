@@ -18,11 +18,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'handle is required' }, { status: 400 })
   }
 
+  // Sanitize handle before interpolating into the PostgREST .or() filter —
+  // commas/parens would otherwise inject extra filter conditions.
+  const h = handle.replace(/^@/, '').replace(/[^a-zA-Z0-9_.-]/g, '')
+
   // Look up profile by handle (stored with or without @)
   const { data: profile } = await supabase
     .from('profiles')
     .select('id')
-    .or(`handle.eq.${handle},handle.eq.@${handle}`)
+    .or(`handle.eq.${h},handle.eq.@${h}`)
     .single()
 
   if (!profile) {
@@ -63,11 +67,14 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: 'handle is required' }, { status: 400 })
   }
 
+  // Sanitize handle (see POST) before interpolating into the .or() filter.
+  const h = handle.replace(/^@/, '').replace(/[^a-zA-Z0-9_.-]/g, '')
+
   // Look up profile by handle
   const { data: profile } = await supabase
     .from('profiles')
     .select('id')
-    .or(`handle.eq.${handle},handle.eq.@${handle}`)
+    .or(`handle.eq.${h},handle.eq.@${h}`)
     .single()
 
   if (!profile) {

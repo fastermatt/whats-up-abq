@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 function isAuthorized(request: NextRequest): boolean {
   const secret = process.env.ADMIN_SECRET
   if (!secret) return false

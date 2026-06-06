@@ -14,6 +14,8 @@ import { createServiceClient } from '@/lib/supabase/server'
  *   - Update event_submissions.status='approved', published_event_id=<new id>
  *   - Increment profiles.events_approved for the submitter
  */
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies()
   const token = cookieStore.get('admin_token')?.value
@@ -120,14 +122,21 @@ export async function POST(request: NextRequest) {
     })
     .eq('id', id)
 
-  // Bump submitter's approved counter (best-effort)
+  // Bump submitter's approved counter (best-effort). events_approved/trust_score
+  // live on PROFILES, not on the submission row — read the profile, then increment.
   if (sub.submitted_by) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: prof } = await (supabase as any)
+      .schema('public').from('profiles')
+      .select('events_approved, trust_score')
+      .eq('id', sub.submitted_by)
+      .single()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (supabase as any)
       .schema('public').from('profiles')
       .update({
-        events_approved: (sub.events_approved ?? 0) + 1,
-        trust_score:     (sub.trust_score ?? 0) + 1,
+        events_approved: (prof?.events_approved ?? 0) + 1,
+        trust_score:     (prof?.trust_score ?? 0) + 1,
       })
       .eq('id', sub.submitted_by)
       .then(() => {}, () => {})

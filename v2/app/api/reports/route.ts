@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 const VALID_TYPES = ['wrong_info', 'wrong_category', 'event_cancelled', 'duplicate', 'other', 'suggest_update']
 
 export async function POST(request: NextRequest) {

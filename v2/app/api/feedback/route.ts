@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 const VALID_CATEGORIES = new Set([
   'event_report', 'event_idea', 'site_suggestion', 'bug_report', 'general',
 ])

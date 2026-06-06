@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 // Fire-and-forget admin notification via Resend
+export const dynamic = 'force-dynamic'
+
 async function notifyAdmin(title: string, submittedBy: string, submissionId: string) {
   const key = process.env.RESEND_API_KEY
   if (!key) return

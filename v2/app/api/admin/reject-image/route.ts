@@ -23,6 +23,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 const VALID_STATUSES = ['unverified', 'verified', 'rejected'] as const
 type ImageStatus = typeof VALID_STATUSES[number]
 

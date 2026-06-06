@@ -61,14 +61,19 @@ export default async function PublicProfilePage({ params }: PageProps) {
   const { username } = await params
   const supabase = await createClient()
 
-  // Look up profile by handle (with or without @)
+  // Sanitize handle before interpolating into the PostgREST .or() filter.
+  const u = username.replace(/^@/, '').replace(/[^a-zA-Z0-9_.-]/g, '')
+
+  // Look up profile by handle (with or without @). Filter is_public at the DB
+  // layer so private/non-existent handles are indistinguishable (no enumeration).
   const { data: profile } = await supabase
     .from('profiles')
     .select('*')
-    .or(`handle.eq.${username},handle.eq.@${username}`)
+    .eq('is_public', true)
+    .or(`handle.eq.${u},handle.eq.@${u}`)
     .single()
 
-  if (!profile || profile.is_public === false) {
+  if (!profile) {
     notFound()
   }
 

@@ -26,6 +26,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 const IG_API = 'https://graph.facebook.com/v19.0'
 
 function isAuthorized(request: NextRequest): boolean {

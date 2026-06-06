@@ -75,7 +75,7 @@ export async function PATCH(
         .schema('public')
         .from('ig_scheduled_posts')
         .insert({
-          image_data_url: body.imageDataUrl,
+          image_urls:     [body.imageDataUrl],   // ig_scheduled_posts.image_urls is text[] — NOT image_data_url
           caption:        body.caption ?? suggestion.caption ?? '',
           scheduled_for:  suggestion.scheduled_for,
           media_type:     'FEED',

@@ -37,7 +37,8 @@ export function ReviewSection({ eventId }: Props) {
       const { data } = await supabase
         .from('reviews')
         .select('id, rating, body, created_at, user_id')
-        .eq('event_id', eventId)
+        .eq('target_type', 'event')
+        .eq('target_id', eventId)
         .order('created_at', { ascending: false })
         .limit(20)
 
@@ -67,7 +68,8 @@ export function ReviewSection({ eventId }: Props) {
 
     const payload = {
       user_id: user.id,
-      event_id: eventId,
+      target_type: 'event',
+      target_id: eventId,
       rating: selectedRating,
       body: body.trim() || null,
     }
@@ -82,7 +84,8 @@ export function ReviewSection({ eventId }: Props) {
     const { data } = await supabase
       .from('reviews')
       .select('id, rating, body, created_at, user_id')
-      .eq('event_id', eventId)
+      .eq('target_type', 'event')
+      .eq('target_id', eventId)
       .order('created_at', { ascending: false })
       .limit(20)
 

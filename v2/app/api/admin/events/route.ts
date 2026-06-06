@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 const VALID_CATEGORIES = [
   'Music', 'Comedy', 'Sports', 'Arts & Theater', 'Family',
   'Film', 'Food & Drink', 'Festivals', 'Outdoor', 'Community',

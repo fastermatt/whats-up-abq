@@ -7,6 +7,8 @@
  *
  * Called client-side from AICaptionGenerator.tsx.
  */
+import { cookies } from 'next/headers'
+
 export const dynamic = 'force-dynamic'
 
 const SYSTEM_PROMPT = `You are the caption writer for ABQ Unplugged, an events aggregator for Albuquerque, NM. You write Instagram captions as a Burqueño who has been to the shows — someone who knows the city, loves its culture, and speaks plainly about what is worth your Friday night.
@@ -106,6 +108,13 @@ function buildUserPrompt(data: {
 }
 
 export async function POST(request: Request) {
+  // Admin-only: this endpoint spends DeepSeek quota, so it must not be callable
+  // by anonymous traffic. Middleware only checks cookie presence, not validity.
+  const adminToken = (await cookies()).get('admin_token')?.value
+  if (!adminToken || adminToken !== process.env.ADMIN_SECRET) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const apiKey = process.env.DEEPSEEK_API_KEY
   if (!apiKey) {
     return Response.json(
