@@ -107,6 +107,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/brewery-concerts`,           lastModified: new Date(), changeFrequency: 'daily',  priority: 0.85 },
     { url: `${baseUrl}/art-events-albuquerque`,     lastModified: new Date(), changeFrequency: 'daily',  priority: 0.8 },
     { url: `${baseUrl}/farmers-markets-albuquerque`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.75 },
+    // Geo-modified landing pages — target "{category} albuquerque" / "albuquerque {category}" queries
+    { url: `${baseUrl}/things-to-do-in-albuquerque`,      lastModified: new Date(), changeFrequency: 'daily',  priority: 0.9  },
+    { url: `${baseUrl}/concerts-albuquerque`,             lastModified: new Date(), changeFrequency: 'daily',  priority: 0.85 },
+    { url: `${baseUrl}/comedy-shows-albuquerque`,         lastModified: new Date(), changeFrequency: 'daily',  priority: 0.85 },
+    { url: `${baseUrl}/family-events-albuquerque`,        lastModified: new Date(), changeFrequency: 'daily',  priority: 0.8  },
+    { url: `${baseUrl}/outdoor-activities-albuquerque`,   lastModified: new Date(), changeFrequency: 'daily',  priority: 0.8  },
+    { url: `${baseUrl}/arts-theater-albuquerque`,         lastModified: new Date(), changeFrequency: 'daily',  priority: 0.8  },
     { url: `${baseUrl}/welcome`,        lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     { url: `${baseUrl}/about`,          lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
     // Category pages — high SEO value
