@@ -4,9 +4,21 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 // Fire-and-forget admin notification via Resend
 export const dynamic = 'force-dynamic'
 
-async function notifyAdmin(title: string, submittedBy: string, submissionId: string) {
+interface SubmissionNotice {
+  title: string
+  submittedBy: string
+  submissionId: string
+  eventDate: string
+  venueName: string
+  category: string
+  isFree: boolean
+  description: string
+}
+
+async function notifyAdmin(s: SubmissionNotice) {
   const key = process.env.RESEND_API_KEY
   if (!key) return
+  const price = s.isFree ? '🆓 Free' : '💰 Ticketed'
   try {
     await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -14,13 +26,21 @@ async function notifyAdmin(title: string, submittedBy: string, submissionId: str
       body: JSON.stringify({
         from: 'ABQ Unplugged <noreply@abqunplugged.com>',
         to: ['4mattcarlson@gmail.com'],
-        subject: `New event submission: "${title}"`,
+        subject: `🎉 New submission: ${s.title}`,
         html: `
-          <p>A new community event was submitted and is awaiting review.</p>
-          <p><strong>Event:</strong> ${title}<br>
-          <strong>Submitted by:</strong> ${submittedBy}<br>
-          <strong>Submission ID:</strong> ${submissionId}</p>
-          <p><a href="https://abqunplugged.com/admin/submissions">Review in admin →</a></p>
+          <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:24px">
+            <h2 style="margin:0 0 16px;color:#9a442d">New Event Submission</h2>
+            <table style="width:100%;border-collapse:collapse;font-size:15px">
+              <tr><td style="padding:6px 0;color:#666;width:110px">Event</td><td style="padding:6px 0"><strong>${s.title}</strong></td></tr>
+              <tr><td style="padding:6px 0;color:#666">Date</td><td style="padding:6px 0">${s.eventDate}</td></tr>
+              <tr><td style="padding:6px 0;color:#666">Venue</td><td style="padding:6px 0">${s.venueName}</td></tr>
+              <tr><td style="padding:6px 0;color:#666">Category</td><td style="padding:6px 0">${s.category}</td></tr>
+              <tr><td style="padding:6px 0;color:#666">Price</td><td style="padding:6px 0">${price}</td></tr>
+              <tr><td style="padding:6px 0;color:#666">Submitter</td><td style="padding:6px 0">${s.submittedBy}</td></tr>
+            </table>
+            <p style="margin:16px 0;padding:12px;background:#f5f5f5;border-radius:6px;font-size:14px;color:#333">${s.description.slice(0, 400)}${s.description.length > 400 ? '…' : ''}</p>
+            <a href="https://abqunplugged.com/admin/submissions" style="display:inline-block;padding:10px 20px;background:#9a442d;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">Review in admin →</a>
+          </div>
         `,
       }),
     })
@@ -175,7 +195,16 @@ export async function POST(request: NextRequest) {
       .then(() => {}, () => {}) // ignore if RPC doesn't exist
 
     // Notify admin — fire and forget, never blocks the response
-    notifyAdmin(title.trim(), user.email ?? user.id, data?.id ?? '?')
+    notifyAdmin({
+      title:        title.trim(),
+      submittedBy:  user.email ?? user.id,
+      submissionId: data?.id ?? '?',
+      eventDate:    event_date,
+      venueName:    venue_name.trim(),
+      category:     category ?? '',
+      isFree:       !!is_free,
+      description:  description?.trim() ?? '',
+    })
 
     return NextResponse.json({ success: true, id: data?.id })
   } catch (e) {
