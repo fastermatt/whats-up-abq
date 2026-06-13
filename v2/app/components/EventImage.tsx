@@ -52,10 +52,13 @@ export function EventImage({
   const [loaded, setLoaded] = useState(fetchPriority === 'high')
   const imgRef = useRef<HTMLImageElement>(null)
 
-  // Cached images load before onLoad fires — check .complete on mount
+  // Cached images load before onLoad fires — check .complete on mount AND after
+  // each src swap. Without the currentSrc dep, a fallback that's already cached
+  // (after onError sets loaded=false and swaps src) never re-fires onLoad and the
+  // image stays stuck at opacity-0. naturalWidth>0 guards against broken images.
   useEffect(() => {
-    if (imgRef.current?.complete) setLoaded(true)
-  }, [])
+    if (imgRef.current?.complete && imgRef.current.naturalWidth > 0) setLoaded(true)
+  }, [currentSrc])
 
   const resolvedDecoding = decoding ?? (fetchPriority === 'high' ? 'sync' : 'async')
 

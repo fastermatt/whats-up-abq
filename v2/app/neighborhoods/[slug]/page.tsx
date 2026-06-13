@@ -23,7 +23,10 @@ const NEIGHBORHOOD_ALIASES: Record<string, string> = {
   'barelas':         'barelas-south-downtown',
   'south-downtown':  'barelas-south-downtown',
   'barelas-south':   'barelas-south-downtown',
-  'rio-rancho':      null as unknown as string,  // hard block — we don't cover RR
+  // Rio Rancho IS covered (metro area, ~73 events, linked from the homepage +
+  // /neighborhoods index). It was previously hard-blocked to notFound(), which
+  // made every Rio Rancho card a 404. It now renders like any other neighborhood
+  // via its neighborhood_slug.
 }
 
 interface PageProps {

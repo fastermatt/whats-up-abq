@@ -48,6 +48,14 @@ const PRICE_FILTERS = [
   { value: '50',   label: '< $50' },
 ] as const
 
+/** Time-of-day filters — match the daypart windows in fetchEvents (lib/events.ts):
+ *  morning < 12 PM · afternoon 12–5 PM · evening 5 PM+ */
+const DAYPARTS = [
+  { value: 'morning',   label: '☀️ Morning' },
+  { value: 'afternoon', label: '🌤️ Afternoon' },
+  { value: 'evening',   label: '🌙 Evening' },
+] as const
+
 /** Top neighborhoods by event count (slug must match neighborhood_slug column) */
 const NEIGHBORHOODS = [
   { label: 'State Fairgrounds', slug: 'state-fairgrounds-midtown' },
@@ -79,6 +87,7 @@ interface FilterBarProps {
   currentTime: string
   currentCategory: string
   currentNeighborhood: string
+  currentDaypart?: string
   priceFilter?: string
   categoryCounts?: CategoryCount[]
 }
@@ -100,6 +109,7 @@ export function FilterBar({
   currentTime,
   currentCategory,
   currentNeighborhood,
+  currentDaypart = '',
   priceFilter,
   categoryCounts = [],
 }: FilterBarProps) {
@@ -115,25 +125,29 @@ export function FilterBar({
   const [optCategory, setOptCategory] = useState<string | null>(null)
   const [optPrice, setOptPrice] = useState<string | null>(null)
   const [optNeighborhood, setOptNeighborhood] = useState<string | null>(null)
+  const [optDaypart, setOptDaypart] = useState<string | null>(null)
 
   // Track previous server props so we can detect when navigation completes
   const prevTime = useRef(currentTime)
   const prevCategory = useRef(currentCategory)
   const prevPrice = useRef(priceFilter)
   const prevNeighborhood = useRef(currentNeighborhood)
+  const prevDaypart = useRef(currentDaypart)
 
   useEffect(() => {
     if (currentTime !== prevTime.current) { prevTime.current = currentTime; setOptTime(null) }
     if (currentCategory !== prevCategory.current) { prevCategory.current = currentCategory; setOptCategory(null) }
     if (priceFilter !== prevPrice.current) { prevPrice.current = priceFilter; setOptPrice(null) }
     if (currentNeighborhood !== prevNeighborhood.current) { prevNeighborhood.current = currentNeighborhood; setOptNeighborhood(null) }
-  }, [currentTime, currentCategory, priceFilter, currentNeighborhood])
+    if (currentDaypart !== prevDaypart.current) { prevDaypart.current = currentDaypart; setOptDaypart(null) }
+  }, [currentTime, currentCategory, priceFilter, currentNeighborhood, currentDaypart])
 
   // Effective values: optimistic state takes priority while navigation is in flight
   const effectiveTime = optTime ?? currentTime
   const effectiveCategory = optCategory ?? currentCategory
   const effectivePrice = optPrice ?? priceFilter
   const effectiveNeighborhood = optNeighborhood ?? currentNeighborhood
+  const effectiveDaypart = optDaypart ?? currentDaypart
 
   const [sportsExpanded, setSportsExpanded] = useState(currentCategory.startsWith('Sports'))
   const [musicExpanded, setMusicExpanded] = useState(currentCategory.startsWith('Music'))
@@ -175,6 +189,22 @@ export function FilterBar({
       router.push(`/events?${params.toString()}`, { scroll: false })
     })
   }, [router, searchParams, priceFilter, effectivePrice, startTransition])
+
+  const setDaypart = useCallback((value: string) => {
+    // Optimistic update
+    setOptDaypart(effectiveDaypart === value ? '' : value)
+
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams.toString())
+      if (currentDaypart === value) {
+        params.delete('daypart')
+      } else {
+        params.set('daypart', value)
+      }
+      params.delete('page')
+      router.push(`/events?${params.toString()}`, { scroll: false })
+    })
+  }, [router, searchParams, currentDaypart, effectiveDaypart, startTransition])
 
   /** Set a vibe — replaces category/time/price with the vibe's preset */
   const setVibe = useCallback((vibeParams: Record<string, string>) => {
@@ -241,6 +271,13 @@ export function FilterBar({
         : 'bg-white border border-sand-mid text-ink-mid hover:border-sage hover:text-sage'
     }`
 
+  const daypartPill = (isActive: boolean) =>
+    `flex-none px-3.5 py-2 min-h-[36px] rounded-full text-xs font-semibold transition-colors whitespace-nowrap inline-flex items-center ${
+      isActive
+        ? 'bg-ink text-white'
+        : 'bg-white border border-sand-mid text-ink-mid hover:border-ink hover:text-ink'
+    }`
+
   const catPill = (isActive: boolean) =>
     `flex-none px-3.5 py-2 min-h-[36px] rounded-full text-xs font-semibold transition-colors whitespace-nowrap inline-flex items-center gap-1 ${
       isActive
@@ -276,7 +313,8 @@ export function FilterBar({
   const activeTimeFilter = TIME_FILTERS.find(f => f.value === effectiveTime && effectiveTime && effectiveTime !== 'upcoming')
   const activePriceFilter = PRICE_FILTERS.find(f => f.value === effectivePrice)
   const activeNeighborhood = NEIGHBORHOODS.find(n => n.slug === effectiveNeighborhood)
-  const hasActiveFilters = !!(activeTimeFilter || effectiveCategory || activePriceFilter || activeNeighborhood)
+  const activeDaypart = DAYPARTS.find(d => d.value === effectiveDaypart)
+  const hasActiveFilters = !!(activeTimeFilter || effectiveCategory || activePriceFilter || activeNeighborhood || activeDaypart)
 
   const clearCategory = () => { setOptCategory(''); setFilter('category', ''); setSportsExpanded(false); setMusicExpanded(false) }
   const clearPrice = () => {
@@ -288,18 +326,26 @@ export function FilterBar({
     })
   }
   const clearNeighborhood = () => { setOptNeighborhood(''); setNeighborhood(''); setAreaExpanded(false) }
+  const clearDaypart = () => {
+    setOptDaypart('')
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams.toString())
+      params.delete('daypart'); params.delete('page')
+      router.push(`/events?${params.toString()}`, { scroll: false })
+    })
+  }
   const clearAll = () => {
-    setOptTime(''); setOptCategory(''); setOptPrice(null); setOptNeighborhood('')
+    setOptTime(''); setOptCategory(''); setOptPrice(null); setOptNeighborhood(''); setOptDaypart('')
     setSportsExpanded(false); setMusicExpanded(false); setAreaExpanded(false)
     startTransition(() => {
       const params = new URLSearchParams(searchParams.toString())
       params.delete('time'); params.delete('category'); params.delete('price')
-      params.delete('free'); params.delete('neighborhood'); params.delete('page')
+      params.delete('free'); params.delete('neighborhood'); params.delete('daypart'); params.delete('page')
       router.push(`/events?${params.toString()}`, { scroll: false })
     })
   }
 
-  const activeCount = [activeTimeFilter, effectiveCategory, activePriceFilter, activeNeighborhood].filter(Boolean).length
+  const activeCount = [activeTimeFilter, effectiveCategory, activePriceFilter, activeNeighborhood, activeDaypart].filter(Boolean).length
 
   return (
     <div className="space-y-2">
@@ -344,6 +390,15 @@ export function FilterBar({
               <X className="w-3 h-3 opacity-80" />
             </button>
           )}
+          {activeDaypart && (
+            <button
+              onClick={clearDaypart}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-ink text-white shadow-sm hover:bg-ink-mid transition-colors"
+            >
+              {activeDaypart.label}
+              <X className="w-3 h-3 opacity-80" />
+            </button>
+          )}
           {activeCount > 1 && (
             <button
               onClick={clearAll}
@@ -371,6 +426,16 @@ export function FilterBar({
 
         {PRICE_FILTERS.map(({ value, label }) => (
           <button key={value} onClick={() => setPrice(value)} className={pricePill(effectivePrice === value)}>
+            {label}
+          </button>
+        ))}
+
+        {/* Divider */}
+        <div className="flex-none self-center w-px h-4 bg-sand-mid mx-0.5" />
+
+        {/* Time-of-day */}
+        {DAYPARTS.map(({ value, label }) => (
+          <button key={value} onClick={() => setDaypart(value)} className={daypartPill(effectiveDaypart === value)}>
             {label}
           </button>
         ))}

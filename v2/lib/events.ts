@@ -55,6 +55,7 @@ export interface FetchEventsOptions {
   freeOnly?: boolean
   maxPrice?: number   // 0 = free only; 25 = under $25; 50 = under $50
   date?: string       // YYYY-MM-DD — overrides timeFilter when set
+  daypart?: Daypart   // morning | afternoon | evening — filters by start time
   christianMusic?: boolean // filter to events tagged christian_music: true in ai_enrichment
   limit?: number
   offset?: number
@@ -213,6 +214,7 @@ export async function fetchEvents({
   freeOnly = false,
   maxPrice,
   date,
+  daypart,
   christianMusic,
   limit = 24,
   offset = 0,
@@ -238,7 +240,7 @@ export async function fetchEvents({
   // 'tonight' always goes through in-memory so we can apply the 5 PM time cutoff
   // after fetching all of today's events (the DB gte is a bare date string — see
   // the comment in getTimeRange('tonight') in lib/utils/dates.ts).
-  const needsInMemory = !!(subCat || search || freeOnly || maxPrice !== undefined || timeFilter === 'tonight')
+  const needsInMemory = !!(subCat || search || freeOnly || maxPrice !== undefined || timeFilter === 'tonight' || daypart)
 
   if (!needsInMemory) {
     // ── Pure DB path: category filter + pagination in DB (no raw scan) ─────────
@@ -295,6 +297,7 @@ export async function fetchEvents({
   if (topLevelCat) q = q.eq('category', topLevelCat)  // Pre-filter cuts dataset!
   if (mood) q = q.eq('ai_enrichment->>mood', mood)
   if (neighborhood) q = q.eq('neighborhood_slug', neighborhood)
+  if (christianMusic) q = q.eq('ai_enrichment->>christian_music', 'true')  // mirror DB path (was dropped here)
 
   // Search pre-filter: push each term down to DB as ilike on title + venue columns.
   // This dramatically reduces rows fetched (avoids full-table JSONB scan).
@@ -377,6 +380,13 @@ export async function fetchEvents({
   // Mother's Day Tea) into the Tonight feed.
   if (timeFilter === 'tonight') {
     allNormalized = allNormalized.filter(isEvening)
+  }
+
+  // Time-of-day filter: keep only events that start in the chosen daypart.
+  // Events with an unknown start time are dropped (see inDaypart) so a
+  // "Morning" filter can't be padded with timeless evening shows.
+  if (daypart) {
+    allNormalized = allNormalized.filter((e) => inDaypart(e, daypart))
   }
 
   return {
@@ -865,24 +875,44 @@ export async function fetchTonightRanked(limit = 60): Promise<NormalizedEvent[]>
  * morning events out of "tonight" sections. Events with an unknown time
  * are kept since they might be evening shows.
  */
-function isEvening(event: NormalizedEvent): boolean {
-  const EVENING_HOUR = 17
-  // Full ISO timestamp on event.date — compare directly
+/** Parse an event's start hour (0-23) in ABQ time, or null if unknown.
+ *  Handles both full-ISO timestamps on event.date AND date-only events whose
+ *  time lives in the separate event.time string ("10:00 AM" / "19:30"). */
+function eventStartHour(event: NormalizedEvent): number | null {
+  // Full ISO timestamp on event.date — read the hour directly
   if (!/^\d{4}-\d{2}-\d{2}$/.test(event.date)) {
     try {
-      return new TZDate(new Date(event.date), ABQ_TZ).getHours() >= EVENING_HOUR
-    } catch { return true }
+      return new TZDate(new Date(event.date), ABQ_TZ).getHours()
+    } catch { return null }
   }
-  // Date-only: parse the separate event.time string ("10:00 AM" / "19:30")
+  // Date-only: parse the separate event.time string
   const t = event.time?.trim()
-  if (!t) return true // unknown — keep
+  if (!t) return null
   const m = t.match(/^(\d{1,2}):(\d{2})\s*([AaPp][Mm])?$/)
-  if (!m) return true
+  if (!m) return null
   let hr = parseInt(m[1], 10)
   const meridian = m[3]?.toUpperCase()
   if (meridian === 'PM' && hr < 12) hr += 12
   if (meridian === 'AM' && hr === 12) hr = 0
-  return hr >= EVENING_HOUR
+  return hr
+}
+
+function isEvening(event: NormalizedEvent): boolean {
+  const hr = eventStartHour(event)
+  return hr === null ? true : hr >= 17 // unknown time kept — might be an evening show
+}
+
+export type Daypart = 'morning' | 'afternoon' | 'evening'
+
+/** Does this event start within the given daypart? Events with an UNKNOWN start
+ *  time return false — a daypart filter should only surface events we can
+ *  actually confirm fall in that window, not pad results with timeless events. */
+function inDaypart(event: NormalizedEvent, daypart: Daypart): boolean {
+  const hr = eventStartHour(event)
+  if (hr === null) return false
+  if (daypart === 'morning')   return hr < 12
+  if (daypart === 'afternoon') return hr >= 12 && hr < 17
+  return hr >= 17 // evening
 }
 
 /** Weekend events (Fri/Sat/Sun), ranked same as tonight.

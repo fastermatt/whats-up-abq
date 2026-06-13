@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { fetchEvents, fetchCategoryCounts, fetchEventCountsByDate, NormalizedEvent, CATEGORY_SLUG_MAP, venueToSlug } from '@/lib/events'
+import { fetchEvents, fetchCategoryCounts, fetchEventCountsByDate, NormalizedEvent, CATEGORY_SLUG_MAP, venueToSlug, type Daypart } from '@/lib/events'
 import { OG_IMAGE } from '@/lib/fallback-images'
 import { TimeFilter } from '@/lib/utils/dates'
 import { getCategoryFallback } from '@/lib/fallback-images'
@@ -37,7 +37,7 @@ const PREF_TO_DB_CAT: Record<string, string> = {
 const FAMILY_RE = /\bkids?\b|\bchildren\b|\bfamily\b|\bstory.?time\b|\bplaydate\b/i
 
 interface PageProps {
-  searchParams: Promise<{ time?: string; category?: string; mood?: string; neighborhood?: string; page?: string; q?: string; free?: string; price?: string; date?: string; cal?: string }>
+  searchParams: Promise<{ time?: string; category?: string; mood?: string; neighborhood?: string; page?: string; q?: string; free?: string; price?: string; date?: string; cal?: string; daypart?: string }>
 }
 
 const CATEGORY_TITLES: Record<string, string> = {
@@ -125,6 +125,8 @@ export default async function EventsPage({ searchParams }: PageProps) {
   const categoryLabel = category ? (CATEGORY_TITLES[category] ?? `${category} Events`) : null
   const mood = params.mood || undefined
   const neighborhood = params.neighborhood || undefined
+  const VALID_DAYPARTS = ['morning', 'afternoon', 'evening']
+  const daypart = VALID_DAYPARTS.includes(params.daypart ?? '') ? (params.daypart as Daypart) : undefined
   const search = params.q?.trim() || undefined
   const selectedDate = params.date || null  // YYYY-MM-DD from calendar
   const showCal = params.cal === '1' || !!selectedDate
@@ -158,7 +160,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
   }
 
   const [{ events: rawEvents, total }, categoryCounts, calendarCounts] = await Promise.all([
-    fetchEvents({ timeFilter, category, mood, neighborhood, search, freeOnly, maxPrice, date: selectedDate ?? undefined, limit, offset }),
+    fetchEvents({ timeFilter, category, mood, neighborhood, search, freeOnly, maxPrice, date: selectedDate ?? undefined, daypart, limit, offset }),
     fetchCategoryCounts(),
     showCal ? fetchEventCountsByDate(calStart, calEnd) : Promise.resolve([]),
   ])
@@ -206,7 +208,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
   }
 
   // Only emit rich schema on the unfiltered default view (no search/category/mood params)
-  const isDefaultView = !category && !mood && !neighborhood && !search && page === 1 && !selectedDate
+  const isDefaultView = !category && !mood && !neighborhood && !search && page === 1 && !selectedDate && !daypart
   const breadcrumbsLd = buildBreadcrumbs([
     { name: 'Home', url: 'https://abqunplugged.com' },
     { name: 'Events', url: 'https://abqunplugged.com/events' },
@@ -266,8 +268,9 @@ export default async function EventsPage({ searchParams }: PageProps) {
         <Suspense>
           <FilterBar
             currentTime={params.time ?? ''}
-            currentCategory={params.category ?? ''}
+            currentCategory={category ?? ''}
             currentNeighborhood={neighborhood ?? ''}
+            currentDaypart={daypart ?? ''}
             priceFilter={priceParam}
             categoryCounts={categoryCounts}
           />
@@ -322,6 +325,9 @@ export default async function EventsPage({ searchParams }: PageProps) {
             category={params.category}
             q={params.q}
             price={priceParam}
+            neighborhood={neighborhood}
+            date={selectedDate ?? undefined}
+            daypart={daypart}
           />
         )}
       </div>
@@ -497,6 +503,9 @@ function Pagination({
   category,
   q,
   price,
+  neighborhood,
+  date,
+  daypart,
 }: {
   page: number
   totalPages: number
@@ -504,6 +513,9 @@ function Pagination({
   category?: string
   q?: string
   price?: string
+  neighborhood?: string
+  date?: string
+  daypart?: string
 }) {
   const buildUrl = (p: number) => {
     const params = new URLSearchParams()
@@ -511,6 +523,9 @@ function Pagination({
     if (category) params.set('category', category)
     if (q) params.set('q', q)
     if (price) params.set('price', price)
+    if (neighborhood) params.set('neighborhood', neighborhood)
+    if (date) params.set('date', date)
+    if (daypart) params.set('daypart', daypart)
     if (p > 1) params.set('page', String(p))
     const qs = params.toString()
     return `/events${qs ? `?${qs}` : ''}`

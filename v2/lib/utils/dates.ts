@@ -48,55 +48,40 @@ export function endOfWeekend(): TZDate {
 export type TimeFilter = 'today' | 'tonight' | 'tomorrow' | 'this-weekend' | 'this-week' | 'upcoming'
 
 export function getTimeRange(filter: TimeFilter): { gte: string; lte?: string } {
-  const now = nowInABQ()
+  // event_date is a Postgres DATE column, so EVERY bound must be a bare
+  // 'yyyy-MM-dd' string. A timestamptz literal (e.g. endOfDay().toISOString())
+  // is compared against the date column after a UTC cast, which shifts the
+  // boundary by the Mountain offset — that silently dropped each range's first
+  // day and leaked the next (verified: 'tomorrow' returned day-after-tomorrow's
+  // events and hid all of tomorrow's). Bare date strings compare unambiguously.
+  const todayStr = format(nowInABQ(), 'yyyy-MM-dd')
 
   switch (filter) {
     case 'today':
-      return {
-        // Use a bare YYYY-MM-DD string so both date-only ('2026-04-29') and
-        // full-timestamp ('2026-04-29T10:00:00-06:00') event_date rows pass the
-        // gte filter. In PostgreSQL text comparison a plain date string sorts
-        // BEFORE any same-day timestamp, so an ISO timestamp gte was silently
-        // dropping all date-only events.
-        gte: format(nowInABQ(), 'yyyy-MM-dd'),
-        lte: endOfToday().toISOString(),
-      }
-    case 'tonight': {
-      // Same date-only gte trick — grabs all of today's events from the DB.
-      // fetchEvents then applies a 5 PM Mountain-time in-memory cutoff to drop
-      // morning events whose timestamps are known (see needsInMemory logic there).
-      // Date-only events (time unknown) are always kept — they might be evening shows.
-      return {
-        gte: format(nowInABQ(), 'yyyy-MM-dd'),
-        lte: endOfToday().toISOString(),
-      }
-    }
+    case 'tonight':
+      // Both scope to today's date. 'tonight' additionally applies a 5 PM
+      // Mountain in-memory cutoff in fetchEvents (see isEvening + needsInMemory);
+      // date-only events with unknown time are kept there as possible evening shows.
+      return { gte: todayStr, lte: todayStr }
     case 'tomorrow': {
-      const tomorrow = new TZDate(addDays(startOfToday(), 1), ABQ_TZ)
-      return {
-        gte: tomorrow.toISOString(),
-        lte: endOfDay(tomorrow).toISOString(),
-      }
+      const t = format(new TZDate(addDays(startOfToday(), 1), ABQ_TZ), 'yyyy-MM-dd')
+      return { gte: t, lte: t }
     }
     case 'this-weekend':
+      // Saturday through Sunday inclusive (startOfWeekend excludes Friday).
       return {
-        gte: startOfWeekend().toISOString(),
-        lte: endOfWeekend().toISOString(),
+        gte: format(startOfWeekend(), 'yyyy-MM-dd'),
+        lte: format(endOfWeekend(), 'yyyy-MM-dd'),
       }
-    case 'this-week': {
-      const weekEnd = new TZDate(addDays(startOfToday(), 7), ABQ_TZ)
+    case 'this-week':
+      // Today through 7 days out.
       return {
-        gte: now.toISOString(),
-        lte: endOfDay(weekEnd).toISOString(),
+        gte: todayStr,
+        lte: format(new TZDate(addDays(startOfToday(), 7), ABQ_TZ), 'yyyy-MM-dd'),
       }
-    }
     case 'upcoming':
     default:
-      // Use a bare date string (not a timestamp) so today's events always appear
-      // regardless of when in the day the query runs. A UTC timestamp gte would
-      // silently drop date-only rows earlier than "now" in UTC — so an NHCC event
-      // on June 6 disappears after 6 PM Mountain (midnight UTC).
-      return { gte: format(nowInABQ(), 'yyyy-MM-dd') }
+      return { gte: todayStr }
   }
 }
 

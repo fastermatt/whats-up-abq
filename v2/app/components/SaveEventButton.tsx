@@ -52,7 +52,10 @@ export function SaveEventButton({ eventId, eventName, eventDate, venueName, cate
       await supabase.from('user_events').delete().eq('user_id', user.id).eq('event_id', eventId)
       setState(null)
     } else {
-      // Save
+      // Save (also covers switching from "going" → "saved"). When leaving the
+      // "going" state, drop the going count by one — otherwise the "N going"
+      // label stays inflated by a user who is no longer going.
+      if (state === 'going') setCount(c => Math.max(0, c - 1))
       await supabase.from('user_events').upsert({
         user_id: user.id, event_id: eventId, state: 'saved',
         event_name: eventName, event_date: eventDate,
