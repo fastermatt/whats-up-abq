@@ -594,24 +594,37 @@ export async function fetchNeighborhoodCounts(): Promise<NeighborhoodCount[]> {
   const { data, error } = await (supabase as any)
     .schema('public')
     .from('events')
-    .select('neighborhood')
+    .select('neighborhood, neighborhood_slug')
     .eq('hidden', false)
     .gte('event_date', today)
     .not('neighborhood', 'is', null)
 
   if (error) return []
 
-  const counts: Record<string, number> = {}
-  for (const row of (data ?? []) as { neighborhood: string }[]) {
-    const n = row.neighborhood
-    if (n) counts[n] = (counts[n] ?? 0) + 1
+  // Aggregate by SLUG, not by raw name. Two name variants that resolve to the
+  // same slug ("Downtown" vs "Downtown Albuquerque") otherwise produced two
+  // separate cards with the same React key AND split one neighborhood's events
+  // across both — so the homepage undercounted and React logged duplicate-key
+  // errors. Grouping on the DB-generated `neighborhood_slug` (with a derived
+  // fallback) also guarantees the card's link matches exactly what the
+  // neighborhood page filters on (.eq('neighborhood_slug', slug)).
+  const agg: Record<string, { count: number; labels: Record<string, number> }> = {}
+  for (const row of (data ?? []) as { neighborhood: string; neighborhood_slug: string | null }[]) {
+    const name = row.neighborhood
+    if (!name) continue
+    const slug = row.neighborhood_slug || neighborhoodToSlug(name)
+    if (!slug) continue
+    const bucket = (agg[slug] ??= { count: 0, labels: {} })
+    bucket.count += 1
+    bucket.labels[name] = (bucket.labels[name] ?? 0) + 1
   }
 
-  return Object.entries(counts)
-    .map(([neighborhood, count]) => ({
-      neighborhood,
+  return Object.entries(agg)
+    .map(([slug, { count, labels }]) => ({
+      // Display the most common raw-name variant for this slug.
+      neighborhood: Object.entries(labels).sort((a, b) => b[1] - a[1])[0][0],
       count,
-      slug: neighborhoodToSlug(neighborhood),
+      slug,
     }))
     .sort((a, b) => b.count - a.count)
 }

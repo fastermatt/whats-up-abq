@@ -3,7 +3,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { Sparkles, SlidersHorizontal, ArrowRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { fetchEventById } from '@/lib/events'
+import { fetchEventById, fetchEvents } from '@/lib/events'
 import { EventImage } from '@/app/components/EventImage'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { DismissButton } from './DismissButton'
@@ -40,6 +40,21 @@ const CAT_MAP: Record<string, string[]> = {
   'free events':       [], // handled via price, not category
 }
 
+// Maps a PreferencesPicker label → canonical DB `category` column value(s).
+// Used by the live fallback to pull real upcoming events matching a user's
+// picks. One label can span multiple DB categories (e.g. "outdoors & sports").
+const PREF_TO_DB_CATS: Record<string, string[]> = {
+  'music':             ['Music'],
+  'comedy':            ['Comedy'],
+  'food & drink':      ['Food & Drink'],
+  'arts & theater':    ['Arts & Theater'],
+  'outdoors & sports': ['Outdoor', 'Sports'],
+  'family / kids':     ['Family'],
+  'film':              ['Film'],
+  'nightlife':         ['Community'],
+  'volunteering':      ['Community'],
+}
+
 // Categories that contain family/kids content — hidden for non-family users
 const FAMILY_CATEGORIES = ['family', 'kids', 'children', 'family-friendly', 'family friendly']
 
@@ -74,7 +89,7 @@ export default async function ForYouPage() {
   if (!user) redirect('/login?next=/for-you')
 
   // Fetch both pref systems in parallel: taste profile (new) + notification prefs (old)
-  const [{ data: profile }, { data: notifPrefs }, { data: matches }] = await Promise.all([
+  const [{ data: profile }, { data: notifPrefs }, { data: matches }, { data: dismissed }] = await Promise.all([
     supabase.from('profiles').select('preferences').eq('id', user.id).single(),
     supabase
       .from('user_event_preferences')
@@ -88,7 +103,16 @@ export default async function ForYouPage() {
       .eq('dismissed', false)
       .order('score', { ascending: false })
       .limit(60),
+    // Dismissed matches — excluded from the live fallback so "not interested"
+    // sticks even for events the matcher never surfaced.
+    supabase
+      .from('notification_matches')
+      .select('event_id')
+      .eq('user_id', user.id)
+      .eq('dismissed', true),
   ])
+
+  const dismissedIds = new Set(((dismissed ?? []) as { event_id: string }[]).map(d => d.event_id))
 
   const tastePrefs = (profile?.preferences ?? {}) as UserPreferences
 
@@ -155,6 +179,46 @@ export default async function ForYouPage() {
         return b.score - a.score
       })
     }
+  }
+
+  // ── Live fallback ───────────────────────────────────────────────────────────
+  // The daily matcher (notification_matches) lags a user's picks by up to a day,
+  // and a brand-new picker has zero matches — so without this, the moment someone
+  // tells us what they like, "For You" showed an empty "check back tomorrow"
+  // state. Instead, supplement the matched feed with a live query against their
+  // taste prefs so picks produce relevant results immediately. Matched events
+  // (with a score) always rank first; live picks fill in below.
+  if (hasTastePrefs) {
+    const budgetFreeOnly = tastePrefs.budget === 'free'
+    const isNonFamily = tastePrefs.who === 'solo' || tastePrefs.who === 'couple'
+    const dbCats = Array.from(new Set(
+      (tastePrefs.categories ?? [])
+        .map(c => c.toLowerCase())
+        .filter(c => c !== 'free events')
+        .flatMap(label => PREF_TO_DB_CATS[label] ?? [])
+    ))
+
+    // One indexed query per preferred category (usually 1-4); fall back to a
+    // general upcoming pool when the only pick is "Free Events".
+    const pools = dbCats.length > 0
+      ? await Promise.all(dbCats.map(cat =>
+          fetchEvents({ category: cat, freeOnly: budgetFreeOnly, timeFilter: 'upcoming', limit: 18 })
+        ))
+      : [await fetchEvents({ freeOnly: budgetFreeOnly, timeFilter: 'upcoming', limit: 24 })]
+
+    const seen = new Set(items.map(i => i.event.id))
+    const liveItems: EventItem[] = []
+    for (const pool of pools) {
+      for (const event of pool.events) {
+        if (seen.has(event.id) || dismissedIds.has(event.id)) continue
+        if (isNonFamily && isFamilyEvent(event.category, event.title)) continue
+        seen.add(event.id)
+        liveItems.push({ event, score: 0, reasons: [] })
+      }
+    }
+    // Soonest-first under the matched items, capped to a browsable feed.
+    liveItems.sort((a, b) => (a.event.date ?? '').localeCompare(b.event.date ?? ''))
+    items = [...items, ...liveItems].slice(0, 36)
   }
 
   const showNudge = !hasTastePrefs
@@ -306,7 +370,7 @@ export default async function ForYouPage() {
         {items.length > 0 && (
           <>
             <p className="text-[12px] text-ink-light mb-4">
-              <strong className="text-ink">{items.length}</strong> events matched to your picks
+              <strong className="text-ink">{items.length}</strong> events picked for you
             </p>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
               {items.map(({ event, score, reasons }) => (
@@ -323,9 +387,11 @@ export default async function ForYouPage() {
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     <DismissButton eventId={event.id} />
-                    <div className="absolute top-2 right-2 z-10 px-2 py-0.5 rounded-full bg-terra text-white text-[10px] font-black shadow">
-                      {score}%
-                    </div>
+                    {score > 0 && (
+                      <div className="absolute top-2 right-2 z-10 px-2 py-0.5 rounded-full bg-terra text-white text-[10px] font-black shadow">
+                        {score}%
+                      </div>
+                    )}
                     {event.category && (
                       <div className="absolute bottom-2 left-2 z-10 px-2 py-0.5 rounded-full bg-black/65 text-white text-[10px] font-semibold">
                         {event.category}
@@ -345,11 +411,13 @@ export default async function ForYouPage() {
                     {event.price && (
                       <p className="text-[10px] text-sage mt-0.5 font-semibold">{event.price}</p>
                     )}
-                    {reasons?.length > 0 && (
+                    {score > 0 && reasons?.length > 0 ? (
                       <p className="text-[9px] text-sage mt-1 line-clamp-1 font-semibold">
                         {reasons.slice(0, 2).map(r => r.replace(/^(category|venue|nh|tag|kw|mood):/, '')).join(' · ')}
                       </p>
-                    )}
+                    ) : score === 0 ? (
+                      <p className="text-[9px] text-sage mt-1 font-semibold">Based on your picks</p>
+                    ) : null}
                   </div>
                 </Link>
               ))}
