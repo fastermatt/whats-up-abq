@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { Sparkles, SlidersHorizontal, ArrowRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { fetchEventById, fetchEvents } from '@/lib/events'
+import { prefLabelsToDbCategories } from '@/lib/preferences'
 import { EventImage } from '@/app/components/EventImage'
 import { getCategoryFallback } from '@/lib/fallback-images'
 import { DismissButton } from './DismissButton'
@@ -38,21 +39,6 @@ const CAT_MAP: Record<string, string[]> = {
   'nightlife':         ['nightlife', 'club', 'dj', 'bar', 'lounge'],
   'volunteering':      ['volunteer', 'volunteering', 'community'],
   'free events':       [], // handled via price, not category
-}
-
-// Maps a PreferencesPicker label → canonical DB `category` column value(s).
-// Used by the live fallback to pull real upcoming events matching a user's
-// picks. One label can span multiple DB categories (e.g. "outdoors & sports").
-const PREF_TO_DB_CATS: Record<string, string[]> = {
-  'music':             ['Music'],
-  'comedy':            ['Comedy'],
-  'food & drink':      ['Food & Drink'],
-  'arts & theater':    ['Arts & Theater'],
-  'outdoors & sports': ['Outdoor', 'Sports'],
-  'family / kids':     ['Family'],
-  'film':              ['Film'],
-  'nightlife':         ['Community'],
-  'volunteering':      ['Community'],
 }
 
 // Categories that contain family/kids content — hidden for non-family users
@@ -191,12 +177,7 @@ export default async function ForYouPage() {
   if (hasTastePrefs) {
     const budgetFreeOnly = tastePrefs.budget === 'free'
     const isNonFamily = tastePrefs.who === 'solo' || tastePrefs.who === 'couple'
-    const dbCats = Array.from(new Set(
-      (tastePrefs.categories ?? [])
-        .map(c => c.toLowerCase())
-        .filter(c => c !== 'free events')
-        .flatMap(label => PREF_TO_DB_CATS[label] ?? [])
-    ))
+    const dbCats = prefLabelsToDbCategories(tastePrefs.categories ?? [])
 
     // One indexed query per preferred category (usually 1-4); fall back to a
     // general upcoming pool when the only pick is "Free Events".

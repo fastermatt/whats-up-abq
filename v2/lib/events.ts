@@ -304,7 +304,14 @@ export async function fetchEvents({
   // The JS layer below still applies the full AND+word-boundary logic — this is
   // just a fast pre-filter, not a replacement. Filters on terms ≥ 3 chars only.
   if (search) {
-    const searchTerms = search.toLowerCase().split(/\s+/).filter(t => t.length >= 3)
+    // Sanitize each term before interpolating into PostgREST .or(): strip chars
+    // significant in the .or() grammar (comma, parens, dot, %, *, :, ") so a
+    // search like "a,b)" can't break or reshape the query. The JS layer below
+    // applies the authoritative AND + word-boundary match, so a slightly broader
+    // pre-filter is harmless (zero under-fetch).
+    const searchTerms = search.toLowerCase().split(/\s+/)
+      .map(t => t.replace(/[,()."*:%\\]/g, ''))
+      .filter(t => t.length >= 3)
     if (searchTerms.length > 0) {
       // OR across all terms × both columns — returns anything matching any term,
       // JS layer refines to strict AND. Acceptable: some over-fetch, zero under-fetch.

@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { createClient } from '@/lib/supabase/server'
+import { venueToSlug } from '@/lib/events'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://abqunplugged.com'
@@ -54,11 +55,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ),
   ] as string[]
 
-  // ── Venue slug helper ─────────────────────────────────────────────────────
-  const venueToSlug = (name: string) =>
-    encodeURIComponent(
-      name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-')
-    )
+  // Venue slugs use the canonical venueToSlug() from lib/events (imported above)
+  // so sitemap URLs exactly match what /venues/[slug] resolves — the hand-rolled
+  // version diverged on special-char venues ("AT&T" → "att" vs "at-t").
 
   // ── Assemble sitemap ──────────────────────────────────────────────────────
   // All 10 event category pages

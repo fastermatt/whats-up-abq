@@ -51,8 +51,16 @@ const LIMIT = argv.limit ?? '60'
 function run(name, args) {
   return new Promise((resolve) => {
     const start = Date.now()
+    // Guard: skip (don't crash) if the target script no longer exists.
+    // e.g. gemma-event-audit.mjs was removed; this step now degrades gracefully.
+    const scriptPath = path.join(__dirname, args[0])
+    if (!fs.existsSync(scriptPath)) {
+      console.log(`\n[skip] ${name} — ${args[0]} not found`)
+      resolve(0)
+      return
+    }
     console.log(`\n━━━ ${name} ━━━`)
-    const child = spawn('node', [path.join(__dirname, args[0]), ...args.slice(1)], {
+    const child = spawn('node', [scriptPath, ...args.slice(1)], {
       stdio: 'inherit',
       env: process.env,
     })

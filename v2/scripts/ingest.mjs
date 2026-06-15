@@ -643,6 +643,16 @@ async function main() {
   const pass = invariantFails.length === 0 && smokeResults.failures.filter(f => !isImageOnlyFailure(f)).length === 0
   if (pass) {
     console.log(`${C.green}${C.bold}✓ PIPELINE HEALTHY${C.reset}`)
+    // Notify IndexNow (Bing/Yandex) of the refreshed URL set so new events get
+    // crawled within hours, not days. Non-fatal — never blocks a healthy run.
+    try {
+      const { execFileSync } = await import('node:child_process')
+      const { fileURLToPath } = await import('node:url')
+      const indexnow = fileURLToPath(new URL('./submit-indexnow.mjs', import.meta.url))
+      execFileSync('node', [indexnow], { stdio: 'inherit', env: process.env })
+    } catch (e) {
+      console.warn('[IndexNow] submission skipped (non-fatal):', e?.message ?? e)
+    }
     process.exit(0)
   } else {
     console.log(`${C.red}${C.bold}✗ PIPELINE FAILED${C.reset} — see failures above`)

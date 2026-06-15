@@ -5,6 +5,7 @@
  */
 
 import type { NormalizedEvent } from '@/lib/events'
+import { parseClockTime } from '@/lib/utils/dates'
 
 // ─── RFC 5545 escaping ────────────────────────────────────────────────────────
 
@@ -45,21 +46,18 @@ function toIcsDateTime(isoDate: string, isoTime: string | null): string {
   // Build a full ISO string to parse
   let fullIso: string
 
-  if (isoTime === null) {
-    // Date-only event — no time in normalizer means we only have YYYY-MM-DD
-    // Use noon local time as a sensible fallback
-    fullIso = `${isoDate}T12:00:00`
+  if (/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) {
+    // event_date is date-only; the real start time (if known) lives in the
+    // display `isoTime` string ("7:00 PM"). Parse it instead of always defaulting
+    // to noon — that was putting every timed-but-date-only event at 12:00.
+    const clock = parseClockTime(isoTime)
+    const hh = clock ? String(clock.hour).padStart(2, '0') : '12'
+    const mm = clock ? String(clock.minute).padStart(2, '0') : '00'
+    // Floating local time; DTSTART carries TZID=America/Denver, which is DST-safe.
+    fullIso = `${isoDate}T${hh}:${mm}:00`
   } else {
-    // The date field from NormalizedEvent may already be a full ISO string
-    if (/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) {
-      // date is YYYY-MM-DD, time is a display string like "7:00 PM"
-      // We need to reconstruct from parts — but we don't have the raw ISO time here.
-      // The `time` field is a display string, not ISO. So fall back to raw date with noon.
-      fullIso = `${isoDate}T12:00:00`
-    } else {
-      // isoDate is already a full ISO timestamp (e.g. from start_at or dateTime fields)
-      fullIso = isoDate
-    }
+    // isoDate is already a full ISO timestamp (e.g. from start_at or dateTime fields)
+    fullIso = isoDate
   }
 
   try {

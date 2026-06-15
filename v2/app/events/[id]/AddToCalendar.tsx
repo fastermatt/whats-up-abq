@@ -7,62 +7,51 @@ interface AddToCalendarProps {
   title: string
   /** YYYY-MM-DD or full ISO string from NormalizedEvent.date */
   date: string
+  /** Display time string ("7:00 PM") from NormalizedEvent.time, when date is date-only */
+  time: string | null
   venue: string | null
   address: string | null
   description: string | null
 }
 
-// ─── Google Calendar UTC date helpers ────────────────────────────────────────
+// ─── Google Calendar local-time helpers ───────────────────────────────────────
+// We pass LOCAL wall-clock times + ctz=America/Denver so Google applies the
+// correct offset (MST vs MDT) itself — no manual, DST-unaware -06:00 math, and
+// the real event time is used instead of a noon approximation.
 
-/**
- * Build a UTC datetime string in Google Calendar format: YYYYMMDDTHHMMSSZ
- * Google Calendar needs UTC for the `dates` param.
- * Since our events are in America/Denver (UTC-6 standard / UTC-7 MDT),
- * we offset by 6 hours as a reasonable approximation for date-only events.
- * For full ISO timestamps, we parse them directly.
- */
-function toGcalUtc(isoDate: string): string {
-  let d: Date
-
-  if (/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) {
-    // Date-only: treat noon Denver (UTC-6) as 6 PM UTC
-    d = new Date(`${isoDate}T18:00:00Z`)
-  } else if (isoDate.endsWith('Z') || isoDate.includes('+')) {
-    d = new Date(isoDate)
-  } else {
-    // Local time string — treat as America/Denver (~UTC-6 MST)
-    d = new Date(isoDate + '-06:00')
-  }
-
-  if (isNaN(d.getTime())) {
-    // Fallback: parse date portion only
-    const datePart = isoDate.slice(0, 10)
-    d = new Date(`${datePart}T18:00:00Z`)
-  }
-
-  const pad2 = (n: number) => String(n).padStart(2, '0')
-  return (
-    `${d.getUTCFullYear()}${pad2(d.getUTCMonth() + 1)}${pad2(d.getUTCDate())}` +
-    `T${pad2(d.getUTCHours())}${pad2(d.getUTCMinutes())}${pad2(d.getUTCSeconds())}Z`
-  )
+function parseTimeParts(time: string | null): { h: number; m: number } {
+  const match = time?.trim().match(/^(\d{1,2}):(\d{2})\s*([AaPp][Mm])?/)
+  if (!match) return { h: 12, m: 0 } // noon fallback when time unknown
+  let h = parseInt(match[1], 10)
+  const m = parseInt(match[2], 10)
+  const mer = match[3]?.toUpperCase()
+  if (mer === 'PM' && h < 12) h += 12
+  if (mer === 'AM' && h === 12) h = 0
+  return { h: h > 23 ? 12 : h, m: m > 59 ? 0 : m }
 }
 
-function toGcalUtcPlusTwoHours(isoDate: string): string {
-  const start = toGcalUtc(isoDate)
-  // Parse back and add 2 hours
-  const d = new Date(
-    parseInt(start.slice(0, 4)),
-    parseInt(start.slice(4, 6)) - 1,
-    parseInt(start.slice(6, 8)),
-    parseInt(start.slice(9, 11)) + 2,
-    parseInt(start.slice(11, 13)),
-    parseInt(start.slice(13, 15)),
-  )
-  const pad2 = (n: number) => String(n).padStart(2, '0')
-  return (
-    `${d.getUTCFullYear()}${pad2(d.getUTCMonth() + 1)}${pad2(d.getUTCDate())}` +
-    `T${pad2(d.getUTCHours())}${pad2(d.getUTCMinutes())}${pad2(d.getUTCSeconds())}Z`
-  )
+/** Format a UTC-keyed Date (whose UTC fields hold local digits) as floating
+ *  "YYYYMMDDTHHMMSS" for Google Calendar's `dates` param (paired with ctz). */
+function fmtLocal(d: Date): string {
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${d.getUTCFullYear()}${p(d.getUTCMonth() + 1)}${p(d.getUTCDate())}T${p(d.getUTCHours())}${p(d.getUTCMinutes())}00`
+}
+
+/** The event's Denver wall-clock start as a UTC-keyed Date (UTC fields = local
+ *  digits), so fmtLocal emits the wall clock regardless of the runtime TZ. */
+function denverWallClock(date: string, time: string | null): Date {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    const { h, m } = parseTimeParts(time)
+    return new Date(Date.UTC(+date.slice(0, 4), +date.slice(5, 7) - 1, +date.slice(8, 10), h, m, 0))
+  }
+  // Full ISO timestamp → read its Denver wall clock via Intl
+  const o = Object.fromEntries(
+    new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Denver', hour12: false,
+      year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
+    }).formatToParts(new Date(date)).map(p => [p.type, p.value])
+  ) as Record<string, string>
+  return new Date(Date.UTC(+o.year, +o.month - 1, +o.day, +(o.hour === '24' ? '0' : o.hour), +o.minute, 0))
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -71,15 +60,17 @@ export default function AddToCalendar({
   id,
   title,
   date,
+  time,
   venue,
   address,
   description,
 }: AddToCalendarProps) {
   const canonicalUrl = `https://abqunplugged.com/events/${id}`
 
-  // Google Calendar URL
-  const startUtc = toGcalUtc(date)
-  const endUtc   = toGcalUtcPlusTwoHours(date)
+  // Google Calendar URL — local wall-clock + ctz (DST-safe, uses the real time)
+  const startWall = denverWallClock(date, time)
+  const start = fmtLocal(startWall)
+  const end   = fmtLocal(new Date(startWall.getTime() + 2 * 3600 * 1000))
 
   const locationParts: string[] = []
   if (venue) locationParts.push(venue)
@@ -91,7 +82,8 @@ export default function AddToCalendar({
   const gcalUrl = new URL('https://calendar.google.com/calendar/render')
   gcalUrl.searchParams.set('action', 'TEMPLATE')
   gcalUrl.searchParams.set('text', title)
-  gcalUrl.searchParams.set('dates', `${startUtc}/${endUtc}`)
+  gcalUrl.searchParams.set('dates', `${start}/${end}`)
+  gcalUrl.searchParams.set('ctz', 'America/Denver')
   gcalUrl.searchParams.set('details', descStr)
   if (locationStr) gcalUrl.searchParams.set('location', locationStr)
 

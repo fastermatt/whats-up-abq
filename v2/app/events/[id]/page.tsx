@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import ShareButton from './ShareButton'
 import AddToCalendar from './AddToCalendar'
+import { denverOffsetForDate } from '@/lib/utils/dates'
 import { AnimateIn } from '@/app/components/AnimateIn'
 import { SaveEventButton } from '@/app/components/SaveEventButton'
 import { ReviewSection } from '@/app/components/ReviewSection'
@@ -150,7 +151,7 @@ export default async function EventDetailPage({ params }: PageProps) {
           time24 = `${h24[1]}:${h24[2]}`
         }
       }
-      return `${event.date}T${time24}:00-06:00`
+      return `${event.date}T${time24}:00${denverOffsetForDate(event.date)}`
     }
     return event.date
   })()
@@ -686,6 +687,7 @@ export default async function EventDetailPage({ params }: PageProps) {
               id={event.id}
               title={event.title}
               date={event.date}
+              time={event.time}
               venue={event.venue}
               address={event.address}
               description={event.description}

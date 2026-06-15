@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { fetchEvents, fetchCategoryCounts, fetchEventCountsByDate, NormalizedEvent, CATEGORY_SLUG_MAP, venueToSlug, type Daypart } from '@/lib/events'
+import { prefLabelsToDbCategories } from '@/lib/preferences'
 import { OG_IMAGE } from '@/lib/fallback-images'
 import { TimeFilter } from '@/lib/utils/dates'
 import { getCategoryFallback } from '@/lib/fallback-images'
@@ -20,19 +21,6 @@ import { buildBreadcrumbs } from '@/lib/seo'
 // logged-in users. The revalidate hint is still used as a fallback for
 // unauthenticated requests.
 export const revalidate = 60
-
-// Maps preference label → canonical DB category
-const PREF_TO_DB_CAT: Record<string, string> = {
-  'music':           'Music',
-  'comedy':          'Comedy',
-  'food & drink':    'Food & Drink',
-  'arts & theater':  'Arts & Theater',
-  'outdoors & sports': 'Outdoor',
-  'family / kids':   'Family',
-  'film':            'Film',
-  'nightlife':       'Community',
-  'volunteering':    'Community',
-}
 
 const FAMILY_RE = /\bkids?\b|\bchildren\b|\bfamily\b|\bstory.?time\b|\bplaydate\b/i
 
@@ -183,11 +171,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
 
     // Soft sort: events in preferred categories bubble to the top
     if (tastePrefs.categories?.length) {
-      const preferredCats = new Set(
-        tastePrefs.categories
-          .map(p => PREF_TO_DB_CAT[p.toLowerCase()])
-          .filter((c): c is string => Boolean(c))
-      )
+      const preferredCats = new Set(prefLabelsToDbCategories(tastePrefs.categories))
       events = [...events].sort((a, b) => {
         const aScore = preferredCats.has(a.category ?? '') ? 1 : 0
         const bScore = preferredCats.has(b.category ?? '') ? 1 : 0

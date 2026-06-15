@@ -85,6 +85,39 @@ export function getTimeRange(filter: TimeFilter): { gte: string; lte?: string } 
   }
 }
 
+/** Parse a display/clock time ("7:30 PM", "19:30") to {hour, minute}, or null if unparseable. */
+export function parseClockTime(time: string | null | undefined): { hour: number; minute: number } | null {
+  const t = time?.trim()
+  if (!t) return null
+  const m = t.match(/^(\d{1,2}):(\d{2})\s*([AaPp][Mm])?/)
+  if (!m) return null
+  let hour = parseInt(m[1], 10)
+  const minute = parseInt(m[2], 10)
+  const mer = m[3]?.toUpperCase()
+  if (mer === 'PM' && hour < 12) hour += 12
+  if (mer === 'AM' && hour === 12) hour = 0
+  if (hour > 23 || minute > 59) return null
+  return { hour, minute }
+}
+
+/** The America/Denver UTC offset in effect on a given date ("-06:00" MDT / "-07:00" MST).
+ *  DST-aware via Intl — replaces hardcoded -06:00 that was wrong all winter (MST). */
+export function denverOffsetForDate(dateStr: string): string {
+  const probe = new Date(`${dateStr.slice(0, 10)}T12:00:00Z`)
+  if (isNaN(probe.getTime())) return '-07:00'
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: ABQ_TZ, hour12: false,
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+  }).formatToParts(probe)
+  const o = Object.fromEntries(parts.map(p => [p.type, p.value])) as Record<string, string>
+  const asUTC = Date.UTC(+o.year, +o.month - 1, +o.day, +(o.hour === '24' ? '0' : o.hour), +o.minute, +o.second)
+  const diffMin = Math.round((asUTC - probe.getTime()) / 60000)
+  const sign = diffMin >= 0 ? '+' : '-'
+  const abs = Math.abs(diffMin)
+  return `${sign}${String(Math.floor(abs / 60)).padStart(2, '0')}:${String(abs % 60).padStart(2, '0')}`
+}
+
 /** Pretty display format: "Fri, Apr 18 · 8:00 PM" */
 export function formatEventTime(isoString: string): string {
   const d = new TZDate(new Date(isoString), ABQ_TZ)
