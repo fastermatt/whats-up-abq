@@ -140,6 +140,7 @@ export default function RootLayout({
             No preload needed; heading renders from HTML+CSS with no external resource. */}
         {/* Preconnect to Flaticon CDN so the TCP handshake is done before the async CSS loads */}
         <link rel="preconnect" href="https://cdn-uicons.flaticon.com" />
+        <link rel="alternate" type="application/rss+xml" title="ABQ Unplugged Events" href="https://abqunplugged.com/feed.xml" />
         {/* Flaticon Uicons — loaded async to avoid render-blocking. Icons appear ~200ms after
             page paint. noscript fallback ensures they still load without JS. */}
         <noscript>
