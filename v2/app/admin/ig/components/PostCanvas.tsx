@@ -8,6 +8,7 @@ import type { Slide, Layer, TextLayer, ImageLayer, ShapeLayer, CanvasFormat } fr
 import { CANVAS_DIMS } from '../types'
 import { useEditor } from '../store'
 import { proxyIfNeeded } from '../lib/image-proxy'
+import { waitForDesignImages } from '../lib/verifyRender'
 
 // Global keyboard shortcuts — Delete removes selected layer, ⌘Z/⌘⇧Z undo/redo, Escape deselects.
 // Skipped when focus is inside an input/textarea/select (user is typing in the design panel).
@@ -280,7 +281,7 @@ function InlineTextEditor({
   onCancel: () => void
 }) {
   const editorRef = useRef<HTMLDivElement>(null)
-  const initialTextRef = useRef(layer.text)
+  const [initialText] = useState(layer.text)
   const cancelledRef = useRef(false)
 
   // Mount: focus + select all so the user can start typing immediately.
@@ -301,7 +302,7 @@ function InlineTextEditor({
     if (!el) return
     // innerText preserves visible newlines; trim trailing newline added by contentEditable.
     const next = el.innerText.replace(/\n$/, '')
-    if (next === initialTextRef.current) {
+    if (next === initialText) {
       onCancel()
     } else {
       onCommit(next)
@@ -366,7 +367,7 @@ function InlineTextEditor({
         // Don't show the browser caret-color override; default looks fine.
       }}
     >
-      {initialTextRef.current}
+      {initialText}
     </div>
   )
 }
@@ -540,6 +541,7 @@ function SafeZoneOverlay({ format, w, h }: { format: CanvasFormat; w: number; h:
 // ── Main canvas ─────────────────────────────────────────────────────────
 
 export interface PostCanvasHandle {
+  waitForReady: () => Promise<void>
   exportPng: () => Promise<string>
   exportAllSlides: () => Promise<string[]>
 }
@@ -570,6 +572,7 @@ export function PostCanvas({ onExportRef }: { onExportRef?: (h: PostCanvasHandle
   // Inline text editor state — id of the text layer currently being edited.
   // Cleared when the editor commits or cancels, or when the active slide changes.
   const [inlineEditId, setInlineEditId] = useState<string | null>(null)
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setInlineEditId(null) }, [activeSlideIndex])
   const editingLayer = inlineEditId
     ? (slide.layers.find(l => l.id === inlineEditId && l.type === 'text') as TextLayer | undefined)
@@ -652,6 +655,10 @@ export function PostCanvas({ onExportRef }: { onExportRef?: (h: PostCanvasHandle
   useEffect(() => {
     if (!onExportRef) return
     onExportRef({
+      waitForReady: async () => {
+        await waitForDesignImages(useEditor.getState().design)
+        stageRef.current?.getLayers().forEach(l => l.batchDraw())
+      },
       exportPng: async () => {
         const stage = stageRef.current
         if (!stage) return ''

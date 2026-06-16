@@ -21,6 +21,7 @@ import { DIGEST_TEMPLATES } from '../lib/templates'
 import type { PostCanvasHandle } from '../components/PostCanvas'
 import { useEditor } from '../store'
 import { IGSubNav } from '../components/IGSubNav'
+import { verifyRenderedPng } from '../lib/verifyRender'
 
 const PostCanvas = dynamic(
   () => import('../components/PostCanvas').then(m => m.PostCanvas),
@@ -288,9 +289,13 @@ export default function DigestPage() {
   // ── Export / schedule ──────────────────────────────────────────────────
   async function renderJpeg(): Promise<string> {
     if (!canvasRef.current) throw new Error('Canvas not ready')
-    await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())))
-    await new Promise(r => setTimeout(r, 400))
-    return pngToJpeg(await canvasRef.current.exportPng())
+    await canvasRef.current.waitForReady()
+    const png = await canvasRef.current.exportPng()
+    const verification = await verifyRenderedPng(png)
+    if (!verification.ok) {
+      throw new Error(verification.reasons.join(' '))
+    }
+    return pngToJpeg(png)
   }
 
   const handleDownload = useCallback(async () => {
@@ -303,7 +308,6 @@ export default function DigestPage() {
     } catch (e) {
       alert('Export failed: ' + (e instanceof Error ? e.message : String(e)))
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startDate, endDate])
 
   const handleSchedule = useCallback(async () => {
@@ -356,7 +360,6 @@ export default function DigestPage() {
       setActionStatus('failed')
       setErrorMsg(e instanceof Error ? e.message : 'Unknown error')
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeEvents, startDate, endDate, scheduledAt])
 
   // ─── Render ────────────────────────────────────────────────────────────

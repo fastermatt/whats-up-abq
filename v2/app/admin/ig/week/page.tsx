@@ -15,6 +15,7 @@ import type { PostCanvasHandle } from '../components/PostCanvas'
 import { buildCaptions } from '../components/CaptionBuilder'
 import { IGSubNav } from '../components/IGSubNav'
 import type { NormalizedEvent } from '@/lib/events'
+import { verifyRenderedPng } from '../lib/verifyRender'
 
 // Konva stage must load client-side only
 const PostCanvas = dynamic(
@@ -369,12 +370,8 @@ export default function WeekSchedulerPage() {
         loadDesign(design)
       }
 
-      // Wait two paint frames so the Konva stage rerenders the new design
-      await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())))
-      // Plus a bit more for image loading, since the bg uses an <img>
-      await new Promise(r => setTimeout(r, 600))
-
       if (!canvasRef.current) throw new Error('Canvas not ready')
+      await canvasRef.current.waitForReady()
       return await canvasRef.current.exportPng()
     } finally {
       release()
@@ -419,7 +416,12 @@ export default function WeekSchedulerPage() {
         customImageUrl: row.customImageUrl,
         customDesign:   row.customDesign,
       }
-      const png   = await renderEventPoster(evt, overrides)
+      const png = await renderEventPoster(evt, overrides)
+      const verification = await verifyRenderedPng(png)
+      if (!verification.ok) {
+        setRows(prev => ({ ...prev, [key]: { ...prev[key], status: 'failed', errorMsg: verification.reasons.join(' ') } }))
+        return false
+      }
       const jpeg  = await pngToJpeg(png)
       const thumb = await pngToThumbnail(png, 360)
       setRows(prev => ({ ...prev, [key]: { ...prev[key], status: 'uploading', previewUrl: thumb } }))
@@ -457,7 +459,6 @@ export default function WeekSchedulerPage() {
       return r && !r.previewUrl && r.status !== 'scheduled'
     }))
     for (const evt of queued) {
-      // eslint-disable-next-line no-await-in-loop
       await renderPreview(evt)
     }
   }, [days, rows, renderPreview])
@@ -482,7 +483,6 @@ export default function WeekSchedulerPage() {
     for (const { evt } of queued) {
       // Sequential — both to keep Konva renders in-order and to avoid
       // hitting Supabase Storage with parallel uploads.
-      // eslint-disable-next-line no-await-in-loop
       await scheduleRow(evt)
       done += 1
       setBatchProgress({ done, total: queued.length })
@@ -502,7 +502,6 @@ export default function WeekSchedulerPage() {
     setBatchProgress({ done: 0, total: queued.length })
     let done = 0
     for (const evt of queued) {
-      // eslint-disable-next-line no-await-in-loop
       await scheduleRow(evt)
       done += 1
       setBatchProgress({ done, total: queued.length })
@@ -1243,10 +1242,12 @@ function DesignQuickEdit({
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   // Re-sync drafts when the row's persisted overrides change (e.g. after reload)
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setDraftTemplate(row.templateId ?? 'poster')
     setDraftImageUrl(row.customImageUrl ?? '')
   }, [row.templateId, row.customImageUrl])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const key = `${row.date}::${evt.id}`
   const hasOverride = Boolean(row.templateId || row.customImageUrl || row.customDesign)

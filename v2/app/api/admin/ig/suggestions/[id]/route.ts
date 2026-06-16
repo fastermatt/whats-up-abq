@@ -16,6 +16,23 @@ function isAuthorized(req: NextRequest): boolean {
   return req.cookies.get('admin_token')?.value === secret
 }
 
+function decodeBase64(dataUrl: string): Buffer {
+  const base64 = dataUrl.replace(/^data:image\/\w+;base64,/, '')
+  return Buffer.from(base64, 'base64')
+}
+
+async function uploadToSupabase(
+  supabase: Awaited<ReturnType<typeof createServiceClient>>,
+  buffer: Buffer,
+  filename: string
+): Promise<string> {
+  const { error } = await supabase.storage
+    .from('event-photos')
+    .upload(filename, buffer, { contentType: 'image/jpeg', upsert: false })
+  if (error) throw new Error(`Upload failed: ${error.message}`)
+  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-photos/${filename}`
+}
+
 interface PatchBody {
   action: 'accept' | 'reject' | 'skip'
   reason?: string
@@ -45,15 +62,25 @@ export async function PATCH(
       return NextResponse.json({ error: 'Post image not ready yet — wait for the preview to render, then accept.' }, { status: 400 })
     }
 
+    let publicImageUrl: string
+    try {
+      const buffer = decodeBase64(body.imageDataUrl)
+      const filename = `ig-posts/sched_${Date.now()}.jpg`
+      publicImageUrl = await uploadToSupabase(supabase, buffer, filename)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Image upload failed'
+      return NextResponse.json({ error: message }, { status: 500 })
+    }
+
     // Update suggestion to accepted
     const updatePayload: Record<string, unknown> = {
       status: 'accepted',
       caption_edited: body.caption ? true : false,
     }
     if (body.caption)       updatePayload.caption = body.caption
-    if (body.imageDataUrl)  updatePayload.image_data_url = body.imageDataUrl
+    updatePayload.image_data_url = publicImageUrl
 
-    const { error: updateErr } = await (supabase as any)
+    const { error: updateErr } = await supabase
       .schema('public')
       .from('ig_post_suggestions')
       .update(updatePayload)
@@ -62,20 +89,20 @@ export async function PATCH(
     if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 })
 
     // Fetch the suggestion to schedule the post
-    const { data: suggestion } = await (supabase as any)
+    const { data: suggestion } = await supabase
       .schema('public')
       .from('ig_post_suggestions')
       .select('*')
       .eq('id', id)
       .single()
 
-    if (suggestion && body.imageDataUrl) {
+    if (suggestion) {
       // Create an ig_scheduled_post entry (uses existing scheduling infrastructure)
-      const { error: schedErr } = await (supabase as any)
+      const { error: schedErr } = await supabase
         .schema('public')
         .from('ig_scheduled_posts')
         .insert({
-          image_urls:     [body.imageDataUrl],   // ig_scheduled_posts.image_urls is text[] — NOT image_data_url
+          image_urls:     [publicImageUrl],   // ig_scheduled_posts.image_urls is text[] — NOT image_data_url
           caption:        body.caption ?? suggestion.caption ?? '',
           scheduled_for:  suggestion.scheduled_for,
           media_type:     'FEED',
@@ -90,7 +117,7 @@ export async function PATCH(
   }
 
   if (body.action === 'reject') {
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .schema('public')
       .from('ig_post_suggestions')
       .update({ status: 'rejected', rejection_reason: body.reason ?? '' })
@@ -101,7 +128,7 @@ export async function PATCH(
   }
 
   if (body.action === 'skip') {
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .schema('public')
       .from('ig_post_suggestions')
       .update({ status: 'skipped' })
