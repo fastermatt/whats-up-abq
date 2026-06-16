@@ -22,6 +22,10 @@ export interface TemplateEventSlot {
   venue?: string
   category?: string
   imageUrl?: string
+  price?: string
+  priceText?: string
+  priceType?: string
+  isFree?: boolean
 }
 
 export interface TemplateContext {
@@ -1904,6 +1908,36 @@ function epilogueTitleSize(title: string, availWidth: number): { fontSize: numbe
   return { fontSize: FONT_SIZE, text }
 }
 
+function compactEpilogueTitle(title: string, availWidth: number, fontSize: number): string {
+  const max = Math.floor(availWidth / (fontSize * 0.56))
+  return title.length > max ? truncateAtWord(title, max) : title
+}
+
+function digestRange(events: TemplateEventSlot[], fallbackDate?: string): string {
+  const fmtD = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  const evDates = events.map(e => e.date).filter((d): d is string => !!d).sort()
+  if (evDates.length > 0) {
+    const first = new Date(evDates[0] + 'T12:00:00')
+    const last = new Date(evDates[evDates.length - 1] + 'T12:00:00')
+    return first.getTime() === last.getTime() ? fmtD(first) : `${fmtD(first)} - ${fmtD(last)}`
+  }
+  if (fallbackDate) return fmtD(new Date(fallbackDate + 'T12:00:00'))
+  return ''
+}
+
+function priceChipLabel(event: TemplateEventSlot): string {
+  const raw = [
+    event.price,
+    event.priceText,
+    event.priceType,
+  ].filter((p): p is string => !!p && p.trim().length > 0).join(' ').trim()
+  if (event.isFree || /\bfree\b/i.test(raw)) return 'FREE'
+  const amount = raw.match(/\$\s?\d+(?:\.\d{1,2})?/)
+  if (amount) return amount[0].replace(/\s+/g, '')
+  if (/\bcheap|low|budget|donation\b/i.test(raw)) return 'LOW $'
+  return ''
+}
+
 const weekendDigest: Template = {
   id: 'weekend-digest',
   name: 'Weekend Digest',
@@ -2605,6 +2639,623 @@ const topThree: Template = {
   },
 }
 
+// ── D6. Free + Cheap This Weekend ─────────────────────────────────────────
+
+const freeCheap: Template = {
+  id: 'free-cheap',
+  name: 'Free + Cheap This Weekend',
+  description: 'Budget friendly multi-event digest with price chips and practical weekend details.',
+  category: 'brand',
+  thumb: {
+    bg: BRAND_COLORS.cream,
+    blocks: [
+      { x: 7, y: 6, w: 28, h: 2, c: BRAND_COLORS.terra, o: 0.7 },
+      { x: 7, y: 13, w: 74, h: 8, c: BRAND_COLORS.ink },
+      { x: 7, y: 24, w: 42, h: 2, c: BRAND_COLORS.sage, o: 0.75 },
+      { x: 7, y: 34, w: 60, h: 3, c: BRAND_COLORS.ink, o: 0.82 }, { x: 72, y: 33, w: 18, h: 5, c: BRAND_COLORS.sage, r: 3 },
+      { x: 7, y: 46, w: 52, h: 3, c: BRAND_COLORS.ink, o: 0.82 }, { x: 72, y: 45, w: 18, h: 5, c: BRAND_COLORS.sage, r: 3 },
+      { x: 7, y: 58, w: 66, h: 3, c: BRAND_COLORS.ink, o: 0.82 }, { x: 72, y: 57, w: 18, h: 5, c: BRAND_COLORS.sage, r: 3 },
+      { x: 7, y: 70, w: 50, h: 3, c: BRAND_COLORS.ink, o: 0.82 }, { x: 72, y: 69, w: 18, h: 5, c: BRAND_COLORS.sage, r: 3 },
+      { x: 7, y: 92, w: 86, h: 2, c: BRAND_COLORS.terra },
+      { x: 22, y: 97, w: 56, h: 2, c: BRAND_COLORS.terra, o: 0.55 },
+    ],
+  },
+  build: (ctx, format) => {
+    const fmt = format ?? '4:5'
+    const { w, h } = CANVAS_DIMS[fmt]
+    const sy = (y: number) => Math.round(y * h / 1350)
+    const isStory = fmt === '9:16'
+    const topSafe = isStory ? Math.round(h * 0.12) : Math.round(h * 0.08)
+    const botSafe = isStory ? Math.round(h * 0.15) : Math.round(h * 0.08)
+
+    const events = (ctx.events ?? [])
+      .map(e => {
+        const venue = e.venue ?? ''
+        return {
+          title: resolveTitle(e.title, venue),
+          venue,
+          time: e.time ?? '',
+          date: e.date,
+          price: priceChipLabel(e),
+        }
+      })
+      .filter(e => e.price)
+      .slice(0, 5)
+    const rowCount = events.length
+    const range = digestRange(ctx.events ?? [], ctx.postDate)
+    const headerH = topSafe + sy(344)
+    const rowStart = headerH + sy(46)
+    const ctaY = h - botSafe - sy(48)
+    const rowH = rowCount > 0 ? Math.floor((ctaY - rowStart - sy(36)) / rowCount) : sy(112)
+
+    const layers: Layer[] = [
+      logo(LOGO_T, 80, topSafe, 50),
+      textLayer({
+        name: 'Eyebrow', text: range ? `BUDGET PICKS · ${range.toUpperCase()}` : 'BUDGET PICKS',
+        x: 80, y: topSafe + sy(76), width: w - 160,
+        fontFamily: font('DM Mono'), fontSize: 21, fontWeight: 500,
+        fill: BRAND_COLORS.terra, opacity: 0.86, letterSpacing: 5,
+      }),
+      textLayer({
+        name: 'Headline', text: 'Free + Cheap\nThis Weekend',
+        x: 80, y: topSafe + sy(112), width: w - 160,
+        fontFamily: font('Epilogue'), fontSize: 90, fontWeight: 900,
+        fill: BRAND_COLORS.ink, lineHeight: 0.92, letterSpacing: -2,
+      }),
+      textLayer({
+        name: 'Subhead', text: 'A few easy ABQ plans that keep the night light.',
+        x: 80, y: topSafe + sy(300), width: w - 160,
+        fontFamily: font('Inter'), fontSize: 26, fontWeight: 600,
+        fill: BRAND_COLORS.sage, opacity: 0.9,
+      }),
+      shape({ shape: 'rect', x: 80, y: headerH + sy(18), width: w - 160, height: 3, fill: BRAND_COLORS.terra }),
+    ]
+
+    events.forEach((slot, i) => {
+      const y = rowStart + i * rowH
+      const chipW = slot.price === 'FREE' ? 104 : 112
+      const titleW = w - 80 - 152 - chipW - 28
+      const meta = [shortDay(slot.date), slot.time, slot.venue ? shortVenue(slot.venue) : ''].filter(Boolean).join(' · ')
+      const { fontSize: titleSize, text: titleText } = epilogueTitleSize(slot.title, titleW)
+      layers.push(
+        textLayer({
+          name: `Event ${i + 1}`, text: titleText,
+          x: 80, y, width: titleW,
+          fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 700,
+          fill: BRAND_COLORS.ink, lineHeight: 1.05, letterSpacing: -0.5,
+        }),
+        ...(meta ? [textLayer({
+          name: `Meta ${i + 1}`, text: meta,
+          x: 80, y: y + sy(56), width: titleW,
+          fontFamily: font('DM Mono'), fontSize: 19, fontWeight: 500,
+          fill: BRAND_COLORS.sage, opacity: 0.88,
+        })] : []),
+        shape({ shape: 'rect', x: w - 80 - chipW, y: y + sy(4), width: chipW, height: sy(48), fill: BRAND_COLORS.sage, cornerRadius: 24 }),
+        textLayer({
+          name: `Price ${i + 1}`, text: slot.price,
+          x: w - 80 - chipW, y: y + sy(17), width: chipW,
+          fontFamily: font('DM Mono'), fontSize: 18, fontWeight: 500,
+          fill: BRAND_COLORS.cream, align: 'center', letterSpacing: 1, lineHeight: 1,
+        }),
+        shape({ shape: 'rect', x: 80, y: y + Math.min(rowH - sy(16), sy(96)), width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.14 }),
+      )
+    })
+
+    layers.push(
+      shape({ shape: 'rect', x: 80, y: ctaY - sy(22), width: w - 160, height: 3, fill: BRAND_COLORS.terra }),
+      textLayer({
+        name: 'CTA', text: ctx.cta ?? 'weekend plans under budget',
+        x: 80, y: ctaY, width: w - 160,
+        fontFamily: font('DM Mono'), fontSize: 22, fontWeight: 500,
+        fill: BRAND_COLORS.terra, opacity: 0.86, align: 'center', letterSpacing: 2,
+      }),
+    )
+
+    return {
+      id: uid(), name: 'Free + cheap', format: fmt,
+      slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.cream }, layers }],
+      createdAt: Date.now(), updatedAt: Date.now(),
+    }
+  },
+}
+
+// ── D7. Date Night Picks ─────────────────────────────────────────────────
+
+const dateNight: Template = {
+  id: 'date-night',
+  name: 'Date Night Picks',
+  description: 'Warm photo optional digest for three or four easy night out ideas.',
+  category: 'brand',
+  thumb: {
+    bg: BRAND_COLORS.cream,
+    blocks: [
+      { x: 7, y: 6, w: 28, h: 2, c: BRAND_COLORS.terra, o: 0.7 },
+      { x: 7, y: 13, w: 65, h: 8, c: BRAND_COLORS.ink },
+      { x: 7, y: 24, w: 42, h: 2, c: BRAND_COLORS.terra, o: 0.75 },
+      { x: 7, y: 34, w: 24, h: 14, c: BRAND_COLORS.terra, o: 0.78, r: 2 }, { x: 36, y: 36, w: 52, h: 3, c: BRAND_COLORS.ink, o: 0.82 },
+      { x: 7, y: 53, w: 24, h: 14, c: BRAND_COLORS.sage, o: 0.72, r: 2 }, { x: 36, y: 55, w: 46, h: 3, c: BRAND_COLORS.ink, o: 0.82 },
+      { x: 7, y: 72, w: 24, h: 14, c: BRAND_COLORS.turquoise, o: 0.72, r: 2 }, { x: 36, y: 74, w: 55, h: 3, c: BRAND_COLORS.ink, o: 0.82 },
+      { x: 7, y: 94, w: 86, h: 2, c: BRAND_COLORS.terra },
+    ],
+  },
+  build: (ctx, format) => {
+    const fmt = format ?? '4:5'
+    const { w, h } = CANVAS_DIMS[fmt]
+    const sy = (y: number) => Math.round(y * h / 1350)
+    const isStory = fmt === '9:16'
+    const topSafe = isStory ? Math.round(h * 0.12) : Math.round(h * 0.08)
+    const botSafe = isStory ? Math.round(h * 0.15) : Math.round(h * 0.08)
+
+    const events = (ctx.events ?? []).slice(0, 4).map(e => {
+      const venue = e.venue ?? ''
+      return {
+        title: resolveTitle(e.title, venue),
+        venue,
+        time: e.time ?? '',
+        date: e.date,
+        imageUrl: e.imageUrl?.trim() ?? '',
+      }
+    })
+    const rowCount = events.length
+    const headerH = topSafe + sy(270)
+    const rowStart = headerH + sy(40)
+    const ctaY = h - botSafe - sy(48)
+    const rowGap = sy(18)
+    const rowH = rowCount > 0 ? Math.floor((ctaY - rowStart - sy(36) - rowGap * (rowCount - 1)) / rowCount) : sy(180)
+    const photoW = 210
+    const textX = 80 + photoW + 32
+    const textW = w - textX - 80
+
+    const layers: Layer[] = [
+      logo(LOGO_T, 80, topSafe, 50),
+      textLayer({
+        name: 'Headline', text: 'DATE NIGHT',
+        x: 80, y: topSafe + sy(78), width: w - 160,
+        fontFamily: font('Epilogue'), fontSize: 104, fontWeight: 900,
+        fill: BRAND_COLORS.terra, lineHeight: 0.92, letterSpacing: -1,
+      }),
+      textLayer({
+        name: 'Subhead', text: 'in Albuquerque',
+        x: 80, y: topSafe + sy(178), width: w - 160,
+        fontFamily: font('Fraunces'), fontSize: 54, fontStyle: 'italic', fontWeight: 400,
+        fill: BRAND_COLORS.ink, opacity: 0.82,
+      }),
+      textLayer({
+        name: 'Prompt', text: 'A few ideas worth texting to the group chat.',
+        x: 80, y: topSafe + sy(232), width: w - 160,
+        fontFamily: font('Inter'), fontSize: 24, fontWeight: 600,
+        fill: BRAND_COLORS.sage, opacity: 0.9,
+      }),
+      shape({ shape: 'rect', x: 80, y: headerH + sy(16), width: w - 160, height: 3, fill: BRAND_COLORS.terra }),
+    ]
+
+    events.forEach((slot, i) => {
+      const y = rowStart + i * (rowH + rowGap)
+      const photoH = Math.max(sy(128), rowH - sy(8))
+      const meta = [shortDay(slot.date), slot.time, slot.venue ? shortVenue(slot.venue) : ''].filter(Boolean).join(' · ')
+      const { fontSize: titleSize, text: titleText } = epilogueTitleSize(slot.title, textW)
+      layers.push(
+        ...(slot.imageUrl
+          ? [imageLayer({ src: slot.imageUrl, x: 80, y, width: photoW, height: photoH, fit: 'cover', cornerRadius: 5 })]
+          : [
+              shape({ shape: 'rect', x: 80, y, width: photoW, height: photoH, fill: i % 2 === 0 ? BRAND_COLORS.terra : BRAND_COLORS.sage, opacity: 0.84, cornerRadius: 5 }),
+              textLayer({
+                name: `Photo Fallback ${i + 1}`, text: 'ABQ',
+                x: 80, y: y + Math.round(photoH / 2) - sy(20), width: photoW,
+                fontFamily: font('Epilogue'), fontSize: 34, fontWeight: 900,
+                fill: BRAND_COLORS.cream, opacity: 0.72, align: 'center', letterSpacing: 2,
+              }),
+            ]),
+        textLayer({
+          name: `Event ${i + 1}`, text: titleText,
+          x: textX, y: y + sy(10), width: textW,
+          fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 700,
+          fill: BRAND_COLORS.ink, lineHeight: 1.05, letterSpacing: -0.5,
+        }),
+        ...(meta ? [textLayer({
+          name: `Meta ${i + 1}`, text: meta,
+          x: textX, y: y + sy(72), width: textW,
+          fontFamily: font('DM Mono'), fontSize: 19, fontWeight: 500,
+          fill: BRAND_COLORS.sage, opacity: 0.88,
+        })] : []),
+      )
+    })
+
+    layers.push(
+      shape({ shape: 'rect', x: 80, y: ctaY - sy(22), width: w - 160, height: 3, fill: BRAND_COLORS.terra }),
+      textLayer({
+        name: 'CTA', text: ctx.cta ?? 'abqunplugged.com',
+        x: 80, y: ctaY, width: w - 160,
+        fontFamily: font('DM Mono'), fontSize: 22, fontWeight: 500,
+        fill: BRAND_COLORS.terra, opacity: 0.86, align: 'center', letterSpacing: 2,
+      }),
+    )
+
+    return {
+      id: uid(), name: 'Date night picks', format: fmt,
+      slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.cream }, layers }],
+      createdAt: Date.now(), updatedAt: Date.now(),
+    }
+  },
+}
+
+// ── 17. Local Spotlight ─────────────────────────────────────────────────
+
+const localSpotlight: Template = {
+  id: 'local-spotlight',
+  name: 'Local Spotlight',
+  description: 'Single event editorial spotlight with photo first, category, title, and soft CTA.',
+  category: 'event',
+  thumb: {
+    bg: BRAND_COLORS.cream,
+    blocks: [
+      { x: 7, y: 8, w: 86, h: 42, c: BRAND_COLORS.terra, o: 0.75, r: 2 },
+      { x: 7, y: 56, w: 22, h: 3, c: BRAND_COLORS.terra },
+      { x: 7, y: 64, w: 78, h: 10, c: BRAND_COLORS.ink },
+      { x: 7, y: 78, w: 54, h: 2, c: BRAND_COLORS.sage, o: 0.7 },
+      { x: 7, y: 94, w: 86, h: 2, c: BRAND_COLORS.terra },
+    ],
+  },
+  build: (ctx, format) => {
+    const fmt = format ?? '4:5'
+    const { w, h } = CANVAS_DIMS[fmt]
+    const sy = (y: number) => Math.round(y * h / 1350)
+    const isStory = fmt === '9:16'
+    const topSafe = isStory ? Math.round(h * 0.12) : Math.round(h * 0.08)
+    const botSafe = isStory ? Math.round(h * 0.15) : Math.round(h * 0.08)
+    const mx = 80
+    const title = truncateAtWord(resolveTitle(ctx.title ?? '', ctx.venue ?? ''), 58)
+    const meta = [formatDate(ctx.date, ctx.time), ctx.venue ? shortVenue(ctx.venue) : ''].filter(Boolean).join('\n')
+    const cta = ctx.cta ?? 'More local events at abqunplugged.com'
+    const layers: Layer[] = [logo(LOGO_T, mx, topSafe, 50)]
+
+    if (ctx.imageUrl) {
+      const photoY = topSafe + sy(82)
+      const photoH = isStory ? Math.round(h * 0.43) : sy(540)
+      const titleY = photoY + photoH + sy(52)
+      const titleFontSize = isStory ? 86 : 76
+      layers.push(
+        imageLayer({ src: ctx.imageUrl, x: mx, y: photoY, width: w - mx * 2, height: photoH, fit: 'cover', cornerRadius: 6 }),
+        ...(ctx.category ? [textLayer({
+          name: 'Category', text: ctx.category.toUpperCase(),
+          x: mx, y: titleY - sy(34), width: w - mx * 2,
+          fontFamily: font('DM Mono'), fontSize: 18, fontWeight: 500,
+          fill: BRAND_COLORS.terra, letterSpacing: 4,
+        })] : []),
+        textLayer({
+          name: 'Title', text: compactEpilogueTitle(title, w - mx * 2, titleFontSize),
+          x: mx, y: titleY, width: w - mx * 2,
+          fontFamily: font('Epilogue'), fontSize: titleFontSize, fontWeight: 900,
+          fill: BRAND_COLORS.ink, lineHeight: 0.96, letterSpacing: -1,
+        }),
+      )
+    } else {
+      layers.push(
+        shape({ shape: 'rect', x: w - 238, y: topSafe + sy(92), width: 118, height: 118, fill: BRAND_COLORS.sage, opacity: 0.18, cornerRadius: 59 }),
+        shape({ shape: 'rect', x: mx, y: topSafe + sy(116), width: 150, height: 4, fill: BRAND_COLORS.terra }),
+        ...(ctx.category ? [textLayer({
+          name: 'Category', text: ctx.category.toUpperCase(),
+          x: mx, y: topSafe + sy(154), width: w - mx * 2,
+          fontFamily: font('DM Mono'), fontSize: 20, fontWeight: 500,
+          fill: BRAND_COLORS.terra, letterSpacing: 4,
+        })] : []),
+        textLayer({
+          name: 'Title', text: compactEpilogueTitle(title, w - mx * 2, 104),
+          x: mx, y: topSafe + sy(218), width: w - mx * 2,
+          fontFamily: font('Epilogue'), fontSize: 104, fontWeight: 900,
+          fill: BRAND_COLORS.ink, lineHeight: 0.94, letterSpacing: -2,
+        }),
+      )
+    }
+
+    const infoY = h - botSafe - sy(190)
+    layers.push(
+      shape({ shape: 'rect', x: mx, y: infoY - sy(30), width: w - mx * 2, height: 3, fill: BRAND_COLORS.terra }),
+      ...(meta ? [textLayer({
+        name: 'Details', text: meta,
+        x: mx, y: infoY, width: w - mx * 2,
+        fontFamily: font('DM Mono'), fontSize: 23, fontWeight: 500,
+        fill: BRAND_COLORS.sage, opacity: 0.9, lineHeight: 1.3,
+      })] : []),
+      textLayer({
+        name: 'CTA', text: cta,
+        x: mx, y: h - botSafe - sy(48), width: w - mx * 2,
+        fontFamily: font('DM Mono'), fontSize: 20, fontWeight: 500,
+        fill: BRAND_COLORS.terra, opacity: 0.86, align: 'center', letterSpacing: 1,
+      }),
+    )
+
+    return {
+      id: uid(), name: ctx.title ?? 'Local spotlight', format: fmt,
+      slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.cream }, layers }],
+      createdAt: Date.now(), updatedAt: Date.now(),
+    }
+  },
+}
+
+// ── 18. Hidden Gem ───────────────────────────────────────────────────────
+
+const hiddenGemEvent: Template = {
+  id: 'hidden-gem',
+  name: 'Hidden Gem',
+  description: 'Quiet single-event editorial card with type first, sage accents, and practical details.',
+  category: 'event',
+  thumb: {
+    bg: BRAND_COLORS.cream,
+    blocks: [
+      { x: 7, y: 8, w: 36, h: 2, c: BRAND_COLORS.sage, o: 0.7 },
+      { x: 7, y: 24, w: 82, h: 18, c: BRAND_COLORS.ink },
+      { x: 7, y: 48, w: 70, h: 6, c: BRAND_COLORS.sage, o: 0.6 },
+      { x: 7, y: 64, w: 54, h: 2, c: BRAND_COLORS.ink, o: 0.55 },
+      { x: 7, y: 72, w: 42, h: 2, c: BRAND_COLORS.ink, o: 0.38 },
+      { x: 7, y: 94, w: 86, h: 2, c: BRAND_COLORS.sage },
+    ],
+  },
+  build: (ctx, format) => {
+    const fmt = format ?? '4:5'
+    const { w, h } = CANVAS_DIMS[fmt]
+    const sy = (y: number) => Math.round(y * h / 1350)
+    const isStory = fmt === '9:16'
+    const topSafe = isStory ? Math.round(h * 0.12) : Math.round(h * 0.08)
+    const botSafe = isStory ? Math.round(h * 0.15) : Math.round(h * 0.08)
+    const mx = 80
+    const title = truncateAtWord(resolveTitle(ctx.title ?? '', ctx.venue ?? ''), 58)
+    const tagline = ctx.tagline ? truncateAtWord(ctx.tagline, 112) : ''
+    const meta = [formatDate(ctx.date, ctx.time), ctx.venue ? shortVenue(ctx.venue) : ''].filter(Boolean).join('\n')
+    const titleSize = isStory ? 92 : 84
+    const titleText = compactEpilogueTitle(title, w - mx * 2, titleSize)
+    const titleY = topSafe + sy(178)
+    const taglineY = titleY + sy(142)
+    const metaY = h - botSafe - sy(208)
+
+    const layers: Layer[] = [
+      logo(LOGO_T, mx, topSafe, 50),
+      shape({ shape: 'rect', x: w - 222, y: topSafe + sy(82), width: 118, height: 118, fill: BRAND_COLORS.sage, opacity: 0.14, cornerRadius: 59 }),
+      shape({ shape: 'rect', x: mx, y: topSafe + sy(106), width: 150, height: 4, fill: BRAND_COLORS.sage }),
+      textLayer({
+        name: 'Eyebrow', text: 'WORTH KNOWING',
+        x: mx, y: topSafe + sy(128), width: w - mx * 2,
+        fontFamily: font('DM Mono'), fontSize: 21, fontWeight: 500,
+        fill: BRAND_COLORS.sage, letterSpacing: 5,
+      }),
+      textLayer({
+        name: 'Title', text: titleText,
+        x: mx, y: titleY, width: w - mx * 2,
+        fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 900,
+        fill: BRAND_COLORS.ink, lineHeight: 0.98, letterSpacing: -1,
+      }),
+      ...(tagline ? [textLayer({
+        name: 'About', text: tagline,
+        x: mx, y: taglineY, width: w - mx * 2,
+        fontFamily: font('Inter'), fontSize: 34, fontWeight: 600,
+        fill: BRAND_COLORS.sage, opacity: 0.9, lineHeight: 1.28,
+      })] : []),
+      shape({ shape: 'rect', x: mx, y: metaY - sy(30), width: w - mx * 2, height: 3, fill: BRAND_COLORS.sage }),
+      ...(meta ? [textLayer({
+        name: 'Details', text: meta,
+        x: mx, y: metaY, width: w - mx * 2,
+        fontFamily: font('DM Mono'), fontSize: 23, fontWeight: 500,
+        fill: BRAND_COLORS.ink, opacity: 0.62, lineHeight: 1.32,
+      })] : []),
+      textLayer({
+        name: 'CTA', text: ctx.cta ?? 'more local plans at abqunplugged.com',
+        x: mx, y: h - botSafe - sy(48), width: w - mx * 2,
+        fontFamily: font('DM Mono'), fontSize: 20, fontWeight: 500,
+        fill: BRAND_COLORS.sage, opacity: 0.9, align: 'center', letterSpacing: 1,
+      }),
+    ]
+
+    return {
+      id: uid(), name: ctx.title ?? 'Hidden gem', format: fmt,
+      slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.cream }, layers }],
+      createdAt: Date.now(), updatedAt: Date.now(),
+    }
+  },
+}
+
+// ── D8. Venue Crawl ──────────────────────────────────────────────────────
+
+const venueCrawl: Template = {
+  id: 'venue-crawl',
+  name: 'Venue Crawl',
+  description: 'Venue-led digest for grouped events, with each stop framed as part of one ABQ route.',
+  category: 'brand',
+  thumb: {
+    bg: BRAND_COLORS.terra,
+    blocks: [
+      { x: 7, y: 7, w: 28, h: 2, c: BRAND_COLORS.cream, o: 0.7 },
+      { x: 7, y: 15, w: 70, h: 8, c: BRAND_COLORS.cream },
+      { x: 7, y: 30, w: 60, h: 3, c: BRAND_COLORS.cream, o: 0.88 },
+      { x: 7, y: 36, w: 42, h: 2, c: BRAND_COLORS.cream, o: 0.5 },
+      { x: 7, y: 48, w: 66, h: 3, c: BRAND_COLORS.cream, o: 0.88 },
+      { x: 7, y: 54, w: 50, h: 2, c: BRAND_COLORS.cream, o: 0.5 },
+      { x: 7, y: 66, w: 52, h: 3, c: BRAND_COLORS.cream, o: 0.88 },
+      { x: 7, y: 92, w: 86, h: 2, c: BRAND_COLORS.cream, o: 0.4 },
+    ],
+  },
+  build: (ctx, format) => {
+    const fmt = format ?? '4:5'
+    const { w, h } = CANVAS_DIMS[fmt]
+    const sy = (y: number) => Math.round(y * h / 1350)
+    const isStory = fmt === '9:16'
+    const topSafe = isStory ? Math.round(h * 0.12) : Math.round(h * 0.08)
+    const botSafe = isStory ? Math.round(h * 0.15) : Math.round(h * 0.08)
+
+    const events = (ctx.events ?? [])
+      .filter(e => !!e.venue?.trim())
+      .slice(0, 5)
+      .map(e => {
+        const venue = e.venue ?? ''
+        return {
+          title: resolveTitle(e.title, venue),
+          venue,
+          time: e.time ?? '',
+          date: e.date,
+        }
+      })
+    const rowCount = events.length
+    const range = digestRange(events, ctx.postDate)
+    const headerH = topSafe + sy(344)
+    const rowStart = headerH + sy(42)
+    const ctaY = h - botSafe - sy(48)
+    const rowH = rowCount > 0 ? Math.floor((ctaY - rowStart - sy(36)) / rowCount) : sy(112)
+
+    const layers: Layer[] = [
+      logo(LOGO_W, 80, topSafe, 50),
+      textLayer({
+        name: 'Eyebrow', text: range ? `ABQ ROUTE · ${range.toUpperCase()}` : 'ABQ ROUTE',
+        x: 80, y: topSafe + sy(78), width: w - 160,
+        fontFamily: font('DM Mono'), fontSize: 21, fontWeight: 500,
+        fill: BRAND_COLORS.cream, opacity: 0.68, letterSpacing: 5,
+      }),
+      textLayer({
+        name: 'Headline', text: 'Venue\nCrawl',
+        x: 80, y: topSafe + sy(116), width: w - 160,
+        fontFamily: font('Epilogue'), fontSize: 96, fontWeight: 900,
+        fill: BRAND_COLORS.cream, lineHeight: 0.88, letterSpacing: -2,
+      }),
+      textLayer({
+        name: 'Subhead', text: 'A route through ABQ, built from the lineup.',
+        x: 80, y: topSafe + sy(300), width: w - 160,
+        fontFamily: font('Inter'), fontSize: 25, fontWeight: 600,
+        fill: BRAND_COLORS.cream, opacity: 0.72,
+      }),
+      shape({ shape: 'rect', x: 80, y: headerH + sy(18), width: w - 160, height: 2, fill: BRAND_COLORS.cream, opacity: 0.34 }),
+    ]
+
+    events.forEach((slot, i) => {
+      const y = rowStart + i * rowH
+      const venueText = compactEpilogueTitle(shortVenue(slot.venue), w - 160, 42)
+      const titleText = compactEpilogueTitle(slot.title, w - 160, 30)
+      const meta = [shortDay(slot.date), slot.time].filter(Boolean).join(' · ')
+      layers.push(
+        textLayer({
+          name: `Venue ${i + 1}`, text: venueText,
+          x: 80, y, width: w - 160,
+          fontFamily: font('Epilogue'), fontSize: 42, fontWeight: 900,
+          fill: BRAND_COLORS.cream, lineHeight: 1.02, letterSpacing: -0.5,
+        }),
+        textLayer({
+          name: `Event ${i + 1}`, text: titleText,
+          x: 80, y: y + sy(50), width: w - 160,
+          fontFamily: font('Inter'), fontSize: 30, fontWeight: 600,
+          fill: BRAND_COLORS.cream, opacity: 0.76, lineHeight: 1.1,
+        }),
+        ...(meta ? [textLayer({
+          name: `Meta ${i + 1}`, text: meta,
+          x: 80, y: y + sy(88), width: w - 160,
+          fontFamily: font('DM Mono'), fontSize: 18, fontWeight: 500,
+          fill: BRAND_COLORS.sandstone, opacity: 0.86,
+        })] : []),
+        shape({ shape: 'rect', x: 80, y: y + Math.min(rowH - sy(16), sy(114)), width: w - 160, height: 1, fill: BRAND_COLORS.cream, opacity: 0.22 }),
+      )
+    })
+
+    layers.push(
+      shape({ shape: 'rect', x: 80, y: ctaY - sy(22), width: w - 160, height: 3, fill: BRAND_COLORS.cream, opacity: 0.5 }),
+      textLayer({
+        name: 'CTA', text: ctx.cta ?? 'abqunplugged.com',
+        x: 80, y: ctaY, width: w - 160,
+        fontFamily: font('DM Mono'), fontSize: 22, fontWeight: 500,
+        fill: BRAND_COLORS.cream, opacity: 0.72, align: 'center', letterSpacing: 2,
+      }),
+    )
+
+    return {
+      id: uid(), name: 'Venue crawl', format: fmt,
+      slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.terra }, layers }],
+      createdAt: Date.now(), updatedAt: Date.now(),
+    }
+  },
+}
+
+// ── D9. Reel Cover: 5 Things ─────────────────────────────────────────────
+
+const reelCover: Template = {
+  id: 'reel-cover',
+  name: 'Reel Cover: 5 Things',
+  description: '9:16 native cover for a future Reel, with five short event titles in the center band.',
+  category: 'brand',
+  thumb: {
+    gradient: { from: BRAND_COLORS.terra, to: BRAND_COLORS.sage, angle: 150 },
+    blocks: [
+      { x: 8, y: 18, w: 60, h: 10, c: BRAND_COLORS.cream },
+      { x: 8, y: 31, w: 46, h: 8, c: BRAND_COLORS.cream, o: 0.9 },
+      { x: 8, y: 48, w: 82, h: 3, c: BRAND_COLORS.cream, o: 0.82 },
+      { x: 8, y: 58, w: 70, h: 3, c: BRAND_COLORS.cream, o: 0.78 },
+      { x: 8, y: 68, w: 76, h: 3, c: BRAND_COLORS.cream, o: 0.78 },
+      { x: 8, y: 78, w: 64, h: 3, c: BRAND_COLORS.cream, o: 0.78 },
+      { x: 23, y: 103, w: 54, h: 2, c: BRAND_COLORS.cream, o: 0.45 },
+    ],
+  },
+  build: (ctx, format) => {
+    const fmt = format ?? '9:16'
+    const { w, h } = CANVAS_DIMS[fmt]
+    const sy = (y: number) => Math.round(y * h / 1350)
+    const isStory = fmt === '9:16'
+    const topSafe = isStory ? Math.round(h * 0.12) : Math.round(h * 0.08)
+    const botSafe = isStory ? Math.round(h * 0.15) : Math.round(h * 0.08)
+    const centerTop = topSafe + sy(190)
+    const centerBottom = h - botSafe - sy(130)
+    const events = (ctx.events ?? []).slice(0, 5).map(e => {
+      const venue = e.venue ?? ''
+      return { title: resolveTitle(e.title, venue), imageUrl: e.imageUrl?.trim() ?? '' }
+    })
+    const firstImage = events.find(e => e.imageUrl)?.imageUrl
+    const rowCount = events.length
+    const rowH = rowCount > 0 ? Math.floor((centerBottom - (centerTop + sy(330))) / rowCount) : sy(82)
+
+    const layers: Layer[] = [
+      ...(firstImage ? [imageLayer({ src: firstImage, x: 0, y: 0, width: w, height: h, fit: 'cover' })] : []),
+      shape({ shape: 'rect', x: 0, y: 0, width: w, height: h, fill: firstImage ? BRAND_COLORS.ink : BRAND_COLORS.terra, opacity: firstImage ? 0.72 : 1 }),
+      shape({ shape: 'rect', x: 0, y: 0, width: w, height: h, fill: BRAND_COLORS.sage, opacity: firstImage ? 0.28 : 0.34 }),
+      logo(LOGO_W, 80, topSafe, 50),
+      textLayer({
+        name: 'Headline', text: '5 things\nto do in ABQ',
+        x: 80, y: centerTop, width: w - 160,
+        fontFamily: font('Epilogue'), fontSize: isStory ? 116 : 94, fontWeight: 900,
+        fill: BRAND_COLORS.cream, lineHeight: 0.9, letterSpacing: -2,
+      }),
+      shape({ shape: 'rect', x: 80, y: centerTop + sy(286), width: w - 160, height: 3, fill: BRAND_COLORS.cream, opacity: 0.55 }),
+    ]
+
+    events.forEach((slot, i) => {
+      const y = centerTop + sy(326) + i * rowH
+      const titleText = compactEpilogueTitle(slot.title, w - 244, 38)
+      layers.push(
+        textLayer({
+          name: `No.${i + 1}`, text: String(i + 1).padStart(2, '0'),
+          x: 80, y, width: 78,
+          fontFamily: font('DM Mono'), fontSize: 22, fontWeight: 500,
+          fill: BRAND_COLORS.sandstone, opacity: 0.86,
+        }),
+        textLayer({
+          name: `Event ${i + 1}`, text: titleText,
+          x: 158, y: y - sy(4), width: w - 238,
+          fontFamily: font('Epilogue'), fontSize: 38, fontWeight: 700,
+          fill: BRAND_COLORS.cream, lineHeight: 1.05, letterSpacing: -0.5,
+        }),
+      )
+    })
+
+    layers.push(
+      shape({ shape: 'rect', x: 80, y: h - botSafe - sy(84), width: w - 160, height: 2, fill: BRAND_COLORS.cream, opacity: 0.38 }),
+      textLayer({
+        name: 'Footer', text: ctx.cta ?? 'lineup at abqunplugged.com',
+        x: 80, y: h - botSafe - sy(52), width: w - 160,
+        fontFamily: font('DM Mono'), fontSize: 22, fontWeight: 500,
+        fill: BRAND_COLORS.cream, opacity: 0.78, align: 'center', letterSpacing: 1,
+      }),
+    )
+
+    return {
+      id: uid(), name: 'Reel cover', format: fmt,
+      slides: [{ id: uid(), background: { type: 'gradient', from: BRAND_COLORS.terra, to: BRAND_COLORS.sage, angle: 150 }, layers }],
+      createdAt: Date.now(), updatedAt: Date.now(),
+    }
+  },
+}
+
 // ════════════════════════════════════════════════════════════════════════
 //   EXPORTS
 // ════════════════════════════════════════════════════════════════════════
@@ -2613,13 +3264,17 @@ export const TEMPLATES: Template[] = [
   // Event templates (10 feed + 3 story)
   poster, broadside, marquee, split, dispatch, goldenHour, paper,
   signal, stencil, terra,
-  storyFullBleed, storySplit, storyTypeOnly,
+  storyFullBleed, storySplit, storyTypeOnly, localSpotlight, hiddenGemEvent,
   // Brand templates (7)
-  statement, categorySpotlight, weekendPreview, mesa, tonightDrop, hiddenGem, blank,
-  // Digest templates — multi-event (5)
+  statement, categorySpotlight, weekendPreview, mesa, tonightDrop, blank,
+  // Digest templates — multi-event (9)
   weekendDigest, tonightList, weeklyFive, weeklySummary, topThree,
+  freeCheap, dateNight, venueCrawl, reelCover,
 ]
 
 export const EVENT_TEMPLATES  = TEMPLATES.filter(t => t.category === 'event')
 export const PROMO_TEMPLATES  = TEMPLATES.filter(t => t.category === 'brand')
-export const DIGEST_TEMPLATES = [weekendDigest, tonightList, weeklyFive, weeklySummary, topThree]
+export const DIGEST_TEMPLATES = [
+  weekendDigest, tonightList, weeklyFive, weeklySummary, topThree,
+  freeCheap, dateNight, venueCrawl, reelCover,
+]
