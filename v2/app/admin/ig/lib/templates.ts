@@ -1982,11 +1982,15 @@ const weekendDigest: Template = {
         fontFamily: font('DM Mono'), fontSize: 19, fontWeight: 500,
         fill: BRAND_COLORS.terra, letterSpacing: 5, opacity: 0.9,
       }),
-      // Headline — "This Weekend" fills the upper area; bottom of line 2 ≈ sy(460)
+      // Headline — "This Weekend" fills the upper area. lineHeight 0.82 makes the
+      // first line's glyph ink overflow its line-box ~15px upward, so the y must
+      // clear the kicker by more than that gap (kicker ink ends ~sy(145)); pushed
+      // to sy(176) + 165px so the ink top lands ~sy(162) (clean gap) while the
+      // bottom (ink ≈ sy(426)) still clears the section rule at sy(466).
       textLayer({
         name: 'Headline', text: 'This\nWeekend',
-        x: 80, y: sy(155), width: w - 160,
-        fontFamily: font('Epilogue'), fontSize: 175, fontWeight: 900,
+        x: 80, y: sy(176), width: w - 160,
+        fontFamily: font('Epilogue'), fontSize: 165, fontWeight: 900,
         fill: BRAND_COLORS.ink, lineHeight: 0.82, letterSpacing: -4,
       }),
       // Section rule sits just above the first row (ROW_START 480), below headline
