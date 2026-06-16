@@ -2437,6 +2437,174 @@ const weeklySummary: Template = {
   },
 }
 
+// ── D5. Top 3 Picks ───────────────────────────────────────────────────────
+
+const topThree: Template = {
+  id: 'top-three',
+  name: 'Top 3 Picks',
+  description: 'Photo-forward three-event digest with real event images and compact date/venue details.',
+  category: 'brand',
+  thumb: {
+    bg: BRAND_COLORS.cream,
+    blocks: [
+      { x: 7,  y: 6,  w: 28, h: 2,   c: BRAND_COLORS.terra, o: 0.7 },
+      { x: 7,  y: 12, w: 62, h: 7,   c: BRAND_COLORS.ink },
+      { x: 7,  y: 21, w: 34, h: 2,   c: BRAND_COLORS.terra, o: 0.7 },
+      { x: 7,  y: 31, w: 34, h: 18,  c: BRAND_COLORS.sage, o: 0.75, r: 2 },
+      { x: 45, y: 34, w: 10, h: 3,   c: BRAND_COLORS.terra },
+      { x: 58, y: 34, w: 31, h: 3,   c: BRAND_COLORS.ink, o: 0.82 },
+      { x: 58, y: 41, w: 24, h: 1.5, c: BRAND_COLORS.sage, o: 0.7 },
+      { x: 7,  y: 54, w: 34, h: 18,  c: BRAND_COLORS.terra, o: 0.75, r: 2 },
+      { x: 45, y: 57, w: 10, h: 3,   c: BRAND_COLORS.terra },
+      { x: 58, y: 57, w: 28, h: 3,   c: BRAND_COLORS.ink, o: 0.82 },
+      { x: 58, y: 64, w: 30, h: 1.5, c: BRAND_COLORS.sage, o: 0.7 },
+      { x: 7,  y: 77, w: 34, h: 18,  c: BRAND_COLORS.turquoise, o: 0.72, r: 2 },
+      { x: 45, y: 80, w: 10, h: 3,   c: BRAND_COLORS.terra },
+      { x: 58, y: 80, w: 34, h: 3,   c: BRAND_COLORS.ink, o: 0.82 },
+      { x: 58, y: 87, w: 22, h: 1.5, c: BRAND_COLORS.sage, o: 0.7 },
+      { x: 7,  y: 111, w: 86, h: 2,  c: BRAND_COLORS.terra },
+      { x: 23, y: 116, w: 54, h: 2,  c: BRAND_COLORS.terra, o: 0.55 },
+    ],
+  },
+  build: (ctx, format) => {
+    const fmt = format ?? '4:5'
+    const { w, h } = CANVAS_DIMS[fmt]
+    const sy = (y: number) => Math.round(y * h / 1350)
+    const isStory = fmt === '9:16'
+    const topSafe = isStory ? Math.round(h * 0.12) : Math.round(h * 0.08)
+    const botSafe = isStory ? Math.round(h * 0.15) : Math.round(h * 0.08)
+
+    const fmtD = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    const evDates = (ctx.events ?? [])
+      .slice(0, 3)
+      .map(e => e.date).filter((d): d is string => !!d).sort()
+    let picksRange = ''
+    if (evDates.length > 0) {
+      const first = new Date(evDates[0] + 'T12:00:00')
+      const last  = new Date(evDates[evDates.length - 1] + 'T12:00:00')
+      picksRange = first.getTime() === last.getTime()
+        ? fmtD(first)
+        : `${fmtD(first)} – ${fmtD(last)}`
+    } else if (ctx.postDate) {
+      picksRange = fmtD(new Date(ctx.postDate + 'T12:00:00'))
+    }
+
+    const events = (ctx.events ?? []).slice(0, 3).map(e => {
+      const venue = e.venue ?? ''
+      return {
+        title: resolveTitle(e.title, venue),
+        venue,
+        time: e.time ?? '',
+        date: e.date,
+        category: e.category ?? '',
+        imageUrl: e.imageUrl?.trim() ?? '',
+      }
+    })
+    const rowCount = Math.min(events.length, 3)
+    const headerH = topSafe + sy(236)
+    const rowStart = headerH + sy(38)
+    const ctaY = h - botSafe - sy(48)
+    const footerRuleY = ctaY - sy(22)
+    const rowGap = sy(22)
+    const rowH = rowCount > 0
+      ? Math.floor((footerRuleY - rowStart - rowGap * (rowCount - 1)) / rowCount)
+      : sy(214)
+    const photoW = Math.round((w - 160) * 0.4)
+    const textX = 80 + photoW + 34
+    const textW = w - textX - 80
+
+    const layers: Layer[] = [
+      logo(LOGO_T, 80, topSafe, 50),
+      textLayer({
+        name: 'Eyebrow', text: picksRange ? `TOP PICKS · ${picksRange.toUpperCase()}` : 'TOP PICKS',
+        x: 80, y: topSafe + sy(74), width: w - 160,
+        fontFamily: font('DM Mono'), fontSize: 21, fontWeight: 500,
+        fill: BRAND_COLORS.terra, opacity: 0.86, letterSpacing: 5,
+      }),
+      textLayer({
+        name: 'Headline', text: 'Top 3 Picks',
+        x: 80, y: topSafe + sy(108), width: w - 160,
+        fontFamily: font('Epilogue'), fontSize: 104, fontWeight: 900,
+        fill: BRAND_COLORS.ink, lineHeight: 0.92, letterSpacing: -2,
+      }),
+      shape({ shape: 'rect', x: 80, y: headerH + sy(16), width: w - 160, height: 3, fill: BRAND_COLORS.terra, opacity: 0.9 }),
+    ]
+
+    events.forEach((slot, i) => {
+      const y = rowStart + i * (rowH + rowGap)
+      const num = String(i + 1)
+      const photoY = y
+      const photoH = Math.max(sy(142), rowH - sy(14))
+      const meta = [shortDay(slot.date), slot.time, slot.venue ? shortVenue(slot.venue) : ''].filter(Boolean).join(' · ')
+      const { fontSize: titleSize, text: titleText } = epilogueTitleSize(slot.title, textW)
+      const tag = slot.category ? slot.category.toUpperCase() : 'ABQ PICK'
+
+      layers.push(
+        ...(slot.imageUrl
+          ? [imageLayer({ src: slot.imageUrl, x: 80, y: photoY, width: photoW, height: photoH, fit: 'cover', cornerRadius: 4 })]
+          : [
+              shape({
+                shape: 'rect', x: 80, y: photoY, width: photoW, height: photoH,
+                fill: i % 2 === 0 ? BRAND_COLORS.sage : BRAND_COLORS.terra,
+                opacity: 0.82, cornerRadius: 4,
+              }),
+              shape({
+                shape: 'rect', x: 80 + sy(18), y: photoY + sy(18), width: photoW - sy(36), height: 2,
+                fill: BRAND_COLORS.cream, opacity: 0.42,
+              }),
+              textLayer({
+                name: `Photo Fallback ${i + 1}`, text: 'ABQ',
+                x: 80, y: photoY + Math.round(photoH / 2) - sy(22), width: photoW,
+                fontFamily: font('Epilogue'), fontSize: 38, fontWeight: 900,
+                fill: BRAND_COLORS.cream, opacity: 0.72, align: 'center', letterSpacing: 2,
+              }),
+            ]),
+        shape({ shape: 'circle', x: 100, y: photoY + sy(16), width: 52, height: 52, fill: BRAND_COLORS.terra }),
+        textLayer({
+          name: `No.${num}`, text: num,
+          x: 100, y: photoY + sy(25), width: 52,
+          fontFamily: font('DM Mono'), fontSize: 23, fontWeight: 500,
+          fill: BRAND_COLORS.cream, align: 'center', lineHeight: 1,
+        }),
+        textLayer({
+          name: `Tag ${i + 1}`, text: tag,
+          x: textX, y: y + sy(4), width: textW,
+          fontFamily: font('DM Mono'), fontSize: 16, fontWeight: 500,
+          fill: BRAND_COLORS.terra, opacity: 0.76, letterSpacing: 3,
+        }),
+        textLayer({
+          name: `Event ${i + 1}`, text: titleText,
+          x: textX, y: y + sy(34), width: textW,
+          fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 700,
+          fill: BRAND_COLORS.ink, lineHeight: 1.05, letterSpacing: -0.5,
+        }),
+        ...(meta ? [textLayer({
+          name: `Meta ${i + 1}`, text: meta,
+          x: textX, y: y + sy(96), width: textW,
+          fontFamily: font('DM Mono'), fontSize: 19, fontWeight: 500,
+          fill: BRAND_COLORS.sage, opacity: 0.88, lineHeight: 1,
+        })] : []),
+      )
+    })
+
+    layers.push(
+      shape({ shape: 'rect', x: 80, y: footerRuleY, width: w - 160, height: 3, fill: BRAND_COLORS.terra }),
+      textLayer({
+        name: 'CTA', text: ctx.cta ?? 'abqunplugged.com',
+        x: 80, y: ctaY, width: w - 160,
+        fontFamily: font('DM Mono'), fontSize: 22, fontWeight: 500,
+        fill: BRAND_COLORS.terra, opacity: 0.86, align: 'center', letterSpacing: 2,
+      }),
+    )
+
+    return {
+      id: uid(), name: 'Top 3 picks', format: fmt,
+      slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.cream }, layers }],
+      createdAt: Date.now(), updatedAt: Date.now(),
+    }
+  },
+}
+
 // ════════════════════════════════════════════════════════════════════════
 //   EXPORTS
 // ════════════════════════════════════════════════════════════════════════
@@ -2448,10 +2616,10 @@ export const TEMPLATES: Template[] = [
   storyFullBleed, storySplit, storyTypeOnly,
   // Brand templates (7)
   statement, categorySpotlight, weekendPreview, mesa, tonightDrop, hiddenGem, blank,
-  // Digest templates — multi-event (4)
-  weekendDigest, tonightList, weeklyFive, weeklySummary,
+  // Digest templates — multi-event (5)
+  weekendDigest, tonightList, weeklyFive, weeklySummary, topThree,
 ]
 
 export const EVENT_TEMPLATES  = TEMPLATES.filter(t => t.category === 'event')
 export const PROMO_TEMPLATES  = TEMPLATES.filter(t => t.category === 'brand')
-export const DIGEST_TEMPLATES = [weekendDigest, tonightList, weeklyFive, weeklySummary]
+export const DIGEST_TEMPLATES = [weekendDigest, tonightList, weeklyFive, weeklySummary, topThree]
