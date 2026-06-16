@@ -30,6 +30,11 @@ export interface DigestEvent {
   category: string | null
   imageUrl: string | null
   popularityScore: number
+  about: string | null
+  highlights: string[]
+  venueTips: string | null
+  localRec: string | null
+  nearbyDining: { name: string; note?: string }[]
 }
 
 export interface DigestResponse {
@@ -142,10 +147,39 @@ interface EventRow {
   popularity_score: number | null
   featured: boolean | null
   source: string | null
+  ai_enrichment: Record<string, unknown> | null
+}
+
+function cleanString(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() ? value.trim() : null
+}
+
+function cleanHighlights(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  return value
+    .map(cleanString)
+    .filter((item): item is string => Boolean(item))
+    .slice(0, 2)
+}
+
+function cleanNearbyDining(value: unknown): { name: string; note?: string }[] {
+  if (!Array.isArray(value)) return []
+  return value
+    .map(item => {
+      if (!item || typeof item !== 'object') return null
+      const rec = item as Record<string, unknown>
+      const name = cleanString(rec.name)
+      if (!name) return null
+      const note = cleanString(rec.note)
+      return note ? { name, note } : { name }
+    })
+    .filter((item): item is { name: string; note?: string } => Boolean(item))
+    .slice(0, 2)
 }
 
 function rowToDigestEvent(row: EventRow, score: number): DigestEvent {
   const raw  = row.raw ?? {}
+  const ai = row.ai_enrichment ?? {}
   const dates = (raw as Record<string, Record<string, unknown>>).dates as
     | Record<string, Record<string, unknown>>
     | undefined
@@ -174,6 +208,11 @@ function rowToDigestEvent(row: EventRow, score: number): DigestEvent {
     category:        row.category,
     imageUrl:        row.cached_photo_url,
     popularityScore: Math.round(score * 10) / 10,
+    about:           cleanString(ai.about),
+    highlights:      cleanHighlights(ai.highlights),
+    venueTips:       cleanString(ai.venue_tips),
+    localRec:        cleanString(ai.local_rec),
+    nearbyDining:    cleanNearbyDining(ai.nearby_dining),
   }
 }
 
@@ -212,7 +251,7 @@ export async function GET(request: NextRequest) {
   const supabase = await createServiceClient()
   const { data, error } = await supabase
     .from('events')
-    .select('id, raw, event_date, venue_name, category, cached_photo_url, popularity_score, featured, source')
+    .select('id, raw, event_date, venue_name, category, cached_photo_url, popularity_score, featured, source, ai_enrichment')
     .eq('hidden', false)
     .gte('event_date', start)
     .lte('event_date', end + 'T23:59:59')

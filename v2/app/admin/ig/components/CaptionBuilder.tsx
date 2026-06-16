@@ -41,14 +41,14 @@ const CAT_TAGS: Record<string, string> = {
 const CAT_OPENERS: Record<string, string> = {
   'Music':         'Live music in Albuquerque.',
   'Sports':        'Game day in the Duke City.',
-  'Arts & Theater':'Arts worth your evening in the 505.',
+  'Arts & Theater':'Great arts happening in the 505.',
   'Food & Drink':  'Something good to eat and drink in Burque.',
   'Comedy':        'A night of laughs in the 505.',
   'Community':     'Albuquerque, out and together.',
   'Family':        'A good one for the whole family.',
-  'Outdoor':       'Get outside in New Mexico.',
+  'Outdoor':       'A beautiful New Mexico outing.',
   'Film':          'On the big screen in Albuquerque.',
-  'Festivals':     'A festival worth showing up for.',
+  'Festivals':     'A wonderful event coming to ABQ.',
 }
 
 const CAT_EMOJI: Record<string, string> = {
@@ -77,13 +77,13 @@ export function buildCaptions(event: NormalizedEvent) {
   const dayOfWeek = dateLabel.split(',')[0]
 
   // Standard: warm opener → event + venue → date/time → friendly CTA
-  const standard = `${opener}\n\n${event.title}\n${venue}\n\n📅 ${dateLabel}${timeStr}${priceStr}\n\n🎟️ Tickets and details → link in bio\n\n${tags}`
+  const standard = `${opener}\n\n${event.title}\n${venue}\n\n📅 ${dateLabel}${timeStr}${priceStr}\n\n🎟️ Full details + more at link in bio\n\n${tags}`
 
   // Friendly: leads with the event name, clean and easy to read
-  const friendly = `${emoji} ${event.title}\n\n📅 ${dateLabel}${timeStr}\n📍 ${venue}${priceStr}\n\nFind tickets and details → link in bio\n\n${tags}`
+  const friendly = `${emoji} ${event.title}\n\n📅 ${dateLabel}${timeStr}\n📍 ${venue}${priceStr}\n\nFull details + more at link in bio\n\n${tags}`
 
   // Spotlight: a warm weekly pick — celebrates the event without pressure
-  const spotlight = `${dayOfWeek}'s pick for Albuquerque.\n\n${event.title} at ${venue} — a lovely way to spend time in the 505.\n\n📅 ${dateLabel}${timeStr}${priceStr}\n🔗 Full details and tickets → link in bio\n\n${tags}`
+  const spotlight = `${dayOfWeek}'s pick for Albuquerque.\n\n${event.title} at ${venue}. A lovely way to spend time in the 505.\n\n📅 ${dateLabel}${timeStr}${priceStr}\n🔗 Full details + more at link in bio\n\n${tags}`
 
   // Minimal: just the essentials, clean under a strong visual
   const minimal = `${event.title}\n${dateLabel}${timeStr} · ${venue}${priceStr}\n\n🔗 link in bio\n\n${BASE_TAGS}`
@@ -124,20 +124,9 @@ async function pngToJpeg(pngDataUrl: string, quality = 0.93): Promise<string> {
 /** Pad a number to two digits */
 function pad2(n: number) { return String(n).padStart(2, '0') }
 
-/** Format a local YYYY-MM-DD to a date object at noon Mountain time */
-function localDateAtTime(dateStr: string, hour: number, minute = 0) {
-  const d = new Date(`${dateStr}T${pad2(hour)}:${pad2(minute)}:00`)
-  return isNaN(d.getTime()) ? null : d
-}
-
 /** Produce YYYY-MM-DD from a Date */
 function toDateInput(d: Date) {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
-}
-
-/** Produce HH:MM from a Date */
-function toTimeInput(d: Date) {
-  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`
 }
 
 interface SchedulePreset { label: string; date: string; time: string }
@@ -445,12 +434,18 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           event: {
+            id: event.id,
             title: event.title,
             date: event.date ? formatDate(event.date) : undefined,
             time: event.time,
             venue: event.venue,
             category: event.category,
             about: event.about ?? undefined,
+            highlights: event.highlights,
+            venueTips: event.venueTips ?? undefined,
+            localTips: event.localTips ?? undefined,
+            localRec: event.localRec ?? undefined,
+            nearbyDining: event.nearbyDining,
             price: event.price,
           },
         }),
@@ -491,8 +486,6 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
     setErrorMsg(null)
     setPostId(null)
 
-    let capturedJpeg: string | null = null
-
     try {
       let payload: Record<string, unknown>
 
@@ -503,7 +496,6 @@ export function CaptionBuilder({ event, canvasRef }: Props) {
       } else {
         const png = await canvasRef.current.exportPng()
         const jpeg = await pngToJpeg(png)
-        capturedJpeg = jpeg
         payload = {
           imageDataUrl: jpeg, caption: text, mediaType, eventId: event.id,
           ...(venueId ? { location_id: venueId } : {}),

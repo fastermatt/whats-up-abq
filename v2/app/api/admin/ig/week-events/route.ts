@@ -9,7 +9,7 @@
  *   per_day  — events per day (default 1, max 3)
  *
  * Response: array of { date: 'YYYY-MM-DD', events: WeekEvent[] }
- *   WeekEvent extends EventSearchResult with `about` for caption pre-fill.
+ *   WeekEvent extends EventSearchResult with verified enrichment for captions.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -28,6 +28,10 @@ export interface WeekEvent {
   popularityScore: number | null
   rank: number
   about: string | null          // ai_enrichment.about (used for caption pre-fill)
+  highlights: string[]
+  venueTips: string | null
+  localRec: string | null
+  nearbyDining: { name: string; note?: string }[]
   price: string | null
   featured: boolean
 }
@@ -73,6 +77,33 @@ function plusDays(isoDate: string, days: number): string {
   const d = new Date(isoDate + 'T12:00:00')
   d.setDate(d.getDate() + days)
   return d.toISOString().slice(0, 10)
+}
+
+function cleanString(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() ? value.trim() : null
+}
+
+function cleanHighlights(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  return value
+    .map(cleanString)
+    .filter((item): item is string => Boolean(item))
+    .slice(0, 2)
+}
+
+function cleanNearbyDining(value: unknown): { name: string; note?: string }[] {
+  if (!Array.isArray(value)) return []
+  return value
+    .map(item => {
+      if (!item || typeof item !== 'object') return null
+      const rec = item as Record<string, unknown>
+      const name = cleanString(rec.name)
+      if (!name) return null
+      const note = cleanString(rec.note)
+      return note ? { name, note } : { name }
+    })
+    .filter((item): item is { name: string; note?: string } => Boolean(item))
+    .slice(0, 2)
 }
 
 interface EventRow {
@@ -156,7 +187,11 @@ export async function GET(request: NextRequest) {
         imageUrl:        row.cached_photo_url,
         popularityScore: Math.round(score * 10) / 10,
         rank:            idx + 1,
-        about:           (ai as Record<string, unknown>).about as string | null ?? null,
+        about:           cleanString((ai as Record<string, unknown>).about),
+        highlights:      cleanHighlights((ai as Record<string, unknown>).highlights),
+        venueTips:       cleanString((ai as Record<string, unknown>).venue_tips),
+        localRec:        cleanString((ai as Record<string, unknown>).local_rec),
+        nearbyDining:    cleanNearbyDining((ai as Record<string, unknown>).nearby_dining),
         price,
         featured:        row.featured === true,
       }

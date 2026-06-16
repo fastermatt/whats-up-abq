@@ -24,6 +24,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { venueHandles } from '@/lib/venue-instagram'
+import {
+  buildRichCaptionContext,
+  renderRichCaptionContext,
+  type RichCaptionContext,
+} from '@/app/admin/ig/lib/captionContext'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60 // caption generation can take a few seconds
@@ -128,6 +133,7 @@ interface EventRow {
   cached_photo_url: string | null
   popularity_score: number | null
   source: string | null
+  ai_enrichment: Record<string, unknown> | null
 }
 
 interface EventSnap {
@@ -138,11 +144,41 @@ interface EventSnap {
   venue: string | null
   category: string | null
   imageUrl: string | null
+  price: string | null
   popularityScore: number
+  richContext: RichCaptionContext
+}
+
+function cleanString(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() ? value.trim() : null
+}
+
+function cleanHighlights(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  return value
+    .map(cleanString)
+    .filter((item): item is string => Boolean(item))
+    .slice(0, 2)
+}
+
+function cleanNearbyDining(value: unknown): { name: string; note?: string }[] {
+  if (!Array.isArray(value)) return []
+  return value
+    .map(item => {
+      if (!item || typeof item !== 'object') return null
+      const rec = item as Record<string, unknown>
+      const name = cleanString(rec.name)
+      if (!name) return null
+      const note = cleanString(rec.note)
+      return note ? { name, note } : { name }
+    })
+    .filter((item): item is { name: string; note?: string } => Boolean(item))
+    .slice(0, 2)
 }
 
 function rowToSnap(row: EventRow): EventSnap {
   const raw = (row.raw ?? {}) as Record<string, unknown>
+  const ai = row.ai_enrichment ?? {}
   const dates = (raw as Record<string, Record<string, unknown>>).dates as Record<string, Record<string, unknown>> | undefined
   const localTime = (dates?.start?.localTime as string | undefined) ?? (raw.time as string | undefined) ?? null
 
@@ -153,6 +189,21 @@ function rowToSnap(row: EventRow): EventSnap {
   }
 
   const title = String(raw.name ?? raw.title ?? '').trim() || (row.venue_name ?? '')
+  const price = cleanString(raw.price)
+  const snapBase = {
+    id: row.id,
+    title,
+    date: String(row.event_date).slice(0, 10),
+    time,
+    venue: row.venue_name,
+    category: row.category,
+    price,
+    about: cleanString(ai.about),
+    highlights: cleanHighlights(ai.highlights),
+    venueTips: cleanString(ai.venue_tips),
+    localRec: cleanString(ai.local_rec),
+    nearbyDining: cleanNearbyDining(ai.nearby_dining),
+  }
   return {
     id: row.id,
     title,
@@ -161,60 +212,76 @@ function rowToSnap(row: EventRow): EventSnap {
     venue: row.venue_name,
     category: row.category,
     imageUrl: row.cached_photo_url,
+    price,
     popularityScore: Math.round((row.popularity_score ?? 5) * 10) / 10,
+    richContext: buildRichCaptionContext(snapBase),
   }
 }
 
 // ── Caption generator (DeepSeek) ──────────────────────────────────────────────
 
-const CAPTION_SYSTEM = `You write Instagram captions for ABQ Unplugged — Albuquerque NM's local events guide.
+const CAPTION_SYSTEM = `You write Instagram captions for ABQ Unplugged, Albuquerque NM's local events guide.
 
-VOICE: You are a Burqueño who has been to these shows, knows these venues, and is texting a friend about what's worth their Friday night. Confident, specific, never corporate. Write complete sentences like a real person — NOT advertising fragments.
+Use only the provided event fields. Never invent facts, reviews, crowd claims, artist details, venue details, prices, dining, or recommendations. If a detail is missing, leave it out.
 
-CRITICAL: Write the caption directly. Do NOT say "Here's a caption", "Okay here's one", or narrate what you're about to do. Just write it. No preamble, no separator lines (---), no meta-commentary. The first word of your response is the first word of the caption.
+Voice: warm, local, genuine ABQ neighbor. Community-first, celebratory, helpful, never corporate.
 
-BANNED PATTERNS (these instantly sound AI-generated — never use them):
-- Three-word fragment sentences: "Cold beer. Live music." / "Four bands. One room."
-- Invented crowd sizes or stadium imagery: "12,000 voices", "15,000 boots"
-- Generic hype words: "amazing", "epic", "wild", "iconic", "unforgettable", "zero filler", "summer formula"
-- Marketing hooks: "Discover", "Unleash", "Don't miss", "You won't want to miss"
-- Em dashes
-- Stacked bullet lists for every event — pick 1–2 highlights and tell people about them
+Caption structure:
+1. Warm opener line.
+2. One or two sentences of concrete event detail from About or Highlights.
+3. A why-go or local line from Local recommendation, Venue tips, or Nearby dining.
+4. Practical info line: date, time if provided, venue if provided, price if provided.
+5. Soft CTA: "Full details + more at abqunplugged.com" or "Full details + more at the link in bio".
+6. Final line with 8 to 10 tasteful, relevant hashtags mixing ABQ/local, category, and event-specific tags.
 
-GOOD APPROACH: Lead with the ONE detail that makes this interesting. Write like you know the venue, the artist's genre, the vibe. Mention a real specific fact if you have one. For roundups, pick what's most interesting and let the rest follow naturally. A save/tag prompt should feel conversational, not like a call-to-action template.
+Hard rules:
+- No FOMO, pressure, urgency, or scarcity.
+- No commands, including "go", "don't miss", "save this", "get outside", or "check it out".
+- Do not use "hidden gem".
+- No em dashes. Use commas, periods, or line breaks.
+- No time-relative wording like "tonight", "this weekend", or "this week" unless the prompt explicitly says same-day wording is allowed.
+- Keep it scannable with line breaks.
+- When venue @handles are provided, use only those exact handles and only when natural.
 
-DO NOT use time-relative phrases ("tonight", "this week", "this weekend") unless the prompt explicitly says the post goes live that same day — these are scheduled ahead.
+Write the caption directly. No preamble, markdown, code fences, separator lines, or meta-commentary.`
 
-When the prompt provides venue @handles, weave 1–2 naturally into the body. Never invent a handle.
-
-End with: abqunplugged.com 🌵
-Final line: exactly 8 hashtags — #ABQ #Albuquerque #505 #BurqueLife #ThingsToDo505 plus 3 specific.
-Body length: 150–350 characters (enough to write a real thought, not so long it loses people).`
+function renderEventsForPrompt(events: EventSnap[]): string {
+  return events
+    .map((event, idx) => `Event ${idx + 1}\n${renderRichCaptionContext(event.richContext)}`)
+    .join('\n\n')
+}
 
 const CAPTION_PROMPTS: Record<PostType, (events: EventSnap[]) => string> = {
-  WeeklyFive: (e) => `Instagram caption for an Albuquerque "five shows worth knowing about this week" post.
-Events (with dates so you can reference them naturally): ${e.map(ev => `${ev.title} at ${ev.venue ?? 'ABQ'} on ${ev.date}${ev.time ? ' at ' + ev.time : ''}`).join(' / ')}
-Lead with the most impressive or unexpected name on the list. Write it like you're telling a friend which nights are worth planning around — not like you're listing every event. Save this prompt.`,
+  WeeklyFive: (e) => `Instagram caption for an Albuquerque weekly roundup with up to five picks.
+Use the verified event context below. Mention a few concrete details rather than listing every field.
 
-  BreweryNights: (e) => `Instagram caption for an ABQ brewery live music roundup.
-Events: ${e.map(ev => `${ev.title} at ${ev.venue ?? 'ABQ'} on ${ev.date}${ev.time ? ' at ' + ev.time : ''}`).join(' / ')}
-Highlight the 1–2 most interesting ones — an album release, a local act worth knowing, or something specific about the venue. Sound like someone who goes to these spots, not like a promo post. Include a tag prompt.`,
+${renderEventsForPrompt(e)}`,
+
+  BreweryNights: (e) => `Instagram caption for an ABQ brewery or taproom live-music roundup.
+Use the verified event context below. Highlight one or two concrete details and keep the tone neighborly.
+
+${renderEventsForPrompt(e)}`,
 
   WeekendDigest: (e) => `Instagram caption for an Albuquerque weekend events roundup.
-Events: ${e.map(ev => `${ev.title} at ${ev.venue ?? 'ABQ'} on ${ev.date}${ev.time ? ' at ' + ev.time : ''}`).join(' / ')}
-Pick the angle that makes this weekend interesting — a surprising pairing, an unusual range, or a standout show. Don't list every event. Write the way you'd explain the weekend to someone deciding what to do. Save this prompt.`,
+Use the verified event context below. Find a natural through-line across the selected events without inventing a theme.
+
+${renderEventsForPrompt(e)}`,
 
   SingleEvent: (e) => `Instagram caption spotlighting one Albuquerque event.
-Event: ${e[0]?.title} at ${e[0]?.venue} on ${e[0]?.date}${e[0]?.time ? ' at ' + e[0].time : ''}.
-Write 2–3 sentences about why this is worth going to. Reference something real about the artist or the venue if you know it. Sound like a local who cares about the show, not a ticket seller.`,
+Use the verified event context below. Draw from About, Highlights, Local recommendation, Venue tips, or Nearby dining when present.
 
-  Tonight: (e) => `Instagram caption for an Albuquerque live events roundup.
-Events: ${e.map(ev => `${ev.title} at ${ev.venue ?? 'ABQ'}${ev.time ? ' at ' + ev.time : ''}`).join(' / ')}
-Lead with the most interesting name or pairing on the list. Write naturally — you're pointing someone toward their options for the night, not filing a press release. Include a tag prompt.`,
+${renderEventsForPrompt(e)}`,
 
-  DeepDive: (e) => `Instagram caption for a "deep dive" spotlight on ONE under-the-radar Albuquerque event most people will scroll past.
-Event: ${e[0]?.title} at ${e[0]?.venue} on ${e[0]?.date}${e[0]?.time ? ' at ' + e[0].time : ''} (${e[0]?.category}).
-This is the discovery post — the kind of thing that doesn't sell out but is genuinely worth knowing about. Write 3-4 sentences making the case for it: who it's for, what makes it worth the trip, why it's a hidden gem. Sound like a local sharing a tip, not promoting. Earnest, specific, a little protective of the good stuff.`,
+  Tonight: (e) => `Instagram caption for an Albuquerque same-day live events roundup.
+Same-day wording is allowed for this prompt.
+Use the verified event context below.
+
+${renderEventsForPrompt(e)}`,
+
+  DeepDive: (e) => `Instagram caption for a deeper spotlight on one Albuquerque event.
+Use only the verified event context below. Make the caption rich and specific without calling it a hidden gem.
+
+${renderEventsForPrompt(e)}`,
 }
 
 /** Insert any venue @handles the caption didn't already include, on their own
@@ -241,18 +308,18 @@ function ensureVenueTags(caption: string, handles: string[]): string {
  *  ends up with a blank caption (which kills reach and drops venue tags). */
 function fallbackCaption(postType: PostType, events: EventSnap[], handles: string[]): string {
   const hooks: Record<PostType, string> = {
-    WeeklyFive:    'This week in Burque:',
+    WeeklyFive:    'A few Albuquerque picks:',
     BreweryNights: 'Taproom nights in ABQ:',
     WeekendDigest: 'Your Albuquerque weekend, sorted:',
     SingleEvent:   'On our radar:',
     Tonight:       'Tonight in Burque:',
-    DeepDive:      'One you might have missed:',
+    DeepDive:      'A local pick worth knowing about:',
   }
   const hook = hooks[postType] ?? 'Happening in Albuquerque:'
   const lines = events.slice(0, 5).map(e => `• ${e.title}${e.venue ? ` @ ${e.venue}` : ''}`)
   const tagLine = handles.length ? `\n📍 ${handles.map(h => '@' + h).join(' ')}` : ''
-  const saveLine = events.length > 1 ? '\nSave this for later. ' : '\n'
-  return `${hook}\n${lines.join('\n')}${tagLine}\n${saveLine}Full details → abqunplugged.com 🌵\n#ABQ #Albuquerque #505 #BurqueLife #ThingsToDo505 #ABQEvents #NewMexico #DukeCity`
+  const detailLine = events.length > 1 ? '\nFull details + more at abqunplugged.com 🌵' : '\nFull details + more at abqunplugged.com 🌵'
+  return `${hook}\n${lines.join('\n')}${tagLine}\n${detailLine}\n#ABQ #Albuquerque #505 #BurqueLife #ThingsToDo505 #ABQEvents #NewMexico #DukeCity`
 }
 
 async function generateCaption(postType: PostType, events: EventSnap[], handles: string[] = [], extra = ''): Promise<string> {
@@ -405,7 +472,7 @@ export async function POST(req: NextRequest) {
   const { data: allRows } = await supabase
     .schema('public')
     .from('events')
-    .select('id, raw, event_date, venue_name, category, cached_photo_url, popularity_score, source')
+    .select('id, raw, event_date, venue_name, category, cached_photo_url, popularity_score, source, ai_enrichment')
     .eq('hidden', false)
     .gte('event_date', weekStart)
     .lte('event_date', weekEnd + 'T23:59:59')
@@ -447,9 +514,6 @@ export async function POST(req: NextRequest) {
     strategy_notes: string
   }
   const insertions: SuggestionInsert[] = []
-
-  // Image-based event templates (use event photo as hero)
-  const IMAGE_TEMPLATES = ['poster', 'golden-hour', 'split', 'paper', 'dispatch'] as const
 
   // Per-post-type memory so the SAME post type generated twice in one window
   // (e.g. two BreweryNights in a 2-week range) doesn't repeat the same events.
@@ -612,7 +676,7 @@ export async function POST(req: NextRequest) {
     // concurrently after the selection loop (see Promise.all below).
     const handles = venueHandles(selected.map(e => e.venue))
     const captionExtra = slot.postType === 'WeekendDigest' && slot.variant === 'under-radar'
-      ? 'Frame these as the under-the-radar weekend picks — the free, local, smaller-venue stuff people overlook while everyone talks about the big shows. The locals\' alternative.'
+      ? 'Frame these as local, smaller-venue weekend picks. Keep it warm and specific without comparing them to bigger shows.'
       : ''
 
     insertions.push({

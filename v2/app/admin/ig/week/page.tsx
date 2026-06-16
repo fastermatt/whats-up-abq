@@ -212,6 +212,10 @@ function toNormalized(evt: WeekEvent): NormalizedEvent {
     category:  evt.category,
     imageUrl:  evt.imageUrl,
     about:     evt.about,
+    highlights: evt.highlights,
+    venueTips: evt.venueTips,
+    localRec: evt.localRec,
+    nearbyDining: evt.nearbyDining,
     price:     evt.price,
     // The remaining fields aren't used by buildCaptions — fill with sensible defaults
     address:           null,
