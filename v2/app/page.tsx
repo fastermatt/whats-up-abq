@@ -339,8 +339,7 @@ export default async function DiscoverPage() {
             below; folded into it. Bigger search + surprise gets the breathing
             room previously spent on duplicated affordances. */}
         <div className="relative z-10 max-w-6xl mx-auto px-4 pt-6 md:pt-9 pb-7 lg:pb-8">
-          <div className="grid lg:grid-cols-[minmax(0,1fr)_400px] gap-7 lg:gap-10 items-center">
-            <div className="max-w-[680px]">
+          <div className="max-w-[680px]">
               {/* Mobile-only wordmark — desktop has the logo in the sticky DesktopNav */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -411,75 +410,7 @@ export default async function DiscoverPage() {
                 <SurpriseButton />
               </div>
             </div>
-
-            {/* Hero photo collage — decorative event tiles, desktop only.
-                Kept in-flow on desktop so the headline, search, and imagery align
-                as one composed first screen without making images the hero LCP. */}
-            <div className="hidden lg:block" aria-hidden="true">
-              {(() => {
-                const livePool = [...featured, ...tonight.events, ...weekend.events]
-                const firstForCategory = (cat: string) =>
-                  livePool.find(e => e.category === cat && e.imageUrl) ??
-                  livePool.find(e => e.category === cat)
-
-                const targets = ['Music', 'Comedy', 'Arts & Theater', 'Food & Drink', 'Sports', 'Family', 'Outdoor']
-                const tiles: { key: string; src: string; label: string; title?: string; featured?: boolean }[] = []
-                for (const cat of targets) {
-                  if (tiles.length === 4) break
-                  const event = firstForCategory(cat)
-                  tiles.push({
-                    key: cat,
-                    src: event?.imageUrl ? eventImageSrc(event.imageUrl, 360) : getCategoryFallback(cat),
-                    label: cat,
-                    title: event?.title,
-                    featured: Boolean(event?.isFeatured),
-                  })
-                }
-                if (tiles.length < 4) return null
-
-                return (
-                  <div className="relative ml-auto w-[400px]">
-                    <div className="absolute -inset-3 rounded-[28px] bg-cream/35 ring-1 ring-terra/10" />
-                    <div className="relative grid grid-cols-2 gap-3">
-                      {tiles.map((t, i) => (
-                        <div
-                          key={t.key}
-                          className={[
-                            'group relative overflow-hidden rounded-2xl bg-cream shadow-[0_16px_32px_rgba(26,22,20,.16)] ring-1 ring-ink/10',
-                            i === 0 ? 'aspect-[4/5]' : i === 3 ? 'aspect-[4/5] translate-y-6' : 'aspect-[4/3]',
-                          ].join(' ')}
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={t.src}
-                            alt=""
-                            loading="lazy"
-                            className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.035]"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/5 to-transparent opacity-90" />
-                          <div className="absolute inset-x-2 bottom-2">
-                            <div className="inline-flex max-w-full items-center gap-1 rounded-full bg-cream px-2 py-1 text-[9px] font-black uppercase tracking-[0.08em] text-terra shadow-sm">
-                              {t.featured && <span className="text-turq" aria-hidden="true">★</span>}
-                              <span className="truncate">{t.label}</span>
-                            </div>
-                            {t.title && (
-                              <p
-                                className="mt-1 line-clamp-2 text-[11px] font-black leading-tight text-white drop-shadow"
-                                style={{ fontFamily: 'var(--font-epilogue)' }}
-                              >
-                                {t.title}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )
-              })()}
-            </div>
           </div>
-        </div>
 
         {/* Stat strip — sentence-style links so the LABEL leads
             (round-2 critique: tiny labels under big numbers force a
