@@ -409,7 +409,10 @@ const split: Template = {
     ],
   },
   build: (ctx, format) => {
-    const { w, h } = CANVAS_DIMS[format ?? '4:5']
+    const fmt = format ?? '4:5'
+    const { w, h } = CANVAS_DIMS[fmt]
+    const isStory = fmt === '9:16'
+    const botSafe = isStory ? Math.round(h * 0.15) : 80
     const splitY = Math.round(h * 0.52)
     const rawTitle = ctx.title ?? 'Your Event'
     // Text zone height: from textBaseY+category to Date layer (h-230).
@@ -472,9 +475,10 @@ const split: Template = {
         fill: BRAND_COLORS.ink, opacity: 0.6,
       }))
     }
-    layers.push(logo(LOGO_T, 80, h - 96, 60))
+    const logoH = 60
+    layers.push(logo(LOGO_T, 80, h - botSafe - logoH, logoH))
     return {
-      id: uid(), name: ctx.title ?? 'Split post', format: format ?? '4:5',
+      id: uid(), name: ctx.title ?? 'Split post', format: fmt,
       slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.cream }, layers }],
       createdAt: Date.now(), updatedAt: Date.now(),
     }
@@ -843,11 +847,12 @@ const signal: Template = {
     const textW    = w - textX - 44
 
     const DARK     = '#0f0e0d'
-    const title    = ctx.title ?? 'Your Event'
-    const titleSize = title.length < 12 ? 130
-                    : title.length < 22 ? 108
-                    : title.length < 36 ? 88
+    const rawTitle = ctx.title ?? 'Your Event'
+    const titleSize = rawTitle.length < 12 ? 130
+                    : rawTitle.length < 22 ? 108
+                    : rawTitle.length < 36 ? 88
                     : 70
+    const title    = compactEpilogueTitle(rawTitle, textW * 4, titleSize)
 
     // Estimate title block height for downstream stacking
     const charsPerLine = Math.floor(textW / (titleSize * 0.52))
@@ -1064,11 +1069,12 @@ const terra: Template = {
     const sy = (y: number) => Math.round(y * h / 1350)
 
     const mx     = 80
-    const title  = ctx.title ?? 'Your Event'
-    const titleSize = title.length < 12 ? 155
-                    : title.length < 24 ? 130
-                    : title.length < 38 ? 105
+    const rawTitle = ctx.title ?? 'Your Event'
+    const titleSize = rawTitle.length < 12 ? 155
+                    : rawTitle.length < 24 ? 130
+                    : rawTitle.length < 38 ? 105
                     : 85
+    const title  = compactEpilogueTitle(rawTitle, (w - mx * 2) * 4, titleSize)
 
     // ── Photo zone — framed inset ──────────────────────────────────────────
     // When a photo exists: cream border rect behind the image gives a
@@ -1290,6 +1296,9 @@ const weekendPreview: Template = {
     sun.setDate(sat.getDate() + 1)
     const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     const weekendRange = `${fmt(sat)} – ${fmt(sun)}`
+    const event1Raw = ctx.title ?? 'Event name here'
+    const event1FontSize = event1Raw.length > 28 ? 40 : 52
+    const event1Title = compactEpilogueTitle(event1Raw, w - 280, event1FontSize)
 
     const layers: Layer[] = [
       logo(LOGO_T, 80, sy(64), 76),
@@ -1317,9 +1326,9 @@ const weekendPreview: Template = {
         fill: BRAND_COLORS.terra,
       }),
       textLayer({
-        name: 'Event 1', text: ctx.title ?? 'Event name here',
+        name: 'Event 1', text: event1Title,
         x: 200, y: sy(668), width: w - 280,
-        fontFamily: font('Fraunces'), fontSize: 52, fontStyle: 'italic', fontWeight: 400,
+        fontFamily: font('Fraunces'), fontSize: event1FontSize, fontStyle: 'italic', fontWeight: 400,
         fill: BRAND_COLORS.ink, lineHeight: 1.1,
       }),
       shape({ shape: 'rect', x: 80, y: sy(758), width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.12 }),
@@ -1472,59 +1481,6 @@ const tonightDrop: Template = {
   },
 }
 
-// ── 12. Hidden Gem ────────────────────────────────────────────────────────
-
-const hiddenGem: Template = {
-  id: 'hidden-gem',
-  name: 'Hidden Gem',
-  description: 'Venue or neighborhood spotlight — sage background, Fraunces italic.',
-  category: 'brand',
-  thumb: {
-    bg: BRAND_COLORS.sage,
-    blocks: [
-      { x: 10, y: 11, w: 80, h: 3, c: 'rgba(232,214,183,0.7)' },
-      { x: 7, y: 40, w: 86, h: 28, c: 'rgba(251,247,241,0.9)' },
-      { x: 10, y: 74, w: 80, h: 4, c: 'rgba(251,247,241,0.75)' },
-      { x: 15, y: 90, w: 70, h: 3, c: 'rgba(232,214,183,0.6)' },
-    ],
-  },
-  build: (ctx, format) => {
-    const { w, h } = CANVAS_DIMS[format ?? '4:5']
-    const sy = (y: number) => Math.round(y * h / 1350)
-    return {
-      id: uid(), name: 'Hidden gem', format: format ?? '4:5',
-      slides: [{
-        id: uid(),
-        background: ctx.imageUrl
-          ? { type: 'image', src: ctx.imageUrl, fit: 'cover', overlayColor: BRAND_COLORS.night, overlayOpacity: 0.55 }
-          : { type: 'color', color: BRAND_COLORS.sage },
-        layers: [
-          textLayer({
-            name: 'Kicker', text: 'HIDDEN GEM',
-            x: 80, y: sy(140), width: w - 160,
-            fontFamily: font('Inter'), fontSize: 34, fontWeight: 700,
-            fill: BRAND_COLORS.sandstone, letterSpacing: 6, align: 'center',
-          }),
-          textLayer({
-            name: 'Name', text: ctx.title ?? ctx.venue ?? 'Venue name',
-            x: 80, y: h / 2 - sy(140), width: w - 160,
-            fontFamily: font('Fraunces'), fontSize: 130, fontStyle: 'italic', fontWeight: 400,
-            fill: BRAND_COLORS.cream, align: 'center', lineHeight: 1.0,
-          }),
-          textLayer({
-            name: 'Tagline', text: ctx.tagline ?? 'Why locals love it',
-            x: 80, y: h - 360, width: w - 160,
-            fontFamily: font('Inter'), fontSize: 38, fontWeight: 500,
-            fill: BRAND_COLORS.cream, align: 'center', opacity: 0.9, lineHeight: 1.4,
-          }),
-          logo(LOGO_W, Math.round((w - Math.round(60 * LOGO_R)) / 2), h - 110, 60),
-        ],
-      }],
-      createdAt: Date.now(), updatedAt: Date.now(),
-    }
-  },
-}
-
 // ── 13. Blank ─────────────────────────────────────────────────────────────
 
 const blank: Template = {
@@ -1661,6 +1617,12 @@ const storySplit: Template = {
     const isStory = fmt === '9:16'
     const botSafe  = isStory ? Math.round(h * 0.15) : Math.round(h * 0.08)
     const halfH = Math.round(h / 2)
+    const titleX = 90
+    const titleY = halfH + 60
+    const titleW = w - 150
+    const titleFontSize = title.length > 44 ? 70 : title.length > 28 ? 84 : 100
+    const maxTitleLines = Math.max(Math.floor(((halfH + 300) - titleY - 40) / titleFontSize), 1)
+    const titleText = compactEpilogueTitle(title, titleW * maxTitleLines, titleFontSize)
 
     const layers: Layer[] = []
 
@@ -1674,9 +1636,9 @@ const storySplit: Template = {
 
     // Title
     layers.push(textLayer({
-      name: 'title', text: title,
-      x: 90, y: halfH + 60, width: w - 150,
-      fontFamily: font('Fraunces'), fontSize: 100, fontWeight: 900,
+      name: 'title', text: titleText,
+      x: titleX, y: titleY, width: titleW,
+      fontFamily: font('Fraunces'), fontSize: titleFontSize, fontWeight: 900,
       fill: '#1a1614', align: 'left', letterSpacing: -0.5, lineHeight: 1.0,
     }))
 
@@ -1743,10 +1705,15 @@ const storyTypeOnly: Template = {
 
     const titleFontSize = title.length > 20 ? 100 : title.length > 12 ? 130 : 150
     const centerY = Math.round(h * 0.42)  // visual center for title block
+    const titleW = w - 120
+    const titleMaxLines = 3
+    const titleText = compactEpilogueTitle(title, titleW * titleMaxLines, titleFontSize)
+    const titleLines = Math.min(estimateTextLines(titleText, titleW, titleFontSize, 0.56), titleMaxLines)
+    const titleHeight = titleLines * titleFontSize * 1.1
     const pillWidth = 320
     const pillHeight = 64
     const pillX = Math.round((w - pillWidth) / 2)
-    const pillY = centerY + titleFontSize + 40
+    const pillY = centerY + titleHeight + 40
 
     const layers: Layer[] = []
 
@@ -1760,8 +1727,8 @@ const storyTypeOnly: Template = {
 
     // Large title
     layers.push(textLayer({
-      name: 'title', text: title,
-      x: 60, y: centerY, width: w - 120,
+      name: 'title', text: titleText,
+      x: 60, y: centerY, width: titleW,
       fontFamily: font('Space Grotesk'), fontSize: titleFontSize, fontWeight: 700,
       fill: '#fff', align: 'center', letterSpacing: -1, lineHeight: 1.1,
     }))
@@ -1911,6 +1878,11 @@ function epilogueTitleSize(title: string, availWidth: number): { fontSize: numbe
 function compactEpilogueTitle(title: string, availWidth: number, fontSize: number): string {
   const max = Math.floor(availWidth / (fontSize * 0.56))
   return title.length > max ? truncateAtWord(title, max) : title
+}
+
+function estimateTextLines(title: string, availWidth: number, fontSize: number, charFactor = 0.56): number {
+  const charsPerLine = Math.max(Math.floor(availWidth / (fontSize * charFactor)), 1)
+  return Math.max(Math.ceil(title.length / charsPerLine), 1)
 }
 
 function digestRange(events: TemplateEventSlot[], fallbackDate?: string): string {
@@ -2908,12 +2880,16 @@ const localSpotlight: Template = {
     const meta = [formatDate(ctx.date, ctx.time), ctx.venue ? shortVenue(ctx.venue) : ''].filter(Boolean).join('\n')
     const cta = ctx.cta ?? 'More local events at abqunplugged.com'
     const layers: Layer[] = [logo(LOGO_T, mx, topSafe, 50)]
+    let titleBottomY = topSafe + sy(218)
 
     if (ctx.imageUrl) {
       const photoY = topSafe + sy(82)
-      const photoH = isStory ? Math.round(h * 0.43) : sy(540)
+      const photoH = isStory ? Math.round(h * 0.35) : sy(540)
       const titleY = photoY + photoH + sy(52)
-      const titleFontSize = isStory ? 86 : 76
+      const titleFontSize = isStory ? 78 : 76
+      const titleText = compactEpilogueTitle(title, w - mx * 2, titleFontSize)
+      const titleLines = estimateTextLines(titleText, w - mx * 2, titleFontSize, 0.56)
+      titleBottomY = titleY + titleLines * titleFontSize * 0.96
       layers.push(
         imageLayer({ src: ctx.imageUrl, x: mx, y: photoY, width: w - mx * 2, height: photoH, fit: 'cover', cornerRadius: 6 }),
         ...(ctx.category ? [textLayer({
@@ -2923,13 +2899,18 @@ const localSpotlight: Template = {
           fill: BRAND_COLORS.terra, letterSpacing: 4,
         })] : []),
         textLayer({
-          name: 'Title', text: compactEpilogueTitle(title, w - mx * 2, titleFontSize),
+          name: 'Title', text: titleText,
           x: mx, y: titleY, width: w - mx * 2,
           fontFamily: font('Epilogue'), fontSize: titleFontSize, fontWeight: 900,
           fill: BRAND_COLORS.ink, lineHeight: 0.96, letterSpacing: -1,
         }),
       )
     } else {
+      const titleY = topSafe + sy(218)
+      const titleFontSize = 104
+      const titleText = compactEpilogueTitle(title, w - mx * 2, titleFontSize)
+      const titleLines = estimateTextLines(titleText, w - mx * 2, titleFontSize, 0.56)
+      titleBottomY = titleY + titleLines * titleFontSize * 0.94
       layers.push(
         shape({ shape: 'rect', x: w - 238, y: topSafe + sy(92), width: 118, height: 118, fill: BRAND_COLORS.sage, opacity: 0.18, cornerRadius: 59 }),
         shape({ shape: 'rect', x: mx, y: topSafe + sy(116), width: 150, height: 4, fill: BRAND_COLORS.terra }),
@@ -2940,15 +2921,16 @@ const localSpotlight: Template = {
           fill: BRAND_COLORS.terra, letterSpacing: 4,
         })] : []),
         textLayer({
-          name: 'Title', text: compactEpilogueTitle(title, w - mx * 2, 104),
-          x: mx, y: topSafe + sy(218), width: w - mx * 2,
-          fontFamily: font('Epilogue'), fontSize: 104, fontWeight: 900,
+          name: 'Title', text: titleText,
+          x: mx, y: titleY, width: w - mx * 2,
+          fontFamily: font('Epilogue'), fontSize: titleFontSize, fontWeight: 900,
           fill: BRAND_COLORS.ink, lineHeight: 0.94, letterSpacing: -2,
         }),
       )
     }
 
-    const infoY = h - botSafe - sy(190)
+    const defaultInfoY = h - botSafe - sy(190)
+    const infoY = Math.max(defaultInfoY, titleBottomY + sy(72))
     layers.push(
       shape({ shape: 'rect', x: mx, y: infoY - sy(30), width: w - mx * 2, height: 3, fill: BRAND_COLORS.terra }),
       ...(meta ? [textLayer({
