@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { ExternalLink, MapPin, ArrowLeft, ArrowRight } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
 import { buildBreadcrumbs } from '@/lib/seo'
+import { netlifyImageUrl } from '@/lib/image-url'
 import {
   PLACES,
   PLACE_CATEGORIES,
@@ -211,9 +212,11 @@ function PlaceCard({ place }: { place: Place }) {
       <div className="relative aspect-[4/3] overflow-hidden flex-shrink-0">
         {place.image ? (
           <>
+            {/* Routed through the Netlify Image CDN — place-photos live in Supabase
+                Storage; serving raw was the dominant egress source. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={place.image}
+              src={netlifyImageUrl(place.image, 480)}
               alt={place.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
               loading="lazy"

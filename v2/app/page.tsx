@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { fetchEvents, fetchFeaturedEvents, fetchNeighborhoodCounts, rankByCategoryDemand, NormalizedEvent } from '@/lib/events'
 import { getCategoryFallback, OG_IMAGE } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
-import { eventImageSrc } from '@/lib/image-url'
+import { eventImageSrc, netlifyImageUrl } from '@/lib/image-url'
 import { MapPin, ArrowRight, ExternalLink, Star } from 'lucide-react'
 import { InstagramIcon } from '@/app/components/InstagramIcon'
 import { AnimateIn } from '@/app/components/AnimateIn'
@@ -969,9 +969,12 @@ function PlaceTeaseCard({ place, index }: { place: Place; index: number }) {
       <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2 shadow-sm ring-1 ring-ink/5 group-hover:shadow-lg group-hover:-translate-y-0.5 group-hover:ring-terra/25 transition-all duration-300">
         {place.image ? (
           <>
+            {/* Routed through the Netlify Image CDN (place-photos live in Supabase
+                Storage; serving them raw was the dominant egress source — this
+                edge-caches + converts to AVIF so Storage is hit ~once per image). */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={place.image}
+              src={netlifyImageUrl(place.image, 360)}
               alt={place.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
               loading="lazy"
