@@ -620,6 +620,50 @@ async function sendFailureAlert(date, slotId, error) {
   })
 }
 
+async function sendEmailAlert(subject, text) {
+  if (!process.env.RESEND_API_KEY || !process.env.ALERT_EMAIL) return
+  await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
+    body: JSON.stringify({ from: 'ABQ Unplugged <alerts@abqunplugged.com>', to: [process.env.ALERT_EMAIL], subject, text }),
+  }).catch(err => console.error('alert send failed:', err instanceof Error ? err.message : err))
+}
+
+// Daily token health check. The long-lived USER token does NOT expire
+// (expires_at: 0), but Meta's data_access_expires_at (~90 days, reset only by
+// a Facebook re-login, NOT by token exchange) will stop posting if it lapses.
+// Email a reminder when it's within 14 days so Matt can re-auth in time.
+async function checkTokenHealth() {
+  const token = process.env.INSTAGRAM_ACCESS_TOKEN
+  const appId = process.env.INSTAGRAM_APP_ID || process.env.FACEBOOK_APP_ID
+  const appSecret = process.env.INSTAGRAM_APP_SECRET || process.env.FACEBOOK_APP_SECRET
+  if (!token || !appId || !appSecret) {
+    console.warn('token health check skipped (need INSTAGRAM_ACCESS_TOKEN + APP_ID + APP_SECRET)')
+    return
+  }
+  try {
+    const res = await fetch(`https://graph.facebook.com/v21.0/debug_token?input_token=${encodeURIComponent(token)}&access_token=${encodeURIComponent(appId)}|${encodeURIComponent(appSecret)}`)
+    const d = (await res.json())?.data || {}
+    if (d.is_valid === false) {
+      await sendEmailAlert('Instagram token INVALID', 'The @abqunplugged access token failed validation. Re-authenticate via the app OAuth to resume autoposting.')
+      return
+    }
+    if (d.data_access_expires_at) {
+      const days = Math.round((d.data_access_expires_at - Math.floor(Date.now() / 1000)) / 86400)
+      const onIso = new Date(d.data_access_expires_at * 1000).toISOString().slice(0, 10)
+      console.log(`token ok; data-access expires ${onIso} (${days}d); token expiry: ${d.expires_at ? new Date(d.expires_at * 1000).toISOString().slice(0, 10) : 'never'}`)
+      if (days <= 14) {
+        await sendEmailAlert(
+          `Instagram data-access expires in ${days} days`,
+          `Meta data-access for @abqunplugged expires ${onIso} (in ${days} days). A token exchange does NOT reset it. Log in to Facebook through the app's OAuth flow to extend ~90 days, or autoposting will stop.`,
+        )
+      }
+    }
+  } catch (err) {
+    console.warn('token health check error:', err instanceof Error ? err.message : err)
+  }
+}
+
 function planOutput({ date, slot, events, caption, tags, pngPath, width, height }) {
   return {
     date,
@@ -649,6 +693,10 @@ async function main() {
     console.log('autopost disabled')
     return
   }
+
+  // Live runs: check the IG token's data-access window and email a reminder if
+  // it's expiring soon (never blocks posting).
+  if (!dryRun) await checkTokenHealth()
 
   const hasServiceKey = Boolean((process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL) && process.env.SUPABASE_SERVICE_ROLE_KEY)
   const useFixture = Boolean(args.fixture || (dryRun && !hasServiceKey))
