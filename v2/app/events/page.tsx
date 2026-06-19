@@ -20,7 +20,7 @@ import { buildBreadcrumbs } from '@/lib/seo'
 // Note: reading cookies for user preferences makes this route dynamic for
 // logged-in users. The revalidate hint is still used as a fallback for
 // unauthenticated requests.
-export const revalidate = 60
+export const revalidate = 300
 
 const FAMILY_RE = /\bkids?\b|\bchildren\b|\bfamily\b|\bstory.?time\b|\bplaydate\b/i
 

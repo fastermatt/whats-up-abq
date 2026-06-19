@@ -24,7 +24,7 @@ import { InviteCard } from '@/app/components/InviteCard'
 import { affiliateUrl } from '@/lib/affiliate'
 import { StickyTicketCTA } from './StickyTicketCTA'
 
-export const revalidate = 60
+export const revalidate = 600
 
 // Human-readable source labels — avoids leaking raw DB enums like "Local-venue" / "Nhcc"
 const SOURCE_LABELS: Record<string, string> = {

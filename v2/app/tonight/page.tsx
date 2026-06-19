@@ -7,7 +7,7 @@ import { EventImage } from '@/app/components/EventImage'
 import { QuickSaveButton } from '@/app/components/QuickSaveButton'
 import { buildBreadcrumbs } from '@/lib/seo'
 
-export const revalidate = 60
+export const revalidate = 300
 
 // ─── Metadata ─────────────────────────────────────────────────────────────────
 
