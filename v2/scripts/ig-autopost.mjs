@@ -48,7 +48,9 @@ CAPTION STRUCTURE:
 3. A why-go or local line from Local recommendation, Venue tips, or Nearby dining.
 4. Practical info line using provided date, time, and venue.
 5. Soft CTA: "Full details + more at abqunplugged.com" or "Full details + more at the link in bio".
-6. Final line with 8 to 10 tasteful, relevant hashtags mixing ABQ/local, category, and event-specific tags.
+6. Final line with 4 to 6 tasteful, relevant hashtags mixing ABQ/local, category, and event-specific tags. Never more than 6.
+
+For a DIGEST (multiple events), the IMAGE already lists every event with its day, time, and venue. Keep the caption SHORT: one warm hook line, one line of context, the CTA, then the hashtags. Do NOT re-list or describe the individual events. Aim for under 60 words before the hashtags.
 
 RULES:
 - Never make up details not in the event data
@@ -58,6 +60,10 @@ RULES:
 - No em dashes. Use commas, periods, or line breaks.
 - For any date, use the provided "Date" text EXACTLY as written. Never compute, infer, or state a day of the week that differs from the provided Date.
 - No time-relative wording like "tonight," "this weekend," or "this week" unless the prompt explicitly says same-day wording is allowed.
+- Never open with or state a relative day ("Thursday's here," "the weekend is here," "Friday brings"). Reference events only by the provided Date.
+- Use at most ONE prestige adjective in the whole caption (legendary, iconic, timeless, acclaimed, world-renowned, beloved). Stacking them reads like AI.
+- No soft commands either: avoid "make a night of it," "plan a...," "get ready," "arrive early," "don't forget," "grab a," "be sure to."
+- Invent nothing about the crowd or experience ("you might get pulled on stage," "best sightlines") unless it is in the provided fields.
 - The link in bio points to abqunplugged.com. Frame CTAs as "find more details" / "link in bio" not "get your tickets"
 - Never name a ticket vendor or platform (Ticketmaster, SeatGeek, Eventbrite, etc.) and never add a "tickets available through X" line. It is not in the provided fields. Point people to abqunplugged.com for details and tickets.
 - Use "Full details + more at abqunplugged.com" or "Full details + more at the link in bio" for CTA lines
@@ -446,6 +452,26 @@ function renderCaptionContext(events, kind, date) {
   ].join('\n')
 }
 
+// Hard cap + dedupe hashtags (the model sometimes emits 10-15). Strips all
+// hashtags then re-appends the first `max` unique ones as a clean final line.
+function capHashtags(caption, max = 6) {
+  const tags = caption.match(/#[A-Za-z0-9_]+/g) || []
+  if (tags.length <= max) return caption
+  const kept = []
+  const seen = new Set()
+  for (const t of tags) {
+    const k = t.toLowerCase()
+    if (!seen.has(k)) { seen.add(k); kept.push(t) }
+    if (kept.length >= max) break
+  }
+  const body = caption
+    .replace(/#[A-Za-z0-9_]+/g, '')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trimEnd()
+  return `${body}\n\n${kept.join(' ')}`
+}
+
 function stripFences(text) {
   let cleaned = text.trim()
   const fence = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
@@ -498,10 +524,11 @@ The link in bio goes to abqunplugged.com, an events discovery site for all of Al
   if (!caption) throw new Error('DeepSeek caption response missing caption')
   // Replace em dashes (and stray "--") with a comma, collapsing surrounding
   // spaces so "word — that" becomes "word, that" (not "word , that").
-  return caption
+  const cleaned = caption
     .replace(/\s*—\s*/g, ', ')
     .replace(/\s+--\s+/g, ', ')
     .replace(/ {2,}/g, ' ')
+  return capHashtags(cleaned, 6)
 }
 
 function fallbackCaption(events, slot) {
@@ -714,7 +741,16 @@ async function main() {
     if (!dryRun) recentIds = await recentlyPostedIds(supabase)
   }
 
-  const selected = selectEvents(slot, events, today, recentIds)
+  // --event <id> / --events <id,id,...> pins specific events (manual override /
+  // producing a curated week); otherwise auto-select via rotation rules.
+  let selected
+  if (args.event || args.events) {
+    const ids = String(args.events || args.event).split(',').map(s => s.trim()).filter(Boolean)
+    selected = ids.map(id => events.find(e => e.id === id)).filter(Boolean)
+    if (selected.length === 0) throw new Error(`--event id(s) not found in pool: ${ids.join(', ')}`)
+  } else {
+    selected = selectEvents(slot, events, today, recentIds)
+  }
   if (selected.length === 0) throw new Error(`No eligible events for ${today} ${slot.id}`)
 
   const ctx = buildContext(slot, selected, today)
