@@ -1,0 +1,61 @@
+name: IG autopost daily
+
+on:
+  schedule:
+    - cron: '30 13 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Render and caption without queueing'
+        required: true
+        type: boolean
+        default: true
+
+jobs:
+  ig-autopost:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: v2
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
+      IG_BASE_URL: https://abqunplugged.com
+      IG_AUTOPOST_ENABLED: ${{ secrets.IG_AUTOPOST_ENABLED }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: v2/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run dry-run autopost
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        run: node scripts/ig-autopost.mjs --dry-run
+
+      - name: Run live autopost
+        if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) }}
+        run: node scripts/ig-autopost.mjs
+
+      - name: Upload dry-run PNG
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ig-autopost-dry-run
+          path: /tmp/ig-autopost/*.png
+          if-no-files-found: error

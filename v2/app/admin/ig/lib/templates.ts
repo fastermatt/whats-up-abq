@@ -458,11 +458,14 @@ const split: Template = {
       fontFamily: font('Fraunces'), fontSize: titleSize, fontWeight: 800,
       fill: BRAND_COLORS.ink, lineHeight: 0.92,
     }))
+    // Date + venue lifted up (h-300/h-240) so the bottom-left logo (anchored at
+    // h-botSafe-logoH ≈ h-140) clears the venue line — they collided at the old
+    // h-170/h-210 positions for any non-empty venue.
     const dateStr = formatDate(ctx.date, ctx.time)
     if (dateStr) {
       layers.push(textLayer({
         name: 'Date', text: dateStr,
-        x: 80, y: h - 230, width: w - 160,
+        x: 80, y: h - 300, width: w - 160,
         fontFamily: font('Inter'), fontSize: 46, fontWeight: 600,
         fill: BRAND_COLORS.ink, opacity: 0.75,
       }))
@@ -470,7 +473,7 @@ const split: Template = {
     if (ctx.venue) {
       layers.push(textLayer({
         name: 'Venue', text: shortVenue(ctx.venue),
-        x: 80, y: h - 170, width: w - 160,
+        x: 80, y: h - 240, width: w - 160,
         fontFamily: font('Inter'), fontSize: 40, fontWeight: 400,
         fill: BRAND_COLORS.ink, opacity: 0.6,
       }))

@@ -1,0 +1,9 @@
+{
+  "_rule": "Only handles confirmed real are listed. The caption code tags a venue/artist ONLY if its name maps here. Never invent handles.",
+  "venues": {
+    "National Hispanic Cultural Center": "nationalhispanicculturalcenter",
+    "Launchpad": "launchpadrocks",
+    "Outpost Performance Space": "outpostperformancespace"
+  },
+  "artists": {}
+}

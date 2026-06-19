@@ -1,0 +1,706 @@
+#!/usr/bin/env node
+
+import { createHash } from 'node:crypto'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import process from 'node:process'
+import { createClient } from '@supabase/supabase-js'
+import { renderIG } from './ig-render.mjs'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const DENVER_TZ = 'America/Denver'
+const DEFAULT_BASE_URL = 'http://localhost:3000'
+const DEFAULT_FIXTURE = path.join(__dirname, 'fixtures', 'ig-events-week.json')
+const TAG_HANDLES_PATH = path.join(__dirname, 'ig-tag-handles.json')
+const OUT_DIR = '/tmp/ig-autopost'
+
+const ROTATION = {
+  1: { id: 'weekly-summary', kind: 'digest', period: 'this-week', time: '09:00' },
+  2: { id: 'poster', kind: 'single', period: 'next-10', time: '17:30', cats: ['Music'] },
+  3: { id: 'golden-hour', kind: 'single', period: 'next-10', time: '12:00', cats: ['Comedy', 'Arts & Theater'] },
+  4: { id: 'split', kind: 'single', period: 'next-10', time: '17:30', cats: ['Arts & Theater', 'Music'] },
+  5: { id: 'weekend-digest', kind: 'digest', period: 'this-weekend', time: '11:00' },
+  6: { id: 'top-three', kind: 'digest', period: 'this-weekend', time: '10:30' },
+  0: { id: 'terra', kind: 'single', period: 'today-or-next', time: '16:00', cats: ['Arts & Theater', 'Music'] },
+}
+
+const SLOT_BY_ID = Object.fromEntries(Object.values(ROTATION).map(slot => [slot.id, slot]))
+
+const SYSTEM_PROMPT = `You are a caption writer for ABQ Unplugged (@abqunplugged), Albuquerque's community events guide. You write the way a local who genuinely loves this city would write: warm, excited, helpful, never pushy.
+
+ABQ Unplugged exists because we love Albuquerque and want it to flourish: the people, the businesses, the artists, coffee shops, libraries, kids, parks, community. Every caption should feel like a neighbor sharing something they think you'd enjoy, not a brand trying to sell something.
+
+BRAND VOICE:
+- Warm, celebratory, community-first
+- Invites, never commands or pressures
+- Celebrates the city and its venues, artists, and events
+- Never uses FOMO ("don't miss," "last chance," "selling fast," "everyone will be there")
+- Never talks down or implies judgment ("worth showing up for," "actually good")
+- Never trash-talks or compares to other platforms
+- No urgency language, no hype, no commands ("Get out there," "Go now", "Go", "Don't miss")
+- Proper capitalization and grammar throughout
+- Albuquerque references when natural: ABQ, Burque, the 505, Duke City, Nob Hill, Old Town, etc.
+
+CAPTION STRUCTURE:
+1. Warm opener line.
+2. Concrete event detail from About or Highlights.
+3. A why-go or local line from Local recommendation, Venue tips, or Nearby dining.
+4. Practical info line using provided date, time, and venue.
+5. Soft CTA: "Full details + more at abqunplugged.com" or "Full details + more at the link in bio".
+6. Final line with 8 to 10 tasteful, relevant hashtags mixing ABQ/local, category, and event-specific tags.
+
+RULES:
+- Never make up details not in the event data
+- Use ONLY the provided fields. Never invent facts, reviews, venue details, artist details, crowd claims, dining, prices, or recommendations.
+- Never use: "unforgettable," "epic," "hidden gem," "vibrant," "nestled," "don't miss," "you have to," "a night you won't forget," "fun for the whole family," "this is your sign"
+- No FOMO, pressure, urgency, or commands.
+- No em dashes. Use commas, periods, or line breaks.
+- For any date, use the provided "Date" text EXACTLY as written. Never compute, infer, or state a day of the week that differs from the provided Date.
+- No time-relative wording like "tonight," "this weekend," or "this week" unless the prompt explicitly says same-day wording is allowed.
+- The link in bio points to abqunplugged.com. Frame CTAs as "find more details" / "link in bio" not "get your tickets"
+- Never name a ticket vendor or platform (Ticketmaster, SeatGeek, Eventbrite, etc.) and never add a "tickets available through X" line. It is not in the provided fields. Point people to abqunplugged.com for details and tickets.
+- Use "Full details + more at abqunplugged.com" or "Full details + more at the link in bio" for CTA lines
+- Keep it scannable with line breaks.
+
+OUTPUT FORMAT:
+Return a JSON object with one key, "caption", containing the finished caption text with actual line breaks.
+Return only the JSON object. No markdown, no code fences, no explanation.`
+
+function parseArgs(argv) {
+  const args = {}
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i]
+    if (!arg.startsWith('--')) continue
+    const key = arg.slice(2)
+    const next = argv[i + 1]
+    if (!next || next.startsWith('--')) args[key] = true
+    else {
+      args[key] = next
+      i += 1
+    }
+  }
+  return args
+}
+
+async function loadEnv() {
+  for (const file of [
+    path.join(__dirname, '.env'),
+    path.join(__dirname, '..', '.env.local'),
+    path.join(__dirname, '..', '.env'),
+  ]) {
+    try {
+      const text = await readFile(file, 'utf8')
+      for (const line of text.split(/\r?\n/)) {
+        const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/)
+        if (!m || process.env[m[1]] !== undefined) continue
+        process.env[m[1]] = m[2].trim().replace(/^['"]|['"]$/g, '')
+      }
+    } catch {}
+  }
+}
+
+function denverDateParts(date = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: DENVER_TZ,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    weekday: 'short',
+  }).formatToParts(date)
+  const get = type => parts.find(p => p.type === type)?.value
+  const iso = `${get('year')}-${get('month')}-${get('day')}`
+  return { iso, weekday: get('weekday') }
+}
+
+function parseISODate(iso) {
+  const [y, m, d] = iso.split('-').map(Number)
+  return new Date(Date.UTC(y, m - 1, d, 12, 0, 0))
+}
+
+function addDays(iso, days) {
+  const d = parseISODate(iso)
+  d.setUTCDate(d.getUTCDate() + days)
+  return d.toISOString().slice(0, 10)
+}
+
+function weekdayIndex(iso) {
+  return parseISODate(iso).getUTCDay()
+}
+
+// Correct, timezone-safe human date ("Friday, June 19, 2026"). parseISODate
+// builds the date at UTC noon, so formatting in UTC yields the right calendar
+// day + weekday. The caption model must use this verbatim (it guessed wrong
+// weekdays when given the raw ISO date).
+function humanDate(iso) {
+  if (!iso) return null
+  return parseISODate(iso).toLocaleDateString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC',
+  })
+}
+
+function dateRangeFor(period, date, events = []) {
+  if (period === 'this-week') return { start: date, end: addDays(date, 6) }
+  if (period === 'next-10') return { start: date, end: addDays(date, 10) }
+  if (period === 'this-weekend') {
+    const daysToSat = (6 - weekdayIndex(date) + 7) % 7
+    const sat = addDays(date, daysToSat)
+    return { start: sat, end: addDays(sat, 1) }
+  }
+  if (period === 'today-or-next') {
+    const todayEvents = events.filter(e => e.date === date)
+    if (todayEvents.length > 0) return { start: date, end: date }
+    return { start: addDays(date, 1), end: addDays(date, 10) }
+  }
+  return { start: date, end: date }
+}
+
+function mdtIso(date, hhmm) {
+  const [h, m] = hhmm.split(':').map(Number)
+  const utcGuess = new Date(`${date}T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00.000Z`)
+  const denverHour = Number(new Intl.DateTimeFormat('en-US', { timeZone: DENVER_TZ, hour: '2-digit', hour12: false }).format(utcGuess))
+  let offsetHours = h - denverHour
+  if (offsetHours < -12) offsetHours += 24
+  if (offsetHours > 12) offsetHours -= 24
+  return new Date(Date.UTC(
+    Number(date.slice(0, 4)),
+    Number(date.slice(5, 7)) - 1,
+    Number(date.slice(8, 10)),
+    h + offsetHours,
+    m,
+    0,
+    0,
+  )).toISOString()
+}
+
+function formatTime(time) {
+  if (!time || typeof time !== 'string') return null
+  const trimmed = time.trim()
+  if (/^\d{1,2}:\d{2}\s*[AP]M$/i.test(trimmed)) {
+    return trimmed.replace(/\s+/g, ' ').toUpperCase()
+  }
+  if (/^\d{2}:\d{2}(:\d{2})?$/.test(trimmed)) {
+    const [h, m] = trimmed.split(':').map(Number)
+    const ampm = h >= 12 ? 'PM' : 'AM'
+    return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${ampm}`
+  }
+  return trimmed
+}
+
+function cleanString(value) {
+  return typeof value === 'string' && value.trim() ? value.trim() : null
+}
+
+function cleanHighlights(value) {
+  return Array.isArray(value) ? value.map(cleanString).filter(Boolean).slice(0, 2) : []
+}
+
+function cleanNearbyDining(value) {
+  return Array.isArray(value)
+    ? value.map(item => {
+      if (!item || typeof item !== 'object') return null
+      const name = cleanString(item.name)
+      const note = cleanString(item.note)
+      return name ? (note ? `${name}: ${note}` : name) : null
+    }).filter(Boolean).slice(0, 2)
+    : []
+}
+
+function eventFromFixture(event) {
+  return {
+    id: String(event.id),
+    title: cleanString(event.title) ?? '',
+    date: String(event.date).slice(0, 10),
+    localTime: event.localTime ?? null,
+    time: formatTime(event.localTime ?? event.time),
+    venue: cleanString(event.venue),
+    category: cleanString(event.category),
+    imageUrl: cleanString(event.imageUrl),
+    popularityScore: Number(event.popularityScore ?? 0),
+    featured: event.featured === true,
+    about: cleanString(event.about),
+    highlights: cleanHighlights(event.highlights),
+    venueTips: cleanString(event.venueTips),
+    localRec: cleanString(event.localRec),
+    nearbyDining: cleanNearbyDining(event.nearbyDining),
+  }
+}
+
+function eventFromRow(row) {
+  const raw = row.raw ?? {}
+  const ai = row.ai_enrichment ?? {}
+  const title = cleanString(raw.name) ?? cleanString(raw.title) ?? cleanString(row.venue_name) ?? ''
+  const rawTime = raw?.dates?.start?.localTime ?? raw.time ?? null
+  return {
+    id: String(row.id),
+    title,
+    date: String(row.event_date).slice(0, 10),
+    localTime: rawTime,
+    time: formatTime(rawTime),
+    venue: cleanString(row.venue_name),
+    category: cleanString(row.category),
+    imageUrl: cleanString(row.cached_photo_url),
+    popularityScore: Number(row.popularity_score ?? heuristicScore(row)),
+    featured: row.featured === true,
+    about: cleanString(ai.about),
+    highlights: cleanHighlights(ai.highlights),
+    venueTips: cleanString(ai.venue_tips),
+    localRec: cleanString(ai.local_rec),
+    nearbyDining: cleanNearbyDining(ai.nearby_dining),
+  }
+}
+
+function heuristicScore(row) {
+  const catScore = {
+    Festivals: 7.5,
+    Music: 7.0,
+    'Arts & Theater': 6.5,
+    Comedy: 6.5,
+    'Food & Drink': 6.0,
+    Outdoor: 5.5,
+    Sports: 5.5,
+    Family: 5.0,
+    Film: 4.5,
+  }
+  let score = catScore[String(row.category ?? '')] ?? 4
+  const dow = weekdayIndex(String(row.event_date).slice(0, 10))
+  if (dow === 5 || dow === 6) score += 1.5
+  else if (dow === 4) score += 0.8
+  else if (dow === 0) score += 0.5
+  if (row.cached_photo_url) score += 0.3
+  if (row.featured === true) score += 1.5
+  return Math.min(10, Math.max(1, score))
+}
+
+function venueKey(venue) {
+  return (venue ?? '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20)
+}
+
+function titleKey(title) {
+  return (title ?? '').toLowerCase().replace(/[^a-z0-9 ]/g, '').trim().split(/\s+/).slice(0, 2).join(' ')
+}
+
+function artistCore(title) {
+  return (title ?? '').toLowerCase().replace(/[^a-z0-9 ]/g, '').trim().split(/\s+/).slice(0, 5).join(' ')
+}
+
+function dedupeEvents(events) {
+  const first = new Map()
+  for (const event of events) {
+    const key = `${event.date}|${venueKey(event.venue)}|${titleKey(event.title)}`
+    const existing = first.get(key)
+    if (!existing || event.popularityScore > existing.popularityScore) first.set(key, event)
+  }
+
+  const second = new Map()
+  for (const event of first.values()) {
+    const date = event.date
+    const vkey = venueKey(event.venue)
+    const core = artistCore(event.title)
+    let merged = false
+    for (const [key, existing] of second) {
+      const [d2, v2] = key.split('|')
+      if (d2 !== date || v2 !== vkey) continue
+      const core2 = artistCore(existing.title)
+      if (core && core2 && (core.includes(core2) || core2.includes(core))) {
+        if (event.popularityScore > existing.popularityScore) second.set(key, event)
+        merged = true
+        break
+      }
+    }
+    if (!merged) second.set(`${date}|${vkey}|${core}`, event)
+  }
+  return [...second.values()]
+}
+
+function hasRealPhoto(event) {
+  const url = event.imageUrl ?? ''
+  if (!url) return false
+  return !/Horizontal-Rule|rocket_cropped/i.test(url)
+}
+
+function isIsotopesGame(event) {
+  const text = `${event.title} ${event.venue} ${event.category}`.toLowerCase()
+  return text.includes('isotopes') || text.includes('space cowboys at albuquerque') || (text.includes(' vs ') && text.includes('baseball'))
+}
+
+function filterIsotopesSpam(events) {
+  let kept = false
+  return events.filter(event => {
+    if (!isIsotopesGame(event)) return true
+    if (kept) return false
+    kept = true
+    return true
+  })
+}
+
+function selectDiverse(events, count) {
+  const selected = []
+  const seenCat = new Set()
+  for (const event of events) {
+    if (selected.length >= count) break
+    const cat = event.category ?? '__none__'
+    if (!seenCat.has(cat)) {
+      seenCat.add(cat)
+      selected.push(event)
+    }
+  }
+  const selectedIds = new Set(selected.map(e => e.id))
+  for (const event of events) {
+    if (selected.length >= count) break
+    if (!selectedIds.has(event.id)) {
+      selected.push(event)
+      selectedIds.add(event.id)
+    }
+  }
+  return selected
+}
+
+function eventInRange(event, range) {
+  return event.date >= range.start && event.date <= range.end
+}
+
+function selectEvents(slot, allEvents, date, recentlyPostedIds) {
+  const initialRange = dateRangeFor(slot.period, date, allEvents)
+  const range = slot.period === 'today-or-next' ? dateRangeFor(slot.period, date, allEvents.filter(e => !recentlyPostedIds.has(e.id))) : initialRange
+  const pool = dedupeEvents(allEvents)
+    .filter(event => eventInRange(event, range))
+    .filter(event => !recentlyPostedIds.has(event.id))
+    .sort((a, b) => b.popularityScore - a.popularityScore)
+
+  if (slot.kind === 'single') {
+    const candidates = pool.filter(hasRealPhoto)
+    const preferred = candidates.filter(event => slot.cats?.includes(event.category ?? ''))
+    return [(preferred[0] ?? candidates[0])].filter(Boolean)
+  }
+
+  if (slot.id === 'top-three') {
+    return filterIsotopesSpam(pool.filter(hasRealPhoto)).slice(0, 3)
+  }
+
+  return selectDiverse(filterIsotopesSpam(pool), slot.id === 'weekly-summary' ? 6 : 5)
+}
+
+function buildContext(slot, events, date) {
+  if (slot.kind === 'single') {
+    const event = events[0]
+    return {
+      title: event.title,
+      date: event.date,
+      time: event.time ?? undefined,
+      venue: event.venue ?? undefined,
+      category: event.category ?? undefined,
+      imageUrl: event.imageUrl ?? undefined,
+      tagline: event.about ?? `${event.category ?? 'Event'} in Albuquerque`,
+      cta: 'abqunplugged.com',
+    }
+  }
+
+  return {
+    postDate: date,
+    cta: 'abqunplugged.com',
+    events: events.map(event => ({
+      title: event.title,
+      date: event.date,
+      time: event.time ?? undefined,
+      venue: event.venue ?? undefined,
+      category: event.category ?? undefined,
+      imageUrl: event.imageUrl ?? undefined,
+    })),
+  }
+}
+
+function renderCaptionContext(events, kind, date) {
+  if (kind === 'single') {
+    const event = events[0]
+    return [
+      `Title: ${event.title}`,
+      event.category && `Category: ${event.category}`,
+      event.date && `Date: ${humanDate(event.date)}`,
+      event.time && `Time: ${event.time}`,
+      event.venue && `Venue: ${event.venue}`,
+      'Site URL: https://abqunplugged.com',
+      event.about && `About: ${event.about}`,
+      event.highlights.length > 0 && `Highlights: ${event.highlights.join(' | ')}`,
+      event.venueTips && `Venue tips: ${event.venueTips}`,
+      event.localRec && `Local recommendation: ${event.localRec}`,
+      event.nearbyDining.length > 0 && `Nearby dining: ${event.nearbyDining.join(' | ')}`,
+    ].filter(Boolean).join('\n')
+  }
+
+  return [
+    `Digest date: ${humanDate(date)}`,
+    'Events:',
+    ...events.map((event, i) => [
+      `${i + 1}. ${event.title}`,
+      event.category && `   Category: ${event.category}`,
+      event.date && `   Date: ${humanDate(event.date)}`,
+      event.time && `   Time: ${event.time}`,
+      event.venue && `   Venue: ${event.venue}`,
+      event.about && `   About: ${event.about}`,
+      event.highlights.length > 0 && `   Highlights: ${event.highlights.join(' | ')}`,
+      event.venueTips && `   Venue tips: ${event.venueTips}`,
+      event.localRec && `   Local recommendation: ${event.localRec}`,
+    ].filter(Boolean).join('\n')),
+    'Site URL: https://abqunplugged.com',
+  ].join('\n')
+}
+
+function stripFences(text) {
+  let cleaned = text.trim()
+  const fence = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
+  if (fence) cleaned = fence[1].trim()
+  return cleaned.replace(/^```\s*/, '').replace(/\s*```$/, '').trim()
+}
+
+async function generateCaption(events, slot, date) {
+  const dryRun = process.argv.includes('--dry-run')
+  if (!process.env.DEEPSEEK_API_KEY) {
+    if (!dryRun) throw new Error('DEEPSEEK_API_KEY is required')
+    return fallbackCaption(events, slot)
+  }
+
+  const userPrompt = `Write one Instagram caption for this ABQ Unplugged ${slot.kind === 'single' ? 'event' : 'event digest'}:
+
+${renderCaptionContext(events, slot.kind, date)}
+
+The link in bio goes to abqunplugged.com, an events discovery site for all of Albuquerque, not a page for a specific event. Frame any CTA around discovering more events, not getting tickets directly.`
+
+  let res
+  try {
+    res = await fetch('https://api.deepseek.com/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: 'deepseek-v4-flash',
+      temperature: 0.8,
+      max_tokens: 1000,
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: userPrompt },
+      ],
+    }),
+    })
+  } catch (error) {
+    if (dryRun) return fallbackCaption(events, slot)
+    throw error
+  }
+  if (!res.ok) throw new Error(`DeepSeek API error ${res.status}: ${await res.text()}`)
+  const data = await res.json()
+  const content = data?.choices?.[0]?.message?.content
+  if (!content) throw new Error('DeepSeek returned no caption content')
+
+  const parsed = JSON.parse(stripFences(content))
+  const caption = cleanString(parsed.caption)
+  if (!caption) throw new Error('DeepSeek caption response missing caption')
+  // Replace em dashes (and stray "--") with a comma, collapsing surrounding
+  // spaces so "word — that" becomes "word, that" (not "word , that").
+  return caption
+    .replace(/\s*—\s*/g, ', ')
+    .replace(/\s+--\s+/g, ', ')
+    .replace(/ {2,}/g, ' ')
+}
+
+function fallbackCaption(events, slot) {
+  const body = slot.kind === 'single'
+    ? `${events[0].title}\n${[events[0].date, events[0].time, events[0].venue].filter(Boolean).join(' · ')}`
+    : events.map(event => `${event.title} · ${[event.date, event.time, event.venue].filter(Boolean).join(' · ')}`).join('\n')
+  return `${body}\n\nFull details + more at abqunplugged.com\n\n#ABQ #Albuquerque #505 #Burque #ABQEvents #ThingsToDoABQ #NewMexico #DukeCity`
+}
+
+async function loadTagMap() {
+  const data = JSON.parse(await readFile(TAG_HANDLES_PATH, 'utf8'))
+  return {
+    venues: data.venues ?? {},
+    artists: data.artists ?? {},
+  }
+}
+
+function mentionsFor(events, tagMap) {
+  const handles = []
+  for (const event of events) {
+    const venueHandle = event.venue ? tagMap.venues[event.venue] : null
+    if (venueHandle) handles.push(`@${venueHandle}`)
+    const artistHandle = tagMap.artists[event.title]
+    if (artistHandle) handles.push(`@${artistHandle}`)
+  }
+  return [...new Set(handles)]
+}
+
+function appendMentions(caption, mentions) {
+  if (mentions.length === 0) return caption
+  return `${caption.trim()}\n\n${mentions.join(' ')}`
+}
+
+function supabaseClient() {
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) throw new Error('SUPABASE_URL/NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required')
+  return createClient(url, key, { auth: { persistSession: false } })
+}
+
+async function loadFixtureEvents(fixturePath) {
+  const json = JSON.parse(await readFile(fixturePath, 'utf8'))
+  return (json.events ?? []).map(eventFromFixture)
+}
+
+async function loadLiveEvents(supabase, range) {
+  const { data, error } = await supabase
+    .from('events')
+    .select('id, raw, event_date, venue_name, category, cached_photo_url, popularity_score, featured, ai_enrichment')
+    .eq('hidden', false)
+    .gte('event_date', range.start)
+    .lte('event_date', `${range.end}T23:59:59`)
+    .not('cached_photo_url', 'is', null)
+    .order('event_date', { ascending: true })
+    .limit(500)
+  if (error) throw new Error(`Event query failed: ${error.message}`)
+  return (data ?? []).map(eventFromRow)
+}
+
+async function recentlyPostedIds(supabase) {
+  const since = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString()
+  const { data, error } = await supabase
+    .from('ig_post_log')
+    .select('event_id')
+    .gte('posted_at', since)
+    .not('event_id', 'is', null)
+  if (error) throw new Error(`ig_post_log query failed: ${error.message}`)
+  return new Set((data ?? []).map(row => row.event_id).filter(Boolean))
+}
+
+async function uploadPng(supabase, buffer, date, slotId) {
+  const digest = createHash('sha1').update(buffer).digest('hex').slice(0, 10)
+  const filename = `ig-posts/autopost_${date}_${slotId}_${digest}.png`
+  const { error } = await supabase.storage
+    .from('event-photos')
+    .upload(filename, buffer, { contentType: 'image/png', upsert: false })
+  if (error) throw new Error(`Upload failed: ${error.message}`)
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+  return `${url}/storage/v1/object/public/event-photos/${filename}`
+}
+
+async function queuePost(supabase, { date, slot, imageUrl, caption, events }) {
+  const { data, error } = await supabase
+    .from('ig_scheduled_posts')
+    .insert({
+      scheduled_for: mdtIso(date, slot.time),
+      media_type: 'FEED',
+      image_urls: [imageUrl],
+      caption,
+      event_id: slot.kind === 'single' ? events[0].id : null,
+      status: 'pending',
+    })
+    .select('id')
+    .single()
+  if (error) throw new Error(`DB insert failed: ${error.message}`)
+  return data.id
+}
+
+async function sendFailureAlert(date, slotId, error) {
+  if (!process.env.RESEND_API_KEY || !process.env.ALERT_EMAIL) return
+  const message = error instanceof Error ? error.message : String(error)
+  await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+    },
+    body: JSON.stringify({
+      from: 'ABQ Unplugged <alerts@abqunplugged.com>',
+      to: [process.env.ALERT_EMAIL],
+      subject: `IG autopost failed ${date} ${slotId}`,
+      text: `IG autopost failed ${date} ${slotId}: ${message}`,
+    }),
+  }).catch(alertErr => {
+    console.error('Failure alert send failed:', alertErr instanceof Error ? alertErr.message : alertErr)
+  })
+}
+
+function planOutput({ date, slot, events, caption, tags, pngPath, width, height }) {
+  return {
+    date,
+    slot: slot.id,
+    templateId: slot.id,
+    events: events.map(event => ({ id: event.id, title: event.title, time: event.time })),
+    caption,
+    tags,
+    pngPath,
+    width,
+    height,
+  }
+}
+
+async function main() {
+  await loadEnv()
+  const args = parseArgs(process.argv.slice(2))
+  const dryRun = args['dry-run'] === true
+  const today = args.date || denverDateParts().iso
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(today)) throw new Error('--date must be YYYY-MM-DD')
+
+  const day = weekdayIndex(today)
+  const slot = args.slot ? SLOT_BY_ID[args.slot] : ROTATION[day]
+  if (!slot) throw new Error(`Unknown --slot ${args.slot}`)
+
+  if (!dryRun && process.env.IG_AUTOPOST_ENABLED !== 'true') {
+    console.log('autopost disabled')
+    return
+  }
+
+  const hasServiceKey = Boolean((process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL) && process.env.SUPABASE_SERVICE_ROLE_KEY)
+  const useFixture = Boolean(args.fixture || (dryRun && !hasServiceKey))
+  const fixturePath = args.fixture ? path.resolve(String(args.fixture)) : DEFAULT_FIXTURE
+  let supabase = null
+  let recentIds = new Set()
+  let events
+
+  if (useFixture) {
+    events = await loadFixtureEvents(fixturePath)
+  } else {
+    supabase = supabaseClient()
+    const broadRange = dateRangeFor(slot.period, today)
+    events = await loadLiveEvents(supabase, slot.period === 'today-or-next' ? { start: today, end: addDays(today, 10) } : broadRange)
+    if (!dryRun) recentIds = await recentlyPostedIds(supabase)
+  }
+
+  const selected = selectEvents(slot, events, today, recentIds)
+  if (selected.length === 0) throw new Error(`No eligible events for ${today} ${slot.id}`)
+
+  const ctx = buildContext(slot, selected, today)
+  const tagMap = await loadTagMap()
+  const tags = mentionsFor(selected, tagMap)
+  const caption = appendMentions(await generateCaption(selected, slot, today), tags)
+
+  const { buffer, width, height } = await renderIG({
+    baseUrl: process.env.IG_BASE_URL || DEFAULT_BASE_URL,
+    adminToken: process.env.ADMIN_SECRET,
+    templateId: slot.id,
+    ctx,
+    format: '4:5',
+  })
+
+  if (dryRun) {
+    await mkdir(OUT_DIR, { recursive: true })
+    const pngPath = path.join(OUT_DIR, `${today}-${slot.id}.png`)
+    await writeFile(pngPath, buffer)
+    console.log(JSON.stringify(planOutput({ date: today, slot, events: selected, caption, tags, pngPath, width, height }), null, 2))
+    return
+  }
+
+  if (!supabase) supabase = supabaseClient()
+  const publicUrl = await uploadPng(supabase, buffer, today, slot.id)
+  const rowId = await queuePost(supabase, { date: today, slot, imageUrl: publicUrl, caption, events: selected })
+  console.log(JSON.stringify({ id: rowId, scheduledFor: mdtIso(today, slot.time), imageUrl: publicUrl }, null, 2))
+}
+
+main().catch(async error => {
+  const args = parseArgs(process.argv.slice(2))
+  const date = args.date || denverDateParts().iso
+  const slotId = args.slot || SLOT_BY_ID[args.slot]?.id || ROTATION[weekdayIndex(date)]?.id || 'unknown'
+  await sendFailureAlert(date, slotId, error)
+  console.error(error instanceof Error ? error.message : error)
+  process.exit(1)
+})
