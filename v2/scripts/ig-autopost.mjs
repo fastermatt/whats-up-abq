@@ -340,6 +340,17 @@ function filterIsotopesSpam(events) {
   })
 }
 
+// Quality gate: ABQ Unplugged features in-person events, so an event with no
+// real venue (or an online/virtual/webinar "venue") is never auto-posted. This
+// excludes the low-quality no-venue Eventbrite listings that otherwise slip into
+// thin weeks (e.g. garbled webinar titles).
+function passesQualityGate(event) {
+  const venue = (event.venue ?? '').trim()
+  if (!venue) return false
+  if (/\b(online|virtual|webinar|zoom|livestream|live\s?stream|twitch)\b/i.test(venue)) return false
+  return true
+}
+
 function selectDiverse(events, count) {
   const selected = []
   const seenCat = new Set()
@@ -370,6 +381,7 @@ function selectEvents(slot, allEvents, date, recentlyPostedIds) {
   const initialRange = dateRangeFor(slot.period, date, allEvents)
   const range = slot.period === 'today-or-next' ? dateRangeFor(slot.period, date, allEvents.filter(e => !recentlyPostedIds.has(e.id))) : initialRange
   const pool = dedupeEvents(allEvents)
+    .filter(passesQualityGate)
     .filter(event => eventInRange(event, range))
     .filter(event => !recentlyPostedIds.has(event.id))
     .sort((a, b) => b.popularityScore - a.popularityScore)
