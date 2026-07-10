@@ -41,6 +41,9 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
+      - name: Install ffmpeg
+        run: sudo apt-get install -y ffmpeg
+
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
@@ -52,10 +55,10 @@ jobs:
         if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) }}
         run: node scripts/ig-autopost.mjs
 
-      - name: Upload dry-run PNG
+      - name: Upload dry-run artifacts
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
         uses: actions/upload-artifact@v4
         with:
           name: ig-autopost-dry-run
-          path: /tmp/ig-autopost/*.png
+          path: /tmp/ig-autopost/*
           if-no-files-found: error

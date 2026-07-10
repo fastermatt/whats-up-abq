@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
@@ -16,12 +17,12 @@ const TAG_HANDLES_PATH = path.join(__dirname, 'ig-tag-handles.json')
 const OUT_DIR = '/tmp/ig-autopost'
 
 const ROTATION = {
-  1: { id: 'weekly-summary', kind: 'digest', period: 'this-week', time: '09:00' },
+  1: { id: 'weekly-summary', kind: 'digest', period: 'this-week', time: '09:00', reel: true },
   2: { id: 'poster', kind: 'single', period: 'next-10', time: '17:30', cats: ['Music'] },
   3: { id: 'golden-hour', kind: 'single', period: 'next-10', time: '12:00', cats: ['Comedy', 'Arts & Theater'] },
   4: { id: 'split', kind: 'single', period: 'next-10', time: '17:30', cats: ['Arts & Theater', 'Music'] },
-  5: { id: 'weekend-digest', kind: 'digest', period: 'this-weekend', time: '11:00' },
-  6: { id: 'top-three', kind: 'digest', period: 'this-weekend', time: '10:30' },
+  5: { id: 'weekend-digest', kind: 'digest', period: 'this-weekend', time: '11:00', reel: true },
+  6: { id: 'top-three', kind: 'digest', period: 'this-weekend', time: '10:30', reel: true },
   0: { id: 'terra', kind: 'single', period: 'today-or-next', time: '16:00', cats: ['Arts & Theater', 'Music'] },
 }
 
@@ -622,12 +623,47 @@ async function uploadPng(supabase, buffer, date, slotId) {
   return `${url}/storage/v1/object/public/event-photos/${filename}`
 }
 
-async function queuePost(supabase, { date, slot, imageUrl, caption, events }) {
+// Convert a rendered 4:5 PNG (1080×1350) into a 9:16 MP4 (1080×1920) using
+// ffmpeg. Pads the canvas with cream and applies a slow Ken Burns zoom so the
+// Reel doesn't look like a static image in a video wrapper. Requires ffmpeg on
+// PATH (Ubuntu runners have it; install locally with `brew install ffmpeg`).
+async function generateReel(pngPath) {
+  const mp4Path = pngPath.replace(/\.png$/, '.mp4')
+  const vf = [
+    'scale=1080:1350',
+    'pad=1080:1920:0:285:color=#fbf7f1',
+    "zoompan=z='min(zoom+0.0008,1.3)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=450:s=1080x1920:fps=25",
+    'format=yuv420p',
+  ].join(',')
+  execFileSync('ffmpeg', [
+    '-y', '-loop', '1', '-i', pngPath,
+    '-vf', vf,
+    '-t', '18', '-r', '25',
+    '-c:v', 'libx264', '-crf', '22', '-preset', 'fast',
+    '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
+    mp4Path,
+  ], { stdio: 'pipe' })
+  return mp4Path
+}
+
+async function uploadMp4(supabase, mp4Path, date, slotId) {
+  const buffer = await readFile(mp4Path)
+  const digest = createHash('sha1').update(buffer).digest('hex').slice(0, 10)
+  const filename = `ig-posts/autopost_${date}_${slotId}_${digest}.mp4`
+  const { error } = await supabase.storage
+    .from('event-photos')
+    .upload(filename, buffer, { contentType: 'video/mp4', upsert: false })
+  if (error) throw new Error(`MP4 upload failed: ${error.message}`)
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+  return `${url}/storage/v1/object/public/event-photos/${filename}`
+}
+
+async function queuePost(supabase, { date, slot, imageUrl, caption, events, mediaType = 'FEED' }) {
   const { data, error } = await supabase
     .from('ig_scheduled_posts')
     .insert({
       scheduled_for: mdtIso(date, slot.time),
-      media_type: 'FEED',
+      media_type: mediaType,
       image_urls: [imageUrl],
       caption,
       event_id: slot.kind === 'single' ? events[0].id : null,
@@ -703,15 +739,17 @@ async function checkTokenHealth() {
   }
 }
 
-function planOutput({ date, slot, events, caption, tags, pngPath, width, height }) {
+function planOutput({ date, slot, events, caption, tags, pngPath, mp4Path, width, height }) {
   return {
     date,
     slot: slot.id,
     templateId: slot.id,
+    format: mp4Path ? 'REELS' : 'FEED',
     events: events.map(event => ({ id: event.id, title: event.title, time: event.time })),
     caption,
     tags,
     pngPath,
+    mp4Path: mp4Path ?? null,
     width,
     height,
   }
@@ -778,18 +816,40 @@ async function main() {
     format: '4:5',
   })
 
+  const isReel = slot.reel === true
+
   if (dryRun) {
     await mkdir(OUT_DIR, { recursive: true })
     const pngPath = path.join(OUT_DIR, `${today}-${slot.id}.png`)
     await writeFile(pngPath, buffer)
-    console.log(JSON.stringify(planOutput({ date: today, slot, events: selected, caption, tags, pngPath, width, height }), null, 2))
+    let mp4Path
+    if (isReel) {
+      try {
+        mp4Path = await generateReel(pngPath)
+        console.error(`[reel] generated ${mp4Path}`)
+      } catch (err) {
+        console.error('[reel] ffmpeg not available in dry-run, keeping PNG:', err instanceof Error ? err.message : err)
+      }
+    }
+    console.log(JSON.stringify(planOutput({ date: today, slot, events: selected, caption, tags, pngPath, mp4Path, width, height }), null, 2))
     return
   }
 
   if (!supabase) supabase = supabaseClient()
-  const publicUrl = await uploadPng(supabase, buffer, today, slot.id)
-  const rowId = await queuePost(supabase, { date: today, slot, imageUrl: publicUrl, caption, events: selected })
-  console.log(JSON.stringify({ id: rowId, scheduledFor: mdtIso(today, slot.time), imageUrl: publicUrl }, null, 2))
+  let publicUrl
+  let mediaType = 'FEED'
+  if (isReel) {
+    await mkdir(OUT_DIR, { recursive: true })
+    const pngPath = path.join(OUT_DIR, `${today}-${slot.id}.png`)
+    await writeFile(pngPath, buffer)
+    const mp4Path = await generateReel(pngPath)
+    publicUrl = await uploadMp4(supabase, mp4Path, today, slot.id)
+    mediaType = 'REELS'
+  } else {
+    publicUrl = await uploadPng(supabase, buffer, today, slot.id)
+  }
+  const rowId = await queuePost(supabase, { date: today, slot, imageUrl: publicUrl, caption, events: selected, mediaType })
+  console.log(JSON.stringify({ id: rowId, scheduledFor: mdtIso(today, slot.time), imageUrl: publicUrl, mediaType }, null, 2))
 }
 
 main().catch(async error => {

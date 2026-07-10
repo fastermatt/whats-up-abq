@@ -107,7 +107,7 @@ async function publishContainer(igUserId: string, token: string, creationId: str
 
 interface ScheduledPost {
   id: string
-  media_type: 'FEED' | 'STORIES' | 'CAROUSEL'
+  media_type: 'FEED' | 'STORIES' | 'CAROUSEL' | 'REELS'
   image_urls: string[]
   caption: string | null
   location_id: string | null
@@ -205,6 +205,32 @@ export default async function handler() {
           slide_count: post.image_urls.length,
           posted_at: new Date().toISOString(),
         })
+      } else if (post.media_type === 'REELS') {
+        // Reels use video_url + share_to_feed so the algorithm distributes to
+        // non-followers via the Reels tab. Video processing takes longer than
+        // images — poll up to 24 × 5 s (2 min) before giving up.
+        const containerParams: Record<string, string> = {
+          media_type: 'REELS',
+          video_url: post.image_urls[0],
+          share_to_feed: 'true',
+        }
+        if (post.caption) containerParams.caption = post.caption
+
+        const containerId = await createContainer(igUserId, igToken, containerParams)
+        const ready = await pollStatus(containerId, igToken, 24)
+        if (!ready) throw new Error('Reel container processing timed out')
+
+        postId = await publishContainer(igUserId, igToken, containerId)
+
+        await supabase.from('ig_post_log').insert({
+          post_id: postId,
+          media_type: 'REELS',
+          image_url: post.image_urls[0],
+          caption: post.caption,
+          event_id: post.event_id,
+          slide_count: 1,
+          posted_at: new Date().toISOString(),
+        })
       } else {
         // FEED or STORIES — single image
         const containerParams: Record<string, string> = {
@@ -223,7 +249,6 @@ export default async function handler() {
 
         postId = await publishContainer(igUserId, igToken, containerId)
 
-        // Log to ig_post_log
         await supabase.from('ig_post_log').insert({
           post_id: postId,
           media_type: post.media_type,
