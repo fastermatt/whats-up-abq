@@ -249,6 +249,15 @@ export default function RootLayout({
           strategy="lazyOnload"
         />
 
+        {/* Plausible analytics — privacy-first, GDPR-compliant, no cookies.
+            Sign in at plausible.io and add abqunplugged.com to see data. */}
+        <Script
+          defer
+          data-domain="abqunplugged.com"
+          src="https://plausible.io/js/script.js"
+          strategy="afterInteractive"
+        />
+
       </body>
     </html>
   )
