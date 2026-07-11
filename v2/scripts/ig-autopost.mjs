@@ -16,17 +16,34 @@ const DEFAULT_FIXTURE = path.join(__dirname, 'fixtures', 'ig-events-week.json')
 const TAG_HANDLES_PATH = path.join(__dirname, 'ig-tag-handles.json')
 const OUT_DIR = '/tmp/ig-autopost'
 
-const ROTATION = {
-  1: { id: 'weekly-summary', kind: 'digest', period: 'this-week', time: '09:00', reel: true },
-  2: { id: 'poster', kind: 'single', period: 'next-10', time: '17:30', cats: ['Music'] },
-  3: { id: 'golden-hour', kind: 'single', period: 'next-10', time: '12:00', cats: ['Comedy', 'Arts & Theater'] },
-  4: { id: 'split', kind: 'single', period: 'next-10', time: '17:30', cats: ['Arts & Theater', 'Music'] },
-  5: { id: 'weekend-digest', kind: 'digest', period: 'this-weekend', time: '11:00', reel: true },
-  6: { id: 'top-three', kind: 'digest', period: 'this-weekend', time: '10:30', reel: true },
-  0: { id: 'terra', kind: 'single', period: 'today-or-next', time: '16:00', cats: ['Arts & Theater', 'Music'] },
+// Morning shift (9 AM MT): digest/roundup discovery posts for the week or weekend.
+// All run as Reels for algorithm-boosted reach to non-followers.
+const MORNING_ROTATION = {
+  0: { id: 'weekly-summary',  kind: 'digest', period: 'this-week',    time: '09:00', reel: true },
+  1: { id: 'weekly-summary',  kind: 'digest', period: 'this-week',    time: '09:00', reel: true },
+  2: { id: 'top-three',       kind: 'digest', period: 'next-10',      time: '09:00', reel: true },
+  3: { id: 'top-three',       kind: 'digest', period: 'next-10',      time: '09:00', reel: true },
+  4: { id: 'weekend-digest',  kind: 'digest', period: 'this-weekend', time: '09:00', reel: true },
+  5: { id: 'top-three',       kind: 'digest', period: 'this-weekend', time: '09:00', reel: true },
+  6: { id: 'weekend-digest',  kind: 'digest', period: 'this-weekend', time: '09:00', reel: true },
 }
 
-const SLOT_BY_ID = Object.fromEntries(Object.values(ROTATION).map(slot => [slot.id, slot]))
+// Evening shift (7:30 PM MT): single-event spotlights timed for when people
+// decide what to do tonight or plan the weekend. Targets categories by day.
+const EVENING_ROTATION = {
+  0: { id: 'terra',       kind: 'single', period: 'today-or-next', time: '19:30', cats: ['Arts & Theater', 'Music', 'Comedy'],  reel: true },
+  1: { id: 'poster',      kind: 'single', period: 'today-or-next', time: '19:30', cats: ['Music', 'Comedy', 'Festivals'],       reel: true },
+  2: { id: 'golden-hour', kind: 'single', period: 'today-or-next', time: '19:30', cats: ['Comedy', 'Arts & Theater', 'Music'],  reel: true },
+  3: { id: 'split',       kind: 'single', period: 'today-or-next', time: '19:30', cats: ['Arts & Theater', 'Music'],            reel: true },
+  4: { id: 'poster',      kind: 'single', period: 'today-or-next', time: '19:30', cats: ['Music', 'Festivals'],                 reel: true },
+  5: { id: 'terra',       kind: 'single', period: 'today-or-next', time: '19:30', cats: ['Music', 'Arts & Theater'],            reel: true },
+  6: { id: 'golden-hour', kind: 'single', period: 'today-or-next', time: '19:30', cats: ['Comedy', 'Music', 'Arts & Theater'],  reel: true },
+}
+
+const SLOT_BY_ID = Object.fromEntries(
+  [...Object.values(MORNING_ROTATION), ...Object.values(EVENING_ROTATION)]
+    .map(slot => [slot.id, slot])
+)
 
 const SYSTEM_PROMPT = `You are a caption writer for ABQ Unplugged (@abqunplugged), Albuquerque's community events guide. You write the way a local who genuinely loves this city would write: warm, excited, helpful, never pushy.
 
@@ -52,6 +69,8 @@ CAPTION STRUCTURE:
 6. Final line with 4 to 6 tasteful, relevant hashtags mixing ABQ/local, category, and event-specific tags. Never more than 6.
 
 For a DIGEST (multiple events), the IMAGE already lists every event with its day, time, and venue. Keep the caption SHORT: one warm hook line, one line of context, the CTA, then the hashtags. Do NOT re-list or describe the individual events. Aim for under 60 words before the hashtags.
+
+For a REEL post (marked as such in the prompt), the first line must be a concise scroll-stopping hook — one short sentence that names what's happening and makes someone pause. Same-day wording like "tonight" or "this evening" is allowed only when the prompt explicitly says so. Close with one light engagement invite on the final line: "Which would you go to? 👇" or "Drop your pick below 👇" — keep it casual, never forced.
 
 RULES:
 - Never make up details not in the event data
@@ -492,14 +511,14 @@ function stripFences(text) {
   return cleaned.replace(/^```\s*/, '').replace(/\s*```$/, '').trim()
 }
 
-async function generateCaption(events, slot, date) {
+async function generateCaption(events, slot, date, reelNote = '') {
   const dryRun = process.argv.includes('--dry-run')
   if (!process.env.DEEPSEEK_API_KEY) {
     if (!dryRun) throw new Error('DEEPSEEK_API_KEY is required')
     return fallbackCaption(events, slot)
   }
 
-  const userPrompt = `Write one Instagram caption for this ABQ Unplugged ${slot.kind === 'single' ? 'event' : 'event digest'}:
+  const userPrompt = `Write one Instagram caption for this ABQ Unplugged ${slot.kind === 'single' ? 'event' : 'event digest'}${reelNote}:
 
 ${renderCaptionContext(events, slot.kind, date)}
 
@@ -658,6 +677,69 @@ async function uploadMp4(supabase, mp4Path, date, slotId) {
   return `${url}/storage/v1/object/public/event-photos/${filename}`
 }
 
+// Category-to-visual mapping for Gemini Imagen prompts. Generates atmospheric
+// backgrounds matched to the event's mood and scene when GEMINI_API_KEY is set.
+const CATEGORY_VISUALS = {
+  Music:           'vibrant concert stage, warm amber stage lighting, crowd silhouettes with raised hands',
+  Comedy:          'warm intimate comedy club, single spotlight on stage, wooden interior, warm golden light',
+  'Arts & Theater':'dramatic theater stage, rich red curtains, golden footlights, moody atmosphere',
+  Festivals:       'colorful outdoor festival in the New Mexico high desert, turquoise sky, string lights at dusk',
+  'Food & Drink':  'warm inviting restaurant, string lights, adobe walls, New Mexico decor, candles on tables',
+  Outdoor:         'Sandia Mountains at golden hour, orange and pink sky over Albuquerque skyline',
+  Sports:          'stadium at night, bright field lights, electric crowd, aerial wide-angle view',
+  Family:          'sunny afternoon park in Albuquerque, families, vibrant desert wildflowers',
+  Film:            'classic movie theater interior, red velvet seats, warm golden projection light',
+}
+
+function buildImagePrompt(slot, events) {
+  const catVisual = events.map(e => CATEGORY_VISUALS[e.category ?? '']).filter(Boolean)[0]
+    ?? 'vibrant evening in downtown Albuquerque, New Mexico, city lights, Sandia Mountains silhouette at dusk'
+  const scene = slot.kind === 'digest'
+    ? `Cinematic wide-angle lifestyle photo of Albuquerque entertainment life. ${catVisual}. Lively, warm, inviting atmosphere.`
+    : `Cinematic close-up editorial shot. ${catVisual}. Atmospheric, moody, editorial quality.`
+  return `${scene} No text, no logos, no readable signs, no people's faces. Richly saturated colors, New Mexico warmth. Vertical 9:16 aspect ratio. Photorealistic, not illustrated.`
+}
+
+async function generateGeminiImage(prompt) {
+  const key = process.env.GEMINI_API_KEY
+  if (!key) return null
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${key}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          instances: [{ prompt }],
+          parameters: { sampleCount: 1, aspectRatio: '9:16' },
+        }),
+      }
+    )
+    if (!res.ok) {
+      console.error(`[gemini] API error ${res.status}: ${await res.text()}`)
+      return null
+    }
+    const data = await res.json()
+    const b64 = data?.predictions?.[0]?.bytesBase64Encoded
+    if (!b64) { console.error('[gemini] no image bytes in response'); return null }
+    return Buffer.from(b64, 'base64')
+  } catch (err) {
+    console.error('[gemini] image generation failed:', err instanceof Error ? err.message : err)
+    return null
+  }
+}
+
+async function uploadImageBuffer(supabase, buffer, mime, date, label, ext) {
+  const digest = createHash('sha1').update(buffer).digest('hex').slice(0, 10)
+  const filename = `ig-posts/autopost_${date}_${label}_${digest}.${ext}`
+  const { error } = await supabase.storage
+    .from('event-photos')
+    .upload(filename, buffer, { contentType: mime, upsert: false })
+  if (error) throw new Error(`Image upload failed: ${error.message}`)
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+  return `${url}/storage/v1/object/public/event-photos/${filename}`
+}
+
 async function queuePost(supabase, { date, slot, imageUrl, caption, events, mediaType = 'FEED' }) {
   const { data, error } = await supabase
     .from('ig_scheduled_posts')
@@ -739,9 +821,10 @@ async function checkTokenHealth() {
   }
 }
 
-function planOutput({ date, slot, events, caption, tags, pngPath, mp4Path, width, height }) {
+function planOutput({ date, shift, slot, events, caption, tags, pngPath, mp4Path, width, height, geminiImagePrompt }) {
   return {
     date,
+    shift,
     slot: slot.id,
     templateId: slot.id,
     format: mp4Path ? 'REELS' : 'FEED',
@@ -750,6 +833,7 @@ function planOutput({ date, slot, events, caption, tags, pngPath, mp4Path, width
     tags,
     pngPath,
     mp4Path: mp4Path ?? null,
+    geminiImagePrompt: geminiImagePrompt ?? null,
     width,
     height,
   }
@@ -763,7 +847,9 @@ async function main() {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(today)) throw new Error('--date must be YYYY-MM-DD')
 
   const day = weekdayIndex(today)
-  const slot = args.slot ? SLOT_BY_ID[args.slot] : ROTATION[day]
+  const shift = args.shift || 'morning'
+  const dayRotation = shift === 'evening' ? EVENING_ROTATION : MORNING_ROTATION
+  const slot = args.slot ? SLOT_BY_ID[args.slot] : dayRotation[day]
   if (!slot) throw new Error(`Unknown --slot ${args.slot}`)
 
   if (!dryRun && process.env.IG_AUTOPOST_ENABLED !== 'true') {
@@ -804,9 +890,33 @@ async function main() {
   if (selected.length === 0) throw new Error(`No eligible events for ${today} ${slot.id}`)
 
   const ctx = buildContext(slot, selected, today)
+
+  // Gemini background: generate a category-matched atmospheric image for Reel posts.
+  // Runs only when GEMINI_API_KEY is set. In live mode uploads to Supabase Storage and
+  // injects the URL into ctx.imageUrl so the Konva template uses it as the background.
+  // Falls back to the event's source photo if the key is absent or the API fails.
+  let geminiImagePrompt = null
+  if (slot.reel && process.env.GEMINI_API_KEY) {
+    geminiImagePrompt = buildImagePrompt(slot, selected)
+    if (!dryRun && supabase) {
+      console.error(`[gemini] generating background for ${slot.id}…`)
+      const geminiBuffer = await generateGeminiImage(geminiImagePrompt)
+      if (geminiBuffer) {
+        const geminiUrl = await uploadImageBuffer(supabase, geminiBuffer, 'image/jpeg', today, `${slot.id}-bg`, 'jpg')
+        ctx.imageUrl = geminiUrl
+        console.error(`[gemini] background: ${geminiUrl}`)
+      }
+    } else {
+      console.error(`[gemini] dry-run image prompt: ${geminiImagePrompt.slice(0, 120)}…`)
+    }
+  }
+
   const tagMap = await loadTagMap()
   const tags = mentionsFor(selected, tagMap)
-  const caption = appendMentions(await generateCaption(selected, slot, today), tags)
+  const reelNote = slot.reel
+    ? ` (REEL post${shift === 'evening' ? ' — same-day wording like "tonight" and "this evening" is allowed for events happening today' : ''})`
+    : ''
+  const caption = appendMentions(await generateCaption(selected, slot, today, reelNote), tags)
 
   const { buffer, width, height } = await renderIG({
     baseUrl: process.env.IG_BASE_URL || DEFAULT_BASE_URL,
@@ -831,7 +941,7 @@ async function main() {
         console.error('[reel] ffmpeg not available in dry-run, keeping PNG:', err instanceof Error ? err.message : err)
       }
     }
-    console.log(JSON.stringify(planOutput({ date: today, slot, events: selected, caption, tags, pngPath, mp4Path, width, height }), null, 2))
+    console.log(JSON.stringify(planOutput({ date: today, shift, slot, events: selected, caption, tags, pngPath, mp4Path, width, height, geminiImagePrompt }), null, 2))
     return
   }
 
@@ -855,7 +965,9 @@ async function main() {
 main().catch(async error => {
   const args = parseArgs(process.argv.slice(2))
   const date = args.date || denverDateParts().iso
-  const slotId = args.slot || SLOT_BY_ID[args.slot]?.id || ROTATION[weekdayIndex(date)]?.id || 'unknown'
+  const errShift = args.shift || 'morning'
+  const errRotation = errShift === 'evening' ? EVENING_ROTATION : MORNING_ROTATION
+  const slotId = args.slot || SLOT_BY_ID[args.slot]?.id || errRotation[weekdayIndex(date)]?.id || 'unknown'
   await sendFailureAlert(date, slotId, error)
   console.error(error instanceof Error ? error.message : error)
   process.exit(1)

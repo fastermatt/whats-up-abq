@@ -2,7 +2,8 @@ name: IG autopost daily
 
 on:
   schedule:
-    - cron: '30 13 * * *'
+    - cron: '30 13 * * *'   # 7:30 AM MT (morning shift — MDT=UTC-6)
+    - cron: '30 1 * * *'    # 7:30 PM MT (evening shift — MDT=UTC-6)
   workflow_dispatch:
     inputs:
       dry_run:
@@ -10,6 +11,11 @@ on:
         required: true
         type: boolean
         default: true
+      shift:
+        description: 'Which shift to run (morning or evening)'
+        required: false
+        type: string
+        default: 'morning'
 
 jobs:
   ig-autopost:
@@ -22,6 +28,7 @@ jobs:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
       IG_BASE_URL: https://abqunplugged.com
       IG_AUTOPOST_ENABLED: ${{ secrets.IG_AUTOPOST_ENABLED }}
@@ -49,11 +56,15 @@ jobs:
 
       - name: Run dry-run autopost
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
-        run: node scripts/ig-autopost.mjs --dry-run
+        run: node scripts/ig-autopost.mjs --dry-run --shift ${{ inputs.shift || 'morning' }}
 
-      - name: Run live autopost
-        if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) }}
-        run: node scripts/ig-autopost.mjs
+      - name: Run morning autopost
+        if: ${{ github.event.schedule == '30 13 * * *' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run && inputs.shift == 'morning') }}
+        run: node scripts/ig-autopost.mjs --shift morning
+
+      - name: Run evening autopost
+        if: ${{ github.event.schedule == '30 1 * * *' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run && inputs.shift == 'evening') }}
+        run: node scripts/ig-autopost.mjs --shift evening
 
       - name: Upload dry-run artifacts
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
