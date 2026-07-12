@@ -677,8 +677,8 @@ async function uploadMp4(supabase, mp4Path, date, slotId) {
   return `${url}/storage/v1/object/public/event-photos/${filename}`
 }
 
-// Category-to-visual mapping for Gemini Imagen prompts. Generates atmospheric
-// backgrounds matched to the event's mood and scene when GEMINI_API_KEY is set.
+// Category-to-visual mapping for DALL-E 3 prompts. Generates atmospheric
+// backgrounds matched to the event's mood and scene when OPENAI_API_KEY is set.
 const CATEGORY_VISUALS = {
   Music:           'vibrant concert stage, warm amber stage lighting, crowd silhouettes with raised hands',
   Comedy:          'warm intimate comedy club, single spotlight on stage, wooden interior, warm golden light',
@@ -700,31 +700,32 @@ function buildImagePrompt(slot, events) {
   return `${scene} No text, no logos, no readable signs, no people's faces. Richly saturated colors, New Mexico warmth. Vertical 9:16 aspect ratio. Photorealistic, not illustrated.`
 }
 
-async function generateGeminiImage(prompt) {
-  const key = process.env.GEMINI_API_KEY
+async function generateOpenAIImage(prompt) {
+  const key = process.env.OPENAI_API_KEY
   if (!key) return null
   try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${key}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          instances: [{ prompt }],
-          parameters: { sampleCount: 1, aspectRatio: '9:16' },
-        }),
-      }
-    )
+    const res = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+      body: JSON.stringify({
+        model: 'dall-e-3',
+        prompt,
+        n: 1,
+        size: '1024x1792',
+        quality: 'standard',
+        response_format: 'b64_json',
+      }),
+    })
     if (!res.ok) {
-      console.error(`[gemini] API error ${res.status}: ${await res.text()}`)
+      console.error(`[openai] API error ${res.status}: ${await res.text()}`)
       return null
     }
     const data = await res.json()
-    const b64 = data?.predictions?.[0]?.bytesBase64Encoded
-    if (!b64) { console.error('[gemini] no image bytes in response'); return null }
+    const b64 = data?.data?.[0]?.b64_json
+    if (!b64) { console.error('[openai] no image bytes in response'); return null }
     return Buffer.from(b64, 'base64')
   } catch (err) {
-    console.error('[gemini] image generation failed:', err instanceof Error ? err.message : err)
+    console.error('[openai] image generation failed:', err instanceof Error ? err.message : err)
     return null
   }
 }
@@ -821,7 +822,7 @@ async function checkTokenHealth() {
   }
 }
 
-function planOutput({ date, shift, slot, events, caption, tags, pngPath, mp4Path, width, height, geminiImagePrompt }) {
+function planOutput({ date, shift, slot, events, caption, tags, pngPath, mp4Path, width, height, aiImagePrompt }) {
   return {
     date,
     shift,
@@ -833,7 +834,7 @@ function planOutput({ date, shift, slot, events, caption, tags, pngPath, mp4Path
     tags,
     pngPath,
     mp4Path: mp4Path ?? null,
-    geminiImagePrompt: geminiImagePrompt ?? null,
+    aiImagePrompt: aiImagePrompt ?? null,
     width,
     height,
   }
@@ -891,23 +892,23 @@ async function main() {
 
   const ctx = buildContext(slot, selected, today)
 
-  // Gemini background: generate a category-matched atmospheric image for Reel posts.
-  // Runs only when GEMINI_API_KEY is set. In live mode uploads to Supabase Storage and
+  // DALL-E 3 background: generate a category-matched atmospheric image for Reel posts.
+  // Runs only when OPENAI_API_KEY is set. In live mode uploads to Supabase Storage and
   // injects the URL into ctx.imageUrl so the Konva template uses it as the background.
   // Falls back to the event's source photo if the key is absent or the API fails.
-  let geminiImagePrompt = null
-  if (slot.reel && process.env.GEMINI_API_KEY) {
-    geminiImagePrompt = buildImagePrompt(slot, selected)
+  let aiImagePrompt = null
+  if (slot.reel && process.env.OPENAI_API_KEY) {
+    aiImagePrompt = buildImagePrompt(slot, selected)
     if (!dryRun && supabase) {
-      console.error(`[gemini] generating background for ${slot.id}…`)
-      const geminiBuffer = await generateGeminiImage(geminiImagePrompt)
-      if (geminiBuffer) {
-        const geminiUrl = await uploadImageBuffer(supabase, geminiBuffer, 'image/jpeg', today, `${slot.id}-bg`, 'jpg')
-        ctx.imageUrl = geminiUrl
-        console.error(`[gemini] background: ${geminiUrl}`)
+      console.error(`[openai] generating background for ${slot.id}…`)
+      const aiBuffer = await generateOpenAIImage(aiImagePrompt)
+      if (aiBuffer) {
+        const aiUrl = await uploadImageBuffer(supabase, aiBuffer, 'image/jpeg', today, `${slot.id}-bg`, 'jpg')
+        ctx.imageUrl = aiUrl
+        console.error(`[openai] background: ${aiUrl}`)
       }
     } else {
-      console.error(`[gemini] dry-run image prompt: ${geminiImagePrompt.slice(0, 120)}…`)
+      console.error(`[openai] dry-run image prompt: ${aiImagePrompt.slice(0, 120)}…`)
     }
   }
 
@@ -941,7 +942,7 @@ async function main() {
         console.error('[reel] ffmpeg not available in dry-run, keeping PNG:', err instanceof Error ? err.message : err)
       }
     }
-    console.log(JSON.stringify(planOutput({ date: today, shift, slot, events: selected, caption, tags, pngPath, mp4Path, width, height, geminiImagePrompt }), null, 2))
+    console.log(JSON.stringify(planOutput({ date: today, shift, slot, events: selected, caption, tags, pngPath, mp4Path, width, height, aiImagePrompt }), null, 2))
     return
   }
 
