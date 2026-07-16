@@ -6,9 +6,8 @@ name: V2 Weekly Event Refresh
 # Exit code 0 = site healthy, non-zero = something needs fixing.
 
 on:
-  # Cron PAUSED 2026-04-20 — re-enable by uncommenting the schedule block below
-  # schedule:
-  #   - cron: '0 14 * * 2'   # Every Tuesday 7 AM MT
+  schedule:
+    - cron: '0 14 * * 2'   # Every Tuesday 7 AM MT
 
   # Manual trigger from GitHub Actions tab
   workflow_dispatch:
