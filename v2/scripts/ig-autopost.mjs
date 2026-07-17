@@ -551,8 +551,14 @@ The link in bio goes to abqunplugged.com, an events discovery site for all of Al
   const content = data?.choices?.[0]?.message?.content
   if (!content) throw new Error('DeepSeek returned no caption content')
 
-  const parsed = JSON.parse(stripFences(content))
-  const caption = cleanString(parsed.caption)
+  let caption
+  try {
+    const parsed = JSON.parse(stripFences(content))
+    caption = cleanString(parsed.caption)
+  } catch {
+    // DeepSeek returned malformed JSON (e.g. unescaped quote in caption) — use raw text
+    caption = cleanString(content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim())
+  }
   if (!caption) throw new Error('DeepSeek caption response missing caption')
   // Replace em dashes (and stray "--") with a comma, collapsing surrounding
   // spaces so "word — that" becomes "word, that" (not "word , that").
