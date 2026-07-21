@@ -176,7 +176,7 @@ function dateRangeFor(period, date, events = []) {
   if (period === 'today-or-next') {
     const todayEvents = events.filter(e => e.date === date)
     if (todayEvents.length > 0) return { start: date, end: date }
-    return { start: addDays(date, 1), end: addDays(date, 10) }
+    return { start: addDays(date, 1), end: addDays(date, 7) }
   }
   return { start: date, end: date }
 }
@@ -880,7 +880,7 @@ async function main() {
   } else {
     supabase = supabaseClient()
     const broadRange = dateRangeFor(slot.period, today)
-    events = await loadLiveEvents(supabase, slot.period === 'today-or-next' ? { start: today, end: addDays(today, 10) } : broadRange)
+    events = await loadLiveEvents(supabase, slot.period === 'today-or-next' ? { start: today, end: addDays(today, 7) } : broadRange)
     if (!dryRun) recentIds = await recentlyPostedIds(supabase)
   }
 
