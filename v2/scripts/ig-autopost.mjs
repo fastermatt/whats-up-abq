@@ -685,25 +685,23 @@ async function uploadMp4(supabase, mp4Path, date, slotId) {
 
 // Category-to-visual mapping for DALL-E 3 prompts. Generates atmospheric
 // backgrounds matched to the event's mood and scene when OPENAI_API_KEY is set.
+// Style: linocut illustration, terra+teal+black+beige palette — matches site design.
 const CATEGORY_VISUALS = {
-  Music:           'vibrant concert stage, warm amber stage lighting, crowd silhouettes with raised hands',
-  Comedy:          'warm intimate comedy club, single spotlight on stage, wooden interior, warm golden light',
-  'Arts & Theater':'dramatic theater stage, rich red curtains, golden footlights, moody atmosphere',
-  Festivals:       'colorful outdoor festival in the New Mexico high desert, turquoise sky, string lights at dusk',
-  'Food & Drink':  'warm inviting restaurant, string lights, adobe walls, New Mexico decor, candles on tables',
-  Outdoor:         'Sandia Mountains at golden hour, orange and pink sky over Albuquerque skyline',
-  Sports:          'stadium at night, bright field lights, electric crowd, aerial wide-angle view',
-  Family:          'sunny afternoon park in Albuquerque, families, vibrant desert wildflowers',
-  Film:            'classic movie theater interior, red velvet seats, warm golden projection light',
+  Music:           'make a lively concert image in Albuquerque with a full band on stage, crowd singing along and dancing with joy, guitars blazing',
+  Comedy:          'comedy club stage in Albuquerque, spotlight on performer, audience laughing, warm intimate venue',
+  'Arts & Theater':'dramatic theater stage in Albuquerque, performers in colorful costumes, golden footlights, audience watching',
+  Festivals:       'outdoor street festival in Albuquerque plaza, vendor tents with colorful banners, crowd dancing and browsing, adobe buildings',
+  'Food & Drink':  'lively brewery in Albuquerque, people toasting with craft beers, bartender at long tap bar, warm amber lighting',
+  Outdoor:         'Sandia Mountains at golden hour, hot air balloon rising, vast New Mexico desert landscape below',
+  Sports:          'packed sports stadium in Albuquerque at night, crowd cheering, bright field lights, electric atmosphere',
+  Family:          'families exploring Albuquerque park on sunny day, children playing, cottonwood trees, Sandia Mountains backdrop',
+  Film:            'outdoor film screening in Albuquerque park at night, audience on blankets under stars, glowing screen',
 }
 
 function buildImagePrompt(slot, events) {
   const catVisual = events.map(e => CATEGORY_VISUALS[e.category ?? '']).filter(Boolean)[0]
-    ?? 'vibrant evening in downtown Albuquerque, New Mexico, city lights, Sandia Mountains silhouette at dusk'
-  const scene = slot.kind === 'digest'
-    ? `Cinematic wide-angle lifestyle photo of Albuquerque entertainment life. ${catVisual}. Lively, warm, inviting atmosphere.`
-    : `Cinematic close-up editorial shot. ${catVisual}. Atmospheric, moody, editorial quality.`
-  return `${scene} No text, no logos, no readable signs, no people's faces. Richly saturated colors, New Mexico warmth. Vertical 9:16 aspect ratio. Photorealistic, not illustrated.`
+    ?? 'make a lively evening image in downtown Albuquerque with people celebrating, city lights, Sandia Mountains silhouette'
+  return `${catVisual}, linocut hand drawn imagery using terra and teal and black and beige, bold outlines, flat graphic color, woodblock print style, expressive joyful people, no text, no logos, vertical 9:16 composition --ar 9:16`
 }
 
 async function generateOpenAIImage(prompt) {
