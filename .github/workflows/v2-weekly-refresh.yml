@@ -44,6 +44,7 @@ jobs:
       EVENTBRITE_TOKEN:          ${{ secrets.EVENTBRITE_TOKEN }}
       DEEPSEEK_API_KEY:          ${{ secrets.DEEPSEEK_API_KEY }}
       ANTHROPIC_API_KEY:         ${{ secrets.ANTHROPIC_API_KEY }}
+      OPENAI_API_KEY:            ${{ secrets.OPENAI_API_KEY }}
 
     steps:
       - name: Checkout repo

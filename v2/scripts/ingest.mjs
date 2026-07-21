@@ -573,6 +573,17 @@ async function main() {
     if (christianRes.ok) ok(`christian music tagger (${(christianRes.durationMs/1000).toFixed(1)}s)`)
     else warn(`christian music tagger returned non-zero — continuing`)
 
+    // DALL-E 3 illustrated photos for events with no cached_photo_url.
+    // Skips automatically when OPENAI_API_KEY is not set. Capped at 20/run
+    // to keep cost low (~$0.80). A full batch can be triggered from
+    // the enrich-photos workflow in GitHub Actions.
+    if (process.env.OPENAI_API_KEY) {
+      step('DALL-E 3 photo enrichment (illustrated graphics for events missing photos)')
+      const dalleRes = await runScript('enrich-photos-dalle.mjs', ['--limit=20'])
+      if (dalleRes.ok) ok(`dalle photo enrichment (${(dalleRes.durationMs/1000).toFixed(1)}s)`)
+      else warn(`dalle photo enrichment returned non-zero — continuing`)
+    }
+
   } else {
     warn('Skipped enrichment (--skip-enrich)')
   }

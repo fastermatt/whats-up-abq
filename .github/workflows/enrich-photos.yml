@@ -1,0 +1,63 @@
+name: Enrich Event Photos (DALL-E 3)
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Max images to generate (default 100)'
+        required: false
+        default: '100'
+        type: string
+      category:
+        description: 'Only this category (leave blank for all)'
+        required: false
+        default: ''
+        type: string
+      all:
+        description: 'Generate for ALL events, including those with existing photos'
+        required: false
+        default: false
+        type: boolean
+      dry_run:
+        description: 'Preview prompts without generating images'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  enrich-photos:
+    name: Generate illustrated event photos
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: v2
+
+    env:
+      SUPABASE_URL:              ${{ secrets.SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_URL:  ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      OPENAI_API_KEY:            ${{ secrets.OPENAI_API_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: v2/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Run photo enrichment
+        run: |
+          ARGS="--limit=${{ inputs.limit || '100' }}"
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          if [ "${{ inputs.all }}" = "true" ]; then ARGS="$ARGS --all"; fi
+          if [ -n "${{ inputs.category }}" ]; then ARGS="$ARGS --category=${{ inputs.category }}"; fi
+          echo "Running: node scripts/enrich-photos-dalle.mjs $ARGS"
+          node scripts/enrich-photos-dalle.mjs $ARGS
