@@ -649,21 +649,27 @@ async function uploadPng(supabase, buffer, date, slotId) {
 }
 
 // Convert a rendered 4:5 PNG (1080×1350) into a 9:16 MP4 (1080×1920) using
-// ffmpeg. Pads the canvas with cream and applies a slow Ken Burns zoom so the
-// Reel doesn't look like a static image in a video wrapper. Requires ffmpeg on
-// PATH (Ubuntu runners have it; install locally with `brew install ffmpeg`).
+// ffmpeg. Scales to fill the full frame (no letterbox bands) and applies a
+// slow horizontal drift using crop + frame-number math instead of zoompan —
+// zoompan has known per-frame floating-point jitter that makes text hard to
+// read. Requires ffmpeg on PATH (Ubuntu runners have it; `brew install ffmpeg`).
 async function generateReel(pngPath) {
   const mp4Path = pngPath.replace(/\.png$/, '.mp4')
+  // Scale 4:5 (1080×1350) to fill 9:16 height: width becomes 1536, height 1920.
+  // Horizontal headroom = 1536 - 1080 = 456px. Drift 200px left over 18s
+  // (11px/sec, imperceptible jitter since floor() keeps it integer).
+  // Text stays visible: it sits at x≈768 in the 1536-wide image, well within
+  // the 1080-wide crop window even at maximum drift (x=428, visible 428–1508).
   const vf = [
-    'scale=1080:1350',
-    'pad=1080:1920:0:285:color=#fbf7f1',
-    "zoompan=z='min(zoom+0.0008,1.3)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=450:s=1080x1920:fps=25",
+    'scale=1536:1920',
+    "crop=1080:1920:'228+floor(200*n/540)':0",
+    'fade=t=in:st=0:d=0.8,fade=t=out:st=17.2:d=0.8',
     'format=yuv420p',
   ].join(',')
   execFileSync('ffmpeg', [
     '-y', '-loop', '1', '-i', pngPath,
     '-vf', vf,
-    '-t', '18', '-r', '25',
+    '-t', '18', '-r', '30',
     '-c:v', 'libx264', '-crf', '22', '-preset', 'fast',
     '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
     mp4Path,
@@ -701,7 +707,7 @@ const CATEGORY_VISUALS = {
 function buildImagePrompt(slot, events) {
   const catVisual = events.map(e => CATEGORY_VISUALS[e.category ?? '']).filter(Boolean)[0]
     ?? 'make a lively evening image in downtown Albuquerque with people celebrating, city lights, Sandia Mountains silhouette'
-  return `${catVisual}, linocut hand drawn imagery using terra and teal and black and beige, bold outlines, flat graphic color, woodblock print style, expressive joyful people, no text, no logos, vertical 9:16 composition --ar 9:16`
+  return `${catVisual}, linocut hand drawn imagery using terra and teal and black and beige, bold outlines, flat graphic color, woodblock print style, expressive joyful people, no text, no logos, vertical composition`
 }
 
 async function generateOpenAIImage(prompt) {
