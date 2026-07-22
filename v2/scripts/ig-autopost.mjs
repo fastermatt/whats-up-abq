@@ -2,6 +2,7 @@
 
 import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
+import { existsSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -28,16 +29,17 @@ const MORNING_ROTATION = {
   6: { id: 'weekend-digest',  kind: 'digest', period: 'this-weekend', time: '09:00', reel: true },
 }
 
-// Evening shift (7:30 PM MT): single-event spotlights timed for when people
-// decide what to do tonight or plan the weekend. Targets categories by day.
+// Evening shift (7:30 PM MT): mix of single-event spotlights and multi-event
+// roundups. Data shows roundup format (247-263 reach) vs single-event (11-12
+// reach) — 20x gap. Mon/Thu/Sat are roundup nights to match morning cadence.
 const EVENING_ROTATION = {
-  0: { id: 'terra',       kind: 'single', period: 'today-or-next', time: '19:30', cats: ['Arts & Theater', 'Music', 'Comedy'],  reel: true },
-  1: { id: 'poster',      kind: 'single', period: 'today-or-next', time: '19:30', cats: ['Music', 'Comedy', 'Festivals'],       reel: true },
-  2: { id: 'golden-hour', kind: 'single', period: 'today-or-next', time: '19:30', cats: ['Comedy', 'Arts & Theater', 'Music'],  reel: true },
-  3: { id: 'split',       kind: 'single', period: 'today-or-next', time: '19:30', cats: ['Arts & Theater', 'Music'],            reel: true },
-  4: { id: 'poster',      kind: 'single', period: 'today-or-next', time: '19:30', cats: ['Music', 'Festivals'],                 reel: true },
-  5: { id: 'terra',       kind: 'single', period: 'today-or-next', time: '19:30', cats: ['Music', 'Arts & Theater'],            reel: true },
-  6: { id: 'golden-hour', kind: 'single', period: 'today-or-next', time: '19:30', cats: ['Comedy', 'Music', 'Arts & Theater'],  reel: true },
+  0: { id: 'terra',          kind: 'single', period: 'today-or-next', time: '19:30', cats: ['Arts & Theater', 'Music', 'Comedy'],  reel: true },  // Sun
+  1: { id: 'top-three',      kind: 'digest', period: 'next-10',       time: '19:30',                                               reel: true },  // Mon — roundup
+  2: { id: 'golden-hour',    kind: 'single', period: 'today-or-next', time: '19:30', cats: ['Comedy', 'Arts & Theater', 'Music'],  reel: true },  // Tue
+  3: { id: 'split',          kind: 'single', period: 'today-or-next', time: '19:30', cats: ['Arts & Theater', 'Music'],            reel: true },  // Wed
+  4: { id: 'weekend-digest', kind: 'digest', period: 'this-weekend',  time: '19:30',                                               reel: true },  // Thu — weekend preview
+  5: { id: 'poster',         kind: 'single', period: 'today-or-next', time: '19:30', cats: ['Music', 'Festivals'],                 reel: true },  // Fri
+  6: { id: 'top-three',      kind: 'digest', period: 'this-weekend',  time: '19:30',                                               reel: true },  // Sat — weekend picks
 }
 
 const SLOT_BY_ID = Object.fromEntries(
@@ -648,24 +650,57 @@ async function uploadPng(supabase, buffer, date, slotId) {
   return `${url}/storage/v1/object/public/event-photos/${filename}`
 }
 
+// Decorative font candidates — need a font with geometric Unicode symbols
+// (◆ ★ ●) for the animated floating overlays. DejaVu is pre-installed on
+// Ubuntu (GitHub Actions runners). The macOS fallback is best-effort.
+const DECOR_FONT_CANDIDATES = [
+  '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',      // Ubuntu — primary
+  '/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf',  // Ubuntu Noto
+  '/System/Library/Fonts/Supplemental/Arial Unicode.ttf', // macOS
+  '/Library/Fonts/Arial Unicode MS.ttf',                  // macOS alt
+]
+
 // Convert a rendered 4:5 PNG (1080×1350) into a 9:16 MP4 (1080×1920) using
 // ffmpeg. Scales to fill the full frame (no letterbox bands) and applies a
 // slow horizontal drift using crop + frame-number math instead of zoompan —
 // zoompan has known per-frame floating-point jitter that makes text hard to
 // read. Requires ffmpeg on PATH (Ubuntu runners have it; `brew install ffmpeg`).
+//
+// Floating vector decoratives (◆ ★ ●) are composited as a subtle animated
+// layer over the top 55% of the frame using ffmpeg drawtext with sinusoidal
+// position expressions. Text/event info in the bottom 45% is never touched.
 async function generateReel(pngPath) {
   const mp4Path = pngPath.replace(/\.png$/, '.mp4')
-  // Scale 4:5 (1080×1350) to fill 9:16 height: width becomes 1536, height 1920.
-  // Horizontal headroom = 1536 - 1080 = 456px. Drift 200px left over 18s
-  // (11px/sec, imperceptible jitter since floor() keeps it integer).
-  // Text stays visible: it sits at x≈768 in the 1536-wide image, well within
-  // the 1080-wide crop window even at maximum drift (x=428, visible 428–1508).
+
+  // Find a font that covers the geometric symbol block (U+25A0–U+25FF)
+  const fontFile = DECOR_FONT_CANDIDATES.find(p => existsSync(p))
+
+  // Floating decoratives — terra ◆ and teal ★ ● that drift with different
+  // phases so they never move in sync. All kept above y=1050 (top 55% of
+  // 1920) so the bottom event-info cluster is never obscured.
+  // t = elapsed seconds in ffmpeg expression context.
+  const decor = fontFile ? [
+    // top-left diamond, terra, gentle figure-eight
+    `drawtext=fontfile=${fontFile}:text=◆:fontsize=100:fontcolor=0x9a442d@0.13:x=100+28*sin(0.72*t):y=175+22*cos(0.55*t)`,
+    // top-right star, teal, slower circular drift
+    `drawtext=fontfile=${fontFile}:text=★:fontsize=82:fontcolor=0x006a62@0.13:x=820+32*cos(0.80*t+1.05):y=340+28*sin(0.62*t+0.52)`,
+    // center-upper small diamond, teal
+    `drawtext=fontfile=${fontFile}:text=◆:fontsize=66:fontcolor=0x006a62@0.10:x=510+22*cos(0.52*t+2.09):y=560+18*sin(0.74*t+1.00)`,
+    // left-middle circle, terra, slowest drift
+    `drawtext=fontfile=${fontFile}:text=●:fontsize=54:fontcolor=0x9a442d@0.08:x=155+18*sin(0.61*t+3.49):y=760+22*cos(0.42*t+1.96)`,
+  ] : []
+
   const vf = [
+    // Fill 9:16 from 4:5 source: scale to height (1920), width 1536
     'scale=1536:1920',
+    // Slow 200px horizontal drift — smooth (floor keeps it integer)
     "crop=1080:1920:'228+floor(200*n/540)':0",
+    // Animated floating decoratives in top 55% — text zone unaffected
+    ...decor,
     'fade=t=in:st=0:d=0.8,fade=t=out:st=17.2:d=0.8',
     'format=yuv420p',
   ].join(',')
+
   execFileSync('ffmpeg', [
     '-y', '-loop', '1', '-i', pngPath,
     '-vf', vf,
