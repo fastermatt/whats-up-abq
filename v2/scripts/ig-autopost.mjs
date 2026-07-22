@@ -786,11 +786,11 @@ async function uploadImageBuffer(supabase, buffer, mime, date, label, ext) {
   return `${url}/storage/v1/object/public/event-photos/${filename}`
 }
 
-async function queuePost(supabase, { date, slot, imageUrl, caption, events, mediaType = 'FEED' }) {
+async function queuePost(supabase, { date, slot, imageUrl, caption, events, mediaType = 'FEED', scheduledFor }) {
   const { data, error } = await supabase
     .from('ig_scheduled_posts')
     .insert({
-      scheduled_for: mdtIso(date, slot.time),
+      scheduled_for: scheduledFor ?? mdtIso(date, slot.time),
       media_type: mediaType,
       image_urls: [imageUrl],
       caption,
@@ -889,13 +889,18 @@ async function main() {
   await loadEnv()
   const args = parseArgs(process.argv.slice(2))
   const dryRun = args['dry-run'] === true
+  const postNow = args.now === true || args.now === 'true'
+  const isStoryMode = args.story === true || args.story === 'true'
   const today = args.date || denverDateParts().iso
   if (!/^\d{4}-\d{2}-\d{2}$/.test(today)) throw new Error('--date must be YYYY-MM-DD')
 
   const day = weekdayIndex(today)
   const shift = args.shift || 'morning'
   const dayRotation = shift === 'evening' ? EVENING_ROTATION : MORNING_ROTATION
-  const slot = args.slot ? SLOT_BY_ID[args.slot] : dayRotation[day]
+  // --story forces a shareable digest (top 3 upcoming events across ABQ)
+  let slot = isStoryMode
+    ? { id: 'top-three', kind: 'digest', period: 'next-10', time: dayRotation[day]?.time || '19:30', reel: false }
+    : (args.slot ? SLOT_BY_ID[args.slot] : dayRotation[day])
   if (!slot) throw new Error(`Unknown --slot ${args.slot}`)
 
   if (!dryRun && process.env.IG_AUTOPOST_ENABLED !== 'true') {
@@ -964,15 +969,18 @@ async function main() {
     : ''
   const caption = appendMentions(await generateCaption(selected, slot, today, reelNote), tags)
 
+  // --story renders 9:16 (Story dimensions); regular posts render 4:5
+  const renderFormat = isStoryMode ? '9:16' : '4:5'
+
   const { buffer, width, height } = await renderIG({
     baseUrl: process.env.IG_BASE_URL || DEFAULT_BASE_URL,
     adminToken: process.env.ADMIN_SECRET,
     templateId: slot.id,
     ctx,
-    format: '4:5',
+    format: renderFormat,
   })
 
-  const isReel = slot.reel === true
+  const isReel = slot.reel === true && !isStoryMode
 
   if (dryRun) {
     await mkdir(OUT_DIR, { recursive: true })
@@ -994,7 +1002,11 @@ async function main() {
   if (!supabase) supabase = supabaseClient()
   let publicUrl
   let mediaType = 'FEED'
-  if (isReel) {
+  if (isStoryMode) {
+    // Story: 9:16 PNG posted directly to Instagram Stories
+    publicUrl = await uploadPng(supabase, buffer, today, `${slot.id}-story`)
+    mediaType = 'STORIES'
+  } else if (isReel) {
     await mkdir(OUT_DIR, { recursive: true })
     const pngPath = path.join(OUT_DIR, `${today}-${slot.id}.png`)
     await writeFile(pngPath, buffer)
@@ -1004,8 +1016,11 @@ async function main() {
   } else {
     publicUrl = await uploadPng(supabase, buffer, today, slot.id)
   }
-  const rowId = await queuePost(supabase, { date: today, slot, imageUrl: publicUrl, caption, events: selected, mediaType })
-  console.log(JSON.stringify({ id: rowId, scheduledFor: mdtIso(today, slot.time), imageUrl: publicUrl, mediaType }, null, 2))
+  // --now: schedule for right now so the Netlify publisher (runs every 5 min) picks it up immediately
+  const scheduledFor = postNow ? new Date().toISOString() : undefined
+  const rowId = await queuePost(supabase, { date: today, slot, imageUrl: publicUrl, caption, events: selected, mediaType, scheduledFor })
+  const displayTime = scheduledFor ?? mdtIso(today, slot.time)
+  console.log(JSON.stringify({ id: rowId, scheduledFor: displayTime, imageUrl: publicUrl, mediaType }, null, 2))
 }
 
 main().catch(async error => {

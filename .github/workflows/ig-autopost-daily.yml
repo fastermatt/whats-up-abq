@@ -16,6 +16,16 @@ on:
         required: false
         type: string
         default: 'morning'
+      post_now:
+        description: 'Queue for immediate publish (within 5 min) instead of the scheduled time slot'
+        required: false
+        type: boolean
+        default: false
+      story:
+        description: 'Post as an Instagram Story (9:16 image, top-3 digest) instead of a Reel'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   ig-autopost:
@@ -56,15 +66,26 @@ jobs:
 
       - name: Run dry-run autopost
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
-        run: node scripts/ig-autopost.mjs --dry-run --shift ${{ inputs.shift || 'morning' }}
+        run: |
+          ARGS="--dry-run --shift ${{ inputs.shift || 'morning' }}"
+          if [ "${{ inputs.story }}" = "true" ]; then ARGS="$ARGS --story"; fi
+          node scripts/ig-autopost.mjs $ARGS
 
       - name: Run morning autopost
         if: ${{ github.event.schedule == '30 13 * * *' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run && inputs.shift == 'morning') }}
-        run: node scripts/ig-autopost.mjs --shift morning
+        run: |
+          ARGS="--shift morning"
+          if [ "${{ inputs.post_now }}" = "true" ]; then ARGS="$ARGS --now"; fi
+          if [ "${{ inputs.story }}" = "true" ]; then ARGS="$ARGS --story"; fi
+          node scripts/ig-autopost.mjs $ARGS
 
       - name: Run evening autopost
         if: ${{ github.event.schedule == '30 1 * * *' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run && inputs.shift == 'evening') }}
-        run: node scripts/ig-autopost.mjs --shift evening
+        run: |
+          ARGS="--shift evening"
+          if [ "${{ inputs.post_now }}" = "true" ]; then ARGS="$ARGS --now"; fi
+          if [ "${{ inputs.story }}" = "true" ]; then ARGS="$ARGS --story"; fi
+          node scripts/ig-autopost.mjs $ARGS
 
       - name: Upload dry-run artifacts
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
