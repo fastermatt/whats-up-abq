@@ -666,7 +666,13 @@ export function PostCanvas({ onExportRef }: { onExportRef?: (h: PostCanvasHandle
         trRef.current?.visible(false)
         safeZoneLayerRef.current?.visible(false)
         stage.batchDraw()
-        const url = stage.toDataURL({ pixelRatio: 1 / scale, mimeType: 'image/png' })
+        // Export at the format's true pixel dimensions, computed from the LIVE
+        // stage width — never from the `scale` state, which can be stale in
+        // this closure right after a format switch (the 9:16 Reel renders came
+        // out 759×1350 because of exactly that). Konva re-renders vectors at
+        // the export pixelRatio, so text stays sharp regardless of display size.
+        const target = CANVAS_DIMS[useEditor.getState().design.format]
+        const url = stage.toDataURL({ pixelRatio: target.w / stage.width(), mimeType: 'image/png' })
         trRef.current?.visible(true)
         // Restore to whatever the toggle state actually is, not always-true
         safeZoneLayerRef.current?.visible(showSafeZoneRef.current)
@@ -686,7 +692,11 @@ export function PostCanvas({ onExportRef }: { onExportRef?: (h: PostCanvasHandle
           await new Promise(r => requestAnimationFrame(() => r(null)))
           await new Promise(r => requestAnimationFrame(() => r(null)))
           const stage = stageRef.current
-          if (stage) results.push(stage.toDataURL({ pixelRatio: 1 / scale, mimeType: 'image/png' }))
+          if (stage) {
+            // Same live-stage math as exportPng — never the stale `scale` state.
+            const target = CANVAS_DIMS[useEditor.getState().design.format]
+            results.push(stage.toDataURL({ pixelRatio: target.w / stage.width(), mimeType: 'image/png' }))
+          }
         }
         useEditor.setState({ activeSlideIndex: original })
         trRef.current?.visible(true)
