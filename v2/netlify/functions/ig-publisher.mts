@@ -12,6 +12,17 @@
  *     params) fail fast, 429/5xx/network retry.
  *   - Image-URL pre-flight: refuses data:/blank/non-public URLs before hitting IG.
  *   - Failures recorded as status='failed' (matches the queue UI bucket).
+ *
+ * Reels rebuild (2026-07-23):
+ *   - REELS video containers take 30-120s to process, far longer than this
+ *     function's execution limit. The old code polled inline and got killed
+ *     mid-poll, leaving rows wedged in 'publishing' forever with the post
+ *     sometimes live and sometimes not. Now the flow is STATEFUL: create the
+ *     container, persist container_id on the row, and let the next 5-minute
+ *     invocation check status and publish. Each invocation does seconds of
+ *     work, so nothing gets killed and nothing double-posts.
+ *   - Every DB write is error-checked. A silent failed UPDATE was how rows
+ *     got stuck in 'publishing' with no error_msg.
  */
 
 import { createClient } from '@supabase/supabase-js'
@@ -67,17 +78,26 @@ function isPublicHttpUrl(u: string | undefined | null): boolean {
   return !!u && /^https?:\/\//i.test(u)
 }
 
-async function pollStatus(containerId: string, token: string, maxAttempts = 12): Promise<boolean> {
+/** One immediate container-status check (no pre-wait). */
+async function containerStatus(containerId: string, token: string): Promise<'FINISHED' | 'IN_PROGRESS' | 'ERROR'> {
+  const data = await igFetch(
+    `${IG_API}/${containerId}?fields=status_code,status&access_token=${token}`,
+    undefined,
+    2,
+  ) as { status_code?: string }
+  if (data.status_code === 'FINISHED') return 'FINISHED'
+  if (data.status_code === 'ERROR' || data.status_code === 'EXPIRED') return 'ERROR'
+  return 'IN_PROGRESS'
+}
+
+/** Short inline poll for fast media (images finish in seconds). */
+async function pollStatus(containerId: string, token: string, maxAttempts = 4): Promise<boolean> {
   for (let i = 0; i < maxAttempts; i++) {
-    await new Promise(r => setTimeout(r, 5000))
+    await new Promise(r => setTimeout(r, 4000))
     try {
-      const data = await igFetch(
-        `${IG_API}/${containerId}?fields=status_code,status&access_token=${token}`,
-        undefined,
-        2,
-      ) as { status_code?: string }
-      if (data.status_code === 'FINISHED') return true
-      if (data.status_code === 'ERROR' || data.status_code === 'EXPIRED') return false
+      const s = await containerStatus(containerId, token)
+      if (s === 'FINISHED') return true
+      if (s === 'ERROR') return false
     } catch {
       // Transient poll failure — keep polling until maxAttempts.
     }
@@ -112,6 +132,40 @@ interface ScheduledPost {
   caption: string | null
   location_id: string | null
   event_id: string | null
+  container_id: string | null
+}
+
+type Supa = ReturnType<typeof supabaseAdmin>
+
+// ── DB writes (always error-checked — silent failures wedge the queue) ───────
+
+async function markPublished(supabase: Supa, rowId: string, postId: string) {
+  const { error } = await supabase
+    .from('ig_scheduled_posts')
+    .update({ status: 'published', post_id: postId, published_at: new Date().toISOString() })
+    .eq('id', rowId)
+  if (error) console.error(`ig-publisher: FAILED to mark ${rowId} published (IG post ${postId} IS live):`, error.message)
+}
+
+async function markFailed(supabase: Supa, rowId: string, msg: string) {
+  const { error } = await supabase
+    .from('ig_scheduled_posts')
+    .update({ status: 'failed', error_msg: msg.slice(0, 500) })
+    .eq('id', rowId)
+  if (error) console.error(`ig-publisher: FAILED to mark ${rowId} failed:`, error.message)
+}
+
+async function logPost(supabase: Supa, post: ScheduledPost, postId: string, slideCount: number) {
+  const { error } = await supabase.from('ig_post_log').insert({
+    post_id: postId,
+    media_type: post.media_type,
+    image_url: post.image_urls[0] ?? null,
+    caption: post.caption,
+    event_id: post.event_id,
+    slide_count: slideCount,
+    posted_at: new Date().toISOString(),
+  })
+  if (error) console.error(`ig-publisher: ig_post_log insert failed for ${postId}:`, error.message)
 }
 
 // ── Main handler ──────────────────────────────────────────────────────────────
@@ -126,10 +180,45 @@ export default async function handler() {
 
   const supabase = supabaseAdmin()
 
-  // Fetch all pending posts due right now (scheduled_for <= current time)
+  // ── Phase 1: resume Reels whose container was created on a previous tick ──
+  const { data: resumable, error: resumeErr } = await supabase
+    .from('ig_scheduled_posts')
+    .select('id, media_type, image_urls, caption, location_id, event_id, container_id')
+    .eq('status', 'publishing')
+    .not('container_id', 'is', null)
+    .limit(5)
+
+  if (resumeErr) {
+    console.error('ig-publisher: resume fetch error:', resumeErr.message)
+  } else {
+    for (const post of (resumable ?? []) as ScheduledPost[]) {
+      try {
+        const status = await containerStatus(post.container_id as string, igToken)
+        if (status === 'IN_PROGRESS') {
+          console.log(`ig-publisher: ${post.id} container still processing, will retry next tick`)
+          continue
+        }
+        if (status === 'ERROR') {
+          await markFailed(supabase, post.id, `Container ${post.container_id} failed/expired during processing`)
+          continue
+        }
+        const postId = await publishContainer(igUserId, igToken, post.container_id as string)
+        await logPost(supabase, post, postId, 1)
+        await markPublished(supabase, post.id, postId)
+        console.log(`ig-publisher: resumed + published ${post.id} → IG post ${postId}`)
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err)
+        console.error(`ig-publisher: resume failed for ${post.id}:`, msg)
+        if (err instanceof TerminalError) await markFailed(supabase, post.id, msg)
+        // Non-terminal errors: leave the row for the next tick.
+      }
+    }
+  }
+
+  // ── Phase 2: fresh pending posts due right now ─────────────────────────────
   const { data: posts, error: fetchErr } = await supabase
     .from('ig_scheduled_posts')
-    .select('id, media_type, image_urls, caption, location_id, event_id')
+    .select('id, media_type, image_urls, caption, location_id, event_id, container_id')
     .eq('status', 'pending')
     .lte('scheduled_for', new Date().toISOString())
     .order('scheduled_for', { ascending: true })
@@ -167,6 +256,40 @@ export default async function handler() {
         throw new Error('Invalid image URL — must be a public http(s) URL (not a data: URL or blank)')
       }
 
+      if (post.media_type === 'REELS') {
+        // Stateful flow: create container → persist container_id → try one
+        // quick status check. Video processing usually outlives this function,
+        // so publishing happens in Phase 1 of a later tick if not ready now.
+        const containerParams: Record<string, string> = {
+          media_type: 'REELS',
+          video_url: post.image_urls[0],
+          share_to_feed: 'true',
+        }
+        if (post.caption) containerParams.caption = post.caption
+
+        const containerId = await createContainer(igUserId, igToken, containerParams)
+        const { error: saveErr } = await supabase
+          .from('ig_scheduled_posts')
+          .update({ container_id: containerId })
+          .eq('id', post.id)
+        if (saveErr) {
+          // Without a persisted container_id the row can never resume — fail
+          // it now rather than wedge it. (The orphan container just expires.)
+          throw new Error(`Could not persist container_id ${containerId}: ${saveErr.message}`)
+        }
+
+        const status = await containerStatus(containerId, igToken).catch(() => 'IN_PROGRESS' as const)
+        if (status !== 'FINISHED') {
+          console.log(`ig-publisher: ${post.id} reel container ${containerId} processing — deferred to next tick`)
+          continue
+        }
+        const postId = await publishContainer(igUserId, igToken, containerId)
+        await logPost(supabase, post, postId, 1)
+        await markPublished(supabase, post.id, postId)
+        console.log(`ig-publisher: published ${post.id} → IG post ${postId}`)
+        continue
+      }
+
       let postId: string
 
       if (post.media_type === 'CAROUSEL') {
@@ -194,43 +317,7 @@ export default async function handler() {
         if (!parentReady) throw new Error('Carousel parent container failed')
 
         postId = await publishContainer(igUserId, igToken, parentId)
-
-        // Log carousel to ig_post_log
-        await supabase.from('ig_post_log').insert({
-          post_id: postId,
-          media_type: 'CAROUSEL',
-          image_url: post.image_urls[0] ?? null,
-          caption: post.caption,
-          event_id: post.event_id,
-          slide_count: post.image_urls.length,
-          posted_at: new Date().toISOString(),
-        })
-      } else if (post.media_type === 'REELS') {
-        // Reels use video_url + share_to_feed so the algorithm distributes to
-        // non-followers via the Reels tab. Video processing takes longer than
-        // images — poll up to 24 × 5 s (2 min) before giving up.
-        const containerParams: Record<string, string> = {
-          media_type: 'REELS',
-          video_url: post.image_urls[0],
-          share_to_feed: 'true',
-        }
-        if (post.caption) containerParams.caption = post.caption
-
-        const containerId = await createContainer(igUserId, igToken, containerParams)
-        const ready = await pollStatus(containerId, igToken, 24)
-        if (!ready) throw new Error('Reel container processing timed out')
-
-        postId = await publishContainer(igUserId, igToken, containerId)
-
-        await supabase.from('ig_post_log').insert({
-          post_id: postId,
-          media_type: 'REELS',
-          image_url: post.image_urls[0],
-          caption: post.caption,
-          event_id: post.event_id,
-          slide_count: 1,
-          posted_at: new Date().toISOString(),
-        })
+        await logPost(supabase, post, postId, post.image_urls.length)
       } else {
         // FEED or STORIES — single image
         const containerParams: Record<string, string> = {
@@ -248,34 +335,15 @@ export default async function handler() {
         if (!ready) throw new Error('Container processing timed out')
 
         postId = await publishContainer(igUserId, igToken, containerId)
-
-        await supabase.from('ig_post_log').insert({
-          post_id: postId,
-          media_type: post.media_type,
-          image_url: post.image_urls[0],
-          caption: post.caption,
-          event_id: post.event_id,
-          slide_count: 1,
-          posted_at: new Date().toISOString(),
-        })
+        await logPost(supabase, post, postId, 1)
       }
 
-      // Mark as published (guard on the claimed 'publishing' state)
-      await supabase
-        .from('ig_scheduled_posts')
-        .update({ status: 'published', post_id: postId, published_at: new Date().toISOString() })
-        .eq('id', post.id)
-
+      await markPublished(supabase, post.id, postId)
       console.log(`ig-publisher: published ${post.id} → IG post ${postId}`)
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err)
       console.error(`ig-publisher: failed to publish ${post.id}:`, msg)
-
-      // Mark as failed (matches the queue UI bucket) so it doesn't retry forever.
-      await supabase
-        .from('ig_scheduled_posts')
-        .update({ status: 'failed', error_msg: msg })
-        .eq('id', post.id)
+      await markFailed(supabase, post.id, msg)
     }
   }
 }
