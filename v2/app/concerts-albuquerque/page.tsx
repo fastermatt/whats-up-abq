@@ -9,8 +9,7 @@ import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 3600
-
+export const revalidate = 10800 // 3h
 const SEO_TITLE = 'Concerts Albuquerque 2026 — Upcoming Shows & Concert Guide | ABQ Unplugged'
 const SEO_DESC =
   'Find upcoming concerts in Albuquerque, from Isleta Amphitheater and Tingley Coliseum to intimate shows at Launchpad and El Rey. Your Albuquerque concert guide, updated daily.'

@@ -7,8 +7,7 @@ import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 3600
-
+export const revalidate = 10800 // 3h
 const SEO_TITLE = 'Concerts in Albuquerque 2026 — Live Music at Tingley, Isleta, Popejoy | ABQ Unplugged'
 const SEO_DESC = 'Find real concerts in Albuquerque — not bar shows. Tingley Coliseum, Isleta Amphitheater, Popejoy Hall. Tickets, dates, and insider tips.'
 

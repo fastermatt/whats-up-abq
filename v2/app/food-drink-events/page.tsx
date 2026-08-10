@@ -7,8 +7,7 @@ import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 3600
-
+export const revalidate = 10800 // 3h
 const SEO_TITLE = 'Food & Drink Events in Albuquerque, NM | ABQ Unplugged'
 const SEO_DESC = 'Wine festivals, food trucks, farmers markets, beer fests — find food and drink events in Albuquerque. Updated daily.'
 

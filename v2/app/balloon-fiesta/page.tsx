@@ -7,8 +7,7 @@ import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 3600
-
+export const revalidate = 10800 // 3h
 const SEO_TITLE = 'Albuquerque Balloon Fiesta 2026: Events, Schedule & What to Know | ABQ Unplugged'
 const SEO_DESC = 'Find Balloon Fiesta 2026 events, schedules, and insider tips. Mass ascensions, glows, concerts. Don\'t just say you\'ll go. Actually go.'
 

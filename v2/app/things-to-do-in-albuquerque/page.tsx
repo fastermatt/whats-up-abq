@@ -9,8 +9,7 @@ import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 3600
-
+export const revalidate = 10800 // 3h
 const SEO_TITLE = 'Things to Do in Albuquerque, NM — Events & Activities | ABQ Unplugged'
 const SEO_DESC =
   'The best things to do in Albuquerque right now — live music, outdoor adventures, festivals, comedy, and events worth leaving the house for. Updated daily.'

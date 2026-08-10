@@ -8,8 +8,7 @@ import { MapPin, Calendar, ArrowLeft, ExternalLink, Map } from 'lucide-react'
 import neighborhoodDescriptions from '@/lib/neighborhood-descriptions.json'
 import { buildBreadcrumbs } from '@/lib/seo'
 
-export const revalidate = 3600
-
+export const revalidate = 10800 // 3h
 /** Common alternate slugs users type → canonical slug we use in the DB.
  *  Avoids 404s for natural-language neighborhood names. */
 const NEIGHBORHOOD_ALIASES: Record<string, string> = {

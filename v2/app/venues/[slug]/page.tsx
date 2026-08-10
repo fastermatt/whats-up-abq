@@ -11,8 +11,7 @@ import { venueInstagram } from '@/data/venue-instagram'
 import { AnimateIn } from '@/app/components/AnimateIn'
 import venueDescriptions from '@/lib/venue-descriptions.json'
 
-export const revalidate = 3600
-
+export const revalidate = 10800 // 3h
 /** Slug aliases for common misspellings / alternate spellings that won't
  *  resolve via the normal fetchVenueBySlug lookup.
  *  Key: what the user typed. Value: the canonical slug (must match venueToSlug(DB venue_name)). */

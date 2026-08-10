@@ -123,57 +123,43 @@
   [headers.values]
     Cache-Control = "private, no-store"
 
-# API routes: Allow intelligent caching per-route
-# Data APIs (feed, events, notifications) cache at edge to cut function invocations
-# Admin/write APIs (submit, follow, feedback) explicitly opt-out
+# ─── API routes ───────────────────────────────────────────────────────────────
+# DENY BY DEFAULT. Netlify applies the LAST matching [[headers]] rule, so a
+# broad `/api/*` public-cache rule at the bottom silently overrides every
+# no-store rule above it. Anything user-specific (auth, prefs, matches) must
+# never be publicly cached — a shared CDN entry would serve one signed-in
+# user's data to the next visitor.
+#
+# Only routes whose response depends solely on the URL are opted in below.
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "private, no-store"
+
+# --- Explicit opt-ins: anonymous, URL-deterministic responses only ---
+
 [[headers]]
   for = "/api/feed.json"
   [headers.values]
-    Cache-Control = "public, s-maxage=300, stale-while-revalidate=3600"
+    Cache-Control = "public, s-maxage=900, stale-while-revalidate=3600"
 
+# Query-param routes: Netlify's edge keys on path only by default, so without
+# Netlify-Vary every ?url= would collide on one cache entry (this is the bug
+# the image-proxy previously worked around by disabling the CDN entirely).
+# Netlify-Vary restores per-URL caching, which is the real invocation saver.
 [[headers]]
   for = "/api/surprise"
   [headers.values]
     Cache-Control = "public, s-maxage=60, stale-while-revalidate=600"
 
 [[headers]]
-  for = "/api/ig-data"
+  for = "/api/image-proxy"
   [headers.values]
-    Cache-Control = "public, s-maxage=3600, stale-while-revalidate=7200"
+    Cache-Control = "public, max-age=604800, stale-while-revalidate=86400"
+    Netlify-CDN-Cache-Control = "public, s-maxage=604800, stale-while-revalidate=86400"
+    Netlify-Vary = "query=url"
 
 [[headers]]
-  for = "/api/notifications/matches"
+  for = "/api/events/*/ics"
   [headers.values]
-    Cache-Control = "public, s-maxage=120, stale-while-revalidate=600"
-
-# Write/mutation APIs: no caching
-[[headers]]
-  for = "/api/admin/*"
-  [headers.values]
-    Cache-Control = "private, no-store"
-
-[[headers]]
-  for = "/api/submit"
-  [headers.values]
-    Cache-Control = "private, no-store"
-
-[[headers]]
-  for = "/api/follow"
-  [headers.values]
-    Cache-Control = "private, no-store"
-
-[[headers]]
-  for = "/api/feedback"
-  [headers.values]
-    Cache-Control = "private, no-store"
-
-[[headers]]
-  for = "/api/push/*"
-  [headers.values]
-    Cache-Control = "private, no-store"
-
-# Default: public cache with moderate TTL for other data endpoints
-[[headers]]
-  for = "/api/*"
-  [headers.values]
-    Cache-Control = "public, s-maxage=180, stale-while-revalidate=1800"
+    Cache-Control = "public, s-maxage=3600, stale-while-revalidate=86400"

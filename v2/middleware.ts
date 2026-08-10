@@ -146,7 +146,18 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Run on all routes except static files and Next.js internals
-    '/((?!_next/static|_next/image|favicon.ico|icon-|manifest.json).*)',
+    // Middleware is an Edge Function — it bills per invocation, so it must not
+    // run for anything that doesn't need it.
+    //
+    // The public-route branch only sets `x-pathname`, and the only consumer of
+    // that header is app/admin/layout.tsx. So for public traffic middleware
+    // exists solely for the /search, /venues/* and /events?category= redirects
+    // above — all extensionless page paths.
+    //
+    // Excluding files-with-extensions stops every logo, hero image, sw.js,
+    // robots.txt, sitemap.xml and manifest request from spending an
+    // invocation. /admin and /api/admin have no extension, so the auth guard
+    // is unaffected.
+    '/((?!_next/static|_next/image|_next/data|\\.netlify/|.*\\.[\\w]+$).*)',
   ],
 }

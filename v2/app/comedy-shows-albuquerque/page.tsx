@@ -8,8 +8,7 @@ import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 3600
-
+export const revalidate = 10800 // 3h
 const SEO_TITLE = 'Comedy Shows in Albuquerque, NM — Clubs, Open Mics & Headliners | ABQ Unplugged'
 const SEO_DESC =
   "Find comedy shows in Albuquerque — from Hyena's Comedy Nightclub headliners to free open mics at local breweries. ABQ's full comedy guide, updated daily."

@@ -1,7 +1,7 @@
 /**
  * Netlify Scheduled Function — ig-publisher
  *
- * Runs every 5 minutes. Picks up pending IG posts from ig_scheduled_posts
+ * Runs every 15 minutes. Picks up pending IG posts from ig_scheduled_posts
  * whose scheduled_for <= now, publishes them to Instagram, and marks them done.
  *
  * No server-side state or cron infra needed — Netlify fires this automatically.
@@ -28,7 +28,10 @@
 import { createClient } from '@supabase/supabase-js'
 
 // ── Config ────────────────────────────────────────────────────────────────────
-export const config = { schedule: '*/5 * * * *' }
+// Every 15 min. At */5 this polled 8,640 times/month to publish a handful of
+// posts; most runs found an empty queue. 15 min keeps scheduling granularity
+// acceptable for IG while cutting ~5,800 invocations/month.
+export const config = { schedule: '*/15 * * * *' }
 
 const IG_API = 'https://graph.facebook.com/v19.0'
 

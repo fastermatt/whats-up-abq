@@ -7,8 +7,7 @@ import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 3600
-
+export const revalidate = 10800 // 3h
 const SEO_TITLE = 'Outdoor Activities in Albuquerque, NM | ABQ Unplugged'
 const SEO_DESC = 'Hiking, biking, the Bosque trail, Petroglyph National Monument — find outdoor events and activities in Albuquerque. Updated daily.'
 

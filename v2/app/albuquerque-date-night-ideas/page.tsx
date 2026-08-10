@@ -8,8 +8,7 @@ import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 3600
-
+export const revalidate = 10800 // 3h
 const SEO_TITLE = 'Albuquerque Date Night Ideas, Romantic Things to Do in ABQ | ABQ Unplugged'
 const SEO_DESC =
   'The best date night ideas in Albuquerque, live music at Sister Bar, dinner in Nob Hill, concerts at El Rey, Old Town walks, rooftop views. Real ideas from an ABQ local.'

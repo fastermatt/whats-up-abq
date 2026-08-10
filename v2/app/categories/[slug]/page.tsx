@@ -9,8 +9,7 @@ import { MapPin, Calendar, ArrowLeft, ExternalLink, Tag } from 'lucide-react'
 import categoryDescriptions from '@/lib/category-descriptions.json'
 import categoryFaqs from '@/lib/category-faqs.json'
 
-export const revalidate = 3600
-
+export const revalidate = 10800 // 3h
 interface PageProps {
   params: Promise<{ slug: string }>
 }

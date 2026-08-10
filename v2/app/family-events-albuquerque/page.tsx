@@ -8,8 +8,7 @@ import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 3600
-
+export const revalidate = 10800 // 3h
 const SEO_TITLE = 'Family Events in Albuquerque, NM — Things to Do with Kids | ABQ Unplugged'
 const SEO_DESC =
   "Family-friendly events and activities in Albuquerque — BioPark, Explora, outdoor adventures, and events that keep kids and parents happy. Updated daily."

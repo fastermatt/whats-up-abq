@@ -7,8 +7,7 @@ import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 3600
-
+export const revalidate = 10800 // 3h
 const SEO_TITLE = 'Albuquerque Festivals 2026 — Your Year-Round Guide to Local Celebrations | ABQ Unplugged'
 const SEO_DESC = 'Albuquerque has way more festivals than Balloon Fiesta. State Fair, Lavender Festival, wine fests, Green Chile Festival — find them all here.'
 

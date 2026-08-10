@@ -6,8 +6,7 @@ import { AnimateIn } from '@/app/components/AnimateIn'
 import { buildBreadcrumbs } from '@/lib/seo'
 import type { NeighborhoodCount } from '@/lib/events'
 
-export const revalidate = 3600
-
+export const revalidate = 10800 // 3h
 export const metadata: Metadata = {
   title: 'Albuquerque Events by Neighborhood, ABQ Unplugged',
   description:

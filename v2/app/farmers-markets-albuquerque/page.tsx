@@ -11,8 +11,7 @@ import { createStaticClient } from '@/lib/supabase/static'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 3600
-
+export const revalidate = 10800 // 3h
 const SEO_TITLE = 'Albuquerque Farmers Markets — Rail Yards, Downtown Growers & More | ABQ Unplugged'
 const SEO_DESC  = 'Where and when to find farmers markets in Albuquerque: the Rail Yards Market, Downtown Growers’ Market, and neighborhood markets. Days, seasons, and what to expect.'
 

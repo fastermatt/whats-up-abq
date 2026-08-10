@@ -7,8 +7,7 @@ import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 3600
-
+export const revalidate = 10800 // 3h
 const SEO_TITLE = 'Things to Do in Albuquerque This Week'
 const SEO_DESC =
   'Everything happening in Albuquerque this week — concerts, comedy, arts, ' +

@@ -7,8 +7,7 @@ import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 3600
-
+export const revalidate = 10800 // 3h
 const SEO_TITLE = 'Live Music in Albuquerque, NM, Concerts & Shows | ABQ Unplugged'
 const SEO_DESC = 'Find live music in Albuquerque, from intimate sets at Sister Bar to headliners at Sunshine Theater. Your local gig guide.'
 

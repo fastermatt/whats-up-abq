@@ -7,8 +7,7 @@ import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 3600
-
+export const revalidate = 10800 // 3h
 const SEO_TITLE = 'Kids Activities in Albuquerque — Things to Do with Kids | ABQ Unplugged'
 const SEO_DESC = 'Find real things to do with kids in Albuquerque. BioPark, Explora, hidden playgrounds, and family events that aren\'t boring.'
 

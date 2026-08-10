@@ -8,8 +8,7 @@ import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 3600
-
+export const revalidate = 10800 // 3h
 const SEO_TITLE = 'Free Events in Albuquerque, Things to Do for Free | ABQ Unplugged'
 const SEO_DESC =
   'Find free events in Albuquerque, concerts, festivals, farmers markets, museum free days, outdoor activities, and community events. No cover, no ticket price.'

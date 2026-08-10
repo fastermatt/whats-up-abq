@@ -14,8 +14,7 @@ import {
 import { fetchEvents } from '@/lib/events'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 3600
-
+export const revalidate = 10800 // 3h
 export const metadata: Metadata = {
   title: 'Welcome to ABQ Unplugged: The Best Way to Find Things to Do in Albuquerque',
   description:

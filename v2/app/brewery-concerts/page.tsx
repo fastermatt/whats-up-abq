@@ -10,8 +10,7 @@ import { createStaticClient } from '@/lib/supabase/static'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 3600
-
+export const revalidate = 10800 // 3h
 const SEO_TITLE = 'Brewery Concerts Albuquerque — Live Music at ABQ Taprooms | ABQ Unplugged'
 const SEO_DESC  = 'Canteen Brewhouse, Marble Brewery, JUNO, Rio Bravo and more. All the live music, trivia nights and taproom events at Albuquerque\'s craft breweries — updated daily.'
 

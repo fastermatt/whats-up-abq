@@ -7,8 +7,7 @@ import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 3600
-
+export const revalidate = 10800 // 3h
 const SEO_TITLE = 'Things to Do This Weekend in Albuquerque | ABQ Unplugged'
 const SEO_DESC =
   'This Weekend in Albuquerque: concerts, comedy, family events, markets, sports, and local things to do. Updated hourly from ABQ Unplugged.'

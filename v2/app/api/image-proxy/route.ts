@@ -8,11 +8,8 @@
  *
  * Only proxies http/https URLs. Cached for 7 days at the CDN edge — event
  * images never change after publication.
- *
- * Revalidate every 7 days (604800s) at edge to cache the fetch result in CDN.
- * Multiple requests for the same ?url=X will hit the CDN cache, not the function.
  */
-export const revalidate = 604800
+export const dynamic = 'force-dynamic'
 
 // Domains this proxy is allowed to fetch from
 const ALLOWED_DOMAINS = [
@@ -92,14 +89,16 @@ export async function GET(request: Request) {
         // Browser cache aggressively — each ?url= is a distinct URL from
         // the browser's perspective.
         'Cache-Control': 'public, max-age=604800, stale-while-revalidate=86400',
-        // BYPASS Netlify's CDN cache entirely. Netlify's edge only varies
-        // on Next.js internal query params (__nextDataReq, _rsc) by
-        // default, so every /api/image-proxy?url=X response got cached
-        // under the bare path — every visitor got the first image that
-        // happened to be cached, regardless of which URL they asked for.
-        // Browser cache + source CDN (Cloudflare R2, Ticketmaster's CDN,
-        // Supabase Storage, etc.) still cover the performance story.
-        'Netlify-CDN-Cache-Control': 'public, max-age=0, must-revalidate',
+        // Netlify's edge keys the cache on PATH ONLY by default, so every
+        // /api/image-proxy?url=X collapsed onto one entry and visitors got
+        // whichever image was cached first. The previous workaround disabled
+        // the CDN entirely — correct, but it meant every single <img> load
+        // spent a function invocation.
+        //
+        // Netlify-Vary: query=url makes the cache key include the ?url param,
+        // which fixes the collision AND lets the edge serve repeats for free.
+        'Netlify-CDN-Cache-Control': 'public, s-maxage=604800, stale-while-revalidate=86400',
+        'Netlify-Vary': 'query=url',
       },
     })
   } catch (err) {
