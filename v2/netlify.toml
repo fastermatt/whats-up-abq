@@ -123,7 +123,57 @@
   [headers.values]
     Cache-Control = "private, no-store"
 
+# API routes: Allow intelligent caching per-route
+# Data APIs (feed, events, notifications) cache at edge to cut function invocations
+# Admin/write APIs (submit, follow, feedback) explicitly opt-out
+[[headers]]
+  for = "/api/feed.json"
+  [headers.values]
+    Cache-Control = "public, s-maxage=300, stale-while-revalidate=3600"
+
+[[headers]]
+  for = "/api/surprise"
+  [headers.values]
+    Cache-Control = "public, s-maxage=60, stale-while-revalidate=600"
+
+[[headers]]
+  for = "/api/ig-data"
+  [headers.values]
+    Cache-Control = "public, s-maxage=3600, stale-while-revalidate=7200"
+
+[[headers]]
+  for = "/api/notifications/matches"
+  [headers.values]
+    Cache-Control = "public, s-maxage=120, stale-while-revalidate=600"
+
+# Write/mutation APIs: no caching
+[[headers]]
+  for = "/api/admin/*"
+  [headers.values]
+    Cache-Control = "private, no-store"
+
+[[headers]]
+  for = "/api/submit"
+  [headers.values]
+    Cache-Control = "private, no-store"
+
+[[headers]]
+  for = "/api/follow"
+  [headers.values]
+    Cache-Control = "private, no-store"
+
+[[headers]]
+  for = "/api/feedback"
+  [headers.values]
+    Cache-Control = "private, no-store"
+
+[[headers]]
+  for = "/api/push/*"
+  [headers.values]
+    Cache-Control = "private, no-store"
+
+# Default: public cache with moderate TTL for other data endpoints
 [[headers]]
   for = "/api/*"
   [headers.values]
-    Cache-Control = "private, no-store"
+    Cache-Control = "public, s-maxage=180, stale-while-revalidate=1800"

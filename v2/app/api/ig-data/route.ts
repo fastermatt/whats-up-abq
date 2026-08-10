@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { fetchEventById } from '@/lib/events'
 import { getCategoryFallback } from '@/lib/fallback-images'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 3600
 
 export async function GET(req: NextRequest) {
   const rawUrl = req.nextUrl.searchParams.get('url')

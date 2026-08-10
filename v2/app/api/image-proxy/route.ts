@@ -8,8 +8,11 @@
  *
  * Only proxies http/https URLs. Cached for 7 days at the CDN edge — event
  * images never change after publication.
+ *
+ * Revalidate every 7 days (604800s) at edge to cache the fetch result in CDN.
+ * Multiple requests for the same ?url=X will hit the CDN cache, not the function.
  */
-export const dynamic = 'force-dynamic'
+export const revalidate = 604800
 
 // Domains this proxy is allowed to fetch from
 const ALLOWED_DOMAINS = [

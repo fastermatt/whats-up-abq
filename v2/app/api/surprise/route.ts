@@ -2,11 +2,14 @@
  * GET /api/surprise
  * Picks a random upcoming event that has an image and redirects to its detail page.
  * Prefers featured events; falls back to any event with a photo.
+ * 
+ * Revalidates every 60 seconds on the edge (Netlify CDN) so visitors get a "fresh"
+ * surprise without hitting the function every request.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
 export async function GET(req: NextRequest) {
   try {
