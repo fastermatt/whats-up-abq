@@ -27,10 +27,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .not('venue_name', 'is', null)
     .limit(5000)
 
-  // Count and deduplicate venues
+  // Count and deduplicate venues, excluding junk placeholder names that
+  // occasionally slip through import (e.g. Eventbrite online-only listings) —
+  // these aren't real venues and shouldn't get an indexed /venues/[slug] page.
+  const JUNK_VENUE_NAMES = new Set(['unknown', 'online event', 'online', 'tbd', 'n/a'])
   const venueCounts: Record<string, number> = {}
   for (const row of (venueRows ?? []) as { venue_name: string }[]) {
-    if (row.venue_name) venueCounts[row.venue_name] = (venueCounts[row.venue_name] ?? 0) + 1
+    const name = row.venue_name?.trim()
+    if (name && !JUNK_VENUE_NAMES.has(name.toLowerCase())) {
+      venueCounts[name] = (venueCounts[name] ?? 0) + 1
+    }
   }
   const topVenues = Object.entries(venueCounts)
     .sort((a, b) => b[1] - a[1])
