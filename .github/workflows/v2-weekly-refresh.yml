@@ -32,6 +32,9 @@ jobs:
   ingest:
     name: Foolproof Ingest Pipeline
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     # 30m was too tight: a full DeepSeek re-enrichment of ~400 events runs long
     # and got killed mid-run. 60m gives the import + hygiene + enrichment room.
     timeout-minutes: 60
