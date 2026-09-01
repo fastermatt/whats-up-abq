@@ -5,6 +5,7 @@
  */
 import Image from 'next/image'
 import Link from 'next/link'
+import type { ReactNode } from 'react'
 import { Clock, MapPin } from 'lucide-react'
 import { NormalizedEvent, venueToSlug } from '@/lib/events'
 import { getCategoryFallback } from '@/lib/fallback-images'
@@ -95,9 +96,13 @@ export function curatedJsonLd(events: NormalizedEvent[], config: CuratedListConf
 export function CuratedListPage({
   events,
   config,
+  extraSection,
 }: {
   events: NormalizedEvent[]
   config: CuratedListConfig
+  /** Optional custom content rendered between the intro/venue strip and the
+   *  event grid — e.g. a day-by-day schedule table on /balloon-fiesta. */
+  extraSection?: ReactNode
 }) {
   const grouped: Record<string, NormalizedEvent[]> = {}
   for (const event of events) {
@@ -200,6 +205,8 @@ export function CuratedListPage({
             </div>
           )}
         </div>
+
+        {extraSection}
 
         {events.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center animate-fade-in">

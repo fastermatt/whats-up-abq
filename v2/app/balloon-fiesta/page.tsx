@@ -6,6 +6,7 @@ import type { Metadata } from 'next'
 import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
+import { ScheduleTable } from './ScheduleTable'
 
 export const revalidate = 10800 // 3h
 const SEO_TITLE = 'Albuquerque Balloon Fiesta 2026: Events, Schedule & What to Know | ABQ Unplugged'
@@ -59,11 +60,16 @@ const RELATED_LINKS = [
 ]
 
 export default async function Page() {
-  const { events } = await fetchEvents({ search: 'balloon fiesta', limit: 200 })
+  // search matches venue_name too, which would pull in any unrelated event
+  // just held at "Balloon Fiesta Park" (e.g. an April food truck festival) —
+  // require the event's own title to actually name Balloon Fiesta.
+  const { events: searchResults } = await fetchEvents({ search: 'balloon fiesta', limit: 200 })
+  const events = searchResults.filter((e) => e.title.toLowerCase().includes('balloon fiesta'))
 
   return (
     <CuratedListPage
       events={events}
+      extraSection={<ScheduleTable events={events} />}
       config={{
         slug: 'balloon-fiesta',
         heading: 'Albuquerque Balloon Fiesta',
