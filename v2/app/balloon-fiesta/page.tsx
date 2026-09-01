@@ -5,12 +5,14 @@
 import type { Metadata } from 'next'
 import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
-import { OG_IMAGE } from '@/lib/fallback-images'
 import { ScheduleTable } from './ScheduleTable'
+import { ItineraryPlanner, type PlannerEvent } from './ItineraryPlanner'
+import { FiestaAtAGlance } from './FiestaAtAGlance'
 
 export const revalidate = 10800 // 3h
-const SEO_TITLE = 'Albuquerque Balloon Fiesta 2026: Events, Schedule & What to Know | ABQ Unplugged'
-const SEO_DESC = 'Find Balloon Fiesta 2026 events, schedules, and insider tips. Mass ascensions, glows, concerts. Don\'t just say you\'ll go. Actually go.'
+const SEO_TITLE = 'Balloon Fiesta 2026 Itinerary: What to Do Before & After | ABQ Unplugged'
+const SEO_DESC = 'Build your Albuquerque Balloon Fiesta day: five local itineraries for food, kids, shopping, the tram, evening glows, and weather cancellations.'
+const FIESTA_IMAGE = 'https://bsmvfutebmbkjvlrhiyq.supabase.co/storage/v1/object/public/event-photos/balloon-fiesta-2026-nasa-1788286880.webp'
 
 export const metadata: Metadata = {
   title: { absolute: SEO_TITLE },
@@ -19,24 +21,24 @@ export const metadata: Metadata = {
     title: SEO_TITLE,
     description: SEO_DESC,
     url: 'https://abqunplugged.com/balloon-fiesta',
-    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: 'Albuquerque Balloon Fiesta' }],
+    images: [{ url: FIESTA_IMAGE, width: 1200, height: 630, alt: 'Hot air balloons rising over Albuquerque during Balloon Fiesta' }],
   },
-  twitter: { card: 'summary_large_image', images: [OG_IMAGE] },
+  twitter: { card: 'summary_large_image', images: [FIESTA_IMAGE] },
   alternates: { canonical: 'https://abqunplugged.com/balloon-fiesta' },
 }
 
 const FAQS = [
   {
     q: 'When is the 2026 Albuquerque International Balloon Fiesta?',
-    a: 'It runs for nine days in early October. Exact dates are announced by the official Balloon Fiesta site around March. Historically it runs from the first Saturday of October through the following Sunday: nine days total.',
+    a: 'The 2026 Albuquerque International Balloon Fiesta runs Saturday, October 3 through Sunday, October 11, 2026: nine days total.',
   },
   {
     q: 'Do I need tickets for Balloon Fiesta?',
-    a: 'General admission to the launch field requires a ticket; it\'s not free. Adult tickets run around $15 to $20 per day. Some special events like the Evening Glow or the Music Fiesta require separate tickets and sell out fast. Buy in advance at balloonfiesta.com.',
+    a: 'Yes. General admission is $20 per person, per session (about $22.24 online with fees), and children 12 and under are free. Each day can have a morning and evening session, ticketed separately. Buy through the official Balloon Fiesta site and confirm any special-event pricing there.',
   },
   {
     q: 'Where do I park for Balloon Fiesta?',
-    a: 'Official parking is at Balloon Fiesta Park (8401 Balloon Museum Dr NE). A better option: take the park-and-ride buses from designated lots around the city. They run before dawn for the mass ascensions and drop you at the entrance. The city posts the park-and-ride locations each year at cabq.gov. Lots fill before 5am on peak days, so plan accordingly.',
+    a: 'Balloon Fiesta Park is at 4401 Alameda Boulevard NE, Albuquerque, NM 87113. Official parking and Park & Ride are both available on service days, but Park & Ride does not run Monday through Wednesday, October 5–7; it runs only the other six days. Locations are Cottonwood Mall, Coronado Center, Hoffmantown Church, and Intel on weekends. If you drive, use Waze for live rerouting because temporary closures and Fiesta traffic patterns can make ordinary mapping rough. Always follow police directions and event signs over any app.',
   },
   {
     q: 'What are the best viewing spots for Balloon Fiesta?',
@@ -48,7 +50,7 @@ const FAQS = [
   },
   {
     q: 'What\'s the best day to go to Balloon Fiesta?',
-    a: 'Weekday mornings (Tuesday through Thursday) are less crowded and the mass ascensions happen regardless of day. Saturday and Sunday are packed but the energy is at its peak. If you can only go once, the first Saturday opening day is electric, but arrive by 4:30am if you want to park. The Special Shapes Rodeo (usually Wednesday and Saturday) is a fan favorite.',
+    a: 'Weekday mornings are generally less crowded, while Saturdays and Sundays bring the biggest energy and traffic. If you can only go once, choose the official program you care about most and arrive very early. In 2026, the Special Shape Rodeo and Glowdeo are Thursday and Friday, October 8–9. Always confirm the live program and weather status in the official Fiesta app.',
   },
 ]
 
@@ -59,36 +61,115 @@ const RELATED_LINKS = [
   { name: 'NM Tourism: Balloon Fiesta', url: 'https://www.newmexico.org/balloon-fiesta/', description: 'State tourism overview of the world\'s largest balloon festival.' },
 ]
 
-export default async function Page() {
+type PageProps = {
+  searchParams: Promise<{ src?: string; plan?: string; date?: string }>
+}
+
+function cleanParam(value: string | undefined, fallback: string): string {
+  return value && /^[a-z0-9][a-z0-9_-]{0,63}$/.test(value) ? value : fallback
+}
+
+export default async function Page({ searchParams }: PageProps) {
+  const params = await searchParams
+  const source = cleanParam(params.src, 'direct')
+  const initialPlan = cleanParam(params.plan, 'left-the-field')
+  const initialDate = /^2026-10-(0[3-9]|1[01])$/.test(params.date ?? '') ? params.date! : '2026-10-03'
+
   // search matches venue_name too, which would pull in any unrelated event
   // just held at "Balloon Fiesta Park" (e.g. an April food truck festival) —
   // require the event's own title to actually name Balloon Fiesta.
-  const { events: searchResults } = await fetchEvents({ search: 'balloon fiesta', limit: 200 })
+  const [{ events: searchResults }, ...localResults] = await Promise.all([
+    fetchEvents({ search: 'balloon fiesta', limit: 200 }),
+    fetchEvents({ category: 'Food & Drink', limit: 200 }),
+    fetchEvents({ category: 'Family', limit: 200 }),
+    fetchEvents({ category: 'Arts & Theater', limit: 200 }),
+  ])
   const events = searchResults.filter((e) => e.title.toLowerCase().includes('balloon fiesta'))
+  const localEvents: PlannerEvent[] = localResults
+    .flatMap((result) => result.events)
+    .filter((event) => event.date >= '2026-10-03' && event.date <= '2026-10-11')
+    .filter((event) => !event.title.toLowerCase().includes('balloon fiesta'))
+    .filter((event, index, all) => all.findIndex((candidate) => candidate.id === event.id) === index)
+    .map((event) => ({
+      id: event.id,
+      title: event.title,
+      date: event.date,
+      time: event.time,
+      venue: event.venue,
+      category: event.category,
+      href: `/events/${event.id}`,
+    }))
+
+  const festivalJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: 'Albuquerque International Balloon Fiesta 2026',
+    description: SEO_DESC,
+    startDate: '2026-10-03',
+    endDate: '2026-10-11',
+    eventStatus: 'https://schema.org/EventScheduled',
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    image: [FIESTA_IMAGE],
+    location: {
+      '@type': 'Place',
+      name: 'Balloon Fiesta Park',
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: '4401 Alameda Boulevard NE',
+        addressLocality: 'Albuquerque',
+        addressRegion: 'NM',
+        postalCode: '87113',
+        addressCountry: 'US',
+      },
+    },
+    organizer: {
+      '@type': 'Organization',
+      name: 'Albuquerque International Balloon Fiesta',
+      url: 'https://www.balloonfiesta.com/',
+    },
+    offers: {
+      '@type': 'Offer',
+      url: 'https://www.balloonfiesta.com/Purchase-Tickets/',
+      price: '20',
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+      validFrom: '2026-01-01',
+    },
+  }
 
   return (
-    <CuratedListPage
-      events={events}
-      extraSection={<ScheduleTable events={events} />}
-      config={{
-        slug: 'balloon-fiesta',
-        heading: 'Albuquerque Balloon Fiesta',
-        lede: `Find ${events.length} Balloon Fiesta events: mass ascensions, evening glows, and everything in between.`,
-        intro: 'Look, every Albuquerque local has that friend who swears they\'ll go to Balloon Fiesta "next year." Next year comes. They don\'t go. Don\'t be that person. The Albuquerque International Balloon Fiesta is nine days in October, and it\'s the reason people move here. The sky fills with hundreds of balloons, the Field of Dreams turns into a walking rainbow, and the smell of breakfast burritos mixes with propane. It\'s chaotic, cold in the morning, and totally worth it. The official Balloon Fiesta site posts the full schedule, but we break it down into what\'s actually worth your time. Mass ascensions at dawn? Yes, even if it means waking up at 4am. The evening glow? Magical. And the special shapes rodeo is for the weirdos (I say that affectionately). We list dates, times, parking info, and tips from people who\'ve done this a dozen times. Don\'t scroll past this. Get your crew together and make it happen. One week a year, Albuquerque becomes the center of the ballooning world. Be there.',
-        introExtra: 'Let\'s be real: Balloon Fiesta can feel overwhelming. Thousands of people, early mornings, traffic. But the payoff is unreal. We\'ve linked to the official Balloon Fiesta site for the hard numbers, and we also pull from Visit Albuquerque\'s essential visitor guide for logistics. Plus, the City of Albuquerque\'s events page has the lowdown on road closures and park-and-ride spots. Our goal is to cut through the noise and give you the one thing you need: a clear plan to actually go. No excuses.',
-        venueStrip: [
-          { name: 'Balloon Fiesta Park',   emoji: '🎈', href: 'https://www.balloonfiesta.com' },
-          { name: 'Visit Albuquerque',     emoji: '🗺️', href: 'https://www.visitalbuquerque.org/balloon-fiesta/' },
-          { name: 'Old Town ABQ',          emoji: '⛪', href: 'https://oldtownalbuquerqueabq.com' },
-          { name: 'Canteen Brewhouse',     emoji: '🍺', href: 'https://canteenbrewhouse.com' },
-          { name: 'NHCC',                  emoji: '🎭', href: 'https://nhccnm.org' },
-        ],
-        emptyHeading: 'No balloon fiesta listings right now',
-        emptyBody: 'Check back as October approaches. Events get added daily. The official Balloon Fiesta site starts releasing specific times in late summer.',
-        breadcrumbLabel: 'Balloon Fiesta',
-        faqs: FAQS,
-        relatedLinks: RELATED_LINKS,
-      }}
-    />
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(festivalJsonLd) }} />
+      <CuratedListPage
+        events={events}
+        extraSection={(
+          <div className="space-y-8">
+            <ItineraryPlanner source={source} localEvents={localEvents} initialPlan={initialPlan} initialDate={initialDate} />
+            <FiestaAtAGlance source={source} />
+            <ScheduleTable events={events} />
+          </div>
+        )}
+        config={{
+          slug: 'balloon-fiesta',
+          heading: 'Albuquerque Balloon Fiesta 2026',
+          lede: `October 3–11, 2026 · Start with the balloons. Use our local planner for everything after.`,
+          intro: 'Balloon Fiesta owns the sky. ABQ Unplugged helps you plan the city around it. Pick one of five ready-made days for food, families, local shopping, the Sandia Peak Tramway, an evening glow, or a weather cancellation—then see exactly how far each stop sits from Balloon Fiesta Park.',
+          introExtra: 'Use the official Balloon Fiesta schedule and app for live program names, tickets, and weather calls. Use this page when you need the answer to the next question: what should we do with the rest of our day in Albuquerque?',
+          heroImage: { src: FIESTA_IMAGE, alt: 'Mass ascension at the Albuquerque International Balloon Fiesta' },
+          venueStrip: [
+            { name: 'Official schedule', emoji: '🎈', href: 'https://www.balloonfiesta.com/plan-your-visit/event-schedule/' },
+            { name: 'Park & Ride', emoji: '🚌', href: 'https://www.balloonfiesta.com/Park-Ride' },
+            { name: 'Sandia Peak Tramway', emoji: '🚠', href: 'https://sandiapeak.com/' },
+            { name: 'Old Town', emoji: '🛍️', href: 'https://www.cabq.gov/artsculture/historic-old-town' },
+            { name: 'Local events', emoji: '📅', href: '/events?date=2026-10-03' },
+          ],
+          emptyHeading: 'No Balloon Fiesta ticket listings right now',
+          emptyBody: 'The itinerary planner still works. For Fiesta admission and the live program, use the official Balloon Fiesta site.',
+          breadcrumbLabel: 'Balloon Fiesta',
+          faqs: FAQS,
+          relatedLinks: RELATED_LINKS,
+        }}
+      />
+    </>
   )
 }

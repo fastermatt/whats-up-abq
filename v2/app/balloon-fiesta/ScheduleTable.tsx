@@ -38,7 +38,7 @@ export function ScheduleTable({ events }: { events: NormalizedEvent[] }) {
           >
             official day-by-day schedule
           </a>{' '}
-          — session names can shift year to year and we'd rather send you to the source than guess.
+          — session names can shift year to year and we&rsquo;d rather send you to the source than guess.
         </p>
         <div className="grid sm:grid-cols-2 gap-2">
           {days.map(([date, times]) => {
