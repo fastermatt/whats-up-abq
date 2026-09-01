@@ -59,7 +59,7 @@ const RELATED_LINKS = [
 ]
 
 export default async function Page() {
-  const { events } = await fetchEvents({ category: 'Festivals', limit: 200 })
+  const { events } = await fetchEvents({ search: 'balloon fiesta', limit: 200 })
 
   return (
     <CuratedListPage
