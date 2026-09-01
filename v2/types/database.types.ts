@@ -160,7 +160,10 @@ export type Database = {
           device: string | null
           event_type: string
           id: string
+          is_bot: boolean
           session_id: string | null
+          suspicious: boolean
+          visitor_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -168,7 +171,10 @@ export type Database = {
           device?: string | null
           event_type: string
           id?: string
+          is_bot?: boolean
           session_id?: string | null
+          suspicious?: boolean
+          visitor_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -176,7 +182,34 @@ export type Database = {
           device?: string | null
           event_type?: string
           id?: string
+          is_bot?: boolean
           session_id?: string | null
+          suspicious?: boolean
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      analytics_daily_rollup: {
+        Row: {
+          day: string
+          distinct_visitors: number
+          event_type: string
+          events: number
+          is_bot: boolean
+        }
+        Insert: {
+          day: string
+          distinct_visitors: number
+          event_type: string
+          events: number
+          is_bot: boolean
+        }
+        Update: {
+          day?: string
+          distinct_visitors?: number
+          event_type?: string
+          events?: number
+          is_bot?: boolean
         }
         Relationships: []
       }

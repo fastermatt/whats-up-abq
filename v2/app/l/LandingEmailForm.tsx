@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { InstagramIcon } from '@/app/components/InstagramIcon'
+import { getAnalyticsContext } from '@/lib/analytics/track'
 
 export function LandingEmailForm() {
   const [email, setEmail] = useState('')
@@ -15,7 +16,11 @@ export function LandingEmailForm() {
       const res = await fetch('/api/newsletter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({
+          email,
+          analytics: getAnalyticsContext(),
+          source: 'landing-page',
+        }),
       })
       setStatus(res.ok ? 'success' : 'error')
     } catch {

@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createServiceClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
 const PUBLICATION_ID = 'pub_ad8d3710-77c3-4bda-947b-18a1497ccbc6'
 
+function safeAnalyticsId(value: unknown): string | null {
+  return typeof value === 'string' && value.length >= 8 && value.length <= 100
+    ? value
+    : null
+}
+
 export async function POST(req: NextRequest) {
-  const { email } = await req.json().catch(() => ({}))
+  const { email, analytics, source } = await req.json().catch(() => ({}))
 
   if (!email || typeof email !== 'string' || !email.includes('@')) {
     return NextResponse.json({ error: 'Valid email required' }, { status: 400 })
@@ -34,7 +41,25 @@ export async function POST(req: NextRequest) {
     }
   )
 
-  if (res.ok) return NextResponse.json({ ok: true })
+  if (res.ok) {
+    const visitorId = safeAnalyticsId(analytics?.visitor_id)
+    const sessionId = safeAnalyticsId(analytics?.session_id)
+    if (visitorId && sessionId) {
+      const supabase = createServiceClient()
+      const { error } = await supabase.from('analytics').insert({
+        event_type: 'newsletter_signup',
+        visitor_id: visitorId,
+        session_id: sessionId,
+        device: null,
+        data: {
+          source: typeof source === 'string' ? source.slice(0, 80) : 'website',
+          user_agent: req.headers.get('user-agent') || '',
+        },
+      })
+      if (error) console.error('[newsletter] Analytics insert failed:', error.message)
+    }
+    return NextResponse.json({ ok: true })
+  }
 
   const err = await res.json().catch(() => ({}))
   console.error('[newsletter] Beehiiv error:', res.status, err)

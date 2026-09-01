@@ -14,6 +14,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Heart } from 'lucide-react'
+import { trackEvent } from '@/lib/analytics/track'
 
 interface Props {
   eventId: string
@@ -51,19 +52,23 @@ export function QuickSaveButton({
 
     if (saved) {
       // Unsave
-      await supabase.from('user_events')
+      const { error } = await supabase.from('user_events')
         .delete()
         .eq('user_id', user.id)
         .eq('event_id', eventId)
+      if (error) { setLoading(false); return }
       setSaved(false)
+      trackEvent('save_event', { event_id: eventId, action: 'unsave', source: 'quick-save' })
     } else {
       // Save
-      await supabase.from('user_events').upsert({
+      const { error } = await supabase.from('user_events').upsert({
         user_id: user.id, event_id: eventId, state: 'saved',
         event_name: eventName, event_date: eventDate,
         venue_name: venueName, category, image_url: imageUrl, ticket_url: ticketUrl,
       }, { onConflict: 'user_id,event_id' })
+      if (error) { setLoading(false); return }
       setSaved(true)
+      trackEvent('save_event', { event_id: eventId, action: 'save', source: 'quick-save' })
       setBurst(true)
       // Reset burst after animation completes
       setTimeout(() => setBurst(false), 700)

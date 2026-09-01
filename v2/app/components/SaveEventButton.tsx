@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Heart, HeartOff, Check, Calendar } from 'lucide-react'
+import { trackEvent } from '@/lib/analytics/track'
 
 interface Props {
   eventId: string
@@ -49,19 +50,23 @@ export function SaveEventButton({ eventId, eventName, eventDate, venueName, cate
 
     if (state === 'saved') {
       // Toggle off
-      await supabase.from('user_events').delete().eq('user_id', user.id).eq('event_id', eventId)
+      const { error } = await supabase.from('user_events').delete().eq('user_id', user.id).eq('event_id', eventId)
+      if (error) { setLoading(false); return }
       setState(null)
+      trackEvent('save_event', { event_id: eventId, action: 'unsave' })
     } else {
       // Save (also covers switching from "going" → "saved"). When leaving the
       // "going" state, drop the going count by one — otherwise the "N going"
       // label stays inflated by a user who is no longer going.
       if (state === 'going') setCount(c => Math.max(0, c - 1))
-      await supabase.from('user_events').upsert({
+      const { error } = await supabase.from('user_events').upsert({
         user_id: user.id, event_id: eventId, state: 'saved',
         event_name: eventName, event_date: eventDate,
         venue_name: venueName, category, image_url: imageUrl, ticket_url: ticketUrl,
       }, { onConflict: 'user_id,event_id' })
+      if (error) { setLoading(false); return }
       setState('saved')
+      trackEvent('save_event', { event_id: eventId, action: 'save' })
     }
     setLoading(false)
   }
@@ -71,17 +76,21 @@ export function SaveEventButton({ eventId, eventName, eventDate, venueName, cate
     setLoading(true)
 
     if (state === 'going') {
-      await supabase.from('user_events').delete().eq('user_id', user.id).eq('event_id', eventId)
+      const { error } = await supabase.from('user_events').delete().eq('user_id', user.id).eq('event_id', eventId)
+      if (error) { setLoading(false); return }
       setState(null)
       setCount(c => Math.max(0, c - 1))
+      trackEvent('going_event', { event_id: eventId, action: 'ungoing' })
     } else {
-      await supabase.from('user_events').upsert({
+      const { error } = await supabase.from('user_events').upsert({
         user_id: user.id, event_id: eventId, state: 'going',
         event_name: eventName, event_date: eventDate,
         venue_name: venueName, category, image_url: imageUrl, ticket_url: ticketUrl,
       }, { onConflict: 'user_id,event_id' })
+      if (error) { setLoading(false); return }
       setCount(c => c + 1)
       setState('going')
+      trackEvent('going_event', { event_id: eventId, action: 'going' })
     }
     setLoading(false)
   }

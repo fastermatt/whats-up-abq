@@ -1,535 +1,319 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { ArrowLeft, Users, MousePointer, Search, Heart, TrendingUp, Smartphone, Monitor, AlertTriangle, Globe } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, Bot, Globe, Heart, MousePointer, Share2, Smartphone, Ticket, TrendingUp, Users } from 'lucide-react'
 import { ExcludeVisits } from './ExcludeVisits'
 
-// ── Referrer categorisation ────────────────────────────────────────────────
-function categorizeReferrer(referrer: string | null | undefined): string | null {
-  if (!referrer) return 'Direct'
+export const revalidate = 0
+
+const TIME_ZONE = 'America/Denver'
+const PAGE_SIZE = 1_000
+const CONVERSION_EVENTS = new Set(['ticket_click', 'save_event', 'going_event', 'share_click', 'newsletter_signup'])
+
+interface AnalyticsRow {
+  created_at: string | null
+  data: unknown
+  device: string | null
+  event_type: string
+  is_bot: boolean
+  session_id: string | null
+  suspicious: boolean
+  visitor_id: string | null
+}
+
+type ServiceClient = ReturnType<typeof createServiceClient>
+
+function denverDay(value: string): string {
+  return new Date(value).toLocaleDateString('en-CA', { timeZone: TIME_ZONE })
+}
+
+function rowData(row: AnalyticsRow): Record<string, unknown> {
+  return row.data && typeof row.data === 'object' ? row.data as Record<string, unknown> : {}
+}
+
+function categorizeReferrer(referrer: unknown): string | null {
+  if (typeof referrer !== 'string' || !referrer) return 'Direct'
   try {
     const host = new URL(referrer).hostname.replace(/^www\./, '')
-    // Filter internal self-referrals, not an acquisition source
-    if (host === 'abqunplugged.com' || host === 'localhost' || host === '127.0.0.1') return null
-    if (/google\./i.test(host))                        return 'Google'
-    if (/bing\.com/i.test(host))                       return 'Bing'
-    if (/yahoo\.com/i.test(host))                      return 'Yahoo'
-    if (/duckduckgo\.com/i.test(host))                 return 'DuckDuckGo'
-    if (/facebook\.com|fb\.me|fb\.com/i.test(host))   return 'Facebook'
-    if (/instagram\.com/i.test(host))                  return 'Instagram'
-    if (/twitter\.com|x\.com|t\.co/i.test(host))      return 'Twitter / X'
-    if (/reddit\.com/i.test(host))                     return 'Reddit'
-    if (/nextdoor\.com/i.test(host))                   return 'Nextdoor'
-    if (/linkedin\.com/i.test(host))                   return 'LinkedIn'
-    if (/tiktok\.com/i.test(host))                     return 'TikTok'
-    return host  // show raw domain for everything else
+    if (['abqunplugged.com', 'localhost', '127.0.0.1'].includes(host)) return null
+    if (/google\./i.test(host)) return 'Google'
+    if (/bing\.com/i.test(host)) return 'Bing'
+    if (/yahoo\.com/i.test(host)) return 'Yahoo'
+    if (/duckduckgo\.com/i.test(host)) return 'DuckDuckGo'
+    if (/facebook\.com|fb\.me|fb\.com/i.test(host)) return 'Facebook'
+    if (/instagram\.com/i.test(host)) return 'Instagram'
+    if (/twitter\.com|x\.com|t\.co/i.test(host)) return 'Twitter / X'
+    if (/reddit\.com/i.test(host)) return 'Reddit'
+    if (/nextdoor\.com/i.test(host)) return 'Nextdoor'
+    if (/linkedin\.com/i.test(host)) return 'LinkedIn'
+    if (/tiktok\.com/i.test(host)) return 'TikTok'
+    return host
   } catch {
     return 'Direct'
   }
 }
 
-export const revalidate = 0
+async function fetchAnalyticsRows(supabase: ServiceClient, since: string): Promise<AnalyticsRow[]> {
+  const rows: AnalyticsRow[] = []
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const { data, error } = await supabase
+      .from('analytics')
+      .select('created_at,data,device,event_type,is_bot,session_id,suspicious,visitor_id')
+      .gte('created_at', since)
+      .order('created_at', { ascending: true })
+      .range(from, from + PAGE_SIZE - 1)
+    if (error) throw error
+    const page = (data ?? []) as AnalyticsRow[]
+    rows.push(...page)
+    if (page.length < PAGE_SIZE) break
+  }
+  return rows
+}
 
-// V1 path patterns, hash-router SPA, filter these out for V2 clarity
-const V1_PATH = /^#(events|discover|places|plan|profile|event\/|place\/)/
+function addToSet(map: Map<string, Set<string>>, key: string, value: string | null): void {
+  if (!key || !value) return
+  const values = map.get(key) ?? new Set<string>()
+  values.add(value)
+  map.set(key, values)
+}
+
+function positiveAction(row: AnalyticsRow): boolean {
+  const action = rowData(row).action
+  if (row.event_type === 'save_event') return action === 'save'
+  if (row.event_type === 'going_event') return action === 'going'
+  return true
+}
+
+function buildIdentityMetrics(human: AnalyticsRow[], today: string, ago7: string) {
+  const starts = human.filter(row => row.event_type === 'session_start')
+  const visitorsByDay = new Map<string, Set<string>>()
+  const sessionsByDay = new Map<string, Set<string>>()
+  const daysByVisitor = new Map<string, Set<string>>()
+  const weekVisitorIds = new Set<string>()
+  for (const row of starts) {
+    if (!row.created_at) continue
+    const day = denverDay(row.created_at)
+    addToSet(visitorsByDay, day, row.visitor_id)
+    addToSet(sessionsByDay, day, row.session_id)
+    addToSet(daysByVisitor, row.visitor_id ?? '', day)
+    if (day >= ago7 && row.visitor_id) weekVisitorIds.add(row.visitor_id)
+  }
+  const daily = [...visitorsByDay.keys()].sort().map(day => ({
+    day,
+    visitors: visitorsByDay.get(day)?.size ?? 0,
+    sessions: sessionsByDay.get(day)?.size ?? 0,
+  }))
+  const mobile = starts.filter(row => row.device === 'mobile').length
+  const desktop = starts.filter(row => row.device === 'desktop').length
+  return {
+    daily,
+    visitors: new Set(human.map(row => row.visitor_id).filter(Boolean)).size,
+    sessions: new Set(human.map(row => row.session_id).filter(Boolean)).size,
+    returningVisitors: [...daysByVisitor.values()].filter(days => days.size >= 2).length,
+    todayVisitors: visitorsByDay.get(today)?.size ?? 0,
+    weekVisitors: weekVisitorIds.size,
+    mobileShare: mobile + desktop ? Math.round((mobile / (mobile + desktop)) * 100) : 0,
+  }
+}
+
+function buildContentMetrics(human: AnalyticsRow[]) {
+  const pageMap = new Map<string, { views: number; visitors: Set<string> }>()
+  for (const row of human.filter(item => item.event_type === 'pageview')) {
+    const path = rowData(row).path
+    if (typeof path !== 'string' || /^#(events|discover|places|plan|profile|event\/|place\/)/.test(path)) continue
+    const current = pageMap.get(path) ?? { views: 0, visitors: new Set<string>() }
+    current.views++
+    if (row.visitor_id) current.visitors.add(row.visitor_id)
+    pageMap.set(path, current)
+  }
+  const engagement = new Map<string, { events: number; visitors: Set<string> }>()
+  for (const row of human.filter(item => CONVERSION_EVENTS.has(item.event_type))) {
+    const current = engagement.get(row.event_type) ?? { events: 0, visitors: new Set<string>() }
+    current.events++
+    if (row.visitor_id) current.visitors.add(row.visitor_id)
+    engagement.set(row.event_type, current)
+  }
+  return {
+    topPages: [...pageMap.entries()].map(([path, value]) => ({ path, views: value.views, visitors: value.visitors.size })).sort((a, b) => b.views - a.views).slice(0, 10),
+    engagement,
+  }
+}
+
+function buildFunnel(human: AnalyticsRow[]) {
+  const eventDetails = human.filter(row => row.event_type === 'pageview' && String(rowData(row).path ?? '').startsWith('/events/'))
+  const positive = human.filter(row => CONVERSION_EVENTS.has(row.event_type) && positiveAction(row))
+  const stages = [
+    { label: 'Event detail views', count: eventDetails.length },
+    { label: 'Ticket clicks', count: positive.filter(row => row.event_type === 'ticket_click').length },
+    { label: 'Save / going / share', count: positive.filter(row => ['save_event', 'going_event', 'share_click'].includes(row.event_type)).length },
+    { label: 'Newsletter signups', count: positive.filter(row => row.event_type === 'newsletter_signup').length },
+  ]
+  return stages.map((stage, index) => ({
+    ...stage,
+    rate: index === 0 ? null : stages[index - 1].count ? Math.round(stage.count / stages[index - 1].count * 1_000) / 10 : 0,
+  }))
+}
+
+function buildTrafficSources(starts: AnalyticsRow[]) {
+  const sources = new Map<string, Set<string>>()
+  for (const row of starts) {
+    const source = categorizeReferrer(rowData(row).referrer)
+    if (source) addToSet(sources, source, row.session_id ?? row.visitor_id)
+  }
+  return [...sources.entries()].map(([source, values]) => ({ source, sessions: values.size })).sort((a, b) => b.sessions - a.sessions)
+}
+
+function buildBotMetrics(botRows: AnalyticsRow[]) {
+  const agents = new Map<string, number>()
+  for (const row of botRows) {
+    const userAgent = rowData(row).user_agent
+    const label = typeof userAgent === 'string' && userAgent ? userAgent : '(missing user agent)'
+    agents.set(label, (agents.get(label) ?? 0) + 1)
+  }
+  return {
+    events: botRows.length,
+    visitors: new Set(botRows.map(row => row.visitor_id).filter(Boolean)).size,
+    agents: [...agents.entries()].map(([agent, count]) => ({ agent, count })).sort((a, b) => b.count - a.count).slice(0, 5),
+  }
+}
+
+function buildReport(rows: AnalyticsRow[], today: string, ago7: string) {
+  const human = rows.filter(row => !row.is_bot)
+  const identity = buildIdentityMetrics(human, today, ago7)
+  const content = buildContentMetrics(human)
+  const positiveTickets = human.filter(row => row.event_type === 'ticket_click' && positiveAction(row))
+  const tickets = new Map<string, number>()
+  for (const row of positiveTickets) {
+    const eventId = rowData(row).event_id
+    if (typeof eventId === 'string') tickets.set(eventId, (tickets.get(eventId) ?? 0) + 1)
+  }
+  const lastEventAt = human.at(-1)?.created_at ?? null
+  return {
+    ...identity,
+    ...content,
+    funnel: buildFunnel(human),
+    trafficSources: buildTrafficSources(human.filter(row => row.event_type === 'session_start')),
+    bots: buildBotMetrics(rows.filter(row => row.is_bot)),
+    suspiciousRows: human.filter(row => row.suspicious).length,
+    topTicketEvents: [...tickets.entries()].map(([id, count]) => ({ id, count })).sort((a, b) => b.count - a.count).slice(0, 8),
+    lastEventAt,
+    daysSilent: lastEventAt ? Math.floor((Date.now() - new Date(lastEventAt).getTime()) / 86_400_000) : null,
+  }
+}
+
+const fmt = (value: number) => value.toLocaleString()
 
 export default async function AnalyticsPage() {
-  const supabase = await createServiceClient()
-
-  const now   = new Date()
-  // Use toLocaleDateString (date-only) so the result is a clean 'YYYY-MM-DD' string.
-  // toLocaleString (with time) returns a locale-formatted string that new Date() can't
-  // reliably parse, it produced Invalid Date and crashed the page with RangeError.
-  const today = now.toLocaleDateString('en-CA', { timeZone: 'America/Denver' })
-  const ago7  = new Date(Date.now() - 7  * 86400000).toISOString().slice(0, 10)
-  const ago30 = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)
-
-  const [
-    { data: raw30 },
-    { data: rawHourly },
-    { data: rawDow },
-    { data: rawTopPages },
-    { data: rawEngagement },
-    { data: rawClickedEvents },
-  ] = await (async () => {
-    try {
-      return await Promise.all([
-        // 30-day daily sessions (data includes referrer for traffic sources)
-        supabase.from('analytics')
-          .select('created_at, session_id, device, data')
-          .eq('event_type', 'session_start')
-          .gte('created_at', ago30 + 'T00:00:00'),
-        // Hourly distribution
-        supabase.from('analytics')
-          .select('created_at, session_id')
-          .eq('event_type', 'session_start')
-          .gte('created_at', ago30 + 'T00:00:00'),
-        // Day of week
-        supabase.from('analytics')
-          .select('created_at, session_id')
-          .eq('event_type', 'session_start')
-          .gte('created_at', ago30 + 'T00:00:00'),
-        // Top pages
-        supabase.from('analytics')
-          .select('data, session_id')
-          .eq('event_type', 'pageview')
-          .gte('created_at', ago30 + 'T00:00:00'),
-        // Engagement events
-        supabase.from('analytics')
-          .select('event_type, session_id')
-          .in('event_type', ['event_click', 'search', 'wishlist_add', 'wishlist_remove', 'category_click', 'checkin', 'share_click', 'directions_click'])
-          .gte('created_at', ago30 + 'T00:00:00'),
-        // Top clicked events (last 30d)
-        supabase.from('analytics')
-          .select('data')
-          .eq('event_type', 'event_click')
-          .gte('created_at', ago30 + 'T00:00:00'),
-      ])
-    } catch {
-      return [
-        { data: [] },
-        { data: [] },
-        { data: [] },
-        { data: [] },
-        { data: [] },
-        { data: [] },
-      ]
-    }
-  })()
-
-  // ── Daily sessions chart ───────────────────────────────────────────────────
-  const byDay: Record<string, { sessions: Set<string>; mobile: number; desktop: number }> = {}
-  const refCounts: Record<string, Set<string>> = {}  // source → unique session IDs
-
-  for (const row of raw30 ?? []) {
-    const day = new Date(row.created_at)
-      .toLocaleDateString('en-CA', { timeZone: 'America/Denver' })
-    if (!byDay[day]) byDay[day] = { sessions: new Set(), mobile: 0, desktop: 0 }
-    byDay[day].sessions.add(row.session_id)
-    if (row.device === 'mobile') byDay[day].mobile++
-    else if (row.device === 'desktop') byDay[day].desktop++
-
-    // Traffic source, parse referrer from session_start data
-    const referrer = (row.data as Record<string, string | null> | null)?.referrer
-    const source = categorizeReferrer(referrer)
-    if (source !== null) {  // null = internal navigation, skip
-      if (!refCounts[source]) refCounts[source] = new Set()
-      refCounts[source].add(row.session_id)
-    }
+  const supabase = createServiceClient()
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: TIME_ZONE })
+  const ago7 = new Date(Date.now() - 7 * 86_400_000).toISOString().slice(0, 10)
+  const since = new Date(Date.now() - 30 * 86_400_000).toISOString()
+  let rows: AnalyticsRow[] = []
+  let loadError: string | null = null
+  try { rows = await fetchAnalyticsRows(supabase, since) } catch (error) {
+    loadError = error instanceof Error ? error.message : 'Unknown analytics query error'
   }
-
-  const trafficSources = Object.entries(refCounts)
-    .map(([source, sessions]) => ({ source, sessions: sessions.size }))
-    .sort((a, b) => b.sessions - a.sessions)
-  const maxRefSessions = Math.max(...trafficSources.map(s => s.sessions), 1)
-  const dailyData = Object.entries(byDay)
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([day, d]) => ({ day, count: d.sessions.size, mobile: d.mobile, desktop: d.desktop }))
-  const maxDay = Math.max(...dailyData.map(d => d.count), 1)
-
-  // Totals
-  const totalSessions30 = dailyData.reduce((s, d) => s + d.count, 0)
-  const todaySessions   = byDay[today]?.sessions.size ?? 0
-  const week7Sessions   = Object.entries(byDay)
-    .filter(([d]) => d >= ago7)
-    .reduce((s, [, d]) => s + d.sessions.size, 0)
-
-  // Device split
-  const totalMobile  = (raw30 ?? []).filter(r => r.device === 'mobile').length
-  const totalDesktop = (raw30 ?? []).filter(r => r.device === 'desktop').length
-  const mobileShare  = totalMobile + totalDesktop > 0
-    ? Math.round((totalMobile / (totalMobile + totalDesktop)) * 100)
-    : 0
-
-  // Data freshness: when was the last session_start?
-  const lastSession = dailyData.at(-1)?.day ?? null
-  const daysSilent  = lastSession
-    ? Math.round((Date.now() - new Date(lastSession + 'T12:00:00').getTime()) / 86400000)
-    : null
-  const isStale = daysSilent !== null && daysSilent > 1
-
-  // ── Hourly distribution ────────────────────────────────────────────────────
-  const hourCounts: Record<number, Set<string>> = {}
-  for (let h = 0; h < 24; h++) hourCounts[h] = new Set()
-  for (const row of rawHourly ?? []) {
-    const hour = new Date(row.created_at).toLocaleString('en-US', {
-      timeZone: 'America/Denver', hour: 'numeric', hour12: false,
-    })
-    const h = parseInt(hour, 10) % 24
-    hourCounts[h].add(row.session_id)
-  }
-  const hourlyData = Array.from({ length: 24 }, (_, h) => ({ hour: h, count: hourCounts[h].size }))
-  const maxHour    = Math.max(...hourlyData.map(d => d.count), 1)
-
-  // ── Day of week ────────────────────────────────────────────────────────────
-  const DOW_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-  const dowCounts: Record<number, Set<string>> = {}
-  for (let d = 0; d < 7; d++) dowCounts[d] = new Set()
-  for (const row of rawDow ?? []) {
-    const dow = new Date(row.created_at).toLocaleDateString('en-US', {
-      timeZone: 'America/Denver', weekday: 'short',
-    })
-    const idx = DOW_LABELS.indexOf(dow)
-    if (idx >= 0) dowCounts[idx].add(row.session_id)
-  }
-  const dowData    = DOW_LABELS.map((label, i) => ({ label, count: dowCounts[i].size }))
-  const maxDow     = Math.max(...dowData.map(d => d.count), 1)
-  // Stable copies for peak/slowest, don't mutate dowData used in the chart
-  const peakDay    = [...dowData].sort((a, b) => b.count - a.count)[0]?.label ?? '—'
-  const slowestDay = [...dowData].sort((a, b) => a.count - b.count)[0]?.label ?? '—'
-
-  // ── Top pages ─────────────────────────────────────────────────────────────
-  const pageCounts: Record<string, { views: number; unique: Set<string> }> = {}
-  for (const row of rawTopPages ?? []) {
-    const path = (row.data as Record<string, string> | null)?.path ?? '(unknown)'
-    if (V1_PATH.test(path)) continue
-    if (!pageCounts[path]) pageCounts[path] = { views: 0, unique: new Set() }
-    pageCounts[path].views++
-    pageCounts[path].unique.add(row.session_id)
-  }
-  const topPages = Object.entries(pageCounts)
-    .map(([path, d]) => ({ path, views: d.views, unique: d.unique.size }))
-    .sort((a, b) => b.views - a.views)
-    .slice(0, 10)
-
-  // ── Engagement ─────────────────────────────────────────────────────────────
-  const engCounts: Record<string, { total: number; unique: Set<string> }> = {}
-  for (const row of rawEngagement ?? []) {
-    if (!engCounts[row.event_type]) engCounts[row.event_type] = { total: 0, unique: new Set() }
-    engCounts[row.event_type].total++
-    engCounts[row.event_type].unique.add(row.session_id)
-  }
-
-  // ── Top clicked events ─────────────────────────────────────────────────────
-  const clickedEventCounts: Record<string, { count: number; id: string }> = {}
-  for (const row of rawClickedEvents ?? []) {
-    const d = row.data as Record<string, string> | null
-    const id    = d?.event_id ?? ''
-    const title = d?.title    ?? d?.event_id ?? '(unknown)'
-    if (!id) continue
-    if (!clickedEventCounts[id]) clickedEventCounts[id] = { count: 0, id }
-    clickedEventCounts[id].count++
-    // store the last-seen title for display
-    ;(clickedEventCounts[id] as Record<string, unknown>).title = title
-  }
-  const topClickedEvents = Object.values(clickedEventCounts)
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 8)
-
-  const fmt = (n: number) => n.toLocaleString()
-  const HOUR_LABEL = (h: number) => {
-    if (h === 0)  return '12am'
-    if (h === 12) return '12pm'
-    return h < 12 ? `${h}am` : `${h - 12}pm`
-  }
+  const report = buildReport(rows, today, ago7)
+  const maxDaily = Math.max(...report.daily.map(day => day.visitors), 1)
+  const maxSource = Math.max(...report.trafficSources.map(source => source.sessions), 1)
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link href="/admin" className="text-white/40 hover:text-white/70 transition-colors">
-          <ArrowLeft className="w-4 h-4" />
-        </Link>
+      <header className="flex items-center gap-3">
+        <Link href="/admin" className="text-white/40 hover:text-white/70"><ArrowLeft className="w-4 h-4" /></Link>
         <div className="flex-1">
           <h1 className="text-3xl font-black" style={{ fontFamily: 'var(--font-epilogue)' }}>Analytics</h1>
-          <p className="text-white/40 text-sm">Last 30 days · America/Denver · unique sessions per visitor</p>
+          <p className="text-white/40 text-sm">Last 30 days · America/Denver · known bots excluded from human KPIs</p>
         </div>
         <ExcludeVisits />
+      </header>
+
+      {loadError && <Warning title="Analytics query failed" detail={loadError} />}
+      {!loadError && report.daysSilent !== null && report.daysSilent > 1 && <Warning title={`Human analytics data is ${report.daysSilent} days old`} detail={`Last human event: ${report.lastEventAt ? new Date(report.lastEventAt).toLocaleString() : 'unknown'}. The heartbeat alerts after a 26-hour zero-data window.`} />}
+
+      <section className="grid grid-cols-2 lg:grid-cols-6 gap-3">
+        <Kpi label="Today" value={report.todayVisitors} icon={TrendingUp} tip="Unique browser visitors today" />
+        <Kpi label="7-Day Visitors" value={report.weekVisitors} icon={Users} tip="Daily unique visitors summed over 7 days" />
+        <Kpi label="Unique Visitors" value={report.visitors} icon={Users} tip="Distinct browser IDs in 30 days; not people" />
+        <Kpi label="Sessions" value={report.sessions} icon={MousePointer} tip="Distinct 30-minute visit IDs in 30 days" />
+        <Kpi label="Returning" value={report.returningVisitors} icon={Heart} tip="Visitors active on at least 2 Denver calendar days" />
+        <Kpi label="Mobile" value={`${report.mobileShare}%`} icon={Smartphone} tip="Human session starts on mobile" />
+      </section>
+
+      <section className="bg-white/5 rounded-2xl p-5">
+        <h2 className="text-xs uppercase tracking-widest text-white/55 mb-1">30-Day Conversion Funnel</h2>
+        <p className="text-white/45 text-[10px] mb-4">Human events only · positive save/going actions only · stage-over-stage rate</p>
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          {report.funnel.map((stage, index) => <div key={stage.label} className="bg-white/5 rounded-xl p-4">
+            <p className="text-white/45 text-[10px] uppercase tracking-wide">{index + 1}. {stage.label}</p>
+            <p className="text-3xl font-black tabular-nums mt-1">{fmt(stage.count)}</p>
+            <p className="text-white/45 text-[10px] mt-1">{stage.rate === null ? 'Funnel entry' : `${stage.rate}% from prior stage`}</p>
+          </div>)}
+        </div>
+      </section>
+
+      <section className="bg-red-500/5 border border-red-400/20 rounded-2xl p-5">
+        <div className="flex items-center gap-2 mb-1"><Bot className="w-4 h-4 text-red-300" /><h2 className="text-xs uppercase tracking-widest text-red-200/80">Bot Traffic</h2></div>
+        <p className="text-red-100/50 text-[10px] mb-4">{fmt(report.bots.events)} events from {fmt(report.bots.visitors)} browser IDs · excluded from every KPI above</p>
+        {report.bots.agents.length === 0 ? <p className="text-white/45 text-sm">No classified bot traffic in this window.</p> : report.bots.agents.map(bot => <div key={bot.agent} className="flex gap-3 py-1.5 border-t border-white/5 first:border-0"><span className="text-white/45 text-xs tabular-nums w-16 text-right">{fmt(bot.count)}</span><span className="text-white/55 text-xs font-mono truncate" title={bot.agent}>{bot.agent}</span></div>)}
+        {report.suspiciousRows > 0 && <p className="text-yellow-300/70 text-[10px] mt-3">{fmt(report.suspiciousRows)} human-classified rows are separately marked suspicious.</p>}
+      </section>
+
+      <section className="bg-white/5 rounded-2xl p-5">
+        <h2 className="text-xs uppercase tracking-widest text-white/55 mb-4">Daily Human Visitors</h2>
+        {report.daily.length === 0 ? <p className="text-white/45 text-sm py-6 text-center">No human session data in this window.</p> : <>
+          <div className="flex gap-[2px] h-32">{report.daily.map(day => <div key={day.day} className="flex-1 relative group" title={`${day.day}: ${day.visitors} visitors, ${day.sessions} sessions`}><div className={`absolute bottom-0 inset-x-0 rounded-t ${day.day === today ? 'bg-terra' : 'bg-white/20 group-hover:bg-white/35'}`} style={{ height: `${Math.max(Math.round(day.visitors / maxDaily * 128), 2)}px` }} /></div>)}</div>
+          <div className="flex justify-between mt-2 text-white/45 text-[10px]"><span>{report.daily[0]?.day}</span><span>{today}</span></div>
+        </>}
+      </section>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <section className="bg-white/5 rounded-2xl p-5">
+          <div className="flex items-center gap-2 mb-1"><Globe className="w-4 h-4 text-[#7cc4bf]" /><h2 className="text-xs uppercase tracking-widest text-white/55">Traffic Sources</h2></div>
+          <p className="text-white/45 text-[10px] mb-4">Human sessions · internal referrals excluded</p>
+          <div className="space-y-2">{report.trafficSources.slice(0, 10).map(source => <BarRow key={source.source} label={source.source} value={source.sessions} percent={Math.round(source.sessions / maxSource * 100)} />)}</div>
+        </section>
+        <Engagement engagement={report.engagement} />
       </div>
 
-      {/* ── Staleness warning ── */}
-      {isStale && (
-        <div className="flex items-start gap-3 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-4">
-          <AlertTriangle className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
-          <div>
-            <p className="text-yellow-300 text-sm font-semibold">Data is {daysSilent} days old</p>
-            <p className="text-yellow-400/70 text-xs mt-0.5">
-              Last session recorded on {lastSession}. The analytics tracker is now active, new visits will appear here.
-            </p>
-          </div>
-        </div>
-      )}
+      {report.topPages.length > 0 && <section className="bg-white/5 rounded-2xl p-5">
+        <h2 className="text-xs uppercase tracking-widest text-white/55 mb-4">Top Human-Viewed Pages</h2>
+        <div className="space-y-2">{report.topPages.map(page => <div key={page.path} className="flex gap-3 text-xs"><span className="text-white/60 font-mono truncate flex-1" title={page.path}>{page.path}</span><span className="text-white/45 tabular-nums">{fmt(page.views)} views</span><span className="text-white/45 tabular-nums w-24 text-right">{fmt(page.visitors)} visitors</span></div>)}</div>
+      </section>}
 
-      {/* ── Top KPIs ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          { label: 'Today',         value: todaySessions,    icon: TrendingUp,  color: 'text-terra',  tip: 'Unique visitor sessions today' },
-          { label: 'This Week',     value: week7Sessions,    icon: Users,       color: 'text-[#7cc4bf]',  tip: 'Sessions in the last 7 days' },
-          { label: '30-Day Total',  value: totalSessions30,  icon: Users,       color: 'text-white',      tip: 'Total sessions this month' },
-          { label: 'Mobile Share',  value: `${mobileShare}%`, icon: Smartphone, color: 'text-[#b0c4b1]',  tip: 'Percentage of mobile visitors' },
-        ].map(({ label, value, icon: Icon, color, tip }) => (
-          <div key={label} className="bg-white/5 rounded-2xl p-4" title={tip}>
-            <div className="flex items-center gap-2 mb-2">
-              <Icon className={`w-3.5 h-3.5 ${color}`} />
-              <p className="text-white/40 text-xs uppercase tracking-wider">{label}</p>
-            </div>
-            <p className={`text-3xl font-black tabular-nums ${color}`} style={{ fontFamily: 'var(--font-epilogue)' }}>
-              {typeof value === 'number' ? fmt(value) : value}
-            </p>
-            <p className="text-white/45 text-[10px] mt-1">{tip}</p>
-          </div>
-        ))}
-      </div>
+      {report.topTicketEvents.length > 0 && <section className="bg-white/5 rounded-2xl p-5">
+        <h2 className="text-xs uppercase tracking-widest text-white/55 mb-4">Top Ticket-Click Events</h2>
+        <div className="space-y-2">{report.topTicketEvents.map(event => <div key={event.id} className="flex gap-3 text-xs"><Link href={`/events/${event.id}`} target="_blank" className="text-white/60 hover:text-white truncate flex-1">{event.id}</Link><span className="text-white/45 tabular-nums">{fmt(event.count)} clicks</span></div>)}</div>
+      </section>}
 
-      {/* ── Traffic Sources ── */}
-      <section className="bg-white/5 rounded-2xl p-5">
-        <div className="flex items-center gap-2 mb-1">
-          <Globe className="w-3.5 h-3.5 text-[#7cc4bf]" />
-          <h2 className="text-xs uppercase tracking-widest text-white/55">Where Traffic Comes From</h2>
-        </div>
-        <p className="text-white/45 text-[10px] mb-4">
-          Sessions by acquisition source · last 30 days · internal navigation excluded
-        </p>
-        {trafficSources.length === 0 ? (
-          <p className="text-white/45 text-sm py-4 text-center">No referrer data yet, data builds from new sessions.</p>
-        ) : (
-          <div className="space-y-2">
-            {trafficSources.map(({ source, sessions }) => {
-              const pct = Math.round((sessions / maxRefSessions) * 100)
-              const isTop = sessions === maxRefSessions
-              const emoji =
-                source === 'Direct'       ? '🔗' :
-                source === 'Google'       ? '🔍' :
-                source === 'Bing'         ? '🔍' :
-                source === 'Yahoo'        ? '🔍' :
-                source === 'DuckDuckGo'   ? '🔍' :
-                source === 'Facebook'     ? '📘' :
-                source === 'Instagram'    ? '📸' :
-                source === 'Twitter / X'  ? '𝕏' :
-                source === 'Reddit'       ? '🤖' :
-                source === 'Nextdoor'     ? '🏘️' :
-                source === 'LinkedIn'     ? '💼' :
-                source === 'TikTok'       ? '🎵' : '🔗'
-              return (
-                <div key={source} className="flex items-center gap-3">
-                  <span className="text-sm w-4 text-center shrink-0">{emoji}</span>
-                  <span className="text-white/60 text-xs w-32 truncate shrink-0" title={source}>{source}</span>
-                  <div className="flex-1 h-2.5 bg-white/10 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all ${isTop ? 'bg-[#7cc4bf]' : 'bg-white/25'}`}
-                      style={{ width: `${Math.max(pct, 2)}%` }}
-                    />
-                  </div>
-                  <span className="text-white/40 text-xs tabular-nums w-16 text-right shrink-0">
-                    {sessions} {sessions === 1 ? 'session' : 'sessions'}
-                  </span>
-                </div>
-              )
-            })}
-          </div>
-        )}
-        <p className="text-white/45 text-[10px] mt-4">
-          Direct = no referrer (typed URL, bookmarks, email links without UTM, most iOS share sheets)
-        </p>
-      </section>
-
-      {/* ── 30-Day Traffic Chart ── */}
-      <section className="bg-white/5 rounded-2xl p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xs uppercase tracking-widest text-white/55">Daily Visitors, Last 30 Days</h2>
-          <span className="text-white/45 text-[10px] tabular-nums">{dailyData.length} days with data</span>
-        </div>
-        {dailyData.length === 0 ? (
-          <p className="text-white/45 text-sm py-8 text-center">No session data yet, tracker just reactivated.</p>
-        ) : (
-          <>
-            {/* Use absolute positioning + pixel heights, percentage heights are unreliable
-                inside flex-1 children whose computed height comes from the flex algorithm */}
-            <div className="flex gap-[2px] h-32">
-              {dailyData.map(({ day, count }) => {
-                const isToday = day === today
-                const pxH     = Math.max(Math.round(count / maxDay * 128), 2)
-                const label   = new Date(day + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                return (
-                  <div key={day} className="flex-1 relative group" title={`${label}: ${count} sessions`}>
-                    <div
-                      className={`absolute bottom-0 inset-x-0 rounded-t transition-all ${isToday ? 'bg-terra' : 'bg-white/20 group-hover:bg-white/35'}`}
-                      style={{ height: `${pxH}px` }}
-                    />
-                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:flex bg-black/80 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap z-10 pointer-events-none">
-                      {label}: {count}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-            <div className="flex justify-between mt-2">
-              <span className="text-white/45 text-[10px]">{dailyData[0]?.day ?? ''}</span>
-              <span className="text-white/45 text-[10px]">{today} (today)</span>
-            </div>
-          </>
-        )}
-      </section>
-
-      {/* ── Hourly + Day-of-Week ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Hourly heatmap */}
-        <section className="bg-white/5 rounded-2xl p-5">
-          <h2 className="text-xs uppercase tracking-widest text-white/55 mb-1">Busiest Hours</h2>
-          <p className="text-white/45 text-[10px] mb-4">When visitors are on the site (Denver time)</p>
-          <div className="space-y-1">
-            {hourlyData.map(({ hour, count }) => {
-              const pct   = Math.round((count / maxHour) * 100)
-              const isTop = count === maxHour && count > 0
-              return (
-                <div key={hour} className="flex items-center gap-2">
-                  <span className="text-white/55 text-[10px] w-8 text-right tabular-nums">{HOUR_LABEL(hour)}</span>
-                  <div className="flex-1 h-3 bg-white/10 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all ${isTop ? 'bg-terra' : 'bg-white/30'}`}
-                      style={{ width: `${Math.max(pct, count > 0 ? 2 : 0)}%` }}
-                    />
-                  </div>
-                  <span className="text-white/55 text-[10px] w-5 tabular-nums">{count}</span>
-                </div>
-              )
-            })}
-          </div>
-        </section>
-
-        {/* Day of week */}
-        <section className="bg-white/5 rounded-2xl p-5">
-          <h2 className="text-xs uppercase tracking-widest text-white/55 mb-1">Busiest Days</h2>
-          <p className="text-white/45 text-[10px] mb-4">Total sessions per weekday over 30 days</p>
-          {/* Explicit pixel bar heights inside a relative container, fully reliable */}
-          <div className="flex gap-2">
-            {dowData.map(({ label, count }) => {
-              const pxH   = Math.max(Math.round(count / maxDow * 112), count > 0 ? 4 : 0)
-              const isTop = count === maxDow && count > 0
-              return (
-                <div key={label} className="flex-1 flex flex-col items-center">
-                  <span className="text-white/55 text-[10px] tabular-nums leading-none mb-1 shrink-0">{count}</span>
-                  <div className="w-full relative shrink-0" style={{ height: '112px' }}>
-                    <div
-                      className={`absolute bottom-0 inset-x-0 rounded-t transition-all ${isTop ? 'bg-terra' : 'bg-white/20'}`}
-                      style={{ height: `${pxH}px` }}
-                    />
-                  </div>
-                  <span className="text-white/40 text-[10px] font-semibold leading-none mt-1 shrink-0">{label}</span>
-                </div>
-              )
-            })}
-          </div>
-          <p className="text-white/45 text-[10px] mt-2">
-            Peak: {peakDay} · Slowest: {slowestDay}
-          </p>
-        </section>
-      </div>
-
-      {/* ── Device breakdown ── */}
-      <section className="bg-white/5 rounded-2xl p-5">
-        <h2 className="text-xs uppercase tracking-widest text-white/55 mb-4">Device Breakdown</h2>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Smartphone className="w-4 h-4 text-[#7cc4bf]" />
-            <div>
-              <p className="text-2xl font-black tabular-nums text-[#7cc4bf]" style={{ fontFamily: 'var(--font-epilogue)' }}>{mobileShare}%</p>
-              <p className="text-white/55 text-xs">Mobile ({fmt(totalMobile)} sessions)</p>
-            </div>
-          </div>
-          <div className="flex-1 h-4 bg-white/10 rounded-full overflow-hidden">
-            <div className="h-full bg-[#7cc4bf] rounded-full" style={{ width: `${mobileShare}%` }} />
-          </div>
-          <div className="flex items-center gap-2">
-            <Monitor className="w-4 h-4 text-white/50" />
-            <div>
-              <p className="text-2xl font-black tabular-nums" style={{ fontFamily: 'var(--font-epilogue)' }}>{100 - mobileShare}%</p>
-              <p className="text-white/55 text-xs">Desktop ({fmt(totalDesktop)} sessions)</p>
-            </div>
-          </div>
-        </div>
-        <p className="text-white/45 text-[10px] mt-3">
-          Most ABQ Unplugged visitors are on {mobileShare > 50 ? 'mobile' : 'desktop'}, {mobileShare > 50 ? 'prioritize mobile UX' : 'desktop UX matters here'}.
-        </p>
-      </section>
-
-      {/* ── Top Pages ── */}
-      {topPages.length > 0 && (
-        <section className="bg-white/5 rounded-2xl p-5">
-          <h2 className="text-xs uppercase tracking-widest text-white/55 mb-1">Top Pages (V2)</h2>
-          <p className="text-white/45 text-[10px] mb-4">Most-visited pages in the last 30 days</p>
-          <div className="space-y-2">
-            {topPages.map(({ path, views, unique }) => {
-              const maxViews = topPages[0]?.views ?? 1
-              const pct      = Math.round((views / maxViews) * 100)
-              return (
-                <div key={path} className="flex items-center gap-3">
-                  <span className="text-white/50 text-xs font-mono w-36 truncate" title={path}>{path}</span>
-                  <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full bg-terra rounded-full" style={{ width: `${pct}%` }} />
-                  </div>
-                  <span className="text-white/40 text-xs tabular-nums w-12 text-right">{views}</span>
-                  <span className="text-white/45 text-[10px] w-16 text-right">{unique} uniq</span>
-                </div>
-              )
-            })}
-          </div>
-        </section>
-      )}
-
-      {/* ── Engagement ── */}
-      <section className="bg-white/5 rounded-2xl p-5">
-        <h2 className="text-xs uppercase tracking-widest text-white/55 mb-1">User Engagement</h2>
-        <p className="text-white/45 text-[10px] mb-4">Actions taken in the last 30 days</p>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { key: 'event_click',    label: 'Event Clicks',   icon: MousePointer, color: 'text-terra',  tip: 'Tapped through to an event detail page' },
-            { key: 'search',         label: 'Searches',        icon: Search,       color: 'text-[#7cc4bf]',  tip: 'Used the search bar' },
-            { key: 'wishlist_add',   label: 'Events Saved',    icon: Heart,        color: 'text-terra-light',  tip: 'Added an event to wishlist/saved' },
-            { key: 'category_click', label: 'Category Clicks', icon: TrendingUp,   color: 'text-[#b0c4b1]',  tip: 'Clicked a category filter' },
-          ].map(({ key, label, icon: Icon, color, tip }) => {
-            const d = engCounts[key]
-            return (
-              <div key={key} className="bg-white/5 rounded-xl p-3" title={tip}>
-                <div className="flex items-center gap-1.5 mb-2">
-                  <Icon className={`w-3.5 h-3.5 ${color}`} />
-                  <p className="text-white/40 text-[10px] uppercase tracking-wide">{label}</p>
-                </div>
-                <p className={`text-2xl font-black tabular-nums ${color}`} style={{ fontFamily: 'var(--font-epilogue)' }}>
-                  {fmt(d?.total ?? 0)}
-                </p>
-                <p className="text-white/45 text-[10px] mt-0.5">{d?.unique.size ?? 0} visitors</p>
-              </div>
-            )
-          })}
-        </div>
-      </section>
-
-      {/* ── Top clicked events ── */}
-      {topClickedEvents.length > 0 && (
-        <section className="bg-white/5 rounded-2xl p-5">
-          <h2 className="text-xs uppercase tracking-widest text-white/55 mb-1">Top Clicked Events</h2>
-          <p className="text-white/45 text-[10px] mb-4">Events users opened most in the last 30 days</p>
-          <div className="space-y-2">
-            {topClickedEvents.map((ev, i) => {
-              const title = (ev as Record<string, unknown>).title as string ?? ev.id
-              const maxCt = topClickedEvents[0]?.count ?? 1
-              const pct   = Math.round((ev.count / maxCt) * 100)
-              return (
-                <div key={ev.id} className="flex items-center gap-3">
-                  <span className="text-white/45 text-[10px] w-4 tabular-nums text-right">{i + 1}</span>
-                  <Link href={`/events/${ev.id}`} target="_blank" className="text-white/60 text-xs truncate w-48 hover:text-white transition-colors" title={title}>
-                    {title}
-                  </Link>
-                  <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full bg-[#7cc4bf] rounded-full" style={{ width: `${pct}%` }} />
-                  </div>
-                  <span className="text-white/55 text-xs tabular-nums w-10 text-right">{ev.count}×</span>
-                </div>
-              )
-            })}
-          </div>
-        </section>
-      )}
-
-      {/* ── Notes ── */}
       <section className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-white/55 text-xs leading-relaxed space-y-1">
-        <p className="text-white/50 font-semibold text-[10px] uppercase tracking-widest mb-2">How to read this</p>
-        <p><span className="text-white/50">Sessions</span> = one visit per device per day. If someone uses the site twice in a day, that&apos;s 2 sessions.</p>
-        <p><span className="text-white/50">Unique visitors</span> = distinct session IDs, a proxy for individual people.</p>
-        <p><span className="text-white/50">Hourly/day charts</span> = 30-day aggregate. Use this to know the best times to post social, add new events, or send push notifications.</p>
-        <p><span className="text-white/50">Top pages</span> = V2 app routes only. V1 hash-route traffic (#events, #discover) is filtered out.</p>
-        <p>Analytics auto-purge after 30 days to stay lean.</p>
+        <p className="text-white/50 font-semibold text-[10px] uppercase tracking-widest mb-2">Metric definitions</p>
+        <p><span className="text-white/70">Unique visitor</span> = one browser installation ID. It is not necessarily one person.</p>
+        <p><span className="text-white/70">Session</span> = one browser-tab visit, rotated after more than 30 minutes without a tracked action.</p>
+        <p><span className="text-white/70">Returning visitor</span> = a human-classified visitor active on at least two distinct Denver calendar days in this window.</p>
+        <p><span className="text-white/70">Bot traffic</span> remains stored and visible separately, but is excluded from human KPIs.</p>
+        <p>Raw analytics are rolled up daily, then automatically purged after 30 days.</p>
       </section>
     </div>
   )
+}
+
+function Engagement({ engagement }: { engagement: Map<string, { events: number; visitors: Set<string> }> }) {
+  const items = [
+    ['ticket_click', 'Ticket clicks', Ticket], ['save_event', 'Save actions', Heart],
+    ['going_event', 'Going actions', TrendingUp], ['share_click', 'Shares', Share2],
+    ['newsletter_signup', 'Newsletter', Users],
+  ] as const
+  return <section className="bg-white/5 rounded-2xl p-5"><h2 className="text-xs uppercase tracking-widest text-white/55 mb-1">Measured Actions</h2><p className="text-white/45 text-[10px] mb-4">Human events · includes positive and removal actions</p><div className="grid grid-cols-2 gap-3">{items.map(([key, label, Icon]) => { const value = engagement.get(key); return <div key={key} className="bg-white/5 rounded-xl p-3"><div className="flex gap-1.5 items-center text-white/45 text-[10px] uppercase tracking-wide"><Icon className="w-3.5 h-3.5 text-terra" /> {label}</div><p className="text-2xl font-black mt-1">{fmt(value?.events ?? 0)}</p><p className="text-white/45 text-[10px]">{value?.visitors.size ?? 0} visitors</p></div> })}</div></section>
+}
+
+function Warning({ title, detail }: { title: string; detail: string }) {
+  return <div className="flex items-start gap-3 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-4"><AlertTriangle className="w-4 h-4 text-yellow-400 mt-0.5 shrink-0" /><div><p className="text-yellow-300 text-sm font-semibold">{title}</p><p className="text-yellow-400/70 text-xs mt-0.5">{detail}</p></div></div>
+}
+
+function Kpi({ label, value, icon: Icon, tip }: { label: string; value: number | string; icon: typeof Users; tip: string }) {
+  return <div className="bg-white/5 rounded-2xl p-4" title={tip}><div className="flex items-center gap-2 mb-2"><Icon className="w-3.5 h-3.5 text-terra" /><p className="text-white/40 text-[10px] uppercase tracking-wider">{label}</p></div><p className="text-3xl font-black tabular-nums" style={{ fontFamily: 'var(--font-epilogue)' }}>{typeof value === 'number' ? fmt(value) : value}</p><p className="text-white/45 text-[10px] mt-1">{tip}</p></div>
+}
+
+function BarRow({ label, value, percent }: { label: string; value: number; percent: number }) {
+  return <div className="flex items-center gap-3"><span className="text-white/60 text-xs w-32 truncate" title={label}>{label}</span><div className="flex-1 h-2.5 bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-[#7cc4bf] rounded-full" style={{ width: `${Math.max(percent, 2)}%` }} /></div><span className="text-white/45 text-xs tabular-nums w-12 text-right">{fmt(value)}</span></div>
 }

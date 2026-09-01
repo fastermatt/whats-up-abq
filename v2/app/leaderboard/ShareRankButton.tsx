@@ -1,16 +1,28 @@
 'use client'
 
+import { trackEvent } from '@/lib/analytics/track'
+
 export function ShareRankButton({ rank }: { rank: number }) {
   const share = async () => {
     if (navigator.share) {
-      await navigator.share({
-        title: 'ABQ Unplugged',
-        text: `I'm ranked #${rank} on ABQ Unplugged — Albuquerque's event guide. 🎯`,
-        url: 'https://abqunplugged.com/leaderboard',
-      })
+      try {
+        await navigator.share({
+          title: 'ABQ Unplugged',
+          text: `I'm ranked #${rank} on ABQ Unplugged — Albuquerque's event guide. 🎯`,
+          url: 'https://abqunplugged.com/leaderboard',
+        })
+        trackEvent('share_click', { source: 'leaderboard', rank, method: 'native' })
+      } catch {
+        // Native share cancellation is not a completed conversion.
+      }
     } else {
-      await navigator.clipboard.writeText('https://abqunplugged.com/leaderboard')
-      alert('Link copied!')
+      try {
+        await navigator.clipboard.writeText('https://abqunplugged.com/leaderboard')
+        trackEvent('share_click', { source: 'leaderboard', rank, method: 'clipboard' })
+        alert('Link copied!')
+      } catch {
+        // Clipboard unavailable; do not report a conversion.
+      }
     }
   }
   return (

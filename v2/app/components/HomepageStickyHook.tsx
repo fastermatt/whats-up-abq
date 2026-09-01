@@ -19,6 +19,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { X, Download, Share } from 'lucide-react'
+import { getAnalyticsContext } from '@/lib/analytics/track'
 
 const STORAGE_KEY = 'abqu-hook-v1'
 
@@ -81,7 +82,11 @@ export function HomepageStickyHook() {
       const res = await fetch('/api/newsletter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({
+          email,
+          analytics: getAnalyticsContext(),
+          source: 'homepage-sticky-hook',
+        }),
       })
       if (res.ok) {
         setEmailStatus('success')

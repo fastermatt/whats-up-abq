@@ -10,7 +10,7 @@ import { InstagramIcon } from '@/app/components/InstagramIcon'
 import { venueInstagram } from '@/data/venue-instagram'
 import { createClient } from '@/lib/supabase/server'
 import {
-  MapPin, Clock, Calendar, Ticket, ArrowLeft, ExternalLink,
+  MapPin, Clock, Calendar, Ticket, ArrowLeft,
   Users, Flag, Share2,
 } from 'lucide-react'
 import ShareButton from './ShareButton'
@@ -23,6 +23,7 @@ import { CheckInButton } from '@/app/components/CheckInButton'
 import { InviteCard } from '@/app/components/InviteCard'
 import { affiliateUrl } from '@/lib/affiliate'
 import { StickyTicketCTA } from './StickyTicketCTA'
+import { TrackedTicketLink } from './TrackedTicketLink'
 
 export const revalidate = 21600 // 6h — event details are fixed after publication; ingest runs weekly
 
@@ -549,22 +550,14 @@ export default async function EventDetailPage({ params }: PageProps) {
           {/* ── Primary CTA — anchor for sticky bar IntersectionObserver ── */}
           <div id="main-cta" className="flex flex-wrap gap-3 mb-8">
             {ticketHref && (
-              <a
+              <TrackedTicketLink
                 href={ticketHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 sm:flex-none group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-terra text-white font-bold text-[15px] hover:bg-terra-hover transition-all duration-200 hover:shadow-lg hover:shadow-terra/25 hover:scale-[1.01] active:scale-[0.99]"
-                style={{ fontFamily: 'var(--font-epilogue)' }}
-                data-umami-event="ticket-click"
-                data-umami-event-event-id={event.id}
-                data-umami-event-source={event.source}
-                data-umami-event-label={ctaLabel}
-              >
-                {ctaLabel}
-                <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </a>
+                eventId={event.id}
+                source={event.source}
+                label={ctaLabel}
+              />
             )}
-            <ShareButton title={event.title} />
+            <ShareButton title={event.title} eventId={event.id} />
           </div>
 
           {/* ── Description ── */}
@@ -829,7 +822,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 
       {/* ── Sticky mobile ticket CTA ── appears when main CTA scrolls off */}
       {ticketHref && (
-        <StickyTicketCTA href={ticketHref} label={ctaLabel} />
+        <StickyTicketCTA href={ticketHref} label={ctaLabel} eventId={event.id} source={event.source} />
       )}
     </main>
   )

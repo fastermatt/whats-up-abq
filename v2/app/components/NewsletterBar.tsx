@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { InstagramIcon } from './InstagramIcon'
+import { getAnalyticsContext } from '@/lib/analytics/track'
 
 export function NewsletterBar() {
   const [email, setValue] = useState('')
@@ -15,7 +16,11 @@ export function NewsletterBar() {
       const res = await fetch('/api/newsletter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({
+          email,
+          analytics: getAnalyticsContext(),
+          source: 'newsletter-footer',
+        }),
       })
       if (res.ok) {
         setStatus('success')

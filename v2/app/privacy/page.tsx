@@ -130,12 +130,13 @@ export default function PrivacyPage() {
                 <span className="w-2 h-2 rounded-full bg-terra flex-shrink-0 mt-[0.45rem]" />
                 <span>
                   <strong className="text-ink">Anonymous analytics.</strong>{' '}
-                  We use Umami, a privacy-first analytics tool, to understand
-                  which events and categories people find useful. Umami does not
-                  track individuals, does not use cookies for analytics, and does
-                  not share data with advertisers. It helps us know whether to
-                  aggregate more music events or more food festivals, nothing
-                  more personal than that.
+                  We use first-party analytics to understand which pages and
+                  event actions are useful. A random browser identifier and a
+                  30-minute visit identifier are stored in your browser; we do
+                  not fingerprint you or store newsletter email addresses in
+                  analytics. Known crawler traffic is reported separately, raw
+                  analytics are deleted after 30 days, and the data is not shared
+                  with advertisers.
                 </span>
               </li>
             </ul>

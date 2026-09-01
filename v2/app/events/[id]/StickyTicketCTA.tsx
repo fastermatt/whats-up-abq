@@ -9,15 +9,18 @@
  */
 import { ExternalLink } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { trackEvent } from '@/lib/analytics/track'
 
 interface Props {
   /** Pre-computed (server-side) affiliate URL or original ticket URL */
   href: string
   /** CTA label: "Get Tickets" | "RSVP Free" | "More Info" */
   label: string
+  eventId: string
+  source: string
 }
 
-export function StickyTicketCTA({ href, label }: Props) {
+export function StickyTicketCTA({ href, label, eventId, source }: Props) {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -48,6 +51,7 @@ export function StickyTicketCTA({ href, label }: Props) {
         target="_blank"
         rel="noopener noreferrer"
         tabIndex={visible ? 0 : -1}
+        onClick={() => trackEvent('ticket_click', { event_id: eventId, source, label })}
         className="flex items-center justify-center gap-2 w-full px-6 py-3.5 rounded-xl bg-terra text-white font-bold text-[15px] shadow-lg shadow-terra/25 hover:bg-terra-hover transition-colors active:scale-[0.98]"
         style={{ fontFamily: 'var(--font-epilogue)' }}
       >

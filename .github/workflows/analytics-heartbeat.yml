@@ -1,0 +1,40 @@
+name: Analytics heartbeat
+
+on:
+  schedule:
+    - cron: '15 15 * * *' # 9:15 AM MDT / 8:15 AM MST
+  workflow_dispatch:
+    inputs:
+      force_empty:
+        description: 'Exercise the zero-row alert path'
+        required: true
+        type: boolean
+        default: false
+      dry_run:
+        description: 'Log the alert without sending email'
+        required: true
+        type: boolean
+        default: true
+
+jobs:
+  heartbeat:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: v2
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Check recent analytics rows
+        run: |
+          ARGS=""
+          if [ "${{ inputs.force_empty }}" = "true" ]; then ARGS="$ARGS --force-empty"; fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          node scripts/check-analytics-heartbeat.mjs $ARGS

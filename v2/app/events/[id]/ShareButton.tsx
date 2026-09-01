@@ -2,8 +2,9 @@
 
 import { Share2, Check } from 'lucide-react'
 import { useState, useCallback } from 'react'
+import { trackEvent } from '@/lib/analytics/track'
 
-export default function ShareButton({ title }: { title: string }) {
+export default function ShareButton({ title, eventId }: { title: string; eventId: string }) {
   const [copied, setCopied] = useState(false)
 
   const handleShare = useCallback(async () => {
@@ -13,6 +14,7 @@ export default function ShareButton({ title }: { title: string }) {
     if (navigator.share) {
       try {
         await navigator.share({ title, url })
+        trackEvent('share_click', { event_id: eventId, method: 'native' })
         return
       } catch {
         // User cancelled or share failed — fall through to clipboard
@@ -22,12 +24,13 @@ export default function ShareButton({ title }: { title: string }) {
     // Fallback: copy to clipboard
     try {
       await navigator.clipboard.writeText(url)
+      trackEvent('share_click', { event_id: eventId, method: 'clipboard' })
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
       // Clipboard API not available
     }
-  }, [title])
+  }, [eventId, title])
 
   return (
     <button

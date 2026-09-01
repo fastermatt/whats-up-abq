@@ -41,7 +41,7 @@ export default async function AdminDashboard() {
     // Category breakdown, read the actual category column, not ai_enrichment
     supabase.from('events').select('category').eq('hidden', false).gte('event_date', today),
     // Analytics events in last 7 days (pulls `data` so we can filter out V1 noise)
-    supabase.from('analytics').select('event_type, data, created_at').gte('created_at', weekAgo + 'T00:00:00').order('created_at', { ascending: false }).limit(500),
+    supabase.from('analytics').select('event_type, data, created_at').eq('is_bot', false).gte('created_at', weekAgo + 'T00:00:00').order('created_at', { ascending: false }).limit(500),
   ])
 
   // Category tally from the actual category column

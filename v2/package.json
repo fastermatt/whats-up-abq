@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test:analytics": "node --experimental-strip-types --test lib/analytics/session.test.ts",
     "ingest": "node scripts/ingest.mjs",
     "ingest:smoke": "node scripts/ingest.mjs --smoke-only",
     "ingest:dry": "node scripts/ingest.mjs --dry-run"
