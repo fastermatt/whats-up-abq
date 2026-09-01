@@ -651,7 +651,15 @@ async function main() {
   const isImageOnlyFailure = (f) => f.checks.every(c =>
     c === 'no-image-url' || (c.startsWith('image-invalid') && c.includes('no-url'))
   )
-  const pass = invariantFails.length === 0 && smokeResults.failures.filter(f => !isImageOnlyFailure(f)).length === 0
+  // Eventbrite has ~100+ genuinely venue-less online/virtual listings — a
+  // documented source-data condition (already excluded from the IG posting
+  // gate), not a pipeline defect. A randomly sampled one shouldn't hard-fail
+  // an otherwise healthy run.
+  const isKnownEventbriteNoVenue = (f) =>
+    f.source === 'eventbrite' && f.checks.every(c => c === 'no-venue')
+  const pass = invariantFails.length === 0 && smokeResults.failures.filter(f =>
+    !isImageOnlyFailure(f) && !isKnownEventbriteNoVenue(f)
+  ).length === 0
   if (pass) {
     console.log(`${C.green}${C.bold}✓ PIPELINE HEALTHY${C.reset}`)
     // Notify IndexNow (Bing/Yandex) of the refreshed URL set so new events get
