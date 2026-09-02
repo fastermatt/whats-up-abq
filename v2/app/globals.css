@@ -249,6 +249,50 @@ body {
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* Floating mobile navigation: Liquid Glass is reserved for navigation, where
+   translucency communicates a persistent layer above the page content. */
+.abq-bottom-nav {
+  inset-inline: 12px;
+  bottom: max(10px, env(safe-area-inset-bottom));
+  height: 68px;
+  border: 1px solid rgba(255, 255, 255, .74);
+  border-radius: 24px;
+  background: rgba(251, 247, 241, .72);
+  -webkit-backdrop-filter: blur(26px) saturate(1.6);
+  backdrop-filter: blur(26px) saturate(1.6);
+  box-shadow: 0 14px 34px rgba(26, 22, 20, .16), inset 0 1px 0 rgba(255, 255, 255, .92);
+  overflow: hidden;
+}
+
+.abq-bottom-nav-item {
+  min-height: 66px;
+  isolation: isolate;
+}
+
+.abq-bottom-nav-item::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 6px 4px;
+  border-radius: 18px;
+  background: rgba(154, 68, 45, .12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55);
+  opacity: 0;
+  transform: scale(.82);
+  transition: opacity .2s ease-out, transform .3s cubic-bezier(.16, 1, .3, 1);
+}
+
+.abq-bottom-nav-item.text-terra::before { opacity: 1; transform: scale(1); }
+.abq-bottom-nav-item:active { transform: scale(.91); }
+
+@media (prefers-reduced-transparency: reduce) {
+  .abq-bottom-nav { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--color-cream); }
+}
+
+@supports not ((-webkit-backdrop-filter: blur(2px)) or (backdrop-filter: blur(2px))) {
+  .abq-bottom-nav { background: rgba(251, 247, 241, .98); }
+}
+
 /* ─── Scrollbar styling (Webkit) ─────────────────────────────────────── */
 ::-webkit-scrollbar         { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track   { background: var(--sand-light); }

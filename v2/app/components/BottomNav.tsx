@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { Compass, CalendarDays, MapPin, Bookmark, User } from 'lucide-react'
 
 const NAV_ITEMS = [
-  { href: '/',              label: 'Discover', Icon: Compass      },
+  { href: '/',              label: 'Home',     Icon: Compass      },
   { href: '/events',        label: 'Events',   Icon: CalendarDays },
   { href: '/things-to-do', label: 'Places',   Icon: MapPin       },
   { href: '/saved',         label: 'Saved',    Icon: Bookmark     },
@@ -18,10 +18,9 @@ export default function BottomNav() {
   return (
     <nav
       aria-label="Main navigation"
-      className="fixed bottom-0 inset-x-0 z-50 bg-white/92 backdrop-blur-xl border-t border-sand-light md:hidden"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      className="abq-bottom-nav fixed z-50 md:hidden"
     >
-      <div className="grid grid-cols-5 h-16 max-w-lg mx-auto">
+      <div className="grid grid-cols-5 h-full max-w-lg mx-auto">
         {NAV_ITEMS.map(({ href, label, Icon }) => {
           const isActive =
             href === '/'
@@ -35,20 +34,14 @@ export default function BottomNav() {
               data-umami-event="bottom-nav"
               data-umami-event-target={href}
               className={`
-                flex flex-col items-center justify-center gap-1 relative
-                transition-colors duration-150
+                abq-bottom-nav-item flex flex-col items-center justify-center gap-1 relative
+                transition-all duration-150
                 ${isActive ? 'text-terra' : 'text-ink-light'}
               `}
             >
-              {/* Active indicator bar */}
-              {isActive && (
-                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-b-sm bg-terra" />
-              )}
-
               <Icon
                 className="w-5 h-5"
                 strokeWidth={isActive ? 2.5 : 1.75}
-                fill={isActive ? 'currentColor' : 'none'}
               />
 
               <span

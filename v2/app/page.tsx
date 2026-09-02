@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { fetchEvents, fetchFeaturedEvents, fetchNeighborhoodCounts, rankByCategoryDemand, NormalizedEvent } from '@/lib/events'
+import { fetchEvents, fetchNeighborhoodCounts, rankByCategoryDemand, NormalizedEvent } from '@/lib/events'
 import { getCategoryFallback, OG_IMAGE } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
 import { eventImageSrc, netlifyImageUrl } from '@/lib/image-url'
@@ -8,29 +8,16 @@ import { MapPin, ArrowRight, ExternalLink, Star } from 'lucide-react'
 import { InstagramIcon } from '@/app/components/InstagramIcon'
 import { AnimateIn } from '@/app/components/AnimateIn'
 import MoodChips from '@/app/components/MoodChips'
-import SurpriseButton from '@/app/components/SurpriseButton'
+import HomepageNightPlanner, { type PlannerEvent } from '@/app/components/HomepageNightPlanner'
 import { fetchNowPlayingMovies, type Movie } from '@/lib/movies'
 import { cachedFetch } from '@/lib/cache/redis'
+import homepageStyles from '@/app/HomepageRedesign.module.css'
 
 import { ScrollHintManager } from '@/app/components/ScrollHintManager'
 import { getFeaturedPlaces, PLACE_CATEGORIES, type Place } from '@/data/places'
 import { getActiveHoliday } from '@/data/holidays'
 import { fetchHolidayEventsCached } from '@/lib/holidays'
 import { HomepageStickyHook } from '@/app/components/HomepageStickyHook'
-
-// Rotates hourly (server-side, ISR updates within 60s of the hour turning)
-const HERO_SAYINGS = [
-  "Burque’s better in person.",
-  "A good night starts local.",
-  "ABQ is happening.",
-  "The 505 has plans.",
-  "Less screen. More scene.",
-  "Find your people, Burque.",
-  "Tonight has options.",
-  "Red, green, or something to do?",
-  "This hour looks good on ABQ.",
-  "Something good is close by.",
-]
 
 // ISR: regenerate every 5 min — keeps tonight/weekend lists fresh while
 // letting Netlify CDN serve cached HTML for most requests (fast TTFB).
@@ -209,11 +196,10 @@ export default async function DiscoverPage() {
 
   // Redis caches each data source globally (Upstash is multi-region) so even
   // Lighthouse/PSI cold-start requests get fast data after the first warm-up.
-  const [tonight, weekend, allUpcoming, featuredRaw, neighborhoodCounts, movies, holidayEvents] = await Promise.all([
+  const [tonight, weekend, allUpcoming, neighborhoodCounts, movies, holidayEvents] = await Promise.all([
     rc('hp:tonight',     () => fetchEvents({ timeFilter: 'tonight', limit: 10 }),     300),
     rc('hp:weekend',     () => fetchEvents({ timeFilter: 'this-weekend', limit: 10 }), 900),
     rc('hp:upcoming',    () => fetchEvents({ timeFilter: 'upcoming', limit: 1 }),      600),
-    rc('hp:featured',    () => fetchFeaturedEvents(6),                                 900),
     rc('hp:hoods',       () => fetchNeighborhoodCounts(),                              3600),
     rc('hp:movies',      () => fetchNowPlayingMovies(10),                              3600),
     activeHoliday
@@ -229,8 +215,6 @@ export default async function DiscoverPage() {
   // /events listing keeps its native sort so user filters work as expected.
   tonight.events = rankByCategoryDemand(tonight.events)
   weekend.events = rankByCategoryDemand(weekend.events)
-  const featured = rankByCategoryDemand(featuredRaw)
-
   const now = new Date()
 
   // Per-neighborhood character descriptions — gives cards personality instead of generic "Events & local spots"
@@ -253,10 +237,32 @@ export default async function DiscoverPage() {
     'east-mountains':              'Mountain escapes & outdoor life',
   }
 
-  const abqHour = parseInt(
-    now.toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: 'America/Denver' })
+  const dateLabel = now.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    timeZone: 'America/Denver',
+  })
+
+  const uniqueTonightEvents = Array.from(
+    new Map(tonight.events.map((event) => [event.title.trim().toLowerCase(), event])).values()
   )
-  const heroSaying = HERO_SAYINGS[abqHour % HERO_SAYINGS.length]
+
+  const plannerEvents: PlannerEvent[] = uniqueTonightEvents.map((event) => {
+    const fallback = getCategoryFallback(event.category ?? undefined, event.title)
+    return {
+      id: event.id,
+      title: event.title,
+      time: event.time,
+      venue: event.venue,
+      category: event.category,
+      price: event.price,
+      imageUrl: event.imageUrl || fallback,
+      fallback,
+    }
+  })
+
+  const homepagePicks = uniqueTonightEvents.slice(0, 3)
 
   // LCP preload — Lighthouse identified the first event card image as the LCP
   // element (NOT the hero h2). The <img> already carries fetchPriority="high"
@@ -265,9 +271,9 @@ export default async function DiscoverPage() {
   // here (Next.js App Router hoists <link> tags to <head>) gives the browser
   // the URL ~30–100ms sooner. The href is computed via eventImageSrc() so it
   // matches the rendered <img src> byte-for-byte and the browser can de-dupe.
-  // Width must match the rendered card: 540 for FeaturedCard, 440 for HorizontalCard.
-  const lcpEvent = featured[0] ?? tonight.events[0] ?? null
-  const lcpWidth = featured.length > 0 ? 540 : 440
+  // Width matches the first real-photo row in the client-side planner.
+  const lcpEvent = homepagePicks[0] ?? null
+  const lcpWidth = 240
   const lcpPreloadHref = lcpEvent?.imageUrl
     ? eventImageSrc(lcpEvent.imageUrl, lcpWidth)
     : null
@@ -299,213 +305,52 @@ export default async function DiscoverPage() {
       {/* SEO h1 — visually hidden, provides primary keyword signal */}
       <h1 className="sr-only">Events in Albuquerque, NM — Things to Do in ABQ</h1>
 
-      {/* ── Hero ── */}
-      <section className="relative overflow-hidden border-b border-terra/15" style={{ background: '#eedcd0' }}>
+      <HomepageNightPlanner dateLabel={dateLabel} events={plannerEvents} />
 
-        {/* Sandstone floor: deepen toward the base */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: 'linear-gradient(to bottom, rgba(251,247,241,.42) 0%, transparent 42%, rgba(154,68,45,.08) 100%)' }}
-        />
-
-        {/* Real ABQ street map — fades at both edges and top/bottom */}
-        <div
-          className="absolute inset-0 pointer-events-none overflow-hidden"
-          style={{
-            maskImage:
-              'linear-gradient(to right, transparent 0%, rgba(0,0,0,.45) 14%, black 32%, black 70%, rgba(0,0,0,.18) 88%, transparent 100%), ' +
-              'linear-gradient(to bottom, transparent 0%, black 8%, black 90%, transparent 100%)',
-            maskComposite: 'intersect',
-            WebkitMaskImage:
-              'linear-gradient(to right, transparent 0%, rgba(0,0,0,.45) 14%, black 32%, black 70%, rgba(0,0,0,.18) 88%, transparent 100%), ' +
-              'linear-gradient(to bottom, transparent 0%, black 8%, black 90%, transparent 100%)',
-            WebkitMaskComposite: 'source-in',
-          }}
-        >
-          {/* Panning container — map drifts slowly east→west */}
-          <div className="absolute animate-map-pan" style={{ top: '-15%', bottom: '-15%', left: '-6%', right: '-6%' }}>
-            {/* Map removed from <img> to eliminate image LCP candidacy.
-                Heading text is now the LCP element (zero resource-load delay).
-                The sandstone background (#eedcd0) + gradient + HeroMapRoute SVG
-                preserve the visual character without an external image fetch. */}
-          </div>
-
+      <nav className={homepageStyles.quickStart} aria-label="Quick event views">
+        <div className={homepageStyles.quickStartInner}>
+          {[
+            { label: `Tonight · ${tonight.total.toLocaleString()} things`, href: '/tonight' },
+            { label: `This weekend · ${weekend.total.toLocaleString()}`, href: '/weekend' },
+            { label: 'Free in ABQ', href: '/free' },
+          ].map(({ label, href }) => (
+            <Link key={label} href={href} className={homepageStyles.quickLink} data-umami-event="homepage-quick-view" data-umami-event-target={href}>
+              <span className={homepageStyles.quickLabel}>{label}</span>
+              <span className={homepageStyles.quickArrow} aria-hidden="true">→</span>
+            </Link>
+          ))}
         </div>
+      </nav>
 
-        {/* Hero content — round-2 critique #4: trimmed from 7 stacked elements
-            to 4 (mobile logo, headline, rotating saying, search). The "The 505."
-            brand mark moved out (DesktopNav has the logo + the footer/about pages
-            cover identity). The tonight CTA was redundant with the stat strip
-            below; folded into it. Bigger search + surprise gets the breathing
-            room previously spent on duplicated affordances. */}
-        <div className="relative z-10 max-w-6xl mx-auto px-4 pt-6 md:pt-9 pb-7 lg:pb-8">
-          <div className="max-w-[680px]">
-              {/* Mobile-only wordmark — desktop has the logo in the sticky DesktopNav */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/logo-terra.svg"
-                alt="ABQ Unplugged"
-                className="md:hidden h-8 w-auto mb-5 animate-fade-in"
-              />
-
-              <p
-                className="hidden sm:inline-flex items-center gap-2 mb-4 rounded-full border border-terra/20 bg-cream/55 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-terra"
-                style={{ fontFamily: 'var(--font-dm-mono)' }}
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-turq" aria-hidden="true" />
-                Albuquerque, all in one place
-              </p>
-
-              {/* Functional headline — clear user intent */}
-              <h2
-                className="font-black leading-[0.9] mb-4 text-balance"
-                style={{
-                  fontFamily: 'var(--font-epilogue)',
-                  fontSize: 'clamp(38px, 6.7vw, 76px)',
-                  color: '#1a1614',
-                  letterSpacing: '0',
-                  maxWidth: '700px',
-                }}
-              >
-                Find something to do in Albuquerque.
-              </h2>
-
-              {/* Rotating personality line — hourly, server-side */}
-              <p
-                className="font-black mb-6 animate-hero-text"
-                style={{
-                  fontFamily: 'var(--font-epilogue)',
-                  fontSize: 'clamp(17px, 2.2vw, 26px)',
-                  color: '#9a442d',
-                  letterSpacing: '0',
-                }}
-              >
-                {heroSaying}
-              </p>
-
-              {/* Search + surprise — bigger, more prominent now that we've
-                  cleared 3 elements above. Min-h-[48px] meets WCAG 2.5.5 AAA. */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 animate-hero-row">
-                <form
-                  action="/events"
-                  method="get"
-                  className="flex flex-1 max-w-[560px] rounded-xl overflow-hidden border border-terra/25 bg-white shadow-[0_12px_28px_rgba(26,22,20,.12)] focus-within:ring-2 focus-within:ring-turq/45"
-                >
-                  <input
-                    name="q"
-                    type="text"
-                    placeholder="Search events, venues, neighborhoods…"
-                    className="flex-1 min-h-[52px] bg-white text-ink text-sm px-4 outline-none placeholder:text-ink-light"
-                    aria-label="Search events"
+      {homepagePicks.length > 0 && (
+        <section className={homepageStyles.picks} aria-labelledby="homepage-picks-title">
+          <div className={homepageStyles.picksHead}>
+            <h2 id="homepage-picks-title">Worth leaving the house for</h2>
+            <Link href="/tonight">See all tonight <ArrowRight aria-hidden="true" /></Link>
+          </div>
+          <div className={homepageStyles.eventList}>
+            {homepagePicks.map((event) => {
+              const fallback = getCategoryFallback(event.category ?? undefined, event.title)
+              return (
+                <Link key={event.id} href={`/events/${event.id}`} className={homepageStyles.eventRow} data-umami-event="homepage-editorial-pick" data-umami-event-id={event.id}>
+                  <span className={homepageStyles.eventTime}>{event.time || 'Time TBA'}</span>
+                  <span className={homepageStyles.eventCategory}>{event.category || 'Local event'}</span>
+                  <span className={homepageStyles.eventName}>{event.title}</span>
+                  <span className={homepageStyles.eventVenue}>{event.venue || 'Albuquerque'}</span>
+                  <EventImage
+                    src={event.imageUrl || fallback}
+                    fallback={fallback}
+                    alt={`Photo for ${event.title}`}
+                    className={homepageStyles.eventImage}
+                    width={300}
                   />
-                  <button
-                    type="submit"
-                    data-umami-event="hero-search-submit"
-                    className="bg-terra text-white font-bold text-sm px-5 min-h-[52px] hover:bg-terra-hover transition-colors flex items-center gap-1.5 whitespace-nowrap focus-visible:outline-turq"
-                  >
-                    <i className="fi fi-rr-search text-[12px]" aria-hidden="true" />
-                    Search
-                  </button>
-                </form>
-                <SurpriseButton />
-              </div>
-            </div>
+                  <span className={homepageStyles.eventArrow}><ArrowRight aria-hidden="true" /></span>
+                </Link>
+              )
+            })}
           </div>
-
-        {/* Stat strip — sentence-style links so the LABEL leads
-            (round-2 critique: tiny labels under big numbers force a
-            beat of parsing; pulling the label first reads instantly). */}
-        <div
-          className="relative z-10"
-          style={{ background: 'rgba(251,247,241,.55)', borderTop: '1px solid rgba(154,68,45,.14)' }}
-        >
-          <div className="max-w-6xl mx-auto grid grid-cols-3">
-            {[
-              { label: 'Tonight',  count: tonight.total,     href: '/tonight',  accent: true  },
-              { label: 'Weekend',  count: weekend.total,     href: '/weekend',  accent: false },
-              { label: 'Upcoming', count: allUpcoming.total, href: '/events',   accent: false },
-            ].map((tab, i) => (
-              <Link
-                key={tab.label}
-                href={tab.href}
-                data-umami-event="hero-stat-tab"
-                data-umami-event-tab={tab.label}
-                // Label-first on every viewport — horizontal on tablet+, stacked
-                // on phones (label above number) so reading order matches
-                // ("Tonight: 147"). Round-3 critique fix.
-                className="py-3.5 sm:py-4 flex flex-col sm:flex-row items-center justify-center gap-0 sm:gap-2 transition-colors hover:bg-terra/[0.06] focus-visible:bg-terra/[0.06] group"
-                style={i < 2 ? { borderRight: '1px solid rgba(154,68,45,.13)' } : {}}
-              >
-                <span
-                  className="text-[11px] sm:text-sm font-black tracking-wide leading-tight"
-                  style={{ fontFamily: 'var(--font-epilogue)', color: tab.accent ? '#9a442d' : '#1a1614' }}
-                >
-                  {tab.label}
-                </span>
-                <span
-                  className="font-black text-lg sm:text-xl leading-none"
-                  style={{ fontFamily: 'var(--font-epilogue)', color: tab.accent ? '#9a442d' : '#1a1614' }}
-                >
-                  {tab.count.toLocaleString()}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Editor's Picks — Featured Events ─────────────────────────────────
-          Moved ABOVE category/mood chips so IG visitors see real events with
-          photos immediately after the stat strip, rather than navigation UI.
-          They came with intent — give them the goods first.               */}
-      {featured.length > 0 && (
-        <AnimateIn animation="fade-up">
-          {/* Warm section bg differentiates this from the standard horizontal rows */}
-          <section className="py-8 md:py-10 bg-gradient-to-b from-[#f5ece3] to-cream border-b border-[#e8d5c0]/70">
-            <div className="max-w-6xl mx-auto px-4 flex items-end justify-between mb-5">
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.16em] text-terra mb-1 font-bold flex items-center gap-1.5">
-                  <span>★</span> Editor&apos;s picks
-                </p>
-                <h2
-                  className="text-2xl md:text-[28px] font-black text-ink leading-none"
-                  style={{ fontFamily: 'var(--font-epilogue)' }}
-                >
-                  Not to miss
-                </h2>
-              </div>
-              <Link
-                href="/events?featured=1"
-                data-umami-event="nav-see-all-featured"
-                className="text-xs font-bold text-terra hover:text-terra-hover flex-shrink-0 flex items-center gap-1 group focus-visible:ring-2 focus-visible:ring-turq/50 rounded-full px-2 py-1"
-              >
-                See all
-                <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
-            </div>
-
-            <div className="overflow-x-auto scrollbar-hide">
-              <div
-                className="flex gap-4 px-4 pb-2 snap-x snap-mandatory scroll-hint-inner"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-              >
-                {featured.map((event, i) => (
-                  <FeaturedCard key={event.id} event={event} index={i} />
-                ))}
-              </div>
-            </div>
-
-            {/* "Weekend picks drop Friday" — sets visit-cadence expectation inline.
-                Small enough to not compete with the event cards above, clear enough
-                to make the promise explicit.                                       */}
-            <p className="text-center text-[11px] text-ink-light mt-5 px-4">
-              Weekend picks refresh every Friday noon ·{' '}
-              <Link href="/events" className="text-terra font-semibold hover:underline">
-                Browse all {allUpcoming.total.toLocaleString()} events
-              </Link>
-            </p>
-          </section>
-        </AnimateIn>
+          <p className={homepageStyles.photoNote}>Photos come from the event organizers when available; category art only fills gaps.</p>
+        </section>
       )}
 
       {/* ── Inline stickiness hook — email + install, shown once ─────────────
@@ -1152,71 +997,6 @@ function HorizontalCard({
       </div>
 
       {/* Info */}
-      <h3
-        className="font-black text-ink text-sm leading-tight line-clamp-2 mb-0.5 group-hover:text-terra transition-colors"
-        style={{ fontFamily: 'var(--font-epilogue)' }}
-      >
-        {event.title}
-      </h3>
-      {event.venue && (
-        <p className="text-[10px] text-ink-light line-clamp-1 flex items-center gap-0.5">
-          <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
-          {event.venue}
-        </p>
-      )}
-    </Link>
-  )
-}
-
-// ─── Featured Card — Wide landscape card, larger than standard HorizontalCard ─
-
-function FeaturedCard({ event, index = 0 }: { event: NormalizedEvent; index?: number }) {
-  const dateStr = event.date
-    ? new Date(event.date + 'T12:00:00').toLocaleDateString('en-US', {
-        weekday: 'short', month: 'short', day: 'numeric',
-      })
-    : null
-
-  return (
-    <Link
-      href={`/events/${event.id}`}
-      className="group flex-shrink-0 w-[270px] snap-start rounded-xl focus-visible:ring-2 focus-visible:ring-turq/50"
-    >
-      {/* Landscape 16:10 — matches every other card on the site */}
-      <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-sand-light mb-2.5 shadow-md ring-1 ring-ink/8 group-hover:shadow-xl group-hover:-translate-y-0.5 group-hover:ring-terra/25 transition-all duration-300">
-        {/* fetchPriority="high" restored on the first FeaturedCard (2026-05-09).
-            Lighthouse caught the LCP element as the first card image, NOT the
-            hero h2. Without the priority hint LCP slipped from ~4s to ~10s.
-            Pairs with the netlify.toml + lib/image-url.ts changes that route
-            TM/SG CDNs through Netlify Image CDN for AVIF instead of the slow
-            /api/image-proxy. */}
-        <EventImage
-          src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}
-          fallback={getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}
-          alt={event.title}
-          loading={index === 0 ? 'eager' : 'lazy'}
-          fetchPriority={index === 0 ? 'high' : undefined}
-          width={540}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-        />
-        {/* ★ Featured badge */}
-        <div className="absolute top-2 left-2 bg-terra text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-sm">
-          ★ Featured
-        </div>
-        {/* Price */}
-        {event.price && (
-          <div className="absolute top-2 right-2 bg-turq text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
-            {event.price}
-          </div>
-        )}
-        {/* Bottom gradient + date */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
-        {dateStr && (
-          <div className="absolute bottom-2 left-2.5 text-white text-[11px] font-semibold drop-shadow">
-            {dateStr}
-          </div>
-        )}
-      </div>
       <h3
         className="font-black text-ink text-sm leading-tight line-clamp-2 mb-0.5 group-hover:text-terra transition-colors"
         style={{ fontFamily: 'var(--font-epilogue)' }}

@@ -8,7 +8,7 @@ import { Compass, Calendar, MapPin, User, Trophy, PlusCircle, Moon, CalendarDays
 // Secondary items hide on md and only show on lg+, so medium desktop widths
 // don't wrap.
 const NAV_ITEMS = [
-  { href: '/',              label: 'Discover',  Icon: Compass,      primary: true  },
+  { href: '/',              label: 'Home',      Icon: Compass,      primary: true  },
   { href: '/events',        label: 'Events',    Icon: Calendar,     primary: true  },
   { href: '/for-you',       label: 'For You',   Icon: Sparkles,     primary: true  },
   { href: '/tonight',       label: 'Tonight',   Icon: Moon,         primary: false },

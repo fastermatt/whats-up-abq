@@ -256,6 +256,19 @@ Full-bleed dark hero with carousel background, SVG city map overlay, and large E
 - **Display type:** Epilogue 900, cream (`#fbf7f1`) solid for the first line. Second line: fully transparent fill with white ghost stroke (`-webkit-text-stroke: 1.5px rgba(255,255,255,0.5)`) — creates an outlined/hollow headline word.
 - **Subcopy:** Inter 400, 16-17px, `rgba(255,255,255,0.72)`.
 
+### Homepage Night Planner (2026 Mobile-First Extension)
+
+The homepage uses the approved “Make tonight yours” field-guide composition. This supersedes the legacy dark-carousel hero on `/` only; other editorial pages may retain their existing hero patterns.
+
+- **Content truth:** Planner choices operate on the current `tonight` feed. Event names, times, venues, prices, links, and photography come from normalized event records. Duplicate titles are removed from the first-screen shortlist. Never replace this with invented restaurant or nightlife stops.
+- **Composition:** Cream-paper planner controls sit beside a dark field-notes sheet on desktop and stack on mobile. The dark sheet is an intentional editorial surface, not a global dark-mode direction.
+- **Photography:** Use organizer/event photography first. The existing category-photo system is the fallback when a source image is missing or rejected.
+- **Mobile controls:** 52px selects and a 60px primary action use 16px radii. The floating mobile header uses a 22px radius; the floating bottom navigation uses 24px. These larger radii are reserved for touch controls and navigation, not ordinary content cards.
+- **Glass boundary:** Translucent materials are allowed only on the sticky mobile header, selector controls, quick-view navigation, image metadata, and bottom navigation. Main content, event cards, and the field-notes sheet remain opaque.
+- **Glass palette:** Warm cream translucency (`rgba(251,247,241,.72–.78)`) with neutral ink shadows and white inset highlights. Do not introduce cool gray or colored glow shadows.
+- **Motion:** Press feedback uses small scale transforms with the site’s expo-style ease. Swipe rails use native horizontal scrolling and scroll snap. Respect reduced motion and reduced transparency.
+- **Navigation language:** The root route is labeled “Home,” not “Discover,” to avoid generic SaaS language.
+
 ## 6. Do's and Don'ts
 
 ### Do:
