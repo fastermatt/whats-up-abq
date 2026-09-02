@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
-import type { Holiday } from '@/data/holidays'
 
 /**
  * Sliver banner shown at the top of every page during a holiday window.
@@ -32,7 +31,8 @@ export function HolidayBanner(props: HolidayBannerProps) {
   useEffect(() => {
     const key = `holiday-dismissed:${props.holidayKey}:${props.date}`
     if (typeof window !== 'undefined' && localStorage.getItem(key)) return
-    setDismissed(false)
+    const frame = window.requestAnimationFrame(() => setDismissed(false))
+    return () => window.cancelAnimationFrame(frame)
   }, [props.holidayKey, props.date])
 
   if (dismissed) return null
@@ -69,29 +69,29 @@ export function HolidayBanner(props: HolidayBannerProps) {
     <div
       role="region"
       aria-label={`${props.name} highlight`}
-      className={`${props.bgImage ? '' : bg} ${text} text-center py-2 px-3 sm:px-4 text-xs sm:text-sm font-semibold tracking-tight relative`}
+      className={`${props.bgImage ? '' : bg} ${text} text-center py-0 sm:py-2 px-3 sm:px-4 text-xs sm:text-sm font-semibold tracking-tight relative`}
       style={bgStyle}
     >
       <a
         href="#holiday-rail"
         data-umami-event="holiday-banner-click"
         data-umami-event-holiday={props.holidayKey}
-        className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 hover:underline pr-7"
+        className="min-h-11 sm:min-h-0 inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 hover:underline pr-7"
       >
         <span aria-hidden="true">{props.emoji}</span>
         <span>{props.tagline}</span>
         <span className="opacity-70 font-normal hidden sm:inline">·</span>
-        <span className="opacity-70 font-normal text-[11px] sm:text-xs">
-          {dayLabel}
-          {props.subtitle ? ` · ${props.subtitle}` : ''}
-        </span>
+        <span className="opacity-80 font-normal text-[11px] sm:text-xs">{dayLabel}</span>
+        {props.subtitle && (
+          <span className="opacity-70 font-normal text-xs hidden sm:inline">· {props.subtitle}</span>
+        )}
       </a>
       <button
         onClick={handleDismiss}
         aria-label={`Dismiss ${props.name} banner`}
         data-umami-event="holiday-banner-dismiss"
         data-umami-event-holiday={props.holidayKey}
-        className="absolute right-1 top-1/2 -translate-y-1/2 p-2 opacity-60 hover:opacity-100 transition-opacity"
+        className="absolute right-0 top-1/2 -translate-y-1/2 min-h-11 min-w-11 grid place-items-center opacity-60 hover:opacity-100 transition-opacity"
       >
         <X className="w-3.5 h-3.5" />
       </button>

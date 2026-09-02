@@ -244,8 +244,17 @@ export default async function DiscoverPage() {
     timeZone: 'America/Denver',
   })
 
+  // The homepage has very little room to earn trust. Collapse exact-title
+  // duplicates, plus sports listings that describe the same matchup in
+  // home/away order (Ticketmaster and SeatGeek commonly reverse the title).
   const uniqueTonightEvents = Array.from(
-    new Map(tonight.events.map((event) => [event.title.trim().toLowerCase(), event])).values()
+    new Map(tonight.events.map((event) => {
+      const titleKey = event.title.trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ')
+      const sportsKey = event.category === 'Sports'
+        ? `sports:${(event.venue || '').trim().toLowerCase()}:${event.time || ''}`
+        : titleKey
+      return [sportsKey, event] as const
+    })).values()
   )
 
   const plannerEvents: PlannerEvent[] = uniqueTonightEvents.map((event) => {
@@ -310,12 +319,15 @@ export default async function DiscoverPage() {
       <nav className={homepageStyles.quickStart} aria-label="Quick event views">
         <div className={homepageStyles.quickStartInner}>
           {[
-            { label: `Tonight · ${tonight.total.toLocaleString()} things`, href: '/tonight' },
-            { label: `This weekend · ${weekend.total.toLocaleString()}`, href: '/weekend' },
-            { label: 'Free in ABQ', href: '/free' },
-          ].map(({ label, href }) => (
-            <Link key={label} href={href} className={homepageStyles.quickLink} data-umami-event="homepage-quick-view" data-umami-event-target={href}>
-              <span className={homepageStyles.quickLabel}>{label}</span>
+            { label: 'Tonight', context: `${tonight.total.toLocaleString()} things`, href: '/tonight' },
+            { label: 'Weekend', context: `${weekend.total.toLocaleString()} things`, href: '/weekend' },
+            { label: 'Free', context: 'in ABQ', href: '/free' },
+          ].map(({ label, context, href }) => (
+            <Link key={label} href={href} className={homepageStyles.quickLink} aria-label={`${label} · ${context}`} data-umami-event="homepage-quick-view" data-umami-event-target={href}>
+              <span className={homepageStyles.quickLabel}>
+                <span>{label}</span>
+                <span className={homepageStyles.quickContext}>{context}</span>
+              </span>
               <span className={homepageStyles.quickArrow} aria-hidden="true">→</span>
             </Link>
           ))}
@@ -356,10 +368,10 @@ export default async function DiscoverPage() {
       {/* ── Inline stickiness hook — email + install, shown once ─────────────
           Renders between featured events and category chips, at the exact
           moment engagement is highest. Client component (localStorage check). */}
-      <HomepageStickyHook />
+      <div className="hidden md:block"><HomepageStickyHook /></div>
 
       {/* ── Category quick links ── */}
-      <section className="py-5 border-b border-sand-light/60 animate-fade-in">
+      <section className="hidden md:block py-5 border-b border-sand-light/60 animate-fade-in">
         <div className="overflow-x-auto scrollbar-hide">
           <div
             className="flex gap-2 px-4 pb-1 scroll-hint-inner"
@@ -459,15 +471,17 @@ export default async function DiscoverPage() {
 
       {/* ── Happening Now ── */}
       {tonight.events.length > 0 && (
-        <AnimateIn animation="fade-up">
-          <EventSection
-            title="Doors are open"
-            subtitle="Opening today"
-            events={tonight.events}
-            seeAllHref="/tonight"
-            sectionLabel="Tonight"
-          />
-        </AnimateIn>
+        <div className="hidden md:block">
+          <AnimateIn animation="fade-up">
+            <EventSection
+              title="Doors are open"
+              subtitle="Opening today"
+              events={tonight.events}
+              seeAllHref="/tonight"
+              sectionLabel="Tonight"
+            />
+          </AnimateIn>
+        </div>
       )}
 
       {/* ── This Weekend ── */}
@@ -507,7 +521,7 @@ export default async function DiscoverPage() {
                 href="/things-to-do"
                 data-umami-event="things-to-do-cta"
                 data-umami-event-position="section-header"
-                className="text-xs font-bold text-terra hover:text-terra-hover flex-shrink-0 flex items-center gap-1 group focus-visible:ring-2 focus-visible:ring-turq/50 rounded-full px-2 py-1"
+                className="min-h-11 text-xs font-bold text-terra hover:text-terra-hover flex-shrink-0 flex items-center gap-1 group focus-visible:ring-2 focus-visible:ring-turq/50 rounded-full px-2 py-1"
               >
                 See all
                 <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
@@ -542,7 +556,7 @@ export default async function DiscoverPage() {
                 <Link
                   href="/neighborhoods"
                   data-umami-event="nav-see-all-neighborhoods"
-                  className="text-xs font-bold text-terra hover:text-terra-hover flex-shrink-0 flex items-center gap-1 group focus-visible:ring-2 focus-visible:ring-turq/50 rounded-full px-2 py-1"
+                  className="min-h-11 text-xs font-bold text-terra hover:text-terra-hover flex-shrink-0 flex items-center gap-1 group focus-visible:ring-2 focus-visible:ring-turq/50 rounded-full px-2 py-1"
                 >
                   See all
                   <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
@@ -550,13 +564,13 @@ export default async function DiscoverPage() {
               </div>
               <div className="max-w-6xl mx-auto px-4">
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
-                  {neighborhoodCounts.slice(0, 12).map(({ neighborhood, count, slug }) => (
+                  {neighborhoodCounts.slice(0, 12).map(({ neighborhood, count, slug }, index) => (
                     <Link
                       key={slug}
                       href={`/neighborhoods/${slug}`}
                       data-umami-event="neighborhood-click"
                       data-umami-event-neighborhood={slug}
-                      className="flex flex-col items-start px-3 py-3 rounded-xl bg-card border border-[#ede4d3] shadow-[0_1px_0_rgba(26,22,20,.04)] hover:border-terra hover:shadow-md hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-turq/40 transition-all group"
+                      className={`${index >= 6 ? 'hidden sm:flex' : 'flex'} flex-col items-start px-3 py-3 rounded-xl bg-card border border-[#ede4d3] shadow-[0_1px_0_rgba(26,22,20,.04)] hover:border-terra hover:shadow-md hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-turq/40 transition-all group`}
                     >
                       <span
                         className="font-black text-[13px] text-ink group-hover:text-terra transition-colors leading-tight mb-0.5"
@@ -599,7 +613,7 @@ export default async function DiscoverPage() {
               <Link
                 href="/movies"
                 data-umami-event="nav-see-all-movies"
-                className="text-xs font-bold text-[#c8aa8c] hover:text-white flex-shrink-0 flex items-center gap-1 group transition-colors focus-visible:ring-2 focus-visible:ring-turq/50 rounded-full px-2 py-1"
+                className="min-h-11 text-xs font-bold text-[#c8aa8c] hover:text-white flex-shrink-0 flex items-center gap-1 group transition-colors focus-visible:ring-2 focus-visible:ring-turq/50 rounded-full px-2 py-1"
               >
                 See all
                 <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
@@ -648,8 +662,8 @@ export default async function DiscoverPage() {
           <div className="max-w-3xl mx-auto px-4">
             <div className="divide-y divide-sand-light">
               {HOMEPAGE_FAQS.map(({ q, a }, i) => (
-                <details key={i} className="group py-3 first:pt-0 last:pb-0">
-                  <summary className="flex items-center justify-between gap-3 cursor-pointer list-none select-none">
+                <details key={i} className={`${i >= 5 ? 'hidden md:block ' : ''}group py-3 first:pt-0 last:pb-0`}>
+                  <summary className="min-h-11 flex items-center justify-between gap-3 cursor-pointer list-none select-none">
                     <h3
                       className="text-sm font-bold text-ink group-open:text-terra transition-colors"
                       style={{ fontFamily: 'var(--font-epilogue)' }}
@@ -709,7 +723,7 @@ export default async function DiscoverPage() {
               <Link
                 href="/login"
                 data-umami-event="join-community-cta"
-                className="inline-flex items-center gap-2 bg-terra text-white font-bold text-sm px-5 py-2.5 rounded-full hover:bg-terra-hover transition-colors"
+                className="min-h-11 inline-flex items-center gap-2 bg-terra text-white font-bold text-sm px-5 py-2.5 rounded-full hover:bg-terra-hover transition-colors"
               >
                 Join the community
                 <ArrowRight className="w-4 h-4" />
@@ -717,7 +731,7 @@ export default async function DiscoverPage() {
               <Link
                 href="/leaderboard"
                 data-umami-event="see-leaderboard-cta"
-                className="inline-flex items-center gap-2 text-ink-mid font-semibold text-sm px-5 py-2.5 rounded-full border border-[#c8aa8c] hover:border-terra hover:text-terra transition-all"
+                className="min-h-11 inline-flex items-center gap-2 text-ink-mid font-semibold text-sm px-5 py-2.5 rounded-full border border-[#c8aa8c] hover:border-terra hover:text-terra transition-all"
               >
                 See leaderboard
               </Link>
@@ -726,7 +740,7 @@ export default async function DiscoverPage() {
             <Link
               href="/events"
               data-umami-event="browse-all-events-cta"
-              className="inline-flex items-center gap-1.5 text-xs text-ink-light hover:text-terra transition-colors group"
+              className="min-h-11 inline-flex items-center gap-1.5 text-xs text-ink-light hover:text-terra transition-colors group"
             >
               Browse all {allUpcoming.total.toLocaleString()} events
               <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
@@ -911,7 +925,7 @@ function EventSection({
           href={seeAllHref}
           data-umami-event="nav-see-all"
           data-umami-event-section={sectionLabel}
-          className="text-xs font-bold text-terra hover:text-terra-hover flex-shrink-0 flex items-center gap-1 group focus-visible:ring-2 focus-visible:ring-turq/50 rounded-full px-2 py-1"
+          className="min-h-11 text-xs font-bold text-terra hover:text-terra-hover flex-shrink-0 flex items-center gap-1 group focus-visible:ring-2 focus-visible:ring-turq/50 rounded-full px-2 py-1"
         >
           See all
           <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />

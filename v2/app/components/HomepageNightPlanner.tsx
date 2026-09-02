@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, ChevronDown, SlidersHorizontal } from 'lucide-react'
 import { EventImage } from '@/app/components/EventImage'
 import styles from '@/app/HomepageRedesign.module.css'
 
@@ -77,17 +77,18 @@ export default function HomepageNightPlanner({ dateLabel, events }: HomepageNigh
   const [budget, setBudget] = useState('under-50')
   const [seed, setSeed] = useState(0)
   const planRef = useRef<HTMLElement>(null)
+  const mobilePlanRef = useRef<HTMLElement>(null)
 
   const plan = useMemo(() => {
     const max = time === 'hour' ? 1 : time === '2-3' ? 2 : 3
     return rankEvents(events, company, budget, seed).slice(0, max)
   }, [events, time, company, budget, seed])
 
-  function buildPlan(event: React.FormEvent<HTMLFormElement>) {
+  function buildPlan(event: React.FormEvent<HTMLFormElement>, target = planRef.current) {
     event.preventDefault()
     setSeed((current) => current + 1)
-    if (window.matchMedia('(max-width: 980px)').matches) {
-      requestAnimationFrame(() => planRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }))
+    if (window.matchMedia('(max-width: 980px)').matches && target) {
+      requestAnimationFrame(() => target.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
     }
   }
 
@@ -99,7 +100,7 @@ export default function HomepageNightPlanner({ dateLabel, events }: HomepageNigh
           <h2 id="homepage-title" className={styles.heroTitle}>Make tonight yours.</h2>
           <p className={styles.lede}>Three quick choices. One Albuquerque night.</p>
 
-          <form className={styles.builder} onSubmit={buildPlan}>
+          <form className={`${styles.builder} ${styles.desktopBuilder}`} onSubmit={(event) => buildPlan(event)}>
             <div className={styles.field}>
               <label htmlFor="night-time">I have</label>
               <select id="night-time" value={time} onChange={(event) => setTime(event.target.value)}>
@@ -183,6 +184,89 @@ export default function HomepageNightPlanner({ dateLabel, events }: HomepageNigh
             Open all of tonight <ArrowRight aria-hidden="true" />
           </Link>
         </article>
+
+        <details className={styles.mobilePlanner}>
+          <summary className={styles.mobilePlannerSummary}>
+            <span className={styles.mobilePlannerSummaryIcon} aria-hidden="true"><SlidersHorizontal /></span>
+            <span>
+              <strong>Plan it for me</strong>
+              <small>Three choices, then a short list</small>
+            </span>
+            <ChevronDown className={styles.mobilePlannerChevron} aria-hidden="true" />
+          </summary>
+
+          <div className={styles.mobilePlannerBody}>
+            <form className={styles.mobileBuilder} onSubmit={(event) => buildPlan(event, mobilePlanRef.current)}>
+              <div className={styles.field}>
+                <label htmlFor="mobile-night-time">I have</label>
+                <select id="mobile-night-time" value={time} onChange={(event) => setTime(event.target.value)}>
+                  <option value="2-3">2–3 hours</option>
+                  <option value="evening">All evening</option>
+                  <option value="hour">Just an hour</option>
+                </select>
+              </div>
+              <div className={styles.field}>
+                <label htmlFor="mobile-night-company">I&apos;m with</label>
+                <select id="mobile-night-company" value={company} onChange={(event) => setCompany(event.target.value)}>
+                  <option value="date">A date</option>
+                  <option value="friends">Friends</option>
+                  <option value="kids">The kids</option>
+                  <option value="solo">Just me</option>
+                </select>
+              </div>
+              <div className={styles.field}>
+                <label htmlFor="mobile-night-budget">Keep it</label>
+                <select id="mobile-night-budget" value={budget} onChange={(event) => setBudget(event.target.value)}>
+                  <option value="under-50">Under $50</option>
+                  <option value="free">Free</option>
+                  <option value="splurge">Worth a splurge</option>
+                </select>
+              </div>
+              <button
+                type="submit"
+                className={styles.mobilePlannerButton}
+                data-umami-event="homepage-plan-build"
+                data-umami-event-time={time}
+                data-umami-event-company={company}
+                data-umami-event-budget={budget}
+              >
+                Refresh my picks
+                <ArrowRight aria-hidden="true" />
+              </button>
+            </form>
+
+            <article ref={mobilePlanRef} className={styles.mobilePlan} aria-live="polite" aria-label="Your suggested events tonight">
+              <p className={styles.mobilePlanLabel}>Your short list · {summaryText(time, company, budget)}</p>
+              {plan.length > 0 ? plan.map((event) => (
+                <Link
+                  key={`mobile-${event.id}-${seed}`}
+                  href={`/events/${event.id}`}
+                  className={styles.mobilePlanEvent}
+                  data-umami-event="homepage-plan-event"
+                  data-umami-event-id={event.id}
+                >
+                  <EventImage
+                    src={event.imageUrl}
+                    fallback={event.fallback}
+                    alt=""
+                    className={styles.mobilePlanImage}
+                    width={176}
+                    loading="lazy"
+                  />
+                  <span>
+                    <small>{event.time || 'Time TBA'} · {event.category || 'Local event'}</small>
+                    <strong>{event.title}</strong>
+                    <em>{event.venue || 'Albuquerque'}</em>
+                  </span>
+                  <ArrowRight aria-hidden="true" />
+                </Link>
+              )) : (
+                <p className={styles.emptyPlan}>Tonight&apos;s listings are still being updated.</p>
+              )}
+              <Link className={styles.mobilePlanAll} href="/tonight">See everything tonight <ArrowRight aria-hidden="true" /></Link>
+            </article>
+          </div>
+        </details>
       </div>
     </section>
   )

@@ -47,7 +47,7 @@ export default function MoodChips() {
         className="flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-hide"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
-        {MOODS.map((mood) => {
+        {MOODS.map((mood, index) => {
           const Icon = ICON_MAP[mood.icon]
           return (
             <Link
@@ -56,7 +56,8 @@ export default function MoodChips() {
               data-umami-event="mood-chip"
               data-umami-event-mood={mood.slug}
               className={[
-                'flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full',
+                index >= 4 ? 'hidden sm:flex' : 'flex',
+                'min-h-11 flex-shrink-0 items-center gap-1.5 px-3.5 py-2 rounded-full',
                 'bg-terra/10 border border-terra/20 text-terra',
                 'text-xs font-semibold whitespace-nowrap',
                 'hover:bg-terra hover:text-white hover:border-terra',

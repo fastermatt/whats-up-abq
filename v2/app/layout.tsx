@@ -212,7 +212,7 @@ export default function RootLayout({
                   href="https://ko-fi.com/stopscrolling"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[10px] text-[#b8a89e] hover:text-terra transition-colors tracking-wide"
+                  className="min-h-11 inline-flex items-center text-[10px] text-[#b8a89e] hover:text-terra transition-colors tracking-wide"
                 >
                   ☕ ko-fi.com/stopscrolling
                 </a>
