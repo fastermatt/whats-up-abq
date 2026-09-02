@@ -269,27 +269,14 @@ export default async function EventDetailPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
 
-      {/* ── Nav — cream bar above image on all sizes ── */}
-      <header className="sticky top-0 z-20 bg-cream/95 backdrop-blur-md border-b border-sand-mid/60">
-        <div className="max-w-3xl mx-auto px-4 py-2.5 flex items-center justify-between">
-          <Link
-            href="/events"
-            className="flex items-center gap-1.5 text-sm font-medium text-ink-mid hover:text-terra transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Events</span>
-          </Link>
-          <Link
-            href="/"
-            className="font-black text-lg tracking-tight text-ink hover:text-terra transition-colors"
-            style={{ fontFamily: 'var(--font-epilogue)' }}
-          >
-            ABQ Unplugged
-          </Link>
-        </div>
-      </header>
-
       <article className="max-w-3xl mx-auto animate-fade-up">
+        <Link
+          href="/events"
+          className="mx-4 mt-3 mb-2 min-h-11 inline-flex items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-ink-mid hover:bg-sand-light hover:text-terra transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>All events</span>
+        </Link>
         {/* ── Poster hero — full-width on mobile, sits below cream nav (no pull-up) ── */}
         <div className="relative h-[420px] sm:h-auto sm:aspect-[2/1]
           sm:mt-4 sm:mx-4 sm:rounded-2xl overflow-hidden">

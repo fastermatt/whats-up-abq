@@ -7,6 +7,7 @@ import { ClientChrome } from './components/ClientChrome'
 import { AdminGate } from './components/AdminGate'
 import { LazyNewsletterBar } from './components/LazyNewsletterBar'
 import { HolidayBanner } from './components/HolidayBanner'
+import { MobileTopBar } from './components/MobileTopBar'
 import { OG_IMAGE } from '@/lib/fallback-images'
 import { getActiveHoliday } from '@/data/holidays'
 import './globals.css'
@@ -171,6 +172,7 @@ export default function RootLayout({
             </AdminGate>
           )}
           <DesktopNav />
+          <AdminGate><MobileTopBar /></AdminGate>
           {/* pb-[100px] clears the 65px BottomNav with ~35px breathing
               room. Mobile audit (2026-05-09) caught the footer "Built with
               love" tagline being cropped by the nav at scroll-bottom on

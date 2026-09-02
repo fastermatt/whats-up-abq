@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ExternalLink, MapPin, ArrowLeft, ArrowRight } from 'lucide-react'
+import { ExternalLink, MapPin, ArrowRight } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
 import { buildBreadcrumbs } from '@/lib/seo'
 import { netlifyImageUrl } from '@/lib/image-url'
+import { PublicPageHero } from '@/app/components/PublicPageHero'
 import {
   PLACES,
   PLACE_CATEGORIES,
@@ -58,37 +59,18 @@ export default async function ThingsToDoPage({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionLd) }} />
 
-      {/* ── Header — flat per round-6 (gradient hero was the round-4
-          anti-pattern that survived; now killed). Mirrors the
-          /neighborhoods page treatment which round-6 scored 8.0. */}
-      <section className="bg-cream border-b border-sand-light">
-        <div className="max-w-6xl mx-auto px-4 pt-5 pb-6">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 text-ink-light hover:text-terra text-xs mb-4 transition-colors"
-          >
-            <ArrowLeft className="w-3 h-3" />
-            Back
-          </Link>
-          <p className="text-[11px] uppercase tracking-[0.2em] text-terra mb-1.5 font-semibold">
-            Albuquerque
-          </p>
-          <h1
-            className="text-2xl sm:text-3xl font-black leading-tight mb-1.5 text-ink"
-            style={{ fontFamily: 'var(--font-epilogue)' }}
-          >
-            Things To Do
-          </h1>
-          <p className="text-xs text-ink-light max-w-lg">
-            Parks, skate parks, pools, golf courses, museums, arts &amp; culture, and historic sites, all public, all Albuquerque. Every link goes straight to the venue.
-          </p>
-          <div className="flex gap-4 mt-4 text-xs">
-            <span className="text-ink-light"><span className="text-ink font-bold">{PLACES.length}</span> places</span>
-            <span className="text-ink-light"><span className="text-ink font-bold">{PLACE_CATEGORIES.filter(c => PLACES.some(p => p.category === c.slug)).length}</span> categories</span>
-            <span className="text-ink-light"><span className="text-ink font-bold">{PLACES.filter(p => p.free).length}</span> free</span>
-          </div>
-        </div>
-      </section>
+      <PublicPageHero
+        eyebrow="Albuquerque"
+        title="Things To Do"
+        lede="Parks, pools, museums, art, history, and the places worth knowing. Every link goes straight to the venue."
+        meta={
+          <>
+            <span><strong className="text-ink">{PLACES.length}</strong> places</span>
+            <span><strong className="text-ink">{PLACE_CATEGORIES.filter(c => PLACES.some(p => p.category === c.slug)).length}</strong> categories</span>
+            <span><strong className="text-ink">{PLACES.filter(p => p.free).length}</strong> free</span>
+          </>
+        }
+      />
 
       {/* ── Sticky category filter ── */}
       <div className="sticky top-0 md:top-14 z-30 bg-cream/95 backdrop-blur-sm border-b border-sand-light">

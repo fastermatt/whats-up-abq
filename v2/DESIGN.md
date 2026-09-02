@@ -269,6 +269,16 @@ The homepage uses the approved “Make tonight yours” field-guide composition.
 - **Motion:** Press feedback uses small scale transforms with the site’s expo-style ease. Swipe rails use native horizontal scrolling and scroll snap. Respect reduced motion and reduced transparency.
 - **Navigation language:** The root route is labeled “Home,” not “Discover,” to avoid generic SaaS language.
 
+### Public Page System (2026)
+
+The homepage treatment extends across public routes through two shared components instead of route-by-route imitation.
+
+- **MobileTopBar:** Every public route receives the same 62px floating warm-glass masthead with the ABQ Unplugged mark and a 44px search target. It is hidden at `md` and above and on `/admin`; the desktop navigation takes over at larger widths. Do not add a second sticky header inside a page.
+- **PublicPageHero:** Listing and editorial routes open with a cream-paper hero using a turquoise uppercase eyebrow, Epilogue 900 display title, accessible ink lede, and optional metadata/action regions. The movies route may use the documented opaque field-notes dark variant. These heroes never use decorative glass.
+- **Responsive behavior:** The desktop hero aligns copy and its action in two columns. Below 720px it becomes one column, keeps the title between 36–50px, and makes the action region full width. Interactive children must remain at least 44px tall.
+- **Content truth:** Page-specific counts, dates, filters, copy, photography, and event records stay authoritative. The shared system changes presentation and hierarchy, not what a route claims or where outbound links go.
+- **Accessibility:** One visible `h1` per route, semantic `header`/`section` landmarks, visible turquoise focus rings, reduced-transparency fallbacks, and labels on icon-only navigation controls are required.
+
 ## 6. Do's and Don'ts
 
 ### Do:

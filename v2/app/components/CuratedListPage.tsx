@@ -12,6 +12,7 @@ import { getCategoryFallback } from '@/lib/fallback-images'
 import { EventImage } from './EventImage'
 import { QuickSaveButton } from './QuickSaveButton'
 import { buildBreadcrumbs } from '@/lib/seo'
+import { PublicPageHero } from './PublicPageHero'
 
 const CATEGORY_ORDER = [
   'Music', 'Arts & Theater', 'Comedy', 'Food & Drink', 'Family',
@@ -155,16 +156,17 @@ export function CuratedListPage({
         </div>
       )}
 
+      {!heroSection && (
+        <PublicPageHero
+          eyebrow="Worth leaving the house for"
+          title={config.heading}
+          lede={config.lede}
+          meta={<span><strong className="text-ink">{events.length}</strong> upcoming {events.length === 1 ? 'event' : 'events'}</span>}
+        />
+      )}
+
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-8">
         {!heroSection && <div className="animate-fade-in">
-          <h1
-            className="text-3xl font-black text-ink tracking-tight"
-            style={{ fontFamily: 'var(--font-epilogue)' }}
-          >
-            {config.heading}
-          </h1>
-          <p className="text-ink-light text-sm mt-1">{config.lede}</p>
-
           {/* SEO body copy keeps the page above the threshold for crawlable text.
               Split on \n\n so authors can break long intros into real paragraphs
               without HTML in the data; each chunk renders as its own <p>. */}

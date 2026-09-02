@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Search } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { EventImage } from '@/app/components/EventImage'
 import styles from '@/app/HomepageRedesign.module.css'
 
@@ -93,16 +93,6 @@ export default function HomepageNightPlanner({ dateLabel, events }: HomepageNigh
 
   return (
     <section className={styles.hero} aria-labelledby="homepage-title">
-      <div className={styles.mobileHeader}>
-        <Link href="/" aria-label="ABQ Unplugged home">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo-terra.svg" alt="ABQ Unplugged" />
-        </Link>
-        <Link href="/events" className={styles.mobileSearch} aria-label="Search Albuquerque events">
-          <Search aria-hidden="true" />
-        </Link>
-      </div>
-
       <div className={styles.heroGrid}>
         <div className={styles.heroCopy}>
           <p className={styles.dateLine}>{dateLabel}</p>

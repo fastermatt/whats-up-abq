@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { fetchNeighborhoodCounts } from '@/lib/events'
-import { MapPin, ArrowLeft } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
 import { buildBreadcrumbs } from '@/lib/seo'
 import type { NeighborhoodCount } from '@/lib/events'
+import { PublicPageHero } from '@/app/components/PublicPageHero'
 
 export const revalidate = 10800 // 3h
 export const metadata: Metadata = {
@@ -66,38 +66,13 @@ export default async function NeighborhoodsPage() {
     <main id="main" className="min-h-dvh bg-cream">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
-      {/* ── Header ── */}
-      <header className="sticky top-0 z-20 bg-cream/90 backdrop-blur-md border-b border-sand-mid/60">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-3">
-          <Link
-            href="/"
-            className="flex items-center gap-1.5 text-sm text-ink-mid hover:text-terra transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="font-medium">Home</span>
-          </Link>
-        </div>
-      </header>
-
+      <PublicPageHero
+        eyebrow="Browse by area"
+        title="Albuquerque Neighborhoods"
+        lede="Find what’s happening near you, from the Westside to the foothills and every pocket in between."
+        meta={<span><strong className="text-ink">{neighborhoods.length}</strong> neighborhoods with upcoming events</span>}
+      />
       <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* ── Hero ── */}
-        <AnimateIn animation="fade-up">
-          <div className="mb-8">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-turq font-semibold mb-1">
-              Browse by area
-            </p>
-            <h1
-              className="text-3xl font-black text-ink leading-tight mb-2"
-              style={{ fontFamily: 'var(--font-epilogue)' }}
-            >
-              Albuquerque Neighborhoods
-            </h1>
-            <p className="text-sm text-ink-light">
-              Find events happening near you across all of Albuquerque.
-            </p>
-          </div>
-        </AnimateIn>
-
         {/* ── Neighborhood Grid ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {neighborhoods.map((n, i) => (

@@ -6,6 +6,7 @@ import { getCategoryFallback } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
 import { QuickSaveButton } from '@/app/components/QuickSaveButton'
 import { buildBreadcrumbs } from '@/lib/seo'
+import { PublicPageHero } from '@/app/components/PublicPageHero'
 
 export const revalidate = 300
 
@@ -105,18 +106,12 @@ export default async function WeekendPage() {
     <main id="main" className="min-h-dvh bg-[--bg] pb-24 md:pb-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <PublicPageHero
+        eyebrow={`${fri} – ${sun}`}
+        title="This Weekend in Albuquerque"
+        lede={events.length === 1 ? 'One plan worth leaving the house for.' : `${events.length} ways to spend the weekend in the 505.`}
+      />
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-8">
-        {/* ── Header ── */}
-        <div className="animate-fade-in">
-          <h1
-            className="text-3xl font-black text-ink tracking-tight"
-            style={{ fontFamily: 'var(--font-epilogue)' }}
-          >
-            This Weekend in Albuquerque
-          </h1>
-          <p className="text-ink-light text-sm mt-1">{fri} – {sun}</p>
-        </div>
-
         {/* ── Empty state ── */}
         {events.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center animate-fade-in">

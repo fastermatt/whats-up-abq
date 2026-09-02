@@ -249,6 +249,67 @@ body {
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* Floating mobile masthead. Paired with the bottom navigation so every public
+   route inherits the homepage's warm, tactile app chrome. */
+.abq-mobile-header {
+  position: sticky;
+  display: flex;
+  z-index: 40;
+  top: max(8px, env(safe-area-inset-top));
+  width: calc(100% - 24px);
+  height: 62px;
+  margin: 9px auto 2px;
+  padding: 8px 9px 8px 14px;
+  border: 1px solid rgba(255, 255, 255, .72);
+  border-radius: 22px;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(251, 247, 241, .74);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  backdrop-filter: blur(24px) saturate(1.5);
+  box-shadow: 0 10px 28px rgba(26, 22, 20, .11), inset 0 1px 0 rgba(255, 255, 255, .86);
+}
+
+.abq-mobile-logo { min-width: 78px; min-height: 44px; display: flex; align-items: center; }
+.abq-mobile-logo img { width: 78px; height: auto; }
+.abq-mobile-search {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--color-terra);
+  background: rgba(255, 255, 255, .48);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9);
+  transition: transform .16s cubic-bezier(.16, 1, .3, 1);
+}
+.abq-mobile-search:active { transform: scale(.92); }
+.abq-mobile-search svg { width: 21px; height: 21px; }
+
+/* Thumb-first baseline: older route-specific controls used 30–42px targets.
+   Their visual sizes may stay compact, but their boxes now meet the 44px mobile
+   interaction floor shared by the homepage planner. */
+@media (max-width: 767px) {
+  button,
+  [role='button'],
+  input:not([type='checkbox']):not([type='radio']),
+  select,
+  textarea {
+    min-height: 44px;
+  }
+
+  button,
+  [role='button'] {
+    min-width: 44px;
+  }
+}
+
+/* This explicit breakpoint wins over the base display declaration regardless
+   of Tailwind layer ordering. */
+@media (min-width: 768px) {
+  .abq-mobile-header { display: none; }
+}
+
 /* Floating mobile navigation: Liquid Glass is reserved for navigation, where
    translucency communicates a persistent layer above the page content. */
 .abq-bottom-nav {
@@ -286,11 +347,11 @@ body {
 .abq-bottom-nav-item:active { transform: scale(.91); }
 
 @media (prefers-reduced-transparency: reduce) {
-  .abq-bottom-nav { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--color-cream); }
+  .abq-mobile-header, .abq-bottom-nav { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--color-cream); }
 }
 
 @supports not ((-webkit-backdrop-filter: blur(2px)) or (backdrop-filter: blur(2px))) {
-  .abq-bottom-nav { background: rgba(251, 247, 241, .98); }
+  .abq-mobile-header, .abq-bottom-nav { background: rgba(251, 247, 241, .98); }
 }
 
 /* ─── Scrollbar styling (Webkit) ─────────────────────────────────────── */

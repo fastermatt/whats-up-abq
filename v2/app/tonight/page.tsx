@@ -6,6 +6,7 @@ import { getCategoryFallback } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
 import { QuickSaveButton } from '@/app/components/QuickSaveButton'
 import { buildBreadcrumbs } from '@/lib/seo'
+import { PublicPageHero } from '@/app/components/PublicPageHero'
 
 export const revalidate = 300
 
@@ -111,25 +112,14 @@ export default async function TonightPage() {
     <main id="main" className="min-h-dvh bg-[--bg] pb-24 md:pb-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <PublicPageHero
+        eyebrow={todayLabel}
+        title="Tonight in Albuquerque"
+        lede={events.length === 1
+          ? 'One thing happening tonight. Pick it.'
+          : `${events.length} things across the 505. Pick something.`}
+      />
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-8">
-        {/* ── Header ── */}
-        <div className="animate-fade-in">
-          <h1
-            className="text-3xl font-black text-ink tracking-tight"
-            style={{ fontFamily: 'var(--font-epilogue)' }}
-          >
-            Tonight in Albuquerque
-          </h1>
-          <p className="text-ink-light text-sm mt-1">{todayLabel}</p>
-          {events.length > 0 && (
-            <p className="text-ink-mid text-base mt-3 leading-relaxed">
-              {events.length === 1
-                ? 'One event happening tonight. Pick it.'
-                : <>Tonight, <strong className="font-bold">{events.length}</strong> events across the 505. Pick something.</>}
-            </p>
-          )}
-        </div>
-
         {/* ── Empty state ── */}
         {events.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center animate-fade-in">

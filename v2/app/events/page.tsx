@@ -16,6 +16,7 @@ import { QuickSaveButton } from '@/app/components/QuickSaveButton'
 import { createClient } from '@/lib/supabase/server'
 import type { UserPreferences } from '@/app/components/PreferencesPicker'
 import { buildBreadcrumbs } from '@/lib/seo'
+import { PublicPageHero } from '@/app/components/PublicPageHero'
 
 // Note: reading cookies for user preferences makes this route dynamic for
 // logged-in users. The revalidate hint is still used as a fallback for
@@ -218,23 +219,18 @@ export default async function EventsPage({ searchParams }: PageProps) {
       {collectionLd && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionLd) }} />
       )}
-      <div className="max-w-6xl mx-auto px-4 py-5 space-y-4">
-        {/* ── Title row + Calendar toggle ── */}
-        <div className="flex items-center justify-between animate-fade-in">
-          <div>
-            <h1
-              className="text-2xl font-black text-ink"
-              style={{ fontFamily: 'var(--font-epilogue)' }}
-            >
-              {category && categoryLabel ? `${categoryLabel} in Albuquerque` : timeLabel}
-            </h1>
-            <p className="text-ink-light text-xs mt-0.5">Albuquerque, NM</p>
-          </div>
-          {/* Calendar toggle button — client component so it can read/set URL param */}
+      <PublicPageHero
+        eyebrow="Albuquerque, all in one place"
+        title={category && categoryLabel ? `${categoryLabel} in Albuquerque` : timeLabel}
+        lede={total === 1 ? 'One thing on the calendar. Make it count.' : `${total.toLocaleString()} things on the calendar. Find yours.`}
+        action={
           <Suspense>
             <CalendarToggle isOpen={showCal} />
           </Suspense>
-        </div>
+        }
+      />
+
+      <div className="max-w-6xl mx-auto px-4 py-5 space-y-4">
 
         {/* ── Calendar (shown when cal=1 or date is set) ── */}
         {showCal && (

@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { fetchNowPlayingMovies, type Movie } from '@/lib/movies'
 import { ExternalLink, Star } from 'lucide-react'
 import { buildBreadcrumbs } from '@/lib/seo'
 import { OG_IMAGE } from '@/lib/fallback-images'
+import { PublicPageHero } from '@/app/components/PublicPageHero'
 
 export const dynamic = 'force-dynamic' // always SSR, env var must be read at runtime
 
@@ -55,33 +55,12 @@ export default async function MoviesPage() {
     <main id="main" className="min-h-dvh bg-cream">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {itemListLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />}
-      {/* ── Page header — solid dark (thematic: movies show in dark
-          theaters, posters look right on a dark canvas). Round-6 flagged
-          the prior gradient-to-cream fade as an awkward theme break;
-          this version is intentional, not accidental. */}
-      <section className="py-10 px-4 bg-ink">
-        <div className="max-w-6xl mx-auto">
-          <Link
-            href="/"
-            className="text-[10px] uppercase tracking-[0.15em] text-[#c8aa8c] mb-3 font-semibold inline-flex items-center gap-1 hover:text-white transition-colors"
-          >
-            ← ABQ Unplugged
-          </Link>
-          <h1
-            className="font-black text-white leading-tight mb-2"
-            style={{
-              fontFamily: 'var(--font-epilogue)',
-              fontSize: 'clamp(28px, 5vw, 52px)',
-              letterSpacing: '-0.5px',
-            }}
-          >
-            Now at the movies
-          </h1>
-          <p className="text-[#c8aa8c] text-sm">
-            Playing in Albuquerque theaters this week · Click any film for showtimes
-          </p>
-        </div>
-      </section>
+      <PublicPageHero
+        tone="dark"
+        eyebrow="On the big screen"
+        title="Now at the movies"
+        lede="Playing in Albuquerque theaters this week. Tap any film for showtimes."
+      />
 
       {/* ── Movie grid ── */}
       <section className="max-w-6xl mx-auto px-4 py-8">
