@@ -93,9 +93,11 @@ export default async function AdminSubmissionsPage({ searchParams }: PageProps) 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const profileMap = new Map((profiles ?? []).map((p: any) => [p.id, p]))
 
-  // Fetch auth emails via admin API
+  // Only call the admin API when some rows are missing a DB-stored email.
+  // New submissions always store it; this avoids a perPage-1000 admin.listUsers on every load.
+  const needsEmails = userIds.length > 0 && (subs ?? []).some((s: SubmissionRow) => s.submitted_by && !s.submitter_email)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: users } = userIds.length ? await (supabase as any).auth.admin.listUsers({ perPage: 1000 }) : { data: { users: [] } }
+  const { data: users } = needsEmails ? await (supabase as any).auth.admin.listUsers({ perPage: 1000 }) : { data: { users: [] } }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const emailMap = new Map((users?.users ?? []).map((u: any) => [u.id, u.email]))
 
@@ -105,7 +107,7 @@ export default async function AdminSubmissionsPage({ searchParams }: PageProps) 
     return {
       ...s,
       submitter_handle: profile?.handle ?? null,
-      submitter_email:  s.submitted_by ? (emailMap.get(s.submitted_by) as string ?? null) : null,
+      submitter_email:  s.submitter_email ?? (s.submitted_by ? (emailMap.get(s.submitted_by) as string ?? null) : null),
     }
   })
 
@@ -128,12 +130,12 @@ export default async function AdminSubmissionsPage({ searchParams }: PageProps) 
         <span className="text-white/40 text-sm">{rows.length} shown</span>
       </div>
 
-      <div className="flex gap-2 border-b border-white/10 pb-0 flex-wrap">
+      <div className="flex gap-1 border-b border-white/10 overflow-x-auto scrollbar-none">
         {TABS.map(tab => (
           <Link
             key={tab.value}
             href={`/admin/submissions?status=${tab.value}`}
-            className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+            className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
               status === tab.value ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'
             }`}
           >

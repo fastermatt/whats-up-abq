@@ -27,7 +27,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   return (
     <div className="min-h-dvh bg-ink text-white">
       <AdminNav />
-      <main id="main" className="max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
+      <main id="main" className="max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-8 overflow-x-hidden">
         {children}
       </main>
     </div>
