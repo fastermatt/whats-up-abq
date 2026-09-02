@@ -122,7 +122,7 @@ export function ItineraryPlanner({
   }
 
   return (
-    <section id="day-planner" aria-labelledby="planner-heading" className="relative overflow-hidden rounded-[1.75rem] border border-sand-mid bg-card shadow-[0_24px_70px_rgba(74,63,58,0.10)]">
+    <section id="day-planner" aria-labelledby="planner-heading" className="relative scroll-mt-24 overflow-hidden rounded-[1.75rem] border border-sand-mid bg-card shadow-[0_24px_70px_rgba(74,63,58,0.10)]">
       <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1.5 bg-[linear-gradient(90deg,#9a442d_0_26%,#c99b3b_26%_48%,#006a62_48%_74%,#4f6249_74%)]" />
 
       <div className="grid lg:grid-cols-[0.8fr_1.2fr]">

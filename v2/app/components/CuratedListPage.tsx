@@ -53,6 +53,9 @@ export interface CuratedListConfig {
   heroImage?: { src: string; alt: string }
   /** Optional venue strip — named venues shown between intro and events */
   venueStrip?: { name: string; href?: string; emoji?: string }[]
+  /** Set false for editorial guides that should not publish or render an event
+   *  marketplace grid. Breadcrumb/FAQ schema and all guide content remain. */
+  showEventGrid?: boolean
 }
 
 export function curatedJsonLd(events: NormalizedEvent[], config: CuratedListConfig) {
@@ -76,7 +79,7 @@ export function curatedJsonLd(events: NormalizedEvent[], config: CuratedListConf
     { name: 'Events', url: 'https://abqunplugged.com/events' },
     { name: config.breadcrumbLabel, url },
   ])
-  const nodes: object[] = [itemList, breadcrumbs]
+  const nodes: object[] = config.showEventGrid === false ? [breadcrumbs] : [itemList, breadcrumbs]
 
   if (config.faqs && config.faqs.length > 0) {
     nodes.push({
@@ -97,9 +100,13 @@ export function CuratedListPage({
   events,
   config,
   extraSection,
+  heroSection,
 }: {
   events: NormalizedEvent[]
   config: CuratedListConfig
+  /** Optional page-specific hero. When provided it replaces the generic image,
+   *  heading, intro copy, and venue strip while preserving the list/FAQ shell. */
+  heroSection?: ReactNode
   /** Optional custom content rendered between the intro/venue strip and the
    *  event grid — e.g. a day-by-day schedule table on /balloon-fiesta. */
   extraSection?: ReactNode
@@ -131,8 +138,10 @@ export function CuratedListPage({
         />
       ))}
 
+      {heroSection}
+
       {/* ── Optional full-bleed hero image ── */}
-      {config.heroImage && (
+      {!heroSection && config.heroImage && (
         <div className="relative w-full h-44 sm:h-60 md:h-72 overflow-hidden">
           <Image
             src={config.heroImage.src}
@@ -147,7 +156,7 @@ export function CuratedListPage({
       )}
 
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-8">
-        <div className="animate-fade-in">
+        {!heroSection && <div className="animate-fade-in">
           <h1
             className="text-3xl font-black text-ink tracking-tight"
             style={{ fontFamily: 'var(--font-epilogue)' }}
@@ -204,11 +213,11 @@ export function CuratedListPage({
               })}
             </div>
           )}
-        </div>
+        </div>}
 
         {extraSection}
 
-        {events.length === 0 ? (
+        {config.showEventGrid === false ? null : events.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center animate-fade-in">
             <div className="text-5xl mb-4">🌵</div>
             <h2

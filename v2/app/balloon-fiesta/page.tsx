@@ -5,13 +5,13 @@
 import type { Metadata } from 'next'
 import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
-import { ScheduleTable } from './ScheduleTable'
 import { ItineraryPlanner, type PlannerEvent } from './ItineraryPlanner'
 import { FiestaAtAGlance } from './FiestaAtAGlance'
+import { BalloonFiestaHero } from './BalloonFiestaHero'
 
 export const revalidate = 10800 // 3h
-const SEO_TITLE = 'Balloon Fiesta 2026 Itinerary: What to Do Before & After | ABQ Unplugged'
-const SEO_DESC = 'Build your Albuquerque Balloon Fiesta day: five local itineraries for food, kids, shopping, the tram, evening glows, and weather cancellations.'
+const SEO_TITLE = 'What to Do Before & After Balloon Fiesta | Albuquerque Day Planner'
+const SEO_DESC = 'An independent local companion for planning the hours around Balloon Fiesta. Use the official Fiesta site for tickets and live schedules; use our five Albuquerque itineraries for everything before and after.'
 const FIESTA_IMAGE = 'https://bsmvfutebmbkjvlrhiyq.supabase.co/storage/v1/object/public/event-photos/balloon-fiesta-2026-nasa-1788286880.webp'
 
 export const metadata: Metadata = {
@@ -78,13 +78,11 @@ export default async function Page({ searchParams }: PageProps) {
   // search matches venue_name too, which would pull in any unrelated event
   // just held at "Balloon Fiesta Park" (e.g. an April food truck festival) —
   // require the event's own title to actually name Balloon Fiesta.
-  const [{ events: searchResults }, ...localResults] = await Promise.all([
-    fetchEvents({ search: 'balloon fiesta', limit: 200 }),
+  const localResults = await Promise.all([
     fetchEvents({ category: 'Food & Drink', limit: 200 }),
     fetchEvents({ category: 'Family', limit: 200 }),
     fetchEvents({ category: 'Arts & Theater', limit: 200 }),
   ])
-  const events = searchResults.filter((e) => e.title.toLowerCase().includes('balloon fiesta'))
   const localEvents: PlannerEvent[] = localResults
     .flatMap((result) => result.events)
     .filter((event) => event.date >= '2026-10-03' && event.date <= '2026-10-11')
@@ -141,16 +139,43 @@ export default async function Page({ searchParams }: PageProps) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(festivalJsonLd) }} />
       <CuratedListPage
-        events={events}
+        events={[]}
+        heroSection={<BalloonFiestaHero image={FIESTA_IMAGE} />}
         extraSection={(
-          <div className="space-y-8">
+          <div className="space-y-8 pt-2">
+            <div className="grid gap-3 rounded-[1.5rem] border border-sand-mid bg-card p-4 shadow-[0_14px_40px_rgba(74,63,58,0.07)] sm:grid-cols-3 sm:p-5">
+              <div className="border-b border-sand-light pb-3 sm:border-b-0 sm:border-r sm:pb-0 sm:pr-4">
+                <p className="text-[9px] font-black uppercase tracking-[0.18em] text-terra">The dates</p>
+                <p className="mt-1 text-sm font-black text-ink">October 3–11, 2026</p>
+              </div>
+              <div className="border-b border-sand-light pb-3 sm:border-b-0 sm:border-r sm:pb-0 sm:px-4">
+                <p className="text-[9px] font-black uppercase tracking-[0.18em] text-terra">The price</p>
+                <p className="mt-1 text-sm font-black text-ink">$20 per person, per session</p>
+              </div>
+              <div className="sm:pl-4">
+                <p className="text-[9px] font-black uppercase tracking-[0.18em] text-terra">The rule</p>
+                <p className="mt-1 text-sm font-black text-ink">Arrive early. Then add more buffer.</p>
+              </div>
+            </div>
+            <div className="grid gap-4 px-1 py-2 sm:grid-cols-[0.72fr_1.28fr] sm:items-start sm:gap-10 sm:px-4 sm:py-4">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-terra">Two guides, one great day</p>
+                <h2 className="mt-2 text-2xl font-black leading-tight tracking-tight text-ink sm:text-3xl" style={{ fontFamily: 'var(--font-epilogue)' }}>
+                  Fiesta has the field.<br />We have the city.
+                </h2>
+              </div>
+              <div className="space-y-3 text-sm leading-relaxed text-ink-mid sm:text-[15px]">
+                <p>Use Balloon Fiesta&apos;s official schedule and app for live program names, tickets, and weather calls. Use this page for the next question: what should we do with the rest of our day in Albuquerque?</p>
+                <p>Choose one of five ready-made routes for food, families, local shopping, the Sandia Peak Tramway, an evening glow, or a weather cancellation. Every stop includes practical distance context from Balloon Fiesta Park.</p>
+              </div>
+            </div>
             <ItineraryPlanner source={source} localEvents={localEvents} initialPlan={initialPlan} initialDate={initialDate} />
             <FiestaAtAGlance source={source} />
-            <ScheduleTable events={events} />
           </div>
         )}
         config={{
           slug: 'balloon-fiesta',
+          showEventGrid: false,
           heading: 'Albuquerque Balloon Fiesta 2026',
           lede: `October 3–11, 2026 · Start with the balloons. Use our local planner for everything after.`,
           intro: 'Balloon Fiesta owns the sky. ABQ Unplugged helps you plan the city around it. Pick one of five ready-made days for food, families, local shopping, the Sandia Peak Tramway, an evening glow, or a weather cancellation—then see exactly how far each stop sits from Balloon Fiesta Park.',
