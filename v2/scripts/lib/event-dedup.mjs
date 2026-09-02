@@ -93,6 +93,14 @@ export function samePlace(a, b) {
   const aStreet = streetAddress(a)
   const bStreet = streetAddress(b)
   if (aStreet && bStreet && aStreet === bStreet) return true
+  if (aStreet && bStreet) {
+    const direction = value => value.match(/(nw|ne|sw|se)$/)?.[1] ?? ''
+    const withoutDirection = value => value.replace(/(nw|ne|sw|se)$/, '')
+    const aDirection = direction(aStreet)
+    const bDirection = direction(bStreet)
+    if (withoutDirection(aStreet) === withoutDirection(bStreet)
+        && (!aDirection || !bDirection)) return true
+  }
   const aVenue = canonicalVenue(a?.venue_name ?? a?.raw?.venue_name ?? a?.raw?.venue)
   const bVenue = canonicalVenue(b?.venue_name ?? b?.raw?.venue_name ?? b?.raw?.venue)
   return Boolean(aVenue && bVenue && (

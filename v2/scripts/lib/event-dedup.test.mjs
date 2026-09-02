@@ -26,6 +26,17 @@ test('venue aliases and street addresses identify the same place', () => {
   assert.equal(samePlace(row({ id: 'a', title: 'Sex Trivia', venue: 'Marble Brewery Downtown', address: '111 Marble Ave NW' }), row({ id: 'b', title: 'Sex Trivia', venue: 'Marble Brewery NE Heights', address: '9904 Montgomery Blvd NE' })), false)
 })
 
+test('one omitted street quadrant matches, but conflicting quadrants do not', () => {
+  assert.equal(samePlace(
+    row({ id: 'a', title: 'Faetooth', venue: '', address: '407 Central Ave. NW' }),
+    row({ id: 'b', title: 'Faetooth', venue: '', address: '407 Central Avenue' })
+  ), true)
+  assert.equal(samePlace(
+    row({ id: 'a', title: 'Show', venue: '', address: '407 Central Avenue NW' }),
+    row({ id: 'b', title: 'Show', venue: '', address: '407 Central Avenue NE' })
+  ), false)
+})
+
 test('same place and title still requires the same explicit showing time', () => {
   const evening = row({ id: 'a', title: 'Company', time: '19:30' })
   const matinee = row({ id: 'b', title: 'Company', time: '14:00' })
