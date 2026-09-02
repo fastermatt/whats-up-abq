@@ -278,7 +278,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
             the "you can contribute" energy without the banner-ad feel. */}
         <div className="mt-2 rounded-2xl border border-dashed border-terra/35 bg-cream-raised p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.15em] text-terra font-semibold mb-0.5">
+            <p className="text-xs uppercase tracking-[0.15em] text-terra font-semibold mb-0.5">
               Know something we don&apos;t?
             </p>
             <p className="text-base font-black text-ink" style={{ fontFamily: 'var(--font-epilogue)' }}>
@@ -290,7 +290,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
           </div>
           <Link
             href="/submit"
-            className="flex-shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-terra text-white text-sm font-bold hover:bg-terra-hover transition-colors"
+            className="flex-shrink-0 inline-flex min-h-11 items-center gap-2 px-5 py-2.5 rounded-xl bg-terra text-white text-sm font-bold hover:bg-terra-hover transition-colors"
           >
             Add your event →
           </Link>
@@ -341,7 +341,7 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
 
           {/* Category badge — top right */}
           {event.category && (
-            <div className="absolute top-1.5 right-1.5 bg-ink/55 backdrop-blur-sm text-white text-[10px] px-1.5 py-0.5 rounded-full">
+            <div className="absolute top-1.5 right-1.5 bg-ink/55 backdrop-blur-sm text-white text-xs px-1.5 py-0.5 rounded-full">
               {event.subcategory ? `${event.category} · ${event.subcategory}` : event.category}
             </div>
           )}
@@ -353,7 +353,7 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
               <div className="absolute inset-0 bg-terra/20 mix-blend-multiply pointer-events-none" />
               {/* Bottom gradient for badge legibility */}
               <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[#6b2e1a]/70 to-transparent pointer-events-none" />
-              <div className="absolute bottom-1.5 left-1.5 flex items-center gap-0.5 text-white text-[10px] font-semibold">
+              <div className="absolute bottom-1.5 left-1.5 flex items-center gap-0.5 text-white text-xs font-semibold">
                 🎸 <span>Local Live</span>
               </div>
             </>
@@ -361,14 +361,14 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
 
           {/* Community badge — bottom left */}
           {event.source === 'community' && (
-            <div className="absolute bottom-1.5 left-1.5 bg-turq/90 backdrop-blur-sm text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+            <div className="absolute bottom-1.5 left-1.5 bg-turq/90 backdrop-blur-sm text-white text-xs font-semibold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
               👥 Community
             </div>
           )}
 
           {/* Price badge — bottom right */}
           {event.price && (
-            <div className="absolute bottom-1.5 right-1.5 bg-turq/90 backdrop-blur-sm text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
+            <div className="absolute bottom-1.5 right-1.5 bg-turq/90 backdrop-blur-sm text-white text-xs font-semibold px-1.5 py-0.5 rounded-full">
               {event.price}
             </div>
           )}
@@ -389,10 +389,10 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
             {event.title}
           </h3>
 
-          {(dateStr || timeStr) && (
-            <p className="text-[10px] text-terra font-medium flex items-center gap-1">
+          {dateStr && (
+            <p className="text-[11px] text-terra font-medium flex items-center gap-1">
               <Clock className="w-2.5 h-2.5 flex-shrink-0" />
-              <span>{timeStr ? `${dateStr} · ${timeStr}` : dateStr}</span>
+              <span>{`${dateStr} · ${timeStr || 'Time not listed'}`}</span>
             </p>
           )}
         </div>
@@ -400,15 +400,20 @@ function EventCard({ event, index }: { event: NormalizedEvent; index: number }) 
 
       {/* Venue link — OUTSIDE the main <Link> to avoid nested-anchor.
           Independently clickable so users can browse all events at the venue. */}
-      {event.venue && (
+      {event.venue ? (
         <Link
           href={`/venues/${venueToSlug(event.venue)}`}
-          className="block px-2 pb-2 text-[10px] text-ink-light hover:text-terra hover:underline line-clamp-1 flex items-center gap-1 transition-colors"
+          className="block px-2 pb-2 text-[11px] text-ink-light hover:text-terra hover:underline line-clamp-1 flex items-center gap-1 transition-colors"
           aria-label={`See all events at ${event.venue}`}
         >
           <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
           {event.venue}
         </Link>
+      ) : (
+        <p className="px-2 pb-2 text-[11px] text-ink-light line-clamp-1 flex items-center gap-1">
+          <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
+          {event.address?.split(',')[0] || 'Location not listed'}
+        </p>
       )}
 
       {/* Heart save button — lives OUTSIDE the Link to avoid nested anchor */}

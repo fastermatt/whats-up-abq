@@ -13,7 +13,8 @@ export function SearchBar() {
 
   // Sync external changes (e.g. back/forward navigation)
   useEffect(() => {
-    setValue(searchParams.get('q') ?? '')
+    const frame = requestAnimationFrame(() => setValue(searchParams.get('q') ?? ''))
+    return () => cancelAnimationFrame(frame)
   }, [searchParams])
 
   const updateQuery = useCallback(
@@ -51,7 +52,7 @@ export function SearchBar() {
         value={value}
         onChange={handleChange}
         placeholder="Search events, venues, artists..."
-        className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-white border border-sand-border text-sm text-ink placeholder:text-ink-light focus-visible:outline-none focus:border-terra focus-visible:ring-1 focus-visible:ring-terra/30 transition-colors"
+        className="w-full min-h-11 pl-10 pr-9 py-2.5 rounded-xl bg-white border border-sand-border text-sm text-ink placeholder:text-ink-light focus-visible:outline-none focus:border-terra focus-visible:ring-1 focus-visible:ring-terra/30 transition-colors"
         style={{ fontFamily: 'var(--font-inter)' }}
       />
       {value && (

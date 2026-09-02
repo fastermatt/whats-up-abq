@@ -1363,6 +1363,12 @@ function normalizeLocal(row: RawEventRow): NormalizedEvent {
   const embedded = r._embedded as Record<string, unknown> | undefined
   const tmVenues = embedded?.venues as Array<Record<string, unknown>> | undefined
   const tmVenue = tmVenues?.[0]
+  const rawVenue = decodeHtml(
+    typeof r.venue === 'string' ? r.venue
+    : (r.venue_name as string | undefined)
+    ?? (tmVenue?.name as string | undefined)
+    ?? null
+  ) || null
   return {
     id: row.id,
     title: decodeHtml((r.title as string) ?? (r.name as string)) || 'Local Event',
@@ -1375,12 +1381,7 @@ function normalizeLocal(row: RawEventRow): NormalizedEvent {
           if (rawTime) return rawTime
           return row.event_date ? (formatTime(row.event_date) || null) : null
         })(),
-    venue: decodeHtml(
-      typeof r.venue === 'string' ? r.venue
-      : (r.venue_name as string | undefined)
-      ?? (tmVenue?.name as string | undefined)
-      ?? null
-    ) || null,
+    venue: isGenericVenueName(rawVenue) ? null : rawVenue,
     // Address fallback chain: explicit `address` string → TM-format _embedded.venues[0].address.line1
     address: decodeHtml((r.address as string | undefined) ?? null)
       || (tmVenue ? buildTMAddress(tmVenue) : null)
@@ -1431,14 +1432,20 @@ function normalizeLocalVenue(row: RawEventRow): NormalizedEvent {
     date: row.event_date ?? localStartDate ?? '',
     time: (localStartDate && localStartTime)
       ? formatTime(`${localStartDate}T${localStartTime}`)
-      : row.event_date ? (formatTime(row.event_date) || null) : null,
+      : (r.start_time as string | undefined)
+        ? formatTime(`${localStartDate ?? row.event_date}T${r.start_time as string}`)
+        : row.event_date ? (formatTime(row.event_date) || null) : null,
     venue: decodeHtml((r.venue_name as string) ?? (r.venue as string) ?? null) || null,
     address: decodeHtml((r.address as string | undefined) ?? null) || null,
     city: (r.city as string | undefined) ?? 'Albuquerque',
     ...mapCategory((r.category as string | undefined), title),
     description: (r.notes as string | undefined) ?? null,
     price: null,  // local venue events scraped from website — no ticket price
-    imageUrl: null,  // no image for direct venue scrapes; EventCard uses venue fallback
+    // Venue pages often expose only a logo or generic room photo. The importer
+    // marks an image event-specific only when URL tokens match the event title.
+    imageUrl: r.image_kind === 'event-specific'
+      ? row.cached_photo_url ?? (r.image as string | undefined) ?? null
+      : null,
     ticketUrl: (r.source_url as string | undefined) ?? null,
     source: row.source,
     isFeatured: false,
@@ -1471,6 +1478,15 @@ function normalizeGeneric(row: RawEventRow): NormalizedEvent {
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function isGenericVenueName(value: string | null): boolean {
+  if (!value) return true
+  const normalized = value.toLowerCase().replace(/[^a-z0-9]/g, '')
+  return normalized === 'albuquerque'
+    || normalized === 'albuquerquenm'
+    || normalized === 'online'
+    || normalized === 'virtualevent'
+}
 
 /** Parse the minimum dollar amount from a price string. Returns 0 for Free, null if unknown. */
 function parsePriceMin(price: string | null): number | null {

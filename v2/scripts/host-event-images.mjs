@@ -210,6 +210,15 @@ function extractSourceImageUrl(row) {
   // Eventbrite: raw.logo.url
   if (r.logo?.url && typeof r.logo.url === 'string' && r.logo.url.startsWith('http')) return r.logo.url
 
+  // Local venue pages often expose a generic venue logo/hero. Only host it when
+  // the importer proved the URL matched the event title.
+  if (row.source === 'local-venue') {
+    if (r.image_kind === 'event-specific' && typeof r.image === 'string' && r.image.startsWith('http')) {
+      return r.image
+    }
+    return null
+  }
+
   // Local/volunteer/NHCC/lovenm: raw.image (string)
   if (typeof r.image === 'string' && r.image.startsWith('http')) return r.image
 

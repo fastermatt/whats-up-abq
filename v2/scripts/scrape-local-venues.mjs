@@ -27,6 +27,7 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { extractBestImage, extractAllCandidates } from './lib/image-extractor.mjs'
+import { collapseExtractedVenueEvents } from './lib/event-dedup.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -372,12 +373,13 @@ function slugifyForMatch(s) {
  * Pick the best image for an event from a list of candidate URLs scraped
  * from the venue page. Prefers URLs whose path contains tokens from the
  * event title (e.g. "Iron-Chiwawa-5-30.png" matches title "Iron Chiwawa").
- * Falls back to the venue page's primary image (og:image).
+ * Returns null when the URL cannot be tied to the event title. A generic venue
+ * image is worse than the site's honest category fallback.
  */
-function pickEventImage(eventTitle, candidates, venueFallback) {
-  if (!candidates || candidates.length === 0) return venueFallback ?? null
+function pickEventImage(eventTitle, candidates) {
+  if (!candidates || candidates.length === 0) return null
   const tokens = slugifyForMatch(eventTitle)
-  if (tokens.length === 0) return venueFallback ?? candidates[0] ?? null
+  if (tokens.length === 0) return null
 
   let bestUrl = null
   let bestScore = 0
@@ -394,7 +396,7 @@ function pickEventImage(eventTitle, candidates, venueFallback) {
   }
   // Require at least one decent token hit (≥4 chars) to count as a real match
   if (bestScore >= 4) return bestUrl
-  return venueFallback ?? candidates[0] ?? null
+  return null
 }
 
 /** Classify event into site categories based on title keywords.
@@ -504,7 +506,12 @@ async function main() {
       continue
     }
 
-    console.log(`   📅 ${events.length} event(s) found`)
+    const collapsed = collapseExtractedVenueEvents(events)
+    events = collapsed.events
+    console.log(`   📅 ${events.length} event(s) found${collapsed.dropped.length ? ` (${collapsed.dropped.length} duplicate extraction${collapsed.dropped.length === 1 ? '' : 's'} collapsed)` : ''}`)
+    if (verbose) {
+      for (const duplicate of collapsed.dropped) console.log(`   ↳ duplicate extraction: ${duplicate.date} ${duplicate.title}`)
+    }
     venuesOk++
 
     // 4. Upsert each event
@@ -538,15 +545,16 @@ async function main() {
         ? `${ev.date}T${ev.time}:00-07:00`
         : ev.date
 
-      // Pick best image: prefer one whose URL contains tokens from the event title,
-      // fall back to the venue page's og:image. Better than null in every case.
+      // Pick an image only when its URL contains tokens from the event title.
+      // Generic venue art is intentionally left null so the UI uses a small,
+      // clearly representative category fallback instead of a misleading photo.
       // Preserve admin-rejected images — never overwrite them.
       const prior = existingById.get(buildId(slug, ev.date, ev.title))
       const adminRejected = prior?.image_status === 'rejected'
-      const candidateImage = pickEventImage(ev.title, imageCandidates, venueFallbackImage)
+      const candidateImage = pickEventImage(ev.title, imageCandidates)
       const eventImage = adminRejected
         ? (prior?.cached_photo_url ?? null)
-        : candidateImage
+        : candidateImage ?? (prior?.image_status === 'verified' ? prior.cached_photo_url : null)
 
       const raw = {
         title: ev.title,
@@ -561,6 +569,7 @@ async function main() {
         // Store scraped time separately for display
         start_time: ev.time ?? null,
         image: eventImage ?? null,
+        image_kind: eventImage ? 'event-specific' : 'category-fallback',
         images: eventImage ? [{ url: eventImage }] : [],
         // TM-compat format for normalizeLocal
         dates: {

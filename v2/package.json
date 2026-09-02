@@ -9,6 +9,7 @@
     "lint": "eslint",
     "test:analytics": "node --experimental-strip-types --test lib/analytics/session.test.ts",
     "test:images": "node --test scripts/lib/event-image-pipeline.test.mjs",
+    "test:dedup": "node --test scripts/lib/event-dedup.test.mjs",
     "ingest": "node scripts/ingest.mjs",
     "ingest:smoke": "node scripts/ingest.mjs --smoke-only",
     "ingest:dry": "node scripts/ingest.mjs --dry-run",

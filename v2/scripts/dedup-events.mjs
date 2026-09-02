@@ -5,22 +5,20 @@
  * from the same source) and hides the losers while preserving all ticket links
  * on the winner.
  *
- * Two distinct dup classes found in the DB:
+ * Three distinct dup classes found in the DB:
  *   1. SAME-SOURCE (majority): SeatGeek ingests both "seatgeek_12345" and
  *      "seatgeek_sg-12345" for the same numeric ID — pure ingest bug.
  *   2. CROSS-SOURCE (31 groups): same show on Ticketmaster + SeatGeek.
  *
- * Dedup key: normalize(title, 35 chars) + event_date + venue
- *   - strip non-alphanumeric, lowercase, take first 35 chars
- *   - "Buckethead" → "buckethead", "A at B"/"B vs A" both share 35-char prefix
- *   - Venue is required in pass 1 so unrelated same-name events at different
- *     businesses are never merged. Pass 2 handles conservative cross-source
- *     title variants at the same venue/date.
+ * Passes:
+ *   1. Exact normalized title + date + time + venue.
+ *   2. Guarded Ticketmaster/SeatGeek same-venue/date/time matches.
+ *   3. Conservative semantic matches across every source, with explicit
+ *      date/place/time boundaries and safe handling for one untimed listing.
  *
  * Source priority (winner selection): ticketmaster > seatgeek > eventbrite >
- *   local > nhcc — ticketmaster rows tend to have the best photo
- *   and venue_name data. Within the same source, prefer the non-"sg-" ID
- *   (the plain numeric one has a venue_name populated).
+ *   local-venue > local > nhcc — ticket sources tend to have the best artwork,
+ *   while direct venue listings are generally more complete than aggregators.
  *
  * Safety:
  *   - NEVER deletes. Sets hidden=true + ai_enrichment.dedup_reason on losers.
@@ -40,6 +38,7 @@ import { createClient } from '@supabase/supabase-js'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { findSemanticDuplicateGroups } from './lib/event-dedup.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -76,7 +75,10 @@ const today = new Date().toISOString().slice(0, 10)
 // Source priority — higher index = higher priority (winner)
 // Ticketmaster is preferred over SeatGeek for the primary record because it
 // generally has the strongest organizer imagery; alternate URLs are merged.
-const SOURCE_PRIORITY = ['nhcc', 'local', 'eventbrite', 'seatgeek', 'ticketmaster']
+const SOURCE_PRIORITY = [
+  'nhcc', 'volunteer', 'community', 'local', 'abqtodo', 'local-venue',
+  'eventbrite', 'seatgeek', 'ticketmaster',
+]
 function sourcePriority(source) {
   const idx = SOURCE_PRIORITY.indexOf(source)
   return idx === -1 ? 0 : idx
@@ -129,6 +131,7 @@ function getLocalTime5(row) {
   const value = raw?.dates?.start?.localTime
     ?? raw?.start?.local
     ?? raw?.datetime_local
+    ?? raw?.start_time
     ?? raw?.time
     ?? ''
   const match = String(value).match(/(?:T|\b)(\d{1,2}):(\d{2})/)
@@ -182,8 +185,8 @@ async function fetchUpcomingVisible() {
 }
 
 // ─── Pick winner from a group of duplicate rows ───────────────────────────────
-// Rules: highest source priority wins. Within same source, prefer non-sg- ID
-// (those tend to have venue_name populated). Tiebreak: whichever has a photo.
+// Rules: highest source priority wins. Within the same source, prefer the
+// canonical SeatGeek row, then a photo, then the shorter scannable title.
 function pickWinner(rows) {
   return rows.slice().sort((a, b) => {
     const sPriority = sourcePriority(b.source) - sourcePriority(a.source)
@@ -197,7 +200,9 @@ function pickWinner(rows) {
     // Prefer rows with a cached photo
     const aPhoto = a.cached_photo_url ? 1 : 0
     const bPhoto = b.cached_photo_url ? 1 : 0
-    return bPhoto - aPhoto
+    if (aPhoto !== bPhoto) return bPhoto - aPhoto
+
+    return getTitle(a).length - getTitle(b).length
   })[0]
 }
 
@@ -236,8 +241,7 @@ async function main() {
 
   console.log(`Found ${dupGroups.length} duplicate groups among ${rows.length} events`)
   if (dupGroups.length === 0) {
-    console.log('Nothing to deduplicate.')
-    return
+    console.log('No exact-key duplicates; continuing to semantic passes.')
   }
 
   // ─── Process each group ──────────────────────────────────────────────────────
@@ -245,6 +249,7 @@ async function main() {
   let totalHidden = 0
   let totalTicketsMerged = 0
   let totalErrors = 0
+  const plannedHiddenIds = new Set()
 
   const capped = dupGroups.slice(0, MAX_GROUPS)
   if (MAX_GROUPS < dupGroups.length) {
@@ -275,6 +280,7 @@ async function main() {
       console.log(`       Winner: ${winner.id} (${winner.source})`)
       for (const l of losers) {
         console.log(`       Hide:   ${l.id} (${l.source})`)
+        plannedHiddenIds.add(l.id)
       }
       if (newUrls.length > 0) {
         console.log(`       Merge ${newUrls.length} ticket URL(s) → winner`)
@@ -333,6 +339,7 @@ async function main() {
         totalErrors++
       } else {
         console.log(`  Hidden: ${loser.id} (${loser.source}) → winner: ${winner.id} | "${winnerTitle.slice(0, 40)}"`)
+        plannedHiddenIds.add(loser.id)
         totalHidden++
       }
     }
@@ -371,13 +378,12 @@ async function main() {
     }).slice(0, MAX_GROUPS)
 
     let pass2Hidden = 0
-    const pass2HiddenIds = new Set()
     for (const group of venueGroups) {
       const tmRows = group.filter(r => r.source === 'ticketmaster')
       const sgRows = group.filter(r => r.source === 'seatgeek')
 
       for (const tm of tmRows) {
-        if (tm.hidden || pass2HiddenIds.has(tm.id)) continue
+        if (tm.hidden || plannedHiddenIds.has(tm.id)) continue
         const tmTitle = getTitle(tm)
         const venueName = tm.venue_name
         const tmTime = getLocalTime5(tm)
@@ -385,7 +391,7 @@ async function main() {
         const isAddOn = isTMAddOn(tm)
         const isSports = SPORTS_VENUES.has(venueName)
         const matches = sgRows.filter(sg => {
-          if (pass2HiddenIds.has(sg.id)) return false
+          if (plannedHiddenIds.has(sg.id)) return false
           const sgTime = getLocalTime5(sg)
           if (!tmTime || !sgTime || tmTime !== sgTime) return false
           if (isSports) return true
@@ -411,10 +417,10 @@ async function main() {
             : 'Concert venue+date+time title match'
 
         for (const loser of losers) {
-          if (pass2HiddenIds.has(loser.id)) continue
+          if (plannedHiddenIds.has(loser.id)) continue
           if (isDryRun) {
             console.log(`[DRY P2] Hide ${loser.id}: "${getTitle(loser).slice(0, 50)}" (${reason})`)
-            pass2HiddenIds.add(loser.id)
+            plannedHiddenIds.add(loser.id)
             pass2Hidden++
             continue
           }
@@ -432,7 +438,7 @@ async function main() {
             totalErrors++
           } else {
             console.log(`  P2 hidden: ${loser.id} (${reason}): "${getTitle(loser).slice(0, 45)}"`)
-            pass2HiddenIds.add(loser.id)
+            plannedHiddenIds.add(loser.id)
             pass2Hidden++
             totalHidden++
           }
@@ -440,6 +446,88 @@ async function main() {
       }
     }
     console.log(`Pass 2 hidden: ${pass2Hidden}`)
+  }
+
+  // ─── Pass 3: conservative semantic dedup across every source ───────────────
+  // Catches wrapper-title variants ("Live Music at the Brewhouse X" vs "X"),
+  // venue aliases ("Sister" vs "Sister Bar"), and exact title/address pairs
+  // where one source omits time and there is only one possible showing.
+  console.log('\n─── Pass 3: Semantic same-showing dedup ───────────────')
+  const { data: rows3, error: err3 } = await fetchUpcomingVisible()
+  if (err3) {
+    console.error('Pass 3 fetch error:', err3.message)
+  } else {
+    const available = rows3.filter(row => !plannedHiddenIds.has(row.id))
+    const semanticGroups = findSemanticDuplicateGroups(available).slice(0, MAX_GROUPS)
+    let pass3Hidden = 0
+
+    for (const match of semanticGroups) {
+      const group = match.rows.filter(row => !plannedHiddenIds.has(row.id))
+      if (group.length < 2) continue
+      const winner = pickWinner(group)
+      const losers = group.filter(row => row.id !== winner.id)
+      const winnerTitle = getTitle(winner)
+
+      const winnerUrls = new Set(extractTicketUrls(winner))
+      const newUrls = []
+      for (const loser of losers) {
+        for (const url of extractTicketUrls(loser)) {
+          if (!winnerUrls.has(url)) {
+            winnerUrls.add(url)
+            newUrls.push(url)
+          }
+        }
+      }
+
+      if (isDryRun) {
+        console.log(`[DRY P3] GROUP: "${winnerTitle.slice(0, 60)}" on ${winner.event_date}`)
+        console.log(`         Winner: ${winner.id} (${winner.source})`)
+        for (const loser of losers) {
+          console.log(`         Hide:   ${loser.id} (${loser.source})`)
+          plannedHiddenIds.add(loser.id)
+          pass3Hidden++
+          totalHidden++
+        }
+        if (newUrls.length) console.log(`         Merge ${newUrls.length} ticket URL(s) → winner`)
+        totalTicketsMerged += newUrls.length
+        continue
+      }
+
+      if (newUrls.length) {
+        const updatedRaw = { ...(winner.raw || {}), ticket_links: [...winnerUrls] }
+        const { error: winnerErr } = await supabase.schema('public').from('events')
+          .update({ raw: updatedRaw })
+          .eq('id', winner.id)
+        if (winnerErr) {
+          console.error(`  ERROR updating winner ${winner.id}: ${winnerErr.message}`)
+          totalErrors++
+          continue
+        }
+        totalTicketsMerged += newUrls.length
+      }
+
+      for (const loser of losers) {
+        const enrichment = {
+          ...(loser.ai_enrichment || {}),
+          dedup_reason: `High-confidence semantic duplicate of ${winner.id} (${winner.source}); same showing boundary. Hidden by dedup-events.mjs pass 3 on ${today}.`,
+          dedup_primary_id: winner.id,
+          dedup_hidden_at: new Date().toISOString(),
+        }
+        const { error: hideErr } = await supabase.schema('public').from('events')
+          .update({ hidden: true, ai_enrichment: enrichment })
+          .eq('id', loser.id)
+        if (hideErr) {
+          console.error(`  ERROR hiding ${loser.id}: ${hideErr.message}`)
+          totalErrors++
+        } else {
+          console.log(`  P3 hidden: ${loser.id} → ${winner.id} | "${winnerTitle.slice(0, 45)}"`)
+          plannedHiddenIds.add(loser.id)
+          pass3Hidden++
+          totalHidden++
+        }
+      }
+    }
+    console.log(`Pass 3 groups: ${semanticGroups.length}; hidden: ${pass3Hidden}`)
   }
 
   // ─── Summary ─────────────────────────────────────────────────────────────────
