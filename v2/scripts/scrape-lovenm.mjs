@@ -339,7 +339,6 @@ async function main() {
       image_status: imageStatus,
       ai_enrichment: aiEnrichment,
       featured: false,
-      hidden: false,
       category: 'Community',
       venue_name: extracted.venue ?? 'Albuquerque',
     }

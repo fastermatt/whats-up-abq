@@ -444,7 +444,6 @@ async function main() {
       cached_photo_url: finalPhotoUrl,
       image_status: finalImageStatus,
       featured: false,
-      hidden: false,
       category: 'Music',
       venue_name: VENUE_NAME,
     }

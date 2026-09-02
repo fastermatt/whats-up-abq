@@ -10,15 +10,15 @@
  *      "seatgeek_sg-12345" for the same numeric ID — pure ingest bug.
  *   2. CROSS-SOURCE (31 groups): same show on Ticketmaster + SeatGeek.
  *
- * Dedup key: normalize(title, 35 chars) + event_date
+ * Dedup key: normalize(title, 35 chars) + event_date + venue
  *   - strip non-alphanumeric, lowercase, take first 35 chars
  *   - "Buckethead" → "buckethead", "A at B"/"B vs A" both share 35-char prefix
- *   - Venue fuzzy matching skipped — venue_name is NULL for many SeatGeek rows,
- *     so title+date is more reliable; 35-char truncation handles minor wording
- *     differences between sources while being long enough to avoid false matches.
+ *   - Venue is required in pass 1 so unrelated same-name events at different
+ *     businesses are never merged. Pass 2 handles conservative cross-source
+ *     title variants at the same venue/date.
  *
  * Source priority (winner selection): ticketmaster > seatgeek > eventbrite >
- *   local > volunteer > nhcc — ticketmaster rows tend to have the best photo
+ *   local > nhcc — ticketmaster rows tend to have the best photo
  *   and venue_name data. Within the same source, prefer the non-"sg-" ID
  *   (the plain numeric one has a venue_name populated).
  *
@@ -74,9 +74,9 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 const today = new Date().toISOString().slice(0, 10)
 
 // Source priority — higher index = higher priority (winner)
-// SeatGeek > Ticketmaster because SG URLs are event-slug-based (don't 404);
-// TM URLs are opaque IDs that sometimes redirect to wrong pages.
-const SOURCE_PRIORITY = ['nhcc', 'volunteer', 'local', 'eventbrite', 'ticketmaster', 'seatgeek']
+// Ticketmaster is preferred over SeatGeek for the primary record because it
+// generally has the strongest organizer imagery; alternate URLs are merged.
+const SOURCE_PRIORITY = ['nhcc', 'local', 'eventbrite', 'seatgeek', 'ticketmaster']
 function sourcePriority(source) {
   const idx = SOURCE_PRIORITY.indexOf(source)
   return idx === -1 ? 0 : idx
@@ -124,6 +124,18 @@ function getTitle(row) {
   return String(title).trim()
 }
 
+function getLocalTime5(row) {
+  const raw = row.raw || {}
+  const value = raw?.dates?.start?.localTime
+    ?? raw?.start?.local
+    ?? raw?.datetime_local
+    ?? raw?.time
+    ?? ''
+  const match = String(value).match(/(?:T|\b)(\d{1,2}):(\d{2})/)
+  if (!match) return ''
+  return `${String(match[1]).padStart(2, '0')}:${match[2]}`
+}
+
 // ─── Extract all ticket/purchase URLs from a row ─────────────────────────────
 // Ticket links are stored variously across sources. We pull every URL we can find.
 function extractTicketUrls(row) {
@@ -147,6 +159,26 @@ function extractTicketUrls(row) {
 
   // Remove empty/null
   return [...urls].filter(Boolean)
+}
+
+async function fetchUpcomingVisible() {
+  const pageSize = 1000
+  const rows = []
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await supabase
+      .schema('public')
+      .from('events')
+      .select('id, source, event_date, venue_name, raw, ai_enrichment, cached_photo_url')
+      .eq('hidden', false)
+      .gte('event_date', today)
+      .order('event_date', { ascending: true })
+      .order('id', { ascending: true })
+      .range(from, from + pageSize - 1)
+    if (error) return { data: null, error }
+    rows.push(...(data || []))
+    if (!data || data.length < pageSize) break
+  }
+  return { data: rows, error: null }
 }
 
 // ─── Pick winner from a group of duplicate rows ───────────────────────────────
@@ -176,13 +208,7 @@ async function main() {
 
   // Fetch all upcoming visible events (we only dedup future events to be safe)
   console.log('Fetching upcoming visible events...')
-  const { data: rows, error } = await supabase
-    .schema('public')
-    .from('events')
-    .select('id, source, event_date, venue_name, raw, ai_enrichment, cached_photo_url')
-    .eq('hidden', false)
-    .gte('event_date', today)
-    .order('event_date', { ascending: true })
+  const { data: rows, error } = await fetchUpcomingVisible()
 
   if (error) {
     console.error('Fetch error:', error.message)
@@ -196,9 +222,11 @@ async function main() {
 
   for (const row of rows) {
     const title = getTitle(row)
-    if (!title) continue
+    const venue = String(row.venue_name || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+    const time = getLocalTime5(row)
+    if (!title || !venue || !time) continue
 
-    const key = `${normalizeTitle(title)}::${row.event_date}`
+    const key = `${normalizeTitle(title)}::${String(row.event_date).slice(0, 10)}::${time}::${venue}`
     if (!groups.has(key)) groups.set(key, [])
     groups.get(key).push(row)
   }
@@ -315,22 +343,13 @@ async function main() {
   // ─── Pass 2: Venue+Date cross-source dedup ────────────────────────────────────
   // Catches events where titles differ between sources (sports games home/away
   // order, concert "Artist Tour Name" vs "Artist with Opener", etc.).
-  // Strategy:
-  //   A) Any TM add-on (PSS VIP Parking, Photo in the Lobby) — always hide
-  //   B) Sports venue (1 event/date rule): TM at same venue+date as SG → hide TM
-  //   C) Concert venues: TM at same venue+date as SG, first word of titles match → hide TM
-  //   D) Substring match: TM title contains SG title as substring (or vice versa) → hide TM
+  // Safety boundary: ordinary events must share an explicit start time. This
+  // prevents multiple same-day Broadway/comedy performances from collapsing.
 
   console.log('\n─── Pass 2: Venue+Date cross-source dedup ─────────────')
 
   // Re-fetch to pick up any changes from Pass 1
-  const { data: rows2, error: err2 } = await supabase
-    .schema('public')
-    .from('events')
-    .select('id, source, event_date, venue_name, raw, ai_enrichment, cached_photo_url')
-    .eq('hidden', false)
-    .gte('event_date', today)
-    .order('event_date', { ascending: true })
+  const { data: rows2, error: err2 } = await fetchUpcomingVisible()
 
   if (err2) {
     console.error('Pass 2 fetch error:', err2.message)
@@ -349,65 +368,71 @@ async function main() {
     const venueGroups = [...byVenueDate.values()].filter(g => {
       const sources = new Set(g.map(r => r.source))
       return sources.has('ticketmaster') && sources.has('seatgeek')
-    })
+    }).slice(0, MAX_GROUPS)
 
     let pass2Hidden = 0
+    const pass2HiddenIds = new Set()
     for (const group of venueGroups) {
       const tmRows = group.filter(r => r.source === 'ticketmaster')
       const sgRows = group.filter(r => r.source === 'seatgeek')
 
       for (const tm of tmRows) {
-        if (tm.hidden) continue
+        if (tm.hidden || pass2HiddenIds.has(tm.id)) continue
         const tmTitle = getTitle(tm)
         const venueName = tm.venue_name
+        const tmTime = getLocalTime5(tm)
 
-        // A) TM add-ons (parking passes, merch, photo packages) — always hide
         const isAddOn = isTMAddOn(tm)
-
-        // B) Sports venue — one game per date; any TM+SG pair is the same event
         const isSports = SPORTS_VENUES.has(venueName)
-
-        // C & D) Concert match: first-word match OR SG title is substring of TM title
-        const concertMatch = !isAddOn && !isSports && sgRows.some(sg => {
+        const matches = sgRows.filter(sg => {
+          if (pass2HiddenIds.has(sg.id)) return false
+          const sgTime = getLocalTime5(sg)
+          if (!tmTime || !sgTime || tmTime !== sgTime) return false
+          if (isSports) return true
           const sgTitle = getTitle(sg)
           const tmFirst = firstWordNorm(tmTitle)
           const sgFirst = firstWordNorm(sgTitle)
-          // First word match (>= 4 chars to avoid false positives on "The", "A", etc.)
           if (tmFirst.length >= 4 && tmFirst === sgFirst) return true
-          // Normalized 5-char prefix match (handles "The Kid LAROI" → "theki" == "theki")
           const tmNorm5 = tmTitle.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 5)
           const sgNorm5 = sgTitle.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 5)
           if (tmNorm5.length >= 5 && tmNorm5 === sgNorm5) return true
-          // SG title (>= 5 chars) is substring of TM title
           if (sgTitle.length >= 5 && tmTitle.toLowerCase().includes(sgTitle.toLowerCase())) return true
           return false
         })
 
-        if (!isAddOn && !isSports && !concertMatch) continue
+        const candidates = isAddOn ? [tm] : [tm, ...matches]
+        if (!isAddOn && matches.length === 0) continue
+        const winner = isAddOn ? null : pickWinner(candidates)
+        const losers = isAddOn ? [tm] : candidates.filter(row => row.id !== winner.id)
+        const reason = isAddOn
+          ? 'TM add-on/parking pass'
+          : isSports
+            ? `Sports venue+time dedup (${venueName})`
+            : 'Concert venue+date+time title match'
 
-        // Hide this TM event
-        const reason = isAddOn ? 'TM add-on/parking pass'
-          : isSports ? `Sports venue dedup (${venueName})`
-          : 'Concert venue+date title match'
-
-        if (isDryRun) {
-          console.log(`[DRY P2] Hide TM ${tm.id}: "${tmTitle.slice(0, 50)}" (${reason})`)
-          pass2Hidden++
-        } else {
+        for (const loser of losers) {
+          if (pass2HiddenIds.has(loser.id)) continue
+          if (isDryRun) {
+            console.log(`[DRY P2] Hide ${loser.id}: "${getTitle(loser).slice(0, 50)}" (${reason})`)
+            pass2HiddenIds.add(loser.id)
+            pass2Hidden++
+            continue
+          }
           const enrichment = {
-            ...(tm.ai_enrichment || {}),
+            ...(loser.ai_enrichment || {}),
             dedup_reason: `${reason}. Hidden by dedup-events.mjs pass 2 on ${today}.`,
+            dedup_primary_id: winner?.id ?? null,
             dedup_hidden_at: new Date().toISOString(),
           }
-          const { error: hideErr } = await supabase
-            .schema('public').from('events')
+          const { error: hideErr } = await supabase.schema('public').from('events')
             .update({ hidden: true, ai_enrichment: enrichment })
-            .eq('id', tm.id)
+            .eq('id', loser.id)
           if (hideErr) {
-            console.error(`  ERROR hiding ${tm.id}: ${hideErr.message}`)
+            console.error(`  ERROR hiding ${loser.id}: ${hideErr.message}`)
             totalErrors++
           } else {
-            console.log(`  P2 hidden: ${tm.id} (${reason}): "${tmTitle.slice(0, 45)}"`)
+            console.log(`  P2 hidden: ${loser.id} (${reason}): "${getTitle(loser).slice(0, 45)}"`)
+            pass2HiddenIds.add(loser.id)
             pass2Hidden++
             totalHidden++
           }

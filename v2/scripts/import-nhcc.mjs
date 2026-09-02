@@ -394,7 +394,6 @@ async function main() {
       event_date: isAllDay ? eventDate : eventDatetime,
       cached_photo_url: imageUrl,
       featured: false,
-      hidden: false,
       category,
       venue_name: venue,
     }

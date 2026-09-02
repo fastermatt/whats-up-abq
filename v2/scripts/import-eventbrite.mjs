@@ -151,7 +151,7 @@ function transformJsonLd(item, timeBySlug) {
   if (loc['@type'] === 'VirtualLocation') return null
 
   // Virtual signals: title, venue name, or street address explicitly says so
-  const VIRTUAL_RE = /\b(virtual event|online (class|event|workshop|webinar|meeting)|zoom webinar|zoom meeting|via zoom|live ?stream|webinar|online\/virtual|google meet|microsoft teams)\b/i
+  const VIRTUAL_RE = /\b(virtual(?:ly)?|online (class|event|workshop|webinar|meeting)|zoom webinar|zoom meeting|via zoom|live ?stream|webinar|online\/virtual|google meet|microsoft teams)\b/i
   const _virtualHaystack = [
     item.name || '',
     loc.name || '',
@@ -173,6 +173,7 @@ function transformJsonLd(item, timeBySlug) {
   const cityName = (addr.addressLocality || '').toLowerCase().trim()
   const postalCode = (addr.postalCode || '').toString().trim()
   const streetAddr = (addr.streetAddress || '').toString()
+  const venueName = (loc.name || '').toString().trim()
 
   // Hard reject Rio Rancho (zip + city + street-mentions). Catches RR events
   // whose lat/lng fall inside the wider ABQ box but are socially a different city.
@@ -180,6 +181,11 @@ function transformJsonLd(item, timeBySlug) {
   if (cityName === 'rio rancho') return null
   if (/\brio\s+rancho\b/i.test(streetAddr)) return null
   if (/\b(87124|87144)\b/.test(streetAddr)) return null
+
+  // Eventbrite discovery sometimes assigns the searched city to cruises,
+  // livestreams, and other non-local listings. A city string alone is not
+  // sufficient evidence that a visitor can physically attend in Albuquerque.
+  if (!venueName && !streetAddr && !(lat && lng)) return null
 
   if (lat && lng) {
     // Has coordinates — apply metro bounding box
@@ -384,7 +390,6 @@ async function main() {
       category,
       venue_name:      displayVenue || null,
       cached_photo_url: imageUrl,
-      hidden:          false,
       featured:        false,
     }
 

@@ -63,7 +63,7 @@ const API_BASE  = 'https://abqtodo.com/wp-json/tribe/events/v1/events'
 const PLACEHOLDER_HASHES = new Set(['336632cc', 'e9bd5d12', '7a10f4c2'])
 
 const ABQ_CITIES = new Set([
-  'albuquerque', 'abq', 'rio rancho', 'bernalillo', 'los ranchos',
+  'albuquerque', 'abq', 'bernalillo', 'los ranchos',
   'los ranchos de albuquerque', 'corrales', 'sandia park', 'tijeras',
   'cedar crest', 'placitas', 'edgewood',
 ])
@@ -493,7 +493,6 @@ async function main() {
       cached_photo_url: finalPhotoUrl,
       image_status: finalImageStatus,
       featured: false,
-      hidden: false,
       category: extracted.category,
       venue_name: extracted.venue || null,
       image_width: hostedResult?.ok ? hostedResult.prepared.srcW : (prior?.image_width ?? null),

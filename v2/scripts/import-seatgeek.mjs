@@ -356,7 +356,6 @@ async function main() {
       category,
       venue_name: venueName,
       cached_photo_url: imageUrl,
-      hidden: false,
       featured: false,
     }
 

@@ -37,6 +37,7 @@ export default function OfflinePage() {
       if (active) setChecking(false)
     }
 
+    void retry()
     const interval = window.setInterval(retry, 15_000)
     window.addEventListener('online', retry)
     return () => {

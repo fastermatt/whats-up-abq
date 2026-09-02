@@ -447,7 +447,6 @@ async function main() {
       cached_photo_url: cachedPhotoUrl,
       image_status: imageStatus,
       featured: false,
-      hidden: false,
       category: 'Music',          // AMP is overwhelmingly music; audit-accuracy may re-categorize
       venue_name: venueName || null,
     }

@@ -66,9 +66,9 @@ const SITE = typeof argv.site === 'string' ? argv.site.replace(/\/$/, '') : null
 const TESTS = [
   // ── Normalizer / venue data ────────────────────────────────────────────
   {
-    id: 'no-online-fallback-venues',
+    id: 'no-venue-less-eventbrite-events',
     tag: 'normalizer',
-    description: 'No upcoming events should display venue="Online" (the EB normalizer fallback bug)',
+    description: 'Visible Eventbrite events need physical venue evidence; searched-city-only listings are not local events',
     async fn() {
       // We can't trivially run the normalizer here without TS, so we check the data shape:
       // if EB events have NO venue name in either _embedded.venues[0].name or venue_name,
@@ -85,8 +85,8 @@ const TESTS = [
         return !embedded?.trim() && !r.venue_name?.trim()
       })
       return offenders.length === 0
-        ? { ok: true, detail: `${data.length} EB events checked, all have a venue` }
-        : { ok: false, detail: `${offenders.length} EB events would render as "Online": ${offenders.slice(0, 5).map(o => o.id).join(', ')}` }
+        ? { ok: true, detail: `${data.length} EB events checked, all have physical venue evidence` }
+        : { ok: false, detail: `${offenders.length} EB events lack a physical venue: ${offenders.slice(0, 5).map(o => o.id).join(', ')}` }
     },
   },
   {
@@ -102,10 +102,16 @@ const TESTS = [
         .or('venue_name.is.null,venue_name.eq.')
       if (error) return { ok: false, detail: error.message }
       // Volunteer events sometimes legitimately have no fixed venue ("various locations")
-      const bad = data.filter(r => !['volunteer', 'local'].includes(r.source))
+      const bad = data.filter(r => {
+        if (['local', 'volunteer'].includes(r.source)) return false
+        const venue = r.raw?._embedded?.venues?.[0] || r.raw?.venue || {}
+        const street = venue.address?.line1 ?? venue.address?.address_1
+        const location = venue.location || {}
+        return !venue.name?.trim() && !street?.trim() && !(location.latitude && location.longitude)
+      })
       return bad.length <= 5
-        ? { ok: true, detail: `${data.length} events with no venue (mostly volunteer/local — acceptable)` }
-        : { ok: false, detail: `${bad.length} non-volunteer events have no venue: ${bad.slice(0, 5).map(o => `${o.source}:${o.id}`).join(', ')}` }
+        ? { ok: true, detail: `${data.length - bad.length}/${data.length} venue-name gaps still have a physical address or are accepted local events` }
+        : { ok: false, detail: `${bad.length} events have no venue or physical address: ${bad.slice(0, 5).map(o => `${o.source}:${o.id}`).join(', ')}` }
     },
   },
   // ── Photos / images ─────────────────────────────────────────────────────
@@ -243,7 +249,7 @@ const TESTS = [
     tag: 'ingestion',
     description: 'Every active source should have at least one upcoming event (catches dead ingestion pipelines)',
     async fn() {
-      const SOURCES = ['ticketmaster', 'eventbrite', 'seatgeek', 'local', 'volunteer', 'nhcc']
+      const SOURCES = ['ticketmaster', 'eventbrite', 'seatgeek', 'local', 'local-venue', 'nhcc']
       const counts = {}
       for (const s of SOURCES) {
         const { count } = await sb
@@ -256,6 +262,25 @@ const TESTS = [
       return empty.length === 0
         ? { ok: true, detail: Object.entries(counts).map(([s, c]) => `${s}:${c}`).join(' ') }
         : { ok: false, detail: `Empty sources (ingestion may be dead): ${empty.join(', ')}` }
+    },
+  },
+  {
+    id: 'importers-preserve-hidden-state',
+    tag: 'ingestion',
+    description: 'Source refreshes must not resurrect rows hidden by moderation, hygiene, or deduplication',
+    async fn() {
+      const importers = [
+        'import-ticketmaster.mjs', 'import-seatgeek.mjs', 'import-eventbrite.mjs',
+        'import-nhcc.mjs', 'scrape-abqtodo.mjs', 'scrape-babydolls.mjs',
+        'scrape-local-venues.mjs', 'scrape-amp-concerts.mjs', 'scrape-lovenm.mjs',
+      ]
+      const offenders = importers.filter(file => {
+        const source = fs.readFileSync(path.join(__dirname, file), 'utf8')
+        return /hidden\s*:\s*false/.test(source)
+      })
+      return offenders.length === 0
+        ? { ok: true, detail: 'all active importers preserve existing hidden state' }
+        : { ok: false, detail: `importers reset hidden=false: ${offenders.join(', ')}` }
     },
   },
   // ── No future events drift ──────────────────────────────────────────────

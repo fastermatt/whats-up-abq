@@ -579,7 +579,6 @@ async function main() {
         cached_photo_url: eventImage,
         image_status: adminRejected ? 'rejected' : (eventImage ? 'unverified' : null),
         featured: false,
-        hidden: false,
         category,
         venue_name: venue.name,
         neighborhood: venue.neighborhood ?? null,

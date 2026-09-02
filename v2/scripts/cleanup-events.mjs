@@ -60,12 +60,21 @@ function todayInDenver() {
 
 async function hide(reason, filterFn) {
   // First fetch the ids to hide so we can report counts.
-  const query = supabase.schema('public').from('events').select('id').eq('hidden', false)
+  const query = supabase.schema('public').from('events').select('id, ai_enrichment').eq('hidden', false)
   const { data: rows, error } = await filterFn(query)
   if (error) {
     console.error(`❌ [${reason}] query error:`, error.message)
     return 0
   }
+  if (!rows || rows.length === 0) {
+    console.log(`  [${reason}] nothing to hide`)
+    return 0
+  }
+
+  return hideRows(reason, rows)
+}
+
+async function hideRows(reason, rows) {
   if (!rows || rows.length === 0) {
     console.log(`  [${reason}] nothing to hide`)
     return 0
@@ -83,11 +92,7 @@ async function hide(reason, filterFn) {
   let hidden = 0
   for (let i = 0; i < ids.length; i += 200) {
     const chunk = ids.slice(i, i + 200)
-    // Fetch current ai_enrichment for these rows to preserve existing keys.
-    const { data: existing } = await supabase
-      .schema('public').from('events')
-      .select('id, ai_enrichment')
-      .in('id', chunk)
+    const existing = rows.filter(row => chunk.includes(row.id))
 
     await Promise.all((existing || []).map(async row => {
       const merged = {
@@ -165,7 +170,64 @@ async function main() {
     console.log(`  [eb_spam_title_daily] ${DRY_RUN ? 'would hide' : 'hid'} ${hidden} rows`)
   }
 
-  // 5. Cross-source + intra-source duplicates.
+  // Eventbrite discovery can label remote cruises/webinars with the searched
+  // city even though there is no physical venue. Hide rows with no place
+  // evidence, explicit virtual markers, or a Rio Rancho address. The importer
+  // applies the same rules prospectively; this cleans previously admitted rows.
+  {
+    const VIRTUAL_RE = /\b(virtual(?:ly)?|online (class|event|workshop|webinar|meeting)|zoom webinar|zoom meeting|via zoom|live ?stream|webinar|google meet|microsoft teams)\b/i
+    const { data: ebRows, error } = await supabase.schema('public').from('events')
+      .select('id, raw, venue_name, ai_enrichment')
+      .eq('source', 'eventbrite')
+      .eq('hidden', false)
+      .gte('event_date', today)
+      .limit(1000)
+    if (error) {
+      console.error('❌ [eb_location_hygiene_daily] query error:', error.message)
+    } else {
+      const offenders = (ebRows || []).filter(row => {
+        const venue = row.raw?._embedded?.venues?.[0] || row.raw?.venue || {}
+        const city = String(venue.city?.name ?? venue.address?.city ?? '').trim().toLowerCase()
+        const postal = String(venue.postalCode ?? venue.address?.postal_code ?? '').trim()
+        const street = String(venue.address?.line1 ?? venue.address?.address_1 ?? '').trim()
+        const venueName = String(venue.name ?? row.venue_name ?? '').trim()
+        const location = venue.location || {}
+        const hasCoordinates = Boolean(location.latitude && location.longitude)
+        const title = typeof row.raw?.name === 'string' ? row.raw.name : row.raw?.name?.text
+        const description = row.raw?.description?.text ?? row.raw?.description ?? row.raw?.info ?? ''
+        const haystack = `${title ?? ''} ${venueName} ${street} ${String(description).slice(0, 400)}`
+        const noPhysicalPlace = !venueName && !street && !hasCoordinates
+        const rioRancho = city === 'rio rancho' || ['87124', '87144'].includes(postal) || /\brio rancho\b/i.test(street)
+        return noPhysicalPlace || rioRancho || VIRTUAL_RE.test(haystack)
+      })
+      await hideRows('eb_location_hygiene_daily', offenders)
+    }
+  }
+
+  // ABQtodo occasionally supplies a misleading venue name while its city/ZIP
+  // correctly identifies Rio Rancho. Use the structured address, not the title.
+  {
+    const { data: localRows, error } = await supabase.schema('public').from('events')
+      .select('id, raw, ai_enrichment')
+      .eq('source', 'local')
+      .eq('hidden', false)
+      .gte('event_date', today)
+      .limit(1000)
+    if (error) {
+      console.error('❌ [non_abq_location_daily] query error:', error.message)
+    } else {
+      const offenders = (localRows || []).filter(row => {
+        const venue = row.raw?._embedded?.venues?.[0] || {}
+        const city = String(venue.city?.name ?? '').trim().toLowerCase()
+        const postal = String(venue.postalCode ?? '').trim()
+        const street = String(venue.address?.line1 ?? '').trim()
+        return city === 'rio rancho' || ['87124', '87144'].includes(postal) || /\brio rancho\b/i.test(street)
+      })
+      await hideRows('non_abq_location_daily', offenders)
+    }
+  }
+
+  // 5. Cross-source + intra-source exact duplicates.
   //    Key: (title, date, venue_name, localTime5). Keep highest-scoring row per key.
   //    Scoring: TM (1000) >> has-time (100) >> TM G5vzZ prefix (+50) >> SG (10) >> EB (5) >> photo (5).
   //    TM wins over SG/EB even when TM lacks a start time — TM has better photos.

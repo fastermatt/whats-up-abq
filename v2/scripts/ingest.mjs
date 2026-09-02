@@ -80,7 +80,7 @@ const flag  = (name) => argv.includes(`--${name}`)
 const value = (name) => { const p = argv.find(a => a.startsWith(`--${name}=`)); return p ? p.split('=')[1] : null }
 
 const DRY         = flag('dry-run')
-const SKIP_IMPORT = flag('skip-imports')
+const SKIP_IMPORT = flag('skip-imports') || flag('skip-import')
 const SKIP_ENRICH = flag('skip-enrich')
 const SKIP_SMOKE  = flag('skip-smoke')
 const SMOKE_ONLY  = flag('smoke-only')
@@ -162,6 +162,12 @@ async function snapshotCounts() {
     missingMood: 0,
   }
 
+  const { count: upcomingCount } = await supabase
+    .schema('public').from('events')
+    .select('id', { count: 'exact', head: true })
+    .eq('hidden', false).gte('event_date', today)
+  snap.totalUpcoming = upcomingCount ?? 0
+
   // Per-source counts (upcoming, not hidden)
   for (const src of SOURCES) {
     const { count } = await supabase
@@ -169,7 +175,6 @@ async function snapshotCounts() {
       .select('id', { count: 'exact', head: true })
       .eq('source', src.key).eq('hidden', false).gte('event_date', today)
     snap.bySource[src.key] = count ?? 0
-    snap.totalUpcoming += count ?? 0
   }
 
   // Rejected images
@@ -523,7 +528,7 @@ async function main() {
   }
 
   // 2. ENRICH
-  if (!SKIP_ENRICH) {
+  if (!SKIP_ENRICH && !DRY) {
     step('Category backfill (denormalized column from raw JSON + title heuristics)')
     const { data: catResult, error: catErr } = await supabase.rpc('backfill_event_categories')
     if (catErr) fail(`backfill_event_categories: ${catErr.message}`)
@@ -575,7 +580,7 @@ async function main() {
     // real organizer imagery remains the first choice.
 
   } else {
-    warn('Skipped enrichment (--skip-enrich)')
+    warn(DRY ? 'Skipped enrichment (dry-run guarantees no writes)' : 'Skipped enrichment (--skip-enrich)')
   }
 
   // Cleanup + matcher always run — they're hygiene, not enrichment.
@@ -583,9 +588,18 @@ async function main() {
   step('Cleanup (hide past, duplicates, cancelled)')
   // The 04:00 daily pg_cron job owns hard deletion. Skipping it here prevents
   // a weekly import from doubling the retention write burst on the same day.
-  const cleanupRes = await runScript('cleanup-events.mjs', ['--skip-purge'])
+  const cleanupArgs = ['--skip-purge', ...(DRY ? ['--dry-run'] : [])]
+  const cleanupRes = await runScript('cleanup-events.mjs', cleanupArgs)
   if (cleanupRes.ok) ok(`cleanup-events (${(cleanupRes.durationMs/1000).toFixed(1)}s)`)
   else fail(`cleanup-events failed (exit=${cleanupRes.exitCode})`)
+
+  // Fuzzy cross-source dedup is separate from exact-match daily hygiene.
+  // Importers preserve hidden state, so these decisions now survive refreshes.
+  step('Cross-source deduplication (bounded, reversible)')
+  const dedupArgs = ['--limit=100', ...(DRY ? ['--dry-run'] : [])]
+  const dedupRes = await runScript('dedup-events.mjs', dedupArgs)
+  if (dedupRes.ok) ok(`dedup-events (${(dedupRes.durationMs/1000).toFixed(1)}s)`)
+  else warn(`dedup-events failed (exit=${dedupRes.exitCode}) — continuing without destructive fallback`)
 
   step('Pruning unreferenced Storage objects (30-day grace, bounded batch)')
   const storageArgs = DRY ? ['--limit=100'] : ['--apply', '--limit=100']
@@ -594,7 +608,7 @@ async function main() {
   else warn(`cleanup-storage failed (exit=${storageRes.exitCode}) — event import remains valid`)
 
   step('Notification matcher (user prefs → events)')
-  const mnRes = await runScript('match-notifications.mjs')
+  const mnRes = await runScript('match-notifications.mjs', DRY ? ['--dry-run'] : [])
   if (mnRes.ok) ok(`match-notifications (${(mnRes.durationMs/1000).toFixed(1)}s)`)
   else warn(`match-notifications failed (exit=${mnRes.exitCode}) — not fatal`)
 
@@ -649,20 +663,16 @@ async function main() {
   const isImageOnlyFailure = (f) => f.checks.every(c =>
     c === 'no-image-url' || (c.startsWith('image-invalid') && c.includes('no-url'))
   )
-  // Eventbrite has ~100+ genuinely venue-less online/virtual listings — a
-  // documented source-data condition (already excluded from the IG posting
-  // gate), not a pipeline defect. A randomly sampled one shouldn't hard-fail
-  // an otherwise healthy run.
-  const isKnownEventbriteNoVenue = (f) =>
-    f.source === 'eventbrite' && f.checks.every(c => c === 'no-venue')
   const pass = invariantFails.length === 0 && smokeResults.failures.filter(f =>
-    !isImageOnlyFailure(f) && !isKnownEventbriteNoVenue(f)
+    !isImageOnlyFailure(f)
   ).length === 0
   if (pass) {
     console.log(`${C.green}${C.bold}✓ PIPELINE HEALTHY${C.reset}`)
     // Notify IndexNow (Bing/Yandex) of the refreshed URL set so new events get
     // crawled within hours, not days. Non-fatal — never blocks a healthy run.
-    try {
+    if (DRY) {
+      warn('Skipped IndexNow submission (dry-run guarantees no external writes)')
+    } else try {
       const { execFileSync } = await import('node:child_process')
       const { fileURLToPath } = await import('node:url')
       const indexnow = fileURLToPath(new URL('./submit-indexnow.mjs', import.meta.url))
