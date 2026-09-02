@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { proxyIfNeeded, netlifyImageUrl } from '@/lib/image-url'
 
 /**
@@ -14,8 +14,10 @@ import { proxyIfNeeded, netlifyImageUrl } from '@/lib/image-url'
  * pass it in. This component just handles the swap.
  *
  * URL resolution order:
- *   1. proxyIfNeeded(src)   — route CAPTCHA-blocked domains through /api/image-proxy
- *   2. netlifyImageUrl(...)  — wrap remainder in Netlify Image CDN for AVIF conversion
+ *   1. Netlify-optimized real image
+ *   2. Raw/proxied real image
+ *   3. Netlify-optimized category fallback
+ *   4. Raw/proxied category fallback
  * The same logic lives in lib/image-url.ts so server components can compute
  * matching preload URLs without duplicating code.
  */
@@ -47,38 +49,36 @@ export function EventImage({
    *  so paint isn't deferred behind background decode work, and 'async' otherwise. */
   decoding?: 'sync' | 'async' | 'auto'
 }) {
-  const [currentSrc, setCurrentSrc] = useState(() => netlifyImageUrl(proxyIfNeeded(src), width))
-  // Priority images skip the fade-in so they're immediately visible for LCP measurement
-  const [loaded, setLoaded] = useState(fetchPriority === 'high')
-  const imgRef = useRef<HTMLImageElement>(null)
-
-  // Cached images load before onLoad fires — check .complete on mount AND after
-  // each src swap. Without the currentSrc dep, a fallback that's already cached
-  // (after onError sets loaded=false and swaps src) never re-fires onLoad and the
-  // image stays stuck at opacity-0. naturalWidth>0 guards against broken images.
-  useEffect(() => {
-    if (imgRef.current?.complete && imgRef.current.naturalWidth > 0) setLoaded(true)
-  }, [currentSrc])
+  const rawPrimary = proxyIfNeeded(src || fallback)
+  const rawFallback = proxyIfNeeded(fallback)
+  const candidates = Array.from(new Set([
+    netlifyImageUrl(rawPrimary, width),
+    rawPrimary,
+    netlifyImageUrl(rawFallback, width),
+    rawFallback,
+  ]))
+  const candidateKey = `${src}\u0000${fallback}\u0000${width}`
+  const [failure, setFailure] = useState({ key: '', index: 0 })
+  const activeIndex = failure.key === candidateKey
+    ? Math.min(failure.index, candidates.length - 1)
+    : 0
+  const currentSrc = candidates[activeIndex]
 
   const resolvedDecoding = decoding ?? (fetchPriority === 'high' ? 'sync' : 'async')
 
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      ref={imgRef}
       src={currentSrc}
       alt={alt}
       loading={loading}
       sizes={sizes}
-      // eslint-disable-next-line react/no-unknown-property
       fetchPriority={fetchPriority}
       decoding={resolvedDecoding}
-      className={`${className ?? ''} transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
-      onLoad={() => setLoaded(true)}
+      className={className}
       onError={() => {
-        if (currentSrc !== fallback) {
-          setLoaded(false)
-          setCurrentSrc(fallback)
+        if (activeIndex < candidates.length - 1) {
+          setFailure({ key: candidateKey, index: activeIndex + 1 })
         }
       }}
     />

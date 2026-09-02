@@ -20,9 +20,10 @@
  *     re-download unless --force)
  *   - Only downloads if cached_photo_url is NOT already a supabase.co URL
  *     (i.e., only rehosts external URLs)
- *   - Validates: 200 OK, content-type image/*, size > 5KB, size < 20MB
- *   - Filename: event-photos/{sanitized-event-id}-{timestamp}.{ext}
- *     Timestamp prevents every single CDN cache from interfering with updates.
+ *   - Validates content, dimensions, and known placeholder hashes
+ *   - Never upscales a small source into a larger blurry file
+ *   - Content-hashed filenames reuse unchanged images
+ *   - Superseded managed objects are removed after the DB update succeeds
  *
  * USAGE:
  *   node scripts/host-event-images.mjs                   # rehost all unhosted
@@ -37,10 +38,15 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
-import sharp from 'sharp'
 import path from 'path'
 import fs from 'fs'
 import { fileURLToPath } from 'url'
+import {
+  imageMetadata,
+  prepareEventImage,
+  removeSupersededImage,
+  uploadPreparedImage,
+} from './lib/event-image-pipeline.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -100,38 +106,7 @@ const FETCH_HEADERS_BY_HOST = (host) => ({
   'Accept-Language': 'en-US,en;q=0.9',
 })
 
-// ── Image optimization targets ─────────────────────────────────────────────
-// 1080px wide is the IG portrait standard (1080×1350) and looks sharp on the
-// site without bloating page weight. Webp quality 82 balances crisp artwork
-// with ~80-150KB files on average. Minimum 600×400 — below that we reject
-// (looks pixelated in any IG format).
-
-const TARGET_WIDTH = 1080
-const WEBP_QUALITY = 82
-// Philosophy: a real event photo, even if small, beats a random category
-// placeholder. Eventbrite returns 512×256 thumbnails for many events, and
-// those are still THE actual event image. Use the lowest floor that rules
-// out obvious junk (tracking pixels, favicons).
-// - 250×140 floor rejects anything uselessly small
-// - Images below 1080px wide are UPSCALED with lanczos3 to 1080 using
-//   mild unsharp mask so EB thumbnails still look reasonable on IG.
-const MIN_SOURCE_WIDTH  = 250
-const MIN_SOURCE_HEIGHT = 140
-
 // ── Helpers ────────────────────────────────────────────────────────────────
-
-function extFromContentType(ct) {
-  if (!ct) return 'jpg'
-  if (ct.includes('webp')) return 'webp'
-  if (ct.includes('png'))  return 'png'
-  if (ct.includes('gif'))  return 'gif'
-  if (ct.includes('svg'))  return 'svg'
-  return 'jpg'
-}
-
-function sanitize(id) {
-  return id.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80)
-}
 
 // CAPTCHA-blocked hosts: abqtodo.com, nhccnm.org, lovenm.org, do505.com all
 // return a 400×304 WordPress placeholder JPEG instead of the actual image
@@ -197,67 +172,6 @@ async function downloadImage(url, timeoutMs = 20000) {
   }
 }
 
-/**
- * Resize + optimize via sharp. Returns a webp buffer at TARGET_WIDTH, quality
- * WEBP_QUALITY. Rejects images that are below MIN_SOURCE_WIDTH/HEIGHT — those
- * would look pixelated in any IG format.
- *
- * Sharp auto-rotates based on EXIF orientation, strips metadata, and picks
- * the best resize algorithm. Output is almost always 80-200KB.
- */
-async function optimizeImage(buffer) {
-  try {
-    const img = sharp(buffer, { failOn: 'none' }).rotate()  // auto-orient from EXIF
-    const meta = await img.metadata()
-
-    if (!meta.width || !meta.height) return { ok: false, reason: 'no-dimensions' }
-    if (meta.width < MIN_SOURCE_WIDTH || meta.height < MIN_SOURCE_HEIGHT) {
-      return { ok: false, reason: `too-low-res: ${meta.width}x${meta.height}` }
-    }
-
-    // Always target 1080px width. For sources larger than that, downscale.
-    // For sources SMALLER than that, upscale with lanczos3 + light sharpen —
-    // a 512×256 EB thumb becomes 1080×540 that's still the correct event
-    // image, which beats a generic category placeholder every time.
-    const isUpscale = meta.width < TARGET_WIDTH
-    let pipeline = img.resize(TARGET_WIDTH, null, {
-      withoutEnlargement: false,
-      fit: 'inside',
-      kernel: isUpscale ? sharp.kernel.lanczos3 : sharp.kernel.lanczos3,
-    })
-
-    // Light sharpen on upscales to counter the softness lanczos produces.
-    // sigma=0.6 is mild — sharpens edges without introducing ringing.
-    if (isUpscale) pipeline = pipeline.sharpen({ sigma: 0.6 })
-
-    const out = await pipeline
-      .webp({ quality: WEBP_QUALITY, effort: 4 })
-      .toBuffer({ resolveWithObject: true })
-
-    return {
-      ok: true,
-      buffer: out.data,
-      contentType: 'image/webp',
-      ext: 'webp',
-      srcW: meta.width, srcH: meta.height,
-      outW: out.info.width, outH: out.info.height,
-      outSize: out.data.length,
-      upscaled: isUpscale,
-    }
-  } catch (e) {
-    return { ok: false, reason: `sharp: ${e.message.slice(0, 80)}` }
-  }
-}
-
-async function uploadToStorage(buffer, filename, contentType) {
-  const { data, error } = await supabase.storage
-    .from(BUCKET)
-    .upload(filename, buffer, { contentType, upsert: true })
-  if (error) return { ok: false, reason: error.message }
-  const { data: publicData } = supabase.storage.from(BUCKET).getPublicUrl(filename)
-  return { ok: true, key: data.path, url: publicData.publicUrl }
-}
-
 // Extract the "best" (= highest-resolution non-fallback) source image URL.
 // Critical: TM returns ~10 variants per event; picking the first 16:9 gets us
 // a 640×360 thumbnail when 2048×1152 is available. We want the biggest one we
@@ -315,7 +229,7 @@ async function main() {
   // Fetch candidates: upcoming, not hidden, not rejected, with an external URL
   let q = supabase
     .schema('public').from('events')
-    .select('id, source, raw, cached_photo_url, image_status, event_date')
+    .select('id, source, raw, cached_photo_url, image_status, event_date, image_hash')
     .eq('hidden', false)
     .gte('event_date', new Date().toISOString().slice(0, 10))
     .order('event_date', { ascending: true })
@@ -375,7 +289,6 @@ async function main() {
       // reject the event's image_status so we stop trying on every re-run
       // and the event falls back to its category image sitewide.
       if (dl.reason && dl.reason.startsWith('placeholder-match')) {
-        // eslint-disable-next-line
         const { error: rejErr } = await supabase
           .schema('public').from('events')
           .update({ image_status: 'rejected' })
@@ -386,21 +299,31 @@ async function main() {
     }
     stats.downloaded++
 
-    const opt = await optimizeImage(dl.buffer)
+    const opt = await prepareEventImage(dl.buffer)
     if (!opt.ok) {
       console.log(`  ✗ optimize failed: ${opt.reason}`)
       failures.push({ id, step: 'optimize', reason: opt.reason })
       stats.failed++
+      if (opt.quality === 'rejected') {
+        const { error: rejectError } = await supabase
+          .schema('public').from('events')
+          .update({
+            cached_photo_url: null,
+            image_status: 'rejected',
+            image_width: opt.width ?? null,
+            image_height: opt.height ?? null,
+            image_quality: 'rejected',
+          })
+          .eq('id', id)
+        if (!rejectError) console.log('  🚫 source is too small for the site — using category fallback')
+      }
       continue
     }
     const compressionRatio = (dl.buffer.length / opt.outSize).toFixed(1)
-    const sizeChange = opt.upscaled
-      ? `${opt.srcW}×${opt.srcH} → ${opt.outW}×${opt.outH} (upscaled+sharpened, webp q${WEBP_QUALITY})`
-      : `${opt.srcW}×${opt.srcH} → ${opt.outW}×${opt.outH}, ${compressionRatio}× smaller, webp q${WEBP_QUALITY}`
+    const sizeChange = `${opt.srcW}×${opt.srcH} → ${opt.outW}×${opt.outH}, ${compressionRatio}× smaller, ${opt.quality}`
     console.log(`  ↓ ${dl.buffer.length}B → ${opt.outSize}B (${sizeChange})`)
 
-    const filename = `${sanitize(id)}-${Date.now()}.${opt.ext}`
-    const up = await uploadToStorage(opt.buffer, filename, opt.contentType)
+    const up = await uploadPreparedImage(supabase, id, opt, BUCKET)
     if (!up.ok) {
       console.log(`  ✗ upload failed: ${up.reason}`)
       failures.push({ id, step: 'upload', reason: up.reason })
@@ -413,12 +336,15 @@ async function main() {
     // ONLY update cached_photo_url — leave raw alone. If the hosted image is
     // ever deleted or Supabase goes down, normalizeRow can still fall back to
     // raw.image or raw.images[0].url (the original source URL).
-    // Also set image_status='verified' — we successfully downloaded and hosted
-    // it, so admin doesn't need to worry about it later.
-    // eslint-disable-next-line
+    // Hosting proves availability and resolution, not that the photo matches.
+    // Preserve a human verification on --force; automatic images stay unverified.
     const { error: updErr } = await supabase
       .schema('public').from('events')
-      .update({ cached_photo_url: up.url, image_status: 'verified' })
+      .update({
+        cached_photo_url: up.url,
+        image_status: image_status === 'verified' ? 'verified' : 'unverified',
+        ...imageMetadata(opt),
+      })
       .eq('id', id)
 
     if (updErr) {
@@ -427,6 +353,14 @@ async function main() {
       stats.failed++
     } else {
       console.log(`  ✓ hosted and linked`)
+      const cleanup = await removeSupersededImage({
+        supabase,
+        previousUrl: cached_photo_url,
+        nextUrl: up.url,
+        supabaseUrl: SUPABASE_URL,
+        bucket: BUCKET,
+      })
+      if (cleanup.removed) console.log(`  🧹 removed superseded object: ${cleanup.key}`)
     }
     console.log('')
   }

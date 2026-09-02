@@ -9,10 +9,7 @@ import { EventImage } from '@/app/components/EventImage'
 import { InstagramIcon } from '@/app/components/InstagramIcon'
 import { venueInstagram } from '@/data/venue-instagram'
 import { createClient } from '@/lib/supabase/server'
-import {
-  MapPin, Clock, Calendar, Ticket, ArrowLeft,
-  Users, Flag, Share2,
-} from 'lucide-react'
+import { MapPin, Calendar, Ticket, ArrowLeft, Users, Flag } from 'lucide-react'
 import ShareButton from './ShareButton'
 import AddToCalendar from './AddToCalendar'
 import { denverOffsetForDate } from '@/lib/utils/dates'
@@ -277,28 +274,23 @@ export default async function EventDetailPage({ params }: PageProps) {
           <ArrowLeft className="w-4 h-4" />
           <span>All events</span>
         </Link>
-        {/* ── Poster hero — full-width on mobile, sits below cream nav (no pull-up) ── */}
-        <div className="relative h-[420px] sm:h-auto sm:aspect-[2/1]
-          sm:mt-4 sm:mx-4 sm:rounded-2xl overflow-hidden">
+        {/* A real event photo should help identify the event, not become a
+            billboard for a 320px source. Keep the detail image compact on
+            phones; future low-resolution sources also request fewer CDN pixels. */}
+        <div className="relative mx-4 mt-2 sm:mt-4 aspect-[16/10] sm:aspect-[2/1]
+          rounded-2xl overflow-hidden bg-sand-light ring-1 ring-ink/5">
           <EventImage
             src={event.imageUrl || getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}
             fallback={getCategoryFallback(event.category ?? undefined, event.title ?? event.id)}
             alt={event.title}
+            width={event.imageQuality === 'compact' ? 360 : 720}
+            sizes="(max-width: 640px) calc(100vw - 32px), 736px"
             className="w-full h-full object-cover"
           />
           {/* Faint warm vignette — the title sits below the image on cream, so this
               just grounds the photo bottom edge instead of crushing it to black. */}
           <div className="absolute inset-0 bg-gradient-to-t from-ink/35 to-transparent" />
 
-          {/* Film grain — softens low-res images, mobile only */}
-          <div
-            className="absolute inset-0 pointer-events-none sm:hidden"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E")`,
-              opacity: 0.75,
-              mixBlendMode: 'overlay',
-            }}
-          />
         </div>
 
         {/* ── Content ── */}

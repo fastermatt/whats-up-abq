@@ -184,7 +184,7 @@ Return only the JSON object:`
         'Authorization': `Bearer ${DEEPSEEK_KEY}`,
       },
       body: JSON.stringify({
-        model: 'deepseek-chat',
+        model: 'deepseek-v4-flash',
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.1,
         max_tokens: 300,
@@ -376,7 +376,7 @@ async function main() {
 
     // Host image to Supabase Storage
     const prior = existingById.get(recordId)
-    const adminRejected = prior?.image_status === 'rejected' && prior?.ai_enrichment?.admin_rejected === true
+    const adminRejected = prior?.image_status === 'rejected'
     let hostedUrl = adminRejected ? (prior?.cached_photo_url ?? null) : null
 
     if (!adminRejected && imageUrl) {

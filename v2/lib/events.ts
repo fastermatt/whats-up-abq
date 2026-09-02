@@ -25,6 +25,7 @@ export interface NormalizedEvent {
   description: string | null
   price: string | null
   imageUrl: string | null
+  imageQuality?: 'compact' | 'standard' | 'high' | 'rejected' | null
   ticketUrl: string | null
   source: string
   isFeatured: boolean
@@ -121,6 +122,7 @@ interface RawEventRow {
   submitted_by?: string | null
   // Admin image control (added 2026-04-19): 'rejected' forces category fallback
   image_status?: 'unverified' | 'verified' | 'rejected' | null
+  image_quality?: 'compact' | 'standard' | 'high' | 'rejected' | null
 }
 
 // ─── Category counts ──────────────────────────────────────────────────────────
@@ -158,7 +160,7 @@ export async function fetchCategoryCounts(): Promise<CategoryCount[]> {
 // ─── Main fetch function ──────────────────────────────────────────────────────
 
 // Columns for queries that need full normalisation (includes raw JSONB)
-const COLS = 'id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, pinned_last, neighborhood, venue_slug, category, venue_name, submitted_by, image_status'
+const COLS = 'id, source, raw, event_date, cached_photo_url, ai_enrichment, featured, hidden, pinned_last, neighborhood, venue_slug, category, venue_name, submitted_by, image_status, image_quality'
 
 /** Normalize URL-safe category slug forms to canonical DB values.
  *  DB categories: Music, Comedy, Sports, Arts & Theater, Family, Festivals,
@@ -1062,6 +1064,7 @@ export function normalizeRow(row: RawEventRow): NormalizedEvent | null {
     if (evt) {
       evt.neighborhood    = row.neighborhood  ?? null
       evt.venueSlug       = row.venue_slug    ?? null
+      evt.imageQuality    = row.image_quality ?? null
       evt.submitterHandle = null  // populated in fetchEventById for community events
       // Use denormalized DB category when available (consistent with DB filtering).
       // The backfill in migration add_denormalized_category_venue_columns already

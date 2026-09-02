@@ -341,7 +341,7 @@ async function main() {
         age_appeal:       result.age_appeal,
         mood_confidence:  result.confidence,
         mood_enriched_at: new Date().toISOString(),
-        mood_model:       'deepseek-chat',
+        mood_model:       'deepseek-v4-flash',
       }
 
       const { error: updateErr } = await supabase

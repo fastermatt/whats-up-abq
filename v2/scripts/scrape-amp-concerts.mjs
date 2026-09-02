@@ -424,7 +424,7 @@ async function main() {
 
     // Image-status preservation (admin reject takes priority)
     const prior = existingById.get(recordId)
-    const adminRejected = prior?.image_status === 'rejected' && prior?.ai_enrichment?.admin_rejected === true
+    const adminRejected = prior?.image_status === 'rejected'
 
     let cachedPhotoUrl
     let imageStatus

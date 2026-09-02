@@ -90,7 +90,6 @@ const ONLY_SOURCE = value('only')  // e.g., --only=nhcc
 // ── ANSI colors ────────────────────────────────────────────────────────────
 
 const C = { reset: '\x1b[0m', bold: '\x1b[1m', dim: '\x1b[2m', red: '\x1b[31m', green: '\x1b[32m', yellow: '\x1b[33m', blue: '\x1b[34m', cyan: '\x1b[36m' }
-const log = (m) => !QUIET && console.log(m)
 const step = (m) => console.log(`\n${C.bold}${C.cyan}▸ ${m}${C.reset}`)
 const ok   = (m) => console.log(`  ${C.green}✓${C.reset} ${m}`)
 const warn = (m) => console.log(`  ${C.yellow}⚠${C.reset}  ${m}`)
@@ -165,7 +164,6 @@ async function snapshotCounts() {
 
   // Per-source counts (upcoming, not hidden)
   for (const src of SOURCES) {
-    // eslint-disable-next-line
     const { count } = await supabase
       .schema('public').from('events')
       .select('id', { count: 'exact', head: true })
@@ -398,7 +396,6 @@ async function invariantChecks(before, after) {
     autoReject.slice(0, 5).forEach(({ url, ids, titles }) => {
       console.log(`    ${url.slice(0, 70)}…  (${ids.length} events: ${titles.slice(0,2).join(' / ')}…)`)
     })
-    // eslint-disable-next-line
     const { error: rejErr } = await supabase
       .schema('public').from('events')
       .update({ image_status: 'rejected', cached_photo_url: null })
@@ -573,16 +570,9 @@ async function main() {
     if (christianRes.ok) ok(`christian music tagger (${(christianRes.durationMs/1000).toFixed(1)}s)`)
     else warn(`christian music tagger returned non-zero — continuing`)
 
-    // DALL-E 3 illustrated photos for events with no cached_photo_url.
-    // Skips automatically when OPENAI_API_KEY is not set. Capped at 20/run
-    // to keep cost low (~$0.80). A full batch can be triggered from
-    // the enrich-photos workflow in GitHub Actions.
-    if (process.env.OPENAI_API_KEY) {
-      step('DALL-E 3 photo enrichment (illustrated graphics for events missing photos)')
-      const dalleRes = await runScript('enrich-photos-dalle.mjs', ['--limit=20'])
-      if (dalleRes.ok) ok(`dalle photo enrichment (${(dalleRes.durationMs/1000).toFixed(1)}s)`)
-      else warn(`dalle photo enrichment returned non-zero — continuing`)
-    }
+    // Do not generate unique synthetic art per event. The site already has a
+    // deliberately small 40-photo category fallback set (4 per category), and
+    // real organizer imagery remains the first choice.
 
   } else {
     warn('Skipped enrichment (--skip-enrich)')
@@ -591,9 +581,17 @@ async function main() {
   // Cleanup + matcher always run — they're hygiene, not enrichment.
   // Even in --skip-enrich mode these are valuable.
   step('Cleanup (hide past, duplicates, cancelled)')
-  const cleanupRes = await runScript('cleanup-events.mjs')
+  // The 04:00 daily pg_cron job owns hard deletion. Skipping it here prevents
+  // a weekly import from doubling the retention write burst on the same day.
+  const cleanupRes = await runScript('cleanup-events.mjs', ['--skip-purge'])
   if (cleanupRes.ok) ok(`cleanup-events (${(cleanupRes.durationMs/1000).toFixed(1)}s)`)
   else fail(`cleanup-events failed (exit=${cleanupRes.exitCode})`)
+
+  step('Pruning unreferenced Storage objects (30-day grace, bounded batch)')
+  const storageArgs = DRY ? ['--limit=100'] : ['--apply', '--limit=100']
+  const storageRes = await runScript('cleanup-storage.mjs', storageArgs)
+  if (storageRes.ok) ok(`cleanup-storage (${(storageRes.durationMs/1000).toFixed(1)}s)`)
+  else warn(`cleanup-storage failed (exit=${storageRes.exitCode}) — event import remains valid`)
 
   step('Notification matcher (user prefs → events)')
   const mnRes = await runScript('match-notifications.mjs')

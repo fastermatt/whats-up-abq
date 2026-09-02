@@ -2,11 +2,10 @@
 /**
  * scrape-abqtodo.mjs — DeepSeek-powered scraping engine for abqtodo.com
  *
- * DeepSeek does the heavy lifting:
- *   ✅ Reads each event page's HTML and extracts ALL fields intelligently
- *   ✅ Parses dates and times correctly from the actual page content
- *   ✅ Classifies the category with full context
- *   ✅ Cleans up venue names (strips embedded addresses)
+ * The Tribe REST API is the source of truth for event identity, date, time,
+ * venue, description, price, and image. DeepSeek optionally improves category
+ * classification and copy, but a failed or truncated AI response can never
+ * prevent a valid Tribe event from importing.
  *
  * The Tribe REST API provides: event URL list + direct image URLs.
  * The API returns ev.image.url / ev.image.sizes.large.url for each event —
@@ -26,6 +25,11 @@ import { readFileSync, existsSync } from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import { createHash } from 'crypto'
+import {
+  prepareEventImage,
+  removeSupersededImage,
+  uploadPreparedImage,
+} from './lib/event-image-pipeline.mjs'
 
 const __dir = dirname(fileURLToPath(import.meta.url))
 
@@ -76,8 +80,69 @@ async function httpGet(url, timeout = 15000) {
       signal: AbortSignal.timeout(timeout),
     })
     return { ok: res.ok, status: res.status, text: res.ok ? await res.text() : null }
-  } catch (e) {
-    return { ok: false, error: e.message, text: null }
+  } catch (error) {
+    return { ok: false, error: error.message, text: null }
+  }
+}
+
+function htmlToText(value = '') {
+  return String(value)
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;|&#160;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;|&#34;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function classifyTribeEvent(apiEv) {
+  const taxonomy = (apiEv.categories ?? []).map(cat => `${cat.name} ${cat.slug}`).join(' ')
+  const haystack = htmlToText(`${apiEv.title ?? ''} ${taxonomy} ${apiEv.description ?? ''}`).toLowerCase()
+
+  const rules = [
+    ['Comedy', /\b(comedy|comedian|improv|stand[ -]?up)\b/],
+    ['Film', /\b(film|movie|cinema|screening)\b/],
+    ['Music', /\b(concert|music|musical artist|band|singer|dj|open mic|orchestra|symphony)\b/],
+    ['Sports', /\b(sport|fitness|yoga|pilates|zumba|run|race|game|tournament|soccer|baseball|basketball|football|hockey)\b/],
+    ['Outdoor', /\b(outdoor|hike|hiking|trail|nature walk|birding|camping|climbing)\b/],
+    ['Food & Drink', /\b(food|drink|beer|brew|wine|cocktail|restaurant|dinner|brunch|tasting|culinary)\b/],
+    ['Festivals', /\b(festival|fiesta|fair|parade|celebration)\b/],
+    ['Family', /\b(family|families|kids?|children|childrens|storytime|lego|teen|youth)\b/],
+    ['Arts & Theater', /\b(art|arts|theatre|theater|play|ballet|dance performance|gallery|museum|exhibit)\b/],
+  ]
+
+  return rules.find(([, pattern]) => pattern.test(haystack))?.[0] ?? 'Community'
+}
+
+function tribeExtract(apiEv) {
+  const start = apiEv.start_date_details ?? {}
+  const values = apiEv.cost_details?.values ?? []
+  const cost = htmlToText(apiEv.cost ?? '')
+  const isFree = values.length === 0 && (!cost || /\bfree\b/i.test(cost))
+  const description = htmlToText(apiEv.description ?? apiEv.excerpt ?? '').slice(0, 400)
+
+  return {
+    title: htmlToText(apiEv.title) || `ABQ event ${apiEv.id}`,
+    date: [start.year, start.month, start.day].every(Boolean)
+      ? `${start.year}-${start.month}-${start.day}`
+      : String(apiEv.start_date ?? '').slice(0, 10),
+    time: apiEv.all_day ? null : [start.hour, start.minutes].every(v => v != null)
+      ? `${String(start.hour).padStart(2, '0')}:${String(start.minutes).padStart(2, '0')}`
+      : (String(apiEv.start_date ?? '').slice(11, 16) || null),
+    venue: htmlToText(apiEv.venue?.venue) || 'Albuquerque',
+    address: htmlToText(apiEv.venue?.address) || null,
+    city: htmlToText(apiEv.venue?.city) || 'Albuquerque',
+    description,
+    imageUrl: apiEv.image?.sizes?.large?.url ?? apiEv.image?.url ?? null,
+    category: classifyTribeEvent(apiEv),
+    price: isFree ? 'Free' : (cost || 'See event page'),
+    isFree,
   }
 }
 
@@ -88,6 +153,7 @@ async function httpGet(url, timeout = 15000) {
  * cleaning venue names, classifying category, etc.
  */
 async function deepseekExtract(eventUrl, html) {
+  if (!DEEPSEEK_KEY || !html) return null
   // Strip scripts, styles, nav, footer to reduce tokens but keep event content
   const cleaned = html
     .replace(/<script[\s\S]*?<\/script>/gi, '')
@@ -139,16 +205,19 @@ Return only the JSON object:`
         'Authorization': `Bearer ${DEEPSEEK_KEY}`,
       },
       body: JSON.stringify({
-        model: 'deepseek-chat',
+        model: 'deepseek-v4-flash',
         messages: [{ role: 'user', content: prompt }],
+        response_format: { type: 'json_object' },
+        thinking: { type: 'disabled' },
         temperature: 0.1,
-        max_tokens: 512,
+        max_tokens: 900,
       }),
     })
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const json = await res.json()
-    const text = json.choices[0].message.content.trim()
+    const text = json.choices?.[0]?.message?.content?.trim()
+    if (!text) throw new Error('Empty response')
 
     // Parse JSON — handle code blocks if DeepSeek wraps it
     const jsonStr = text.replace(/^```json?\n?/i, '').replace(/\n?```$/i, '').trim()
@@ -159,50 +228,50 @@ Return only the JSON object:`
     if (!VALID_CATS.includes(data.category)) data.category = 'Community'
 
     return data
-  } catch (e) {
-    return null // Caller handles failure
+  } catch (error) {
+    console.warn(`DeepSeek extraction failed: ${error.message}`)
+    return null
   }
 }
 
 // ── Image hosting ─────────────────────────────────────────────────────────────
 async function hostImage(eventId, imageUrl) {
-  if (!imageUrl || SKIP_IMG) return null
-  if (!imageUrl.startsWith('http')) return null
+  if (!imageUrl || SKIP_IMG || !imageUrl.startsWith('http')) {
+    return { ok: false, reason: 'skipped', permanent: false }
+  }
 
   try {
     const res = await fetch(imageUrl, {
       headers: { 'User-Agent': UA },
       signal: AbortSignal.timeout(15000),
     })
-    if (!res.ok) return null
+    if (!res.ok) return { ok: false, reason: `http-${res.status}`, permanent: false }
 
     const buf = Buffer.from(await res.arrayBuffer())
-    if (buf.length < 4000) return null // Too small = placeholder
+    if (buf.length < 4000) return { ok: false, reason: 'too-small-bytes', permanent: true }
 
     const hash = createHash('md5').update(buf).digest('hex').slice(0, 8)
     if (PLACEHOLDER_HASHES.has(hash)) {
       console.log(`    ⚠ Placeholder hash ${hash}`)
-      return null
+      return { ok: false, reason: `placeholder-${hash}`, permanent: true }
     }
 
-    // Resize with sharp if available
-    let uploadBuf = buf
-    let ext = 'jpg'
-    try {
-      const { default: sharp } = await import('sharp')
-      uploadBuf = await sharp(buf).resize({ width: 1080, withoutEnlargement: false }).webp({ quality: 82 }).toBuffer()
-      ext = 'webp'
-    } catch { /* sharp not available — upload original */ }
+    const prepared = await prepareEventImage(buf)
+    if (!prepared.ok) {
+      return {
+        ok: false,
+        reason: prepared.reason,
+        permanent: prepared.quality === 'rejected',
+        prepared,
+      }
+    }
 
-    const filename = `${eventId}-${Date.now()}.${ext}`
-    const { error } = await supabase.storage.from('event-photos').upload(
-      filename, uploadBuf, { contentType: ext === 'webp' ? 'image/webp' : 'image/jpeg', upsert: false }
-    )
-    if (error) return null
-
-    const { data: { publicUrl } } = supabase.storage.from('event-photos').getPublicUrl(filename)
-    return publicUrl
-  } catch { return null }
+    const uploaded = await uploadPreparedImage(supabase, eventId, prepared)
+    if (!uploaded.ok) return { ok: false, reason: uploaded.reason, permanent: false }
+    return { ok: true, ...uploaded, prepared }
+  } catch (error) {
+    return { ok: false, reason: error.message, permanent: false }
+  }
 }
 
 // ── Tribe API — get event URL list ────────────────────────────────────────────
@@ -240,14 +309,27 @@ async function fetchEventUrls() {
   return Array.from(bySlug.values()).sort((a, b) => (a.start_date || '').localeCompare(b.start_date || ''))
 }
 
+async function fetchExistingEvents() {
+  const rows = []
+  for (let offset = 0; ; offset += 1000) {
+    const { data, error } = await supabase.schema('public').from('events')
+      .select('id, image_status, cached_photo_url, image_width, image_height, image_bytes, image_hash, image_quality')
+      .like('id', 'abqtodo-%')
+      .range(offset, offset + 999)
+    if (error) throw new Error(`Existing ABQtodo query failed: ${error.message}`)
+    rows.push(...(data ?? []))
+    if (!data || data.length < 1000) break
+  }
+  return rows
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 async function main() {
   console.log(`🤖 scrape-abqtodo (DeepSeek engine) ${DRY_RUN ? '— DRY RUN ' : ''}— ${DAYS}d window, limit=${LIMIT}`)
   console.log()
 
   // Load existing abqtodo records
-  const { data: existing } = await supabase.schema('public').from('events')
-    .select('id, image_status, cached_photo_url').like('id', 'abqtodo-%')
+  const existing = await fetchExistingEvents()
   const existingById = new Map((existing ?? []).map(e => [e.id, e]))
   console.log(`${existingById.size} existing abqtodo events in DB\n`)
 
@@ -278,18 +360,14 @@ async function main() {
 
     process.stdout.write(`  [${i+1}/${toProcess.length}] Fetching page… `)
 
-    // Fetch the actual event page
+    const baseline = tribeExtract(apiEv)
+
+    // Fetch the actual event page for optional AI enrichment. The Tribe API is
+    // complete enough to import safely even if the page or AI service is down.
     const pageRes = await httpGet(eventUrl, 12000)
-    if (!pageRes.ok || !pageRes.text) {
-      console.log(`HTTP ${pageRes.status ?? 'error'} — skip`)
-      failed++
-      failedIds.push(id)
-      await new Promise(r => setTimeout(r, 300))
-      continue
-    }
 
     // Virtual event check on page HTML
-    if (VIRTUAL_RE.test(pageRes.text.slice(0, 3000))) {
+    if (apiEv.is_virtual || (pageRes.text && VIRTUAL_RE.test(pageRes.text.slice(0, 3000)))) {
       console.log('virtual — skip')
       blocked++
       await new Promise(r => setTimeout(r, 300))
@@ -303,16 +381,13 @@ async function main() {
       ?? apiEv.image?.url
       ?? null
 
-    // DeepSeek extracts everything else
-    process.stdout.write('DeepSeek… ')
-    const extracted = await deepseekExtract(eventUrl, pageRes.text)
-
-    if (!extracted) {
-      console.log('parse failed — skip')
-      failed++
-      failedIds.push(id)
-      await new Promise(r => setTimeout(r, 500))
-      continue
+    // DeepSeek is enrichment, not a gate. Keep authoritative API date/time and
+    // location fields so a hallucination cannot move an event.
+    process.stdout.write(pageRes.text ? 'DeepSeek… ' : `page HTTP ${pageRes.status ?? 'error'}; API baseline… `)
+    const ai = pageRes.text ? await deepseekExtract(eventUrl, pageRes.text) : null
+    const extracted = {
+      ...baseline,
+      category: ai && VALID_CATS.includes(ai.category) ? ai.category : baseline.category,
     }
 
     // Candidate image: API image first, DeepSeek extraction as fallback
@@ -330,34 +405,39 @@ async function main() {
 
     // Host image to Supabase Storage
     const prior = existingById.get(id)
-    // Only preserve ADMIN rejections (flagged via the admin UI reject button).
-    // Old pipeline rejections (from host-event-images.mjs) can be overridden.
-    const adminRejected = prior?.image_status === 'rejected' && prior?.ai_enrichment?.admin_rejected === true
-    let hostedUrl = adminRejected ? (prior?.cached_photo_url ?? null) : null
-    // Keep existing Supabase-hosted image if we already have one and found no new candidate
-    if (!hostedUrl && prior?.cached_photo_url?.includes('supabase') && !candidateImageUrl) {
-      hostedUrl = prior.cached_photo_url
-    }
+    // A rejection is an admin-owned decision. The old check depended on an
+    // ai_enrichment flag that the admin API never wrote, so imports could undo it.
+    const adminRejected = prior?.image_status === 'rejected'
+    const previousHostedUrl = prior?.cached_photo_url?.includes('supabase')
+      ? prior.cached_photo_url
+      : null
+    let hostedUrl = adminRejected ? null : previousHostedUrl
+    let hostedResult = null
 
-    if (!adminRejected && candidateImageUrl) {
-      const needsNewImage = !hostedUrl || !hostedUrl.includes('supabase')
-      if (needsNewImage) {
-        const url = await hostImage(id, candidateImageUrl)
-        if (url) { hostedUrl = url; imagesHosted++ }
-        await new Promise(r => setTimeout(r, 200))
+    if (!adminRejected && candidateImageUrl && !SKIP_IMG) {
+      hostedResult = await hostImage(id, candidateImageUrl)
+      if (hostedResult.ok) {
+        hostedUrl = hostedResult.url
+        if (!hostedResult.reused) imagesHosted++
+      } else {
+        console.log(`    ⚠ image not hosted: ${hostedResult.reason}`)
       }
+      await new Promise(r => setTimeout(r, 200))
     }
 
     // Final photo URL: Supabase-hosted > Tribe API/DeepSeek URL > prior DB URL (never wipe)
     // abqtodo.com URLs work through EventImage's /api/image-proxy — storing them directly is fine
-    const finalPhotoUrl = adminRejected
-      ? (prior?.cached_photo_url ?? null)
+    const permanentlyRejected = hostedResult?.permanent === true && !hostedUrl
+    const finalPhotoUrl = adminRejected || permanentlyRejected
+      ? null
       : (hostedUrl ?? candidateImageUrl ?? prior?.cached_photo_url ?? null)
 
     const finalImageStatus = adminRejected
       ? 'rejected'
-      : hostedUrl
-        ? 'verified'
+      : permanentlyRejected
+        ? 'rejected'
+        : hostedUrl
+          ? (prior?.image_status === 'verified' && hostedUrl === previousHostedUrl ? 'verified' : 'unverified')
         : finalPhotoUrl
           ? 'unverified'
           : null
@@ -398,7 +478,7 @@ async function main() {
       abqtodo_id:   apiEv.id,
       abqtodo_slug: apiEv.slug,
       scraped_at:   new Date().toISOString(),
-      scraped_by:   'deepseek-v3-tribe-img',
+      scraped_by:   ai ? 'tribe-api+deepseek-v4' : 'tribe-api',
     }
 
     const eventDatetime = (extracted.time && extracted.time !== '00:00')
@@ -416,6 +496,15 @@ async function main() {
       hidden: false,
       category: extracted.category,
       venue_name: extracted.venue || null,
+      image_width: hostedResult?.ok ? hostedResult.prepared.srcW : (prior?.image_width ?? null),
+      image_height: hostedResult?.ok ? hostedResult.prepared.srcH : (prior?.image_height ?? null),
+      image_bytes: hostedResult?.ok ? hostedResult.prepared.outSize : (prior?.image_bytes ?? null),
+      image_hash: hostedResult?.ok ? hostedResult.prepared.hash : (prior?.image_hash ?? null),
+      image_quality: permanentlyRejected
+        ? 'rejected'
+        : hostedResult?.ok
+          ? hostedResult.prepared.quality
+          : (prior?.image_quality ?? null),
     }
 
     const { error } = await supabase.schema('public').from('events')
@@ -429,6 +518,15 @@ async function main() {
       const isNew = !existingById.has(id)
       console.log(`    ${isNew ? '✅ inserted' : '↑  updated'} | img:${hostedUrl ? '✓ supabase' : '✗ none'}`)
       if (isNew) { inserted++ } else { updated++ }
+      if (hostedResult?.ok) {
+        const cleanup = await removeSupersededImage({
+          supabase,
+          previousUrl: previousHostedUrl,
+          nextUrl: hostedResult.url,
+          supabaseUrl: SUPABASE_URL,
+        })
+        if (cleanup.removed) console.log(`    🧹 removed superseded image: ${cleanup.key}`)
+      }
     }
 
     // Polite delay between pages

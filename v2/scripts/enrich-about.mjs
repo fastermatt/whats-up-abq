@@ -131,7 +131,7 @@ async function generateAbout(events) {
           'Authorization': `Bearer ${DEEPSEEK_KEY}`,
         },
         body: JSON.stringify({
-          model:       'deepseek-chat',
+          model:       'deepseek-v4-flash',
           temperature: 0.4,  // some creativity, but grounded
           max_tokens:  2048,
           messages: [
@@ -258,7 +258,7 @@ async function main() {
         about:            result.about,
         highlights:       highlights,
         localTips:        result.tip && result.tip.trim() ? result.tip.trim() : (existing.localTips ?? null),
-        about_model:      'deepseek-chat',
+        about_model:      'deepseek-v4-flash',
         about_enriched_at: new Date().toISOString(),
       }
 

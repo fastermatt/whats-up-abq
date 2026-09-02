@@ -6,11 +6,14 @@
  *      writes these; the V2 importer uses the `seatgeek_{id}` form, so the sg-
  *      prefix rows are always duplicates).
  *   3. Hide Ticketmaster events with status.code = 'cancelled'.
+ *   4. Permanently delete up to 100 events older than 30 days.
  *
  * Each hidden row is tagged in ai_enrichment.hide_reason so changes are reversible.
  *
  * Usage:
  *   SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... node scripts/cleanup-events.mjs
+ *   node scripts/cleanup-events.mjs --dry-run
+ *   node scripts/cleanup-events.mjs --skip-purge  # cron owns retention
  */
 import { createClient } from '@supabase/supabase-js'
 import fs from 'fs'
@@ -42,6 +45,8 @@ if (!SUPABASE_KEY) {
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+const DRY_RUN = process.argv.includes('--dry-run')
+const SKIP_PURGE = process.argv.includes('--skip-purge')
 
 // Today in America/Denver, as YYYY-MM-DD
 function todayInDenver() {
@@ -64,6 +69,11 @@ async function hide(reason, filterFn) {
   if (!rows || rows.length === 0) {
     console.log(`  [${reason}] nothing to hide`)
     return 0
+  }
+
+  if (DRY_RUN) {
+    console.log(`  [${reason}] would hide ${rows.length} row(s)`)
+    return rows.length
   }
 
   const ids = rows.map(r => r.id)
@@ -97,7 +107,7 @@ async function hide(reason, filterFn) {
 }
 
 async function main() {
-  console.log('🧹 ABQ Unplugged — daily event cleanup\n')
+  console.log(`🧹 ABQ Unplugged — daily event cleanup${DRY_RUN ? ' (DRY RUN)' : ''}\n`)
   const today = todayInDenver()
   console.log(`  Today (America/Denver): ${today}\n`)
 
@@ -138,6 +148,10 @@ async function main() {
     for (const row of data || []) {
       const title = typeof row.raw?.name === 'string' ? row.raw.name : row.raw?.name?.text
       if (!title || !SPAM_TITLE.test(title)) continue
+      if (DRY_RUN) {
+        hidden += 1
+        continue
+      }
       const merged = {
         ...(row.ai_enrichment || {}),
         hide_reason: 'eb_spam_title_daily',
@@ -148,7 +162,7 @@ async function main() {
         .eq('id', row.id)
       if (!error) hidden += 1
     }
-    console.log(`  [eb_spam_title_daily] hid ${hidden} rows`)
+    console.log(`  [eb_spam_title_daily] ${DRY_RUN ? 'would hide' : 'hid'} ${hidden} rows`)
   }
 
   // 5. Cross-source + intra-source duplicates.
@@ -235,21 +249,42 @@ async function main() {
 
       if (toHide.size > 0) {
         const ids = [...toHide]
-        const now = new Date().toISOString()
-        for (let i = 0; i < ids.length; i += 200) {
-          const chunk = ids.slice(i, i + 200)
-          const { data: existing } = await supabase.schema('public').from('events')
-            .select('id, ai_enrichment').in('id', chunk)
-          await Promise.all((existing || []).map(async row => {
-            const merged = { ...(row.ai_enrichment || {}), hide_reason: 'auto_dedup_daily', hidden_at: now }
-            const { error } = await supabase.schema('public').from('events')
-              .update({ hidden: true, ai_enrichment: merged }).eq('id', row.id)
-            if (!error) hidden += 1
-          }))
+        if (DRY_RUN) {
+          hidden = ids.length
+        } else {
+          const now = new Date().toISOString()
+          for (let i = 0; i < ids.length; i += 200) {
+            const chunk = ids.slice(i, i + 200)
+            const { data: existing } = await supabase.schema('public').from('events')
+              .select('id, ai_enrichment').in('id', chunk)
+            await Promise.all((existing || []).map(async row => {
+              const merged = { ...(row.ai_enrichment || {}), hide_reason: 'auto_dedup_daily', hidden_at: now }
+              const { error } = await supabase.schema('public').from('events')
+                .update({ hidden: true, ai_enrichment: merged }).eq('id', row.id)
+              if (!error) hidden += 1
+            }))
+          }
         }
       }
-      console.log(`  [auto_dedup_daily] hid ${hidden} dup row(s)`)
+      console.log(`  [auto_dedup_daily] ${DRY_RUN ? 'would hide' : 'hid'} ${hidden} dup row(s)`)
     }
+  }
+
+  // 6. Hard-delete only after a 30-day grace period. The RPC is intentionally
+  // bounded at 100 rows so a backlog cannot create another burst-I/O incident.
+  if (SKIP_PURGE) {
+    console.log('  [past_event_retention_30d] skipped here; daily cron owns the bounded purge')
+  } else if (DRY_RUN) {
+    const cutoff = new Date(Date.now() - 30 * 86_400_000).toISOString().slice(0, 10)
+    const { count, error } = await supabase.schema('public').from('events')
+      .select('id', { count: 'exact', head: true })
+      .lt('event_date', cutoff)
+    if (error) console.error('❌ [past_event_retention_30d] count error:', error.message)
+    else console.log(`  [past_event_retention_30d] would delete ${Math.min(count ?? 0, 100)} / ${count ?? 0} expired row(s)`)
+  } else {
+    const { data: purged, error } = await supabase.rpc('purge_old_events')
+    if (error) console.error('❌ [past_event_retention_30d] purge error:', error.message)
+    else console.log(`  [past_event_retention_30d] deleted ${purged ?? 0} expired row(s)`)
   }
 
   console.log('\n✅ Cleanup complete')

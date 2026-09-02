@@ -349,7 +349,7 @@ async function generateCaption(postType: PostType, events: EventSnap[], handles:
         // which burns 800–2000 tokens internally before writing any output, leaving
         // nothing for the caption. 'deepseek-chat' skips that pass entirely:
         // 0 thinking tokens, ~100 output tokens, real captions every time.
-        model: 'deepseek-chat',
+        model: 'deepseek-v4-flash',
         messages: [
           { role: 'system', content: CAPTION_SYSTEM },
           { role: 'user',   content: userPrompt },

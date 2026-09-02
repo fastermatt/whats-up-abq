@@ -8,9 +8,11 @@
     "start": "next start",
     "lint": "eslint",
     "test:analytics": "node --experimental-strip-types --test lib/analytics/session.test.ts",
+    "test:images": "node --test scripts/lib/event-image-pipeline.test.mjs",
     "ingest": "node scripts/ingest.mjs",
     "ingest:smoke": "node scripts/ingest.mjs --smoke-only",
-    "ingest:dry": "node scripts/ingest.mjs --dry-run"
+    "ingest:dry": "node scripts/ingest.mjs --dry-run",
+    "cleanup:storage": "node scripts/cleanup-storage.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1030.0",
