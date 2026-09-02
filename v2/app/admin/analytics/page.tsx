@@ -230,7 +230,7 @@ export default async function AnalyticsPage() {
       {loadError && <Warning title="Analytics query failed" detail={loadError} />}
       {!loadError && report.daysSilent !== null && report.daysSilent > 1 && <Warning title={`Human analytics data is ${report.daysSilent} days old`} detail={`Last human event: ${report.lastEventAt ? new Date(report.lastEventAt).toLocaleString() : 'unknown'}. The heartbeat alerts after a 26-hour zero-data window.`} />}
 
-      <section className="grid grid-cols-2 lg:grid-cols-6 gap-3">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
         <Kpi label="Today" value={report.todayVisitors} icon={TrendingUp} tip="Unique browser visitors today" />
         <Kpi label="7-Day Visitors" value={report.weekVisitors} icon={Users} tip="Daily unique visitors summed over 7 days" />
         <Kpi label="Unique Visitors" value={report.visitors} icon={Users} tip="Distinct browser IDs in 30 days; not people" />
@@ -261,7 +261,7 @@ export default async function AnalyticsPage() {
       <section className="bg-white/5 rounded-2xl p-5">
         <h2 className="text-xs uppercase tracking-widest text-white/55 mb-4">Daily Human Visitors</h2>
         {report.daily.length === 0 ? <p className="text-white/45 text-sm py-6 text-center">No human session data in this window.</p> : <>
-          <div className="flex gap-[2px] h-32">{report.daily.map(day => <div key={day.day} className="flex-1 relative group" title={`${day.day}: ${day.visitors} visitors, ${day.sessions} sessions`}><div className={`absolute bottom-0 inset-x-0 rounded-t ${day.day === today ? 'bg-terra' : 'bg-white/20 group-hover:bg-white/35'}`} style={{ height: `${Math.max(Math.round(day.visitors / maxDaily * 128), 2)}px` }} /></div>)}</div>
+          <div className="flex gap-[2px] h-32 overflow-hidden">{report.daily.map(day => <div key={day.day} className="flex-1 relative group" title={`${day.day}: ${day.visitors} visitors, ${day.sessions} sessions`}><div className={`absolute bottom-0 inset-x-0 rounded-t ${day.day === today ? 'bg-terra' : 'bg-white/20 group-hover:bg-white/35'}`} style={{ height: `${Math.max(Math.round(day.visitors / maxDaily * 128), 2)}px` }} /></div>)}</div>
           <div className="flex justify-between mt-2 text-white/45 text-[10px]"><span>{report.daily[0]?.day}</span><span>{today}</span></div>
         </>}
       </section>
@@ -311,7 +311,7 @@ function Warning({ title, detail }: { title: string; detail: string }) {
 }
 
 function Kpi({ label, value, icon: Icon, tip }: { label: string; value: number | string; icon: typeof Users; tip: string }) {
-  return <div className="bg-white/5 rounded-2xl p-4" title={tip}><div className="flex items-center gap-2 mb-2"><Icon className="w-3.5 h-3.5 text-terra" /><p className="text-white/40 text-[10px] uppercase tracking-wider">{label}</p></div><p className="text-3xl font-black tabular-nums" style={{ fontFamily: 'var(--font-epilogue)' }}>{typeof value === 'number' ? fmt(value) : value}</p><p className="text-white/45 text-[10px] mt-1">{tip}</p></div>
+  return <div className="bg-white/5 rounded-2xl p-4 min-w-0" title={tip}><div className="flex items-center gap-2 mb-2"><Icon className="w-3.5 h-3.5 text-terra" /><p className="text-white/40 text-[10px] uppercase tracking-wider">{label}</p></div><p className="text-3xl font-black tabular-nums" style={{ fontFamily: 'var(--font-epilogue)' }}>{typeof value === 'number' ? fmt(value) : value}</p><p className="text-white/45 text-[10px] mt-1 line-clamp-2">{tip}</p></div>
 }
 
 function BarRow({ label, value, percent }: { label: string; value: number; percent: number }) {
