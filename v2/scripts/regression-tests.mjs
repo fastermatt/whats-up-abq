@@ -58,6 +58,23 @@ const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
 
 const SITE = typeof argv.site === 'string' ? argv.site.replace(/\/$/, '') : null
 
+async function fetchSite(url, options = {}, attempts = 3) {
+  let lastError
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      const response = await fetch(url, options)
+      if (![429, 502, 503, 504].includes(response.status) || attempt === attempts) {
+        return response
+      }
+    } catch (error) {
+      lastError = error
+      if (attempt === attempts) throw error
+    }
+    await new Promise(resolve => setTimeout(resolve, attempt * 750))
+  }
+  throw lastError ?? new Error(`Unable to fetch ${url}`)
+}
+
 // ─────────────────────────────────────────────────────────────────────────
 // Tests
 // Each test returns { ok: boolean, detail: string }
@@ -642,7 +659,7 @@ const TESTS = [
         ]
         const failures = []
         for (const t of TESTS) {
-          const r = await fetch(`${SITE}/events?category=${t.slug}`, { redirect: 'manual' })
+          const r = await fetchSite(`${SITE}/events?category=${t.slug}`, { redirect: 'manual' })
           // Expect 308 redirect to canonical URL
           const location = r.headers.get('location') || ''
           if (r.status !== 308 || !location.includes(t.expected)) {
@@ -661,7 +678,7 @@ const TESTS = [
       tag: 'live',
       description: '/search?q=... should redirect to /events?q=... (was 404 before)',
       async fn() {
-        const r = await fetch(`${SITE}/search?q=jazz`, { redirect: 'manual' })
+        const r = await fetchSite(`${SITE}/search?q=jazz`, { redirect: 'manual' })
         const location = r.headers.get('location') || ''
         return r.status === 308 && location.includes('/events') && location.includes('q=jazz')
           ? { ok: true, detail: `308 → ${location}` }
@@ -684,7 +701,7 @@ const TESTS = [
         ]
         const failures = []
         for (const t of TESTS) {
-          const r = await fetch(`${SITE}/venues/${t.slug}`, { redirect: 'manual' })
+          const r = await fetchSite(`${SITE}/venues/${t.slug}`, { redirect: 'manual' })
           const location = r.headers.get('location') || ''
           if (r.status !== 308 || !location.includes(t.expectedSubstring)) {
             failures.push(`${t.slug} → ${r.status} ${location || '(no redirect)'}`)
@@ -712,7 +729,7 @@ const TESTS = [
         // page has both names so we only test ones with distinct canonical slugs
         const failures = []
         for (const t of TESTS) {
-          const r = await fetch(`${SITE}/neighborhoods/${t.slug}`)
+          const r = await fetchSite(`${SITE}/neighborhoods/${t.slug}`)
           // After following any redirects, the final URL should contain the canonical slug
           const finalUrl = r.url
           if (!finalUrl.includes(t.expectedSubstring) && !finalUrl.includes(t.slug)) {
@@ -745,7 +762,7 @@ const TESTS = [
         ]
         const failures = []
         for (const v of VENUES) {
-          const r = await fetch(`${SITE}/venues/${v.slug}`)
+          const r = await fetchSite(`${SITE}/venues/${v.slug}`)
           if (r.status !== 200) {
             failures.push(`${v.slug} → ${r.status}`)
             continue
@@ -771,7 +788,7 @@ const TESTS = [
       tag: 'live',
       description: 'Homepage returns 200 with content',
       async fn() {
-        const r = await fetch(SITE)
+        const r = await fetchSite(SITE)
         const ok = r.status === 200
         const text = ok ? await r.text() : ''
         return ok && text.includes('ABQ Unplugged')
@@ -784,7 +801,7 @@ const TESTS = [
       tag: 'live',
       description: 'Sitemap includes venue pages',
       async fn() {
-        const r = await fetch(`${SITE}/sitemap.xml`)
+        const r = await fetchSite(`${SITE}/sitemap.xml`)
         const text = await r.text()
         const venueCount = (text.match(/\/venues\//g) || []).length
         return venueCount >= 30
@@ -798,7 +815,7 @@ const TESTS = [
       tag: 'live',
       description: 'Searching "taco" should not return Tacoma Rainiers baseball games (word-boundary regression)',
       async fn() {
-        const r = await fetch(`${SITE}/events?q=taco`)
+        const r = await fetchSite(`${SITE}/events?q=taco`)
         if (r.status !== 200) return { ok: false, detail: `Got ${r.status}` }
         const text = await r.text()
         // If "Tacoma Rainiers" appears in the page, the word-boundary fix is broken
@@ -815,7 +832,7 @@ const TESTS = [
       tag: 'live',
       description: 'POST /api/newsletter responds (not 404)',
       async fn() {
-        const r = await fetch(`${SITE}/api/newsletter`, {
+        const r = await fetchSite(`${SITE}/api/newsletter`, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ email: 'invalid' }),
