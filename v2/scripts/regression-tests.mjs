@@ -96,7 +96,7 @@ const TESTS = [
     async fn() {
       const { data, error } = await sb
         .from('events')
-        .select('id, source, venue_name')
+        .select('id, source, venue_name, raw')
         .eq('hidden', false)
         .gte('event_date', new Date().toISOString().slice(0, 10))
         .or('venue_name.is.null,venue_name.eq.')
