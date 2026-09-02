@@ -102,7 +102,7 @@ async function checkCounts() {
     eventbrite:   { warn:  30, fail: 10 },
     nhcc:         { warn:  15, fail:  5 },
     local:        { warn:  10, fail:  3 },
-    volunteer:    { warn:   5, fail:  1 },
+    'local-venue': { warn: 20, fail: 5 },
   }
 
   const lines = Object.entries(counts)
