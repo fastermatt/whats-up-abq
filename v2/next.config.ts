@@ -5,6 +5,15 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  // Every prerendered discovery page queries the same Supabase project. Keep
+  // static generation serial so a deploy cannot create a burst of concurrent
+  // reads when the database is already near its Disk IO allowance. A single
+  // retry also avoids multiplying an upstream outage into more database work.
+  experimental: {
+    staticGenerationRetryCount: 1,
+    staticGenerationMaxConcurrency: 1,
+    staticGenerationMinPagesPerWorker: 100,
+  },
   async headers() {
     return [
       {

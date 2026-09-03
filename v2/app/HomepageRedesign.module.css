@@ -239,7 +239,8 @@
 .quickLink:hover { background: var(--color-sand-light); }
 .quickLabel { padding-bottom: 6px; border-bottom: 2px solid var(--color-terra); display: flex; align-items: baseline; gap: 8px; font: 800 clamp(22px, 2.4vw, 34px)/1.1 var(--font-epilogue), sans-serif; }
 .quickContext { color: var(--color-ink-mid); font: 600 13px/1.2 var(--font-inter), sans-serif; }
-.quickArrow { color: var(--color-terra); font-size: 27px; }
+.quickArrow { color: var(--color-terra); display: inline-flex; }
+.quickArrow svg { width: 25px; height: 25px; stroke-width: 2; }
 
 .picks { width: min(100%, 1440px); margin-inline: auto; padding: 34px 36px 62px; }
 .picksHead { margin-bottom: 15px; display: flex; align-items: baseline; justify-content: space-between; gap: 20px; }
@@ -325,7 +326,7 @@
   .quickLink:active { transform: scale(.975); }
   .quickLabel { padding: 0; border: 0; display: block; font-size: 14px; line-height: 1.1; letter-spacing: -.015em; }
   .quickContext { display: block; margin-top: 3px; font-size: 11px; }
-  .quickArrow { font-size: 22px; }
+  .quickArrow svg { width: 21px; height: 21px; }
 
   .picks { padding: 22px 16px 28px; overflow: hidden; }
   .picksHead { align-items: flex-end; }

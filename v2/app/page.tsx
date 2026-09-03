@@ -250,8 +250,8 @@ export default async function DiscoverPage() {
   const uniqueTonightEvents = Array.from(
     new Map(tonight.events.map((event) => {
       const titleKey = event.title.trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ')
-      const sportsKey = event.category === 'Sports'
-        ? `sports:${(event.venue || '').trim().toLowerCase()}:${event.time || ''}`
+      const sportsKey = event.category === 'Sports' && event.venue
+        ? `sports:${event.venue.trim().toLowerCase()}:${event.time || ''}`
         : titleKey
       return [sportsKey, event] as const
     })).values()
@@ -328,7 +328,7 @@ export default async function DiscoverPage() {
                 <span>{label}</span>
                 <span className={homepageStyles.quickContext}>{context}</span>
               </span>
-              <span className={homepageStyles.quickArrow} aria-hidden="true">→</span>
+              <span className={homepageStyles.quickArrow} aria-hidden="true"><ArrowRight /></span>
             </Link>
           ))}
         </div>
