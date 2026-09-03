@@ -197,7 +197,11 @@ export default async function DiscoverPage() {
   // Redis caches each data source globally (Upstash is multi-region) so even
   // Lighthouse/PSI cold-start requests get fast data after the first warm-up.
   const [tonight, weekend, allUpcoming, neighborhoodCounts, movies, holidayEvents] = await Promise.all([
-    rc('hp:tonight',     () => fetchEvents({ timeFilter: 'tonight', limit: 10 }),     300),
+    // Tonight's query already loads the full day so it can apply the 5 PM
+    // cutoff in memory. Keep the larger result pool here; it costs no extra DB
+    // rows and gives the editorial picker enough variety to avoid routine
+    // daytime/library listings when stronger evening options exist.
+    rc('hp:tonight:v2',  () => fetchEvents({ timeFilter: 'tonight', limit: 30 }),     300),
     rc('hp:weekend',     () => fetchEvents({ timeFilter: 'this-weekend', limit: 10 }), 900),
     rc('hp:upcoming',    () => fetchEvents({ timeFilter: 'upcoming', limit: 1 }),      600),
     rc('hp:hoods',       () => fetchNeighborhoodCounts(),                              3600),
@@ -271,7 +275,38 @@ export default async function DiscoverPage() {
     }
   })
 
-  const homepagePicks = uniqueTonightEvents.slice(0, 3)
+  // "Worth leaving the house for" is a promise, not just another date-sorted
+  // list. Prefer complete, time-specific destination events. Routine classes
+  // and library programs remain available in Tonight/search, but do not crowd
+  // out a game, show, open mic, or evening social event in this three-item edit.
+  const editorialScore = (event: NormalizedEvent) => {
+    const title = event.title.toLowerCase()
+    const destinationWords = /\b(vs\.?|concert|comedy|festival|show|theat(?:er|re)|live|open mic|trivia|game|party|dance|rodeo)\b/
+    const routineWords = /\b(library|storytime|book club|yoga|workshop|class|meeting|support group|craft club|lego club|zoob club)\b/
+    const categoryScore: Record<string, number> = {
+      Music: 4,
+      Comedy: 4,
+      Sports: 3,
+      'Arts & Theater': 3,
+      Festivals: 3,
+      'Food & Drink': 2,
+      Family: 1,
+      Community: 0,
+    }
+
+    return (event.isFeatured ? 20 : 0)
+      + (event.time ? 8 : 0)
+      + (event.imageUrl && !event.imageUrl.startsWith('/fallbacks/') ? 3 : 0)
+      + (destinationWords.test(title) ? 6 : 0)
+      - (routineWords.test(title) ? 10 : 0)
+      + (categoryScore[event.category ?? ''] ?? 0)
+  }
+
+  const homepagePicks = uniqueTonightEvents
+    .map((event, index) => ({ event, index, score: editorialScore(event) }))
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .slice(0, 3)
+    .map(({ event }) => event)
 
   // LCP preload — Lighthouse identified the first event card image as the LCP
   // element (NOT the hero h2). The <img> already carries fetchPriority="high"

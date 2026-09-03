@@ -76,6 +76,7 @@ export default function HomepageNightPlanner({ dateLabel, events }: HomepageNigh
   const [company, setCompany] = useState('date')
   const [budget, setBudget] = useState('under-50')
   const [seed, setSeed] = useState(0)
+  const [mobilePlannerOpen, setMobilePlannerOpen] = useState(false)
   const planRef = useRef<HTMLElement>(null)
   const mobilePlanRef = useRef<HTMLElement>(null)
 
@@ -185,7 +186,11 @@ export default function HomepageNightPlanner({ dateLabel, events }: HomepageNigh
           </Link>
         </article>
 
-        <details className={styles.mobilePlanner}>
+        <details
+          className={styles.mobilePlanner}
+          open={mobilePlannerOpen}
+          onToggle={(event) => setMobilePlannerOpen(event.currentTarget.open)}
+        >
           <summary className={styles.mobilePlannerSummary}>
             <span className={styles.mobilePlannerSummaryIcon} aria-hidden="true"><SlidersHorizontal /></span>
             <span>
