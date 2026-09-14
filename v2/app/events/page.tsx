@@ -21,7 +21,7 @@ import { PublicPageHero } from '@/app/components/PublicPageHero'
 // Note: reading cookies for user preferences makes this route dynamic for
 // logged-in users. The revalidate hint is still used as a fallback for
 // unauthenticated requests.
-export const revalidate = 300
+export const revalidate = 3600
 
 const FAMILY_RE = /\bkids?\b|\bchildren\b|\bfamily\b|\bstory.?time\b|\bplaydate\b/i
 

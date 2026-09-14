@@ -1,6 +1,6 @@
 import { fetchEvents } from '@/lib/events'
 
-export const revalidate = 3600
+export const revalidate = 86400
 
 const SITE_URL = 'https://abqunplugged.com'
 

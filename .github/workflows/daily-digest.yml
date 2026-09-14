@@ -25,6 +25,10 @@ on:
         default: false
         type: boolean
 
+concurrency:
+  group: abq-supabase-writers
+  cancel-in-progress: false
+
 jobs:
   digest:
     name: Send daily digest

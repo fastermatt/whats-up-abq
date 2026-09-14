@@ -75,7 +75,7 @@ export async function fetchNowPlayingMovies(limit = 20): Promise<Movie[]> {
   try {
     const url = `${TMDB_BASE}/movie/now_playing?language=en-US&page=1&region=US`
     const res = await fetch(url, {
-      next: { revalidate: 3600 }, // cache 1hr — movies change weekly
+      next: { revalidate: 86400 }, // cache 24h — movies change weekly
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/json',

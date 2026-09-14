@@ -710,7 +710,7 @@ export async function fetchTopVenues(limit = 60): Promise<{ venueName: string; c
       Authorization: `Bearer ${key}`,
       'Content-Type': 'application/json',
     },
-    next: { revalidate: 3600 },
+    next: { revalidate: 86400 },
   })
 
   if (!res.ok) return []

@@ -5,7 +5,7 @@ import { venueToSlug } from './[slug]/page'
 import { MapPin, ArrowLeft } from 'lucide-react'
 import { AnimateIn } from '@/app/components/AnimateIn'
 
-export const revalidate = 10800 // 3h
+export const revalidate = 86400 // 24h — source catalog imports weekly
 export const metadata: Metadata = {
   title: 'Venues in Albuquerque, NM, Find Events Near You',
   description:

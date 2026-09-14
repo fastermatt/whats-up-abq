@@ -17,7 +17,7 @@ import { getCategoryFallback } from '@/lib/fallback-images'
 import { LandingEmailForm } from './LandingEmailForm'
 import { InstagramIcon } from '@/app/components/InstagramIcon'
 
-export const revalidate = 300
+export const revalidate = 3600
 export const dynamic = 'force-static'
 
 export const metadata: Metadata = {

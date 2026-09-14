@@ -8,7 +8,7 @@ import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 900 // 15 min — tonight's events change fast
+export const revalidate = 3600 // 1h — preserves same-day usefulness without frequent regeneration
 
 const SEO_TITLE = 'Live Music in Albuquerque Tonight — Shows & Concerts | ABQ Unplugged'
 const SEO_DESC =

@@ -7,7 +7,7 @@ import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 900 // 15 min
+export const revalidate = 3600 // 1h — same-day page
 
 const SEO_TITLE = "Comedy Shows in Albuquerque Tonight — Stand-Up & Improv | ABQ Unplugged"
 const SEO_DESC =

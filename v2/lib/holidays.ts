@@ -93,7 +93,7 @@ export async function fetchHolidayEventsCached(
   const { cachedFetch } = await import('@/lib/cache/redis')
   const key = `holiday:${holiday.key}:${holidayDate}:${limit}`
   try {
-    return await cachedFetch(key, () => fetchHolidayEvents(holiday, holidayDate, limit), 300)
+    return await cachedFetch(key, () => fetchHolidayEvents(holiday, holidayDate, limit), 3600)
   } catch {
     return fetchHolidayEvents(holiday, holidayDate, limit)
   }

@@ -1,7 +1,7 @@
 /**
  * Netlify Scheduled Function — ig-publisher
  *
- * Runs every 15 minutes. Picks up pending IG posts from ig_scheduled_posts
+ * Runs hourly. Picks up pending IG posts from ig_scheduled_posts
  * whose scheduled_for <= now, publishes them to Instagram, and marks them done.
  *
  * No server-side state or cron infra needed — Netlify fires this automatically.
@@ -18,7 +18,7 @@
  *     function's execution limit. The old code polled inline and got killed
  *     mid-poll, leaving rows wedged in 'publishing' forever with the post
  *     sometimes live and sometimes not. Now the flow is STATEFUL: create the
- *     container, persist container_id on the row, and let the next 15-minute
+ *     container, persist container_id on the row, and let the next hourly
  *     invocation check status and publish. Each invocation does seconds of
  *     work, so nothing gets killed and nothing double-posts.
  *   - Every DB write is error-checked. A silent failed UPDATE was how rows
@@ -28,10 +28,10 @@
 import { createClient } from '@supabase/supabase-js'
 
 // ── Config ────────────────────────────────────────────────────────────────────
-// Every 15 min. At */5 this polled 8,640 times/month to publish a handful of
-// posts; most runs found an empty queue. 15 min keeps scheduling granularity
-// acceptable for IG while cutting ~5,800 invocations/month.
-export const config = { schedule: '*/15 * * * *' }
+// One check at minute 7 each hour. This preserves arbitrary scheduled/manual
+// posts and the two-phase Reel flow while cutting idle polling from 96 to 24
+// invocations per day. Most posts now publish within one to two hours.
+export const config = { schedule: '7 * * * *' }
 
 const IG_API = 'https://graph.facebook.com/v19.0'
 

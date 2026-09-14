@@ -9,9 +9,9 @@ import {
 import { ConnectionQuote } from '@/app/components/ConnectionQuote'
 import { EventImage } from '@/app/components/EventImage'
 
-// Short cache — this page is the bio link on Instagram, so it should stay
+// Hourly cache — this page is the bio link on Instagram, so it should stay
 // fresh but not thrash the DB if the account takes off.
-export const revalidate = 300
+export const revalidate = 3600
 
 export const metadata: Metadata = {
   title: 'ABQ Unplugged — For Instagram',

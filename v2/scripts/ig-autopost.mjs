@@ -1143,7 +1143,7 @@ async function main() {
   } else {
     publicUrl = await uploadPng(supabase, buffer, today, slot.id)
   }
-  // --now: schedule for right now so the Netlify publisher picks it up on its next 15-minute run
+  // --now: schedule for right now so the Netlify publisher picks it up on its next hourly run
   const scheduledFor = postNow ? new Date().toISOString() : undefined
   const rowId = await queuePost(supabase, { date: today, slot, imageUrl: publicUrl, caption, events: selected, mediaType, scheduledFor })
   const displayTime = scheduledFor ?? mdtIso(today, slot.time)

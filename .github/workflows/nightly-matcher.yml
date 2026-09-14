@@ -15,6 +15,10 @@ on:
         default: ''
         type: string
 
+concurrency:
+  group: abq-supabase-writers
+  cancel-in-progress: false
+
 jobs:
   match:
     name: Run notification matcher

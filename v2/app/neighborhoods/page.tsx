@@ -6,7 +6,7 @@ import { buildBreadcrumbs } from '@/lib/seo'
 import type { NeighborhoodCount } from '@/lib/events'
 import { PublicPageHero } from '@/app/components/PublicPageHero'
 
-export const revalidate = 10800 // 3h
+export const revalidate = 86400 // 24h — source catalog imports weekly
 export const metadata: Metadata = {
   title: 'Albuquerque Events by Neighborhood, ABQ Unplugged',
   description:

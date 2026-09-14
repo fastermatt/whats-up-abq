@@ -19,12 +19,12 @@ import { getActiveHoliday } from '@/data/holidays'
 import { fetchHolidayEventsCached } from '@/lib/holidays'
 import { HomepageStickyHook } from '@/app/components/HomepageStickyHook'
 
-// ISR: regenerate every 5 min — keeps tonight/weekend lists fresh while
+// ISR: regenerate hourly — keeps tonight/weekend lists useful while
 // letting Netlify CDN serve cached HTML for most requests (fast TTFB).
 // force-static: @upstash/redis uses fetch({cache:'no-store'}) internally,
 // which Next.js misreads as "dynamic". Override so the route is prerendered
 // and ISR-cached. No cookies()/headers() calls in this import chain.
-export const revalidate = 300
+export const revalidate = 3600
 export const dynamic = 'force-static'
 
 export const metadata: Metadata = {
@@ -201,9 +201,9 @@ export default async function DiscoverPage() {
     // cutoff in memory. Keep the larger result pool here; it costs no extra DB
     // rows and gives the editorial picker enough variety to avoid routine
     // daytime/library listings when stronger evening options exist.
-    rc('hp:tonight:v2',  () => fetchEvents({ timeFilter: 'tonight', limit: 30 }),     300),
-    rc('hp:weekend',     () => fetchEvents({ timeFilter: 'this-weekend', limit: 10 }), 900),
-    rc('hp:upcoming',    () => fetchEvents({ timeFilter: 'upcoming', limit: 1 }),      600),
+    rc('hp:tonight:v2',  () => fetchEvents({ timeFilter: 'tonight', limit: 30 }),     3600),
+    rc('hp:weekend',     () => fetchEvents({ timeFilter: 'this-weekend', limit: 10 }), 3600),
+    rc('hp:upcoming',    () => fetchEvents({ timeFilter: 'upcoming', limit: 1 }),      3600),
     rc('hp:hoods',       () => fetchNeighborhoodCounts(),                              3600),
     rc('hp:movies',      () => fetchNowPlayingMovies(10),                              3600),
     activeHoliday

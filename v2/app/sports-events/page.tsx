@@ -7,7 +7,7 @@ import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 10800 // 3h
+export const revalidate = 86400 // 24h — source catalog imports weekly
 const SEO_TITLE = 'Sports Events in Albuquerque, NM | ABQ Unplugged'
 const SEO_DESC = 'Find Isotopes games, New Mexico United soccer, Lobo basketball, and more sports events in Albuquerque. Cheap tickets, great times.'
 

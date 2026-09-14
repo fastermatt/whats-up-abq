@@ -7,7 +7,7 @@ name: V2 Weekly Event Refresh
 
 on:
   schedule:
-    - cron: '0 14 * * 2'   # Every Tuesday 7 AM MT
+    - cron: '0 17 * * 2'   # Every Tuesday 11 AM MDT / 10 AM MST
 
   # Manual trigger from GitHub Actions tab
   workflow_dispatch:
@@ -27,6 +27,10 @@ on:
         required: false
         default: false
         type: boolean
+
+concurrency:
+  group: abq-supabase-writers
+  cancel-in-progress: false
 
 jobs:
   ingest:

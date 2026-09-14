@@ -9,7 +9,7 @@ import { ItineraryPlanner, type PlannerEvent } from './ItineraryPlanner'
 import { FiestaAtAGlance } from './FiestaAtAGlance'
 import { BalloonFiestaHero } from './BalloonFiestaHero'
 
-export const revalidate = 10800 // 3h
+export const revalidate = 86400 // 24h — source catalog imports weekly
 const SEO_TITLE = 'What to Do Before & After Balloon Fiesta | Albuquerque Day Planner'
 const SEO_DESC = 'An independent local companion for planning the hours around Balloon Fiesta. Use the official Fiesta site for tickets and live schedules; use our five Albuquerque itineraries for everything before and after.'
 const FIESTA_IMAGE = 'https://bsmvfutebmbkjvlrhiyq.supabase.co/storage/v1/object/public/event-photos/balloon-fiesta-2026-nasa-1788286880.webp'

@@ -2,14 +2,14 @@
  * SEO landing page: Art Events in Albuquerque
  * Targets: "albuquerque art events", "abq artwalk", "albuquerque art galleries",
  *           "first friday albuquerque art"
- * Revalidates every hour.
+ * Revalidates daily; source catalog imports weekly.
  */
 import type { Metadata } from 'next'
 import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 10800 // 3h
+export const revalidate = 86400 // 24h — source catalog imports weekly
 const SEO_TITLE = 'Art Events in Albuquerque — Galleries, ArtWalk & Openings | ABQ Unplugged'
 const SEO_DESC  = 'First Friday ArtWalk in Nob Hill, gallery openings, museum exhibitions, and art markets across Albuquerque. Every upcoming art event in one place, updated daily.'
 

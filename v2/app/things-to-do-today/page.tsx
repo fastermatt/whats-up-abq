@@ -8,7 +8,7 @@ import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 1800 // 30 min
+export const revalidate = 3600 // 1h — same-day page
 
 const SEO_TITLE = 'Things to Do in Albuquerque Today, Events Happening Now | ABQ Unplugged'
 const SEO_DESC =

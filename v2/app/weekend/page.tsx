@@ -8,7 +8,7 @@ import { QuickSaveButton } from '@/app/components/QuickSaveButton'
 import { buildBreadcrumbs } from '@/lib/seo'
 import { PublicPageHero } from '@/app/components/PublicPageHero'
 
-export const revalidate = 300
+export const revalidate = 3600
 
 // ─── Metadata ─────────────────────────────────────────────────────────────────
 

@@ -22,7 +22,7 @@ import { affiliateUrl } from '@/lib/affiliate'
 import { StickyTicketCTA } from './StickyTicketCTA'
 import { TrackedTicketLink } from './TrackedTicketLink'
 
-export const revalidate = 21600 // 6h — event details are fixed after publication; ingest runs weekly
+export const revalidate = 86400 // 24h — event details are fixed after publication; ingest runs weekly
 
 // Human-readable source labels — avoids leaking raw DB enums like "Local-venue" / "Nhcc"
 const SOURCE_LABELS: Record<string, string> = {

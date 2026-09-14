@@ -11,7 +11,7 @@ import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 3600 // 1 hr
+export const revalidate = 86400 // 24h — source catalog imports weekly
 
 const SEO_TITLE = 'Christian & Faith Events in Albuquerque | ABQ Unplugged'
 const SEO_DESC =

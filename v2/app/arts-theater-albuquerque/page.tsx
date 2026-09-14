@@ -8,7 +8,7 @@ import { fetchEvents } from '@/lib/events'
 import { CuratedListPage } from '@/app/components/CuratedListPage'
 import { OG_IMAGE } from '@/lib/fallback-images'
 
-export const revalidate = 10800 // 3h
+export const revalidate = 86400 // 24h — source catalog imports weekly
 const SEO_TITLE = 'Arts & Theater in Albuquerque, NM — Galleries, Performances & Events | ABQ Unplugged'
 const SEO_DESC =
   'Find art shows, theater, gallery openings, and cultural events in Albuquerque. ABQ has a real arts scene — First Fridays, 516 Arts, NHCC, Popejoy. Updated daily.'

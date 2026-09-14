@@ -3,7 +3,6 @@ name: IG autopost daily
 on:
   schedule:
     - cron: '30 13 * * *'   # 7:30 AM MT (morning shift — MDT=UTC-6)
-    - cron: '30 1 * * *'    # 7:30 PM MT (evening shift — MDT=UTC-6)
   workflow_dispatch:
     inputs:
       dry_run:
@@ -17,7 +16,7 @@ on:
         type: string
         default: 'morning'
       post_now:
-        description: 'Queue for immediate publish (within 5 min) instead of the scheduled time slot'
+        description: 'Queue for the next hourly publisher run instead of the scheduled time slot'
         required: false
         type: boolean
         default: false
@@ -26,6 +25,10 @@ on:
         required: false
         type: boolean
         default: false
+
+concurrency:
+  group: abq-supabase-writers
+  cancel-in-progress: false
 
 jobs:
   ig-autopost:

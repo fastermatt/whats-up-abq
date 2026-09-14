@@ -29,7 +29,7 @@ import { EventImage } from '@/app/components/EventImage'
 import { buildBreadcrumbs } from '@/lib/seo'
 import { FeaturedToggle, FeaturedEvent } from './FeaturedToggle'
 
-export const revalidate = 10800 // 3h
+export const revalidate = 86400 // 24h — source catalog imports weekly
 // ── SEO ────────────────────────────────────────────────────────────────────────
 
 const SEO_TITLE = 'Albuquerque Nightlife: Bars, Live Music & What\'s On Tonight | ABQ Unplugged'
