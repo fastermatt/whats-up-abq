@@ -687,6 +687,12 @@ function appendMentions(caption, mentions) {
   return `${caption.trim()}\n\n${mentions.join(' ')}`
 }
 
+export async function resolveCaption(override, generate, mentions = []) {
+  const reviewed = cleanString(override)
+  const caption = reviewed ? capHashtags(reviewed, 6) : await generate()
+  return appendMentions(caption, mentions)
+}
+
 function supabaseClient() {
   const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -1082,7 +1088,11 @@ async function main() {
   const reelNote = slot.reel
     ? ` (REEL post${shift === 'evening' ? ' — same-day wording like "tonight" and "this evening" is allowed for events happening today' : ''})`
     : ''
-  const caption = appendMentions(await generateCaption(selected, slot, today, reelNote), tags)
+  const caption = await resolveCaption(
+    process.env.IG_CAPTION_OVERRIDE,
+    () => generateCaption(selected, slot, today, reelNote),
+    tags,
+  )
 
   // Reels and Stories render natively at 9:16 — the Konva templates lay out
   // text with format-aware safe zones, so nothing gets cropped. Never scale a
@@ -1133,7 +1143,7 @@ async function main() {
   } else {
     publicUrl = await uploadPng(supabase, buffer, today, slot.id)
   }
-  // --now: schedule for right now so the Netlify publisher (runs every 5 min) picks it up immediately
+  // --now: schedule for right now so the Netlify publisher picks it up on its next 15-minute run
   const scheduledFor = postNow ? new Date().toISOString() : undefined
   const rowId = await queuePost(supabase, { date: today, slot, imageUrl: publicUrl, caption, events: selected, mediaType, scheduledFor })
   const displayTime = scheduledFor ?? mdtIso(today, slot.time)

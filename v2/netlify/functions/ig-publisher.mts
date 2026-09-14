@@ -18,7 +18,7 @@
  *     function's execution limit. The old code polled inline and got killed
  *     mid-poll, leaving rows wedged in 'publishing' forever with the post
  *     sometimes live and sometimes not. Now the flow is STATEFUL: create the
- *     container, persist container_id on the row, and let the next 5-minute
+ *     container, persist container_id on the row, and let the next 15-minute
  *     invocation check status and publish. Each invocation does seconds of
  *     work, so nothing gets killed and nothing double-posts.
  *   - Every DB write is error-checked. A silent failed UPDATE was how rows

@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { fallbackCaption, formatTime, parseCaptionResponse, selectEvents } from './ig-autopost.mjs'
+import { fallbackCaption, formatTime, parseCaptionResponse, resolveCaption, selectEvents } from './ig-autopost.mjs'
 
 test('accepts the preferred plain-text caption format', () => {
   assert.equal(parseCaptionResponse('Burque has plans.\n\nFull details at the link in bio.'), 'Burque has plans.\n\nFull details at the link in bio.')
@@ -37,6 +37,19 @@ test('digest fallback stays short and does not duplicate the event list', () => 
   assert.equal(caption.includes('Second Event'), false)
   assert.ok(caption.split(/\s+/).length < 60)
   assert.equal((caption.match(/#[\w]+/g) ?? []).length, 6)
+})
+
+test('reviewed caption override bypasses the model and still applies safety limits', async () => {
+  let generated = false
+  const caption = await resolveCaption(
+    'Reviewed copy.\n\n#One #Two #Three #Four #Five #Six #Seven',
+    async () => { generated = true; return 'model copy' },
+    ['@venue'],
+  )
+
+  assert.equal(generated, false)
+  assert.equal((caption.match(/#[\w]+/g) ?? []).length, 6)
+  assert.match(caption, /@venue$/)
 })
 
 test('weekly summary selects at most one event from each date', () => {
