@@ -201,16 +201,18 @@ function mdtIso(date, hhmm) {
   )).toISOString()
 }
 
-function formatTime(time) {
+export function formatTime(time) {
   if (!time || typeof time !== 'string') return null
   const trimmed = time.trim()
   if (/^\d{1,2}:\d{2}\s*[AP]M$/i.test(trimmed)) {
-    return trimmed.replace(/\s+/g, ' ').toUpperCase()
+    return trimmed.replace(/:00\s*/i, ' ').replace(/\s+/g, ' ').toUpperCase()
   }
   if (/^\d{2}:\d{2}(:\d{2})?$/.test(trimmed)) {
     const [h, m] = trimmed.split(':').map(Number)
     const ampm = h >= 12 ? 'PM' : 'AM'
-    return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${ampm}`
+    return m === 0
+      ? `${h % 12 || 12} ${ampm}`
+      : `${h % 12 || 12}:${String(m).padStart(2, '0')} ${ampm}`
   }
   return trimmed
 }
@@ -235,6 +237,12 @@ function cleanNearbyDining(value) {
 }
 
 function eventFromFixture(event) {
+  const fallbackScore = heuristicScore({
+    category: event.category,
+    event_date: event.date,
+    cached_photo_url: event.imageUrl,
+    featured: event.featured,
+  })
   return {
     id: String(event.id),
     title: cleanString(event.title) ?? '',
@@ -244,7 +252,7 @@ function eventFromFixture(event) {
     venue: cleanString(event.venue),
     category: cleanString(event.category),
     imageUrl: cleanString(event.imageUrl),
-    popularityScore: Number(event.popularityScore ?? 0),
+    popularityScore: Number(event.popularityScore ?? fallbackScore),
     featured: event.featured === true,
     about: cleanString(event.about),
     highlights: cleanHighlights(event.highlights),
@@ -399,7 +407,7 @@ function eventInRange(event, range) {
   return event.date >= range.start && event.date <= range.end
 }
 
-function selectEvents(slot, allEvents, date, recentlyPostedIds) {
+export function selectEvents(slot, allEvents, date, recentlyPostedIds) {
   const initialRange = dateRangeFor(slot.period, date, allEvents)
   const range = slot.period === 'today-or-next' ? dateRangeFor(slot.period, date, allEvents.filter(e => !recentlyPostedIds.has(e.id))) : initialRange
   const pool = dedupeEvents(allEvents)
@@ -416,6 +424,18 @@ function selectEvents(slot, allEvents, date, recentlyPostedIds) {
 
   if (slot.id === 'top-three') {
     return filterIsotopesSpam(pool.filter(hasRealPhoto)).slice(0, 3)
+  }
+
+  if (slot.id === 'weekly-summary') {
+    const bestByDate = new Map()
+    const seenSeries = new Set()
+    for (const event of filterIsotopesSpam(pool)) {
+      const seriesKey = `${venueKey(event.venue)}|${artistCore(event.title)}`
+      if (bestByDate.has(event.date) || seenSeries.has(seriesKey)) continue
+      bestByDate.set(event.date, event)
+      seenSeries.add(seriesKey)
+    }
+    return selectDiverse([...bestByDate.values()], 5)
   }
 
   return selectDiverse(filterIsotopesSpam(pool), 5)

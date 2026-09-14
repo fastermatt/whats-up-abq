@@ -55,7 +55,8 @@ All original P1/P2 issues were resolved in the redesign: chronology, contrast, b
 
 ## Minor Observations
 
-- The Kenny Wayne Shepherd title and long Isotopes venue still ellipsize, but each retains its differentiating identity.
+- The final live-data candidate was re-rendered with five curated, date-distinct events. On-the-hour times were compacted to `8 PM`/`4 PM`, eliminating the only content-specific metadata defect found in that pass.
+- The SOMOS and Chelsea Peretti titles still ellipsize, but each retains its differentiating identity and its complete date, time, and venue context.
 - The protected bottom Reel zone remains intentionally quiet.
 
 ## Questions to Consider
