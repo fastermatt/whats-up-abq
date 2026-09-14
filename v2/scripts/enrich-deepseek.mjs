@@ -49,7 +49,7 @@ const SUPABASE_URL = process.env.SUPABASE_URL || 'https://bsmvfutebmbkjvlrhiyq.s
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 const DEEPSEEK_KEY = process.env.DEEPSEEK_API_KEY
 const DEEPSEEK_URL = 'https://api.deepseek.com/chat/completions'
-const DEEPSEEK_MODEL = 'deepseek-chat'
+const DEEPSEEK_MODEL = 'deepseek-flash'
 
 if (!SUPABASE_KEY) {
   console.error('SUPABASE_SERVICE_ROLE_KEY not set. Add it to scripts/.env')
@@ -145,6 +145,7 @@ async function classifyBatch(events) {
         },
         body: JSON.stringify({
           model:       DEEPSEEK_MODEL,
+          thinking:    { type: 'disabled' },
           temperature: 0,
           max_tokens:  1024,
           messages: [
@@ -341,7 +342,7 @@ async function main() {
         age_appeal:       result.age_appeal,
         mood_confidence:  result.confidence,
         mood_enriched_at: new Date().toISOString(),
-        mood_model:       'deepseek-v4-flash',
+        mood_model:       DEEPSEEK_MODEL,
       }
 
       const { error: updateErr } = await supabase

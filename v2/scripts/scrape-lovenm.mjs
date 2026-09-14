@@ -142,11 +142,13 @@ Return only the JSON object:`
         'Authorization': `Bearer ${DEEPSEEK_KEY}`,
       },
       body: JSON.stringify({
-        model: 'deepseek-v4-flash',
+        model: 'deepseek-flash',
+        thinking: { type: 'disabled' },
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.1,
         max_tokens: 600,
       }),
+      signal: AbortSignal.timeout(30_000),
     })
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`)

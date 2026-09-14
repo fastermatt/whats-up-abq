@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto'
 import { existsSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import process from 'node:process'
 import { createClient } from '@supabase/supabase-js'
 import { renderIG } from './ig-render.mjs'
@@ -92,8 +92,8 @@ RULES:
 - Keep it scannable with line breaks.
 
 OUTPUT FORMAT:
-Return a JSON object with one key, "caption", containing the finished caption text with actual line breaks.
-Return only the JSON object. No markdown, no code fences, no explanation.`
+Return only the finished caption as plain text with real line breaks.
+Do not return JSON, markdown, code fences, labels, or explanation.`
 
 function parseArgs(argv) {
   const args = {}
@@ -418,7 +418,7 @@ function selectEvents(slot, allEvents, date, recentlyPostedIds) {
     return filterIsotopesSpam(pool.filter(hasRealPhoto)).slice(0, 3)
   }
 
-  return selectDiverse(filterIsotopesSpam(pool), slot.id === 'weekly-summary' ? 6 : 5)
+  return selectDiverse(filterIsotopesSpam(pool), 5)
 }
 
 function buildContext(slot, events, date) {
@@ -513,6 +513,56 @@ function stripFences(text) {
   return cleaned.replace(/^```\s*/, '').replace(/\s*```$/, '').trim()
 }
 
+/**
+ * Normalize model output before it can reach Instagram. The prompt now asks for
+ * plain text, but this deliberately accepts old JSON-shaped responses too. Some
+ * model responses contained invalid JSON or extra prose; the previous fallback
+ * published the entire `{\"caption\": ...}` wrapper and literal `\\n` escapes.
+ */
+function captionFromJson(text) {
+  try {
+    const parsed = JSON.parse(text)
+    if (typeof parsed === 'string') return cleanString(parsed)
+    if (parsed && typeof parsed === 'object') return cleanString(parsed.caption)
+  } catch { return null }
+  return null
+}
+
+function embeddedJsonCaption(text) {
+  const objectStart = text.indexOf('{')
+  const objectEnd = text.lastIndexOf('}')
+  if (objectStart >= 0 && objectEnd > objectStart) {
+    return captionFromJson(text.slice(objectStart, objectEnd + 1))
+  }
+  return null
+}
+
+function malformedWrapperCaption(text) {
+  const wrapped = text.match(/^\s*\{?\s*["']?caption["']?\s*:\s*["']?([\s\S]*?)["']?\s*\}?\s*$/i)
+  if (!wrapped) return null
+  return cleanString(wrapped[1]
+    .replace(/\\r\\n|\\n|\\r/g, '\n')
+    .replace(/\\"/g, '"')
+    .replace(/\\\\/g, '\\')
+    .trim())
+}
+
+export function parseCaptionResponse(content) {
+  if (typeof content !== 'string') return null
+  const cleaned = stripFences(content)
+  if (!cleaned) return null
+  return captionFromJson(cleaned)
+    ?? embeddedJsonCaption(cleaned)
+    ?? malformedWrapperCaption(cleaned)
+    ?? cleanString(cleaned)
+}
+
+function looksSerialized(caption) {
+  return /^\s*\{?\s*["']?caption["']?\s*:/i.test(caption)
+    || /\\[nr]/.test(caption)
+    || /["']\s*\}\s*$/.test(caption)
+}
+
 async function generateCaption(events, slot, date, reelNote = '') {
   const dryRun = process.argv.includes('--dry-run')
   if (!process.env.DEEPSEEK_API_KEY) {
@@ -535,7 +585,8 @@ The link in bio goes to abqunplugged.com, an events discovery site for all of Al
       Authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}`,
     },
     body: JSON.stringify({
-      model: 'deepseek-v4-flash',
+      model: 'deepseek-flash',
+      thinking: { type: 'disabled' },
       temperature: 0.8,
       max_tokens: 1000,
       messages: [
@@ -543,25 +594,36 @@ The link in bio goes to abqunplugged.com, an events discovery site for all of Al
         { role: 'user', content: userPrompt },
       ],
     }),
+    signal: AbortSignal.timeout(30_000),
     })
   } catch (error) {
-    if (dryRun) return fallbackCaption(events, slot)
-    throw error
+    console.error('[caption] DeepSeek request failed; using deterministic fallback', error instanceof Error ? error.message : error)
+    return fallbackCaption(events, slot)
   }
-  if (!res.ok) throw new Error(`DeepSeek API error ${res.status}: ${await res.text()}`)
+  if (!res.ok) {
+    const errorBody = await res.text()
+    if (res.status === 429 || res.status >= 500) {
+      console.error(`[caption] DeepSeek API error ${res.status}; using deterministic fallback`, errorBody.slice(0, 300))
+      return fallbackCaption(events, slot)
+    }
+    throw new Error(`DeepSeek API error ${res.status}: ${errorBody}`)
+  }
   const data = await res.json()
   const content = data?.choices?.[0]?.message?.content
-  if (!content) throw new Error('DeepSeek returned no caption content')
-
-  let caption
-  try {
-    const parsed = JSON.parse(stripFences(content))
-    caption = cleanString(parsed.caption)
-  } catch {
-    // DeepSeek returned malformed JSON (e.g. unescaped quote in caption) — use raw text
-    caption = cleanString(content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim())
+  if (!content) {
+    console.error('[caption] DeepSeek returned no caption content; using deterministic fallback', {
+      model: data?.model,
+      finishReason: data?.choices?.[0]?.finish_reason,
+      reasoningTokens: data?.usage?.completion_tokens_details?.reasoning_tokens,
+    })
+    return fallbackCaption(events, slot)
   }
-  if (!caption) throw new Error('DeepSeek caption response missing caption')
+
+  const caption = parseCaptionResponse(content)
+  if (!caption || looksSerialized(caption)) {
+    console.error('[caption] rejected serialized or malformed model output; using deterministic fallback')
+    return fallbackCaption(events, slot)
+  }
   // Replace em dashes (and stray "--") with a comma, collapsing surrounding
   // spaces so "word — that" becomes "word, that" (not "word , that").
   const cleaned = caption
@@ -571,11 +633,14 @@ The link in bio goes to abqunplugged.com, an events discovery site for all of Al
   return capHashtags(cleaned, 6)
 }
 
-function fallbackCaption(events, slot) {
+export function fallbackCaption(events, slot) {
+  if (slot.kind !== 'single') {
+    return `A few ways to spend a little more time in Burque.\n\nSave this one and find full details at abqunplugged.com.\n\n#ABQ #Albuquerque #505 #Burque #ABQEvents #ThingsToDoABQ`
+  }
   const body = slot.kind === 'single'
     ? `${events[0].title}\n${[events[0].date, events[0].time, events[0].venue].filter(Boolean).join(' · ')}`
     : events.map(event => `${event.title} · ${[event.date, event.time, event.venue].filter(Boolean).join(' · ')}`).join('\n')
-  return `${body}\n\nFull details + more at abqunplugged.com\n\n#ABQ #Albuquerque #505 #Burque #ABQEvents #ThingsToDoABQ #NewMexico #DukeCity`
+  return `${body}\n\nFull details + more at abqunplugged.com\n\n#ABQ #Albuquerque #505 #Burque #ABQEvents #ThingsToDoABQ`
 }
 
 async function loadTagMap() {
@@ -614,28 +679,49 @@ async function loadFixtureEvents(fixturePath) {
   return (json.events ?? []).map(eventFromFixture)
 }
 
+const DATA_QUERY_ATTEMPTS = 3
+const DATA_QUERY_TIMEOUT_MS = 25_000
+
+async function withDataQueryRetries(label, queryFactory) {
+  let lastError
+  for (let attempt = 1; attempt <= DATA_QUERY_ATTEMPTS; attempt++) {
+    try {
+      const result = await queryFactory(AbortSignal.timeout(DATA_QUERY_TIMEOUT_MS))
+      if (!result.error) return result.data
+      lastError = new Error(result.error.message)
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error))
+    }
+    if (attempt < DATA_QUERY_ATTEMPTS) {
+      console.error(`[data] ${label} attempt ${attempt}/${DATA_QUERY_ATTEMPTS} failed; retrying: ${lastError.message}`)
+      await new Promise(resolve => setTimeout(resolve, 1_500 * attempt))
+    }
+  }
+  throw new Error(`${label} failed after ${DATA_QUERY_ATTEMPTS} attempts: ${lastError?.message ?? 'unknown error'}`)
+}
+
 async function loadLiveEvents(supabase, range) {
-  const { data, error } = await supabase
-    .from('events')
-    .select('id, raw, event_date, venue_name, category, cached_photo_url, popularity_score, featured, ai_enrichment')
-    .eq('hidden', false)
-    .gte('event_date', range.start)
-    .lte('event_date', `${range.end}T23:59:59`)
-    .not('cached_photo_url', 'is', null)
-    .order('event_date', { ascending: true })
-    .limit(500)
-  if (error) throw new Error(`Event query failed: ${error.message}`)
+  const data = await withDataQueryRetries('Event query', signal => supabase
+      .from('events')
+      .select('id, raw, event_date, venue_name, category, cached_photo_url, popularity_score, featured, ai_enrichment')
+      .eq('hidden', false)
+      .gte('event_date', range.start)
+      .lte('event_date', `${range.end}T23:59:59`)
+      .not('cached_photo_url', 'is', null)
+      .order('event_date', { ascending: true })
+      .limit(500)
+      .abortSignal(signal))
   return (data ?? []).map(eventFromRow)
 }
 
 async function recentlyPostedIds(supabase) {
   const since = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString()
-  const { data, error } = await supabase
-    .from('ig_post_log')
-    .select('event_id')
-    .gte('posted_at', since)
-    .not('event_id', 'is', null)
-  if (error) throw new Error(`ig_post_log query failed: ${error.message}`)
+  const data = await withDataQueryRetries('Recent post query', signal => supabase
+      .from('ig_post_log')
+      .select('event_id')
+      .gte('posted_at', since)
+      .not('event_id', 'is', null)
+      .abortSignal(signal))
   return new Set((data ?? []).map(row => row.event_id).filter(Boolean))
 }
 
@@ -671,14 +757,25 @@ const DECOR_FONT_CANDIDATES = [
 //     of 2π/8 (0.7854 or 1.5708 rad/s), so each element lands exactly on its
 //     start position at t=8. No fades — the loop point is invisible when IG
 //     replays, and short runtime = higher completion rate = wider reach.
-// Requires ffmpeg on PATH (Ubuntu runners have it; `brew install ffmpeg`).
+// Requires ffmpeg on PATH. Some Homebrew builds omit libfreetype/drawtext;
+// those still produce a valid static Reel instead of failing the entire post.
 async function generateReel(pngPath) {
   const mp4Path = pngPath.replace(/\.png$/, '.mp4')
 
   // Find a font that covers the geometric symbol block (U+25A0–U+25FF)
   const fontFile = DECOR_FONT_CANDIDATES.find(p => existsSync(p))
+  let hasDrawtext = false
+  if (fontFile) {
+    try {
+      const filters = execFileSync('ffmpeg', ['-hide_banner', '-filters'], {
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'ignore'],
+      })
+      hasDrawtext = /\bdrawtext\b/.test(filters)
+    } catch {}
+  }
 
-  const decor = fontFile ? [
+  const decor = fontFile && hasDrawtext ? [
     // top-left diamond, terra — one slow orbit per loop
     `drawtext=fontfile=${fontFile}:text=◆:fontsize=96:fontcolor=0x9a442d@0.13:x=90+30*sin(0.7854*t):y=210+24*cos(0.7854*t)`,
     // top-right star, teal — drifts and twinkles (alpha pulse, 4s period)
@@ -923,7 +1020,7 @@ async function main() {
     supabase = supabaseClient()
     const broadRange = dateRangeFor(slot.period, today)
     events = await loadLiveEvents(supabase, slot.period === 'today-or-next' ? { start: today, end: addDays(today, 7) } : broadRange)
-    if (!dryRun) recentIds = await recentlyPostedIds(supabase)
+    recentIds = await recentlyPostedIds(supabase)
   }
 
   // --event <id> / --events <id,id,...> pins specific events (manual override /
@@ -1023,13 +1120,15 @@ async function main() {
   console.log(JSON.stringify({ id: rowId, scheduledFor: displayTime, imageUrl: publicUrl, mediaType }, null, 2))
 }
 
-main().catch(async error => {
-  const args = parseArgs(process.argv.slice(2))
-  const date = args.date || denverDateParts().iso
-  const errShift = args.shift || 'morning'
-  const errRotation = errShift === 'evening' ? EVENING_ROTATION : MORNING_ROTATION
-  const slotId = args.slot || SLOT_BY_ID[args.slot]?.id || errRotation[weekdayIndex(date)]?.id || 'unknown'
-  await sendFailureAlert(date, slotId, error)
-  console.error(error instanceof Error ? error.message : error)
-  process.exit(1)
-})
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch(async error => {
+    const args = parseArgs(process.argv.slice(2))
+    const date = args.date || denverDateParts().iso
+    const errShift = args.shift || 'morning'
+    const errRotation = errShift === 'evening' ? EVENING_ROTATION : MORNING_ROTATION
+    const slotId = args.slot || SLOT_BY_ID[args.slot]?.id || errRotation[weekdayIndex(date)]?.id || 'unknown'
+    await sendFailureAlert(date, slotId, error)
+    console.error(error instanceof Error ? error.message : error)
+    process.exit(1)
+  })
+}

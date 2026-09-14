@@ -51,7 +51,7 @@ const SUPABASE_KEY     = process.env.SUPABASE_SERVICE_ROLE_KEY
 const ANTHROPIC_KEY    = process.env.ANTHROPIC_API_KEY
 const DEEPSEEK_KEY     = process.env.DEEPSEEK_API_KEY
 const HAIKU_MODEL      = 'claude-haiku-4-5'
-const DEEPSEEK_MODEL   = 'deepseek-chat'
+const DEEPSEEK_MODEL   = 'deepseek-flash'
 const USER_AGENT       = 'ABQUnplugged/2.0 (community events; 4mattcarlson@gmail.com)'
 
 if (!SUPABASE_KEY) {
@@ -267,6 +267,7 @@ async function extractWithDeepSeek(venueText, venueName) {
     },
     body: JSON.stringify({
       model: DEEPSEEK_MODEL,
+      thinking: { type: 'disabled' },
       messages: [{
         role: 'user',
         content: `Extract ONLY upcoming events from the ${venueName} website text below. Return a plain-text list, one event per line with date, performer name, and time if available. Skip past events, hours-of-operation, daily food trucks, and recurring promo nights ("$5 pints every Monday") unless they're a real performance. If a time is NOT given, omit it — DO NOT default to "12:00 AM" or "00:00". If none found, respond with "NO_EVENTS". Today is ${new Date().toISOString().slice(0, 10)}.\n\n${venueText}`,
@@ -323,6 +324,7 @@ ${rawText}
     },
     body: JSON.stringify({
       model: DEEPSEEK_MODEL,
+      thinking: { type: 'disabled' },
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.1,
       max_tokens: 4096,

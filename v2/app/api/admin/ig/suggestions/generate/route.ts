@@ -344,12 +344,10 @@ async function generateCaption(postType: PostType, events: EventSnap[], handles:
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        // 'deepseek-chat' is the non-thinking alias for deepseek-v4-flash.
-        // 'deepseek-v4-flash' by name activates mandatory thinking/reasoning mode
-        // which burns 800–2000 tokens internally before writing any output, leaving
-        // nothing for the caption. 'deepseek-chat' skips that pass entirely:
-        // 0 thinking tokens, ~100 output tokens, real captions every time.
-        model: 'deepseek-v4-flash',
+        // Captions do not benefit from hidden reasoning. DeepSeek enables thinking
+        // by default, and its reasoning tokens share the output-token budget.
+        model: 'deepseek-flash',
+        thinking: { type: 'disabled' },
         messages: [
           { role: 'system', content: CAPTION_SYSTEM },
           { role: 'user',   content: userPrompt },
@@ -357,6 +355,7 @@ async function generateCaption(postType: PostType, events: EventSnap[], handles:
         temperature: 0.8,
         max_tokens: 400,
       }),
+      signal: AbortSignal.timeout(30_000),
     })
     if (!res.ok) {
       console.error('[generateCaption] DeepSeek HTTP error:', res.status, (await res.text()).slice(0, 300))

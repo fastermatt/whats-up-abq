@@ -106,11 +106,13 @@ async function callDeepSeek(prompt) {
       'Authorization': `Bearer ${DEEPSEEK_KEY}`,
     },
     body: JSON.stringify({
-      model: 'deepseek-v4-flash',
+      model: 'deepseek-flash',
+      thinking: { type: 'disabled' },
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.2,
       max_tokens: 2048,
     }),
+    signal: AbortSignal.timeout(30_000),
   })
   if (!res.ok) throw new Error(`DeepSeek error: ${res.status} ${await res.text()}`)
   const json = await res.json()

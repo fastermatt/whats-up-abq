@@ -127,7 +127,8 @@ async function caption(type, events, variant='') {
     const res = await fetch('https://api.deepseek.com/chat/completions',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+DEEPSEEK_KEY},
-      body:JSON.stringify({model:'deepseek-v4-flash',messages:[{role:'system',content:SYSTEM},{role:'user',content:prompt}],temperature:0.8,max_tokens:400})
+      body:JSON.stringify({model:'deepseek-flash',thinking:{type:'disabled'},messages:[{role:'system',content:SYSTEM},{role:'user',content:prompt}],temperature:0.8,max_tokens:400}),
+      signal:AbortSignal.timeout(30_000)
     })
     if (!res.ok) return ''
     return (await res.json()).choices?.[0]?.message?.content?.trim() ?? ''

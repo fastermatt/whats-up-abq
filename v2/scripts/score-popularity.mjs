@@ -93,9 +93,10 @@ async function scoreBatch(events) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${DEEPSEEK_KEY}` },
       body: JSON.stringify({
-        model: 'deepseek-v4-flash',
+        model: 'deepseek-flash',
+        thinking: { type: 'disabled' },
         temperature: 0.1,
-        max_tokens: 2048,  // reasoning_content eats tokens before JSON output; needs headroom
+        max_tokens: 2048,
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user',   content: prompt },

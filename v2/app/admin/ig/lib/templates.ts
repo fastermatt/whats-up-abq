@@ -2319,7 +2319,7 @@ const weeklyFive: Template = {
 const weeklySummary: Template = {
   id: 'weekly-summary',
   name: 'Weekly Summary',
-  description: 'One-image weekly recap with up to 6 events, date range, and quick venue details.',
+  description: 'Chronological five-event Burque broadside with large day blocks and Reel-safe details.',
   category: 'brand',
   thumb: {
     bg: BRAND_COLORS.cream,
@@ -2329,13 +2329,14 @@ const weeklySummary: Template = {
       { x: 7,  y: 14, w: 54,  h: 7,  c: BRAND_COLORS.cream },
       { x: 7,  y: 23, w: 42,  h: 2,  c: BRAND_COLORS.cream, o: 0.58 },
       { x: 78, y: 8,  w: 12,  h: 12, c: BRAND_COLORS.turquoise, o: 0.85, r: 6 },
-      { x: 7,  y: 36, w: 8,   h: 3,  c: BRAND_COLORS.terra }, { x: 20, y: 36, w: 66, h: 3, c: BRAND_COLORS.ink, o: 0.8 },
-      { x: 20, y: 42, w: 48,  h: 1.5, c: BRAND_COLORS.sage, o: 0.7 },
-      { x: 7,  y: 49, w: 8,   h: 3,  c: BRAND_COLORS.terra }, { x: 20, y: 49, w: 58, h: 3, c: BRAND_COLORS.ink, o: 0.8 },
-      { x: 20, y: 55, w: 42,  h: 1.5, c: BRAND_COLORS.sage, o: 0.7 },
-      { x: 7,  y: 62, w: 8,   h: 3,  c: BRAND_COLORS.terra }, { x: 20, y: 62, w: 70, h: 3, c: BRAND_COLORS.ink, o: 0.8 },
-      { x: 20, y: 68, w: 50,  h: 1.5, c: BRAND_COLORS.sage, o: 0.7 },
-      { x: 7,  y: 75, w: 8,   h: 3,  c: BRAND_COLORS.terra }, { x: 20, y: 75, w: 54, h: 3, c: BRAND_COLORS.ink, o: 0.8 },
+      { x: 7,  y: 36, w: 9,   h: 9,  c: BRAND_COLORS.sandstone }, { x: 20, y: 36, w: 66, h: 3, c: BRAND_COLORS.ink, o: 0.8 },
+      { x: 20, y: 42, w: 48,  h: 1.5, c: BRAND_COLORS.sage, o: 0.9 },
+      { x: 7,  y: 49, w: 9,   h: 9,  c: BRAND_COLORS.sandstone }, { x: 20, y: 49, w: 58, h: 3, c: BRAND_COLORS.ink, o: 0.8 },
+      { x: 20, y: 55, w: 42,  h: 1.5, c: BRAND_COLORS.sage, o: 0.9 },
+      { x: 7,  y: 62, w: 9,   h: 9,  c: BRAND_COLORS.sandstone }, { x: 20, y: 62, w: 70, h: 3, c: BRAND_COLORS.ink, o: 0.8 },
+      { x: 20, y: 68, w: 50,  h: 1.5, c: BRAND_COLORS.sage, o: 0.9 },
+      { x: 7,  y: 75, w: 9,   h: 9,  c: BRAND_COLORS.sandstone }, { x: 20, y: 75, w: 54, h: 3, c: BRAND_COLORS.ink, o: 0.8 },
+      { x: 7,  y: 88, w: 9,   h: 9,  c: BRAND_COLORS.sandstone }, { x: 20, y: 88, w: 62, h: 3, c: BRAND_COLORS.ink, o: 0.8 },
       { x: 7,  y: 93, w: 86,  h: 2,  c: BRAND_COLORS.terra },
       { x: 23, y: 97, w: 54,  h: 2,  c: BRAND_COLORS.terra, o: 0.55 },
     ],
@@ -2364,81 +2365,99 @@ const weeklySummary: Template = {
       weekRange = `${fmtD(first)} – ${fmtD(last)}`
     }
 
-    const events = (ctx.events ?? []).slice(0, 6).map(e => {
+    const events = [...(ctx.events ?? [])].sort((a, b) => {
+      const dateOrder = (a.date ?? '9999-12-31').localeCompare(b.date ?? '9999-12-31')
+      return dateOrder || (a.time ?? '99:99').localeCompare(b.time ?? '99:99')
+    }).slice(0, 5).map(e => {
       const venue = e.venue ?? ''
       return { title: resolveTitle(e.title, venue), venue, time: e.time ?? '', date: e.date }
     })
-    const rowCount = Math.min(events.length, 6)
-    const countLabel = `${ctx.events?.length ?? 0} thing${(ctx.events?.length ?? 0) === 1 ? '' : 's'} to do this week`
-    const headerH = topSafe + sy(284)
-    const rowStart = headerH + sy(38)
-    const ctaY = h - botSafe - sy(48)
+    const rowCount = events.length
+    const side = isStory ? 64 : 72
+    const rightSafe = isStory ? 150 : 72
+    const headerH = topSafe + sy(214)
+    const rowStart = headerH + sy(26)
+    const ctaY = h - botSafe - sy(isStory ? 78 : 60)
+    const footerRuleY = ctaY - sy(34)
+    const rowGap = sy(10)
     const rowH = rowCount > 0
-      ? Math.floor((ctaY - rowStart - sy(34)) / rowCount)
-      : sy(112)
+      ? Math.floor((footerRuleY - rowStart - rowGap * (rowCount - 1)) / rowCount)
+      : sy(142)
 
     const layers: Layer[] = [
       shape({ shape: 'rect', x: 0, y: 0, width: w, height: headerH, fill: BRAND_COLORS.terra }),
-      shape({ shape: 'circle', x: w - 178, y: topSafe + sy(22), width: 118, height: 118, fill: BRAND_COLORS.turquoise, opacity: 0.85 }),
-      shape({ shape: 'circle', x: w - 120, y: topSafe + sy(100), width: 54, height: 54, fill: BRAND_COLORS.sage, opacity: 0.75 }),
-      logo(LOGO_W, 80, topSafe, 50),
+      logo(LOGO_W, side, topSafe + sy(12), 46),
       textLayer({
-        name: 'Eyebrow', text: weekRange ? `THIS WEEK · ${weekRange.toUpperCase()}` : 'THIS WEEK',
-        x: 80, y: topSafe + sy(72), width: w - 160,
-        fontFamily: font('DM Mono'), fontSize: 21, fontWeight: 500,
-        fill: BRAND_COLORS.cream, opacity: 0.76, letterSpacing: 5,
-      }),
-      textLayer({
-        name: 'Headline', text: 'in Albuquerque',
-        x: 80, y: topSafe + sy(106), width: w - 160,
-        fontFamily: font('Epilogue'), fontSize: 104, fontWeight: 900,
+        name: 'Headline', text: `${rowCount || 5} FOR BURQUE`,
+        x: side, y: topSafe + sy(70), width: w - side - rightSafe,
+        fontFamily: font('Epilogue'), fontSize: isStory ? 88 : 76, fontWeight: 900,
         fill: BRAND_COLORS.cream, lineHeight: 0.92, letterSpacing: -2,
       }),
       textLayer({
-        name: 'Count', text: countLabel,
-        x: 80, y: topSafe + sy(214), width: w - 160,
-        fontFamily: font('Inter'), fontSize: 28, fontWeight: 600,
-        fill: BRAND_COLORS.cream, opacity: 0.8,
+        name: 'Week Range', text: weekRange ? weekRange.toUpperCase() : 'THIS WEEK',
+        x: side, y: topSafe + sy(164), width: w - side - rightSafe,
+        fontFamily: font('DM Mono'), fontSize: 25, fontWeight: 600,
+        fill: BRAND_COLORS.cream, letterSpacing: 3,
       }),
-      shape({ shape: 'rect', x: 80, y: headerH + sy(18), width: w - 160, height: 3, fill: BRAND_COLORS.terra, opacity: 0.9 }),
+      shape({ shape: 'rect', x: side, y: headerH + sy(12), width: w - side - rightSafe, height: 3, fill: BRAND_COLORS.terra }),
     ]
 
     events.forEach((slot, i) => {
-      const y = rowStart + i * rowH
-      const num = String(i + 1)
-      const meta = [shortDay(slot.date), slot.time, slot.venue ? shortVenue(slot.venue) : ''].filter(Boolean).join(' · ')
-      const { fontSize: titleSize, text: titleText } = epilogueTitleSize(slot.title, w - 244)
+      const y = rowStart + i * (rowH + rowGap)
+      const date = slot.date ? new Date(slot.date + 'T12:00:00') : null
+      const day = date ? date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase() : 'DATE'
+      const dateNum = date ? date.toLocaleDateString('en-US', { day: 'numeric' }) : 'TBA'
+      const meta = [slot.time, slot.venue ? shortVenue(slot.venue) : ''].filter(Boolean).join(' · ')
+      const titleText = truncateAtWord(slot.title, isStory ? 62 : 48)
+      const dateW = isStory ? 106 : 92
+      const textX = side + dateW + 30
+      const textW = w - textX - rightSafe
       layers.push(
-        shape({ shape: 'circle', x: 80, y: y + sy(2), width: 48, height: 48, fill: BRAND_COLORS.terra }),
+        shape({
+          shape: 'rect', x: side, y: y + sy(6), width: dateW, height: rowH - sy(16),
+          fill: BRAND_COLORS.sandstone, cornerRadius: 12,
+        }),
         textLayer({
-          name: `No.${num}`, text: num,
-          x: 80, y: y + sy(10), width: 48,
-          fontFamily: font('DM Mono'), fontSize: 22, fontWeight: 500,
-          fill: BRAND_COLORS.cream, align: 'center', lineHeight: 1,
+          name: `Day ${i + 1}`, text: day,
+          x: side, y: y + sy(26), width: dateW,
+          fontFamily: font('DM Mono'), fontSize: 19, fontWeight: 600,
+          fill: BRAND_COLORS.terra, align: 'center', lineHeight: 1, letterSpacing: 2,
+        }),
+        textLayer({
+          name: `Date ${i + 1}`, text: dateNum,
+          x: side, y: y + sy(52), width: dateW,
+          fontFamily: font('Epilogue'), fontSize: 48, fontWeight: 900,
+          fill: BRAND_COLORS.ink, align: 'center', lineHeight: 1,
         }),
         textLayer({
           name: `Event ${i + 1}`, text: titleText,
-          x: 152, y: y, width: w - 244,
-          fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 700,
-          fill: BRAND_COLORS.ink, lineHeight: 1.05, letterSpacing: -0.5,
+          x: textX, y: y + sy(10), width: textW,
+          fontFamily: font('Epilogue'), fontSize: isStory ? 39 : 34, fontWeight: 800,
+          fill: BRAND_COLORS.ink, lineHeight: 1.02, letterSpacing: -0.5,
         }),
         ...(meta ? [textLayer({
           name: `Meta ${i + 1}`, text: meta,
-          x: 152, y: y + sy(56), width: w - 244,
-          fontFamily: font('DM Mono'), fontSize: 20, fontWeight: 500,
-          fill: BRAND_COLORS.sage, opacity: 0.85, lineHeight: 1,
+          x: textX, y: y + rowH - sy(38), width: textW,
+          fontFamily: font('DM Mono'), fontSize: isStory ? 23 : 20, fontWeight: 600,
+          fill: BRAND_COLORS.sage, lineHeight: 1,
         })] : []),
-        shape({ shape: 'rect', x: 80, y: y + Math.min(rowH - sy(18), sy(94)), width: w - 160, height: 1, fill: BRAND_COLORS.ink, opacity: 0.16 }),
+        shape({ shape: 'rect', x: textX, y: y + rowH - 1, width: textW, height: 1, fill: BRAND_COLORS.ink, opacity: 0.16 }),
       )
     })
 
     layers.push(
-      shape({ shape: 'rect', x: 80, y: ctaY - sy(22), width: w - 160, height: 3, fill: BRAND_COLORS.terra }),
+      shape({ shape: 'rect', x: side, y: footerRuleY, width: w - side - rightSafe, height: 3, fill: BRAND_COLORS.terra }),
       textLayer({
-        name: 'CTA', text: ctx.cta ?? 'abqunplugged.com',
-        x: 80, y: ctaY, width: w - 160,
-        fontFamily: font('DM Mono'), fontSize: 22, fontWeight: 500,
-        fill: BRAND_COLORS.terra, opacity: 0.86, align: 'center', letterSpacing: 2,
+        name: 'CTA', text: 'SAVE THIS WEEK',
+        x: side, y: ctaY, width: w - side - rightSafe,
+        fontFamily: font('Epilogue'), fontSize: 30, fontWeight: 900,
+        fill: BRAND_COLORS.terra, letterSpacing: -0.5,
+      }),
+      textLayer({
+        name: 'CTA Detail', text: `FULL DETAILS IN BIO · ${(ctx.cta ?? 'abqunplugged.com').toUpperCase()}`,
+        x: side, y: ctaY + sy(34), width: w - side - rightSafe,
+        fontFamily: font('DM Mono'), fontSize: 19, fontWeight: 600,
+        fill: BRAND_COLORS.sage, letterSpacing: 1.5,
       }),
     )
 
@@ -2455,28 +2474,28 @@ const weeklySummary: Template = {
 const topThree: Template = {
   id: 'top-three',
   name: 'Top 3 Picks',
-  description: 'Photo-forward three-event digest with real event images and compact date/venue details.',
+  description: 'Bold dark-frame digest with three large photo cards and Reel-safe event details.',
   category: 'brand',
   thumb: {
-    bg: BRAND_COLORS.cream,
+    bg: BRAND_COLORS.night,
     blocks: [
-      { x: 7,  y: 6,  w: 28, h: 2,   c: BRAND_COLORS.terra, o: 0.7 },
-      { x: 7,  y: 12, w: 62, h: 7,   c: BRAND_COLORS.ink },
-      { x: 7,  y: 21, w: 34, h: 2,   c: BRAND_COLORS.terra, o: 0.7 },
-      { x: 7,  y: 31, w: 34, h: 18,  c: BRAND_COLORS.sage, o: 0.75, r: 2 },
-      { x: 45, y: 34, w: 10, h: 3,   c: BRAND_COLORS.terra },
-      { x: 58, y: 34, w: 31, h: 3,   c: BRAND_COLORS.ink, o: 0.82 },
-      { x: 58, y: 41, w: 24, h: 1.5, c: BRAND_COLORS.sage, o: 0.7 },
-      { x: 7,  y: 54, w: 34, h: 18,  c: BRAND_COLORS.terra, o: 0.75, r: 2 },
-      { x: 45, y: 57, w: 10, h: 3,   c: BRAND_COLORS.terra },
-      { x: 58, y: 57, w: 28, h: 3,   c: BRAND_COLORS.ink, o: 0.82 },
-      { x: 58, y: 64, w: 30, h: 1.5, c: BRAND_COLORS.sage, o: 0.7 },
-      { x: 7,  y: 77, w: 34, h: 18,  c: BRAND_COLORS.turquoise, o: 0.72, r: 2 },
-      { x: 45, y: 80, w: 10, h: 3,   c: BRAND_COLORS.terra },
-      { x: 58, y: 80, w: 34, h: 3,   c: BRAND_COLORS.ink, o: 0.82 },
-      { x: 58, y: 87, w: 22, h: 1.5, c: BRAND_COLORS.sage, o: 0.7 },
-      { x: 7,  y: 111, w: 86, h: 2,  c: BRAND_COLORS.terra },
-      { x: 23, y: 116, w: 54, h: 2,  c: BRAND_COLORS.terra, o: 0.55 },
+      { x: 6,  y: 7,  w: 27, h: 2,   c: BRAND_COLORS.cream, o: 0.7 },
+      { x: 6,  y: 13, w: 44, h: 7,   c: BRAND_COLORS.cream },
+      { x: 6,  y: 22, w: 30, h: 2,   c: BRAND_COLORS.skyGold, o: 0.9 },
+      { x: 5,  y: 30, w: 90, h: 20,  c: BRAND_COLORS.cream, r: 2 },
+      { x: 7,  y: 32, w: 29, h: 16,  c: BRAND_COLORS.sage, r: 1 },
+      { x: 40, y: 34, w: 46, h: 3,   c: BRAND_COLORS.ink, o: 0.82 },
+      { x: 40, y: 43, w: 35, h: 1.5, c: BRAND_COLORS.terra, o: 0.8 },
+      { x: 5,  y: 54, w: 90, h: 20,  c: BRAND_COLORS.cream, r: 2 },
+      { x: 7,  y: 56, w: 29, h: 16,  c: BRAND_COLORS.terra, r: 1 },
+      { x: 40, y: 58, w: 40, h: 3,   c: BRAND_COLORS.ink, o: 0.82 },
+      { x: 40, y: 67, w: 44, h: 1.5, c: BRAND_COLORS.terra, o: 0.8 },
+      { x: 5,  y: 78, w: 90, h: 20,  c: BRAND_COLORS.cream, r: 2 },
+      { x: 7,  y: 80, w: 29, h: 16,  c: BRAND_COLORS.turquoise, r: 1 },
+      { x: 40, y: 82, w: 48, h: 3,   c: BRAND_COLORS.ink, o: 0.82 },
+      { x: 40, y: 91, w: 32, h: 1.5, c: BRAND_COLORS.terra, o: 0.8 },
+      { x: 6,  y: 108, w: 88, h: 1,  c: BRAND_COLORS.skyGold, o: 0.85 },
+      { x: 24, y: 114, w: 52, h: 2,  c: BRAND_COLORS.cream, o: 0.65 },
     ],
   },
   build: (ctx, format) => {
@@ -2514,105 +2533,118 @@ const topThree: Template = {
       }
     })
     const rowCount = Math.min(events.length, 3)
-    const headerH = topSafe + sy(236)
-    const rowStart = headerH + sy(38)
-    const ctaY = h - botSafe - sy(48)
+    const headerH = topSafe + sy(174)
+    const rowStart = headerH + sy(24)
+    const ctaY = h - botSafe - sy(44)
     const footerRuleY = ctaY - sy(22)
     const rowGap = sy(22)
     const rowH = rowCount > 0
       ? Math.floor((footerRuleY - rowStart - rowGap * (rowCount - 1)) / rowCount)
       : sy(214)
-    const photoW = Math.round((w - 160) * 0.4)
-    const textX = 80 + photoW + 34
-    const textW = w - textX - 80
+    const marginX = 58
+    const cardInset = 16
+    const photoW = isStory ? 300 : 270
+    const textX = marginX + cardInset + photoW + 30
+    const textW = w - textX - marginX - cardInset
 
     const layers: Layer[] = [
-      logo(LOGO_T, 80, topSafe, 50),
+      logo(LOGO_W, marginX, topSafe, 46),
       textLayer({
-        name: 'Eyebrow', text: picksRange ? `TOP PICKS · ${picksRange.toUpperCase()}` : 'TOP PICKS',
-        x: 80, y: topSafe + sy(74), width: w - 160,
-        fontFamily: font('DM Mono'), fontSize: 21, fontWeight: 500,
-        fill: BRAND_COLORS.terra, opacity: 0.86, letterSpacing: 5,
+        name: 'Eyebrow', text: picksRange ? `THE 505 · ${picksRange.toUpperCase()}` : 'THE 505',
+        x: marginX, y: topSafe + sy(62), width: w - marginX * 2,
+        fontFamily: font('DM Mono'), fontSize: 20, fontWeight: 500,
+        fill: BRAND_COLORS.skyGold, opacity: 0.95, letterSpacing: 5,
       }),
       textLayer({
-        name: 'Headline', text: 'Top 3 Picks',
-        x: 80, y: topSafe + sy(108), width: w - 160,
-        fontFamily: font('Epilogue'), fontSize: 104, fontWeight: 900,
-        fill: BRAND_COLORS.ink, lineHeight: 0.92, letterSpacing: -2,
+        name: 'Headline', text: '3 PICKS FOR BURQUE',
+        x: marginX, y: topSafe + sy(92), width: w - marginX * 2,
+        fontFamily: font('Epilogue'), fontSize: 86, fontWeight: 900,
+        fill: BRAND_COLORS.cream, lineHeight: 0.92, letterSpacing: -2,
       }),
-      shape({ shape: 'rect', x: 80, y: headerH + sy(16), width: w - 160, height: 3, fill: BRAND_COLORS.terra, opacity: 0.9 }),
     ]
 
     events.forEach((slot, i) => {
       const y = rowStart + i * (rowH + rowGap)
       const num = String(i + 1)
-      const photoY = y
-      const photoH = Math.max(sy(142), rowH - sy(14))
-      const meta = [shortDay(slot.date), slot.time, slot.venue ? shortVenue(slot.venue) : ''].filter(Boolean).join(' · ')
-      const { fontSize: titleSize, text: titleText } = epilogueTitleSize(slot.title, textW)
+      const photoY = y + cardInset
+      const photoH = Math.max(sy(142), rowH - cardInset * 2)
+      const when = [shortDay(slot.date), slot.time].filter(Boolean).join(' · ')
+      const where = slot.venue ? shortVenue(slot.venue) : ''
+      const titleSize = isStory ? 52 : 46
+      const titleText = truncateAtWord(slot.title, isStory ? 40 : 36)
       const tag = slot.category ? slot.category.toUpperCase() : 'ABQ PICK'
 
       layers.push(
+        shape({
+          shape: 'rect', x: marginX, y, width: w - marginX * 2, height: rowH,
+          fill: BRAND_COLORS.cream, cornerRadius: 12,
+        }),
         ...(slot.imageUrl
-          ? [imageLayer({ src: slot.imageUrl, x: 80, y: photoY, width: photoW, height: photoH, fit: 'cover', cornerRadius: 4 })]
+          ? [imageLayer({ src: slot.imageUrl, x: marginX + cardInset, y: photoY, width: photoW, height: photoH, fit: 'cover', cornerRadius: 8 })]
           : [
               shape({
-                shape: 'rect', x: 80, y: photoY, width: photoW, height: photoH,
+                shape: 'rect', x: marginX + cardInset, y: photoY, width: photoW, height: photoH,
                 fill: i % 2 === 0 ? BRAND_COLORS.sage : BRAND_COLORS.terra,
-                opacity: 0.82, cornerRadius: 4,
+                opacity: 0.9, cornerRadius: 8,
               }),
               shape({
-                shape: 'rect', x: 80 + sy(18), y: photoY + sy(18), width: photoW - sy(36), height: 2,
+                shape: 'rect', x: marginX + cardInset + sy(18), y: photoY + sy(18), width: photoW - sy(36), height: 2,
                 fill: BRAND_COLORS.cream, opacity: 0.42,
               }),
               textLayer({
                 name: `Photo Fallback ${i + 1}`, text: 'ABQ',
-                x: 80, y: photoY + Math.round(photoH / 2) - sy(22), width: photoW,
+                x: marginX + cardInset, y: photoY + Math.round(photoH / 2) - sy(22), width: photoW,
                 fontFamily: font('Epilogue'), fontSize: 38, fontWeight: 900,
                 fill: BRAND_COLORS.cream, opacity: 0.72, align: 'center', letterSpacing: 2,
               }),
             ]),
-        shape({ shape: 'circle', x: 100, y: photoY + sy(16), width: 52, height: 52, fill: BRAND_COLORS.terra }),
+        shape({ shape: 'circle', x: marginX + cardInset + 14, y: photoY + 14, width: 52, height: 52, fill: BRAND_COLORS.terra }),
         textLayer({
           name: `No.${num}`, text: num,
-          x: 100, y: photoY + sy(25), width: 52,
+          x: marginX + cardInset + 14, y: photoY + 23, width: 52,
           fontFamily: font('DM Mono'), fontSize: 23, fontWeight: 500,
           fill: BRAND_COLORS.cream, align: 'center', lineHeight: 1,
         }),
         textLayer({
           name: `Tag ${i + 1}`, text: tag,
-          x: textX, y: y + sy(4), width: textW,
-          fontFamily: font('DM Mono'), fontSize: 16, fontWeight: 500,
-          fill: BRAND_COLORS.terra, opacity: 0.76, letterSpacing: 3,
+          x: textX, y: y + sy(28), width: textW,
+          fontFamily: font('DM Mono'), fontSize: 20, fontWeight: 600,
+          fill: BRAND_COLORS.terra, opacity: 0.95, letterSpacing: 2.5,
         }),
         textLayer({
           name: `Event ${i + 1}`, text: titleText,
-          x: textX, y: y + sy(34), width: textW,
+          x: textX, y: y + sy(60), width: textW,
           fontFamily: font('Epilogue'), fontSize: titleSize, fontWeight: 700,
-          fill: BRAND_COLORS.ink, lineHeight: 1.05, letterSpacing: -0.5,
+          fill: BRAND_COLORS.ink, lineHeight: 1.02, letterSpacing: -0.5,
         }),
-        ...(meta ? [textLayer({
-          name: `Meta ${i + 1}`, text: meta,
-          x: textX, y: y + sy(96), width: textW,
-          fontFamily: font('DM Mono'), fontSize: 19, fontWeight: 500,
-          fill: BRAND_COLORS.sage, opacity: 0.88, lineHeight: 1,
+        ...(when ? [textLayer({
+          name: `When ${i + 1}`, text: when,
+          x: textX, y: y + rowH - sy(86), width: textW,
+          fontFamily: font('DM Mono'), fontSize: 25, fontWeight: 600,
+          fill: BRAND_COLORS.sage, opacity: 1, lineHeight: 1,
+        })] : []),
+        ...(where ? [textLayer({
+          name: `Where ${i + 1}`, text: where,
+          x: textX, y: y + rowH - sy(50), width: textW,
+          fontFamily: font('DM Mono'), fontSize: 23, fontWeight: 600,
+          fill: BRAND_COLORS.sage, opacity: 0.92, lineHeight: 1,
         })] : []),
       )
     })
 
     layers.push(
-      shape({ shape: 'rect', x: 80, y: footerRuleY, width: w - 160, height: 3, fill: BRAND_COLORS.terra }),
+      shape({ shape: 'rect', x: marginX, y: footerRuleY, width: w - marginX * 2, height: 2, fill: BRAND_COLORS.skyGold, opacity: 0.8 }),
       textLayer({
         name: 'CTA', text: ctx.cta ?? 'abqunplugged.com',
-        x: 80, y: ctaY, width: w - 160,
+        x: marginX, y: ctaY, width: w - marginX * 2,
         fontFamily: font('DM Mono'), fontSize: 22, fontWeight: 500,
-        fill: BRAND_COLORS.terra, opacity: 0.86, align: 'center', letterSpacing: 2,
+        fill: BRAND_COLORS.cream, opacity: 0.82, align: 'center', letterSpacing: 2,
       }),
     )
 
     return {
       id: uid(), name: 'Top 3 picks', format: fmt,
-      slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.cream }, layers }],
+      slides: [{ id: uid(), background: { type: 'color', color: BRAND_COLORS.night }, layers }],
       createdAt: Date.now(), updatedAt: Date.now(),
     }
   },

@@ -123,7 +123,8 @@ The link in bio goes to abqunplugged.com, an events discovery site for all of Al
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'deepseek-v4-flash',
+        model: 'deepseek-flash',
+        thinking: { type: 'disabled' },
         temperature: 0.9,
         max_tokens: 2000,
         messages: [
@@ -131,6 +132,7 @@ The link in bio goes to abqunplugged.com, an events discovery site for all of Al
           { role: 'user',   content: userPrompt },
         ],
       }),
+      signal: AbortSignal.timeout(30_000),
     })
 
     if (!dsRes.ok) {

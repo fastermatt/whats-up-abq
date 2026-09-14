@@ -163,7 +163,8 @@ export async function POST(request: Request) {
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'deepseek-v4-flash',
+        model: 'deepseek-flash',
+        thinking: { type: 'disabled' },
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user',   content: userPrompt },

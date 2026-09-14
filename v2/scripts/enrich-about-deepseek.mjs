@@ -447,11 +447,13 @@ async function callDeepSeek(prompt, retries = 2) {
           'Authorization': `Bearer ${DEEPSEEK_KEY}`,
         },
         body: JSON.stringify({
-          model: 'deepseek-v4-flash',
+          model: 'deepseek-flash',
+          thinking: { type: 'disabled' },
           messages: [{ role: 'user', content: prompt }],
           temperature: 0.2,
           max_tokens: 1200,
         }),
+        signal: AbortSignal.timeout(30_000),
       })
       if (!res.ok) {
         const body = await res.text()
