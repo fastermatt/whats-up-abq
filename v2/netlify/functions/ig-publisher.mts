@@ -1,7 +1,7 @@
 /**
  * Netlify Scheduled Function — ig-publisher
  *
- * Runs hourly. Picks up pending IG posts from ig_scheduled_posts
+ * Runs in a focused once-daily publishing window. Picks up pending IG posts from ig_scheduled_posts
  * whose scheduled_for <= now, publishes them to Instagram, and marks them done.
  *
  * No server-side state or cron infra needed — Netlify fires this automatically.
@@ -18,7 +18,7 @@
  *     function's execution limit. The old code polled inline and got killed
  *     mid-poll, leaving rows wedged in 'publishing' forever with the post
  *     sometimes live and sometimes not. Now the flow is STATEFUL: create the
- *     container, persist container_id on the row, and let the next hourly
+ *     container, persist container_id on the row, and let the next scheduled
  *     invocation check status and publish. Each invocation does seconds of
  *     work, so nothing gets killed and nothing double-posts.
  *   - Every DB write is error-checked. A silent failed UPDATE was how rows
@@ -28,12 +28,14 @@
 import { createClient } from '@supabase/supabase-js'
 
 // ── Config ────────────────────────────────────────────────────────────────────
-// One check at minute 7 each hour. This preserves arbitrary scheduled/manual
-// posts and the two-phase Reel flow while cutting idle polling from 96 to 24
-// invocations per day. Most posts now publish within one to two hours.
-export const config = { schedule: '7 * * * *' }
+// Six focused checks around the once-daily 9 AM Mountain post. The 15–17 UTC
+// window covers both MDT and MST; minute 7 creates the Reel container and
+// minute 37 normally publishes it after Meta finishes processing. The final
+// hour leaves bounded retry room without paying for 24 idle checks every day.
+export const config = { schedule: '7,37 15-17 * * *' }
 
 const IG_API = 'https://graph.facebook.com/v19.0'
+const FINALIZE_LEASE_MS = 10 * 60 * 1000
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -130,6 +132,8 @@ async function publishContainer(igUserId: string, token: string, creationId: str
 
 interface ScheduledPost {
   id: string
+  status: string
+  scheduled_for: string
   media_type: 'FEED' | 'STORIES' | 'CAROUSEL' | 'REELS'
   image_urls: string[]
   caption: string | null
@@ -159,6 +163,17 @@ async function markFailed(supabase: Supa, rowId: string, msg: string) {
 }
 
 async function logPost(supabase: Supa, post: ScheduledPost, postId: string, slideCount: number) {
+  // Defense in depth for a retried Graph publish: the finalization lease below
+  // prevents concurrent workers, and this check keeps a replay from duplicating
+  // the historical audit row when Meta returns the same published media ID.
+  const { data: existing, error: existingErr } = await supabase
+    .from('ig_post_log')
+    .select('id')
+    .eq('post_id', postId)
+    .limit(1)
+  if (existingErr) console.error(`ig-publisher: ig_post_log lookup failed for ${postId}:`, existingErr.message)
+  if (existing?.length) return
+
   const { error } = await supabase.from('ig_post_log').insert({
     post_id: postId,
     media_type: post.media_type,
@@ -184,20 +199,53 @@ export default async function handler() {
   const supabase = supabaseAdmin()
 
   // ── Phase 1: resume Reels whose container was created on a previous tick ──
-  const { data: resumable, error: resumeErr } = await supabase
+  const resumeColumns = 'id, status, scheduled_for, media_type, image_urls, caption, location_id, event_id, container_id'
+  const resumeNow = new Date().toISOString()
+  const { data: processing, error: processingErr } = await supabase
     .from('ig_scheduled_posts')
-    .select('id, media_type, image_urls, caption, location_id, event_id, container_id')
+    .select(resumeColumns)
     .eq('status', 'publishing')
     .not('container_id', 'is', null)
     .limit(5)
+  const { data: staleFinalizing, error: staleFinalizingErr } = await supabase
+    .from('ig_scheduled_posts')
+    .select(resumeColumns)
+    .eq('status', 'finalizing')
+    .not('container_id', 'is', null)
+    .lte('scheduled_for', resumeNow)
+    .limit(5)
 
-  if (resumeErr) {
-    console.error('ig-publisher: resume fetch error:', resumeErr.message)
+  if (processingErr || staleFinalizingErr) {
+    console.error('ig-publisher: resume fetch error:', processingErr?.message ?? staleFinalizingErr?.message)
   } else {
-    for (const post of (resumable ?? []) as ScheduledPost[]) {
+    const resumable = [...(processing ?? []), ...(staleFinalizing ?? [])].slice(0, 5) as ScheduledPost[]
+    for (const post of resumable) {
+      // Lease the final publish step. A second overlapping invocation cannot
+      // transition the same row, while a crashed worker becomes retryable after
+      // ten minutes instead of leaving the post wedged forever.
+      const leaseUntil = new Date(Date.now() + FINALIZE_LEASE_MS).toISOString()
+      let claim = supabase
+        .from('ig_scheduled_posts')
+        .update({ status: 'finalizing', scheduled_for: leaseUntil })
+        .eq('id', post.id)
+        .eq('status', post.status)
+      if (post.status === 'finalizing') claim = claim.lte('scheduled_for', resumeNow)
+      const { data: claimed, error: claimErr } = await claim.select('id')
+      if (claimErr) {
+        console.error(`ig-publisher: resume claim error for ${post.id}:`, claimErr.message)
+        continue
+      }
+      if (!claimed?.length) continue
+
       try {
         const status = await containerStatus(post.container_id as string, igToken)
         if (status === 'IN_PROGRESS') {
+          const { error: releaseErr } = await supabase
+            .from('ig_scheduled_posts')
+            .update({ status: 'publishing', scheduled_for: new Date().toISOString() })
+            .eq('id', post.id)
+            .eq('status', 'finalizing')
+          if (releaseErr) console.error(`ig-publisher: failed to release ${post.id}:`, releaseErr.message)
           console.log(`ig-publisher: ${post.id} container still processing, will retry next tick`)
           continue
         }
@@ -213,7 +261,14 @@ export default async function handler() {
         const msg = err instanceof Error ? err.message : String(err)
         console.error(`ig-publisher: resume failed for ${post.id}:`, msg)
         if (err instanceof TerminalError) await markFailed(supabase, post.id, msg)
-        // Non-terminal errors: leave the row for the next tick.
+        else {
+          const { error: releaseErr } = await supabase
+            .from('ig_scheduled_posts')
+            .update({ status: 'publishing', scheduled_for: new Date().toISOString() })
+            .eq('id', post.id)
+            .eq('status', 'finalizing')
+          if (releaseErr) console.error(`ig-publisher: failed to release ${post.id}:`, releaseErr.message)
+        }
       }
     }
   }
