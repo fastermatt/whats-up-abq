@@ -16,7 +16,7 @@ on:
         type: string
         default: 'morning'
       post_now:
-        description: 'Queue for the next hourly publisher run instead of the scheduled time slot'
+        description: 'Queue for the next focused publisher check instead of the scheduled time slot'
         required: false
         type: boolean
         default: false
