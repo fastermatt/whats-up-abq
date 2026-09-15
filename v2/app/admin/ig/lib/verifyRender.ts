@@ -34,7 +34,14 @@ export async function waitForDesignImages(
   })))
 
   if (sources.length > 0) {
-    await Promise.allSettled(sources.map(src => waitForImageSettled(proxyIfNeeded(src), timeoutMs)))
+    const results = await Promise.all(sources.map(async src => ({
+      src,
+      loaded: await waitForImageSettled(proxyIfNeeded(src), timeoutMs),
+    })))
+    const failed = results.filter(result => !result.loaded)
+    if (failed.length > 0) {
+      throw new Error(`Refusing export: ${failed.length} design image${failed.length === 1 ? '' : 's'} failed to load.`)
+    }
   }
 
   await nextFrame()
@@ -87,22 +94,22 @@ export async function verifyRenderedPng(
   return { ok: reasons.length === 0, reasons }
 }
 
-function waitForImageSettled(src: string, timeoutMs: number): Promise<void> {
+function waitForImageSettled(src: string, timeoutMs: number): Promise<boolean> {
   return new Promise(resolve => {
     const img = new Image()
     let settled = false
-    const finish = () => {
+    const finish = (loaded: boolean) => {
       if (settled) return
       settled = true
       clearTimeout(timer)
-      resolve()
+      resolve(loaded)
     }
-    const timer = window.setTimeout(finish, timeoutMs)
+    const timer = window.setTimeout(() => finish(false), timeoutMs)
     img.crossOrigin = 'anonymous'
-    img.onload = finish
-    img.onerror = finish
+    img.onload = () => finish(img.naturalWidth > 0 && img.naturalHeight > 0)
+    img.onerror = () => finish(false)
     img.src = src
-    if (img.complete) finish()
+    if (img.complete) finish(img.naturalWidth > 0 && img.naturalHeight > 0)
   })
 }
 

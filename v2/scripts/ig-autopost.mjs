@@ -8,6 +8,7 @@ import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import process from 'node:process'
 import { createClient } from '@supabase/supabase-js'
+import sharp from 'sharp'
 import { renderIG } from './ig-render.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -259,6 +260,9 @@ function eventFromFixture(event) {
     venueTips: cleanString(event.venueTips),
     localRec: cleanString(event.localRec),
     nearbyDining: cleanNearbyDining(event.nearbyDining),
+    source: cleanString(event.source),
+    imageStatus: cleanString(event.imageStatus),
+    imageQuality: cleanString(event.imageQuality),
   }
 }
 
@@ -283,6 +287,9 @@ function eventFromRow(row) {
     venueTips: cleanString(ai.venue_tips),
     localRec: cleanString(ai.local_rec),
     nearbyDining: cleanNearbyDining(ai.nearby_dining),
+    source: cleanString(row.source),
+    imageStatus: cleanString(row.image_status),
+    imageQuality: cleanString(row.image_quality),
   }
 }
 
@@ -346,12 +353,37 @@ function dedupeEvents(events) {
     }
     if (!merged) second.set(`${date}|${vkey}|${core}`, event)
   }
-  return [...second.values()]
+  // Sports feeds sometimes describe the same matchup once from each team's
+  // perspective (for example "New Mexico Lobos" and "Mercyhurst Lakers").
+  // Those titles do not resemble each other, but a venue cannot host two
+  // different headline games on the same date. Keep the stronger row so an IG
+  // roundup never presents the two sides of one game as separate picks.
+  const sportsByVenueDate = new Map()
+  const deduped = []
+  for (const event of second.values()) {
+    if (event.category !== 'Sports') {
+      deduped.push(event)
+      continue
+    }
+    const key = `${event.date}|${venueKey(event.venue)}`
+    const existingIndex = sportsByVenueDate.get(key)
+    if (existingIndex === undefined) {
+      sportsByVenueDate.set(key, deduped.length)
+      deduped.push(event)
+    } else if (event.popularityScore > deduped[existingIndex].popularityScore) {
+      deduped[existingIndex] = event
+    }
+  }
+  return deduped
 }
 
 function hasRealPhoto(event) {
   const url = event.imageUrl ?? ''
   if (!url) return false
+  if (event.imageQuality === 'rejected') return false
+  // Direct-venue calendars frequently reuse the wrong flyer across nearby
+  // events. Only let those images into auto-posts after explicit verification.
+  if (event.source === 'local-venue' && event.imageStatus !== 'verified') return false
   return !/Horizontal-Rule|rocket_cropped/i.test(url)
 }
 
@@ -403,6 +435,19 @@ function selectDiverse(events, count) {
   return selected
 }
 
+function selectDistinctSeries(events, count) {
+  const selected = []
+  const seenSeries = new Set()
+  for (const event of events) {
+    const seriesKey = `${venueKey(event.venue)}|${artistCore(event.title)}`
+    if (seenSeries.has(seriesKey)) continue
+    seenSeries.add(seriesKey)
+    selected.push(event)
+    if (selected.length >= count) break
+  }
+  return selected
+}
+
 function eventInRange(event, range) {
   return event.date >= range.start && event.date <= range.end
 }
@@ -423,7 +468,8 @@ export function selectEvents(slot, allEvents, date, recentlyPostedIds) {
   }
 
   if (slot.id === 'top-three') {
-    return filterIsotopesSpam(pool.filter(hasRealPhoto)).slice(0, 3)
+    const distinctSeries = selectDistinctSeries(filterIsotopesSpam(pool.filter(hasRealPhoto)), pool.length)
+    return selectDiverse(distinctSeries, 3)
   }
 
   if (slot.id === 'weekly-summary') {
@@ -439,6 +485,41 @@ export function selectEvents(slot, allEvents, date, recentlyPostedIds) {
   }
 
   return selectDiverse(filterIsotopesSpam(pool), 5)
+}
+
+async function imageUrlIsUsable(url) {
+  if (!/^https?:\/\//i.test(url ?? '')) return false
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(10_000) })
+    if (!res.ok) return false
+    const contentType = res.headers.get('content-type') ?? ''
+    if (!contentType.startsWith('image/')) return false
+    const contentLength = Number(res.headers.get('content-length') ?? 0)
+    if (contentLength > 15 * 1024 * 1024) return false
+    const bytes = Buffer.from(await res.arrayBuffer())
+    if (bytes.length === 0 || bytes.length > 15 * 1024 * 1024) return false
+    const metadata = await sharp(bytes).metadata()
+    return (metadata.width ?? 0) >= 320 && (metadata.height ?? 0) >= 180
+  } catch {
+    return false
+  }
+}
+
+async function selectEventsWithUsablePhotos(slot, allEvents, date, recentlyPostedIds) {
+  const excluded = new Set(recentlyPostedIds)
+  const needed = slot.kind === 'single' ? 1 : slot.id === 'weekly-summary' ? 5 : slot.id === 'top-three' ? 3 : 5
+
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const selected = selectEvents(slot, allEvents, date, excluded)
+    if (selected.length === 0) return []
+    const checks = await Promise.all(selected.map(event => imageUrlIsUsable(event.imageUrl)))
+    const failed = selected.filter((_, index) => !checks[index])
+    if (failed.length === 0 && selected.length >= needed) return selected
+    for (const event of failed) excluded.add(event.id)
+    if (failed.length === 0) return selected
+    console.error(`[images] rejected ${failed.length} unavailable/undersized event image${failed.length === 1 ? '' : 's'}; selecting replacements`)
+  }
+  return []
 }
 
 function buildContext(slot, events, date) {
@@ -729,7 +810,7 @@ async function withDataQueryRetries(label, queryFactory) {
 async function loadLiveEvents(supabase, range) {
   const data = await withDataQueryRetries('Event query', signal => supabase
       .from('events')
-      .select('id, raw, event_date, venue_name, category, cached_photo_url, popularity_score, featured, ai_enrichment')
+      .select('id, source, raw, event_date, venue_name, category, cached_photo_url, popularity_score, featured, ai_enrichment, image_status, image_quality')
       .eq('hidden', false)
       .gte('event_date', range.start)
       .lte('event_date', `${range.end}T23:59:59`)
@@ -1057,7 +1138,7 @@ async function main() {
     selected = ids.map(id => events.find(e => e.id === id)).filter(Boolean)
     if (selected.length === 0) throw new Error(`--event id(s) not found in pool: ${ids.join(', ')}`)
   } else {
-    selected = selectEvents(slot, events, today, recentIds)
+    selected = await selectEventsWithUsablePhotos(slot, events, today, recentIds)
   }
   if (selected.length === 0) throw new Error(`No eligible events for ${today} ${slot.id}`)
 
