@@ -50,6 +50,7 @@ export function HolidayBanner(props: HolidayBannerProps) {
   const dayLabel =
     props.daysUntil === 0 ? 'Today'
     : props.daysUntil === 1 ? 'Tomorrow'
+    : props.daysUntil < 0 ? 'Happening now'
     : `In ${props.daysUntil} days`
 
   // Background style: photo with terra gradient overlay (when image set)

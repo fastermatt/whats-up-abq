@@ -68,7 +68,7 @@ CAPTION STRUCTURE:
 2. Concrete event detail from About or Highlights.
 3. A why-go or local line from Local recommendation, Venue tips, or Nearby dining.
 4. Practical info line using provided date, time, and venue.
-5. Soft CTA: "Full details + more at abqunplugged.com" or "Full details + more at the link in bio".
+5. Soft CTA: "Full details + more at the link in bio".
 6. Final line with 4 to 6 tasteful, relevant hashtags mixing ABQ/local, category, and event-specific tags. Never more than 6.
 
 For a DIGEST (multiple events), the IMAGE already lists every event with its day, time, and venue. Keep the caption SHORT: one warm hook line, one line of context, the CTA, then the hashtags. Do NOT re-list or describe the individual events. Aim for under 60 words before the hashtags.
@@ -87,9 +87,9 @@ RULES:
 - Use at most ONE prestige adjective in the whole caption (legendary, iconic, timeless, acclaimed, world-renowned, beloved). Stacking them reads like AI.
 - No soft commands either: avoid "make a night of it," "plan a...," "get ready," "arrive early," "don't forget," "grab a," "be sure to."
 - Invent nothing about the crowd or experience ("you might get pulled on stage," "best sightlines") unless it is in the provided fields.
-- The link in bio points to abqunplugged.com. Frame CTAs as "find more details" / "link in bio" not "get your tickets"
+- The link in bio points to abqunplugged.com/ig, a fast event finder for tonight, tomorrow, this weekend, and local categories. Frame CTAs as "find more details" / "link in bio" not "get your tickets"
 - Never name a ticket vendor or platform (Ticketmaster, SeatGeek, Eventbrite, etc.) and never add a "tickets available through X" line. It is not in the provided fields. Point people to abqunplugged.com for details and tickets.
-- Use "Full details + more at abqunplugged.com" or "Full details + more at the link in bio" for CTA lines
+- Use "Full details + more at the link in bio" for the CTA line
 - Keep it scannable with line breaks.
 
 OUTPUT FORMAT:
@@ -675,7 +675,7 @@ async function generateCaption(events, slot, date, reelNote = '') {
 
 ${renderCaptionContext(events, slot.kind, date)}
 
-The link in bio goes to abqunplugged.com, an events discovery site for all of Albuquerque, not a page for a specific event. Frame any CTA around discovering more events, not getting tickets directly.`
+The link in bio goes to abqunplugged.com/ig, a focused event finder for tonight, tomorrow, this weekend, and categories. Frame any CTA around discovering event details and more local options, not getting tickets directly.`
 
   let res
   try {
@@ -736,12 +736,12 @@ The link in bio goes to abqunplugged.com, an events discovery site for all of Al
 
 export function fallbackCaption(events, slot) {
   if (slot.kind !== 'single') {
-    return `A few ways to spend a little more time in Burque.\n\nSave this one and find full details at abqunplugged.com.\n\n#ABQ #Albuquerque #505 #Burque #ABQEvents #ThingsToDoABQ`
+    return `A few ways to spend a little more time in Burque.\n\nWorth saving. Full details + more at the link in bio.\n\n#ABQ #Albuquerque #505 #Burque #ABQEvents #ThingsToDoABQ`
   }
   const body = slot.kind === 'single'
     ? `${events[0].title}\n${[events[0].date, events[0].time, events[0].venue].filter(Boolean).join(' · ')}`
     : events.map(event => `${event.title} · ${[event.date, event.time, event.venue].filter(Boolean).join(' · ')}`).join('\n')
-  return `${body}\n\nFull details + more at abqunplugged.com\n\n#ABQ #Albuquerque #505 #Burque #ABQEvents #ThingsToDoABQ`
+  return `${body}\n\nFull details + more at the link in bio.\n\n#ABQ #Albuquerque #505 #Burque #ABQEvents #ThingsToDoABQ`
 }
 
 async function loadTagMap() {

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { fetchEvents, fetchRecentlyAdded, fetchFeaturedEvents } from '@/lib/events'
+import { fetchEvents, fetchRecentlyAdded } from '@/lib/events'
 import { getCategoryFallback, getHeroImage } from '@/lib/fallback-images'
 import {
   Sparkles, MapPin, Bookmark, Mail, Info, ArrowRight,
@@ -22,11 +22,11 @@ export const metadata: Metadata = {
 }
 
 export default async function IgLandingPage() {
-  const [tonight, tomorrow, weekend, featured, justAdded] = await Promise.all([
+  const [tonight, tomorrow, weekend, thisWeek, justAdded] = await Promise.all([
     fetchEvents({ timeFilter: 'tonight', limit: 1 }),
     fetchEvents({ timeFilter: 'tomorrow', limit: 1 }),
     fetchEvents({ timeFilter: 'this-weekend', limit: 1 }),
-    fetchFeaturedEvents(4),
+    fetchEvents({ timeFilter: 'this-week', limit: 4 }),
     fetchRecentlyAdded(4),
   ])
 
@@ -43,7 +43,7 @@ export default async function IgLandingPage() {
   const utmAmp = '&utm_source=instagram&utm_medium=bio&utm_campaign=link_in_bio'
 
   const heroSrc = getHeroImage()
-  const weekTotal = tonight.total + tomorrow.total + weekend.total
+  const weekTotal = thisWeek.total
 
   const categoryChips: { label: string; emoji: string; cat?: string; price?: string }[] = [
     { label: 'Tonight', emoji: '🌙' },
@@ -172,8 +172,8 @@ export default async function IgLandingPage() {
       </section>
 
       {/* ── Category chips ── */}
-      <section className="pt-6">
-        <p className="max-w-md mx-auto px-5 text-[10px] uppercase tracking-[0.22em] text-terra mb-3 font-bold">
+      <section className="max-w-md mx-auto pt-6 overflow-hidden">
+        <p className="px-5 text-[10px] uppercase tracking-[0.22em] text-terra mb-3 font-bold">
           What&apos;s your vibe?
         </p>
         <div className="overflow-x-auto scrollbar-hide">
@@ -199,12 +199,12 @@ export default async function IgLandingPage() {
         </div>
       </section>
 
-      {/* ── Editor's picks ── */}
-      {featured.length > 0 && (
+      {/* ── Current picks ── */}
+      {thisWeek.events.length > 0 && (
         <section className="max-w-md mx-auto px-5 pt-7">
           <div className="flex items-baseline justify-between mb-3">
             <p className="text-[10px] uppercase tracking-[0.22em] text-terra font-bold">
-              ★ Don&apos;t miss
+              This week in ABQ
             </p>
             <Link
               href={`/events${utm}`}
@@ -214,7 +214,7 @@ export default async function IgLandingPage() {
             </Link>
           </div>
           <div className="space-y-2">
-            {featured.map((event) => {
+            {thisWeek.events.map((event) => {
               const fallback = getCategoryFallback(event.category ?? undefined, event.title ?? event.id)
               const primary = event.imageUrl || fallback
               const dateStr = event.date
