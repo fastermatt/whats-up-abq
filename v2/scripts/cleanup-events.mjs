@@ -13,6 +13,7 @@
  * Usage:
  *   SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... node scripts/cleanup-events.mjs
  *   node scripts/cleanup-events.mjs --dry-run
+ *   node scripts/cleanup-events.mjs --past-only   # hide past rows only
  *   node scripts/cleanup-events.mjs --skip-purge  # cron owns retention
  */
 import { createClient } from '@supabase/supabase-js'
@@ -47,6 +48,7 @@ if (!SUPABASE_KEY) {
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 const DRY_RUN = process.argv.includes('--dry-run')
 const SKIP_PURGE = process.argv.includes('--skip-purge')
+const PAST_ONLY = process.argv.includes('--past-only')
 
 // Today in America/Denver, as YYYY-MM-DD
 function todayInDenver() {
@@ -114,10 +116,16 @@ async function hideRows(reason, rows) {
 async function main() {
   console.log(`🧹 ABQ Unplugged — daily event cleanup${DRY_RUN ? ' (DRY RUN)' : ''}\n`)
   const today = todayInDenver()
+  const VIRTUAL_RE = /\b(virtual(?:ly)?|online (class|event|workshop|webinar|meeting)|zoom webinar|zoom meeting|via zoom|live ?stream|webinar|google meet|microsoft teams)\b/i
   console.log(`  Today (America/Denver): ${today}\n`)
 
   // 1. Past events
   await hide('past_event_cleanup_daily', q => q.lt('event_date', today))
+
+  if (PAST_ONLY) {
+    console.log('\n✅ Past-event cleanup complete (--past-only)')
+    return
+  }
 
   // 2. V1 SeatGeek sg- prefix duplicates
   await hide('v1_sg_prefix_dedup_daily', q => q.like('id', 'seatgeek_sg-%'))
@@ -172,10 +180,9 @@ async function main() {
 
   // Eventbrite discovery can label remote cruises/webinars with the searched
   // city even though there is no physical venue. Hide rows with no place
-  // evidence, explicit virtual markers, or a Rio Rancho address. The importer
-  // applies the same rules prospectively; this cleans previously admitted rows.
+  // evidence or explicit virtual markers. Rio Rancho is intentionally part of
+  // the greater-metro coverage area and must not be hidden here.
   {
-    const VIRTUAL_RE = /\b(virtual(?:ly)?|online (class|event|workshop|webinar|meeting)|zoom webinar|zoom meeting|via zoom|live ?stream|webinar|google meet|microsoft teams)\b/i
     const { data: ebRows, error } = await supabase.schema('public').from('events')
       .select('id, raw, venue_name, ai_enrichment')
       .eq('source', 'eventbrite')
@@ -187,8 +194,6 @@ async function main() {
     } else {
       const offenders = (ebRows || []).filter(row => {
         const venue = row.raw?._embedded?.venues?.[0] || row.raw?.venue || {}
-        const city = String(venue.city?.name ?? venue.address?.city ?? '').trim().toLowerCase()
-        const postal = String(venue.postalCode ?? venue.address?.postal_code ?? '').trim()
         const street = String(venue.address?.line1 ?? venue.address?.address_1 ?? '').trim()
         const venueName = String(venue.name ?? row.venue_name ?? '').trim()
         const location = venue.location || {}
@@ -197,15 +202,14 @@ async function main() {
         const description = row.raw?.description?.text ?? row.raw?.description ?? row.raw?.info ?? ''
         const haystack = `${title ?? ''} ${venueName} ${street} ${String(description).slice(0, 400)}`
         const noPhysicalPlace = !venueName && !street && !hasCoordinates
-        const rioRancho = city === 'rio rancho' || ['87124', '87144'].includes(postal) || /\brio rancho\b/i.test(street)
-        return noPhysicalPlace || rioRancho || VIRTUAL_RE.test(haystack)
+        return noPhysicalPlace || VIRTUAL_RE.test(haystack)
       })
       await hideRows('eb_location_hygiene_daily', offenders)
     }
   }
 
-  // ABQtodo occasionally supplies a misleading venue name while its city/ZIP
-  // correctly identifies Rio Rancho. Use the structured address, not the title.
+  // ABQtodo sometimes carries online classes with an Albuquerque searched-city
+  // value. Hide explicit virtual venues; Rio Rancho remains valid metro data.
   {
     const { data: localRows, error } = await supabase.schema('public').from('events')
       .select('id, raw, ai_enrichment')
@@ -218,12 +222,15 @@ async function main() {
     } else {
       const offenders = (localRows || []).filter(row => {
         const venue = row.raw?._embedded?.venues?.[0] || {}
-        const city = String(venue.city?.name ?? '').trim().toLowerCase()
-        const postal = String(venue.postalCode ?? '').trim()
+        const title = typeof row.raw?.name === 'string' ? row.raw.name : row.raw?.name?.text
+        const venueName = String(venue.name ?? '')
         const street = String(venue.address?.line1 ?? '').trim()
-        return city === 'rio rancho' || ['87124', '87144'].includes(postal) || /\brio rancho\b/i.test(street)
+        const description = row.raw?.description?.text ?? row.raw?.description ?? row.raw?.info ?? ''
+        const noPhysicalPlace = !venueName && !street
+        return VIRTUAL_RE.test(venueName) ||
+          (noPhysicalPlace && VIRTUAL_RE.test(`${title ?? ''} ${String(description).slice(0, 400)}`))
       })
-      await hideRows('non_abq_location_daily', offenders)
+      await hideRows('local_virtual_hygiene_daily', offenders)
     }
   }
 

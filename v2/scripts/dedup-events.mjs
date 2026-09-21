@@ -185,10 +185,15 @@ async function fetchUpcomingVisible() {
 }
 
 // ─── Pick winner from a group of duplicate rows ───────────────────────────────
-// Rules: highest source priority wins. Within the same source, prefer the
-// canonical SeatGeek row, then a photo, then the shorter scannable title.
+// Rules: never discard concrete venue data in favor of a venue-less row. Then
+// use source priority. Within the same source, prefer the canonical SeatGeek
+// row, then a photo, then the shorter scannable title.
 function pickWinner(rows) {
   return rows.slice().sort((a, b) => {
+    const aVenue = String(a.venue_name || '').trim() ? 1 : 0
+    const bVenue = String(b.venue_name || '').trim() ? 1 : 0
+    if (aVenue !== bVenue) return bVenue - aVenue
+
     const sPriority = sourcePriority(b.source) - sourcePriority(a.source)
     if (sPriority !== 0) return sPriority
 

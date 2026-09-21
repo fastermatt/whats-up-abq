@@ -6,7 +6,7 @@
  */
 import Link from 'next/link'
 import {
-  RefreshCw, Image, Database, ExternalLink, Terminal, LayoutDashboard,
+  RefreshCw, Image as ImageIcon, Database, ExternalLink, Terminal, LayoutDashboard,
   FileText, BarChart2, AlertCircle, Clock, CheckCircle2, ChevronRight,
   Camera,
 } from 'lucide-react'
@@ -267,7 +267,7 @@ export default function ToolsPage() {
             name="Regression Tests"
             badge="Auto-runs on push"
             badgeColor="blue"
-            description="30 data-shape invariants: no Online venues, no Rio Rancho events, no cross-source duplicates, no boilerplate descriptions, family category clean, etc. Each test catches a specific bug class that has bitten us before."
+            description="30 data-shape invariants: no online-only listings, Rio Rancho metro events tagged correctly, no cross-source duplicates, no boilerplate descriptions, family category clean, etc. Each test catches a specific bug class that has bitten us before."
             when="Runs automatically on every push to v2/lib/ or v2/scripts/. Also runs daily at 6 AM MT. Trigger manually after a big DB change."
           />
           <WorkflowCard
@@ -380,7 +380,7 @@ export default function ToolsPage() {
             />
             <ScriptRow
               name="Eventbrite"
-              desc="Imports ~108 EB events. Filters Rio Rancho zip codes, online-only events, non-ABQ events."
+              desc="Imports ABQ and Rio Rancho metro events. Filters online-only and non-metro listings."
               cmd="node scripts/import-eventbrite.mjs"
               flags={[{ flag: '--dry-run', desc: 'Preview without writing' }]}
             />
@@ -591,7 +591,7 @@ export default function ToolsPage() {
           />
           <AdminPageLink
             href="/admin/ig"
-            icon={<Image size={16} className="text-terra" />}
+            icon={<ImageIcon size={16} className="text-terra" />}
             label="IG Editor (Advanced)"
             sub="Drag-and-drop canvas editor for custom Instagram graphics"
           />

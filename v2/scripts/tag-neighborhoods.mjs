@@ -102,7 +102,7 @@ const ZIP_AMBIGUOUS = new Set(['87106'])
 // Used when: (a) no zip, (b) zip is in ZIP_AMBIGUOUS
 const RULES = [
   // Downtown (includes Harwood ~7th St NW, close to downtown)
-  [/\b(sunshine theater|launchpad|el rey|kimo|century downtown|civic plaza|albuquerque civic|convention center|hotel andaluz|strand|downtown|(main library.*downtown)|special collections library|black cat cultural|african american performing arts|casa de benavidez|the grove|harwood art center|harwood|juno brewery|juno.*cafe|cathedral.*john|st.*john.*cathedral|african american performing|albuquerque social club.*central|robinson park|marquette ave|the block|groove artspace|red door bar|500 marquette|hla conference)\b/i, 'Downtown'],
+  [/\b(sunshine theater|launchpad|el rey|kimo|century downtown|civic plaza|albuquerque civic|convention center|hotel andaluz|strand|downtown|(main library.*downtown)|special collections library|black cat cultural|african american performing arts|casa de benavidez|the grove|harwood art center|harwood|juno brewery|juno.*cafe|cathedral.*john|st.*john.*cathedral|african american performing|albuquerque social club.*central|robinson park|marquette ave|effex|arrive albuquerque|arrive hotel|groove artspace|red door bar|500 marquette|hla conference)\b/i, 'Downtown'],
 
   // Downtown / EDo
   [/\b(edo|east downtown|sister.*bar|the jam spot)\b/i, 'Downtown / EDo'],
@@ -114,7 +114,7 @@ const RULES = [
   [/\b(popejoy|keller hall|university arena|johnson center|domenici|unm north campus|unm continuing ed|stanford dr|yale blvd|cornell drive|university of new mexico campus|loma linda community center|kiva lecture hall|1920 yale|university stadium|visual art museum|unm art)\b/i, 'UNM Campus'],
 
   // UNM / Nob Hill (87106 sub-area: Central Ave between Girard and San Mateo)
-  [/\b(nob hill|lobo theater|historic lobo|effex|anodyne|tractor brewery|flying star|ernie pyle library|erna fergusson|girard blvd)\b/i, 'UNM / Nob Hill'],
+  [/\b(nob hill|lobo theater|historic lobo|anodyne|tractor brewery|flying star|ernie pyle library|erna fergusson|girard blvd)\b/i, 'UNM / Nob Hill'],
 
   // State Fairgrounds / Midtown (Isotopes, Tingley, State Fair)
   [/\b(state fairground|expo new mexico|the pit|midtown.*arena|isotopes|rgcu field|rio grande credit union field|4801 lang|2448 menaul|menaul blvd|urban 360|tingley coliseum|chupacabras)\b/i, 'State Fairgrounds / Midtown'],
@@ -124,7 +124,7 @@ const RULES = [
 
   // Uptown / Midtown (San Mateo, Louisiana, Wyoming, Pan American Freeway NE corridors)
   // Horn YMCA is 7840 Pan American Freeway NE (zip 87109) — NOT Northeast Heights
-  [/\b(uptown|louisiana blvd|coronado center|san mateo blvd|albuquerque marriott|wyoming.*menaul|san mateo pl|san mateo place|pan american freeway|horn ymca|hb.*ymca|hb &amp;.*ymca|americas pkwy|americas parkway|babydoll)\b/i, 'Uptown / Midtown'],
+  [/\b(uptown|louisiana blvd|coronado center|san mateo|albuquerque marriott|wyoming.*menaul|pan american freeway|horn ymca|hb.*ymca|hb &amp;.*ymca|americas pkwy|americas parkway|babydoll)\b/i, 'Uptown / Midtown'],
 
   // Far Northeast / Sandia Foothills
   [/\b(sandia foothills|tramway blvd|elena gallegos|balloon fiesta|fiesta pkwy|foothills|far northeast|high desert|tony hillerman library|roadrunner food bank|office blvd|sandia casino|sandia amphitheater)\b/i, 'Far Northeast / Sandia Foothills'],
@@ -132,16 +132,16 @@ const RULES = [
   // Northeast Heights (Juan Tabo, Eubank, Academy, Comanche corridor — NE quadrant only)
   // REMOVED from here: taylor ranch (West Side 87120), overtime sports (Coors Bypass = West Side),
   // horn ymca / hb ymca (Pan American Freeway = Uptown/Midtown 87109)
-  [/\b(juan tabo|lomas tramway|cherry hills.*library|montgomery blvd|sandia labs|kirtland|eubank blvd|academy blvd|comanche|adobe theater|creativity warehouse|story quest|unity spiritual|nexus brewery|heartstrings|holiday park|san pedro.*library|csp dance|ymca.*comanche)\b/i, 'Northeast Heights'],
+  [/\b(juan tabo|lomas tramway|cherry hills.*library|montgomery blvd|sandia labs|kirtland|eubank blvd|academy blvd|comanche|7901 mountain|adobe theater|creativity warehouse|story quest|unity spiritual|nexus brewery|heartstrings|holiday park|san pedro.*library|csp dance|ymca.*comanche)\b/i, 'Northeast Heights'],
 
   // North Valley / Los Ranchos
   [/\b(north valley|los ranchos|rudolfo anaya|los griegos|alameda blvd|los duranes|corrales|rio grande.*north|revel entertainment)\b/i, 'North Valley'],
 
   // Old Town
-  [/\b(old town|biopark|aquarium|botanic garden|tingley beach|rio grande nature|museum of natural history|albuquerque museum|indian pueblo cultural|rio grande blvd|mountain road|mountain rd|raindrop foundation|4920 rio grande|arrive albuquerque|arrive hotel)\b/i, 'Old Town'],
+  [/\b(old town|biopark|aquarium|botanic garden|tingley beach|rio grande nature|museum of natural history|albuquerque museum|indian pueblo cultural|rio grande blvd|4920 rio grande)\b/i, 'Old Town'],
 
   // Rio Rancho
-  [/\b(rio rancho|sandoval|santa ana star|hyatt regency.*tamaya|rust medical|hilton.*rio rancho|cafe.*rio rancho boulevard|castle coffee.*rio rancho)\b/i, 'Rio Rancho'],
+  [/\b(rio rancho|enchanted hills|sandoval|santa ana star|hyatt regency.*tamaya|rust medical|hilton.*rio rancho|cafe.*rio rancho boulevard|castle coffee.*rio rancho)\b/i, 'Rio Rancho'],
 
   // West Side (Coors, Unser, Taylor Ranch, Ladera, Paradise Hills, Westgate)
   // Taylor Ranch is NW ABQ (zip 87120) — NOT Northeast Heights
@@ -191,7 +191,12 @@ function getVenueString(row) {
     raw._embedded?.venues?.[0]?.address?.line1 ||
     raw.address ||
     ''
-  return [vn, fromRaw, addr].filter(Boolean).join(' | ')
+  const city =
+    raw.venue?.address?.city ||
+    raw.venue?.city?.name ||
+    raw._embedded?.venues?.[0]?.city?.name ||
+    ''
+  return [vn, fromRaw, addr, city].filter(Boolean).join(' | ')
 }
 
 // ─── High-confidence venue overrides (bypass zip lookup) ─────────────────────

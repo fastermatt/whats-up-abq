@@ -56,20 +56,14 @@ const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
-// ABQ metro city names — used when no lat/lng is available.
-// 2026-04-26: Rio Rancho removed per user feedback. RR is a separate
-// city ~30 min from Albuquerque proper and shows up too often in search
-// results, diluting the "things to do in ABQ" promise. To re-include
-// later, add back here AND add an explicit "Rio Rancho" neighborhood.
+// Greater ABQ metro city names — used when no lat/lng is available.
+// Rio Rancho is intentionally included: the site has a dedicated neighborhood
+// page and the community-submission boundary explicitly covers the metro.
 const ABQ_CITIES = new Set([
-  'albuquerque', 'bernalillo', 'corrales', 'los lunas',
+  'albuquerque', 'rio rancho', 'bernalillo', 'corrales', 'los lunas',
   'belen', 'edgewood', 'tijeras', 'cedar crest', 'los ranchos',
   'los ranchos de albuquerque', 'alburquerque',
 ])
-
-// Rio Rancho zips (87124, 87144) — explicit reject even if lat/lng is in
-// the wider metro box, since they're "in" geographic ABQ but socially RR.
-const RIO_RANCHO_ZIPS = new Set(['87124', '87144'])
 
 // ── Discovery pages to scrape ─────────────────────────────────────────────────
 const DISCOVERY_URLS = [
@@ -82,7 +76,7 @@ const DISCOVERY_URLS = [
   'https://www.eventbrite.com/d/nm--albuquerque/arts/',
   'https://www.eventbrite.com/d/nm--albuquerque/family-and-education/',
   'https://www.eventbrite.com/d/nm--albuquerque/community/',
-  // 'https://www.eventbrite.com/d/nm--rio-rancho/events/'  // removed 2026-04-26 — RR is its own city
+  'https://www.eventbrite.com/d/nm--rio-rancho/events/',
 ]
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -171,16 +165,8 @@ function transformJsonLd(item, timeBySlug) {
   if (eventUrl && !/eventbrite\.com\//.test(eventUrl)) return null
 
   const cityName = (addr.addressLocality || '').toLowerCase().trim()
-  const postalCode = (addr.postalCode || '').toString().trim()
   const streetAddr = (addr.streetAddress || '').toString()
   const venueName = (loc.name || '').toString().trim()
-
-  // Hard reject Rio Rancho (zip + city + street-mentions). Catches RR events
-  // whose lat/lng fall inside the wider ABQ box but are socially a different city.
-  if (RIO_RANCHO_ZIPS.has(postalCode)) return null
-  if (cityName === 'rio rancho') return null
-  if (/\brio\s+rancho\b/i.test(streetAddr)) return null
-  if (/\b(87124|87144)\b/.test(streetAddr)) return null
 
   // Eventbrite discovery sometimes assigns the searched city to cruises,
   // livestreams, and other non-local listings. A city string alone is not

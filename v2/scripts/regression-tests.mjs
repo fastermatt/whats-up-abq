@@ -430,32 +430,30 @@ const TESTS = [
         : { ok: false, detail: `${pairs} SG↔TM dupe pair(s): ${examples.join(', ')}` }
     },
   },
-  // ── Rio Rancho leaks ─────────────────────────────────────────────────────
+  // ── Rio Rancho metro coverage ────────────────────────────────────────────
   {
-    id: 'no-rio-rancho-events',
+    id: 'rio-rancho-events-are-tagged',
     tag: 'geo',
-    description: 'Rio Rancho is a separate city — should not appear in the visible feed',
+    description: 'Visible Rio Rancho metro events must be tagged to the Rio Rancho neighborhood',
     async fn() {
       const { data, error } = await sb
         .from('events')
-        .select('id, venue_name, raw')
+        .select('id, venue_name, neighborhood, raw')
         .eq('hidden', false)
         .gte('event_date', new Date().toISOString().slice(0, 10))
       if (error) return { ok: false, detail: error.message }
-      let hits = 0
-      const examples = []
+      let total = 0
+      const bad = []
       for (const r of data || []) {
-        // Rio Rancho Events Center is a legitimate metro-area concert venue — exempt it
-        if (/rio rancho events center/i.test(r.venue_name ?? '')) continue
         const blob = `${r.venue_name ?? ''} ${JSON.stringify(r.raw).slice(0, 2000)}`
         if (/\b(rio rancho|87124|87144)\b/i.test(blob)) {
-          hits++
-          if (examples.length < 3) examples.push(r.id)
+          total++
+          if (r.neighborhood !== 'Rio Rancho') bad.push(r.id)
         }
       }
-      return hits === 0
-        ? { ok: true, detail: 'no Rio Rancho events visible' }
-        : { ok: false, detail: `${hits} Rio Rancho event(s) visible: ${examples.join(', ')}` }
+      return bad.length === 0
+        ? { ok: true, detail: `${total} Rio Rancho metro event(s), all tagged correctly` }
+        : { ok: false, detail: `${bad.length}/${total} Rio Rancho events need neighborhood tags: ${bad.slice(0, 5).join(', ')}` }
     },
   },
   // ── Image status integrity (#20) ────────────────────────────────────────

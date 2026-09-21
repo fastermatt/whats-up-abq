@@ -15,6 +15,7 @@
  *   node scripts/audit-location-time.mjs                    # 60 events
  *   node scripts/audit-location-time.mjs --limit=200
  *   node scripts/audit-location-time.mjs --source=local
+ *   node scripts/audit-location-time.mjs --id=nhcc-27154
  *   node scripts/audit-location-time.mjs --apply            # auto-hide
  *                                                          # confirmed location/time mismatches
  *
@@ -45,6 +46,7 @@ const argv = Object.fromEntries(
 )
 const LIMIT  = parseInt(argv.limit ?? '60', 10)
 const SOURCE = typeof argv.source === 'string' ? argv.source : null
+const ID     = typeof argv.id === 'string' ? argv.id : null
 const APPLY  = argv.apply === true
 
 const sb = createClient(
@@ -70,18 +72,29 @@ Return STRICT JSON shaped exactly:
 Rules:
 - If the description is silent on venue/time, the displayed value is fine — return true.
 - "Doors at 7, show at 8" with displayed time "20:00" or "8:00 PM" is OK (true).
+- When the description lists a sequence such as "1:30 opening performance; 2:00 film begins",
+  a displayed time matching the first activity is a valid overall event start (time_ok=true).
 - A description that names a different physical venue OR a different street address sets venue_ok=false.
 - A description that says "rescheduled to <new date/time>" or "now <new date>" sets rescheduled=true AND time_ok=false.
+- A bare date mismatch is NOT proof of rescheduling. Recurring-event pages often
+  reuse stale description copy. Set rescheduled=true only when the text explicitly
+  says rescheduled, postponed, moved, changed, or "now <date/time>".
 - "Online", "via Zoom", "livestream" in the description while the DB has a physical venue → venue_ok=false.
 - Be conservative. You're flagging things to be human-reviewed; false negatives are far cheaper than false positives.
 - ONLY emit the JSON object. No prose. No code fences.`
 
 function buildUserMsg(e) {
-  const title = e.raw?.name?.text ?? e.raw?.name ?? '(no title)'
+  const title = e.raw?.name?.text ?? e.raw?.name ?? e.raw?.title ?? '(no title)'
   const desc  = e.raw?.description?.text ?? e.raw?.description ?? e.raw?.info ?? ''
   const descShort = typeof desc === 'string' ? desc.slice(0, 1200) : ''
   // Display time = whatever we'd show users
-  const time = e.raw?.dates?.start?.localTime ?? ''
+  const eventDateText = String(e.event_date || '')
+  const time = e.raw?.dates?.start?.localTime
+    ?? e.raw?.start?.local?.match(/T(\d{2}:\d{2})/)?.[1]
+    ?? e.raw?.start_time
+    ?? e.raw?.time
+    ?? eventDateText.match(/T(\d{2}:\d{2})/)?.[1]
+    ?? ''
   return [
     `Displayed metadata:`,
     `  title:   ${title}`,
@@ -107,6 +120,7 @@ let q = sb.from('events')
   .eq('hidden', false)
   .gte('event_date', todayDb)
 if (SOURCE) q = q.eq('source', SOURCE)
+if (ID) q = q.eq('id', ID)
 const { data: events, error } = await q.limit(2000)
 if (error) { console.error('DB error:', error.message); process.exit(2) }
 
@@ -125,9 +139,11 @@ const per = Math.max(1, Math.floor(LIMIT / sources.length))
 const sample = []
 for (const s of sources) {
   const list = bySrc.get(s)
-  for (let i = list.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[list[i], list[j]] = [list[j], list[i]]
+  if (!ID) {
+    for (let i = list.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[list[i], list[j]] = [list[j], list[i]]
+    }
   }
   sample.push(...list.slice(0, per))
 }
@@ -149,7 +165,11 @@ for (const e of sample) {
     })
     const v = res.venue_ok !== false   // default true
     const t = res.time_ok  !== false
-    const r = res.rescheduled === true
+    const description = String(e.raw?.description?.text ?? e.raw?.description ?? e.raw?.info ?? '')
+    const explicitReschedule = /\b(rescheduled|postponed|moved\s+(?:to|from)|changed\s+to|now\s+(?:on|at))\b/i.test(description)
+    // A model inference about mismatched dates is review evidence, not proof of
+    // rescheduling. Auto-action requires explicit source language.
+    const r = res.rescheduled === true && explicitReschedule
     if (v && t && !r) {
       console.log('OK')
     } else {
@@ -157,7 +177,7 @@ for (const e of sample) {
       console.log(`flagged: ${codes.join(',')} — ${(res.reason||'').slice(0,80)}`)
       findings.push({
         id: e.id, source: e.source,
-        title: (e.raw?.name?.text ?? e.raw?.name ?? '').toString().replace(/[\r\n,]+/g, ' ').slice(0, 100),
+        title: (e.raw?.name?.text ?? e.raw?.name ?? e.raw?.title ?? '').toString().replace(/[\r\n,]+/g, ' ').slice(0, 100),
         venue: (e.venue_name ?? '').replace(/[\r\n,]+/g, ' ').slice(0, 80),
         event_date: e.event_date,
         venue_ok: v, time_ok: t, rescheduled: r,
