@@ -19,6 +19,10 @@
  *   LM_MODEL        explicit model id (skip auto-pick)
  *   LM_MAX_TOKENS   default 600
  *   LM_TEMPERATURE  default 0.2
+ *   LM_TIMEOUT_MS    default 60000
+ *   LM_SEED          default 1 (repeatable extraction/classification)
+ *   LM_REASONING_EFFORT default none (prevents hidden reasoning from consuming
+ *                       the visible completion budget in LM Studio)
  *
  * Auto-discovery probes in order:
  *   1. http://localhost:1234   (LM Studio)
@@ -113,7 +117,7 @@ export async function discoverLLM({ modelHint = '', forceRefresh = false } = {})
 }
 
 /** Chat completion that returns plain text. */
-export async function chat({ system, user, modelHint = '', maxTokens, temperature, model } = {}) {
+export async function chat({ system, user, modelHint = '', maxTokens, temperature, model, timeoutMs, responseFormat } = {}) {
   const llm = await discoverLLM({ modelHint })
   const body = {
     model: model || llm.model,
@@ -123,12 +127,16 @@ export async function chat({ system, user, modelHint = '', maxTokens, temperatur
     ],
     temperature: temperature ?? parseFloat(process.env.LM_TEMPERATURE ?? '0.2'),
     max_tokens:  maxTokens  ?? parseInt(process.env.LM_MAX_TOKENS ?? '600', 10),
+    reasoning_effort: process.env.LM_REASONING_EFFORT ?? 'none',
+    seed: parseInt(process.env.LM_SEED ?? '1', 10),
     stream: false,
+    ...(responseFormat ? { response_format: responseFormat } : {}),
   }
   const res = await fetch(llm.url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
+    signal: AbortSignal.timeout(timeoutMs ?? parseInt(process.env.LM_TIMEOUT_MS ?? '60000', 10)),
   })
   if (!res.ok) {
     const txt = await res.text().catch(() => '')

@@ -8,12 +8,15 @@
  *
  * Flow per venue:
  *   1. Fetch venue homepage (or events subpage) HTML
- *   2. Claude Haiku — extract raw event text from the HTML
- *   3. DeepSeek    — normalize into structured JSON array
+ *   2. Gemma 4 E4B in LM Studio — extract + normalize locally (preferred)
+ *      OR Claude Haiku / DeepSeek when --cloud is explicitly selected
  *   4. Upsert to Supabase
  *
  * Usage:
  *   node scripts/scrape-local-venues.mjs [--dry-run] [--venue=thirsty-eye]
+ *   node scripts/scrape-local-venues.mjs --local --dry-run
+ *   node scripts/scrape-local-venues.mjs --local --new-only --venue=outpost-performance-space
+ *   node scripts/scrape-local-venues.mjs --cloud --dry-run
  *
  * Add new venues to the VENUES map below.
  * Requires in scripts/.env:
@@ -28,6 +31,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { extractBestImage, extractAllCandidates } from './lib/image-extractor.mjs'
 import { collapseExtractedVenueEvents } from './lib/event-dedup.mjs'
+import { chat } from './lib/llm.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -52,21 +56,33 @@ const ANTHROPIC_KEY    = process.env.ANTHROPIC_API_KEY
 const DEEPSEEK_KEY     = process.env.DEEPSEEK_API_KEY
 const HAIKU_MODEL      = 'claude-haiku-4-5'
 const DEEPSEEK_MODEL   = 'deepseek-flash'
+// Deliberately separate from the repo-wide LM_MODEL used by short Gemma audit
+// jobs. Official Gemma was faster and more reliable than Qwen on chunked,
+// schema-constrained venue extraction in this machine's benchmark.
+const LOCAL_LLM_MODEL  = process.env.LOCAL_LM_MODEL || 'google/gemma-4-e4b'
 const USER_AGENT       = 'ABQUnplugged/2.0 (community events; 4mattcarlson@gmail.com)'
 
 if (!SUPABASE_KEY) {
   console.error('❌ SUPABASE_SERVICE_ROLE_KEY not set in scripts/.env')
   process.exit(1)
 }
-// Haiku is optional — falls back to DeepSeek for extraction when key not set
-const USE_HAIKU = !!ANTHROPIC_KEY
-if (!USE_HAIKU) {
+const useCloud = process.argv.includes('--cloud')
+const useLocal = !useCloud
+// In explicit cloud mode, Haiku is optional and falls back to DeepSeek.
+const USE_HAIKU = useCloud && !!ANTHROPIC_KEY
+if (useCloud && !USE_HAIKU) {
   console.log('ℹ️  No ANTHROPIC_API_KEY — using DeepSeek for extraction (add key to scripts/.env for Haiku)')
 }
 
 const isDryRun   = process.argv.includes('--dry-run')
+const newOnly    = process.argv.includes('--new-only')
 const venueArg   = process.argv.find(a => a.startsWith('--venue='))?.split('=')[1]
 const verbose    = process.argv.includes('--verbose')
+
+if (process.argv.includes('--local') && useCloud) {
+  console.error('❌ Choose only one of --local or --cloud')
+  process.exit(1)
+}
 
 // ── Venue map ─────────────────────────────────────────────────────────────────
 // slug → { name, url, neighborhood, address }
@@ -88,6 +104,7 @@ const VENUES = {
   'marble-brewery-downtown': {
     name: 'Marble Brewery Downtown',
     url: 'https://marblebrewery.com/events/',
+    extractHint: 'Include only events explicitly labeled 111 Downtown or Marble Downtown. Exclude NE Heights and Westside events.',
     neighborhood: 'downtown',
     address: '111 Marble Ave NW, Albuquerque, NM 87102',
   },
@@ -131,6 +148,7 @@ const VENUES = {
   'marble-brewery-ne-heights': {
     name: 'Marble Brewery NE Heights',
     url: 'https://marblebrewery.com/locations/ne-heights/',
+    extractHint: 'Include only events explicitly labeled Marble NE Heights. Exclude 111 Downtown and Westside events.',
     neighborhood: 'ne-heights',
     address: '9904 Montgomery Blvd NE, Albuquerque, NM 87111',
   },
@@ -219,6 +237,78 @@ function roughStripHtml(html) {
     // Cap at 24,000 chars — Haiku/DeepSeek both handle 24k easily, and several
     // venue calendars (Outpost schedule, Marble NE Heights) blew past 12k.
     .slice(0, 24_000)
+}
+
+/** Split large calendars so one long generation cannot monopolize LM Studio. */
+function chunkVenueText(text, maxChars = 4_500, overlapChars = 600) {
+  if (text.length <= maxChars) return [text]
+  const chunks = []
+  let start = 0
+  while (start < text.length) {
+    let end = Math.min(start + maxChars, text.length)
+    if (end < text.length) {
+      const boundary = Math.max(text.lastIndexOf('\n', end), text.lastIndexOf(' ', end))
+      if (boundary > start + Math.floor(maxChars * 0.7)) end = boundary
+    }
+    chunks.push(text.slice(start, end))
+    if (end >= text.length) break
+    start = Math.max(end - overlapChars, start + 1)
+  }
+  return chunks
+}
+
+/** Extract and normalize a venue calendar in bounded local-model passes. */
+async function extractWithLocal(venueText, venue) {
+  const today = new Date().toISOString().slice(0, 10)
+  const year = new Date().getFullYear()
+  const system = `You extract upcoming Albuquerque venue events from source-supplied website text.
+Return ONLY a valid JSON array. Never add an event, date, time, performer, price, or fact that is not supported by the supplied text.
+Today is ${today}. Skip past events, operating hours, food-truck schedules, happy hours, generic weekly promotions, navigation, and filler.
+For each real named event return exactly:
+{"title":"string","date":"YYYY-MM-DD","time":"HH:MM or null","notes":"string or null"}
+Use the performer or specific event name as title, not generic headings such as "Live Music at the Brewhouse". For a recurring named trivia host, use the host name. Use the show time rather than doors time. If time is absent, use null—never midnight. Infer ${year} or ${year + 1} only from an explicit month/day and whether that date has passed. Deduplicate obvious repeats. If an excerpt begins or ends mid-event, skip that incomplete item. If no supported events exist, return [].`
+
+  const chunks = chunkVenueText(venueText)
+  const allEvents = []
+  for (let i = 0; i < chunks.length; i++) {
+    const text = await chat({
+      system,
+      user: `Venue: ${venue.name}\n${venue.extractHint ? `Venue filter: ${venue.extractHint}\n` : ''}Source excerpt ${i + 1} of ${chunks.length}:\n${chunks[i]}`,
+      model: LOCAL_LLM_MODEL,
+      maxTokens: 1200,
+      temperature: 0.1,
+      timeoutMs: 90_000,
+      responseFormat: {
+        type: 'json_schema',
+        json_schema: {
+          name: 'venue_events',
+          strict: true,
+          schema: {
+            type: 'array',
+            items: {
+              type: 'object',
+              additionalProperties: false,
+              properties: {
+                title: { type: 'string' },
+                date: { type: 'string' },
+                time: { type: ['string', 'null'] },
+                notes: { type: ['string', 'null'] },
+              },
+              required: ['title', 'date', 'time', 'notes'],
+            },
+          },
+        },
+      },
+    })
+    const clean = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim()
+    try {
+      const parsed = JSON.parse(clean)
+      if (Array.isArray(parsed)) allEvents.push(...parsed)
+    } catch {
+      if (verbose) console.log(`    ⚠️  Local model returned non-JSON for excerpt ${i + 1}:`, clean.slice(0, 300))
+    }
+  }
+  return allEvents
 }
 
 /** Call Claude Haiku to extract raw event text from stripped HTML */
@@ -378,9 +468,10 @@ function slugifyForMatch(s) {
  * Returns null when the URL cannot be tied to the event title. A generic venue
  * image is worse than the site's honest category fallback.
  */
-function pickEventImage(eventTitle, candidates) {
+function pickEventImage(eventTitle, candidates, venueName = '') {
   if (!candidates || candidates.length === 0) return null
-  const tokens = slugifyForMatch(eventTitle)
+  const venueTokens = new Set(slugifyForMatch(venueName))
+  const tokens = slugifyForMatch(eventTitle).filter(token => !venueTokens.has(token))
   if (tokens.length === 0) return null
 
   let bestUrl = null
@@ -416,6 +507,7 @@ function classify(title) {
 // ── Main ──────────────────────────────────────────────────────────────────────
 async function main() {
   console.log(`\n🎸 Local Venue Scraper${isDryRun ? ' [DRY RUN]' : ''}`)
+  console.log(`   Extraction: ${useLocal ? `LM Studio (${LOCAL_LLM_MODEL})` : (USE_HAIKU ? 'Claude Haiku + DeepSeek' : 'DeepSeek')}`)
   console.log('━'.repeat(50))
 
   // Filter to a single venue if --venue= arg provided
@@ -467,39 +559,49 @@ async function main() {
       if (venueFallbackImage) console.log(`   Venue fallback img: ${venueFallbackImage.slice(0, 90)}`)
     }
 
-    // 2. Strip + extract with Haiku (or DeepSeek if no Anthropic key)
+    // 2. Strip + extract with the local model by default. Cloud mode retains
+    //    the former Haiku/DeepSeek two-pass path as an explicit fallback.
     const strippedText = roughStripHtml(html)
     if (verbose) console.log(`   Stripped: ${strippedText.length.toLocaleString()} chars`)
 
-    let rawEventText
-    try {
-      if (USE_HAIKU) {
-        rawEventText = await extractWithHaiku(strippedText, venue.name)
-        if (verbose) console.log('   Haiku output:', rawEventText.slice(0, 300))
-      } else {
-        rawEventText = await extractWithDeepSeek(strippedText, venue.name)
-        if (verbose) console.log('   DeepSeek extract output:', rawEventText.slice(0, 300))
-      }
-    } catch (err) {
-      console.log(`   ❌ Extraction failed: ${err.message}`)
-      venuesFailed++
-      continue
-    }
-
-    if (!rawEventText || rawEventText === 'NO_EVENTS' || rawEventText.length < 10) {
-      console.log('   ℹ️  No events found')
-      venuesOk++
-      continue
-    }
-
-    // 3. Normalize with DeepSeek
     let events
-    try {
-      events = await normalizeWithDeepSeek(rawEventText, venue.name)
-    } catch (err) {
-      console.log(`   ❌ DeepSeek failed: ${err.message}`)
-      venuesFailed++
-      continue
+    if (useLocal) {
+      try {
+        events = await extractWithLocal(strippedText, venue)
+      } catch (err) {
+        console.log(`   ❌ Local extraction failed: ${err.message}`)
+        venuesFailed++
+        continue
+      }
+    } else {
+      let rawEventText
+      try {
+        if (USE_HAIKU) {
+          rawEventText = await extractWithHaiku(strippedText, venue.name)
+          if (verbose) console.log('   Haiku output:', rawEventText.slice(0, 300))
+        } else {
+          rawEventText = await extractWithDeepSeek(strippedText, venue.name)
+          if (verbose) console.log('   DeepSeek extract output:', rawEventText.slice(0, 300))
+        }
+      } catch (err) {
+        console.log(`   ❌ Extraction failed: ${err.message}`)
+        venuesFailed++
+        continue
+      }
+
+      if (!rawEventText || rawEventText === 'NO_EVENTS' || rawEventText.length < 10) {
+        console.log('   ℹ️  No events found')
+        venuesOk++
+        continue
+      }
+
+      try {
+        events = await normalizeWithDeepSeek(rawEventText, venue.name)
+      } catch (err) {
+        console.log(`   ❌ DeepSeek failed: ${err.message}`)
+        venuesFailed++
+        continue
+      }
     }
 
     if (events.length === 0) {
@@ -540,6 +642,11 @@ async function main() {
       }
 
       const id = buildId(slug, ev.date, ev.title)
+      const isNew = !existingIds.has(id)
+      if (newOnly && !isNew) {
+        totalSkipped++
+        continue
+      }
       const category = classify(ev.title)
 
       // Build event_date — include time if available
@@ -553,7 +660,7 @@ async function main() {
       // Preserve admin-rejected images — never overwrite them.
       const prior = existingById.get(buildId(slug, ev.date, ev.title))
       const adminRejected = prior?.image_status === 'rejected'
-      const candidateImage = pickEventImage(ev.title, imageCandidates)
+      const candidateImage = pickEventImage(ev.title, imageCandidates, venue.name)
       const eventImage = adminRejected
         ? (prior?.cached_photo_url ?? null)
         : candidateImage ?? (prior?.image_status === 'verified' ? prior.cached_photo_url : null)
@@ -595,8 +702,7 @@ async function main() {
         neighborhood: venue.neighborhood ?? null,
       }
 
-      const isNew = !existingIds.has(id)
-      console.log(`   ${isNew ? '➕' : '🔄'} ${ev.date}  ${ev.title}`)
+      console.log(`   ${isNew ? '➕' : '🔄'} ${ev.date}${ev.time ? ` ${ev.time}` : ''}  ${ev.title}`)
       if (ev.notes) console.log(`      ${ev.notes}`)
       if ((verbose || isDryRun) && eventImage) console.log(`      🖼  ${eventImage.slice(0, 90)}`)
       else if ((verbose || isDryRun) && !eventImage) console.log(`      🖼  (no image found)`)

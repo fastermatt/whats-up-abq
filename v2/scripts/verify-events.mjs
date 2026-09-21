@@ -9,7 +9,7 @@
  *   4. Ask local LM Studio (Gemma/Qwen/etc) to compare our DB record to the
  *      page contents and output a structured verdict.
  *   5. Write result into ai_enrichment.verification.
- *   6. Auto-hide events marked "wrong" with confidence >= 0.9.
+ *   6. With --apply, auto-hide events marked "wrong" with confidence >= 0.9.
  *
  * Usage:
  *   node scripts/verify-events.mjs                       # verify all unseen events
@@ -17,7 +17,8 @@
  *   node scripts/verify-events.mjs --source=eventbrite   # only one source
  *   node scripts/verify-events.mjs --force               # re-verify already verified
  *   node scripts/verify-events.mjs --dry-run             # no DB writes
- *   LM_MODEL=openai/gpt-oss-20b node scripts/verify-events.mjs
+ *   node scripts/verify-events.mjs --apply               # persist verdicts / hides
+ *   VERIFY_LM_MODEL=google/gemma-4-e4b node scripts/verify-events.mjs
  */
 import { createClient } from '@supabase/supabase-js'
 import * as cheerio from 'cheerio'
@@ -47,7 +48,9 @@ for (const envFile of [
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://bsmvfutebmbkjvlrhiyq.supabase.co'
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 const LM_URL       = process.env.LM_URL   || 'http://localhost:1234/v1/chat/completions'
-const LM_MODEL     = process.env.LM_MODEL || 'openai/gpt-oss-20b'
+// Official Gemma is the default local structured-data worker on this machine.
+// Override per run when comparing another loaded model.
+const LM_MODEL     = process.env.VERIFY_LM_MODEL || 'google/gemma-4-e4b'
 
 if (!SUPABASE_KEY) {
   console.error('❌ Missing SUPABASE_SERVICE_ROLE_KEY')
@@ -62,7 +65,8 @@ const args = Object.fromEntries(
     return [k, v ?? true]
   }),
 )
-const isDryRun  = !!args['dry-run']
+const applyChanges = !!args.apply && !args['dry-run']
+const isDryRun  = !applyChanges
 const force     = !!args.force
 const limit     = parseInt(args.limit || '0', 10) || 0
 const onlySource = args.source || null
@@ -149,13 +153,19 @@ function canonical(row) {
       title = r.name || r.title || null
   }
 
+  // Some importers store the display time only in the event_date timestamp,
+  // while raw.time is absent. The verifier must compare what users actually
+  // see, not silently treat that record as time-less.
+  const eventDateText = String(row.event_date || '')
+  const timestampTime = eventDateText.match(/T(\d{2}:\d{2})/)?.[1] || null
+
   return {
     id: row.id,
     source,
     title,
     venue: row.venue_name,
-    event_date: row.event_date, // YYYY-MM-DD
-    local_time: localTime,      // HH:MM[:SS] or null
+    event_date: eventDateText.slice(0, 10),
+    local_time: localTime || timestampTime, // HH:MM[:SS] or null
     url,
   }
 }
@@ -227,6 +237,12 @@ function htmlToText(html) {
 // ── LM Studio call ────────────────────────────────────────────────────────────
 
 async function verify(canonicalRec, pageText) {
+  const sourceText = [pageText?.meta?.title, pageText?.meta?.description, pageText?.body]
+    .filter(Boolean)
+    .join(' ')
+  const timeRanges = [...sourceText.matchAll(/\b(\d{1,2})(?::(\d{2}))?\s*(am|pm)\s*(?:-|\u2013|\u2014|to)\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/gi)]
+    .map(match => `${match[1]}:${match[2] || '00'} ${match[3].toUpperCase()}-${match[4]}:${match[5] || '00'} ${match[6].toUpperCase()}`)
+  const uniqueTimeRanges = [...new Set(timeRanges)]
   const system = `You are an event-data fact-checker. You will be shown (a) a record from our database about an event and (b) text extracted from the event's source page on the web. Return a single JSON object — no markdown fences, no prose, no explanations outside the JSON.
 
 DECISION RULES — follow these precisely. Err on the side of "uncertain" rather than "wrong".
@@ -255,6 +271,8 @@ MATCHING RULES — memorize these:
   • "Source says 'Saturday, May 2'" + DB date is 2026-05-02 AND May 2 2026 IS a Saturday → status="verified".
   • "Source says '10 AM - 3 PM'" + DB has no time → status="verified" or "uncertain", NEVER date_mismatch.
     A time on the source and no time in the DB is NOT a date problem. The date is fine.
+  • "Source says '5 PM - 10 PM'" + DB local_time is "22:00" → status="wrong", issue="time_mismatch".
+    The DB time must match the START of a displayed range, not its ending time.
   • "Source says '7 PM - 10:30 PM'" + DB has no time → NOT date_mismatch. Set status="verified" if date matches.
   • "Source says event runs May 1–2" + DB says May 1 → status="verified" (May 1 is the start date, OK).
   • NEVER use date_mismatch just because the source has a time and the DB doesn't. That is a time import gap, not a date mismatch.
@@ -280,7 +298,10 @@ Output shape (strict JSON only, no prose, no fences):
 ${JSON.stringify(canonicalRec, null, 2)}
 
 Source page (JSON-LD + meta + body excerpt):
-${JSON.stringify(pageText, null, 2).slice(0, 8000)}`
+${JSON.stringify(pageText, null, 2).slice(0, 8000)}
+
+Deterministic extraction aid (not a verdict):
+${JSON.stringify({ db_local_time: canonicalRec.local_time, explicit_source_time_ranges: uniqueTimeRanges }, null, 2)}`
 
   const resp = await fetch(LM_URL, {
     method: 'POST',
@@ -292,7 +313,9 @@ ${JSON.stringify(pageText, null, 2).slice(0, 8000)}`
         { role: 'user', content: user },
       ],
       temperature: 0.1,
+      seed: 1,
       max_tokens: 500,
+      reasoning_effort: 'none',
       response_format: {
         type: 'json_schema',
         json_schema: {
@@ -322,6 +345,7 @@ ${JSON.stringify(pageText, null, 2).slice(0, 8000)}`
         },
       },
     }),
+    signal: AbortSignal.timeout(60_000),
   })
 
   if (!resp.ok) {
@@ -345,7 +369,7 @@ async function main() {
   console.log('🔍 ABQ Unplugged — event verification via LM Studio')
   console.log(`  LM model: ${LM_MODEL}`)
   console.log(`  Auto-hide threshold: confidence >= ${AUTO_HIDE_CONFIDENCE}`)
-  if (isDryRun) console.log('  🔍 DRY RUN — no DB writes')
+  if (isDryRun) console.log('  🔍 REPORT ONLY — pass --apply to write verdicts or hide events')
   console.log('')
 
   // Pull candidate events
