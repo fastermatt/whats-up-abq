@@ -29,10 +29,31 @@ const CATEGORY_SLUG_REDIRECTS: Record<string, string> = {
   'nightlife':        'Nightlife',   // kept as-is (UI uses it; page shows Community fallback)
 }
 
+// ── Abusive / useless crawler block ───────────────────────────────────────────
+// Netlify Free caps serverless Functions at 125K requests/month and suspends the
+// WHOLE account (all 15 sites) when exceeded. Edge Functions have an 8x larger
+// budget (1M), so refusing these crawlers here, before the cache or any
+// serverless handler, is the cheapest place to stop them.
+//
+// Evidence (first-party analytics, Oct 1-3 2026): meta-externalagent was ~96% of
+// all bot pageviews (~4,700 hits across thousands of distinct URLs, plus
+// /feedback every ~45s around the clock). The rest are crawlers with no value
+// to a local-events site. NOT blocked on purpose: Googlebot/Bingbot/DuckDuckBot
+// (search), facebookexternalhit (Facebook/Instagram link previews).
+const BLOCKED_BOT_UA =
+  /meta-externalagent|meta-webindexer|shapbot|bytespider|baiduspider|petalbot|mj12bot|dotbot|semrushbot|ahrefsbot/i
+
 // Middleware runs on Edge Runtime.
 // For admin: checks cookie presence only (actual secret compared in layout.tsx / Node.js runtime).
 // For Supabase auth: refreshes the session so server components can read the user.
 export async function middleware(request: NextRequest) {
+  if (BLOCKED_BOT_UA.test(request.headers.get('user-agent') ?? '')) {
+    return new NextResponse('Forbidden', {
+      status: 403,
+      headers: { 'Cache-Control': 'no-store' },
+    })
+  }
+
   const { pathname, searchParams } = request.nextUrl
 
   // ── /search → /events redirect (edge-level, before ISR) ─────────────────────
