@@ -8,7 +8,7 @@ import { getCategoryFallback } from '@/lib/fallback-images'
 import { EventImage } from '@/app/components/EventImage'
 import { InstagramIcon } from '@/app/components/InstagramIcon'
 import { venueInstagram } from '@/data/venue-instagram'
-import { createClient } from '@/lib/supabase/server'
+import { createStaticClient } from '@/lib/supabase/static'
 import { MapPin, Calendar, Ticket, ArrowLeft, Users, Flag } from 'lucide-react'
 import ShareButton from './ShareButton'
 import AddToCalendar from './AddToCalendar'
@@ -23,6 +23,14 @@ import { StickyTicketCTA } from './StickyTicketCTA'
 import { TrackedTicketLink } from './TrackedTicketLink'
 
 export const revalidate = 86400 // 24h — event details are fixed after publication; ingest runs weekly
+
+// Registers this dynamic route for ISR. Without generateStaticParams Next treats
+// /events/[id] as fully dynamic (private, no-store, a function invocation per hit)
+// and ignores `revalidate`. Empty = build nothing up front (keeps build DB load
+// low); each event is rendered once on first request, then served from cache.
+export async function generateStaticParams() {
+  return []
+}
 
 // Human-readable source labels — avoids leaking raw DB enums like "Local-venue" / "Nhcc"
 const SOURCE_LABELS: Record<string, string> = {
@@ -88,7 +96,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function EventDetailPage({ params }: PageProps) {
   const { id } = await params
-  const [event, supabase] = await Promise.all([fetchEventById(id), createClient()])
+  // Public aggregate reads only (going/saved counts, public attendee profiles) —
+  // per-user state is resolved client-side by the Save/CheckIn/Review components.
+  // The cookie-based client (cookies()) made every event page render dynamically
+  // (private, no-store) and burned a Netlify function invocation per hit, defeating
+  // `revalidate`. The static client keeps the page ISR/CDN-cacheable.
+  const supabase = createStaticClient()
+  const event = await fetchEventById(id)
   if (!event) notFound()
 
   // Going count
