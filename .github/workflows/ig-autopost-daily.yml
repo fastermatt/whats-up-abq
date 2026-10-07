@@ -2,7 +2,7 @@ name: IG autopost daily
 
 on:
   schedule:
-    - cron: '30 13 * * *'   # 7:30 AM MT (morning shift — MDT=UTC-6)
+    - cron: '30 13 * * 5,6'   # Fri + Sat only, 7:30 AM MT (morning shift — MDT=UTC-6)
   workflow_dispatch:
     inputs:
       dry_run:
@@ -75,7 +75,7 @@ jobs:
           node scripts/ig-autopost.mjs $ARGS
 
       - name: Run morning autopost
-        if: ${{ github.event.schedule == '30 13 * * *' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run && inputs.shift == 'morning') }}
+        if: ${{ github.event.schedule == '30 13 * * 5,6' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run && inputs.shift == 'morning') }}
         run: |
           ARGS="--shift morning"
           if [ "${{ inputs.post_now }}" = "true" ]; then ARGS="$ARGS --now"; fi
