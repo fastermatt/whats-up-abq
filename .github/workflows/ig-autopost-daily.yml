@@ -1,30 +1,13 @@
-name: IG autopost daily
+name: Instagram Friday roundup
 
 on:
   schedule:
-    - cron: '30 13 * * 5,6'   # Fri + Sat only, 7:30 AM MT (morning shift — MDT=UTC-6)
+    - cron: '23 15 * * 5'
+      timezone: America/Denver
   workflow_dispatch:
-    inputs:
-      dry_run:
-        description: 'Render and caption without queueing'
-        required: true
-        type: boolean
-        default: true
-      shift:
-        description: 'Which shift to run (morning or evening)'
-        required: false
-        type: string
-        default: 'morning'
-      post_now:
-        description: 'Queue for the next focused publisher check instead of the scheduled time slot'
-        required: false
-        type: boolean
-        default: false
-      story:
-        description: 'Post as an Instagram Story (9:16 image, top-3 digest) instead of a Reel'
-        required: false
-        type: boolean
-        default: false
+
+permissions:
+  contents: read
 
 concurrency:
   group: abq-supabase-writers
@@ -32,68 +15,48 @@ concurrency:
 
 jobs:
   ig-autopost:
-    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.run_attempt == '1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
     defaults:
       run:
         working-directory: v2
-    env:
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
-      IG_BASE_URL: https://abqunplugged.com
-      IG_AUTOPOST_ENABLED: ${{ secrets.IG_AUTOPOST_ENABLED }}
-      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-      ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
         with:
-          node-version: '20'
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
           cache: npm
           cache-dependency-path: v2/package-lock.json
 
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps
-
-      - name: Install ffmpeg
-        run: sudo apt-get install -y ffmpeg
+        run: npm ci --legacy-peer-deps --ignore-scripts
 
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+        run: npx --no-install playwright install --with-deps chromium
 
-      - name: Run dry-run autopost
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+      - name: Prepare the Friday roundup
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
+          IG_BASE_URL: https://abq-unplugged-v2.netlify.app
+          IG_AUTOPOST_ENABLED: 'true' # The workflow's enabled state is the schedule switch.
+          IG_RUN_EVENT: ${{ github.event_name }}
         run: |
-          ARGS="--dry-run --shift ${{ inputs.shift || 'morning' }}"
-          if [ "${{ inputs.story }}" = "true" ]; then ARGS="$ARGS --story"; fi
-          node scripts/ig-autopost.mjs $ARGS
+          if [ "$IG_RUN_EVENT" = "schedule" ]; then
+            node scripts/ig-autopost.mjs --friday-roundup
+          else
+            node scripts/ig-autopost.mjs --friday-roundup --dry-run
+          fi
 
-      - name: Run morning autopost
-        if: ${{ github.event.schedule == '30 13 * * 5,6' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run && inputs.shift == 'morning') }}
-        run: |
-          ARGS="--shift morning"
-          if [ "${{ inputs.post_now }}" = "true" ]; then ARGS="$ARGS --now"; fi
-          if [ "${{ inputs.story }}" = "true" ]; then ARGS="$ARGS --story"; fi
-          node scripts/ig-autopost.mjs $ARGS
-
-      - name: Run evening autopost
-        if: ${{ github.event.schedule == '30 1 * * *' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run && inputs.shift == 'evening') }}
-        run: |
-          ARGS="--shift evening"
-          if [ "${{ inputs.post_now }}" = "true" ]; then ARGS="$ARGS --now"; fi
-          if [ "${{ inputs.story }}" = "true" ]; then ARGS="$ARGS --story"; fi
-          node scripts/ig-autopost.mjs $ARGS
-
-      - name: Upload dry-run artifacts
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+      - name: Save manual preview
+        if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
-          name: ig-autopost-dry-run
-          path: /tmp/ig-autopost/*
+          name: ig-friday-roundup-preview
+          path: /tmp/ig-autopost/*.png
           if-no-files-found: error

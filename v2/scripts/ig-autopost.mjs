@@ -17,6 +17,10 @@ const DEFAULT_BASE_URL = 'http://localhost:3000'
 const DEFAULT_FIXTURE = path.join(__dirname, 'fixtures', 'ig-events-week.json')
 const TAG_HANDLES_PATH = path.join(__dirname, 'ig-tag-handles.json')
 const OUT_DIR = '/tmp/ig-autopost'
+const FRIDAY_ROUNDUP = {
+  id: 'top-three', kind: 'digest', period: 'this-weekend', time: '15:23', reel: false,
+}
+const FRIDAY_PUBLISH_END = '18:00'
 
 // Morning shift (9 AM MT): digest/roundup discovery posts for the week or weekend.
 // All run as Reels for algorithm-boosted reach to non-followers.
@@ -1005,6 +1009,37 @@ async function queuePost(supabase, { date, slot, imageUrl, caption, events, medi
   return data.id
 }
 
+async function hasFridayPost(supabase, date) {
+  const posts = await withDataQueryRetries('Friday publish history', signal => supabase
+    .from('ig_post_log')
+    .select('post_id')
+    .gte('posted_at', mdtIso(date, '00:00'))
+    .limit(1)
+    .abortSignal(signal))
+  return posts.length > 0
+}
+
+async function publishFridayRoundup(buffer, caption) {
+  const base = process.env.IG_BASE_URL
+  const secret = process.env.ADMIN_SECRET
+  if (!base || !secret) throw new Error('Instagram publishing endpoint and admin credential are required')
+  const jpeg = await sharp(buffer).jpeg({ quality: 90 }).toBuffer()
+  const response = await fetch(new URL('/api/admin/ig/publish', base), {
+    method: 'POST',
+    redirect: 'error',
+    headers: { 'Content-Type': 'application/json', Cookie: `admin_token=${secret}` },
+    body: JSON.stringify({
+      imageDataUrl: `data:image/jpeg;base64,${jpeg.toString('base64')}`, caption, mediaType: 'FEED',
+    }),
+    signal: AbortSignal.timeout(45_000),
+  })
+  const result = await response.json().catch(() => null)
+  if (!response.ok || !result?.postId) {
+    throw new Error(`Friday publish was not confirmed (HTTP ${response.status}). Check Instagram before any manual retry.`)
+  }
+  console.log(`Friday roundup published as Instagram post ${result.postId}`)
+}
+
 async function sendFailureAlert(date, slotId, error) {
   if (!process.env.RESEND_API_KEY || !process.env.ALERT_EMAIL) return
   const message = error instanceof Error ? error.message : String(error)
@@ -1093,14 +1128,17 @@ async function main() {
   const dryRun = args['dry-run'] === true
   const postNow = args.now === true || args.now === 'true'
   const isStoryMode = args.story === true || args.story === 'true'
-  const today = args.date || denverDateParts().iso
+  const fridayRoundup = args['friday-roundup'] === true
+  const localToday = denverDateParts().iso
+  const nextFriday = addDays(localToday, (5 - weekdayIndex(localToday) + 7) % 7)
+  const today = args.date || (fridayRoundup && dryRun ? nextFriday : localToday)
   if (!/^\d{4}-\d{2}-\d{2}$/.test(today)) throw new Error('--date must be YYYY-MM-DD')
 
   const day = weekdayIndex(today)
-  const shift = args.shift || 'morning'
+  const shift = fridayRoundup ? 'friday' : args.shift || 'morning'
   const dayRotation = shift === 'evening' ? EVENING_ROTATION : MORNING_ROTATION
   // --story forces a shareable digest (top 3 upcoming events across ABQ)
-  let slot = isStoryMode
+  const slot = fridayRoundup ? FRIDAY_ROUNDUP : isStoryMode
     ? { id: 'top-three', kind: 'digest', period: 'next-10', time: dayRotation[day]?.time || '19:30', reel: false }
     : (args.slot ? SLOT_BY_ID[args.slot] : dayRotation[day])
   if (!slot) throw new Error(`Unknown --slot ${args.slot}`)
@@ -1110,9 +1148,18 @@ async function main() {
     return
   }
 
-  // Live runs: check the IG token's data-access window and email a reminder if
-  // it's expiring soon (never blocks posting).
-  if (!dryRun) await checkTokenHealth()
+  if (fridayRoundup && !dryRun) {
+    // A rerun cannot safely retry a publish whose response may have been lost.
+    if (process.env.GITHUB_EVENT_NAME !== 'schedule' || process.env.GITHUB_RUN_ATTEMPT !== '1') {
+      throw new Error('Friday publication requires the first attempt of the scheduled workflow')
+    }
+    const now = new Date().toISOString()
+    if (today !== localToday || day !== 5 || now < mdtIso(today, FRIDAY_ROUNDUP.time) || now >= mdtIso(today, FRIDAY_PUBLISH_END)) {
+      console.log('Outside the Friday afternoon window')
+      return
+    }
+  }
+  if (!dryRun && !fridayRoundup) await checkTokenHealth()
 
   const hasServiceKey = Boolean((process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL) && process.env.SUPABASE_SERVICE_ROLE_KEY)
   const useFixture = Boolean(args.fixture || (dryRun && !hasServiceKey))
@@ -1125,6 +1172,10 @@ async function main() {
     events = await loadFixtureEvents(fixturePath)
   } else {
     supabase = supabaseClient()
+    if (fridayRoundup && !dryRun && await hasFridayPost(supabase, today)) {
+      console.log('An Instagram post is already recorded for this Friday')
+      return
+    }
     const broadRange = dateRangeFor(slot.period, today)
     events = await loadLiveEvents(supabase, slot.period === 'today-or-next' ? { start: today, end: addDays(today, 7) } : broadRange)
     recentIds = await recentlyPostedIds(supabase)
@@ -1171,7 +1222,7 @@ async function main() {
     : ''
   const caption = await resolveCaption(
     process.env.IG_CAPTION_OVERRIDE,
-    () => generateCaption(selected, slot, today, reelNote),
+    () => fridayRoundup ? fallbackCaption(selected, slot) : generateCaption(selected, slot, today, reelNote),
     tags,
   )
 
@@ -1207,6 +1258,14 @@ async function main() {
     return
   }
 
+  if (fridayRoundup) {
+    if (new Date().toISOString() >= mdtIso(today, FRIDAY_PUBLISH_END)) {
+      console.log('Friday afternoon publish window closed during rendering')
+      return
+    }
+    await publishFridayRoundup(buffer, caption)
+    return
+  }
   if (!supabase) supabase = supabaseClient()
   let publicUrl
   let mediaType = 'FEED'
@@ -1238,7 +1297,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     const errShift = args.shift || 'morning'
     const errRotation = errShift === 'evening' ? EVENING_ROTATION : MORNING_ROTATION
     const slotId = args.slot || SLOT_BY_ID[args.slot]?.id || errRotation[weekdayIndex(date)]?.id || 'unknown'
-    await sendFailureAlert(date, slotId, error)
+    if (!args['friday-roundup']) await sendFailureAlert(date, slotId, error)
     console.error(error instanceof Error ? error.message : error)
     process.exit(1)
   })
