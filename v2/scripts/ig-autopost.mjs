@@ -10,6 +10,7 @@ import process from 'node:process'
 import { createClient } from '@supabase/supabase-js'
 import sharp from 'sharp'
 import { renderIG } from './ig-render.mjs'
+import { renderWeekendRoundup, weekendCaption } from './ig-weekend-roundup.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const DENVER_TZ = 'America/Denver'
@@ -18,7 +19,7 @@ const DEFAULT_FIXTURE = path.join(__dirname, 'fixtures', 'ig-events-week.json')
 const TAG_HANDLES_PATH = path.join(__dirname, 'ig-tag-handles.json')
 const OUT_DIR = '/tmp/ig-autopost'
 const FRIDAY_ROUNDUP = {
-  id: 'top-three', kind: 'digest', period: 'this-weekend', time: '15:23', reel: false,
+  id: 'friday-roundup', kind: 'digest', period: 'friday-weekend', time: '15:23', reel: false,
 }
 const FRIDAY_PUBLISH_END = '18:00'
 
@@ -175,6 +176,7 @@ function humanDate(iso) {
 function dateRangeFor(period, date, events = []) {
   if (period === 'this-week') return { start: date, end: addDays(date, 6) }
   if (period === 'next-10') return { start: date, end: addDays(date, 10) }
+  if (period === 'friday-weekend') return { start: date, end: addDays(date, 2) }
   if (period === 'this-weekend') {
     const daysToSat = (6 - weekdayIndex(date) + 7) % 7
     const sat = addDays(date, daysToSat)
@@ -274,7 +276,7 @@ function eventFromRow(row) {
   const raw = row.raw ?? {}
   const ai = row.ai_enrichment ?? {}
   const title = cleanString(raw.name) ?? cleanString(raw.title) ?? cleanString(row.venue_name) ?? ''
-  const rawTime = raw?.dates?.start?.localTime ?? raw.time ?? null
+  const rawTime = raw?.dates?.start?.localTime ?? raw.time ?? raw.start_time ?? raw.local_time ?? null
   return {
     id: String(row.id),
     title,
@@ -456,6 +458,31 @@ function eventInRange(event, range) {
   return event.date >= range.start && event.date <= range.end
 }
 
+function minutesFromTime(time) {
+  const match = /^(\d{1,2})(?::(\d{2}))?\s([AP]M)$/u.exec(time ?? '')
+  return match ? (Number(match[1]) % 12 + (match[3] === 'PM' ? 12 : 0)) * 60 + Number(match[2] ?? 0) : Infinity
+}
+
+function selectWeekendRoundup(pool, friday) {
+  const selected = []
+  const seriesKey = event => `${venueKey(event.venue)}|${artistCore(event.title)}`
+  const seenSeries = new Set()
+  const candidates = filterIsotopesSpam(pool.filter(event => {
+    const start = minutesFromTime(event.time)
+    return event.title && (event.date !== friday || (Number.isFinite(start) && start >= 18 * 60))
+  }))
+  for (const date of [friday, addDays(friday, 1), addDays(friday, 2)]) {
+    const day = candidates.filter(event => event.date === date && !seenSeries.has(seriesKey(event)))
+    const picks = selectDiverse(selectDistinctSeries(day, day.length), 3)
+    picks.sort((a, b) => minutesFromTime(a.time) - minutesFromTime(b.time) || a.title.localeCompare(b.title))
+    for (const event of picks) {
+      seenSeries.add(seriesKey(event))
+      selected.push(event)
+    }
+  }
+  return selected
+}
+
 export function selectEvents(slot, allEvents, date, recentlyPostedIds) {
   const initialRange = dateRangeFor(slot.period, date, allEvents)
   const range = slot.period === 'today-or-next' ? dateRangeFor(slot.period, date, allEvents.filter(e => !recentlyPostedIds.has(e.id))) : initialRange
@@ -470,6 +497,8 @@ export function selectEvents(slot, allEvents, date, recentlyPostedIds) {
     const preferred = candidates.filter(event => slot.cats?.includes(event.category ?? ''))
     return [(preferred[0] ?? candidates[0])].filter(Boolean)
   }
+
+  if (slot.id === FRIDAY_ROUNDUP.id) return selectWeekendRoundup(pool, date)
 
   if (slot.id === 'top-three') {
     const distinctSeries = selectDistinctSeries(filterIsotopesSpam(pool.filter(hasRealPhoto)), pool.length)
@@ -811,17 +840,16 @@ async function withDataQueryRetries(label, queryFactory) {
   throw new Error(`${label} failed after ${DATA_QUERY_ATTEMPTS} attempts: ${lastError?.message ?? 'unknown error'}`)
 }
 
-async function loadLiveEvents(supabase, range) {
-  const data = await withDataQueryRetries('Event query', signal => supabase
-      .from('events')
+async function loadLiveEvents(supabase, range, { requirePhoto = true } = {}) {
+  const data = await withDataQueryRetries('Event query', signal => {
+    let query = supabase.from('events')
       .select('id, source, raw, event_date, venue_name, category, cached_photo_url, popularity_score, featured, ai_enrichment, image_status, image_quality')
       .eq('hidden', false)
       .gte('event_date', range.start)
-      .lte('event_date', `${range.end}T23:59:59`)
-      .not('cached_photo_url', 'is', null)
-      .order('event_date', { ascending: true })
-      .limit(500)
-      .abortSignal(signal))
+      .lte('event_date', range.end)
+    if (requirePhoto) query = query.not('cached_photo_url', 'is', null)
+    return query.order('event_date', { ascending: true }).limit(500).abortSignal(signal)
+  })
   return (data ?? []).map(eventFromRow)
 }
 
@@ -1040,6 +1068,24 @@ async function publishFridayRoundup(buffer, caption) {
   console.log(`Friday roundup published as Instagram post ${result.postId}`)
 }
 
+async function runFridayRoundup(date, events, dryRun) {
+  const buffer = await renderWeekendRoundup(events)
+  const caption = weekendCaption(events)
+  if (dryRun) {
+    await mkdir(OUT_DIR, { recursive: true })
+    const pngPath = path.join(OUT_DIR, `${date}-weekend-roundup.png`)
+    await writeFile(pngPath, buffer)
+    await writeFile(path.join(OUT_DIR, `${date}-caption.txt`), caption + '\n')
+    console.log(`Rendered ${events.length} weekend listings to ${pngPath}`)
+    return
+  }
+  if (new Date().toISOString() >= mdtIso(date, FRIDAY_PUBLISH_END)) {
+    console.log('Friday afternoon publish window closed during rendering')
+    return
+  }
+  await publishFridayRoundup(buffer, caption)
+}
+
 async function sendFailureAlert(date, slotId, error) {
   if (!process.env.RESEND_API_KEY || !process.env.ALERT_EMAIL) return
   const message = error instanceof Error ? error.message : String(error)
@@ -1177,7 +1223,8 @@ async function main() {
       return
     }
     const broadRange = dateRangeFor(slot.period, today)
-    events = await loadLiveEvents(supabase, slot.period === 'today-or-next' ? { start: today, end: addDays(today, 7) } : broadRange)
+    const liveRange = slot.period === 'today-or-next' ? { start: today, end: addDays(today, 7) } : broadRange
+    events = await loadLiveEvents(supabase, liveRange, { requirePhoto: !fridayRoundup })
     recentIds = await recentlyPostedIds(supabase)
   }
 
@@ -1189,9 +1236,16 @@ async function main() {
     selected = ids.map(id => events.find(e => e.id === id)).filter(Boolean)
     if (selected.length === 0) throw new Error(`--event id(s) not found in pool: ${ids.join(', ')}`)
   } else {
-    selected = await selectEventsWithUsablePhotos(slot, events, today, recentIds)
+    selected = fridayRoundup
+      ? selectEvents(slot, events, today, recentIds)
+      : await selectEventsWithUsablePhotos(slot, events, today, recentIds)
   }
   if (selected.length === 0) throw new Error(`No eligible events for ${today} ${slot.id}`)
+
+  if (fridayRoundup) {
+    await runFridayRoundup(today, selected, dryRun)
+    return
+  }
 
   const ctx = buildContext(slot, selected, today)
 
@@ -1222,7 +1276,7 @@ async function main() {
     : ''
   const caption = await resolveCaption(
     process.env.IG_CAPTION_OVERRIDE,
-    () => fridayRoundup ? fallbackCaption(selected, slot) : generateCaption(selected, slot, today, reelNote),
+    () => generateCaption(selected, slot, today, reelNote),
     tags,
   )
 
@@ -1258,14 +1312,6 @@ async function main() {
     return
   }
 
-  if (fridayRoundup) {
-    if (new Date().toISOString() >= mdtIso(today, FRIDAY_PUBLISH_END)) {
-      console.log('Friday afternoon publish window closed during rendering')
-      return
-    }
-    await publishFridayRoundup(buffer, caption)
-    return
-  }
   if (!supabase) supabase = supabaseClient()
   let publicUrl
   let mediaType = 'FEED'

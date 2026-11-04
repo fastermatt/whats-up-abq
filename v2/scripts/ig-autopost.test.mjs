@@ -129,3 +129,23 @@ test('top-three excludes unverified direct-venue artwork', () => {
 
   assert.deepEqual(selected.map(event => event.id), ['verified-local', 'api-event'])
 })
+
+test('Friday roundup selects three events per day without requiring photos', () => {
+  const events = ['06', '07', '08'].flatMap((day, dayIndex) =>
+    ['Art show', 'Live music', 'Comedy showcase', 'Food market'].map((title, index) => ({
+      id: day + index,
+      title: title + ' ' + ['Downtown', 'Nob Hill', 'Old Town'][dayIndex],
+      date: '2026-11-' + day,
+      time: '7 PM',
+      venue: 'Venue ' + day + index,
+      category: ['Art', 'Music', 'Comedy', 'Food'][index],
+      imageUrl: null,
+      popularityScore: 10 - index,
+    })),
+  )
+  events.push({ ...events[0], id: 'past', title: 'Friday afternoon event', time: '2 PM', popularityScore: 100 })
+  const slot = { id: 'friday-roundup', kind: 'digest', period: 'friday-weekend' }
+  const picks = selectEvents(slot, events, '2026-11-06', new Set())
+  assert.deepEqual(picks.map(event => event.date.slice(-2)), ['06', '06', '06', '07', '07', '07', '08', '08', '08'])
+  assert.ok(picks.every(event => !event.imageUrl && event.id !== 'past'))
+})
