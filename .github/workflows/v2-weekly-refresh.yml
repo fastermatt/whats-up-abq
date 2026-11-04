@@ -1,136 +1,104 @@
 name: V2 Weekly Event Refresh
 
-# Single-command foolproof pipeline. All the logic lives in
-# v2/scripts/ingest.mjs — imports, enrichment, category backfill, cleanup,
-# invariant checks, smoke tests, auto-reject of bad shared-image URLs.
-# Exit code 0 = site healthy, non-zero = something needs fixing.
-
 on:
   schedule:
-    - cron: '0 17 * * 2'   # Every Tuesday 11 AM MDT / 10 AM MST
-
-  # Manual trigger from GitHub Actions tab
+    - cron: '0 17 * * 2' # Tuesday 10 AM MST / 11 AM MDT
   workflow_dispatch:
     inputs:
-      only:
-        description: 'Run only one source (tm|sg|eb|nhcc) — leave blank for all'
-        required: false
-        default: ''
-        type: string
-      skip_imports:
-        description: 'Skip imports, only run enrichment + validation'
-        required: false
-        default: false
+      snapshot_only:
+        description: Build from the current catalog without re-running imports
         type: boolean
-      smoke_only:
-        description: 'Only run smoke tests (no imports, no enrichment)'
-        required: false
-        default: false
-        type: boolean
+        default: true
+
+permissions:
+  contents: read
 
 concurrency:
   group: abq-supabase-writers
   cancel-in-progress: false
 
 jobs:
-  ingest:
-    name: Foolproof Ingest Pipeline
+  weekly:
+    name: Refresh and build static calendar
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      issues: write
-    # 30m was too tight: a full DeepSeek re-enrichment of ~400 events runs long
-    # and got killed mid-run. 60m gives the import + hygiene + enrichment room.
-    timeout-minutes: 60
-
-    env:
-      SUPABASE_URL:              ${{ secrets.SUPABASE_URL }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      TICKETMASTER_API_KEY:      ${{ secrets.TICKETMASTER_API_KEY }}
-      SEATGEEK_AID:              ${{ secrets.SEATGEEK_AID }}
-      EVENTBRITE_TOKEN:          ${{ secrets.EVENTBRITE_TOKEN }}
-      DEEPSEEK_API_KEY:          ${{ secrets.DEEPSEEK_API_KEY }}
-      ANTHROPIC_API_KEY:         ${{ secrets.ANTHROPIC_API_KEY }}
-      OPENAI_API_KEY:            ${{ secrets.OPENAI_API_KEY }}
-
+    timeout-minutes: 30
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js 20
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
           cache-dependency-path: v2/package-lock.json
-
-      - name: Install V2 dependencies
+      - name: Install locked dependencies
         working-directory: v2
-        run: npm install --legacy-peer-deps --ignore-scripts
+        run: npm ci --legacy-peer-deps --ignore-scripts
 
-      - name: Run foolproof ingest pipeline
-        id: ingest
+      - name: Refresh event feeds without model calls
+        if: github.event_name == 'schedule' || !inputs.snapshot_only
         working-directory: v2
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
+          SEATGEEK_AID: ${{ secrets.SEATGEEK_AID }}
+          EVENTBRITE_TOKEN: ${{ secrets.EVENTBRITE_TOKEN }}
         run: |
-          ARGS=""
-          if [ -n "${{ inputs.only }}" ]; then ARGS="$ARGS --only=${{ inputs.only }}"; fi
-          if [ "${{ inputs.skip_imports }}" = "true" ]; then ARGS="$ARGS --skip-imports"; fi
-          if [ "${{ inputs.smoke_only }}" = "true" ]; then ARGS="$ARGS --smoke-only"; fi
-          echo "Running: node scripts/ingest.mjs $ARGS"
-          node scripts/ingest.mjs $ARGS
+          set -euo pipefail
+          for source in ticketmaster seatgeek eventbrite nhcc; do
+            timeout 180s node "scripts/import-$source.mjs"
+          done
+          timeout 720s node scripts/scrape-abqtodo.mjs --api-only || echo "::warning::ABQtodo community feed did not complete."
+          timeout 180s node scripts/scrape-amp-concerts.mjs || echo "::warning::AMP community feed did not complete."
+          timeout 90s node scripts/cleanup-events.mjs --skip-purge
+          timeout 90s node scripts/dedup-events.mjs --limit=100
 
-      - name: Write GitHub step summary
-        if: always()
+      - name: Build and verify the public snapshot
+        env:
+          ABQ_PUBLIC_KEY: ${{ vars.ABQ_PUBLIC_KEY }}
         run: |
-          {
-            echo "## 📅 V2 Ingest Pipeline"
-            echo ""
-            echo "**Run at:** $(date -u '+%Y-%m-%d %H:%M UTC')"
-            echo "**Trigger:** ${{ github.event_name }}"
-            echo "**Pipeline result:** ${{ steps.ingest.outcome }}"
-            echo ""
-            if [ "${{ steps.ingest.outcome }}" = "success" ]; then
-              echo "✅ All gates and smoke tests passed. Site is healthy."
-            else
-              echo "❌ Pipeline failed. Check the ingest step logs above for specific failures."
-              echo ""
-              echo "Common causes:"
-              echo "- Source API down or returning empty (check the failed source's logs)"
-              echo "- Coverage gates dropped below threshold (category/image/neighborhood/mood)"
-              echo "- Smoke tests caught invalid image/time/venue in a sampled event"
-              echo "- Image-URL misassociation detected across 5+ unrelated events (auto-rejected)"
-            fi
-            echo ""
-            echo "---"
-            echo "Full playbook: memory/ingestion.md + memory/image_system.md"
-          } >> $GITHUB_STEP_SUMMARY
+          node --test static-site/calendar.test.mjs
+          npm exec --yes --package=tsx@4.23.15 -- tsx --tsconfig v2/tsconfig.json static-site/build.mjs
+          node static-site/verify.mjs
 
-      # ── On failure: open a GitHub Issue instead of emailing Matt ──────────────
-      - name: Open issue on failure
-        if: failure()
-        uses: actions/github-script@v7
+      - name: Save deployable files
+        uses: actions/upload-artifact@v4
         with:
-          script: |
-            const { data: issues } = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: 'ci-failure',
-              state: 'open',
-            });
-            const title = `🚨 CI failed: ${context.workflow}`;
-            const existing = issues.find(i => i.title === title);
-            if (!existing) {
-              await github.rest.issues.create({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                title,
-                body: [
-                  `**Workflow:** ${context.workflow}`,
-                  `**Trigger:** ${context.eventName}`,
-                  `**Run:** ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
-                  ``,
-                  `Claude will investigate at next session start. Close this issue once fixed.`,
-                ].join('\n'),
-                labels: ['ci-failure'],
-              });
-            }
+          name: abq-static-site
+          path: static-site/dist/
+          retention-days: 14
+
+  publish:
+    name: Publish to Cloudflare Pages
+    if: vars.ABQ_STATIC_PUBLISH_ENABLED == 'true' && github.ref == 'refs/heads/v2'
+    needs: weekly
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: abq-cloudflare-production
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/download-artifact@v4
+        with:
+          name: abq-static-site
+          path: dist
+      - name: Upload verified files to the Pages production branch
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PAGES_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::error::Cloudflare Pages deployment credentials are missing."
+            exit 1
+          fi
+          npm exec --yes --package=wrangler@4.157.0 -- wrangler pages deploy dist --project-name=abq-unplugged-static --branch=main
+      - name: Verify the deployed catalog
+        run: |
+          origin=https://abq-unplugged-static.pages.dev
+          curl -fsS --retry 5 --retry-all-errors --max-time 15 "$origin/catalog.json?build=$GITHUB_RUN_ID" -o live-catalog.json
+          cmp dist/catalog.json live-catalog.json
+          for path in / /events/ /tonight/ /weekend/ /free/ /sitemap.xml; do
+            curl -fsS --max-time 15 "$origin$path" -o /dev/null
+          done

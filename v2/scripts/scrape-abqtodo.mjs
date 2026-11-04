@@ -18,6 +18,7 @@
  *   node scripts/scrape-abqtodo.mjs --limit=20     # first 20 events
  *   node scripts/scrape-abqtodo.mjs --days=30      # 30-day window
  *   node scripts/scrape-abqtodo.mjs --skip-images  # skip image hosting
+ *   node scripts/scrape-abqtodo.mjs --api-only     # use only structured source data
  */
 
 import { createClient } from '@supabase/supabase-js'
@@ -52,7 +53,8 @@ if (!SUPABASE_KEY) { console.error('Missing SUPABASE_SERVICE_ROLE_KEY'); process
 // ── Args ──────────────────────────────────────────────────────────────────────
 const args      = process.argv.slice(2)
 const DRY_RUN   = args.includes('--dry-run')
-const SKIP_IMG  = args.includes('--skip-images')
+const API_ONLY  = args.includes('--api-only')
+const SKIP_IMG  = API_ONLY || args.includes('--skip-images')
 const LIMIT     = parseInt(args.find(a => a.startsWith('--limit='))?.split('=')[1] ?? '999')
 const DAYS      = parseInt(args.find(a => a.startsWith('--days='))?.split('=')[1] ?? '90')
 
@@ -359,13 +361,13 @@ async function main() {
       continue
     }
 
-    process.stdout.write(`  [${i+1}/${toProcess.length}] Fetching page… `)
+    process.stdout.write(`  [${i+1}/${toProcess.length}] ${API_ONLY ? 'Tribe API… ' : 'Fetching page… '}`)
 
     const baseline = tribeExtract(apiEv)
 
     // Fetch the actual event page for optional AI enrichment. The Tribe API is
     // complete enough to import safely even if the page or AI service is down.
-    const pageRes = await httpGet(eventUrl, 12000)
+    const pageRes = API_ONLY ? {} : await httpGet(eventUrl, 12000)
 
     // Virtual event check on page HTML
     if (apiEv.is_virtual || (pageRes.text && VIRTUAL_RE.test(pageRes.text.slice(0, 3000)))) {
@@ -384,7 +386,7 @@ async function main() {
 
     // DeepSeek is enrichment, not a gate. Keep authoritative API date/time and
     // location fields so a hallucination cannot move an event.
-    process.stdout.write(pageRes.text ? 'DeepSeek… ' : `page HTTP ${pageRes.status ?? 'error'}; API baseline… `)
+    if (!API_ONLY) process.stdout.write(pageRes.text ? 'DeepSeek… ' : `page HTTP ${pageRes.status ?? 'error'}; API baseline… `)
     const ai = pageRes.text ? await deepseekExtract(eventUrl, pageRes.text) : null
     const extracted = {
       ...baseline,

@@ -11,11 +11,7 @@ name: CI — deploy + smoke tests
 # step below retries up to 3x on those specific infrastructure errors.
 
 on:
-  push:
-    branches: [v2]
-    paths:
-      - 'v2/**'
-      - '.github/workflows/deploy-v2.yml'
+  # Legacy admin and submissions only. Public calendar deploys from v2-weekly-refresh.yml.
   workflow_dispatch:
 
 concurrency:
