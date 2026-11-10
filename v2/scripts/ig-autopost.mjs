@@ -19,9 +19,16 @@ const DEFAULT_FIXTURE = path.join(__dirname, 'fixtures', 'ig-events-week.json')
 const TAG_HANDLES_PATH = path.join(__dirname, 'ig-tag-handles.json')
 const OUT_DIR = '/tmp/ig-autopost'
 const FRIDAY_ROUNDUP = {
-  id: 'friday-roundup', kind: 'digest', period: 'friday-weekend', time: '15:23', reel: false,
+  id: 'friday-roundup', kind: 'digest', period: 'friday-weekend', time: '12:00', reel: false,
 }
-const FRIDAY_PUBLISH_END = '18:00'
+// GitHub routinely starts scheduled jobs hours late (Nov 6 2026 ran 3.5h late and
+// the old 15:23–18:00 window silently skipped the post). The window is wide on
+// purpose; hasFridayPost() keeps the backup run from posting twice.
+const FRIDAY_PUBLISH_END = '21:00'
+// Hosts that may legitimately serve the admin publish API. Netlify redirects its
+// *.netlify.app hostname to the primary custom domain with a 301, which would
+// turn a POST into a GET, so redirects are followed by hand to these hosts only.
+const PUBLISH_HOSTS = new Set(['abq-unplugged-v2.netlify.app', 'abqunplugged.com', 'www.abqunplugged.com'])
 
 // Morning shift (9 AM MT): digest/roundup discovery posts for the week or weekend.
 // All run as Reels for algorithm-boosted reach to non-followers.
@@ -1047,19 +1054,41 @@ async function hasFridayPost(supabase, date) {
   return posts.length > 0
 }
 
-async function publishFridayRoundup(buffer, caption) {
+// Calls an admin API route, following up to two redirects to known hosts while
+// keeping the method, body and admin cookie. A 3xx means the request was not
+// processed, so repeating it at the new location cannot double-publish.
+export async function adminFetch(pathname, { method = 'GET', body, timeoutMs = 45_000 } = {}) {
   const base = process.env.IG_BASE_URL
   const secret = process.env.ADMIN_SECRET
   if (!base || !secret) throw new Error('Instagram publishing endpoint and admin credential are required')
+  let url = new URL(pathname, base)
+  for (let hop = 0; hop < 3; hop++) {
+    if (url.protocol !== 'https:' && url.hostname !== 'localhost') throw new Error(`Refusing non-HTTPS admin URL ${url.origin}`)
+    const response = await fetch(url, {
+      method,
+      redirect: 'manual',
+      headers: { 'Content-Type': 'application/json', Cookie: `admin_token=${secret}` },
+      body,
+      signal: AbortSignal.timeout(timeoutMs),
+    })
+    if (response.status < 300 || response.status >= 400) return response
+    const location = response.headers.get('location')
+    const next = location ? new URL(location, url) : null
+    if (!next || !PUBLISH_HOSTS.has(next.hostname)) {
+      throw new Error(`Admin API redirected to an unexpected location (${response.status} ${next?.origin ?? 'none'})`)
+    }
+    url = next
+  }
+  throw new Error('Admin API redirected too many times')
+}
+
+async function publishFridayRoundup(buffer, caption) {
   const jpeg = await sharp(buffer).jpeg({ quality: 90 }).toBuffer()
-  const response = await fetch(new URL('/api/admin/ig/publish', base), {
+  const response = await adminFetch('/api/admin/ig/publish', {
     method: 'POST',
-    redirect: 'error',
-    headers: { 'Content-Type': 'application/json', Cookie: `admin_token=${secret}` },
     body: JSON.stringify({
       imageDataUrl: `data:image/jpeg;base64,${jpeg.toString('base64')}`, caption, mediaType: 'FEED',
     }),
-    signal: AbortSignal.timeout(45_000),
   })
   const result = await response.json().catch(() => null)
   if (!response.ok || !result?.postId) {
@@ -1080,8 +1109,7 @@ async function runFridayRoundup(date, events, dryRun) {
     return
   }
   if (new Date().toISOString() >= mdtIso(date, FRIDAY_PUBLISH_END)) {
-    console.log('Friday afternoon publish window closed during rendering')
-    return
+    throw new Error('Friday publish window closed during rendering; the weekend roundup was not posted')
   }
   await publishFridayRoundup(buffer, caption)
 }
@@ -1168,16 +1196,39 @@ function planOutput({ date, shift, slot, events, caption, tags, pngPath, mp4Path
   }
 }
 
+// Thursday check: everything Friday needs, without publishing. Fails (and emails)
+// so problems are fixed a day early instead of discovered after a missed post.
+async function runPreflight(friday, events) {
+  const problems = []
+  if (events.length < 5) problems.push(`only ${events.length} weekend events qualify for ${friday} (need at least 5)`)
+  try {
+    await runFridayRoundup(friday, events, true)
+  } catch (error) {
+    problems.push(`render failed: ${error instanceof Error ? error.message : error}`)
+  }
+  try {
+    const response = await adminFetch('/api/admin/ig/history?limit=1', { timeoutMs: 20_000 })
+    if (!response.ok) problems.push(`publish API check returned HTTP ${response.status} (is ADMIN_SECRET current and the Netlify app up?)`)
+  } catch (error) {
+    problems.push(`publish API unreachable: ${error instanceof Error ? error.message : error}`)
+  }
+  await checkTokenHealth()
+  if (problems.length) throw new Error(`Friday roundup preflight failed:\n- ${problems.join('\n- ')}`)
+  console.log(`Preflight ok: ${events.length} events ready for ${friday}; publish API reachable`)
+}
+
 async function main() {
   await loadEnv()
   const args = parseArgs(process.argv.slice(2))
   const dryRun = args['dry-run'] === true
   const postNow = args.now === true || args.now === 'true'
   const isStoryMode = args.story === true || args.story === 'true'
-  const fridayRoundup = args['friday-roundup'] === true
+  const preflight = args.preflight === true
+  const fridayRoundup = args['friday-roundup'] === true || preflight
+  const manualRecovery = args['manual-recovery'] === true
   const localToday = denverDateParts().iso
   const nextFriday = addDays(localToday, (5 - weekdayIndex(localToday) + 7) % 7)
-  const today = args.date || (fridayRoundup && dryRun ? nextFriday : localToday)
+  const today = args.date || (fridayRoundup && (dryRun || preflight) ? nextFriday : localToday)
   if (!/^\d{4}-\d{2}-\d{2}$/.test(today)) throw new Error('--date must be YYYY-MM-DD')
 
   const day = weekdayIndex(today)
@@ -1189,20 +1240,30 @@ async function main() {
     : (args.slot ? SLOT_BY_ID[args.slot] : dayRotation[day])
   if (!slot) throw new Error(`Unknown --slot ${args.slot}`)
 
-  if (!dryRun && process.env.IG_AUTOPOST_ENABLED !== 'true') {
+  if (!dryRun && !preflight && process.env.IG_AUTOPOST_ENABLED !== 'true') {
     console.log('autopost disabled')
     return
   }
 
-  if (fridayRoundup && !dryRun) {
+  if (fridayRoundup && !dryRun && !preflight) {
     // A rerun cannot safely retry a publish whose response may have been lost.
-    if (process.env.GITHUB_EVENT_NAME !== 'schedule' || process.env.GITHUB_RUN_ATTEMPT !== '1') {
-      throw new Error('Friday publication requires the first attempt of the scheduled workflow')
+    // Manual recovery is a deliberate, one-off dispatch for a Friday that was
+    // missed; it is still blocked if a post is already logged for the day.
+    const scheduledFirstAttempt = process.env.GITHUB_EVENT_NAME === 'schedule' && process.env.GITHUB_RUN_ATTEMPT === '1'
+    const manualDispatch = manualRecovery && process.env.GITHUB_EVENT_NAME === 'workflow_dispatch'
+    if (!scheduledFirstAttempt && !manualDispatch) {
+      throw new Error('Friday publication requires the first attempt of the scheduled workflow or a manual recovery dispatch')
     }
     const now = new Date().toISOString()
-    if (today !== localToday || day !== 5 || now < mdtIso(today, FRIDAY_ROUNDUP.time) || now >= mdtIso(today, FRIDAY_PUBLISH_END)) {
-      console.log('Outside the Friday afternoon window')
+    if (today !== localToday || day !== 5) {
+      throw new Error(`Friday roundup started on ${localToday}, not a Friday in Denver; nothing was posted`)
+    }
+    if (now < mdtIso(today, FRIDAY_ROUNDUP.time) && !manualDispatch) {
+      console.log('Before the Friday publish window; the later scheduled run will post')
       return
+    }
+    if (now >= mdtIso(today, FRIDAY_PUBLISH_END)) {
+      throw new Error(`Friday roundup started after ${FRIDAY_PUBLISH_END} Denver time; the weekend roundup was not posted`)
     }
   }
   if (!dryRun && !fridayRoundup) await checkTokenHealth()
@@ -1218,7 +1279,7 @@ async function main() {
     events = await loadFixtureEvents(fixturePath)
   } else {
     supabase = supabaseClient()
-    if (fridayRoundup && !dryRun && await hasFridayPost(supabase, today)) {
+    if (fridayRoundup && !dryRun && !preflight && await hasFridayPost(supabase, today)) {
       console.log('An Instagram post is already recorded for this Friday')
       return
     }
@@ -1240,8 +1301,12 @@ async function main() {
       ? selectEvents(slot, events, today, recentIds)
       : await selectEventsWithUsablePhotos(slot, events, today, recentIds)
   }
-  if (selected.length === 0) throw new Error(`No eligible events for ${today} ${slot.id}`)
+  if (selected.length === 0 && !preflight) throw new Error(`No eligible events for ${today} ${slot.id}`)
 
+  if (preflight) {
+    await runPreflight(today, selected)
+    return
+  }
   if (fridayRoundup) {
     await runFridayRoundup(today, selected, dryRun)
     return
@@ -1342,8 +1407,10 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     const date = args.date || denverDateParts().iso
     const errShift = args.shift || 'morning'
     const errRotation = errShift === 'evening' ? EVENING_ROTATION : MORNING_ROTATION
-    const slotId = args.slot || SLOT_BY_ID[args.slot]?.id || errRotation[weekdayIndex(date)]?.id || 'unknown'
-    if (!args['friday-roundup']) await sendFailureAlert(date, slotId, error)
+    const slotId = args.preflight ? 'friday-roundup-preflight'
+      : args['friday-roundup'] ? FRIDAY_ROUNDUP.id
+      : args.slot || errRotation[weekdayIndex(date)]?.id || 'unknown'
+    await sendFailureAlert(date, slotId, error)
     console.error(error instanceof Error ? error.message : error)
     process.exit(1)
   })
