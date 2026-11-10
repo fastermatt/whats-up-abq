@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { createHash } from 'node:crypto'
 import { CATEGORY_SLUG_MAP, cleanDescription, normalizeRow } from '../v2/lib/events.ts'
 import { clockMinutes, dateLabel, details, filterEvents, localDate, slug } from './calendar.mjs'
+import { analyticsSnippet, analyticsToken, contentSecurityPolicy, privacyCopy } from './analytics.mjs'
 
 const base = fileURLToPath(new URL('./', import.meta.url))
 const publicDir = join(base, '../v2/public')
@@ -12,6 +13,7 @@ const legacy = 'https://abq-unplugged-v2.netlify.app'
 const source = 'https://bsmvfutebmbkjvlrhiyq.supabase.co'
 const today = localDate()
 const previewDays = Number(process.env.ABQ_PREVIEW_DAYS || 0)
+const analytics = analyticsToken(process.env.ABQ_CF_ANALYTICS_TOKEN)
 const cols = 'id,source,raw,event_date,category,venue_name,venue_slug,neighborhood,image_status'
 const fallback = new Set(['arts-theater','comedy','community','family','festivals','film','food-drink','music','outdoor','sports'])
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
@@ -77,7 +79,7 @@ function layout({ path, title, description, content, extra = '' }) {
 <meta property="og:title" content="${esc(tabTitle)}"><meta property="og:description" content="${esc(description)}"><meta property="og:url" content="${esc(canonical(path))}"><meta property="og:image" content="${site}/og-image.jpg">
 <link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/assets/site.css">${extra}</head>
 <body><a class="skip" href="#main">Skip to content</a><header class="mast"><div class="wrap"><a href="/"><img src="/assets/logo.svg" alt="ABQ Unplugged" width="144" height="50"></a><nav class="nav" aria-label="Main">${nav.map(([label, href]) => `<a href="${href}">${label}</a>`).join('')}</nav></div></header>
-<main id="main">${content}</main><footer class="foot"><div class="wrap"><span>Built with love for Albuquerque.</span><a href="/about/">About</a><a href="/submit/">Submit an event</a><a href="/privacy/">Privacy</a><a href="https://www.instagram.com/abqunplugged/">Instagram</a><a href="https://ko-fi.com/stopscrolling">Support ABQ Unplugged</a></div></footer></body></html>`
+<main id="main">${content}</main><footer class="foot"><div class="wrap"><span>Built with love for Albuquerque.</span><a href="/about/">About</a><a href="/submit/">Submit an event</a><a href="/privacy/">Privacy</a><a href="https://www.instagram.com/abqunplugged/">Instagram</a><a href="https://ko-fi.com/stopscrolling">Support ABQ Unplugged</a></div></footer>${analyticsSnippet(analytics)}</body></html>`
 }
 
 const card = event => `<li class="card"><img alt="" loading="lazy" decoding="async" src="${event.art}"><div class="body">
@@ -140,6 +142,29 @@ const aliases = {
   'movies':'categories/film',
 }
 
+// Pages that only the Netlify app can serve (accounts, saved events, digest-email
+// links, auth callbacks, APIs). The static host forwards them so nothing breaks
+// when abqunplugged.com moves to Cloudflare Pages. Query strings carry over.
+const forwarded = ['admin','api','auth','feedback','for-you','ig','l','leaderboard','login','onboarding',
+  'profile','saved','search','surprise-me','u','welcome','feed.xml']
+
+// Retired landing pages from the Netlify app, sent to the closest static page.
+const retired = {
+  'albuquerque-date-night-ideas':'events', 'date-night':'events', 'this-week':'events', 'nightlife':'events',
+  'balloon-fiesta':'categories/festivals', 'brewery-concerts':'categories/music', 'christian-music-albuquerque':'categories/music',
+  'comedy-tonight':'tonight', 'live-music-tonight':'tonight', 'things-to-do-today':'tonight',
+  'farmers-markets-albuquerque':'categories/food-drink', 'why':'about', 'offline':'',
+}
+
+function redirectRules() {
+  return [
+    ...Object.entries(aliases).map(([from,to]) => `/${from} /${to ? to + '/' : ''} 301`),
+    ...Object.entries(retired).map(([from,to]) => `/${from} /${to ? to + '/' : ''} 302`),
+    '/neighborhood/:slug /neighborhoods/:slug/ 301',
+    ...forwarded.flatMap(path => [`/${path} ${legacy}/${path} 302`, `/${path}/* ${legacy}/${path}/:splat 302`]),
+  ].join('\n') + '\n'
+}
+
 async function writePage(dir, path, content) {
   const file = join(dir, path.slice(1), 'index.html')
   await mkdir(dirname(file), { recursive:true })
@@ -187,19 +212,18 @@ async function build(dir, events) {
     routes.add(prefix)
   }
   await writePage(dir,'/about/',information('/about/','About ABQ Unplugged','An independent guide to things to do around Albuquerque. The public calendar is refreshed weekly.'))
-  await writePage(dir,'/privacy/',information('/privacy/','Privacy','The public calendar runs from static files. It does not require an account or use tracking scripts. Organizer sites and event submissions have their own privacy policies.'))
+  await writePage(dir,'/privacy/',information('/privacy/','Privacy',privacyCopy(analytics)))
   await writePage(dir,'/submit/',information('/submit/','Submit an event','Share an upcoming Albuquerque area event. Approved submissions can appear in the next weekly refresh.',`<a class="button" href="${legacy}/submit">Open the submission form ↗</a>`))
   await writeFile(join(dir,'404.html'),information('/404','Page not found','The event may have passed, or the page may have moved. Browse the calendar for upcoming events.','<a class="button" href="/events/">Browse events</a>'))
   await writeFile(join(dir,'catalog.json'),JSON.stringify({ refreshed: today, events: events.map(({ description: _d,address: _a,tickets: _t,...event }) => event) }))
   await writeFile(join(dir,'sitemap.xml'),'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +
     [...routes].map(path => '<url><loc>' + esc(canonical(path)) + '</loc></url>').join('') + '</urlset>')
   await writeFile(join(dir,'robots.txt'), 'User-agent: *\nDisallow: /admin/\nSitemap: ' + site + '/sitemap.xml\n')
-  await writeFile(join(dir,'_redirects'),Object.entries(aliases).map(([from,to]) => `/${from} /${to ? to + '/' : ''} 301`).join('\n') +
-    `\n/neighborhood/:slug /neighborhoods/:slug/ 301\n/admin ${legacy}/admin 302\n/admin/* ${legacy}/admin/:splat 302\n/login ${legacy}/login 302\n/feedback ${legacy}/feedback 302\n`)
+  await writeFile(join(dir,'_redirects'),redirectRules())
   await writeFile(join(dir,'_headers'),`/*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Content-Security-Policy: default-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'
+  Content-Security-Policy: ${contentSecurityPolicy(analytics)}
 /catalog.json
   Cache-Control: public, max-age=300
 `)
@@ -233,7 +257,7 @@ try {
   if (files > 20000) throw new Error('Cloudflare Pages asset limit exceeded.')
   await rm(output,{ recursive:true, force:true })
   await rename(temporary,output)
-  console.log(`Built ${files} static files for ${events.length} upcoming events (${today}).`)
+  console.log(`Built ${files} static files for ${events.length} upcoming events (${today}); Cloudflare Web Analytics ${analytics ? 'on' : 'off'}.`)
 } finally {
   await rm(temporary,{ recursive:true, force:true })
 }

@@ -36,3 +36,16 @@ needed. Preserve email and payment records.
 
 `ABQ_PREVIEW_DAYS=90` is available only for a smaller dashboard upload; it
 sets a no-index header. Scheduled publishing always builds the full catalog.
+
+## Traffic stats
+
+The site can count visits with Cloudflare Web Analytics (cookieless, no local
+storage, no cross-site tracking). It stays off until the repo variable
+`ABQ_CF_ANALYTICS_TOKEN` holds the token from the Web Analytics JS snippet
+(Cloudflare → Analytics & Logs → Web Analytics → Add a site → `abqunplugged.com`
+→ manual JS snippet). The token is public; it is printed into every page. When
+set, the build adds the beacon to every page, allows only
+`static.cloudflareinsights.com` (script) and `cloudflareinsights.com` (beacon)
+in the CSP, and switches the /privacy/ text to describe it. `verify.mjs` fails
+the build if pages, headers and privacy text disagree. Do not also turn on the
+Pages project's automatic Web Analytics injection, or visits count twice.
