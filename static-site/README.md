@@ -1,6 +1,6 @@
 # ABQ Unplugged static calendar
 
-`v2-weekly-refresh.yml` imports public source feeds on Tuesdays at 17:00 UTC,
+`v2-weekly-refresh.yml` imports public source feeds once a week, Thursdays at 6 PM Denver (so Friday's Instagram roundup has the latest events),
 runs bounded cleanup, and generates HTML and a public calendar index. It does
 not receive model credentials or schedule social posts, emails, image hosting,
 or Netlify builds. Missing organizer images use the site's existing category

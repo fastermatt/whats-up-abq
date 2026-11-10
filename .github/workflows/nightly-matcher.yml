@@ -2,7 +2,7 @@ name: Nightly Notification Matcher
 
 # Runs match-notifications.mjs every night so new users see "For You" matches
 # within ~24h of saving preferences. Also refreshes scores after new events
-# are imported during the Tuesday pipeline.
+# are imported during the Thursday-evening pipeline.
 
 on:
   schedule:

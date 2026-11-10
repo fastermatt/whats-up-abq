@@ -2,7 +2,10 @@ name: V2 Weekly Event Refresh
 
 on:
   schedule:
-    - cron: '0 17 * * 2' # Tuesday 10 AM MST / 11 AM MDT
+    # The ONLY scheduled event update: Thursday 6 PM Denver, so Friday's roundup
+    # post (12:23 PM Denver) and the weekend calendar use the freshest events.
+    - cron: '0 18 * * 4'
+      timezone: America/Denver
   workflow_dispatch:
     inputs:
       snapshot_only:
