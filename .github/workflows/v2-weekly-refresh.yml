@@ -57,8 +57,9 @@ jobs:
       - name: Build and verify the public snapshot
         env:
           ABQ_PUBLIC_KEY: ${{ vars.ABQ_PUBLIC_KEY }}
+          ABQ_CF_ANALYTICS_TOKEN: ${{ vars.ABQ_CF_ANALYTICS_TOKEN }}
         run: |
-          node --test static-site/calendar.test.mjs
+          node --test static-site/calendar.test.mjs static-site/analytics.test.mjs
           npm exec --yes --package=tsx@4.23.15 -- tsx --tsconfig v2/tsconfig.json static-site/build.mjs
           node static-site/verify.mjs
 
