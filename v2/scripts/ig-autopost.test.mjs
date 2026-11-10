@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { fallbackCaption, formatTime, parseCaptionResponse, resolveCaption, selectEvents } from './ig-autopost.mjs'
+import { adminFetch, fallbackCaption, formatTime, parseCaptionResponse, resolveCaption, selectEvents } from './ig-autopost.mjs'
+import { fitTitle } from './ig-weekend-roundup.mjs'
 
 test('accepts the preferred plain-text caption format', () => {
   assert.equal(parseCaptionResponse('Burque has plans.\n\nFull details at the link in bio.'), 'Burque has plans.\n\nFull details at the link in bio.')
@@ -148,4 +149,48 @@ test('Friday roundup selects three events per day without requiring photos', () 
   const picks = selectEvents(slot, events, '2026-11-06', new Set())
   assert.deepEqual(picks.map(event => event.date.slice(-2)), ['06', '06', '06', '07', '07', '07', '08', '08', '08'])
   assert.ok(picks.every(event => !event.imageUrl && event.id !== 'past'))
+})
+
+test('weekend roundup titles stay inside the image column', () => {
+  for (const title of ['Loverboy', 'Sugar Land Space Cowboys at Albuquerque Isotopes', 'Festival Flamenco Alburquerque 39: María Pagés-De Scheherezade and friends']) {
+    const fitted = fitTitle(title)
+    assert.ok(Array.from(fitted.title).length * fitted.titleSize * 0.66 <= 910, title)
+    assert.ok(fitted.titleSize >= 28 && fitted.titleSize <= 38)
+  }
+  assert.equal(fitTitle('Loverboy').titleSize, 38)
+})
+
+test('admin publish follows a Netlify domain redirect without dropping the POST', async () => {
+  const calls = []
+  const realFetch = globalThis.fetch
+  process.env.IG_BASE_URL = 'https://abq-unplugged-v2.netlify.app'
+  process.env.ADMIN_SECRET = 'test-secret'
+  globalThis.fetch = async (url, init) => {
+    calls.push({ url: String(url), method: init.method, body: init.body, cookie: init.headers.Cookie })
+    return calls.length === 1
+      ? new Response(null, { status: 301, headers: { location: 'https://abqunplugged.com/api/admin/ig/publish' } })
+      : Response.json({ postId: '1' })
+  }
+  try {
+    const response = await adminFetch('/api/admin/ig/publish', { method: 'POST', body: '{"x":1}' })
+    assert.equal(response.status, 200)
+    assert.deepEqual(calls.map(call => [call.url, call.method, call.body, call.cookie]), [
+      ['https://abq-unplugged-v2.netlify.app/api/admin/ig/publish', 'POST', '{"x":1}', 'admin_token=test-secret'],
+      ['https://abqunplugged.com/api/admin/ig/publish', 'POST', '{"x":1}', 'admin_token=test-secret'],
+    ])
+  } finally {
+    globalThis.fetch = realFetch
+  }
+})
+
+test('admin publish refuses redirects to unknown hosts', async () => {
+  const realFetch = globalThis.fetch
+  process.env.IG_BASE_URL = 'https://abq-unplugged-v2.netlify.app'
+  process.env.ADMIN_SECRET = 'test-secret'
+  globalThis.fetch = async () => new Response(null, { status: 302, headers: { location: 'https://example.com/steal' } })
+  try {
+    await assert.rejects(adminFetch('/api/admin/ig/publish', { method: 'POST', body: '{}' }), /unexpected location/)
+  } finally {
+    globalThis.fetch = realFetch
+  }
 })

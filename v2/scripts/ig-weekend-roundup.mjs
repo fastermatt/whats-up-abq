@@ -35,6 +35,22 @@ export function weekendCaption(events) {
   return [heading, ...sections, 'More events at the link in bio.'].join('\n\n')
 }
 
+// Text must stay inside the 910px column (x 85–995). DejaVu Sans Bold averages
+// about 0.66em per character and the regular weight about 0.6em, so these limits
+// keep the widest realistic titles and venue lines from running off the image.
+const COLUMN_WIDTH = 910
+const TITLE_EM = 0.66
+const TITLE_MIN = 28
+const TITLE_MAX = 38
+const META_MAX_CHARS = Math.floor(COLUMN_WIDTH / (25 * 0.6))
+
+export function fitTitle(value) {
+  const maxChars = Math.floor(COLUMN_WIDTH / (TITLE_MIN * TITLE_EM))
+  const title = shorten(value, maxChars)
+  const fitted = Math.floor(COLUMN_WIDTH / (Array.from(title).length * TITLE_EM))
+  return { title, titleSize: Math.max(TITLE_MIN, Math.min(TITLE_MAX, fitted)) }
+}
+
 const escape = value => value.replace(/[<>&]/gu, character => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' })[character])
 
 export function renderWeekendRoundup(events) {
@@ -50,10 +66,9 @@ export function renderWeekendRoundup(events) {
     const rows = entries.map(event => {
       const baseline = y
       y += rowHeight
-      const title = shorten(event.title, 57)
-      const titleSize = Math.max(28, Math.min(38, Math.floor(1710 / Array.from(title).length)))
+      const { title, titleSize } = fitTitle(event.title)
       return `<text x="85" y="${baseline}" font-size="${titleSize}" font-weight="700">${escape(title)}</text>
-        <text x="85" y="${baseline + 30}" fill="#51453e" font-size="25">${escape(shorten(metadata(event, 52), 69))}</text>`
+        <text x="85" y="${baseline + 30}" fill="#51453e" font-size="25">${escape(shorten(metadata(event, 46), META_MAX_CHARS))}</text>`
     }).join('')
     y += dayGap
     return `<text x="85" y="${dayY}" fill="#99412a" font-size="29" font-weight="700">${escape(day.toUpperCase())}</text>

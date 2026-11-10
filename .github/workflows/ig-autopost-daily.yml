@@ -1,10 +1,28 @@
 name: Instagram Friday roundup
 
+# One post a week: "What's Happening This Weekend" (Fri–Sun), published Friday.
+#
+# GitHub often starts scheduled jobs hours late, so Friday has a primary and a
+# backup run. The script posts at most once per Friday (it checks ig_post_log),
+# skips quietly only when a post already exists, and fails loudly (GitHub email +
+# ALERT_EMAIL) if the post is missed. Thursday's preflight renders the roundup
+# and checks the publish API so a broken pipeline is caught a day early.
+
 on:
   schedule:
-    - cron: '23 15 * * 5'
+    - cron: '23 12 * * 5' # Friday 12:23 PM Denver — primary
+      timezone: America/Denver
+    - cron: '23 15 * * 5' # Friday 3:23 PM Denver — backup if the primary was delayed or failed
+      timezone: America/Denver
+    - cron: '41 10 * * 4' # Thursday 10:41 AM Denver — preflight, never publishes
       timezone: America/Denver
   workflow_dispatch:
+    inputs:
+      mode:
+        description: preview renders only; preflight checks the publish API; recover posts a missed roundup (Fridays only)
+        type: choice
+        default: preview
+        options: [preview, preflight, recover]
 
 permissions:
   contents: read
@@ -35,27 +53,41 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps --ignore-scripts
 
-      - name: Prepare the Friday roundup
+      - name: Run the Friday roundup
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
           IG_BASE_URL: https://abq-unplugged-v2.netlify.app
           IG_AUTOPOST_ENABLED: 'true' # The workflow's enabled state is the schedule switch.
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+          # Optional: lets the preflight warn ahead of Meta data-access expiry.
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_APP_ID: ${{ secrets.INSTAGRAM_APP_ID }}
+          INSTAGRAM_APP_SECRET: ${{ secrets.INSTAGRAM_APP_SECRET }}
           IG_RUN_EVENT: ${{ github.event_name }}
+          IG_SCHEDULE: ${{ github.event.schedule }}
+          IG_MODE: ${{ inputs.mode }}
         run: |
-          if [ "$IG_RUN_EVENT" = "schedule" ]; then
+          if [ "$IG_RUN_EVENT" = "schedule" ] && [ "$IG_SCHEDULE" = "41 10 * * 4" ]; then
+            node scripts/ig-autopost.mjs --preflight
+          elif [ "$IG_RUN_EVENT" = "schedule" ]; then
             node scripts/ig-autopost.mjs --friday-roundup
+          elif [ "$IG_MODE" = "preflight" ]; then
+            node scripts/ig-autopost.mjs --preflight
+          elif [ "$IG_MODE" = "recover" ]; then
+            node scripts/ig-autopost.mjs --friday-roundup --manual-recovery
           else
             node scripts/ig-autopost.mjs --friday-roundup --dry-run
           fi
 
-      - name: Save manual preview
-        if: github.event_name == 'workflow_dispatch'
+      - name: Save preview
+        if: always() && (github.event_name == 'workflow_dispatch' || github.event.schedule == '41 10 * * 4')
         uses: actions/upload-artifact@v4
         with:
           name: ig-friday-roundup-preview
           path: |
             /tmp/ig-autopost/*.png
             /tmp/ig-autopost/*-caption.txt
-          if-no-files-found: error
+          if-no-files-found: warn
