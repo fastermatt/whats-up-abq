@@ -1578,21 +1578,6 @@ export type Database = {
         }
         Relationships: []
       }
-      umami_latest: {
-        Row: {
-          captured_at: string | null
-          error: string | null
-          id: number | null
-          series_30d: Json | null
-          stats_30d: Json | null
-          stats_30d_prev: Json | null
-          stats_7d: Json | null
-          stats_7d_prev: Json | null
-          top_pages_30d: Json | null
-          top_refs_30d: Json | null
-        }
-        Relationships: []
-      }
     }
     Functions: {
       backfill_event_categories: {
@@ -1610,7 +1595,6 @@ export type Database = {
       purge_old_events: { Args: never; Returns: number }
       purge_past_events: { Args: never; Returns: number }
       read_secret: { Args: { secret_name: string }; Returns: string }
-      refresh_umami_snapshot: { Args: never; Returns: number }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       upsert_events: { Args: { p_events: Json }; Returns: undefined }
