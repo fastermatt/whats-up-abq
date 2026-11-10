@@ -138,6 +138,14 @@ const aliases = {
   'food-drink-events':'categories/food-drink', 'outdoor-activities':'categories/outdoor',
   'outdoor-activities-albuquerque':'categories/outdoor', 'festivals':'categories/festivals',
   'movies':'categories/film',
+  // Legacy SEO/landing paths from the old Next app, kept so indexed links do not 404.
+  'balloon-fiesta':'events', 'date-night':'events', 'albuquerque-date-night-ideas':'events',
+  'brewery-concerts':'categories/music', 'christian-music-albuquerque':'categories/music', 'live-music-tonight':'tonight',
+  'comedy-tonight':'categories/comedy', 'farmers-markets-albuquerque':'categories/food-drink', 'nightlife':'categories/community',
+  'neighborhood':'neighborhoods', 'feed.xml':'events',
+  // Per-user features of the old app (accounts, saved events) no longer exist on the static calendar.
+  'for-you':'events', 'saved':'events', 'profile':'events', 'onboarding':'events', 'welcome':'events',
+  'leaderboard':'events', 'why':'about', 'offline':'', 'l':'events', 'u':'events',
 }
 
 async function writePage(dir, path, content) {
@@ -195,7 +203,7 @@ async function build(dir, events) {
     [...routes].map(path => '<url><loc>' + esc(canonical(path)) + '</loc></url>').join('') + '</urlset>')
   await writeFile(join(dir,'robots.txt'), 'User-agent: *\nDisallow: /admin/\nSitemap: ' + site + '/sitemap.xml\n')
   await writeFile(join(dir,'_redirects'),Object.entries(aliases).map(([from,to]) => `/${from} /${to ? to + '/' : ''} 301`).join('\n') +
-    `\n/neighborhood/:slug /neighborhoods/:slug/ 301\n/admin ${legacy}/admin 302\n/admin/* ${legacy}/admin/:splat 302\n/login ${legacy}/login 302\n/feedback ${legacy}/feedback 302\n`)
+    `\n/neighborhood/:slug /neighborhoods/:slug/ 301\n/admin ${legacy}/admin 302\n/admin/* ${legacy}/admin/:splat 302\n/login ${legacy}/login 302\n/feedback ${legacy}/feedback 302\n/surprise-me ${legacy}/api/surprise 302\n/api/* ${legacy}/api/:splat 307\n`)
   await writeFile(join(dir,'_headers'),`/*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
