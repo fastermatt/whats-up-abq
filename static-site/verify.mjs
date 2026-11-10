@@ -22,6 +22,21 @@ for (const event of events) {
 for (const art of new Set(events.map(e=>e.art))) assert.ok((await stat(file(art))).size > 0)
 assert.ok((await stat(file('catalog.json'))).size < 1024 * 1024)
 await assert.rejects(access(file('_worker.js')), { code:'ENOENT' })
+// Netlify-only pages must keep working after abqunplugged.com moves to Pages:
+// digest emails link to /for-you and /profile/notifications, logins use /auth and /api.
+const redirects = (await read('_redirects')).split('\n').filter(Boolean)
+assert.ok(redirects.length <= 2000, 'Cloudflare Pages allows at most 2,000 redirect rules')
+assert.ok(redirects.filter(rule => /[:*]/.test(rule.split(' ')[0])).length <= 100, 'Cloudflare Pages allows at most 100 dynamic redirects')
+for (const path of ['admin','api','auth','login','feedback','for-you','profile','saved','u','onboarding']) {
+  assert.ok(redirects.includes(`/${path} https://abq-unplugged-v2.netlify.app/${path} 302`), `/${path} is not forwarded to the Netlify app`)
+  assert.ok(redirects.includes(`/${path}/* https://abq-unplugged-v2.netlify.app/${path}/:splat 302`), `/${path}/* is not forwarded to the Netlify app`)
+}
+for (const rule of redirects) {
+  const [from, to, status] = rule.split(' ')
+  assert.ok(from.startsWith('/') && ['301','302'].includes(status), `bad redirect rule: ${rule}`)
+  // A category can be empty in a given week; warn rather than block the deploy.
+  if (to.startsWith('/') && !to.includes(':')) await access(file(to + 'index.html')).catch(() => console.warn(`::warning::redirect ${from} points to ${to}, which has no page this week`))
+}
 const analytics = analyticsToken(process.env.ABQ_CF_ANALYTICS_TOKEN)
 const headers = await read('_headers')
 const privacy = await read('privacy/index.html')

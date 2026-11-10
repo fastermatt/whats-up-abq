@@ -142,6 +142,29 @@ const aliases = {
   'movies':'categories/film',
 }
 
+// Pages that only the Netlify app can serve (accounts, saved events, digest-email
+// links, auth callbacks, APIs). The static host forwards them so nothing breaks
+// when abqunplugged.com moves to Cloudflare Pages. Query strings carry over.
+const forwarded = ['admin','api','auth','feedback','for-you','ig','l','leaderboard','login','onboarding',
+  'profile','saved','search','surprise-me','u','welcome','feed.xml']
+
+// Retired landing pages from the Netlify app, sent to the closest static page.
+const retired = {
+  'albuquerque-date-night-ideas':'events', 'date-night':'events', 'this-week':'events', 'nightlife':'events',
+  'balloon-fiesta':'categories/festivals', 'brewery-concerts':'categories/music', 'christian-music-albuquerque':'categories/music',
+  'comedy-tonight':'tonight', 'live-music-tonight':'tonight', 'things-to-do-today':'tonight',
+  'farmers-markets-albuquerque':'categories/food-drink', 'why':'about', 'offline':'',
+}
+
+function redirectRules() {
+  return [
+    ...Object.entries(aliases).map(([from,to]) => `/${from} /${to ? to + '/' : ''} 301`),
+    ...Object.entries(retired).map(([from,to]) => `/${from} /${to ? to + '/' : ''} 302`),
+    '/neighborhood/:slug /neighborhoods/:slug/ 301',
+    ...forwarded.flatMap(path => [`/${path} ${legacy}/${path} 302`, `/${path}/* ${legacy}/${path}/:splat 302`]),
+  ].join('\n') + '\n'
+}
+
 async function writePage(dir, path, content) {
   const file = join(dir, path.slice(1), 'index.html')
   await mkdir(dirname(file), { recursive:true })
@@ -196,8 +219,7 @@ async function build(dir, events) {
   await writeFile(join(dir,'sitemap.xml'),'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +
     [...routes].map(path => '<url><loc>' + esc(canonical(path)) + '</loc></url>').join('') + '</urlset>')
   await writeFile(join(dir,'robots.txt'), 'User-agent: *\nDisallow: /admin/\nSitemap: ' + site + '/sitemap.xml\n')
-  await writeFile(join(dir,'_redirects'),Object.entries(aliases).map(([from,to]) => `/${from} /${to ? to + '/' : ''} 301`).join('\n') +
-    `\n/neighborhood/:slug /neighborhoods/:slug/ 301\n/admin ${legacy}/admin 302\n/admin/* ${legacy}/admin/:splat 302\n/login ${legacy}/login 302\n/feedback ${legacy}/feedback 302\n`)
+  await writeFile(join(dir,'_redirects'),redirectRules())
   await writeFile(join(dir,'_headers'),`/*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
