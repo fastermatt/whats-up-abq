@@ -18,7 +18,7 @@ on:
       - 'v2/scripts/**'
       - '.github/workflows/regression-tests.yml'
   schedule:
-    - cron: '0 13 * * *'   # Every day 6 AM MT
+    - cron: '0 13 * * 5'   # Weekly, Friday 6 AM MT, after Thursday's refresh
   workflow_dispatch:
     inputs:
       include_live:
