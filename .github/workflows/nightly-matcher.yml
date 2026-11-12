@@ -6,7 +6,7 @@ name: Nightly Notification Matcher
 
 on:
   schedule:
-    - cron: '0 12 * * *'   # Every day at 5 AM MT (12:00 UTC)
+    - cron: '30 19 * * 4'  # Weekly, Thursday after v2-weekly-refresh (events only change weekly)
   workflow_dispatch:
     inputs:
       user:

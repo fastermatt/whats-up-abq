@@ -1,8 +1,7 @@
 name: Analytics heartbeat
 
 on:
-  schedule:
-    - cron: '15 15 * * *' # 9:15 AM MDT / 8:15 AM MST
+  # Schedule removed: the static Cloudflare calendar no longer writes Supabase analytics.
   workflow_dispatch:
     inputs:
       force_empty:
