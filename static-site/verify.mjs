@@ -7,7 +7,9 @@ const file = path => new URL(path.replace(/^\//,''), root)
 const read = path => readFile(file(path), 'utf8')
 const { events, refreshed } = JSON.parse(await read('catalog.json'))
 assert.match(refreshed, /^\d{4}-\d{2}-\d{2}$/)
-assert.ok(events.length >= 200)
+// A bad import must never replace a healthy site: Thursday's calendar normally has 800+ events and most with photos.
+assert.ok(events.length >= 400, `only ${events.length} events: refusing to publish`)
+assert.ok(events.filter(e => e.photo).length / events.length >= 0.4, 'photo coverage collapsed: refusing to publish')
 assert.equal(new Set(events.map(e => e.id)).size, events.length)
 for (const route of ['index.html','events/index.html','tonight/index.html','weekend/index.html','free/index.html','404.html']) {
   const html = await read(route)

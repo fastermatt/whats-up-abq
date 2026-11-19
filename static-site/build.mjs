@@ -289,6 +289,11 @@ function information(path, title, copy, actions = '') {
   return layout({ path, title, description: copy, content: `<div class="wrap content"><h1>${esc(title)}</h1><p>${esc(copy)}</p>${actions}</div>` })
 }
 
+// SEO-tool and bulk scrapers add load without sending visitors; Google, Bing and social previews stay welcome.
+const BLOCKED_CRAWLERS = ['DotBot', 'AhrefsBot', 'SemrushBot', 'MJ12bot', 'PetalBot', 'Bytespider', 'BLEXBot', 'DataForSeoBot']
+const robotsTxt = () => BLOCKED_CRAWLERS.map(bot => `User-agent: ${bot}\nDisallow: /\n`).join('\n') +
+  '\nUser-agent: *\nDisallow: /admin/\nDisallow: /api/\nDisallow: /login\nDisallow: /feedback\nDisallow: /surprise-me\nSitemap: ' + site + '/sitemap.xml\n'
+
 async function build(dir, events) {
   await mkdir(join(dir, 'assets'), { recursive:true })
   for (const file of ['favicon.ico','og-image.jpg','a8f4c2b1d7e5f3a9b4c8d2e6f1a5b9c3.txt']) await copyFile(join(publicDir,file), join(dir,file))
@@ -336,7 +341,7 @@ async function build(dir, events) {
   await writeFile(join(dir,'catalog.json'),JSON.stringify({ refreshed: today, events: events.map(({ description: _d,address: _a,tickets: _t,...event }) => event) }))
   await writeFile(join(dir,'sitemap.xml'),'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +
     [...routes].map(path => '<url><loc>' + esc(canonical(path)) + '</loc><lastmod>' + today + '</lastmod></url>').join('') + '</urlset>')
-  await writeFile(join(dir,'robots.txt'), 'User-agent: *\nDisallow: /admin/\nSitemap: ' + site + '/sitemap.xml\n')
+  await writeFile(join(dir,'robots.txt'), robotsTxt())
   await writeFile(join(dir,'_redirects'),Object.entries(aliases).map(([from,to]) => `/${from} /${to ? to + '/' : ''} 301`).join('\n') +
     `\n/neighborhood/:slug /neighborhoods/:slug/ 301\n/admin ${legacy}/admin 302\n/admin/* ${legacy}/admin/:splat 302\n/login ${legacy}/login 302\n/feedback ${legacy}/feedback 302\n/surprise-me ${legacy}/api/surprise 302\n/api/* ${legacy}/api/:splat 307\n`)
   await writeFile(join(dir,'_headers'),`/*
