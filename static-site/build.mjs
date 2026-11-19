@@ -18,6 +18,51 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&
 const clean = (value, max = 200) => cleanDescription(value, max)?.trim() || null
 const canonical = path => site + path
 
+// ---- SEO helpers: unique titles/descriptions, structured data, freshness ----
+const ld = (...items) => items.filter(Boolean).map(item =>
+  `<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', ...item }).replace(/</g, '\\u003c')}</script>`).join('')
+const dayFmt = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
+const monthFmt = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+const shortDay = date => dayFmt.format(new Date(date + 'T12:00:00Z'))
+const monthYear = date => monthFmt.format(new Date(date + 'T12:00:00Z'))
+const shift = (day, n) => { const d = new Date(day + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10) }
+const clip = (text, max = 155) => {
+  const t = String(text ?? '').replace(/\s+/g, ' ').trim()
+  return t.length <= max ? t : t.slice(0, max - 1).replace(/\s+\S*$/, '') + '…'
+}
+function weekendRange() {
+  const wd = new Date(today + 'T12:00:00Z').getUTCDay()
+  const fri = shift(today, wd === 6 || wd === 0 ? 0 : 5 - wd), sun = shift(today, (7 - wd) % 7)
+  return fri === sun ? shortDay(fri) : shortDay(fri) + '–' + (fri.slice(5, 7) === sun.slice(5, 7) ? String(Number(sun.slice(8))) : shortDay(sun))
+}
+const offsetCache = new Map()
+function mountainOffset(date) {
+  if (!offsetCache.has(date)) {
+    const value = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Denver', timeZoneName: 'longOffset' })
+      .formatToParts(new Date(date + 'T12:00:00Z')).find(p => p.type === 'timeZoneName')?.value ?? 'GMT-07:00'
+    offsetCache.set(date, value.replace('GMT', '') || '-07:00')
+  }
+  return offsetCache.get(date)
+}
+function startDate(event) {
+  const m = clockMinutes(event.time)
+  if (m == null) return event.date
+  return `${event.date}T${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}:00${mountainOffset(event.date)}`
+}
+const crumbs = items => ({ '@type': 'BreadcrumbList', itemListElement: items.map(([name, path], i) =>
+  ({ '@type': 'ListItem', position: i + 1, name, item: canonical(path) })) })
+function eventLd(event) {
+  const url = canonical(details(event))
+  const price = /^free\b/i.test(event.price ?? '') ? 0 : (/\$\s*(\d+(?:\.\d+)?)/.exec(event.price ?? '') ? Number(/\$\s*(\d+(?:\.\d+)?)/.exec(event.price)[1]) : null)
+  return { '@type': 'Event', name: event.title, startDate: startDate(event), url,
+    eventStatus: 'https://schema.org/EventScheduled', eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    location: { '@type': 'Place', name: event.venue || 'Albuquerque, NM', address: { '@type': 'PostalAddress',
+      ...(event.address ? { streetAddress: event.address } : {}), addressLocality: 'Albuquerque', addressRegion: 'NM', addressCountry: 'US' } },
+    description: clip(event.description || [event.title, dateLabel(event.date), event.venue].filter(Boolean).join(' · '), 300),
+    image: [site + event.art],
+    ...(price != null ? { offers: { '@type': 'Offer', url: event.tickets || url, price, priceCurrency: 'USD', availability: 'https://schema.org/InStock' } } : {}) }
+}
+
 function ticketLink(input) {
   try {
     const u = new URL(input)
@@ -70,10 +115,11 @@ async function readEvents(key) {
 }
 
 const nav = [['Events','/events/'],['Tonight','/tonight/'],['This weekend','/weekend/'],['Free','/free/']]
-function layout({ path, title, description, content, extra = '' }) {
-  const tabTitle = path === '/' ? 'ABQ Unplugged — Things to Do in Albuquerque, NM' : title + ' · ABQ Unplugged'
+function layout({ path, title, description, content, extra = '', seoTitle }) {
+  const tabTitle = seoTitle || (path === '/' ? 'ABQ Unplugged — Things to Do in Albuquerque, NM' : title + ' · ABQ Unplugged')
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(tabTitle)}</title><meta name="description" content="${esc(description)}"><link rel="canonical" href="${esc(canonical(path))}">
+<meta name="robots" content="index,follow,max-image-preview:large"><meta property="og:type" content="website"><meta property="og:site_name" content="ABQ Unplugged"><meta name="twitter:card" content="summary_large_image">
 <meta property="og:title" content="${esc(tabTitle)}"><meta property="og:description" content="${esc(description)}"><meta property="og:url" content="${esc(canonical(path))}"><meta property="og:image" content="${site}/og-image.jpg">
 <link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/assets/site.css">${extra}</head>
 <body><a class="skip" href="#main">Skip to content</a><header class="mast"><div class="wrap"><a href="/"><img src="/assets/logo.svg" alt="ABQ Unplugged" width="144" height="50"></a><nav class="nav" aria-label="Main">${nav.map(([label, href]) => `<a href="${href}">${label}</a>`).join('')}</nav></div></header>
@@ -100,20 +146,66 @@ ${['date','neighborhood','venue'].map(key => `<input type="hidden" name="${key}"
 
 function listing(path, title, events, query) {
   const matched = filterEvents(events, query, today)
-  const description = 'Find concerts, festivals, free events, and more around Albuquerque, New Mexico.'
-  return layout({ path, title, description, content: `<section class="hero"><div class="wrap"><p class="eyebrow">Albuquerque, New Mexico</p><h1>${esc(title)}</h1><p>Make a plan worth leaving the house for. Explore live music, neighborhood happenings, and more around the Duke City.</p></div></section>
+  const range = weekendRange()
+  const phrase = {
+    '/': 'upcoming Albuquerque events', '/events/': 'upcoming Albuquerque events',
+    '/tonight/': 'things to do in Albuquerque tonight', '/weekend/': `Albuquerque events this weekend (${range})`,
+    '/free/': 'free Albuquerque events', '/this-week/': 'Albuquerque events in the next 7 days',
+    '/things-to-do-today/': 'things to do in Albuquerque today',
+  }[path] ?? (path.startsWith('/categories/') ? title.toLowerCase() + ' in Albuquerque'
+    : path.startsWith('/venues/') ? 'upcoming events at ' + title
+    : path.startsWith('/neighborhoods/') ? 'upcoming events in ' + title + ', Albuquerque' : 'upcoming Albuquerque events')
+  const seoTitle = {
+    '/': 'Things to Do in Albuquerque: Events This Week · ABQ Unplugged',
+    '/events/': `Albuquerque Events Calendar, ${monthYear(today)} · ABQ Unplugged`,
+    '/tonight/': `Things to Do in Albuquerque Tonight (${shortDay(today)}) · ABQ Unplugged`,
+    '/weekend/': `Albuquerque Events This Weekend (${range}) · ABQ Unplugged`,
+    '/free/': 'Free Events & Things to Do in Albuquerque · ABQ Unplugged',
+    '/this-week/': `Albuquerque Events This Week (${shortDay(today)}–${shortDay(shift(today, 6))}) · ABQ Unplugged`,
+    '/things-to-do-today/': `Things to Do in Albuquerque Today (${shortDay(today)}) · ABQ Unplugged`,
+  }[path] ?? (path.startsWith('/categories/') ? `${title} in Albuquerque, NM · ABQ Unplugged`
+    : path.startsWith('/venues/') ? `Events at ${title}, Albuquerque · ABQ Unplugged`
+    : path.startsWith('/neighborhoods/') ? `Things to Do in ${title}, Albuquerque · ABQ Unplugged` : undefined)
+  const names = matched.slice(0, 3).map(e => e.title)
+  const mix = Object.entries(matched.reduce((m, e) => (e.category && (m[e.category] = (m[e.category] || 0) + 1), m), {}))
+    .sort((a, b) => b[1] - a[1]).slice(0, 3).map(([c, n]) => `${c} (${n})`)
+  const fits = n => `${matched.length} ${phrase}${n ? ': ' + names.slice(0, n).join(', ') : ''}. Updated ${shortDay(today)}.`
+  const generic = ['/', '/events/'].includes(path)
+  const description = !matched.length || generic
+    ? `${matched.length ? matched.length + ' upcoming Albuquerque events' : 'Albuquerque events'}: concerts, festivals, comedy, family outings and free things to do. Updated ${shortDay(today)}.`
+    : clip([3, 2, 1, 0].map(fits).find(text => text.length <= 155) ?? fits(0))
+  const lead = matched.length
+    ? `${matched.length} ${phrase}${names.length ? ', including ' + names.join(', ') : ''}.${mix.length ? ' Most listed: ' + mix.join(', ') + '.' : ''} Updated ${dateLabel(today)}.`
+    : 'Nothing is listed for this view right now. Browse the full Albuquerque calendar for upcoming events.'
+  const slugOk = k => k && /^[a-z0-9-]+$/.test(k)
+  const cats = [...new Set(events.map(e => e.category).filter(Boolean))].sort()
+  const hoods = [...new Map(events.filter(e => slugOk(slug(e.neighborhood))).map(e => [slug(e.neighborhood), e.neighborhood])).entries()].sort((a, b) => a[1].localeCompare(b[1]))
+  const browse = `<h2>Browse Albuquerque events by category</h2><nav class="tabs" aria-label="Browse by category">${cats.filter(c => slugOk(slug(c))).map(c => `<a href="/categories/${slug(c)}/">${esc(c)}</a>`).join('')}</nav>
+<h2>Things to do by neighborhood</h2><nav class="tabs" aria-label="Browse by neighborhood">${hoods.map(([k, n]) => `<a href="/neighborhoods/${k}/">${esc(n)}</a>`).join('')}</nav>`
+  const extra = ld(
+    path === '/' ? { '@type': 'WebSite', name: 'ABQ Unplugged', url: site + '/', potentialAction: { '@type': 'SearchAction', target: site + '/events/?q={search_term_string}', 'query-input': 'required name=search_term_string' } } : null,
+    path === '/' ? { '@type': 'Organization', name: 'ABQ Unplugged', url: site + '/', sameAs: ['https://www.instagram.com/abqunplugged/'] } : null,
+    path !== '/' ? crumbs([['Home', '/'], [title, path]]) : null,
+    { '@type': 'ItemList', name: seoTitle?.replace(' · ABQ Unplugged', '') || title, numberOfItems: matched.length,
+      itemListElement: matched.slice(0, 24).map((e, i) => ({ '@type': 'ListItem', position: i + 1, url: canonical(details(e)), name: e.title })) })
+  return layout({ path, title, seoTitle, description, extra, content: `<section class="hero"><div class="wrap"><p class="eyebrow">Albuquerque, New Mexico</p><h1>${esc(title)}</h1><p>${esc(lead)}</p></div></section>
 <section class="wrap content" aria-labelledby="upcoming"><h2 id="upcoming">Find your next outing</h2><nav class="tabs" aria-label="Quick filters">${nav.map(([label, href]) => `<a href="${href}"${href === path ? ' aria-current="page"' : ''}>${label}</a>`).join('')}</nav>
 ${filters(events, query)}
 <p class="count" id="count" aria-live="polite">${matched.length ? matched.length + ' upcoming events' : 'No upcoming events match.'}</p><ul id="cards" class="cards">${matched.slice(0, 24).map(card).join('')}</ul>
 <button type="button" class="button" id="more" hidden>Show more events</button><template id="event-card">${cardTemplate}</template>
+${browse}
 <p class="meta">Calendar refreshed ${dateLabel(today)}. Confirm details with the organizer before you go.</p></section><script type="module" src="/assets/catalog.mjs"></script>` })
 }
 
 function detail(event) {
   const path = details(event)
-  const description = event.description || [event.title, dateLabel(event.date), event.venue].filter(Boolean).join(' · ')
+  const facts = [dateLabel(event.date), event.time, event.venue ? 'at ' + event.venue : 'in Albuquerque'].filter(Boolean).join(' ')
+  const description = clip(event.description ? `${event.title}, ${facts}. ${event.description}` : `${event.title}, ${facts}. Details and tickets on ABQ Unplugged.`)
+  const base = [event.title, dateLabel(event.date), event.venue].filter(Boolean).join(' · ')
+  const seoTitle = base.length <= 50 ? base + ' · ABQ Unplugged' : clip(base, 72)
   const meta = [['Date', dateLabel(event.date)],['Time', event.time || 'Time not listed'],['Venue', event.venue],['Address', event.address],['Price',event.price]]
-  return layout({ path, title: event.title, description, content: `<div class="wrap content"><a href="/events/">← All events</a>
+  const extra = ld(eventLd(event), crumbs([['Home', '/'], ['Events', '/events/'], [event.title, path]]))
+  return layout({ path, title: event.title, seoTitle, description, extra, content: `<div class="wrap content"><a href="/events/">← All events</a>
 <article class="detail"><p class="tag">${esc(event.category || 'Event')}</p><h1>${esc(event.title)}</h1><img src="${event.art}" alt="" width="950" height="380">
 <dl>${meta.filter(([,v]) => v).map(([k,v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
 ${event.description ? `<p>${esc(event.description)}</p>` : ''}
@@ -123,9 +215,9 @@ ${event.tickets ? `<a class="button" rel="noopener noreferrer" href="${esc(event
 
 const listings = {
   '/': ['Things to do in Albuquerque', {}], '/events/': ['Albuquerque events', {}],
-  '/tonight/': ['Things to do tonight', { time:'tonight' }], '/weekend/': ['Things to do this weekend', { time:'this-weekend' }],
-  '/free/': ['Free events in Albuquerque', { price:'free' }], '/this-week/': ['Things to do this week', { time:'this-week' }],
-  '/things-to-do-today/': ['Things to do today', { time:'today' }],
+  '/tonight/': ['Things to do in Albuquerque tonight', { time:'tonight' }], '/weekend/': ['Things to do in Albuquerque this weekend', { time:'this-weekend' }],
+  '/free/': ['Free events in Albuquerque', { price:'free' }], '/this-week/': ['Things to do in Albuquerque this week', { time:'this-week' }],
+  '/things-to-do-today/': ['Things to do in Albuquerque today', { time:'today' }],
   '/ig/': ['What’s happening in ABQ', { time:'this-week' }], '/search/': ['Find Albuquerque events', {}],
 }
 const aliases = {
@@ -200,7 +292,7 @@ async function build(dir, events) {
   await writeFile(join(dir,'404.html'),information('/404','Page not found','The event may have passed, or the page may have moved. Browse the calendar for upcoming events.','<a class="button" href="/events/">Browse events</a>'))
   await writeFile(join(dir,'catalog.json'),JSON.stringify({ refreshed: today, events: events.map(({ description: _d,address: _a,tickets: _t,...event }) => event) }))
   await writeFile(join(dir,'sitemap.xml'),'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +
-    [...routes].map(path => '<url><loc>' + esc(canonical(path)) + '</loc></url>').join('') + '</urlset>')
+    [...routes].map(path => '<url><loc>' + esc(canonical(path)) + '</loc><lastmod>' + today + '</lastmod></url>').join('') + '</urlset>')
   await writeFile(join(dir,'robots.txt'), 'User-agent: *\nDisallow: /admin/\nSitemap: ' + site + '/sitemap.xml\n')
   await writeFile(join(dir,'_redirects'),Object.entries(aliases).map(([from,to]) => `/${from} /${to ? to + '/' : ''} 301`).join('\n') +
     `\n/neighborhood/:slug /neighborhoods/:slug/ 301\n/admin ${legacy}/admin 302\n/admin/* ${legacy}/admin/:splat 302\n/login ${legacy}/login 302\n/feedback ${legacy}/feedback 302\n/surprise-me ${legacy}/api/surprise 302\n/api/* ${legacy}/api/:splat 307\n`)
