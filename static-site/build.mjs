@@ -311,8 +311,7 @@ async function build(dir, events) {
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Content-Security-Policy: default-src 'self'; img-src 'self' https: data:; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'none'; frame-ancestors 'none'
-/catalog.json
-  Cache-Control: public, max-age=300
+  Cache-Control: public, max-age=300, must-revalidate
 `)
   await writeFile(join(dir,'sw.js'),"self.addEventListener('install', () => self.skipWaiting());\nself.addEventListener('activate', e => e.waitUntil(caches.delete('abq-shell-v1').then(() => self.registration.unregister())));\n")
 }
