@@ -100,8 +100,13 @@ jobs:
       - name: Verify the deployed catalog
         run: |
           origin=https://abq-unplugged-static.pages.dev
-          curl -fsS --retry 5 --retry-all-errors --max-time 15 "$origin/catalog.json?build=$GITHUB_RUN_ID" -o live-catalog.json
-          cmp dist/catalog.json live-catalog.json
+          # Cloudflare can take a few seconds to serve the new files everywhere, so retry before failing.
+          for attempt in 1 2 3 4 5 6; do
+            curl -fsS --retry 5 --retry-all-errors --max-time 15 "$origin/catalog.json?build=$GITHUB_RUN_ID-$attempt" -o live-catalog.json
+            cmp -s dist/catalog.json live-catalog.json && break
+            [ "$attempt" = 6 ] && { echo "Deployed catalog still differs after retries"; exit 1; }
+            sleep 15
+          done
           for path in / /events/ /tonight/ /weekend/ /free/ /sitemap.xml; do
             curl -fsS --max-time 15 "$origin$path" -o /dev/null
           done
