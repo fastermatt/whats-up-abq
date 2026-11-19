@@ -18,6 +18,8 @@ function eventCard(event) {
   const item = template.content.cloneNode(true)
   const img = item.querySelector('img'), link = item.querySelector('a')
   img.src = event.art
+  img.referrerPolicy = 'no-referrer'
+  if (!event.photo) img.className = 'ph'
   link.href = details(event)
   link.textContent = event.title
   item.querySelector('.tag').textContent = event.category ?? 'Event'

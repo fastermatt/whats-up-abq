@@ -1,7 +1,6 @@
 import { copyFile, mkdir, mkdtemp, readdir, rename, rm, writeFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { createHash } from 'node:crypto'
 import { CATEGORY_SLUG_MAP, cleanDescription, normalizeRow } from '../v2/lib/events.ts'
 import { clockMinutes, dateLabel, details, filterEvents, localDate, slug } from './calendar.mjs'
 
@@ -12,8 +11,7 @@ const legacy = 'https://abq-unplugged-v2.netlify.app'
 const source = 'https://bsmvfutebmbkjvlrhiyq.supabase.co'
 const today = localDate()
 const previewDays = Number(process.env.ABQ_PREVIEW_DAYS || 0)
-const cols = 'id,source,raw,event_date,category,venue_name,venue_slug,neighborhood,image_status'
-const fallback = new Set(['arts-theater','comedy','community','family','festivals','film','food-drink','music','outdoor','sports'])
+const cols = 'id,source,raw,event_date,category,venue_name,venue_slug,neighborhood,image_status,cached_photo_url'
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
 const clean = (value, max = 200) => cleanDescription(value, max)?.trim() || null
 const canonical = path => site + path
@@ -59,7 +57,7 @@ function eventLd(event) {
     location: { '@type': 'Place', name: event.venue || 'Albuquerque, NM', address: { '@type': 'PostalAddress',
       ...(event.address ? { streetAddress: event.address } : {}), addressLocality: 'Albuquerque', addressRegion: 'NM', addressCountry: 'US' } },
     description: clip(event.description || [event.title, dateLabel(event.date), event.venue].filter(Boolean).join(' · '), 300),
-    image: [site + event.art],
+    image: [event.photo ? event.art : site + '/og-image.jpg'],
     ...(price != null ? { offers: { '@type': 'Offer', url: event.tickets || url, price, priceCurrency: 'USD', availability: 'https://schema.org/InStock' } } : {}) }
 }
 
@@ -70,17 +68,32 @@ function ticketLink(input) {
   } catch { return null }
 }
 
+// PHOTO POLICY (permanent): an event shows a photo only if the resolver
+// (cached_photo_url -> raw image, with admin image_status='rejected' => null) gave us a
+// real, servable https image. Otherwise it gets a neutral branded placeholder. We never
+// substitute category stock photos: they were the source of "wrong photo" complaints
+// (a library storytime showing a rock concert).
+const PLACEHOLDER = '/assets/map.webp'
+const blockedPhotoHosts = /(^|\.)(abqtodo\.com|nhccnm\.org|lovenm\.org|do505\.com)$/i
+const genericPhoto = /evbstatic|eb_orange|placeholder|default[-_]?(image|event)|no[-_]?image|e9bd5d127ea|logo/i
+function photoUrl(value) {
+  try {
+    const u = new URL(value)
+    if (u.protocol !== 'https:' || u.username || u.password || blockedPhotoHosts.test(u.hostname) || genericPhoto.test(u.href)) return null
+    return u.href
+  } catch { return null }
+}
+
 function eventRecord(row) {
   if (!/^[\w-][\w.-]{0,190}$/.test(row.id) || !/^\d{4}-\d{2}-\d{2}$/.test(row.event_date)) return null
   const event = normalizeRow(row)
   const title = clean(event?.title)
   if (!title) return null
-  const group = slug(event.category)
-  const n = createHash('sha256').update(row.id).digest()[0] % 4
+  const photo = row.image_status === 'rejected' ? null : photoUrl(event.imageUrl)
   return {
     id: row.id, title, date: row.event_date, time: clean(event.time, 40), venue: clean(event.venue),
     venueSlug: event.venueSlug, category: clean(event.category), neighborhood: clean(event.neighborhood),
-    price: clean(event.price, 120), art: '/assets/photos/' + (fallback.has(group) ? group : 'community') + '/' + n + '.jpg',
+    price: clean(event.price, 120), art: photo ?? PLACEHOLDER, photo: Boolean(photo),
     description: clean(event.description, 1000), address: clean(event.address), tickets: ticketLink(event.ticketUrl),
   }
 }
@@ -121,12 +134,12 @@ function layout({ path, title, description, content, extra = '', seoTitle }) {
 <title>${esc(tabTitle)}</title><meta name="description" content="${esc(description)}"><link rel="canonical" href="${esc(canonical(path))}">
 <meta name="robots" content="index,follow,max-image-preview:large"><meta property="og:type" content="website"><meta property="og:site_name" content="ABQ Unplugged"><meta name="twitter:card" content="summary_large_image">
 <meta property="og:title" content="${esc(tabTitle)}"><meta property="og:description" content="${esc(description)}"><meta property="og:url" content="${esc(canonical(path))}"><meta property="og:image" content="${site}/og-image.jpg">
-<link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/assets/site.css">${extra}</head>
+<link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/assets/site.css"><script src="/assets/img.js" defer></script>${extra}</head>
 <body><a class="skip" href="#main">Skip to content</a><header class="mast"><div class="wrap"><a href="/"><img src="/assets/logo.svg" alt="ABQ Unplugged" width="144" height="50"></a><nav class="nav" aria-label="Main">${nav.map(([label, href]) => `<a href="${href}">${label}</a>`).join('')}</nav></div></header>
 <main id="main">${content}</main><footer class="foot"><div class="wrap"><span>Built with love for Albuquerque.</span><a href="/about/">About</a><a href="/submit/">Submit an event</a><a href="/privacy/">Privacy</a><a href="https://www.instagram.com/abqunplugged/">Instagram</a><a href="https://ko-fi.com/stopscrolling">Support ABQ Unplugged</a></div></footer></body></html>`
 }
 
-const card = event => `<li class="card"><img alt="" loading="lazy" decoding="async" src="${event.art}"><div class="body">
+const card = event => `<li class="card"><img${event.photo ? '' : ' class="ph"'} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${event.art}"><div class="body">
 <span class="tag">${esc(event.category || 'Event')}</span><h3><a href="${details(event)}">${esc(event.title)}</a></h3>
 <p class="meta">${esc([dateLabel(event.date),event.time,event.venue,event.price].filter(Boolean).join(' · '))}</p></div></li>`
 const cardTemplate = '<li class="card"><img alt="" loading="lazy" decoding="async"><div class="body"><span class="tag"></span><h3><a></a></h3><p class="meta"></p></div></li>'
@@ -206,7 +219,7 @@ function detail(event) {
   const meta = [['Date', dateLabel(event.date)],['Time', event.time || 'Time not listed'],['Venue', event.venue],['Address', event.address],['Price',event.price]]
   const extra = ld(eventLd(event), crumbs([['Home', '/'], ['Events', '/events/'], [event.title, path]]))
   return layout({ path, title: event.title, seoTitle, description, extra, content: `<div class="wrap content"><a href="/events/">← All events</a>
-<article class="detail"><p class="tag">${esc(event.category || 'Event')}</p><h1>${esc(event.title)}</h1><img src="${event.art}" alt="" width="950" height="380">
+<article class="detail"><p class="tag">${esc(event.category || 'Event')}</p><h1>${esc(event.title)}</h1><img${event.photo ? '' : ' class="ph"'} src="${event.art}" alt="" width="950" height="380" referrerpolicy="no-referrer">
 <dl>${meta.filter(([,v]) => v).map(([k,v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
 ${event.description ? `<p>${esc(event.description)}</p>` : ''}
 ${event.tickets ? `<a class="button" rel="noopener noreferrer" href="${esc(event.tickets)}">Organizer and tickets ↗</a>` : ''}
@@ -252,13 +265,11 @@ function information(path, title, copy, actions = '') {
 
 async function build(dir, events) {
   await mkdir(join(dir, 'assets'), { recursive:true })
-  const { cp } = await import('node:fs/promises')
-  await cp(join(publicDir,'fallbacks/pixabay'), join(dir,'assets/photos'), { recursive:true })
   for (const file of ['favicon.ico','og-image.jpg','a8f4c2b1d7e5f3a9b4c8d2e6f1a5b9c3.txt']) await copyFile(join(publicDir,file), join(dir,file))
   for (const [file,target] of [['logo-terra.svg','logo.svg'],['abq-map-bg.webp','map.webp']]) {
     await copyFile(join(publicDir,file), join(dir,'assets',target))
   }
-  for (const file of ['calendar.mjs','catalog.mjs','site.css']) await copyFile(join(base,file), join(dir,'assets',file))
+  for (const file of ['calendar.mjs','catalog.mjs','site.css','img.js']) await copyFile(join(base,file), join(dir,'assets',file))
 
   const routes = new Set()
   const listingPage = async (path,title,query) => { routes.add(path); await writePage(dir,path,listing(path,title,events,query)) }
@@ -299,7 +310,7 @@ async function build(dir, events) {
   await writeFile(join(dir,'_headers'),`/*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'none'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; img-src 'self' https: data:; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'none'; frame-ancestors 'none'
 /catalog.json
   Cache-Control: public, max-age=300
 `)

@@ -12,13 +12,19 @@ assert.equal(new Set(events.map(e => e.id)).size, events.length)
 for (const route of ['index.html','events/index.html','tonight/index.html','weekend/index.html','free/index.html','404.html']) {
   const html = await read(route)
   assert.match(html, /ABQ Unplugged/)
-  assert.doesNotMatch(html, /\/_next\/|\.supabase\.co|\.netlify\/functions/)
+  // Hosted event photos live in our public Supabase Storage bucket; any other database host is a leak.
+  assert.doesNotMatch(html.replace(/https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/event-photos\/[^"'\s]*/g, ''), /\/_next\/|\.supabase\.co|\.netlify\/functions/)
 }
 for (const event of events) {
   assert.ok(event.date >= refreshed)
   await access(file(details(event) + 'index.html'))
 }
-for (const art of new Set(events.map(e=>e.art))) assert.ok((await stat(file(art))).size > 0)
+for (const art of new Set(events.map(e=>e.art))) {
+  assert.doesNotMatch(art, /\/assets\/photos\//, 'category stock photos must never be used as event photos')
+  if (art.startsWith('/')) assert.ok((await stat(file(art))).size > 0)
+  else assert.match(art, /^https:\/\//)
+}
+assert.ok(events.every(e => e.photo === (e.art !== '/assets/map.webp')))
 assert.ok((await stat(file('catalog.json'))).size < 1024 * 1024)
 await assert.rejects(access(file('_worker.js')), { code:'ENOENT' })
 console.log(`Verified ${events.length} event pages, local images, and core routes.`)

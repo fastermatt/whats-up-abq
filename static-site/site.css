@@ -7,3 +7,4 @@
 .detail{max-width:52rem;margin:1.4rem auto 0}.detail h1{max-width:20ch;font-size:clamp(2.25rem,6vw,4.5rem)}.detail img{width:100%;aspect-ratio:2.5;object-fit:cover;border-radius:1rem;margin:1rem 0}.detail dl{display:grid;grid-template-columns:max-content 1fr;gap:.45rem 1rem;margin:1.2rem 0}.detail dt{font-weight:700}.detail dd{margin:0}.foot{border-top:1px solid var(--line);padding:1.25rem 0;color:var(--quiet)}.foot .wrap{display:flex;gap:.65rem 1.1rem;flex-wrap:wrap}
 @media(max-width:700px){.filters{grid-template-columns:1fr 1fr}.filters label:first-child{grid-column:1/-1}.mast img{width:7.5rem}.nav a{font-size:.88rem;padding:.5rem}.hero{padding-block:2rem}}@media(max-width:360px){.mast .wrap{justify-content:center}}
 [hidden]{display:none!important}
+.card img.ph,.detail img.ph{object-fit:cover;opacity:.9;filter:saturate(.8)}
