@@ -1,4 +1,4 @@
-import { copyFile, mkdir, mkdtemp, readdir, rename, rm, writeFile } from 'node:fs/promises'
+import { copyFile, cp, mkdir, mkdtemp, readdir, rename, rm, writeFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { CATEGORY_SLUG_MAP, cleanDescription, normalizeRow } from '../v2/lib/events.ts'
@@ -74,6 +74,17 @@ function ticketLink(input) {
 // substitute category stock photos: they were the source of "wrong photo" complaints
 // (a library storytime showing a rock concert).
 const PLACEHOLDER = '/assets/map.webp'
+// Real photos of the venue or team's home, used only when an event has no photo of its own.
+// A venue photo is never "the wrong event", unlike a category stock photo. Hosted by us, no hotlinking.
+const VENUE_PHOTOS = [
+  [/isotopes park|rio grande credit union field/i, 'isotopes'],
+  [/\bel rey\b/i, 'elrey', 'Photo: John Phelan, CC BY 4.0, via Wikimedia Commons'],
+  [/\bthe pit\b|university arena/i, 'pit'],
+  [/\bkimo\b/i, 'kimo'],
+  [/hyena/i, 'hyenas'],
+  [/sunshine (theater|theatre)/i, 'sunshine'],
+]
+const venuePhoto = name => { const hit = VENUE_PHOTOS.find(([re]) => re.test(name || '')); return hit && { art: `/assets/venues/${hit[1]}.webp`, credit: hit[2] || '' } }
 const blockedPhotoHosts = /(^|\.)(abqtodo\.com|nhccnm\.org|lovenm\.org|do505\.com)$/i
 const genericPhoto = /evbstatic|eb_orange|placeholder|default[-_]?(image|event)|no[-_]?image|e9bd5d127ea|logo/i
 function photoUrl(value) {
@@ -84,16 +95,25 @@ function photoUrl(value) {
   } catch { return null }
 }
 
+// Source categories misfile a few recurring library programs; correct the obvious ones by title.
+function fixCategory(title, category) {
+  if (/^music (&|and) movement\b/i.test(title)) return 'Family'
+  if (/\b(qi ?gong|tai chi)\b/i.test(title)) return 'Community'
+  return category
+}
+
 function eventRecord(row) {
   if (!/^[\w-][\w.-]{0,190}$/.test(row.id) || !/^\d{4}-\d{2}-\d{2}$/.test(row.event_date)) return null
   const event = normalizeRow(row)
   const title = clean(event?.title)
   if (!title) return null
-  const photo = row.image_status === 'rejected' ? null : photoUrl(event.imageUrl)
+  const own = row.image_status === 'rejected' ? null : photoUrl(event.imageUrl)
+  const venue = own ? null : venuePhoto(clean(event.venue) || row.venue_name)
+  const photo = own ?? venue?.art ?? null
   return {
     id: row.id, title, date: row.event_date, time: clean(event.time, 40), venue: clean(event.venue),
-    venueSlug: event.venueSlug, category: clean(event.category), neighborhood: clean(event.neighborhood),
-    price: clean(event.price, 120), art: photo ?? PLACEHOLDER, photo: Boolean(photo),
+    venueSlug: event.venueSlug, category: fixCategory(title, clean(event.category)), neighborhood: clean(event.neighborhood),
+    price: clean(event.price, 120), art: photo ?? PLACEHOLDER, photo: Boolean(photo), credit: venue?.credit || undefined,
     description: clean(event.description, 1000), address: clean(event.address), tickets: ticketLink(event.ticketUrl),
   }
 }
@@ -139,7 +159,7 @@ function layout({ path, title, description, content, extra = '', seoTitle }) {
 <main id="main">${content}</main><footer class="foot"><div class="wrap"><span>Built with love for Albuquerque.</span><a href="/about/">About</a><a href="/submit/">Submit an event</a><a href="/privacy/">Privacy</a><a href="https://www.instagram.com/abqunplugged/">Instagram</a><a href="https://ko-fi.com/stopscrolling">Support ABQ Unplugged</a></div></footer></body></html>`
 }
 
-const card = event => `<li class="card"><img${event.photo ? '' : ' class="ph"'} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${event.art}"><div class="body">
+const card = event => `<li class="card${event.photo ? '' : ' np'}">${event.photo ? `<img alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${event.art}">` : ''}<div class="body">
 <span class="tag">${esc(event.category || 'Event')}</span><h3><a href="${details(event)}">${esc(event.title)}</a></h3>
 <p class="meta">${esc([dateLabel(event.date),event.time,event.venue,event.price].filter(Boolean).join(' · '))}</p></div></li>`
 const cardTemplate = '<li class="card"><img alt="" loading="lazy" decoding="async"><div class="body"><span class="tag"></span><h3><a></a></h3><p class="meta"></p></div></li>'
@@ -219,7 +239,7 @@ function detail(event) {
   const meta = [['Date', dateLabel(event.date)],['Time', event.time || 'Time not listed'],['Venue', event.venue],['Address', event.address],['Price',event.price]]
   const extra = ld(eventLd(event), crumbs([['Home', '/'], ['Events', '/events/'], [event.title, path]]))
   return layout({ path, title: event.title, seoTitle, description, extra, content: `<div class="wrap content"><a href="/events/">← All events</a>
-<article class="detail"><p class="tag">${esc(event.category || 'Event')}</p><h1>${esc(event.title)}</h1><img${event.photo ? '' : ' class="ph"'} src="${event.art}" alt="" width="950" height="380" referrerpolicy="no-referrer">
+<article class="detail"><p class="tag">${esc(event.category || 'Event')}</p><h1>${esc(event.title)}</h1>${event.photo ? `<img src="${event.art}" alt="" width="950" height="380" referrerpolicy="no-referrer">${event.credit ? `<small class="credit">${esc(event.credit)}</small>` : ''}` : ''}
 <dl>${meta.filter(([,v]) => v).map(([k,v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
 ${event.description ? `<p>${esc(event.description)}</p>` : ''}
 ${event.tickets ? `<a class="button" rel="noopener noreferrer" href="${esc(event.tickets)}">Organizer and tickets ↗</a>` : ''}
@@ -270,6 +290,7 @@ async function build(dir, events) {
     await copyFile(join(publicDir,file), join(dir,'assets',target))
   }
   for (const file of ['calendar.mjs','catalog.mjs','site.css','img.js']) await copyFile(join(base,file), join(dir,'assets',file))
+  await cp(join(base,'venues'), join(dir,'assets','venues'), { recursive:true })
 
   const routes = new Set()
   const listingPage = async (path,title,query) => { routes.add(path); await writePage(dir,path,listing(path,title,events,query)) }
