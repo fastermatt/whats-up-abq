@@ -3,8 +3,9 @@
 `v2-weekly-refresh.yml` imports public source feeds once a week, Thursdays at 6 PM Denver (so Friday's Instagram roundup has the latest events),
 runs bounded cleanup, and generates HTML and a public calendar index. It does
 not receive model credentials or schedule social posts, emails, image hosting,
-or Netlify builds. Missing organizer images use the site's existing category
-photos. No database request or server function is needed to visit or filter the
+or Netlify builds. Events without their own photo get an official venue flyer (matched by title and mirrored
+onto Cloudflare Pages by flyers.mjs), a hosted venue photo from venues/, or a text-only card,
+never a stock photo. No database request or server function is needed to visit or filter the
 calendar. Admin and submissions still use the legacy Netlify app.
 
 The build needs Node 24, the locked V2 npm dependencies, and the Supabase

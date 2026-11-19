@@ -2,6 +2,7 @@ import { copyFile, cp, mkdir, mkdtemp, readdir, rename, rm, writeFile } from 'no
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { CATEGORY_SLUG_MAP, cleanDescription, normalizeRow } from '../v2/lib/events.ts'
+import { fetchFlyers, mirrorHeld } from './flyers.mjs'
 import { clockMinutes, dateLabel, details, filterEvents, localDate, slug } from './calendar.mjs'
 
 const base = fileURLToPath(new URL('./', import.meta.url))
@@ -82,11 +83,15 @@ const VENUE_PHOTOS = [
   [/\bthe pit\b|university arena/i, 'pit'],
   [/\bkimo\b/i, 'kimo'],
   [/hyena/i, 'hyenas'],
+  [/outpost ice arena/i, 'outpost'],
+  [/erna fergusson/i, 'erna', 'Photo: John Phelan, CC BY-SA 3.0, via Wikimedia Commons'],
+  [/taylor ranch (public )?library/i, 'taylor', 'Photo: G. Edward Johnson, CC BY 4.0, via Wikimedia Commons'],
   [/sunshine (theater|theatre)/i, 'sunshine'],
 ]
 const venuePhoto = name => { const hit = VENUE_PHOTOS.find(([re]) => re.test(name || '')); return hit && { art: `/assets/venues/${hit[1]}.webp`, credit: hit[2] || '' } }
 const blockedPhotoHosts = /(^|\.)(abqtodo\.com|nhccnm\.org|lovenm\.org|do505\.com)$/i
 const genericPhoto = /evbstatic|eb_orange|placeholder|default[-_]?(image|event)|no[-_]?image|e9bd5d127ea|logo/i
+const heldPhotos = new Map()
 function photoUrl(value) {
   try {
     const u = new URL(value)
@@ -108,6 +113,7 @@ function eventRecord(row) {
   const title = clean(event?.title)
   if (!title) return null
   const own = row.image_status === 'rejected' ? null : photoUrl(event.imageUrl)
+  if (!own && row.image_status !== 'rejected' && /^https:\/\/(www\.)?nhccnm\.org\//i.test(event.imageUrl || '') && !genericPhoto.test(event.imageUrl)) heldPhotos.set(row.id, event.imageUrl)
   const venue = own ? null : venuePhoto(clean(event.venue) || row.venue_name)
   const photo = own ?? venue?.art ?? null
   return {
@@ -291,6 +297,11 @@ async function build(dir, events) {
   }
   for (const file of ['calendar.mjs','catalog.mjs','site.css','img.js']) await copyFile(join(base,file), join(dir,'assets',file))
   await cp(join(base,'venues'), join(dir,'assets','venues'), { recursive:true })
+
+  // Better photos for events that only have a venue photo or none: mirrored flyers from blocked hosts, then official venue flyers.
+  const apply = (found, credit) => { for (const e of events) if (found.has(e.id) && (!e.photo || e.art.startsWith('/assets/venues/'))) { e.art = found.get(e.id); e.photo = true; e.credit = credit } }
+  apply(await mirrorHeld(new Map([...heldPhotos].filter(([id]) => events.some(e => e.id === id && !e.photo))), dir))
+  apply(await fetchFlyers(events.filter(e => !e.photo || e.art.startsWith('/assets/venues/')), dir))
 
   const routes = new Set()
   const listingPage = async (path,title,query) => { routes.add(path); await writePage(dir,path,listing(path,title,events,query)) }
