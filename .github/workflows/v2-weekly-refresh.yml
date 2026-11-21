@@ -110,3 +110,25 @@ jobs:
           for path in / /events/ /tonight/ /weekend/ /free/ /sitemap.xml; do
             curl -fsS --max-time 15 "$origin$path" -o /dev/null
           done
+
+  keepalive:
+    # GitHub switches off scheduled workflows in a public repo after 60 days with
+    # no commits. Re-enabling them through the API resets that timer, so the
+    # Thursday refresh and the Friday post keep running with nobody touching the repo.
+    name: Keep schedules enabled
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions:
+      actions: write
+    steps:
+      - name: Re-enable scheduled workflows
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          for wf in v2-weekly-refresh.yml ig-autopost-daily.yml; do
+            gh api -X PUT "repos/$REPO/actions/workflows/$wf/enable" >/dev/null \
+              && echo "kept enabled: $wf" \
+              || echo "::warning::Could not refresh the schedule timer for $wf"
+          done
